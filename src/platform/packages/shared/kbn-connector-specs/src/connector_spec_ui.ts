@@ -26,10 +26,12 @@ import { z } from '@kbn/zod/v4';
 
 export enum WidgetType {
   Text = 'text',
+  Number = 'number',
   Password = 'password',
   Select = 'select',
   FormFieldset = 'formFieldset',
   KeyValue = 'keyValue',
+  FileUpload = 'fileUpload',
 }
 
 export interface BaseMetadata {

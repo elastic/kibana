@@ -44,10 +44,40 @@ mappings:
       target:
         type: string
         example: summary
+observableTypes:
+  type: array
+  description: Custom observable type configuration details.
+  items:
+    type: object
+    properties:
+      key:
+        type: string
+        description: The observable type key.
+        example: d312efda-ec2b-42ec-9e2c-84981795c581
+      label:
+        type: string
+        description: The observable type label.
+        example: My observable type
+extractObservables:
+  type: boolean
+  description: >
+    Indicates whether observables (for example, IPs, hashes, and URLs) are
+    automatically extracted from case comments and events.
+  example: true
 owner:
   $ref: 'owner.yaml'
 templates:
   $ref: 'templates.yaml'
+workflowTags:
+  type: array
+  description: >
+    Workflow tags that limit which workflows appear in Cases workflow selectors.
+    An empty array shows all workflows.
+  maxItems: 100
+  items:
+    type: string
+    minLength: 1
+    maxLength: 1024
 updated_at:
   type: string
   format: date-time

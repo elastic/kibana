@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import { customHostSettingsSchema } from '@kbn/actions-utils';
 import {
@@ -18,6 +18,10 @@ import {
 } from '../common';
 
 import { validateDuration } from './lib/parse_date';
+import {
+  INBOUND_EVENTS_MAX_EMITTED_DEFAULT,
+  INBOUND_EVENTS_MAX_EMITTED_LIMIT,
+} from './inbound/constants';
 
 export enum AllowedHosts {
   Any = '*',
@@ -30,8 +34,129 @@ export enum EnabledActionTypes {
 const MAX_MAX_ATTEMPTS = 10;
 const MIN_MAX_ATTEMPTS = 1;
 
+function tlsCertRequiresKeyValidator(configPath: string) {
+  return function validate(rawConfig: { certificate?: string; key?: string }): string | undefined {
+    if (rawConfig.certificate && !rawConfig.key) {
+      return `must specify [${configPath}.key] when [${configPath}.certificate] is specified`;
+    }
+    if (rawConfig.key && !rawConfig.certificate) {
+      return `must specify [${configPath}.certificate] when [${configPath}.key] is specified`;
+    }
+  };
+}
+
+const tlsVerificationModeSchema = schema.oneOf(
+  [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+  { defaultValue: 'full' }
+);
+
+const relaySSLConfigSchema = schema.object(
+  {
+    verificationMode: tlsVerificationModeSchema,
+    certificateAuthorities: schema.maybe(
+      schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+    ),
+    certificate: schema.maybe(schema.string()),
+    key: schema.maybe(schema.string()),
+  },
+  { validate: tlsCertRequiresKeyValidator('relay.ssl') }
+);
+
+function relayUiamRequiresMtlsValidator(rawConfig: {
+  ssl?: { certificate?: string; key?: string };
+  uiam?: { enabled?: boolean };
+}): string | undefined {
+  if (rawConfig.uiam?.enabled && !(rawConfig.ssl?.certificate && rawConfig.ssl?.key)) {
+    return 'must specify [relay.ssl.certificate] and [relay.ssl.key] when [relay.uiam.enabled] is set';
+  }
+}
+
 const MIN_QUEUED_MAX = 1;
 export const DEFAULT_QUEUED_MAX = 1000000;
+
+const INBOUND_EVENTS_LIMIT_MIN = 1;
+const INBOUND_EVENTS_IN_FLIGHT_MAX = 100;
+// 50 slots at the same 2s point where 10 slots sustain 300/min: 50 / 2 * 60.
+const INBOUND_EVENTS_PER_MINUTE_MAX = 1500;
+const INBOUND_EVENTS_MAX_KEYS = 10000;
+
+export const defaultInboundEventsAdmissionConfig = {
+  enabled: true,
+  maxInFlight: 50,
+  maxInFlightPerConnector: 10,
+};
+
+export const defaultInboundEventsRateLimitConfig = {
+  enabled: true,
+  maxKeys: INBOUND_EVENTS_MAX_KEYS,
+  remoteAddress: {
+    limit: 10,
+    window: '1m',
+  },
+  connector: {
+    limit: 300,
+    window: '1m',
+  },
+};
+
+export const defaultInboundEventsLimitConfigs = {
+  admission: defaultInboundEventsAdmissionConfig,
+  rateLimit: defaultInboundEventsRateLimitConfig,
+};
+
+const inboundEventsAdmissionSchema = schema.object(
+  {
+    enabled: schema.boolean({ defaultValue: defaultInboundEventsAdmissionConfig.enabled }),
+    maxInFlight: schema.number({
+      defaultValue: defaultInboundEventsAdmissionConfig.maxInFlight,
+      min: INBOUND_EVENTS_LIMIT_MIN,
+      max: INBOUND_EVENTS_IN_FLIGHT_MAX,
+    }),
+    maxInFlightPerConnector: schema.number({
+      defaultValue: defaultInboundEventsAdmissionConfig.maxInFlightPerConnector,
+      min: INBOUND_EVENTS_LIMIT_MIN,
+      max: INBOUND_EVENTS_IN_FLIGHT_MAX,
+    }),
+  },
+  {
+    validate(value) {
+      if (value.maxInFlightPerConnector > value.maxInFlight) {
+        return '[maxInFlightPerConnector] must be less than or equal to [maxInFlight]';
+      }
+    },
+  }
+);
+
+const inboundEventsRateLimitSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: defaultInboundEventsRateLimitConfig.enabled }),
+  maxKeys: schema.number({
+    defaultValue: defaultInboundEventsRateLimitConfig.maxKeys,
+    min: INBOUND_EVENTS_LIMIT_MIN,
+    max: INBOUND_EVENTS_MAX_KEYS,
+  }),
+  remoteAddress: schema.object({
+    limit: schema.number({
+      defaultValue: defaultInboundEventsRateLimitConfig.remoteAddress.limit,
+      min: INBOUND_EVENTS_LIMIT_MIN,
+      max: INBOUND_EVENTS_PER_MINUTE_MAX,
+    }),
+    window: schema.string({
+      defaultValue: defaultInboundEventsRateLimitConfig.remoteAddress.window,
+      validate: validateDuration,
+    }),
+  }),
+  connector: schema.object({
+    limit: schema.number({
+      defaultValue: defaultInboundEventsRateLimitConfig.connector.limit,
+      min: INBOUND_EVENTS_LIMIT_MIN,
+      max: INBOUND_EVENTS_PER_MINUTE_MAX,
+    }),
+    window: schema.string({
+      defaultValue: defaultInboundEventsRateLimitConfig.connector.window,
+      validate: validateDuration,
+    }),
+  }),
+});
 
 const validRateLimiterConnectorTypeIds = new Set(['email']);
 
@@ -120,6 +245,27 @@ export const configSchema = schema.object({
   maxResponseContentLength: schema.byteSize({ defaultValue: '1mb' }),
   responseTimeout: schema.duration({ defaultValue: '60s' }),
   customHostSettings: schema.maybe(schema.arrayOf(customHostSettingsSchema)),
+  relay: schema.maybe(
+    schema.object(
+      {
+        url: schema.conditional(
+          schema.contextRef('dev'),
+          true,
+          schema.uri({ scheme: ['https', 'http'] }),
+          schema.uri({ scheme: ['https'] })
+        ),
+        ssl: schema.maybe(relaySSLConfigSchema),
+        // Serverless only: authenticate Relay requests with a per-request ephemeral UIAM token for
+        // Kibana's own identity, on top of mTLS. Requires `xpack.security.uiam` to be configured.
+        uiam: schema.maybe(
+          offeringBasedSchema({
+            serverless: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
+          })
+        ),
+      },
+      { validate: relayUiamRequiresMtlsValidator }
+    )
+  ),
   microsoftGraphApiUrl: schema.string({ defaultValue: DEFAULT_MICROSOFT_GRAPH_API_URL }),
   microsoftGraphApiScope: schema.string({ defaultValue: DEFAULT_MICROSOFT_GRAPH_API_SCOPE }),
   microsoftExchangeUrl: schema.string({ defaultValue: DEFAULT_MICROSOFT_EXCHANGE_URL }),
@@ -216,12 +362,36 @@ export const configSchema = schema.object({
     oauth_authorization_code: schema.object({
       rate_limits: oauthAuthorizationCodeRateLimitsSchema,
     }),
+    ears: schema.maybe(
+      schema.object({
+        enabled: schema.boolean({ defaultValue: true }),
+        enableExperimental: schema.boolean({ defaultValue: false }),
+        url: schema.maybe(schema.uri({ scheme: ['https'] })),
+        ssl: schema.maybe(
+          schema.object(
+            {
+              verificationMode: tlsVerificationModeSchema,
+              certificate: schema.maybe(schema.string()),
+              key: schema.maybe(schema.string()),
+            },
+            { validate: tlsCertRequiresKeyValidator('auth.ears.ssl') }
+          )
+        ),
+      })
+    ),
   }),
-  ears: schema.maybe(
-    schema.object({
-      url: schema.maybe(schema.uri({ scheme: ['https'] })),
-    })
-  ),
+  inboundEvents: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    maxBodyBytes: schema.byteSize({ defaultValue: '1mb' }),
+    maxEmitted: schema.number({
+      defaultValue: INBOUND_EVENTS_MAX_EMITTED_DEFAULT,
+      min: 1,
+      max: INBOUND_EVENTS_MAX_EMITTED_LIMIT,
+    }),
+    // maxInFlight * maxBodyBytes is the raw-body budget for this route.
+    admission: inboundEventsAdmissionSchema,
+    rateLimit: inboundEventsRateLimitSchema,
+  }),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;

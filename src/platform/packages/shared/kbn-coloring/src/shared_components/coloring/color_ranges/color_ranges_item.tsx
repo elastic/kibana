@@ -14,13 +14,14 @@ import React, { useState, useCallback, useContext, useMemo } from 'react';
 import { css } from '@emotion/react';
 
 import {
-  EuiFieldNumber,
-  EuiColorPicker,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiIcon,
-  EuiColorPickerSwatch,
   EuiButtonIcon,
+  EuiColorPicker,
+  EuiColorPickerSwatch,
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -181,12 +182,14 @@ export function ColorRangeItem({
                   style={{ width: euiTheme.size.xl, height: euiTheme.size.xl }}
                 />
               ) : (
-                <EuiButtonIcon
-                  color="danger"
-                  iconType="stopSlash"
-                  iconSize="l"
-                  aria-label={selectNewColorText}
-                />
+                <EuiToolTip content={selectNewColorText} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    color="danger"
+                    iconType="stopSlash"
+                    iconSize="l"
+                    aria-label={selectNewColorText}
+                  />
+                </EuiToolTip>
               )
             }
             secondaryInputDisplay="top"
@@ -197,9 +200,15 @@ export function ColorRangeItem({
               setPopoverInFocus(false);
             }}
             isInvalid={!isColorValid}
+            aria-label={selectNewColorText}
           />
         ) : (
-          <EuiIcon type={RelatedIcon} size="m" color={euiTheme.colors.disabled} />
+          <EuiIcon
+            type={RelatedIcon}
+            size="m"
+            color={euiTheme.colors.disabled}
+            aria-hidden={true}
+          />
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={true}>

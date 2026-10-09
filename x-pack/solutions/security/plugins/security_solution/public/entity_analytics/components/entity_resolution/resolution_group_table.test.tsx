@@ -33,16 +33,26 @@ const mockGroup: ResolutionGroup = {
 
 describe('ResolutionGroupTable', () => {
   it('renders table with target and alias rows', () => {
-    const { getByTestId, getByText, getAllByText } = render(
+    const { getByTestId, getByText } = render(
       <TestProviders>
         <ResolutionGroupTable group={mockGroup} isLoading={false} targetEntityId="alice-id" />
       </TestProviders>
     );
 
     expect(getByTestId(RESOLUTION_GROUP_TABLE_TEST_ID)).toBeInTheDocument();
-    // 'alice' appears in both entity row and summary row, so use getAllByText
-    expect(getAllByText('alice').length).toBeGreaterThanOrEqual(1);
+    expect(getByText('alice')).toBeInTheDocument();
     expect(getByText('alice-azure')).toBeInTheDocument();
+  });
+
+  it('shows target entity icon next to target entity name', () => {
+    const { container } = render(
+      <TestProviders>
+        <ResolutionGroupTable group={mockGroup} isLoading={false} targetEntityId="alice-id" />
+      </TestProviders>
+    );
+
+    const aggregateIcon = container.querySelector('[data-euiicon-type="aggregate"]');
+    expect(aggregateIcon).toBeInTheDocument();
   });
 
   it('shows empty state when group is null', () => {
@@ -65,26 +75,34 @@ describe('ResolutionGroupTable', () => {
     expect(container.querySelector('[role="progressbar"]')).toBeInTheDocument();
   });
 
-  it('shows remove buttons when showActions is true', () => {
+  it('shows actions as leading column with expand and delete buttons', () => {
     const onRemove = jest.fn();
-    const { getAllByLabelText } = render(
+    const onExpand = jest.fn();
+    const { getAllByLabelText, container } = render(
       <TestProviders>
         <ResolutionGroupTable
           group={mockGroup}
           isLoading={false}
           showActions
           onRemoveEntity={onRemove}
+          onEntityNameClick={onExpand}
           targetEntityId="alice-id"
+          currentEntityId="alice-id"
         />
       </TestProviders>
     );
 
+    const expandButtons = getAllByLabelText(/open entity details/i);
     const removeButtons = getAllByLabelText(/remove from resolution group/i);
-    // 2 entity rows + 1 summary row (summary renders null for actions, but we get buttons for the 2 entity rows)
-    expect(removeButtons.length).toBeGreaterThanOrEqual(2);
+    expect(expandButtons).toHaveLength(2);
+    expect(removeButtons).toHaveLength(2);
+
+    // Actions column should be first — check first header cell
+    const headers = container.querySelectorAll('th');
+    expect(headers[0]?.textContent).toContain('Actions');
   });
 
-  it('calls onRemoveEntity when remove button clicked on alias', () => {
+  it('calls onRemoveEntity when delete button clicked on alias', () => {
     const onRemove = jest.fn();
     const { getAllByLabelText } = render(
       <TestProviders>
@@ -99,10 +117,89 @@ describe('ResolutionGroupTable', () => {
     );
 
     const removeButtons = getAllByLabelText(/remove from resolution group/i);
-    // The second button is for the alias row (first is target, which is disabled)
     const aliasButton = removeButtons.find((btn) => !btn.hasAttribute('disabled'));
     expect(aliasButton).toBeDefined();
     fireEvent.click(aliasButton!);
     expect(onRemove).toHaveBeenCalledWith('alice-azure-id');
+  });
+
+  it('disables expand button for current entity', () => {
+    const onExpand = jest.fn();
+    const { getAllByLabelText } = render(
+      <TestProviders>
+        <ResolutionGroupTable
+          group={mockGroup}
+          isLoading={false}
+          showActions
+          onEntityNameClick={onExpand}
+          targetEntityId="alice-id"
+          currentEntityId="alice-id"
+        />
+      </TestProviders>
+    );
+
+    const expandButtons = getAllByLabelText(/open entity details/i);
+    const currentEntityButton = expandButtons[0];
+    expect(currentEntityButton).toBeDisabled();
+  });
+
+  it('does not render name links when showActions is true', () => {
+    const onExpand = jest.fn();
+    const { getByText } = render(
+      <TestProviders>
+        <ResolutionGroupTable
+          group={mockGroup}
+          isLoading={false}
+          showActions
+          onEntityNameClick={onExpand}
+          targetEntityId="alice-id"
+        />
+      </TestProviders>
+    );
+
+    const aliceName = getByText('alice');
+    expect(aliceName.closest('a')).toBeNull();
+  });
+
+  it('renders entity names as links when onEntityNameClick provided without showActions', () => {
+    const onClick = jest.fn();
+    const { getByText } = render(
+      <TestProviders>
+        <ResolutionGroupTable
+          group={mockGroup}
+          isLoading={false}
+          targetEntityId="alice-id"
+          onEntityNameClick={onClick}
+        />
+      </TestProviders>
+    );
+
+    const aliceLink = getByText('alice');
+    fireEvent.click(aliceLink);
+    expect(onClick).toHaveBeenCalledWith(mockGroup.target);
+  });
+
+  it('renders risk scores as badges', () => {
+    const { container } = render(
+      <TestProviders>
+        <ResolutionGroupTable group={mockGroup} isLoading={false} targetEntityId="alice-id" />
+      </TestProviders>
+    );
+
+    const badges = container.querySelectorAll('.euiBadge');
+    expect(badges.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('shows column headers with correct names', () => {
+    const { getByText } = render(
+      <TestProviders>
+        <ResolutionGroupTable group={mockGroup} isLoading={false} targetEntityId="alice-id" />
+      </TestProviders>
+    );
+
+    expect(getByText('Entity name')).toBeInTheDocument();
+    expect(getByText('Entity ID')).toBeInTheDocument();
+    expect(getByText('Data source')).toBeInTheDocument();
+    expect(getByText('Risk score')).toBeInTheDocument();
   });
 });

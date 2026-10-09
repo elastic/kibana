@@ -71,15 +71,14 @@ describe('getCasesStepDefinition', () => {
   });
 
   it('returns error when cases.bulkGet throws', async () => {
-    // FAILURE SCENARIO: client throws (e.g. auth failure)
     const bulkGet = jest.fn().mockRejectedValue(new Error('unauthorized'));
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { bulkGet },
     } as unknown as CasesClient);
     const definition = getCasesStepDefinition(getCasesClient);
 
-    await expect(definition.handler(createContext({ case_ids: ['case-1'] }))).rejects.toThrow(
-      'unauthorized'
-    );
+    const result = await definition.handler(createContext({ case_ids: ['case-1'] }));
+
+    expect(result).toMatchObject({ error: expect.objectContaining({ message: 'unauthorized' }) });
   });
 });

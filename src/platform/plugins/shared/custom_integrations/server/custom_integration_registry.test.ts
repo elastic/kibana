@@ -176,4 +176,49 @@ describe('CustomIntegrationsRegistry', () => {
       expect(registry.getReplacementCustomIntegrations()).toEqual([]);
     });
   });
+
+  describe('registerDeferredInitializer', () => {
+    test('deferred initializer is called exactly once before the first read', () => {
+      const registry = new CustomIntegrationRegistry(mockLogger, false);
+      const init = jest.fn(() => {
+        registry.registerCustomIntegration(integration);
+      });
+
+      registry.registerDeferredInitializer(init);
+
+      // Not yet called — no read has happened.
+      expect(init).not.toHaveBeenCalled();
+
+      // First read triggers materialisation.
+      registry.getAppendCustomIntegrations();
+      expect(init).toHaveBeenCalledTimes(1);
+
+      // Subsequent reads do NOT call the initializer again.
+      registry.getAppendCustomIntegrations();
+      registry.getReplacementCustomIntegrations();
+      expect(init).toHaveBeenCalledTimes(1);
+    });
+
+    test('integrations registered inside a deferred initializer are visible after the first read', () => {
+      const registry = new CustomIntegrationRegistry(mockLogger, false);
+      registry.registerDeferredInitializer(() => {
+        registry.registerCustomIntegration(integration);
+      });
+
+      expect(registry.getAppendCustomIntegrations()).toEqual(
+        expect.arrayContaining([expect.objectContaining({ id: integration.id })])
+      );
+    });
+
+    test('multiple deferred initializers run in registration order', () => {
+      const order: number[] = [];
+      const registry = new CustomIntegrationRegistry(mockLogger, false);
+      registry.registerDeferredInitializer(() => order.push(1));
+      registry.registerDeferredInitializer(() => order.push(2));
+      registry.registerDeferredInitializer(() => order.push(3));
+
+      registry.getAppendCustomIntegrations();
+      expect(order).toEqual([1, 2, 3]);
+    });
+  });
 });

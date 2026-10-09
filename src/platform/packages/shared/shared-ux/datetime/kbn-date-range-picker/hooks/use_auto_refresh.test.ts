@@ -189,6 +189,36 @@ describe('useAutoRefresh', () => {
     expect(first).not.toHaveBeenCalled();
   });
 
+  it('resets the countdown when refreshEpoch increments', () => {
+    const onRefresh = jest.fn();
+    const { result, rerender } = renderHook(
+      ({ epoch }: { epoch: number | undefined }) =>
+        useAutoRefresh({ isPaused: false, intervalMs: 5000, onRefresh, refreshEpoch: epoch }),
+      { initialProps: { epoch: undefined as number | undefined } }
+    );
+
+    expect(result.current.secondsRemaining).toBe(5);
+
+    act(() => {
+      jest.advanceTimersByTime(3000);
+    });
+
+    expect(result.current.secondsRemaining).toBe(2);
+
+    // External refresh fires — epoch increments, countdown should reset to 5
+    rerender({ epoch: 1 });
+
+    expect(result.current.secondsRemaining).toBe(5);
+    expect(onRefresh).not.toHaveBeenCalled();
+
+    act(() => {
+      jest.advanceTimersByTime(5000);
+    });
+
+    expect(onRefresh).toHaveBeenCalledTimes(1);
+    expect(result.current.secondsRemaining).toBe(5);
+  });
+
   it('uses Math.ceil for sub-second intervals so refresh does not fire too eagerly', () => {
     const onRefresh = jest.fn();
     const { result } = renderHook(() =>

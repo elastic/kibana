@@ -13,6 +13,10 @@ import React from 'react';
 import type { FieldHook, FieldConfig, FormData } from '../types';
 import { useFieldFromProps } from '../hooks';
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export interface Props<T, FormType = FormData, I = T> {
   path: string;
   // @ts-expect-error upgrade typescript v4.9.5
@@ -74,10 +78,17 @@ function UseFieldComp<T = unknown, FormType = FormData, I = T>(props: Props<T, F
   return <ComponentToRender {...{ field, ...propsToForward }} />;
 }
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export const UseField = React.memo(UseFieldComp) as typeof UseFieldComp;
 
 /**
  * Get a <UseField /> component providing some common props for all instances.
+ *
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
  * @param partialProps Partial props to apply to all <UseField /> instances
  *
  * @example

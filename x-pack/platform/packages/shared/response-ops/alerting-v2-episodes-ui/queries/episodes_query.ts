@@ -6,129 +6,156 @@
  */
 
 import type { ComposerQuery } from '@elastic/esql';
-import { esql } from '@elastic/esql';
-import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import { escapeStringValue } from '@kbn/esql-utils';
 import {
-  ALERT_EVENTS_DATA_STREAM,
-  ALERT_ACTIONS_DATA_STREAM,
-  PAGE_SIZE_ESQL_VARIABLE,
-} from '../constants';
+  applyFilterState,
+  buildEpisodesBaseQuery,
+  type EpisodesFilterState,
+} from '@kbn/alerting-v2-common-queries';
+import type { AlertEpisode as BaseAlertEpisode } from '@kbn/alerting-v2-schemas';
+import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
 
-export interface AlertEpisode {
-  '@timestamp': string;
-  'episode.id': string;
-  'episode.status': AlertEpisodeStatus;
-  'rule.id': string;
-  group_hash: string;
-  first_timestamp: string;
-  last_timestamp: string;
-  duration: number;
+export type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-common-queries';
+
+/**
+ * Extension of the base AlertEpisode type with client-only capability flags
+ * used to differentiate source alert rows from v2 episode rows.
+ * These fields are never set by the v2 pipeline.
+ */
+export interface AlertEpisode extends BaseAlertEpisode {
+  /**
+   * Whether the row supports v2 episode actions (ack, assign, snooze). Source
+   * alert rows set this to `false`; v2 episodes default to `true`.
+   */
+  supports_actions?: boolean;
+  /**
+   * Whether the row supports the v2 episode timeline/events flyout. Source
+   * alert rows set this to `false` (they use a simpler fields flyout);
+   * v2 episodes default to `true`.
+   */
+  supports_timeline?: boolean;
+  /**
+   * Rule name embedded from the source alert document. Used as a display fallback
+   * when the rules API cannot resolve the name (e.g. due to RBAC restrictions).
+   * V2 episodes never set this — they always resolve via the rules cache.
+   */
+  'rule.name'?: string;
+  /**
+   * Human-readable rule type name from the alert document (e.g. "Custom threshold").
+   * Only set for source alert rows; v2 episodes never set this.
+   */
+  rule_category?: string;
+  /**
+   * Identifies which `EpisodeDataSource` produced this row. Undefined for rows
+   * from the v2 pipeline. Stamped on source rows by the list fetch (and by
+   * `fetchEpisodesFromSource`).
+   */
+  source_id?: string;
+  /**
+   * Opaque context attached by the data source, consumed only by that source's
+   * action extensions. The framework never reads this field.
+   */
+  source_action_context?: unknown;
+  /**
+   * Whether the source alert is indefinitely muted at the rule level.
+   * Only set for source alert rows; native episodes never use this.
+   */
+  is_muted?: boolean;
+  /**
+   * Whether the source alert is currently flapping.
+   * Only set for source alert rows; native episodes never use this.
+   */
+  is_flapping?: boolean;
+  /**
+   * Flattened grouping object (e.g. `{ 'host.name': 'web-01' }`).
+   * Used to render grouping tags on source alert rows. Native episodes never set this.
+   */
+  source_grouping?: Record<string, unknown>;
 }
 
-export const ALERT_EPISODE_FIELDS = [
-  '@timestamp',
-  'episode.id',
-  'episode.status',
-  'rule.id',
-  'group_hash',
-  'first_timestamp',
-  'last_timestamp',
-  'duration',
-] as const;
+/** True when the row came from an additional episode data source, not the v2 pipeline. */
+export const isSourceEpisode = (episode: AlertEpisode): boolean => episode.source_id != null;
 
-export interface EpisodesFilterState {
-  /** Single episode status (inactive | pending | active | recovering) or null for All */
-  status?: string | null;
-  /** Rule ID or null */
-  ruleId?: string | null;
-  /** Query string for full-text search */
-  queryString?: string | null;
-}
+/**
+ * Native v2 rules always include `kind`. Source adapters omit it so a source-stamped
+ * episode whose rule was loaded from the v2 API can still take the v2 flyout path.
+ */
+export const isNativeV2Rule = (rule: { kind?: unknown }): boolean => rule.kind != null;
 
-export interface EpisodesSortState {
-  sortField: string;
-  sortDirection: 'asc' | 'desc';
-}
+/** V2 episodes leave `supports_actions` unset; source alert rows set it to `false`. */
+export const episodeSupportsActions = (episode: AlertEpisode): boolean =>
+  episode.supports_actions !== false;
 
-const ALLOWLISTED_SORT_FIELDS = new Set([
-  '@timestamp',
-  'episode.id',
-  'episode.status',
-  'rule.id',
-  'duration',
-]);
+/** V2 episodes leave `supports_timeline` unset; source alert rows set it to `false`. */
+export const episodeSupportsTimeline = (episode: AlertEpisode): boolean =>
+  episode.supports_timeline !== false;
 
-const sanitizeSortField = (field: string) => {
-  return ALLOWLISTED_SORT_FIELDS.has(field) ? field : '@timestamp';
-};
+/**
+ * Builds an ES|QL query that computes six KPI counts in a single STATS pass.
+ * Uses indicator EVALs (CASE-based 0/1 columns) so all aggregations can share
+ * one STATS command without sub-queries.
+ *
+ * Counts: active_alerts, firing_rules, assigned_to_me, unassigned, acknowledged, snoozed.
+ */
+export const buildEpisodesKpisQuery = (
+  spaceId: string,
+  currentUserUid?: string,
+  filterState?: EpisodesFilterState
+): string => {
+  const query = buildEpisodesBaseQuery(spaceId, filterState);
 
-export const addEpisodeAggregation = (query: ComposerQuery) => {
-  // This will be simplified when the `$.alerting-episodes` ES|QL view works.
+  if (filterState) {
+    applyFilterState(query, filterState);
+  }
+
+  // Indicator columns — null for distinct count, 1/0 for sum-based counts.
+  // When there's no current user (anonymous/proxy-authenticated), nothing can be
+  // "assigned to me", so the indicator is always 0.
   // prettier-ignore
   query
-    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp) BY episode.id`
-    .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
-    .pipe`WHERE @timestamp == last_timestamp`;
-};
+    .pipe`EVAL _active_rule_id = CASE(\`episode.status\` == "active", \`rule.id\`, null)`
+    .pipe(
+      currentUserUid
+        ? `EVAL _assigned_to_me = CASE(last_assignee_uid == ${escapeStringValue(currentUserUid)}, 1, 0)`
+        : `EVAL _assigned_to_me = 0`
+    )
+    .pipe`EVAL _is_unassigned  = CASE(last_assignee_uid IS NULL, 1, 0)`
+    .pipe`EVAL _is_acked       = CASE(last_ack_action == "ack", 1, 0)`
+    .pipe`EVAL _is_snoozed     = CASE(last_snooze_action == "snooze" AND (snoozed_until IS NULL OR TO_DATETIME(snoozed_until) > NOW()), 1, 0)`
+    .pipe`STATS
+      alerts_count   = COUNT(*),
+      firing_rules   = COUNT_DISTINCT(_active_rule_id),
+      assigned_to_me = SUM(_assigned_to_me),
+      unassigned     = SUM(_is_unassigned),
+      acknowledged   = SUM(_is_acked),
+      snoozed        = SUM(_is_snoozed)`;
 
-const addQueryStringFilter = (query: ComposerQuery, search: string) => {
-  query.where`QSTR(${search})`;
-};
-
-/**
- * Builds an ES|QL query that aggregates episode data starting from
- * the alerting-events data stream.
- */
-export const buildEpisodesBaseQuery = (search?: string): ComposerQuery => {
-  const query = esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`;
-
-  if (search) {
-    addQueryStringFilter(query, search);
-  }
-
-  addEpisodeAggregation(query);
-
-  return query;
+  return query.print('basic');
 };
 
 /**
- * Builds an ES|QL query for episodes request with sorting and filtering.
- *
- * Joins `.rule-events` and `.alert-actions` so that user-driven deactivation
- * is reflected in an `effective_status` column used for status filtering.
+ * Builds a lightweight ESQL query for histogram data.
+ * Returns only the fields needed for overlap counting; no SORT.
+ * Time range is applied by the caller via executeEsqlQuery's input.timeRange.
  */
-export const buildEpisodesQuery = (
-  sortState: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' },
-  filterState?: EpisodesFilterState
+export const buildEpisodesHistogramQuery = (
+  spaceId: string,
+  filterState?: EpisodesFilterState,
+  breakdownField?: string
 ): ComposerQuery => {
-  const sortField = sanitizeSortField(sortState.sortField);
-  const sortDir = sortState.sortDirection.toUpperCase() as 'ASC' | 'DESC';
-  const pageSizeParam = esql.par(undefined, PAGE_SIZE_ESQL_VARIABLE);
+  const query = buildEpisodesBaseQuery(spaceId, filterState);
 
-  const query = esql.from(ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM)
-    .where`type == "alert" OR action_type IN ("deactivate", "activate")`
-    .pipe`INLINE STATS last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate") BY group_hash`
-    .where`type == "alert"`;
-
-  const search = filterState?.queryString?.trim();
-  if (search) {
-    addQueryStringFilter(query, search);
+  if (filterState) {
+    applyFilterState(query, filterState);
   }
 
-  addEpisodeAggregation(query);
+  const keepFields = [
+    ...new Set(
+      ['first_timestamp', 'last_timestamp', 'episode.status', breakdownField].filter(
+        (f): f is string => Boolean(f)
+      )
+    ),
+  ];
 
-  // Derive effective status: overridden to "inactive" when the latest action is "deactivate"
-  query.pipe`EVAL effective_status = CASE(last_deactivate_action == "deactivate", "inactive", episode.status)`;
-
-  if (filterState?.status) {
-    query.where`effective_status == ${filterState.status}`;
-  }
-
-  if (filterState?.ruleId) {
-    query.where`rule.id == ${filterState.ruleId}`;
-  }
-
-  return query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(
-    ...ALERT_EPISODE_FIELDS
-  );
+  return query.keep(...(keepFields as [string, ...string[]])).limit(HISTOGRAM_EPISODE_LIMIT);
 };

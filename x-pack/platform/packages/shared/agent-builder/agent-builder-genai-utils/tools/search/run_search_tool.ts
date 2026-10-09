@@ -6,10 +6,9 @@
  */
 
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
-import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { ToolEventEmitter, ToolHandlerResult } from '@kbn/agent-builder-server';
+import type { ModelProvider, ToolEventEmitter, ToolHandlerResult } from '@kbn/agent-builder-server';
 import type { TimeRange } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools';
 import type { TopSnippetsConfig } from '../steps/extract_snippets';
@@ -22,11 +21,14 @@ export const runSearchTool = async ({
   customInstructions,
   allowPatternTarget = false,
   timeRange,
-  model,
+  modelProvider,
   esClient,
+  internalEsClient,
   logger,
   events,
   topSnippetsConfig,
+  includeDatasets = false,
+  includeFrozen = false,
 }: {
   nlQuery: string;
   index?: string;
@@ -35,22 +37,28 @@ export const runSearchTool = async ({
   /** When true, a pattern (e.g. logs-*) targets all matching indices via ESQL. When false, a single index is chosen via index explorer. */
   allowPatternTarget?: boolean;
   timeRange?: TimeRange;
-  model: ScopedModel;
+  modelProvider: ModelProvider;
   esClient: ElasticsearchClient;
+  internalEsClient?: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
   topSnippetsConfig?: TopSnippetsConfig;
+  includeDatasets?: boolean;
+  includeFrozen?: boolean;
 }): Promise<ToolHandlerResult[]> => {
-  const toolGraph = createSearchToolGraph({
-    model,
+  const toolGraph = await createSearchToolGraph({
+    modelProvider,
     esClient,
+    internalEsClient,
     logger,
     events,
     topSnippetsConfig,
+    includeDatasets,
+    includeFrozen,
   });
 
   return withActiveInferenceSpan(
-    'SearchToolGraph',
+    'search_tool',
     {
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',

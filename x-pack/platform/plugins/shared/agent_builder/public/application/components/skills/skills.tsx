@@ -10,6 +10,8 @@ import { css } from '@emotion/react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useUiPrivileges } from '../../hooks/use_ui_privileges';
 import { appPaths } from '../../utils/app_paths';
@@ -24,7 +26,7 @@ export const AgentBuilderSkills = () => {
   return (
     <KibanaPageTemplate data-test-subj="agentBuilderSkillsPage">
       <KibanaPageTemplate.Header
-        pageTitle={labels.skills.title}
+        pageTitle={labels.skills.libraryTitle}
         description={i18n.translate('xpack.agentBuilder.skills.skillsDescription', {
           defaultMessage:
             'Skills define reusable instructions and tool sets that agents use to perform specific tasks. Built-in skills cover common operations, and you can create your own for custom workflows.',
@@ -41,6 +43,11 @@ export const AgentBuilderSkills = () => {
               iconType="plus"
               onClick={() => navigateToAgentBuilderUrl(appPaths.skills.new)}
               data-test-subj="agentBuilderNewSkillButton"
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.globalManagement.NEW_SKILL,
+                detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+              })}
             >
               <EuiText size="s">{labels.skills.newSkillButton}</EuiText>
             </EuiButton>

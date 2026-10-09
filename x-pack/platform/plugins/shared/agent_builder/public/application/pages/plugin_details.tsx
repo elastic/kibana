@@ -22,7 +22,7 @@ export const AgentBuilderPluginDetailsPage = () => {
 
   useBreadcrumb([
     {
-      text: labels.plugins.title,
+      text: labels.plugins.libraryTitle,
       path: appPaths.plugins.list,
     },
     {

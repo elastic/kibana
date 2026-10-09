@@ -12,7 +12,7 @@ import {
   getOptionLabel,
   omitAllOption,
 } from '../../../../../../../common/agent_configuration/all_option';
-import { callApmApi } from '../../../../../../services/rest/create_call_apm_api';
+import { getApmInternalServices } from '../../../../../../plugin';
 
 export async function saveConfig({
   config,
@@ -24,6 +24,7 @@ export async function saveConfig({
   isEditMode: boolean;
   toasts: NotificationsStart['toasts'];
 }) {
+  const { callApmApi } = getApmInternalServices();
   try {
     await callApmApi('PUT /api/apm/settings/agent-configuration 2023-10-31', {
       signal: null,

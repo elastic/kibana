@@ -7,6 +7,7 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { ATTACHMENT_REF_ACTOR, AttachmentType } from '@kbn/agent-builder-common/attachments';
 import {
   AGENT_BUILDER_EVENT_TYPES,
   agentBuilderServerEbtEvents,
@@ -15,22 +16,61 @@ import {
   ToolResultType,
   type ToolSelection,
   type ToolType,
+  type VersionedAttachment,
 } from '@kbn/agent-builder-common';
 import type {
   ReportAgentCreatedParams,
   ReportAgentUpdatedParams,
+  ReportPluginImportedParams,
+  ReportExecutionCompleteParams,
   ReportRoundCompleteParams,
   ReportRoundErrorParams,
   ReportSkillCreatedParams,
   ReportSkillDeletedParams,
+  ReportSkillInvokedParams,
   ReportSkillUpdatedParams,
   ReportToolCallErrorParams,
   ReportToolCallSuccessParams,
   ReportToolCreatedParams,
+  SkillCreationOrigin,
+  SkillInvocationOrigin,
+  SkillSolutionArea,
+  TelemetryConversationOrigin,
 } from '@kbn/agent-builder-common/telemetry/agent_builder_events';
 import type { ModelProvider } from '@kbn/inference-common';
+import type { ExecutionTelemetry } from '../services/execution/utils/report_round_telemetry';
 import { normalizeErrorType, sanitizeForCounterName } from './error_utils';
-import { normalizeAgentIdForTelemetry, normalizeToolIdForTelemetry } from './utils';
+import {
+  normalizeAgentIdForTelemetry,
+  normalizePluginIdForTelemetry,
+  normalizeSkillIdForTelemetry,
+  normalizeToolIdForTelemetry,
+} from './utils';
+
+/**
+ * Attachment types on a round's input. Inline attachments carry their own type; user image uploads
+ * arrive as refs and have to be resolved against the conversation's attachment snapshot.
+ */
+const inputAttachmentTypes = (
+  round: ConversationRound,
+  conversationAttachments: VersionedAttachment[]
+): string[] | undefined => {
+  const attachmentTypeById = new Map(conversationAttachments.map(({ id, type }) => [id, type]));
+  const imageAttachmentIds = new Set(
+    round.input.attachment_refs
+      ?.filter(({ actor }) => actor === ATTACHMENT_REF_ACTOR.user)
+      .filter(
+        ({ attachment_id: attachmentId }) =>
+          attachmentTypeById.get(attachmentId) === AttachmentType.image
+      )
+      .map(({ attachment_id: attachmentId }) => attachmentId) ?? []
+  );
+  const types = [
+    ...(round.input.attachments?.map(({ type }) => type || 'unknown') ?? []),
+    ...Array.from(imageAttachmentIds, () => AttachmentType.image),
+  ];
+  return types.length > 0 ? types : undefined;
+};
 
 /**
  * Server-side analytics wrapper for Agent Builder telemetry.
@@ -108,33 +148,147 @@ export class AnalyticsService {
     }
   }
 
-  reportSkillCreated({ skillId }: { skillId: string }): void {
+  reportSkillCreated({
+    skillId,
+    origin,
+    pluginId,
+    toolIds,
+  }: {
+    skillId: string;
+    origin?: SkillCreationOrigin;
+    pluginId?: string;
+    toolIds: string[];
+  }): void {
     try {
+      const toolsIncluded = Array.from(new Set(toolIds)).map((toolId) =>
+        normalizeToolIdForTelemetry(toolId)
+      );
       this.analytics.reportEvent<ReportSkillCreatedParams>(AGENT_BUILDER_EVENT_TYPES.SkillCreated, {
-        skill_id: skillId,
+        skill_id: normalizeSkillIdForTelemetry({
+          id: skillId,
+          readonly: false,
+          plugin_id: pluginId,
+        }),
+        origin,
+        tool_ids: toolsIncluded,
       });
     } catch (error) {
       this.logger.debug('Failed to report SkillCreated telemetry event', { error });
     }
   }
 
-  reportSkillUpdated({ skillId }: { skillId: string }): void {
+  reportSkillUpdated({
+    skillId,
+    origin,
+    pluginId,
+    toolIds,
+  }: {
+    skillId: string;
+    origin?: SkillCreationOrigin;
+    pluginId?: string;
+    toolIds: string[];
+  }): void {
     try {
+      const toolsIncluded = Array.from(new Set(toolIds)).map((toolId) =>
+        normalizeToolIdForTelemetry(toolId)
+      );
       this.analytics.reportEvent<ReportSkillUpdatedParams>(AGENT_BUILDER_EVENT_TYPES.SkillUpdated, {
-        skill_id: skillId,
+        skill_id: normalizeSkillIdForTelemetry({
+          id: skillId,
+          readonly: false,
+          plugin_id: pluginId,
+        }),
+        origin,
+        tool_ids: toolsIncluded,
       });
     } catch (error) {
       this.logger.debug('Failed to report SkillUpdated telemetry event', { error });
     }
   }
 
-  reportSkillDeleted({ skillId }: { skillId: string }): void {
+  reportSkillDeleted({
+    skillId,
+    origin,
+    pluginId,
+  }: {
+    skillId: string;
+    origin?: SkillCreationOrigin;
+    pluginId?: string;
+  }): void {
     try {
       this.analytics.reportEvent<ReportSkillDeletedParams>(AGENT_BUILDER_EVENT_TYPES.SkillDeleted, {
-        skill_id: skillId,
+        skill_id: normalizeSkillIdForTelemetry({
+          id: skillId,
+          readonly: false,
+          plugin_id: pluginId,
+        }),
+        origin,
       });
     } catch (error) {
       this.logger.debug('Failed to report SkillDeleted telemetry event', { error });
+    }
+  }
+
+  reportSkillInvoked({
+    skillId,
+    origin,
+    solutionArea,
+    pluginId,
+    agentId,
+    conversationId,
+    executionId,
+    toolCount,
+  }: {
+    skillId: string;
+    origin: SkillInvocationOrigin;
+    solutionArea: SkillSolutionArea;
+    pluginId?: string;
+    agentId?: string;
+    conversationId?: string;
+    executionId?: string;
+    toolCount: number;
+  }): void {
+    try {
+      this.analytics.reportEvent<ReportSkillInvokedParams>(AGENT_BUILDER_EVENT_TYPES.SkillInvoked, {
+        skill_id: normalizeSkillIdForTelemetry({
+          id: skillId,
+          readonly: origin === 'builtin',
+          plugin_id: pluginId,
+        }),
+        origin,
+        solution_area: solutionArea,
+        plugin_id: normalizePluginIdForTelemetry(pluginId),
+        agent_id: normalizeAgentIdForTelemetry(agentId),
+        conversation_id: conversationId,
+        execution_id: executionId,
+        tool_count: toolCount,
+      });
+    } catch (error) {
+      this.logger.debug('Failed to report SkillInvoked telemetry event', { error });
+    }
+  }
+
+  reportPluginImported({
+    pluginId,
+    sourceType,
+    skillCount,
+  }: {
+    pluginId: string;
+    sourceType: 'url' | 'file';
+    skillCount: number;
+  }): void {
+    try {
+      const normalizedPluginId = normalizePluginIdForTelemetry(pluginId);
+      this.analytics.reportEvent<ReportPluginImportedParams>(
+        AGENT_BUILDER_EVENT_TYPES.PluginImported,
+        {
+          plugin_id: normalizedPluginId ?? 'unknown',
+          source_type: sourceType === 'url' ? 'url' : 'upload',
+          skill_count: skillCount,
+        }
+      );
+    } catch (error) {
+      this.logger.debug('Failed to report PluginImported telemetry event', { error });
     }
   }
 
@@ -145,6 +299,7 @@ export class AnalyticsService {
     modelProvider,
     round,
     roundCount,
+    conversationAttachments,
   }: {
     agentId: string;
     conversationId?: string;
@@ -152,6 +307,7 @@ export class AnalyticsService {
     modelProvider: ModelProvider;
     round: ConversationRound;
     roundCount: number;
+    conversationAttachments: VersionedAttachment[];
   }): void {
     try {
       const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
@@ -163,15 +319,14 @@ export class AnalyticsService {
       // call). This allows downstream telemetry analysis to compute per-tool invocation counts by
       // aggregating over the array values.
       const toolsInvoked =
-        toolCallSteps.map((step) => normalizeToolIdForTelemetry(step.tool_id)) ?? [];
+        toolCallSteps.map((step) => normalizeToolIdForTelemetry(step.tool_id, step.tool_type)) ??
+        [];
 
       const toolCallErrors = toolCallSteps.filter(({ results }) => {
         return results.length > 0 && results.every((r) => r.type === ToolResultType.error);
       });
 
-      const attachments = round.input.attachments?.length
-        ? round.input.attachments.map((a) => a.type || 'unknown')
-        : undefined;
+      const attachments = inputAttachmentTypes(round, conversationAttachments);
       this.analytics.reportEvent<ReportRoundCompleteParams>(
         AGENT_BUILDER_EVENT_TYPES.RoundComplete,
         {
@@ -179,7 +334,9 @@ export class AnalyticsService {
           attachments,
           conversation_id: conversationId,
           execution_id: executionId,
+          origin: round.origin?.type,
           input_tokens: round.model_usage.input_tokens,
+          cached_input_tokens: round.model_usage.cached_input_tokens,
           llm_calls: round.model_usage.llm_calls,
           message_length: round.input.message.length,
           model: round.model_usage.model,
@@ -203,6 +360,86 @@ export class AnalyticsService {
     }
   }
 
+  /**
+   * One row per execution. A round paused for human input reports several: the pause, then one per
+   * resume, each carrying only its own usage. Round totals live on `reportRoundComplete`.
+   */
+  reportExecutionComplete({
+    agentId,
+    conversationId,
+    executionId,
+    modelProvider,
+    telemetry,
+    conversationAttachments,
+  }: {
+    agentId: string;
+    conversationId?: string;
+    executionId?: string;
+    modelProvider: ModelProvider;
+    telemetry: ExecutionTelemetry;
+    conversationAttachments: VersionedAttachment[];
+  }): void {
+    try {
+      const { executionRound, roundTotals } = telemetry;
+      const toolCallSteps =
+        executionRound.steps?.filter((step) => step.type === ConversationRoundStepType.toolCall) ??
+        [];
+      const toolCallErrors = toolCallSteps.filter(
+        ({ results }) => results.length > 0 && results.every((r) => r.type === ToolResultType.error)
+      );
+      const attachments = inputAttachmentTypes(roundTotals, conversationAttachments);
+
+      this.analytics.reportEvent<ReportExecutionCompleteParams>(
+        AGENT_BUILDER_EVENT_TYPES.ExecutionComplete,
+        {
+          agent_id: normalizeAgentIdForTelemetry(agentId) ?? 'unknown',
+          attachments,
+          conversation_id: conversationId,
+          execution_id: executionId,
+          round_id: telemetry.roundId,
+          round_number: telemetry.roundCount,
+          execution_index: telemetry.executionIndex,
+          trigger: telemetry.isResume ? 'prompt_response' : 'user_message',
+          outcome: telemetry.isRoundTerminal ? 'responded' : 'prompt_requested',
+          input_tokens: executionRound.model_usage.input_tokens,
+          cached_input_tokens: executionRound.model_usage.cached_input_tokens,
+          output_tokens: executionRound.model_usage.output_tokens,
+          llm_calls: executionRound.model_usage.llm_calls,
+          model: executionRound.model_usage.model,
+          model_provider: modelProvider,
+          started_at: executionRound.started_at,
+          time_to_first_token: executionRound.time_to_first_token,
+          time_to_last_token: executionRound.time_to_last_token,
+          tools_invoked: toolCallSteps.map((step) =>
+            normalizeToolIdForTelemetry(step.tool_id, step.tool_type)
+          ),
+          tool_calls: toolCallSteps.length,
+          tool_call_errors: toolCallErrors.length,
+          message_length: roundTotals.input.message.length,
+          response_length: executionRound.response.message.length,
+          ...(telemetry.pendingPromptTypes.length > 0
+            ? {
+                prompt_count: telemetry.pendingPromptTypes.length,
+                prompt_types: telemetry.pendingPromptTypes,
+              }
+            : {}),
+          ...(telemetry.promptResponseTypes.length > 0
+            ? {
+                prompt_response_types: telemetry.promptResponseTypes,
+                prompt_response_outcomes: telemetry.promptResponseOutcomes,
+              }
+            : {}),
+          ...(telemetry.humanLatencyMs !== undefined
+            ? { human_latency_ms: telemetry.humanLatencyMs }
+            : {}),
+        }
+      );
+    } catch (error) {
+      // Do not fail the request if telemetry fails
+      this.logger.debug('Failed to report ExecutionComplete telemetry event', { error });
+    }
+  }
+
   reportRoundError({
     agentId,
     conversationId,
@@ -210,6 +447,7 @@ export class AnalyticsService {
     error,
     modelProvider,
     roundId,
+    roundOrigin,
   }: {
     agentId: string;
     conversationId?: string;
@@ -217,6 +455,7 @@ export class AnalyticsService {
     error: unknown;
     modelProvider: ModelProvider;
     roundId?: string;
+    roundOrigin?: TelemetryConversationOrigin;
   }): void {
     try {
       const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
@@ -226,6 +465,7 @@ export class AnalyticsService {
         agent_id: normalizedAgentId ?? 'unknown',
         conversation_id: conversationId,
         execution_id: executionId,
+        origin: roundOrigin,
         round_id: roundId,
         model_provider: modelProvider,
         error_message: errorMessage,
@@ -241,7 +481,9 @@ export class AnalyticsService {
     agentId,
     conversationId,
     executionId,
+    origin,
     toolId,
+    toolType,
     toolCallId,
     source,
     resultTypes,
@@ -250,7 +492,9 @@ export class AnalyticsService {
     agentId?: string;
     conversationId?: string;
     executionId?: string;
+    origin?: TelemetryConversationOrigin;
     toolId: string;
+    toolType?: ToolType | string;
     toolCallId: string;
     source: string;
     resultTypes: string[];
@@ -263,7 +507,8 @@ export class AnalyticsService {
           agent_id: normalizeAgentIdForTelemetry(agentId),
           conversation_id: conversationId,
           execution_id: executionId,
-          tool_id: normalizeToolIdForTelemetry(toolId),
+          origin,
+          tool_id: normalizeToolIdForTelemetry(toolId, toolType),
           tool_call_id: toolCallId,
           source,
           result_types: resultTypes,
@@ -279,7 +524,9 @@ export class AnalyticsService {
     agentId,
     conversationId,
     executionId,
+    origin,
     toolId,
+    toolType,
     toolCallId,
     source,
     errorType,
@@ -289,7 +536,9 @@ export class AnalyticsService {
     agentId?: string;
     conversationId?: string;
     executionId?: string;
+    origin?: TelemetryConversationOrigin;
     toolId: string;
+    toolType?: ToolType | string;
     toolCallId: string;
     source: string;
     errorType: string;
@@ -303,7 +552,8 @@ export class AnalyticsService {
           agent_id: normalizeAgentIdForTelemetry(agentId),
           conversation_id: conversationId,
           execution_id: executionId,
-          tool_id: normalizeToolIdForTelemetry(toolId),
+          origin,
+          tool_id: normalizeToolIdForTelemetry(toolId, toolType),
           tool_call_id: toolCallId,
           source,
           error_type: sanitizeForCounterName(errorType),

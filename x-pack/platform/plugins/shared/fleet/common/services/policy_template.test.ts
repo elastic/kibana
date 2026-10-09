@@ -23,13 +23,18 @@ import {
   isIntegrationPolicyTemplate,
   getNormalizedInputs,
   getNormalizedDataStreams,
+  getPolicyTemplateDataStreamPaths,
   filterPolicyTemplatesTiles,
+  getEnabledPolicyTemplates,
+  getEnabledInputsByPolicyTemplate,
   hasMultipleEnabledPolicyTemplates,
   getPolicyTemplateInputDefinition,
   registryInputAllowsDynamicSignalTypes,
   packagePolicyInputAllowsUndefinedDataStreamType,
   hasDynamicSignalTypes,
   shouldIncludeUseAPMVar,
+  shouldIncludeDataStreamTypeVar,
+  addDataStreamTypeVarIfNotPresent,
 } from './policy_template';
 
 describe('isInputOnlyPolicyTemplate', () => {
@@ -198,6 +203,54 @@ describe('shouldIncludeUseAPMVar', () => {
   });
 });
 
+describe('shouldIncludeDataStreamTypeVar', () => {
+  it('returns true when dynamic_signal_types is false', () => {
+    expect(shouldIncludeDataStreamTypeVar(false)).toBe(true);
+  });
+
+  it('returns false when dynamic_signal_types is true', () => {
+    expect(shouldIncludeDataStreamTypeVar(true)).toBe(false);
+  });
+});
+
+describe('addDataStreamTypeVarIfNotPresent', () => {
+  it('adds the data_stream.type var with the given default when not already present', () => {
+    const result = addDataStreamTypeVarIfNotPresent([], 'metrics');
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toEqual('data_stream.type');
+    expect(result[0].default).toEqual('metrics');
+    expect(result[0].show_user).toEqual(false);
+  });
+
+  it('uses empty array when vars is undefined', () => {
+    const result = addDataStreamTypeVarIfNotPresent(undefined, 'logs');
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toEqual('data_stream.type');
+  });
+
+  it('does not set a default when defaultType is not provided', () => {
+    const result = addDataStreamTypeVarIfNotPresent([]);
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toEqual('data_stream.type');
+    expect(result[0].default).toBeUndefined();
+  });
+
+  it('does not add the var when data_stream.type is already present', () => {
+    const existing = {
+      name: 'data_stream.type',
+      type: 'text' as RegistryVarType,
+      title: 'existing',
+      description: 'existing',
+      multi: false,
+      required: false,
+      show_user: true,
+    };
+    const result = addDataStreamTypeVarIfNotPresent([existing], 'metrics');
+    expect(result).toHaveLength(1);
+    expect(result[0]).toBe(existing);
+  });
+});
+
 describe('getNormalizedDataStreams', () => {
   const integrationPkg: PackageInfo = {
     name: 'nginx',
@@ -324,7 +377,88 @@ describe('getNormalizedDataStreams', () => {
     });
     expect(result).toHaveLength(1);
     expect(result[0].streams).toHaveLength(1);
-    expect(result?.[0].streams?.[0]?.vars).toEqual([datasetVar]);
+    const vars = result?.[0].streams?.[0]?.vars;
+    // dataset var should not be duplicated
+    expect(vars?.filter((v) => v.name === 'data_stream.dataset')).toHaveLength(1);
+    expect(vars?.find((v) => v.name === 'data_stream.dataset')).toMatchObject(datasetVar);
+  });
+
+  it('should add synthetic data_stream.type var with policyTemplate.type as default', () => {
+    const result = getNormalizedDataStreams({
+      ...integrationPkg,
+      type: 'input',
+      policy_templates: [
+        {
+          input: 'logfile',
+          type: 'logs',
+          name: 'myinput',
+          template_path: 'some/path.hbl',
+          title: 'My Input',
+          description: 'My Input',
+          vars: [],
+        },
+      ],
+    });
+    expect(result).toHaveLength(1);
+    const vars = result[0].streams![0].vars;
+    const typeVar = vars?.find((v) => v.name === 'data_stream.type');
+    expect(typeVar).toBeDefined();
+    expect(typeVar?.default).toEqual('logs');
+    expect(typeVar?.show_user).toEqual(false);
+  });
+
+  it('should not add data_stream.type var when already declared by the package', () => {
+    const existingTypeVar = {
+      name: 'data_stream.type',
+      type: 'text' as RegistryVarType,
+      title: 'custom type',
+      description: 'custom',
+      multi: false,
+      required: false,
+      show_user: true,
+    };
+    const result = getNormalizedDataStreams({
+      ...integrationPkg,
+      type: 'input',
+      policy_templates: [
+        {
+          input: 'logfile',
+          type: 'logs',
+          name: 'myinput',
+          template_path: 'some/path.hbl',
+          title: 'My Input',
+          description: 'My Input',
+          vars: [existingTypeVar],
+        },
+      ],
+    });
+    expect(result).toHaveLength(1);
+    const vars = result[0].streams![0].vars;
+    const typeVars = vars?.filter((v) => v.name === 'data_stream.type');
+    expect(typeVars).toHaveLength(1);
+    expect(typeVars![0]).toMatchObject(existingTypeVar);
+  });
+
+  it('should not add data_stream.type var when dynamic_signal_types is true', () => {
+    const result = getNormalizedDataStreams({
+      ...integrationPkg,
+      type: 'input',
+      policy_templates: [
+        {
+          input: 'otelcol',
+          name: 'otel-dynamic',
+          template_path: 'some/path.hbl',
+          title: 'OTel Dynamic',
+          description: 'OTel with dynamic signal types',
+          dynamic_signal_types: true,
+          vars: [],
+        },
+      ],
+    } as any);
+    expect(result).toHaveLength(1);
+    const vars = result[0].streams![0].vars;
+    const typeVar = vars?.find((v) => v.name === 'data_stream.type');
+    expect(typeVar).toBeUndefined();
   });
 
   const inputPkg: PackageInfo = {
@@ -470,47 +604,75 @@ describe('getNormalizedDataStreams', () => {
     expect(useApmVar?.default).toEqual(true);
   });
 
-  it('should use generic.otel as default dataset for dynamic_signal_types packages', () => {
-    const result = getNormalizedDataStreams({
-      ...integrationPkg,
-      type: 'input',
-      policy_templates: [
-        {
-          input: 'otelcol',
-          name: 'otlpreceiver',
-          template_path: 'some/path.hbl',
-          title: 'OTLP',
-          description: 'OTLP input',
-          dynamic_signal_types: true,
-          vars: [],
-        },
-      ],
-    });
-    expect(result).toHaveLength(1);
-    // Dataset should be 'generic.otel', NOT the policy_template-based default 'nginx.otlpreceiver'
-    expect(result[0].dataset).toEqual('generic.otel');
-    expect(result[0].path).toEqual('generic.otel');
+  it('should derive default dataset from packageName.templateName regardless of dynamic_signal_types', () => {
+    const makePkg = (name: string, dynamicSignalTypes?: boolean) =>
+      getNormalizedDataStreams({
+        ...integrationPkg,
+        type: 'input',
+        policy_templates: [
+          {
+            input: 'otelcol',
+            name,
+            template_path: 'some/path.hbl',
+            title: name,
+            description: name,
+            ...(dynamicSignalTypes !== undefined
+              ? { dynamic_signal_types: dynamicSignalTypes }
+              : {}),
+            vars: [],
+          },
+        ],
+      });
+
+    // dynamic_signal_types: true — same createDefaultDatasetName behaviour as non-dynamic
+    expect(makePkg('otlpreceiver', true)[0].dataset).toEqual('nginx.otlpreceiver');
+    expect(makePkg('otlpreceiver', true)[0].path).toEqual('nginx.otlpreceiver');
+
+    // dynamic_signal_types: false / absent — same behaviour
+    expect(makePkg('mysqlreceiver', false)[0].dataset).toEqual('nginx.mysqlreceiver');
+    expect(makePkg('mysqlreceiver')[0].dataset).toEqual('nginx.mysqlreceiver');
+  });
+});
+
+describe('getPolicyTemplateDataStreamPaths', () => {
+  it('returns the declared data_streams for integration templates', () => {
+    expect(
+      getPolicyTemplateDataStreamPaths({ name: 'nginx' }, {
+        name: 'nginx',
+        data_streams: ['access', 'error'],
+        inputs: [{ type: 'logfile' }],
+      } as any)
+    ).toEqual(['access', 'error']);
   });
 
-  it('should use policy_template-based default dataset for non-dynamic_signal_types packages', () => {
-    const result = getNormalizedDataStreams({
-      ...integrationPkg,
-      type: 'input',
-      policy_templates: [
-        {
-          input: 'otelcol',
-          name: 'mysqlreceiver',
-          type: 'metrics',
-          template_path: 'some/path.hbl',
-          title: 'MySQL OTel',
-          description: 'MySQL metrics via OTel',
-          vars: [],
-        },
-      ],
-    });
-    expect(result).toHaveLength(1);
-    // Without dynamic_signal_types, dataset is derived from packageName.templateName
-    expect(result[0].dataset).toEqual('nginx.mysqlreceiver');
+  it('returns an empty array for integration templates without data_streams', () => {
+    expect(
+      getPolicyTemplateDataStreamPaths({ name: 'nginx' }, {
+        name: 'nginx',
+        inputs: [{ type: 'logfile' }],
+      } as any)
+    ).toEqual([]);
+  });
+
+  it('returns the synthesized data stream path for input-only templates', () => {
+    expect(
+      getPolicyTemplateDataStreamPaths({ name: 'aws_cloudwatch' }, {
+        name: 'ec2',
+        input: 'otelcol',
+        title: 'EC2',
+        description: 'EC2',
+      } as any)
+    ).toEqual(['aws_cloudwatch.ec2']);
+  });
+
+  it('scopes each input-only template to its own data stream path', () => {
+    const packageInfo = { name: 'aws_cloudwatch' };
+    expect(
+      getPolicyTemplateDataStreamPaths(packageInfo, { name: 'rds', input: 'otelcol' } as any)
+    ).toEqual(['aws_cloudwatch.rds']);
+    expect(
+      getPolicyTemplateDataStreamPaths(packageInfo, { name: 'sqs', input: 'otelcol' } as any)
+    ).toEqual(['aws_cloudwatch.sqs']);
   });
 });
 
@@ -958,6 +1120,73 @@ describe('filterPolicyTemplatesTiles', () => {
         status: 'not_installed',
       },
     ]);
+  });
+});
+
+describe('getEnabledPolicyTemplates', () => {
+  it('returns the distinct templates of enabled inputs in first-appearance order', () => {
+    expect(
+      getEnabledPolicyTemplates({
+        inputs: [
+          { enabled: true, policy_template: 'cspm' },
+          { enabled: true, policy_template: 'cspm' },
+          { enabled: false, policy_template: 'kspm' },
+          { enabled: true },
+          { enabled: true, policy_template: 'cloudtrail' },
+        ],
+      })
+    ).toEqual(['cspm', 'cloudtrail']);
+  });
+
+  it('returns an empty array for an undefined policy or missing inputs', () => {
+    expect(getEnabledPolicyTemplates(undefined)).toEqual([]);
+    expect(getEnabledPolicyTemplates({})).toEqual([]);
+  });
+});
+
+describe('getEnabledInputsByPolicyTemplate', () => {
+  it('groups the enabled input types by policy template, templates in first-appearance order', () => {
+    expect(
+      getEnabledInputsByPolicyTemplate({
+        inputs: [
+          { type: 'cloudbeat/cis_aws', enabled: true, policy_template: 'cspm' },
+          { type: 'aws-s3', enabled: true, policy_template: 'cloudtrail' },
+          { type: 'cloudbeat/asset_inventory_aws', enabled: true, policy_template: 'cspm' },
+        ],
+      })
+    ).toEqual([
+      { name: 'cspm', enabledInputs: ['cloudbeat/asset_inventory_aws', 'cloudbeat/cis_aws'] },
+      { name: 'cloudtrail', enabledInputs: ['aws-s3'] },
+    ]);
+  });
+
+  it('deduplicates repeated input types within a policy template', () => {
+    expect(
+      getEnabledInputsByPolicyTemplate({
+        inputs: [
+          { type: 'aws-s3', enabled: true, policy_template: 'guardduty' },
+          { type: 'aws-s3', enabled: true, policy_template: 'guardduty' },
+        ],
+      })
+    ).toEqual([{ name: 'guardduty', enabledInputs: ['aws-s3'] }]);
+  });
+
+  it('ignores disabled inputs and inputs with no policy template', () => {
+    expect(
+      getEnabledInputsByPolicyTemplate({
+        inputs: [
+          { type: 'aws-s3', enabled: true, policy_template: 'guardduty' },
+          { type: 'aws-cloudwatch', enabled: false, policy_template: 'guardduty' },
+          { type: 'httpjson', enabled: false, policy_template: 'cloudtrail' },
+          { type: 'cel', enabled: true },
+        ],
+      })
+    ).toEqual([{ name: 'guardduty', enabledInputs: ['aws-s3'] }]);
+  });
+
+  it('returns an empty array for an undefined policy or missing inputs', () => {
+    expect(getEnabledInputsByPolicyTemplate(undefined)).toEqual([]);
+    expect(getEnabledInputsByPolicyTemplate({})).toEqual([]);
   });
 });
 

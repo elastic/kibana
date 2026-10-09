@@ -10,12 +10,16 @@
 // @generated — DO NOT EDIT DIRECTLY. Edit .elasticsearch-agent/skills and run ./build
 
 import { catalogEcommerceSkill } from './catalog_ecommerce';
+import { elasticsearchOnboardingSkill } from './elasticsearch_onboarding';
+import { elasticsearchTutorialSkill } from './elasticsearch_tutorial';
 import { keywordSearchSkill } from './keyword_search';
 import { ragChatbotSkill } from './rag_chatbot';
 import { useCaseLibrarySkill } from './use_case_library';
 import { vectorHybridSearchSkill } from './vector_hybrid_search';
 export {
   catalogEcommerceSkill,
+  elasticsearchOnboardingSkill,
+  elasticsearchTutorialSkill,
   keywordSearchSkill,
   ragChatbotSkill,
   useCaseLibrarySkill,
@@ -24,6 +28,8 @@ export {
 
 export const skills = [
   catalogEcommerceSkill,
+  elasticsearchOnboardingSkill,
+  elasticsearchTutorialSkill,
   keywordSearchSkill,
   ragChatbotSkill,
   useCaseLibrarySkill,

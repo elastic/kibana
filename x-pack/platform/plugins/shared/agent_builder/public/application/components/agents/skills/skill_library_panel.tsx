@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicSkillSummary } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { LibraryPanel } from '../common/library_panel';
@@ -42,7 +43,6 @@ interface SkillLibraryPanelProps {
   allSkills: PublicSkillSummary[];
   activeSkillIdSet: Set<string>;
   onToggleSkill: (skill: PublicSkillSummary, isActive: boolean) => void;
-  mutatingSkillId: string | null;
   enableElasticCapabilities?: boolean;
   builtinSkillIdSet?: Set<string>;
 }
@@ -52,7 +52,6 @@ export const SkillLibraryPanel: React.FC<SkillLibraryPanelProps> = ({
   allSkills,
   activeSkillIdSet,
   onToggleSkill,
-  mutatingSkillId,
   enableElasticCapabilities = false,
   builtinSkillIdSet,
 }) => {
@@ -71,13 +70,13 @@ export const SkillLibraryPanel: React.FC<SkillLibraryPanelProps> = ({
       allItems={allSkills}
       activeItemIdSet={activeSkillIdSet}
       onToggleItem={onToggleSkill}
-      mutatingItemId={mutatingSkillId}
       flyoutTitleId="skillLibraryFlyoutTitle"
       libraryLabels={libraryLabels}
       manageLibraryPath={appPaths.manage.skills}
       getItemName={getSkillName}
       disabledItemIdSet={disabledItemIdSet}
       readOnlyItemIdSet={readOnlyItemIdSet}
+      ebtEntityType={AGENT_BUILDER_UI_EBT.entity.SKILL}
     />
   );
 };

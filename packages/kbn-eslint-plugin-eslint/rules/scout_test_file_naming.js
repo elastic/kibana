@@ -12,10 +12,17 @@
 const path = require('path');
 
 /**
- * Matches Scout test file paths following the pattern:
- * {scout,scout_*}/{ui,api}/{tests,parallel_tests}/**\/*.spec.ts
+ * Matches `scout{_*}/[<namespace>/]{ui,api}/{parallel_,}tests/` paths.
+ * Backtracking prevents `ui`/`api` from being consumed as the namespace segment.
  */
-const SCOUT_TEST_PATH_PATTERN = /\/test\/scout(_[^/]+)?\/(?:ui|api)\/(?:parallel_)?tests\//;
+const SCOUT_TEST_PATH_PATTERN =
+  /\/test\/scout(?:_[^/]+)?(?:\/[^/]+)?\/(?:ui|api)\/(?:parallel_)?tests\//;
+
+/**
+ * Detects unsupported two-level namespace nesting: `scout{_*}/<a>/<b>/{ui,api}/`.
+ * Only one namespace level is allowed between the scout root and `{ui,api}/`.
+ */
+const SCOUT_TOO_DEEP_NAMESPACE_PATTERN = /\/test\/scout(?:_[^/]+)?\/[^/]+\/[^/]+\/(?:ui|api)\//;
 
 /**
  * Checks if a file path is in a Scout test directory
@@ -36,12 +43,13 @@ const hasSpecExtension = (filename) => {
 };
 
 /**
- * Checks if a file is a global setup file
+ * Checks if a file is a global setup or teardown file
  * @param {string} filename
  * @returns {boolean}
  */
-const isGlobalSetupFile = (filename) => {
-  return path.basename(filename) === 'global.setup.ts';
+const isGlobalSetupOrTeardownFile = (filename) => {
+  const basename = path.basename(filename);
+  return basename === 'global.setup.ts' || basename === 'global.teardown.ts';
 };
 
 const ALLOWED_PLAYWRIGHT_CONFIG_NAMES = new Set([
@@ -92,7 +100,12 @@ module.exports = {
       invalidExtension:
         'Scout test files must end with .spec.ts extension. Found: "{{actual}}", expected: "{{expected}}"',
       invalidPath:
-        'Scout test files must be located in scout{_*}/{ui,api}/{parallel_,}tests/ directories.',
+        'Scout test files must be located in scout{_*}/[<namespace>/]{ui,api}/{parallel_,}tests/ directories, ' +
+        'where the optional <namespace> is a single sub-directory level.',
+      invalidNamespaceDepth:
+        'Scout test files support at most one namespace sub-directory between the scout root and the ' +
+        '{ui,api} directory: scout{_*}/<namespace>/{ui,api}/{parallel_,}tests/. ' +
+        'Found more than one namespace level; rename to use a single namespace segment.',
       invalidPlaywrightConfigName: `Scout Playwright config files must be named one of the following: ${[
         ...ALLOWED_PLAYWRIGHT_CONFIG_NAMES,
       ].join(', ')}. Found: "{{actual}}"`,
@@ -100,27 +113,30 @@ module.exports = {
     fixable: null,
     schema: [],
   },
-  create: (context) => {
-    const filename = context.getFilename();
+  createOnce(context) {
+    let filename;
 
-    // Only process TypeScript files in test/scout directories
-    if (!filename.includes('/test/scout')) {
-      return {};
-    }
+    return {
+      before() {
+        filename = context.filename;
+      },
+      Program(node) {
+        // Only process TypeScript files in test/scout directories
+        if (!filename.includes('/test/scout')) {
+          return;
+        }
 
-    // Check if the file is in a Scout test directory
-    if (isInScoutTestDirectory(filename)) {
-      // Allow global.setup.ts files
-      if (isGlobalSetupFile(filename)) {
-        return {};
-      }
+        // Check if the file is in a Scout test directory
+        if (isInScoutTestDirectory(filename)) {
+          // Allow global.setup.ts and global.teardown.ts files
+          if (isGlobalSetupOrTeardownFile(filename)) {
+            return;
+          }
 
-      // File is in correct directory structure, check extension
-      if (!hasSpecExtension(filename)) {
-        const actualExt = getExtension(filename);
+          // File is in correct directory structure, check extension
+          if (!hasSpecExtension(filename)) {
+            const actualExt = getExtension(filename);
 
-        return {
-          Program(node) {
             context.report({
               node,
               messageId: 'invalidExtension',
@@ -129,13 +145,9 @@ module.exports = {
                 expected: path.basename(filename).replace(actualExt, '.spec.ts'),
               },
             });
-          },
-        };
-      }
-    } else if (filename.includes('/test/scout') && filename.endsWith('.ts')) {
-      if (isNonStandardPlaywrightConfig(filename)) {
-        return {
-          Program(node) {
+          }
+        } else if (filename.endsWith('.ts')) {
+          if (isNonStandardPlaywrightConfig(filename)) {
             context.report({
               node,
               messageId: 'invalidPlaywrightConfigName',
@@ -143,25 +155,27 @@ module.exports = {
                 actual: path.basename(filename),
               },
             });
-          },
-        };
-      }
+            return;
+          }
 
-      // File is in /test/scout but not in the correct subdirectory structure
-      // Only report if it looks like a test file (has test/spec in name or is .ts)
-      const basename = path.basename(filename, '.ts');
-      if (basename.includes('spec') || hasSpecExtension(filename)) {
-        return {
-          Program(node) {
+          // Check for unsupported two-level namespace paths, e.g. scout/<a>/<b>/{ui,api}/
+          if (SCOUT_TOO_DEEP_NAMESPACE_PATTERN.test(filename)) {
+            context.report({
+              node,
+              messageId: 'invalidNamespaceDepth',
+            });
+            return;
+          }
+
+          // Only report if it looks like a test file (has .spec.ts extension)
+          if (hasSpecExtension(filename)) {
             context.report({
               node,
               messageId: 'invalidPath',
             });
-          },
-        };
-      }
-    }
-
-    return {};
+          }
+        }
+      },
+    };
   },
 };

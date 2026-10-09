@@ -14,6 +14,13 @@ import {
   EQL_QUERY_VALIDATION_LABEL,
   EQL_QUERY_VALIDATION_SPINNER,
 } from '../screens/create_new_rule';
+import {
+  CREATE_CASE_FLYOUT,
+  DESCRIPTION_INPUT as CASE_DESCRIPTION_INPUT,
+  SUBMIT_BTN as CREATE_CASE_SUBMIT_BTN,
+  TITLE_INPUT as CASE_TITLE_INPUT,
+  VIEW_CASE_TOASTER_LINK,
+} from '../screens/create_new_case';
 
 import {
   ACTIVE_TIMELINE_BOTTOM_BAR,
@@ -38,7 +45,6 @@ import {
   OPEN_TIMELINE_ICON,
   PIN_EVENT,
   QUERY_EVENT_COUNT,
-  QUERY_TAB_BUTTON,
   RESET_FIELDS,
   SAVE_DATA_PROVIDER_BTN,
   SAVE_FILTER_BTN,
@@ -52,7 +58,6 @@ import {
   TIMELINE_CORRELATION_INPUT,
   TIMELINE_CORRELATION_TAB,
   TIMELINE_CREATE_TEMPLATE_FROM_TIMELINE_BTN,
-  TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN,
   TIMELINE_DATA_PROVIDER_FIELD,
   TIMELINE_DATA_PROVIDER_OPERATOR,
   TIMELINE_DATA_PROVIDER_VALUE,
@@ -74,7 +79,6 @@ import {
   TIMELINE_PROGRESS_BAR,
   TIMELINE_QUERY,
   TIMELINE_SAVE_MODAL,
-  TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH,
   TIMELINE_SAVE_MODAL_SAVE_BUTTON,
   TIMELINE_SEARCH_OR_FILTER,
   TIMELINE_SHOWQUERYBARMENU_BUTTON,
@@ -83,6 +87,7 @@ import {
   TIMELINE_TITLE,
   TIMELINE_TITLE_BY_ID,
   TIMELINE_TITLE_INPUT,
+  TIMELINE_WRAPPER,
   TOGGLE_DATA_PROVIDER_BTN,
 } from '../screens/timeline';
 
@@ -130,18 +135,6 @@ export const addNameToTimelineAndSave = (name: string) => {
   typeAndVerifyValue(TIMELINE_TITLE_INPUT, name);
   cy.get(TIMELINE_TITLE_INPUT).type('{enter}');
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
-  cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).click();
-  cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
-};
-
-export const addNameToTimelineAndSaveAsNew = (name: string) => {
-  cy.get(SAVE_TIMELINE_ACTION_BTN).first().click();
-  cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').clear();
-  typeAndVerifyValue(TIMELINE_TITLE_INPUT, name);
-  cy.get(TIMELINE_TITLE_INPUT).type('{enter}');
-  cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
-  cy.get(TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH).should('exist');
-  cy.get(TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH).click();
   cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
@@ -220,14 +213,27 @@ export const clearEqlInTimeline = () => {
   cy.get(EQL_QUERY_VALIDATION_LABEL).should('not.exist');
 };
 
-export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
+export const addFilter = (filter: TimelineFilter): void => {
   cy.get(ADD_FILTER).click();
-  cy.get(TIMELINE_FILTER_FIELD).type(`${filter.field}{downarrow}{enter}`);
-  cy.get(TIMELINE_FILTER_OPERATOR).type(`${filter.operator}{downarrow}{enter}`);
-  if (filter.operator !== 'exists') {
-    cy.get(TIMELINE_FILTER_VALUE).type(`${filter.value}{enter}`);
-  }
-  return cy.get(SAVE_FILTER_BTN).click();
+  // Field combobox sometimes re-renders and drops the selection under load (see #259682).
+  // Retry until the operator input enables, which only happens after a field is committed.
+  cy.waitUntil(() => {
+    cy.get(TIMELINE_FILTER_FIELD).should('be.enabled');
+    cy.get(TIMELINE_FILTER_FIELD).focus();
+    cy.get(TIMELINE_FILTER_FIELD).invoke('val', ''); // .clear() not working well
+    cy.get(TIMELINE_FILTER_FIELD).type(`${filter.field}{downarrow}{enter}`);
+    return cy.get(TIMELINE_FILTER_OPERATOR).then(($el) => !$el.attr('disabled'));
+  }).then(() => {
+    cy.get(TIMELINE_FILTER_OPERATOR).type(`${filter.operator}{downarrow}{enter}`);
+
+    if (filter.operator !== 'exists' && filter.value) {
+      cy.get(TIMELINE_FILTER_VALUE).type(filter.value);
+    }
+
+    cy.get(SAVE_FILTER_BTN).should('not.be.disabled');
+    cy.get(SAVE_FILTER_BTN).click();
+    cy.get(SAVE_FILTER_BTN).should('not.exist');
+  });
 };
 
 export const changeTimelineQueryLanguage = (language: 'kuery' | 'lucene') => {
@@ -290,53 +296,90 @@ export const attachTimelineToExistingCase = () => {
   cy.get(ATTACH_TIMELINE_TO_EXISTING_CASE_ICON).click();
 };
 
+/**
+ * Reads `xpack.cases.attachments.enabled` from the server-injected browser config so a spec
+ * can assert the actual runtime behavior: the legacy markdown link (flag off) or the
+ * `security.timeline` case attachment (flag on). Follows the real flag instead of pinning it
+ * per CI lane, so the spec passes whether or not the flag has been flipped.
+ */
+export const getCasesAttachmentsEnabled = (): Cypress.Chainable<boolean> =>
+  cy
+    .get('kbn-injected-metadata')
+    .invoke('attr', 'data')
+    .then((data) => {
+      const { uiPlugins = [] } = JSON.parse(data ?? '{}');
+      const casesPlugin = uiPlugins.find((plugin: { id: string }) => plugin.id === 'cases');
+      return Boolean(casesPlugin?.config?.attachments?.enabled);
+    });
+
+/**
+ * Fills and submits the create-case flyout opened by the unified attachments flow.
+ */
+export const createCaseFromTimelineFlyout = () => {
+  cy.get(CREATE_CASE_FLYOUT).should('be.visible');
+  cy.get(CASE_TITLE_INPUT).type('Timeline case');
+  cy.get(CASE_DESCRIPTION_INPUT).type('Timeline case description');
+  cy.get(CREATE_CASE_SUBMIT_BTN).click();
+};
+
+export const navigateToCaseFromSuccessToaster = () => {
+  cy.get(VIEW_CASE_TOASTER_LINK).click();
+};
+
+/**
+ * Retry until the timeline overlay mask is hidden. When the overlay is still open,
+ * click the close button so concurrent React re-renders (e.g. from markAsFavorite's
+ * timelines refresh) can settle before the next attempt.
+ */
+export const ensureTimelineOverlayHidden = () => {
+  recurse(
+    () => {
+      return cy.get(TIMELINE_WRAPPER).then(($wrapper) => {
+        if (!$wrapper.hasClass('timeline-portal-overlay-mask--hidden')) {
+          cy.get(CLOSE_TIMELINE_BTN).should('be.visible').click();
+        }
+        return cy.get(TIMELINE_WRAPPER);
+      });
+    },
+    ($timelineWrapper) => $timelineWrapper.hasClass('timeline-portal-overlay-mask--hidden')
+  );
+};
+
 export const closeTimeline = () => {
-  cy.get(CLOSE_TIMELINE_BTN).click();
-  cy.get(QUERY_TAB_BUTTON).should('not.be.visible');
+  ensureTimelineOverlayHidden();
 };
 
 export const createNewTimeline = () => {
   openCreateTimelineOptionsPopover();
-  cy.get(CREATE_NEW_TIMELINE).click();
+  cy.get(CREATE_NEW_TIMELINE).filter(':visible').click();
 };
 
 export const openCreateTimelineOptionsPopover = () => {
-  recurse(
-    () => {
-      cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
-      return cy.get(CREATE_NEW_TIMELINE);
-    },
-    (sub) => sub.is(':visible')
-  );
+  // NEW_TIMELINE_ACTION toggles the popover, so click it once and wait on the
+  // menu item instead of re-clicking in a retry loop, which would re-toggle the
+  // popover shut and detach CREATE_NEW_TIMELINE mid-click.
+  cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
+  cy.get(CREATE_NEW_TIMELINE).should('be.visible');
 };
 
 export const createTimelineFromBottomBar = () => {
-  recurse(
-    () => {
-      cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
-      return cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE);
-    },
-    (sub) => sub.is(':visible')
-  );
-
+  // The plus icon toggles the popover, so click it once and let `should` wait for the
+  // opening transition; re-clicking in a retry loop would close the popover again.
+  cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
+  cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE).should('be.visible');
   cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE).click();
 };
 
 export const createTimelineTemplateFromBottomBar = () => {
-  recurse(
-    () => {
-      cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
-      return cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0);
-    },
-    (sub) => sub.is(':visible')
-  );
-
+  cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
+  cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0).should('be.visible');
   cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0).click();
 };
 
 export const executeTimelineKQL = (query: string) => {
-  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).clear();
-  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).type(`${query} {enter}`);
+  const selector = `${SEARCH_OR_FILTER_CONTAINER} textarea`;
+  typeAndVerifyValue(selector, query);
+  cy.get(selector).type(' {enter}');
 };
 
 export const executeTimelineSearch = (query: string) => {
@@ -367,8 +410,10 @@ export const saveTimeline = () => {
 
 export const markAsFavorite = () => {
   cy.intercept('PATCH', 'api/timeline/_favorite').as('markedAsFavourite');
+  cy.intercept('GET', '/api/timelines*').as('timelinesRefreshed');
   cy.get(TIMELINE_PANEL).within(() => cy.get(STAR_ICON).click());
   cy.wait('@markedAsFavourite');
+  cy.wait('@timelinesRefreshed');
 };
 
 export const openTimelineDiscoverAddField = () => {
@@ -460,10 +505,6 @@ export const refreshTimelinesUntilTimeLinePresent = (
   cy.get(REFRESH_BUTTON).click();
   cy.get(TIMELINE(id)).should('be.visible');
   return cy.get(TIMELINE(id));
-};
-
-export const clickingOnCreateTimelineFormTemplateBtn = () => {
-  cy.get(TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN).click();
 };
 
 export const clickingOnCreateTemplateFromTimelineBtn = () => {

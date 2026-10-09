@@ -8,6 +8,15 @@
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiPopover, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import type { MouseEvent } from 'react';
+
+import { i18n } from '@kbn/i18n';
+import type { EbtClickAttrs } from '@kbn/ebt-click';
+import { getEbtProps } from '@kbn/ebt-click';
+
+function isPlainLeftClick(e: MouseEvent) {
+  return e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
+}
 
 export interface ActionSubItem {
   id: string;
@@ -15,6 +24,7 @@ export interface ActionSubItem {
   onClick?: () => void;
   href?: string;
   icon?: string;
+  ebt?: EbtClickAttrs;
 }
 
 export interface Action {
@@ -24,6 +34,7 @@ export interface Action {
   href?: string;
   icon?: string;
   items?: ActionSubItem[];
+  ebt?: EbtClickAttrs;
 }
 
 export interface ActionGroup {
@@ -76,7 +87,6 @@ export function ActionsContextMenu({
           css: {
             fontWeight: 700,
             color: euiTheme.colors.text,
-            borderBottom: euiTheme.border.thin,
             marginTop: groupIndex > 0 ? euiTheme.size.m : 0,
           },
           'data-test-subj': `${dataTestSubjPrefix}Group-${group.id}`,
@@ -110,6 +120,7 @@ export function ActionsContextMenu({
                       closePopover();
                     },
                   }),
+              ...(subItem.ebt ? getEbtProps(subItem.ebt) : {}),
               'data-test-subj': `${dataTestSubjPrefix}Item-${subItem.id}`,
             })),
           });
@@ -117,7 +128,17 @@ export function ActionsContextMenu({
           mainPanelItems.push({
             name: action.name,
             icon: action.icon,
-            ...(action.href
+            ...(action.href && action.onClick
+              ? {
+                  href: action.href,
+                  onClick: (e: MouseEvent) => {
+                    if (!isPlainLeftClick(e)) return;
+                    e.preventDefault();
+                    action.onClick!();
+                    closePopover();
+                  },
+                }
+              : action.href
               ? { href: action.href, target: '_self' as const }
               : {
                   onClick: () => {
@@ -125,6 +146,7 @@ export function ActionsContextMenu({
                     closePopover();
                   },
                 }),
+            ...(action.ebt ? getEbtProps(action.ebt) : {}),
             'data-test-subj': `${dataTestSubjPrefix}Item-${action.id}`,
           });
         }
@@ -137,6 +159,9 @@ export function ActionsContextMenu({
   return (
     <EuiPopover
       id={id}
+      aria-label={i18n.translate('xpack.apm.actionsContextMenu.ariaLabel', {
+        defaultMessage: 'Actions',
+      })}
       button={buttonWithToggle}
       isOpen={isPopoverOpen}
       closePopover={closePopover}

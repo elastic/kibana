@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type {
   CountIndexPatternColumn,
   DateHistogramIndexPatternColumn,
@@ -16,10 +17,9 @@ import type {
   MathIndexPatternColumn,
   AvgIndexPatternColumn,
 } from '@kbn/lens-common';
-import type { LensAttributes } from '../../types';
-import type { LensApiState } from '../../schema';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
-import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
+import type { LensAttributes } from '../../types';
+import type { XYConfig } from '../../schema';
 
 export const minimalAttributesXY: LensAttributes = {
   visualizationType: 'lnsXY',
@@ -191,6 +191,7 @@ export const fullBasicXY: LensAttributes = {
       legend: {
         isVisible: true,
         legendSize: 'auto',
+        legendStats: [],
         maxLines: 2,
         position: 'right',
         shouldTruncate: true,
@@ -204,7 +205,6 @@ export const fullBasicXY: LensAttributes = {
         yRight: true,
       },
       valueLabels: 'hide',
-      valuesInLegend: false,
       yLeftExtent: {
         enforce: true,
         mode: 'dataBounds',
@@ -360,6 +360,7 @@ export const multipleMetricsXY: LensAttributes = {
       ],
       legend: {
         isVisible: true,
+        legendStats: [],
         position: 'bottom',
         layout: 'list',
         shouldTruncate: true,
@@ -373,7 +374,6 @@ export const multipleMetricsXY: LensAttributes = {
         yRight: true,
       },
       valueLabels: 'hide',
-      valuesInLegend: false,
       yLeftExtent: {
         enforce: true,
         mode: 'dataBounds',
@@ -1073,7 +1073,7 @@ export const xyWithFormulaRefColumnsAndRankByTermsBucketOperationAttributes: Len
   version: LENS_ITEM_LATEST_VERSION,
 };
 
-export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
+export const apiXYWithNoYTitleAndInsideLegend: XYConfig = {
   title: '',
   type: 'xy',
   legend: {
@@ -1093,7 +1093,6 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
       },
     },
     y: {
-      anchor: 'start',
       title: {
         visible: false,
       },
@@ -1152,7 +1151,7 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
   },
 };
 
-export const apiXYWithTopListWithTruncationLegend: LensApiState = {
+export const apiXYWithTopListWithTruncationLegend: XYConfig = {
   title: '',
   type: 'xy',
   legend: {
@@ -1174,7 +1173,6 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
       },
     },
     y: {
-      anchor: 'start',
       title: {
         visible: false,
       },
@@ -1233,7 +1231,7 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
   },
 };
 
-export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
+export const apiXYWithNoTitleAndCustomOutsideLegend: XYConfig = {
   title: '',
   type: 'xy',
   legend: {
@@ -1253,7 +1251,6 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
       },
     },
     y: {
-      anchor: 'start',
       title: {
         visible: false,
       },

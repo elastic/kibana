@@ -14,25 +14,71 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { GetUnifiedHistoryResponse } from './get_unified_history.gen';
 
+export const OsqueryGetUnifiedHistoryRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * The number of results to return per page.
+     */
+    pageSize: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .default(20)
+      .describe('The number of results to return per page.'),
+    /**
+     * A base64-encoded cursor for pagination. Use the value from the previous response to fetch the next page.
+     */
+    nextPage: z
+      .string()
+      .optional()
+      .describe(
+        'A base64-encoded cursor for pagination. Use the value from the previous response to fetch the next page.'
+      ),
+    /**
+     * A search string to filter history entries by pack name, query text, or query ID.
+     */
+    kuery: z
+      .string()
+      .optional()
+      .describe('A search string to filter history entries by pack name, query text, or query ID.'),
+    /**
+     * Comma-separated list of user IDs to filter live query history.
+     */
+    userIds: z
+      .string()
+      .optional()
+      .describe('Comma-separated list of user IDs to filter live query history.'),
+    /**
+     * Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.
+     */
+    sourceFilters: z
+      .string()
+      .optional()
+      .describe(
+        'Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.'
+      ),
+    /**
+     * The start of the time range filter (ISO 8601).
+     */
+    startDate: z.string().optional().describe('The start of the time range filter (ISO 8601).'),
+    /**
+     * The end of the time range filter (ISO 8601).
+     */
+    endDate: z.string().optional().describe('The end of the time range filter (ISO 8601).'),
+  })
+);
 export type OsqueryGetUnifiedHistoryRequestQuery = z.infer<
   typeof OsqueryGetUnifiedHistoryRequestQuery
 >;
-export const OsqueryGetUnifiedHistoryRequestQuery = z.object({
-  pageSize: z.coerce.number().int().min(1).max(100).optional().default(20),
-  nextPage: z.string().optional(),
-  kuery: z.string().optional(),
-  userIds: z.string().optional(),
-  sourceFilters: z.string().optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-});
 export type OsqueryGetUnifiedHistoryRequestQueryInput = z.input<
   typeof OsqueryGetUnifiedHistoryRequestQuery
 >;
 
+export const OsqueryGetUnifiedHistoryResponse = lazySchema(() => GetUnifiedHistoryResponse);
 export type OsqueryGetUnifiedHistoryResponse = z.infer<typeof OsqueryGetUnifiedHistoryResponse>;
-export const OsqueryGetUnifiedHistoryResponse = GetUnifiedHistoryResponse;

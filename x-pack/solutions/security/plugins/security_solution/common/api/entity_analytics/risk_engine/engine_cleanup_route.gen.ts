@@ -14,20 +14,24 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const CleanUpRiskEngineErrorResponse = lazySchema(() =>
+  z.object({
+    cleanup_successful: z.boolean(),
+    errors: z.array(
+      z.object({
+        seq: z.number().int(),
+        error: z.string(),
+      })
+    ),
+  })
+);
 export type CleanUpRiskEngineErrorResponse = z.infer<typeof CleanUpRiskEngineErrorResponse>;
-export const CleanUpRiskEngineErrorResponse = z.object({
-  cleanup_successful: z.boolean(),
-  errors: z.array(
-    z.object({
-      seq: z.number().int(),
-      error: z.string(),
-    })
-  ),
-});
 
+export const CleanUpRiskEngineResponse = lazySchema(() =>
+  z.object({
+    cleanup_successful: z.boolean().optional(),
+  })
+);
 export type CleanUpRiskEngineResponse = z.infer<typeof CleanUpRiskEngineResponse>;
-export const CleanUpRiskEngineResponse = z.object({
-  cleanup_successful: z.boolean().optional(),
-});

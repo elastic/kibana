@@ -31,6 +31,7 @@ import type {
 } from './types';
 import type { StreamsAppServices } from './services/types';
 import {
+  createDiscoverFlyoutStreamFieldByStreamNameLink,
   createDiscoverFlyoutStreamFieldLink,
   createDiscoverFlyoutStreamProcessingLink,
 } from './discover_features';
@@ -89,7 +90,6 @@ export class StreamsAppPlugin
 {
   logger: Logger;
   telemetry: StreamsTelemetryService = new StreamsTelemetryService();
-
   private readonly version: string;
 
   constructor(private readonly context: PluginInitializerContext<ConfigSchema>) {
@@ -110,10 +110,10 @@ export class StreamsAppPlugin
       category: DEFAULT_APP_CATEGORIES.management,
       order: 10000,
       updater$: from(startServicesPromise).pipe(
-        switchMap(([_, pluginsStart]) =>
+        switchMap(([, pluginsStart]) =>
           pluginsStart.streams.navigationStatus$.pipe(
             map(({ status }): AppUpdater => {
-              return (app) => {
+              return () => {
                 if (status !== 'enabled') {
                   return {
                     visibleIn: [],
@@ -121,7 +121,7 @@ export class StreamsAppPlugin
                 }
 
                 return {
-                  visibleIn: ['sideNav', 'globalSearch'],
+                  visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
                 };
               };
             })
@@ -158,13 +158,20 @@ export class StreamsAppPlugin
     return {};
   }
 
-  start(_coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
+  start(coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
     const locator = pluginsStart.share.url.locators.create(new StreamsAppLocatorDefinition());
     pluginsStart.streams.navigationStatus$.subscribe((status) => {
       if (status.status !== 'enabled') return;
+      const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
       pluginsStart.discoverShared.features.registry.register({
         id: 'streams',
         renderFlyoutStreamField: createDiscoverFlyoutStreamFieldLink({
+          streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
+          locator,
+          http: coreStart.http,
+          isServerless,
+        }),
+        renderFlyoutStreamFieldByStreamName: createDiscoverFlyoutStreamFieldByStreamNameLink({
           streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
           locator,
         }),
@@ -172,6 +179,8 @@ export class StreamsAppPlugin
           fieldFormats: pluginsStart.fieldFormats,
           streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
           locator,
+          http: coreStart.http,
+          isServerless,
         }),
       });
     });

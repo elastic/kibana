@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import {
   fetchMonitorListAction,
   getMonitorListPageStateWithDefaults,
@@ -15,9 +15,11 @@ import {
 import {
   ConfigKey,
   PrivateLocationHealthStatusValue,
+  type EncryptedSyntheticsSavedMonitor,
 } from '../../../../../../common/runtime_types';
 import { fetchMonitorHealthAction, selectMonitorHealth } from '../../../state/monitor_health';
 import { resetMonitorAPI, resetMonitorBulkAPI } from '../../../state/monitor_management/api';
+import { resetSyntheticsPrivateLocation } from '../../../state/private_locations/api';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { isFixableByResetStatus } from './status_labels';
 
@@ -33,7 +35,36 @@ export interface MonitorIntegrationStatus {
 
 interface UseMonitorIntegrationHealthOptions {
   configIds?: string[];
+  /** Checks every monitor on these private locations, not just the current monitor list page. */
+  locationIds?: string[];
 }
+const getPrivateLocationMonitorIds = (monitors: EncryptedSyntheticsSavedMonitor[]): string[] =>
+  monitors
+    .filter((m) => (m[ConfigKey.LOCATIONS] ?? []).some((loc) => !loc.isServiceManaged))
+    .map((m) => m[ConfigKey.CONFIG_ID]);
+
+const getHealthQueryKey = ({
+  explicitConfigIdsKey,
+  locationIdsKey,
+  listLoaded,
+  listMonitors,
+}: {
+  explicitConfigIdsKey: string | undefined;
+  locationIdsKey: string | undefined;
+  listLoaded: boolean;
+  listMonitors: EncryptedSyntheticsSavedMonitor[];
+}): { key: 'monitorIds' | 'locationIds'; ids: string } => {
+  if (locationIdsKey !== undefined) {
+    return { key: 'locationIds', ids: locationIdsKey };
+  }
+  if (explicitConfigIdsKey !== undefined) {
+    return { key: 'monitorIds', ids: explicitConfigIdsKey };
+  }
+  if (!listLoaded) {
+    return { key: 'monitorIds', ids: '' };
+  }
+  return { key: 'monitorIds', ids: getPrivateLocationMonitorIds(listMonitors).join(',') };
+};
 
 interface UseMonitorIntegrationHealthReturn {
   statuses: Map<string, MonitorIntegrationStatus[]>;
@@ -41,6 +72,8 @@ interface UseMonitorIntegrationHealthReturn {
   isResetting: boolean;
   resetMonitor: (configId: string) => Promise<{ error?: Error }>;
   resetMonitors: (configIds: string[]) => Promise<{ error?: Error }>;
+  /** Recreates only the given location's missing package policies, across all its monitors. */
+  resetPrivateLocation: (locationId: string) => Promise<{ error?: Error }>;
   isUnhealthy: (configId: string) => boolean;
   isFixableByReset: (configId: string) => boolean;
   getUnhealthyLocationStatuses: (configId: string) => MonitorIntegrationStatus[];
@@ -54,7 +87,8 @@ interface UseMonitorIntegrationHealthReturn {
 export const useMonitorIntegrationHealth = (
   options?: UseMonitorIntegrationHealthOptions
 ): UseMonitorIntegrationHealthReturn => {
-  const { configIds } = options ?? {};
+  const { configIds, locationIds } = options ?? {};
+  const usesMonitorList = !configIds && !locationIds;
   const dispatch = useDispatch();
   const [isResetting, setIsResetting] = useState(false);
   const { lastRefresh } = useSyntheticsRefreshContext();
@@ -68,27 +102,36 @@ export const useMonitorIntegrationHealth = (
   const { data: healthData, loading: healthLoading } = useSelector(selectMonitorHealth);
 
   useEffect(() => {
-    if (!configIds && !listLoaded && !listLoading) {
+    if (usesMonitorList && !listLoaded && !listLoading) {
       dispatch(fetchMonitorListAction.get(getMonitorListPageStateWithDefaults()));
     }
-  }, [dispatch, configIds, listLoaded, listLoading]);
+  }, [dispatch, usesMonitorList, listLoaded, listLoading]);
 
-  const monitorIdsToFetch = useMemo(() => {
-    if (configIds) {
-      return configIds;
-    }
-    if (!listLoaded) {
-      return [];
-    }
-    return listMonitors
-      .filter((m) => (m[ConfigKey.LOCATIONS] ?? []).some((loc) => !loc.isServiceManaged))
-      .map((m) => m[ConfigKey.CONFIG_ID]);
-  }, [configIds, listLoaded, listMonitors]);
+  // Compare by joined ids — callers often pass inline arrays (e.g. [configId]).
+  const explicitConfigIdsKey = configIds?.join(',');
+  const locationIdsKey = locationIds?.join(',');
+
+  const { key: queryKey, ids: queryIdsKey } = useMemo(
+    () =>
+      getHealthQueryKey({
+        explicitConfigIdsKey,
+        locationIdsKey,
+        listLoaded,
+        listMonitors,
+      }),
+    [explicitConfigIdsKey, locationIdsKey, listLoaded, listMonitors]
+  );
+
+  const healthQuery = useMemo(() => {
+    if (!queryIdsKey) return null;
+    const ids = queryIdsKey.split(',');
+    return queryKey === 'locationIds' ? { locationIds: ids } : { monitorIds: ids };
+  }, [queryKey, queryIdsKey]);
 
   useEffect(() => {
-    if (monitorIdsToFetch.length === 0) return;
-    dispatch(fetchMonitorHealthAction.get(monitorIdsToFetch));
-  }, [dispatch, monitorIdsToFetch, lastRefresh]);
+    if (!healthQuery) return;
+    dispatch(fetchMonitorHealthAction.get(healthQuery));
+  }, [dispatch, lastRefresh, healthQuery]);
 
   const statuses = useMemo(() => {
     const map = new Map<string, MonitorIntegrationStatus[]>();
@@ -161,7 +204,7 @@ export const useMonitorIntegrationHealth = (
   const getUnhealthyMonitorsForLocation = useCallback(
     (locationId: string): Array<{ configId: string; name: string }> => {
       const monitorNameMap = new Map(
-        listMonitors.map((m) => [m[ConfigKey.CONFIG_ID], m[ConfigKey.NAME]])
+        (healthData?.monitors ?? []).map((m) => [m.configId, m.monitorName])
       );
       const monitors: Array<{ configId: string; name: string }> = [];
 
@@ -177,14 +220,14 @@ export const useMonitorIntegrationHealth = (
 
       return monitors;
     },
-    [statuses, listMonitors]
+    [statuses, healthData]
   );
 
   const refetchHealth = useCallback(() => {
-    if (monitorIdsToFetch.length > 0) {
-      dispatch(fetchMonitorHealthAction.get(monitorIdsToFetch));
+    if (healthQuery) {
+      dispatch(fetchMonitorHealthAction.get(healthQuery));
     }
-  }, [dispatch, monitorIdsToFetch]);
+  }, [dispatch, healthQuery]);
 
   const resetMonitor = useCallback(
     async (configId: string): Promise<{ error?: Error }> => {
@@ -222,7 +265,26 @@ export const useMonitorIntegrationHealth = (
     [refetchHealth]
   );
 
-  const loading = configIds ? healthLoading : !listLoaded || healthLoading;
+  const resetPrivateLocation = useCallback(
+    async (locationId: string): Promise<{ error?: Error }> => {
+      setIsResetting(true);
+      try {
+        const { failed } = await resetSyntheticsPrivateLocation(locationId);
+        refetchHealth();
+        if (failed.length > 0) {
+          return { error: new Error('Failed to reset one or more monitors') };
+        }
+        return {};
+      } catch (err) {
+        return { error: err instanceof Error ? err : new Error(String(err)) };
+      } finally {
+        setIsResetting(false);
+      }
+    },
+    [refetchHealth]
+  );
+
+  const loading = usesMonitorList ? !listLoaded || healthLoading : healthLoading;
 
   return {
     statuses,
@@ -230,6 +292,7 @@ export const useMonitorIntegrationHealth = (
     isResetting,
     resetMonitor,
     resetMonitors,
+    resetPrivateLocation,
     isUnhealthy,
     isFixableByReset,
     getUnhealthyLocationStatuses,

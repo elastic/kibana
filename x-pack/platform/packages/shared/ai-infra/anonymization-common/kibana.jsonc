@@ -1,7 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/anonymization-common",
-  "owner": ["@elastic/workchat-eng", "@elastic/security-generative-ai", "@elastic/security-threat-hunting"],
+  "owner": [
+    "@elastic/security-investigations"
+  ],
   "group": "platform",
   "visibility": "shared"
 }

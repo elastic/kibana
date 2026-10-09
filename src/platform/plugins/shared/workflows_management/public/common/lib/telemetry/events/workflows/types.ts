@@ -19,6 +19,7 @@ import type {
   ReportWorkflowExecutionsCancelledActionParams,
   ReportWorkflowRunCancelledActionParams,
   ReportWorkflowRunInitiatedActionParams,
+  ReportWorkflowRunResumedActionParams,
   ReportWorkflowStepTestRunInitiatedActionParams,
   ReportWorkflowTestRunInitiatedActionParams,
   WorkflowExecutionEventTypes,
@@ -37,8 +38,17 @@ import type {
   WorkflowLifecycleEventTypes,
 } from './lifecycle/types';
 import type {
+  ReportWorkflowAccessDeniedLicenseActionParams,
+  ReportWorkflowAccessDeniedPrivilegesActionParams,
+  ReportWorkflowAccessDeniedServerlessTierActionParams,
   ReportWorkflowCreateOpenedActionParams,
   ReportWorkflowDetailViewedActionParams,
+  ReportWorkflowExecutionsDetailOpenedActionParams,
+  ReportWorkflowExecutionsFilterAppliedActionParams,
+  ReportWorkflowExecutionsOpenInEditorClickedActionParams,
+  ReportWorkflowExecutionsPageViewedActionParams,
+  ReportWorkflowExecutionsSearchUsedActionParams,
+  ReportWorkflowExecutionsStepExpandedActionParams,
   ReportWorkflowListViewedActionParams,
   WorkflowUIEventTypes,
 } from './ui/types';
@@ -109,9 +119,19 @@ export interface WorkflowsTelemetryEventsMap {
   [WorkflowExecutionEventTypes.WorkflowRunInitiated]: ReportWorkflowRunInitiatedActionParams;
   [WorkflowExecutionEventTypes.WorkflowRunCancelled]: ReportWorkflowRunCancelledActionParams;
   [WorkflowExecutionEventTypes.WorkflowExecutionsCancelled]: ReportWorkflowExecutionsCancelledActionParams;
+  [WorkflowExecutionEventTypes.WorkflowRunResumed]: ReportWorkflowRunResumedActionParams;
   [WorkflowUIEventTypes.WorkflowListViewed]: ReportWorkflowListViewedActionParams;
   [WorkflowUIEventTypes.WorkflowDetailViewed]: ReportWorkflowDetailViewedActionParams;
   [WorkflowUIEventTypes.WorkflowCreateOpened]: ReportWorkflowCreateOpenedActionParams;
+  [WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges]: ReportWorkflowAccessDeniedPrivilegesActionParams;
+  [WorkflowUIEventTypes.WorkflowAccessDeniedLicense]: ReportWorkflowAccessDeniedLicenseActionParams;
+  [WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier]: ReportWorkflowAccessDeniedServerlessTierActionParams;
+  [WorkflowUIEventTypes.WorkflowExecutionsPageViewed]: ReportWorkflowExecutionsPageViewedActionParams;
+  [WorkflowUIEventTypes.WorkflowExecutionsFilterApplied]: ReportWorkflowExecutionsFilterAppliedActionParams;
+  [WorkflowUIEventTypes.WorkflowExecutionsSearchUsed]: ReportWorkflowExecutionsSearchUsedActionParams;
+  [WorkflowUIEventTypes.WorkflowExecutionsDetailOpened]: ReportWorkflowExecutionsDetailOpenedActionParams;
+  [WorkflowUIEventTypes.WorkflowExecutionsStepExpanded]: ReportWorkflowExecutionsStepExpandedActionParams;
+  [WorkflowUIEventTypes.WorkflowExecutionsOpenInEditorClicked]: ReportWorkflowExecutionsOpenInEditorClickedActionParams;
   [WorkflowImportExportEventTypes.WorkflowExported]: ReportWorkflowExportedActionParams;
   [WorkflowImportExportEventTypes.WorkflowImported]: ReportWorkflowImportedActionParams;
   [WorkflowAiChatEventTypes.WorkflowAiChatOpened]: ReportWorkflowAiChatOpenedParams;

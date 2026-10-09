@@ -92,6 +92,7 @@
       "mappings": {
         "dynamic": false,
         "properties.someNewProperty.type": "keyword",
+        "properties.someNewProperty.ignore_above": 1024,
         "properties.taskType.type": "keyword",
         "properties.scheduledAt.type": "date",
         "properties.runAt.type": "date",

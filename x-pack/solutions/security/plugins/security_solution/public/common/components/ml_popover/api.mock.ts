@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import type { Module, RecognizerModule, SecurityJob } from './types';
 
 export const mockOpenedJob: MlSummaryJob = {

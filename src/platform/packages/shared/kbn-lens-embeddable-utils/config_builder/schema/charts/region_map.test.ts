@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
-import type { RegionMapState } from './region_map';
-import { regionMapStateSchema } from './region_map';
+import type { RegionMapConfig } from './region_map';
+import { regionMapConfigSchema } from './region_map';
 
-type DefaultRegionMapConfig = Pick<RegionMapState, 'sampling' | 'ignore_global_filters'>;
-type RegionMapWithoutDefaultsConfig = Omit<RegionMapState, 'sampling' | 'ignore_global_filters'>;
+type DefaultRegionMapConfig = Pick<RegionMapConfig, 'sampling' | 'ignore_global_filters'>;
+type RegionMapWithoutDefaultsConfig = Omit<RegionMapConfig, 'sampling' | 'ignore_global_filters'>;
 
-type RegionTerms = Extract<RegionMapState['region'], { operation: 'terms' }>;
+type RegionTerms = Extract<RegionMapConfig['region'], { operation: 'terms' }>;
 interface RegionMapTermsRegionBaseConfig {
   region: Omit<RegionTerms, 'limit'>;
 }
@@ -50,7 +51,7 @@ describe('Region Map Schema', () => {
           },
         };
 
-      const validated = regionMapStateSchema.validate(input);
+      const validated = regionMapConfigSchema.parse(input);
       expect(validated).toEqual({
         ...defaultValues,
         ...input,
@@ -79,7 +80,7 @@ describe('Region Map Schema', () => {
         },
       };
 
-      const validated = regionMapStateSchema.validate(input);
+      const validated = regionMapConfigSchema.parse(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
     });
   });
@@ -103,7 +104,7 @@ describe('Region Map Schema', () => {
         },
       };
 
-      const validated = regionMapStateSchema.validate(input);
+      const validated = regionMapConfigSchema.parse(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
     });
   });
@@ -131,7 +132,8 @@ describe('Region Map Schema', () => {
         },
       };
 
-      expect(() => regionMapStateSchema.validate(input)).toThrow();
+      const result = regionMapConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws on missing region operation', () => {
@@ -148,7 +150,8 @@ describe('Region Map Schema', () => {
           fields: ['location'],
         },
       };
-      expect(() => regionMapStateSchema.validate(input)).toThrow();
+      const result = regionMapConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws on missing ems join field', () => {
@@ -175,7 +178,8 @@ describe('Region Map Schema', () => {
         },
       };
 
-      expect(() => regionMapStateSchema.validate(input)).toThrow();
+      const result = regionMapConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throw when using term buckets operation in an esql configuration', () => {
@@ -194,7 +198,8 @@ describe('Region Map Schema', () => {
           limit: 5,
         },
       };
-      expect(() => regionMapStateSchema.validate(input)).toThrow();
+      const result = regionMapConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
   });
 
@@ -219,7 +224,7 @@ describe('Region Map Schema', () => {
         },
       };
 
-      const validated = regionMapStateSchema.validate(input);
+      const validated = regionMapConfigSchema.parse(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
     });
 
@@ -244,7 +249,7 @@ describe('Region Map Schema', () => {
         },
       };
 
-      const validated = regionMapStateSchema.validate(input);
+      const validated = regionMapConfigSchema.parse(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
     });
   });

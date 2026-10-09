@@ -13,7 +13,7 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_CLONE_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerCloneWorkflowRoute(deps: RouteDependencies) {
   const { router, api, spaces, audit } = deps;
@@ -41,11 +41,11 @@ export function registerCloneWorkflowRoute(deps: RouteDependencies) {
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const { id } = request.params;
           const spaceId = spaces.getSpaceId(request);
-          const workflow = await api.getWorkflow(id, spaceId);
+          const workflow = await api.getWorkflow(id, spaceId, request);
           if (!workflow) {
             return response.notFound();
           }

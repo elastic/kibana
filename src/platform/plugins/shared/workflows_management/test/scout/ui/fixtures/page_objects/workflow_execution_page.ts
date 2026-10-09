@@ -1,0 +1,356 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { Locator, ScoutPage } from '@kbn/scout';
+
+/**
+ * Page object for the workflow execution detail view.
+ *
+ * Although editing and execution currently live on the same page,
+ * this class isolates execution-specific interactions (step tree,
+ * step results, execution status) from editor interactions so tests
+ * can express intent clearly and the code is future-proof for when
+ * the execution view becomes a separate page.
+ */
+export class WorkflowExecutionPage {
+  public executionPanel: Locator;
+  public readonly serviceAccountIdentity: Locator;
+  public readonly serviceAccountBadges: Locator;
+  public readonly copyServiceAccountId: Locator;
+
+  constructor(private readonly page: ScoutPage) {
+    this.executionPanel = this.page.testSubj
+      .locator('workflowExecutionFlyout')
+      .or(this.page.testSubj.locator('workflowExecutionPanel'));
+    this.serviceAccountIdentity = this.page.testSubj.locator('workflowServiceAccountName');
+    this.serviceAccountBadges = this.page.testSubj
+      .locator('workflowServiceAccountResolved')
+      .or(this.page.testSubj.locator('workflowServiceAccountUnavailable'));
+    this.copyServiceAccountId = this.page.getByRole('button', { name: 'Copy service account ID' });
+  }
+
+  async gotoOverview(workflowId: string, executionId: string): Promise<void> {
+    await this.page.gotoApp(`workflows/${workflowId}`, {
+      params: { executionId, stepExecutionId: '__overview', tab: 'executions' },
+    });
+    await this.page.testSubj
+      .locator('workflowExecutionOverview')
+      .or(this.page.testSubj.locator('workflowExecutionFlyout'))
+      .waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Wait for the execution view to load (URL contains executionId and panel is visible).
+   * Useful after triggering a workflow execution from any entry point.
+   */
+  async waitForExecutionView(timeout?: number) {
+    // executionId can follow other query params (`?tab=executions&executionId=`).
+    await this.page.waitForURL(/\/workflows\/[^/?#]+.*[?&]executionId=/, { timeout });
+    await this.executionPanel.waitFor({ state: 'visible', timeout });
+  }
+
+  /**
+   * Wait for the workflow execution panel to show the specified status.
+   *
+   * Automatically waits for the execution view to load first (URL navigation
+   * and panel visibility), then polls for the expected status badge.
+   *
+   * When expecting 'completed', this method also watches for 'failed' status
+   * so it can fail fast with a descriptive error (including the step error JSON)
+   * instead of timing out with no diagnostic info.
+   *
+   * @param status - The execution status to wait for ('completed' or 'failed')
+   * @param timeout - The timeout in milliseconds
+   */
+  async waitForExecutionStatus(
+    status: 'completed' | 'failed' | 'running' | 'cancelled',
+    timeout: number
+  ) {
+    await this.waitForExecutionView(timeout);
+    const withStatus = (s: string) =>
+      this.executionPanel
+        .locator(`[data-execution-status="${s}"]`)
+        .or(this.executionPanel.and(this.page.locator(`[data-execution-status="${s}"]`)));
+
+    const expectedPanel = withStatus(status);
+
+    if (status === 'completed') {
+      const failedPanel = withStatus('failed');
+
+      // Race: wait for either 'completed' or 'failed' — whichever comes first
+      const winner = await Promise.race([
+        expectedPanel.waitFor({ state: 'visible', timeout }).then(() => 'completed' as const),
+        failedPanel.waitFor({ state: 'visible', timeout }).then(() => 'failed' as const),
+      ]);
+
+      if (winner === 'failed') {
+        const errorDetails = await this.extractFailedStepError();
+        throw new Error(
+          `Expected execution status "completed" but got "failed".\n\n${errorDetails}`
+        );
+      }
+    } else {
+      await expectedPanel.waitFor({ state: 'visible', timeout });
+    }
+
+    await this.dismissToasts();
+  }
+
+  /** Success toasts sit over the flyout and block clicks on the step tree. */
+  private async dismissToasts(): Promise<void> {
+    await this.page.evaluate(() => {
+      document.querySelectorAll('.euiGlobalToastList').forEach((node) => {
+        node.remove();
+      });
+    });
+  }
+
+  /**
+   * Clicks the last step in the execution tree (typically the failed one)
+   * and extracts the error JSON from the step details panel.
+   * Returns a formatted string for use in error messages.
+   */
+  private async extractFailedStepError(): Promise<string> {
+    try {
+      // Find the last step button in the tree — when execution fails, the last
+      // executed step is the one that errored.
+      const stepButtons = this.executionPanel.locator(
+        '[role="treeitem"]:has([data-test-subj="workflowStepName"]), button:has([data-test-subj="workflowStepName"])'
+      );
+      const count = await stepButtons.count();
+      if (count === 0) {
+        return 'No steps found in execution tree.';
+      }
+
+      // eslint-disable-next-line playwright/no-nth-methods -- we need the last step (the failed one)
+      const lastStep = stepButtons.nth(count - 1);
+      const stepName =
+        (await lastStep.locator('span[data-test-subj="workflowStepName"]').textContent()) ??
+        'unknown';
+      await lastStep.click();
+
+      const errorJson = await this.getStepResultJson<unknown>('error');
+      return `Failed step: "${stepName.trim()}"\nError:\n${JSON.stringify(errorJson, null, 2)}`;
+    } catch (e) {
+      return `(could not extract step error details: ${
+        e instanceof Error ? e.message : String(e)
+      })`;
+    }
+  }
+
+  /**
+   * Expands all collapsed steps in the workflow execution panel tree view.
+   * Iterates through collapsed nodes and clicks their expansion arrows until all steps are expanded.
+   */
+  async expandStepsTree() {
+    while (true) {
+      const flyoutChevrons = await this.executionPanel
+        .locator('[data-test-subj="workflowStepTreeChevron"][aria-expanded="false"]')
+        .all();
+      if (flyoutChevrons.length) {
+        await flyoutChevrons[0].scrollIntoViewIfNeeded();
+        await flyoutChevrons[0].click();
+      } else {
+        const collapsedLocators = await this.executionPanel
+          .locator('button[aria-expanded="false"]:has(.euiTreeView__expansionArrow)')
+          .all();
+
+        if (!collapsedLocators.length) {
+          break;
+        }
+        await collapsedLocators[0].scrollIntoViewIfNeeded();
+        await collapsedLocators[0]
+          .locator('.euiTreeView__expansionArrow[role=presentation]')
+          .click();
+      }
+    }
+  }
+
+  /**
+   * Tree rows whose step name matches. The flyout uses treeitem rows; the previous panel used buttons.
+   */
+  stepsByName(name: string | RegExp): Locator {
+    const nameMatch = this.page.locator('[data-test-subj="workflowStepName"]', { hasText: name });
+    return this.executionPanel.locator('[role="treeitem"], button').filter({ has: nameMatch });
+  }
+
+  /**
+   * Input, output, or error section in the open step detail.
+   */
+  getStepResultSection(type: 'input' | 'output' | 'error'): Locator {
+    return this.executionPanel.locator(`[data-test-subj="workflowStepDataSection_${type}"]`);
+  }
+
+  /**
+   * Selects a step in the execution tree by navigating through a hierarchical path.
+   *
+   * @param path - The hierarchical path to the step, using '>' as separator
+   *   (e.g., "Parent > Child > Target Step" or "loop_over_results > Iteration #0 > process-item")
+   * @returns A promise that resolves to the locator for the target step button
+   * @throws Error if any node in the path is not found
+   */
+  async getStep(path: string): Promise<Locator> {
+    const tree = this.executionPanel.locator('[data-test-subj="workflowStepExecutionTree"]');
+    await tree.waitFor({ state: 'visible' });
+    const usesFlyoutTree =
+      (await tree.locator('[data-test-subj="workflowStepTreeNode"]').count()) > 0;
+    return usesFlyoutTree ? this.getFlyoutStep(path) : this.getLegacyStep(path);
+  }
+
+  private async getFlyoutStep(path: string): Promise<Locator> {
+    const nodes = path.split('>').map((substring) => substring.trim());
+    let parentLocator = this.executionPanel.locator('[data-test-subj="workflowStepExecutionTree"]');
+
+    for (let i = 0; i < nodes.length; i++) {
+      const currentNode = nodes[i];
+      const allListItems = await parentLocator
+        .locator('> [data-test-subj="workflowStepTreeNode"]')
+        .all();
+      let found = false;
+
+      for (const listItem of allListItems) {
+        const rowName = listItem.locator(
+          '> [data-test-subj="step-execution-tree-item-label"] [data-test-subj="workflowStepName"]'
+        );
+        const branchName = listItem.locator(
+          '> [data-test-subj="workflowStepExecutionTreeBranchRow"] [data-test-subj="workflowStepName"]'
+        );
+        const nameLocator = (await rowName.count()) > 0 ? rowName : branchName;
+        const stepName = (await nameLocator.textContent())?.trim();
+
+        if (stepName === currentNode) {
+          found = true;
+          if (i === nodes.length - 1) {
+            await this.dismissToasts();
+            const treeItem = listItem.locator(
+              '> [data-test-subj="step-execution-tree-item-label"] [role="treeitem"]'
+            );
+            return (await treeItem.count()) > 0 ? treeItem : nameLocator;
+          }
+
+          parentLocator = listItem.locator('> [data-test-subj="workflowStepTreeIndentGuide"]');
+          break;
+        }
+      }
+
+      if (!found) {
+        throw new Error(
+          `Step not found: "${currentNode}" in path "${path}" (failed at level ${i + 1})`
+        );
+      }
+    }
+
+    throw new Error(`Failed to navigate step path: ${path}`);
+  }
+
+  private async getLegacyStep(path: string): Promise<Locator> {
+    const nodes = path.split('>').map((substring) => substring.trim());
+    let parentLocator = this.executionPanel.locator('[data-test-subj="workflowStepExecutionTree"]');
+
+    for (let i = 0; i < nodes.length; i++) {
+      const currentNode = nodes[i];
+      const allListItems = await parentLocator.locator('> li').all();
+      let found = false;
+
+      for (const listItem of allListItems) {
+        const buttonLocator = listItem.locator('> button');
+        const buttonText = await buttonLocator
+          .locator('span[data-test-subj="workflowStepName"]')
+          .textContent();
+
+        if (buttonText?.trim() === currentNode) {
+          found = true;
+
+          if (i === nodes.length - 1) {
+            return buttonLocator;
+          }
+
+          parentLocator = listItem.locator('> div > ul');
+          break;
+        }
+      }
+
+      if (!found) {
+        throw new Error(
+          `Step not found: "${currentNode}" in path "${path}" (failed at level ${i + 1})`
+        );
+      }
+    }
+
+    throw new Error(`Failed to navigate step path: ${path}`);
+  }
+
+  /**
+   * Retrieves and parses the step result JSON from the workflow step execution details panel.
+   *
+   * @template TOutput - The expected type of the parsed JSON output
+   * @param type - The type of result to retrieve: 'input', 'output', or 'error'
+   * @returns A promise that resolves to the parsed JSON result
+   */
+  async getStepResultJson<TOutput = unknown>(type: 'input' | 'output' | 'error'): Promise<TOutput> {
+    const legacyDetails = this.page.testSubj.locator('workflowStepExecutionDetails');
+    if (await legacyDetails.isVisible()) {
+      return this.getLegacyStepResultJson(type);
+    }
+
+    const section = this.getStepResultSection(type);
+    await section.waitFor({ state: 'visible' });
+    // EuiCodeBlock puts data-test-subj on the <code> element itself.
+    const code = section.locator('[data-test-subj="workflowStepResultJsonCode"]');
+    if (!(await code.isVisible())) {
+      await section.locator('[data-test-subj="workflowStepDataViewToggle"]').click();
+      await this.page.testSubj.locator('workflowViewMode_json').click();
+      await code.waitFor({ state: 'visible' });
+    }
+
+    const stringValue = (await code.innerText()).trim();
+    return JSON.parse(stringValue) as TOutput;
+  }
+
+  private async getLegacyStepResultJson<TOutput = unknown>(
+    type: 'input' | 'output' | 'error'
+  ): Promise<TOutput> {
+    const workflowStepExecutionDetails = this.page.testSubj.locator('workflowStepExecutionDetails');
+
+    await workflowStepExecutionDetails
+      .locator(`button[data-test-subj="workflowStepTab_${type}"]`)
+      .click();
+    // The view-mode toggle lives inside the data viewer, which mounts only once the
+    // step's execution data has finished loading; wait for it before clicking.
+    await workflowStepExecutionDetails
+      .locator('[data-test-subj="workflowJsonDataViewer"]')
+      .waitFor({ state: 'visible' });
+    await workflowStepExecutionDetails
+      .locator('button[data-test-subj="workflowViewMode_json"]')
+      .click();
+
+    const jsonEditor = this.page.testSubj.locator('workflowStepResultJsonEditor');
+    await jsonEditor.waitFor({ state: 'visible' });
+
+    const uri = await jsonEditor.locator('.monaco-editor[data-uri]').getAttribute('data-uri');
+    if (!uri) {
+      throw new Error('Step result JSON editor data-uri not found');
+    }
+
+    const stringValue = await this.page.evaluate((modelUri) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- monaco environment is global, but we don't have a type for it
+      const monacoEnv = (window as any).MonacoEnvironment;
+      if (!monacoEnv?.monaco?.editor) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+      const model = monacoEnv.monaco.editor.getModel(modelUri);
+      if (!model) {
+        throw new Error('Step result JSON editor model not found');
+      }
+      return model.getValue();
+    }, uri);
+
+    return JSON.parse(stringValue);
+  }
+}

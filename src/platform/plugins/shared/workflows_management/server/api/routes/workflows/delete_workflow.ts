@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../types';
@@ -14,7 +15,7 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_DELETE_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerDeleteWorkflowRoute(deps: RouteDependencies) {
   const { router, api, spaces, audit } = deps;
@@ -40,6 +41,12 @@ export function registerDeleteWorkflowRoute(deps: RouteDependencies) {
           request: {
             params: idParamSchema,
             query: schema.object({
+              acknowledgeAclLoss: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description: 'Confirm that permanent deletion removes workflow access controls.',
+                },
+              }),
               force: schema.boolean({
                 defaultValue: false,
                 meta: {
@@ -51,12 +58,18 @@ export function registerDeleteWorkflowRoute(deps: RouteDependencies) {
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
-        const { force } = request.query;
+      withAvailabilityCheck(async (context, request, response) => {
+        const { force, acknowledgeAclLoss } = request.query;
         try {
           const { id } = request.params;
           const spaceId = spaces.getSpaceId(request);
-          await api.deleteWorkflows([id], spaceId, request, { force });
+          const result = await api.deleteWorkflows([id], spaceId, request, {
+            force,
+            acknowledgeAclLoss,
+          });
+          if (result.failures.length > 0) {
+            throw Boom.internal(result.failures[0].error);
+          }
           audit.logWorkflowDeleted(request, { id, force });
           return response.ok();
         } catch (error) {

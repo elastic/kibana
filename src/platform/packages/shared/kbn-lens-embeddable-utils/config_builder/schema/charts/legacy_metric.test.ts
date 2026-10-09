@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
-import type { LegacyMetricState, LegacyMetricStateESQL } from './legacy_metric';
-import { legacyMetricStateSchema } from './legacy_metric';
+import type { LegacyMetricConfig, LegacyMetricConfigESQL } from './legacy_metric';
+import { legacyMetricConfigSchema } from './legacy_metric';
 
 describe('Legacy Metric Schema', () => {
   const baseLegacyMetricConfig = {
@@ -19,14 +20,14 @@ describe('Legacy Metric Schema', () => {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       ref_id: 'test-data-view',
     },
-  } satisfies Partial<LegacyMetricState>;
+  } satisfies Partial<LegacyMetricConfig>;
 
   const defaultValues = {
     sampling: 1,
     ignore_global_filters: false,
-  } satisfies Partial<LegacyMetricState>;
+  } satisfies Partial<LegacyMetricConfig>;
 
-  type LegacyMetricInput = Omit<LegacyMetricState, keyof typeof defaultValues>;
+  type LegacyMetricInput = Omit<LegacyMetricConfig, keyof typeof defaultValues>;
 
   describe('metric configuration', () => {
     it('validates base count metric operation', () => {
@@ -39,12 +40,12 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies LegacyMetricInput;
 
-      const validated = legacyMetricStateSchema.validate(input);
-      expect(validated.metric.size).toBeUndefined();
+      const validated = legacyMetricConfigSchema.parse(input);
+      expect(validated.metric.size).toBe('m');
       expect(validated.metric.labels).toBeUndefined();
       expect(validated.metric.values).toBeUndefined();
       expect(validated.metric.apply_color_to).toBeUndefined();
-      expect(validated.metric.color).toBeUndefined();
+      expect(validated.metric.color).toEqual({ type: 'auto' });
     });
 
     it('validates count metric operation', () => {
@@ -64,8 +65,8 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies LegacyMetricInput;
 
-      const validated = legacyMetricStateSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
+      const validated = legacyMetricConfigSchema.parse(input);
+      expect(validated).toMatchObject({ ...defaultValues, ...input });
     });
 
     it('validates metric with color configuration', () => {
@@ -89,8 +90,8 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies LegacyMetricInput;
 
-      const validated = legacyMetricStateSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
+      const validated = legacyMetricConfigSchema.parse(input);
+      expect(validated).toMatchObject({ ...defaultValues, ...input });
     });
   });
 
@@ -104,7 +105,11 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies LegacyMetricInput;
 
-      expect(() => legacyMetricStateSchema.validate(input)).toThrow();
+      const result = legacyMetricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Invalid input
+          → at metric"
+      `);
     });
 
     it('throws on invalid alignment value', () => {
@@ -120,7 +125,11 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies LegacyMetricInput;
 
-      expect(() => legacyMetricStateSchema.validate(input)).toThrow();
+      const result = legacyMetricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Invalid option: expected one of \\"top\\"|\\"bottom\\"
+          → at metric.labels.alignment"
+      `);
     });
 
     it('throws on invalid size value', () => {
@@ -133,7 +142,11 @@ describe('Legacy Metric Schema', () => {
         },
       };
 
-      expect(() => legacyMetricStateSchema.validate(input)).toThrow();
+      const result = legacyMetricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Invalid input
+          → at metric.size"
+      `);
     });
 
     it('throws on invalid apply_color_to value', () => {
@@ -155,7 +168,11 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies LegacyMetricInput;
 
-      expect(() => legacyMetricStateSchema.validate(input)).toThrow();
+      const result = legacyMetricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Invalid option: expected one of \\"value\\"|\\"background\\"
+          → at metric.apply_color_to"
+      `);
     });
 
     it('throws when color by value is not absolute', () => {
@@ -177,7 +194,11 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies LegacyMetricInput;
 
-      expect(() => legacyMetricStateSchema.validate(input)).toThrow();
+      const result = legacyMetricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Invalid input
+          → at metric.color"
+      `);
     });
   });
 
@@ -208,7 +229,7 @@ describe('Legacy Metric Schema', () => {
         },
       } satisfies LegacyMetricInput;
 
-      const validated = legacyMetricStateSchema.validate(input);
+      const validated = legacyMetricConfigSchema.parse(input);
       expect(validated).toEqual({
         ...defaultValues,
         ...input,
@@ -228,9 +249,15 @@ describe('Legacy Metric Schema', () => {
           labels: { alignment: 'top' },
           values: { alignment: 'center' },
         },
-      } satisfies Omit<LegacyMetricStateESQL, keyof typeof defaultValues>;
+      } satisfies Omit<LegacyMetricConfigESQL, keyof typeof defaultValues>;
 
-      expect(() => legacyMetricStateSchema.validate(input)).toThrow();
+      const result = legacyMetricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Invalid input
+          → at metric
+        ✖ Invalid discriminator value. Expected 'data_view_reference' | 'data_view_spec'
+          → at data_source.type"
+      `);
     });
   });
 });

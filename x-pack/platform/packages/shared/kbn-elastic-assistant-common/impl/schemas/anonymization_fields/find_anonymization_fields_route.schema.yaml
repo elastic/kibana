@@ -6,6 +6,13 @@ paths:
   /api/security_ai_assistant/anonymization_fields/_find:
     get:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/security_ai_assistant/anonymization_fields/_find?page=1&per_page=20' \
+             --header "Authorization: $API_KEY"
       x-labels: [ess, serverless]
       operationId: FindAnonymizationFields
       description: Get a list of all anonymization fields.
@@ -74,7 +81,7 @@ paths:
 
       responses:
         200:
-          description: Successful response
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -126,43 +133,45 @@ paths:
                   - perPage
                   - total
                   - data
-              example:
-                page: 1
-                perPage: 20
-                total: 100
-                data:
-                  - id: '1'
-                    field: 'user.name'
-                    anonymized: true
-                    allowed: true
-                    timestamp: '2023-10-31T12:00:00Z'
-                    createdAt: '2023-10-31T12:00:00Z'
-                    updatedAt: '2023-10-31T12:00:00Z'
-                    createdBy: 'user1'
-                    updatedBy: 'user1'
-                    namespace: 'default'
-                all:
-                  - id: '1'
-                    field: 'user.name'
-                    anonymized: true
-                    allowed: true
-                    timestamp: '2023-10-31T12:00:00Z'
-                    createdAt: '2023-10-31T12:00:00Z'
-                    updatedAt: '2023-10-31T12:00:00Z'
-                    createdBy: 'user1'
-                    updatedBy: 'user1'
-                    namespace: 'default'
-                aggregations:
-                  anonymized:
-                    buckets:
-                      allowed:
-                        doc_count: 1
-                      anonymized:
-                        doc_count: 1
-                      denied:
-                        doc_count: 1
+              examples:
+                FindAnonymizationFieldsResponse200Example:
+                  value:
+                    page: 1
+                    perPage: 20
+                    total: 100
+                    data:
+                      - id: '1'
+                        field: 'user.name'
+                        anonymized: true
+                        allowed: true
+                        timestamp: '2023-10-31T12:00:00Z'
+                        createdAt: '2023-10-31T12:00:00Z'
+                        updatedAt: '2023-10-31T12:00:00Z'
+                        createdBy: 'user1'
+                        updatedBy: 'user1'
+                        namespace: 'default'
+                    all:
+                      - id: '1'
+                        field: 'user.name'
+                        anonymized: true
+                        allowed: true
+                        timestamp: '2023-10-31T12:00:00Z'
+                        createdAt: '2023-10-31T12:00:00Z'
+                        updatedAt: '2023-10-31T12:00:00Z'
+                        createdBy: 'user1'
+                        updatedBy: 'user1'
+                        namespace: 'default'
+                    aggregations:
+                      field_status:
+                        buckets:
+                          allowed:
+                            doc_count: 1
+                          anonymized:
+                            doc_count: 1
+                          denied:
+                            doc_count: 1
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -174,10 +183,12 @@ paths:
                     type: string
                   message:
                     type: string
-              example:
-                statusCode: 400
-                error: Bad Request
-                message: Invalid request parameters
+              examples:
+                FindAnonymizationFieldsResponse400Example:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: Invalid request parameters
 
 components:
   schemas:

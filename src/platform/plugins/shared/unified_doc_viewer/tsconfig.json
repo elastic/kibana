@@ -12,11 +12,11 @@
     "public/**/*.json"
   ],
   "kbn_references": [
-    "@kbn/kibana-react-plugin",
     "@kbn/monaco",
     "@kbn/data-views-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/discover-utils",
+    "@kbn/data-source",
     "@kbn/i18n-react",
     "@kbn/i18n",
     "@kbn/unified-doc-viewer",
@@ -54,11 +54,14 @@
     "@kbn/es-query",
     "@kbn/css-utils",
     "@kbn/storybook",
-    "@kbn/esql-composer",
-    "@kbn/deeplinks-analytics",
+    "@kbn/esql-utils",
     "@kbn/lens-embeddable-utils",
     "@kbn/restorable-state",
     "@kbn/lens-common",
+    "@kbn/ebt-click",
+    "@kbn/apm-shared",
+    "@kbn/ui-callout",
+    "@kbn/genai-common"
   ],
   "exclude": ["target/**/*"]
 }

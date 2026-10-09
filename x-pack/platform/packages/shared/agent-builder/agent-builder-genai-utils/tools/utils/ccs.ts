@@ -6,11 +6,20 @@
  */
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import pLimit from 'p-limit';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { isVisibleSearchSource } from '@kbn/agent-builder-common';
 import type { MappingField } from './mappings';
 import { flattenMapping, getIndexMappings } from './mappings';
-import { processFieldCapsResponse, processFieldCapsResponsePerIndex } from './field_caps';
+import type { GetIndexMappingsResult } from './mappings/get_index_mappings';
+import {
+  fetchFieldCaps,
+  processFieldCapsResponse,
+  processFieldCapsResponsePerIndex,
+} from './field_caps';
 import { batchByUrlLength } from './batch_by_url_length';
+import { listSearchSources } from '../steps/list_search_sources';
+import { getViewFields, listViews } from './views';
 
 /**
  * Returns true if the resource name targets a remote cluster (contains ':'),
@@ -52,11 +61,13 @@ export const partitionByCcs = <T extends { name: string }>(
 export const getFieldsFromFieldCaps = async ({
   resource,
   esClient,
+  includeFrozen = false,
 }: {
   resource: string;
   esClient: ElasticsearchClient;
+  includeFrozen?: boolean;
 }): Promise<MappingField[]> => {
-  const fieldCapRes = await esClient.fieldCaps({ index: resource, fields: ['*'] });
+  const fieldCapRes = await fetchFieldCaps({ index: resource, esClient, includeFrozen });
   const { fields } = processFieldCapsResponse(fieldCapRes);
   return fields;
 };
@@ -69,9 +80,11 @@ export const getFieldsFromFieldCaps = async ({
 export const getBatchedFieldsFromFieldCaps = async ({
   resources,
   esClient,
+  includeFrozen = false,
 }: {
   resources: string[];
   esClient: ElasticsearchClient;
+  includeFrozen?: boolean;
 }): Promise<Record<string, MappingField[]>> => {
   if (resources.length === 0) {
     return {};
@@ -81,9 +94,10 @@ export const getBatchedFieldsFromFieldCaps = async ({
 
   const batchResults = await Promise.all(
     batches.map(async (batch) => {
-      const fieldCapRes = await esClient.fieldCaps({
+      const fieldCapRes = await fetchFieldCaps({
         index: batch.join(','),
-        fields: ['*'],
+        esClient,
+        includeFrozen,
       });
       return processFieldCapsResponsePerIndex(fieldCapRes);
     })
@@ -105,38 +119,206 @@ export const getBatchedFieldsFromFieldCaps = async ({
   return merged;
 };
 
+export type IndexFieldType = 'index' | 'dataStream' | 'alias' | 'indexPattern' | 'view';
+
 export interface IndexFieldsResult {
+  type: IndexFieldType;
   fields: MappingField[];
   rawMapping?: MappingTypeMapping;
 }
 
+type LocalResolution =
+  | { input: string; kind: 'index'; concreteName: string }
+  | { input: string; kind: 'dataStream'; concreteName: string }
+  | { input: string; kind: 'alias'; concreteName: string }
+  | { input: string; kind: 'view'; concreteName: string }
+  | { input: string; kind: 'indexPattern' }
+  | { input: string; kind: 'unresolved' };
+
+/**
+ * Classify a single local input by resolving it via `listSearchSources`
+ * (which wraps `_resolve/index` + 404 handling). Only inputs that resolve
+ * to exactly one concrete resource (index or data stream) are routed to a
+ * mapping API; aliases get `_field_caps` for the unified field list. A name
+ * that matches nothing is `unresolved` so the caller can check ES|QL views
+ * once for the whole batch. Everything else (wildcards, multiple targets)
+ * goes through `_field_caps` as a pattern.
+ */
+const resolveLocalTarget = async ({
+  input,
+  esClient,
+}: {
+  input: string;
+  esClient: ElasticsearchClient;
+}): Promise<LocalResolution> => {
+  const res = await listSearchSources({
+    pattern: input,
+    esClient,
+    includeHidden: true,
+    excludeIndicesRepresentedAsAlias: true,
+    excludeIndicesRepresentedAsDatastream: true,
+  });
+
+  const total = res.indices.length + res.data_streams.length + res.aliases.length;
+  if (total === 1) {
+    if (res.indices.length === 1) {
+      return { input, kind: 'index', concreteName: res.indices[0].name };
+    }
+    if (res.data_streams.length === 1) {
+      return { input, kind: 'dataStream', concreteName: res.data_streams[0].name };
+    }
+    if (res.aliases.length === 1) {
+      return { input, kind: 'alias', concreteName: res.aliases[0].name };
+    }
+  }
+
+  if (total === 0) {
+    return { input, kind: 'unresolved' };
+  }
+
+  return { input, kind: 'indexPattern' };
+};
+
 /**
  * Resolves field information for a list of indices, transparently handling
- * the local-vs-CCS split. Local indices use the _mapping API (preserving
- * the full mapping tree in `rawMapping`), while CCS indices fall back to
- * the batched _field_caps API.
+ * the local-vs-CCS split. Local inputs are classified via `_resolve/index`
+ * and routed to the appropriate mapping / field-caps fetcher; CCS inputs
+ * go directly to the batched _field_caps API.
  */
 export const getIndexFields = async ({
   indices,
   esClient,
   cleanup = true,
+  includeFrozen = false,
+  includeViews = false,
+  skipUnauthorized = false,
 }: {
   indices: string[];
   esClient: ElasticsearchClient;
   cleanup?: boolean;
+  includeFrozen?: boolean;
+  includeViews?: boolean;
+  skipUnauthorized?: boolean;
 }): Promise<Record<string, IndexFieldsResult>> => {
   const local = indices.filter((i) => !isCcsTarget(i));
   const remote = indices.filter((i) => isCcsTarget(i));
   const result: Record<string, IndexFieldsResult> = {};
 
   if (local.length > 0) {
-    const mappings = await getIndexMappings({ indices: local, cleanup, esClient });
-    for (const idx of local) {
-      const entry = mappings[idx];
-      result[idx] = {
+    const resolveLimit = pLimit(5);
+    const resolutions = await Promise.all(
+      local.map((input) => resolveLimit(() => resolveLocalTarget({ input, esClient })))
+    );
+
+    // Views are invisible to `_resolve/index`. Fetch the cluster view list once, and only
+    // when at least one name matched nothing, instead of once per resolved index.
+    const viewNames =
+      includeViews && resolutions.some((resolution) => resolution.kind === 'unresolved')
+        ? (await listViews({ esClient }))
+            .map((view) => view.name)
+            .filter((name) => isVisibleSearchSource(name))
+        : [];
+
+    // All buckets share the same `{input, concrete}` shape. For `indexPattern`
+    // entries we don't have a resolved concrete name, so we use `input` (the
+    // user's verbatim string) — `_field_caps` treats it as a pattern anyway.
+    const buckets: Record<IndexFieldType, Array<{ input: string; concrete: string }>> = {
+      index: [],
+      dataStream: [],
+      alias: [],
+      indexPattern: [],
+      view: [],
+    };
+    for (const r of resolutions) {
+      if (r.kind === 'unresolved') {
+        // Only an exact view name is a view. A pattern such as `logs-*` that happens to
+        // match one view must stay an index pattern.
+        const matchedView = viewNames.find((name) => name === r.input);
+        if (matchedView) {
+          buckets.view.push({ input: r.input, concrete: matchedView });
+        } else {
+          buckets.indexPattern.push({ input: r.input, concrete: r.input });
+        }
+        continue;
+      }
+      const concrete = r.kind === 'indexPattern' ? r.input : r.concreteName;
+      buckets[r.kind].push({ input: r.input, concrete });
+    }
+
+    // Shared concurrency cap across all fetch paths (index/ds/alias/pattern).
+    // Each per-input field_caps call and each batched mapping call counts as
+    // one slot against this limit.
+    const fetchLimit = pLimit(5);
+
+    // Data streams, aliases, and index patterns all go through _field_caps:
+    //  - Aliases / patterns: _mapping doesn't apply.
+    //  - Data streams: the _data_stream/_mappings API returns the template-level
+    //    "effective_mappings", which omits fields dynamically added to backing
+    //    indices (common for OTel telemetry under passthrough properties). Using
+    //    _field_caps yields the actual indexed fields across all backing indices.
+    const fetchPerInputFieldCaps = (bucket: Array<{ input: string; concrete: string }>) =>
+      Promise.all(
+        bucket.map(async (b) => ({
+          input: b.input,
+          fields: await fetchLimit(() =>
+            getFieldsFromFieldCaps({ resource: b.concrete, esClient, includeFrozen })
+          ),
+        }))
+      );
+
+    const viewResults = Promise.all(
+      buckets.view.map(async (b) => ({
+        input: b.input,
+        // A stale view definition must not fail mapping for the other names in this request.
+        fields: await fetchLimit(() =>
+          getViewFields({ name: b.concrete, esClient }).catch(() => [])
+        ),
+      }))
+    );
+
+    const [indexMappings, dsResults, aliasResults, patternResults, resolvedViewResults] =
+      await Promise.all([
+        buckets.index.length > 0
+          ? fetchLimit(() =>
+              getIndexMappings({
+                indices: buckets.index.map((i) => i.concrete),
+                cleanup,
+                skipUnauthorized,
+                esClient,
+              })
+            )
+          : Promise.resolve({} as GetIndexMappingsResult),
+        fetchPerInputFieldCaps(buckets.dataStream),
+        fetchPerInputFieldCaps(buckets.alias),
+        fetchPerInputFieldCaps(buckets.indexPattern),
+        viewResults,
+      ]);
+
+    for (const { input, concrete } of buckets.index) {
+      const entry = indexMappings[concrete];
+      if (!entry) {
+        // Race: resolved to a concrete index, but it's gone by the time we
+        // fetch. Degrade to indexPattern rather than crashing.
+        result[input] = { type: 'indexPattern', fields: [] };
+        continue;
+      }
+      result[input] = {
+        type: 'index',
         fields: flattenMapping(entry.mappings),
         rawMapping: entry.mappings,
       };
+    }
+    for (const { input, fields } of dsResults) {
+      result[input] = { type: 'dataStream', fields };
+    }
+    for (const { input, fields } of aliasResults) {
+      result[input] = { type: 'alias', fields };
+    }
+    for (const { input, fields } of patternResults) {
+      result[input] = { type: 'indexPattern', fields };
+    }
+    for (const { input, fields } of resolvedViewResults) {
+      result[input] = { type: 'view', fields };
     }
   }
 
@@ -144,9 +326,10 @@ export const getIndexFields = async ({
     const fieldsByIndex = await getBatchedFieldsFromFieldCaps({
       resources: remote,
       esClient,
+      includeFrozen,
     });
     for (const idx of remote) {
-      result[idx] = { fields: fieldsByIndex[idx] ?? [] };
+      result[idx] = { type: 'indexPattern', fields: fieldsByIndex[idx] ?? [] };
     }
   }
 

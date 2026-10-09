@@ -14,30 +14,36 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * The response for getting scheduled query results.
  */
+export const GetScheduledQueryResultsResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The query results data wrapper.
+     */
+    data: z
+      .object({
+        /**
+         * The paginated list of query result rows.
+         */
+        edges: z
+          .array(z.object({}))
+          .optional()
+          .describe('The paginated list of query result rows.'),
+        /**
+         * The total number of result rows.
+         */
+        total: z.number().int().optional().describe('The total number of result rows.'),
+        /**
+         * Debug/inspection data for the search query.
+         */
+        inspect: z.object({}).optional().describe('Debug/inspection data for the search query.'),
+      })
+      .optional()
+      .describe('The query results data wrapper.'),
+  })
+);
 export type GetScheduledQueryResultsResponse = z.infer<typeof GetScheduledQueryResultsResponse>;
-export const GetScheduledQueryResultsResponse = z.object({
-  /**
-   * The query results data wrapper.
-   */
-  data: z
-    .object({
-      /**
-       * The paginated list of query result rows.
-       */
-      edges: z.array(z.object({})).optional(),
-      /**
-       * The total number of result rows.
-       */
-      total: z.number().int().optional(),
-      /**
-       * Debug/inspection data for the search query.
-       */
-      inspect: z.object({}).optional(),
-    })
-    .optional(),
-});

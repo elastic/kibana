@@ -14,6 +14,7 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { FSRepository, Repository } from '../../../../../common/types';
 import type { RepositorySettingsValidation } from '../../../services/validation';
@@ -26,12 +27,16 @@ interface Props {
     replaceSettings?: boolean
   ) => void;
   settingErrors: RepositorySettingsValidation;
+  isReadOnlyToggleDisabled?: boolean;
+  readOnlyToggleDisabledTooltipContent?: React.ReactNode;
 }
 
 export const FSSettings: React.FunctionComponent<Props> = ({
   repository,
   updateRepositorySettings,
   settingErrors,
+  isReadOnlyToggleDisabled,
+  readOnlyToggleDisabledTooltipContent,
 }) => {
   const {
     settings: {
@@ -49,6 +54,28 @@ export const FSSettings: React.FunctionComponent<Props> = ({
       [name]: value,
     });
   };
+
+  const readOnlyTooltipContent = isReadOnlyToggleDisabled
+    ? readOnlyToggleDisabledTooltipContent
+    : undefined;
+  const readOnlySwitchControl = (
+    <EuiSwitch
+      label={
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryForm.typeFS.readonlyLabel"
+          defaultMessage="Read-only repository"
+        />
+      }
+      checked={!!readonly}
+      disabled={Boolean(isReadOnlyToggleDisabled)}
+      onChange={(e) => {
+        updateRepositorySettings({
+          readonly: e.target.checked,
+        });
+      }}
+      data-test-subj="readOnlyToggle"
+    />
+  );
 
   return (
     <Fragment>
@@ -194,21 +221,11 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           isInvalid={Boolean(hasErrors && settingErrors.readonly)}
           error={settingErrors.readonly}
         >
-          <EuiSwitch
-            label={
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeFS.readonlyLabel"
-                defaultMessage="Read-only repository"
-              />
-            }
-            checked={!!readonly}
-            onChange={(e) => {
-              updateRepositorySettings({
-                readonly: e.target.checked,
-              });
-            }}
-            data-test-subj="readOnlyToggle"
-          />
+          {readOnlyTooltipContent ? (
+            <EuiToolTip content={readOnlyTooltipContent}>{readOnlySwitchControl}</EuiToolTip>
+          ) : (
+            readOnlySwitchControl
+          )}
         </EuiFormRow>
       </EuiDescribedFormGroup>
     </Fragment>

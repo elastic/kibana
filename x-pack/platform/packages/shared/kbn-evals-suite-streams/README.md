@@ -15,6 +15,17 @@ node scripts/evals run --suite streams --evaluation-connector-id azure-gpt4o
 node scripts/evals run --suite streams --evaluation-connector-id azure-gpt4o pipeline_suggestion
 ```
 
+### EIS connector (Vault CCM + `evals start`)
+
+From the repo root, with Vault logged in (`vault login --method oidc`):
+
+```bash
+x-pack/platform/packages/shared/kbn-evals-suite-streams/scripts/run_stream_evals_eis.sh eis-google-gemini-3-1-pro
+# optional second arg: Playwright --grep (default: Pipeline suggestion)
+```
+
+Skips `discover_eis_models` when `target/eis_models.json` already exists (delete that file to refresh). Stops background services afterward with `node scripts/evals stop`.
+
 ## Creating New Datasets
 
 You can easily create new dataset entries from AI suggestions generated in Kibana:

@@ -34,7 +34,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ])}`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
+        // Mock prebuilt-rules setup uploads the bundled security_detection_engine package name.
+        `--xpack.fleet.internal.skipUploadPackageValidation=true`,
       ],
+    },
+    uiSettings: {
+      globalDefaults: {
+        hideAnnouncements: true,
+      },
     },
     testRunner: SecuritySolutionConfigurableCypressTestRunner,
   };

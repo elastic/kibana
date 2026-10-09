@@ -5,29 +5,36 @@
  * 2.0.
  */
 
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { apiTest as base } from '@kbn/scout-oblt';
-import { COLLECTOR_PACKAGE_POLICY_NAME, SYMBOLIZER_PACKAGE_POLICY_NAME } from './constants';
+import {
+  COLLECTOR_PACKAGE_POLICY_NAME,
+  OTEL_PROFILING_EVENTS_DATA_STREAM,
+  otelEsArchiverPath,
+  PROFILING_OTEL_TEST_NAMESPACE,
+  SYMBOLIZER_PACKAGE_POLICY_NAME,
+} from './constants';
 
 export interface ProfilingHelper {
   installPolicies: () => Promise<void>;
-  cleanupPolicies: () => Promise<void>;
-  getPoliciyIds: () => Promise<{ collectorId?: string; symbolizerId?: string }>;
+  cleanupPolicies: (opts?: { includeAgentPolicy?: boolean }) => Promise<void>;
+  getPolicyIds: () => Promise<{ collectorId?: string; symbolizerId?: string }>;
+  loadOtelData: () => Promise<void>;
 }
 
 const APM_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
 
 export const apiTest = base.extend<{}, { profilingHelper: ProfilingHelper }>({
   profilingHelper: [
-    async ({ apiServices, log }, use) => {
+    async ({ apiServices, esClient, log, profilingSetup }, use) => {
       const installPolicies = async (): Promise<void> => {
         log.info('Checking if APM agent policy exists, creating if needed...');
         const getPolicyResponse = await apiServices.fleet.agent_policies.get({
           page: 1,
-          perPage: 10,
+          perPage: 1000,
         });
         const apmPolicyData = getPolicyResponse.data.items.find(
-          (policy: { id: string }) => policy.id === 'policy-elastic-agent-on-cloud'
+          (policy: { id: string }) => policy.id === APM_AGENT_POLICY_ID
         );
 
         if (!apmPolicyData) {
@@ -45,29 +52,52 @@ export const apiTest = base.extend<{}, { profilingHelper: ProfilingHelper }>({
           log.info(`APM agent policy '${APM_AGENT_POLICY_ID}' already exists`);
         }
       };
-      const cleanupPolicies = async (): Promise<void> => {
+
+      const cleanupPolicies = async (
+        opts: { includeAgentPolicy?: boolean } = {}
+      ): Promise<void> => {
+        const { includeAgentPolicy = false } = opts;
         log.info('Cleaning up profiling resources...');
 
-        const res = await apiServices.fleet.package_policies.get();
-        const policies: PackagePolicy[] = res.data.items;
+        const res = await apiServices.fleet.package_policies.get({ perPage: 1000 });
+        const packagePolicies: PackagePolicy[] = res.data.items;
 
-        const collectorId = policies.find(
-          (item) => item.name === 'elastic-universal-profiling-collector'
+        const collectorId = packagePolicies.find(
+          (item) => item.name === COLLECTOR_PACKAGE_POLICY_NAME
         )?.id;
-        const symbolizerId = policies.find(
-          (item) => item.name === 'elastic-universal-profiling-symbolizer'
+        const symbolizerId = packagePolicies.find(
+          (item) => item.name === SYMBOLIZER_PACKAGE_POLICY_NAME
         )?.id;
+
+        let apmPolicyPromise = Promise.resolve();
+        if (includeAgentPolicy) {
+          const getPolicyResponse = await apiServices.fleet.agent_policies.get({
+            page: 1,
+            perPage: 1000,
+          });
+          const agentPolicies: AgentPolicy[] = getPolicyResponse.data.items;
+          const apmId = agentPolicies.find(
+            (policy: { id: string }) => policy.id === APM_AGENT_POLICY_ID
+          )?.id;
+
+          if (apmId) {
+            apmPolicyPromise = apiServices.fleet.agent_policies.delete(apmId);
+          }
+        }
 
         await Promise.all([
           collectorId ? apiServices.fleet.package_policies.delete(collectorId) : Promise.resolve(),
           symbolizerId
             ? apiServices.fleet.package_policies.delete(symbolizerId)
             : Promise.resolve(),
+          apmPolicyPromise,
         ]);
+
+        log.info('Profiling resources cleaned up');
       };
 
-      const getPoliciyIds = async (): Promise<{ collectorId?: string; symbolizerId?: string }> => {
-        const res = await apiServices.fleet.package_policies.get();
+      const getPolicyIds = async (): Promise<{ collectorId?: string; symbolizerId?: string }> => {
+        const res = await apiServices.fleet.package_policies.get({ perPage: 1000 });
         const policies: PackagePolicy[] = res.data.items;
 
         const collector = policies.find((item) => item.name === COLLECTOR_PACKAGE_POLICY_NAME);
@@ -78,10 +108,28 @@ export const apiTest = base.extend<{}, { profilingHelper: ProfilingHelper }>({
           symbolizerId: symbolizer?.id,
         };
       };
+      // Loads the OTel profiling data unless its own events are already there, since loading it
+      // twice would fail on the documents with fixed ids.
+      const loadOtelData = async (): Promise<void> => {
+        const { count } = await esClient.count({
+          index: OTEL_PROFILING_EVENTS_DATA_STREAM,
+          ignore_unavailable: true,
+          query: { term: { 'k8s.namespace.name': PROFILING_OTEL_TEST_NAMESPACE } },
+        });
+
+        if (count > 0) {
+          log.info('OTel profiling data already loaded');
+          return;
+        }
+
+        await profilingSetup.loadData(otelEsArchiverPath);
+      };
+
       await use({
         installPolicies,
         cleanupPolicies,
-        getPoliciyIds,
+        getPolicyIds,
+        loadOtelData,
       });
     },
     { scope: 'worker' },

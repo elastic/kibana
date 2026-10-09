@@ -80,23 +80,6 @@ export class Homepage {
     return this.page.testSubj.locator('connectionDetailsApiKeyValueRow');
   }
 
-  // Embedded Console methods
-  async expectEmbeddedConsoleControlBarExists() {
-    await this.page.testSubj.waitForSelector('consoleEmbeddedSection');
-  }
-
-  async getEmbeddedConsoleBody() {
-    return this.page.testSubj.locator('consoleEmbeddedBody');
-  }
-
-  async clickEmbeddedConsoleControlBar() {
-    await this.page.testSubj.locator('consoleEmbeddedControlBar').click();
-  }
-
-  async getFullscreenToggleButton() {
-    return this.page.testSubj.locator('consoleToggleFullscreenButton');
-  }
-
   async getSearchHomepageContainer() {
     return this.page.testSubj.locator('search-homepage');
   }
@@ -125,5 +108,18 @@ export class Homepage {
 
   async getBodyLinkByText(text: string) {
     return this.page.getByRole('link', { name: text });
+  }
+
+  // Metric Badges methods
+  async getMetricBadgesContainer() {
+    return this.page.testSubj.locator('searchHomepageMetricBadges');
+  }
+
+  async getMetricBadges() {
+    return this.page.locator('[data-test-subj^="searchHomepageMetricBadge-"]');
+  }
+
+  async getMetricBadge(type: string) {
+    return this.page.testSubj.locator(`searchHomepageMetricBadge-${type}`);
   }
 }

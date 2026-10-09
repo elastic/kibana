@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import type { LocationDescriptorObject } from 'history';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock, httpServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { act, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -16,6 +17,7 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { uploadLicense } from '../public/application/store/actions/upload_license';
 
 import { licenseManagementStore } from '../public/application/store/store';
+import type { ThunkServices } from '../public/application/store/types';
 
 import { UploadLicense } from '../public/application/sections/upload_license';
 import { AppContextProvider, type AppDependencies } from '../public/application/app_context';
@@ -34,21 +36,19 @@ describe('UploadLicense', () => {
   let breadcrumbService: BreadcrumbService;
   let licensing: ReturnType<typeof licensingMock.createSetup>;
   let appDependencies: AppDependencies;
-  let thunkServices: {
-    http: ReturnType<typeof httpServiceMock.createSetupContract>;
-    history: ReturnType<typeof scopedHistoryMock.create>;
-    breadcrumbService: BreadcrumbService;
-    licensing: ReturnType<typeof licensingMock.createSetup>;
-  };
+  let http: ReturnType<typeof httpServiceMock.createSetupContract>;
+  let thunkServices: ThunkServices;
 
   const renderComponent = (store: ReturnType<typeof licenseManagementStore>) => {
     return render(
       <I18nProvider>
-        <AppContextProvider value={appDependencies}>
-          <Provider store={store}>
-            <UploadLicense history={history} />
-          </Provider>
-        </AppContextProvider>
+        <MockAppHeaderProvider>
+          <AppContextProvider value={appDependencies}>
+            <Provider store={store}>
+              <UploadLicense history={history} />
+            </Provider>
+          </AppContextProvider>
+        </MockAppHeaderProvider>
       </I18nProvider>
     );
   };
@@ -94,11 +94,13 @@ describe('UploadLicense', () => {
       },
     };
 
+    http = httpServiceMock.createSetupContract();
     thunkServices = {
-      http: httpServiceMock.createSetupContract(),
+      http,
       history,
       breadcrumbService,
       licensing,
+      toasts: appDependencies.core.notifications.toasts,
     };
 
     licensing.refresh.mockResolvedValue(appDependencies.store.initialLicense);
@@ -116,8 +118,19 @@ describe('UploadLicense', () => {
     expect(rendered.asFragment()).toMatchSnapshot();
   });
 
+  it('should display an error when license type is not a string', async () => {
+    const store = licenseManagementStore({}, thunkServices);
+    renderComponent(store);
+
+    await act(async () => {
+      await store.dispatch(uploadLicense(JSON.stringify({ license: { type: 123 } }), 'trial'));
+    });
+
+    await screen.findByText(/Check your license file\./);
+  });
+
   it('should display an error when ES says license is invalid', async () => {
-    thunkServices.http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_INVALID[2]));
+    http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_INVALID[2]));
     const store = licenseManagementStore({}, thunkServices);
     const rendered = renderComponent(store);
     const invalidLicense = JSON.stringify({ license: { type: 'basic' } });
@@ -130,7 +143,7 @@ describe('UploadLicense', () => {
   });
 
   it('should display an error when ES says license is expired', async () => {
-    thunkServices.http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_EXPIRED[2]));
+    http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_EXPIRED[2]));
     const store = licenseManagementStore({}, thunkServices);
     const rendered = renderComponent(store);
     const invalidLicense = JSON.stringify({ license: { type: 'basic' } });
@@ -143,7 +156,7 @@ describe('UploadLicense', () => {
   });
 
   it('should display a modal when license requires acknowledgement', async () => {
-    thunkServices.http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_REQUIRES_ACK[2]));
+    http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_REQUIRES_ACK[2]));
     const store = licenseManagementStore({}, thunkServices);
     const rendered = renderComponent(store);
     const unacknowledgedLicense = JSON.stringify({
@@ -158,7 +171,7 @@ describe('UploadLicense', () => {
   });
 
   it('should refresh xpack info and navigate to BASE_PATH when ES accepts new license', async () => {
-    thunkServices.http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_SUCCESS[2]));
+    http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_SUCCESS[2]));
     const store = licenseManagementStore({}, thunkServices);
     const validLicense = JSON.stringify({ license: { type: 'basic' } });
     await store.dispatch(uploadLicense(validLicense, 'trial'));
@@ -167,7 +180,7 @@ describe('UploadLicense', () => {
   });
 
   it('should display error when ES returns error', async () => {
-    thunkServices.http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_TLS_NOT_ENABLED[2]));
+    http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_TLS_NOT_ENABLED[2]));
     const store = licenseManagementStore({}, thunkServices);
     const rendered = renderComponent(store);
     const license = JSON.stringify({ license: { type: 'basic' } });

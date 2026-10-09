@@ -26,6 +26,8 @@ dependsOn:
   - '@kbn/server-http-tools'
   - '@kbn/serverless'
   - '@kbn/security-solution-navigation'
+  - '@kbn/alertzero-common'
+  - '@kbn/alertzero-plugin'
   - '@kbn/security-solution-upselling'
   - '@kbn/kibana-react-plugin'
   - '@kbn/core-chrome-browser'
@@ -53,8 +55,12 @@ dependsOn:
   - '@kbn/connector-schemas'
   - '@kbn/management-settings-ids'
   - '@kbn/ai-assistant-common'
+  - '@kbn/deeplinks-workflows'
   - '@kbn/workflows'
   - '@kbn/usage-api-plugin'
+  - '@kbn/workflows-management-plugin'
+  - '@kbn/navigation-plugin'
+  - '@kbn/scout-security'
 tags:
   - plugin
   - prod
@@ -67,5 +73,6 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
+    - test/scout/**/*
     - '!target/**/*'
 tasks: {}

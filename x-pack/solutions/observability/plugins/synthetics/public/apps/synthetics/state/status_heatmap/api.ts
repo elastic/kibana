@@ -15,12 +15,14 @@ export const fetchMonitorStatusHeatmap = async ({
   from,
   to,
   interval,
+  remoteName,
 }: {
   monitorId: string;
   location: string;
   from: string | number;
   to: string | number;
   interval: number;
+  remoteName?: string;
 }): Promise<MonitorStatusHeatmapBucket[]> => {
   const response = await apiService.get<{
     result: MonitorStatusHeatmapBucket[];
@@ -30,6 +32,7 @@ export const fetchMonitorStatusHeatmap = async ({
     from,
     to,
     interval,
+    ...(remoteName ? { remoteName } : {}),
   });
   return response.result;
 };

@@ -7,7 +7,7 @@ This example plugin demonstrates how to register a custom workflow step using th
 Example plugins are only loaded when Kibana is started with the `--run-examples` flag. Start Kibana with:
 
 ```bash
-yarn start --run-examples
+pnpm start --run-examples
 ```
 
 Then open **Developer examples** in the sidebar and click **Workflows Extensions Example**.
@@ -70,7 +70,7 @@ You can emit events in two ways: **via the request-scoped client** (from a route
 
 ### Emit an event (request context)
 
-From a route handler, use the request-scoped workflows context (your plugin must depend on `workflows_extensions` and type the route context with `workflows: WorkflowsRouteHandlerContext`):
+From a route handler, use the request-scoped workflows context (your plugin must depend on `workflows_extensions` and type your HTTP router with `WorkflowsExtensionsRequestHandlerContext` from `@kbn/workflows-extensions/server`, as in `server/plugin.ts`):
 
 ```ts
 const client = context.workflows.getWorkflowsClient();
@@ -92,6 +92,101 @@ curl -X POST -u elastic:changeme -H 'Content-Type: application/json' \
 The trigger id is `example.customTrigger` (kebab-case namespace, camelCase event). The event payload must match the trigger’s `eventSchema` (`message` required; `source`, `category`, and `labels` optional).
 
 For information about some guardrails in event-driven triggers see [Event-driven guardrails](../../src/platform/plugins/shared/workflows_extensions/dev_docs/TRIGGERS.md#event-driven-guardrails).
+
+## Managed Workflows
+
+The plugin also demonstrates **managed workflow** registration — a code-owned lifecycle where a workflow ships with the plugin, is kept in sync by the platform, and is installed/executed across spaces.
+
+### How it works
+
+1. **Define** the workflow in the plugin's definition file under `@kbn/workflows/managed/definitions/` with `yamlTemplate` for install-time parameterization.
+2. **Register** in the central `@kbn/workflows/managed` registry in `managed/definitions/index.ts` (required for orphan cleanup and auto-update reconciliation).
+3. **Declare ownership** during setup via `registerManagedWorkflowOwner(pluginId)`.
+4. **Install** during start via `initManagedWorkflowsClient(pluginId)` → `client.install(id, { spaceId, values })`.
+
+### Example definition
+
+```ts
+import type { ManagedWorkflowDefinition } from '@kbn/workflows/managed';
+
+export const EXAMPLE_MANAGED_WORKFLOW: ManagedWorkflowDefinition = {
+  id: 'system-example-greeting',
+  pluginId: 'workflowsExtensionsExample',
+  yamlTemplate: ({ recipient }) => `name: Example Greeting - ${recipient}
+enabled: true
+triggers:
+  - type: workflows.failed
+    on:
+      # Filter the subscription by using KQL, use event.* to target event properties
+      condition: not event.workflow.isErrorHandler:true
+steps:
+  - name: greet
+    type: console
+    with:
+      message: "Hello, ${recipient}! This is a managed workflow example."
+`,
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'restorable',
+  },
+};
+```
+
+### Key concepts
+
+- **`system-` prefix** is reserved for managed workflow IDs; user-created workflows cannot use it.
+- **`yamlTemplate(values)`** enables install-time parameterization; `values` are persisted and reused on upgrades.
+- **`versionStrategy: 'auto'`** means the platform re-installs the workflow on startup when the template changes.
+- **`enablement: 'restorable'`** preserves user-toggled enabled state across managed updates.
+- **`spaceId`** is mandatory — use `'*'` (the global space constant) for workflows visible from every space.
+
+## Managed service-account execution
+
+The `system-example-service-account` definition demonstrates an admin-authorized managed
+workflow installation. Its template accepts `serviceAccountId`, persists it in
+`settings.run_as`, and executes `elasticsearch.request GET /_security/_authenticate`.
+
+Create the account first with `POST /internal/security/service_account`, for example
+`{ "name": "workflow-example", "roles": ["viewer"] }`. Use the returned `id` in
+`serviceAccountId`; role names must exist on the target deployment and allow the workflow's
+steps. Creation requires explicit roles on both UIAM and Elasticsearch backends.
+
+With this example plugin and `xpack.security.serviceAccounts.enabled` enabled, the following
+internal endpoints use the authenticated request's space:
+
+- `POST /internal/workflows_extensions_example/managed_service_account/{id}` with
+  `{ "serviceAccountId": "<existing SA ID>" }` installs or updates the instance.
+- `POST /internal/workflows_extensions_example/managed_service_account/{id}/run` with `{}`
+  executes it and returns `workflowExecutionId`.
+- `DELETE /internal/workflows_extensions_example/managed_service_account/{id}` uninstalls it.
+
+The persisted workflow ID is `system-example-service-account-{id}`. Installation and changes
+require the relevant Workflows privileges and `manage_security`. Execution uses the normal
+Workflows execute privilege. The endpoints accept an existing account ID; create the account
+through Security's normal API first.
+
+This dynamic definition uses `versionStrategy: 'auto'`. Initial installation uses the setup
+user's credentials. On startup, the owning plugin upgrades installed instances from the
+registered definition, preserving their template values and verified SA binding. No user
+request or SA security-administration privilege is needed for that upgrade. Creating,
+changing, or removing the binding still requires an authorized request.
+
+SA-bound managed workflows must be installed in a concrete space. Installation with
+`spaceId: '*'` is rejected before creating a binding; global SA bindings are not supported.
+
+The Workflows service-account Scout suite covers installation, actual SA execution,
+authorized rebinding, rejection of unauthorized installation/rebinding/removal, and cleanup:
+
+```sh
+nvm use
+node scripts/scout run-tests --arch serverless --domain search --config src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/playwright.config.ts
+```
+
+The `service_accounts` server configuration loads this example on local UIAM and stateful Elasticsearch.
+Use `--arch stateful --domain classic` in the same command to validate the ES backend. The test
+checks both execution identity metadata and the identity returned by Elasticsearch. It does
+not validate `kibana.request` authentication or automatic startup provisioning.
 
 ## Key Points
 

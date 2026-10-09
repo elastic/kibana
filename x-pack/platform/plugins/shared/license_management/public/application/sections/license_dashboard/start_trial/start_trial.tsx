@@ -55,8 +55,8 @@ interface State {
 }
 
 export class StartTrial extends Component<Props, State> {
-  cancelRef: any;
-  confirmRef: any;
+  cancelRef = React.createRef<HTMLButtonElement>();
+  confirmRef = React.createRef<HTMLButtonElement>();
 
   state: State = {
     showConfirmation: false,
@@ -286,9 +286,8 @@ export class StartTrial extends Component<Props, State> {
       <AppContextConsumer>
         {(dependencies) => (
           <EuiFlexItem>
-            {this.acknowledgeModal(dependencies!.docLinks)}
+            {dependencies && this.acknowledgeModal(dependencies.docLinks)}
             <EuiCard
-              // @ts-ignore - Known issue from EUI, while they fix their types I've been told that we can just ignore this for now.
               hasBorder
               title={
                 <FormattedMessage

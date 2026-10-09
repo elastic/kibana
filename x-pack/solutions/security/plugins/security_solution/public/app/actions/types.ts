@@ -53,6 +53,12 @@ export interface SecurityCellActionMetadata extends Record<string, unknown> {
   dataViewId?: string;
 
   /**
+   * When true the filter action includes documents where the field is null/missing,
+   * in addition to documents that match the cell value exactly.
+   */
+  includeNullValues?: boolean;
+
+  /**
    * Ref to the currently visible alerts table
    */
   alertsTableRef?: RefObject<AlertsTableImperativeApi>;

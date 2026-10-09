@@ -34,7 +34,6 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
-import type { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-shared-ui';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -52,7 +51,6 @@ import {
   SEARCH_INDEX_MANAGEMENT_APP_ID,
   SEARCH_INDEX_MANAGEMENT_APP_BASE,
 } from '../common/constants';
-import { registerLocators } from '../common/locators';
 import type { ClientConfigType, InitialAppData } from '../common/types';
 import { hasEnterpriseLicense } from '../common/utils/licensing';
 
@@ -92,7 +90,6 @@ export interface PluginsStart {
   ml?: MlPluginStart;
   navigation: NavigationPublicPluginStart;
   searchNavigation: SearchNavigationPluginStart;
-  searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
   share?: SharePluginStart;
   spaces?: SpacesPluginStart;
@@ -149,7 +146,7 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
-    const { cloud, share } = plugins;
+    const { cloud } = plugins;
 
     core.application.register({
       appRoute: ENTERPRISE_SEARCH_HOME_PLUGIN.URL,
@@ -237,8 +234,6 @@ export class EnterpriseSearchPlugin implements Plugin {
       visibleIn: [],
     });
 
-    registerLocators(share!);
-
     core.application.register({
       appRoute: '/app/enterprise_search',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
@@ -305,9 +300,9 @@ export class EnterpriseSearchPlugin implements Plugin {
     import('./navigation_tree').then(({ getNavigationTreeDefinition }) => {
       return plugins.navigation.addSolutionNavigation(
         getNavigationTreeDefinition({
+          core,
           dynamicItems$: this.sideNavDynamicItems$,
           isCloudEnabled: plugins.cloud?.isCloudEnabled,
-          showAlertingV2: Boolean(core.application.capabilities.alertingVTwo),
         })
       );
     });

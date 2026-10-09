@@ -13,15 +13,16 @@ import type { MetricsTelemetry, Metric } from '../../../../types';
  * Updates the telemetry object based on a single metric row's data.
  */
 export const accumulateMetricsRowTelemetry = (telemetry: MetricsTelemetry, metric: Metric) => {
-  const { metricTypes, dataStreams, units, fieldTypes } = metric;
+  const { metricTypes, indexNames, units, fieldTypes } = metric;
 
   const increment = (record: Record<string, number | undefined>, key: string) => {
     record[key] = (record[key] || 0) + 1;
   };
 
-  telemetry.multi_value_counts.data_streams += +(dataStreams.length > 1);
+  telemetry.multi_value_counts.index_names += +(indexNames.length > 1);
   telemetry.multi_value_counts.field_types += +(fieldTypes.length > 1);
   telemetry.multi_value_counts.metric_types += +(metricTypes.length > 1);
+  telemetry.multi_value_counts.units += +(units.length > 1);
 
   for (const type of metricTypes) {
     increment(telemetry.metrics_by_type, type);

@@ -7,7 +7,7 @@
 
 import type { Ast } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
-import type { PaletteRegistry } from '@kbn/coloring';
+import { type PaletteRegistry } from '@kbn/coloring';
 import type { ExpressionFunctionTheme } from '@kbn/expressions-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -34,6 +34,7 @@ import type {
 } from '@kbn/expression-xy-plugin/common';
 
 import {
+  AreaFillOptions,
   LayerTypes,
   FittingFunctions,
   PointVisibilityOptions,
@@ -69,6 +70,7 @@ import {
 } from '../../shared_components';
 import type { CollapseExpressionFunction } from '../../../common/expressions';
 import { hasIcon } from './xy_config_panel/shared/marker_decoration_settings';
+import { getColorMappingDefaults } from '../../utils';
 
 type XYLayerConfigWithSimpleView = XYLayerConfig & { simpleView?: boolean };
 type XYAnnotationLayerConfigWithSimpleView = XYAnnotationLayerConfig & { simpleView?: boolean };
@@ -345,6 +347,7 @@ export const buildXYExpression = (
     minBarHeight: state.minBarHeight ?? 1,
     fillOpacity: state.fillOpacity ?? 0.3,
     pointVisibility: state.pointVisibility ?? PointVisibilityOptions.AUTO,
+    areaFill: state.areaFill ?? AreaFillOptions.SOLID,
     valueLabels: state.valueLabels ?? 'hide',
     hideEndzones: state.hideEndzones ?? false,
     addTimeMarker:
@@ -488,6 +491,7 @@ const dataLayerToExpression = (
     fn: [layer.collapseFn!],
   });
 
+  const hasActiveSplits = !layer.collapseFn && Boolean(layer.splitAccessors?.length);
   const extendedDataLayerFn = buildExpressionFunction<ExtendedDataLayerFn>('extendedDataLayer', {
     layerId: layer.layerId,
     simpleView: Boolean(layer.simpleView),
@@ -500,7 +504,7 @@ const dataLayerToExpression = (
     isPercentage,
     isStacked,
     isHorizontal,
-    splitAccessors: layer.collapseFn || !layer.splitAccessors ? undefined : layer.splitAccessors,
+    splitAccessors: hasActiveSplits ? layer.splitAccessors : undefined,
     decorations: layer.yConfig
       ? layer.yConfig.map((yConfig) =>
           yConfigToDataDecorationConfigExpression(yConfig, yAxisConfigs)
@@ -512,7 +516,7 @@ const dataLayerToExpression = (
     accessors: layer.accessors,
     columnToLabel: JSON.stringify(columnToLabel),
     palette: buildExpression([
-      layer.palette
+      layer.palette && !layer.collapseFn
         ? buildExpressionFunction<ExpressionFunctionTheme>('theme', {
             variable: 'palette',
             default: [paletteService.get(layer.palette.name).toExpression(layer.palette.params)],
@@ -521,7 +525,15 @@ const dataLayerToExpression = (
             name: getDefaultPalette(layer.seriesType),
           }),
     ]).toAst(),
-    colorMapping: layer.colorMapping ? JSON.stringify(layer.colorMapping) : undefined,
+    colorMapping: hasActiveSplits
+      ? layer.colorMapping
+        ? JSON.stringify(layer.colorMapping)
+        : !layer.palette
+        ? JSON.stringify(
+            getColorMappingDefaults({ defaultPaletteId: getDefaultPalette(layer.seriesType) })
+          )
+        : undefined
+      : undefined,
   });
 
   return {

@@ -102,7 +102,7 @@ export const initTransform =
     const { latestVersion } = getVersionsMeta(migrationDefinition);
     const getVersion = (v: Version | 'latest'): Version => (v === 'latest' ? latestVersion : v);
 
-    const validateFn = (value: unknown, version: number = requestVersion) => {
+    const validateFn = (value: unknown, version: number = requestVersion): Error | null => {
       const def = migrationDefinition[version];
 
       if (!def) {

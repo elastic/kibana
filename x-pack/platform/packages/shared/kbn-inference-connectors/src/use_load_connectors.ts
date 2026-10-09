@@ -11,12 +11,7 @@ import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
-import {
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-} from '@kbn/management-settings-ids';
 import { i18n } from '@kbn/i18n';
-import { fetchConnectorById } from './fetch_connector_by_id';
 import { fetchConnectorsForFeature } from './fetch_connectors_for_feature';
 import { toAIConnector } from './load_connectors';
 import type { AIConnector } from './types';
@@ -38,7 +33,12 @@ export interface UseLoadConnectorsProps {
    * Passed to the search_inference_endpoints API to resolve feature-specific endpoints.
    */
   featureId: string;
-  settings: SettingsStart;
+  /**
+   * @deprecated No longer read by the hook. Default-connector UI settings are now applied
+   * server-side by the search_inference_endpoints connectors route. Kept for call-site
+   * compatibility and will be removed in a follow-up.
+   */
+  settings?: SettingsStart;
 }
 
 export type UseLoadConnectorsResult = UseQueryResult<AIConnector[], IHttpFetchError> & {
@@ -49,62 +49,32 @@ export const useLoadConnectors = ({
   http,
   toasts,
   featureId,
-  settings,
 }: UseLoadConnectorsProps): UseLoadConnectorsResult => {
   const [soEntryFound, setSoEntryFound] = useState(false);
-  const query = useQuery(
-    [...QUERY_KEY, featureId],
-    async () => {
-      const defaultConnectorId = settings.client.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
-      const defaultConnectorOnly = settings.client.get<boolean>(
-        GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-        false
-      );
-
-      if (defaultConnectorOnly) {
-        if (!defaultConnectorId) {
-          return [];
-        }
-        const connector = await fetchConnectorById(http, defaultConnectorId);
-        if (connector) {
-          return [connector];
-        } else {
-          return [];
-        }
-      }
-
+  const query = useQuery({
+    queryKey: [...QUERY_KEY, featureId],
+    queryFn: async () => {
       const result = await fetchConnectorsForFeature(http, featureId);
       setSoEntryFound(result.soEntryFound);
-      const aiConnectors = result.connectors.map(toAIConnector);
-
-      if (!result.soEntryFound && defaultConnectorId) {
-        const defaultConnector = await fetchConnectorById(http, defaultConnectorId);
-        if (defaultConnector) {
-          return [defaultConnector, ...aiConnectors.filter((c) => c.id !== defaultConnectorId)];
-        }
-      }
-
-      return aiConnectors;
+      return result.connectors.map(toAIConnector);
     },
-    {
-      retry: false,
-      keepPreviousData: true,
-      onError: (error: IHttpFetchError) => {
-        if (error.name !== 'AbortError') {
-          toasts?.addError(
-            error.body && (error.body as { message?: string }).message
-              ? new Error((error.body as { message: string }).message)
-              : error,
-            {
-              title: i18n.translate('inferenceConnectors.useLoadConnectors.errorMessage', {
-                defaultMessage: 'Error loading models',
-              }),
-            }
-          );
-        }
-      },
-    }
-  );
+    retry: false,
+    keepPreviousData: true,
+    onError: (error: IHttpFetchError) => {
+      if (error.name !== 'AbortError') {
+        toasts?.addError(
+          error.body && (error.body as { message?: string }).message
+            ? new Error((error.body as { message: string }).message)
+            : error,
+          {
+            title: i18n.translate('inferenceConnectors.useLoadConnectors.errorMessage', {
+              defaultMessage: 'Error loading models',
+            }),
+          }
+        );
+      }
+    },
+  });
 
   return { ...query, soEntryFound };
 };

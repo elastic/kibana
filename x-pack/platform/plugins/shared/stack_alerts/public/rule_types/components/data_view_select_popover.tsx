@@ -15,20 +15,23 @@ import {
   EuiExpression,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
-  EuiLoadingSpinner,
   EuiText,
+  EuiToolTip,
   useEuiPaddingCSS,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type {
   DataView,
+  DataViewListItem,
   DataViewSpec,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
+import type { ToastsStart } from '@kbn/core/public';
 import { DataViewSelector } from '@kbn/unified-search-plugin/public';
 import type { DataViewListItemEnhanced } from '@kbn/unified-search-plugin/public/dataview_picker/dataview_list';
 import type { EsQueryRuleMetaData } from '../es_query/types';
@@ -40,6 +43,7 @@ export interface DataViewSelectPopoverProps {
   dependencies: {
     dataViews: DataViewsPublicPluginStart;
     dataViewEditor: DataViewEditorStart;
+    toasts: ToastsStart;
   };
   dataView?: DataView;
   metadata?: EsQueryRuleMetaData;
@@ -57,8 +61,13 @@ const toDataViewListItem = (dataView: DataView): DataViewListItemEnhanced => {
   };
 };
 
+const toPersistedDataViewListItem = (dataView: DataViewListItem): DataViewListItemEnhanced => ({
+  ...dataView,
+  isAdhoc: false,
+});
+
 export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopoverProps> = ({
-  dependencies: { dataViews, dataViewEditor },
+  dependencies: { dataViews, dataViewEditor, toasts },
   metadata,
   dataView,
   onSelectDataView,
@@ -92,20 +101,37 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
 
   const onChangeDataView = useCallback(
     async (selectedDataViewId: string) => {
-      const selectedDataView = await dataViews.get(selectedDataViewId);
-      onSelectDataView(selectedDataView);
-      closeDataViewPopover();
+      try {
+        // Suppress the data views service toast so we can show a specific message
+        // for the data view the user actually selected.
+        const selectedDataView = await dataViews.get(selectedDataViewId, false);
+        onSelectDataView(selectedDataView);
+        closeDataViewPopover();
+      } catch (error) {
+        const listItem = allDataViewItems.find((item) => item.id === selectedDataViewId);
+        const dataViewName = listItem?.name || listItem?.title || selectedDataViewId;
+        toasts.addDanger({
+          title: i18n.translate(
+            'xpack.stackAlerts.components.ui.dataViewSelectPopover.loadDataViewErrorTitle',
+            {
+              defaultMessage: "Data view ''{dataViewName}'' could not be loaded",
+              values: { dataViewName },
+            }
+          ),
+          text: error instanceof Error ? error.message : String(error),
+        });
+      }
     },
-    [closeDataViewPopover, dataViews, onSelectDataView]
+    [allDataViewItems, closeDataViewPopover, dataViews, onSelectDataView, toasts]
   );
 
   const loadPersistedDataViews = useCallback(async () => {
     setLoadingDataViews(true);
     try {
-      // Calling getIds with refresh = true to make sure we don't get stale data
-      const ids = await dataViews.getIds(true);
-      const dataViewsList = await Promise.all(ids.map((id) => dataViews.get(id)));
-      setDataViewsItems(dataViewsList.map(toDataViewListItem));
+      // Use getIdsWithTitle so the picker list does not hydrate fields for every
+      // data view in the space. refresh=true avoids stale saved object cache data.
+      const dataViewsList = await dataViews.getIdsWithTitle(true);
+      setDataViewsItems(dataViewsList.map(toPersistedDataViewListItem));
     } catch (e) {
       // Error fetching data views
     }
@@ -181,6 +207,10 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   return (
     <EuiPopover
       id="dataViewPopover"
+      aria-label={i18n.translate(
+        'xpack.stackAlerts.components.ui.dataViewSelectPopover.ariaLabel',
+        { defaultMessage: 'Data view' }
+      )}
       button={
         <EuiExpression
           display="columns"
@@ -221,16 +251,24 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
               })}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                data-test-subj="closeDataViewPopover"
-                iconType="cross"
-                color="danger"
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.stackAlerts.components.ui.alertParams.closeDataViewPopoverLabel',
                   { defaultMessage: 'Close' }
                 )}
-                onClick={closeDataViewPopover}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="closeDataViewPopover"
+                  iconType="cross"
+                  color="danger"
+                  aria-label={i18n.translate(
+                    'xpack.stackAlerts.components.ui.alertParams.closeDataViewPopoverLabel',
+                    { defaultMessage: 'Close' }
+                  )}
+                  onClick={closeDataViewPopover}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverTitle>

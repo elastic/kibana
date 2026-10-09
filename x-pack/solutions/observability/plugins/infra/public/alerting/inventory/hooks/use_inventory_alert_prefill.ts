@@ -12,6 +12,7 @@ import type {
   SnapshotMetricInput,
   SnapshotCustomMetricInput,
 } from '../../../../common/http_api/snapshot_api';
+import { DEFAULT_SCHEMA } from '../../../../common/constants';
 
 export interface InventoryPrefillState {
   nodeType: InventoryItemType;
@@ -28,7 +29,7 @@ const initialState: InventoryPrefillState = {
   kuery: undefined,
   metric: { type: 'cpuV2' },
   customMetrics: [],
-  schema: 'ecs',
+  schema: DEFAULT_SCHEMA,
   region: '',
   accountId: '',
 };

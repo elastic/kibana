@@ -12,6 +12,10 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "alertsService": Object {
+          "coordinateInstallation": true,
+          "totalFieldsLimit": 2800,
+        },
         "cancelAlertsOnRuleTimeout": true,
         "enableFrameworkAlerts": true,
         "healthCheck": Object {
@@ -20,6 +24,12 @@ describe('config validation', () => {
         "invalidateApiKeysTask": Object {
           "interval": "5m",
           "removalDelay": "1h",
+        },
+        "ruleChangeTracking": Object {
+          "enabled": true,
+          "scope": Array [
+            "security",
+          ],
         },
         "rules": Object {
           "apiKeyType": "es",

@@ -18,16 +18,20 @@ export function mockHandlerArguments(
   {
     actionsClient = actionsClientMock.create(),
     listTypes: listTypesRes = [],
+    getCurrentUser,
     getSkippedPreconfiguredConnectorIds = () => new Set<string>(),
   }: {
     actionsClient?: ActionsClientMock;
     listTypes?: ConnectorType[];
+    getCurrentUser?: jest.Mock;
     getSkippedPreconfiguredConnectorIds?: () => Set<string>;
   },
   request: unknown,
   response?: Array<MethodKeysOf<KibanaResponseFactory>>
 ): [ActionsRequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {
   const listTypes = jest.fn(() => listTypesRes);
+  const getUser = getCurrentUser ?? jest.fn().mockReturnValue(null);
+  const getCurrentProfile = jest.fn().mockResolvedValue(null);
   return [
     {
       actions: {
@@ -45,6 +49,16 @@ export function mockHandlerArguments(
         },
         getSkippedPreconfiguredConnectorIds,
       },
+      core: Promise.resolve({
+        security: {
+          authc: {
+            getCurrentUser: getUser,
+          },
+        },
+        userProfile: {
+          getCurrent: getCurrentProfile,
+        },
+      }),
     } as unknown as ActionsRequestHandlerContext,
     request as KibanaRequest<unknown, unknown, unknown>,
     mockResponseFactory(response),

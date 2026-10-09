@@ -11,6 +11,7 @@ import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
+import { useSyntheticsDataViewIndexPatterns } from '../hooks/use_synthetics_data_view_index_patterns';
 
 interface AvailabilityPanelprops {
   from: string;
@@ -25,6 +26,7 @@ export const AvailabilityPanel = (props: AvailabilityPanelprops) => {
     },
   } = useKibana<ClientPluginsStart>();
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
+  const dataTypesIndexPatterns = useSyntheticsDataViewIndexPatterns();
 
   if (!queryIdFilter) {
     return null;
@@ -36,6 +38,7 @@ export const AvailabilityPanel = (props: AvailabilityPanelprops) => {
       align="left"
       customHeight="70px"
       reportType={ReportTypes.SINGLE_METRIC}
+      dataTypesIndexPatterns={dataTypesIndexPatterns}
       attributes={[
         {
           time: props,

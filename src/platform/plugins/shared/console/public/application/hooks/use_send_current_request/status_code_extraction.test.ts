@@ -106,4 +106,68 @@ describe('Status Code Extraction in sendRequest', () => {
       expect(result[0].response.statusText).toBe('Bad Request');
     });
   });
+
+  describe('ndjson response handling', () => {
+    // The core HTTP client parses application/ndjson responses as Blob objects.
+    // Console must read the Blob text rather than JSON.stringify-ing it (which yields "{}").
+    it('should display ndjson blob body as plain text', async () => {
+      const { sendRequest } = await import('./send_request');
+
+      const ndjsonText = '{"type":"dashboard","id":"abc"}\n{"type":"index-pattern","id":"def"}\n';
+      const mockResponse = {
+        response: {
+          status: 200,
+          statusText: 'OK',
+          headers: new Map([
+            ['x-console-proxy-status-code', '200'],
+            ['x-console-proxy-status-text', 'OK'],
+            ['Content-Type', 'application/ndjson'],
+          ]),
+        },
+        body: new Blob([ndjsonText], { type: 'application/ndjson' }),
+      };
+
+      mockHttp.post.mockResolvedValue(mockResponse);
+
+      const result = await sendRequest({
+        http: mockHttp,
+        requests: [{ url: '/_export', method: 'POST', data: ['{}'] }],
+      });
+
+      // Each ndjson line should be pretty-printed as JSON
+      expect(result[0].response.value).toContain('"type": "dashboard"');
+      expect(result[0].response.value).toContain('"type": "index-pattern"');
+      expect(result[0].response.value).not.toBe('{}');
+      expect(result[0].response.contentType).toBe('application/ndjson');
+    });
+
+    it('should display ndjson blob error body as plain text', async () => {
+      const { sendRequest } = await import('./send_request');
+
+      const ndjsonError = '{"error":"not_found","id":"missing"}\n';
+
+      const fetchError = {
+        response: {
+          status: 200,
+          statusText: 'OK',
+          headers: new Map([
+            ['x-console-proxy-status-code', '404'],
+            ['x-console-proxy-status-text', 'Not Found'],
+            ['Content-Type', 'application/ndjson'],
+          ]),
+        },
+        body: new Blob([ndjsonError], { type: 'application/ndjson' }),
+      };
+
+      mockHttp.post.mockRejectedValue(fetchError);
+
+      const result = await sendRequest({
+        http: mockHttp,
+        requests: [{ url: '/_export', method: 'POST', data: ['{}'] }],
+      });
+
+      expect(result[0].response.value).toContain('"error": "not_found"');
+      expect(result[0].response.value).not.toBe('{}');
+    });
+  });
 });

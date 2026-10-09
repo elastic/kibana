@@ -24,6 +24,7 @@ import { createActionHandler } from '../../handlers';
 import { parser as OsqueryParser } from './osquery_parser';
 import { getUserInfo } from '../../lib/get_user_info';
 import { isOsqueryResponseActionAuthorized } from '../../lib/check_response_action_authz';
+import { createLiveQueryResponseSchema } from './response_schemas';
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -47,6 +48,11 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
               typeof createLiveQueryRequestBodySchema,
               CreateLiveQueryRequestBodySchema
             >(createLiveQueryRequestBodySchema),
+          },
+          response: {
+            200: {
+              body: () => createLiveQueryResponseSchema,
+            },
           },
         },
       },

@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { ServicesItemsResponse } from '@kbn/apm-api-shared';
 import type { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import type { RollupInterval } from '../../../../common/rollup';
 import type { ServiceGroup } from '../../../../common/service_groups';
@@ -15,20 +16,13 @@ import type { ApmSloClient } from '../../../lib/helpers/get_apm_slo_client';
 import type { MlClient } from '../../../lib/helpers/get_ml_client';
 import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { getHealthStatuses } from './get_health_statuses';
+import { getServiceAnomalyScores } from './get_service_anomaly_scores';
 import { getServicesAlerts } from './get_service_alerts';
 import { getServicesSloStats } from './get_services_slo_stats';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
-import type { MergedServiceStat } from './merge_service_stats';
 import { mergeServiceStats } from './merge_service_stats';
 
 export const MAX_NUMBER_OF_SERVICES = 1_000;
-
-export interface ServicesItemsResponse {
-  items: MergedServiceStat[];
-  maxCountExceeded: boolean;
-  serviceOverflowCount: number;
-}
 
 export async function getServicesItems({
   environment,
@@ -46,6 +40,7 @@ export async function getServicesItems({
   rollupInterval,
   useDurationSummary,
   searchQuery,
+  maxNumServices = MAX_NUMBER_OF_SERVICES,
 }: {
   environment: string;
   kuery: string;
@@ -62,12 +57,13 @@ export async function getServicesItems({
   rollupInterval: RollupInterval;
   useDurationSummary: boolean;
   searchQuery?: string;
+  maxNumServices?: number;
 }): Promise<ServicesItemsResponse> {
   return withApmSpan('get_services_items', async () => {
     const commonParams = {
       environment,
       kuery,
-      maxNumServices: MAX_NUMBER_OF_SERVICES,
+      maxNumServices,
       start,
       end,
       serviceGroup,
@@ -78,13 +74,13 @@ export async function getServicesItems({
       searchQuery,
     };
 
-    const [{ serviceStats, serviceOverflowCount, maxCountExceeded }, healthStatuses, alertCounts] =
+    const [{ serviceStats, serviceOverflowCount, maxCountExceeded }, anomalyScores, alertCounts] =
       await Promise.all([
         getServiceTransactionStats({
           ...commonParams,
           apmEventClient,
         }),
-        getHealthStatuses({ ...commonParams, mlClient }).catch((err) => {
+        getServiceAnomalyScores({ ...commonParams, mlClient }).catch((err) => {
           logger.debug(err);
           return [];
         }),
@@ -106,7 +102,7 @@ export async function getServicesItems({
     const items =
       mergeServiceStats({
         serviceStats,
-        healthStatuses,
+        anomalyScores,
         alertCounts,
         sloStats,
       }) ?? [];

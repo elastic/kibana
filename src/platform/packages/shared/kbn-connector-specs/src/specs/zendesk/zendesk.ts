@@ -8,8 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
+
+const MAX_TICKET_ID_LENGTH = 200;
+const MAX_INCLUDE_LENGTH = 200;
+
 const buildBaseUrl = (ctx: ActionContext): string =>
   `https://${String((ctx.config?.subdomain as string) ?? '').trim()}.zendesk.com/api/v2`;
 
@@ -22,7 +26,7 @@ export const ZendeskConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
@@ -57,59 +61,67 @@ export const ZendeskConnector: ConnectorSpec = {
     ],
   },
 
-  schema: z.object({
-    subdomain: z
-      .string()
-      .min(1)
-      .describe('Your Zendesk subdomain')
-      .meta({
-        widget: 'text',
-        label: i18n.translate('core.kibanaConnectorSpecs.zendesk.config.subdomain.label', {
-          defaultMessage: 'Subdomain',
+  schema: lazySchema(() =>
+    z.object({
+      subdomain: z
+        .string()
+        .min(1)
+        .describe('Your Zendesk subdomain')
+        .meta({
+          widget: 'text',
+          label: i18n.translate('core.kibanaConnectorSpecs.zendesk.config.subdomain.label', {
+            defaultMessage: 'Subdomain',
+          }),
+          placeholder: 'your-company',
+          helpText: i18n.translate('core.kibanaConnectorSpecs.zendesk.config.subdomain.helpText', {
+            defaultMessage:
+              'The subdomain for your Zendesk account (e.g. your-company for https://your-company.zendesk.com)',
+          }),
         }),
-        placeholder: 'your-company',
-        helpText: i18n.translate('core.kibanaConnectorSpecs.zendesk.config.subdomain.helpText', {
-          defaultMessage:
-            'The subdomain for your Zendesk account (e.g. your-company for https://your-company.zendesk.com)',
-        }),
-      }),
-  }),
+    })
+  ),
 
   actions: {
     search: {
       isTool: true,
+      scope: 'read',
       description:
         'Search across Zendesk data (tickets, users, organizations, articles). Use when you need to find items by keyword or criteria.',
-      input: z.object({
-        query: z
-          .string()
-          .describe(
-            'Zendesk query syntax. Supports keywords, field filters (field:value), type filters (type:ticket|user|organization|group), status filters (status:open|pending|solved|closed), assignee filters (assignee:me or assignee:<email>), tags (tags:<tag_name>), date filters (created>YYYY-MM-DD, updated<YYYY-MM-DD), and exact phrases ("exact phrase"). Combine filters with spaces. Examples: "type:ticket status:open assignee:me tags:billing", "crawler", "type:user john".'
-          ),
-        sortBy: z
-          .string()
-          .optional()
-          .describe(
-            'Field to sort results by. Valid values: updated_at, created_at, priority, status, ticket_type. Omit to sort by relevance (default).'
-          ),
-        sortOrder: z
-          .enum(['asc', 'desc'])
-          .optional()
-          .describe('Sort direction. "desc" is the default when sortBy is provided.'),
-        page: z.number().optional().describe('Page number for pagination.'),
-        perPage: z
-          .number()
-          .optional()
-          .describe(
-            'Number of results per page (max 100). The Search API returns up to 1000 results total across all pages.'
-          ),
-        include: z
-          .string()
-          .optional()
-          .describe(
-            'Sideload related resources using parentheses format with no spaces: type(sideload). The type must match your query type. Examples: tickets(users), tickets(users,groups), users(identities). Use tickets(...) when querying type:ticket, users(...) when querying type:user.'
-          ),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          query: z
+            .string()
+            .max(2000)
+            .describe(
+              'Zendesk query syntax. Supports keywords, field filters (field:value), type filters (type:ticket|user|organization|group), status filters (status:open|pending|solved|closed), assignee filters (assignee:me or assignee:<email>), tags (tags:<tag_name>), date filters (created>YYYY-MM-DD, updated<YYYY-MM-DD), and exact phrases ("exact phrase"). Combine filters with spaces. Examples: "type:ticket status:open assignee:me tags:billing", "crawler", "type:user john".'
+            ),
+          sortBy: z
+            .string()
+            .max(50)
+            .optional()
+            .describe(
+              'Field to sort results by. Valid values: updated_at, created_at, priority, status, ticket_type. Omit to sort by relevance (default).'
+            ),
+          sortOrder: z
+            .enum(['asc', 'desc'])
+            .optional()
+            .describe('Sort direction. "desc" is the default when sortBy is provided.'),
+          page: z.number().optional().describe('Page number for pagination.'),
+          perPage: z
+            .number()
+            .optional()
+            .describe(
+              'Number of results per page (max 100). The Search API returns up to 1000 results total across all pages.'
+            ),
+          include: z
+            .string()
+            .max(MAX_INCLUDE_LENGTH)
+            .optional()
+            .describe(
+              'Sideload related resources using parentheses format with no spaces: type(sideload). The type must match your query type. Examples: tickets(users), tickets(users,groups), users(identities). Use tickets(...) when querying type:ticket, users(...) when querying type:user.'
+            ),
+        })
+      ),
       handler: async (ctx, input) => {
         const baseUrl = buildBaseUrl(ctx);
         const params: Record<string, string | number | undefined> = {
@@ -127,22 +139,26 @@ export const ZendeskConnector: ConnectorSpec = {
 
     listTickets: {
       isTool: true,
+      scope: 'read',
       description:
         'List Zendesk tickets. Use when you need to browse or filter tickets by page. For keyword or criteria-based lookups, prefer the search action instead.',
-      input: z.object({
-        page: z.number().default(1).describe('Page number for pagination. Defaults to 1.'),
-        perPage: z
-          .number()
-          .max(100)
-          .default(25)
-          .describe('Number of tickets per page (max 100). Defaults to 25.'),
-        include: z
-          .string()
-          .optional()
-          .describe(
-            'Comma-separated sideloads with no spaces. Valid options: users, groups, organizations. Examples: "users", "users,groups", "users,groups,organizations".'
-          ),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          page: z.number().default(1).describe('Page number for pagination. Defaults to 1.'),
+          perPage: z
+            .number()
+            .max(100)
+            .default(25)
+            .describe('Number of tickets per page (max 100). Defaults to 25.'),
+          include: z
+            .string()
+            .max(MAX_INCLUDE_LENGTH)
+            .optional()
+            .describe(
+              'Comma-separated sideloads with no spaces. Valid options: users, groups, organizations. Examples: "users", "users,groups", "users,groups,organizations".'
+            ),
+        })
+      ),
       handler: async (ctx, input) => {
         const baseUrl = buildBaseUrl(ctx);
         const params: Record<string, string | number | undefined> = {};
@@ -156,11 +172,17 @@ export const ZendeskConnector: ConnectorSpec = {
 
     getTicket: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the full details of a single Zendesk ticket by ID, including metadata and comment count. Use when you already have a ticket ID and need the complete record.',
-      input: z.object({
-        ticketId: z.string().describe('The Zendesk ticket ID (numeric, e.g. "12345").'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          ticketId: z
+            .string()
+            .max(MAX_TICKET_ID_LENGTH)
+            .describe('The Zendesk ticket ID (numeric, e.g. "12345").'),
+        })
+      ),
       handler: async (ctx, input) => {
         const baseUrl = buildBaseUrl(ctx);
         const response = await ctx.client.get(`${baseUrl}/tickets/${input.ticketId}.json`, {
@@ -172,27 +194,36 @@ export const ZendeskConnector: ConnectorSpec = {
 
     getTicketComments: {
       isTool: true,
+      scope: 'read',
       description:
         'List comments on a Zendesk ticket (the conversation thread, including both public and private comments). Use when you have a ticket ID and need to read the full discussion.',
-      input: z.object({
-        ticketId: z.string().describe('The Zendesk ticket ID (numeric, e.g. "12345").'),
-        page: z.number().default(1).describe('Page number for pagination. Defaults to 1.'),
-        perPage: z
-          .number()
-          .max(100)
-          .default(25)
-          .describe('Number of comments per page (max 100). Defaults to 25.'),
-        include: z
-          .string()
-          .optional()
-          .describe(
-            'Comma-separated list of resources to sideload (e.g. "users" to include author details).'
-          ),
-        includeInlineImages: z
-          .boolean()
-          .optional()
-          .describe('When true, inline images are included in comment bodies. Defaults to false.'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          ticketId: z
+            .string()
+            .max(MAX_TICKET_ID_LENGTH)
+            .describe('The Zendesk ticket ID (numeric, e.g. "12345").'),
+          page: z.number().default(1).describe('Page number for pagination. Defaults to 1.'),
+          perPage: z
+            .number()
+            .max(100)
+            .default(25)
+            .describe('Number of comments per page (max 100). Defaults to 25.'),
+          include: z
+            .string()
+            .max(MAX_INCLUDE_LENGTH)
+            .optional()
+            .describe(
+              'Comma-separated list of resources to sideload (e.g. "users" to include author details).'
+            ),
+          includeInlineImages: z
+            .boolean()
+            .optional()
+            .describe(
+              'When true, inline images are included in comment bodies. Defaults to false.'
+            ),
+        })
+      ),
       handler: async (ctx, input) => {
         const baseUrl = buildBaseUrl(ctx);
         const params: Record<string, string | number | boolean | undefined> = {};
@@ -211,9 +242,10 @@ export const ZendeskConnector: ConnectorSpec = {
 
     whoAmI: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the currently authenticated Zendesk user. Returns the user record for the API credentials in use. Useful for verifying which account is connected or resolving your own agent/user ID.',
-      input: z.object({}),
+      input: lazySchema(() => z.object({})),
       handler: async (ctx) => {
         const baseUrl = buildBaseUrl(ctx);
         const response = await ctx.client.get(`${baseUrl}/users/me.json`);
@@ -245,22 +277,9 @@ export const ZendeskConnector: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       const baseUrl = buildBaseUrl(ctx);
-      try {
-        const response = await ctx.client.get(`${baseUrl}/users/me.json`);
-        const user = response.data?.user;
-        return {
-          ok: true,
-          message: user
-            ? `Successfully connected to Zendesk as ${user.email ?? user.name ?? 'user'}`
-            : 'Successfully connected to Zendesk API',
-        };
-      } catch (error: unknown) {
-        const message =
-          error && typeof error === 'object' && 'message' in error
-            ? String((error as { message: unknown }).message)
-            : 'Unknown error';
-        return { ok: false, message };
-      }
+      await ctx.client.get(`${baseUrl}/users/me.json`);
+      return {};
     },
+    enabled: true,
   },
 };

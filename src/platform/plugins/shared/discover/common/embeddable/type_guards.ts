@@ -7,14 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import type {
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableState,
-  DiscoverSessionEsqlTab,
-  DiscoverSessionTab,
-} from '../../server';
-import type {
   SearchEmbeddableByValueState,
   SearchEmbeddablePanelApiState,
   SearchEmbeddableState,
@@ -26,10 +21,6 @@ export function isDiscoverSessionEmbeddableByReferenceState(
   state: DiscoverSessionEmbeddableState
 ): state is DiscoverSessionEmbeddableByReferenceState {
   return 'ref_id' in state;
-}
-
-export function isDiscoverSessionEsqlTab(tab: DiscoverSessionTab): tab is DiscoverSessionEsqlTab {
-  return isOfAggregateQueryType(tab.query);
 }
 
 export function isSearchEmbeddableByValueState(

@@ -13,7 +13,7 @@ import type { PublishingSubject } from '../publishing_subject';
 /** ------------------------------------------------------------------------------------------
  * Performance Tracking Types
  * ------------------------------------------------------------------------------------------ */
-export type PhaseEventType = 'loading' | 'loaded' | 'rendered' | 'error';
+export type PhaseEventType = 'loading' | 'loaded' | 'rendered' | 'error' | 'paused';
 export interface PhaseEvent {
   id: string;
   status: PhaseEventType;

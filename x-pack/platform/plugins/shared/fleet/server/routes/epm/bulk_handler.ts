@@ -8,15 +8,25 @@
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import pMap from 'p-map';
 
 import { appContextService, licenseService, packagePolicyService } from '../../services';
 import type {
   BulkRollbackPackagesRequestSchema,
+  BulkNamespaceCustomizationRequestSchema,
   BulkUninstallPackagesRequestSchema,
   BulkUpgradePackagesRequestSchema,
   FleetRequestHandler,
   GetOneBulkOperationPackagesRequestSchema,
 } from '../../types';
+import { updatePackage } from '../../services/epm/packages/update';
+import { runAndLogNamespacePreflightCheck } from '../../services/epm/packages/namespace_datastream_templates';
+import { scheduleSyncNamespaceTemplatesTask } from '../../tasks/sync_namespace_templates_task';
+import {
+  getAllowedNamespacePrefixesForSpace,
+  isNamespaceAllowedByPrefixes,
+} from '../../services/spaces/policy_namespaces';
 
 import type {
   BulkOperationPackagesResponse,
@@ -24,6 +34,11 @@ import type {
 } from '../../../common/types';
 import { getInstallationsByName } from '../../services/epm/packages/get';
 import { FleetError, FleetUnauthorizedError } from '../../errors';
+import {
+  assertUninstallAuthorizedForAffectedSpaces,
+  collectSpacesForUninstallClosure,
+} from '../../services/epm/packages/uninstall_authz';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 import {
   scheduleBulkUninstall,
   scheduleBulkUpgrade,
@@ -97,6 +112,83 @@ export const postBulkUninstallPackagesHandler: FleetRequestHandler<
 
   const taskManagerStart = getTaskManagerStart();
   await validateInstalledPackages(savedObjectsClient, request.body.packages, 'uninstall');
+
+  // Pre-authorize: check that the caller has privileges in all spaces affected by each package
+  const pkgNames = request.body.packages.map(({ name }) => name);
+  const installations = await getInstallationsByName({ savedObjectsClient, pkgNames });
+  const internalSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+
+  // Single query across all packages, then group by name to avoid N round-trips
+  const allPoliciesKuery = installations
+    .map((i) => `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${i.name}`)
+    .join(' OR ');
+  const { total: allPoliciesTotal, items: allPackagePolicies } = await packagePolicyService.list(
+    internalSoClient,
+    {
+      kuery: allPoliciesKuery,
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      spaceId: '*',
+    }
+  );
+
+  // Fail closed if SO_SEARCH_LIMIT was reached — there may be policies in spaces
+  // we haven't enumerated yet.
+  if (allPackagePolicies.length < allPoliciesTotal) {
+    throw new FleetUnauthorizedError(
+      `Unable to verify uninstall authorization: too many package policies to enumerate`
+    );
+  }
+
+  // Group policies by package name for per-package authz check
+  const policiesByPkg = new Map<string, typeof allPackagePolicies>();
+  for (const policy of allPackagePolicies) {
+    const name = policy.package?.name;
+    if (name) {
+      const existing = policiesByPkg.get(name) ?? [];
+      existing.push(policy);
+      policiesByPkg.set(name, existing);
+    }
+  }
+
+  // Build the combined dependency closure across ALL requested packages with a single
+  // shared beingRemoved set. This ensures shared auto-installed deps (C depended on
+  // by both requested packages A and B) are correctly identified as eventually-removed
+  // and included in the authz check, even though each package is evaluated in sequence.
+  const combinedBeingRemoved = new Set<string>();
+  const combinedSpaceIds = new Set<string>();
+  let closureTruncated = false;
+
+  for (const installation of installations) {
+    const { spaceIds, truncated } = await collectSpacesForUninstallClosure(
+      savedObjectsClient,
+      installation,
+      policiesByPkg.get(installation.name) ?? [],
+      combinedBeingRemoved
+    );
+    if (truncated) closureTruncated = true;
+    for (const spaceId of spaceIds) combinedSpaceIds.add(spaceId);
+  }
+
+  if (closureTruncated) {
+    throw new FleetUnauthorizedError(
+      `Unable to verify uninstall authorization: too many package policies to enumerate`
+    );
+  }
+
+  // Single authz check covering the combined closure of all requested packages.
+  // assertUninstallAuthorizedForAffectedSpaces would recompute the closure per-package;
+  // pass the first installation as a representative carrier and override its space set.
+  if (installations.length > 0) {
+    await assertUninstallAuthorizedForAffectedSpaces({
+      request,
+      pkgName: installations.map((i) => i.name).join(', '),
+      installation: installations[0],
+      packagePolicies: [],
+      savedObjectsClient,
+      precomputedSpaceIds: combinedSpaceIds,
+    });
+  }
 
   const taskId = await scheduleBulkUninstall(
     taskManagerStart,
@@ -179,4 +271,123 @@ export const postBulkRollbackPackagesHandler: FleetRequestHandler<
     taskId,
   };
   return response.ok({ body });
+};
+
+// Number of concurrent per-package namespace-customization updates in the bulk
+// endpoint. Each one hits the Installation SO; kept small to avoid SO client contention.
+const BULK_NAMESPACE_CUSTOMIZATION_CONCURRENCY = 5;
+
+export const postBulkNamespaceCustomizationHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof BulkNamespaceCustomizationRequestSchema.body>
+> = async (context, request, response) => {
+  const fleetContext = await context.fleet;
+  const savedObjectsClient = fleetContext.internalSoClient;
+  const spaceId = savedObjectsClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
+
+  const { packages, enable = [], disable = [] } = request.body;
+
+  const conflicts = enable.filter((ns) => disable.includes(ns));
+  if (conflicts.length > 0) {
+    throw new FleetError(
+      `Namespaces must not appear in both enable and disable: ${conflicts.join(', ')}`
+    );
+  }
+
+  const taskManagerStart = getTaskManagerStart();
+  const allowedPrefixes = await getAllowedNamespacePrefixesForSpace(spaceId);
+
+  const items = await pMap(
+    packages,
+    async (packageName) => {
+      const installation = await getInstallationsByName({
+        savedObjectsClient,
+        pkgNames: [packageName],
+      });
+      if (installation.length === 0) {
+        return {
+          name: packageName,
+          success: false,
+          error: `Package ${packageName} is not installed`,
+        };
+      }
+
+      const current = installation[0].namespace_customization_enabled_for ?? [];
+      // Tracks the persisted state across the try block: starts at `current`, advances
+      // to `newList` once `updatePackage` has committed. The catch handler returns this
+      // so the response always reflects what's actually in the SO.
+      let persistedList = current;
+
+      try {
+        const afterEnable = [...new Set([...current, ...enable])];
+        const newList = afterEnable.filter((ns) => !disable.includes(ns));
+
+        // Gate both added and removed namespaces on the current space's allowed_namespace_prefixes.
+        const added = newList.filter((ns) => !current.includes(ns));
+        const removed = current.filter((ns) => !newList.includes(ns));
+        const changed = [...added, ...removed];
+        const blocked = changed.filter((ns) => !isNamespaceAllowedByPrefixes(ns, allowedPrefixes));
+        if (blocked.length > 0) {
+          return {
+            name: packageName,
+            success: false,
+            namespace_customization_enabled_for: current,
+            error: `Cannot change namespace customization for: ${blocked.join(
+              ', '
+            )}. Allowed prefixes in this space: ${(allowedPrefixes ?? []).join(', ')}`,
+          };
+        }
+
+        const { namespaceCustomizationDiff } = await updatePackage({
+          savedObjectsClient,
+          pkgName: packageName,
+          namespace_customization_enabled_for: newList,
+        });
+        persistedList = newList;
+
+        let warnings;
+        if (namespaceCustomizationDiff.addedNamespaces.length > 0) {
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const detected = await runAndLogNamespacePreflightCheck({
+            esClient,
+            soClient: savedObjectsClient,
+            packageName,
+            namespaces: namespaceCustomizationDiff.addedNamespaces,
+            handlerName: 'postBulkNamespaceCustomizationHandler',
+          });
+          if (detected.length > 0) warnings = detected;
+        }
+
+        if (
+          namespaceCustomizationDiff.addedNamespaces.length > 0 ||
+          namespaceCustomizationDiff.removedNamespaces.length > 0
+        ) {
+          await scheduleSyncNamespaceTemplatesTask(taskManagerStart, {
+            spaceId,
+            packageName,
+            addedNamespaces: namespaceCustomizationDiff.addedNamespaces,
+            removedNamespaces: namespaceCustomizationDiff.removedNamespaces,
+          });
+        }
+
+        return {
+          name: packageName,
+          success: true,
+          namespace_customization_enabled_for: newList,
+          ...(warnings && { warnings }),
+        };
+      } catch (err) {
+        return {
+          name: packageName,
+          success: false,
+          namespace_customization_enabled_for: persistedList,
+          error: err instanceof Error ? err.message : String(err),
+        };
+      }
+    },
+    { concurrency: BULK_NAMESPACE_CUSTOMIZATION_CONCURRENCY }
+  );
+
+  return response.ok({ body: { items } });
 };

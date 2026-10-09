@@ -9,6 +9,15 @@ pricing.tiers.products:
 # Make sure the plugins belonging to this project type are loaded
 plugins.allowlistPluginGroups: ['platform', 'observability']
 
+# Nightshift and Significant Events plugins are re-enabled only for Observability Complete
+xpack.significantEvents.enabled: false
+xpack.nightshiftSources.enabled: false
+xpack.nightshift_investigations.enabled: false
+
+# Escalations are AlertZero-only for now: no escalations sub-feature, routes, or template UI.
+# A plugin flag rather than a feature override, which would fail while the plugin is disabled.
+xpack.agenticInvestigations.escalations.enabled: false
+
 # Disabled Observability plugins
 xpack.ux.enabled: false
 xpack.legacy_uptime.enabled: false
@@ -25,8 +34,6 @@ xpack.features.overrides:
   ### Discover feature should be moved from Analytics category to the Observability one and its privileges are
   ### fine-tuned to grant access to Observability app.
   discover_v2.category: 'observability'
-  ### Agent Builder should be moved from Analytics category to the Observability one.
-  agentBuilder.category: 'observability'
 
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_observability'
@@ -109,3 +116,6 @@ xpack.ml.compatibleModuleType: 'observability'
 
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false
+
+## ES|QL Data Federation in stack management
+xpack.dataFederation.enabled: true

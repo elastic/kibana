@@ -110,8 +110,8 @@ describe('ConnectorFormFieldsGlobal', () => {
     );
   });
 
-  it('shows error when connector ID availability check fails', async () => {
-    checkConnectorIdAvailability.mockRejectedValue(new Error('Network error'));
+  it('shows generic error when availability check fails with an unknown error', async () => {
+    checkConnectorIdAvailability.mockRejectedValue(new Error('Something unexpected'));
 
     render(
       <FormTestProvider onSubmit={onSubmit} defaultValue={defaultValue}>
@@ -126,6 +126,93 @@ describe('ConnectorFormFieldsGlobal', () => {
     await waitFor(
       () => {
         expect(screen.getByText('Unable to verify connector ID availability.')).toBeInTheDocument();
+      },
+      { timeout: 2000 }
+    );
+  });
+
+  it('shows network error when availability check fails without a response', async () => {
+    const networkError = Object.assign(new Error('Failed to fetch'), {
+      name: 'Error',
+      request: new Request('http://localhost/api/actions/connector/some-id'),
+    });
+    checkConnectorIdAvailability.mockRejectedValue(networkError);
+
+    render(
+      <FormTestProvider onSubmit={onSubmit} defaultValue={defaultValue}>
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={false} />
+      </FormTestProvider>
+    );
+
+    const idInput = screen.getByTestId('connectorIdInput');
+    await userEvent.clear(idInput);
+    await userEvent.type(idInput, 'some-connector-id');
+
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText(
+            'Unable to verify connector ID availability due to network connectivity issues.'
+          )
+        ).toBeInTheDocument();
+      },
+      { timeout: 2000 }
+    );
+  });
+
+  it('shows server error when availability check fails with a 500 status', async () => {
+    const serverError = Object.assign(new Error('Internal Server Error'), {
+      name: 'Error',
+      request: new Request('http://localhost/api/actions/connector/some-id'),
+      response: new Response('', { status: 500 }),
+    });
+    checkConnectorIdAvailability.mockRejectedValue(serverError);
+
+    render(
+      <FormTestProvider onSubmit={onSubmit} defaultValue={defaultValue}>
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={false} />
+      </FormTestProvider>
+    );
+
+    const idInput = screen.getByTestId('connectorIdInput');
+    await userEvent.clear(idInput);
+    await userEvent.type(idInput, 'some-connector-id');
+
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText(
+            'Unable to verify connector ID availability. The server is temporarily unavailable.'
+          )
+        ).toBeInTheDocument();
+      },
+      { timeout: 2000 }
+    );
+  });
+
+  it('shows auth error when availability check fails with a 403 status', async () => {
+    const authError = Object.assign(new Error('Forbidden'), {
+      name: 'Error',
+      request: new Request('http://localhost/api/actions/connector/some-id'),
+      response: new Response('', { status: 403 }),
+    });
+    checkConnectorIdAvailability.mockRejectedValue(authError);
+
+    render(
+      <FormTestProvider onSubmit={onSubmit} defaultValue={defaultValue}>
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={false} />
+      </FormTestProvider>
+    );
+
+    const idInput = screen.getByTestId('connectorIdInput');
+    await userEvent.clear(idInput);
+    await userEvent.type(idInput, 'some-connector-id');
+
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText('Unable to verify connector ID availability. User is not authenticated.')
+        ).toBeInTheDocument();
       },
       { timeout: 2000 }
     );

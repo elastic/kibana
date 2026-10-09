@@ -10,11 +10,9 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import {
-  WORKFLOW_EXECUTION_FAILED_TRIGGER_ID,
-  type WorkflowsExtensionsServerPluginStart,
-} from '@kbn/workflows-extensions/server';
+import { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID } from '@kbn/workflows-extensions/server';
 import { buildWorkflowExecutionFailedPayload } from './build_workflow_execution_failed_payload';
+import type { EmitEvent } from '../trigger_events';
 import type { FailedStepContext } from '../workflow_context_manager/workflow_execution_state';
 
 export interface WorkflowRuntimeForEmit {
@@ -29,26 +27,18 @@ export interface WorkflowExecutionStateForEmit {
 /**
  * If the current run ended in FAILED and is not a test run, builds the
  * workflow_execution_failed payload from in-memory state and emits it via
- * workflowsExtensions. Logs a warning on emit failure; does not throw.
+ * emitEvent. Logs a warning on emit failure; does not throw.
  */
 export async function emitWorkflowExecutionFailedEventIfFailed(params: {
   workflowRuntime: WorkflowRuntimeForEmit;
   workflowExecutionState: WorkflowExecutionStateForEmit;
-  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
-  spaceId: string;
+  emitEvent: EmitEvent;
   request: KibanaRequest;
   logger: Logger;
   workflowRunId: string;
 }): Promise<void> {
-  const {
-    workflowRuntime,
-    workflowExecutionState,
-    workflowsExtensions,
-    spaceId,
-    request,
-    logger,
-    workflowRunId,
-  } = params;
+  const { workflowRuntime, workflowExecutionState, emitEvent, request, logger, workflowRunId } =
+    params;
 
   try {
     if (workflowRuntime.getWorkflowExecutionStatus() !== ExecutionStatus.FAILED) {
@@ -62,9 +52,8 @@ export async function emitWorkflowExecutionFailedEventIfFailed(params: {
       execution,
       workflowExecutionState.getLastFailedStepContext()
     );
-    await workflowsExtensions.emitEvent({
+    await emitEvent({
       triggerId: WORKFLOW_EXECUTION_FAILED_TRIGGER_ID,
-      spaceId,
       payload,
       request,
     });

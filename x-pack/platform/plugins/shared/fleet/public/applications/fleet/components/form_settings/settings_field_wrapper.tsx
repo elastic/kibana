@@ -61,17 +61,27 @@ export const SettingsFieldWrapper: React.FC<{
       : undefined;
   const coercedSchema = settingsConfig.schema as z.ZodString;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = typeName === ZodSchemaType.boolean ? e.target.checked : e.target.value;
-    const newValue = convertValue(value, typeName);
-    const validationError = validateSchema(coercedSchema, newValue);
-
+  const applyValidationResult = (validationError: string | undefined) => {
     if (validationError) {
       setError(validationError);
       agentPolicyFormContext?.updateAdvancedSettingsHasErrors(true);
     } else {
       setError('');
       agentPolicyFormContext?.updateAdvancedSettingsHasErrors(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = typeName === ZodSchemaType.boolean ? e.target.checked : e.target.value;
+    const newValue = convertValue(value, typeName);
+
+    try {
+      applyValidationResult(validateSchema(coercedSchema, newValue));
+    } catch {
+      // Schema has async refinements (e.g. yaml validation), fall back to async validation
+      coercedSchema.safeParseAsync(newValue).then((result) => {
+        applyValidationResult(result.success ? undefined : result.error.issues[0].message);
+      });
     }
 
     const newAdvancedSettings = {

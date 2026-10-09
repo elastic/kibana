@@ -17,12 +17,8 @@ interface StreamsAppFetchOptions {
   withTimeRange?: boolean;
   withRefresh?: boolean;
   disableToastOnError?: boolean;
-}
-
-interface DefaultStreamsAppFetchOptions {
-  withTimeRange: false;
-  withRefresh: false;
-  disableToastOnError: false;
+  /** When true, the fetch error toast is not shown (e.g. 404 handled inline by the caller). */
+  shouldSuppressFetchErrorToast?: (error: Error) => boolean;
 }
 
 type ParametersFromOptions<TOptions extends StreamsAppFetchOptions | undefined> = {
@@ -31,20 +27,28 @@ type ParametersFromOptions<TOptions extends StreamsAppFetchOptions | undefined> 
 
 export function useStreamsAppFetch<
   T,
-  TOptions extends StreamsAppFetchOptions | undefined = DefaultStreamsAppFetchOptions
+  TOptions extends StreamsAppFetchOptions | undefined = undefined
 >(
   callback: ({}: ParametersFromOptions<TOptions>) => T,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   deps: any[],
   options?: TOptions
 ): AbortableAsyncState<T> {
-  const { disableToastOnError = false, withRefresh = false, withTimeRange = false } = options || {};
+  const {
+    disableToastOnError = false,
+    withRefresh = false,
+    withTimeRange = false,
+    shouldSuppressFetchErrorToast,
+  } = options || {};
 
   const { timeState, timeState$ } = useTimefilter();
   const showFetchErrorToast = useFetchErrorToast();
 
   const onError = (error: Error) => {
     if (!disableToastOnError && !isRequestAbortedError(error)) {
+      if (shouldSuppressFetchErrorToast?.(error)) {
+        return;
+      }
       showFetchErrorToast(error);
 
       // log to console to get the actual stack trace
@@ -54,7 +58,7 @@ export function useStreamsAppFetch<
   };
 
   const optionsForHook = {
-    ...omit(options, 'disableToastOnError', 'withTimeRange'),
+    ...omit(options, 'disableToastOnError', 'withTimeRange', 'shouldSuppressFetchErrorToast'),
     onError,
   };
 

@@ -42,12 +42,11 @@ export default function ({ getService }: FtrProviderContext) {
         },
       },
     });
+    await es.indices.refresh({ index: INDEX_NAME });
   };
 
   const deleteIndex = async () => {
-    await es.indices.delete({
-      index: INDEX_NAME,
-    });
+    await es.indices.delete({ index: INDEX_NAME }, { ignore: [404] });
   };
 
   describe('Field preview', function () {

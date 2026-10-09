@@ -32,6 +32,7 @@ export interface SaveModalDashboardSelectorProps {
   documentId?: string;
   onSelectDashboard: DashboardPickerProps['onChange'];
   canSaveByReference: boolean;
+  showAddToLibraryCheckbox?: boolean;
   setAddToLibrary: (selected: boolean) => void;
   isAddToLibrarySelected: boolean;
   dashboardOption: 'new' | 'existing' | null;
@@ -45,6 +46,7 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
     documentId,
     onSelectDashboard,
     canSaveByReference,
+    showAddToLibraryCheckbox = true,
     setAddToLibrary,
     isAddToLibrarySelected,
     dashboardOption,
@@ -137,7 +139,7 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
               ) : null}
             </div>
           </EuiPanel>
-          {canSaveByReference ? (
+          {canSaveByReference && showAddToLibraryCheckbox ? (
             <>
               <EuiSpacer size="s" />
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>

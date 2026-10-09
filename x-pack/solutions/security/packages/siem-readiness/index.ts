@@ -6,9 +6,17 @@
  */
 
 export type * from './src/types';
+export type * from './src/reverse_map_types';
 export * from './src/constants';
-export * from './src/use_siem_readiness_api';
-export * from './src/use_get_detection_rules_by_integration';
-export * from './src/use_integration_display_names';
-export * from './src/use_siem_readiness_get_cases_count_by_tags';
-export * from './src/use_mitre_attack_indices_doc_counts';
+export * from './src/get_siem_readiness_statuses';
+export { getIndexCategoryMap } from './src/get_index_category_map';
+export { filterPipelinesByCategories } from './src/filter_pipelines_by_categories';
+export { filterRetentionItemsByCategories } from './src/filter_retention_items_by_categories';
+export { enrichFinding, enrichFindings } from './src/enrich_finding';
+export type { EnrichmentContext, Dimension } from './src/enrich_finding';
+export {
+  recommendedActionsRegistry,
+  getDefaultActions,
+  getDimensionActions,
+  buildRecommendedActions,
+} from './src/recommended_actions';

@@ -6,7 +6,11 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
+import {
+  ExpandableFlyout,
+  useExpandableFlyoutApi,
+  type ExpandableFlyoutProps,
+} from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
 import type {
   FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview,
@@ -16,6 +20,7 @@ import type {
 } from '@kbn/cloud-security-posture';
 import type { GraphGroupedNodePreviewPanelProps } from '@kbn/cloud-security-posture-graph';
 import { GraphGroupedNodePreviewPanelKey } from '@kbn/cloud-security-posture-graph';
+import { ALERT_PREVIEW_BANNER, EVENT_PREVIEW_BANNER } from './document_details/preview/constants';
 import type { GenericEntityDetailsExpandableFlyoutProps } from './entity_details/generic_details_left';
 import {
   GenericEntityDetailsPanel,
@@ -33,25 +38,17 @@ import type { NetworkExpandableFlyoutProps } from './network_details';
 import { NetworkPanel, NetworkPanelKey, NetworkPreviewPanelKey } from './network_details';
 import { Flyouts } from './document_details/shared/constants/flyouts';
 import {
-  DocumentDetailsAlertReasonPanelKey,
   DocumentDetailsAnalyzerPanelKey,
-  DocumentDetailsIsolateHostPanelKey,
   DocumentDetailsLeftPanelKey,
   DocumentDetailsPreviewPanelKey,
   DocumentDetailsRightPanelKey,
   DocumentDetailsSessionViewPanelKey,
 } from './document_details/shared/constants/panel_keys';
-import type { IsolateHostPanelProps } from './document_details/isolate_host';
-import { IsolateHostPanel } from './document_details/isolate_host';
-import { IsolateHostPanelProvider } from './document_details/isolate_host/context';
 import type { DocumentDetailsProps } from './document_details/shared/types';
 import { DocumentDetailsProvider } from './document_details/shared/context';
 import { RightPanel } from './document_details/right';
 import { LeftPanel } from './document_details/left';
 import { PreviewPanel } from './document_details/preview';
-import type { AlertReasonPanelProps } from './document_details/alert_reason';
-import { AlertReasonPanel } from './document_details/alert_reason';
-import { AlertReasonPanelProvider } from './document_details/alert_reason/context';
 import type { RulePanelExpandableFlyoutProps } from './rule_details/right';
 import { RulePanel, RulePanelKey, RulePreviewPanelKey } from './rule_details/right';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
@@ -71,6 +68,7 @@ import {
   WatchlistsFlyoutKey,
   UserPanelKey,
 } from './entity_details/shared/constants';
+import { buildEntityPreviewPanel } from './entity_details/shared/utils/build_entity_preview_panel';
 import type { ServicePanelExpandableFlyoutProps } from './entity_details/service_right';
 import { ServicePanel } from './entity_details/service_right';
 import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/service_details_left';
@@ -79,9 +77,7 @@ import {
   ATTACK_DETAILS_LEFT_PANEL_ARIA_LABEL,
   ATTACK_DETAILS_PREVIEW_PANEL_ARIA_LABEL,
   ATTACK_DETAILS_RIGHT_PANEL_ARIA_LABEL,
-  DOCUMENT_DETAILS_ALERT_REASON_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_ANALYZER_PANEL_ARIA_LABEL,
-  DOCUMENT_DETAILS_ISOLATE_HOST_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_LEFT_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_PREVIEW_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_RIGHT_PANEL_ARIA_LABEL,
@@ -143,6 +139,54 @@ const GraphGroupedNodePreviewPanel = React.lazy(() =>
 );
 
 /**
+ * Wraps {@link GraphGroupedNodePreviewPanel} for the legacy expandable flyout registration, supplying
+ * the `onShowDocument` / `onShowEntity` handlers that open previews via the expandable flyout API.
+ * The panel itself is flyout-agnostic; this is the only place the legacy preview behaviour lives.
+ */
+const GraphGroupedNodePreviewPanelForFlyout = (
+  params: Omit<GraphGroupedNodePreviewPanelProps, 'onShowDocument' | 'onShowEntity'>
+) => {
+  const { openPreviewPanel } = useExpandableFlyoutApi();
+  const onShowDocument = useCallback(
+    (docId: string, indexName?: string, isEvent?: boolean) => {
+      openPreviewPanel({
+        id: DocumentDetailsPreviewPanelKey,
+        params: {
+          id: docId,
+          indexName,
+          scopeId: params.scopeId,
+          banner: isEvent ? EVENT_PREVIEW_BANNER : ALERT_PREVIEW_BANNER,
+          isPreviewMode: true,
+        },
+      });
+    },
+    [openPreviewPanel, params.scopeId]
+  );
+
+  const onShowEntity = useCallback(
+    (entity: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) => {
+      const panel = buildEntityPreviewPanel({ ...entity, scopeId: params.scopeId });
+      if (panel) {
+        openPreviewPanel(panel);
+      }
+    },
+    [openPreviewPanel, params.scopeId]
+  );
+
+  return (
+    <GraphGroupedNodePreviewPanel
+      {...params}
+      onShowDocument={onShowDocument}
+      onShowEntity={onShowEntity}
+    />
+  );
+};
+
+/**
  * List of all panels that will be used within the document details expandable flyout.
  * This needs to be passed to the expandable flyout registeredPanels property.
  */
@@ -175,20 +219,14 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
     'aria-label': DOCUMENT_DETAILS_PREVIEW_PANEL_ARIA_LABEL,
   },
   {
-    key: DocumentDetailsAlertReasonPanelKey,
-    component: (props) => (
-      <AlertReasonPanelProvider {...(props as AlertReasonPanelProps).params}>
-        <AlertReasonPanel />
-      </AlertReasonPanelProvider>
-    ),
-    'aria-label': DOCUMENT_DETAILS_ALERT_REASON_PANEL_ARIA_LABEL,
-  },
-  {
     key: GraphGroupedNodePreviewPanelKey,
     component: (props) => {
       // TODO Fix typing issue here
-      const params = props.params as unknown as GraphGroupedNodePreviewPanelProps;
-      return <GraphGroupedNodePreviewPanel {...params} />;
+      const params = props.params as unknown as Omit<
+        GraphGroupedNodePreviewPanelProps,
+        'onShowDocument' | 'onShowEntity'
+      >;
+      return <GraphGroupedNodePreviewPanelForFlyout {...params} />;
     },
     'aria-label': GRAPH_GROUPED_NODE_PREVIEW_PANEL_ARIA_LABEL,
   },
@@ -203,15 +241,6 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
       <RulePanel {...(props as RulePanelExpandableFlyoutProps).params} isPreviewMode />
     ),
     'aria-label': RULE_PREVIEW_PANEL_ARIA_LABEL,
-  },
-  {
-    key: DocumentDetailsIsolateHostPanelKey,
-    component: (props) => (
-      <IsolateHostPanelProvider {...(props as IsolateHostPanelProps).params}>
-        <IsolateHostPanel path={props.path as IsolateHostPanelProps['path']} />
-      </IsolateHostPanelProvider>
-    ),
-    'aria-label': DOCUMENT_DETAILS_ISOLATE_HOST_PANEL_ARIA_LABEL,
   },
   {
     key: DocumentDetailsAnalyzerPanelKey,

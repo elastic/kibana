@@ -8,14 +8,17 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { EuiSelectable, EuiIcon, useEuiTheme, type Query } from '@elastic/eui';
+import { EuiSelectable, EuiIcon, useEuiTheme, type Query, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   useContentListConfig,
   useContentListSort,
+  DEFAULT_SORT_FIELDS,
+  getSortFieldDirections,
   type SortField,
   type SortingConfig,
 } from '@kbn/content-list-provider';
+import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import { useFilterPopover, FilterPopover } from '../filter_popover';
 
 // Helper to safely extract SortingConfig from features.sorting.
@@ -73,6 +76,9 @@ const i18nText = {
   dateDesc: i18n.translate('contentManagement.contentList.sortRenderer.dateDescLabel', {
     defaultMessage: 'Newest first',
   }),
+  additionalInfo: i18n.translate('contentManagement.contentList.sortRenderer.additionalInfoLabel', {
+    defaultMessage: 'Additional information',
+  }),
 };
 
 /** Fields that receive the `A-Z` / `Z-A` treatment by default. */
@@ -106,6 +112,30 @@ const isDateLikeField = (field: string): boolean => {
 };
 
 /**
+ * Returns the icons appended to a sort option: the direction arrow when `showDirection` is set,
+ * followed by a help tooltip when the field has a `description`.
+ */
+const getOptionAppend = (
+  direction: 'asc' | 'desc',
+  { showDirection, description }: { showDirection: boolean; description?: string }
+): React.ReactNode => (
+  <>
+    {showDirection && (
+      <EuiIcon type={direction === 'asc' ? 'sortUp' : 'sortDown'} aria-hidden={true} />
+    )}
+    {description && (
+      <EuiIconTip
+        type="question"
+        color="inherit"
+        position="right"
+        content={description}
+        aria-label={i18nText.additionalInfo}
+      />
+    )}
+  </>
+);
+
+/**
  * Generates sort options from an array of {@link SortField} configurations.
  *
  * Label resolution follows the same strategy as `TableListView`:
@@ -122,27 +152,19 @@ const isDateLikeField = (field: string): boolean => {
  * @param fields - Array of sort field configurations.
  * @returns Array of {@link SortItem} options for the sort selector.
  */
-const generateOptionsFromFields = (fields: SortField[]): SortItem[] => {
-  const options: SortItem[] = [];
-
-  for (const { field, name, ascLabel, descLabel } of fields) {
-    options.push({
-      label: ascLabel ?? getDefaultLabel(field, name, 'asc'),
+const generateOptionsFromFields = (fields: SortField[]): SortItem[] =>
+  fields.flatMap((sortField) => {
+    const { field, name, ascLabel, descLabel, description } = sortField;
+    const directions = getSortFieldDirections(sortField);
+    const showDirection = directions.length > 1;
+    return directions.map((direction) => ({
+      label:
+        (direction === 'asc' ? ascLabel : descLabel) ?? getDefaultLabel(field, name, direction),
       field,
-      direction: 'asc',
-      append: <EuiIcon type="sortUp" aria-hidden={true} />,
-    });
-
-    options.push({
-      label: descLabel ?? getDefaultLabel(field, name, 'desc'),
-      field,
-      direction: 'desc',
-      append: <EuiIcon type="sortDown" aria-hidden={true} />,
-    });
-  }
-
-  return options;
-};
+      direction,
+      append: getOptionAppend(direction, { showDirection, description }),
+    }));
+  });
 
 /**
  * Generates a default sort label when no explicit label is provided.
@@ -186,7 +208,7 @@ const getDefaultLabel = (field: string, name: string, direction: 'asc' | 'desc')
  * @returns A React element containing the sort dropdown.
  */
 export const SortRenderer = ({
-  'data-test-subj': dataTestSubj = 'contentListSortRenderer',
+  'data-test-subj': dataTestSubj = CONTENT_LIST_TEST_SUBJECTS.sortFilter,
 }: SortRendererProps) => {
   const { euiTheme } = useEuiTheme();
   const config = useContentListConfig();
@@ -212,20 +234,7 @@ export const SortRenderer = ({
     }
 
     // Default options when no sorting config is provided.
-    return [
-      {
-        label: i18nText.nameAsc,
-        field: 'title',
-        direction: 'asc',
-        append: <EuiIcon type="sortUp" aria-hidden={true} />,
-      },
-      {
-        label: i18nText.nameDesc,
-        field: 'title',
-        direction: 'desc',
-        append: <EuiIcon type="sortDown" aria-hidden={true} />,
-      },
-    ];
+    return generateOptionsFromFields(DEFAULT_SORT_FIELDS);
   }, [sortingConfig]);
 
   // Derive checked state from provider sort values instead of duplicating in local state.
@@ -270,7 +279,7 @@ export const SortRenderer = ({
         })}
         options={options}
         onChange={handleSelectChange}
-        data-test-subj="sortSelectOptions"
+        data-test-subj={CONTENT_LIST_TEST_SUBJECTS.sortSelectOptions}
       >
         {(list) => list}
       </EuiSelectable>

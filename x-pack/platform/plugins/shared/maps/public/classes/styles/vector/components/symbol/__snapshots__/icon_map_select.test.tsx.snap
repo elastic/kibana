@@ -34,10 +34,6 @@ exports[`Should render custom stops input when useCustomIconMap 1`] = `
   <EuiSuperSelect
     aria-label="Icon palette"
     compressed={true}
-    fullWidth={false}
-    hasDividers={true}
-    isInvalid={false}
-    isLoading={false}
     onChange={[Function]}
     options={
       Array [
@@ -96,10 +92,6 @@ exports[`Should render default props 1`] = `
   <EuiSuperSelect
     aria-label="Icon palette"
     compressed={true}
-    fullWidth={false}
-    hasDividers={true}
-    isInvalid={false}
-    isLoading={false}
     onChange={[Function]}
     options={
       Array [
@@ -134,10 +126,6 @@ exports[`Should render icon map select with custom icons 1`] = `
   <EuiSuperSelect
     aria-label="Icon palette"
     compressed={true}
-    fullWidth={false}
-    hasDividers={true}
-    isInvalid={false}
-    isLoading={false}
     onChange={[Function]}
     options={
       Array [

@@ -14,16 +14,16 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiTitle,
   EuiForm,
-  EuiCallOut,
+  EuiIcon,
   EuiLink,
-  EuiText,
   EuiSpacer,
-  useEuiTheme,
+  EuiTitle,
+  EuiToolTip,
   euiCanAnimate,
+  useEuiTheme,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -132,7 +132,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
           buttonContent={
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiIcon type={action.iconClass} size="m" />
+                <EuiIcon type={action.iconClass} size="m" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="s">
@@ -142,23 +142,33 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
             </EuiFlexGroup>
           }
           extraAction={
-            <EuiButtonIcon
-              iconType="cross"
-              color="danger"
-              css={styles.watcherThresholdDeleteButton}
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.watcher.sections.watchEdit.threshold.accordion.deleteIconAriaLabel',
                 {
                   defaultMessage: 'Delete',
                 }
               )}
-              onClick={() => {
-                const updatedActions = actions.filter(
-                  (actionItem: ActionType) => actionItem.id !== action.id
-                );
-                setWatchProperty('actions', updatedActions);
-              }}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="cross"
+                color="danger"
+                css={styles.watcherThresholdDeleteButton}
+                aria-label={i18n.translate(
+                  'xpack.watcher.sections.watchEdit.threshold.accordion.deleteIconAriaLabel',
+                  {
+                    defaultMessage: 'Delete',
+                  }
+                )}
+                onClick={() => {
+                  const updatedActions = actions.filter(
+                    (actionItem: ActionType) => actionItem.id !== action.id
+                  );
+                  setWatchProperty('actions', updatedActions);
+                }}
+              />
+            </EuiToolTip>
           }
           paddingSize="l"
         >
@@ -196,7 +206,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
             >
               {settings && settings.actionTypes[action.type].enabled === false ? (
                 <Fragment>
-                  <EuiCallOut
+                  <KbnWarningCallout
                     announceOnMount
                     title={i18n.translate(
                       'xpack.watcher.sections.watchEdit.threshold.actions.actionConfigurationWarningTitleText',
@@ -204,10 +214,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
                         defaultMessage: 'Account may not be configured',
                       }
                     )}
-                    color="warning"
-                    iconType="question"
-                  >
-                    <EuiText>
+                    text={
                       <p>
                         <FormattedMessage
                           id="xpack.watcher.sections.watchEdit.threshold.actions.actionConfigurationWarningDescriptionText"
@@ -228,8 +235,8 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
                           }}
                         />
                       </p>
-                    </EuiText>
-                  </EuiCallOut>
+                    }
+                  />
                   <EuiSpacer />
                 </Fragment>
               ) : null}

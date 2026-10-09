@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-// EntityAnalyticsToggle
-export const ENTITY_ANALYTICS_HEALTH_TEST_ID = 'entity-analytics-health';
+// EntityAnalyticsErrorPanel
 export const ENTITY_ANALYTICS_ERROR_PANEL_TEST_ID = 'entity-analytics-error-panel';
 export const ENTITY_ANALYTICS_SWITCH_TEST_ID = 'entity-analytics-switch';
-export const ENTITY_ANALYTICS_STATUS_LOADING_TEST_ID = 'entity-analytics-status-loading';
 
 // AssetCriticalityTab
 export const ASSET_CRITICALITY_ISSUE_CALLOUT_TEST_ID = 'asset-criticality-issue-callout';
@@ -20,7 +18,7 @@ export const ASSET_CRITICALITY_FILE_UPLOAD_SECTION_TEST_ID =
 export const ASSET_CRITICALITY_INFO_PANEL_TEST_ID = 'asset-criticality-info-panel';
 export const ASSET_CRITICALITY_DOC_LINK_TEST_ID = 'asset-criticality-doc-link';
 
-// ClearEntityDataButton
+// Clear entity data menu item and confirmation modal
 export const CLEAR_ENTITY_DATA_BUTTON_TEST_ID = 'clear-entity-data-button';
 export const CLEAR_ENTITY_DATA_MODAL_TEST_ID = 'clear-entity-data-modal';
 export const CLEAR_ENTITY_DATA_CONFIRM_TEST_ID = 'confirmModalConfirmButton';
@@ -35,7 +33,6 @@ export const ASSET_CRITICALITY_TAB_TEST_ID = 'assetCriticalityTab';
 export const ENGINE_STATUS_TAB_TEST_ID = 'engineStatusTab';
 export const WATCHLISTS_TAB_TEST_ID = 'watchlistsTab';
 export const ENGINE_STATUS_PANEL_TEST_ID = 'engine-status-panel';
-export const ENTITY_STORE_FEATURE_FLAG_CALLOUT_TEST_ID = 'entity-store-feature-flag-callout';
 
 // RiskScoreTab - Form inputs
 export const RISK_SCORE_RETAIN_CHECKBOX_TEST_ID = 'riskScoreRetainCheckbox';

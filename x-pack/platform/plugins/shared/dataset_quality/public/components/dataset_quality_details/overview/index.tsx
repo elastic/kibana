@@ -14,8 +14,9 @@ import {
   EuiSkeletonTitle,
   EuiSpacer,
   EuiSplitPanel,
+  useEuiTheme,
 } from '@elastic/eui';
-import type { QualityIssueType } from '../../../state_machines/dataset_quality_details_controller';
+import { css } from '@emotion/react';
 import { useDatasetQualityDetailsState } from '../../../hooks';
 import { AggregationNotSupported } from './aggregation_not_supported';
 import { QualityIssues } from './quality_issues';
@@ -56,6 +57,7 @@ const QualitySummaryCards = dynamic(() => import('./quality_summary_cards'), {
 const DocumentTrends = dynamic(() => import('./document_trends'));
 
 export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
+  const { euiTheme } = useEuiTheme();
   const {
     dataStream,
     isNonAggregatable,
@@ -63,12 +65,10 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
     updateTimeRange,
     loadingState: { dataStreamSettingsLoading },
     view,
+    docsTrendChart,
   } = useDatasetQualityDetailsState();
 
   const [lastReloadTime, setLastReloadTime] = useState<number>(Date.now());
-
-  const [selectedQualityCard, setSelectedQualityCard] =
-    React.useState<QualityIssueType>('degraded');
 
   const handleTimeChange = useCallback(
     (refreshProps: TimeRange) => {
@@ -103,25 +103,28 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
         hasShadow={false}
         hasBorder={true}
       >
-        <EuiSplitPanel.Inner color="subdued" grow={false}>
-          <QualitySummaryCards
-            selectedCard={selectedQualityCard}
-            setSelectedCard={setSelectedQualityCard}
-          />
+        <EuiSplitPanel.Inner
+          color="subdued"
+          grow={false}
+          css={css`
+            border-right: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+          `}
+        >
+          <QualitySummaryCards selectedCard={docsTrendChart} />
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner grow={true}>
           <DocumentTrends
             lastReloadTime={lastReloadTime}
             openAlertFlyout={openAlertFlyout}
             displayActions={{
-              displayCreateRuleButton: selectedQualityCard === 'degraded',
-              displayEditFailureStore: selectedQualityCard === 'failed',
+              displayCreateRuleButton: docsTrendChart === 'degraded',
+              displayEditFailureStore: docsTrendChart === 'failed',
             }}
           />
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="xxl" />
       <QualityIssues />
     </>
   );

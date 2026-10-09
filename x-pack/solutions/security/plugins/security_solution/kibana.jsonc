@@ -60,16 +60,17 @@
       "savedSearch",
       "unifiedDocViewer",
       "charts",
-      "entityManager",
       "inference",
       "discoverShared",
       "productDocBase",
       "telemetry",
       "elasticAssistantSharedState",
       "share",
+      "workflowsExtensions"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
+      "evals",
       "fleet",
       "ml",
       "newsfeed",
@@ -85,8 +86,12 @@
       "serverless",
       "agentBuilder",
       "llmTasks",
+      "mitreAttack",
       "cps",
-      "searchInferenceEndpoints"
+      "searchInferenceEndpoints",
+      "esql",
+      "alertzero",
+      "agenticInvestigations"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -96,9 +101,11 @@
       "usageCollection",
       "lists",
       "ml",
+      "mitreAttack",
       "unifiedSearch",
       "esql",
-      "agentBuilder"
+      "agentBuilder",
+      "workflowsExtensions"
     ],
     "extraPublicDirs": [
       "common"

@@ -7,8 +7,13 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import type { CloudConfigType } from '.';
-import { CLOUD_SNAPSHOTS_PATH, CLOUD_USER_BILLING_ADMIN_ROLE } from '../common/constants';
-import { getFullCloudUrl } from '../common/utils';
+import {
+  CLOUD_PROJECT_SEARCH_POWER_QUERY,
+  CLOUD_SNAPSHOTS_PATH,
+  CLOUD_USER_BILLING_ADMIN_ROLE,
+  SEARCH_POWER_EDITOR_ROLES,
+} from '../common/constants';
+import { getFullCloudUrl, getProjectPageUrl } from '../common/utils';
 import type { CloudBasicUrls, CloudPrivilegedUrls } from './types';
 
 /**
@@ -40,18 +45,20 @@ export class CloudUrlsService {
       organization_url: organizationUrl,
       deployments_url: deploymentsUrl,
       deployment_url: deploymentUrl,
+      create_deployment_url: createDeploymentUrl,
       performance_url: performanceUrl,
-      users_and_roles_url: usersAndRolesUrl,
       projects_url: projectsUrl,
+      create_project_url: createProjectUrl,
     } = this.config;
 
     const fullCloudDeploymentsUrl = getFullCloudUrl(baseUrl, deploymentsUrl);
     const fullCloudDeploymentUrl = getFullCloudUrl(baseUrl, deploymentUrl);
+    const fullCloudCreateDeploymentUrl = getFullCloudUrl(baseUrl, createDeploymentUrl);
     const fullCloudProfileUrl = getFullCloudUrl(baseUrl, profileUrl);
     const fullCloudOrganizationUrl = getFullCloudUrl(baseUrl, organizationUrl);
     const fullCloudPerformanceUrl = getFullCloudUrl(baseUrl, performanceUrl);
-    const fullCloudUsersAndRolesUrl = getFullCloudUrl(baseUrl, usersAndRolesUrl);
     const fullCloudProjectsUrl = getFullCloudUrl(baseUrl, projectsUrl);
+    const fullCloudCreateProjectUrl = getFullCloudUrl(baseUrl, createProjectUrl);
     const fullCloudSnapshotsUrl = `${fullCloudDeploymentUrl}/${CLOUD_SNAPSHOTS_PATH}`;
 
     return {
@@ -59,12 +66,13 @@ export class CloudUrlsService {
       kibanaUrl,
       deploymentsUrl: fullCloudDeploymentsUrl,
       deploymentUrl: fullCloudDeploymentUrl,
+      createDeploymentUrl: fullCloudCreateDeploymentUrl,
       profileUrl: fullCloudProfileUrl,
       organizationUrl: fullCloudOrganizationUrl,
       snapshotsUrl: fullCloudSnapshotsUrl,
       performanceUrl: fullCloudPerformanceUrl,
-      usersAndRolesUrl: fullCloudUsersAndRolesUrl,
       projectsUrl: fullCloudProjectsUrl,
+      createProjectUrl: fullCloudCreateProjectUrl,
     };
   }
 
@@ -76,32 +84,55 @@ export class CloudUrlsService {
       throw new Error('Cloud configuration is not set up');
     }
 
-    const showBillingUrl = (await this.getCurrentUserRoles()).includes(
-      CLOUD_USER_BILLING_ADMIN_ROLE
-    );
+    const coreStart = await this.getCoreStart();
+
+    const userRoles = await this.getCurrentUserRoles(coreStart);
+    const showBillingUrl = userRoles.includes(CLOUD_USER_BILLING_ADMIN_ROLE);
     const conditionalFullCloudBillingUrl = showBillingUrl
       ? getFullCloudUrl(this.config.base_url, this.config.billing_url)
       : undefined;
 
+    const hasManageSecurity = Boolean(coreStart.application.capabilities.users?.save);
+    const conditionalFullCloudUsersAndRolesUrl = hasManageSecurity
+      ? getFullCloudUrl(this.config.base_url, this.config.users_and_roles_url)
+      : undefined;
+
+    const showSearchPowerUrl =
+      Boolean(this.config.serverless?.project_id) &&
+      userRoles.some((role) => SEARCH_POWER_EDITOR_ROLES.includes(role));
+    const conditionalFullCloudSearchPowerUrl = showSearchPowerUrl
+      ? getProjectPageUrl(
+          getFullCloudUrl(this.config.base_url, this.config.deployment_url),
+          CLOUD_PROJECT_SEARCH_POWER_QUERY
+        )
+      : undefined;
+
     return {
       billingUrl: conditionalFullCloudBillingUrl,
+      usersAndRolesUrl: conditionalFullCloudUsersAndRolesUrl,
+      searchPowerUrl: conditionalFullCloudSearchPowerUrl,
     };
+  }
+
+  private async getCoreStart() {
+    const [coreStart] = (await this.coreSetup?.getStartServices()) || [];
+    if (!coreStart) {
+      throw new Error('Core setup is not available');
+    }
+    return coreStart;
   }
 
   /**
    * Needed for determining access to privileged URLs, such as billing.
    */
-  private async getCurrentUserRoles(): Promise<readonly string[]> {
-    const [coreStart] = (await this.coreSetup?.getStartServices()) || [];
-    if (!coreStart) {
-      throw new Error('Core setup is not available');
-    }
-
+  private async getCurrentUserRoles(
+    coreStart: Awaited<ReturnType<CoreSetup['getStartServices']>>[0]
+  ): Promise<readonly string[]> {
     let userRoles: readonly string[] = [];
     try {
-      userRoles = (await coreStart.security.authc.getCurrentUser()).roles;
+      userRoles = (await coreStart.security.authc.getCurrentUser()).roles ?? [];
     } catch (e) {
-      // If if no user is available, we just return an empty array of roles
+      // If no user is available, we just return an empty array of roles
     }
 
     return userRoles;

@@ -10,13 +10,17 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import { createEntitySourcesService } from './entity_sources_service';
+import { createEntitySourcesService, syncWatchlistInBackground } from './entity_sources_service';
 
 jest.mock('../management/watchlist_config');
 jest.mock('./infra/entity_source_client');
 jest.mock('../entities/service');
 jest.mock('./sync/index_sync');
 jest.mock('../entities/utils');
+jest.mock('./bulk/soft_delete');
+jest.mock('@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request', () => ({
+  getFakeKibanaRequest: jest.fn().mockReturnValue({ fakeRequest: true }),
+}));
 
 const { mockListEntitySources } = jest.requireMock('./infra/entity_source_client') as {
   mockListEntitySources: jest.Mock;
@@ -34,12 +38,21 @@ const { mockListEntityStoreEntities } = jest.requireMock('../entities/service') 
   mockListEntityStoreEntities: jest.Mock;
 };
 
-const { mockPlainIndexSync } = jest.requireMock('./sync/index_sync') as {
+const { mockPlainIndexSync, mockCreateIndexSyncService } = jest.requireMock(
+  './sync/index_sync'
+) as {
   mockPlainIndexSync: jest.Mock;
+  mockCreateIndexSyncService: jest.Mock;
 };
 
 const { mockGetIndexForWatchlist } = jest.requireMock('../entities/utils') as {
   mockGetIndexForWatchlist: jest.Mock;
+};
+
+const { applyBulkRemoveSource: mockApplyBulkRemoveSource } = jest.requireMock(
+  './bulk/soft_delete'
+) as {
+  applyBulkRemoveSource: jest.Mock;
 };
 
 describe('createEntitySourcesService', () => {
@@ -47,102 +60,101 @@ describe('createEntitySourcesService', () => {
   const soClient = savedObjectsClientMock.create();
   const logger = loggingSystemMock.createLogger();
   const namespace = 'default';
+  const mockGetStartServices = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetStartServices.mockResolvedValue([
+      { elasticsearch: { client: {} } },
+      { encryptedSavedObjects: undefined },
+    ]);
 
     mockWatchlistGet.mockResolvedValue({ name: 'VIP Users' });
     mockGetEntitySourceIds.mockResolvedValue(['source-a', 'source-c']);
-    mockListEntitySources.mockResolvedValue({
-      sources: [
-        {
-          id: 'source-a',
-          type: 'index',
-          identifierField: 'user.id',
-        },
-        {
-          id: 'source-b',
-          type: 'integration',
-          integrationName: 'entityanalytics_ad',
-        },
-        {
-          id: 'source-c',
-          type: 'integration',
-          integrationName: 'entityanalytics_okta',
-        },
-      ],
-    });
+    const allSources = [
+      {
+        id: 'source-a',
+        type: 'index',
+        identifierField: 'user.id',
+      },
+      {
+        id: 'source-b',
+        type: 'integration',
+        integrationName: 'entityanalytics_ad',
+      },
+      {
+        id: 'source-c',
+        type: 'integration',
+        integrationName: 'entityanalytics_okta',
+      },
+    ];
+    // Mirrors the real listByIds' bulkGet-based filtering: only sources matching the requested
+    // ids are returned, unlike a plain list() call.
+    mockListEntitySources.mockImplementation(async (_query: unknown, ids?: string[]) => ({
+      sources: ids ? allSources.filter((s) => ids.includes(s.id)) : allSources,
+    }));
     mockListEntityStoreEntities
-      .mockResolvedValueOnce({
-        entityIdsByType: {
-          user: ['user:1'],
-          host: [],
-          service: [],
-          generic: [],
-        },
-        correlationMap: new Map(),
-        watchlistsByEuid: new Map(),
+      .mockImplementationOnce(async function* () {
+        yield {
+          entityIdsByType: { user: ['user:1'], host: [], service: [], generic: [] },
+          correlationMap: new Map(),
+          watchlistsByEuid: new Map(),
+          maxEntityId: 'user:1',
+        };
       })
-      .mockResolvedValueOnce({
-        entityIdsByType: {
-          user: ['user:2'],
-          host: ['host:1'],
-          service: [],
-          generic: [],
-        },
-        watchlistsByEuid: new Map(),
+      .mockImplementationOnce(async function* () {
+        yield {
+          entityIdsByType: { user: ['user:2'], host: ['host:1'], service: [], generic: [] },
+          watchlistsByEuid: new Map(),
+          maxEntityId: 'user:2',
+        };
       });
     mockPlainIndexSync.mockResolvedValue(undefined);
     mockGetIndexForWatchlist.mockReturnValue('.lists-watchlist-vip-users-default');
   });
 
-  it('builds the linked source payload and passes it to plainIndexSync', async () => {
+  it('syncs integration sources and skips index sources that have no stored API key', async () => {
     const service = createEntitySourcesService({
       esClient,
       soClient,
       logger,
       namespace,
+      getStartServices: mockGetStartServices as never,
+      hasEncryptionKey: true,
     });
 
     await service.syncWatchlist('watchlist-1');
 
     expect(mockWatchlistGet).toHaveBeenCalledWith('watchlist-1');
     expect(mockGetEntitySourceIds).toHaveBeenCalledWith('watchlist-1');
-    expect(mockListEntitySources).toHaveBeenCalledWith({});
+    expect(mockListEntitySources).toHaveBeenCalledWith({ per_page: 2 }, ['source-a', 'source-c']);
     expect(mockGetIndexForWatchlist).toHaveBeenCalledWith(namespace);
 
-    expect(mockListEntityStoreEntities).toHaveBeenCalledTimes(2);
-    expect(mockListEntityStoreEntities).toHaveBeenNthCalledWith(1, {
-      type: 'index',
-      field: 'user.id',
-    });
-    expect(mockListEntityStoreEntities).toHaveBeenNthCalledWith(2, {
+    // source-a (index) is skipped — no API key. source-c (integration) syncs.
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Skipping index source source-a: no API key stored')
+    );
+    expect(mockListEntityStoreEntities).toHaveBeenCalledTimes(1);
+    expect(mockListEntityStoreEntities).toHaveBeenCalledWith({
       type: 'integration',
       name: 'entityanalytics_okta',
     });
 
+    // source-c gets one page call + one tail call
+    expect(mockPlainIndexSync).toHaveBeenCalledTimes(2);
     expect(mockPlainIndexSync).toHaveBeenCalledWith([
-      {
-        sourceId: 'source-a',
-        entityStoreEntityIdsByType: {
-          user: ['user:1'],
-          host: [],
-          service: [],
-          generic: [],
-        },
-        correlationMap: expect.any(Map),
+      expect.objectContaining({
+        source: expect.objectContaining({ id: 'source-c' }),
+        entityStoreEntityIdsByType: { user: ['user:1'], host: [], service: [], generic: [] },
         watchlistsByEuid: expect.any(Map),
-      },
-      {
-        sourceId: 'source-c',
-        entityStoreEntityIdsByType: {
-          user: ['user:2'],
-          host: ['host:1'],
-          service: [],
-          generic: [],
-        },
-        watchlistsByEuid: expect.any(Map),
-      },
+        pageRange: expect.objectContaining({ lte: expect.any(String) }),
+      }),
+    ]);
+    expect(mockPlainIndexSync).toHaveBeenCalledWith([
+      expect.objectContaining({
+        source: expect.objectContaining({ id: 'source-c' }),
+        entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
+      }),
     ]);
 
     expect(logger.info).toHaveBeenCalledWith(
@@ -150,9 +162,101 @@ describe('createEntitySourcesService', () => {
     );
   });
 
+  it('uses a scoped ES client for an index source when an API key is stored', async () => {
+    const mockDataEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    const mockCoreElasticsearchClient = {
+      asScoped: jest.fn().mockReturnValue({ asCurrentUser: mockDataEsClient }),
+    };
+    const mockEsoClientGet = jest.fn().mockResolvedValue({
+      attributes: { apiKeyId: 'key-id', apiKey: 'key-secret' },
+    });
+    const mockEncryptedSavedObjects = {
+      getClient: () => ({ getDecryptedAsInternalUser: mockEsoClientGet }),
+    };
+
+    const getStartServices = jest
+      .fn()
+      .mockResolvedValue([
+        { elasticsearch: { client: mockCoreElasticsearchClient } },
+        { encryptedSavedObjects: mockEncryptedSavedObjects },
+      ]);
+
+    const service = createEntitySourcesService({
+      esClient,
+      soClient,
+      logger,
+      namespace,
+      getStartServices: getStartServices as never,
+      hasEncryptionKey: true,
+    });
+
+    await service.syncWatchlist('watchlist-1');
+
+    // source-a (index) should be synced via the scoped client
+    expect(mockCreateIndexSyncService).toHaveBeenCalledWith(
+      expect.objectContaining({
+        internalEsClient: esClient,
+        dataEsClient: mockDataEsClient,
+      })
+    );
+    // source-c (integration) uses the plain esClient for both
+    expect(mockCreateIndexSyncService).toHaveBeenCalledWith(
+      expect.objectContaining({
+        internalEsClient: esClient,
+        dataEsClient: esClient,
+      })
+    );
+  });
+
+  it('does not treat a referenced source as orphaned just because the space has more than 10 sources total', async () => {
+    // descriptorClient.list({}) with no ids would only return the first 10 sources across the
+    // whole space; scoping the lookup to this watchlist's own referenced ids must not lose a
+    // source just because other watchlists in the space have many more sources than that.
+    const manySources = Array.from({ length: 15 }, (_, i) => ({
+      id: `other-source-${i}`,
+      type: 'integration' as const,
+      integrationName: 'entityanalytics_ad' as const,
+    }));
+    mockGetEntitySourceIds.mockResolvedValue(['source-a', 'source-c']);
+    mockListEntitySources.mockImplementation(async (_query: unknown, ids?: string[]) => {
+      const allSources = [
+        { id: 'source-a', type: 'index' as const, identifierField: 'user.id' },
+        { id: 'source-c', type: 'integration' as const, integrationName: 'entityanalytics_okta' },
+        ...manySources,
+      ];
+      return { sources: ids ? allSources.filter((s) => ids.includes(s.id)) : allSources };
+    });
+
+    const service = createEntitySourcesService({
+      esClient,
+      soClient,
+      logger,
+      namespace,
+      getStartServices: mockGetStartServices as never,
+      hasEncryptionKey: true,
+    });
+
+    await service.syncWatchlist('watchlist-1');
+
+    // The lookup is scoped to exactly this watchlist's referenced ids (not a space-wide,
+    // 10-capped list), so source-c is found and synced despite 15 unrelated sources existing.
+    expect(mockListEntitySources).toHaveBeenCalledWith({ per_page: 2 }, ['source-a', 'source-c']);
+    expect(mockListEntityStoreEntities).toHaveBeenCalledWith({
+      type: 'integration',
+      name: 'entityanalytics_okta',
+    });
+  });
+
   describe('syncAllWatchlists', () => {
     const createService = () =>
-      createEntitySourcesService({ esClient, soClient, logger, namespace });
+      createEntitySourcesService({
+        esClient,
+        soClient,
+        logger,
+        namespace,
+        getStartServices: mockGetStartServices as never,
+        hasEncryptionKey: true,
+      });
 
     it('syncs each watchlist returned by list', async () => {
       mockWatchlistList.mockResolvedValue([
@@ -205,6 +309,106 @@ describe('createEntitySourcesService', () => {
       expect(mockWatchlistGet).toHaveBeenCalledWith('wl-1');
     });
 
+    it('cleans up orphaned entities when no sources are linked', async () => {
+      mockWatchlistList.mockResolvedValue([{ id: 'wl-1', name: 'Cleaned' }]);
+
+      const service = createService();
+      mockWatchlistGet.mockResolvedValue({ name: 'Cleaned', id: 'wl-1' });
+      mockGetEntitySourceIds.mockResolvedValue([]);
+      mockListEntitySources.mockResolvedValue({ sources: [] });
+
+      // Mock: aggregation returns one orphaned source ID (not csv)
+      esClient.search
+        .mockResolvedValueOnce({
+          aggregations: {
+            source_ids: {
+              buckets: [
+                { key: 'orphaned-source-1', doc_count: 3 },
+                { key: 'csv', doc_count: 2 },
+              ],
+            },
+          },
+        } as never)
+        // Mock: buildWatchlistsByEuid — first search returns euids
+        .mockResolvedValueOnce({
+          hits: { hits: [{ _source: { entity: { id: 'user:alice' } } }] },
+        } as never)
+        // Mock: buildWatchlistsByEuid — entity store query for watchlist memberships
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  entity: { id: 'user:alice', attributes: { watchlists: ['wl-1'] } },
+                },
+              },
+            ],
+          },
+        } as never)
+        // Mock: findEntitiesBySource — paginated search for stale entities
+        .mockResolvedValueOnce({
+          hits: { hits: [{ _id: 'user:alice:doc1' }] },
+        } as never);
+
+      await service.syncAllWatchlists();
+
+      expect(mockApplyBulkRemoveSource).toHaveBeenCalledWith(
+        expect.objectContaining({
+          staleEntities: [{ docId: 'user:alice:doc1', sourceId: 'orphaned-source-1' }],
+        })
+      );
+      // no active sources so plainIndexSync is never called
+      expect(mockPlainIndexSync).not.toHaveBeenCalled();
+    });
+
+    it('treats a referenced-but-deleted source as orphaned instead of active, so its entities are still cleaned up', async () => {
+      mockWatchlistList.mockResolvedValue([{ id: 'wl-1', name: 'Cleaned' }]);
+
+      const service = createService();
+      mockWatchlistGet.mockResolvedValue({ name: 'Cleaned', id: 'wl-1' });
+      // The watchlist still references 'deleted-source-1' (e.g. a delete-then-unlink removal
+      // was interrupted before the unlink completed), but list() no longer returns it.
+      mockGetEntitySourceIds.mockResolvedValue(['deleted-source-1']);
+      mockListEntitySources.mockResolvedValue({ sources: [] });
+
+      esClient.search
+        .mockResolvedValueOnce({
+          aggregations: {
+            source_ids: { buckets: [{ key: 'deleted-source-1', doc_count: 3 }] },
+          },
+        } as never)
+        // buildWatchlistsByEuid — euids from the watchlist index
+        .mockResolvedValueOnce({
+          hits: { hits: [{ _source: { entity: { id: 'user:alice' } } }] },
+        } as never)
+        // buildWatchlistsByEuid — entity store query for watchlist memberships
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  entity: { id: 'user:alice', attributes: { watchlists: ['wl-1'] } },
+                },
+              },
+            ],
+          },
+        } as never)
+        // findEntitiesBySource — paginated search for stale entities
+        .mockResolvedValueOnce({
+          hits: { hits: [{ _id: 'user:alice:doc1' }] },
+        } as never);
+
+      await service.syncAllWatchlists();
+
+      // Not excluded from cleanup just because it's still referenced — it was deleted, so its
+      // entities must still be cleaned up rather than being permanently retained.
+      expect(mockApplyBulkRemoveSource).toHaveBeenCalledWith(
+        expect.objectContaining({
+          staleEntities: [{ docId: 'user:alice:doc1', sourceId: 'deleted-source-1' }],
+        })
+      );
+    });
+
     it('continues syncing remaining watchlists when one fails', async () => {
       mockWatchlistList.mockResolvedValue([
         { id: 'wl-1', name: 'Failing' },
@@ -225,6 +429,149 @@ describe('createEntitySourcesService', () => {
       );
       // Second watchlist still synced
       expect(mockWatchlistGet).toHaveBeenCalledWith('wl-2');
+    });
+
+    it('stops syncing remaining watchlists when abort signal fires between iterations', async () => {
+      mockWatchlistList.mockResolvedValue([
+        { id: 'wl-1', name: 'First' },
+        { id: 'wl-2', name: 'Second' },
+      ]);
+
+      const controller = new AbortController();
+      const service = createService();
+
+      // Abort after the first watchlist completes
+      mockWatchlistGet.mockImplementationOnce(async () => {
+        controller.abort();
+        return { name: 'First' };
+      });
+      mockGetEntitySourceIds.mockResolvedValue([]);
+      mockListEntitySources.mockResolvedValue({ sources: [] });
+
+      await service.syncAllWatchlists({ abortSignal: controller.signal });
+
+      expect(mockWatchlistGet).toHaveBeenCalledTimes(1);
+      expect(mockWatchlistGet).toHaveBeenCalledWith('wl-1');
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('Abort signal received: stopping watchlist sync')
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Watchlist sync for namespace "default" stopped (abort) before all 2 watchlist(s) were processed'
+        )
+      );
+      expect(logger.info).not.toHaveBeenCalledWith(
+        expect.stringMatching(/Completed sync of 2 watchlist/)
+      );
+    });
+
+    it('does not sync any watchlists when abort signal is already fired', async () => {
+      mockWatchlistList.mockResolvedValue([{ id: 'wl-1', name: 'VIP Users' }]);
+
+      const controller = new AbortController();
+      controller.abort();
+
+      const service = createService();
+      await service.syncAllWatchlists({ abortSignal: controller.signal });
+
+      expect(mockWatchlistGet).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Watchlist sync for namespace "default" stopped (abort) before all 1 watchlist(s) were processed'
+        )
+      );
+    });
+  });
+
+  describe('syncWatchlist abort handling', () => {
+    const createService = () =>
+      createEntitySourcesService({
+        esClient,
+        soClient,
+        logger,
+        namespace,
+        getStartServices: mockGetStartServices as never,
+        hasEncryptionKey: true,
+      });
+
+    it('skips cleanup when abort signal fires after plainIndexSync', async () => {
+      const controller = new AbortController();
+
+      // Need one active source so the paginated loop calls plainIndexSync at least once
+      mockGetEntitySourceIds.mockResolvedValue(['source-c']);
+      mockListEntitySources.mockResolvedValue({
+        sources: [{ id: 'source-c', type: 'integration', integrationName: 'entityanalytics_okta' }],
+      });
+      mockListEntityStoreEntities.mockImplementationOnce(async function* () {
+        yield {
+          entityIdsByType: { user: ['user:1'], host: [], service: [], generic: [] },
+          correlationMap: new Map(),
+          watchlistsByEuid: new Map(),
+          maxEntityId: 'user:1',
+        };
+      });
+
+      // Abort mid-way through syncWatchlist, after plainIndexSync runs
+      mockPlainIndexSync.mockImplementation(async () => {
+        controller.abort();
+      });
+
+      const service = createService();
+      await service.syncWatchlist('watchlist-1', controller.signal);
+
+      // First page pass calls plainIndexSync; abort fires so tail pass is skipped
+      expect(mockPlainIndexSync).toHaveBeenCalledTimes(1);
+      // cleanupOrphanedEntities triggers an esClient.search for orphaned source agg —
+      // it should not be called after abort
+      expect(esClient.search).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Abort signal received: after index sync for watchlist watchlist-1, skipping cleanup'
+        )
+      );
+    });
+  });
+
+  describe('syncWatchlistInBackground', () => {
+    it('resolves and logs completion when the sync succeeds', async () => {
+      await syncWatchlistInBackground({
+        watchlistId: 'watchlist-1',
+        logContext: 'TestCaller',
+        esClient,
+        soClient,
+        logger,
+        namespace,
+        getStartServices: mockGetStartServices as never,
+        hasEncryptionKey: true,
+      });
+
+      expect(logger.info).toHaveBeenCalledWith(
+        '[TestCaller] Background sync completed for watchlist watchlist-1'
+      );
+      expect(logger.warn).not.toHaveBeenCalledWith(
+        expect.stringContaining('Background sync failed')
+      );
+    });
+
+    it('never rejects, and logs a warning when the sync fails', async () => {
+      mockWatchlistGet.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(
+        syncWatchlistInBackground({
+          watchlistId: 'watchlist-1',
+          logContext: 'TestCaller',
+          esClient,
+          soClient,
+          logger,
+          namespace,
+          getStartServices: mockGetStartServices as never,
+          hasEncryptionKey: true,
+        })
+      ).resolves.toBeUndefined();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        '[TestCaller] Background sync failed for watchlist watchlist-1: boom'
+      );
     });
   });
 });

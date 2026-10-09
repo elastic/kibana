@@ -28,15 +28,15 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
   },
   handler: async (routeContext): Promise<any> => {
     const { request, syntheticsMonitorClient, monitorConfigRepository } = routeContext;
+    const queryParams = routeContext.request.query as MonitorsQuery;
     const totalCountQuery = async () => {
-      if (isMonitorsQueryFiltered(request.query)) {
+      if (isMonitorsQueryFiltered(queryParams)) {
         return monitorConfigRepository.find({
           perPage: 0,
           page: 1,
         });
       }
     };
-    const queryParams = routeContext.request.query as MonitorsQuery;
 
     const { filtersStr } = await getMonitorFilters(routeContext);
 
@@ -59,19 +59,21 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
 
     const { saved_objects: savedObjects, per_page: perPageT, ...rest } = queryResultSavedObjects;
 
+    const monitors = savedObjects.map((monitor) => {
+      const mon = mapSavedObjectToMonitor({
+        monitor,
+        internal: request.query?.internal,
+      });
+      return {
+        ...mon,
+        spaceId: monitor.namespaces?.[0],
+        spaces: monitor.namespaces ?? [],
+      };
+    });
+
     return {
       ...rest,
-      monitors: savedObjects.map((monitor) => {
-        const mon = mapSavedObjectToMonitor({
-          monitor,
-          internal: request.query?.internal,
-        });
-        return {
-          ...mon,
-          spaceId: monitor.namespaces?.[0],
-          spaces: monitor.namespaces ?? [],
-        };
-      }),
+      monitors,
       absoluteTotal,
       perPage: perPageT,
       syncErrors: syntheticsMonitorClient.syntheticsService.syncErrors,

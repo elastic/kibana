@@ -25,7 +25,7 @@ export const RESET_DEFAULT_INDEX = i18n.translate(
 export const IMPORT_TIMELINE_QUERY = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.importTimelineQueryButton',
   {
-    defaultMessage: 'Import query from saved timeline',
+    defaultMessage: 'Import query from saved Timeline',
   }
 );
 

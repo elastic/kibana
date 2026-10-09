@@ -120,8 +120,7 @@ export function Readme({
       {processedMarkdown !== undefined ? (
         <EuiText grow={true}>
           <ReactMarkdown
-            transformImageUri={handleImageUri}
-            components={markdownRenderers(refs)}
+            components={markdownRenderers(refs, handleImageUri)}
             rehypePlugins={[rehypeRaw, [rehypeSanitize]]}
             remarkPlugins={[remarkGfm]}
           >

@@ -12,7 +12,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { DraggableChildrenFn, DraggingStyle, NotDraggingStyle } from '@hello-pangea/dnd';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import styled from 'styled-components';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import {
   DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
@@ -69,10 +69,8 @@ const getItemStyle = (
 const DroppableContainer = styled.div`
   min-height: ${ROW_OF_DATA_PROVIDERS_HEIGHT}px;
   height: auto !important;
-  display: none;
 
   .${IS_DRAGGING_CLASS_NAME} &:hover {
-    display: flex;
     background-color: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.2)} !important;
   }
 `;

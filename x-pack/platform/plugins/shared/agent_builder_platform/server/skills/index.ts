@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export { dataExplorationSkill } from './data_exploration_skill';
 export { graphCreationSkill } from './graph_creation_skill';
-export { visualizationCreationSkill } from './visualization_creation_skill';
+export { skillManagementSkill } from './skill_management';
 export { registerSkills } from './register_skills';
+export { analyzeAndImproveSkill } from './analyze_and_improve';
+export { contextEngineSignalsSkill } from './context_engine_signals';
+export { aiIndexSourcesSkill } from './ai_index_sources';
+export { aiIndexAutomationsSkill } from './ai_index_automations';

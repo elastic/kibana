@@ -76,7 +76,11 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
   },
   deprecations: () => [
     (cfg) => {
-      if (cfg.telemetry?.enabled === false) {
+      const raw = cfg.telemetry?.enabled;
+      const isDisabling =
+        raw === false || (typeof raw === 'string' && raw.toLowerCase() === 'false');
+
+      if (isDisabling) {
         return {
           set: [
             { path: 'telemetry.optIn', value: false },

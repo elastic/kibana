@@ -6,19 +6,14 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen } from '@testing-library/react';
 import { ReactFlow, Position } from '@xyflow/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import type { NodeProps } from '../../types';
 import { getRelationshipColors, getLabelColors } from '../styles';
 import {
-  GRAPH_RELATIONSHIP_NODE_ID,
   GRAPH_RELATIONSHIP_NODE_SHAPE_ID,
   GRAPH_RELATIONSHIP_NODE_HANDLE_ID,
-  GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID,
-  GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID,
-  GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID,
 } from '../../test_ids';
 import { RelationshipNode } from './relationship_node';
 
@@ -78,147 +73,42 @@ describe('RelationshipNode', () => {
     expect(screen.getByText('test-relationship-node')).toBeInTheDocument();
   });
 
-  test('renders hover outline if interactive', async () => {
-    render(
-      <ReactFlow>
-        <RelationshipNode {...baseProps} />
-      </ReactFlow>
-    );
-
-    await userEvent.hover(screen.getByTestId(GRAPH_RELATIONSHIP_NODE_ID));
-
-    await waitFor(() => {
-      expect(screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID)).toBeInTheDocument();
-    });
-  });
-
-  test('does not render hover outline if not interactive', async () => {
-    const props = {
-      ...baseProps,
-      data: {
-        ...baseProps.data,
-        interactive: false,
-      },
-    };
-
-    render(
-      <ReactFlow>
-        <RelationshipNode {...props} />
-      </ReactFlow>
-    );
-
-    await userEvent.hover(screen.getByTestId(GRAPH_RELATIONSHIP_NODE_ID));
-
-    await waitFor(() => {
-      expect(
-        screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID)
-      ).not.toBeInTheDocument();
-    });
-  });
-
-  describe('Tooltip', () => {
-    test('shows tooltip when text is truncated', async () => {
-      const props = {
-        ...baseProps,
-        data: {
-          ...baseProps.data,
-          label: 'This relationship label is too long so it will be truncated for sure',
-        },
-      };
-
-      render(
-        <ReactFlow>
-          <RelationshipNode {...props} />
-        </ReactFlow>
-      );
-
-      await userEvent.hover(screen.getByTestId(GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID));
-
-      await waitFor(() => {
-        expect(screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID)).toBeInTheDocument();
-      });
-    });
-
-    test('tooltip shows full text content', async () => {
-      const longText =
-        'This is a very long relationship label that exceeds twenty-seven characters';
-      const props = {
-        ...baseProps,
-        data: {
-          ...baseProps.data,
-          label: longText,
-        },
-      };
-
-      render(
-        <ReactFlow>
-          <RelationshipNode {...props} />
-        </ReactFlow>
-      );
-
-      await userEvent.hover(screen.getByTestId(GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID));
-
-      await waitFor(() => {
-        expect(screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID)).toBeInTheDocument();
-        expect(screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID)).toHaveTextContent(
-          longText
-        );
-      });
-    });
-
-    test('does not show tooltip for short text', async () => {
-      render(
-        <ReactFlow>
-          <RelationshipNode {...baseProps} />
-        </ReactFlow>
-      );
-
-      await userEvent.hover(screen.getByTestId(GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID));
-
-      await waitFor(() => {
-        expect(screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID)).not.toBeInTheDocument();
-      });
-    });
-  });
-
   describe('Shape colors', () => {
     const mockEuiTheme = {
       colors: {
-        danger: '#FF0000',
-        backgroundBasePrimary: '#0000FF',
-        borderStrongPrimary: '#0000DD',
-        textInverse: '#FFFFFF',
-        textPrimary: '#000000',
+        backgroundLightPrimary: '#E6F1FA',
+        borderBasePlain: '#D3DAE6',
+        textHeading: '#1A1C21',
+        textParagraph: '#DDDDDD',
+        backgroundLightText: '#a1b2c3',
         backgroundFilledText: '#333333',
         borderBaseProminent: '#CCCCCC',
       },
     };
 
-    it('should return relationship colors with dark background and light text', () => {
+    it('should return relationship colors matching event/label node colors', () => {
       const colors = getRelationshipColors(mockEuiTheme as EuiThemeComputed);
       expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.backgroundFilledText,
-        borderColor: mockEuiTheme.colors.borderBaseProminent,
-        textColor: mockEuiTheme.colors.textInverse,
+        backgroundColor: mockEuiTheme.colors.backgroundLightPrimary,
+        borderColor: mockEuiTheme.colors.borderBasePlain,
+        textColor: mockEuiTheme.colors.textHeading,
       });
     });
 
-    it('should return label colors for primary color', () => {
+    const expectedLabelColors = {
+      backgroundColor: mockEuiTheme.colors.backgroundLightPrimary,
+      borderColor: mockEuiTheme.colors.borderBasePlain,
+      textColor: mockEuiTheme.colors.textHeading,
+    };
+
+    it('should return gray colors for label nodes with primary color', () => {
       const colors = getLabelColors('primary', mockEuiTheme as EuiThemeComputed);
-      expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.backgroundBasePrimary,
-        borderColor: mockEuiTheme.colors.borderStrongPrimary,
-        textColor: mockEuiTheme.colors.textPrimary,
-      });
+      expect(colors).toEqual(expectedLabelColors);
     });
 
-    it('should return danger colors for label nodes with danger color', () => {
+    it('should return gray colors for label nodes with danger color', () => {
       const colors = getLabelColors('danger', mockEuiTheme as EuiThemeComputed);
-      expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.danger,
-        borderColor: mockEuiTheme.colors.danger,
-        textColor: mockEuiTheme.colors.textInverse,
-      });
+      expect(colors).toEqual(expectedLabelColors);
     });
   });
 });

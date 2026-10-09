@@ -38,11 +38,6 @@ export const getAttackDiscoveryGenerationsAggs = (size: number): estypes.SearchR
             field: 'kibana.alert.rule.execution.metrics.alert_counts.new',
           },
         },
-        loading_message: {
-          terms: {
-            field: 'kibana.alert.rule.execution.status',
-          },
-        },
         event_actions: {
           terms: {
             field: 'event.action',
@@ -63,6 +58,41 @@ export const getAttackDiscoveryGenerationsAggs = (size: number): estypes.SearchR
           min: {
             field: 'event.start',
             format: 'strict_date_optional_time',
+          },
+        },
+        loading_message: {
+          terms: {
+            field: 'kibana.alert.rule.execution.status',
+          },
+        },
+        /**
+         * Workflow tracking aggregations
+         *
+         * New workflow fields (preferred):
+         * - event.module: workflow definition ID ("workflowId")
+         * - event.id: workflow run ID ("workflowRunId")
+         *
+         * Legacy workflow field (deprecated):
+         * - event.reference: colon-separated string "workflowId:workflowRunId"
+         *
+         * NOTE: The legacy `workflow_reference` aggregation is NOT decoded by the
+         * transform. Old events will have undefined workflow IDs.
+         *
+         * @see write_attack_discovery_event.ts for field mapping details
+         */
+        workflow_id: {
+          terms: {
+            field: 'event.module',
+          },
+        },
+        workflow_run_id: {
+          terms: {
+            field: 'event.id',
+          },
+        },
+        workflow_reference: {
+          terms: {
+            field: 'event.reference',
           },
         },
       },

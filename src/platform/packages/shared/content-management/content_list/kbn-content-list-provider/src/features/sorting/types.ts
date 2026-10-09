@@ -33,7 +33,27 @@ export interface SortField {
   ascLabel?: string;
   /** Custom label for descending sort (overrides auto-generated label). */
   descLabel?: string;
+  /**
+   * Restricts the directions offered in the sort dropdown. Omit to offer both.
+   * Use single-direction arrays for fields where only one direction is meaningful.
+   */
+  allowedDirections?: readonly ['asc' | 'desc', ...Array<'asc' | 'desc'>];
+  /** When set, the field's dropdown options show a "?" icon with this help text as a tooltip. */
+  description?: string;
 }
+
+const SORT_DIRECTIONS = ['asc', 'desc'] as const;
+
+/**
+ * Gets the directions a sort field offers, in canonical order (`asc` before `desc`).
+ * Both directions are offered when `allowedDirections` is omitted.
+ */
+export const getSortFieldDirections = ({
+  allowedDirections,
+}: SortField): ReadonlyArray<'asc' | 'desc'> =>
+  SORT_DIRECTIONS.filter(
+    (direction) => !allowedDirections || allowedDirections.includes(direction)
+  );
 
 /**
  * Sort option definition with explicit label, field, and direction.
@@ -69,3 +89,25 @@ export interface SortingConfig {
     direction: 'asc' | 'desc';
   };
 }
+
+/**
+ * Default sort fields used when sorting is enabled but no explicit fields are configured.
+ *
+ * Provides Name (A-Z / Z-A) and Last updated (Newest / Oldest) sort options,
+ * matching the common pattern across `TableListView` consumers.
+ */
+export const DEFAULT_SORT_FIELDS: SortField[] = [
+  { field: 'title', name: 'Name' },
+  { field: 'updatedAt', name: 'Last updated' },
+];
+
+/**
+ * Default initial sort used when sorting is enabled but no explicit `initialSort` is configured.
+ *
+ * Sorts by `title` ascending (A-Z), matching `TableListView` behavior.
+ * Consumers that prefer "newest first" can set `initialSort: { field: 'updatedAt', direction: 'desc' }`.
+ */
+export const DEFAULT_INITIAL_SORT: { field: string; direction: 'asc' | 'desc' } = {
+  field: 'title',
+  direction: 'asc',
+};

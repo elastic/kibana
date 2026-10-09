@@ -7,11 +7,12 @@
 
 import React from 'react';
 import {
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiButtonIcon,
-  withEuiTheme,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
   type WithEuiThemeProps,
+  withEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label';
@@ -45,36 +46,58 @@ export const MetricsEditMode = withEuiTheme(
             style={{ padding: '10px 0px 9px' }}
           >
             <EuiFlexItem grow={false} style={{ width: ICON_WIDTH }}>
-              <EuiButtonIcon
-                data-test-subj="infraMetricsEditModeButton"
-                iconType="pencil"
-                onClick={() => onEdit(metric)}
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.infra.waffle.customMetrics.editMode.editButtonAriaLabel',
                   {
                     defaultMessage: 'Edit custom metric for {name}',
                     values: { name: getCustomMetricLabel(metric) },
                   }
                 )}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="infraMetricsEditModeButton"
+                  iconType="pencil"
+                  onClick={() => onEdit(metric)}
+                  aria-label={i18n.translate(
+                    'xpack.infra.waffle.customMetrics.editMode.editButtonAriaLabel',
+                    {
+                      defaultMessage: 'Edit custom metric for {name}',
+                      values: { name: getCustomMetricLabel(metric) },
+                    }
+                  )}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={1} style={{ overflow: 'hidden' }}>
               {getCustomMetricLabel(metric)}
             </EuiFlexItem>
             <EuiFlexItem grow={false} style={{ width: ICON_WIDTH, textAlign: 'right' }}>
-              <EuiButtonIcon
-                data-test-subj="infraMetricsEditModeButton"
-                iconType="trash"
-                color="danger"
-                onClick={() => onDelete(metric)}
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.infra.waffle.customMetrics.editMode.deleteAriaLabel',
                   {
                     defaultMessage: 'Delete custom metric for {name}',
                     values: { name: getCustomMetricLabel(metric) },
                   }
                 )}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="infraMetricsEditModeButton"
+                  iconType="trash"
+                  color="danger"
+                  onClick={() => onDelete(metric)}
+                  aria-label={i18n.translate(
+                    'xpack.infra.waffle.customMetrics.editMode.deleteAriaLabel',
+                    {
+                      defaultMessage: 'Delete custom metric for {name}',
+                      values: { name: getCustomMetricLabel(metric) },
+                    }
+                  )}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         ))}

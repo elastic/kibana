@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { Streams, emptyAssets } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -22,7 +21,6 @@ import {
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const esClient = getService('es');
-  const kibanaServer = getService('kibanaServer');
   const config = getService('config');
   const isServerless = !!config.get('serverless');
 
@@ -82,6 +80,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         } satisfies Streams.ClassicStream.Definition);
       });
 
+      it('allows listing only classic streams on internal api', async () => {
+        const doc = {
+          message: '2023-01-01T00:00:10.000Z error test',
+        };
+        const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
+        expect(response.result).to.eql('created');
+
+        const {
+          body: { streams },
+          status,
+        } = await apiClient.fetch('GET /internal/streams/classic');
+
+        expect(status).to.eql(200);
+        expect(streams.every((s) => s.type === 'classic')).to.eql(true);
+      });
+
       it('Allows setting processing on classic streams', async () => {
         const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
           params: {
@@ -132,14 +146,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const {
           dashboards,
-          queries,
           stream,
           effective_lifecycle: effectiveLifecycle,
           elasticsearch_assets: elasticsearchAssets,
         } = body;
 
         expect(dashboards).to.eql([]);
-        expect(queries).to.eql([]);
 
         expect(stream).to.eql({
           type: 'classic',
@@ -526,6 +538,84 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(fieldCapsResponse.fields).to.have.property('foo.baz');
         expect(fieldCapsResponse.fields['foo.baz']).to.have.property('keyword');
       });
+
+      it('Clears the data stream mappings override when all field overrides are removed', async () => {
+        const setResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
+          params: {
+            path: { name: TEST_STREAM_NAME },
+            body: {
+              ...emptyAssets,
+              stream: {
+                type: 'classic',
+                description: '',
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: { steps: [] },
+                  settings: {},
+                  classic: {
+                    field_overrides: {
+                      'foo.bar': {
+                        type: 'keyword',
+                      },
+                    },
+                  },
+                  failure_store: { inherit: {} },
+                },
+              },
+            },
+          },
+        });
+        expect(setResponse.status).to.eql(200);
+
+        const mappingsBefore = await esClient.indices.getDataStreamMappings({
+          name: TEST_STREAM_NAME,
+        });
+        expect(mappingsBefore.data_streams[0].mappings).to.have.property('properties');
+        expect(mappingsBefore.data_streams[0].mappings._meta).to.eql({ managed_by: 'streams' });
+
+        const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
+          params: {
+            path: { name: TEST_STREAM_NAME },
+            body: {
+              ...emptyAssets,
+              stream: {
+                type: 'classic',
+                description: '',
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: { steps: [] },
+                  settings: {},
+                  classic: {
+                    field_overrides: {},
+                  },
+                  failure_store: { inherit: {} },
+                },
+              },
+            },
+          },
+        });
+        expect(putResponse.status).to.eql(200);
+
+        // The data stream level override must be gone entirely, including _meta
+        const mappingsAfter = await esClient.indices.getDataStreamMappings({
+          name: TEST_STREAM_NAME,
+        });
+        expect(mappingsAfter.data_streams[0].mappings).to.eql({});
+
+        // A lazy rollover was requested: indexing a document creates a new backing index
+        const indicesBefore = (await esClient.indices.getDataStream({ name: TEST_STREAM_NAME }))
+          .data_streams[0].indices.length;
+
+        const response = await indexDocument(esClient, TEST_STREAM_NAME, {
+          '@timestamp': '2024-01-01T00:00:20.000Z',
+          message: 'after reset',
+        });
+        expect(response.result).to.eql('created');
+
+        const indicesAfter = (await esClient.indices.getDataStream({ name: TEST_STREAM_NAME }))
+          .data_streams[0].indices.length;
+        expect(indicesAfter).to.eql(indicesBefore + 1);
+      });
     });
 
     describe('Deleting classic streams', () => {
@@ -614,7 +704,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           400
         );
         expect((response as any).message).to.eql(
-          'Desired stream state is invalid: Stream name cannot contain "<".'
+          'Desired stream state is invalid: Stream name cannot contain "<", ">".'
         );
       });
 
@@ -972,9 +1062,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const ORPHANED_STREAM_NAME = 'logs-orphaned-default';
 
       before(async () => {
-        await kibanaServer.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: true,
-        });
         const doc = {
           message: '2023-01-01T00:00:10.000Z error test',
         };
@@ -1005,12 +1092,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // delete the underlying data stream
         await esClient.indices.deleteDataStream({
           name: ORPHANED_STREAM_NAME,
-        });
-      });
-
-      after(async () => {
-        await kibanaServer.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: false,
         });
       });
 

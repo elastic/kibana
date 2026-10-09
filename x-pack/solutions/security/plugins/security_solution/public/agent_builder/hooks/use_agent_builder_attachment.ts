@@ -8,9 +8,8 @@
 import { useCallback, useRef } from 'react';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { useKibana } from '../../common/lib/kibana/use_kibana';
-import { useSecurityAgentId } from './use_security_agent_id';
 
-export interface UseAgentBuilderAttachmentParams {
+interface UseAgentBuilderAttachmentBaseParams {
   /**
    * Optional stable ID for the attachment. When provided, the platform will
    * replace any existing attachment with the same ID instead of creating a new one.
@@ -22,14 +21,31 @@ export interface UseAgentBuilderAttachmentParams {
    */
   attachmentType: string;
   /**
-   * Data for the attachment
-   */
-  attachmentData: Record<string, unknown>;
-  /**
    * Prompt/input text for the agent builder conversation
    */
-  attachmentPrompt: string;
+  attachmentPrompt?: string;
+  /**
+   * Description shown for the attachment in the conversation
+   */
+  attachmentDescription?: string;
+  /**
+   * When true, the initial message is sent automatically without user confirmation.
+   * Defaults to false.
+   */
+  autoSendInitialMessage?: boolean;
 }
+
+/**
+ * At least one of `attachmentData` and `origin` must be provided:
+ * - `attachmentData`: data for the attachment.
+ * - `origin`: saved-object ID linking the attachment to its source. When set, the platform can
+ *   call the server-side `resolve` to refresh stale data, and card intent derives from this field.
+ */
+export type UseAgentBuilderAttachmentParams = UseAgentBuilderAttachmentBaseParams &
+  (
+    | { attachmentData: Record<string, unknown>; origin?: string }
+    | { attachmentData?: Record<string, unknown>; origin: string }
+  );
 
 export interface UseAgentBuilderAttachmentResult {
   /**
@@ -46,10 +62,12 @@ export const useAgentBuilderAttachment = ({
   attachmentId,
   attachmentType,
   attachmentData,
+  origin,
   attachmentPrompt,
+  attachmentDescription,
+  autoSendInitialMessage,
 }: UseAgentBuilderAttachmentParams): UseAgentBuilderAttachmentResult => {
   const { agentBuilder } = useKibana().services;
-  const agentId = useSecurityAgentId();
   const hasWarned = useRef(false);
 
   const openAgentBuilderFlyout = useCallback(() => {
@@ -68,17 +86,27 @@ export const useAgentBuilderAttachment = ({
       id: attachmentId ?? `${attachmentType}-${Date.now()}`,
       type: attachmentType,
       data: attachmentData,
+      origin,
+      description: attachmentDescription,
     };
 
     agentBuilder.openChat({
-      autoSendInitialMessage: false,
+      autoSendInitialMessage: autoSendInitialMessage ?? false,
       newConversation: true,
       initialMessage: attachmentPrompt,
       attachments: [attachment],
       sessionTag: 'security',
-      ...(agentId ? { agentId } : {}),
     });
-  }, [attachmentId, attachmentType, attachmentData, attachmentPrompt, agentBuilder, agentId]);
+  }, [
+    attachmentId,
+    attachmentType,
+    attachmentData,
+    origin,
+    attachmentPrompt,
+    attachmentDescription,
+    autoSendInitialMessage,
+    agentBuilder,
+  ]);
 
   return {
     openAgentBuilderFlyout,

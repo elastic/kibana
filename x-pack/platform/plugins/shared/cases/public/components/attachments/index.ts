@@ -5,19 +5,36 @@
  * 2.0.
  */
 
-import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
-import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 import { getCommentAttachmentType } from './comment';
-import { getFileType } from './file/file_type';
-import { getVisualizationAttachmentType } from './lens/attachment';
+import { getDashboardAttachmentType } from './dashboard';
+import { getDiscoverSessionAttachmentType } from './discover_session';
+import { getFileAttachmentType } from './file';
+import { getMapAttachmentType } from './map';
+import { getVisualizationAttachmentType } from './lens';
+import { getStackAlertAttachmentType } from './alert';
+
+export interface RegisterInternalAttachmentsOptions {
+  hasDashboardPluginEnabled?: boolean;
+  hasMapsPluginEnabled?: boolean;
+}
 
 export const registerInternalAttachments = (
-  externalRefRegistry: ExternalReferenceAttachmentTypeRegistry,
-  persistableStateRegistry: PersistableStateAttachmentTypeRegistry,
-  unifiedRegistry: UnifiedAttachmentTypeRegistry
+  unifiedRegistry: UnifiedAttachmentTypeRegistry,
+  {
+    hasDashboardPluginEnabled = false,
+    hasMapsPluginEnabled = false,
+  }: RegisterInternalAttachmentsOptions = {}
 ) => {
-  externalRefRegistry.register(getFileType());
-  persistableStateRegistry.register(getVisualizationAttachmentType());
+  unifiedRegistry.register(getFileAttachmentType());
+  unifiedRegistry.register(getVisualizationAttachmentType());
   unifiedRegistry.register(getCommentAttachmentType());
+  unifiedRegistry.register(getStackAlertAttachmentType());
+  unifiedRegistry.register(getDiscoverSessionAttachmentType());
+  if (hasDashboardPluginEnabled) {
+    unifiedRegistry.register(getDashboardAttachmentType());
+  }
+  if (hasMapsPluginEnabled) {
+    unifiedRegistry.register(getMapAttachmentType());
+  }
 };

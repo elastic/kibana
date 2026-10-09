@@ -11,6 +11,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Rules Management - Rule Read API', function () {
     loadTestFile(require.resolve('./find_rules'));
     loadTestFile(require.resolve('./find_rules_ess'));
+    loadTestFile(require.resolve('./search_rules'));
     loadTestFile(require.resolve('./read_rules'));
     loadTestFile(require.resolve('./read_rules_ess'));
     loadTestFile(require.resolve('./resolve_read_rules'));

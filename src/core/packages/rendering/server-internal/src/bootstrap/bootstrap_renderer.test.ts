@@ -10,9 +10,12 @@
 import {
   renderTemplateMock,
   getPluginsBundlePathsMock,
-  getJsDependencyPathsMock,
+  getRspackDependencyPathsMock,
 } from './bootstrap_renderer.test.mocks';
 
+import Fs from 'fs';
+import Path from 'path';
+import { fromRoot } from '@kbn/repo-info';
 import { BehaviorSubject } from 'rxjs';
 import type { PackageInfo } from '@kbn/config';
 import type { AuthStatus } from '@kbn/core-http-server';
@@ -72,7 +75,7 @@ describe('bootstrapRenderer', () => {
 
     getPluginsBundlePathsMock.mockReturnValue(new Map());
     renderTemplateMock.mockReturnValue('__rendered__');
-    getJsDependencyPathsMock.mockReturnValue([]);
+    getRspackDependencyPathsMock.mockReturnValue([]);
     uiSettingsClient.get.mockImplementation(getClientGetMockImplementation());
 
     renderer = bootstrapRendererFactory({
@@ -87,7 +90,7 @@ describe('bootstrapRenderer', () => {
   afterEach(() => {
     getPluginsBundlePathsMock.mockReset();
     renderTemplateMock.mockReset();
-    getJsDependencyPathsMock.mockReset();
+    getRspackDependencyPathsMock.mockReset();
     themeName$.complete();
   });
 
@@ -427,11 +430,7 @@ describe('bootstrapRenderer', () => {
     });
   });
 
-  // here
-  it('calls getJsDependencyPaths with the correct parameters', async () => {
-    const pluginsBundlePaths = new Map<string, unknown>();
-
-    getPluginsBundlePathsMock.mockReturnValue(pluginsBundlePaths);
+  it('calls getRspackDependencyPaths with the correct parameters', async () => {
     const request = httpServerMock.createKibanaRequest();
 
     await renderer({
@@ -439,15 +438,100 @@ describe('bootstrapRenderer', () => {
       uiSettingsClient,
     });
 
-    expect(getJsDependencyPathsMock).toHaveBeenCalledTimes(1);
-    expect(getJsDependencyPathsMock).toHaveBeenCalledWith(
+    expect(getRspackDependencyPathsMock).toHaveBeenCalledTimes(1);
+    expect(getRspackDependencyPathsMock).toHaveBeenCalledWith(
       '/base-path/buildShaShort/bundles',
-      pluginsBundlePaths
+      [],
+      expect.any(Array)
     );
   });
 
+  describe('external plugins', () => {
+    const bundlesHref = '/base-path/buildShaShort/bundles';
+
+    const bundlePathInfo = (pluginId: string) => ({
+      publicPath: `${bundlesHref}/plugin/${pluginId}/1.0.0/`,
+      bundlePath: `${bundlesHref}/plugin/${pluginId}/1.0.0/${pluginId}.plugin.js`,
+    });
+
+    beforeEach(() => {
+      const externalPluginsDir = fromRoot('plugins');
+      for (const pluginId of ['extFirst', 'extSecond']) {
+        uiPlugins.internal.set(pluginId, {
+          requiredBundles: [],
+          version: '1.0.0',
+          publicTargetDir: Path.join(externalPluginsDir, pluginId, 'target', 'public'),
+          publicAssetsDir: Path.join(externalPluginsDir, pluginId, 'public', 'assets'),
+        });
+      }
+      const realExistsSync = Fs.existsSync;
+      jest
+        .spyOn(Fs, 'existsSync')
+        .mockImplementation((path) =>
+          String(path).startsWith(externalPluginsDir + Path.sep) ? true : realExistsSync(path)
+        );
+      // External plugins are detected when the factory runs, so recreate the renderer.
+      renderer = bootstrapRendererFactory({
+        auth,
+        packageInfo,
+        uiPlugins,
+        baseHref: `/base-path/${packageInfo.buildShaShort}`,
+        themeName$,
+      });
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('only loads external plugin bundles that are part of the page bundle paths', async () => {
+      getPluginsBundlePathsMock.mockReturnValue(
+        new Map([
+          ['internalPlugin', bundlePathInfo('internalPlugin')],
+          ['extSecond', bundlePathInfo('extSecond')],
+        ])
+      );
+
+      await renderer({ request: httpServerMock.createKibanaRequest(), uiSettingsClient });
+
+      expect(getRspackDependencyPathsMock).toHaveBeenCalledWith(
+        bundlesHref,
+        [`${bundlesHref}/plugin/extSecond/1.0.0/extSecond.plugin.js`],
+        expect.any(Array)
+      );
+      const publicPathMap = JSON.parse(renderTemplateMock.mock.calls[0][0].publicPathMap);
+      expect(publicPathMap).toEqual(
+        expect.objectContaining({
+          internalPlugin: `${bundlesHref}/`,
+          extSecond: `${bundlesHref}/plugin/extSecond/1.0.0/`,
+        })
+      );
+      expect(publicPathMap).not.toHaveProperty('extFirst');
+    });
+
+    it('keeps the detection order of external plugins regardless of bundle path order', async () => {
+      getPluginsBundlePathsMock.mockReturnValue(
+        new Map([
+          ['extSecond', bundlePathInfo('extSecond')],
+          ['extFirst', bundlePathInfo('extFirst')],
+        ])
+      );
+
+      await renderer({ request: httpServerMock.createKibanaRequest(), uiSettingsClient });
+
+      expect(getRspackDependencyPathsMock).toHaveBeenCalledWith(
+        bundlesHref,
+        [
+          `${bundlesHref}/plugin/extFirst/1.0.0/extFirst.plugin.js`,
+          `${bundlesHref}/plugin/extSecond/1.0.0/extSecond.plugin.js`,
+        ],
+        expect.any(Array)
+      );
+    });
+  });
+
   it('calls renderTemplate with the correct parameters', async () => {
-    getJsDependencyPathsMock.mockReturnValue(['path-1', 'path-2']);
+    getRspackDependencyPathsMock.mockReturnValue(['path-1', 'path-2']);
 
     const request = httpServerMock.createKibanaRequest();
 
@@ -462,6 +546,7 @@ describe('bootstrapRenderer', () => {
       colorMode: 'light',
       jsDependencyPaths: ['path-1', 'path-2'],
       publicPathMap: expect.any(String),
+      useHMR: expect.any(Boolean),
     });
   });
 });

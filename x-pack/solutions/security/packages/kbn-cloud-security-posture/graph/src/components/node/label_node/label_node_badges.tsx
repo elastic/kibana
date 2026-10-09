@@ -9,17 +9,16 @@ import React from 'react';
 import { EuiIcon, EuiText, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { RoundedBadge } from '../styles';
 import type { DocumentAnalysisOutput } from './analyze_documents';
 
 export const TEST_SUBJ_ALERT_ICON = 'label-node-alert-icon';
 export const TEST_SUBJ_ALERT_COUNT = 'label-node-alert-count';
 export const TEST_SUBJ_ALERT_COUNT_BUTTON = 'label-node-alert-count-button';
+export const TEST_SUBJ_EVENT_ICON = 'label-node-event-icon';
 export const TEST_SUBJ_EVENT_COUNT = 'label-node-event-count';
 export const TEST_SUBJ_EVENT_COUNT_BUTTON = 'label-node-event-count-button';
-
-export const LIMIT = 99;
-export const displayCount = (count: number) => (count > LIMIT ? `+${LIMIT}` : count);
 
 const POPOVER_EVENT_ARIA_LABEL = i18n.translate(
   'securitySolutionPackages.csp.graph.labelBadges.eventAriaLabel',
@@ -61,39 +60,55 @@ const CountText: React.FC<{ testSubj: string; color: string; children: React.Rea
 };
 
 const AlertIcon: React.FC<{ color: string }> = ({ color }) => (
-  <EuiIcon data-test-subj={TEST_SUBJ_ALERT_ICON} type="warningFill" color={color} size="s" />
+  <EuiIcon
+    data-test-subj={TEST_SUBJ_ALERT_ICON}
+    type="warningFill"
+    color={color}
+    size="s"
+    aria-hidden={true}
+  />
 );
 
 const EventBadge: React.FC<{
-  count: number;
+  count?: number;
   onEventClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }> = ({ count, onEventClick }) => {
   const { euiTheme } = useEuiTheme();
+  const isGrouped = count !== undefined && count > 1;
+  const countLabel = isGrouped ? `+${getAbbreviatedNumber(count)}` : undefined;
+
   return (
     <RoundedBadge>
-      {onEventClick ? (
-        <EuiButtonEmpty
-          size="xs"
-          data-test-subj={TEST_SUBJ_EVENT_COUNT_BUTTON}
-          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onEventClick?.(e);
-          }}
-          aria-label={POPOVER_EVENT_ARIA_LABEL}
-          flush="both"
-          css={css`
-            font-weight: ${euiTheme.font.weight.medium};
-            color: ${euiTheme.colors.textHeading};
-          `}
-        >
-          {displayCount(count)}
-        </EuiButtonEmpty>
-      ) : (
-        <CountText testSubj={TEST_SUBJ_EVENT_COUNT} color={euiTheme.colors.textHeading}>
-          {displayCount(count)}
-        </CountText>
-      )}
+      <EuiIcon
+        data-test-subj={TEST_SUBJ_EVENT_ICON}
+        type="analyzeEvent"
+        size="s"
+        aria-hidden={true}
+      />
+      {isGrouped &&
+        (onEventClick ? (
+          <EuiButtonEmpty
+            size="xs"
+            data-test-subj={TEST_SUBJ_EVENT_COUNT_BUTTON}
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onEventClick?.(e);
+            }}
+            aria-label={POPOVER_EVENT_ARIA_LABEL}
+            flush="both"
+            css={css`
+              font-weight: ${euiTheme.font.weight.medium};
+              color: ${euiTheme.colors.textHeading};
+            `}
+          >
+            {countLabel}
+          </EuiButtonEmpty>
+        ) : (
+          <CountText testSubj={TEST_SUBJ_EVENT_COUNT} color={euiTheme.colors.textHeading}>
+            {countLabel}
+          </CountText>
+        ))}
     </RoundedBadge>
   );
 };
@@ -104,36 +119,39 @@ const AlertCountBadge: React.FC<{
   onEventClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }> = ({ count, inverted, onEventClick }) => {
   const { euiTheme } = useEuiTheme();
-  const bgColor = inverted ? euiTheme.colors.danger : undefined;
-  const iconColor = inverted ? euiTheme.colors.backgroundBasePlain : 'danger';
-  const textColor = inverted ? euiTheme.colors.textInverse : euiTheme.colors.textHeading;
+  const bgColor = inverted ? euiTheme.colors.backgroundLightDanger : undefined;
+  const iconColor = 'danger';
+  const textColor = inverted ? euiTheme.colors.textDanger : euiTheme.colors.textHeading;
+  const showCount = count > 1;
+  const countLabel = `+${getAbbreviatedNumber(count)}`;
 
   return (
     <RoundedBadge bgColor={bgColor}>
       <AlertIcon color={iconColor} />
-      {onEventClick ? (
-        <EuiButtonEmpty
-          size="xs"
-          data-test-subj={TEST_SUBJ_ALERT_COUNT_BUTTON}
-          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onEventClick?.(e);
-          }}
-          aria-label={POPOVER_ALERT_ARIA_LABEL}
-          flush="both"
-          css={css`
-            font-weight: ${euiTheme.font.weight.medium};
-            color: ${textColor};
-          `}
-        >
-          {displayCount(count)}
-        </EuiButtonEmpty>
-      ) : (
-        <CountText testSubj={TEST_SUBJ_ALERT_COUNT} color={textColor}>
-          {displayCount(count)}
-        </CountText>
-      )}
+      {showCount &&
+        (onEventClick ? (
+          <EuiButtonEmpty
+            size="xs"
+            data-test-subj={TEST_SUBJ_ALERT_COUNT_BUTTON}
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onEventClick?.(e);
+            }}
+            aria-label={POPOVER_ALERT_ARIA_LABEL}
+            flush="both"
+            css={css`
+              font-weight: ${euiTheme.font.weight.medium};
+              color: ${textColor};
+            `}
+          >
+            {countLabel}
+          </EuiButtonEmpty>
+        ) : (
+          <CountText testSubj={TEST_SUBJ_ALERT_COUNT} color={textColor}>
+            {countLabel}
+          </CountText>
+        ))}
     </RoundedBadge>
   );
 };
@@ -143,12 +161,9 @@ const AlertIconBadge: React.FC = () => (
     <AlertIcon color="danger" />
   </RoundedBadge>
 );
+
 export const LabelNodeBadges = ({ analysis, onEventClick }: LabelNodeBadgesProps) => {
   const { euiTheme } = useEuiTheme();
-
-  if (analysis.isSingleEvent) {
-    return null;
-  }
 
   return (
     <div
@@ -159,6 +174,7 @@ export const LabelNodeBadges = ({ analysis, onEventClick }: LabelNodeBadgesProps
         gap: ${euiTheme.size.xs};
       `}
     >
+      {analysis.isSingleEvent && <EventBadge />}
       {analysis.isSingleAlert && <AlertIconBadge />}
       {analysis.isGroupOfEvents && (
         <EventBadge count={analysis.uniqueEventsCount} onEventClick={onEventClick} />

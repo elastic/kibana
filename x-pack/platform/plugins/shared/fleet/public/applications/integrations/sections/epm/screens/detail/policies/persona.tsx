@@ -15,7 +15,7 @@ const MIN_WIDTH: CSSProperties = { minWidth: 0 };
  * Shows a user's name along with an avatar. Name is truncated if its wider than the availble space
  */
 export const Persona = memo<EuiAvatarProps>(
-  ({ name, className, 'data-test-subj': dataTestSubj, title, ...otherAvatarProps }) => {
+  ({ name, className, 'data-test-subj': dataTestSubj, ...otherAvatarProps }) => {
     const getTestId = useCallback(
       (suffix: any) => {
         if (dataTestSubj) {
@@ -31,7 +31,6 @@ export const Persona = memo<EuiAvatarProps>(
         style={MIN_WIDTH}
         className={className}
         data-test-subj={dataTestSubj}
-        title={title}
         responsive={false}
       >
         <EuiFlexItem grow={false}>

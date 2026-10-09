@@ -150,27 +150,15 @@ export const createMigrationRules = async (
 
 export const deleteAllRuleMigrations = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: [SIEM_MIGRATIONS_INDEX_PATTERN],
+    index: [
+      SIEM_MIGRATIONS_INDEX_PATTERN,
+      SIEM_MIGRATIONS_RULES_INDEX_PATTERN,
+      SIEM_MIGRATIONS_RESOURCES_INDEX_PATTERN,
+    ],
     query: {
       match_all: {},
     },
-    ignore_unavailable: true,
-    refresh: true,
-  });
-
-  await es.deleteByQuery({
-    index: [SIEM_MIGRATIONS_RULES_INDEX_PATTERN],
-    query: {
-      match_all: {},
-    },
-    ignore_unavailable: true,
-    refresh: true,
-  });
-  await es.deleteByQuery({
-    index: [SIEM_MIGRATIONS_RESOURCES_INDEX_PATTERN],
-    query: {
-      match_all: {},
-    },
+    conflicts: 'proceed',
     ignore_unavailable: true,
     refresh: true,
   });
@@ -231,6 +219,34 @@ export const expectedQradarReferenceSets = [
   { type: 'lookup', name: 'Suspicious IPs' },
   { type: 'lookup', name: 'Malicious Hosts' },
 ];
+
+/**
+ * Sentinel ARM template resources containing one Scheduled rule referencing a watchlist.
+ * Mirrors the export shape produced by Microsoft Sentinel.
+ */
+export const sentinelArmResourcesWithWatchlist = {
+  resources: [
+    {
+      id: '/subscriptions/abc/resourceGroups/rg/providers/Microsoft.SecurityInsights/alertRules/rule-1',
+      name: 'rule-1',
+      kind: 'Scheduled',
+      type: 'Microsoft.SecurityInsights/alertRules',
+      properties: {
+        displayName: 'Suspicious sign-in from watchlisted account',
+        description: 'Detects sign-ins from accounts on the high-value watchlist',
+        query: "SigninLogs | where AccountName in (_GetWatchlist('HighValueAccounts'))",
+        severity: 'Medium',
+        tactics: ['InitialAccess'],
+        techniques: ['T1078'],
+      },
+    },
+  ],
+};
+
+/**
+ * Expected watchlist resources identified from sentinelArmResourcesWithWatchlist.
+ */
+export const expectedSentinelWatchlists = [{ type: 'lookup', name: 'HighValueAccounts' }];
 
 export const executeTaskInBatches = async <T>({
   items,

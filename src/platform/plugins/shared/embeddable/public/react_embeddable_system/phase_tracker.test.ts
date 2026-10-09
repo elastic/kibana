@@ -13,7 +13,7 @@ import { PhaseTracker } from './phase_tracker';
 describe('PhaseTracker', () => {
   describe('api does not implement PublishesDataLoading or PublishesRendered', () => {
     test(`should emit 'rendered' event`, (done) => {
-      const phaseTracker = new PhaseTracker();
+      const phaseTracker = new PhaseTracker(performance.now());
       phaseTracker
         .getPhase$()
         .pipe(skip(1))
@@ -21,13 +21,31 @@ describe('PhaseTracker', () => {
           expect(phaseEvent?.status).toBe('rendered');
           done();
         });
-      phaseTracker.trackPhaseEvents('1', {});
+      phaseTracker.trackPhaseEvents({ uuid: '1' });
+    });
+  });
+
+  describe('api implements PublishesPauseFetch', () => {
+    test(`should emit 'paused' event when isFetchPaused is true`, (done) => {
+      const phaseTracker = new PhaseTracker(performance.now());
+      phaseTracker
+        .getPhase$()
+        .pipe(skip(1))
+        .subscribe((phaseEvent) => {
+          expect(phaseEvent?.status).toBe('paused');
+          done();
+        });
+      phaseTracker.trackPhaseEvents({
+        dataLoading$: new BehaviorSubject<boolean | undefined>(false),
+        isFetchPaused$: new BehaviorSubject(true),
+        uuid: '1',
+      });
     });
   });
 
   describe('api implements PublishesDataLoading', () => {
     test(`should emit 'loading' event when dataLoading is true`, (done) => {
-      const phaseTracker = new PhaseTracker();
+      const phaseTracker = new PhaseTracker(performance.now());
       phaseTracker
         .getPhase$()
         .pipe(skip(1))
@@ -35,11 +53,14 @@ describe('PhaseTracker', () => {
           expect(phaseEvent?.status).toBe('loading');
           done();
         });
-      phaseTracker.trackPhaseEvents('1', { dataLoading$: new BehaviorSubject(true) });
+      phaseTracker.trackPhaseEvents({
+        dataLoading$: new BehaviorSubject<boolean | undefined>(true),
+        uuid: '1',
+      });
     });
 
     test(`should emit 'rendered' event when dataLoading is false`, (done) => {
-      const phaseTracker = new PhaseTracker();
+      const phaseTracker = new PhaseTracker(performance.now());
       phaseTracker
         .getPhase$()
         .pipe(skip(1))
@@ -47,13 +68,16 @@ describe('PhaseTracker', () => {
           expect(phaseEvent?.status).toBe('rendered');
           done();
         });
-      phaseTracker.trackPhaseEvents('1', { dataLoading$: new BehaviorSubject(false) });
+      phaseTracker.trackPhaseEvents({
+        dataLoading$: new BehaviorSubject<boolean | undefined>(false),
+        uuid: '1',
+      });
     });
   });
 
   describe('api implements PublishesDataLoading and PublishesRendered', () => {
     test(`should emit 'loading' event when dataLoading is true`, (done) => {
-      const phaseTracker = new PhaseTracker();
+      const phaseTracker = new PhaseTracker(performance.now());
       phaseTracker
         .getPhase$()
         .pipe(skip(1))
@@ -61,14 +85,15 @@ describe('PhaseTracker', () => {
           expect(phaseEvent?.status).toBe('loading');
           done();
         });
-      phaseTracker.trackPhaseEvents('1', {
-        dataLoading$: new BehaviorSubject(true),
+      phaseTracker.trackPhaseEvents({
+        dataLoading$: new BehaviorSubject<boolean | undefined>(true),
         rendered$: new BehaviorSubject(false),
+        uuid: '1',
       });
     });
 
     test(`should emit 'loading' event when dataLoading is false but rendered is false`, (done) => {
-      const phaseTracker = new PhaseTracker();
+      const phaseTracker = new PhaseTracker(performance.now());
       phaseTracker
         .getPhase$()
         .pipe(skip(1))
@@ -76,14 +101,15 @@ describe('PhaseTracker', () => {
           expect(phaseEvent?.status).toBe('loading');
           done();
         });
-      phaseTracker.trackPhaseEvents('1', {
-        dataLoading$: new BehaviorSubject(false),
+      phaseTracker.trackPhaseEvents({
+        dataLoading$: new BehaviorSubject<boolean | undefined>(false),
         rendered$: new BehaviorSubject(false),
+        uuid: '1',
       });
     });
 
     test(`should emit 'rendered' event only when rendered is true`, (done) => {
-      const phaseTracker = new PhaseTracker();
+      const phaseTracker = new PhaseTracker(performance.now());
       phaseTracker
         .getPhase$()
         .pipe(skip(1))
@@ -91,9 +117,10 @@ describe('PhaseTracker', () => {
           expect(phaseEvent?.status).toBe('rendered');
           done();
         });
-      phaseTracker.trackPhaseEvents('1', {
-        dataLoading$: new BehaviorSubject(false),
+      phaseTracker.trackPhaseEvents({
+        dataLoading$: new BehaviorSubject<boolean | undefined>(false),
         rendered$: new BehaviorSubject(true),
+        uuid: '1',
       });
     });
   });

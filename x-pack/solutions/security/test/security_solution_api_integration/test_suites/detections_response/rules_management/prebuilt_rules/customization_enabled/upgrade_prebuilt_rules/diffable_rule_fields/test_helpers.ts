@@ -73,6 +73,8 @@ type ExpectedDiffOutcome =
       expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate;
       isSolvableConflict: boolean;
       expectedFieldDiffValues: FieldDiffValueVersions;
+      /** Merge outcome of a solvable conflict, defaults to `Merged` */
+      expectedMergeOutcome?: ThreeWayMergeOutcome;
     }
   | {
       expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseNoUpdate;
@@ -146,6 +148,7 @@ export function testFieldUpgradeReview(
           expectSolvableABCFieldDiff(diff, {
             diffableRuleFieldName: params.diffableRuleFieldName,
             valueVersions: params.expectedFieldDiffValues,
+            expectedMergeOutcome: params.expectedMergeOutcome,
           });
         } else {
           expectNonSolvableABCFieldDiff(diff, {
@@ -217,14 +220,17 @@ export function testFieldUpgradesToMergedValue(
 
     const hasRuleFieldsToPatch = Object.keys(ruleUpgradeAssets.patch).length > 0;
 
+    const ruleId = ruleUpgradeAssets.upgrade.rule_id ?? DEFAULT_TEST_RULE_ID;
+    const version = ruleUpgradeAssets.upgrade.version ?? DEFAULT_RULE_UPDATE_VERSION;
+
     const response = await performUpgradePrebuiltRules(es, supertest, {
       mode: ModeEnum.SPECIFIC_RULES,
       on_conflict: onConflict,
       rules: [
         {
-          rule_id: ruleUpgradeAssets.upgrade.rule_id ?? DEFAULT_TEST_RULE_ID,
+          rule_id: ruleId,
           revision: hasRuleFieldsToPatch ? 1 : 0,
-          version: ruleUpgradeAssets.upgrade.version ?? DEFAULT_RULE_UPDATE_VERSION,
+          version,
           fields: {
             [diffableRuleFieldName]: {
               pick_version: 'MERGED',
@@ -235,10 +241,10 @@ export function testFieldUpgradesToMergedValue(
     });
 
     const upgradedRule = await detectionsApi.readRule({
-      query: { rule_id: DEFAULT_TEST_RULE_ID },
+      query: { rule_id: ruleId },
     });
 
-    expectRuleFields(response.results.updated[0], expectedFieldsAfterUpgrade);
+    expect(response.results.updated[0]).toMatchObject({ rule_id: ruleId, version });
     expectRuleFields(upgradedRule.body, expectedFieldsAfterUpgrade);
   });
 }
@@ -291,13 +297,16 @@ export function testFieldUpgradesToResolvedValue(
 
     const hasRuleFieldsToPatch = Object.keys(ruleUpgradeAssets.patch).length > 0;
 
+    const ruleId = ruleUpgradeAssets.upgrade.rule_id ?? DEFAULT_TEST_RULE_ID;
+    const version = ruleUpgradeAssets.upgrade.version ?? DEFAULT_RULE_UPDATE_VERSION;
+
     const response = await performUpgradePrebuiltRules(deps.es, deps.supertest, {
       mode: ModeEnum.SPECIFIC_RULES,
       rules: [
         {
           rule_id: ruleUpgradeAssets.upgrade.rule_id ?? DEFAULT_TEST_RULE_ID,
           revision: hasRuleFieldsToPatch ? 1 : 0,
-          version: ruleUpgradeAssets.upgrade.version ?? DEFAULT_RULE_UPDATE_VERSION,
+          version,
           fields: {
             [diffableRuleFieldName]: {
               pick_version: 'RESOLVED',
@@ -309,10 +318,10 @@ export function testFieldUpgradesToResolvedValue(
     });
 
     const upgradedRule = await deps.detectionsApi.readRule({
-      query: { rule_id: DEFAULT_TEST_RULE_ID },
+      query: { rule_id: ruleId },
     });
 
-    expectRuleFields(response.results.updated[0], expectedFieldsAfterUpgrade);
+    expect(response.results.updated[0]).toMatchObject({ rule_id: ruleId, version });
     expectRuleFields(upgradedRule.body, expectedFieldsAfterUpgrade);
   });
 }
@@ -437,7 +446,7 @@ function expectABBFieldDiff(
  */
 function expectSolvableABCFieldDiff(
   ruleDiff: PartialThreeWayRuleDiff,
-  fieldAssertParams: FieldAssertParams
+  fieldAssertParams: FieldAssertParams & { expectedMergeOutcome?: ThreeWayMergeOutcome }
 ): void {
   expect(ruleDiff).toMatchObject({
     num_fields_with_updates: 2, // counts <diffableRuleFieldName> + version field
@@ -452,7 +461,7 @@ function expectSolvableABCFieldDiff(
         target_version: fieldAssertParams.valueVersions.target,
         merged_version: fieldAssertParams.valueVersions.merged,
         diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-        merge_outcome: ThreeWayMergeOutcome.Merged,
+        merge_outcome: fieldAssertParams.expectedMergeOutcome ?? ThreeWayMergeOutcome.Merged,
         conflict: ThreeWayDiffConflict.SOLVABLE,
       },
       isUndefined

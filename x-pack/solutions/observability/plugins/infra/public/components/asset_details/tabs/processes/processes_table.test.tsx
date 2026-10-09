@@ -104,7 +104,6 @@ const renderSemConvProcessesTable = ({
           name: 'cpu',
           isAscending: false,
         }}
-        error={undefined}
         clearSearchBar={() => {}}
         setSortBy={(s: SortBy) => {}}
         schema="semconv"

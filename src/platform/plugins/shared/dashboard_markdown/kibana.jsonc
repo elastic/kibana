@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/dashboard-markdown",
-  "owner": "@elastic/kibana-presentation",
+  "owner": "@elastic/kibana-dashboards",
   "description": "Dashboard markdown",
   "group": "platform",
   "visibility": "private",
@@ -13,6 +13,7 @@
       "contentManagement",
       "dataViews",
       "embeddable",
+      "expressions",
       "uiActions",
       "dashboard",
       "data",
@@ -20,6 +21,8 @@
       "dataViewFieldEditor",
       "visualizations",
       "kibanaUtils"
-    ]
+    ],
+    "requiredBundles": ["kibanaReact"],
+    "optionalPlugins": ["usageCollection"]
   }
 }

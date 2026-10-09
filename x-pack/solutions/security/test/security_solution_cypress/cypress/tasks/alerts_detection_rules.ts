@@ -60,7 +60,6 @@ import {
   RULES_TAGS_POPOVER_WRAPPER,
   SELECT_ALL_RULES_BTN,
   SELECTED_RULES_NUMBER_LABEL,
-  TOASTER_BODY,
   TOASTER_CLOSE_ICON,
   TOASTER_ERROR_BTN,
   CONFIRM_BULK_GAP_FILL_BTN,
@@ -83,6 +82,7 @@ import { setKibanaSetting } from './api_calls/kibana_advanced_settings';
 import { REVERT_MODAL_CONFIRMATION_BTN } from '../screens/rule_updates';
 import { BULK_FILL_RULE_GAPS_BTN, BULK_MANUAL_RULE_RUN_BTN } from '../screens/rules_bulk_actions';
 import { assertSuccessToast, assertToast } from '../screens/common/toast';
+import { openAppMenuOverflow } from './app_menu';
 
 export const getRulesManagementTableRows = () => cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW);
 
@@ -317,6 +317,7 @@ export const waitForRuleToUpdate = () => {
 };
 
 export const importRules = (rulesFile: Cypress.FileReference | Cypress.FileReference[]) => {
+  openAppMenuOverflow();
   cy.get(RULE_IMPORT_MODAL).click();
   cy.get(INPUT_FILE).click();
   cy.get(INPUT_FILE).selectFile(rulesFile);
@@ -523,6 +524,7 @@ const selectOverwriteConnectorsRulesImport = () => {
 export const importRulesWithOverwriteAll = (
   rulesFile: Cypress.FileReference | Cypress.FileReference[]
 ) => {
+  openAppMenuOverflow();
   cy.get(RULE_IMPORT_MODAL).click();
   cy.get(INPUT_FILE).click({ force: true });
   cy.get(INPUT_FILE).selectFile(rulesFile);
@@ -621,7 +623,9 @@ export const clickErrorToastBtn = () => {
 };
 
 export const clickErrorToastBtnByContent = (content: string) => {
-  cy.contains(TOASTER_BODY, content).find(TOASTER_ERROR_BTN).click();
+  cy.contains('[data-test-subj="globalToastList"] .euiToast', content)
+    .find(TOASTER_ERROR_BTN)
+    .click();
 };
 
 export const closeErrorToast = () => {

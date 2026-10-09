@@ -14,6 +14,7 @@ import type { RequestResult } from '../hooks/use_send_current_request/send_reque
 
 export type Actions =
   | { type: 'sendRequest'; payload: undefined }
+  | { type: 'setRequestInFlight'; payload: boolean }
   | { type: 'cleanRequest'; payload: undefined }
   | { type: 'requestSuccess'; payload: { data: RequestResult[] } }
   | { type: 'requestFail'; payload: RequestResult<string> | undefined };
@@ -42,6 +43,11 @@ export const reducer: Reducer<Store, Actions> = (state, action) => {
   if (action.type === 'sendRequest') {
     draft.requestInFlight = true;
     draft.lastResult = initialResultValue;
+    return draft;
+  }
+
+  if (action.type === 'setRequestInFlight') {
+    draft.requestInFlight = action.payload;
     return draft;
   }
 

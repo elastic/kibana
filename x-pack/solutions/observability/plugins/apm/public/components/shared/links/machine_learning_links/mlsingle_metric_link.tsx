@@ -16,6 +16,7 @@ import { DEFAULT_REFRESH_INTERVAL } from '../../date_picker/apm_date_picker';
 interface Props {
   children?: ReactNode;
   jobId: string;
+  detectorIndex?: number;
   external?: boolean;
   serviceName?: string;
   transactionType?: string;
@@ -23,12 +24,13 @@ interface Props {
 
 export function MLSingleMetricLink({
   jobId,
+  detectorIndex,
   serviceName,
   transactionType,
   external,
   children,
 }: Props) {
-  const href = useSingleMetricHref({ jobId, serviceName, transactionType });
+  const href = useSingleMetricHref({ jobId, detectorIndex, serviceName, transactionType });
 
   return (
     <EuiLink
@@ -43,10 +45,12 @@ export function MLSingleMetricLink({
 
 function useSingleMetricHref({
   jobId,
+  detectorIndex,
   serviceName,
   transactionType,
 }: {
   jobId: string;
+  detectorIndex?: number;
   serviceName?: string;
   transactionType?: string;
 }) {
@@ -78,6 +82,7 @@ function useSingleMetricHref({
       jobIds: [jobId],
       timeRange: { from: rangeFrom, to: rangeTo },
       refreshInterval: { pause: true, value: DEFAULT_REFRESH_INTERVAL },
+      detectorIndex,
       ...entities,
     },
   });

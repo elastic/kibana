@@ -100,6 +100,50 @@ describe('loadAllowlist', () => {
     expect(result.entries).toHaveLength(2);
     expect(result.entries.map((e) => e.path)).toEqual(['/api/active', '/api/no-expiry']);
   });
+
+  it('rejects a source on an oasdiff rule, which could never match', () => {
+    const allowlist = {
+      entries: [
+        {
+          path: '/api/fleet/outputs',
+          method: 'post',
+          reason: 'Approved removal',
+          approvedBy: 'test-user',
+          oasdiffId: 'request-property-removed',
+          source: '/components/schemas/Output/properties/name',
+        },
+      ],
+    };
+
+    writeFileSync(testAllowlistPath, JSON.stringify(allowlist));
+
+    expect(() => loadAllowlist(testAllowlistPath)).toThrow(
+      'Remove "source" from: POST /api/fleet/outputs (request-property-removed)'
+    );
+  });
+
+  it('accepts a source on a kbn: rule', () => {
+    const allowlist = {
+      entries: [
+        {
+          path: '/api/data_views/data_view',
+          method: 'post',
+          reason: 'Intentional tightening',
+          approvedBy: 'test-user',
+          oasdiffId: 'kbn:request-additional-properties-tightened',
+          source: '/components/schemas/Data_views_create_data_view_request_object',
+        },
+      ],
+    };
+
+    writeFileSync(testAllowlistPath, JSON.stringify(allowlist));
+
+    expect(loadAllowlist(testAllowlistPath).entries).toHaveLength(1);
+  });
+
+  it('loads the repository allowlist', () => {
+    expect(() => loadAllowlist()).not.toThrow();
+  });
 });
 
 describe('isAllowlisted', () => {
@@ -153,5 +197,146 @@ describe('isAllowlisted', () => {
     const allowlist = { entries: [] };
 
     expect(isAllowlisted(allowlist, '/api/any/path', 'get')).toBe(false);
+  });
+
+  it('legacy entry (no oasdiffId/source) matches any change on the same endpoint', () => {
+    const allowlist = {
+      entries: [
+        {
+          path: '/api/fleet/outputs',
+          method: 'post',
+          reason: 'Legacy entry',
+          approvedBy: 'test-user',
+        },
+      ],
+    };
+
+    expect(
+      isAllowlisted(
+        allowlist,
+        '/api/fleet/outputs',
+        'post',
+        'request-property-removed',
+        '/components/schemas/Output/properties/name'
+      )
+    ).toBe(true);
+    expect(
+      isAllowlisted(
+        allowlist,
+        '/api/fleet/outputs',
+        'post',
+        'response-optional-property-removed',
+        '/components/schemas/Output/properties/type'
+      )
+    ).toBe(true);
+  });
+
+  it('scoped entry with oasdiffId matches only the intended change', () => {
+    const allowlist = {
+      entries: [
+        {
+          path: '/api/fleet/outputs',
+          method: 'post',
+          reason: 'Only suppress property removal',
+          approvedBy: 'test-user',
+          oasdiffId: 'request-property-removed',
+        },
+      ],
+    };
+
+    expect(
+      isAllowlisted(
+        allowlist,
+        '/api/fleet/outputs',
+        'post',
+        'request-property-removed',
+        '/some/source'
+      )
+    ).toBe(true);
+    expect(
+      isAllowlisted(
+        allowlist,
+        '/api/fleet/outputs',
+        'post',
+        'response-optional-property-removed',
+        '/some/source'
+      )
+    ).toBe(false);
+  });
+
+  it('scoped entry with source matches only the intended location', () => {
+    const allowlist = {
+      entries: [
+        {
+          path: '/api/fleet/outputs',
+          method: 'post',
+          reason: 'Only suppress this specific location',
+          approvedBy: 'test-user',
+          source: '/components/schemas/Output/properties/name',
+        },
+      ],
+    };
+
+    expect(
+      isAllowlisted(
+        allowlist,
+        '/api/fleet/outputs',
+        'post',
+        'request-property-removed',
+        '/components/schemas/Output/properties/name'
+      )
+    ).toBe(true);
+    expect(
+      isAllowlisted(
+        allowlist,
+        '/api/fleet/outputs',
+        'post',
+        'request-property-removed',
+        '/components/schemas/Output/properties/type'
+      )
+    ).toBe(false);
+  });
+
+  it('scoped entry with both oasdiffId and source requires both to match', () => {
+    const allowlist = {
+      entries: [
+        {
+          path: '/api/fleet/outputs',
+          method: 'post',
+          reason: 'Fully scoped',
+          approvedBy: 'test-user',
+          oasdiffId: 'request-property-removed',
+          source: '/components/schemas/Output/properties/name',
+        },
+      ],
+    };
+
+    expect(
+      isAllowlisted(
+        allowlist,
+        '/api/fleet/outputs',
+        'post',
+        'request-property-removed',
+        '/components/schemas/Output/properties/name'
+      )
+    ).toBe(true);
+    expect(
+      isAllowlisted(
+        allowlist,
+        '/api/fleet/outputs',
+        'post',
+        'request-property-removed',
+        '/components/schemas/Output/properties/type'
+      )
+    ).toBe(false);
+    expect(
+      isAllowlisted(
+        allowlist,
+        '/api/fleet/outputs',
+        'post',
+        'response-optional-property-removed',
+        '/components/schemas/Output/properties/name'
+      )
+    ).toBe(false);
   });
 });

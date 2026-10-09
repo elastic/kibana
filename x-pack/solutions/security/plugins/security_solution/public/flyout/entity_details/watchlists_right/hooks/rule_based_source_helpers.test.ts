@@ -7,6 +7,7 @@
 
 import type { EntitySourceInput, PerTypeState } from './rule_based_source_helpers';
 import {
+  DEFAULT_RANGE,
   EMPTY_QUERY,
   toggleToType,
   queryFromSource,
@@ -98,8 +99,19 @@ describe('stateFromSource', () => {
       filterQuery: { query: 'status: "error"', language: 'kuery' },
       indexPatterns: [{ label: 'logs-*' }],
       entityField: 'host.name',
-      dirty: true,
+      range: DEFAULT_RANGE,
+      dirty: false,
     });
+  });
+
+  it('uses range from source when provided', () => {
+    const source: EntitySourceInput = {
+      type: 'index',
+      name: 'test',
+      range: { start: 'now-7d', end: 'now' },
+    };
+    const state = stateFromSource(source);
+    expect(state.range).toEqual({ start: 'now-7d', end: 'now' });
   });
 
   it('returns clean empty state for undefined source', () => {
@@ -108,6 +120,7 @@ describe('stateFromSource', () => {
       filterQuery: EMPTY_QUERY,
       indexPatterns: [],
       entityField: '',
+      range: DEFAULT_RANGE,
       dirty: false,
     });
   });
@@ -118,16 +131,18 @@ describe('buildStoreSource', () => {
     filterQuery: { query: 'risk > 50', language: 'kuery' },
     indexPatterns: [],
     entityField: '',
+    range: DEFAULT_RANGE,
     dirty: true,
   };
 
-  it('builds a store source with watchlist name prefix', () => {
+  it('builds a store source with watchlist name prefix and no range', () => {
     const result = buildStoreSource(state, 'My Watchlist');
     expect(result).toEqual({
       type: 'store',
       name: 'My Watchlist-store',
       queryRule: 'risk > 50',
     });
+    expect(result.range).toBeUndefined();
   });
 
   it('uses default name when watchlistName is empty', () => {
@@ -147,6 +162,7 @@ describe('buildIndexSource', () => {
     filterQuery: { query: 'agent.type: "filebeat"', language: 'kuery' },
     indexPatterns: [{ label: 'logs-*' }, { label: 'metrics-*' }],
     entityField: 'host.name',
+    range: DEFAULT_RANGE,
     dirty: true,
   };
 
@@ -158,6 +174,7 @@ describe('buildIndexSource', () => {
       indexPattern: 'logs-*,metrics-*',
       identifierField: 'host.name',
       queryRule: 'agent.type: "filebeat"',
+      range: DEFAULT_RANGE,
     });
   });
 
@@ -242,17 +259,17 @@ describe('computeDefaultToggle', () => {
     ).toBe('entityStore');
   });
 
-  it('returns entityStore when both sources exist', () => {
+  it('returns indexPattern when both sources exist (index takes priority)', () => {
     expect(
       computeDefaultToggle({
         store: { type: 'store', name: 'st' },
         index: { type: 'index', name: 'idx' },
       })
-    ).toBe('entityStore');
+    ).toBe('indexPattern');
   });
 
-  it('returns entityStore when neither source exists', () => {
-    expect(computeDefaultToggle({ store: undefined, index: undefined })).toBe('entityStore');
+  it('returns none when neither source exists', () => {
+    expect(computeDefaultToggle({ store: undefined, index: undefined })).toBe('none');
   });
 });
 
@@ -261,6 +278,7 @@ describe('buildEntitySources', () => {
     filterQuery: EMPTY_QUERY,
     indexPatterns: [],
     entityField: '',
+    range: DEFAULT_RANGE,
     dirty: false,
     ...overrides,
   });
@@ -323,27 +341,11 @@ describe('buildEntitySources', () => {
 });
 
 describe('getToggleButtons', () => {
-  it('enables both buttons in create mode', () => {
-    const buttons = getToggleButtons(false, false);
-    expect(buttons[0].isDisabled).toBe(false);
-    expect(buttons[1].isDisabled).toBe(false);
-  });
-
-  it('enables both buttons for managed watchlists in edit mode', () => {
-    const buttons = getToggleButtons(true, true);
-    expect(buttons[0].isDisabled).toBe(false);
-    expect(buttons[1].isDisabled).toBe(false);
-  });
-
-  it('locks to entityStore in edit mode for non-managed store source', () => {
-    const buttons = getToggleButtons(true, false, { type: 'store', name: 'st' });
-    expect(buttons[0].isDisabled).toBe(false); // entityStore enabled
-    expect(buttons[1].isDisabled).toBe(true); // indexPattern disabled
-  });
-
-  it('locks to indexPattern in edit mode for non-managed index source', () => {
-    const buttons = getToggleButtons(true, false, { type: 'index', name: 'idx' });
-    expect(buttons[0].isDisabled).toBe(true); // entityStore disabled
-    expect(buttons[1].isDisabled).toBe(false); // indexPattern enabled
+  it('returns three buttons: none, entityStore, indexPattern', () => {
+    const buttons = getToggleButtons();
+    expect(buttons).toHaveLength(3);
+    expect(buttons[0].id).toBe('none');
+    expect(buttons[1].id).toBe('entityStore');
+    expect(buttons[2].id).toBe('indexPattern');
   });
 });

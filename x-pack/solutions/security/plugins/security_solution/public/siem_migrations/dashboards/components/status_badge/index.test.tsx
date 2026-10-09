@@ -20,13 +20,13 @@ describe('StatusBadge', () => {
     expect(getByText('Installed')).toBeInTheDocument();
   });
 
-  it('renders "Error" when status is FAILED', () => {
+  it('renders "Failed" when status is FAILED', () => {
     const dashboard = getDashboardMigrationDashboardMock({
       elastic_dashboard: undefined,
       status: SiemMigrationStatus.FAILED,
     });
     const { getByText } = render(<StatusBadge dashboard={dashboard} />);
-    expect(getByText('Error')).toBeInTheDocument();
+    expect(getByText('Failed')).toBeInTheDocument();
   });
 
   it('shows tooltip with comment on failed translation', async () => {

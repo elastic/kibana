@@ -14,7 +14,8 @@ import {
 import { MissingLookupsList } from '../../../../../../../common/components';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
 import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import * as i18n from './translations';
+import type { MigrationSource } from '../../../../../../../common/types';
+import { useRuleMigrationVendorCopy } from '../../../../../../hooks/use_rule_migration_vendor_copy';
 
 export interface MissingLookupsListStepProps {
   status: EuiStepStatus;
@@ -33,6 +34,9 @@ export const useMissingLookupsListStep = ({
   onCopied,
 }: MissingLookupsListStepProps): EuiStepProps => {
   const { upsertResources, isLoading, error } = useUpsertResources(addUploadedLookups);
+  const { resourceDataInputStep } = useRuleMigrationVendorCopy(
+    migrationStats.vendor as MigrationSource
+  );
 
   const omitLookup = useCallback(
     (lookupName: string) => {
@@ -58,11 +62,12 @@ export const useMissingLookupsListStep = ({
   }, [isLoading, error, status]);
 
   return {
-    title: i18n.LOOKUPS_DATA_INPUT_COPY_TITLE,
+    title: resourceDataInputStep.copyTitle,
     status: listStepStatus,
     children: (
       <MissingLookupsList
         onCopied={onCopied}
+        migrationSource={migrationStats.vendor as MigrationSource}
         missingLookups={missingLookups}
         uploadedLookups={uploadedLookups}
         omitLookup={omitLookup}

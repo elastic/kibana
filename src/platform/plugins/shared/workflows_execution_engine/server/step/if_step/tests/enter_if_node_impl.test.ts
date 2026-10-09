@@ -21,7 +21,7 @@ describe('EnterIfNodeImpl', () => {
   let impl: EnterIfNodeImpl;
   let workflowContextLoggerMock: IWorkflowEventLogger;
   let mockContextManager: jest.Mocked<
-    Pick<WorkflowContextManager, 'getContext' | 'renderValueAccordingToContext'>
+    Pick<WorkflowContextManager, 'getContext' | 'renderValueWithContext'>
   >;
   let workflowGraph: WorkflowGraph;
 
@@ -33,7 +33,7 @@ describe('EnterIfNodeImpl', () => {
       getContext: jest.fn().mockReturnValue({
         event: { type: 'alert' },
       }),
-      renderValueAccordingToContext: jest.fn().mockImplementation((value) => value),
+      renderValueWithContext: jest.fn().mockImplementation((value) => value),
     };
 
     mockStepExecutionRuntime = {
@@ -78,28 +78,28 @@ describe('EnterIfNodeImpl', () => {
   });
 
   it('should start the step with condition rendered value and condition result', async () => {
-    mockContextManager.renderValueAccordingToContext = jest
+    mockContextManager.renderValueWithContext = jest
       .fn()
       .mockImplementation(() => 'event.type: foo');
 
     await impl.run();
 
-    expect(mockContextManager.renderValueAccordingToContext).toHaveBeenCalledWith(
-      'event.type: alert'
-    );
+    expect(mockContextManager.renderValueWithContext).toHaveBeenCalledWith('event.type: alert', {
+      event: { type: 'alert' },
+    });
     expect(mockStepExecutionRuntime.startStep).toHaveBeenCalledWith();
   });
 
   it('should set step inputs', async () => {
-    mockContextManager.renderValueAccordingToContext = jest
+    mockContextManager.renderValueWithContext = jest
       .fn()
       .mockImplementation(() => 'event.type: foo');
 
     await impl.run();
 
-    expect(mockContextManager.renderValueAccordingToContext).toHaveBeenCalledWith(
-      'event.type: alert'
-    );
+    expect(mockContextManager.renderValueWithContext).toHaveBeenCalledWith('event.type: alert', {
+      event: { type: 'alert' },
+    });
     expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith({
       rawCondition: 'event.type: alert',
       condition: 'event.type: foo',
@@ -108,6 +108,7 @@ describe('EnterIfNodeImpl', () => {
     expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
       conditionResult: false,
     });
+    expect(mockContextManager.getContext).toHaveBeenCalledTimes(1);
   });
 
   it('should store true conditionResult in step state when condition matches', async () => {
@@ -253,7 +254,7 @@ describe('EnterIfNodeImpl', () => {
         } as EnterConditionBranchNode,
       ]);
 
-      mockContextManager.renderValueAccordingToContext = jest.fn().mockReturnValue(true);
+      mockContextManager.renderValueWithContext = jest.fn().mockReturnValue(true);
 
       await impl.run();
 
@@ -276,7 +277,7 @@ describe('EnterIfNodeImpl', () => {
         } as EnterConditionBranchNode,
       ]);
 
-      mockContextManager.renderValueAccordingToContext = jest.fn().mockReturnValue(false);
+      mockContextManager.renderValueWithContext = jest.fn().mockReturnValue(false);
 
       await impl.run();
 
@@ -299,7 +300,7 @@ describe('EnterIfNodeImpl', () => {
         } as EnterConditionBranchNode,
       ]);
 
-      mockContextManager.renderValueAccordingToContext = jest.fn().mockReturnValue(undefined);
+      mockContextManager.renderValueWithContext = jest.fn().mockReturnValue(undefined);
 
       await impl.run();
 
@@ -321,9 +322,7 @@ describe('EnterIfNodeImpl', () => {
         } as EnterConditionBranchNode,
       ]);
 
-      mockContextManager.renderValueAccordingToContext = jest
-        .fn()
-        .mockReturnValue('event.type:alert');
+      mockContextManager.renderValueWithContext = jest.fn().mockReturnValue('event.type:alert');
 
       await impl.run();
 
@@ -341,7 +340,7 @@ describe('EnterIfNodeImpl', () => {
         } as EnterConditionBranchNode,
       ]);
 
-      mockContextManager.renderValueAccordingToContext = jest.fn().mockReturnValue({
+      mockContextManager.renderValueWithContext = jest.fn().mockReturnValue({
         enabled: true,
         timeout: 5000,
       });
@@ -360,9 +359,7 @@ describe('EnterIfNodeImpl', () => {
         } as EnterConditionBranchNode,
       ]);
 
-      mockContextManager.renderValueAccordingToContext = jest
-        .fn()
-        .mockReturnValue(['item1', 'item2']);
+      mockContextManager.renderValueWithContext = jest.fn().mockReturnValue(['item1', 'item2']);
 
       await expect(impl.run()).rejects.toThrow(
         /Invalid condition type.*expected boolean or string/
@@ -378,7 +375,7 @@ describe('EnterIfNodeImpl', () => {
         } as EnterConditionBranchNode,
       ]);
 
-      mockContextManager.renderValueAccordingToContext = jest.fn().mockReturnValue(42);
+      mockContextManager.renderValueWithContext = jest.fn().mockReturnValue(42);
 
       await expect(impl.run()).rejects.toThrow(
         /Invalid condition type.*expected boolean or string/
@@ -394,7 +391,7 @@ describe('EnterIfNodeImpl', () => {
         } as EnterConditionBranchNode,
       ]);
 
-      mockContextManager.renderValueAccordingToContext = jest.fn().mockReturnValue({});
+      mockContextManager.renderValueWithContext = jest.fn().mockReturnValue({});
 
       await expect(impl.run()).rejects.toThrow(
         new RegExp(`Invalid condition type for step ${node.stepId}`)

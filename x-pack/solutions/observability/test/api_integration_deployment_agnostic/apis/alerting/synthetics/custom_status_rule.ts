@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import Url from 'url';
 import expect from '@kbn/expect';
 import moment from 'moment-timezone';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import { waitForDocumentInIndex } from '../../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
+import { waitForDocumentInIndex } from '../../../../common/utils/alerting_wait_for_helpers';
 import type { RoleCredentials, SupertestWithRoleScopeType } from '../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -19,7 +20,13 @@ import {
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const server = getService('kibanaServer');
+  const config = getService('config');
   const retryService = getService('retry');
+  const kibanaUrl = Url.format({
+    protocol: config.get('servers.kibana.protocol'),
+    hostname: config.get('servers.kibana.hostname'),
+    port: config.get('servers.kibana.port'),
+  });
   let ruleHelper: SyntheticsRuleHelper;
   const logger = getService('log');
   const esClient = getService('es');
@@ -167,7 +174,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(downResponse.hits.hits[0]._source).property('locationNames', 'Dev Service');
         expect(downResponse.hits.hits[0]._source).property(
           'linkMessage',
-          `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+          `- Link: ${kibanaUrl}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
         expect(downResponse.hits.hits[0]._source).property('locationId', 'dev');
       });
@@ -210,7 +217,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(recoveredResponse.hits.hits[0]._source).property('locationNames', 'Dev Service');
         expect(recoveredResponse.hits.hits[0]._source).property(
           'linkMessage',
-          `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+          `- Link: ${kibanaUrl}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
         expect(recoveredResponse.hits.hits[0]._source).property('locationId', 'dev');
         expect(recoveredResponse.hits.hits[0]._source).property(
@@ -312,7 +319,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           );
           expect(hit).property(
             'linkMessage',
-            `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=${hit?.locationId}`
+            `- Link: ${kibanaUrl}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=${hit?.locationId}`
           );
         });
       });
@@ -396,7 +403,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(downResponse.hits.hits[0]._source).property('locationNames', 'Dev Service');
         expect(downResponse.hits.hits[0]._source).property(
           'linkMessage',
-          `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+          `- Link: ${kibanaUrl}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
         expect(downResponse.hits.hits[0]._source).property('locationId', 'dev');
       });
@@ -440,14 +447,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(recoveredResponse.hits.hits[0]._source).property('locationNames', 'Dev Service');
         expect(recoveredResponse.hits.hits[0]._source).property(
           'linkMessage',
-          `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+          `- Link: ${kibanaUrl}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
         expect(recoveredResponse.hits.hits[0]._source).property('locationId', 'dev');
-        expect(recoveredResponse.hits.hits[0]._source).property(
-          'recoveryReason',
-          'the alert condition is no longer met'
-        );
-        expect(recoveredResponse.hits.hits[0]._source).property('recoveryStatus', 'has recovered');
+        const recoveryReason = (recoveredResponse.hits.hits[0]._source as Record<string, string>)
+          .recoveryReason;
+        expect(recoveryReason).to.match(/the monitor is now up again\. It ran successfully at /);
+        expect(recoveredResponse.hits.hits[0]._source).property('recoveryStatus', 'is now up');
       });
     });
 
@@ -613,7 +619,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           );
           expect(downResponse.hits.hits[0]._source).property(
             'linkMessage',
-            `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+            `- Link: ${kibanaUrl}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
           );
           expect(downResponse.hits.hits[0]._source).property('locationId', 'dev and dev2');
         });
@@ -671,7 +677,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           );
           expect(recoveryResponse.hits.hits[0]._source).property(
             'linkMessage',
-            `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+            `- Link: ${kibanaUrl}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
           );
           expect(recoveryResponse.hits.hits[0]._source).property('locationId', 'dev and dev2');
         });
@@ -720,7 +726,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(alertActionDoc).property('locationNames', 'Dev Service and Dev Service 2');
           expect(alertActionDoc).property(
             'linkMessage',
-            `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+            `- Link: ${kibanaUrl}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
           );
           expect(alertActionDoc).property('locationId', 'dev and dev2');
         });
@@ -761,11 +767,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(alertActionDoc).property('locationNames', 'Dev Service and Dev Service 2');
           expect(alertActionDoc).property(
             'linkMessage',
-            `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+            `- Link: ${kibanaUrl}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
           );
           expect(alertActionDoc).property('locationId', 'dev and dev2');
-          expect(alertActionDoc).property('recoveryReason', 'the alert condition is no longer met');
-          expect(alertActionDoc).property('recoveryStatus', 'has recovered');
+          const recoveryReason = (alertActionDoc as Record<string, string>).recoveryReason;
+          expect(recoveryReason).to.match(/the monitor is now up again\. It ran successfully at /);
+          expect(alertActionDoc).property('recoveryStatus', 'is now up');
         });
       });
     }
@@ -882,7 +889,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(downResponse.hits.hits[0]._source).property('locationNames', 'Dev Service');
           expect(downResponse.hits.hits[0]._source).property(
             'linkMessage',
-            `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+            `- Link: ${kibanaUrl}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
           );
           expect(downResponse.hits.hits[0]._source).property('locationId', 'dev');
         });
@@ -958,7 +965,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(recoveryResponse.hits.hits[0]._source).property('locationNames', 'Dev Service');
           expect(recoveryResponse.hits.hits[0]._source).property(
             'linkMessage',
-            `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+            `- Link: ${kibanaUrl}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
           );
           expect(recoveryResponse.hits.hits[0]._source).property('locationId', 'dev');
         });
@@ -1073,7 +1080,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
         expect(downResponse.hits.hits[0]._source).property(
           'linkMessage',
-          `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+          `- Link: ${kibanaUrl}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
         expect(downResponse.hits.hits[0]._source).property('locationId', 'dev and dev2');
       });
@@ -1105,7 +1112,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
         expect(alertAction.hits.hits[0]._source).property(
           'linkMessage',
-          `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+          `- Link: ${kibanaUrl}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
         expect(alertAction.hits.hits[0]._source).property('locationId', 'dev and dev2');
       });
@@ -1158,7 +1165,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
         expect(recoveryAction.hits.hits[0]._source).property(
           'linkMessage',
-          `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+          `- Link: ${kibanaUrl}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
         expect(recoveryAction.hits.hits[0]._source).property('locationId', 'dev and dev2');
       });

@@ -8,33 +8,41 @@
  */
 
 import React from 'react';
-import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public/context';
 import { mockManagementPlugin } from '../../../../mocks';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 import { ScriptingWarningCallOut } from './warning_call_out';
 
 describe('ScriptingWarningCallOut', () => {
   const mockedContext = mockManagementPlugin.createIndexPatternManagmentContext();
 
   it('should render normally', async () => {
-    const component = mountWithI18nProvider(<ScriptingWarningCallOut isVisible={true} />, {
-      wrappingComponent: KibanaContextProvider,
-      wrappingComponentProps: {
-        services: mockedContext,
-      },
-    });
+    renderWithKibanaRenderContext(
+      <KibanaContextProvider services={mockedContext}>
+        <ScriptingWarningCallOut isVisible={true} />
+      </KibanaContextProvider>
+    );
 
-    expect(component.render()).toMatchSnapshot();
+    expect(
+      screen.getByText(
+        'Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow and, if done incorrectly, can cause Kibana to become unusable.',
+        { exact: false }
+      )
+    ).toBeVisible();
+    expect(screen.getByText('Scripted fields are deprecated')).toBeVisible();
+    expect(
+      screen.getByText('For greater flexibility and Painless script support, use', { exact: false })
+    ).toBeVisible();
   });
 
   it('should render nothing if not visible', async () => {
-    const component = mountWithI18nProvider(<ScriptingWarningCallOut isVisible={false} />, {
-      wrappingComponent: KibanaContextProvider,
-      wrappingComponentProps: {
-        services: mockedContext,
-      },
-    });
+    const { container } = renderWithKibanaRenderContext(
+      <KibanaContextProvider services={mockedContext}>
+        <ScriptingWarningCallOut isVisible={false} />
+      </KibanaContextProvider>
+    );
 
-    expect(component).toMatchSnapshot();
+    expect(container).toBeEmptyDOMElement();
   });
 });

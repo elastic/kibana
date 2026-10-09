@@ -10,9 +10,17 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiPopover, EuiContextMenu, EuiIcon, EuiTextColor } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiIcon,
+  EuiPopover,
+  EuiTextColor,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { Observable } from '../../../common/types/domain/observable/v1';
 import * as i18n from './translations';
+import * as workflowI18n from '../workflows/translations';
 
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { DeleteAttachmentConfirmationModal } from '../user_actions/delete_attachment_confirmation_modal';
@@ -20,14 +28,30 @@ import { useDeletePropertyAction } from '../user_actions/property_actions/use_de
 import { type CaseUI } from '../../containers/types';
 import { EditObservableModal } from './edit_observable_modal';
 import { useDeleteObservable } from '../../containers/use_delete_observables';
+import { RunCaseWorkflowModal } from '../workflows/run_case_workflow_modal';
+import { useCasesWorkflowExecutor } from '../workflows/use_cases_workflow_executor';
+import { useCaseWorkflowFilters } from '../workflows/use_run_case_workflow';
+import { OBSERVABLE_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
 
-export const ObservableActionsPopoverButton: React.FC<{
+/** The Cases API derives the workflow event from the origin, so no client inputs are sent. */
+const WORKFLOW_INPUTS: Record<string, unknown> = {};
+
+export interface ObservableActionsPopoverButtonProps {
   caseData: CaseUI;
   observable: Observable;
-}> = ({ caseData, observable }) => {
+  /** Whether the current user may run a workflow from this observable. */
+  canRunWorkflow: boolean;
+}
+
+export const ObservableActionsPopoverButton: React.FC<ObservableActionsPopoverButtonProps> = ({
+  caseData,
+  observable,
+  canRunWorkflow,
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { permissions } = useCasesContext();
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showRunWorkflowModal, setShowRunWorkflowModal] = useState(false);
   const buttonRef = React.useRef<HTMLAnchorElement>(null);
 
   const { isLoading: isDeleteLoading, mutateAsync: deleteObservable } = useDeleteObservable(
@@ -48,6 +72,18 @@ export const ObservableActionsPopoverButton: React.FC<{
     },
   });
 
+  const origin = useMemo(
+    () => ({
+      type: OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+      caseId: caseData.id,
+      observableId: observable.id,
+    }),
+    [caseData.id, observable.id]
+  );
+
+  const runWorkflow = useCasesWorkflowExecutor({ caseId: caseData.id, origin });
+  const { filterWorkflow, sortWorkflow } = useCaseWorkflowFilters();
+
   const tooglePopover = useCallback(() => setIsPopoverOpen((prevValue) => !prevValue), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
@@ -62,10 +98,23 @@ export const ObservableActionsPopoverButton: React.FC<{
       },
     ];
 
+    if (canRunWorkflow) {
+      mainPanelItems.push({
+        name: <EuiTextColor>{workflowI18n.RUN_WORKFLOW}</EuiTextColor>,
+        icon: <EuiIcon type="play" size="m" aria-hidden={true} />,
+        onClick: () => {
+          closePopover();
+          setShowRunWorkflowModal(true);
+        },
+        disabled: isLoading,
+        'data-test-subj': 'cases-observables-run-workflow-button',
+      });
+    }
+
     if (permissions.update) {
       mainPanelItems.push({
         name: <EuiTextColor color={'danger'}>{i18n.DELETE_OBSERVABLE}</EuiTextColor>,
-        icon: <EuiIcon type="trash" size="m" color={'danger'} />,
+        icon: <EuiIcon type="trash" size="m" color={'danger'} aria-hidden={true} />,
         onClick: () => {
           closePopover();
           onDeletionModalOpen();
@@ -76,7 +125,7 @@ export const ObservableActionsPopoverButton: React.FC<{
 
       mainPanelItems.push({
         name: <EuiTextColor>{i18n.EDIT_OBSERVABLE}</EuiTextColor>,
-        icon: <EuiIcon type="pencil" size="m" />,
+        icon: <EuiIcon type="pencil" size="m" aria-hidden={true} />,
         onClick: () => {
           setShowEditModal(true);
           closePopover();
@@ -87,24 +136,27 @@ export const ObservableActionsPopoverButton: React.FC<{
     }
 
     return panelsToBuild;
-  }, [closePopover, isLoading, onDeletionModalOpen, permissions]);
+  }, [canRunWorkflow, closePopover, isLoading, onDeletionModalOpen, permissions]);
 
   return (
     <>
       <EuiPopover
+        aria-label={i18n.OBSERVABLE_ACTIONS}
         id={`cases-observables-popover-${observable.id}`}
         key={`cases-observables-popover-${observable.id}`}
         data-test-subj={`cases-observables-popover-${observable.id}`}
         button={
-          <EuiButtonIcon
-            onClick={tooglePopover}
-            iconType="boxesVertical"
-            aria-label={i18n.OBSERVABLE_ACTIONS}
-            color="text"
-            key={`cases-observables-actions-popover-button-${observable.id}`}
-            data-test-subj={`cases-observables-actions-popover-button-${observable.id}`}
-            buttonRef={buttonRef}
-          />
+          <EuiToolTip content={i18n.OBSERVABLE_ACTIONS} disableScreenReaderOutput>
+            <EuiButtonIcon
+              onClick={tooglePopover}
+              iconType="boxesVertical"
+              aria-label={i18n.OBSERVABLE_ACTIONS}
+              color="text"
+              key={`cases-observables-actions-popover-button-${observable.id}`}
+              data-test-subj={`cases-observables-actions-popover-button-${observable.id}`}
+              buttonRef={buttonRef}
+            />
+          </EuiToolTip>
         }
         isOpen={isPopoverOpen}
         closePopover={closePopover}
@@ -131,6 +183,16 @@ export const ObservableActionsPopoverButton: React.FC<{
           caseData={caseData}
           observable={observable}
           onCloseModal={() => setShowEditModal(false)}
+        />
+      )}
+      {showRunWorkflowModal && (
+        <RunCaseWorkflowModal
+          inputs={WORKFLOW_INPUTS}
+          runWorkflow={runWorkflow}
+          filterWorkflow={filterWorkflow}
+          sortWorkflow={sortWorkflow}
+          onClose={() => setShowRunWorkflowModal(false)}
+          focusButtonRef={buttonRef}
         />
       )}
     </>

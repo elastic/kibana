@@ -34,7 +34,7 @@ export const productFeaturesExtensions: ProductFeaturesConfiguratorExtensions = 
           // Using api privileges below provides the required backwards compatibility.
           privileges: {
             all: { api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`] },
-            read: { api: [`${APP_ID}-showEndpointExceptions`] },
+            read: { api: [`${APP_ID}-showEndpointExceptions`, 'lists-summary'] },
           },
         },
       },
@@ -54,7 +54,7 @@ export const productFeaturesExtensions: ProductFeaturesConfiguratorExtensions = 
           ],
           privileges: {
             all: { api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`] },
-            read: { api: [`${APP_ID}-showEndpointExceptions`] },
+            read: { api: [`${APP_ID}-showEndpointExceptions`, 'lists-summary'] },
           },
         },
       },
@@ -67,7 +67,7 @@ export const productFeaturesExtensions: ProductFeaturesConfiguratorExtensions = 
           ],
           privileges: {
             all: { api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`] },
-            read: { api: [`${APP_ID}-showEndpointExceptions`] },
+            read: { api: [`${APP_ID}-showEndpointExceptions`, 'lists-summary'] },
           },
         },
       },

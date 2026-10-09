@@ -9,11 +9,11 @@ import type { History } from 'history';
 import type { CoreSetup } from '@kbn/core/public';
 import {
   CELL_VALUE_TRIGGER,
+  SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
   SECURITY_CELL_ACTIONS_ALERTS_COUNT,
   SECURITY_CELL_ACTIONS_CASE_EVENTS,
   SECURITY_CELL_ACTIONS_DEFAULT,
   SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
-  SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
@@ -24,16 +24,16 @@ import {
   createFilterOutDiscoverCellActionFactory,
 } from './filter';
 import {
-  createAddToTimelineLensAction,
   createAddToTimelineCellActionFactory,
-  createInvestigateInNewTimelineCellActionFactory,
   createAddToTimelineDiscoverCellActionFactory,
+  createAddToTimelineLensAction,
+  createInvestigateInNewTimelineCellActionFactory,
 } from './add_to_timeline';
 import { createShowTopNCellActionFactory } from './show_top_n';
 import {
-  createCopyToClipboardLensAction,
   createCopyToClipboardCellActionFactory,
   createCopyToClipboardDiscoverCellActionFactory,
+  createCopyToClipboardLensAction,
 } from './copy_to_clipboard';
 import { createToggleColumnCellActionFactory } from './toggle_column';
 import { createToggleUserAssetFieldCellActionFactory } from './toggle_asset_column';
@@ -65,16 +65,32 @@ const registerLensEmbeddableActions = (store: SecurityAppStore, services: StartS
   const { uiActions } = services;
 
   const filterInLegendActions = createFilterInLensAction({ store, order: 2, services });
-  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterInLegendActions);
+  uiActions.addTriggerActionAsync(
+    CELL_VALUE_TRIGGER,
+    filterInLegendActions.id,
+    async () => filterInLegendActions
+  );
 
   const filterOutLegendActions = createFilterOutLensAction({ store, order: 3, services });
-  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterOutLegendActions);
+  uiActions.addTriggerActionAsync(
+    CELL_VALUE_TRIGGER,
+    filterOutLegendActions.id,
+    async () => filterOutLegendActions
+  );
 
   const addToTimelineAction = createAddToTimelineLensAction({ store, order: 4 });
-  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, addToTimelineAction);
+  uiActions.addTriggerActionAsync(
+    CELL_VALUE_TRIGGER,
+    addToTimelineAction.id,
+    async () => addToTimelineAction
+  );
 
   const copyToClipboardAction = createCopyToClipboardLensAction({ order: 5 });
-  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, copyToClipboardAction);
+  uiActions.addTriggerActionAsync(
+    CELL_VALUE_TRIGGER,
+    copyToClipboardAction.id,
+    async () => copyToClipboardAction
+  );
 };
 
 const registerDiscoverCellActions = (store: SecurityAppStore, services: StartServices) => {
@@ -96,7 +112,11 @@ const registerDiscoverCellActions = (store: SecurityAppStore, services: StartSer
       if (actionFactory) {
         const action = actionFactory({ id: `${triggerId}-${actionName}`, order });
         const actionWithTelemetry = enhanceActionWithTelemetry(action, services);
-        uiActions.addTriggerAction(triggerId, actionWithTelemetry);
+        uiActions.addTriggerActionAsync(
+          triggerId,
+          actionWithTelemetry.id,
+          async () => actionWithTelemetry
+        );
       }
     });
   };
@@ -137,7 +157,11 @@ const registerCellActions = (
       if (actionFactory) {
         const action = actionFactory({ id: `${triggerId}-${actionName}`, order });
         const actionWithTelemetry = enhanceActionWithTelemetry(action, services);
-        uiActions.addTriggerAction(triggerId, actionWithTelemetry);
+        uiActions.addTriggerActionAsync(
+          triggerId,
+          actionWithTelemetry.id,
+          async () => actionWithTelemetry
+        );
       }
     });
   };
@@ -164,6 +188,8 @@ const registerCellActions = (
 
   registerCellActionsTrigger(SECURITY_CELL_ACTIONS_CASE_EVENTS, [
     'addToTimeline',
+    'toggleColumn',
+    'showTopN',
     'copyToClipboard',
   ]);
 };

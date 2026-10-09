@@ -14,9 +14,9 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiPopoverFooter,
-  EuiPopoverTitle,
   EuiTextColor,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -49,31 +49,31 @@ const Definition: React.FC<TermDef> = ({ label }) => (
 const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const closePopover = () => setPopoverIsOpen(false);
+  const metaDataLabel = i18n.translate(
+    'xpack.searchIndexDocuments.result.header.metadata.icon.ariaLabel',
+    { defaultMessage: 'Document metadata for {id}', values: { id } }
+  );
 
   const metaDataIcon = (
-    <EuiButtonIcon
-      display="empty"
-      size="xs"
-      iconType="info"
-      color="primary"
-      onClick={() => setPopoverIsOpen(!popoverIsOpen)}
-      aria-label={i18n.translate(
-        'xpack.searchIndexDocuments.result.header.metadata.icon.ariaLabel',
-        {
-          defaultMessage: 'Metadata for document: {id}',
-          values: { id },
-        }
-      )}
-    />
+    <EuiToolTip content={metaDataLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        display="empty"
+        size="xs"
+        iconType="info"
+        color="primary"
+        onClick={() => setPopoverIsOpen(!popoverIsOpen)}
+        aria-label={metaDataLabel}
+      />
+    </EuiToolTip>
   );
 
   return (
-    <EuiPopover button={metaDataIcon} isOpen={popoverIsOpen} closePopover={closePopover}>
-      <EuiPopoverTitle>
-        {i18n.translate('xpack.searchIndexDocuments.result.header.metadata.title', {
-          defaultMessage: 'Document metadata',
-        })}
-      </EuiPopoverTitle>
+    <EuiPopover
+      button={metaDataIcon}
+      isOpen={popoverIsOpen}
+      closePopover={closePopover}
+      aria-label={metaDataLabel}
+    >
       <EuiFlexGroup gutterSize="s" direction="column" style={{ width: '20rem' }}>
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
@@ -101,7 +101,7 @@ export const ResultHeader: React.FC<Props> = ({ title, metaData }) => {
     <Styles.ResultHeader euiTheme={euiTheme}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem>
-          <EuiTitle size="xs">
+          <EuiTitle size="xxs">
             <h4>{title}</h4>
           </EuiTitle>
         </EuiFlexItem>

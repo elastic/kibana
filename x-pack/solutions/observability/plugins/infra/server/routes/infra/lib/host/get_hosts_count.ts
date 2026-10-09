@@ -9,7 +9,11 @@ import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import type { ApmDataAccessServicesWrapper } from '../../../../lib/helpers/get_apm_data_access_client';
 import type { GetInfraEntityCountRequestBodyPayload } from '../../../../../common/http_api';
 import type { InfraMetricsClient } from '../../../../lib/helpers/get_infra_metrics_client';
-import { HOST_NAME_FIELD, MAX_HOST_COUNT_LIMIT } from '../../../../../common/constants';
+import {
+  DEFAULT_SCHEMA,
+  HOST_NAME_FIELD,
+  MAX_HOST_COUNT_LIMIT,
+} from '../../../../../common/constants';
 import { assertQueryStructure, extractExcludedMetadataValues } from '../utils';
 import { getDocumentsFilter } from '../helpers/query';
 import { getFilteredHostNames } from './get_filtered_hosts';
@@ -21,7 +25,7 @@ export async function getHostsCount({
   query,
   from,
   to,
-  schema = 'ecs',
+  schema = DEFAULT_SCHEMA,
 }: GetInfraEntityCountRequestBodyPayload & {
   infraMetricsClient: InfraMetricsClient;
   apmDataAccessServices?: ApmDataAccessServicesWrapper;

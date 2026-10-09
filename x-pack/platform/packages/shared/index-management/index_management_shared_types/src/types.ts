@@ -8,7 +8,6 @@
 import type {
   IlmExplainLifecycleLifecycleExplain,
   HealthStatus,
-  IndicesStatsIndexMetadataState,
   Uuid,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ScopedHistory } from '@kbn/core-application-browser';
@@ -138,6 +137,8 @@ export interface IndexAttributes {
   aliases?: string | string[];
   data_stream?: string;
   mode?: string;
+  // Configured `index.lifecycle.name`; ES reports lookup indices as unmanaged even when this is set.
+  ilmPolicyName?: string;
 
   // The types below are added by extension services if corresponding plugins are enabled (ILM, Rollup, CCR)
   isRollupIndex?: boolean;
@@ -147,7 +148,8 @@ export interface IndexAttributes {
   // The types from here below represent information returned from the index stats API;
   // treated optional as the stats API is not available on serverless
   health?: HealthStatus;
-  status?: IndicesStatsIndexMetadataState;
+  // Some consumers (e.g. the indices list UI) display user-friendly status text.
+  status?: string;
   uuid?: Uuid;
   documents?: number;
   size?: number;

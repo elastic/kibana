@@ -46,9 +46,12 @@ import { DocViewerExtensionActionsProvider } from '../../../../hooks/use_doc_vie
 export type OverviewProps = DocViewRenderProps &
   RestorableStateProviderProps<TraceWaterfallRestorableState> & {
     indexes: ObservabilityIndexes;
+    profileId: string;
     showWaterfall?: boolean;
     showActions?: boolean;
     docViewActions?: DocViewActions;
+    /** Used when the hit's flattened `trace.id` is missing (common for some OTel shapes). */
+    fallbackTraceId?: string;
   };
 
 export type TraceOverviewSections = 'errors-table';
@@ -66,12 +69,14 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
       onRemoveColumn,
       columns,
       indexes,
+      profileId,
       showWaterfall = true,
       dataView,
       decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
       docViewActions,
       initialState,
       onInitialStateChange,
+      fallbackTraceId,
     },
     ref
   ) => {
@@ -85,7 +90,7 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
     const isOtelSpan = apmDurationField == null && flattenedHit[DURATION] != null;
     const duration = apmDurationField ?? flattenedHit[DURATION]! * 0.001;
 
-    const traceId = flattenedHit[TRACE_ID];
+    const traceId = flattenedHit[TRACE_ID] ?? fallbackTraceId;
     const transactionId = flattenedHit[TRANSACTION_ID];
     const spanId = flattenedHit[SPAN_ID];
     const serviceName = flattenedHit[SERVICE_NAME];
@@ -112,7 +117,7 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
     );
 
     return (
-      <DataSourcesProvider indexes={indexes}>
+      <DataSourcesProvider indexes={indexes} profileId={profileId}>
         <DocViewerExtensionActionsProvider actions={docViewActions}>
           <TraceRootSpanProvider traceId={traceId}>
             <div

@@ -6,6 +6,7 @@
  */
 
 import { ExternalServiceResponseRt } from './v1';
+import { ExternalServiceResponseSchema } from '../../api_zod/external_service/v1';
 
 describe('ExternalServiceResponseRt', () => {
   const defaultRequest = {
@@ -50,5 +51,17 @@ describe('ExternalServiceResponseRt', () => {
       _tag: 'Right',
       right: defaultRequest,
     });
+  });
+
+  it('zod: has expected attributes in request', () => {
+    const result = ExternalServiceResponseSchema.safeParse(defaultRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
+  });
+
+  it('zod: strips unknown fields', () => {
+    const result = ExternalServiceResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
   });
 });

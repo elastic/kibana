@@ -6,17 +6,31 @@
  */
 
 import React from 'react';
-import { EuiCard, EuiText, useEuiTheme } from '@elastic/eui';
+import type { EuiCardProps } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiFlexGroup,
+  EuiLoadingSpinner,
+  EuiSkeletonText,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export interface CapabilityCardProps {
   count: number;
   title: string;
+  betaBadgeProps?: Pick<
+    NonNullable<EuiCardProps['betaBadgeProps']>,
+    'label' | 'tooltipContent' | 'size'
+  >;
   description: string;
   emptyDescription: string;
   image?: string;
   href?: string;
   onClick?: () => void;
+  isCountLoading?: boolean;
+  dataTestSubj?: string;
 }
 
 const TEXT_SIZE = '64px';
@@ -25,22 +39,70 @@ const CARD_IMAGE_HEIGHT = '112px';
 export const CapabilityCard: React.FC<CapabilityCardProps> = ({
   count,
   title,
+  betaBadgeProps,
   description,
   emptyDescription,
   image,
   href,
   onClick,
+  isCountLoading = false,
+  dataTestSubj,
 }) => {
   const { euiTheme } = useEuiTheme();
+
+  // EuiCard simulates a click on the title link for any click target that isn't the link
+  // itself (its "redundant click" a11y behavior), which would otherwise fire card navigation
+  // when the user clicks the badge. Stopping propagation here keeps the badge non-navigating.
+  const cardBetaBadgeProps: EuiCardProps['betaBadgeProps'] = betaBadgeProps
+    ? {
+        label: betaBadgeProps.label,
+        tooltipContent: betaBadgeProps.tooltipContent,
+        size: betaBadgeProps.size,
+        onClick: (event: React.MouseEvent<HTMLButtonElement>) => event.stopPropagation(),
+      }
+    : undefined;
+
+  if (isCountLoading) {
+    return (
+      <EuiCard
+        data-test-subj={dataTestSubj}
+        hasBorder
+        display="plain"
+        paddingSize="m"
+        title={title}
+        titleElement="h4"
+        titleSize="xs"
+        betaBadgeProps={cardBetaBadgeProps}
+        textAlign="left"
+        footer={
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexGroup>
+        }
+        css={css`
+          height: 100%;
+          .euiCard__content p {
+            color: ${euiTheme.colors.textSubdued};
+          }
+        `}
+        aria-busy={true}
+      >
+        <EuiSkeletonText lines={2} size="s" />
+      </EuiCard>
+    );
+  }
 
   if (count === 0) {
     return (
       <EuiCard
+        data-test-subj={dataTestSubj}
         hasBorder
         display="plain"
         paddingSize="none"
         title={title}
         titleElement="h4"
+        titleSize="xs"
+        betaBadgeProps={cardBetaBadgeProps}
         description={emptyDescription}
         textAlign="left"
         href={href}
@@ -74,11 +136,14 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
 
   return (
     <EuiCard
+      data-test-subj={dataTestSubj}
       hasBorder
       display="plain"
       paddingSize="m"
       title={title}
       titleElement="h4"
+      titleSize="xs"
+      betaBadgeProps={cardBetaBadgeProps}
       description={description}
       textAlign="left"
       footer={

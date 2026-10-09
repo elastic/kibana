@@ -15,12 +15,17 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CreateDataStreamFlyout } from './create_data_stream_flyout';
 import { UIStateProvider } from '../../contexts';
 import { IntegrationFormProvider } from '../../forms/integration_form';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   useFetchIndices,
   useValidateIndex,
   useGetIntegrationById,
   useCreateUpdateIntegration,
 } from '../../../../common';
+
+const mockAddWarning = jest.fn();
+const mockAddError = jest.fn();
+const mockUploadMutateAsync = jest.fn();
 
 jest.mock('../../../../common', () => ({
   useFetchIndices: jest.fn(),
@@ -29,7 +34,7 @@ jest.mock('../../../../common', () => ({
   useCreateUpdateIntegration: jest.fn(),
   useUploadSamples: jest.fn(() => ({
     uploadSamplesMutation: {
-      mutateAsync: jest.fn(),
+      mutateAsync: mockUploadMutateAsync,
       isLoading: false,
     },
     isLoading: false,
@@ -41,17 +46,19 @@ jest.mock('../../../../common', () => ({
   useKibana: jest.fn(() => ({
     services: {
       http: {},
-      notifications: { toasts: { addError: jest.fn(), addWarning: jest.fn() } },
+      notifications: { toasts: { addError: mockAddError, addWarning: mockAddWarning } },
       application: { navigateToApp: jest.fn() },
     },
   })),
 }));
+const mockGetInstalledPackages = jest.fn(
+  (): Promise<{ items: Array<{ id: string; type: string }> }> => Promise.resolve({ items: [] })
+);
+const mockGetAllIntegrations = jest.fn((): Promise<unknown[]> => Promise.resolve([]));
 jest.mock('../../../../common/lib/api', () => ({
-  getInstalledPackages: jest.fn(() =>
-    Promise.resolve({
-      items: [],
-    })
-  ),
+  getInstalledPackages: (...args: unknown[]) => mockGetInstalledPackages(...(args as [])),
+  getAllIntegrations: (...args: unknown[]) => mockGetAllIntegrations(...(args as [])),
+  getAllIntegrationNames: (...args: unknown[]) => mockGetAllIntegrations(...(args as [])),
 }));
 
 const mockReportAnalyzeLogsTriggered = jest.fn();
@@ -90,6 +97,9 @@ const createWrapper = (
               <Route path={['/edit/:integrationId', '/create']}>
                 <UIStateProvider>
                   <IntegrationFormProvider onSubmit={jest.fn()} initialValue={initialValue}>
+                    <UseField path="title">{() => null}</UseField>
+                    <UseField path="description">{() => null}</UseField>
+                    <UseField path="connectorId">{() => null}</UseField>
                     {children}
                   </IntegrationFormProvider>
                 </UIStateProvider>
@@ -145,6 +155,8 @@ describe('CreateDataStreamFlyout', () => {
       isLoading: false,
       error: null,
     });
+
+    mockUploadMutateAsync.mockResolvedValue({ success: true });
   });
 
   describe('rendering', () => {
@@ -239,6 +251,52 @@ describe('CreateDataStreamFlyout', () => {
 
       expect(getByTestId('analyzeLogsButton')).toBeDisabled();
     });
+
+    it('should keep analyze button disabled when integration title is a single character', async () => {
+      const Wrapper = createWrapper({
+        title: 'A',
+        description: 'Integration description',
+        connectorId: 'connector-1',
+        dataStreamTitle: 'Valid stream',
+        dataStreamDescription: 'Stream description',
+        dataCollectionMethod: ['filestream'],
+        logSample: '2024-01-01 level=info msg=test',
+      });
+      const { getByTestId } = render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('analyzeLogsButton')).toBeInTheDocument();
+      });
+
+      expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+    });
+
+    it('should keep analyze button disabled when data stream title is a single character', async () => {
+      const Wrapper = createWrapper({
+        title: 'Integration',
+        description: 'Integration description',
+        connectorId: 'connector-1',
+        dataStreamTitle: 'B',
+        dataStreamDescription: 'Stream description',
+        dataCollectionMethod: ['filestream'],
+        logSample: '2024-01-01 level=info msg=test',
+      });
+      const { getByTestId } = render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('analyzeLogsButton')).toBeInTheDocument();
+      });
+
+      expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+    });
   });
 
   describe('log source selection', () => {
@@ -254,7 +312,6 @@ describe('CreateDataStreamFlyout', () => {
         expect(getByTestId('logsSourceUploadCard')).toBeInTheDocument();
       });
 
-      // Upload card should be checked by default
       const uploadCard = getByTestId('logsSourceUploadCard');
       const radio = uploadCard.querySelector('input[type="radio"]');
       expect(radio).toBeChecked();
@@ -272,12 +329,10 @@ describe('CreateDataStreamFlyout', () => {
         expect(getByTestId('logsSourceIndexCard')).toBeInTheDocument();
       });
 
-      // Click the index source card
       const indexCard = getByTestId('logsSourceIndexCard');
       const radio = indexCard.querySelector('input[type="radio"]');
       fireEvent.click(radio!);
 
-      // Index card should now be checked
       expect(radio).toBeChecked();
     });
 
@@ -293,16 +348,13 @@ describe('CreateDataStreamFlyout', () => {
         expect(getByTestId('logsSourceIndexCard')).toBeInTheDocument();
       });
 
-      // Index select should be disabled initially (upload is default)
       const indexSelect = getByTestId('indexSelect');
       expect(indexSelect.querySelector('[data-test-subj="comboBoxSearchInput"]')).toBeDisabled();
 
-      // Click the index source card
       const indexCard = getByTestId('logsSourceIndexCard');
       const radio = indexCard.querySelector('input[type="radio"]');
       fireEvent.click(radio!);
 
-      // Index select should now be enabled
       await waitFor(() => {
         expect(
           indexSelect.querySelector('[data-test-subj="comboBoxSearchInput"]')
@@ -331,12 +383,10 @@ describe('CreateDataStreamFlyout', () => {
         expect(getByTestId('logsSourceIndexCard')).toBeInTheDocument();
       });
 
-      // Switch to index source
       const indexCard = getByTestId('logsSourceIndexCard');
       const radio = indexCard.querySelector('input[type="radio"]');
       fireEvent.click(radio!);
 
-      // Error should be displayed
       await waitFor(() => {
         expect(getByText('Index is missing event.original field')).toBeInTheDocument();
       });
@@ -364,12 +414,10 @@ describe('CreateDataStreamFlyout', () => {
         expect(getByTestId('logsSourceIndexCard')).toBeInTheDocument();
       });
 
-      // Switch to index source
       const indexCard = getByTestId('logsSourceIndexCard');
       const radio = indexCard.querySelector('input[type="radio"]');
       fireEvent.click(radio!);
 
-      // The combobox should show loading state
       const indexSelect = getByTestId('indexSelect');
       expect(indexSelect.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
     });
@@ -393,12 +441,10 @@ describe('CreateDataStreamFlyout', () => {
         expect(getByTestId('logsSourceIndexCard')).toBeInTheDocument();
       });
 
-      // Switch to index source
       const indexCard = getByTestId('logsSourceIndexCard');
       const radio = indexCard.querySelector('input[type="radio"]');
       fireEvent.click(radio!);
 
-      // The combobox should show loading state
       const indexSelect = getByTestId('indexSelect');
       expect(indexSelect.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
     });
@@ -516,6 +562,29 @@ describe('CreateDataStreamFlyout', () => {
     });
   });
 
+  describe('duplicate integration name validation', () => {
+    it('should disable analyze button when integration name already exists', async () => {
+      mockGetInstalledPackages.mockResolvedValue({
+        items: [{ id: 'existing_integration', type: 'integration' }],
+      });
+
+      const Wrapper = createWrapper({
+        title: 'Existing Integration',
+        description: 'Some description',
+        connectorId: 'test-connector',
+      });
+      const { getByTestId } = render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+      });
+    });
+  });
+
   describe('telemetry', () => {
     it('should render without telemetry errors', async () => {
       const Wrapper = createWrapper();
@@ -528,6 +597,76 @@ describe('CreateDataStreamFlyout', () => {
       await waitFor(() => {
         expect(getByTestId('createDataStreamFlyout')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('sample upload limits', () => {
+    const validForm = {
+      title: 'Integration',
+      description: 'Integration description',
+      connectorId: 'connector-1',
+      dataStreamTitle: 'My stream',
+      dataStreamDescription: 'Stream description',
+      dataCollectionMethod: ['filestream'],
+    };
+
+    it('still uploads the capped samples when the file exceeds the line limit', async () => {
+      const extraLines = 5;
+      const logSample = Array.from({ length: 1000 + extraLines }, (_, i) => `log line ${i}`).join(
+        '\n'
+      );
+      const Wrapper = createWrapper({ ...validForm, logSample });
+      const { getByTestId } = render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('analyzeLogsButton')).not.toBeDisabled();
+      });
+
+      fireEvent.click(getByTestId('analyzeLogsButton'));
+
+      await waitFor(() => {
+        expect(mockUploadMutateAsync).toHaveBeenCalledTimes(1);
+      });
+
+      const uploadRequest = mockUploadMutateAsync.mock.calls[0][0];
+      expect(uploadRequest.samples).toHaveLength(1000);
+      expect(uploadRequest.samples[0]).toBe('log line 0');
+      expect(uploadRequest.samples[999]).toBe('log line 999');
+      expect(mockAddWarning).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Sample log limits applied',
+        })
+      );
+      expect(mockMutateAsync).toHaveBeenCalledTimes(1);
+    });
+
+    it('uploads all samples without a warning when the file is within limits', async () => {
+      const Wrapper = createWrapper({
+        ...validForm,
+        logSample: 'log line 1\nlog line 2',
+      });
+      const { getByTestId } = render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('analyzeLogsButton')).not.toBeDisabled();
+      });
+
+      fireEvent.click(getByTestId('analyzeLogsButton'));
+
+      await waitFor(() => {
+        expect(mockUploadMutateAsync).toHaveBeenCalledTimes(1);
+      });
+
+      expect(mockUploadMutateAsync.mock.calls[0][0].samples).toEqual(['log line 1', 'log line 2']);
+      expect(mockAddWarning).not.toHaveBeenCalled();
     });
   });
 });

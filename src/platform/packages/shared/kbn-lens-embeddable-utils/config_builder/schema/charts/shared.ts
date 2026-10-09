@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema, type Props } from '@kbn/config-schema';
+import { z, lazySchema } from '@kbn/zod';
 
 import {
   countMetricOperationSchema,
@@ -24,6 +23,7 @@ import {
   counterRateOperationSchema,
   staticOperationDefinitionSchema,
   formulaOperationDefinitionSchema,
+  METRIC_OP_TITLES,
 } from '../metric_ops';
 import {
   bucketDateHistogramOperationSchema,
@@ -31,57 +31,101 @@ import {
   bucketHistogramOperationSchema,
   bucketRangesOperationSchema,
   bucketFiltersOperationSchema,
+  BUCKET_OP_TITLES,
 } from '../bucket_ops';
 
-export const baseLegendVisibilitySchema = schema.maybe(
-  schema.oneOf([schema.literal('visible'), schema.literal('hidden')], {
-    meta: { description: 'Legend visibility' },
-  })
+export const baseLegendVisibilitySchema = lazySchema(() =>
+  z
+    .union([z.literal('visible'), z.literal('hidden')])
+    .optional()
+    .meta({ description: 'Legend visibility.' })
 );
 
-export const legendVisibilitySchemaWithAuto = schema.maybe(
-  schema.oneOf([schema.literal('auto'), schema.literal('visible'), schema.literal('hidden')], {
-    meta: { description: 'Legend visibility' },
-  })
+export const legendVisibilitySchemaWithAuto = lazySchema(() =>
+  z
+    .union([z.literal('auto'), z.literal('visible'), z.literal('hidden')])
+    .optional()
+    .meta({ description: 'Legend visibility.' })
 );
 
-export const legendSizeSchema = schema.maybe(
-  schema.oneOf(
-    [
-      schema.literal('auto'),
-      schema.literal('s'),
-      schema.literal('m'),
-      schema.literal('l'),
-      schema.literal('xl'),
-    ],
-    {
-      meta: {
-        id: 'legendSize',
-        title: 'Legend Size',
-        description: 'Legend size',
-      },
+export const legendSizeSchema = lazySchema(() =>
+  z
+    .union([z.literal('auto'), z.literal('s'), z.literal('m'), z.literal('l'), z.literal('xl')])
+    .optional()
+    .meta({
+      id: 'visLegendSize',
+      title: 'Legend Size',
+      description: 'Legend size.',
+    })
+);
+
+function ctxMeta(context: string, suffix: string, title: string) {
+  return { id: `vis${context[0].toUpperCase()}${context.slice(1)}${suffix}`, title };
+}
+
+const ctxSchemaCache = new Map<string, { base: z.ZodType; schema: z.ZodType }>();
+
+/**
+ * Applies context-specific meta, creating each id'd schema only once so that
+ * lazySchema factory re-runs (e.g. after GC) never produce duplicate schema ids.
+ */
+export function withCtxMeta<T extends z.ZodType>(
+  schema: T,
+  context: string,
+  suffix: string,
+  title: string
+): T {
+  const meta = ctxMeta(context, suffix, title);
+  const cached = ctxSchemaCache.get(meta.id);
+  if (cached) {
+    if (cached.base !== schema) {
+      throw new Error(`Schema id "${meta.id}" is already used by a different base schema`);
     }
-  )
-);
+    return cached.schema as T;
+  }
+  const created = schema.meta(meta);
+  ctxSchemaCache.set(meta.id, { base: schema, schema: created });
+  return created;
+}
 
-function mergeWithSimpleMetrics<T extends Props>(baseSchema: T) {
-  return schema.oneOf([
-    countMetricOperationSchema.extends(baseSchema),
-    uniqueCountMetricOperationSchema.extends(baseSchema),
-    metricOperationSchema.extends(baseSchema),
-    sumMetricOperationSchema.extends(baseSchema),
-    lastValueOperationSchema.extends(baseSchema),
-    percentileOperationSchema.extends(baseSchema),
-    percentileRanksOperationSchema.extends(baseSchema),
+function getSimpleMetricsSchema(context: string) {
+  return z.union([
+    withCtxMeta(countMetricOperationSchema, context, 'CountMetric', METRIC_OP_TITLES.count),
+    withCtxMeta(
+      uniqueCountMetricOperationSchema,
+      context,
+      'UniqueCountMetric',
+      METRIC_OP_TITLES.uniqueCount
+    ),
+    withCtxMeta(metricOperationSchema, context, 'StatsMetric', METRIC_OP_TITLES.stats),
+    withCtxMeta(sumMetricOperationSchema, context, 'SumMetric', METRIC_OP_TITLES.sum),
+    withCtxMeta(lastValueOperationSchema, context, 'LastValue', METRIC_OP_TITLES.lastValue),
+    withCtxMeta(percentileOperationSchema, context, 'Percentile', METRIC_OP_TITLES.percentile),
+    withCtxMeta(
+      percentileRanksOperationSchema,
+      context,
+      'PercentileRanks',
+      METRIC_OP_TITLES.percentileRanks
+    ),
   ]);
 }
 
-function mergeWithRefrenceBasedMetrics<T extends Props>(baseSchema: T) {
-  return schema.oneOf([
-    differencesOperationSchema.extends(baseSchema),
-    movingAverageOperationSchema.extends(baseSchema),
-    cumulativeSumOperationSchema.extends(baseSchema),
-    counterRateOperationSchema.extends(baseSchema),
+function getReferenceBasedMetricsSchema(context: string) {
+  return z.union([
+    withCtxMeta(differencesOperationSchema, context, 'Differences', METRIC_OP_TITLES.differences),
+    withCtxMeta(
+      movingAverageOperationSchema,
+      context,
+      'MovingAverage',
+      METRIC_OP_TITLES.movingAverage
+    ),
+    withCtxMeta(
+      cumulativeSumOperationSchema,
+      context,
+      'CumulativeSum',
+      METRIC_OP_TITLES.cumulativeSum
+    ),
+    withCtxMeta(counterRateOperationSchema, context, 'CounterRate', METRIC_OP_TITLES.counterRate),
   ]);
 }
 
@@ -94,73 +138,61 @@ function mergeWithRefrenceBasedMetrics<T extends Props>(baseSchema: T) {
  * - bucket operations
  */
 
-export function mergeAllMetricsWithChartDimensionSchema<T extends Props>(baseSchema: T) {
-  return schema.oneOf([
-    // oneOf allows only 12 items
-    // so break down metrics based on the type: field-based, reference-based, formula-like
-    mergeWithSimpleMetrics(baseSchema),
-    formulaOperationDefinitionSchema.extends(baseSchema),
+export function getMetricsWithChartDimensionSchema(context: string) {
+  return z.union([
+    getSimpleMetricsSchema(context),
+    withCtxMeta(formulaOperationDefinitionSchema, context, 'Formula', METRIC_OP_TITLES.formula),
   ]);
 }
 
-export function mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps<T extends Props>(
-  baseSchema: T
-) {
-  return schema.oneOf([
-    // oneOf allows only 12 items
-    // so break down metrics based on the type: field-based, reference-based, formula-like
-    mergeWithSimpleMetrics(baseSchema),
-    mergeWithRefrenceBasedMetrics(baseSchema),
-    formulaOperationDefinitionSchema.extends(baseSchema),
+export function getMetricsWithChartDimensionSchemaWithRefBasedOps(context: string) {
+  return z.union([
+    getSimpleMetricsSchema(context),
+    getReferenceBasedMetricsSchema(context),
+    withCtxMeta(formulaOperationDefinitionSchema, context, 'Formula', METRIC_OP_TITLES.formula),
   ]);
 }
 
-export function mergeAllMetricsWithChartDimensionSchemaWithTimeBasedAndStaticOps<T extends Props>(
-  baseSchema: T
-) {
-  return schema.oneOf([
-    // oneOf allows only 12 items
-    // so break down metrics based on the type: field-based, reference-based, formula-like
-    mergeWithSimpleMetrics(baseSchema),
-    mergeWithRefrenceBasedMetrics(baseSchema),
-    staticOperationDefinitionSchema.extends(baseSchema),
-    formulaOperationDefinitionSchema.extends(baseSchema),
+export function getMetricsWithChartDimensionSchemaWithTimeBasedAndStaticOps(context: string) {
+  return z.union([
+    getSimpleMetricsSchema(context),
+    getReferenceBasedMetricsSchema(context),
+    withCtxMeta(staticOperationDefinitionSchema, context, 'Static', METRIC_OP_TITLES.static),
+    withCtxMeta(formulaOperationDefinitionSchema, context, 'Formula', METRIC_OP_TITLES.formula),
   ]);
 }
 
-export function mergeAllMetricsWithChartDimensionSchemaWithStaticOps<T extends Props>(
-  baseSchema: T
-) {
-  return schema.oneOf([
-    // oneOf allows only 12 items
-    // so break down metrics based on the type: field-based, reference-based, formula-like
-    mergeWithSimpleMetrics(baseSchema),
-    staticOperationDefinitionSchema.extends(baseSchema),
-    formulaOperationDefinitionSchema.extends(baseSchema),
+export function getMetricsWithChartDimensionSchemaWithStaticOps(context: string) {
+  return z.union([
+    getSimpleMetricsSchema(context),
+    withCtxMeta(staticOperationDefinitionSchema, context, 'Static', METRIC_OP_TITLES.static),
+    withCtxMeta(formulaOperationDefinitionSchema, context, 'Formula', METRIC_OP_TITLES.formula),
   ]);
 }
 
-export function mergeAllBucketsWithChartDimensionSchema<T extends Props>(baseSchema: T) {
-  return schema.oneOf([
-    bucketDateHistogramOperationSchema.extends(baseSchema),
-    bucketTermsOperationSchema.extends(baseSchema),
-    bucketHistogramOperationSchema.extends(baseSchema),
-    bucketRangesOperationSchema.extends(baseSchema),
-    bucketFiltersOperationSchema.extends(baseSchema),
+export function getBucketsWithChartDimensionSchema(context: string) {
+  return z.union([
+    withCtxMeta(
+      bucketDateHistogramOperationSchema,
+      context,
+      'DateHistogram',
+      BUCKET_OP_TITLES.dateHistogram
+    ),
+    withCtxMeta(bucketTermsOperationSchema, context, 'Terms', BUCKET_OP_TITLES.terms),
+    withCtxMeta(bucketHistogramOperationSchema, context, 'Histogram', BUCKET_OP_TITLES.histogram),
+    withCtxMeta(bucketRangesOperationSchema, context, 'Ranges', BUCKET_OP_TITLES.ranges),
+    withCtxMeta(bucketFiltersOperationSchema, context, 'Filters', BUCKET_OP_TITLES.filters),
   ]);
 }
 
 /**
  * X-axis scale type for data transformation
  */
-export const xScaleSchema = schema.oneOf(
-  [schema.literal('ordinal'), schema.literal('temporal'), schema.literal('linear')],
-  {
-    meta: {
-      // IMPORTANT: This description guides LLM agents - modify with caution and test agent behavior after changes
-      description:
-        "X-axis scale type. Use 'temporal' for timestamp/date fields (e.g., @timestamp, DATE_TRUNC results). Use 'ordinal' for categorical/text fields. Use 'linear' for numeric fields.",
-    },
-  }
+export const xScaleSchema = lazySchema(() =>
+  z.union([z.literal('ordinal'), z.literal('temporal'), z.literal('linear')]).meta({
+    // IMPORTANT: This description guides LLM agents - modify with caution and test agent behavior after changes
+    description:
+      "X-axis scale type. Use 'temporal' for timestamp/date fields (for example, @timestamp or DATE_TRUNC results). Use 'ordinal' for categorical/text fields. Use 'linear' for numeric fields.",
+  })
 );
-export type XScaleSchemaType = TypeOf<typeof xScaleSchema>;
+export type XScaleSchemaType = z.output<typeof xScaleSchema>;

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback, useContext } from 'react';
 import { EuiButton } from '@elastic/eui';
 
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as i18n from './translations';
+import { TemplateFieldsValidationContext } from './template_fields_validation_context';
 
 export interface SubmitCaseButtonComponentProps {
   isSubmitting: boolean;
@@ -17,6 +18,15 @@ export interface SubmitCaseButtonComponentProps {
 
 const SubmitCaseButtonComponent: React.FC<SubmitCaseButtonComponentProps> = ({ isSubmitting }) => {
   const { submit } = useFormContext();
+  const triggerRef = useContext(TemplateFieldsValidationContext);
+
+  const handleClick = useCallback(async () => {
+    if (triggerRef.current) {
+      const isValid = await triggerRef.current();
+      if (!isValid) return;
+    }
+    submit();
+  }, [submit, triggerRef]);
 
   return (
     <EuiButton
@@ -26,7 +36,7 @@ const SubmitCaseButtonComponent: React.FC<SubmitCaseButtonComponentProps> = ({ i
       iconType="plusCircle"
       isDisabled={isSubmitting}
       isLoading={isSubmitting}
-      onClick={submit}
+      onClick={handleClick}
     >
       {i18n.CREATE_CASE}
     </EuiButton>

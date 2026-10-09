@@ -14,11 +14,11 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
-import type { SeverityThreshold } from '../../../../common/types/anomalies';
+import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import type { MlLocator } from '@kbn/ml-common-types/locator';
 import { ExplorerChartsContainer } from './explorer_charts_container';
 import { SelectSeverityUI } from '../../components/controls/select_severity';
 import type { ExplorerChartsData } from './explorer_charts_container_service';
-import type { MlLocator } from '../../../../common/types/locator';
 import type { AnomaliesTableData } from '../explorer_utils';
 import type { SeverityOption } from '../hooks/use_severity_options';
 
@@ -68,9 +68,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   showFilterIcons,
 }) => {
   return (
-    // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
-    // These attributes are temporarily needed for reporting to not have any warning
-    <div data-shared-item="" data-rendering-count={1}>
+    <div>
       <EuiFlexGroup id={id} direction="row" gutterSize="l" responsive={true}>
         <EuiFlexItem grow={false}>
           <SelectSeverityUI severity={severity} onChange={setSeverity} />

@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/292030
+issues:
+- https://github.com/elastic/kibana/issues/291510
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Fix OpenTelemetry exception navigation and missing errors for mixed spans in APM

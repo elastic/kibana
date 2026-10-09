@@ -29,10 +29,48 @@ spaceTest.describe(
       await scoutSpace.uiSettings.unset(AI_CHAT_EXPERIENCE_TYPE);
     });
 
-    spaceTest('should change Chat Experience to Agent', async ({ pageObjects }) => {
-      await spaceTest.step('verify Chat Experience is set to Classic mode by default', async () => {
+    spaceTest('should show Agent as default and display Agent UI', async ({ pageObjects }) => {
+      await spaceTest.step(
+        'verify Agent is the default Chat Experience for Security space',
+        async () => {
+          const chatExperienceField = pageObjects.genAiSettings.getChatExperienceField();
+          await expect(chatExperienceField).toHaveValue(AIChatExperience.Agent);
+        }
+      );
+
+      await spaceTest.step('verify Agent side nav button is shown', async () => {
+        const agentSideNavButton = pageObjects.genAiSettings.getAgentSideNavButton();
+        await pageObjects.genAiSettings.getMoreMenuButton().click();
+        await expect(agentSideNavButton).toBeVisible();
+      });
+
+      await spaceTest.step('verify AI Assistants side nav setting is hidden', async () => {
+        const aiAssistantSideNavSetting = pageObjects.genAiSettings.getAIAssistantSideNavSetting();
+        await expect(aiAssistantSideNavSetting).toBeHidden();
+      });
+
+      await spaceTest.step('verify AI Agent nav button is visible', async () => {
+        const aiAgentNavButton = pageObjects.genAiSettings.getAIAgentNavButton();
+        await expect(aiAgentNavButton).toBeVisible();
+      });
+    });
+
+    spaceTest('should switch to Classic mode from Agent default', async ({ pageObjects }) => {
+      await spaceTest.step('verify Agent is the default Chat Experience', async () => {
         const chatExperienceField = pageObjects.genAiSettings.getChatExperienceField();
-        await expect(chatExperienceField).toHaveValue(AIChatExperience.Classic);
+        await expect(chatExperienceField).toHaveValue(AIChatExperience.Agent);
+      });
+
+      await spaceTest.step('switch to Classic mode', async () => {
+        const chatExperienceField = pageObjects.genAiSettings.getChatExperienceField();
+        await chatExperienceField.selectOption({ value: AIChatExperience.Classic });
+      });
+
+      await spaceTest.step('save settings and wait for reload', async () => {
+        const bottomBar = pageObjects.genAiSettings.getSaveButtonBottomBar();
+        await pageObjects.genAiSettings.getSaveButton().click();
+        await expect(bottomBar).toBeHidden();
+        await pageObjects.genAiSettings.waitForPageToLoad();
       });
 
       await spaceTest.step('verify AI Assistant nav button is visible', async () => {
@@ -49,35 +87,6 @@ spaceTest.describe(
         const agentSideNavButton = pageObjects.genAiSettings.getAgentSideNavButton();
         await pageObjects.genAiSettings.getMoreMenuButton().click();
         await expect(agentSideNavButton).toBeHidden();
-      });
-
-      await spaceTest.step('switch to Agent mode', async () => {
-        const chatExperienceField = pageObjects.genAiSettings.getChatExperienceField();
-        await chatExperienceField.selectOption({ value: AIChatExperience.Agent });
-        await pageObjects.genAiSettings.getConfirmModalConfirmButton().click();
-      });
-
-      await spaceTest.step('save settings and wait for reload', async () => {
-        const bottomBar = pageObjects.genAiSettings.getSaveButtonBottomBar();
-        await pageObjects.genAiSettings.getSaveButton().click();
-        await expect(bottomBar).toBeHidden();
-        await pageObjects.genAiSettings.waitForPageToLoad();
-      });
-
-      await spaceTest.step('verify Agent side nav button is shown', async () => {
-        const agentSideNavButton = pageObjects.genAiSettings.getAgentSideNavButton();
-        await pageObjects.genAiSettings.getMoreMenuButton().click();
-        await expect(agentSideNavButton).toBeVisible();
-      });
-
-      await spaceTest.step('verify AI Assistants side nav setting is hidden', async () => {
-        const aiAssistantSideNavSetting = pageObjects.genAiSettings.getAIAssistantSideNavSetting();
-        await expect(aiAssistantSideNavSetting).toBeHidden();
-      });
-
-      await spaceTest.step('verify AI Agent nav button is visible', async () => {
-        const aiAgentNavButton = pageObjects.genAiSettings.getAIAgentNavButton();
-        await expect(aiAgentNavButton).toBeVisible();
       });
     });
   }

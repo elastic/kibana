@@ -11,6 +11,7 @@ import { mockEISPreconfiguredEndpoints } from '../__mocks__/inference_endpoints'
 import {
   filterPreconfiguredEndpoints,
   findEndpointsWithoutConnectors,
+  findStaleDynamicConnectorIds,
   connectorFromEndpoint,
   getConnectorIdFromEndpoint,
   getConnectorNameFromEndpoint,
@@ -88,6 +89,30 @@ describe('filterPreconfiguredEndpoints', () => {
     expect(filterPreconfiguredEndpoints([])).toEqual([]);
   });
 
+  it('filters out endpoints with inference IDs starting with .gp-llm-v2', () => {
+    const endpoint = makeEndpoint({ inference_id: '.gp-llm-v2-chat_completion' });
+    expect(filterPreconfiguredEndpoints([endpoint])).toEqual([]);
+  });
+
+  it('filters out all .gp-llm-v2 variant inference IDs', () => {
+    const endpoint1 = makeEndpoint({ inference_id: '.gp-llm-v2' });
+    const endpoint2 = makeEndpoint({ inference_id: '.gp-llm-v2-chat_completion' });
+    const endpoint3 = makeEndpoint({ inference_id: '.gp-llm-v2-completion' });
+    expect(filterPreconfiguredEndpoints([endpoint1, endpoint2, endpoint3])).toEqual([]);
+  });
+
+  it('filters out endpoints with inference IDs starting with .rainbow-sprinkles', () => {
+    const endpoint = makeEndpoint({ inference_id: '.rainbow-sprinkles-elastic' });
+    expect(filterPreconfiguredEndpoints([endpoint])).toEqual([]);
+  });
+
+  it('does not filter out non-blocked endpoints that otherwise qualify', () => {
+    const valid = makeEndpoint();
+    const gp = makeEndpoint({ inference_id: '.gp-llm-v2-chat_completion' });
+    const rainbow = makeEndpoint({ inference_id: '.rainbow-sprinkles-elastic' });
+    expect(filterPreconfiguredEndpoints([valid, gp, rainbow])).toEqual([valid]);
+  });
+
   it('filters the EIS mock endpoints to only chat_completion endpoints with kibana-connector property', () => {
     const results = filterPreconfiguredEndpoints(mockEISPreconfiguredEndpoints);
     expect(results.length).toBeGreaterThan(0);
@@ -96,6 +121,13 @@ describe('filterPreconfiguredEndpoints', () => {
       expect(ep.metadata?.heuristics?.properties).toContain('kibana-connector');
       expect(endpoint.task_type).toBe('chat_completion');
     });
+  });
+
+  it('excludes .gp-llm-v2 and .rainbow-sprinkles endpoints from the EIS mock list', () => {
+    const results = filterPreconfiguredEndpoints(mockEISPreconfiguredEndpoints);
+    const resultIds = results.map((ep) => ep.inference_id);
+    expect(resultIds.every((id) => !id.startsWith('.gp-llm-v2'))).toBe(true);
+    expect(resultIds.every((id) => !id.startsWith('.rainbow-sprinkles'))).toBe(true);
   });
 });
 
@@ -128,6 +160,50 @@ describe('findEndpointsWithoutConnectors', () => {
     expect(
       findEndpointsWithoutConnectors([endpointA, endpointB], [connectorA, connectorB])
     ).toEqual([]);
+  });
+});
+
+describe('findStaleDynamicConnectorIds', () => {
+  const endpointA = makeEndpoint({ inference_id: '.model-a-chat_completion' });
+  const endpointB = makeEndpoint({ inference_id: '.model-b-chat_completion' });
+  const dynamicConnectorA = { ...connectorFromEndpoint(endpointA), isDynamic: true };
+  const dynamicConnectorB = { ...connectorFromEndpoint(endpointB), isDynamic: true };
+
+  it('returns connector ids that no longer have a matching endpoint', () => {
+    expect(
+      findStaleDynamicConnectorIds([endpointA], [dynamicConnectorA, dynamicConnectorB])
+    ).toEqual([dynamicConnectorB.id]);
+  });
+
+  it('returns an empty array when all dynamic connectors still have matching endpoints', () => {
+    expect(
+      findStaleDynamicConnectorIds([endpointA, endpointB], [dynamicConnectorA, dynamicConnectorB])
+    ).toEqual([]);
+  });
+
+  it('returns all dynamic connector ids when no endpoints remain', () => {
+    expect(findStaleDynamicConnectorIds([], [dynamicConnectorA, dynamicConnectorB])).toEqual([
+      dynamicConnectorA.id,
+      dynamicConnectorB.id,
+    ]);
+  });
+
+  it('ignores non-dynamic connectors even if their endpoint is missing', () => {
+    const nonDynamicConnector = { ...connectorFromEndpoint(endpointA), isDynamic: false };
+    expect(findStaleDynamicConnectorIds([], [nonDynamicConnector])).toEqual([]);
+  });
+
+  it('ignores connectors that are not .inference connectors', () => {
+    const otherConnector = {
+      ...dynamicConnectorA,
+      actionTypeId: '.slack',
+    };
+    expect(findStaleDynamicConnectorIds([], [otherConnector])).toEqual([]);
+  });
+
+  it('ignores dynamic connectors without an inferenceId in config', () => {
+    const connectorWithoutInferenceId = { ...dynamicConnectorA, config: {} };
+    expect(findStaleDynamicConnectorIds([], [connectorWithoutInferenceId])).toEqual([]);
   });
 });
 

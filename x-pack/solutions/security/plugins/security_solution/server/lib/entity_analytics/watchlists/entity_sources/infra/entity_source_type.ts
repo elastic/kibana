@@ -8,6 +8,7 @@
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { Type } from '@kbn/config-schema';
+import type { EncryptedSavedObjectTypeRegistration } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { MonitoringEntitySourceAttributes } from '../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 
@@ -29,6 +30,16 @@ const watchlistEntitySourceMappings: SavedObjectsType['mappings'] = {
     },
     enabled: {
       type: 'boolean',
+    },
+    range: {
+      properties: {
+        start: {
+          type: 'keyword',
+        },
+        end: {
+          type: 'keyword',
+        },
+      },
     },
   },
 };
@@ -60,6 +71,11 @@ const integrationsSchema = schema.object(
   { unknowns: 'ignore' }
 );
 
+export interface EntitySourceApiKeyFields {
+  apiKeyId?: string | null;
+  apiKey?: string | null; // encrypted
+}
+
 type WatchlistEntitySourceSchemaAttributes = Pick<
   MonitoringEntitySourceAttributes,
   | 'type'
@@ -72,11 +88,12 @@ type WatchlistEntitySourceSchemaAttributes = Pick<
   | 'matchers'
   | 'filter'
   | 'integrations'
+  | 'range'
 > & {
   error?: string;
   matchersModifiedByUser?: boolean;
   managedVersion?: number;
-};
+} & EntitySourceApiKeyFields;
 
 type WatchlistEntitySourceSchemaProps = {
   [Key in keyof WatchlistEntitySourceSchemaAttributes]: Type<unknown>;
@@ -96,12 +113,31 @@ const entitySourceSchemaV1 = {
   managedVersion: schema.maybe(schema.number()),
   filter: schema.maybe(schema.any()),
   integrations: schema.maybe(integrationsSchema),
+} satisfies Omit<WatchlistEntitySourceSchemaProps, 'range'>;
+
+const entitySourceSchemaV2 = {
+  ...entitySourceSchemaV1,
+  range: schema.maybe(
+    schema.object(
+      {
+        start: schema.string(),
+        end: schema.string(),
+      },
+      { unknowns: 'ignore' }
+    )
+  ),
 } satisfies WatchlistEntitySourceSchemaProps;
+
+const entitySourceSchemaV3 = {
+  ...entitySourceSchemaV2,
+  apiKeyId: schema.maybe(schema.nullable(schema.string({ maxLength: 64 }))),
+  apiKey: schema.maybe(schema.nullable(schema.string({ maxLength: 256 }))),
+};
 
 export const watchlistEntitySourceType: SavedObjectsType = {
   name: watchlistEntitySourceTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
-  hidden: false,
+  hidden: true,
   namespaceType: 'multiple-isolated',
   mappings: watchlistEntitySourceMappings,
   modelVersions: {
@@ -112,5 +148,37 @@ export const watchlistEntitySourceType: SavedObjectsType = {
         create: schema.object(entitySourceSchemaV1, { unknowns: 'ignore' }),
       },
     },
+    '2': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            range: {
+              properties: {
+                start: { type: 'keyword' },
+                end: { type: 'keyword' },
+              },
+            },
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: schema.object(entitySourceSchemaV2, { unknowns: 'ignore' }),
+        create: schema.object(entitySourceSchemaV2, { unknowns: 'ignore' }),
+      },
+    },
+    '3': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: schema.object(entitySourceSchemaV3, { unknowns: 'ignore' }),
+        create: schema.object(entitySourceSchemaV3, { unknowns: 'ignore' }),
+      },
+    },
   },
+};
+
+export const WatchlistEntitySourceApiKeyEncryptionParams: EncryptedSavedObjectTypeRegistration = {
+  type: watchlistEntitySourceTypeName,
+  attributesToEncrypt: new Set(['apiKey']),
+  attributesToIncludeInAAD: new Set(['apiKeyId']),
 };

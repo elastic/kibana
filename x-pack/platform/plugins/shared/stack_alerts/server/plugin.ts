@@ -9,7 +9,7 @@ import type { Plugin, Logger, CoreSetup, PluginInitializerContext } from '@kbn/c
 
 import type { StackAlertsDeps, StackAlertsStartDeps } from './types';
 import { registerBuiltInRuleTypes } from './rule_types';
-import { BUILT_IN_ALERTS_FEATURE } from './feature';
+import { BUILT_IN_ALERTS_FEATURE, STACK_ALERTS_ONLY_FEATURE } from './feature';
 
 export class AlertingBuiltinsPlugin
   implements Plugin<void, void, StackAlertsDeps, StackAlertsStartDeps>
@@ -24,6 +24,7 @@ export class AlertingBuiltinsPlugin
 
   public setup(core: CoreSetup<StackAlertsStartDeps>, { alerting, features }: StackAlertsDeps) {
     features.registerKibanaFeature(BUILT_IN_ALERTS_FEATURE);
+    features.registerKibanaFeature(STACK_ALERTS_ONLY_FEATURE);
     registerBuiltInRuleTypes(
       {
         logger: this.logger,

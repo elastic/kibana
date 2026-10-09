@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-errors'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-data-discovery'
+  defaultOwner: '@elastic/kibana-discover'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/search-errors'
   description: Moon project for @kbn/search-errors
   channel: ''
-  owner: '@elastic/kibana-data-discovery'
+  owner: '@elastic/kibana-discover'
   sourceRoot: src/platform/packages/shared/kbn-search-errors
 dependsOn:
   - '@kbn/i18n'
@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/kibana-utils-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/search-types'
+  - '@kbn/test-jest-helpers'
 tags:
   - shared-common
   - package

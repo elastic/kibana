@@ -20,6 +20,7 @@ import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createReadySignal } from '@kbn/event-log-plugin/server/lib/ready_signal';
 import type { ActionsConfig } from '../config';
+import { defaultInboundEventsLimitConfigs } from '../config';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import { getActionsConfigurationUtilities } from '../actions_config';
 import { resolveCustomHosts } from '../lib/custom_host_settings';
@@ -31,9 +32,9 @@ import {
 import { getFips } from 'crypto';
 import { getAxiosInstanceWithAuth } from '../lib/get_axios_instance';
 import { AuthTypeRegistry, registerAuthTypes } from '../auth_types';
-import type { NormalizedAuthType } from '@kbn/connector-specs';
 import { PFX } from '@kbn/connector-specs/src/auth_types/pfx';
 import { CRT } from '@kbn/connector-specs/src/auth_types/crt';
+import type { NormalizedAuthType } from '@kbn/connector-specs';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -802,6 +803,12 @@ const BaseActionsConfig: ActionsConfig = {
         callback: { lookbackWindow: '1h', limit: 100 },
       },
     },
+  },
+  inboundEvents: {
+    enabled: false,
+    maxBodyBytes: new ByteSizeValue(1024 * 1024),
+    maxEmitted: 25,
+    ...defaultInboundEventsLimitConfigs,
   },
 };
 

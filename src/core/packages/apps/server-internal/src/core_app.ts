@@ -341,7 +341,7 @@ export class CoreAppsService {
           version: '1',
           validate: {
             request: {
-              body: schema.recordOf(schema.string(), schema.any()),
+              body: schema.recordOf(schema.string({ maxLength: 1024 }), schema.any()),
             },
             response: {
               '200': { body: () => schema.object({ ok: schema.boolean() }) },
@@ -386,9 +386,9 @@ export class CoreAppsService {
         path: '/{path*}',
         validate: {
           params: schema.object({
-            path: schema.maybe(schema.string()),
+            path: schema.maybe(schema.string({ maxLength: 1024 })),
           }),
-          query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+          query: schema.maybe(schema.recordOf(schema.string({ maxLength: 1024 }), schema.any())),
         },
         security: {
           authz: {

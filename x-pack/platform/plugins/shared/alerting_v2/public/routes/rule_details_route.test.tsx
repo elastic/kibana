@@ -10,14 +10,10 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
+import { createMockLocators, MockLocatorProvider } from '../test_utils/test_providers';
 import { RuleDetailsRoute } from './rule_details_route';
 
-const mockHistoryPush = jest.fn();
-
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: mockHistoryPush }),
-}));
+const mockLocators = createMockLocators();
 
 const mockUseFetchRule = jest.fn();
 jest.mock('../hooks/use_fetch_rule', () => ({
@@ -29,19 +25,19 @@ jest.mock('../components/rule_details/skeleton', () => ({
 }));
 
 jest.mock('../components/rule_details/rule_detail_page', () => ({
-  RuleDetailPage: ({ rule }: { rule: { id: string } }) => (
-    <div data-test-subj="ruleDetailPage">Rule: {rule.id}</div>
-  ),
+  RuleDetailPage: () => <div data-test-subj="ruleDetailPage">Rule detail page</div>,
 }));
 
 const renderRoute = (ruleId = 'rule-1') =>
   render(
     <I18nProvider>
-      <MemoryRouter initialEntries={[`/${ruleId}`]}>
-        <Route path="/:ruleId">
-          <RuleDetailsRoute />
-        </Route>
-      </MemoryRouter>
+      <MockLocatorProvider locators={mockLocators}>
+        <MemoryRouter initialEntries={[`/${ruleId}`]}>
+          <Route path="/:ruleId">
+            <RuleDetailsRoute />
+          </Route>
+        </MemoryRouter>
+      </MockLocatorProvider>
     </I18nProvider>
   );
 
@@ -80,7 +76,7 @@ describe('RuleDetailsRoute', () => {
       isError: false,
     });
     renderRoute();
-    expect(await screen.findByTestId('ruleDetailPage')).toHaveTextContent('Rule: rule-1');
+    expect(await screen.findByTestId('ruleDetailPage')).toBeInTheDocument();
   });
 
   it('passes the ruleId from URL params to useFetchRule', () => {
@@ -89,14 +85,17 @@ describe('RuleDetailsRoute', () => {
     expect(mockUseFetchRule).toHaveBeenCalledWith('my-custom-id');
   });
 
-  it('navigates back to rules list when back button is clicked', () => {
+  it('links back to the host-aware rules list when the rule fails to load', () => {
     mockUseFetchRule.mockReturnValue({
       data: undefined,
       isLoading: false,
       isError: true,
     });
     renderRoute();
-    screen.getByTestId('ruleDetailsErrorBackButton').click();
-    expect(mockHistoryPush).toHaveBeenCalledWith('/');
+    expect(mockLocators.rulesLocators.useUrl).toHaveBeenCalledWith({});
+    expect(screen.getByTestId('ruleDetailsErrorBackButton')).toHaveAttribute(
+      'href',
+      '/mock-locator-url'
+    );
   });
 });

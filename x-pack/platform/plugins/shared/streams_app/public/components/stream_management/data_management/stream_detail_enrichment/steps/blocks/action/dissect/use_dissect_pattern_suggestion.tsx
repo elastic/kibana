@@ -8,6 +8,7 @@
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { lastValueFrom } from 'rxjs';
 import type { useAbortController } from '@kbn/react-hooks';
+import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import { useFetchErrorToast } from '../../../../../../../../hooks/use_fetch_error_toast';
 import { NoSuggestionsError, isNoSuggestionsError } from '../utils/no_suggestions_error';
 import {
@@ -116,7 +117,7 @@ export function useDissectPatternSuggestion(
         };
       } catch (error) {
         finishTrackingAndReport(0, [0]);
-        if (!isNoSuggestionsError(error)) {
+        if (!isNoSuggestionsError(error) && !isRequestAbortedError(error)) {
           showFetchErrorToast(error as Error);
         }
         throw error;

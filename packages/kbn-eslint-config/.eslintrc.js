@@ -17,47 +17,6 @@
  * under the License.
  */
 
-const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
-
-const USES_ELASTIC_APM_AGENT = [
-  // Core platform APM integration & agent infrastructure
-  /src[\/\\]core[\/\\]/,
-  /kbn-apm-config-loader[\/\\]/,
-  /kbn-apm-utils[\/\\]/,
-
-  // Test & dev tooling
-  /kbn-test[\/\\]src[\/\\]/,
-  /kbn-journeys[\/\\]/,
-  /kbn-cli-dev-mode[\/\\]/,
-  /kbn-docs-utils[\/\\]/,
-  /src[\/\\]platform[\/\\]test[\/\\]/,
-  /x-pack[\/\\]platform[\/\\]test[\/\\]/,
-
-  // Shared packages with APM tracing
-  /kbn-langchain[\/\\]server[\/\\]tracers[\/\\]/,
-  /kbn-reporting[\/\\]export_types[\/\\]/,
-
-  // Plugins with legacy APM custom spans (pending OTel migration)
-  /workflows_execution_engine[\/\\]server[\/\\]/,
-  /task_manager[\/\\]server[\/\\]/,
-  /fleet[\/\\]server[\/\\]/,
-  /alerting[\/\\]server[\/\\]/,
-  /screenshotting[\/\\]server[\/\\]/,
-  /reporting[\/\\]server[\/\\]/,
-  /intercepts[\/\\]server[\/\\]/,
-  /data_usage[\/\\]server[\/\\]/,
-  /encrypted_saved_objects[\/\\]server[\/\\]/,
-  /plugins[\/\\]shared[\/\\]data[\/\\]server[\/\\]search[\/\\]/,
-  /telemetry[\/\\]server[\/\\]/,
-  /telemetry_collection_manager[\/\\]server[\/\\]/,
-  /security_solution[\/\\]server[\/\\]/,
-  /lists[\/\\]server[\/\\]/,
-  /elastic_assistant[\/\\]server[\/\\]/,
-  /plugins[\/\\]apm[\/\\]/,
-  /synthetics[\/\\]server[\/\\]/,
-  /feature-flags[\/\\]server-internal[\/\\]/,
-];
-
 module.exports = {
   extends: [
     './javascript.js',
@@ -73,6 +32,8 @@ module.exports = {
     '@kbn/eslint-plugin-imports',
     '@kbn/eslint-plugin-telemetry',
     '@kbn/eslint-plugin-i18n',
+    '@kbn/eslint-plugin-alerting-v2',
+    '@kbn/eslint-plugin-kbn-ui',
     '@elastic/eui',
     'eslint-plugin-depend',
     'prettier',
@@ -105,125 +66,6 @@ module.exports = {
       {
         endOfLine: 'auto',
       },
-    ],
-
-    '@kbn/eslint/module_migration': [
-      'error',
-      [
-        {
-          from: 'expect.js',
-          to: '@kbn/expect',
-        },
-        {
-          from: 'mkdirp',
-          to: false,
-          disallowedMessage: `Don't use 'mkdirp', use the new { recursive: true } option of Fs.mkdir instead`,
-        },
-        {
-          from: 'numeral',
-          to: '@elastic/numeral',
-        },
-        {
-          from: '@kbn/elastic-idx',
-          to: false,
-          disallowedMessage: `Don't use idx(), use optional chaining syntax instead https://ela.st/optchain`,
-        },
-        {
-          from: 'x-pack',
-          toRelative: 'x-pack',
-        },
-        {
-          from: 'react-router',
-          to: 'react-router-dom',
-        },
-        {
-          from: '@kbn/ui-shared-deps/monaco',
-          to: '@kbn/monaco',
-        },
-        {
-          from: 'monaco-editor',
-          to: false,
-          disallowedMessage: `Don't import monaco directly, use or add exports to @kbn/monaco`,
-        },
-        {
-          from: 'tinymath',
-          to: '@kbn/tinymath',
-          disallowedMessage: `Don't use 'tinymath', use '@kbn/tinymath'`,
-        },
-        {
-          from: '@kbn/test/types/ftr',
-          to: '@kbn/test',
-          disallowedMessage: `import from the root of @kbn/test instead`,
-        },
-        {
-          from: 'react-intl',
-          to: '@kbn/i18n-react',
-          disallowedMessage: `import from @kbn/i18n-react instead`,
-          exclude: [/src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-i18n-react/],
-        },
-        {
-          from: 'zod',
-          to: '@kbn/zod',
-          disallowedMessage: `import from @kbn/zod instead`,
-          exclude: [/src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-zod[\/\\]/],
-        },
-        {
-          from: 'styled-components',
-          to: false,
-          exclude: USES_STYLED_COMPONENTS,
-          disallowedMessage: `Prefer using @emotion/react instead. To use styled-components, ensure you plugin is enabled in packages/kbn-babel-preset/styled_components_files.js.`,
-        },
-        {
-          from: '@kbn/test/jest',
-          to: '@kbn/test-jest-helpers',
-          disallowedMessage: `import from @kbn/test-jest-helpers instead`,
-        },
-        {
-          from: '@kbn/utility-types/jest',
-          to: '@kbn/utility-types-jest',
-          disallowedMessage: `import from @kbn/utility-types-jest instead`,
-        },
-        {
-          from: '@kbn/inspector-plugin',
-          to: '@kbn/inspector-plugin/common',
-          exact: true,
-        },
-        {
-          from: '@kbn/expressions-plugin',
-          to: '@kbn/expressions-plugin/common',
-          exact: true,
-        },
-        {
-          from: '@kbn/kibana-utils-plugin',
-          to: '@kbn/kibana-utils-plugin/common',
-          exact: true,
-        },
-        {
-          from: '@elastic/safer-lodash-set',
-          to: '@kbn/safer-lodash-set',
-        },
-        {
-          from: '@elastic/apm-synthtrace',
-          to: '@kbn/synthtrace',
-        },
-        {
-          from: 'rison-node',
-          to: '@kbn/rison',
-        },
-        {
-          from: '@tanstack/react-query',
-          to: '@kbn/react-query',
-          exact: true,
-          disallowedMessage:
-            'Use `@kbn/react-query` instead of `@tanstack/react-query`, as it defaults to networkMode="always"',
-        },
-        {
-          from: 'elastic-apm-node',
-          to: false,
-          exclude: USES_ELASTIC_APM_AGENT,
-          disallowedMessage: `Do not use 'elastic-apm-node' for new instrumentation. Use withActiveSpan from @kbn/tracing-utils instead.`,
-        },
-      ],
     ],
 
     /**
@@ -358,16 +200,6 @@ module.exports = {
       ],
     ],
 
-    '@kbn/disable/no_protected_eslint_disable': 'error',
-    '@kbn/disable/no_naked_eslint_disable': 'error',
-    '@kbn/eslint/no_async_promise_body': 'error',
-    '@kbn/eslint/no_async_foreach': 'error',
-    '@kbn/eslint/require_kibana_feature_privileges_naming': 'warn',
-    '@kbn/eslint/no_trailing_import_slash': 'error',
-    '@kbn/eslint/no_constructor_args_in_property_initializers': 'error',
-    '@kbn/eslint/no_this_in_property_initializers': 'error',
-    '@kbn/eslint/no_unsafe_console': 'error',
-    '@kbn/eslint/no_unsafe_hash': 'error',
     '@kbn/imports/no_unresolvable_imports': 'error',
     '@kbn/imports/uniform_imports': 'error',
     '@kbn/imports/no_unused_imports': 'error',
@@ -375,6 +207,8 @@ module.exports = {
     '@kbn/imports/no_group_crossing_manifests': 'error',
     '@kbn/imports/no_group_crossing_imports': 'error',
     '@kbn/imports/no_direct_handlebars_import': 'error',
+    '@kbn/imports/no_direct_monaco_import': 'warn',
+    '@kbn/imports/no_undeclared_plugin_target': 'error',
     'no-new-func': 'error',
     'no-implied-eval': 'error',
     'no-prototype-builtins': 'error',
@@ -383,6 +217,18 @@ module.exports = {
      * EUI Team rules
      */
 
+    '@elastic/eui/callout-prefer-props-for-content': [
+      'warn',
+      {
+        components: [
+          'EuiCallOut',
+          'KbnInfoCallout',
+          'KbnSuccessCallout',
+          'KbnWarningCallout',
+          'KbnDangerCallout',
+        ],
+      },
+    ],
     '@elastic/eui/no-restricted-eui-imports': [
       'warn',
       {
@@ -390,5 +236,25 @@ module.exports = {
         message: 'For client-side, please use `useEuiTheme` instead.',
       },
     ],
+
+    /**
+     * a11y-related rules:
+     * all existing violations were fixed; keep this as error to prevent new ones.
+     */
+    '@elastic/eui/callout-announce-on-mount': 'error',
+    '@elastic/eui/prefer-eui-icon-tip': 'error',
+    '@elastic/eui/sr-output-disabled-tooltip': 'error',
+    '@elastic/eui/badge-accessibility-rules': 'error',
+    '@elastic/eui/no-unnamed-interactive-element': 'error',
+    '@elastic/eui/consistent-is-invalid-props': 'error',
+    '@elastic/eui/tooltip-no-interactive-content': 'error',
+    '@elastic/eui/require-table-caption': 'error',
+    '@elastic/eui/accessible-interactive-element': 'error',
+    '@elastic/eui/icon-accessibility-rules': 'error',
+    '@elastic/eui/tooltip-button-icon-wrap': 'error',
+    '@elastic/eui/tooltip-focusable-anchor': 'error',
+    '@elastic/eui/no-unnamed-radio-group': 'error',
+    '@elastic/eui/require-aria-label-for-modals': 'error',
   },
+
 };

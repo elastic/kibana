@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LensEmbeddableInput } from '@kbn/lens-common';
+import type { LensEmbeddableInput, LensPartitionVisualizationState } from '@kbn/lens-common';
+import { hasTextBasedLayers } from '@kbn/lens-common';
 import { v4 as uuidv4 } from 'uuid';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { LensAttributes, LensConfig, LensConfigOptions, DataViewsCommon } from './types';
 import {
   buildGauge,
@@ -53,11 +55,11 @@ import {
   fromAPItoLensState as fromDatatableAPItoLensState,
   fromLensStateToAPI as fromDatatableLensStateToAPI,
 } from './transforms/charts/datatable';
-import type { LensApiState } from './schema';
+import type { LensApiConfig, LensApiConfigChartType } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
 import { isLensLegacyFormat } from './utils';
 
-const compatibilityMap: Record<string, string> = {
+const compatibilityMap: Record<string, LensApiConfigChartType> = {
   lnsMetric: 'metric',
   lnsLegacyMetric: 'legacy_metric',
   lnsXY: 'xy',
@@ -70,12 +72,40 @@ const compatibilityMap: Record<string, string> = {
 };
 
 /**
+ * `lnsPie` is the Lens `visualizationType` for the partition plugin and is
+ * shared across all partition shapes. The API distinguishes them via `type`,
+ * except for `donut`, which is modeled as a pie with `styling.donut_hole` set.
+ */
+const partitionShapeToApiType: Record<string, LensApiConfigChartType> = {
+  pie: 'pie',
+  donut: 'pie',
+  treemap: 'treemap',
+  mosaic: 'mosaic',
+  waffle: 'waffle',
+};
+
+type PartitionLensAttributes = Extract<LensAttributes, { visualizationType: 'lnsPie' }>;
+
+function isPartitionAttributes(attributes: LensAttributes): attributes is PartitionLensAttributes {
+  return attributes.visualizationType === 'lnsPie';
+}
+
+function getPartitionShape(
+  attributes: LensAttributes
+): LensPartitionVisualizationState['shape'] | undefined {
+  if (!isPartitionAttributes(attributes)) {
+    return undefined;
+  }
+  return attributes.state.visualization?.shape;
+}
+
+/**
  * A minimal type to extend for type lookup
  */
 type ChartTypeLike =
   | Pick<LensAttributes, 'visualizationType'>
   | Pick<LensConfig, 'chartType'>
-  | Pick<LensApiState, 'type'>
+  | Pick<LensApiConfig, 'type'>
   | { visualizationType: null | undefined }
   | undefined;
 
@@ -172,6 +202,30 @@ export class LensConfigBuilder {
     return type in this.apiConvertersByChart;
   }
 
+  /**
+   * Resolve the Lens API config type from full `LensAttributes`. Attributes are
+   * required to disambiguate `lnsPie`, which is shared by every partition
+   * shape (`pie`, `donut`, `treemap`, `mosaic`, `waffle`).
+   */
+  getCompatibleType(attributes: LensAttributes): LensApiConfigChartType {
+    const visType = attributes.visualizationType;
+
+    if (isPartitionAttributes(attributes)) {
+      const shape = getPartitionShape(attributes);
+      const apiType = shape ? partitionShapeToApiType[shape] : undefined;
+      if (apiType) {
+        return apiType;
+      }
+      throw new Error(`No compatible type found for lnsPie with shape: ${shape}`);
+    }
+
+    if (visType && compatibilityMap[visType]) {
+      return compatibilityMap[visType];
+    }
+
+    throw new Error(`No compatible type found for visualizationType: ${visType}`);
+  }
+
   getType<C extends ChartTypeLike>(config: C): string | undefined | null {
     if (config == null) {
       return null;
@@ -209,7 +263,12 @@ export class LensConfigBuilder {
       state: {
         ...chartConfig.state,
         filters: options.filters || [],
-        query: options.query || { language: 'kuery', query: '' },
+        // ES|QL lives exclusively on the text-based datasource layers; the
+        // top-level slot only carries a chart-scoped KQL/Lucene filter.
+        query:
+          options.query && !isOfAggregateQueryType(options.query)
+            ? options.query
+            : { language: 'kuery', query: '' },
       },
     };
 
@@ -225,7 +284,7 @@ export class LensConfigBuilder {
     return chartState as LensAttributes;
   }
 
-  fromAPIFormat(config: LensApiState): LensAttributes {
+  fromAPIFormat(config: LensApiConfig): LensAttributes {
     const chartType = config.type;
 
     if (!(chartType in this.apiConvertersByChart)) {
@@ -239,6 +298,15 @@ export class LensConfigBuilder {
       attributes.references ?? []
     );
 
+    // ES|QL documents carry their queries on the text-based layers and
+    // get no top-level slot unless the API provides a KQL/Lucene filter.
+    let querySlot: { query?: LensAttributes['state']['query'] } = {};
+    if (query) {
+      querySlot = { query };
+    } else if (!hasTextBasedLayers(attributes)) {
+      querySlot = { query: { language: 'kuery', query: '' } };
+    }
+
     return {
       // @TODO investigate why it complains about missing type
       // type: 'lens',
@@ -246,14 +314,13 @@ export class LensConfigBuilder {
       references: [...(attributes.references ?? []), ...references],
       state: {
         ...attributes.state,
-        query: { language: 'kuery', query: '' },
-        ...(query ? { query } : {}),
+        ...querySlot,
         filters,
       },
     };
   }
 
-  toAPIFormat(config: LensAttributes): LensApiState {
+  toAPIFormat(config: LensAttributes): LensApiConfig {
     const visType = config.visualizationType;
     const type = compatibilityMap[visType] ?? visType;
 
@@ -261,9 +328,15 @@ export class LensConfigBuilder {
       throw new Error(`No API converter found for chart type: ${visType} as ${type}`);
     }
     const converter = this.apiConvertersByChart[type as keyof typeof this.apiConvertersByChart];
+    const chartConfig = converter.fromLensStateToAPI(config);
+    // Panel-level `query` is the chart-scoped KQL/Lucene filter; ES|QL
+    // queries live on `data_source` and are never emitted here (aggregate
+    // slot values are filtered out by `filtersAndQueryToApiFormat`).
+    const panelFiltersAndQuery = filtersAndQueryToApiFormat(config);
+
     return {
-      ...converter.fromLensStateToAPI(config),
-      ...filtersAndQueryToApiFormat(config),
+      ...chartConfig,
+      ...panelFiltersAndQuery,
     };
   }
 }

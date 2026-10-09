@@ -7,3 +7,11 @@
 
 export const IS_MANAGED_OTLP_SERVICE_ENABLED = 'observability.managedOtlpServiceEnabled';
 export const IS_MANAGED_OTLP_GA = 'observability.managedOtlpGa';
+export const IS_ADD_DATA_PAGE_V2_ENABLED = 'observability.addDataPageV2Enabled';
+export const IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED =
+  'observability.managedOtlpPrwEndpointEnabled';
+export const IS_VENDOR_ENDPOINTS_ENABLED = 'observability.vendorEndpointsEnabled';
+export const IS_INGEST_RECEIPTS_ENABLED = 'observability.ingestReceiptsEnabled';
+// Owned by the ingest_hub plugin, gates its guided AWS flow at /app/onboarding/aws.
+// Keep in sync with x-pack/platform/plugins/shared/ingest_hub/common/core/constants.ts.
+export const IS_INGEST_HUB_ONBOARDING_ENABLED = 'ingestHub.onboardingEnabled';

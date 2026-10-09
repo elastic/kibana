@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useForm, FormProvider } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, FormProvider } from 'react-hook-form';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { RadioGroup } from './radio_group';
 
@@ -18,6 +18,8 @@ interface FormWrapperProps {
   isRequired?: boolean;
   initialValue?: string;
   defaultOption?: string;
+  onConfirm?: () => void;
+  isSaving?: boolean;
   onSubmitResult: (result: { isValid: boolean; data: Record<string, unknown> }) => void;
 }
 
@@ -25,23 +27,28 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
   isRequired,
   initialValue,
   defaultOption,
+  onConfirm,
+  isSaving,
   onSubmitResult,
 }) => {
-  const { form } = useForm<{}>({
-    defaultValue: {
+  const form = useForm({
+    defaultValues: {
       [CASE_EXTENDED_FIELDS]:
         initialValue !== undefined ? { severity_as_keyword: initialValue } : {},
     },
-    options: { stripEmptyFields: false },
   });
 
-  const handleSubmit = async () => {
-    const { isValid, data } = await form.submit();
-    onSubmitResult({ isValid: isValid ?? false, data: data as Record<string, unknown> });
-  };
+  const handleSubmit = form.handleSubmit(
+    (data) => onSubmitResult({ isValid: true, data: data as Record<string, unknown> }),
+    () =>
+      onSubmitResult({
+        isValid: false,
+        data: form.getValues() as Record<string, unknown>,
+      })
+  );
 
   return (
-    <FormProvider form={form}>
+    <FormProvider {...form}>
       <RadioGroup
         name="severity"
         control="RADIO_GROUP"
@@ -49,6 +56,8 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
         label="Severity"
         isRequired={isRequired}
         metadata={{ options: OPTIONS, default: defaultOption }}
+        onConfirm={onConfirm}
+        isSaving={isSaving}
       />
       <button type="button" onClick={handleSubmit}>
         {'Submit'}
@@ -71,6 +80,14 @@ describe('RadioGroup', () => {
       }
     });
 
+    it('disables every option while saving', () => {
+      render(<FormWrapper isSaving onSubmitResult={jest.fn()} />);
+
+      for (const option of OPTIONS) {
+        expect(screen.getByLabelText(option)).toBeDisabled();
+      }
+    });
+
     it('pre-selects metadata.default when provided', () => {
       render(<FormWrapper defaultOption="medium" onSubmitResult={jest.fn()} />);
       expect(screen.getByLabelText('medium')).toBeChecked();
@@ -86,6 +103,16 @@ describe('RadioGroup', () => {
     it('uses initialValue from form state when provided', () => {
       render(<FormWrapper initialValue="high" onSubmitResult={jest.fn()} />);
       expect(screen.getByLabelText('high')).toBeChecked();
+    });
+
+    it('shows Optional label when isRequired is false', () => {
+      render(<FormWrapper isRequired={false} onSubmitResult={jest.fn()} />);
+      expect(screen.getByText('Optional')).toBeInTheDocument();
+    });
+
+    it('does not show Optional label when isRequired is true', () => {
+      render(<FormWrapper isRequired onSubmitResult={jest.fn()} />);
+      expect(screen.queryByText('Optional')).not.toBeInTheDocument();
     });
 
     it('shows the first option selected when form value is empty string (yaml sync with no default)', async () => {
@@ -122,6 +149,38 @@ describe('RadioGroup', () => {
       );
       expect(checkedOptions).toHaveLength(1);
       expect(checkedOptions[0]).toBe('high');
+    });
+
+    it('shows actions only while the field is dirty', async () => {
+      render(<FormWrapper onConfirm={jest.fn()} onSubmitResult={jest.fn()} />);
+
+      expect(screen.queryByTestId('template-field-confirm-severity')).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByLabelText('critical'));
+
+      expect(screen.getByTestId('template-field-confirm-severity')).toBeInTheDocument();
+      expect(screen.getByTestId('template-field-cancel-severity')).toBeInTheDocument();
+    });
+
+    it('confirms the pending value', async () => {
+      const onConfirm = jest.fn();
+      render(<FormWrapper onConfirm={onConfirm} onSubmitResult={jest.fn()} />);
+
+      await userEvent.click(screen.getByLabelText('critical'));
+      await userEvent.click(screen.getByTestId('template-field-confirm-severity'));
+
+      expect(onConfirm).toHaveBeenCalledTimes(1);
+    });
+
+    it('cancels the pending value and hides the actions', async () => {
+      render(<FormWrapper defaultOption="low" onConfirm={jest.fn()} onSubmitResult={jest.fn()} />);
+
+      await userEvent.click(screen.getByLabelText('high'));
+      await userEvent.click(screen.getByTestId('template-field-cancel-severity'));
+
+      expect(screen.getByLabelText('low')).toBeChecked();
+      expect(screen.getByLabelText('high')).not.toBeChecked();
+      expect(screen.queryByTestId('template-field-confirm-severity')).not.toBeInTheDocument();
     });
   });
 

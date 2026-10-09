@@ -4,23 +4,22 @@ description: Automates malware alert response — scans file hash with VirusTota
 enabled: true
 
 triggers:
-  - type: manual
   - type: alert
-
-inputs:
-  - name: description
-    type: string
-    default: this is a test case
-  - name: title
-    type: string
-    default: Test Case
-  - name: tags
-    type: array
-    default:
-      - automation
-      - test
-  - name: severity
-    type: string
+  - type: manual
+    inputs:
+      - name: description
+        type: string
+        default: this is a test case
+      - name: title
+        type: string
+        default: Test Case
+      - name: tags
+        type: array
+        default:
+          - automation
+          - test
+      - name: severity
+        type: string
 
 consts:
   slack_token: 'YOUR-SECRET-HERE'

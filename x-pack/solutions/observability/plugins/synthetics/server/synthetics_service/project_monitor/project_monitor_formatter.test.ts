@@ -7,7 +7,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { ProjectMonitorFormatter } from './project_monitor_formatter';
-import type { Locations, PrivateLocation } from '../../../common/runtime_types';
+import type { Locations, PrivateLocation, SyntheticsMonitor } from '../../../common/runtime_types';
 import { ConfigKey, MonitorTypeEnum, LocationStatus } from '../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { times } from 'lodash';
@@ -20,6 +20,7 @@ import { formatSecrets } from '../utils';
 import * as telemetryHooks from '../../routes/telemetry/monitor_upgrade_sender';
 import { formatLocation } from '../../../common/utils/location_formatter';
 import * as locationsUtil from '../get_all_locations';
+import * as addMonitorBulk from '../../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
 import { mockEncryptedSO } from '../utils/mocks';
 import type { SyntheticsServerSetup } from '../../types';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';
@@ -106,6 +107,9 @@ describe('ProjectMonitorFormatter', () => {
     logger,
     syntheticsEsClient: mockEsClient,
     authSavedObjectsClient: soClient,
+    basePath: {
+      publicBaseUrl: 'https://localhost:5601',
+    },
     config: {
       service: {
         username: 'dev',
@@ -231,12 +235,53 @@ describe('ProjectMonitorFormatter', () => {
     });
   });
 
-  it('catches errors from bulk edit method', async () => {
+  it('returns invalid location error without logging it as a server error', async () => {
+    logger.error.mockClear();
+
+    const invalidLocationMonitor = {
+      ...testMonitors[0],
+      locations: [],
+      privateLocations: ['does not exist'],
+    };
+    const pushMonitorFormatter = new ProjectMonitorFormatter({
+      projectId: 'test-project',
+      spaceId: 'default',
+      routeContext,
+      monitors: [invalidLocationMonitor],
+    });
+
+    pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
+
+    await pushMonitorFormatter.configureAllProjectMonitors();
+
+    expect({
+      createdMonitors: pushMonitorFormatter.createdMonitors,
+      updatedMonitors: pushMonitorFormatter.updatedMonitors,
+      failedMonitors: pushMonitorFormatter.failedMonitors,
+    }).toStrictEqual({
+      createdMonitors: [],
+      updatedMonitors: [],
+      failedMonitors: [
+        {
+          details:
+            "Invalid locations specified. Private Location(s) 'does not exist' not found. Available private locations are 'Test private location'",
+          id: 'check if title is present 10 0',
+          payload: invalidLocationMonitor,
+          reason: "Couldn't save or update monitor because of an invalid configuration.",
+        },
+      ],
+    });
+
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('does not synchronize project monitors when bulk Saved Object creation has no successes', async () => {
     soClient.bulkCreate.mockImplementation(async () => {
       return {
         saved_objects: [],
       };
     });
+    const addMonitors = jest.spyOn(monitorClient, 'addMonitors');
 
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
@@ -256,18 +301,15 @@ describe('ProjectMonitorFormatter', () => {
     }).toEqual({
       createdMonitors: [],
       updatedMonitors: [],
-      failedMonitors: [
-        {
-          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
-          payload: payloadData,
-          reason: 'Failed to create 2 monitors',
-        },
-      ],
+      failedMonitors: [],
     });
+    expect(addMonitors).not.toHaveBeenCalled();
+    addMonitors.mockRestore();
   });
 
-  it('configures project monitors when there are errors', async () => {
+  it('does not report project monitors as created when the repository returns no Saved Objects', async () => {
     soClient.bulkCreate = jest.fn().mockResolvedValue({ saved_objects: [] });
+    const addMonitors = jest.spyOn(monitorClient, 'addMonitors');
 
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
@@ -287,18 +329,25 @@ describe('ProjectMonitorFormatter', () => {
     }).toEqual({
       createdMonitors: [],
       updatedMonitors: [],
-      failedMonitors: [
-        {
-          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
-          payload: payloadData,
-          reason: 'Failed to create 2 monitors',
-        },
-      ],
+      failedMonitors: [],
     });
+    expect(addMonitors).not.toHaveBeenCalled();
+    addMonitors.mockRestore();
   });
 
   it('shows errors thrown by fleet api', async () => {
-    soClient.bulkCreate = jest.fn().mockResolvedValue({ saved_objects: soResult });
+    soClient.bulkCreate = jest
+      .fn()
+      .mockImplementation(
+        (monitors: Array<{ id: string; type: string; attributes: Record<string, unknown> }>) => ({
+          saved_objects: monitors.map((monitor) => ({
+            id: monitor.id,
+            type: monitor.type,
+            attributes: monitor.attributes,
+          })),
+        })
+      );
+    monitorClient.addMonitors = jest.fn().mockRejectedValue(new Error('Fleet sync failed'));
 
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
@@ -320,7 +369,7 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [
         {
-          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
+          details: 'Fleet sync failed',
           reason: 'Failed to create 2 monitors',
           payload: payloadData,
         },
@@ -328,7 +377,50 @@ describe('ProjectMonitorFormatter', () => {
     });
   });
 
-  it('creates project monitors when no errors', async () => {
+  it('does not report monitors rolled back after private-location sync failures as created', async () => {
+    const failedMonitor = {
+      id: 'failed-monitor-id',
+      attributes: { [ConfigKey.JOURNEY_ID]: 'failed-journey' },
+    };
+    const successfulMonitor = {
+      id: 'successful-monitor-id',
+      attributes: { [ConfigKey.JOURNEY_ID]: 'successful-journey' },
+    };
+    const syncNewMonitorBulk = jest.spyOn(addMonitorBulk, 'syncNewMonitorBulk').mockResolvedValue({
+      newMonitors: [failedMonitor, successfulMonitor],
+      failedMonitors: [{ monitor: failedMonitor, error: new Error('Private sync failed') }],
+      errors: [],
+    } as unknown as Awaited<ReturnType<typeof addMonitorBulk.syncNewMonitorBulk>>);
+    const pushMonitorFormatter = new ProjectMonitorFormatter({
+      projectId: 'test-project',
+      spaceId: 'default-space',
+      monitors: [],
+      routeContext,
+    });
+    const monitors = [
+      { [ConfigKey.JOURNEY_ID]: 'failed-journey' },
+    ] as unknown as SyntheticsMonitor[];
+    const projectMonitorFormatterWithBulkCreate = pushMonitorFormatter as unknown as {
+      createMonitorsBulk: (monitorsToCreate: SyntheticsMonitor[]) => Promise<void>;
+    };
+
+    try {
+      await projectMonitorFormatterWithBulkCreate.createMonitorsBulk(monitors);
+
+      expect(pushMonitorFormatter.createdMonitors).toEqual(['successful-journey']);
+      expect(pushMonitorFormatter.failedMonitors).toEqual([
+        expect.objectContaining({
+          reason: 'Private sync failed',
+          details: 'Failed to create monitor: failed-journey',
+          payload: monitors,
+        }),
+      ]);
+    } finally {
+      syncNewMonitorBulk.mockRestore();
+    }
+  });
+
+  it('preserves an explicitly configured project monitor namespace when creating monitors', async () => {
     soClient.bulkCreate = jest.fn().mockResolvedValue({ saved_objects: soResult });
 
     monitorClient.addMonitors = jest.fn().mockReturnValue([]);
@@ -340,7 +432,7 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      monitors: testMonitors,
+      monitors: [{ ...testMonitors[0], namespace: 'default' }, testMonitors[1]],
       routeContext,
     });
 
@@ -354,6 +446,7 @@ describe('ProjectMonitorFormatter', () => {
           ...soData[0],
           attributes: {
             ...soData[0].attributes,
+            [ConfigKey.NAMESPACE]: 'default',
             [ConfigKey.MONITOR_QUERY_ID]: expect.any(String),
             [ConfigKey.CONFIG_ID]: expect.any(String),
           },
@@ -379,6 +472,69 @@ describe('ProjectMonitorFormatter', () => {
       createdMonitors: ['check if title is present 10 0', 'check if title is present 10 1'],
       updatedMonitors: [],
       failedMonitors: [],
+    });
+  });
+
+  describe('API Journey monitors on Serverless', () => {
+    const apiMonitor = {
+      type: MonitorTypeEnum.API,
+      id: 'orders-api-health',
+      name: 'Orders API health',
+      schedule: 1,
+      content: 'apiJourney("orders", () => {})',
+      privateLocations: ['Test private location'],
+    };
+
+    const serverlessRouteContext = {
+      ...routeContext,
+      server: { ...serverMock, cloud: { isServerlessEnabled: true } },
+    };
+
+    it('rejects a brand-new API Journey project monitor', async () => {
+      const pushMonitorFormatter = new ProjectMonitorFormatter({
+        projectId: 'test-project',
+        spaceId: 'default-space',
+        monitors: [],
+        routeContext: serverlessRouteContext,
+      });
+      pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
+      await pushMonitorFormatter.init();
+
+      const result = pushMonitorFormatter.validateProjectMonitor({
+        monitor: apiMonitor,
+        publicLocations,
+        privateLocations,
+        isNewMonitor: true,
+      });
+
+      expect(result).toBeNull();
+      expect(pushMonitorFormatter.failedMonitors).toEqual([
+        expect.objectContaining({
+          id: 'orders-api-health',
+          reason: 'API Journey monitors are not yet supported on Serverless',
+        }),
+      ]);
+    });
+
+    it('allows re-pushing an already-existing API Journey project monitor unchanged', async () => {
+      const pushMonitorFormatter = new ProjectMonitorFormatter({
+        projectId: 'test-project',
+        spaceId: 'default-space',
+        monitors: [],
+        routeContext: serverlessRouteContext,
+      });
+      pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
+      await pushMonitorFormatter.init();
+
+      const result = pushMonitorFormatter.validateProjectMonitor({
+        monitor: apiMonitor,
+        publicLocations,
+        privateLocations,
+        isNewMonitor: false,
+      });
+
+      expect(result).not.toBeNull();
+      expect(pushMonitorFormatter.failedMonitors).toEqual([]);
     });
   });
 });

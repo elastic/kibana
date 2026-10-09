@@ -16,15 +16,25 @@ paths:
         - in: query
           name: timelineType
           required: true
+          description: Which draft to load (`default` investigation timeline or `template` timeline template).
           schema:
             $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
       responses:
         '200':
-          description: Indicates that the draft Timeline was successfully retrieved.
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
                 $ref: '../model/components.schema.yaml#/components/schemas/PersistTimelineResponse'
+              examples:
+                draftPayload:
+                  summary: Draft timeline payload
+                  value:
+                    savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    version: WzE0LDFd
+                    title: ''
+                    timelineType: default
+                    status: draft
         '403':
           description: If a draft Timeline was not found and we attempted to create one, it indicates that the user does not have the required permissions to create a draft Timeline.
           content:
@@ -36,6 +46,12 @@ paths:
                     type: string
                   status_code:
                     type: number
+              examples:
+                forbidden:
+                  summary: Permission denied
+                  value:
+                    message: Forbidden
+                    status_code: 403
         '409':
           description: This should never happen, but if a draft Timeline was not found and we attempted to create one, it indicates that there is already a draft Timeline with the given `timelineId`.
           content:
@@ -47,3 +63,9 @@ paths:
                     type: string
                   status_code:
                     type: number
+              examples:
+                conflict:
+                  summary: Draft conflict
+                  value:
+                    message: Conflict
+                    status_code: 409

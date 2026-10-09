@@ -8,33 +8,46 @@
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { memoize } from 'lodash';
 import React from 'react';
-import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescriptionList } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
+import {
+  normalizePatternAnalysisLegacyFields,
+  toUiMinimumTimeRange,
+  type RawPatternAnalysisState,
+} from '../../common/embeddables/pattern_analysis/normalize_legacy_state';
+import type { PatternAnalysisAttachmentData } from '../../common/utils';
 import type {
   PatternAnalysisProps,
   PatternAnalysisSharedComponent,
 } from '../shared_components/pattern_analysis';
 
+// Pre-9.5 case attachments stored time_range as timeRange.
+type RawAttachmentState = RawPatternAnalysisState & { timeRange?: TimeRange };
+type PatternAnalysisViewProps = UnifiedValueAttachmentViewProps<PatternAnalysisAttachmentData>;
+
 export const initComponent = memoize(
   (fieldFormats: FieldFormatsStart, PatternAnalysisComponent: PatternAnalysisSharedComponent) => {
     return React.memo(
-      (props: PersistableStateAttachmentViewProps) => {
-        const { persistableStateAttachmentState } = props;
+      (props: PatternAnalysisViewProps) => {
+        const rawState = props.data.state as RawAttachmentState;
 
         const dataFormatter = fieldFormats.deserialize({
           id: FIELD_FORMAT_IDS.DATE,
         });
 
-        const rawState = persistableStateAttachmentState as unknown as Record<string, unknown>;
-        const timeRange = (rawState.time_range ?? rawState.timeRange) as TimeRange;
+        const normalized = normalizePatternAnalysisLegacyFields(rawState);
         const inputProps = {
-          ...(persistableStateAttachmentState as unknown as PatternAnalysisProps),
-          timeRange,
-        };
+          dataViewId: normalized.data_view_id ?? '',
+          fieldName: normalized.field_name,
+          minimumTimeRangeOption: toUiMinimumTimeRange(normalized.minimum_time_range),
+          randomSamplerMode: normalized.random_sampler_mode,
+          randomSamplerProbability: normalized.random_sampler_probability,
+          timeRange: rawState.time_range ?? rawState.timeRange,
+        } as PatternAnalysisProps;
 
         const listItems = [
           {
@@ -44,9 +57,9 @@ export const initComponent = memoize(
                 defaultMessage="Time range"
               />
             ),
-            description: `${dataFormatter.convert(
+            description: `${dataFormatter.convertToText(
               inputProps.timeRange.from
-            )} - ${dataFormatter.convert(inputProps.timeRange.to)}`,
+            )} - ${dataFormatter.convertToText(inputProps.timeRange.to)}`,
           },
         ];
 
@@ -57,11 +70,7 @@ export const initComponent = memoize(
           </>
         );
       },
-      (prevProps, nextProps) =>
-        deepEqual(
-          prevProps.persistableStateAttachmentState,
-          nextProps.persistableStateAttachmentState
-        )
+      (prevProps, nextProps) => deepEqual(prevProps.data.state, nextProps.data.state)
     );
   }
 );

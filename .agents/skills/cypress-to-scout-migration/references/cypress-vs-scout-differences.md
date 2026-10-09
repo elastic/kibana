@@ -48,8 +48,8 @@ Scout now runs on MKI via the [Appex QA Serverless Scout pipeline](https://build
 | Aspect | Cypress | Scout |
 |--------|---------|-------|
 | Environment setup | Cypress creates the environment automatically | You must create the environment first |
-| Server start | Automatic | `node scripts/scout.js start-server --arch stateful --domain classic` in a separate terminal |
-| Running tests | Open Cypress UI or `cypress run` | `node scripts/scout.js run-tests --arch stateful --domain security_complete --testFiles <path>` |
+| Server start | Automatic | `node scripts/scout start-server --arch stateful --domain classic` in a separate terminal |
+| Running tests | Open Cypress UI or `cypress run` | `node scripts/scout run-tests --arch stateful --domain security_complete --testFiles <path>` |
 
 ## Test Labels/Tags
 
@@ -66,7 +66,7 @@ Scout now runs on MKI via the [Appex QA Serverless Scout pipeline](https://build
 | Screens (selector files) | Page objects (class with locators + methods) |
 | Tasks (action files) | Page object methods |
 | Direct `cy.get()` in tests | `page.testSubj.locator()` via page objects |
-| No EUI abstraction | EUI wrappers (`EuiComboBoxWrapper`, `EuiDataGridWrapper`, etc.) |
+| No EUI abstraction | Published EUI Test Helpers through `page.components.*` (`comboBox`, `dataGrid`, `superSelect`, `globalToastList`); raw locators as fallbacks |
 
 ## Serverless Tiers & Feature Flags
 

@@ -48,6 +48,13 @@ test.describe.serial(
             searchSourceJSON: '{}',
           },
         },
+        references: [
+          {
+            type: 'indexpattern',
+            name: 'control-uuid:optionsListDataView',
+            id: 'apm_static_data_view_id_default',
+          },
+        ],
       });
       testDashboardId = dashboard.id;
     });
@@ -64,8 +71,7 @@ test.describe.serial(
     });
 
     test('displays a linked dashboard with a control group', async ({
-      page,
-      pageObjects: { serviceDetailsPage },
+      pageObjects: { serviceDetailsPage, controls },
     }) => {
       await test.step('Navigate to dashboard tab', async () => {
         await serviceDetailsPage.dashboardsTab.goToTab({
@@ -73,9 +79,7 @@ test.describe.serial(
           rangeFrom: testData.START_DATE,
           rangeTo: testData.END_DATE,
         });
-        await serviceDetailsPage.dashboardsTab.addServiceDashboardButton.waitFor({
-          state: 'visible',
-        });
+        await serviceDetailsPage.dashboardsTab.waitForDashboardsToLoad();
       });
 
       await test.step('Link the test dashboard', async () => {
@@ -83,7 +87,7 @@ test.describe.serial(
       });
 
       await test.step('Verify the control group has rendered', async () => {
-        await expect(page.getByTestId('controls-group-wrapper')).toBeVisible();
+        await expect(controls.group).toBeVisible();
       });
     });
 

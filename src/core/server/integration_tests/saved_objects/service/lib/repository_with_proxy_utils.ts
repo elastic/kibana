@@ -24,6 +24,24 @@ const defaultProxyOptions = (hostname: string, port: string) => ({
   passThrough: true,
 });
 
+// Netty 4.1.133+ strictly rejects HTTP/1.1 requests carrying both `Content-Length`
+// and `Transfer-Encoding` per RFC 9112 (CVE-2026-42585). Two sources combine to
+// produce such requests through the h2o2 proxy:
+//   1. `passThrough: true` forwards any inbound `Transfer-Encoding: chunked` header,
+//      while Wreck also adds `Content-Length` based on the buffered payload.
+//   2. h2o2 unconditionally adds `Transfer-Encoding: chunked` for DELETE requests
+//      whenever `request.payload` is truthy (the empty Buffer Hapi produces for a
+//      bodyless DELETE counts), then Wreck adds `Content-Length: 0`.
+// Normalize before proxying: drop any inbound `Transfer-Encoding` and clear empty
+// buffered payloads so h2o2 does not synthesize a chunked encoding.
+// See https://github.com/elastic/kibana/issues/141398.
+const normalizeRequestForProxy = (request: Hapi.Request) => {
+  delete request.headers['transfer-encoding'];
+  if (Buffer.isBuffer(request.payload) && request.payload.length === 0) {
+    (request as { payload: unknown }).payload = null;
+  }
+};
+
 let proxyInterrupt: string | null | undefined = null;
 
 export const setProxyInterrupt = (
@@ -41,11 +59,23 @@ export const setProxyInterrupt = (
 ) => (proxyInterrupt = testArg);
 
 // passes the req/response directly as is
-const relayHandler = (h: Hapi.ResponseToolkit, hostname: string, port: string) => {
+const relayHandler = (
+  request: Hapi.Request,
+  h: Hapi.ResponseToolkit,
+  hostname: string,
+  port: string
+) => {
+  normalizeRequestForProxy(request);
   return h.proxy(defaultProxyOptions(hostname, port));
 };
 
-const proxyResponseHandler = (h: Hapi.ResponseToolkit, hostname: string, port: string) => {
+const proxyResponseHandler = (
+  request: Hapi.Request,
+  h: Hapi.ResponseToolkit,
+  hostname: string,
+  port: string
+) => {
+  normalizeRequestForProxy(request);
   return h.proxy({
     ...defaultProxyOptions(hostname, port),
     // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -78,9 +108,9 @@ export const declareGetRoute = (
           req.params.type === 'my_type:myType_123' ||
           proxyInterrupt === 'updatePreflight'
         ) {
-          return proxyResponseHandler(h, hostname, port);
+          return proxyResponseHandler(req, h, hostname, port);
         } else {
-          return relayHandler(h, hostname, port);
+          return relayHandler(req, h, hostname, port);
         }
       },
     },
@@ -102,9 +132,9 @@ export const declareDeleteRoute = (
       },
       handler: (req, h) => {
         if (req.params._id === 'my_type:myTypeId1') {
-          return proxyResponseHandler(h, hostname, port);
+          return proxyResponseHandler(req, h, hostname, port);
         } else {
-          return relayHandler(h, hostname, port);
+          return relayHandler(req, h, hostname, port);
         }
       },
     },
@@ -122,9 +152,9 @@ export const declarePostBulkRoute = (hapiServer: Hapi.Server, hostname: string, 
       },
       handler: (req, h) => {
         if (proxyInterrupt === 'bulkCreate') {
-          return proxyResponseHandler(h, hostname, port);
+          return proxyResponseHandler(req, h, hostname, port);
         } else {
-          return relayHandler(h, hostname, port);
+          return relayHandler(req, h, hostname, port);
         }
       },
     },
@@ -146,9 +176,9 @@ export const declarePostMgetRoute = (hapiServer: Hapi.Server, hostname: string, 
           proxyInterrupt === 'internalBulkResolve' ||
           proxyInterrupt === 'bulkDeleteMyDocs'
         ) {
-          return proxyResponseHandler(h, hostname, port);
+          return proxyResponseHandler(req, h, hostname, port);
         } else {
-          return relayHandler(h, hostname, port);
+          return relayHandler(req, h, hostname, port);
         }
       },
     },
@@ -167,9 +197,9 @@ export const declareGetSearchRoute = (
       handler: (req, h) => {
         const payload = req.payload;
         if (!payload) {
-          return proxyResponseHandler(h, hostname, port);
+          return proxyResponseHandler(req, h, hostname, port);
         } else {
-          return relayHandler(h, hostname, port);
+          return relayHandler(req, h, hostname, port);
         }
       },
     },
@@ -191,9 +221,9 @@ export const declarePostSearchRoute = (
       },
       handler: (req, h) => {
         if (proxyInterrupt === 'find') {
-          return proxyResponseHandler(h, hostname, port);
+          return proxyResponseHandler(req, h, hostname, port);
         } else {
-          return relayHandler(h, hostname, port);
+          return relayHandler(req, h, hostname, port);
         }
       },
     },
@@ -215,9 +245,9 @@ export const declarePostUpdateRoute = (
       },
       handler: (req, h) => {
         if (req.params._id === 'my_type:myTypeToUpdate') {
-          return proxyResponseHandler(h, hostname, port);
+          return proxyResponseHandler(req, h, hostname, port);
         } else {
-          return relayHandler(h, hostname, port);
+          return relayHandler(req, h, hostname, port);
         }
       },
     },
@@ -239,9 +269,9 @@ export const declarePostPitRoute = (
       },
       handler: (req, h) => {
         if (proxyInterrupt === 'openPit') {
-          return proxyResponseHandler(h, hostname, port);
+          return proxyResponseHandler(req, h, hostname, port);
         } else {
-          return relayHandler(h, hostname, port);
+          return relayHandler(req, h, hostname, port);
         }
       },
     },
@@ -263,9 +293,9 @@ export const declarePostUpdateByQueryRoute = (
       },
       handler: (req, h) => {
         if (proxyInterrupt === 'deleteByNamespace') {
-          return proxyResponseHandler(h, hostname, port);
+          return proxyResponseHandler(req, h, hostname, port);
         } else {
-          return relayHandler(h, hostname, port);
+          return relayHandler(req, h, hostname, port);
         }
       },
     },
@@ -288,9 +318,9 @@ export const declareIndexRoute = (
       },
       handler: (req, h) => {
         if (proxyInterrupt === 'update') {
-          return proxyResponseHandler(h, hostname, port);
+          return proxyResponseHandler(req, h, hostname, port);
         } else {
-          return relayHandler(h, hostname, port);
+          return relayHandler(req, h, hostname, port);
         }
       },
     },
@@ -307,7 +337,7 @@ export const declarePassthroughRoute = (hapiServer: Hapi.Server, hostname: strin
         parse: false,
       },
       handler: (req, h) => {
-        return relayHandler(h, hostname, port);
+        return relayHandler(req, h, hostname, port);
       },
     },
   });

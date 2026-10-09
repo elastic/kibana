@@ -1,0 +1,34 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { evaluate as evalsBase } from '@kbn/evals';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import type { EvaluateDataset } from './types';
+import { createEvaluateDataset } from './evaluate_dataset';
+
+export const evaluate = evalsBase.extend<
+  {},
+  {
+    evaluateDataset: EvaluateDataset;
+  }
+>({
+  evaluateDataset: [
+    async ({ agentBuilderClient, evaluators, executorClient, esClient, log }, use) => {
+      await use(
+        createEvaluateDataset({
+          agentBuilderClient,
+          agentId: agentBuilderDefaultAgentId,
+          evaluators,
+          executorClient,
+          esClient,
+          log,
+        })
+      );
+    },
+    { scope: 'worker' },
+  ],
+});

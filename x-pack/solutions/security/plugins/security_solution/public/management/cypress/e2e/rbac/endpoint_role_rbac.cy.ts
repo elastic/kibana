@@ -57,6 +57,7 @@ describe('When defining a kibana role for Endpoint security access', { tags: '@e
         'Event Filters Filter out endpoint events that you do not need or want stored in Elasticsearch.Event Filters sub-feature privilegeAllReadNone',
         'Endpoint Exceptions Reduce false positive alerts, and keep Elastic Defend from blocking standard processes.Endpoint Exceptions sub-feature privilegeAllReadNone',
         'Elastic Defend Policy Management Access the Elastic Defend integration policy to configure protections, event collection, and advanced policy features.Elastic Defend Policy Management sub-feature privilegeAllReadNone',
+        'Elastic Defend Scripts Management Management of scripts used with Elastic Defend response actions.Elastic Defend Scripts Management sub-feature privilegeAllReadNone',
         'Response Actions History Access the history of response actions performed on endpoints.Response Actions History sub-feature privilegeAllReadNone',
         'Host Isolation Perform the "isolate" and "release" response actions.Host Isolation sub-feature privilegeAllNone',
         'Process Operations Perform process-related response actions in the response console.Process Operations sub-feature privilegeAllNone',

@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FC } from 'react';
 import type { Presentable } from '@kbn/ui-actions-browser/src/types';
+import type { IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import type { Trigger } from '../types';
 
@@ -24,6 +26,10 @@ export interface ActionExecutionMeta {
    * The event that caused the action to execute (e.g., mouse click, keyboard event)
    */
   event?: React.MouseEvent;
+  /**
+   * Returns focus to the control that opened the action.
+   */
+  returnFocus?: () => void;
 }
 
 /**
@@ -42,6 +48,7 @@ export type ActionDefinitionContext<Context extends object = object> =
 
 export interface ActionMenuItemProps<Context extends object> {
   context: ActionExecutionContext<Context>;
+  dataTestSubj?: string;
 }
 
 export type FrequentCompatibilityChangeAction<Context extends object = object> = Action<Context> &
@@ -65,10 +72,12 @@ export interface Action<Context extends object = object, ActionExtension extends
    */
   readonly type: string;
 
+  readonly MenuItem?: FC<ActionMenuItemProps<Context>>;
+
   /**
    * Optional EUI icon type that can be displayed along with the title.
    */
-  getIconType(context: ActionExecutionContext<Context>): string | undefined;
+  getIconType(context: ActionExecutionContext<Context>): IconType | undefined;
 
   /**
    * Returns a title to be displayed to the user.
@@ -114,16 +123,14 @@ export interface Action<Context extends object = object, ActionExtension extends
   couldBecomeCompatible?: (context: Context) => boolean;
 
   /**
-   * action is disabled or not
-   *
+   * Determines if the action is disabled or not
    */
-  disabled?: boolean;
+  isDisabled?(context: ActionExecutionContext<Context>): boolean;
 
   /**
-   * Determines if notification should be shown in menu for that action
-   *
+   * @returns an Observable that emits when this action's disabled state should be recalculated.
    */
-  showNotification?: boolean;
+  getDisabledStateChangesSubject?: (context: Context) => Observable<undefined> | undefined;
 
   extension?: ActionExtension;
 }
@@ -171,16 +178,14 @@ export type ActionDefinition<
   getHref?(context: ActionDefinitionContext<Context>): Promise<string | undefined>;
 
   /**
-   * action is disabled or not
-   *
+   * Determines if the action is disabled or not
    */
-  disabled?: boolean;
+  isDisabled?(context: ActionDefinitionContext<Context>): boolean;
 
   /**
-   * Determines if notification should be shown in menu for that action
-   *
+   * @returns an Observable that emits when this action's disabled state should be recalculated.
    */
-  showNotification?: boolean;
+  getDisabledStateChangesSubject?: (context: Context) => Observable<undefined> | undefined;
 
   /**
    * @returns an Observable that emits when this action's compatibility should be recalculated.

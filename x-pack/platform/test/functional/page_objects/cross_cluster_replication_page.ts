@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function CrossClusterReplicationPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
+  const find = getService('find');
 
   return {
     async appTitleText() {
-      return await testSubjects.getVisibleText('appTitle');
+      return await testSubjects.getVisibleText(APP_HEADER_TEST_SUBJECTS.title);
     },
     async createFollowerIndexButton() {
       return await testSubjects.find('createFollowerIndexButton');
@@ -29,7 +32,8 @@ export function CrossClusterReplicationPageProvider({ getService }: FtrProviderC
       await (await this.createFollowerIndexButton()).click();
       await retry.waitFor('app title to say Add follower index', async () => {
         return (
-          (await (await testSubjects.find('pageTitle')).getVisibleText()) === 'Add follower index'
+          (await (await testSubjects.find(APP_HEADER_TEST_SUBJECTS.title)).getVisibleText()) ===
+          'Add follower index'
         );
       });
     },
@@ -53,7 +57,13 @@ export function CrossClusterReplicationPageProvider({ getService }: FtrProviderC
           return await testSubjects.isDisplayed('readPollTimeoutInput');
         });
         if (readPollTimeout) {
-          await testSubjects.setValue('readPollTimeoutInput', readPollTimeout);
+          // this field is pre-filled, so it must be cleared with key events for React to commit it
+          await testSubjects.setValue('readPollTimeoutInput', readPollTimeout, {
+            clearWithKeyboard: true,
+          });
+          expect(await testSubjects.getAttribute('readPollTimeoutInput', 'value')).to.eql(
+            readPollTimeout
+          );
         }
       }
       await testSubjects.click('submitButton');
@@ -66,6 +76,22 @@ export function CrossClusterReplicationPageProvider({ getService }: FtrProviderC
       await comboBox.setCustom('comboBoxInput', indexPattern);
       await testSubjects.click('submitButton');
       await retry.waitForWithTimeout('flyout title to show up', 20000, async () => {
+        return await testSubjects.isDisplayed('settingsValues');
+      });
+    },
+    async openAutoFollowerPatternDetails(name: string) {
+      await retry.waitForWithTimeout('auto-follow pattern to be listed', 20000, async () => {
+        const links = await find.allByCssSelector('[data-test-subj="autoFollowPatternLink"]');
+        for (const link of links) {
+          if ((await link.getVisibleText()) === name) {
+            await link.click();
+            return true;
+          }
+        }
+        return false;
+      });
+
+      await retry.waitForWithTimeout('auto-follow pattern details to show up', 20000, async () => {
         return await testSubjects.isDisplayed('settingsValues');
       });
     },

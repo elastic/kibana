@@ -19,6 +19,7 @@ exports[`rendering renders correctly 1`] = `
     paddingSize="none"
   >
     <header
+      css="unknown styles"
       data-test-subj="filters-global-container"
     >
       <p>

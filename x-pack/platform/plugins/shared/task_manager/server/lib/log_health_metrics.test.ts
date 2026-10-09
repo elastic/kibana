@@ -420,7 +420,7 @@ describe('logHealthMetrics', () => {
     logHealthMetrics(health, logger, config, true, docLinks);
 
     const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
-    expect(calculateHealthStatus).toBeCalledTimes(1);
+    expect(calculateHealthStatus).toHaveBeenCalledTimes(1);
     expect(calculateHealthStatus.mock.calls[0][0].stats.capacity_estimation).toBeUndefined();
   });
 });
@@ -437,7 +437,7 @@ function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
         status: HealthStatus.OK,
         value: {
           capacity: { config: 10, as_cost: 20, as_workers: 10 },
-          claim_strategy: 'update_by_query',
+          claim_strategy: 'mget',
           poll_interval: 3000,
           request_capacity: 1000,
           monitored_aggregated_stats_refresh_rate: 5000,
@@ -448,6 +448,10 @@ function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
               warn_threshold: 80,
             },
             custom: {},
+          },
+          execution_control: {
+            paused: false,
+            paused_task_types: [],
           },
         },
       },

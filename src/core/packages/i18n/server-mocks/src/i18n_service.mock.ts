@@ -8,26 +8,57 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { I18nService, InternalI18nServicePreboot } from '@kbn/core-i18n-server-internal';
+import type {
+  I18nService,
+  InternalI18nServicePreboot,
+  InternalI18nServiceSetup,
+} from '@kbn/core-i18n-server-internal';
 import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 import { lazyObject } from '@kbn/lazy-object';
 
+const MOCK_TRANSLATION_HASHES: Record<string, string> = { en: 'MOCK_HASH' };
+const MOCK_LOCALES: readonly string[] = ['en'];
+const MOCK_AVAILABLE_LOCALES: ReadonlyArray<{ id: string; label: string }> = [
+  { id: 'en', label: 'English' },
+];
+
 const createSetupContractMock = () => {
-  const mock: jest.Mocked<I18nServiceSetup> = lazyObject({
+  const base = lazyObject({
     getLocale: jest.fn().mockReturnValue('en'),
+    getLocales: jest.fn().mockReturnValue(MOCK_LOCALES),
+    getAvailableLocales: jest.fn().mockReturnValue(MOCK_AVAILABLE_LOCALES),
     getTranslationFiles: jest.fn().mockReturnValue([]),
     getTranslationHash: jest.fn().mockReturnValue('MOCK_HASH'),
+    getTranslationHashes: jest.fn().mockReturnValue(MOCK_TRANSLATION_HASHES),
   });
 
-  return mock;
+  return base as jest.Mocked<I18nServiceSetup>;
+};
+
+const createInternalSetupContractMock = () => {
+  return {
+    ...createSetupContractMock(),
+    allowLocaleCookie: true,
+    detectBrowserLocale: true,
+  } as jest.Mocked<InternalI18nServiceSetup>;
 };
 
 const createInternalPrebootMock = () => {
-  const mock: jest.Mocked<InternalI18nServicePreboot> = lazyObject({
+  const base = lazyObject({
     getTranslationHash: jest.fn(),
+    getTranslationHashes: jest.fn(),
+    getAvailableLocales: jest.fn(),
   });
 
+  const mock = {
+    ...base,
+    allowLocaleCookie: true,
+    detectBrowserLocale: true,
+  } as jest.Mocked<InternalI18nServicePreboot>;
+
   mock.getTranslationHash.mockReturnValue('MOCK_HASH');
+  mock.getTranslationHashes.mockReturnValue(MOCK_TRANSLATION_HASHES);
+  mock.getAvailableLocales.mockReturnValue(MOCK_AVAILABLE_LOCALES);
 
   return mock;
 };
@@ -37,7 +68,7 @@ type I18nServiceContract = PublicMethodsOf<I18nService>;
 const createMock = () => {
   const mock: jest.Mocked<I18nServiceContract> = lazyObject({
     preboot: jest.fn(),
-    setup: jest.fn().mockResolvedValue(createSetupContractMock()),
+    setup: jest.fn().mockResolvedValue(createInternalSetupContractMock()),
   });
 
   return mock;
@@ -46,5 +77,6 @@ const createMock = () => {
 export const i18nServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
+  createInternalSetupContract: createInternalSetupContractMock,
   createInternalPrebootContract: createInternalPrebootMock,
 };

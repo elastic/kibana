@@ -6,115 +6,93 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent, render, renderHook, waitFor } from '@testing-library/react';
+import { useEuiTheme } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { DataTableRecord } from '@kbn/discover-utils';
 import { ToolsFlyoutHeader } from './tools_flyout_header';
-import { TOOLS_FLYOUT_HEADER_TEST_ID, TOOLS_FLYOUT_HEADER_EXPAND_BUTTON_TEST_ID } from './test_ids';
+import { TOOLS_FLYOUT_HEADER_TEST_ID, TOOLS_FLYOUT_HEADER_TIMESTAMP_TEST_ID } from './test_ids';
 
-const mockOpenSystemFlyout = jest.fn();
-
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      overlays: {
-        openSystemFlyout: mockOpenSystemFlyout,
-      },
-    },
-  }),
-}));
-
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
-  useStore: () => ({}),
-}));
-
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: jest.fn() }),
-}));
-
-jest.mock('../hooks/use_default_flyout_properties', () => ({
-  useDefaultDocumentFlyoutProperties: () => ({ size: 'm' }),
-}));
-
-jest.mock('./flyout_provider', () => ({
-  flyoutProviders: jest.fn(({ children }: { children: React.ReactNode }) => children),
-}));
-
-jest.mock('../../document', () => ({
-  DocumentFlyout: () => <div data-test-subj="mockDocumentFlyout" />,
-}));
-
-jest.mock('../../document/components/title', () => ({
-  Title: ({ hit }: { hit: DataTableRecord }) => (
-    <div data-test-subj="mockTitle">{String(hit.id)}</div>
+jest.mock('./tools_flyout_title', () => ({
+  ToolsFlyoutTitle: ({ label }: { label: string }) => (
+    <div data-test-subj="mockToolsFlyoutTitle">{label}</div>
   ),
 }));
 
-jest.mock('../../document/components/severity', () => ({
-  DocumentSeverity: () => <div data-test-subj="mockDocumentSeverity" />,
-}));
-
-jest.mock('../../document/components/timestamp', () => ({
-  Timestamp: () => <div data-test-subj="mockTimestamp" />,
-}));
-
-const createMockHit = (flattened: DataTableRecord['flattened'] = {}): DataTableRecord =>
-  ({
-    id: 'hit-1',
-    raw: {},
-    flattened,
-    isAnchor: false,
-  } as DataTableRecord);
-
-const renderHeader = (props: Partial<Parameters<typeof ToolsFlyoutHeader>[0]> = {}) => {
-  const hit = createMockHit();
-  return render(
+const renderHeader = (props: Partial<Parameters<typeof ToolsFlyoutHeader>[0]> = {}) =>
+  render(
     <IntlProvider locale="en">
-      <ToolsFlyoutHeader hit={hit} title={<span>{'Correlations'}</span>} {...props} />
+      <ToolsFlyoutHeader title={<span>{'Correlations'}</span>} {...props} />
     </IntlProvider>
   );
+
+const sourceProps = {
+  onTitleClick: jest.fn(),
+  label: 'Test Rule',
+  iconType: 'warning',
 };
 
 describe('<ToolsFlyoutHeader />', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should render the header container', () => {
+  it('renders the header container', () => {
     const { getByTestId } = renderHeader();
     expect(getByTestId(TOOLS_FLYOUT_HEADER_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render the tool title', () => {
+  it('renders the tool title', () => {
     const { getByText } = renderHeader({ title: <span>{'Session view'}</span> });
     expect(getByText('Session view')).toBeInTheDocument();
   });
 
-  it('should render the expand button', () => {
-    const { getByTestId } = renderHeader();
-    expect(getByTestId(TOOLS_FLYOUT_HEADER_EXPAND_BUTTON_TEST_ID)).toBeInTheDocument();
+  it('keeps both sides on the same row without breaking the tool title', () => {
+    const { getByTestId, getByText } = renderHeader(sourceProps);
+    const { result } = renderHook(() => useEuiTheme());
+
+    expect(getByTestId(TOOLS_FLYOUT_HEADER_TEST_ID)).toHaveStyle({ flexWrap: 'nowrap' });
+    expect(getByText('Correlations').closest('.euiTitle')).toHaveStyle({
+      whiteSpace: 'nowrap',
+    });
+    expect(getByTestId('mockToolsFlyoutTitle').parentElement).toHaveStyle({
+      minWidth: `${result.current.euiTheme.base * 8}px`,
+    });
   });
 
-  it('should call openSystemFlyout when the expand button is clicked', () => {
-    const { getByTestId } = renderHeader();
-    fireEvent.click(getByTestId(TOOLS_FLYOUT_HEADER_EXPAND_BUTTON_TEST_ID));
-    expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+  it('renders ToolsFlyoutTitle when onTitleClick, label and iconType are provided', () => {
+    const { getByTestId } = renderHeader(sourceProps);
+    expect(getByTestId('mockToolsFlyoutTitle')).toBeInTheDocument();
+    expect(getByTestId('mockToolsFlyoutTitle')).toHaveTextContent('Test Rule');
   });
 
-  it('should render the document title', () => {
-    const { getByTestId } = renderHeader();
-    expect(getByTestId('mockTitle')).toBeInTheDocument();
+  it('does not render source context when props are missing', () => {
+    const { queryByTestId } = renderHeader();
+    expect(queryByTestId('mockToolsFlyoutTitle')).not.toBeInTheDocument();
   });
 
-  it('should render the document severity', () => {
-    const { getByTestId } = renderHeader();
-    expect(getByTestId('mockDocumentSeverity')).toBeInTheDocument();
+  it('renders badge when provided', () => {
+    const { getByTestId } = renderHeader({
+      ...sourceProps,
+      badge: <div data-test-subj="mockBadge" />,
+    });
+    expect(getByTestId('mockBadge')).toBeInTheDocument();
   });
 
-  it('should render the document timestamp', () => {
-    const { getByTestId } = renderHeader();
-    expect(getByTestId('mockTimestamp')).toBeInTheDocument();
+  it('truncates the timestamp and shows its full value in a tooltip', async () => {
+    const { getByTestId } = renderHeader({
+      ...sourceProps,
+      timestamp: <div>{'Jul 28, 2026 @ 16:45:55.413'}</div>,
+    });
+
+    const timestamp = getByTestId(TOOLS_FLYOUT_HEADER_TIMESTAMP_TEST_ID);
+    expect(timestamp).toHaveStyle({
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    });
+    expect(timestamp).toHaveAttribute('tabindex', '0');
+
+    fireEvent.mouseOver(timestamp);
+    await waitFor(() => {
+      expect(document.querySelector('[role="tooltip"]')).toHaveTextContent(
+        'Jul 28, 2026 @ 16:45:55.413'
+      );
+    });
   });
 });

@@ -9,6 +9,8 @@
 
 import { OasConverter } from '.';
 import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod/v4';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
 describe('OasConverter', () => {
   it('converts schemas with refs', () => {
@@ -86,6 +88,65 @@ describe('OasConverter', () => {
         },
       },
       required: ['foo'],
+    });
+  });
+
+  describe('unwraps Zod schemas from buildRouteValidationWithZod', () => {
+    it('converts query parameters from a wrapped Zod schema', () => {
+      const converter = new OasConverter();
+      const querySchema = z.object({
+        include_components: z.boolean().optional().describe('Return component-level details'),
+        page: z.number().int().optional().describe('Page number'),
+      });
+      const wrapped = buildRouteValidationWithZod(querySchema);
+
+      const result = converter.convertQuery(wrapped);
+      expect(result.length).toBe(2);
+      expect(result.map((p) => p.name).sort()).toEqual(['include_components', 'page']);
+      expect(result.find((p) => p.name === 'include_components')).toMatchObject({
+        in: 'query',
+        required: false,
+        schema: { type: 'boolean' },
+        description: 'Return component-level details',
+      });
+    });
+
+    it('converts path parameters from a wrapped Zod schema', () => {
+      const converter = new OasConverter();
+      const paramsSchema = z.object({
+        entityType: z.enum(['user', 'host']).describe('The entity type'),
+      });
+      const wrapped = buildRouteValidationWithZod(paramsSchema);
+
+      const result = converter.convertPathParameters(wrapped, {
+        entityType: { optional: false },
+      });
+      expect(result.length).toBe(1);
+      expect(result[0]).toMatchObject({
+        name: 'entityType',
+        in: 'path',
+        required: true,
+        description: 'The entity type',
+      });
+    });
+
+    it('converts body schema from a wrapped Zod schema', () => {
+      const converter = new OasConverter();
+      const bodySchema = z.object({
+        name: z.string().describe('Entity name'),
+        tags: z.array(z.string()).optional().describe('Tags'),
+      });
+      const wrapped = buildRouteValidationWithZod(bodySchema);
+
+      const result = converter.convert(wrapped);
+      expect(result).toMatchObject({
+        type: 'object',
+        properties: {
+          name: { type: 'string', description: 'Entity name' },
+          tags: { type: 'array', items: { type: 'string' }, description: 'Tags' },
+        },
+        required: ['name'],
+      });
     });
   });
 });

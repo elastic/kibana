@@ -8,82 +8,95 @@
 import type { MatcherContext } from '@kbn/alerting-v2-schemas';
 import { evaluateKql } from '@kbn/eval-kql';
 import { injectable } from 'inversify';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import { AlertTriage, PolicyCatalog, PolicyMatcher, RuleCatalog } from '../state';
 import type {
-  AlertEpisode,
+  Alert,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
   MatchedPair,
-  NotificationPolicy,
-  NotificationPolicyId,
-  Rule,
-  RuleId,
 } from '../types';
+import { createMatcherContext } from './utils/matcher_context';
 
 @injectable()
 export class EvaluateMatchersStep implements DispatcherStep {
   public readonly name = 'evaluate_matchers';
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { dispatchable = [], rules = new Map(), policies = new Map() } = state;
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    logger: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
+    const {
+      triage = AlertTriage.empty(),
+      rules = RuleCatalog.empty(),
+      policies = PolicyCatalog.empty(),
+    } = state;
 
-    const matched = evaluateMatchers(dispatchable, rules, policies);
+    const matched = this.evaluateMatchers(triage.dispatchable, rules, policies, logger);
 
     return { type: 'continue', data: { matched } };
   }
-}
 
-export function evaluateMatchers(
-  dispatchable: readonly AlertEpisode[],
-  rules: ReadonlyMap<RuleId, Rule>,
-  policies: ReadonlyMap<NotificationPolicyId, NotificationPolicy>
-): MatchedPair[] {
-  const matched: MatchedPair[] = [];
+  private evaluateMatchers(
+    dispatchable: readonly Alert[],
+    rules: RuleCatalog,
+    policies: PolicyCatalog,
+    logger: LoggerServiceContract
+  ): MatchedPair[] {
+    const matched: MatchedPair[] = [];
+    const now = Date.now();
 
-  const policiesBySpace = Map.groupBy(policies.values(), (policy) => policy.spaceId);
+    for (const alert of dispatchable) {
+      if (rules.isOrphanedInternalAlert(alert)) continue;
+      const rule = rules.forAlert(alert);
 
-  for (const episode of dispatchable) {
-    const rule = rules.get(episode.rule_id);
-    if (!rule) continue;
+      const spacePolicies = policies.inSpace(alert.space_id);
+      let context: MatcherContext | undefined;
 
-    const spacePolicies = policiesBySpace.get(rule.spaceId) ?? [];
-    let context: MatcherContext | undefined;
+      for (const policy of spacePolicies) {
+        if (!policy.enabled) continue;
+        if (policy.snoozedUntil && new Date(policy.snoozedUntil).getTime() > now) continue;
 
-    for (const policy of spacePolicies) {
-      if (!policy.enabled) continue;
-      if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
+        const policyMatcher = PolicyMatcher.of(policy.matcher);
+        if (policyMatcher.isCatchAll()) {
+          matched.push({ alert, policy });
+          continue;
+        }
 
-      if (!policy.matcher) {
-        matched.push({ episode, policy });
-        continue;
-      }
+        if (!policyMatcher.matchesRoutingTags(rule?.routingTags)) continue;
 
-      context ??= createMatcherContext(episode, rule);
-      const isMatch = evaluateKql(policy.matcher, context);
-      if (isMatch) {
-        matched.push({ episode, policy });
+        const expression = policyMatcher.expressionKql();
+        if (expression === null) {
+          matched.push({ alert, policy });
+          continue;
+        }
+
+        context ??= createMatcherContext(alert);
+        let isMatch = false;
+        try {
+          isMatch = evaluateKql(expression, context);
+        } catch {
+          logger.warn({
+            message: 'Policy matcher failed to evaluate; treating as no-match',
+            code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
+            labels: {
+              policy_id: policy.id,
+              alert_id: alert.alert_id,
+              rule_id: alert.rule_id ?? undefined,
+              space_id: alert.space_id,
+            },
+          });
+          continue;
+        }
+
+        if (isMatch) {
+          matched.push({ alert, policy });
+        }
       }
     }
+
+    return matched;
   }
-
-  return matched;
-}
-
-function createMatcherContext(episode: AlertEpisode, rule: Rule): MatcherContext {
-  return {
-    last_event_timestamp: episode.last_event_timestamp,
-    group_hash: episode.group_hash,
-    episode_id: episode.episode_id,
-    episode_status: episode.episode_status,
-    ...(episode.data ? { data: episode.data } : {}),
-    rule: {
-      id: rule.id,
-      name: rule.name,
-      description: rule.description,
-      tags: rule.tags,
-      enabled: rule.enabled,
-      createdAt: rule.createdAt,
-      updatedAt: rule.updatedAt,
-    },
-  };
 }

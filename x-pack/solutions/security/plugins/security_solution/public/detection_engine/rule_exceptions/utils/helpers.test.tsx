@@ -300,6 +300,23 @@ describe('Exception helpers', () => {
       expect(result).toEqual(payload);
     });
 
+    test('should not update wildcard entry values with backslashes', () => {
+      const payload = [
+        getExceptionListItemSchemaMock({
+          entries: [
+            {
+              field: 'process.executable.caseless',
+              operator: 'included',
+              type: 'wildcard',
+              value: 'C:\\Users\\*\\app.exe',
+            },
+          ],
+        }),
+      ];
+      const result = prepareExceptionItemsForBulkClose(payload);
+      expect(result[0].entries[0]).toEqual(payload[0].entries[0]);
+    });
+
     test("should update entry fields when they start with 'event.'", () => {
       const payload = [
         {

@@ -23,8 +23,8 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-types/embeddables/swimlane_type';
 import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../../../common/constants/explorer';
-import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import type { OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/constants';
 import { getJobsObservable } from '../common/get_jobs_observable';
@@ -55,6 +55,7 @@ export const initializeSwimLaneDataFetcher = (
     viewBy: swimLaneApi.viewBy,
     perPage: swimLaneApi.perPage,
     fromPage: swimLaneApi.fromPage,
+    severityThreshold: swimLaneApi.severityThreshold,
   });
 
   const fetchContext$ = fetch$(swimLaneApi).pipe(shareReplay(1));
@@ -93,7 +94,9 @@ export const initializeSwimLaneDataFetcher = (
           return of(undefined);
         }
 
-        const { viewBy, swimlaneType, perPage, fromPage } = input;
+        const { viewBy, swimlaneType, perPage, fromPage, severityThreshold } = input;
+        const severityThresholds =
+          severityThreshold !== undefined ? [{ min: severityThreshold }] : undefined;
 
         let appliedFilters: estypes.QueryDslQueryContainer;
         try {
@@ -107,7 +110,12 @@ export const initializeSwimLaneDataFetcher = (
         }
 
         return from(
-          anomalyTimelineService.loadOverallData(explorerJobs, undefined, bucketInterval)
+          anomalyTimelineService.loadOverallData(
+            explorerJobs,
+            undefined,
+            bucketInterval,
+            severityThresholds
+          )
         ).pipe(
           switchMap((overallSwimlaneData) => {
             const { earliest, latest } = overallSwimlaneData;
@@ -126,7 +134,8 @@ export const initializeSwimLaneDataFetcher = (
                   fromPage,
                   undefined,
                   appliedFilters,
-                  bucketInterval
+                  bucketInterval,
+                  severityThresholds
                 )
               ).pipe(
                 map((viewBySwimlaneData) => {

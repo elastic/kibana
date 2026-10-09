@@ -98,6 +98,7 @@ export class Fetcher {
       timeRange: options.timeRange,
       isInternalRequest,
       agentId: options.agentId,
+      shouldExcludeColdAndFrozenTiers: !!options.shouldExcludeColdAndFrozenTiers,
     });
 
     const { eventStats, alertIds } = await query.search(

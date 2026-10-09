@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cloneDeep, pick } from 'lodash';
 import { ReplaySubject } from 'rxjs';
+import { getBreakdownField } from '@kbn/discover-utils';
 import type { UnifiedHistogramApi, UseUnifiedHistogramProps } from './use_unified_histogram';
 import { createStateService } from '../services/state_service';
 import { useStateProps } from './use_state_props';
@@ -20,7 +21,6 @@ import type {
   UnifiedHistogramVisContext,
   LensVisServiceState,
 } from '../types';
-import { getBreakdownField } from '../utils/local_storage_utils';
 import { processFetchParams } from '../utils/process_fetch_params';
 import { LensVisService } from '../services/lens_vis_service';
 import { exportVisContext } from '../utils/external_vis_context';
@@ -48,6 +48,7 @@ export const useServicesBootstrap = (
   const { fetchParams, lensVisService, lensVisServiceState } = state;
   const { services, initialState, localStorageKeyPrefix } = props;
   const enableLensVisService = options?.enableLensVisService;
+  const latestFetchIdRef = useRef(0);
   const propsRef = useRef<UseUnifiedHistogramProps>(props);
   propsRef.current = props;
 
@@ -95,7 +96,8 @@ export const useServicesBootstrap = (
 
   const [api] = useState<UnifiedHistogramApi>(() => ({
     fetch: async (params) => {
-      const nextFetchParams = processFetchParams({
+      const fetchId = ++latestFetchIdRef.current;
+      const { fetchParams: nextFetchParams, lensDataView } = await processFetchParams({
         params,
         services,
         initialBreakdownField,
@@ -108,12 +110,18 @@ export const useServicesBootstrap = (
           lensSuggestionsApi: apiHelper.suggestions,
         });
       }
+
+      // An older in-flight fetch must not overwrite the state of a newer one.
+      if (fetchId !== latestFetchIdRef.current) {
+        return;
+      }
+
       let updatedLensVisServiceState: LensVisServiceState | undefined;
-      if (updatedLensVisService && enableLensVisService) {
+      if (updatedLensVisService && enableLensVisService && lensDataView) {
         updatedLensVisServiceState = updatedLensVisService.update({
           externalVisContext: nextFetchParams.externalVisContext,
           queryParams: {
-            dataView: nextFetchParams.dataView,
+            dataSource: nextFetchParams.dataSource,
             query: nextFetchParams.query,
             filters: nextFetchParams.filters,
             timeRange: nextFetchParams.timeRange,
@@ -143,7 +151,14 @@ export const useServicesBootstrap = (
         lensVisServiceState: updatedLensVisServiceState,
       });
     },
-    ...pick(stateService, 'state$', 'setChartHidden', 'setTopPanelHeight', 'setTotalHits'),
+    ...pick(
+      stateService,
+      'state$',
+      'setChartHidden',
+      'setTopPanelHeight',
+      'setTotalHits',
+      'setLensRequestAdapter'
+    ),
   }));
 
   const stateProps = useStateProps({

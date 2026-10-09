@@ -91,17 +91,17 @@ describe('search', () => {
   });
 
   it('should throw if options.namespaces is an empty array', async () => {
-    await expect(repository.search({ ...options, namespaces: [] })).rejects.toThrowError(
+    await expect(repository.search({ ...options, namespaces: [] })).rejects.toThrow(
       'options.namespaces cannot be an empty array'
     );
     expect(client.search).not.toHaveBeenCalled();
   });
 
   it('should throw if options.type is empty', async () => {
-    await expect(repository.search({ ...options, type: [] })).rejects.toThrowError(
+    await expect(repository.search({ ...options, type: [] })).rejects.toThrow(
       'options.type must be a string or an array of strings'
     );
-    await expect(repository.search({ ...options, type: '' })).rejects.toThrowError(
+    await expect(repository.search({ ...options, type: '' })).rejects.toThrow(
       'options.type must be a string or an array of strings'
     );
     expect(client.search).not.toHaveBeenCalled();

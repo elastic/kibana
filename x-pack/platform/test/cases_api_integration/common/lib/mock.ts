@@ -14,6 +14,8 @@ import type {
   ExternalReferenceNoSOAttachmentPayload,
   ExternalReferenceSOAttachmentPayload,
   PersistableStateAttachmentPayload,
+  UnifiedReferenceAttachmentPayload,
+  UnifiedValueAttachmentPayload,
   Attachment,
 } from '@kbn/cases-plugin/common/types/domain';
 import {
@@ -26,9 +28,23 @@ import type {
   CasePostRequest,
   PostFileAttachmentRequest,
 } from '@kbn/cases-plugin/common/types/api';
-import { FILE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
+import { buildAlertCaseAttachment } from '@kbn/cases-plugin/common';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  FILE_ATTACHMENT_TYPE,
+  INDICATOR_ATTACHMENT_TYPE,
+  LENS_ATTACHMENT_TYPE,
+  LEGACY_FILE_ATTACHMENT_TYPE,
+  LEGACY_INDICATOR_ATTACHMENT_TYPE,
+  LEGACY_LENS_ATTACHMENT_TYPE,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+  SECURITY_ENTITY_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common/constants';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
+import type { JsonValue } from '@kbn/utility-types';
 import type { AttachmentRequest, CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
 
 export const defaultUser = {
@@ -37,6 +53,9 @@ export const defaultUser = {
   username: 'elastic',
   profile_uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
 };
+
+export const userActionSourceUser = { type: 'user', id: 'user' };
+export const userActionSourceApi = { type: 'api', id: 'api' };
 /**
  * A null filled user will occur when the security plugin is disabled
  */
@@ -96,6 +115,16 @@ export const postCommentAlertMultipleIdsReq: AlertAttachmentPayload = {
   owner: 'securitySolutionFixture',
 };
 
+export const postCommentEntityReq: UnifiedReferenceAttachmentPayload = {
+  type: SECURITY_ENTITY_ATTACHMENT_TYPE,
+  owner: 'securitySolutionFixture',
+  attachmentId: 'entity-1',
+  metadata: {
+    entityName: 'alice',
+    entityType: 'user',
+  },
+};
+
 export const postCommentActionsReq: ActionsAttachmentPayload = {
   comment: 'comment text',
   actions: {
@@ -129,15 +158,14 @@ export const postCommentActionsReleaseReq: ActionsAttachmentPayload = {
 export const postExternalReferenceESReq: ExternalReferenceNoSOAttachmentPayload = {
   type: AttachmentType.externalReference,
   externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
-  externalReferenceId: 'my-id',
-  externalReferenceAttachmentTypeId: '.test',
-  externalReferenceMetadata: null,
+  externalReferenceId: 'indicator-1',
+  externalReferenceAttachmentTypeId: LEGACY_INDICATOR_ATTACHMENT_TYPE,
+  externalReferenceMetadata: {
+    indicatorName: 'malware.exe',
+    indicatorType: 'file',
+    indicatorFeedName: '[Filebeat] AbuseCH Malware',
+  },
   owner: 'securitySolutionFixture',
-};
-
-export const postExternalReferenceSOReq: ExternalReferenceSOAttachmentPayload = {
-  ...postExternalReferenceESReq,
-  externalReferenceStorage: { type: ExternalReferenceStorageType.savedObject, soType: 'test-type' },
 };
 
 export const fileMetadata = () => ({
@@ -151,50 +179,158 @@ export const fileAttachmentMetadata: FileAttachmentMetadata = {
   files: [fileMetadata()],
 };
 
+export const persistableStateAttachment: PersistableStateAttachmentPayload = {
+  type: AttachmentType.persistableState,
+  owner: 'securitySolutionFixture',
+  persistableStateAttachmentTypeId: LEGACY_LENS_ATTACHMENT_TYPE,
+  persistableStateAttachmentState: { attributes: { title: 'My visualization' } },
+};
+
 export const getFilesAttachmentReq = (
   req?: Partial<ExternalReferenceSOAttachmentPayload>
 ): ExternalReferenceSOAttachmentPayload => {
   return {
-    ...postExternalReferenceSOReq,
+    type: AttachmentType.externalReference,
+    externalReferenceId: 'my-id',
     externalReferenceStorage: {
       type: ExternalReferenceStorageType.savedObject,
       soType: FILE_SO_TYPE,
     },
-    externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
+    externalReferenceAttachmentTypeId: LEGACY_FILE_ATTACHMENT_TYPE,
     externalReferenceMetadata: { ...fileAttachmentMetadata },
+    owner: 'securitySolutionFixture',
     ...req,
   };
 };
 
-export const persistableStateAttachment: PersistableStateAttachmentPayload = {
-  type: AttachmentType.persistableState,
+// SO-backed external reference (the mapped `.files` type) for legacy-wire-shape specs.
+export const postExternalReferenceSOReq: ExternalReferenceSOAttachmentPayload =
+  getFilesAttachmentReq();
+
+// Unified payloads for the internal bulk-create route.
+export const postUnifiedCommentReq: UnifiedValueAttachmentPayload = {
+  type: COMMENT_ATTACHMENT_TYPE,
+  data: { content: 'This is a cool comment' },
   owner: 'securitySolutionFixture',
-  persistableStateAttachmentTypeId: '.test',
-  persistableStateAttachmentState: { foo: 'foo', injectedId: 'testRef' },
 };
+
+// Fixture owner prefixes are registered on the Kibana server only, not in the FTR process.
+const fixtureOwnerAlertTypes: Partial<Record<string, string>> = {
+  securitySolutionFixture: SECURITY_ALERT_ATTACHMENT_TYPE,
+  observabilityFixture: OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+};
+
+export const buildUnifiedAlertReq = (
+  owner: string,
+  {
+    alertId,
+    index,
+    rule = { id: 'test-rule-id', name: 'test-index-id' },
+  }: {
+    alertId: string | string[];
+    index: string | string[];
+    rule?: { id: string | null; name: string | null } | null;
+  }
+): UnifiedReferenceAttachmentPayload => {
+  const attachment = buildAlertCaseAttachment(owner, { alertId, index, rule });
+  return { ...attachment, type: fixtureOwnerAlertTypes[owner] ?? attachment.type, owner };
+};
+
+export const postUnifiedAlertReq = buildUnifiedAlertReq('securitySolutionFixture', {
+  alertId: 'test-id',
+  index: 'test-index',
+});
+
+export const postUnifiedAlertMultipleIdsReq = buildUnifiedAlertReq('securitySolutionFixture', {
+  alertId: ['test-id-1', 'test-id-2'],
+  index: ['test-index', 'test-index-2'],
+});
+
+export const postUnifiedActionsReq: UnifiedReferenceAttachmentPayload = {
+  type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+  attachmentId: 'endpoint-action-1',
+  data: { content: 'comment text' },
+  metadata: {
+    command: 'isolate',
+    targets: [{ hostname: 'host-name', endpointId: 'endpoint-id', agentType: 'endpoint' }],
+  },
+  owner: 'securitySolutionFixture',
+};
+
+export const postUnifiedActionsReleaseReq: UnifiedReferenceAttachmentPayload = {
+  ...postUnifiedActionsReq,
+  attachmentId: 'endpoint-action-2',
+  metadata: {
+    command: 'unisolate',
+    targets: [{ hostname: 'host-name', endpointId: 'endpoint-id', agentType: 'endpoint' }],
+  },
+};
+
+export const postUnifiedLensReq: UnifiedValueAttachmentPayload = {
+  type: LENS_ATTACHMENT_TYPE,
+  data: {
+    state: { attributes: { title: 'My visualization' } },
+  },
+  owner: 'securitySolutionFixture',
+};
+
+export const postUnifiedIndicatorReq: UnifiedReferenceAttachmentPayload = {
+  type: INDICATOR_ATTACHMENT_TYPE,
+  attachmentId: 'indicator-1',
+  metadata: {
+    indicatorName: 'malware.exe',
+    indicatorType: 'file',
+    indicatorFeedName: '[Filebeat] AbuseCH Malware',
+  },
+  owner: 'securitySolutionFixture',
+};
+
+export const getUnifiedFilesAttachmentReq = (
+  req?: Partial<{
+    attachmentId: string;
+    metadata: Record<string, JsonValue>;
+    owner: string;
+  }>
+): UnifiedReferenceAttachmentPayload => ({
+  type: FILE_ATTACHMENT_TYPE,
+  attachmentId: 'my-id',
+  metadata: { ...fileAttachmentMetadata, soType: FILE_SO_TYPE },
+  owner: 'securitySolutionFixture',
+  ...req,
+});
 
 export const postCaseResp = (
   id?: string | null,
   req: CasePostRequest = postCaseReq
-): Partial<Case> => ({
-  ...req,
-  ...(id != null ? { id } : {}),
-  comments: [],
-  duration: null,
-  severity: req.severity ?? CaseSeverity.LOW,
-  totalAlerts: 0,
-  totalEvents: 0,
-  totalComment: 0,
-  closed_by: null,
-  created_by: defaultUser,
-  external_service: null,
-  status: CaseStatuses.open,
-  updated_by: null,
-  category: null,
-  customFields: [],
-  observables: [],
-  total_observables: 0,
-});
+): Partial<Case> => {
+  // `template` is an optional field on the case response and is only present when the case was
+  // created from a template. transformNewCase deliberately keeps an absent template absent (rather
+  // than writing `template: null`), and CaseRt models it as an optional key — so a case created
+  // without a template has no `template` key at all. None of these mocks supply one, so it is
+  // destructured out of the spread here (rather than left as `template: null`) to match the decoded
+  // response: absent, not null. Destructuring also drops the request-shape `version?: number`,
+  // which is incompatible with the response's pinned `version: number`.
+  const { template, ...reqWithoutTemplate } = req;
+  return {
+    ...reqWithoutTemplate,
+    ...(id != null ? { id } : {}),
+    comments: [],
+    duration: null,
+    severity: req.severity ?? CaseSeverity.LOW,
+    totalAlerts: 0,
+    totalEvents: 0,
+    totalComment: 0,
+    closed_by: null,
+    created_by: defaultUser,
+    external_service: null,
+    status: CaseStatuses.open,
+    updated_by: null,
+    category: null,
+    customFields: [],
+    observables: [],
+    total_observables: 0,
+  };
+};
 
 export const getCaseWithoutCommentsResp = (
   id?: string | null,

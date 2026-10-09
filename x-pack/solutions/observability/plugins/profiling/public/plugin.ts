@@ -6,6 +6,7 @@
  */
 
 import type {
+  AppDeepLink,
   AppMountParameters,
   AppUpdater,
   CoreSetup,
@@ -20,6 +21,8 @@ import { BehaviorSubject, combineLatest, from, map, take } from 'rxjs';
 import { OBLT_PROFILING_APP_ID } from '@kbn/deeplinks-observability';
 import { registerEmbeddables } from './embeddables/register_embeddables';
 import { getServices } from './services';
+import type { NavigationLinkQuery } from './utils/navigation_link_query';
+import { getNavigationLinkQuery, withNavigationLinkQuery } from './utils/navigation_link_query';
 import type { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
 import type { ProfilingEmbeddablesDependencies } from './embeddables/profiling_embeddable_provider';
 
@@ -47,6 +50,7 @@ export class ProfilingPlugin
           defaultMessage: 'Stacktraces',
         }),
         path: '/stacktraces',
+        visibleIn: ['globalSearch', 'projectSideNav'],
       },
       {
         id: 'flamegraphs',
@@ -54,6 +58,7 @@ export class ProfilingPlugin
           defaultMessage: 'Flamegraphs',
         }),
         path: '/flamegraphs',
+        visibleIn: ['globalSearch', 'projectSideNav'],
       },
       {
         id: 'functions',
@@ -61,14 +66,18 @@ export class ProfilingPlugin
           defaultMessage: 'Functions',
         }),
         path: '/functions',
+        visibleIn: ['globalSearch', 'projectSideNav'],
       },
-    ];
+    ] satisfies AppDeepLink[];
 
-    const kuerySubject = new BehaviorSubject<string>('');
+    const navigationLinkQuerySubject = new BehaviorSubject<NavigationLinkQuery>({});
     const appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
-    const section$ = combineLatest([from(coreSetup.getStartServices()), kuerySubject]).pipe(
-      map(([[coreStart], kuery]) => {
+    const section$ = combineLatest([
+      from(coreSetup.getStartServices()),
+      navigationLinkQuerySubject,
+    ]).pipe(
+      map(([[coreStart], navigationLinkQuery]) => {
         if (coreStart.application.capabilities.profiling.show) {
           let isSidebarEnabled = true;
           coreStart.chrome
@@ -87,7 +96,7 @@ export class ProfilingPlugin
                   return {
                     app: OBLT_PROFILING_APP_ID,
                     label: link.title,
-                    path: kuery ? `${link.path}?kuery=${kuery}` : link.path,
+                    path: withNavigationLinkQuery(link.path, navigationLinkQuery),
                     matchPath: (path) => {
                       return path.startsWith(link.path);
                     },
@@ -102,7 +111,7 @@ export class ProfilingPlugin
             appUpdater$.next(() => ({
               deepLinks: links.map((link) => ({
                 ...link,
-                path: kuery ? `${link.path}?kuery=${encodeURIComponent(kuery)}` : link.path,
+                path: withNavigationLinkQuery(link.path, navigationLinkQuery),
               })),
             }));
           }
@@ -123,19 +132,19 @@ export class ProfilingPlugin
       category: DEFAULT_APP_CATEGORIES.observability,
       deepLinks: links,
       updater$: appUpdater$,
-      async mount({ element, history, theme$, setHeaderActionMenu }: AppMountParameters) {
+      async mount({ element, history }: AppMountParameters) {
         const [coreStart, pluginsStart] = await coreSetup.getStartServices();
 
         const { renderApp } = await import('./app');
 
-        function pushKueryToSubject(location: Location) {
-          const query = new URLSearchParams(location.search);
-          kuerySubject.next(query.get('kuery') ?? '');
+        // Keep the search query and schema when navigating between sections from Chrome
+        function pushNavigationLinkQueryToSubject(location: Location) {
+          navigationLinkQuerySubject.next(getNavigationLinkQuery(location.search));
         }
 
-        pushKueryToSubject(history.location);
+        pushNavigationLinkQueryToSubject(history.location);
 
-        history.listen(pushKueryToSubject);
+        history.listen(pushNavigationLinkQueryToSubject);
 
         const unmount = renderApp(
           {
@@ -145,15 +154,13 @@ export class ProfilingPlugin
             pluginsStart,
             pluginsSetup,
             history,
-            theme$,
-            setHeaderActionMenu,
           },
           element
         );
 
         return () => {
           unmount();
-          kuerySubject.next('');
+          navigationLinkQuerySubject.next({});
         };
       },
     });

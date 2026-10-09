@@ -8,7 +8,7 @@
  */
 
 // Declarative components and props.
-export { Column, type ColumnProps } from './part';
+export { Column, createColumn, type ColumnProps } from './part';
 export {
   NameColumn,
   type NameColumnProps,
@@ -32,6 +32,12 @@ export {
   StarButton,
   type StarButtonProps,
 } from './starred';
+export {
+  CreatedByColumn,
+  type CreatedByColumnProps,
+  CreatedByCell,
+  type CreatedByCellProps,
+} from './created_by';
 
 // Namespace type for TypeScript typing of `Column`.
 export type { ColumnNamespace } from './part';

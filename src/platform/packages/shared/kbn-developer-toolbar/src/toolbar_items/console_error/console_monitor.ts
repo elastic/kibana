@@ -29,6 +29,10 @@ export class ConsoleMonitor implements Monitor<ConsoleErrorInfo | null> {
      * Revisit if the warning ever surfaces as an actual bug.
      */
     'Warning: Attempted to synchronously unmount a root while React was already rendering.',
+    /**
+     * This is a known Chrome DevTools warning that occurs when a ResizeObserver callback takes too long to execute and there are pending notifications that couldn't be delivered within the loop.
+     */
+    'ResizeObserver loop completed with undelivered notifications.',
   ] as const;
 
   private static readonly DEBOUNCE_DELAY = 100 as const; // ms

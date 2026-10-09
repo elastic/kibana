@@ -254,7 +254,6 @@ describe('TransactionDetails', () => {
     );
 
     expect(mockSetAgentBuilderChatConfig).toHaveBeenCalledWith({
-      agentId: 'observability.agent',
       attachments: [
         expect.objectContaining({
           type: 'observability.transaction',

@@ -48,14 +48,25 @@ describe('SelectionBar', () => {
 
   const mockOnDelete = jest.fn(async () => {});
 
-  const createWrapper = (options?: { withOnDelete?: boolean }) => {
-    const { withOnDelete = true } = options ?? {};
+  const createWrapper = (options?: {
+    withOnDelete?: boolean;
+    deleteRestriction?: (item: ContentListItem) => string | undefined;
+  }) => {
+    const { withOnDelete = true, deleteRestriction } = options ?? {};
     return ({ children }: { children: React.ReactNode }) => (
       <ContentListProvider
         id="test-list"
         labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
         dataSource={{ findItems: mockFindItems }}
-        item={withOnDelete ? { onDelete: mockOnDelete } : undefined}
+        item={
+          withOnDelete
+            ? {
+                actions: {
+                  delete: { onBulkAction: mockOnDelete, restriction: deleteRestriction },
+                },
+              }
+            : undefined
+        }
       >
         {children}
       </ContentListProvider>
@@ -118,7 +129,7 @@ describe('SelectionBar', () => {
     expect(container.innerHTML).toBe('');
   });
 
-  it('returns null when `onDelete` is not configured even with selected items', async () => {
+  it('returns null when `actions.delete.onBulkAction` is not configured even with selected items', async () => {
     const Wrapper = createWrapper({ withOnDelete: false });
     const { container } = render(
       <Wrapper>
@@ -161,6 +172,29 @@ describe('SelectionBar', () => {
     await waitFor(() => {
       expect(screen.getByTestId('contentListDeleteConfirmation')).toBeInTheDocument();
     });
+  });
+
+  it('opens the informational modal when all selected items are restricted', async () => {
+    const Wrapper = createWrapper({
+      deleteRestriction: () => 'Managed dashboards cannot be deleted.',
+    });
+    render(
+      <Wrapper>
+        <SelectionBarWithSetup itemsToSelect={[mockItems[0], mockItems[1]]} />
+      </Wrapper>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Review 2 dashboards')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('contentListSelectionBar-deleteButton'));
+
+    await waitFor(() => {
+      expect(screen.getByText(/2 dashboards can't be deleted/)).toBeInTheDocument();
+      expect(screen.getByTestId('contentListDeleteConfirmation-closeButton')).toBeInTheDocument();
+    });
+    expect(mockOnDelete).not.toHaveBeenCalled();
   });
 
   it('clears the selection after successful delete', async () => {

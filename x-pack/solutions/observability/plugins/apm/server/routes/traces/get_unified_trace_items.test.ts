@@ -6,6 +6,7 @@
  */
 
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { UnifiedTraceErrors } from './get_unified_trace_errors';
 import { getErrorsByDocId, getUnifiedTraceItems } from './get_unified_trace_items';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
@@ -43,9 +44,12 @@ import {
   ATTRIBUTE_HTTP_SCHEME,
   ATTRIBUTE_HTTP_STATUS_CODE,
   FAAS_COLDSTART,
+  GEN_AI_USAGE_INPUT_TOKENS,
+  GEN_AI_USAGE_OUTPUT_TOKENS,
   SPAN_COMPOSITE_COUNT,
   SPAN_COMPOSITE_SUM,
   SPAN_COMPOSITE_COMPRESSION_STRATEGY,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
 } from '../../../common/es_fields/apm';
 
 describe('getErrorsByDocId', () => {
@@ -78,6 +82,42 @@ describe('getErrorsByDocId', () => {
     });
   });
 
+  it('falls back to transaction.id for APM errors that carry no span.id', () => {
+    // Classic APM errors reference only the transaction they belong to. Without this fallback
+    // the waterfall row for that transaction renders no error badge at all.
+    const unifiedTraceErrors = {
+      apmErrors: [
+        {
+          span: { id: undefined },
+          transaction: { id: 'tx-1' },
+          id: 'error-1',
+          source: 'apm',
+          index: 'logs-apm.error-default',
+        },
+      ],
+      unprocessedOtelErrors: [],
+      totalErrors: 1,
+    } as unknown as UnifiedTraceErrors;
+
+    expect(getErrorsByDocId(unifiedTraceErrors)).toEqual({
+      'tx-1': [{ errorDocId: 'error-1', source: 'apm', errorDocIndex: 'logs-apm.error-default' }],
+    });
+  });
+
+  it('prefers span.id over transaction.id when both are present', () => {
+    const unifiedTraceErrors = {
+      apmErrors: [
+        { span: { id: 'span-1' }, transaction: { id: 'tx-1' }, id: 'error-1', source: 'apm' },
+      ],
+      unprocessedOtelErrors: [],
+      totalErrors: 1,
+    } as unknown as UnifiedTraceErrors;
+
+    expect(getErrorsByDocId(unifiedTraceErrors)).toEqual({
+      'span-1': [{ errorDocId: 'error-1', source: 'apm' }],
+    });
+  });
+
   it('returns an empty object if there are no errors', () => {
     const unifiedTraceErrors = {
       apmErrors: [],
@@ -106,9 +146,12 @@ describe('getUnifiedTraceItems', () => {
 
   const mockLogsClient = {} as LogsClient;
 
+  const mockLogger = loggingSystemMock.createLogger();
+
   const defaultParams = {
     apmEventClient: mockApmEventClient,
     logsClient: mockLogsClient,
+    logger: mockLogger,
     traceId: 'test-trace-id',
     start: 0,
     end: 1000,
@@ -177,6 +220,8 @@ describe('getUnifiedTraceItems', () => {
             sync: undefined,
             agentName: undefined,
             coldstart: undefined,
+            inputTokens: undefined,
+            outputTokens: undefined,
             composite: undefined,
             spanLinksCount: {
               incoming: 0,
@@ -242,6 +287,8 @@ describe('getUnifiedTraceItems', () => {
             sync: undefined,
             agentName: undefined,
             coldstart: undefined,
+            inputTokens: undefined,
+            outputTokens: undefined,
             composite: undefined,
             spanLinksCount: {
               incoming: 0,
@@ -299,6 +346,8 @@ describe('getUnifiedTraceItems', () => {
             sync: undefined,
             agentName: undefined,
             coldstart: undefined,
+            inputTokens: undefined,
+            outputTokens: undefined,
             composite: undefined,
             spanLinksCount: {
               incoming: 0,
@@ -325,6 +374,7 @@ describe('getUnifiedTraceItems', () => {
       expect(getUnifiedTraceErrors).toHaveBeenCalledWith({
         apmEventClient: mockApmEventClient,
         logsClient: mockLogsClient,
+        logger: mockLogger,
         traceId: 'test-trace-id',
         start: 0,
         end: 1000,
@@ -956,6 +1006,56 @@ describe('getUnifiedTraceItems', () => {
       expect(result.traceItems[0].coldstart).toBeUndefined();
     });
 
+    it('should include input and output tokens when present', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['chat gpt-4o-mini'],
+                [SPAN_DURATION]: [1000],
+                [GEN_AI_USAGE_INPUT_TOKENS]: [19],
+                [GEN_AI_USAGE_OUTPUT_TOKENS]: [58],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].inputTokens).toBe(19);
+      expect(result.traceItems[0].outputTokens).toBe(58);
+    });
+
+    it('should return undefined token fields when not present', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].inputTokens).toBeUndefined();
+      expect(result.traceItems[0].outputTokens).toBeUndefined();
+    });
+
     it('should return composite when all fields are present with exact_match strategy', async () => {
       const mockSearchResponse = {
         hits: {
@@ -1382,6 +1482,197 @@ describe('getUnifiedTraceItems', () => {
       const result = await getUnifiedTraceItems(defaultParams);
 
       expect(result.traceItems[0].errors).toEqual([]);
+    });
+  });
+
+  describe('documents with missing required fields', () => {
+    it('skips a document missing service.name and keeps the valid ones', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'malformed-doc',
+              _index: 'traces-generic.otel-default',
+              fields: {
+                [AT_TIMESTAMP]: ['2023-01-01T00:00:00.000Z'],
+                [TRACE_ID]: ['test-trace-id'],
+                [SPAN_ID]: ['span-without-service'],
+                [SPAN_NAME]: ['Malformed Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+            {
+              _id: 'valid-doc',
+              _index: 'traces-apm-default',
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+          total: { value: 2, relation: 'eq' },
+        },
+      });
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems.map((item) => item.id)).toEqual(['span-1']);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          '[get_unified_trace_items] Skipping document with id [malformed-doc] from index [traces-generic.otel-default]'
+        )
+      );
+    });
+
+    it('skips a document missing @timestamp instead of throwing', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'no-timestamp-doc',
+              _index: 'traces-generic.otel-default',
+              fields: {
+                [TRACE_ID]: ['test-trace-id'],
+                [SERVICE_NAME]: ['test-service'],
+                [SPAN_ID]: ['span-without-timestamp'],
+                [SPAN_NAME]: ['Malformed Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+          total: { value: 1, relation: 'eq' },
+        },
+      });
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems).toEqual([]);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Skipping document with id [no-timestamp-doc] from index [traces-generic.otel-default]: Missing required fields (@timestamp) in event'
+        )
+      );
+    });
+  });
+
+  describe('missingDestination', () => {
+    const otelSpanAndChildTransaction = (withDestination: boolean) => ({
+      hits: {
+        hits: [
+          {
+            fields: {
+              ...defaultSearchFields,
+              [SPAN_ID]: ['exit-span'],
+              [SPAN_NAME]: ['call-service-b'],
+              [SPAN_DURATION]: [500],
+              [AGENT_NAME]: ['opentelemetry/nodejs'],
+              ...(withDestination ? { [SPAN_DESTINATION_SERVICE_RESOURCE]: ['postgresql'] } : {}),
+            },
+          },
+          {
+            _source: {},
+            fields: {
+              ...defaultSearchFields,
+              [PROCESSOR_EVENT]: [ProcessorEvent.transaction],
+              [TRANSACTION_ID]: ['child-tx'],
+              [TRANSACTION_NAME]: ['GET /downstream'],
+              [TRANSACTION_DURATION]: [300],
+              [PARENT_ID]: ['exit-span'],
+            },
+          },
+        ],
+        total: { value: 2, relation: 'eq' },
+      },
+    });
+
+    it('sets missingDestination on an OTel exit span whose child is a transaction and destination is absent', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(
+        otelSpanAndChildTransaction(false)
+      );
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      const exitSpan = result.traceItems.find((item) => item.id === 'exit-span');
+      expect(exitSpan?.missingDestination).toBe(true);
+    });
+
+    it('does not set missingDestination when the OTel span has a destination', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(otelSpanAndChildTransaction(true));
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      const exitSpan = result.traceItems.find((item) => item.id === 'exit-span');
+      expect(exitSpan?.missingDestination).toBeUndefined();
+    });
+
+    it('does not set missingDestination on a non-OTel APM span even without a destination', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['apm-span'],
+                [SPAN_NAME]: ['call-service-b'],
+                [SPAN_DURATION]: [500],
+                [AGENT_NAME]: ['nodejs'],
+              },
+            },
+            {
+              _source: {},
+              fields: {
+                ...defaultSearchFields,
+                [PROCESSOR_EVENT]: [ProcessorEvent.transaction],
+                [TRANSACTION_ID]: ['child-tx'],
+                [TRANSACTION_NAME]: ['GET /downstream'],
+                [TRANSACTION_DURATION]: [300],
+                [PARENT_ID]: ['apm-span'],
+              },
+            },
+          ],
+          total: { value: 2, relation: 'eq' },
+        },
+      });
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      const apmSpan = result.traceItems.find((item) => item.id === 'apm-span');
+      expect(apmSpan?.missingDestination).toBeUndefined();
+    });
+
+    it('does not set missingDestination when the child is a span, not a transaction', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['exit-span'],
+                [SPAN_NAME]: ['call-service-b'],
+                [SPAN_DURATION]: [500],
+                [AGENT_NAME]: ['opentelemetry/nodejs'],
+              },
+            },
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['child-span'],
+                [SPAN_NAME]: ['downstream-span'],
+                [SPAN_DURATION]: [300],
+                [PARENT_ID]: ['exit-span'],
+              },
+            },
+          ],
+          total: { value: 2, relation: 'eq' },
+        },
+      });
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      const exitSpan = result.traceItems.find((item) => item.id === 'exit-span');
+      expect(exitSpan?.missingDestination).toBeUndefined();
     });
   });
 });

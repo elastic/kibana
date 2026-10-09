@@ -8,6 +8,11 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  CONTENT_LIST_TEST_SUBJECTS,
+  getContentListToolbarSubjects,
+  getContentListSelectionBarSubjects,
+} from '@kbn/content-list-common';
 import { FtrService } from '../ftr_provider_context';
 
 type AppName = keyof typeof PREFIX_MAP;
@@ -15,9 +20,42 @@ const PREFIX_MAP = {
   visualize: 'vis',
   dashboard: 'dashboard',
   map: 'map',
-  eventAnnotation: 'eventAnnotation',
 };
 
+// `@kbn/content-list` subjects, resolved from the framework's single source of
+// truth so this service can't drift from what the components render — see the
+// class JSDoc.
+const TOOLBAR_SUBJECTS = getContentListToolbarSubjects();
+const CONTENT_LIST_TABLE = CONTENT_LIST_TEST_SUBJECTS.table;
+const CONTENT_LIST_TABLE_SKELETON = CONTENT_LIST_TEST_SUBJECTS.tableSkeleton;
+const CONTENT_LIST_ITEM_LINK = CONTENT_LIST_TEST_SUBJECTS.itemLink;
+const TABLE_LOADING_SELECTOR = [
+  '[data-test-subj~="listingTable-isLoading"]',
+  `[data-test-subj~="${CONTENT_LIST_TABLE_SKELETON}"]`,
+  '.euiBasicTable-loading',
+].join(', ');
+const CONTENT_LIST_SEARCH_BOX = TOOLBAR_SUBJECTS.searchBox;
+const CONTENT_LIST_TAGS_FILTER_BUTTON = CONTENT_LIST_TEST_SUBJECTS.tagsFilter;
+const CONTENT_LIST_SELECTION_BAR_DELETE = getContentListSelectionBarSubjects(
+  TOOLBAR_SUBJECTS.selectionBar
+).deleteButton;
+
+const itemLinkSelector = (appName: AppName) =>
+  `[data-test-subj^="${PREFIX_MAP[appName]}ListingTitleLink-"], [data-test-subj="${CONTENT_LIST_ITEM_LINK}"]`;
+
+/**
+ * Drives a listing page rendered by *either* the legacy `TableListView` or the
+ * `@kbn/content-list` framework.
+ *
+ * A `TableListView` -> Content List migration in one plugin can break suites in
+ * other plugins that navigate to the migrated listing at run time (selective
+ * testing won't schedule them — see
+ * {@link https://github.com/elastic/kibana/pull/270044}). The listing-load,
+ * search, tag-filter, item-link and bulk-delete affordances below resolve both
+ * subject families so those consumers survive the migration. Helpers tied to
+ * legacy `TableListView` DOM (inspect flyout, per-row checkbox selection,
+ * pagination) remain legacy-only; migrate them when their listing moves.
+ */
 export class ListingTableService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
@@ -38,8 +76,25 @@ export class ListingTableService extends FtrService {
     toggleButtonTestSubject: 'userFilterPopoverButton',
   });
 
+  /**
+   * Waits for either the legacy or the Content List variant of a control and
+   * returns whether the legacy one rendered.
+   */
+  private async isLegacyVariant(legacySubj: string, contentListSubj: string): Promise<boolean> {
+    const variant = await this.testSubjects.waitForFirst([legacySubj, contentListSubj], {
+      timeout: 5000,
+    });
+    if (!variant) {
+      throw new Error(`Neither ${legacySubj} nor ${contentListSubj} has rendered`);
+    }
+    return variant === legacySubj;
+  }
+
   private async getSearchFilter() {
-    return await this.testSubjects.find('tableListSearchBox');
+    if (await this.isLegacyVariant('tableListSearchBox', CONTENT_LIST_SEARCH_BOX)) {
+      return this.testSubjects.find('tableListSearchBox');
+    }
+    return this.testSubjects.find(CONTENT_LIST_SEARCH_BOX);
   }
 
   /**
@@ -87,16 +142,25 @@ export class ListingTableService extends FtrService {
   }
 
   public async waitUntilTableIsLoaded() {
-    await this.retry.try(async () => {
-      const isLoaded = await this.find.existsByDisplayedByCssSelector(
-        '[data-test-subj="itemsInMemTable"]:not(.euiBasicTable-loading)'
-      );
+    if (await this.find.existsByCssSelector(TABLE_LOADING_SELECTOR, 1000)) {
+      await this.retry.try(async () => {
+        if (await this.find.existsByCssSelector(TABLE_LOADING_SELECTOR, 100)) {
+          throw new Error('Waiting for table loading to finish');
+        }
+      });
+    }
 
-      if (isLoaded) {
+    await this.retry.try(async () => {
+      if (await this.testSubjects.exists('listingTable-isLoaded')) {
         return true;
-      } else {
-        throw new Error('Waiting');
       }
+      // Content List keeps its table mounted behind a loading skeleton.
+      if (await this.testSubjects.exists(CONTENT_LIST_TABLE)) {
+        if (!(await this.testSubjects.exists(CONTENT_LIST_TABLE_SKELETON))) {
+          return true;
+        }
+      }
+      throw new Error('Waiting');
     });
   }
 
@@ -144,12 +208,21 @@ export class ListingTableService extends FtrService {
 
   public async openTagPopover(): Promise<void> {
     this.log.debug('ListingTable.openTagPopover');
-    await this.tagPopoverToggle.open();
+    if (await this.isLegacyVariant('tagFilterPopoverButton', CONTENT_LIST_TAGS_FILTER_BUTTON)) {
+      await this.tagPopoverToggle.open();
+      return;
+    }
+    await this.testSubjects.click(CONTENT_LIST_TAGS_FILTER_BUTTON);
   }
 
   public async closeTagPopover(): Promise<void> {
     this.log.debug('ListingTable.closeTagPopover');
-    await this.tagPopoverToggle.close();
+    if (await this.isLegacyVariant('tagFilterPopoverButton', CONTENT_LIST_TAGS_FILTER_BUTTON)) {
+      await this.tagPopoverToggle.close();
+      return;
+    }
+    // Content List's filter is a toggle button; clicking it again dismisses it.
+    await this.testSubjects.click(CONTENT_LIST_TAGS_FILTER_BUTTON);
   }
 
   /**
@@ -190,8 +263,15 @@ export class ListingTableService extends FtrService {
   }
 
   public async clickActionButton(actionSelector: string, index: number = 0) {
-    const buttons = await this.testSubjects.findAll(actionSelector);
-    await buttons[index].click();
+    await this.retry.tryForTime(10000, async () => {
+      // The retry provides the wait; look up the buttons without an implicit wait.
+      const buttons = await this.testSubjects.findAll(actionSelector, 0);
+      const button = buttons[index];
+      if (!button) {
+        throw new Error(`Action ${actionSelector} is not available at index ${index}`);
+      }
+      await button.click();
+    });
   }
 
   /**
@@ -241,7 +321,7 @@ export class ListingTableService extends FtrService {
   public async expectItemsCount(appName: AppName, count: number, findTimeout?: number) {
     await this.retry.try(async () => {
       const elements = await this.find.allByCssSelector(
-        `[data-test-subj^="${PREFIX_MAP[appName]}ListingTitleLink"]`,
+        itemLinkSelector(appName),
         findTimeout ?? 10000
       );
       expect(elements.length).to.equal(count);
@@ -280,20 +360,36 @@ export class ListingTableService extends FtrService {
   }
 
   /**
-   * Searches for item on Landing page and retruns items count that match `ListingTitleLink-${name}` pattern
+   * Searches for item on Landing page and returns the count of rows whose title
+   * matches `name` exactly. Counting must stay name-specific: a search can leave
+   * sibling rows visible (e.g. `Foo` and `Foo (1)`), so a broad listing-link
+   * selector would over-count.
    */
   public async searchAndExpectItemsCount(appName: AppName, name: string, count: number) {
     await this.searchForItemWithName(name);
     await this.retry.try(async () => {
-      const links = await this.testSubjects.findAll(
-        `${PREFIX_MAP[appName]}ListingTitleLink-${name.replace(/ /g, '-')}`
-      );
-      expect(links.length).to.equal(count);
+      let matches: number;
+      if (await this.testSubjects.exists(CONTENT_LIST_TABLE)) {
+        // Content List item links carry no per-item subject; match on exact text.
+        const links = await this.testSubjects.findAll(CONTENT_LIST_ITEM_LINK);
+        const texts = await Promise.all(links.map((link) => link.getVisibleText()));
+        matches = texts.filter((text) => text.trim() === name).length;
+      } else {
+        const links = await this.testSubjects.findAll(
+          `${PREFIX_MAP[appName]}ListingTitleLink-${name.replace(/ /g, '-')}`
+        );
+        matches = links.length;
+      }
+      expect(matches).to.equal(count);
     });
   }
 
   public async clickDeleteSelected() {
-    await this.testSubjects.click('deleteSelectedItems');
+    if (await this.isLegacyVariant('deleteSelectedItems', CONTENT_LIST_SELECTION_BAR_DELETE)) {
+      await this.testSubjects.click('deleteSelectedItems');
+      return;
+    }
+    await this.testSubjects.click(CONTENT_LIST_SELECTION_BAR_DELETE);
   }
 
   public async selectFirstItemInList() {
@@ -324,9 +420,23 @@ export class ListingTableService extends FtrService {
    * Clicks item on Landing page by link name if it is present
    */
   public async clickItemLink(appName: AppName, name: string) {
-    await this.testSubjects.click(
-      `${PREFIX_MAP[appName]}ListingTitleLink-${name.split(' ').join('-')}`
-    );
+    const legacySubj = `${PREFIX_MAP[appName]}ListingTitleLink-${name.split(' ').join('-')}`;
+    await this.retry.tryForTime(10000, async () => {
+      if (await this.testSubjects.exists(legacySubj)) {
+        await this.testSubjects.click(legacySubj);
+        return;
+      }
+      // Content List item links carry no per-item subject; match on exact text.
+      // Probe without an implicit wait so a legacy table still gets re-checked.
+      const links = await this.testSubjects.findAll(CONTENT_LIST_ITEM_LINK, 0);
+      for (const link of links) {
+        if ((await link.getVisibleText()).trim() === name) {
+          await link.click();
+          return;
+        }
+      }
+      throw new Error(`No listing row found with name "${name}".`);
+    });
   }
 
   /**
@@ -345,17 +455,22 @@ export class ListingTableService extends FtrService {
    * Clicks NewItem button on Landing page
    */
   public async clickNewButton(): Promise<void> {
-    await this.testSubjects.click('newItemButton');
+    await this.retry.try(async () => {
+      if (await this.testSubjects.exists('newItemButton')) {
+        await this.testSubjects.click('newItemButton');
+        return;
+      }
+      if (await this.testSubjects.exists('app-menu-overflow-button')) {
+        await this.testSubjects.click('app-menu-overflow-button');
+        await this.testSubjects.click('newItemButton');
+        return;
+      }
+      throw new Error('newItemButton not found');
+    });
   }
 
   public async isShowingEmptyPromptCreateNewButton(): Promise<void> {
     await this.testSubjects.existOrFail('newItemButton');
-  }
-
-  public async onListingPage(appName: AppName) {
-    return await this.testSubjects.exists(`${appName}LandingPage`, {
-      timeout: 5000,
-    });
   }
 
   public async selectTab(which: number) {

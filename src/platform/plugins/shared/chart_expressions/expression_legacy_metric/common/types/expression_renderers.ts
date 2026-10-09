@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { $Values } from '@kbn/utility-types';
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import type {
@@ -53,7 +54,7 @@ export interface VisParams {
 }
 
 export interface MetricOptions {
-  value: string;
+  value: ReactNode;
   label: string;
   color?: string;
   bgColor?: string;

@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -22,7 +22,7 @@ import {
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import {
@@ -32,6 +32,7 @@ import {
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
 import type { AlertsCustomState, SloAlertsApi, SloAlertsEmbeddableState } from './types';
 import { openSloConfiguration } from './slo_alerts_open_configuration';
+import { ensureLicense } from '../ensure_license';
 const queryClient = new QueryClient();
 
 export const getAlertsPanelTitle = () =>
@@ -50,7 +51,7 @@ export function getAlertsEmbeddableFactory({
   sloClient: SLORepositoryClient;
   kibanaVersion: string;
 }) {
-  const factory: EmbeddableFactory<SloAlertsEmbeddableState, SloAlertsApi> = {
+  const factory: EmbeddablePublicDefinition<SloAlertsEmbeddableState, SloAlertsApi> = {
     type: SLO_ALERTS_EMBEDDABLE_ID,
     buildEmbeddable: async ({
       initializeDrilldownsManager,
@@ -59,8 +60,9 @@ export function getAlertsEmbeddableFactory({
       uuid,
       parentApi,
     }) => {
+      await ensureLicense(pluginsStart.licensing);
       const deps = { ...coreStart, ...pluginsStart };
-      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
       async function onEdit() {
         try {
           const result = await openSloConfiguration(
@@ -83,18 +85,14 @@ export function getAlertsEmbeddableFactory({
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getAlertsPanelTitle());
       const reload$ = new Subject<FetchContext>();
 
-      function serializeState(): SloAlertsEmbeddableState {
-        return {
+      const stateApi = initializeStateApi<SloAlertsEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           ...drilldownsManager.getLatestState(),
           ...sloAlertsStateManager.getLatestState(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<SloAlertsEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState,
+        }),
         anyStateChange$: merge(
           drilldownsManager.anyStateChange$,
           titleManager.anyStateChange$,
@@ -105,16 +103,16 @@ export function getAlertsEmbeddableFactory({
           ...drilldownsManager.comparators,
           slos: 'referenceEquality',
         }),
-        onReset: (lastSaved) => {
-          drilldownsManager.reinitializeState(lastSaved ?? {});
-          titleManager.reinitializeState(lastSaved);
-          sloAlertsStateManager.reinitializeState(lastSaved);
+        applySerializedState: (nextState) => {
+          drilldownsManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
+          sloAlertsStateManager.reinitializeState(nextState);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...unsavedChangesApi,
+        ...stateApi,
         ...drilldownsManager.api,
         defaultTitle$,
         supportedTriggers: () => SLO_ALERTS_SUPPORTED_TRIGGERS,
@@ -126,7 +124,6 @@ export function getAlertsEmbeddableFactory({
         onEdit: async () => {
           onEdit();
         },
-        serializeState,
         getSloAlertsConfig: () => ({
           slos: sloAlertsStateManager.api.slos$.getValue(),
         }),

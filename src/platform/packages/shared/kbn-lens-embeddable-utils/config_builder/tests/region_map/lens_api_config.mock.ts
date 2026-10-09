@@ -11,7 +11,7 @@ import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_DATA_VIEW_SPEC_TYPE,
 } from '@kbn/as-code-data-views-schema';
-import type { RegionMapState } from '../../schema';
+import type { RegionMapConfig } from '../../schema';
 
 /**
  * Basic region map chart with ad hoc dataView
@@ -43,7 +43,7 @@ export const basicRegionMapWithAdHocDataView = {
   },
   sampling: 1,
   ignore_global_filters: false,
-} satisfies RegionMapState;
+} satisfies RegionMapConfig;
 
 /**
  * Basic region map chart with existing dataView
@@ -79,7 +79,7 @@ export const basicRegionMapWithDataView = {
   },
   sampling: 1,
   ignore_global_filters: false,
-} satisfies RegionMapState;
+} satisfies RegionMapConfig;
 
 /**
  * ESQL-based region map chart
@@ -103,7 +103,7 @@ export const basicEsqlRegionMap = {
   },
   sampling: 1,
   ignore_global_filters: false,
-} satisfies RegionMapState;
+} satisfies RegionMapConfig;
 
 /**
  * Comprehensive region map chart with ad hoc dataView
@@ -138,7 +138,7 @@ export const comprehensiveRegionMapWithAdHocDataView = {
   },
   sampling: 1,
   ignore_global_filters: false,
-} satisfies RegionMapState;
+} satisfies RegionMapConfig;
 
 /**
  * Comprehensive region map chart with existing dataView
@@ -172,7 +172,7 @@ export const comprehensiveRegionMapWithDataView = {
   },
   sampling: 1,
   ignore_global_filters: false,
-} satisfies RegionMapState;
+} satisfies RegionMapConfig;
 
 /**
  * Comprehensive ESQL-based region map chart
@@ -196,4 +196,4 @@ export const comprehensiveEsqlRegionMap = {
   },
   sampling: 1,
   ignore_global_filters: false,
-} satisfies RegionMapState;
+} satisfies RegionMapConfig;

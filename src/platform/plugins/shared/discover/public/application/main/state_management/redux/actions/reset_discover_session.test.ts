@@ -18,6 +18,10 @@ import * as tabsActions from './tabs';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
+import { createResolvedMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import { mockControlState } from '../../../../../__mocks__/esql_controls';
+import { DataSourceType } from '../../../../../../common/data_sources';
+import * as resolveEsqlSourceModule from '../../../data_fetching/resolve_esql_source';
 
 const markUnsavedTabs = (internalState: InternalStateStore, tabIds: string[]) =>
   internalState.dispatch(
@@ -85,6 +89,36 @@ describe('resetDiscoverSession', () => {
 
     expect(internalState.getState().persistedDiscoverSession).toBeUndefined();
     expect(updateTabsSpy).not.toHaveBeenCalled();
+  });
+
+  it('should preserve empty sort arrays when resetting initialized time-based tabs', async () => {
+    const services = createDiscoverServicesMock();
+    const { internalState, initializeTabs, initializeSingleTab } = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewWithTimefieldMock],
+    });
+    const persistedTab = {
+      ...getPersistedTabMock({
+        tabId: 'tab-1',
+        dataView: dataViewWithTimefieldMock,
+        appStateOverrides: { sort: [] },
+        services,
+      }),
+      sort: [],
+    };
+    const persistedDiscoverSession = createDiscoverSessionMock({
+      id: 'test-id',
+      tabs: [persistedTab],
+    });
+
+    await initializeTabs({ persistedDiscoverSession });
+    await initializeSingleTab({ tabId: persistedTab.id });
+
+    expect(selectTab(internalState.getState(), persistedTab.id).appState.sort).toEqual([]);
+
+    await internalState.dispatch(internalStateActions.resetDiscoverSession()).unwrap();
+
+    expect(selectTab(internalState.getState(), persistedTab.id).appState.sort).toEqual([]);
   });
 
   it('should reset persisted tabs and mark unsaved tabs for refetch', async () => {
@@ -166,5 +200,91 @@ describe('resetDiscoverSession', () => {
 
     const refetchedTab = selectTab(internalState.getState(), persistedTab2.id);
     expect(refetchedTab.forceFetchOnSelect).toBe(false);
+  });
+
+  it('should keep current tab runtime state available while replacing all session tabs', async () => {
+    const { internalState, runtimeStateManager, persistedDiscoverSession } = await setup();
+
+    const updatedDiscoverSession = {
+      ...persistedDiscoverSession,
+      id: 'copied-session-id',
+      title: 'Copied session',
+      tabs: cloneDeep(persistedDiscoverSession.tabs).map((tab, index) => ({
+        ...tab,
+        id: `copied-tab-${index + 1}`,
+      })),
+    };
+
+    const observedTabIds: string[] = [];
+    const unavailableRuntimeStateTabIds: string[] = [];
+    const unsubscribe = internalState.subscribe(() => {
+      const currentTabId = internalState.getState().tabs.unsafeCurrentId;
+      const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTabId);
+
+      observedTabIds.push(currentTabId);
+
+      if (!currentTabRuntimeState) {
+        unavailableRuntimeStateTabIds.push(currentTabId);
+      }
+    });
+
+    try {
+      await internalState
+        .dispatch(
+          internalStateActions.resetDiscoverSession({
+            updatedDiscoverSession,
+            nextSelectedTabId: updatedDiscoverSession.tabs[0].id,
+          })
+        )
+        .unwrap();
+    } finally {
+      unsubscribe();
+    }
+
+    expect(observedTabIds.length).toBeGreaterThan(0);
+    expect(observedTabIds).toContain(persistedDiscoverSession.tabs[0].id);
+    expect(observedTabIds).toContain(updatedDiscoverSession.tabs[0].id);
+    expect(unavailableRuntimeStateTabIds).toHaveLength(0);
+    expect(internalState.getState().persistedDiscoverSession).toBe(updatedDiscoverSession);
+    expect(internalState.getState().tabs.unsafeCurrentId).toBe(updatedDiscoverSession.tabs[0].id);
+    expect(
+      selectTabRuntimeState(runtimeStateManager, updatedDiscoverSession.tabs[0].id)
+    ).toBeDefined();
+  });
+
+  it('resolves an ES|QL tab with its control variables', async () => {
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewWithTimefieldMock],
+    });
+    const persistedTab = getPersistedTabMock({
+      dataView: dataViewWithTimefieldMock,
+      services,
+      appStateOverrides: {
+        query: { esql: 'FROM logs-* | WHERE host == ?foo' },
+        dataSource: { type: DataSourceType.Esql },
+      },
+      attributesOverrides: { controlGroupState: mockControlState },
+    });
+    const resolveSpy = jest
+      .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
+      .mockResolvedValue(await createResolvedMockEsqlSource());
+
+    await toolkit.initializeTabs({
+      persistedDiscoverSession: createDiscoverSessionMock({ id: 'test-id', tabs: [persistedTab] }),
+    });
+    await toolkit.initializeSingleTab({ tabId: persistedTab.id, skipWaitForDataFetching: true });
+    resolveSpy.mockClear();
+
+    await toolkit.internalState.dispatch(internalStateActions.resetDiscoverSession()).unwrap();
+
+    expect(resolveSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esql: 'FROM logs-* | WHERE host == ?foo',
+        esqlVariables: [{ key: 'foo', type: 'values', value: 'bar' }],
+      })
+    );
+    resolveSpy.mockRestore();
   });
 });

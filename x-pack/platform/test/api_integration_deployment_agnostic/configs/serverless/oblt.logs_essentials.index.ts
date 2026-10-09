@@ -6,12 +6,11 @@
  */
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
+export default function ({}: DeploymentAgnosticFtrProviderContext) {
   describe('Serverless Observability Logs Essentials - Deployment-agnostic API integration tests', function () {
     this.tags(['esGate']);
 
     // load new oblt and platform deployment-agnostic test here
     // Note: if your tests runtime is over 5 minutes, create a new index and config file
-    loadTestFile(require.resolve('../../apis/core'));
   });
 }

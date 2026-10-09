@@ -48,6 +48,7 @@ properties:
       - $ref: 'payload_tags.yaml'
       - $ref: 'payload_title.yaml'
       - $ref: 'payload_user_comment.yaml'
+      - $ref: 'payload_workflow.yaml'
   version:
     type: string
     example: WzM1ODg4LDFd
@@ -56,14 +57,20 @@ properties:
     description: The type of action.
     enum:
       - assignees
-      - create_case
+      - category
       - comment
       - connector
+      - create_case
+      - customFields
+      - delete_case
       - description
+      - extended_fields
+      - observables
       - pushed
-      - tags
-      - title
-      - status
       - settings
       - severity
+      - status
+      - tags
+      - title
+      - workflow
     example: create_case

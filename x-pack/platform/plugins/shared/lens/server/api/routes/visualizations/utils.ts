@@ -6,10 +6,11 @@
  */
 
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
-import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import { isLensDSLConfig, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import { getMeta, type AsCodeMeta } from '@kbn/as-code-shared-schemas';
+import { toAsCodeTags, toStoredTags } from '@kbn/as-code-shared-transforms';
 
-import type { LensSavedObject, LensUpdateIn } from '../../../content_management';
+import type { LensSavedObject, LensUpdateIn } from '../../../content_management/zod';
 import type { LensCreateRequestBody, LensResponseItem, LensUpdateRequestBody } from './types';
 
 /**
@@ -19,15 +20,17 @@ export function getLensRequestConfig(
   builder: LensConfigBuilder,
   config: LensCreateRequestBody | LensUpdateRequestBody
 ): LensUpdateIn['data'] & LensUpdateIn['options'] {
+  const { references: tagReferences } = toStoredTags(config);
   const attributes = builder.fromAPIFormat(config);
 
   return {
     ...attributes,
+    references: [...(attributes.references ?? []), ...tagReferences],
   } satisfies LensUpdateIn['data'] & LensUpdateIn['options'];
 }
 
 /**
- * Converts Lens Saved Object to Lens Response Item
+ * Converts Lens Saved Object to Lens Response Item.
  */
 export function getLensResponseItem(
   builder: LensConfigBuilder,
@@ -36,7 +39,8 @@ export function getLensResponseItem(
   const { id, references, attributes } = item;
   const meta = getLensResponseItemMeta(item);
 
-  const data = builder.toAPIFormat({
+  const { tags } = toAsCodeTags(references);
+  const chartData = builder.toAPIFormat({
     references,
     ...attributes,
 
@@ -44,11 +48,17 @@ export function getLensResponseItem(
     state: attributes.state!,
     visualizationType: attributes.visualizationType ?? LENS_UNKNOWN_VIS,
   });
-  return {
-    id,
-    data,
-    meta,
-  } satisfies LensResponseItem;
+  const data = { ...chartData, tags };
+
+  if (isLensDSLConfig(data)) {
+    return {
+      id,
+      data,
+      meta,
+    } satisfies LensResponseItem;
+  }
+
+  throw new Error('ES|QL charts are not supported in by-ref Lens');
 }
 
 /**

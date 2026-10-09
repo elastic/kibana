@@ -22,6 +22,7 @@ import {
   useSecretInput,
 } from '../../../../hooks';
 import { isDiffPathProtocol } from '../../../../../../../common/services';
+import { validateSslPathInput, validateSslPathsCombo } from '../ssl_form_validators';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
 import type { FleetServerHost } from '../../../../types';
 import type { ClientAuth, NewFleetServerHost, ValueOf } from '../../../../../../../common/types';
@@ -147,19 +148,25 @@ export function useFleetServerHostsForm(
   const authz = useAuthz();
   const { confirm } = useConfirmModal();
   const isEditDisabled = (fleetServerHost?.is_preconfigured || !authz.fleet.allSettings) ?? false;
+  // Fields listed in allow_edit on a preconfigured host can be changed at runtime.
+  const allowEdit = fleetServerHost?.allow_edit ?? [];
 
   const nameInput = useInput(fleetServerHost?.name ?? '', validateName, isEditDisabled);
   const isDefaultInput = useSwitchInput(
     fleetServerHost?.is_default ?? false,
-    isEditDisabled || fleetServerHost?.is_default
+    (isEditDisabled && !allowEdit.includes('is_default')) || !!fleetServerHost?.is_default
   );
 
   const isServerless = cloud?.isServerlessEnabled;
-  // Set the host URLs to default for new Fleet server host in serverless.
-  const hostUrlsDefaultValue =
-    isServerless && !fleetServerHost?.host_urls
-      ? defaultFleetServerHost?.host_urls || []
-      : fleetServerHost?.host_urls || [];
+
+  // For an existing row always show that row's own URLs; only fall back to the default
+  // host URLs when creating a new Fleet Server host in serverless (no fleetServerHost yet).
+  const hostUrlsDefaultValue = fleetServerHost?.host_urls?.length
+    ? fleetServerHost.host_urls
+    : isServerless
+    ? defaultFleetServerHost?.host_urls || []
+    : [];
+
   const hostUrlsDisabled = isEditDisabled || isServerless;
   const hostUrlsInput = useComboInput(
     'hostUrls',
@@ -167,42 +174,50 @@ export function useFleetServerHostsForm(
     validateFleetServerHosts,
     hostUrlsDisabled
   );
-  const proxyIdInput = useInput(fleetServerHost?.proxy_id ?? '', () => undefined, isEditDisabled);
 
+  const proxyIdInput = useInput(fleetServerHost?.proxy_id ?? '', () => undefined, isEditDisabled);
   const sslCertificateAuthoritiesInput = useComboInput(
     'sslCertificateAuthoritiesComboxBox',
     fleetServerHost?.ssl?.certificate_authorities ?? [],
-    undefined,
+    validateSslPathsCombo,
     isEditDisabled
   );
   const sslCertificateInput = useInput(
     fleetServerHost?.ssl?.certificate ?? '',
-    () => undefined,
+    validateSslPathInput,
     isEditDisabled
   );
 
   const sslEsCertificateAuthoritiesInput = useComboInput(
     'sslEsCertificateAuthoritiesComboxBox',
     fleetServerHost?.ssl?.es_certificate_authorities ?? [],
-    undefined,
+    validateSslPathsCombo,
     isEditDisabled
   );
   const sslEsCertificateInput = useInput(
     fleetServerHost?.ssl?.es_certificate ?? '',
-    () => undefined,
+    validateSslPathInput,
     isEditDisabled
   );
-  const sslKeyInput = useInput(fleetServerHost?.ssl?.key ?? '', undefined, isEditDisabled);
-  const sslESKeyInput = useInput(fleetServerHost?.ssl?.es_key ?? '', undefined, isEditDisabled);
+  const sslKeyInput = useInput(
+    fleetServerHost?.ssl?.key ?? '',
+    validateSslPathInput,
+    isEditDisabled
+  );
+  const sslESKeyInput = useInput(
+    fleetServerHost?.ssl?.es_key ?? '',
+    validateSslPathInput,
+    isEditDisabled
+  );
 
   const sslKeySecretInput = useSecretInput(
-    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.key,
+    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.key ?? undefined,
     undefined,
     isEditDisabled
   );
 
   const sslESKeySecretInput = useSecretInput(
-    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.es_key,
+    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.es_key ?? undefined,
     undefined,
     isEditDisabled
   );
@@ -215,22 +230,22 @@ export function useFleetServerHostsForm(
   const sslAgentCertificateAuthoritiesInput = useComboInput(
     'sslAgentCertificateAuthoritiesComboxBox',
     fleetServerHost?.ssl?.agent_certificate_authorities ?? [],
-    undefined,
+    validateSslPathsCombo,
     isEditDisabled
   );
   const sslAgentCertificateInput = useInput(
     fleetServerHost?.ssl?.agent_certificate ?? '',
-    () => undefined,
+    validateSslPathInput,
     isEditDisabled
   );
   const sslAgentKeySecretInput = useSecretInput(
-    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.agent_key,
+    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.agent_key ?? undefined,
     undefined,
     isEditDisabled
   );
   const sslAgentKeyInput = useInput(
     fleetServerHost?.ssl?.agent_key ?? '',
-    undefined,
+    validateSslPathInput,
     isEditDisabled
   );
 
@@ -285,41 +300,56 @@ export function useFleetServerHostsForm(
         return;
       }
       setIsLoading(true);
-      const data: Partial<NewFleetServerHost> = {
-        name: nameInput.value,
-        host_urls: hostUrlsInput.value,
-        is_default: isDefaultInput.value,
-        proxy_id: proxyIdInput.value !== '' ? proxyIdInput.value : null,
-        ssl: {
-          certificate: sslCertificateInput.value,
-          key: sslKeyInput.value || undefined,
-          certificate_authorities: sslCertificateAuthoritiesInput.value.filter((val) => val !== ''),
-          es_certificate: sslEsCertificateInput.value,
-          es_key: sslESKeyInput.value || undefined,
-          es_certificate_authorities: sslEsCertificateAuthoritiesInput.value.filter(
-            (val) => val !== ''
-          ),
-          agent_certificate: sslAgentCertificateInput.value,
-          agent_key: sslAgentKeyInput.value || undefined,
-          agent_certificate_authorities: sslAgentCertificateAuthoritiesInput.value.filter(
-            (val) => val !== ''
-          ),
-          ...(sslClientAuthInput.value !== clientAuth.None && {
-            client_auth: sslClientAuthInput.value as ValueOf<ClientAuth>,
-          }),
-        },
-        ...(((!sslKeyInput.value && sslKeySecretInput.value) ||
-          (!sslESKeyInput.value && sslESKeySecretInput.value) ||
-          (!sslAgentKeyInput.value && sslAgentKeySecretInput.value)) && {
-          secrets: {
+      // For preconfigured hosts only the fields listed in allow_edit may be sent —
+      // the serverless URL guard blocks any PUT that includes host_urls.
+      const data: Partial<NewFleetServerHost> = fleetServerHost?.is_preconfigured
+        ? { is_default: isDefaultInput.value }
+        : {
+            name: nameInput.value,
+            host_urls: hostUrlsInput.value,
+            is_default: isDefaultInput.value,
+            proxy_id: proxyIdInput.value !== '' ? proxyIdInput.value : null,
             ssl: {
-              key: sslKeySecretInput.value || undefined,
-              es_key: sslESKeySecretInput.value || undefined,
-              agent_key: sslAgentKeySecretInput.value || undefined,
+              certificate: sslCertificateInput.value,
+              key: sslKeyInput.value || undefined,
+              certificate_authorities: sslCertificateAuthoritiesInput.value.filter(
+                (val) => val !== ''
+              ),
+              es_certificate: sslEsCertificateInput.value,
+              es_key: sslESKeyInput.value || undefined,
+              es_certificate_authorities: sslEsCertificateAuthoritiesInput.value.filter(
+                (val) => val !== ''
+              ),
+              agent_certificate: sslAgentCertificateInput.value,
+              agent_key: sslAgentKeyInput.value || undefined,
+              agent_certificate_authorities: sslAgentCertificateAuthoritiesInput.value.filter(
+                (val) => val !== ''
+              ),
+              ...(sslClientAuthInput.value !== clientAuth.None && {
+                client_auth: sslClientAuthInput.value as ValueOf<ClientAuth>,
+              }),
             },
-          },
-        }),
-      };
+            ...((sslKeySecretInput.hasChanged ||
+              sslESKeySecretInput.hasChanged ||
+              sslAgentKeySecretInput.hasChanged ||
+              (fleetServerHost as FleetServerHost)?.secrets?.ssl?.key ||
+              (fleetServerHost as FleetServerHost)?.secrets?.ssl?.es_key ||
+              (fleetServerHost as FleetServerHost)?.secrets?.ssl?.agent_key) && {
+              secrets: {
+                ssl: {
+                  key: sslKeySecretInput.hasChanged
+                    ? sslKeySecretInput.value || null
+                    : (fleetServerHost as FleetServerHost)?.secrets?.ssl?.key,
+                  es_key: sslESKeySecretInput.hasChanged
+                    ? sslESKeySecretInput.value || null
+                    : (fleetServerHost as FleetServerHost)?.secrets?.ssl?.es_key,
+                  agent_key: sslAgentKeySecretInput.hasChanged
+                    ? sslAgentKeySecretInput.value || null
+                    : (fleetServerHost as FleetServerHost)?.secrets?.ssl?.agent_key,
+                },
+              },
+            }),
+          };
 
       if (fleetServerHost) {
         const res = await sendPutFleetServerHost(fleetServerHost.id, data);
@@ -370,16 +400,32 @@ export function useFleetServerHostsForm(
     sslAgentCertificateInput.value,
     sslAgentCertificateAuthoritiesInput.value,
     onSuccess,
+    sslKeySecretInput.hasChanged,
+    sslESKeySecretInput.hasChanged,
+    sslAgentKeySecretInput.hasChanged,
   ]);
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
 
-  const isDisabled =
-    isEditDisabled ||
-    isLoading ||
-    !hasChanged ||
-    hostUrlsInput.props.isInvalid ||
-    nameInput.props.isInvalid;
+  // For preconfigured hosts, only the allow_edit fields can change — skip URL/name/SSL checks.
+  const isDisabled = fleetServerHost?.is_preconfigured
+    ? isLoading || !isDefaultInput.hasChanged
+    : isEditDisabled ||
+      isLoading ||
+      !hasChanged ||
+      !nameInput.value ||
+      !hostUrlsInput.value.some((v) => v.trim()) ||
+      hostUrlsInput.props.isInvalid ||
+      nameInput.props.isInvalid ||
+      sslCertificateAuthoritiesInput.props.isInvalid ||
+      sslCertificateInput.props.isInvalid ||
+      sslKeyInput.props.isInvalid ||
+      sslEsCertificateAuthoritiesInput.props.isInvalid ||
+      sslEsCertificateInput.props.isInvalid ||
+      sslESKeyInput.props.isInvalid ||
+      sslAgentCertificateAuthoritiesInput.props.isInvalid ||
+      sslAgentCertificateInput.props.isInvalid ||
+      sslAgentKeyInput.props.isInvalid;
 
   return {
     isLoading,

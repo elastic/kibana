@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import { UNINSTALL_TOKEN_ROUTES, API_VERSIONS } from '../../../common/constants';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -14,11 +16,17 @@ import {
   GetUninstallTokenResponseSchema,
   GetUninstallTokensMetadataRequestSchema,
   GetUninstallTokensMetadataResponseSchema,
+  RotateUninstallTokenRequestSchema,
+  RotateUninstallTokenResponseSchema,
 } from '../../types/rest_spec/uninstall_token';
 
 import { genericErrorResponse } from '../schema/errors';
 
-import { getUninstallTokenHandler, getUninstallTokensMetadataHandler } from './handlers';
+import {
+  getUninstallTokenHandler,
+  getUninstallTokensMetadataHandler,
+  rotateUninstallTokenHandler,
+} from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   router.versioned
@@ -38,6 +46,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_uninstall_tokens.yaml'),
+        },
         validate: {
           request: GetUninstallTokensMetadataRequestSchema,
           response: {
@@ -72,6 +83,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_uninstall_token.yaml'),
+        },
         validate: {
           request: GetUninstallTokenRequestSchema,
           response: {
@@ -87,5 +101,47 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       getUninstallTokenHandler
+    );
+
+  router.versioned
+    .post({
+      path: UNINSTALL_TOKEN_ROUTES.ROTATE_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
+      },
+      summary: 'Rotate an uninstall token',
+      description:
+        'Rotate the uninstall token for an agent policy. Only applicable to policies with tamper protection enabled.',
+      options: {
+        tags: ['oas-tag:Fleet uninstall tokens'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/rotate_uninstall_token.yaml'),
+        },
+        validate: {
+          request: RotateUninstallTokenRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => RotateUninstallTokenResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+            404: {
+              description: 'Not found.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      rotateUninstallTokenHandler
     );
 };

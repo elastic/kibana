@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import type { estypes } from '@elastic/elasticsearch';
-import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensConfig } from '@kbn/lens-embeddable-utils';
 import type {
   AggregationConfigMap,
   ChartsConfigMap,
@@ -221,10 +221,15 @@ export const TSVBMetricModelRT = rt.intersection([
 
 export type TSVBMetricModel = rt.TypeOf<typeof TSVBMetricModelRT>;
 
+export interface TSVBMetricModelCreatorOptions {
+  schema?: DataSchemaFormat;
+}
+
 export type TSVBMetricModelCreator = (
   timeField: string,
   indexPattern: string | string[],
-  interval: string
+  interval: string,
+  options?: TSVBMetricModelCreatorOptions
 ) => TSVBMetricModel;
 
 export type MetricsUIAggregation = Record<string, estypes.AggregationsAggregate>;
@@ -276,6 +281,14 @@ type Integrations =
     }
   | BeatsIntegrations;
 
+export interface InventoryModelFields {
+  id: string;
+  name: string;
+  os?: string;
+  ip?: string;
+  cloudProvider?: string;
+}
+
 export interface InventoryModel<
   TEntityType extends InventoryItemType,
   TAggregations extends AggregationConfigMap,
@@ -286,13 +299,9 @@ export interface InventoryModel<
   displayName: string;
   singularDisplayName: string;
   requiredIntegration: Integrations;
-  fields: {
-    id: string;
-    name: string;
-    os?: string;
-    ip?: string;
-    cloudProvider?: string;
-  };
+  fields: InventoryModelFields;
+  /** Identity for one schema. `findInventoryFields` returns a present entry as-is. A missing key falls back to `fields`. */
+  schemaFields?: Partial<Record<DataSchemaFormat, InventoryModelFields>>;
   crosslinkSupport: {
     details: boolean;
     logs: boolean;

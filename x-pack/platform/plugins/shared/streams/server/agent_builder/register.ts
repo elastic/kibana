@@ -5,24 +5,43 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
-import type { Logger } from '@kbn/core/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { StreamsPluginStartDependencies, StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
-import type { StreamsServer } from '../types';
-import { registerAgentBuilderTools } from './tools/register_tools';
-import { streamExplorationSkill } from './skills/stream_exploration_skill';
+import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 
-export const registerStreamsAgentBuilder = ({
+import { registerAgentBuilderTools } from './tools/register_tools';
+import { registerAgentBuilderSkills } from './skills/register_skills';
+import { createStreamsToolAvailability } from './utils/get_streams_tool_availability';
+
+export const registerStreamsAgentBuilder = async ({
   agentBuilder,
   getScopedClients,
   server,
   logger,
+  telemetry,
+  core,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
-}) => {
-  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger });
-  agentBuilder.skills.register(streamExplorationSkill);
+  telemetry: EbtTelemetryClient;
+  core: CoreSetup<StreamsPluginStartDependencies>;
+}): Promise<void> => {
+  const availability = createStreamsToolAvailability(core, logger);
+
+  registerAgentBuilderTools({
+    agentBuilder,
+    getScopedClients,
+    server,
+    logger,
+    telemetry,
+    availability,
+  });
+  registerAgentBuilderSkills({
+    agentBuilder,
+    availability,
+  });
 };

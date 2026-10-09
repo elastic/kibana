@@ -9,7 +9,7 @@ import moment from 'moment';
 
 import { validateTimeRange, TIME_FORMAT } from '@kbn/ml-date-utils';
 import type { TimeRange } from '@kbn/es-query';
-import type { MlSummaryJob } from '../../../common';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 
 export function createResultsUrlForJobs(
   jobsList: MlSummaryJob[],

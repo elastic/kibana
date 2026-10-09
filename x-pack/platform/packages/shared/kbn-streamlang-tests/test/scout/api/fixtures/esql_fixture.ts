@@ -9,6 +9,7 @@ import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import pRetry from 'p-retry';
 import { apiTest } from '@kbn/scout';
+import { namespaceIndex } from './index_namespace';
 
 export interface EsqlFixtureOptions {
   esqlDropNullColumns: boolean;
@@ -59,13 +60,15 @@ export const esqlFixture = apiTest.extend<{}, EsqlFixture & EsqlFixtureOptions>(
           throw new Error('ES|QL query must start with a "from" clause.');
         }
 
+        const queryWithDirective = `SET unmapped_fields="LOAD";\n${query}`;
+
         // Retry ES|QL queries to handle cluster state propagation delays.
         // There can be a delay between index creation and
         // when ES|QL can resolve column names from the mapping.
         const response = await pRetry(
           () =>
             esClient.esql.query({
-              query,
+              query: queryWithDirective,
               drop_null_columns: esqlDropNullColumns,
             }),
           {
@@ -130,7 +133,7 @@ export const esqlFixture = apiTest.extend<{}, EsqlFixture & EsqlFixtureOptions>(
             'queryOnIndex should not receive a query that already contains a "from" clause.'
           );
         }
-        const fullQuery = `from ${indexName} ${queryStr}`;
+        const fullQuery = `from ${namespaceIndex(indexName)} ${queryStr}`;
         return await executeEsqlQuery(fullQuery);
       };
 

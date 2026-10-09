@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type {
   CoreSetup,
   CoreStart,
@@ -14,18 +15,21 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { CONTENT_ID, LATEST_VERSION, LINKS_EMBEDDABLE_TYPE } from '../common';
-import type { LinksState } from './content_management';
-import { LinksStorage } from './content_management';
-import { linksSavedObjectType } from './saved_objects';
+import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
+
+import { LINKS_EMBEDDABLE_TYPE } from '../common';
 import { transforms } from '../common/embeddable/transforms/transforms';
+import { registerRoutes } from './api';
+import { linksEmbeddableSchema } from './api/schemas';
+import { linksSavedObjectDefinition } from './links_saved_object';
+import type { LinksByValueState } from './types';
 
 export class LinksServerPlugin implements Plugin<object, object> {
   private readonly logger: Logger;
+  private apiUsageCounter?: UsageCounter;
 
-  constructor(private initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
@@ -34,26 +38,20 @@ export class LinksServerPlugin implements Plugin<object, object> {
     plugins: {
       contentManagement: ContentManagementServerSetup;
       embeddable: EmbeddableSetup;
+      usageCollection?: UsageCollectionSetup;
     }
   ) {
-    plugins.contentManagement.register({
-      id: CONTENT_ID,
-      storage: new LinksStorage({
-        throwOnResultValidationError: this.initializerContext.env.mode.dev,
-        logger: this.logger.get('storage'),
-      }),
-      version: {
-        latest: LATEST_VERSION,
-      },
-    });
-
-    core.savedObjects.registerType<LinksState>(linksSavedObjectType);
-
-    plugins.embeddable.registerTransforms(LINKS_EMBEDDABLE_TYPE, {
+    core.savedObjects.registerType<LinksByValueState>(linksSavedObjectDefinition);
+    plugins.embeddable.registerEmbeddableServerDefinition(LINKS_EMBEDDABLE_TYPE, {
+      title: 'Links',
       getTransforms: () => transforms,
-      // do not publish - not finalized
-      // getSchema: () => linksEmbeddableSchema,
+      getSchema: () => linksEmbeddableSchema,
     });
+
+    if (plugins.usageCollection) {
+      this.apiUsageCounter = plugins.usageCollection.createUsageCounter('links_api');
+    }
+    registerRoutes(core.http, this.apiUsageCounter, this.logger);
 
     return {};
   }

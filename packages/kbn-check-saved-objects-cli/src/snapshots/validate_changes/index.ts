@@ -9,3 +9,4 @@
 
 export { validateChangesNewType } from './new_type';
 export { validateChangesExistingType } from './existing_type';
+export { validateNoVirtualVersionDowngrade } from './no_virtual_version_downgrade';

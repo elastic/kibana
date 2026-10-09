@@ -110,7 +110,7 @@ describe('<ComponentTemplateDetails />', () => {
       expect(within(summaryTabContent).getByTestId('usedByTitle')).toBeInTheDocument();
       expect(within(summaryTabContent).getByTestId('versionTitle')).toBeInTheDocument();
       expect(within(summaryTabContent).getByTestId('metaTitle')).toBeInTheDocument();
-      expect(within(summaryTabContent).getByTestId('dataRetentionTitle')).toBeInTheDocument();
+      expect(within(summaryTabContent).getByTestId('dataLifecycleTitle')).toBeInTheDocument();
 
       // [Settings tab] Navigate to tab and verify content
       fireEvent.click(screen.getByTestId('settingsTab'));
@@ -215,6 +215,52 @@ describe('<ComponentTemplateDetails />', () => {
       const contextMenu = screen.getByTestId('manageComponentTemplateContextMenu');
       const actions = within(contextMenu).getAllByTestId('action');
       expect(actions).toHaveLength(1);
+    });
+  });
+
+  describe('WHEN actions is an empty array', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadComponentTemplateResponse(
+        COMPONENT_TEMPLATE.name,
+        COMPONENT_TEMPLATE
+      );
+
+      renderComponentTemplateDetails({
+        componentTemplateName: COMPONENT_TEMPLATE.name,
+        onClose: () => {},
+        actions: [],
+      });
+
+      await screen.findByTestId('title');
+    });
+
+    test('SHOULD not render the manage control while keeping the close footer', () => {
+      expect(screen.getByTestId('footer')).toBeInTheDocument();
+      expect(screen.getByTestId('closeDetailsButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('manageComponentTemplateButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('WHEN summary call-to-action is disabled', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadComponentTemplateResponse(
+        COMPONENT_TEMPLATE_ONLY_REQUIRED_FIELDS.name,
+        COMPONENT_TEMPLATE_ONLY_REQUIRED_FIELDS
+      );
+
+      renderComponentTemplateDetails({
+        componentTemplateName: COMPONENT_TEMPLATE_ONLY_REQUIRED_FIELDS.name,
+        onClose: () => {},
+        showSummaryCallToAction: false,
+      });
+
+      await screen.findByTestId('title');
+    });
+
+    test('SHOULD omit index-template links from the not-in-use summary callout', () => {
+      const callout = screen.getByTestId('notInUseCallout');
+      expect(within(callout).queryByRole('link', { name: 'Create' })).not.toBeInTheDocument();
+      expect(within(callout).queryByRole('link', { name: 'update' })).not.toBeInTheDocument();
     });
   });
 

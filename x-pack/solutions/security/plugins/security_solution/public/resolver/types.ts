@@ -6,9 +6,9 @@
  */
 
 import type React from 'react';
-import type { AnyAction, Dispatch, Middleware, Store } from 'redux';
+import type { AnyAction, Dispatch, Middleware, Store } from 'redux-v4';
 import type { BBox } from 'rbush';
-import type { Provider } from 'react-redux';
+import type { Provider } from 'react-redux-v7';
 import type { CellActionRenderer } from '../flyout_v2/shared/components/cell_actions';
 import type {
   NewResolverTree,
@@ -195,6 +195,13 @@ export interface TreeFetcherParameters {
    * The `_id` for an ES document. Used to select a process that we'll show the graph for.
    */
   databaseDocumentID: string;
+
+  /**
+   * The `@timestamp` (in milliseconds since epoch) of the analyzed document itself, as opposed to the tree
+   * query's own timestamp for the origin node. Used to label ancestor nodes with the process name in effect
+   * when the analyzed event happened, invariant of the date-picker range.
+   */
+  databaseDocumentTimestamp?: number;
 
   /**
    * The indices that the backend will use to search for the document ID.
@@ -831,6 +838,12 @@ export interface ResolverProps {
   databaseDocumentID: string;
 
   /**
+   * The `@timestamp` (in milliseconds since epoch) of the analyzed document itself. Used to label ancestor
+   * nodes with the process name in effect at that time, rather than the origin node's own tree-query timestamp.
+   */
+  databaseDocumentTimestamp?: number;
+
+  /**
    * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
    * Used to prevent collisions in things like query parameters.
    */
@@ -856,6 +869,10 @@ export interface ResolverProps {
    * Optional callback invoked after alert mutations in nested flyouts.
    */
   onAlertUpdated?: () => void;
+  /**
+   * Use the legacy expandable flyout behavior for resolver panels.
+   */
+  useLegacyExpandableFlyout?: boolean;
 }
 
 /**

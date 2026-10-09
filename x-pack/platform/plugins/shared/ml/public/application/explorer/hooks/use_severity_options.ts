@@ -9,8 +9,8 @@ import { useEuiTheme } from '@elastic/eui';
 import { useMemo } from 'react';
 import { ML_ANOMALY_THRESHOLD, getThemeResolvedSeverityColor } from '@kbn/ml-anomaly-utils';
 import { i18n } from '@kbn/i18n';
-import type { SeverityThreshold } from '../../../../common/types/anomalies';
-import { getSeverityRangeDisplay } from '../../components/controls/select_severity';
+import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import { getSeverityRangeDisplay } from '../../../../common/util/severity_threshold';
 
 const warningLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', {
   defaultMessage: 'warning',

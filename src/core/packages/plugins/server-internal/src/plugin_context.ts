@@ -257,6 +257,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       },
       csp: deps.http.csp,
       getServerInfo: deps.http.getServerInfo,
+      setSelfClientUnauthorizedErrorHandler: deps.http.setSelfClientUnauthorizedErrorHandler,
     },
     i18n: deps.i18n,
     logging: {
@@ -315,6 +316,11 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     security: {
       registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
       fips: deps.security.fips,
+      acquireFakeRequestEnricher: () => deps.security.acquireFakeRequestEnricher(),
+      serviceAccounts: {
+        registerWorkloadType: (registration) =>
+          deps.security.serviceAccounts.registerWorkloadType(plugin.name, registration),
+      },
     },
     userProfile: {
       registerUserProfileDelegate: (delegate) =>
@@ -325,6 +331,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     },
     dataStreams: {
       registerDataStream: (dataStream) => deps.dataStreams.registerDataStream(dataStream),
+    },
+    userStorage: {
+      register: deps.userStorage.register,
     },
   };
 }
@@ -369,9 +378,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     executionContext: deps.executionContext,
     featureFlags: {
       appendContext: deps.featureFlags.appendContext,
-      getBooleanValue: deps.featureFlags.getBooleanValue,
-      getStringValue: deps.featureFlags.getStringValue,
-      getNumberValue: deps.featureFlags.getNumberValue,
       getBooleanValue$: deps.featureFlags.getBooleanValue$,
       getStringValue$: deps.featureFlags.getStringValue$,
       getNumberValue$: deps.featureFlags.getNumberValue$,
@@ -380,6 +386,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       auth: deps.http.auth,
       basePath: deps.http.basePath,
       getServerInfo: deps.http.getServerInfo,
+      selfClient: deps.http.selfClient,
       staticAssets: {
         prependPublicUrl: (pathname: string) => deps.http.staticAssets.prependPublicUrl(pathname),
         getPluginAssetHref: (assetPath: string) =>
@@ -420,6 +427,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     security: {
       authc: deps.security.authc,
       audit: deps.security.audit,
+      serviceAccounts: deps.security.serviceAccounts.asScopedToPlugin(plugin.name),
     },
     userProfile: deps.userProfile,
     injection: {
@@ -428,6 +436,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     dataStreams: {
       initializeClient: (dataStream) => deps.dataStreams.initializeClient(dataStream),
+    },
+    userStorage: {
+      asScoped: deps.userStorage.asScoped,
     },
   };
 }

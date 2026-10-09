@@ -5,22 +5,26 @@
  * 2.0.
  */
 
+import { euiSelectors } from '@kbn/scout-oblt';
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
-import { EXTENDED_TIMEOUT } from '../constants';
+import { ENVIRONMENT_ALL, EXTENDED_TIMEOUT } from '../constants';
 import { testData } from '..';
 
 export class ServiceInventoryPage {
   readonly servicesTable;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
-    this.servicesTable = this.page.locator('.euiBasicTable');
+    this.servicesTable = this.page.locator(euiSelectors.basicTable.ROOT_SELECTOR);
   }
 
-  async gotoServiceInventory(overrides: { rangeFrom?: string; rangeTo?: string } = {}) {
+  async gotoServiceInventory(
+    overrides: { rangeFrom?: string; rangeTo?: string; environment?: string } = {}
+  ) {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/services?${new URLSearchParams({
         rangeFrom: overrides.rangeFrom ?? testData.START_DATE,
         rangeTo: overrides.rangeTo ?? testData.END_DATE,
+        environment: overrides.environment ?? ENVIRONMENT_ALL,
       })}`
     );
     await this.page.testSubj.waitForSelector('apmUnifiedSearchBar', { timeout: EXTENDED_TIMEOUT });
@@ -33,12 +37,12 @@ export class ServiceInventoryPage {
       .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
-  getServiceLink(serviceName: string) {
-    return this.servicesTable.getByRole('link', { name: serviceName });
+  getServiceLink(serviceName: string, exact: boolean = false) {
+    return this.servicesTable.getByRole('link', { name: serviceName, exact });
   }
 
-  async clickServiceLink(serviceName: string) {
-    await this.getServiceLink(serviceName).click();
+  async clickServiceLink(serviceName: string, exact: boolean = false) {
+    await this.getServiceLink(serviceName, exact).click();
   }
 
   async waitForServiceOverviewToLoad() {

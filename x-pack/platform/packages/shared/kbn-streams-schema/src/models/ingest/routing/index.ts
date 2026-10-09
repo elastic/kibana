@@ -17,12 +17,14 @@ export interface RoutingDefinition {
   destination: string;
   where: Condition;
   status?: RoutingStatus;
+  draft?: boolean;
 }
 
 export const routingDefinitionSchema: z.Schema<RoutingDefinition> = z.object({
   destination: NonEmptyString,
   where: conditionSchema,
   status: routingStatus.optional(),
+  draft: z.boolean().optional(),
 });
 
 export const routingDefinitionListSchema: z.Schema<RoutingDefinition[]> =

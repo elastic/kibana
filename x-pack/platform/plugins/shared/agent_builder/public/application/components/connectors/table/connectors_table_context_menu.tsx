@@ -11,13 +11,17 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useConnectorOAuthDisconnect } from '@kbn/response-ops-oauth-hooks';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import { isEarsExperimentalConnector } from '@kbn/connector-specs';
+import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import type { ConnectorItem } from '../../../../../common/http_api/tools';
 import { OAUTH_STATUS } from '../../../../../common/http_api/tools';
 import { useConnectorsActions } from '../../../context/connectors_provider';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../hooks/use_kibana';
 import { labels } from '../../../utils/i18n';
 
@@ -34,6 +38,7 @@ const DisconnectConfirmModal: React.FC<{
 }> = ({ connector, onCancel }) => {
   const {
     services: {
+      analytics,
       notifications: { toasts },
     },
   } = useKibana();
@@ -59,13 +64,31 @@ const DisconnectConfirmModal: React.FC<{
     },
   });
 
+  const handleConfirm = useCallback(() => {
+    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UiClick, {
+      ebt_element: AGENT_BUILDER_UI_EBT.element.pageContent,
+      ebt_action: AGENT_BUILDER_UI_EBT.action.connectors.DISCONNECT_CONFIRM,
+      element_kind: 'button',
+    });
+    disconnect();
+  }, [analytics, disconnect]);
+
+  const handleCancel = useCallback(() => {
+    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UiClick, {
+      ebt_element: AGENT_BUILDER_UI_EBT.element.pageContent,
+      ebt_action: AGENT_BUILDER_UI_EBT.action.connectors.DISCONNECT_CANCEL,
+      element_kind: 'button',
+    });
+    onCancel();
+  }, [analytics, onCancel]);
+
   return (
     <EuiConfirmModal
       aria-labelledby={disconnectModalTitleId}
       titleProps={{ id: disconnectModalTitleId }}
       title={labels.connectors.disconnectConfirmTitle(connector.name)}
-      onCancel={onCancel}
-      onConfirm={disconnect}
+      onCancel={handleCancel}
+      onConfirm={handleConfirm}
       cancelButtonText={labels.connectors.disconnectCancelButton}
       confirmButtonText={labels.connectors.disconnectConfirmButton}
       buttonColor="danger"
@@ -84,6 +107,11 @@ export const ConnectorContextMenu = ({ connector }: ConnectorContextMenuProps) =
     services: { application },
   } = useKibana();
   const canDelete = application.capabilities.actions?.delete === true;
+  const { isEarsEnabled, isEarsExperimentalEnabled } = useAgentBuilderServices();
+  const isEarsDisabled =
+    connector.config?.authType === 'ears' &&
+    (!isEarsEnabled ||
+      (isEarsExperimentalConnector(connector.actionTypeId) && !isEarsExperimentalEnabled));
   const isAuthorized = connector.oauthStatus === OAUTH_STATUS.AUTHORIZED;
   const closeMenu = () => setIsOpen(false);
 
@@ -94,20 +122,24 @@ export const ConnectorContextMenu = ({ connector }: ConnectorContextMenuProps) =
         aria-label={labels.connectors.connectorContextMenuButtonLabel}
         panelPaddingSize="s"
         button={
-          <EuiButtonIcon
-            iconType="boxesVertical"
-            onClick={() => setIsOpen((openState) => !openState)}
-            aria-label={labels.connectors.connectorContextMenuButtonLabel}
-          />
+          <EuiToolTip
+            content={labels.connectors.connectorContextMenuButtonLabel}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="boxesVertical"
+              onClick={() => setIsOpen((openState) => !openState)}
+              aria-label={labels.connectors.connectorContextMenuButtonLabel}
+            />
+          </EuiToolTip>
         }
         isOpen={isOpen}
         closePopover={closeMenu}
       >
-        <EuiContextMenuPanel size="s">
+        <EuiContextMenuPanel>
           <EuiContextMenuItem
             icon="pencil"
             key="edit"
-            size="s"
             onClick={() => {
               editConnector(connector);
               closeMenu();
@@ -115,11 +147,10 @@ export const ConnectorContextMenu = ({ connector }: ConnectorContextMenuProps) =
           >
             {labels.connectors.editConnectorButtonLabel}
           </EuiContextMenuItem>
-          {isAuthorized && (
+          {isAuthorized && !isEarsDisabled && (
             <EuiContextMenuItem
               icon="linkSlash"
               key="disconnect"
-              size="s"
               onClick={() => {
                 setShowDisconnectConfirm(true);
                 closeMenu();
@@ -132,7 +163,6 @@ export const ConnectorContextMenu = ({ connector }: ConnectorContextMenuProps) =
             <EuiContextMenuItem
               icon="trash"
               key="delete"
-              size="s"
               css={({ euiTheme }) => ({
                 color: euiTheme.colors.textDanger,
               })}

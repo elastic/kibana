@@ -10,14 +10,16 @@ import useWindowSize from 'react-use/lib/useWindowSize';
 
 export function useRefDimensions() {
   const ref = useRef<HTMLDivElement>(null);
-  const windowHeight = useWindowSize().height;
+  // Subscribe to the full window size so any resize (width or height change)
+  // triggers re-measurement of the container's bounding rect.
+  const windowSize = useWindowSize();
 
   if (!ref.current) {
     return { ref, width: 0, height: 0 };
   }
 
   const { top, width } = ref.current.getBoundingClientRect();
-  const height = windowHeight - top;
+  const height = windowSize.height - top;
 
   return { ref, width, height };
 }

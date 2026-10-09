@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { ConditionalToolTip } from './conditional_tooltip';
 import type { SnapshotNodeResponse } from '../../../../../../common/http_api';
 import type { InfraWaffleMapNode } from '../../../../../common/inventory/types';
@@ -17,14 +18,22 @@ jest.mock('../../../../../containers/metrics_source', () => ({
 
 jest.mock('../../../../../containers/plugin_config_context');
 jest.mock('../../hooks/use_snaphot');
+import { escapeQuotes } from '@kbn/es-query';
 import type { UseSnapshotRequest } from '../../hooks/use_snaphot';
 import { useSnapshot } from '../../hooks/use_snaphot';
 jest.mock('../../hooks/use_waffle_options');
+jest.mock('../../../../../hooks/use_is_pod_schema_selector_enabled', () => ({
+  useIsPodSchemaSelectorEnabled: jest.fn(() => false),
+}));
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
+import { useIsPodSchemaSelectorEnabled } from '../../../../../hooks/use_is_pod_schema_selector_enabled';
 
 const mockedUseSnapshot = useSnapshot as jest.Mock<ReturnType<typeof useSnapshot>>;
 const mockedUseWaffleOptionsContext = useWaffleOptionsContext as jest.Mock<
   ReturnType<typeof useWaffleOptionsContext>
+>;
+const mockedUseIsPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled as jest.MockedFunction<
+  typeof useIsPodSchemaSelectorEnabled
 >;
 
 const NODE: InfraWaffleMapNode = {
@@ -35,7 +44,27 @@ const NODE: InfraWaffleMapNode = {
   metrics: [{ name: 'cpuV2' }],
 };
 
-const mockedUseWaffleOptionsContextReturnValue = {
+const CUSTOM_METRICS = [
+  {
+    aggregation: 'avg' as const,
+    field: 'host.cpuV2.pct',
+    id: 'cedd6ca0-5775-11eb-a86f-adb714b6c486',
+    label: 'My Custom Label',
+    type: 'custom' as const,
+  },
+  {
+    aggregation: 'avg' as const,
+    field: 'host.network.out.packets',
+    id: 'e12dd700-5775-11eb-a86f-adb714b6c486',
+    type: 'custom' as const,
+  },
+];
+
+const buildWaffleOptions = (
+  preferredSchema: DataSchemaFormat,
+  nodeType: InventoryItemType = 'host'
+) => ({
+  preferredSchema,
   metric: {
     type: 'cpu',
     field: 'host.cpuV2.pct',
@@ -45,26 +74,12 @@ const mockedUseWaffleOptionsContextReturnValue = {
     formatTemplate: '{{value}}%',
   },
   groupBy: [],
-  nodeType: 'host',
+  nodeType,
   view: 'map',
   customOptions: {
     legend: { steps: 10 },
   },
-  customMetrics: [
-    {
-      aggregation: 'avg',
-      field: 'host.cpuV2.pct',
-      id: 'cedd6ca0-5775-11eb-a86f-adb714b6c486',
-      label: 'My Custom Label',
-      type: 'custom',
-    },
-    {
-      aggregation: 'avg',
-      field: 'host.network.out.packets',
-      id: 'e12dd700-5775-11eb-a86f-adb714b6c486',
-      type: 'custom',
-    },
-  ],
+  customMetrics: CUSTOM_METRICS,
   options: {
     fields: {
       cpuV2: { name: 'cpuV2', units: '%' },
@@ -77,53 +92,50 @@ const mockedUseWaffleOptionsContextReturnValue = {
     },
   },
   setWaffleOptions: jest.fn(),
-};
+});
+
+const buildBaseSnapshotResponse = (metricNames: string[]): ReturnType<typeof useSnapshot> => ({
+  nodes: [
+    {
+      name: 'host-01',
+      path: [{ label: 'host-01', value: 'host-01', ip: '192.168.1.10' }],
+      metrics: metricNames.map((name) => ({
+        name,
+        value: 0.1,
+        avg: 0.4,
+        max: 0.7,
+      })),
+    },
+  ],
+  error: null,
+  loading: false,
+  interval: '60s',
+  reload: jest.fn(() => Promise.resolve({} as SnapshotNodeResponse)),
+});
 
 describe('ConditionalToolTip', () => {
   const currentTime = Date.now();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(false);
   });
 
-  it('renders correctly with node data', () => {
-    mockedUseSnapshot.mockReturnValue({
-      nodes: [
-        {
-          name: 'host-01',
-          path: [{ label: 'host-01', value: 'host-01', ip: '192.168.1.10' }],
-          metrics: [
-            { name: 'cpuV2', value: 0.1, avg: 0.4, max: 0.7 },
-            { name: 'cpu', value: 0.1, avg: 0.4, max: 0.7 },
-            { name: 'memory', value: 0.8, avg: 0.8, max: 1 },
-            { name: 'rxV2', value: 1000000, avg: 1000000, max: 1000000 },
-            { name: 'txV2', value: 1000000, avg: 1000000, max: 1000000 },
-            { name: 'rx', value: 1000000, avg: 1000000, max: 1000000 },
-            { name: 'tx', value: 1000000, avg: 1000000, max: 1000000 },
-            {
-              name: 'cedd6ca0-5775-11eb-a86f-adb714b6c486',
-              max: 0.34164999922116596,
-              value: 0.34140000740687054,
-              avg: 0.20920833365784752,
-            },
-            {
-              name: 'e12dd700-5775-11eb-a86f-adb714b6c486',
-              max: 4703.166666666667,
-              value: 4392.166666666667,
-              avg: 3704.6666666666674,
-            },
-          ],
-        },
-      ],
-      error: null,
-      loading: false,
-      interval: '60s',
-      reload: jest.fn(() => Promise.resolve({} as SnapshotNodeResponse)),
-    });
+  it('renders the ECS metric set (including legacy cpu/tx/rx) when preferredSchema=ecs', () => {
+    mockedUseSnapshot.mockReturnValue(
+      buildBaseSnapshotResponse([
+        'cpuV2',
+        'cpu',
+        'memory',
+        'rxV2',
+        'txV2',
+        'rx',
+        'tx',
+        ...CUSTOM_METRICS.map((m) => m.id),
+      ])
+    );
     mockedUseWaffleOptionsContext.mockReturnValue(
-      mockedUseWaffleOptionsContextReturnValue as unknown as ReturnType<
-        typeof useWaffleOptionsContext
-      >
+      buildWaffleOptions('ecs') as unknown as ReturnType<typeof useWaffleOptionsContext>
     );
 
     render(<ConditionalToolTip currentTime={currentTime} node={NODE} nodeType="host" />);
@@ -139,23 +151,11 @@ describe('ConditionalToolTip', () => {
       { type: 'cpu' },
       { type: 'tx' },
       { type: 'rx' },
-      {
-        aggregation: 'avg',
-        field: 'host.cpuV2.pct',
-        id: 'cedd6ca0-5775-11eb-a86f-adb714b6c486',
-        label: 'My Custom Label',
-        type: 'custom',
-      },
-      {
-        aggregation: 'avg',
-        field: 'host.network.out.packets',
-        id: 'e12dd700-5775-11eb-a86f-adb714b6c486',
-        type: 'custom',
-      },
+      ...CUSTOM_METRICS,
     ];
 
     expect(mockedUseSnapshot).toHaveBeenCalledWith({
-      kuery: '"host.name": host-01',
+      kuery: '"host.name": "host-01"',
       metrics: expectedMetrics,
       groupBy: [],
       nodeType: 'host',
@@ -164,8 +164,160 @@ describe('ConditionalToolTip', () => {
       currentTime,
       accountId: '',
       region: '',
+      schema: 'ecs',
     } as UseSnapshotRequest);
 
     expect(tooltip).toMatchSnapshot();
+  });
+
+  it('renders only the semconv metric set (no legacy cpu/tx/rx) when preferredSchema=semconv', () => {
+    mockedUseSnapshot.mockReturnValue(
+      buildBaseSnapshotResponse([
+        'cpuV2',
+        'memory',
+        'txV2',
+        'rxV2',
+        ...CUSTOM_METRICS.map((m) => m.id),
+      ])
+    );
+    mockedUseWaffleOptionsContext.mockReturnValue(
+      buildWaffleOptions('semconv') as unknown as ReturnType<typeof useWaffleOptionsContext>
+    );
+
+    render(<ConditionalToolTip currentTime={currentTime} node={NODE} nodeType="host" />);
+
+    const tooltip = screen.getByTestId('conditionalTooltipContent-host-01');
+    expect(tooltip).toBeInTheDocument();
+
+    const expectedMetrics = [
+      { type: 'cpuV2' },
+      { type: 'memory' },
+      { type: 'txV2' },
+      { type: 'rxV2' },
+      ...CUSTOM_METRICS,
+    ];
+
+    expect(mockedUseSnapshot).toHaveBeenCalledWith({
+      kuery: '"host.name": "host-01"',
+      metrics: expectedMetrics,
+      groupBy: [],
+      nodeType: 'host',
+      sourceId: 'default',
+      includeTimeseries: true,
+      currentTime,
+      accountId: '',
+      region: '',
+      schema: 'semconv',
+    } as UseSnapshotRequest);
+
+    const useSnapshotCall = mockedUseSnapshot.mock.calls[0][0] as UseSnapshotRequest;
+    const requestedTypes = useSnapshotCall.metrics.map((m) => m.type);
+    expect(requestedTypes).not.toContain('cpu');
+    expect(requestedTypes).not.toContain('rx');
+    expect(requestedTypes).not.toContain('tx');
+
+    expect(tooltip).toMatchSnapshot();
+  });
+
+  it('quotes ARN identifiers containing colons in the kuery', () => {
+    const ARN_NODE: InfraWaffleMapNode = {
+      pathId: 'arn:aws:rds:us-west-2:123456789012:db:my-db',
+      id: 'arn:aws:rds:us-west-2:123456789012:db:my-db',
+      name: 'my-db',
+      path: [{ value: 'arn:aws:rds:us-west-2:123456789012:db:my-db', label: 'my-db' }],
+      metrics: [{ name: 'cpu' }],
+    };
+
+    mockedUseSnapshot.mockReturnValue(buildBaseSnapshotResponse(['cpu']));
+    mockedUseWaffleOptionsContext.mockReturnValue(
+      buildWaffleOptions('ecs') as unknown as ReturnType<typeof useWaffleOptionsContext>
+    );
+
+    render(<ConditionalToolTip currentTime={currentTime} node={ARN_NODE} nodeType="awsRDS" />);
+
+    const arn = 'arn:aws:rds:us-west-2:123456789012:db:my-db';
+    const useSnapshotCall = mockedUseSnapshot.mock.calls[0][0] as UseSnapshotRequest;
+    expect(useSnapshotCall.kuery).toBe(`"aws.rds.db_instance.arn": "${escapeQuotes(arn)}"`);
+  });
+
+  it('keeps leftover Hosts OpenTelemetry schema off Kubernetes Pod tooltip requests', () => {
+    const POD_NODE: InfraWaffleMapNode = {
+      pathId: 'pod-01',
+      id: 'pod-01',
+      name: 'pod-01',
+      path: [{ value: 'pod-01', label: 'pod-01' }],
+      metrics: [{ name: 'cpu' }],
+    };
+
+    mockedUseSnapshot.mockReturnValue(
+      buildBaseSnapshotResponse(['cpu', 'memory', 'rx', 'tx', ...CUSTOM_METRICS.map((m) => m.id)])
+    );
+    // Intentional `as ReturnType<typeof useWaffleOptionsContext>` type assertion as the waffle-options mock is a partial test double;
+    mockedUseWaffleOptionsContext.mockReturnValue(
+      buildWaffleOptions('semconv', 'pod') as unknown as ReturnType<typeof useWaffleOptionsContext>
+    );
+
+    render(<ConditionalToolTip currentTime={currentTime} node={POD_NODE} nodeType="pod" />);
+
+    // Intentional `as UseSnapshotRequest` type assertion as Jest's toHaveBeenCalledWith matcher is untyped relative to the hook request;
+    expect(mockedUseSnapshot).toHaveBeenCalledWith({
+      kuery: '"kubernetes.pod.uid": "pod-01"',
+      metrics: [
+        { type: 'cpu' },
+        { type: 'memory' },
+        { type: 'rx' },
+        { type: 'tx' },
+        ...CUSTOM_METRICS,
+      ],
+      groupBy: [],
+      nodeType: 'pod',
+      sourceId: 'default',
+      includeTimeseries: true,
+      currentTime,
+      accountId: '',
+      region: '',
+      schema: 'ecs',
+    } as UseSnapshotRequest);
+  });
+
+  it('queries Kubernetes Pod tooltips with k8s.pod.uid when the selector flag is on and OpenTelemetry is selected', () => {
+    const POD_NODE: InfraWaffleMapNode = {
+      pathId: 'pod-01',
+      id: 'pod-01',
+      name: 'pod-01',
+      path: [{ value: 'pod-01', label: 'pod-01' }],
+      metrics: [{ name: 'cpu' }],
+    };
+
+    mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
+    mockedUseSnapshot.mockReturnValue(
+      buildBaseSnapshotResponse(['cpu', 'memory', 'rx', 'tx', ...CUSTOM_METRICS.map((m) => m.id)])
+    );
+    // Intentional `as ReturnType<typeof useWaffleOptionsContext>` type assertion as the waffle-options mock is a partial test double;
+    mockedUseWaffleOptionsContext.mockReturnValue(
+      buildWaffleOptions('semconv', 'pod') as unknown as ReturnType<typeof useWaffleOptionsContext>
+    );
+
+    render(<ConditionalToolTip currentTime={currentTime} node={POD_NODE} nodeType="pod" />);
+
+    // Intentional `as UseSnapshotRequest` type assertion as Jest's toHaveBeenCalledWith matcher is untyped relative to the hook request;
+    expect(mockedUseSnapshot).toHaveBeenCalledWith({
+      kuery: '"k8s.pod.uid": "pod-01"',
+      metrics: [
+        { type: 'cpu' },
+        { type: 'memory' },
+        { type: 'rx' },
+        { type: 'tx' },
+        ...CUSTOM_METRICS,
+      ],
+      groupBy: [],
+      nodeType: 'pod',
+      sourceId: 'default',
+      includeTimeseries: true,
+      currentTime,
+      accountId: '',
+      region: '',
+      schema: 'semconv',
+    } as UseSnapshotRequest);
   });
 });

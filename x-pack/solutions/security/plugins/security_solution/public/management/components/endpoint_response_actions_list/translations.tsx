@@ -33,6 +33,11 @@ export const OUTPUT_MESSAGES = Object.freeze({
       defaultMessage: `{command} failed`,
       values: { command },
     }),
+  wasCanceled: (command: string) =>
+    i18n.translate('xpack.securitySolution.responseActionsList.list.item.wasCanceled', {
+      defaultMessage: `{command} was canceled`,
+      values: { command },
+    }),
   expandSection: {
     placedAt: i18n.translate(
       'xpack.securitySolution.responseActionsList.list.item.expandSection.placedAt',
@@ -113,6 +118,9 @@ export const TABLE_COLUMN_NAMES = Object.freeze({
   rule: i18n.translate('xpack.securitySolution.responseActionsList.list.rule', {
     defaultMessage: 'Rule',
   }),
+  actions: i18n.translate('xpack.securitySolution.responseActionsList.list.actions', {
+    defaultMessage: 'Actions',
+  }),
 });
 
 export const UX_MESSAGES = Object.freeze({
@@ -156,6 +164,12 @@ export const UX_MESSAGES = Object.freeze({
     pending: i18n.translate('xpack.securitySolution.responseActionsList.list.item.badge.pending', {
       defaultMessage: 'Pending',
     }),
+    canceled: i18n.translate(
+      'xpack.securitySolution.responseActionsList.list.item.badge.canceled',
+      {
+        defaultMessage: 'Canceled',
+      }
+    ),
   },
   unenrolled: {
     hosts: i18n.translate(
@@ -188,6 +202,85 @@ export const UX_MESSAGES = Object.freeze({
     'xpack.securitySolution.responseActionsList.list.rule.triggeredByRule',
     {
       defaultMessage: 'Triggered by rule',
+    }
+  ),
+  cancelAction: i18n.translate('xpack.securitySolution.responseActionsList.action.cancelAction', {
+    defaultMessage: 'Cancel',
+  }),
+  cancelActionNotSupportedTooltip: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionNotSupportedTooltip',
+    {
+      defaultMessage: 'Cancellation is not supported for this action type',
+    }
+  ),
+  cancelActionNotPermittedTooltip: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionNotPermittedTooltip',
+    {
+      defaultMessage: 'You do not have permission to cancel this action',
+    }
+  ),
+  cancelActionModalTitle: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalTitle',
+    {
+      defaultMessage: 'Cancel action',
+    }
+  ),
+  cancelActionModalSubmitButonLabel: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalSubmitButtonLabel',
+    { defaultMessage: 'Submit' }
+  ),
+  cancelActionModalActionAlreadyComplete: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalActionAlreadyComplete',
+    {
+      defaultMessage: 'Action is already complete',
+    }
+  ),
+  cancelActionModalCommentFieldPlaceholder: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalCommentFieldPlaceholder',
+    {
+      defaultMessage: 'Optional',
+    }
+  ),
+  cancelActionModalAgentSelectorLabel: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalAgentSelectorLabel',
+    {
+      defaultMessage: 'Select agents',
+    }
+  ),
+  cancelActionModalHostSelectorLabel: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalHostSelectorLabel',
+    {
+      defaultMessage: 'Select hosts',
+    }
+  ),
+  cancelActionModalCommentLabel: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalCommentLabel',
+    {
+      defaultMessage: 'Comment',
+    }
+  ),
+  cancelActionModalHostSelectorCounter: (selected: number, total: number) =>
+    i18n.translate(
+      'xpack.securitySolution.responseActionsList.action.cancelActionModalHostSelectorCounter',
+      { defaultMessage: '{selected} of {total}', values: { selected, total } }
+    ),
+  cancelActionModalLoadingCapabilities: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalLoadingCapabilities',
+    {
+      defaultMessage: 'Checking host support for cancel',
+    }
+  ),
+  cancelActionModalHostUnsupportedTooltip: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalHostUnsupportedTooltip',
+    {
+      defaultMessage: 'This host is running an agent version that does not support cancel',
+    }
+  ),
+  cancelActionModalAllHostsUnsupported: i18n.translate(
+    'xpack.securitySolution.responseActionsList.action.cancelActionModalAllHostsUnsupported',
+    {
+      defaultMessage:
+        'None of the hosts with a pending action are running an agent version that supports cancel.',
     }
   ),
 });

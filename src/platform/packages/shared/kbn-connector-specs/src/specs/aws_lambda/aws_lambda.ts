@@ -21,8 +21,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
+
+// AWS Lambda API limits: function name/ARN (incl. qualifier) 170, qualifier 128.
+const FUNCTION_NAME_MAX_LENGTH = 170;
+const QUALIFIER_MAX_LENGTH = 128;
+const MARKER_MAX_LENGTH = 2048;
 
 interface LambdaApiResponse {
   data: unknown;
@@ -113,42 +118,60 @@ export const AwsLambdaConnector: ConnectorSpec = {
     }),
     minimumLicense: 'gold',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
+    // No dedicated docs page yet; empty string resolves to the connectors index via the
+    // doc-links service (see getDocsUrlFromSpec), so it stays correct if the docs move.
+    docsUrl: '',
   },
 
   auth: {
     types: ['aws_credentials'],
   },
 
-  schema: z.object({
-    region: z
-      .string()
-      .min(1)
-      .describe(
-        i18n.translate('connectorSpecs.awsLambda.config.region', {
-          defaultMessage: 'AWS Region (e.g., us-east-1, eu-west-1)',
-        })
-      )
-      .meta({
-        widget: 'text',
-        label: i18n.translate('connectorSpecs.awsLambda.config.region.label', {
-          defaultMessage: 'AWS Region',
+  schema: lazySchema(() =>
+    z.object({
+      region: z
+        .string()
+        .min(1)
+        .describe(
+          i18n.translate('connectorSpecs.awsLambda.config.region', {
+            defaultMessage: 'AWS Region (e.g., us-east-1, eu-west-1)',
+          })
+        )
+        .meta({
+          widget: 'text',
+          label: i18n.translate('connectorSpecs.awsLambda.config.region.label', {
+            defaultMessage: 'AWS Region',
+          }),
+          placeholder: 'us-east-1',
         }),
-        placeholder: 'us-east-1',
-      }),
-  }),
+    })
+  ),
 
   actions: {
     invoke: {
       isTool: true,
-      input: z.object({
-        functionName: z.string().min(1).describe('Lambda function name or ARN'),
-        payload: z.unknown().optional().describe('JSON payload to send to the function'),
-        invocationType: z
-          .enum(['RequestResponse', 'Event', 'DryRun'])
-          .default('RequestResponse')
-          .describe('Invocation type: RequestResponse (sync), Event (async), or DryRun'),
-        qualifier: z.string().optional().describe('Function version or alias to invoke'),
-      }),
+      scope: 'destroy',
+      description:
+        'Invoke a Lambda function by name or ARN with an optional JSON payload. Use RequestResponse to wait for and return the function result (plus the tail of its execution log), Event to trigger it asynchronously, or DryRun to validate permissions without running it.',
+      input: lazySchema(() =>
+        z.object({
+          functionName: z
+            .string()
+            .min(1)
+            .max(FUNCTION_NAME_MAX_LENGTH)
+            .describe('Lambda function name or ARN'),
+          payload: z.unknown().optional().describe('JSON payload to send to the function'),
+          invocationType: z
+            .enum(['RequestResponse', 'Event', 'DryRun'])
+            .default('RequestResponse')
+            .describe('Invocation type: RequestResponse (sync), Event (async), or DryRun'),
+          qualifier: z
+            .string()
+            .max(QUALIFIER_MAX_LENGTH)
+            .optional()
+            .describe('Function version or alias to invoke'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           functionName: string;
@@ -206,10 +229,22 @@ export const AwsLambdaConnector: ConnectorSpec = {
 
     listFunctions: {
       isTool: true,
-      input: z.object({
-        maxItems: z.number().optional().describe('Maximum number of functions to return (1-10000)'),
-        marker: z.string().optional().describe('Pagination token from a previous response'),
-      }),
+      scope: 'read',
+      description:
+        'List Lambda functions in the configured region with their name, ARN, runtime, handler, memory, timeout, and last-modified date. Use this to discover function names before calling getFunction or invoke; pass nextMarker from the response as marker to fetch the next page.',
+      input: lazySchema(() =>
+        z.object({
+          maxItems: z
+            .number()
+            .optional()
+            .describe('Maximum number of functions to return (1-10000)'),
+          marker: z
+            .string()
+            .max(MARKER_MAX_LENGTH)
+            .optional()
+            .describe('Pagination token from a previous response'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           maxItems?: number;
@@ -247,10 +282,23 @@ export const AwsLambdaConnector: ConnectorSpec = {
 
     getFunction: {
       isTool: true,
-      input: z.object({
-        functionName: z.string().min(1).describe('Lambda function name or ARN'),
-        qualifier: z.string().optional().describe('Function version or alias'),
-      }),
+      scope: 'read',
+      description:
+        'Get the configuration of a single Lambda function (ARN, runtime, execution role, handler, timeout, memory, state, and last update status). Use this to inspect a function before invoking it or to check whether a deployment finished.',
+      input: lazySchema(() =>
+        z.object({
+          functionName: z
+            .string()
+            .min(1)
+            .max(FUNCTION_NAME_MAX_LENGTH)
+            .describe('Lambda function name or ARN'),
+          qualifier: z
+            .string()
+            .max(QUALIFIER_MAX_LENGTH)
+            .optional()
+            .describe('Function version or alias'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           functionName: string;
@@ -286,22 +334,12 @@ export const AwsLambdaConnector: ConnectorSpec = {
 
   test: {
     handler: async (ctx) => {
-      try {
-        await callLambdaApi(ctx, 'GET', '/2015-03-31/functions/', { MaxItems: '1' });
-        return {
-          ok: true,
-          message: 'Successfully connected to AWS Lambda API',
-        };
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        return {
-          ok: false,
-          message: `Failed to connect: ${errorMessage}`,
-        };
-      }
+      await callLambdaApi(ctx, 'GET', '/2015-03-31/functions/', { MaxItems: '1' });
+      return {};
     },
     description: i18n.translate('connectorSpecs.awsLambda.test.description', {
       defaultMessage: 'Verifies AWS Lambda API credentials',
     }),
+    enabled: true,
   },
 };

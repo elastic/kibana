@@ -1,0 +1,215 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { hasExternalHitlChannels } from './has_external_hitl_channels';
+import {
+  buildWaitForApprovalResumeLinks,
+  sendWaitForApprovalNotifications,
+} from './send_wait_for_approval_notifications';
+
+describe('send_wait_for_approval_notifications', () => {
+  describe('hasExternalHitlChannels', () => {
+    it('returns false when channels are omitted', () => {
+      expect(hasExternalHitlChannels(undefined)).toBe(false);
+    });
+
+    it('returns true when slack webhook connector config is present', () => {
+      expect(
+        hasExternalHitlChannels({
+          slack: { 'connector-id': 'slack-1' },
+        })
+      ).toBe(true);
+    });
+
+    it('returns true when slack_api channel config is present', () => {
+      expect(
+        hasExternalHitlChannels({
+          slack_api: { 'connector-id': 'slack-api-1', channels: ['C0123'] },
+        })
+      ).toBe(true);
+    });
+
+    it('returns true when slack2 channel config is present', () => {
+      expect(
+        hasExternalHitlChannels({
+          slack2: { 'connector-id': 'slack2-1', channels: ['C0123'] },
+        })
+      ).toBe(true);
+    });
+  });
+
+  describe('buildWaitForApprovalResumeLinks', () => {
+    it('builds approve and reject URLs with the resume token', () => {
+      const links = buildWaitForApprovalResumeLinks({
+        kibanaUrl: 'https://kibana.example',
+        spaceId: 'default',
+        executionId: 'exec-1',
+        stepId: 'step-exec-1',
+        token: 'resume-token',
+      });
+
+      expect(links.approveUrl).toContain('approved=true');
+      expect(links.rejectUrl).toContain('approved=false');
+      expect(links.approveUrl).toContain('/steps/step-exec-1/resume/external');
+      expect(links.approveUrl).toContain('token=resume-token');
+      expect(links.rejectUrl).toContain('token=resume-token');
+    });
+  });
+
+  describe('sendWaitForApprovalNotifications', () => {
+    const resumeLinks = {
+      approveUrl: 'https://kibana.example/approve',
+      rejectUrl: 'https://kibana.example/reject',
+    };
+    const baseNotifyArgs = {
+      message: 'Approve change?',
+      approveLabel: 'Approve',
+      rejectLabel: 'Decline',
+      resumeLinks,
+      abortController: new AbortController(),
+    };
+
+    it('sends webhook slack notification with mrkdwn-safe resume links', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+      const resumeLinksWithQuery = {
+        approveUrl: 'https://kibana.example/approve?token=abc&approved=true',
+        rejectUrl: 'https://kibana.example/reject?token=abc&approved=false',
+      };
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          slack: { 'connector-id': 'slack-webhook-1' },
+        },
+        resumeLinks: resumeLinksWithQuery,
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute).toHaveBeenCalledTimes(1);
+      expect(execute.mock.calls[0][0].connectorType).toBe('slack');
+      expect(execute.mock.calls[0][0].input.message).toContain('&amp;approved=true');
+      expect(execute.mock.calls[0][0].input.message).toContain(
+        '<https://kibana.example/approve?token=abc&amp;approved=true|Approve>'
+      );
+    });
+
+    it('sends slack and slack_api notifications when both are configured', async () => {
+      const execute = jest
+        .fn()
+        .mockResolvedValueOnce({ status: 'ok' })
+        .mockResolvedValueOnce({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          slack: { 'connector-id': 'slack-webhook-1' },
+          slack_api: { 'connector-id': 'slack-api-1', channels: ['C0123'] },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute).toHaveBeenCalledTimes(2);
+      expect(execute.mock.calls[0][0].connectorType).toBe('slack');
+      expect(execute.mock.calls[1][0].connectorType).toBe('slack_api');
+      expect(execute.mock.calls[1][0].input).toEqual({
+        subAction: 'postBlockkit',
+        subActionParams: {
+          channelIds: ['C0123'],
+          text: expect.stringContaining('"type":"actions"'),
+        },
+      });
+    });
+
+    it('sends slack_api notifications to every configured channel', async () => {
+      const execute = jest
+        .fn()
+        .mockResolvedValueOnce({ status: 'ok' })
+        .mockResolvedValueOnce({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          slack_api: { 'connector-id': 'slack-api-1', channels: ['C0123', 'C0456'] },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute).toHaveBeenCalledTimes(2);
+      expect(execute.mock.calls[0][0].input.subActionParams.channelIds).toEqual(['C0123']);
+      expect(execute.mock.calls[1][0].input.subActionParams.channelIds).toEqual(['C0456']);
+    });
+
+    it('sends slack_api #channel values as channelNames', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          slack_api: { 'connector-id': 'slack-api-1', channels: ['#alerts', 'C0123'] },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute.mock.calls[0][0].input.subActionParams).toEqual(
+        expect.objectContaining({ channelNames: ['#alerts'] })
+      );
+      expect(execute.mock.calls[1][0].input.subActionParams).toEqual(
+        expect.objectContaining({ channelIds: ['C0123'] })
+      );
+    });
+
+    it('sends slack2 sendMessage notifications to every configured channel', async () => {
+      const execute = jest
+        .fn()
+        .mockResolvedValueOnce({ status: 'ok' })
+        .mockResolvedValueOnce({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          slack2: { 'connector-id': 'slack2-1', channels: ['C0123', 'C0456'] },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute).toHaveBeenCalledTimes(2);
+      expect(execute.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          connectorType: 'slack2',
+          input: {
+            subAction: 'sendMessage',
+            subActionParams: {
+              channel: 'C0123',
+              text: 'Approve change?\n\n<https://kibana.example/approve|Approve>  <https://kibana.example/reject|Decline>',
+              unfurlLinks: false,
+              unfurlMedia: false,
+            },
+          },
+        })
+      );
+      expect(execute.mock.calls[1][0].input.subActionParams.channel).toBe('C0456');
+    });
+
+    it('throws when a configured connector fails', async () => {
+      const execute = jest
+        .fn()
+        .mockResolvedValue({ status: 'error', message: 'Slack unavailable' });
+
+      await expect(
+        sendWaitForApprovalNotifications({
+          ...baseNotifyArgs,
+          channels: {
+            slack: { 'connector-id': 'slack-1' },
+          },
+          connectorExecutor: { execute } as never,
+        })
+      ).rejects.toThrow('Slack unavailable');
+    });
+  });
+});

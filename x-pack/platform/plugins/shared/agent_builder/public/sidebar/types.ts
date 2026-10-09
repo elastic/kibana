@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EmbeddableConversationProps } from '../embeddable/types';
+import type { OpenConversationSidebarOptions } from '@kbn/agent-builder-browser';
 
-export interface OpenConversationSidebarOptions extends EmbeddableConversationProps {
-  onClose?: () => void;
-}
+export type { OpenConversationSidebarOptions };
+
+export type OpenSidebarInternalOptions = OpenConversationSidebarOptions;

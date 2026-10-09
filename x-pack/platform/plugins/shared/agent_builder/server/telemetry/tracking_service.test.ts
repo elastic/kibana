@@ -483,6 +483,92 @@ describe('TrackingService', () => {
     });
   });
 
+  describe('trackSkillInvocation', () => {
+    it('increments counter for builtin origin', () => {
+      trackingService.trackSkillInvocation('builtin');
+
+      expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_builtin`,
+        counterType: 'count',
+        incrementBy: 1,
+      });
+    });
+
+    it('increments counter for custom origin', () => {
+      trackingService.trackSkillInvocation('custom');
+
+      expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_custom`,
+        counterType: 'count',
+        incrementBy: 1,
+      });
+    });
+
+    it('increments counter for plugin origin', () => {
+      trackingService.trackSkillInvocation('plugin');
+
+      expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_plugin`,
+        counterType: 'count',
+        incrementBy: 1,
+      });
+    });
+
+    it('logs debug message on success', () => {
+      trackingService.trackSkillInvocation('custom');
+
+      expect(logger.debug).toHaveBeenCalledWith('Tracked skill invocation: origin=custom');
+    });
+
+    it('logs error when incrementCounter throws', () => {
+      mockUsageCounter.incrementCounter.mockImplementation(() => {
+        throw new Error('Counter error');
+      });
+
+      trackingService.trackSkillInvocation('builtin');
+
+      expect(logger.error).toHaveBeenCalledWith('Failed to track skill invocation: Counter error');
+    });
+  });
+
+  describe('trackPluginImport', () => {
+    it('increments counter for url source', () => {
+      trackingService.trackPluginImport('url');
+
+      expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_plugin_import_url`,
+        counterType: 'count',
+        incrementBy: 1,
+      });
+    });
+
+    it('increments counter for upload source', () => {
+      trackingService.trackPluginImport('upload');
+
+      expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_plugin_import_upload`,
+        counterType: 'count',
+        incrementBy: 1,
+      });
+    });
+
+    it('logs debug message on success', () => {
+      trackingService.trackPluginImport('url');
+
+      expect(logger.debug).toHaveBeenCalledWith('Tracked plugin import: sourceType=url');
+    });
+
+    it('logs error when incrementCounter throws', () => {
+      mockUsageCounter.incrementCounter.mockImplementation(() => {
+        throw new Error('Counter error');
+      });
+
+      trackingService.trackPluginImport('upload');
+
+      expect(logger.error).toHaveBeenCalledWith('Failed to track plugin import: Counter error');
+    });
+  });
+
   describe('trackError', () => {
     it('increments total error counter', () => {
       const error = new Error('Test error');

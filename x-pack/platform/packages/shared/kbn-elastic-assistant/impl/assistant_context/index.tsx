@@ -176,6 +176,14 @@ export const useAssistantContext = () => {
   return context;
 };
 
+/**
+ * Same context as {@link useAssistantContext}, but returns `undefined` when no provider is present.
+ * Prefer {@link useAssistantContext} for assistant UI; use this only when a hook must degrade
+ * gracefully outside `AssistantProvider` (e.g. embedded previews).
+ */
+export const useMaybeAssistantContext = (): UseAssistantContext | undefined =>
+  React.useContext(AssistantContext);
+
 export const useAssistantContextValue = (props: AssistantProviderProps): UseAssistantContext => {
   const {
     actionTypeRegistry,

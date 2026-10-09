@@ -2,7 +2,12 @@
 # Copy from internal roles config in elasticsearch-controller
 # -----
 viewer:
-  cluster: []
+  metadata:
+    _public: true
+    _reserved: true
+  cluster:
+    - 'read_project_routing'
+    - 'monitor_inference'
   indices:
     - names:
         - '/~(([.]|ilm-history-).*)/'
@@ -39,7 +44,12 @@ viewer:
         - '*'
   run_as: []
 editor:
-  cluster: []
+  metadata:
+    _public: true
+    _reserved: true
+  cluster:
+    - 'read_project_routing'
+    - 'monitor_inference'
   indices:
     - names:
         - '/~(([.]|ilm-history-).*)/'
@@ -84,6 +94,14 @@ editor:
         - 'read'
         - 'view_index_metadata'
         - 'manage'
+    - names:
+        - 'kibana_sample_data_*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'write'
+        - 'manage'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -94,6 +112,9 @@ editor:
 
 # admin role defined in elasticsearch controller
 admin:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ['all']
   indices:
     - names: ['*']

@@ -48,7 +48,7 @@ PR_TITLE='[Scout] Update test config manifests'
 BRANCH_NAME="scout_metadata_update_$(date +%s)"
 
 # Check if an open PR with the same title targeting this base already exists
-existing_pr_json=$(gh pr list --base "$TARGET_BRANCH" --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME" --limit 1 --json number,headRefName,title 2>/dev/null || true)
+existing_pr_json=$(gh pr list --base "$TARGET_BRANCH" --search "$PR_TITLE (author:$KIBANA_MACHINE_USERNAME OR author:app/elastic-vault-github-plugin-prod)" --state open --limit 1 --json number,headRefName,title 2>/dev/null || true)
 existing_pr_title=$(echo "$existing_pr_json" | jq -r '.[0].title // empty')
 if [[ "$existing_pr_title" == "$PR_TITLE" ]]; then
   existing_branch=$(echo "$existing_pr_json" | jq -r '.[0].headRefName // empty')

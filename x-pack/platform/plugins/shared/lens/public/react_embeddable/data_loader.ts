@@ -7,7 +7,6 @@
 
 import { type KibanaExecutionContext } from '@kbn/core/public';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type {
   GetStateType,
   LensInternalApi,
@@ -17,6 +16,7 @@ import type {
 } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
 import {
+  apiPublishesApproximation,
   apiPublishesProjectRouting,
   apiPublishesUnifiedSearch,
   fetch$,
@@ -36,6 +36,7 @@ import {
   tap,
   type Subscription,
 } from 'rxjs';
+import { apm } from '@elastic/apm-rum';
 import { getEditPath } from '../../common/constants';
 import { prepareCallbacks } from './expressions/callbacks';
 import { getExpressionRendererParams } from './expressions/expression_params';
@@ -49,7 +50,13 @@ import {
   updateAttributesWithAnnotation,
 } from './helper';
 import { addLog } from './logger';
-import { apiHasLensComponentCallbacks, apiHasUserMessages } from './type_guards';
+import {
+  apiHasLensComponentCallbacks,
+  apiHasUserMessages,
+  hasTablesAdapter,
+  isPartialInspectorAdapters,
+  type OnDataCallback,
+} from './type_guards';
 import type { LensEmbeddableStartServices } from './types';
 import { buildUserMessagesHelpers } from './user_messages/api';
 
@@ -81,6 +88,10 @@ function getSearchContext(parentApi: unknown) {
     ? parentApi
     : { projectRouting$: undefined };
 
+  const { isApproximate$ } = apiPublishesApproximation(parentApi)
+    ? parentApi
+    : { isApproximate$: new BehaviorSubject(false) };
+
   return {
     filters: unifiedSearch$.filters$.getValue(),
     query: unifiedSearch$.query$.getValue(),
@@ -90,6 +101,7 @@ function getSearchContext(parentApi: unknown) {
       ? parentApi.esqlVariables$.getValue()
       : undefined,
     projectRouting: projectRouting$?.getValue(),
+    isApproximate: isApproximate$.getValue(),
   };
 }
 
@@ -105,7 +117,8 @@ export function loadEmbeddableData(
   parentApi: unknown,
   internalApi: LensInternalApi,
   services: LensEmbeddableStartServices,
-  metaInfo?: SharingSavedObjectProps
+  metaInfo?: SharingSavedObjectProps,
+  setApproximationApplied?: (value: boolean | undefined) => void
 ) {
   const { onLoad, onBeforeBadgesRender, ...callbacks } = apiHasLensComponentCallbacks(parentApi)
     ? parentApi
@@ -114,6 +127,32 @@ export function loadEmbeddableData(
   const getConsumerMessages = () =>
     apiHasUserMessages(parentApi) ? parentApi.userMessages ?? [] : [];
 
+  const getExecutionContext = () => {
+    const parentContext = getParentContext(parentApi);
+    const lastState = getState();
+    if (lastState.attributes) {
+      const child: KibanaExecutionContext = {
+        type: 'lens',
+        name: lastState.attributes.visualizationType ?? '',
+        id: uuid || 'new',
+        // Prefer the panel-level title when it is set, falling back to the
+        // chart's own title. With the `lens.apiFormat` path the chart title is
+        // stripped from the wire format, so the panel title is the source of truth.
+        description: lastState.title ?? lastState.attributes.title ?? '',
+        url: `${services.coreStart.application.getUrlForApp('lens')}${getEditPath(
+          lastState.ref_id
+        )}`,
+      };
+
+      return parentContext
+        ? {
+            ...parentContext,
+            child,
+          }
+        : child;
+    }
+  };
+
   // Some convenience api for the user messaging
   const {
     getUserMessages,
@@ -121,7 +160,7 @@ export function loadEmbeddableData(
     updateBlockingErrors,
     updateValidationErrors,
     updateWarnings,
-    resetMessages,
+    discardRuntimeMessages,
     updateMessages,
   } = buildUserMessagesHelpers(
     api,
@@ -152,6 +191,13 @@ export function loadEmbeddableData(
     }
   };
 
+  // Declared outside of `reload` to keep a stable identity: this ends up in the expression
+  // renderer params, where a new reference makes the renderer rebuild its loader on each reload.
+  const onRuntimeError = (error: Error) => {
+    updateBlockingErrors(error);
+    getLogError(getExecutionContext)('runtime');
+  };
+
   async function reload(
     // make reload easier to debug
     sourceId: ReloadReason,
@@ -159,10 +205,21 @@ export function loadEmbeddableData(
   ) {
     addLog(`Embeddable reload reason: ${sourceId}`);
 
-    resetMessages();
+    const currentAbortController = internalApi.expressionAbortController$.getValue();
+
+    // If the current controller is already aborted, create a fresh one for this reload
+    // This happens when cancelRequests() was called before this reload started
+    let activeController = currentAbortController;
+    if (currentAbortController.signal.aborted) {
+      activeController = new AbortController();
+      internalApi.updateAbortController(activeController);
+    }
 
     // reset the render on reload
     internalApi.dispatchRenderStart();
+
+    // Hide badges while reloading. `onRenderComplete` republishes them.
+    updateMessages([]);
 
     // notify about data loading
     internalApi.updateDataLoading(true);
@@ -172,39 +229,27 @@ export function loadEmbeddableData(
 
     const currentState = getState();
 
-    const getExecutionContext = () => {
-      const parentContext = getParentContext(parentApi);
-      const lastState = getState();
-      if (lastState.attributes) {
-        const child: KibanaExecutionContext = {
-          type: 'lens',
-          name: lastState.attributes.visualizationType ?? '',
-          id: uuid || 'new',
-          description: lastState.attributes.title || lastState.title || '',
-          url: `${services.coreStart.application.getUrlForApp('lens')}${getEditPath(
-            lastState.ref_id
-          )}`,
-        };
-
-        return parentContext
-          ? {
-              ...parentContext,
-              child,
-            }
-          : child;
+    // _data (expression result) is unused — Lens only needs the inspector adapters.
+    // The signature OnDataCallback is used for consistency with the expressions plugin.
+    const onDataCallback: OnDataCallback = (_data, adapters) => {
+      const tables = hasTablesAdapter(adapters) ? adapters.tables?.tables : undefined;
+      internalApi.updateVisualizationContext({ activeData: tables });
+      if (setApproximationApplied) {
+        const approximationApplied = tables
+          ? Object.values(tables).some((t) => t.meta?.approximationApplied)
+          : undefined;
+        setApproximationApplied(approximationApplied || undefined);
       }
-    };
-
-    const onDataCallback = (adapters: Partial<DefaultInspectorAdapters> | undefined) => {
-      internalApi.updateVisualizationContext({
-        activeData: adapters?.tables?.tables,
-      });
 
       // data has loaded
       internalApi.updateDataLoading(false);
       // The third argument here is an observable to let the
       // consumer to be notified on data change
-      onLoad?.(false, adapters, api.dataLoading$);
+      onLoad?.(
+        false,
+        isPartialInspectorAdapters(adapters) ? adapters : undefined,
+        api.dataLoading$
+      );
 
       api.loadViewUnderlyingData();
 
@@ -233,7 +278,6 @@ export function loadEmbeddableData(
       services
     );
 
-    // Go concurrently: build the expression and fetch the dataViews
     const [{ params, abortController, ...rest }, dataViewIds] = await Promise.all([
       getExpressionRendererParams(currentState, {
         searchContext,
@@ -246,15 +290,14 @@ export function loadEmbeddableData(
         renderMode: getRenderMode(parentApi),
         services,
         searchSessionId: api.searchSessionId$.getValue(),
-        abortController: internalApi.expressionAbortController$.getValue(),
+        abortController: activeController,
         getExecutionContext,
-        logError: getLogError(getExecutionContext),
+        onRuntimeError,
         addUserMessages,
         onRender,
         onData,
         handleEvent,
         disableTriggers,
-        updateBlockingErrors,
         forceDSL: (parentApi as { forceDSL?: boolean }).forceDSL,
         getDisplayOptions: internalApi.getDisplayOptions,
       }),
@@ -264,6 +307,10 @@ export function loadEmbeddableData(
         services.dataViews
       ),
     ]);
+
+    // Drop runtime errors from the old expression that can arrive during `await`.
+    // (`dispatchBlockingErrorIfAny` reads these, so stale errors would skip rendering)
+    discardRuntimeMessages();
 
     // update the visualization context before anything else
     // as it will be used to compute blocking errors also in case of issues
@@ -282,8 +329,6 @@ export function loadEmbeddableData(
     if (params?.expression != null && !hasBlockingErrors) {
       internalApi.updateExpressionParams(params);
     }
-
-    internalApi.updateAbortController(abortController);
   }
 
   // Build a custom operator to be resused for various observables
@@ -326,6 +371,30 @@ export function loadEmbeddableData(
       .pipe(debounceTime(0))
       .subscribe((fetchContext) => reload('searchContext' as ReloadReason, fetchContext)),
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
+    // Capture blocking errors in APM for observability
+    internalApi.blockingError$
+      .pipe(filter((error): error is Error => error != null))
+      .subscribe((error) => {
+        const currentState = getState();
+        const parentContext = getParentContext(parentApi);
+        const meta = parentContext?.meta as Record<string, string | undefined> | undefined;
+        const transaction = apm.getCurrentTransaction();
+        if (transaction) {
+          const span = transaction.startSpan('lens-chart-error', 'lens-embeddable');
+
+          if (span) {
+            span.addLabels({
+              kibana_meta_metric_type: currentState.attributes?.visualizationType ?? 'unknown',
+              kibana_meta_profile_id: meta?.profile_id ?? 'unknown',
+              kibana_meta_metric_id: meta?.metric_id ?? 'unknown',
+            });
+            apm.captureError(error);
+            // @ts-expect-error RUM types don't include outcome
+            span.outcome = 'failure';
+            span.end();
+          }
+        }
+      }),
     // make sure to reload on viewMode change
     api.viewMode$.subscribe(() => {
       // only reload if drilldowns are set

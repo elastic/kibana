@@ -65,7 +65,7 @@ export class ElasticAssistantPublicPlugin
         ...startPlugins,
         licensing: dependencies.licensing,
         triggersActionsUi: dependencies.triggersActionsUi,
-        security: dependencies.security,
+        security: { ...coreStart.security, ...dependencies.security },
         telemetry,
         productDocBase: dependencies.productDocBase,
         storage: this.storage,
@@ -77,9 +77,8 @@ export class ElasticAssistantPublicPlugin
       return services;
     };
 
-    coreStart.chrome.navControls.registerRight({
-      order: 1001,
-      mount: (target) => {
+    coreStart.chrome.controls.aiButton.register({
+      content: (target: HTMLElement) => {
         const startService = startServices();
         return this.mountAIAssistantButton(target, coreStart, startService);
       },

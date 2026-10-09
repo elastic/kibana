@@ -34,14 +34,9 @@ describe('useAddToRulesTable', () => {
         onRuleSelectionChange: onRuleSelectionChangeMock,
       })
     );
-    expect(useFindRules as jest.Mock).toBeCalledWith({
-      filterOptions: {
-        filter: '',
-        showCustomRules: false,
-        showElasticRules: false,
-        tags: [],
-      },
-      sortingOptions: undefined,
+    expect(useFindRules as jest.Mock).toHaveBeenCalledWith({
+      sort_field: 'enabled',
+      sort_order: 'desc',
       pagination: {
         page: 1,
         perPage: 10000,
@@ -180,7 +175,7 @@ describe('useAddToRulesTable', () => {
     const selectedSwitch = getByRole('switch');
     fireEvent.click(selectedSwitch);
 
-    expect(onRuleSelectionChangeMock).toBeCalledWith([
+    expect(onRuleSelectionChangeMock).toHaveBeenCalledWith([
       expect.objectContaining({ id: '345', name: 'My rule' }),
     ]);
   });

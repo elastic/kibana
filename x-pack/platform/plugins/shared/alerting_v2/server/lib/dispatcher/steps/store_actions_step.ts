@@ -6,19 +6,21 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import {
-  ALERT_ACTIONS_DATA_STREAM,
-  type AlertAction,
+  alertActionActorType,
+  type AlertActionDocument,
 } from '../../../resources/datastreams/alert_actions';
 import type {
-  AlertEpisode,
-  NotificationGroup,
+  Alert,
   DispatcherStep,
   DispatcherPipelineState,
   DispatcherStepOutput,
 } from '../types';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
+import { DispatchPlan, AlertTriage, PolicyCatalog } from '../state';
 
 @injectable()
 export class StoreActionsStep implements DispatcherStep {
@@ -28,140 +30,114 @@ export class StoreActionsStep implements DispatcherStep {
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    _: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
     const {
-      suppressed = [],
-      throttled = [],
-      dispatch = [],
-      dispatchable = [],
-      policies,
-      rules,
+      triage = AlertTriage.empty(),
+      plan = DispatchPlan.empty(),
+      policies = PolicyCatalog.empty(),
     } = state;
+    const { suppressed } = triage;
+    const { toDispatch, throttled, unmatched } = plan;
 
-    const unmatched = getUnmatchedEpisodes(dispatchable, dispatch, throttled);
-
-    if (
-      suppressed.length === 0 &&
-      throttled.length === 0 &&
-      dispatch.length === 0 &&
-      unmatched.length === 0
-    ) {
+    if (suppressed.length === 0 && plan.isEmpty() && unmatched.length === 0) {
       return { type: 'halt', reason: 'no_actions' };
     }
 
     const now = new Date();
-    const spaceIdForEpisode = (episode: AlertEpisode) =>
-      rules?.get(episode.rule_id)?.spaceId ?? 'default';
 
-    await this.storageService.bulkIndexDocs<AlertAction>({
-      index: ALERT_ACTIONS_DATA_STREAM,
-      docs: [
-        ...suppressed.map((episode) =>
+    // One doc per alert-scoped outcome; their count gates watermark advancement.
+    const alertActions: AlertActionDocument[] = [
+      ...suppressed.map((alert) =>
+        toAction({
+          alert,
+          actionType: 'suppress',
+          reason: alert.reason,
+          spaceId: alert.space_id,
+        })
+      ),
+      ...throttled.flatMap((group) =>
+        group.alerts.map((alert) =>
           toAction({
-            episode,
+            alert,
             actionType: 'suppress',
-            now,
-            reason: episode.reason,
-            spaceId: spaceIdForEpisode(episode),
+            reason: `suppressed by throttled policy ${group.policyId}`,
+            spaceId: alert.space_id,
           })
-        ),
-        ...throttled.flatMap((group) =>
-          group.episodes.map((episode) =>
-            toAction({
-              episode,
-              actionType: 'suppress',
-              now,
-              reason: `suppressed by throttled policy ${group.policyId}`,
-              spaceId: spaceIdForEpisode(episode),
-            })
-          )
-        ),
-        ...dispatch.flatMap((group) =>
-          group.episodes.map((episode) =>
-            toAction({
-              episode,
-              actionType: 'fire',
-              now,
-              reason: `dispatched by policy ${group.policyId}`,
-              spaceId: spaceIdForEpisode(episode),
-            })
-          )
-        ),
-        ...dispatch.map((group) => {
-          const groupingMode = policies?.get(group.policyId)?.groupingMode ?? 'per_episode';
-          const firstEpisode = group.episodes[0];
-          const spaceId = firstEpisode ? spaceIdForEpisode(firstEpisode) : 'default';
-          const action: AlertAction = {
-            '@timestamp': now.toISOString(),
-            actor: 'system',
-            action_type: 'notified',
-            rule_id: firstEpisode?.rule_id ?? 'unknown',
-            group_hash: firstEpisode?.group_hash ?? 'unknown',
-            last_series_event_timestamp: now.toISOString(),
-            notification_group_id: group.id,
-            source: 'internal',
-            reason: `notified by policy ${group.policyId}`,
-            space_id: spaceId,
-          };
-          if (groupingMode === 'per_episode') {
-            action.episode_status = firstEpisode?.episode_status;
-          }
-          return action;
-        }),
-        ...unmatched.map((episode) =>
+        )
+      ),
+      ...toDispatch.flatMap((group) =>
+        group.alerts.map((alert) =>
           toAction({
-            episode,
-            actionType: 'unmatched',
-            now,
-            reason: 'no matching notification policy',
-            spaceId: spaceIdForEpisode(episode),
+            alert,
+            actionType: 'fire',
+            reason: `dispatched by policy ${group.policyId}`,
+            spaceId: alert.space_id,
           })
-        ),
-      ],
+        )
+      ),
+      ...unmatched.map((alert) =>
+        toAction({
+          alert,
+          actionType: 'unmatched',
+          reason: 'no matching action policy',
+          spaceId: alert.space_id,
+        })
+      ),
+    ];
+
+    // One `notified` doc per dispatched group — group-scoped, so excluded from
+    // the recordedAlerts tally.
+    const notifiedActions: AlertActionDocument[] = toDispatch.map((group) => {
+      const groupingMode = policies.groupingModeOf(group.policyId);
+      const firstAlert = group.alerts[0];
+      const spaceId = firstAlert?.space_id ?? 'default';
+      const action: AlertActionDocument = {
+        actor: { type: alertActionActorType.internal },
+        action_type: 'notified',
+        rule_id: firstAlert?.rule_id ?? null,
+        group_hash: firstAlert?.group_hash ?? 'unknown',
+        last_series_event_timestamp: now.toISOString(),
+        action_group_id: group.id,
+        source: firstAlert?.source,
+        reason: `notified by policy ${group.policyId}`,
+        space_id: spaceId,
+      };
+      if (groupingMode === 'per_alert') {
+        action.alert_status = firstAlert?.alert_status;
+      }
+      return action;
     });
 
-    return { type: 'continue' };
+    await this.storageService.bulkIndexDocs<AlertActionDocument>({
+      index: ALERT_ACTIONS_DATA_STREAM,
+      docs: [...alertActions, ...notifiedActions],
+    });
+
+    return { type: 'continue', data: { recordedAlerts: alertActions.length } };
   }
 }
 
-function getUnmatchedEpisodes(
-  dispatchable: readonly AlertEpisode[],
-  dispatch: readonly NotificationGroup[],
-  throttled: readonly NotificationGroup[]
-): AlertEpisode[] {
-  const handledEpisodeKeys = new Set<string>();
-  for (const group of [...dispatch, ...throttled]) {
-    for (const episode of group.episodes) {
-      handledEpisodeKeys.add(`${episode.rule_id}:${episode.group_hash}:${episode.episode_id}`);
-    }
-  }
-
-  return dispatchable.filter(
-    (ep) => !handledEpisodeKeys.has(`${ep.rule_id}:${ep.group_hash}:${ep.episode_id}`)
-  );
-}
-
-function toAction({
-  episode,
+export function toAction({
+  alert,
   actionType,
-  now,
   reason,
   spaceId,
 }: {
-  episode: AlertEpisode;
+  alert: Alert;
   actionType: 'suppress' | 'fire' | 'notified' | 'unmatched';
-  now: Date;
   reason?: string;
   spaceId: string;
-}): AlertAction {
+}): AlertActionDocument {
   return {
-    '@timestamp': now.toISOString(),
-    group_hash: episode.group_hash,
-    last_series_event_timestamp: episode.last_event_timestamp,
-    actor: 'system',
+    group_hash: alert.group_hash,
+    last_series_event_timestamp: alert.last_event_timestamp,
+    actor: { type: alertActionActorType.internal },
     action_type: actionType,
-    rule_id: episode.rule_id,
-    source: 'internal',
+    rule_id: alert.rule_id,
+    source: alert.source,
     reason,
     space_id: spaceId,
   };

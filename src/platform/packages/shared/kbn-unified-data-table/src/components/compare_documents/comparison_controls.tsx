@@ -26,11 +26,12 @@ import { i18n } from '@kbn/i18n';
 import type { FC, PropsWithChildren, ReactNode } from 'react';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { DataSource } from '@kbn/data-source';
 import type { DocumentDiffMode } from './types';
 import { styles as toolbarStyles } from '../custom_toolbar/render_custom_toolbar';
 
 export interface ComparisonControlsProps {
-  isPlainRecord?: boolean;
+  dataSource: DataSource | undefined;
   selectedDocIds: string[];
   showDiff: boolean | undefined;
   diffMode: DocumentDiffMode | undefined;
@@ -47,7 +48,7 @@ export interface ComparisonControlsProps {
 }
 
 export const ComparisonControls = ({
-  isPlainRecord,
+  dataSource,
   selectedDocIds,
   showDiff,
   diffMode,
@@ -69,7 +70,7 @@ export const ComparisonControls = ({
       <EuiFlexItem grow={false} css={{ marginRight: euiTheme.size.s }}>
         <EuiText size="s">
           <strong data-test-subj="unifiedDataTableComparisonDisplay">
-            {isPlainRecord ? (
+            {dataSource?.kind === 'esql' ? (
               <FormattedMessage
                 id="unifiedDataTable.comparingResults"
                 defaultMessage="Comparing {documentCount} results"
@@ -156,6 +157,9 @@ const ComparisonSettings = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('unifiedDataTable.comparisonSettingsPopover', {
+        defaultMessage: 'Comparison settings',
+      })}
       button={
         <div className="unifiedDataTableToolbarControlButton" css={toolbarStyles.controlButton}>
           <EuiDataGridToolbarControl
@@ -180,7 +184,6 @@ const ComparisonSettings = ({
       anchorPosition="downCenter"
     >
       <EuiContextMenuPanel
-        size="s"
         data-test-subj="unifiedDataTableComparisonSettingsMenu"
         css={{
           '.euiContextMenuItem__text': {
@@ -338,7 +341,6 @@ const SectionHeader = ({
 
   return (
     <EuiContextMenuItem
-      size="s"
       css={[
         noPadding && { paddingTop: 0 },
         { paddingBottom: 0 },
@@ -382,7 +384,6 @@ const DiffModeEntry: FC<
     <EuiContextMenuItem
       key={entryDiffMode}
       icon={diffMode === entryDiffMode ? 'check' : 'empty'}
-      size="s"
       aria-current={diffMode === entryDiffMode}
       disabled={disabled}
       toolTipContent={disabled ? enableShowDiffTooltip : undefined}
@@ -413,7 +414,6 @@ const DiffOptionSwitch = ({
 }) => {
   return (
     <EuiContextMenuItem
-      size="s"
       disabled={disabled}
       toolTipContent={disabled ? enableShowDiffTooltip : undefined}
       css={itemCss}

@@ -5,54 +5,66 @@
  * 2.0.
  */
 
-import type { MouseEvent } from 'react';
+import type { CSSProperties, MouseEvent } from 'react';
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormMonitorType, MonitorTypeEnum } from '../../../../../../common/runtime_types';
 
+// EuiBadge doesn't expose a `size` prop, but its default is too tall for dense
+// table rows. Apply a compact style override when `size="s"` so callers (e.g.
+// the compact monitors table) get a slimmer badge without affecting the
+// detail/management UIs that use the default presentation.
+const COMPACT_BADGE_STYLE: CSSProperties = {
+  fontSize: 11,
+  lineHeight: '16px',
+  padding: '0 4px',
+};
+
 export function MonitorTypeBadge({
   monitorType,
-  ariaLabel,
   onClick,
+  size = 'm',
 }: {
   monitorType: string;
-  ariaLabel?: string;
   onClick?: () => void;
+  size?: 's' | 'm';
 }) {
+  const style = size === 's' ? COMPACT_BADGE_STYLE : undefined;
+  const badgeTitle = getMonitorTypeBadgeTitle(monitorType);
   return onClick ? (
     <EuiBadge
       onClick={onClick}
-      onClickAriaLabel={getFilterTitle(monitorType)}
-      title={ariaLabel}
-      aria-label={ariaLabel}
+      onClickAriaLabel={getFilterTitle(badgeTitle)}
       iconType={getMonitorTypeBadgeIcon(monitorType)}
+      style={style}
       onMouseDown={(e: MouseEvent) => {
         // Prevents the click event from being propagated to the @elastic/chart metric
         e.stopPropagation();
       }}
     >
-      {getMonitorTypeBadgeTitle(monitorType)}
+      {badgeTitle}
     </EuiBadge>
   ) : (
     <EuiBadge
-      title={ariaLabel}
-      aria-label={ariaLabel}
       iconType={getMonitorTypeBadgeIcon(monitorType)}
+      style={style}
       onMouseDown={(e: MouseEvent) => {
         // Prevents the click event from being propagated to the @elastic/chart metric
         e.stopPropagation();
       }}
     >
-      {getMonitorTypeBadgeTitle(monitorType)}
+      {badgeTitle}
     </EuiBadge>
   );
 }
 
 const getFilterTitle = (type: string) => {
-  return i18n.translate('xpack.synthetics.management.monitorList.monitorTypeBadge.filter', {
-    defaultMessage: 'Click to filter monitors for type: {type}',
-    values: { type: getMonitorTypeBadgeTitle(type) },
+  return i18n.translate('xpack.synthetics.management.monitorList.monitorTypeBadge.filterByType', {
+    defaultMessage: '{type}. Click to filter monitors for this type',
+    values: {
+      type,
+    },
   });
 };
 
@@ -63,19 +75,44 @@ function getMonitorTypeBadgeTitle(monitorType: string) {
     case FormMonitorType.ICMP:
       return monitorType.toUpperCase();
     case FormMonitorType.SINGLE:
-      return 'Page';
+      return i18n.translate('xpack.synthetics.monitorTypeBadge.page', {
+        defaultMessage: 'Page',
+      });
     case FormMonitorType.MULTISTEP:
-      return 'Journey';
-  }
-
-  switch (monitorType) {
     case MonitorTypeEnum.BROWSER:
-      return 'Journey';
+      return i18n.translate('xpack.synthetics.monitorTypeBadge.browser', {
+        defaultMessage: 'Browser',
+      });
+    case FormMonitorType.API:
+    case MonitorTypeEnum.API:
+      return i18n.translate('xpack.synthetics.monitorTypeBadge.apiJourney', {
+        defaultMessage: 'API Journey',
+      });
     default:
       return monitorType.toUpperCase();
   }
 }
 
 function getMonitorTypeBadgeIcon(monitorType: string) {
-  return monitorType === 'browser' ? 'videoPlayer' : 'online';
+  switch (monitorType) {
+    case MonitorTypeEnum.API:
+    case FormMonitorType.API:
+      return 'inputOutput';
+    case FormMonitorType.SINGLE:
+      return 'inspect';
+    case MonitorTypeEnum.BROWSER:
+    case FormMonitorType.MULTISTEP:
+      return 'display';
+    case FormMonitorType.HTTP:
+    case MonitorTypeEnum.HTTP:
+      return 'globe';
+    case FormMonitorType.TCP:
+    case MonitorTypeEnum.TCP:
+      return 'ip';
+    case FormMonitorType.ICMP:
+    case MonitorTypeEnum.ICMP:
+      return 'bolt';
+    default:
+      return 'wifi';
+  }
 }

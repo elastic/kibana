@@ -22,7 +22,7 @@ describe('migrator-only node', () => {
   const log = new ToolingLog({ writeTo: process.stdout, level: 'debug' });
   log.indent(4);
   const es = createTestEsCluster({ log });
-  jest.setTimeout(100_000 + es.getStartTimeout());
+  jest.setTimeout((getFips() === 1 ? 200_000 : 100_000) + es.getStartTimeout());
 
   it('starts Kibana, runs migrations and then exits with a "0" status code', async () => {
     const expectedLog = /Detected migrator node role/;
@@ -44,7 +44,9 @@ describe('migrator-only node', () => {
           '--no-optimizer',
           '--no-base-path',
           '--no-watch',
-          isFipsEnabled ? '--xpack.security.fipsMode.enabled=true' : '--oss',
+          ...(isFipsEnabled
+            ? ['--xpack.security.fipsMode.enabled=true', '--xpack.screenshotting.enabled=false']
+            : ['--oss']),
         ],
         { stdio: ['pipe', 'pipe', 'pipe'] }
       );

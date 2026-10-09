@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import JSZip from 'jszip';
+import { parse as parseYaml } from 'yaml';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiCallOut,
@@ -24,11 +26,59 @@ import {
   runInstallPackage,
   type RequestDeps,
 } from '../../../common';
+import {
+  evaluateUploadedZipPackage,
+  type UploadPackageEvaluation,
+} from '../../../common/lib/evaluate_upload_package';
 import { PAGE_RESTRICT_WIDTH } from '../../integration_management/constants';
 import { LicensePaywallCard } from '../../license_paywall/license_paywall_card';
 import { useTelemetry } from '../../telemetry_context';
 import { DocsLinkSubtitle } from './docs_link_subtitle';
 import * as i18n from './translations';
+
+interface ZipPackageManifest {
+  name: string;
+  version: string | null;
+}
+
+const extractPackageManifestFromZip = async (file: Blob): Promise<ZipPackageManifest | null> => {
+  try {
+    const zip = await JSZip.loadAsync(file);
+    // Top-level manifest one directory deep: <name>-<version>/manifest.yml
+    const manifestEntry = Object.values(zip.files).find(
+      (f) => !f.dir && /^[^/]+\/manifest\.yml$/.test(f.name)
+    );
+    if (!manifestEntry) return null;
+    const content = await manifestEntry.async('string');
+    const parsed = parseYaml(content);
+    if (typeof parsed?.name !== 'string') return null;
+    return {
+      name: parsed.name,
+      version: typeof parsed.version === 'string' ? parsed.version : null,
+    };
+  } catch {
+    return null;
+  }
+};
+
+const evaluationErrorMessage = (
+  evaluation: Extract<UploadPackageEvaluation, { kind: 'error' }>
+) => {
+  if (evaluation.reason === 'not_newer' && evaluation.zipVersion && evaluation.installedVersion) {
+    return i18n.VERSION_NOT_NEWER_ERROR(
+      evaluation.packageName,
+      evaluation.zipVersion,
+      evaluation.installedVersion
+    );
+  }
+  if (evaluation.reason === 'invalid_version') {
+    return i18n.INVALID_PACKAGE_VERSION_ERROR(evaluation.packageName);
+  }
+  if (evaluation.reason === 'automatic_import') {
+    return i18n.AUTOMATIC_IMPORT_PACKAGE_ERROR(evaluation.packageName);
+  }
+  return i18n.DUPLICATE_PACKAGE_NAME_ERROR(evaluation.packageName);
+};
 
 export const CreateIntegrationUpload = React.memo(() => {
   const services = useKibana().services;
@@ -45,10 +95,20 @@ export const CreateIntegrationUpload = React.memo(() => {
 
   const [file, setFile] = useState<Blob>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isValidating, setIsValidating] = useState<boolean>(false);
   const [error, setError] = useState<string>();
   const [integrationName, setIntegrationName] = useState<string>();
-
+  const validateAbortRef = useRef<AbortController | null>(null);
+  const installAbortRef = useRef<AbortController | null>(null);
   const integrationsHref = useMemo(() => application.getUrlForApp('integrations'), [application]);
+
+  useEffect(
+    () => () => {
+      validateAbortRef.current?.abort();
+      installAbortRef.current?.abort();
+    },
+    []
+  );
 
   const onBack = useCallback(() => {
     application.navigateToUrl(integrationsHref);
@@ -63,10 +123,40 @@ export const CreateIntegrationUpload = React.memo(() => {
     application.navigateToUrl(integrationsHref);
   }, [application, integrationsHref]);
 
-  const onChangeFile = useCallback((files: FileList | null) => {
-    setFile(files?.[0]);
-    setError(undefined);
-  }, []);
+  const onChangeFile = useCallback(
+    async (files: FileList | null) => {
+      validateAbortRef.current?.abort();
+      const abortController = new AbortController();
+      validateAbortRef.current = abortController;
+
+      const selectedFile = files?.[0];
+      if (!selectedFile || !http) return;
+
+      setFile(selectedFile);
+      setError(undefined);
+      setIsValidating(true);
+
+      try {
+        const manifest = await extractPackageManifestFromZip(selectedFile);
+        if (!manifest || abortController.signal.aborted) return;
+        const evaluation = await evaluateUploadedZipPackage(manifest.name, manifest.version, {
+          http,
+          abortSignal: abortController.signal,
+        });
+        if (abortController.signal.aborted) return;
+        if (evaluation.kind === 'error') {
+          setError(evaluationErrorMessage(evaluation));
+        }
+      } catch {
+        if (!abortController.signal.aborted) {
+          setError(i18n.VALIDATION_ERROR);
+        }
+      } finally {
+        if (!abortController.signal.aborted) setIsValidating(false);
+      }
+    },
+    [http]
+  );
 
   const onConfirm = useCallback(() => {
     if (http == null || file == null) {
@@ -74,6 +164,7 @@ export const CreateIntegrationUpload = React.memo(() => {
     }
     setIsLoading(true);
     const abortController = new AbortController();
+    installAbortRef.current = abortController;
     (async () => {
       try {
         const deps: RequestDeps = { http, abortSignal: abortController.signal };
@@ -91,7 +182,9 @@ export const CreateIntegrationUpload = React.memo(() => {
           setError(`${i18n.UPLOAD_ERROR}: ${errorMessage}`);
         }
       } finally {
-        setIsLoading(false);
+        if (!abortController.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     })();
   }, [file, http]);
@@ -146,7 +239,7 @@ export const CreateIntegrationUpload = React.memo(() => {
                   display="large"
                   aria-label="Upload .zip file"
                   accept="application/zip"
-                  isLoading={isLoading}
+                  isLoading={isLoading || isValidating}
                   fullWidth
                   isInvalid={error != null}
                 />
@@ -172,7 +265,7 @@ export const CreateIntegrationUpload = React.memo(() => {
         <ButtonsFooter
           cancelButtonText={i18n.BACK_BUTTON}
           actionButtonText={i18n.INSTALL_BUTTON}
-          isActionDisabled={file == null}
+          isActionDisabled={file == null || isValidating || error != null}
           isActionLoading={isLoading}
           onCancel={onBack}
           onAction={onConfirm}

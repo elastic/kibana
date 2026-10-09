@@ -12,6 +12,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['maps']);
   const security = getService('security');
 
+  /**
+   * Purpose: Verfy fonts loaded from kibana server when EMS is disabled
+   *
+   * Migration: move test to API integration test for fonts API
+   */
   describe('Fonts', function () {
     before(async () => {
       await security.testUser.setRoles(['test_logstash_reader', 'global_maps_all']);

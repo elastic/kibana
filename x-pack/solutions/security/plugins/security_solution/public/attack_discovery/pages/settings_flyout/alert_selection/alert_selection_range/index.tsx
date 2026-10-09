@@ -35,10 +35,6 @@ const AlertSelectionRangeComponent: React.FC<Props> = ({ maxAlerts, setMaxAlerts
   return (
     <EuiFlexGroup data-test-subj="alertSelectionRange" direction="column" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <EuiSpacer size="m" />
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
         <AlertsRange
           maxAlerts={MAX_ALERTS}
           minAlerts={MIN_ALERTS}

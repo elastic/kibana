@@ -8,14 +8,17 @@
  */
 
 import React from 'react';
-import userEvent from '@testing-library/user-event';
-import { render, screen, waitFor } from '@testing-library/react';
+
 import { EuiThemeProvider } from '@elastic/eui';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
+import { DEFAULT_EXTERNAL_LINK_OPTIONS, LINKS_VERTICAL_LAYOUT } from '../../../common/constants';
+import type { ResolvedLink } from '../../types';
+import { LinksStrings } from '../links_strings';
 import type { LinksEditorProps } from './links_editor';
 import LinksEditor from './links_editor';
-import { LinksStrings } from '../links_strings';
-import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
-import type { ResolvedLink } from '../../types';
 
 describe('LinksEditor', () => {
   const someLinks: ResolvedLink[] = [
@@ -24,6 +27,7 @@ describe('LinksEditor', () => {
       type: 'dashboardLink' as const,
       destination: '123',
       title: 'dashboard 01',
+      options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
     },
     {
       id: 'bar',
@@ -31,18 +35,21 @@ describe('LinksEditor', () => {
       destination: '456',
       title: 'dashboard 02',
       description: 'awesome dashboard if you ask me',
+      options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
     },
     {
       id: 'bizz',
       type: 'externalLink' as const,
       destination: 'http://example.com',
       title: 'http://example.com',
+      options: DEFAULT_EXTERNAL_LINK_OPTIONS,
     },
     {
       id: 'buzz',
       type: 'externalLink' as const,
       destination: 'http://elastic.co',
       title: 'Elastic website',
+      options: DEFAULT_EXTERNAL_LINK_OPTIONS,
     },
   ];
 

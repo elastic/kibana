@@ -6,30 +6,37 @@
  */
 
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { useEsSearch } from '@kbn/observability-shared-plugin/public';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
-import type { Ping } from '../../../../common/runtime_types';
+import { useSyntheticsEsSearch } from './use_synthetics_es_search';
+import { getSyntheticsCcsIndex } from '../../../../common/get_synthetics_indices';
+import { getHeartbeatLocationFilter } from '../../../../common/lib';
+import { STATUS_LOOKBACK_RANGE_FILTER } from '../../../../common/constants/client_defaults';
+import type { MonitorOrigin, Ping } from '../../../../common/runtime_types';
 
 export const useMonitorDetail = (
   configId: string,
-  location: string
+  location: string,
+  remoteName?: string,
+  origin?: MonitorOrigin
 ): { data?: Ping; loading?: boolean } => {
+  const index = getSyntheticsCcsIndex(remoteName);
+
+  // Heartbeat / Agent autodiscovery pings carry no `config_id`; their identity
+  // is `monitor.id` (see `useExternalMonitor`). Matching `config_id` would
+  // return zero hits and the flyout would render "waiting for first run".
+  const isHeartbeat = origin === 'heartbeat' && !remoteName;
+  const identityFilter = isHeartbeat
+    ? { term: { 'monitor.id': configId } }
+    : { term: { config_id: configId } };
+
   const params = {
-    index: SYNTHETICS_INDEX_PATTERN,
+    index,
     size: 1,
     query: {
       bool: {
         filter: [
-          {
-            term: {
-              config_id: configId,
-            },
-          },
-          {
-            term: {
-              'observer.geo.name': location,
-            },
-          },
+          STATUS_LOOKBACK_RANGE_FILTER,
+          identityFilter,
+          ...getHeartbeatLocationFilter({ field: 'observer.geo.name', value: location }),
           {
             exists: {
               field: 'summary',
@@ -40,13 +47,12 @@ export const useMonitorDetail = (
     },
     sort: [{ '@timestamp': 'desc' as const }],
   };
-  const { data: result, loading } = useEsSearch<Ping & { '@timestamp': string }, SearchRequest>(
-    params,
-    [configId, location],
-    {
-      name: 'getMonitorStatusByLocation',
-    }
-  );
+  const { data: result, loading } = useSyntheticsEsSearch<
+    Ping & { '@timestamp': string },
+    SearchRequest
+  >(params, [configId, location, remoteName, origin], {
+    name: 'getMonitorStatusByLocation',
+  });
 
   if (!result || result.hits.hits.length !== 1) return { data: undefined, loading };
   return {

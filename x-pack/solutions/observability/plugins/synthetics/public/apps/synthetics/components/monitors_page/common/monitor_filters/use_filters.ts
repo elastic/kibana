@@ -6,7 +6,7 @@
  */
 
 import { useMemo, useEffect, useCallback, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 
 import { isLogicalAndField } from '../../../../../../../common/constants';
 import type { MonitorFiltersResult } from '../../../../../../../common/runtime_types';
@@ -17,7 +17,7 @@ import {
   updateManagementPageStateAction,
   fetchMonitorFiltersAction,
   selectMonitorFilterOptions,
-  selectOverviewState,
+  selectOverviewPageState,
 } from '../../../../state';
 import { useSyntheticsRefreshContext } from '../../../../contexts';
 import type { SyntheticsUrlParams } from '../../../../utils/url_params';
@@ -35,9 +35,7 @@ export const useFilters = (): MonitorFiltersResult | null => {
   const dispatch = useDispatch();
   const filtersData = useSelector(selectMonitorFilterOptions);
   const { lastRefresh } = useSyntheticsRefreshContext();
-  const {
-    pageState: { showFromAllSpaces },
-  } = useSelector(selectOverviewState);
+  const { showFromAllSpaces } = useSelector(selectOverviewPageState);
 
   useEffect(() => {
     dispatch(

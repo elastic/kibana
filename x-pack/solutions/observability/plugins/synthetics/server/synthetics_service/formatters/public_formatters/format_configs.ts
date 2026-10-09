@@ -8,7 +8,9 @@
 import { isEmpty, isNil, omitBy } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
-import { formatMWs, replaceStringWithParams } from '../formatting_utils';
+import { periodToSeconds } from '../../../routes/overview_status/utils';
+
+import { formatMWs, replaceStringWithParams, resolveHttpAuthParams } from '../formatting_utils';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
 import type {
   BrowserFields,
@@ -41,24 +43,27 @@ export const formatMonitorConfigFields = (
   params: Record<string, string>,
   mws: MaintenanceWindow[]
 ) => {
+  // Kerberos/NTLM are in PARAMS_KEYS_TO_SKIP; resolve nested string fields here
+  // so public Heartbeat configs get the same per-field substitution as private.
+  const resolvedConfig = resolveHttpAuthParams(config, params, logger);
   const formattedMonitor = {} as Record<ConfigKey, any>;
 
   configKeys.forEach((key) => {
     if (!UI_KEYS_TO_SKIP.includes(key)) {
-      const value = config[key] ?? null;
+      const value = resolvedConfig[key] ?? null;
 
       if (value === null || value === '') {
         return;
       }
 
-      if (config.type !== 'browser' && key === ConfigKey.PARAMS) {
+      if (resolvedConfig.type !== 'browser' && key === ConfigKey.PARAMS) {
         return;
       }
 
       if (!!publicFormatters[key]) {
         const formatter = publicFormatters[key];
         if (typeof formatter === 'function') {
-          formattedMonitor[key] = formatter(config, key);
+          formattedMonitor[key] = formatter(resolvedConfig, key);
         } else {
           formattedMonitor[key] = formatter;
         }
@@ -71,15 +76,15 @@ export const formatMonitorConfigFields = (
     }
   });
 
-  if (!config[ConfigKey.METADATA]?.is_tls_enabled) {
+  if (!resolvedConfig[ConfigKey.METADATA]?.is_tls_enabled) {
     const sslKeys = Object.keys(formattedMonitor).filter((key) =>
       key.includes('ssl')
     ) as unknown as Array<keyof TLSFields>;
     sslKeys.forEach((key) => (formattedMonitor[key] = null));
   }
 
-  if (config[ConfigKey.MAINTENANCE_WINDOWS]) {
-    const maintenanceWindows = config[ConfigKey.MAINTENANCE_WINDOWS];
+  if (resolvedConfig[ConfigKey.MAINTENANCE_WINDOWS]) {
+    const maintenanceWindows = resolvedConfig[ConfigKey.MAINTENANCE_WINDOWS];
     formattedMonitor[ConfigKey.MAINTENANCE_WINDOWS] = formatMWs(
       maintenanceWindows.map((window) => {
         if (typeof window === 'string') {
@@ -102,10 +107,19 @@ export interface ConfigData {
   testRunId?: string;
   params: Record<string, string>;
   spaceId: string;
+  kibanaUrl?: string;
 }
 
 export const formatHeartbeatRequest = (
-  { monitor, configId, heartbeatId, runOnce, testRunId, spaceId }: Omit<ConfigData, 'params'>,
+  {
+    monitor,
+    configId,
+    heartbeatId,
+    runOnce,
+    testRunId,
+    spaceId,
+    kibanaUrl,
+  }: Omit<ConfigData, 'params'>,
   params?: string
 ): HeartbeatConfig => {
   const projectId = (monitor as BrowserFields)[ConfigKey.PROJECT_ID];
@@ -125,10 +139,12 @@ export const formatHeartbeatRequest = (
       'monitor.project.id': projectId || undefined,
       run_once: runOnce,
       test_run_id: testRunId,
+      'monitor.interval': periodToSeconds(monitor[ConfigKey.SCHEDULE]),
       meta: {
         space_id: monSpaces,
       },
       ...(isEmpty(labels) ? {} : { labels }),
+      ...(kibanaUrl ? { kibanaUrl } : {}),
     },
     fields_under_root: true,
     params: monitor.type === 'browser' ? paramsString : '',

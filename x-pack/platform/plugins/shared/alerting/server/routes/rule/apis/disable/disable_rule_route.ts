@@ -13,6 +13,7 @@ import type {
 import {
   disableRuleRequestBodySchemaV1,
   disableRuleRequestParamsSchemaV1,
+  disableRuleParamsExamplesV1,
 } from '../../../../../common/routes/rule/apis/disable';
 import type { ILicenseState } from '../../../../lib';
 import { RuleTypeDisabledError } from '../../../../lib';
@@ -33,6 +34,7 @@ export const disableRuleRoute = (
         access: 'public',
         summary: 'Disable a rule',
         tags: ['oas-tag:alerting'],
+        oasOperationObject: disableRuleParamsExamplesV1,
       },
       validate: {
         request: {

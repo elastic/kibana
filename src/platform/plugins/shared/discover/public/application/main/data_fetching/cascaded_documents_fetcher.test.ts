@@ -8,12 +8,16 @@
  */
 
 import { buildDataTableRecord, type DataTableRecord } from '@kbn/discover-utils';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import type { DataSource } from '@kbn/data-source';
 import type { AggregateQuery } from '@kbn/es-query';
 import { constructCascadeQuery } from '@kbn/esql-utils';
 import { apm } from '@elastic/apm-rum';
+import { BehaviorSubject } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../context_awareness';
 import type {
   CascadedDocumentsStateManager,
   FetchCascadedDocumentsParams,
@@ -42,7 +46,6 @@ jest.mock('@elastic/apm-rum', () => ({
 const mockFetchEsql = jest.mocked(fetchEsql);
 const mockConstructCascadeQuery = jest.mocked(constructCascadeQuery);
 const mockApmCaptureError = jest.mocked(apm.captureError);
-
 const createStateManager = (): CascadedDocumentsStateManager => {
   const recordsById = new Map<string, DataTableRecord[]>();
   return {
@@ -54,18 +57,31 @@ const createStateManager = (): CascadedDocumentsStateManager => {
   };
 };
 
-const createFetcher = () => {
+const createFetcher = (initialLeafSource?: DataSource, currentSource?: DataSource) => {
   const discoverServices = createDiscoverServicesMock();
   const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
     scopedEbtManager: discoverServices.ebtManager.createScopedEBTManager(),
+    toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
   });
   const stateManager = createStateManager();
+  const currentDataSource$ = new BehaviorSubject<DataSource | undefined>(
+    currentSource ?? createMockEsqlSource([], [], '@timestamp')
+  );
+  const cascadedLeafDataSource$ = new BehaviorSubject<DataSource | undefined>(initialLeafSource);
 
   return {
     stateManager,
-    fetcher: new CascadedDocumentsFetcher(discoverServices, scopedProfilesManager, stateManager),
+    fetcher: new CascadedDocumentsFetcher(
+      discoverServices,
+      scopedProfilesManager,
+      stateManager,
+      currentDataSource$,
+      cascadedLeafDataSource$
+    ),
     scopedProfilesManager,
     discoverServices,
+    currentDataSource$,
+    cascadedLeafDataSource$,
   };
 };
 
@@ -81,6 +97,7 @@ const createFetchParams = (
     esqlVariables: undefined,
     dataView: dataViewWithTimefieldMock,
     timeRange: { from: 'now-15m', to: 'now' },
+    esqlApproximation: false,
     ...overrides,
   };
 };
@@ -91,7 +108,7 @@ describe('CascadedDocumentsFetcher', () => {
   });
 
   it('returns cached records without fetching', async () => {
-    const { stateManager, fetcher } = createFetcher();
+    const { stateManager, fetcher, cascadedLeafDataSource$ } = createFetcher();
     const cached = [buildDataTableRecord({ _id: '1', _index: 'logs' }, dataViewWithTimefieldMock)];
 
     stateManager.setCascadedDocuments('node-1', cached);
@@ -101,15 +118,32 @@ describe('CascadedDocumentsFetcher', () => {
     expect(result).toBe(cached);
     expect(mockFetchEsql).not.toHaveBeenCalled();
     expect(mockConstructCascadeQuery).not.toHaveBeenCalled();
+    expect(cascadedLeafDataSource$.getValue()).toBeUndefined();
   });
 
   it('constructs a cascade query, fetches records, and caches them', async () => {
-    const { stateManager, fetcher, scopedProfilesManager, discoverServices } = createFetcher();
+    const extensionSource = createMockEsqlSource(
+      [{ name: 'extension', type: 'string', source: 'esql-result' }],
+      [],
+      '@timestamp'
+    );
+    const {
+      stateManager,
+      fetcher,
+      scopedProfilesManager,
+      discoverServices,
+      cascadedLeafDataSource$,
+    } = createFetcher(undefined, extensionSource);
     const records = [buildDataTableRecord({ _id: '1', _index: 'logs' }, dataViewWithTimefieldMock)];
     const cascadeQuery: AggregateQuery = { esql: 'from logs' };
+    const leafSource = createMockEsqlSource(
+      [{ name: 'message', type: 'string', source: 'index' }],
+      [],
+      '@timestamp'
+    );
 
     mockConstructCascadeQuery.mockReturnValueOnce(cascadeQuery);
-    mockFetchEsql.mockResolvedValue({ records });
+    mockFetchEsql.mockResolvedValue({ records, dataSource: leafSource });
 
     const params = createFetchParams({ nodeId: 'node-2' });
     const result = await fetcher.fetchCascadedDocuments(params);
@@ -127,7 +161,7 @@ describe('CascadedDocumentsFetcher', () => {
       expect.objectContaining({
         query: cascadeQuery,
         esqlVariables: params.esqlVariables,
-        dataView: params.dataView,
+        esqlSource: extensionSource,
         data: discoverServices.data,
         expressions: discoverServices.expressions,
         timeRange: params.timeRange,
@@ -142,11 +176,57 @@ describe('CascadedDocumentsFetcher', () => {
         },
       })
     );
+    expect(cascadedLeafDataSource$.getValue()).toBe(leafSource);
     expect(stateManager.setCascadedDocuments).toHaveBeenCalledWith(params.nodeId, records);
   });
 
+  it('forwards esqlApproximation to fetchEsql so cascade drill-downs match the active search mode', async () => {
+    const { fetcher } = createFetcher();
+    const cascadeQuery: AggregateQuery = { esql: 'from logs' };
+
+    mockConstructCascadeQuery.mockReturnValueOnce(cascadeQuery);
+    mockFetchEsql.mockResolvedValue({ records: [], dataSource: undefined });
+
+    await fetcher.fetchCascadedDocuments(
+      createFetchParams({ nodeId: 'node-approx', esqlApproximation: true })
+    );
+
+    expect(mockFetchEsql).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esqlApproximation: true,
+      })
+    );
+  });
+
+  it('keeps the published leaf source when the fetched columns are unchanged', async () => {
+    const extensionSource = createMockEsqlSource(
+      [{ name: 'extension', type: 'string', source: 'esql-result' }],
+      [],
+      '@timestamp'
+    );
+    const publishedLeafSource = createMockEsqlSource(
+      [{ name: 'extension', type: 'string', source: 'esql-result' }],
+      [],
+      '@timestamp'
+    );
+    const { stateManager, fetcher, cascadedLeafDataSource$ } = createFetcher(
+      publishedLeafSource,
+      extensionSource
+    );
+    const records = [buildDataTableRecord({ _id: '1', _index: 'logs' }, dataViewWithTimefieldMock)];
+    const cascadeQuery: AggregateQuery = { esql: 'from logs' };
+
+    mockConstructCascadeQuery.mockReturnValueOnce(cascadeQuery);
+    mockFetchEsql.mockResolvedValue({ records, dataSource: extensionSource });
+
+    await fetcher.fetchCascadedDocuments(createFetchParams({ nodeId: 'node-same-meta' }));
+
+    expect(cascadedLeafDataSource$.getValue()).toBe(publishedLeafSource);
+    expect(stateManager.setCascadedDocuments).toHaveBeenCalledWith('node-same-meta', records);
+  });
+
   it('captures an error when the cascade query cannot be constructed', async () => {
-    const { stateManager, fetcher } = createFetcher();
+    const { stateManager, fetcher, cascadedLeafDataSource$ } = createFetcher();
 
     mockConstructCascadeQuery.mockReturnValueOnce(undefined);
 
@@ -154,6 +234,7 @@ describe('CascadedDocumentsFetcher', () => {
 
     expect(result).toEqual([]);
     expect(mockFetchEsql).not.toHaveBeenCalled();
+    expect(cascadedLeafDataSource$.getValue()).toBeUndefined();
     expect(stateManager.setCascadedDocuments).not.toHaveBeenCalled();
     expect(mockApmCaptureError).toHaveBeenCalledWith(
       expect.objectContaining({ message: 'Failed to construct cascade query' })

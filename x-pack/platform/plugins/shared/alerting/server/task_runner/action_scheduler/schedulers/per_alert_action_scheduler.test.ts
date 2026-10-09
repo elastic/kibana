@@ -197,7 +197,16 @@ describe('Per-Alert Action Scheduler', () => {
     expect(scheduler.actions).toEqual([actions[0]]);
     expect(logger.error).toHaveBeenCalledTimes(1);
     expect(logger.error).toHaveBeenCalledWith(
-      `Skipping action \"2\" for rule \"rule-id-1\" because the rule type \"Test\" does not support alert-as-data.`
+      `Skipping action \"2\" for rule \"rule-id-1\" because the rule type \"Test\" does not support alert-as-data.`,
+      {
+        labels: {
+          actionId: '2',
+          actionTypeId: 'test',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          ruleId: 'rule-id-1',
+          spaceId: 'test1',
+        },
+      }
     );
   });
 
@@ -261,7 +270,7 @@ describe('Per-Alert Action Scheduler', () => {
       // 2 per-alert actions * 2 alerts = 4 actions to schedule
       const scheduler = new PerAlertActionScheduler({
         ...getSchedulerContext(),
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
       });
       const results = await scheduler.getActionsToSchedule({
         activeAlerts: alerts,
@@ -332,11 +341,31 @@ describe('Per-Alert Action Scheduler', () => {
       expect(logger.debug).toHaveBeenCalledTimes(2);
       expect(logger.debug).toHaveBeenNthCalledWith(
         1,
-        `no scheduling of actions \"action-1\" for alert \"1\" from rule \"rule-id-1\": has active maintenance windows mw-1.`
+        `no scheduling of actions \"action-1\" for alert \"1\" from rule \"rule-id-1\": has active maintenance windows mw-1.`,
+        {
+          labels: {
+            actionId: 'action-1',
+            actionTypeId: 'test',
+            alertId: '1',
+            ruleId: 'rule-id-1',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            spaceId: 'test1',
+          },
+        }
       );
       expect(logger.debug).toHaveBeenNthCalledWith(
         2,
-        `no scheduling of actions \"action-2\" for alert \"1\" from rule \"rule-id-1\": has active maintenance windows mw-1.`
+        `no scheduling of actions \"action-2\" for alert \"1\" from rule \"rule-id-1\": has active maintenance windows mw-1.`,
+        {
+          labels: {
+            actionId: 'action-2',
+            actionTypeId: 'test',
+            alertId: '1',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            ruleId: 'rule-id-1',
+            spaceId: 'test1',
+          },
+        }
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
@@ -371,11 +400,27 @@ describe('Per-Alert Action Scheduler', () => {
       expect(logger.error).toHaveBeenCalledTimes(2);
       expect(logger.error).toHaveBeenNthCalledWith(
         1,
-        `Invalid action group \"invalid\" for rule \"test\".`
+        `Invalid action group \"invalid\" for rule \"test\".`,
+        {
+          labels: {
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            ruleId: 'rule-id-1',
+            ruleType: 'test',
+            spaceId: 'test1',
+          },
+        }
       );
       expect(logger.error).toHaveBeenNthCalledWith(
         2,
-        `Invalid action group \"invalid\" for rule \"test\".`
+        `Invalid action group \"invalid\" for rule \"test\".`,
+        {
+          labels: {
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            ruleId: 'rule-id-1',
+            ruleType: 'test',
+            spaceId: 'test1',
+          },
+        }
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
@@ -514,7 +559,15 @@ describe('Per-Alert Action Scheduler', () => {
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug).toHaveBeenNthCalledWith(
         1,
-        `skipping scheduling of actions for '2' in rule rule-label: rule is muted`
+        `skipping scheduling of actions for '2' in rule rule-label: rule is muted`,
+        {
+          labels: {
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            ruleId: 'rule-id-1',
+            spaceId: 'test1',
+            alertId: '2',
+          },
+        }
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
@@ -532,6 +585,58 @@ describe('Per-Alert Action Scheduler', () => {
 
       // @ts-expect-error private variable
       expect(scheduler.skippedAlerts).toEqual({ '2': { reason: 'muted' } });
+    });
+
+    test('should skip creating actions to schedule when alert is snoozed', async () => {
+      // 2 per-alert actions * 2 alerts = 4 actions to schedule
+      // but alert 2 is snoozed (active snooze, no expiry), so only actions for alert 1 should be scheduled
+      const scheduler = new PerAlertActionScheduler({
+        ...getSchedulerContext(),
+        activeSnoozedIds: new Set(['2']),
+      });
+      const results = await scheduler.getActionsToSchedule({
+        activeAlerts: alerts,
+      });
+
+      expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenNthCalledWith(
+        1,
+        `skipping scheduling of actions for '2' in rule rule-label: alert is snoozed`,
+        {
+          labels: {
+            alertId: '2',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            ruleId: 'rule-id-1',
+            spaceId: 'test1',
+          },
+        }
+      );
+
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(2);
+
+      expect(results).toHaveLength(2);
+      expect(results).toEqual([
+        getResult('action-1', '1', '111-111'),
+        getResult('action-2', '1', '222-222'),
+      ]);
+
+      // @ts-expect-error private variable
+      expect(scheduler.skippedAlerts).toEqual({ '2': { reason: 'snoozed' } });
+    });
+
+    test('should NOT skip alert when activeSnoozedIds does not contain it', async () => {
+      // alert 2 has an expired snooze (expiresAt before epoch 0 since sinon fake timers start at 0)
+      const scheduler = new PerAlertActionScheduler({
+        ...getSchedulerContext(),
+        activeSnoozedIds: new Set(),
+      });
+      const results = await scheduler.getActionsToSchedule({
+        activeAlerts: alerts,
+      });
+
+      expect(results).toHaveLength(4);
     });
 
     test('should skip creating actions to schedule when alert action group has not changed and notifyWhen is onActionGroupChange', async () => {
@@ -575,7 +680,17 @@ describe('Per-Alert Action Scheduler', () => {
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug).toHaveBeenNthCalledWith(
         1,
-        `skipping scheduling of actions for '2' in rule rule-label: alert is active but action group has not changed`
+        `skipping scheduling of actions for '2' in rule rule-label: alert is active but action group has not changed`,
+        {
+          labels: {
+            actionId: 'action-4',
+            actionTypeId: 'test',
+            alertId: '2',
+            spaceId: 'test1',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            ruleId: 'rule-id-1',
+          },
+        }
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(3);
@@ -632,7 +747,17 @@ describe('Per-Alert Action Scheduler', () => {
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug).toHaveBeenNthCalledWith(
         1,
-        `skipping scheduling of actions for '2' in rule rule-label: rule is throttled`
+        `skipping scheduling of actions for '2' in rule rule-label: rule is throttled`,
+        {
+          labels: {
+            actionId: 'action-5',
+            actionTypeId: 'test',
+            alertId: '2',
+            spaceId: 'test1',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            ruleId: 'rule-id-1',
+          },
+        }
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(3);
@@ -766,6 +891,47 @@ describe('Per-Alert Action Scheduler', () => {
         getResult('action-6', '1', '666-666'),
         getResult('action-6', '2', '666-666'),
       ]);
+    });
+
+    test('should include snoozed alert IDs in excludedAlertInstanceIds when querying summarized alerts', async () => {
+      alertsClient.getProcessedAlerts.mockReturnValue(alerts);
+      const summarizedAlerts = {
+        new: {
+          count: 1,
+          data: [{ ...mockAAD, [ALERT_UUID]: alerts[1].getUuid() }],
+        },
+        ongoing: { count: 0, data: [] },
+        recovered: { count: 0, data: [] },
+      };
+      alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
+      const actionWithUseAlertDataForTemplate: SanitizedRuleAction = {
+        id: 'action-6',
+        group: 'default',
+        actionTypeId: 'test',
+        frequency: { summary: false, notifyWhen: 'onActiveAlert', throttle: null },
+        params: {
+          foo: true,
+          contextVal: 'My {{context.value}} goes here',
+          stateVal: 'My {{state.value}} goes here',
+          alertVal:
+            'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
+        },
+        uuid: '666-666',
+        useAlertDataForTemplate: true,
+      };
+      const scheduler = new PerAlertActionScheduler({
+        ...getSchedulerContext(),
+        rule: { ...rule, actions: [actionWithUseAlertDataForTemplate] },
+        activeSnoozedIds: new Set(['2']),
+      });
+      await scheduler.getActionsToSchedule({ activeAlerts: alerts });
+
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          excludedAlertInstanceIds: expect.arrayContaining(['2']),
+        })
+      );
     });
 
     test('should query for summarized alerts if useAlertDataForTemplate is true and action has throttle interval', async () => {
@@ -1107,7 +1273,16 @@ describe('Per-Alert Action Scheduler', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        `Rule "rule-id-1" skipped scheduling action "action-2" because the maximum number of allowed actions has been reached.`
+        `Rule "rule-id-1" skipped scheduling action "action-2" because the maximum number of allowed actions has been reached.`,
+        {
+          labels: {
+            actionId: 'action-2',
+            actionTypeId: 'test',
+            ruleId: 'rule-id-1',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            spaceId: 'test1',
+          },
+        }
       );
 
       expect(results).toHaveLength(3);
@@ -1145,7 +1320,16 @@ describe('Per-Alert Action Scheduler', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        `Rule "rule-id-1" skipped scheduling action "action-1" because the maximum number of allowed actions for connector type test has been reached.`
+        `Rule "rule-id-1" skipped scheduling action "action-1" because the maximum number of allowed actions for connector type test has been reached.`,
+        {
+          labels: {
+            actionId: 'action-1',
+            actionTypeId: 'test',
+            ruleId: 'rule-id-1',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            spaceId: 'test1',
+          },
+        }
       );
 
       expect(results).toHaveLength(1);
@@ -1264,8 +1448,8 @@ describe('Per-Alert Action Scheduler', () => {
         activeAlerts: { '1': alert },
       });
       expect(spy).toHaveBeenCalledTimes(2); // 2 actions
-      expect(spy).nthCalledWith(1, ['111-111', '222-222']);
-      expect(spy).nthCalledWith(2, ['111-111', '222-222']);
+      expect(spy).toHaveBeenNthCalledWith(1, ['111-111', '222-222']);
+      expect(spy).toHaveBeenNthCalledWith(2, ['111-111', '222-222']);
     });
 
     test('should skip creating actions to schedule when alert is delayed', async () => {
@@ -1286,7 +1470,16 @@ describe('Per-Alert Action Scheduler', () => {
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug).toHaveBeenNthCalledWith(
         1,
-        `skipping scheduling of actions for '2' in rule rule-label: alert is delayed`
+        `skipping scheduling of actions for '2' in rule rule-label: alert is delayed`,
+        {
+          labels: {
+            alertId: '2',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            ruleType: 'test',
+            ruleId: 'rule-id-1',
+            spaceId: 'test1',
+          },
+        }
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
@@ -1304,6 +1497,60 @@ describe('Per-Alert Action Scheduler', () => {
 
       // @ts-expect-error private variable
       expect(scheduler.skippedAlerts).toEqual({ '2': { reason: 'delayed' } });
+    });
+
+    describe('event loop yielding', () => {
+      beforeEach(() => {
+        // Restore real timers so that `await new Promise(setImmediate)` resolves
+        // naturally without requiring clock.tick(). The global fake-timer clock is
+        // reinstated in afterEach so subsequent tests are unaffected.
+        clock.restore();
+      });
+
+      afterEach(() => {
+        jest.restoreAllMocks();
+        clock = sinon.useFakeTimers();
+      });
+
+      test('yields to the event loop when the time budget is exceeded and returns correct results', async () => {
+        // Simulate elapsed time: sliceStart captures 0 on the first call; every
+        // subsequent call returns 100ms, so the first iteration immediately exceeds
+        // the 50ms budget and triggers exactly one yield.
+        let nowCallCount = 0;
+        jest.spyOn(Date, 'now').mockImplementation(() => (nowCallCount++ === 0 ? 0 : 100));
+
+        const setImmediateSpy = jest.spyOn(global, 'setImmediate');
+
+        const scheduler = new PerAlertActionScheduler({
+          ...getSchedulerContext(),
+          rule,
+        });
+        const results = await scheduler.getActionsToSchedule({ activeAlerts: alerts });
+
+        expect(setImmediateSpy).toHaveBeenCalledTimes(1);
+        expect(results).toHaveLength(4);
+        expect(results).toEqual([
+          getResult('action-1', '1', '111-111'),
+          getResult('action-1', '2', '111-111'),
+          getResult('action-2', '1', '222-222'),
+          getResult('action-2', '2', '222-222'),
+        ]);
+      });
+
+      test('does not yield when the time budget is not exceeded', async () => {
+        // Date.now always returns 0, so elapsed time never exceeds the budget.
+        jest.spyOn(Date, 'now').mockReturnValue(0);
+        const setImmediateSpy = jest.spyOn(global, 'setImmediate');
+
+        const scheduler = new PerAlertActionScheduler({
+          ...getSchedulerContext(),
+          rule,
+        });
+        const results = await scheduler.getActionsToSchedule({ activeAlerts: alerts });
+
+        expect(setImmediateSpy).not.toHaveBeenCalled();
+        expect(results).toHaveLength(4);
+      });
     });
   });
 });

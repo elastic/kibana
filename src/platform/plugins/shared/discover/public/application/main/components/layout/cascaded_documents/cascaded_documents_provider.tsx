@@ -9,20 +9,22 @@
 
 import { isOfAggregateQueryType, type AggregateQuery, type TimeRange } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { ReactElement } from 'react';
 import { createContext, useContext } from 'react';
 import type { BehaviorSubject } from 'rxjs';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DataSource } from '@kbn/data-source';
 import type { DataCascadeRestorableState } from '@kbn/shared-ux-document-data-cascade';
 import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import type {
   CascadedDocumentsState,
   DiscoverAppState,
+  ExpandedDocCascadePath,
   internalStateActions,
 } from '../../../state_management/redux';
 import type { UpdateESQLQueryFn } from '../../../../../context_awareness';
 import type { CascadedDocumentsFetcher } from '../../../data_fetching/cascaded_documents_fetcher';
+import type { RenderViewModeToggle } from '../../../../../components/view_mode_toggle';
 
 export type CascadedDocumentsDataGridUiStateMap = Record<
   string,
@@ -32,13 +34,18 @@ export type CascadedDocumentsDataGridUiStateMap = Record<
 export interface CascadedDocumentsContext
   extends Pick<CascadedDocumentsState, 'availableCascadeGroups' | 'selectedCascadeGroups'> {
   cascadedDocumentsFetcher: CascadedDocumentsFetcher;
+  cascadedLeafDataSource: DataSource | undefined;
   esqlQuery: AggregateQuery;
   esqlVariables: ESQLControlVariable[] | undefined;
   timeRange: TimeRange | undefined;
-  viewModeToggle: ReactElement | undefined;
+  esqlApproximation: boolean;
+  renderViewModeToggle: RenderViewModeToggle | undefined;
   expandedDoc$: BehaviorSubject<DataTableRecord | undefined>;
   expandedDocOwner$: BehaviorSubject<string | undefined>;
-  getExpandedDocSetter: (owner: string) => NonNullable<UnifiedDataTableProps['setExpandedDoc']>;
+  getExpandedDocSetter: (
+    owner: string,
+    expandedDocCascadePath?: ExpandedDocCascadePath
+  ) => NonNullable<UnifiedDataTableProps['setExpandedDoc']>;
   getRenderDocumentViewMetaSetter: (
     owner: string
   ) => UnifiedDataTableProps['setRenderDocumentViewMeta'] | undefined;
@@ -48,7 +55,7 @@ export interface CascadedDocumentsContext
   setDataGridUiState: (nodeId: string, uiState: Partial<UnifiedDataTableRestorableState>) => void;
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
   onUpdateESQLQuery: UpdateESQLQueryFn;
-  openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => void;
+  openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => Promise<void>;
 }
 
 const cascadedDocumentsContext = createContext<CascadedDocumentsContext | undefined>(undefined);

@@ -7,18 +7,18 @@
 
 import Boom from '@hapi/boom';
 
-import { isLegacyAttachmentRequest } from '../../../common/utils/attachments';
-import type { AlertAttachmentPayload } from '../../../common/types/domain';
 import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import { decodeOrThrow } from '../../common/runtime_types';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { getAlertInfoFromComments, isCommentRequestTypeAlert } from '../../common/utils';
+import { getAlertInfoFromComments } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
 import type { DeleteAllArgs, DeleteArgs } from './types';
 import type { AttachmentRequestV2 } from '../../../common/types/api';
 import { AttachmentRequestRtV2 } from '../../../common/types/api';
+import type { AttachmentSavedObjectType } from '../../services/user_actions/types';
+import { emitAttachmentsDeletedEvents } from './trigger_utils';
 
 /**
  * Delete all comments for a case.
@@ -37,7 +37,6 @@ export async function deleteAll(
   try {
     const comments = await caseService.getAllCaseComments({
       id: caseID,
-      mode: 'legacy',
     });
 
     if (comments.total <= 0) {
@@ -52,10 +51,12 @@ export async function deleteAll(
       })),
     });
 
-    await attachmentService.bulkDelete({
-      savedObjectIds: comments.saved_objects.map((so) => so.id),
-      refresh: true,
-    });
+    const deletedIds = new Set(
+      await attachmentService.bulkDelete({
+        savedObjectIds: comments.saved_objects.map((so) => so.id),
+        refresh: true,
+      })
+    );
 
     await updateCaseAttachmentStats({
       caseService: clientArgs.services.caseService,
@@ -70,6 +71,7 @@ export async function deleteAll(
         id: comment.id,
         owner: comment.attributes.owner,
         attachment: comment.attributes,
+        savedObjectType: comment.type as AttachmentSavedObjectType,
       })),
       user,
     });
@@ -77,6 +79,12 @@ export async function deleteAll(
     const attachments = comments.saved_objects.map((comment) => comment.attributes);
 
     await handleAlerts({ alertsService, attachments, caseId: caseID });
+
+    emitAttachmentsDeletedEvents(
+      clientArgs,
+      caseID,
+      comments.saved_objects.filter(({ id }) => deletedIds.has(id))
+    );
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete all comments case id: ${caseID}: ${error}`,
@@ -103,7 +111,6 @@ export async function deleteComment(
   try {
     const attachment = await attachmentService.getter.get({
       savedObjectId,
-      mode: 'legacy',
     });
 
     if (attachment == null) {
@@ -123,7 +130,7 @@ export async function deleteComment(
       throw Boom.notFound(`This comment ${savedObjectId} does not exist in ${id}.`);
     }
 
-    await attachmentService.bulkDelete({
+    const deletedIds = await attachmentService.bulkDelete({
       savedObjectIds: [savedObjectId],
       refresh: true,
     });
@@ -146,6 +153,7 @@ export async function deleteComment(
         action: UserActionActions.delete,
         caseId: id,
         savedObjectId,
+        savedObjectType: attachment.type as AttachmentSavedObjectType,
         payload: { attachment: attachmentRequestAttributes },
         user,
         owner: attachment.attributes.owner,
@@ -153,6 +161,10 @@ export async function deleteComment(
     });
 
     await handleAlerts({ alertsService, attachments: [attachment.attributes], caseId: id });
+
+    if (deletedIds.includes(savedObjectId)) {
+      emitAttachmentsDeletedEvents(clientArgs, id, [attachment]);
+    }
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete comment: ${caseID} comment id: ${savedObjectId}: ${error}`,
@@ -169,16 +181,12 @@ interface HandleAlertsArgs {
 }
 
 const handleAlerts = async ({ alertsService, attachments, caseId }: HandleAlertsArgs) => {
-  const alertAttachments = attachments.filter(
-    (attachment): attachment is AlertAttachmentPayload =>
-      isLegacyAttachmentRequest(attachment) && isCommentRequestTypeAlert(attachment)
-  );
+  const alerts = getAlertInfoFromComments(attachments);
 
-  if (alertAttachments.length === 0) {
+  if (alerts.length === 0) {
     return;
   }
 
-  const alerts = getAlertInfoFromComments(alertAttachments);
   await alertsService.removeCaseIdFromAlerts({ alerts, caseId });
 };
 

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { CombinedJobWithStats } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 import { USER } from '../../../services/ml/security_common';

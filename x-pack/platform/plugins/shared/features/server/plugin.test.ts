@@ -165,6 +165,8 @@ describe('Features Plugin', () => {
                 "all": Array [
                   "one",
                   "telemetry",
+                  "user-storage",
+                  "user-storage-global",
                 ],
                 "read": Array [
                   "two",
@@ -181,6 +183,8 @@ describe('Features Plugin', () => {
               "savedObject": Object {
                 "all": Array [
                   "three",
+                  "user-storage",
+                  "user-storage-global",
                 ],
                 "read": Array [
                   "four",

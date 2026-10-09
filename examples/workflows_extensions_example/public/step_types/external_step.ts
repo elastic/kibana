@@ -22,6 +22,7 @@ export const getExternalStepDefinition = (deps: { externalService: IExampleExter
       config: {
         'proxy.id': {
           selection: {
+            dependsOnValues: ['config.proxy.ssl'],
             search: async (input, context) => {
               const proxies = await deps.externalService.getProxies();
               const inputTrimmed = input.trim();

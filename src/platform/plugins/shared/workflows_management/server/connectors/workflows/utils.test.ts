@@ -7,48 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AxiosError } from 'axios';
 import { createServiceError } from './utils';
 
 describe('Workflows Utils', () => {
   describe('createServiceError', () => {
-    it('should create error with Axios error message', () => {
-      const axiosError = {
-        isAxiosError: true,
+    it('should create error with HTTP error message', () => {
+      const httpError = {
+        name: 'Error',
         response: {
           data: {
             message: 'API Error: Invalid request',
           },
         },
         message: 'Request failed',
-      } as AxiosError;
+      } as Error;
 
-      const result = createServiceError(axiosError, 'Operation failed');
+      const result = createServiceError(httpError, 'Operation failed');
 
       expect(result.message).toBe('Operation failed. Error: API Error: Invalid request');
     });
 
-    it('should use Axios error message when response data has no message', () => {
-      const axiosError = {
-        isAxiosError: true,
+    it('should use HTTP error message when response data has no message', () => {
+      const httpError = {
+        name: 'Error',
         response: {
           data: {},
         },
         message: 'Network error',
-      } as AxiosError;
+      } as Error;
 
-      const result = createServiceError(axiosError, 'Operation failed');
+      const result = createServiceError(httpError, 'Operation failed');
 
       expect(result.message).toBe('Operation failed. Error: Network error');
     });
 
-    it('should handle Axios error without response data', () => {
-      const axiosError = {
-        isAxiosError: true,
+    it('should handle HTTP error without response data', () => {
+      const httpError = {
+        name: 'Error',
         message: 'Connection timeout',
-      } as AxiosError;
+      } as Error;
 
-      const result = createServiceError(axiosError, 'Operation failed');
+      const result = createServiceError(httpError, 'Operation failed');
 
       expect(result.message).toBe('Operation failed. Error: Connection timeout');
     });

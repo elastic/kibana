@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 import { ML_EXTERNAL_BASE_PATH, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization, SavedObjectsRouteDeps } from '../types';
@@ -19,7 +20,6 @@ import {
   itemTypeSchema,
 } from './schemas/saved_objects';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
-import type { MlSavedObjectType } from '../../common/types/saved_objects';
 
 /**
  * Routes for job saved object management
@@ -34,7 +34,15 @@ export function savedObjectsRoutes(
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: ['ml:canGetJobs', 'ml:canGetTrainedModels'],
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                'ml:canGetJobs',
+                'ml:canGetDataFrameAnalytics',
+                'ml:canGetTrainedModels',
+              ],
+            },
+          ],
         },
       },
       summary: 'Get job and trained model saved object status',
@@ -68,9 +76,13 @@ export function savedObjectsRoutes(
       security: {
         authz: {
           requiredPrivileges: [
-            'ml:canCreateJob',
-            'ml:canCreateDataFrameAnalytics',
-            'ml:canCreateTrainedModels',
+            {
+              anyRequired: [
+                'ml:canCreateJob',
+                'ml:canCreateDataFrameAnalytics',
+                'ml:canCreateTrainedModels',
+              ],
+            },
           ],
         },
       },
@@ -113,9 +125,13 @@ export function savedObjectsRoutes(
       security: {
         authz: {
           requiredPrivileges: [
-            'ml:canCreateJob',
-            'ml:canCreateDataFrameAnalytics',
-            'ml:canCreateTrainedModels',
+            {
+              anyRequired: [
+                'ml:canCreateJob',
+                'ml:canCreateDataFrameAnalytics',
+                'ml:canCreateTrainedModels',
+              ],
+            },
           ],
         },
       },
@@ -156,9 +172,13 @@ export function savedObjectsRoutes(
       security: {
         authz: {
           requiredPrivileges: [
-            'ml:canGetJobs',
-            'ml:canGetDataFrameAnalytics',
-            'ml:canGetTrainedModels',
+            {
+              anyRequired: [
+                'ml:canGetJobs',
+                'ml:canGetDataFrameAnalytics',
+                'ml:canGetTrainedModels',
+              ],
+            },
           ],
         },
       },
@@ -197,7 +217,11 @@ export function savedObjectsRoutes(
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: ['ml:canCreateJob', 'ml:canCreateDataFrameAnalytics'],
+          requiredPrivileges: [
+            {
+              anyRequired: ['ml:canCreateJob', 'ml:canCreateDataFrameAnalytics'],
+            },
+          ],
         },
       },
       summary: 'Update what spaces jobs are assigned to',
@@ -238,7 +262,11 @@ export function savedObjectsRoutes(
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: ['ml:canCreateJob', 'ml:canCreateDataFrameAnalytics'],
+          requiredPrivileges: [
+            {
+              anyRequired: ['ml:canCreateJob', 'ml:canCreateDataFrameAnalytics'],
+            },
+          ],
         },
       },
       summary: 'Update what spaces jobs are assigned to',
@@ -247,7 +275,7 @@ export function savedObjectsRoutes(
         tags: ['oas-tag:machine learning'],
         availability: {
           since: '9.3.0',
-          stability: 'beta',
+          stability: 'stable',
         },
       },
     })
@@ -335,7 +363,7 @@ export function savedObjectsRoutes(
         tags: ['oas-tag:machine learning'],
         availability: {
           since: '9.3.0',
-          stability: 'beta',
+          stability: 'stable',
         },
       },
     })
@@ -373,7 +401,15 @@ export function savedObjectsRoutes(
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: ['ml:canCreateJob', 'ml:canCreateDataFrameAnalytics'],
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                'ml:canCreateJob',
+                'ml:canCreateDataFrameAnalytics',
+                'ml:canCreateTrainedModels',
+              ],
+            },
+          ],
         },
       },
       summary: 'Remove jobs or trained models from the current space',
@@ -439,7 +475,11 @@ export function savedObjectsRoutes(
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: ['ml:canGetJobs', 'ml:canGetDataFrameAnalytics'],
+          requiredPrivileges: [
+            {
+              anyRequired: ['ml:canGetJobs', 'ml:canGetDataFrameAnalytics'],
+            },
+          ],
         },
       },
       summary: 'Get all jobs and their spaces',
@@ -502,9 +542,13 @@ export function savedObjectsRoutes(
       security: {
         authz: {
           requiredPrivileges: [
-            'ml:canGetJobs',
-            'ml:canGetDataFrameAnalytics',
-            'ml:canGetTrainedModels',
+            {
+              anyRequired: [
+                'ml:canGetJobs',
+                'ml:canGetDataFrameAnalytics',
+                'ml:canGetTrainedModels',
+              ],
+            },
           ],
         },
       },
@@ -553,9 +597,13 @@ export function savedObjectsRoutes(
       security: {
         authz: {
           requiredPrivileges: [
-            'ml:canGetJobs',
-            'ml:canGetDataFrameAnalytics',
-            'ml:canGetTrainedModels',
+            {
+              anyRequired: [
+                'ml:canGetJobs',
+                'ml:canGetDataFrameAnalytics',
+                'ml:canGetTrainedModels',
+              ],
+            },
           ],
         },
       },

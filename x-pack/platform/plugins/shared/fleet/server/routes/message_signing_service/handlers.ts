@@ -10,13 +10,20 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { FleetRequestHandler } from '../../types';
 
 import { appContextService } from '../../services';
+import { checkSuperuser } from '../../services/security';
 import type { RotateKeyPairSchema } from '../../types/rest_spec/message_signing_service';
 
 export const rotateKeyPairHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof RotateKeyPairSchema.query>,
   undefined
-> = async (_, __, response) => {
+> = async (context, request, response) => {
+  if (!checkSuperuser(request)) {
+    return response.forbidden({
+      body: { message: 'Rotating the key pair requires superuser privileges.' },
+    });
+  }
+
   const logger = appContextService.getLogger();
   const messageSigningService = appContextService.getMessageSigningService();
   if (!messageSigningService) {

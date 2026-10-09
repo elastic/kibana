@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, fireEvent } from '@testing-library/react';
 import React, { type RefAttributes } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { Graph, type GraphProps } from './graph';
 import { TestProviders } from '../mock/test_providers';
 import type { NodeViewModel, EdgeViewModel } from '../types';
 import type { Edge, Node, ReactFlowInstance, ReactFlowProps } from '@xyflow/react';
+import { GRAPH_CONTROLS_LAYERS_ID } from '../test_ids';
 
 // Turn off the optimization that hides elements that are not visible in the viewport
 jest.mock('../constants', () => ({
   ...jest.requireActual('../constants'),
   ONLY_RENDER_VISIBLE_ELEMENTS: false,
 }));
+
+// Graph uses useLocalStorage to persist display options; return undefined so the
+// DEFAULT_GRAPH_DISPLAY_OPTIONS merge produces all-visible options in tests.
+jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue([undefined, jest.fn()]));
 
 // Mock ReactFlow's fitView function
 let mockFitView = jest.fn();
@@ -706,98 +712,6 @@ describe('<Graph />', () => {
     });
   });
 
-  describe('interactiveBottomRightContent rendering', () => {
-    it('should not render content when interactiveBottomRightContent is null', async () => {
-      const { queryByTestId } = renderGraphPreview({
-        nodes: [],
-        edges: [],
-        interactive: true,
-        interactiveBottomRightContent: null,
-      });
-
-      await waitFor(() => {
-        expect(queryByTestId('graph-callout')).not.toBeInTheDocument();
-      });
-    });
-
-    it('should not render content when interactiveBottomRightContent is undefined', async () => {
-      const { queryByTestId } = renderGraphPreview({
-        nodes: [],
-        edges: [],
-        interactive: true,
-      });
-
-      await waitFor(() => {
-        expect(queryByTestId('graph-callout')).not.toBeInTheDocument();
-      });
-    });
-
-    it('should render content when interactiveBottomRightContent is provided', async () => {
-      const customContent = (
-        <div data-test-subj="custom-content">
-          <h3>{'Test Content Title'}</h3>
-          <p>{'Test content message'}</p>
-        </div>
-      );
-
-      const { getByText } = renderGraphPreview({
-        nodes: [],
-        edges: [],
-        interactive: true,
-        interactiveBottomRightContent: customContent,
-      });
-
-      await waitFor(() => {
-        expect(getByText('Test Content Title')).toBeInTheDocument();
-        expect(getByText('Test content message')).toBeInTheDocument();
-      });
-    });
-
-    it('should not render content when interactive is false even if interactiveBottomRightContent is provided', async () => {
-      const customContent = (
-        <div data-test-subj="custom-content">
-          <h3>{'Test Content Title'}</h3>
-          <p>{'Test content message'}</p>
-        </div>
-      );
-
-      const { queryByText } = renderGraphPreview({
-        nodes: [],
-        edges: [],
-        interactive: false,
-        interactiveBottomRightContent: customContent,
-      });
-
-      await waitFor(() => {
-        expect(queryByText('Test Content Title')).not.toBeInTheDocument();
-      });
-    });
-
-    it('should render both custom content and Controls in the bottom-right Panel', async () => {
-      const customContent = (
-        <div data-test-subj="custom-content">
-          <h3>{'Test Content Title'}</h3>
-          <p>{'Test content message'}</p>
-        </div>
-      );
-
-      const { getByText, getByTestId } = renderGraphPreview({
-        nodes: [],
-        edges: [],
-        interactive: true,
-        interactiveBottomRightContent: customContent,
-      });
-
-      await waitFor(() => {
-        // Verify custom content is rendered
-        expect(getByText('Test Content Title')).toBeInTheDocument();
-
-        // Verify Controls are still rendered (check for zoom in button as indicator)
-        expect(getByTestId('cloudSecurityGraphGraphInvestigationZoomIn')).toBeInTheDocument();
-      });
-    });
-  });
-
   describe('interactive class', () => {
     const testNodes: NodeViewModel[] = [
       {
@@ -848,6 +762,44 @@ describe('<Graph />', () => {
       });
     });
 
+    it('should disable selection and focus on nodes when interactive is false', async () => {
+      const { container } = renderGraphPreview({
+        nodes: testNodes,
+        edges: [],
+        interactive: false,
+      });
+
+      await waitFor(() => {
+        const nodes = container.querySelectorAll('.react-flow__node');
+        expect(nodes.length).toBeGreaterThan(0);
+
+        nodes.forEach((node) => {
+          // React Flow only adds the `selectable` class when `elementsSelectable` is enabled
+          expect(node).not.toHaveClass('selectable');
+          // and only makes nodes focusable (tabbable) when `nodesFocusable` is enabled
+          expect(node).not.toHaveAttribute('tabindex');
+        });
+      });
+    });
+
+    it('should enable selection and focus on nodes when interactive is true', async () => {
+      const { container } = renderGraphPreview({
+        nodes: testNodes,
+        edges: [],
+        interactive: true,
+      });
+
+      await waitFor(() => {
+        const nodes = container.querySelectorAll('.react-flow__node');
+        expect(nodes.length).toBeGreaterThan(0);
+
+        nodes.forEach((node) => {
+          expect(node).toHaveClass('selectable');
+          expect(node).toHaveAttribute('tabindex', '0');
+        });
+      });
+    });
+
     it('should add non-interactive class to relationship nodes when interactive is false', async () => {
       const nodesWithRelationship: NodeViewModel[] = [
         ...testNodes,
@@ -869,6 +821,115 @@ describe('<Graph />', () => {
         expect(relationshipNode).not.toBeNull();
         expect(relationshipNode).toHaveClass('non-interactive');
       });
+    });
+  });
+
+  describe('layers panel', () => {
+    const layersPanelNodes: NodeViewModel[] = [
+      { id: 'entity1', label: 'Entity', color: 'primary', shape: 'hexagon' },
+    ];
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should render the layers button when interactive is true', async () => {
+      const { getByTestId } = renderGraphPreview({
+        nodes: layersPanelNodes,
+        edges: [],
+        interactive: true,
+      });
+
+      await waitFor(() => {
+        expect(getByTestId(GRAPH_CONTROLS_LAYERS_ID)).toBeInTheDocument();
+      });
+    });
+
+    it('should not render the layers button when interactive is false', async () => {
+      const { queryByTestId } = renderGraphPreview({
+        nodes: layersPanelNodes,
+        edges: [],
+        interactive: false,
+      });
+
+      await waitFor(() => {
+        expect(queryByTestId(GRAPH_CONTROLS_LAYERS_ID)).not.toBeInTheDocument();
+      });
+    });
+
+    it('should open the layers panel with all checkboxes when the layers button is clicked', async () => {
+      const { getByTestId, getByRole } = renderGraphPreview({
+        nodes: layersPanelNodes,
+        edges: [],
+        interactive: true,
+      });
+
+      await waitFor(() => expect(getByTestId(GRAPH_CONTROLS_LAYERS_ID)).toBeInTheDocument());
+
+      fireEvent.click(getByTestId(GRAPH_CONTROLS_LAYERS_ID));
+
+      await waitFor(() => {
+        expect(getByRole('checkbox', { name: 'Asset criticality' })).toBeInTheDocument();
+        expect(getByRole('checkbox', { name: 'Data source' })).toBeInTheDocument();
+        expect(getByRole('checkbox', { name: 'IP address' })).toBeInTheDocument();
+        expect(getByRole('checkbox', { name: 'Geolocation' })).toBeInTheDocument();
+        expect(getByRole('checkbox', { name: 'Source IP address' })).toBeInTheDocument();
+        expect(getByRole('checkbox', { name: 'Source geolocation' })).toBeInTheDocument();
+      });
+    });
+
+    it('should call the display options setter with the updated value when a checkbox is toggled off', async () => {
+      const mockSetStored = jest.fn();
+      (useLocalStorage as jest.Mock).mockReturnValue([undefined, mockSetStored]);
+
+      const { getByTestId, getByRole } = renderGraphPreview({
+        nodes: layersPanelNodes,
+        edges: [],
+        interactive: true,
+      });
+
+      await waitFor(() => expect(getByTestId(GRAPH_CONTROLS_LAYERS_ID)).toBeInTheDocument());
+
+      fireEvent.click(getByTestId(GRAPH_CONTROLS_LAYERS_ID));
+
+      await waitFor(() =>
+        expect(getByRole('checkbox', { name: 'Asset criticality' })).toBeInTheDocument()
+      );
+
+      fireEvent.click(getByRole('checkbox', { name: 'Asset criticality' }));
+
+      expect(mockSetStored).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entity: expect.objectContaining({ assetCriticality: false }),
+        })
+      );
+    });
+
+    it('should call the display options setter with the updated value when an event checkbox is toggled off', async () => {
+      const mockSetStored = jest.fn();
+      (useLocalStorage as jest.Mock).mockReturnValue([undefined, mockSetStored]);
+
+      const { getByTestId, getByRole } = renderGraphPreview({
+        nodes: layersPanelNodes,
+        edges: [],
+        interactive: true,
+      });
+
+      await waitFor(() => expect(getByTestId(GRAPH_CONTROLS_LAYERS_ID)).toBeInTheDocument());
+
+      fireEvent.click(getByTestId(GRAPH_CONTROLS_LAYERS_ID));
+
+      await waitFor(() =>
+        expect(getByRole('checkbox', { name: 'Source IP address' })).toBeInTheDocument()
+      );
+
+      fireEvent.click(getByRole('checkbox', { name: 'Source IP address' }));
+
+      expect(mockSetStored).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ sourceIpAddress: false }),
+        })
+      );
     });
   });
 });

@@ -223,9 +223,9 @@ curl -X POST http://localhost:5601/api/agent_builder/tools/_execute \
   }'
 ```
 
-### Chatting with the Observability Agent
+### Chatting with the Elastic AI Agent
 
-Test your tools end-to-end by chatting with the Observability agent:
+Test your tools end-to-end using the default Elastic AI Agent (`elastic-ai-agent`):
 
 ```bash
 curl -X POST http://localhost:5601/api/agent_builder/converse \
@@ -235,7 +235,7 @@ curl -X POST http://localhost:5601/api/agent_builder/converse \
   -H 'Content-Type: application/json' \
   -d '{
     "input": "What services are experiencing issues?",
-    "agent_id": "observability.agent"
+    "agent_id": "elastic-ai-agent"
   }'
 ```
 

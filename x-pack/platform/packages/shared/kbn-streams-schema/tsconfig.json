@@ -8,9 +8,8 @@
   "kbn_references": [
     "@kbn/zod",
     "@kbn/zod-helpers",
-    "@kbn/sse-utils",
     "@kbn/streamlang",
-    "@kbn/inference-common"
+    "@kbn/std"
   ],
   "exclude": ["target/**/*"]
 }

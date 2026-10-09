@@ -9,6 +9,7 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import * as i18n from '../case_view/translations';
+import * as commonI18n from '../../common/translations';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { PropertyActions } from '../property_actions';
@@ -17,6 +18,11 @@ import { useAllCasesNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesToast } from '../../common/use_cases_toast';
 import { AttachmentActionType } from '../../client/attachment_framework/types';
+import { KibanaServices } from '../../common/lib/kibana';
+import { ApplyTemplateModal } from './apply_template_modal';
+import { useRunCaseWorkflow } from '../workflows/use_run_case_workflow';
+import { RunCaseWorkflowModal } from '../workflows/run_case_workflow_modal';
+import * as workflowI18n from '../workflows/translations';
 
 interface CaseViewActions {
   caseData: CaseUI;
@@ -29,7 +35,21 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
   const { permissions } = useCasesContext();
   const { showSuccessToast } = useCasesToast();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [isApplyTemplateModalVisible, setIsApplyTemplateModalVisible] = useState<boolean>(false);
   const buttonRef = React.useRef<HTMLAnchorElement>(null);
+
+  const isTemplatesV2Enabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
+
+  const {
+    canRunWorkflow,
+    isModalOpen: isRunWorkflowModalOpen,
+    openModal: openRunWorkflowModal,
+    closeModal: closeRunWorkflowModal,
+    inputs: workflowInputs,
+    runWorkflow,
+    filterWorkflow: workflowFilterWorkflow,
+    sortWorkflow: workflowSortWorkflow,
+  } = useRunCaseWorkflow({ caseData });
 
   const openModal = useCallback(() => {
     setIsModalVisible(true);
@@ -39,8 +59,26 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
     setIsModalVisible(false);
   }, []);
 
+  const openApplyTemplateModal = useCallback(() => {
+    setIsApplyTemplateModalVisible(true);
+  }, []);
+
+  const closeApplyTemplateModal = useCallback(() => {
+    setIsApplyTemplateModalVisible(false);
+  }, []);
+
   const propertyActions = useMemo(
     () => [
+      ...(canRunWorkflow
+        ? [
+            {
+              type: AttachmentActionType.BUTTON as const,
+              iconType: 'play',
+              label: workflowI18n.RUN_WORKFLOW,
+              onClick: openRunWorkflowModal,
+            },
+          ]
+        : []),
       {
         type: AttachmentActionType.BUTTON as const,
         iconType: 'copy',
@@ -50,6 +88,16 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
           showSuccessToast(i18n.COPY_ID_ACTION_SUCCESS);
         },
       },
+      ...(isTemplatesV2Enabled
+        ? [
+            {
+              type: AttachmentActionType.BUTTON as const,
+              iconType: 'indexEdit',
+              label: commonI18n.APPLY_TEMPLATE_ACTION_LABEL,
+              onClick: openApplyTemplateModal,
+            },
+          ]
+        : []),
       ...(currentExternalIncident != null && !isEmpty(currentExternalIncident?.externalUrl)
         ? [
             {
@@ -72,7 +120,17 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
           ]
         : []),
     ],
-    [permissions.delete, openModal, currentExternalIncident, caseData.id, showSuccessToast]
+    [
+      canRunWorkflow,
+      openRunWorkflowModal,
+      permissions.delete,
+      openModal,
+      openApplyTemplateModal,
+      isTemplatesV2Enabled,
+      currentExternalIncident,
+      caseData.id,
+      showSuccessToast,
+    ]
   );
 
   const onConfirmDeletion = useCallback(() => {
@@ -102,6 +160,18 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
           focusButtonRef={buttonRef}
         />
       ) : null}
+      {isApplyTemplateModalVisible ? (
+        <ApplyTemplateModal caseData={caseData} onClose={closeApplyTemplateModal} />
+      ) : null}
+      {isRunWorkflowModalOpen && (
+        <RunCaseWorkflowModal
+          inputs={workflowInputs}
+          runWorkflow={runWorkflow}
+          filterWorkflow={workflowFilterWorkflow}
+          sortWorkflow={workflowSortWorkflow}
+          onClose={closeRunWorkflowModal}
+        />
+      )}
     </EuiFlexItem>
   );
 };

@@ -10,7 +10,7 @@ export const DATE_PICKER_ABSOLUTE_INPUT = '[data-test-subj="superDatePickerAbsol
 export const GET_LOCAL_DATE_PICKER_APPLY_BUTTON = (container: string) =>
   `${container} button[data-test-subj="querySubmitButton"]`;
 
-export const GLOBAL_FILTERS_CONTAINER = `[data-test-subj="filters-global-container"]`;
+export const GLOBAL_FILTERS_CONTAINER = `[data-test-subj="globalDatePicker"]`;
 
 export const GET_DATE_PICKER_APPLY_BUTTON = (container: string) =>
   `${container} [data-test-subj="querySubmitButton"]`;
@@ -40,6 +40,11 @@ export const DATE_PICKER_START_DATE_POPOVER_BUTTON = `${GLOBAL_FILTERS_CONTAINER
 
 export const GET_LOCAL_SHOW_DATES_BUTTON = (container: string) =>
   `${container} [data-test-subj="superDatePickerShowDatesButton"]`;
+
+export const GET_DATE_RANGE_PICKER_CONTROL_BUTTON = (container: string) =>
+  `${container} [data-test-subj="dateRangePickerControlButton"]`;
+
+export const DATE_RANGE_PICKER_INPUT = '[data-test-subj="dateRangePickerInput"]';
 
 export const GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON = (container: string = '') =>
   `${container} [data-test-subj="superDatePickerstartDatePopoverButton"]`;

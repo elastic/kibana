@@ -6,7 +6,7 @@
  */
 
 import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
@@ -19,6 +19,7 @@ import { savedQuerySavedObjectType } from '../../../common/types';
 import { convertECSMappingToObject } from '../utils';
 import type { ReadSavedQueryRequestParamsSchema } from '../../../common/api/saved_query/read_saved_query_route';
 import { readSavedQueryRequestParamsSchema } from '../../../common/api/saved_query/read_saved_query_route';
+import { readSavedQueryResponseSchema } from './response_schemas';
 
 export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -40,6 +41,11 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
               typeof readSavedQueryRequestParamsSchema,
               ReadSavedQueryRequestParamsSchema
             >(readSavedQueryRequestParamsSchema),
+          },
+          response: {
+            200: {
+              body: () => readSavedQueryResponseSchema,
+            },
           },
         },
       },

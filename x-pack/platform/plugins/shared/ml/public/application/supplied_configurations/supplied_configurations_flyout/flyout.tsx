@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { Module } from '../../../../common/types/modules';
+import type { Module } from '@kbn/ml-common-types/modules';
 import { isLogoObject } from '../supplied_configurations';
 import { OverviewTabContent } from './overview_tab_content';
 import { JobsTabContent } from './jobs_tab_content';
@@ -129,7 +129,9 @@ export const SuppliedConfigurationsFlyout: FC<Props> = ({ module, onClose }) => 
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem grow={false}>
-            {isLogoObject(module.logo) ? <EuiIcon size="xxl" type={module.logo.icon} /> : null}
+            {isLogoObject(module.logo) ? (
+              <EuiIcon aria-hidden={true} size="xxl" type={module.logo.icon} />
+            ) : null}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">

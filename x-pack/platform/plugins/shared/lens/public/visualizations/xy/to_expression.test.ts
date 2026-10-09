@@ -89,6 +89,7 @@ describe('#toExpression', () => {
           legend: { position: Position.Left, isVisible: true },
           valueLabels: 'hide',
           preferredSeriesType: 'bar',
+          areaFill: 'solid',
           fittingFunction: 'Carry',
           endValue: 'Nearest',
           emphasizeFitting: true,
@@ -655,6 +656,244 @@ describe('#toExpression', () => {
     expect(colorMappingConfig.paletteId).toEqual('default');
   });
 
+  it('should use a default colorMapping with the correct paletteId when splitAccessors are defined but colorMapping is not', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'bar',
+            splitAccessors: ['d'],
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    const colorMappingJson = (expression.chain[0].arguments.layers[0] as Ast).chain[1].arguments
+      .colorMapping[0] as string;
+    const colorMappingConfig = JSON.parse(colorMappingJson);
+    expect(colorMappingConfig).toEqual({
+      ...DEFAULT_COLOR_MAPPING_CONFIG,
+      paletteId: 'default',
+    });
+  });
+
+  it('should use the line-optimized paletteId in the default colorMapping for line charts without explicit colorMapping', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'line',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'line',
+            splitAccessors: ['d'],
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    const colorMappingJson = (expression.chain[0].arguments.layers[0] as Ast).chain[1].arguments
+      .colorMapping[0] as string;
+    const colorMappingConfig = JSON.parse(colorMappingJson);
+    expect(colorMappingConfig).toEqual({
+      ...DEFAULT_COLOR_MAPPING_CONFIG,
+      paletteId: 'elastic_line_optimized',
+    });
+  });
+
+  it('should not set colorMapping when there are no splitAccessors', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'bar',
+            splitAccessors: undefined,
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    expect(
+      (expression.chain[0].arguments.layers[0] as Ast).chain[1].arguments.colorMapping
+    ).toBeUndefined();
+  });
+
+  it('should not set colorMapping when splitAccessors are collapsed', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'bar',
+            splitAccessors: ['d'],
+            collapseFn: 'sum',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    expect(
+      (expression.chain[0].arguments.layers[0] as Ast).chain[1].arguments.colorMapping
+    ).toBeUndefined();
+  });
+
+  it('should not set colorMapping when splitAccessors are collapsed even if layer has colorMapping', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'line',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'line',
+            splitAccessors: ['d'],
+            collapseFn: 'sum',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+            colorMapping: {
+              ...DEFAULT_COLOR_MAPPING_CONFIG,
+              paletteId: 'default',
+            },
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    expect(
+      (expression.chain[0].arguments.layers[0] as Ast).chain[1].arguments.colorMapping
+    ).toBeUndefined();
+  });
+
+  it('should use the line-optimized palette in the expression when collapsed line chart has no explicit palette', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'line',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'line',
+            splitAccessors: ['d'],
+            collapseFn: 'sum',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    const layerChain = (expression.chain[0].arguments.layers[0] as Ast).chain;
+    const extendedDataLayer = layerChain[layerChain.length - 1];
+    const paletteExpression = extendedDataLayer.arguments.palette[0] as Ast;
+    expect(paletteExpression.chain[0].function).toEqual('system_palette');
+    expect(paletteExpression.chain[0].arguments.name).toEqual(['elastic_line_optimized']);
+  });
+
+  it('should ignore legacy palette and use series type default when collapsed', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'line',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'line',
+            splitAccessors: ['d'],
+            collapseFn: 'sum',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+            palette: { type: 'palette', name: 'kibana_palette' },
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    const layerChain = (expression.chain[0].arguments.layers[0] as Ast).chain;
+    const extendedDataLayer = layerChain[layerChain.length - 1];
+    const paletteExpression = extendedDataLayer.arguments.palette[0] as Ast;
+    expect(paletteExpression.chain[0].function).toEqual('system_palette');
+    expect(paletteExpression.chain[0].arguments.name).toEqual(['elastic_line_optimized']);
+  });
+
+  it('should not set colorMapping when a legacy palette is explicitly set with active splits', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'line',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'line',
+            splitAccessors: ['d'],
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+            palette: { type: 'palette', name: 'kibana_palette' },
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    expect(
+      (expression.chain[0].arguments.layers[0] as Ast).chain[1].arguments.colorMapping
+    ).toBeUndefined();
+  });
+
   it('should use the default palette for area charts without explicit palette', () => {
     const expression = xyVisualization.toExpression(
       {
@@ -830,5 +1069,56 @@ describe('#toExpression', () => {
       datasourceExpressionsByLayers
     ) as Ast;
     expect(expression.chain[0].arguments.addTimeMarker[0] as Ast).toEqual(false);
+  });
+
+  it('should include areaFill in the expression AST', () => {
+    const ast = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'area',
+        areaFill: 'gradient',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'area',
+            splitAccessors: ['d'],
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    expect(ast.chain[0].arguments.areaFill[0]).toEqual('gradient');
+  });
+
+  it('should default areaFill to solid', () => {
+    const ast = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'area',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'area',
+            splitAccessors: ['d'],
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    expect(ast.chain[0].arguments.areaFill[0]).toEqual('solid');
   });
 });

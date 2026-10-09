@@ -11,11 +11,8 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { useCaseDisabled } from '../hooks/use_case_permission';
-import type { IndicatorAttachmentMetadata } from '../utils/attachments';
-import {
-  generateIndicatorAttachmentsMetadata,
-  generateIndicatorAttachmentsWithoutOwner,
-} from '../utils/attachments';
+import type { IndicatorAttachmentMetadata } from '..';
+import { generateIndicatorAttachmentsMetadata, generateIndicatorAttachmentsWithoutOwner } from '..';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 

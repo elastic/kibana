@@ -21,8 +21,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSiemReadinessApi } from '@kbn/siem-readiness';
 import type { SiemReadinessPackageInfo } from '@kbn/siem-readiness';
+import { useSiemReadinessApi } from '../../../hooks/use_siem_readiness_api';
 import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
 import { useBasePath } from '../../../../common/lib/kibana';
 import { IntegrationSelectablePopover } from '../../components/integrations_selectable_popover';
@@ -230,7 +230,13 @@ export const DataCoveragePanel: React.FC = () => {
         const options = getIntegrationOptionsForCategory(row.category);
         const statusMap = getStatusMapForCategory(row.category);
 
-        return <IntegrationSelectablePopover options={options} statusMap={statusMap} />;
+        return (
+          <IntegrationSelectablePopover
+            options={options}
+            statusMap={statusMap}
+            telemetrySource="data_coverage"
+          />
+        );
       },
     },
   ];

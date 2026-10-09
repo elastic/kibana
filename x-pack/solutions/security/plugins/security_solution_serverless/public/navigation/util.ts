@@ -35,8 +35,6 @@ export const getCloudUrl: GetCloudUrl = (cloudUrlKey, cloud) => {
       return cloudUrls.performanceUrl;
     case 'profile':
       return cloudUrls.profileUrl;
-    case 'usersAndRoles':
-      return cloudUrls.usersAndRolesUrl;
     case 'projects':
       return cloudUrls.projectsUrl;
     default:

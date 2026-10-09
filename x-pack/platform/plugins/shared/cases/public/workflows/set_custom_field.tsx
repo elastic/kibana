@@ -8,11 +8,12 @@
 import type { SelectionOption } from '@kbn/workflows/types/latest';
 import { getCaseConfigure } from '../containers/configure/api';
 import { setCustomFieldStepCommonDefinition } from '../../common/workflows/steps/set_custom_field';
+import type { Owner } from '../../common/bundled-types.gen';
 import type { CasesConfigurationUICustomField } from '../../common/ui';
 import * as i18n from '../../common/workflows/translations';
+import { collectSelectionSearchOptions } from './selection_search';
 import { createPublicCaseStepDefinition } from './shared';
-
-const WORKFLOW_CASE_OWNER = 'securitySolution';
+import { isValidOwner } from '../../common/utils/owner';
 
 const toSelectionOption = (
   customField: CasesConfigurationUICustomField
@@ -22,11 +23,11 @@ const toSelectionOption = (
   description: customField.type,
 });
 
-const getCustomFieldsForWorkflowOwner = async () => {
+const getCustomFieldsForWorkflowOwner = async (owner: Owner) => {
   const configurations = (await getCaseConfigure({})) ?? [];
 
   return configurations
-    .filter((configuration) => configuration.owner === WORKFLOW_CASE_OWNER)
+    .filter((configuration) => configuration.owner === owner)
     .flatMap((configuration) => configuration.customFields ?? []);
 };
 
@@ -36,23 +37,36 @@ export const setCustomFieldStepDefinition = createPublicCaseStepDefinition({
     input: {
       field_name: {
         selection: {
-          search: async (input) => {
-            const customFields = await getCustomFieldsForWorkflowOwner();
+          dependsOnValues: ['input.owner'],
+          search: async (input, ctx) => {
+            const owner = ctx.values.input.owner;
+            if (!isValidOwner(owner)) {
+              return [];
+            }
+
             const query = input.trim().toLowerCase();
+            const customFields = await getCustomFieldsForWorkflowOwner(owner);
 
-            return customFields.reduce<SelectionOption<string>[]>((acc, customField) => {
-              const fieldKey = customField.key.toLowerCase();
-              const fieldLabel = customField.label.toLowerCase();
+            const queryIsEmpty = query.length === 0;
 
-              if (!query || fieldKey.includes(query) || fieldLabel.includes(query)) {
-                acc.push(toSelectionOption(customField));
-              }
-
-              return acc;
-            }, []);
+            return collectSelectionSearchOptions({
+              items: customFields,
+              hasEmptyQuery: queryIsEmpty,
+              matchesQuery: (customField) => {
+                const fieldKey = customField.key.toLowerCase();
+                const fieldLabel = customField.label.toLowerCase();
+                return fieldKey.includes(query) || fieldLabel.includes(query);
+              },
+              toOption: (customField) => toSelectionOption(customField),
+            });
           },
-          resolve: async (value) => {
-            const customFields = await getCustomFieldsForWorkflowOwner();
+          resolve: async (value, ctx) => {
+            const owner = ctx.values.input.owner;
+            if (!isValidOwner(owner)) {
+              return null;
+            }
+
+            const customFields = await getCustomFieldsForWorkflowOwner(owner);
             const customField = customFields.find((currentField) => currentField.key === value);
 
             if (!customField) {

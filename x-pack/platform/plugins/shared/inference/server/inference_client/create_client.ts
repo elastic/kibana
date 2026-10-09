@@ -12,17 +12,20 @@ import type {
   BoundOptions,
   BoundInferenceClient,
   InferenceClient,
-  AnonymizationRule,
   InferenceCallbacks,
 } from '@kbn/inference-common';
+import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
+  InferenceAnonymizationOptions,
+  RegexWorkerService,
+} from '@kbn/ai-anonymization-server';
 import type { ActionsClientProvider } from '../types';
 import { createInferenceClient } from './inference_client';
 import { bindClient } from '../../common/inference_client/bind_client';
-import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
-import type { InferenceAnonymizationOptions } from './anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
+import type { TokenUsageLogger } from '../token_usage';
 
 interface CreateClientOptions {
   request: KibanaRequest;
@@ -36,6 +39,11 @@ interface CreateClientOptions {
   endpointIdCache: InferenceEndpointIdCache;
   callbacks?: InferenceCallbacks;
   anonymization?: InferenceAnonymizationOptions;
+  tokenUsageLogger?: TokenUsageLogger;
+  isTokenUsageTrackingEnabled?: () => Promise<boolean>;
+  isDefaultConnectorOnly?: () => Promise<boolean>;
+  getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
 }
 
 interface BoundCreateClientOptions extends CreateClientOptions {
@@ -59,6 +67,11 @@ export function createClient(
     endpointIdCache,
     callbacks,
     anonymization,
+    tokenUsageLogger,
+    isTokenUsageTrackingEnabled,
+    isDefaultConnectorOnly,
+    getDefaultConnectorId,
+    resolveConnectorId,
   } = options;
   const client = createInferenceClient({
     request,
@@ -72,6 +85,11 @@ export function createClient(
     endpointIdCache,
     callbacks,
     anonymization,
+    tokenUsageLogger,
+    isTokenUsageTrackingEnabled,
+    isDefaultConnectorOnly,
+    getDefaultConnectorId,
+    resolveConnectorId,
   });
   if ('bindTo' in options) {
     return bindClient(client, options.bindTo);

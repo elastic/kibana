@@ -40,13 +40,12 @@ export const isCancelFeatureAvailable = (
     return false;
   }
 
-  // Check agent type
-  if (agentType !== 'microsoft_defender_endpoint') {
-    return false;
-  }
-
   // Check if Microsoft Defender Endpoint cancel feature is enabled
-  if (!featureFlags.microsoftDefenderEndpointCancelEnabled) {
+  if (
+    (!featureFlags.microsoftDefenderEndpointCancelEnabled &&
+      agentType === 'microsoft_defender_endpoint') ||
+    (!featureFlags.responseActionsEndpointCancel && agentType === 'endpoint')
+  ) {
     return false;
   }
 

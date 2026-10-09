@@ -5,23 +5,28 @@
  * 2.0.
  */
 
-import { BuildGroupsStep, buildNotificationGroups } from './build_groups_step';
+import { BuildGroupsStep, buildActionGroups } from './build_groups_step';
+import { RuleCatalog } from '../state';
 import {
-  createAlertEpisode,
+  createActionPolicy,
+  createAlert,
   createDispatcherPipelineState,
   createMatchedPair,
-  createNotificationPolicy,
+  createRule,
+  createStepLogger,
 } from '../fixtures/test_utils';
+
+const logger = createStepLogger();
 
 describe('BuildGroupsStep', () => {
   const step = new BuildGroupsStep();
 
-  it('returns notification groups from matched pairs', async () => {
+  it('returns action groups from matched pairs', async () => {
     const state = createDispatcherPipelineState({
       matched: [
         createMatchedPair({
-          episode: createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' }),
-          policy: createNotificationPolicy({
+          alert: createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' }),
+          policy: createActionPolicy({
             id: 'p1',
             destinations: [{ type: 'workflow', id: 'w1' }],
           }),
@@ -29,19 +34,19 @@ describe('BuildGroupsStep', () => {
       ],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.groups).toHaveLength(1);
     expect(result.data?.groups?.[0].policyId).toBe('p1');
-    expect(result.data?.groups?.[0].episodes).toHaveLength(1);
+    expect(result.data?.groups?.[0].alerts).toHaveLength(1);
   });
 
   it('returns empty groups when no matched pairs', async () => {
     const state = createDispatcherPipelineState({ matched: [] });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -49,194 +54,187 @@ describe('BuildGroupsStep', () => {
   });
 });
 
-describe('buildNotificationGroups', () => {
-  it('creates separate groups for different episodes with no groupBy', () => {
-    const policy = createNotificationPolicy({
+describe('buildActionGroups', () => {
+  it('creates separate groups for different alerts when grouping per alert', () => {
+    const policy = createActionPolicy({
       id: 'p1',
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
     const matched = [
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' }),
+        alert: createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' }),
         policy,
       }),
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e2' }),
+        alert: createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e2' }),
         policy,
       }),
     ];
 
-    const groups = buildNotificationGroups(matched);
+    const groups = buildActionGroups(matched);
 
     expect(groups).toHaveLength(2);
   });
 
-  it('groups episodes from same rule+policy+groupKey into same group', () => {
-    const policy = createNotificationPolicy({
+  it('groups alerts from same rule+policy+groupKey into same group', () => {
+    const policy = createActionPolicy({
       id: 'p1',
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
-    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' });
-    const matched = [
-      createMatchedPair({ episode, policy }),
-      createMatchedPair({ episode, policy }),
-    ];
+    const alert = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+    const matched = [createMatchedPair({ alert, policy }), createMatchedPair({ alert, policy })];
 
-    const groups = buildNotificationGroups(matched);
+    const groups = buildActionGroups(matched);
 
     expect(groups).toHaveLength(1);
-    expect(groups[0].episodes).toHaveLength(2);
+    expect(groups[0].alerts).toHaveLength(2);
   });
 
   it('assigns deterministic group IDs', () => {
-    const policy = createNotificationPolicy({
+    const policy = createActionPolicy({
       id: 'p1',
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
-    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' });
+    const alert = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
 
-    const groups1 = buildNotificationGroups([createMatchedPair({ episode, policy })]);
-    const groups2 = buildNotificationGroups([createMatchedPair({ episode, policy })]);
+    const groups1 = buildActionGroups([createMatchedPair({ alert, policy })]);
+    const groups2 = buildActionGroups([createMatchedPair({ alert, policy })]);
 
     expect(groups1[0].id).toBe(groups2[0].id);
   });
 
-  it('groups episodes by a single data field', () => {
-    const policy = createNotificationPolicy({
+  it('groups alerts by a single data field', () => {
+    const policy = createActionPolicy({
       id: 'p1',
-      groupBy: ['data.host.name'],
-      groupingMode: 'per_field' as const,
+      grouping: { mode: 'per_field' as const, fields: ['data.host.name'] },
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
     const matched = [
       createMatchedPair({
-        episode: createAlertEpisode({
+        alert: createAlert({
           rule_id: 'r1',
-          episode_id: 'e1',
+          alert_id: 'e1',
           data: { host: { name: 'server-1' } },
         }),
         policy,
       }),
       createMatchedPair({
-        episode: createAlertEpisode({
+        alert: createAlert({
           rule_id: 'r1',
-          episode_id: 'e2',
+          alert_id: 'e2',
           data: { host: { name: 'server-1' } },
         }),
         policy,
       }),
     ];
 
-    const groups = buildNotificationGroups(matched);
+    const groups = buildActionGroups(matched);
 
     expect(groups).toHaveLength(1);
-    expect(groups[0].episodes).toHaveLength(2);
+    expect(groups[0].alerts).toHaveLength(2);
     expect(groups[0].groupKey).toEqual({ 'data.host.name': 'server-1' });
   });
 
   it('creates separate groups for different field values', () => {
-    const policy = createNotificationPolicy({
+    const policy = createActionPolicy({
       id: 'p1',
-      groupBy: ['data.host.name'],
-      groupingMode: 'per_field' as const,
+      grouping: { mode: 'per_field' as const, fields: ['data.host.name'] },
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
     const matched = [
       createMatchedPair({
-        episode: createAlertEpisode({
+        alert: createAlert({
           rule_id: 'r1',
-          episode_id: 'e1',
+          alert_id: 'e1',
           data: { host: { name: 'server-1' } },
         }),
         policy,
       }),
       createMatchedPair({
-        episode: createAlertEpisode({
+        alert: createAlert({
           rule_id: 'r1',
-          episode_id: 'e2',
+          alert_id: 'e2',
           data: { host: { name: 'server-2' } },
         }),
         policy,
       }),
     ];
 
-    const groups = buildNotificationGroups(matched);
+    const groups = buildActionGroups(matched);
 
     expect(groups).toHaveLength(2);
     expect(groups[0].groupKey).toEqual({ 'data.host.name': 'server-1' });
     expect(groups[1].groupKey).toEqual({ 'data.host.name': 'server-2' });
   });
 
-  it('groups episodes by multiple data fields', () => {
-    const policy = createNotificationPolicy({
+  it('groups alerts by multiple data fields', () => {
+    const policy = createActionPolicy({
       id: 'p1',
-      groupBy: ['data.host.name', 'data.env'],
-      groupingMode: 'per_field' as const,
+      grouping: { mode: 'per_field' as const, fields: ['data.host.name', 'data.env'] },
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
     const matched = [
       createMatchedPair({
-        episode: createAlertEpisode({
+        alert: createAlert({
           rule_id: 'r1',
-          episode_id: 'e1',
+          alert_id: 'e1',
           data: { host: { name: 'server-1' }, env: 'prod' },
         }),
         policy,
       }),
       createMatchedPair({
-        episode: createAlertEpisode({
+        alert: createAlert({
           rule_id: 'r1',
-          episode_id: 'e2',
+          alert_id: 'e2',
           data: { host: { name: 'server-1' }, env: 'prod' },
         }),
         policy,
       }),
       createMatchedPair({
-        episode: createAlertEpisode({
+        alert: createAlert({
           rule_id: 'r1',
-          episode_id: 'e3',
+          alert_id: 'e3',
           data: { host: { name: 'server-1' }, env: 'staging' },
         }),
         policy,
       }),
     ];
 
-    const groups = buildNotificationGroups(matched);
+    const groups = buildActionGroups(matched);
 
     expect(groups).toHaveLength(2);
     const prodGroup = groups.find((g) => g.groupKey['data.env'] === 'prod')!;
     const stagingGroup = groups.find((g) => g.groupKey['data.env'] === 'staging')!;
-    expect(prodGroup.episodes).toHaveLength(2);
-    expect(stagingGroup.episodes).toHaveLength(1);
+    expect(prodGroup.alerts).toHaveLength(2);
+    expect(stagingGroup.alerts).toHaveLength(1);
   });
 
   it('defaults missing data fields to null', () => {
-    const policy = createNotificationPolicy({
+    const policy = createActionPolicy({
       id: 'p1',
-      groupBy: ['data.host.name', 'data.env'],
-      groupingMode: 'per_field' as const,
+      grouping: { mode: 'per_field' as const, fields: ['data.host.name', 'data.env'] },
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
     const matched = [
       createMatchedPair({
-        episode: createAlertEpisode({
+        alert: createAlert({
           rule_id: 'r1',
-          episode_id: 'e1',
+          alert_id: 'e1',
           data: { host: { name: 'server-1' } },
         }),
         policy,
       }),
       createMatchedPair({
-        episode: createAlertEpisode({
+        alert: createAlert({
           rule_id: 'r1',
-          episode_id: 'e2',
+          alert_id: 'e2',
           data: {},
         }),
         policy,
       }),
     ];
 
-    const groups = buildNotificationGroups(matched);
+    const groups = buildActionGroups(matched);
 
     const groupWithHost = groups.find((g) => g.groupKey['data.host.name'] === 'server-1')!;
     expect(groupWithHost.groupKey).toEqual({ 'data.host.name': 'server-1', 'data.env': null });
@@ -246,73 +244,179 @@ describe('buildNotificationGroups', () => {
   });
 
   it('creates one group per rule for all mode', () => {
-    const policy = createNotificationPolicy({
+    const policy = createActionPolicy({
       id: 'p1',
-      groupingMode: 'all',
+      grouping: { mode: 'all' },
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
     const matched = [
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e1' }),
+        alert: createAlert({ rule_id: 'r1', alert_id: 'e1' }),
         policy,
       }),
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e2' }),
+        alert: createAlert({ rule_id: 'r1', alert_id: 'e2' }),
         policy,
       }),
     ];
 
-    const groups = buildNotificationGroups(matched);
+    const groups = buildActionGroups(matched);
 
     expect(groups).toHaveLength(1);
-    expect(groups[0].episodes).toHaveLength(2);
+    expect(groups[0].alerts).toHaveLength(2);
     expect(groups[0].groupKey).toEqual({});
   });
 
-  it('merges episodes from different rules into one group in all mode', () => {
-    const policy = createNotificationPolicy({
+  it('merges alerts from different rules into one group in all mode', () => {
+    const policy = createActionPolicy({
       id: 'p1',
-      groupingMode: 'all',
+      grouping: { mode: 'all' },
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
     const matched = [
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e1' }),
+        alert: createAlert({ rule_id: 'r1', alert_id: 'e1' }),
         policy,
       }),
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r2', episode_id: 'e2' }),
+        alert: createAlert({ rule_id: 'r2', alert_id: 'e2' }),
         policy,
       }),
     ];
 
-    const groups = buildNotificationGroups(matched);
+    const groups = buildActionGroups(matched);
 
     expect(groups).toHaveLength(1);
-    expect(groups[0].episodes).toHaveLength(2);
-    expect(groups[0].episodes[0].rule_id).toBe('r1');
-    expect(groups[0].episodes[1].rule_id).toBe('r2');
+    expect(groups[0].alerts).toHaveLength(2);
+    expect(groups[0].alerts[0].rule_id).toBe('r1');
+    expect(groups[0].alerts[1].rule_id).toBe('r2');
   });
 
-  it('creates one group per episode for explicit per_episode mode', () => {
-    const policy = createNotificationPolicy({
-      id: 'p1',
-      groupingMode: 'per_episode',
-      destinations: [{ type: 'workflow', id: 'w1' }],
-    });
+  it('populates rules map from state.rules for alerts in the group', () => {
+    const policy = createActionPolicy({ id: 'p1', grouping: { mode: 'all' } });
+    const rules = new Map([
+      ['r1', createRule({ id: 'r1', name: 'CPU spike' })],
+      ['r2', createRule({ id: 'r2', name: 'Cert expiry' })],
+    ]);
     const matched = [
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' }),
+        alert: createAlert({ rule_id: 'r1', alert_id: 'e1' }),
         policy,
       }),
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e2' }),
+        alert: createAlert({ rule_id: 'r2', alert_id: 'e2' }),
         policy,
       }),
     ];
 
-    const groups = buildNotificationGroups(matched);
+    const groups = buildActionGroups(matched, RuleCatalog.of(rules));
+
+    expect(groups[0].rules).toEqual({
+      r1: { name: 'CPU spike' },
+      r2: { name: 'Cert expiry' },
+    });
+  });
+
+  it('omits rules not present in state.rules', () => {
+    const policy = createActionPolicy({ id: 'p1' });
+    const rules = new Map([['r1', createRule({ id: 'r1', name: 'CPU spike' })]]);
+    const matched = [
+      createMatchedPair({
+        alert: createAlert({ rule_id: 'r1', alert_id: 'e1' }),
+        policy,
+      }),
+      createMatchedPair({
+        alert: createAlert({ rule_id: 'r-missing', alert_id: 'e2' }),
+        policy,
+      }),
+    ];
+
+    const groups = buildActionGroups(matched, RuleCatalog.of(rules));
+
+    expect(groups[0].rules).toEqual({ r1: { name: 'CPU spike' } });
+    expect(groups[1].rules).toEqual({});
+  });
+
+  it('returns empty rules map when state.rules is undefined', () => {
+    const policy = createActionPolicy({ id: 'p1' });
+    const matched = [
+      createMatchedPair({
+        alert: createAlert({ rule_id: 'r1', alert_id: 'e1' }),
+        policy,
+      }),
+    ];
+
+    const groups = buildActionGroups(matched);
+
+    expect(groups[0].rules).toEqual({});
+  });
+
+  it('creates one group per alert for explicit per_alert mode', () => {
+    const policy = createActionPolicy({
+      id: 'p1',
+      grouping: { mode: 'per_alert' },
+      destinations: [{ type: 'workflow', id: 'w1' }],
+    });
+    const matched = [
+      createMatchedPair({
+        alert: createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' }),
+        policy,
+      }),
+      createMatchedPair({
+        alert: createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e2' }),
+        policy,
+      }),
+    ];
+
+    const groups = buildActionGroups(matched);
 
     expect(groups).toHaveLength(2);
+    expect(groups.map(({ groupKey }) => groupKey)).toEqual([
+      { groupHash: 'h1', alertId: 'e1' },
+      { groupHash: 'h1', alertId: 'e2' },
+    ]);
+  });
+
+  it('collapses alerts with the same group_hash and alert_id into one group for per_alert mode', () => {
+    const policy = createActionPolicy({
+      id: 'p1',
+      grouping: { mode: 'per_alert' },
+      destinations: [{ type: 'workflow', id: 'w1' }],
+    });
+    const matched = [
+      createMatchedPair({
+        alert: createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' }),
+        policy,
+      }),
+      createMatchedPair({
+        alert: createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' }),
+        policy,
+      }),
+    ];
+
+    const groups = buildActionGroups(matched);
+
+    expect(groups).toHaveLength(1);
+    expect(groups[0].groupKey).toEqual({ groupHash: 'h1', alertId: 'e1' });
+    expect(groups[0].alerts).toHaveLength(2);
+  });
+
+  it('external alert (null rule_id) groups successfully with no rule entry in group.rules', () => {
+    const policy = createActionPolicy({ id: 'p1', spaceId: 'default' });
+    const alert = createAlert({
+      source: 'pagerduty',
+      rule_id: null,
+      space_id: 'default',
+      alert_id: 'pd-ep-1',
+      group_hash: 'pd-hash-1',
+    });
+    const matched = [createMatchedPair({ alert, policy })];
+
+    const groups = buildActionGroups(matched);
+
+    expect(groups).toHaveLength(1);
+    expect(groups[0].alerts).toHaveLength(1);
+    expect(groups[0].alerts[0]).toBe(alert);
+    expect(groups[0].rules).toEqual({});
   });
 });

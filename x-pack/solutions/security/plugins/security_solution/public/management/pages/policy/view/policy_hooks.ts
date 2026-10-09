@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../types';
 import type { State } from '../../../../common/store';
@@ -17,6 +17,7 @@ import {
 } from '../../../common/constants';
 import {
   getPolicyBlocklistsPath,
+  getPolicyCustomYaraSignaturesPath,
   getPolicyDetailsArtifactsListPath,
   getPolicyEndpointExceptionsPath,
   getPolicyEventFiltersPath,
@@ -66,6 +67,11 @@ export function usePolicyDetailsArtifactsNavigateCallback(listId: string) {
         });
       } else if (listId === ENDPOINT_ARTIFACT_LISTS.blocklists.id) {
         return getPolicyBlocklistsPath(policyId, {
+          ...location,
+          ...args,
+        });
+      } else if (listId === ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id) {
+        return getPolicyCustomYaraSignaturesPath(policyId, {
           ...location,
           ...args,
         });

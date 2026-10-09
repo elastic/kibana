@@ -14,23 +14,27 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { AssetsRequestQuery } from './assets_status.gen';
 
+export const ReadAssetsStatusRequestQuery = lazySchema(() =>
+  z.object({
+    query: AssetsRequestQuery,
+  })
+);
 export type ReadAssetsStatusRequestQuery = z.infer<typeof ReadAssetsStatusRequestQuery>;
-export const ReadAssetsStatusRequestQuery = z.object({
-  query: AssetsRequestQuery,
-});
 export type ReadAssetsStatusRequestQueryInput = z.input<typeof ReadAssetsStatusRequestQuery>;
 
+export const ReadAssetsStatusResponse = lazySchema(() => z.object({}));
 export type ReadAssetsStatusResponse = z.infer<typeof ReadAssetsStatusResponse>;
-export const ReadAssetsStatusResponse = z.object({});
+export const UpdateAssetsStatusRequestQuery = lazySchema(() =>
+  z.object({
+    query: AssetsRequestQuery,
+  })
+);
 export type UpdateAssetsStatusRequestQuery = z.infer<typeof UpdateAssetsStatusRequestQuery>;
-export const UpdateAssetsStatusRequestQuery = z.object({
-  query: AssetsRequestQuery,
-});
 export type UpdateAssetsStatusRequestQueryInput = z.input<typeof UpdateAssetsStatusRequestQuery>;
 
+export const UpdateAssetsStatusResponse = lazySchema(() => z.object({}));
 export type UpdateAssetsStatusResponse = z.infer<typeof UpdateAssetsStatusResponse>;
-export const UpdateAssetsStatusResponse = z.object({});

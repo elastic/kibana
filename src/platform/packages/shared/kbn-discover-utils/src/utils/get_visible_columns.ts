@@ -8,23 +8,20 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataTableColumnsMeta } from '../types';
+import type { DataSource } from '@kbn/data-source';
 
 export function canPrependTimeFieldColumn(
   columns: string[] | undefined,
   timeFieldName: string | undefined,
-  columnsMeta: DataTableColumnsMeta | undefined,
-  showTimeCol: boolean, // based on Advanced Settings `doc_table:hideTimeColumn`
-  isESQLMode: boolean
+  dataSource: DataSource | undefined,
+  showTimeCol: boolean // based on Advanced Settings `doc_table:hideTimeColumn`
 ) {
   if (!showTimeCol || !timeFieldName) {
     return false;
   }
 
-  if (isESQLMode) {
-    return (
-      !!columns && !!columnsMeta && timeFieldName in columnsMeta && columns.includes('_source')
-    );
+  if (dataSource?.kind === 'esql') {
+    return !!columns && Boolean(dataSource.getColumn(timeFieldName));
   }
 
   return true;

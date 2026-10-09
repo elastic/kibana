@@ -87,7 +87,7 @@ describe('fetch analytics collection data view id', () => {
         dataViewService as unknown as DataViewsService,
         mockCollectionId
       )
-    ).rejects.toThrowError(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND);
+    ).rejects.toThrow(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND);
     expect(fetchAnalyticsCollections).toHaveBeenCalledWith(mockClient, mockCollectionId);
     expect(dataViewService.find).not.toHaveBeenCalled();
   });

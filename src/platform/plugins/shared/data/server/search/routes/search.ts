@@ -35,6 +35,10 @@ export function registerSearchRoute(
           enabled: false,
           reason: 'This route is opted out from authorization',
         },
+        authc: {
+          enabled: 'minimal',
+          reason: 'This route is optimized for performant retrieval of data from Elasticsearch.',
+        },
       },
     })
     .addVersion(
@@ -56,6 +60,7 @@ export function registerSearchRoute(
                 stream: schema.maybe(schema.boolean()),
                 requestHash: schema.maybe(schema.string()),
                 projectRouting: schema.maybe(schema.string()),
+                approximation: schema.maybe(schema.boolean()),
               },
               { unknowns: 'allow' }
             ),
@@ -72,8 +77,10 @@ export function registerSearchRoute(
           stream,
           requestHash,
           projectRouting,
+          approximation,
           ...searchRequest
         } = request.body;
+
         const { strategy, id } = request.params;
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
@@ -107,6 +114,7 @@ export function registerSearchRoute(
                   stream,
                   requestHash,
                   projectRouting,
+                  approximation,
                 }
               )
               .pipe(first())

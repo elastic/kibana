@@ -9,11 +9,11 @@ import type { CoreStart } from '@kbn/core/public';
 import { tracksOverlays } from '@kbn/presentation-util';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
+import type { PatternAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/pattern_analysis';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import type { AiopsPluginStartDeps } from '../../types';
 import { PatternAnalysisEmbeddableInitializer } from './pattern_analysis_initializer';
 import type { PatternAnalysisComponentApi } from './types';
-import type { PatternAnalysisEmbeddableState } from '../../../common/embeddables/pattern_analysis/types';
 
 export async function resolveEmbeddablePatternAnalysisUserInput(
   coreStart: CoreStart,
@@ -78,7 +78,10 @@ export async function resolveEmbeddablePatternAnalysisUserInput(
         ),
         {
           ownFocus: true,
-          size: 's',
+          size: 500,
+          minWidth: 400,
+          maxWidth: 800,
+          isResizable: true,
           type: 'push',
           paddingSize: 'm',
           hideCloseButton: true,

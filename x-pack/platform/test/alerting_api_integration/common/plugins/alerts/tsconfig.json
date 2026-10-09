@@ -28,6 +28,7 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/data-plugin",
     "@kbn/zod",
+    "@kbn/change-history",
   ],
   "exclude": [
     "target/**/*",

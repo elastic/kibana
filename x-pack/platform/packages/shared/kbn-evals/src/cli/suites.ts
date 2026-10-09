@@ -9,7 +9,7 @@ import Fs from 'fs';
 import Path from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-const METADATA_RELATIVE_PATH = 'x-pack/platform/packages/shared/kbn-evals/evals.suites.json';
+const METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 
 const SKIP_DIRS = new Set([
   '.git',
@@ -27,6 +27,18 @@ const SKIP_DIRS = new Set([
   'data',
 ]);
 
+/**
+ * Splits a suite across several CI steps so a long suite fits inside the Buildkite step timeout.
+ * Each shard becomes its own step (per connector) with its own Scout stack, running only the spec
+ * files it lists. Paths are relative to the suite root (the directory holding `configPath`) and
+ * must partition the suite: CI fails the fanout if one is missing, and the suite's own coverage
+ * test fails if a spec is listed twice or not at all.
+ */
+export interface EvalSuiteShard {
+  id: string;
+  specFiles: string[];
+}
+
 export interface EvalSuiteMetadata {
   id: string;
   name?: string;
@@ -35,6 +47,17 @@ export interface EvalSuiteMetadata {
   tags?: string[];
   ciLabels?: string[];
   serverConfigSet?: string;
+  /** Scout `--arch` for the suite's stack (`stateful` or `serverless`), stateful by default. */
+  scoutArch?: string;
+  /** Scout `--domain` for the suite's stack (e.g. `observability_complete`), `classic` by default. */
+  scoutDomain?: string;
+  /**
+   * Repo-relative bash script that adds env for the suite's Scout server and Playwright run.
+   * It reads the evals config JSON on stdin and prints `{ "env"?: {...} }`.
+   */
+  scoutHook?: string;
+  shards?: EvalSuiteShard[];
+  stepTimeoutInMinutes?: number;
 }
 
 export interface EvalSuiteDefinition {
@@ -49,6 +72,11 @@ export interface EvalSuiteDefinition {
   description?: string;
   source: 'metadata' | 'discovery';
   serverConfigSet?: string;
+  scoutArch?: string;
+  scoutDomain?: string;
+  scoutHook?: string;
+  shards?: EvalSuiteShard[];
+  stepTimeoutInMinutes?: number;
 }
 
 interface MetadataFile {
@@ -154,6 +182,11 @@ const normalizeSuite = (
     description: metadata?.description,
     source: metadata ? 'metadata' : 'discovery',
     serverConfigSet: metadata?.serverConfigSet,
+    scoutArch: metadata?.scoutArch,
+    scoutDomain: metadata?.scoutDomain,
+    scoutHook: metadata?.scoutHook,
+    shards: metadata?.shards,
+    stepTimeoutInMinutes: metadata?.stepTimeoutInMinutes,
   };
 };
 

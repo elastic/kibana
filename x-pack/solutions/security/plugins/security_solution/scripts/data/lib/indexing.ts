@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import crypto from 'crypto';
 import path from 'path';
 import type { Client } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
@@ -253,24 +254,25 @@ export const episodeIndexNames = ({
   dateSuffixOverride?: string;
 }) => {
   const suffix = dateSuffixOverride ?? dateSuffix(endMs);
+  // Opaque per-episode token (not "insights.epN") so index names look like normal namespaces.
+  const episodeToken = crypto.createHash('sha256').update(episodeId).digest('hex').slice(0, 8);
   const epMatch = episodeId.match(/^ep(\d+)$/);
-  if (epMatch) {
-    const epNum = epMatch[1];
-    return {
-      // Keep a dot after `events` to avoid matching common data-stream templates that use `logs-endpoint.events-*`.
-      endpointEvents: `${indexPrefix}.events.insights.ep${epNum}.${suffix}`,
-      // Note: use a dot after `alerts` to avoid matching the Endpoint data stream template
-      // which targets `logs-endpoint.alerts-*` (data streams only).
-      endpointAlerts: `${indexPrefix}.alerts.insights.ep${epNum}.${suffix}`,
-      insightsAlerts: `insights-alerts-ep${epNum}-${suffix}`,
-    };
-  }
+  const legacyEpToken = epMatch
+    ? `insights.ep${epMatch[1]}`
+    : episodeId.replace(/[^a-zA-Z0-9_-]/g, '_');
 
-  const safe = episodeId.replace(/[^a-zA-Z0-9_-]/g, '_');
   return {
-    endpointEvents: `${indexPrefix}.events.${safe}.${suffix}`,
-    endpointAlerts: `${indexPrefix}.alerts.${safe}.${suffix}`,
-    insightsAlerts: `insights-alerts-${safe}-${suffix}`,
+    // Keep a dot after `events`/`alerts` to avoid matching data-stream templates that use `logs-endpoint.events-*`.
+    endpointEvents: `${indexPrefix}.events.${episodeToken}.${suffix}`,
+    endpointAlerts: `${indexPrefix}.alerts.${episodeToken}.${suffix}`,
+    /**
+     * Legacy index names kept for `--clean` of older generator runs only.
+     */
+    legacyEndpointEvents: `${indexPrefix}.events.${legacyEpToken}.${suffix}`,
+    legacyEndpointAlerts: `${indexPrefix}.alerts.${legacyEpToken}.${suffix}`,
+    insightsAlerts: epMatch
+      ? `insights-alerts-ep${epMatch[1]}-${suffix}`
+      : `insights-alerts-${episodeId.replace(/[^a-zA-Z0-9_-]/g, '_')}-${suffix}`,
   };
 };
 

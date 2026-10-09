@@ -98,7 +98,8 @@ export const REF_DATA_KEY_INITIAL_VALUE: Readonly<
       try {
         const endpointExceptionList = await soClient.find({
           type: EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
-          filter: `${EXCEPTION_LIST_NAMESPACE_AGNOSTIC}.attributes.list_id: ${ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id}`,
+          filter: `${EXCEPTION_LIST_NAMESPACE_AGNOSTIC}.attributes.list_id: ${ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id} AND ${EXCEPTION_LIST_NAMESPACE_AGNOSTIC}.attributes.list_type: list`,
+          perPage: 1,
         });
 
         // we should opt-in the user automatically if:

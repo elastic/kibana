@@ -71,6 +71,7 @@ const createStubRule = ({
   has_response_actions: hasResponseActions,
   has_response_actions_endpoint: hasResponseActionsEndpoint,
   has_response_actions_osquery: hasResponseActionsOsquery,
+  ai_created: false,
 });
 
 describe('Detections Usage and Metrics', () => {

@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export enum FIPS_VERSION {
-  TWO = '140-2',
-  THREE = '140-3',
-}
+export const FIPS_VERSION = {
+  TWO: '140-2',
+  THREE: '140-3',
+} as const;
+
+export type FipsVersion = (typeof FIPS_VERSION)[keyof typeof FIPS_VERSION];
 
 export const FIPS_GH_LABELS = {
   [FIPS_VERSION.TWO]: 'ci:enable-fips-140-2-agent',
@@ -20,7 +22,7 @@ export const FIPS_GH_LABELS = {
 /**
  * Checks if the PR has a specific FIPS label or ANY FIPS label when no version is passed.
  */
-export function prHasFIPSLabel(version?: FIPS_VERSION): boolean {
+export function prHasFIPSLabel(version?: FipsVersion): boolean {
   const labels = process.env.GITHUB_PR_LABELS ?? '';
 
   if (!labels) {
@@ -40,6 +42,12 @@ export function prHasFIPSLabel(version?: FIPS_VERSION): boolean {
 export const LABEL_MAPPING: Record<string, Record<string, string>> = {
   'ci:use-chrome-beta': {
     USE_CHROME_BETA: 'true', // Use if you want to run tests with Chrome Beta
+  },
+  'ci:ftr-smart-retry': {
+    FTR_SMART_RETRY_ENABLED: 'true',
+  },
+  'ci:ftr-auto-retry': {
+    FTR_AUTO_RETRY_COUNT: '1',
   },
   [FIPS_GH_LABELS[FIPS_VERSION.TWO]]: {
     TEST_ENABLE_FIPS_VERSION: FIPS_VERSION.TWO,

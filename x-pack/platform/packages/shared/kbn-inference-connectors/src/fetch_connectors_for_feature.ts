@@ -6,15 +6,14 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { InferenceConnector } from '@kbn/inference-common';
+import type { ApiInferenceConnector } from '@kbn/inference-common';
 import {
   INFERENCE_CONNECTORS_INTERNAL_API_PATH,
   type InferenceConnectorsApiResponseBody,
 } from '@kbn/inference-common';
-import { mergeConnectorsFromApiResponse } from './merge_connectors_from_api_response';
 
 export interface FetchConnectorsForFeatureResult {
-  connectors: InferenceConnector[];
+  connectors: ApiInferenceConnector[];
   soEntryFound: boolean;
 }
 
@@ -22,14 +21,13 @@ export const fetchConnectorsForFeature = async (
   http: HttpSetup,
   featureId: string
 ): Promise<FetchConnectorsForFeatureResult> => {
-  const { connectors, allConnectors, soEntryFound } =
-    await http.get<InferenceConnectorsApiResponseBody>(INFERENCE_CONNECTORS_INTERNAL_API_PATH, {
+  const { connectors, soEntryFound } = await http.get<InferenceConnectorsApiResponseBody>(
+    INFERENCE_CONNECTORS_INTERNAL_API_PATH,
+    {
       query: { featureId },
       version: '1',
-    });
+    }
+  );
 
-  return {
-    connectors: mergeConnectorsFromApiResponse(connectors, allConnectors, soEntryFound),
-    soEntryFound,
-  };
+  return { connectors, soEntryFound };
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
 import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
+import { getMeaningfulBucketMs } from '../../util/stream_overview_esql';
 import type { useTimefilter } from '../../hooks/use_timefilter';
 import { TooltipOrPopoverIcon } from '../tooltip_popover_icon/tooltip_popover_icon';
 import { getFormattedError } from '../../util/errors';
@@ -36,11 +37,14 @@ import { getFormattedError } from '../../util/errors';
 export function DocumentsColumn({
   indexPattern,
   histogramQueryFetch,
+  retainHistogramQueryFetch,
   timeState,
   numDataPoints,
 }: {
   indexPattern: string;
   histogramQueryFetch: Promise<UnparsedEsqlResponse>;
+  /** Called on mount with the histogram request, returns a release callback for unmount. */
+  retainHistogramQueryFetch?: (histogramFetch: Promise<UnparsedEsqlResponse>) => () => void;
   timeState: ReturnType<typeof useTimefilter>['timeState'];
   numDataPoints: number;
 }) {
@@ -48,6 +52,11 @@ export function DocumentsColumn({
   const { euiTheme } = useEuiTheme();
 
   const histogramQueryResult = useAsync(() => histogramQueryFetch, [histogramQueryFetch]);
+
+  useEffect(
+    () => retainHistogramQueryFetch?.(histogramQueryFetch),
+    [retainHistogramQueryFetch, histogramQueryFetch]
+  );
 
   const allTimeseries = React.useMemo(
     () =>
@@ -70,7 +79,7 @@ export function DocumentsColumn({
   const hasData = docCount > 0;
 
   const xFormatter = niceTimeFormatter([timeState.start, timeState.end]);
-  const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
+  const minInterval = getMeaningfulBucketMs(timeState.end - timeState.start, numDataPoints);
 
   const noDocCountData = histogramQueryResult.error ? '' : '-';
 
@@ -83,7 +92,7 @@ export function DocumentsColumn({
       iconColor="danger"
     />
   ) : (
-    <EuiIcon type="chartLine" size="m" />
+    <EuiIcon type="chartLine" size="m" aria-hidden={true} />
   );
 
   const cellAriaLabel = hasData
@@ -154,6 +163,7 @@ export function DocumentsColumn({
                     xAccessor="x"
                     yAccessors={['doc_count']}
                     data={serie.data}
+                    enableHistogramMode
                   />
                 ))}
               </Chart>

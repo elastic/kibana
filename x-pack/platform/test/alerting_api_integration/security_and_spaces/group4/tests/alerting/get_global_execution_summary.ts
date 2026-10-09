@@ -99,7 +99,9 @@ export default function getGlobalExecutionSummaryTests({ getService }: FtrProvid
       });
 
       const executionSummary = await retry.try(async () => {
-        // there can be a successful execute before the error one
+        // there can be a successful execute before the error one, so retry until
+        // the summary reflects the expected state (space1's rule failing, space2
+        // excluded)
         const logResponse = await supertestWithoutAuth
           .get(
             `${getUrlPrefix(
@@ -110,16 +112,17 @@ export default function getGlobalExecutionSummaryTests({ getService }: FtrProvid
           .auth(user.username, user.password);
         expect(logResponse.statusCode).to.be(200);
 
-        return logResponse.body;
+        const body = logResponse.body;
+        expect(body.latestExecutionSummary.success).to.be(0);
+        expect(body.latestExecutionSummary.warning).to.be(0);
+        expect(body.latestExecutionSummary.failure).to.be(1);
+        return body;
       });
 
       expect(Object.keys(executionSummary)).to.eql(['executions', 'latestExecutionSummary']);
 
       expect(executionSummary.executions.success).to.be.above(2);
       expect(executionSummary.executions.total).to.be.above(3);
-      expect(executionSummary.latestExecutionSummary.success).to.be(0);
-      expect(executionSummary.latestExecutionSummary.warning).to.be(0);
-      expect(executionSummary.latestExecutionSummary.failure).to.be(1);
     });
   });
 }

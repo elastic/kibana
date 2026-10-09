@@ -11,12 +11,12 @@ import {
   SUPPORTED_PYTORCH_TASKS,
   type SupportedPytorchTasksType,
 } from '@kbn/ml-trained-models-utils';
-import type { TrainedModelUIItem } from '../../../../common/types/trained_models';
+import type { TrainedModelUIItem } from '@kbn/ml-common-types/trained_models';
 import {
   isDFAModelItem,
   isExistingModel,
   isNLPModelItem,
-} from '../../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
 
 const PYTORCH_TYPES = Object.values(SUPPORTED_PYTORCH_TASKS);
 

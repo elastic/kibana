@@ -8,19 +8,16 @@
  */
 
 import type { Dispatch } from 'react';
-import type { ActiveFilters, FilterCounts } from '../datasource';
 import type { ContentListItem } from '../item';
 
 /**
  * Action type constants for state reducer.
  */
 export const CONTENT_LIST_ACTIONS = {
-  /** Atomically update the search query text and parsed filters. */
-  SET_SEARCH: 'SET_SEARCH',
-  /** Clear all filters and reset query text. */
-  CLEAR_FILTERS: 'CLEAR_FILTERS',
-  /** Toggle a value's include/exclude state for any filter dimension, updating filters and query text atomically. */
-  TOGGLE_FILTER: 'TOGGLE_FILTER',
+  /** Set the query text (source of truth for search, filters, and flags). */
+  SET_QUERY: 'SET_QUERY',
+  /** Hard-reset: clear all query text (search, filters, and flags). */
+  RESET_QUERY: 'RESET_QUERY',
   /** Set sort field and direction. */
   SET_SORT: 'SET_SORT',
   /** Set page index. */
@@ -32,36 +29,21 @@ export const CONTENT_LIST_ACTIONS = {
 } as const;
 
 /**
- * Default filter state.
- */
-export const DEFAULT_FILTERS: ActiveFilters = {
-  search: undefined,
-};
-
-/**
  * Client-controlled state managed by the reducer.
  *
- * This includes user-driven state like search, filters, and sort configuration.
+ * This includes user-driven state like query text, sort, and pagination.
  * Query data (items, loading, error) comes directly from React Query.
  */
 export interface ContentListClientState {
   /**
-   * Search state — the serialized `EuiSearchBar` query text is the source of truth
-   * for the search input value. This may contain filter syntax (e.g. `tag:foo`).
-   */
-  search: {
-    /** Full query text including filter syntax (e.g. `tag:foo search text`). */
-    queryText: string;
-  };
-  /**
-   * Parsed filter state used to drive data fetching.
+   * The query text — single source of truth for the search bar.
    *
-   * Always updated atomically with `search.queryText` via `SET_SEARCH`.
-   * When no tag service is configured, `filters.search` equals `search.queryText`.
-   * When tag parsing is available, `filters.search` contains only the free-text
-   * portion and `filters.tag`, `filters.type`, etc. hold structured filters.
+   * All search, filter, and flag state lives in this string (e.g.,
+   * `"createdBy:jane@elastic.co is:starred dashboard"`). The structured
+   * model ({@link ContentListQueryModel}) is derived on-demand via
+   * `useQueryModel`.
    */
-  filters: ActiveFilters;
+  queryText: string;
   /** Sort state. */
   sort: {
     /** Field name to sort by. */
@@ -94,10 +76,6 @@ export interface ContentListQueryData {
   /** Total number of items matching the current query (for pagination). */
   totalItems: number;
   /**
-   * Per-filter counts from the full result set. See {@link FindItemsResult.counts}.
-   */
-  counts?: Record<string, FilterCounts>;
-  /**
    * Whether the initial data load is in progress (no data available yet).
    *
    * This is `true` only on the first fetch before any data has been received.
@@ -118,6 +96,35 @@ export interface ContentListQueryData {
   isFetching: boolean;
   /** Error from the most recent fetch attempt. */
   error?: Error;
+  /**
+   * `true` when the content type has no objects in Elasticsearch and no query
+   * is active. Use this to render a full-page CTA prompt ("Create your first
+   * {entity}"). Mutually exclusive with {@link hasNoResults}.
+   *
+   * Derived from the latest **settled** query data and held stable during
+   * background refetches (`keepPreviousData`). It does not reset to `false`
+   * on every in-flight fetch — only when the newly resolved result contains
+   * items or an active query is detected.
+   */
+  hasNoItems: boolean;
+  /**
+   * `true` when a search or filter is active and returned zero hits. Use this
+   * to render a "no matching results" message inside the table. Mutually
+   * exclusive with {@link hasNoItems}.
+   *
+   * Like {@link hasNoItems}, this is derived from settled data and held stable
+   * during background refetches. It transitions to `false` only when the
+   * resolved result contains hits or the query is cleared.
+   */
+  hasNoResults: boolean;
+  /**
+   * `true` when at least one search term, flag, or field filter is active.
+   *
+   * Derived from the parsed `activeFilters` rather than `queryText` so it is
+   * not confused by whitespace or formatting variations. Drives the
+   * `'filtering'` branch in {@link derivePhase}.
+   */
+  hasActiveQuery: boolean;
 }
 
 /**
@@ -127,29 +134,15 @@ export interface ContentListQueryData {
  */
 export type ContentListState = ContentListClientState & ContentListQueryData;
 
-/** Atomically update both the query text and parsed filters. */
-interface SetSearchAction {
-  type: typeof CONTENT_LIST_ACTIONS.SET_SEARCH;
-  payload: { queryText: string; filters: ActiveFilters };
+/** Set the query text. */
+interface SetQueryAction {
+  type: typeof CONTENT_LIST_ACTIONS.SET_QUERY;
+  payload: { queryText: string };
 }
 
-/** Clear all filters and search text. */
-interface ClearFiltersAction {
-  type: typeof CONTENT_LIST_ACTIONS.CLEAR_FILTERS;
-}
-
-/**
- * Toggle a value's include/exclude state for any filter dimension.
- *
- * Regular call (`withModifierKey: false`): toggles `valueId` in the **include** list.
- * Modifier call (`withModifierKey: true`): toggles `valueId` in the **exclude** list.
- * In both cases the opposite list drops `valueId` if present.
- * The reducer updates `filters` and `search.queryText` atomically
- * using `valueName` as the EUI `Query` field value (the display label in query text).
- */
-interface ToggleFilterAction {
-  type: typeof CONTENT_LIST_ACTIONS.TOGGLE_FILTER;
-  payload: { filterId: string; valueId: string; valueName: string; withModifierKey: boolean };
+/** Hard-reset: clear all query text (search, filters, and flags). */
+interface ResetQueryAction {
+  type: typeof CONTENT_LIST_ACTIONS.RESET_QUERY;
 }
 
 /** Set sort field and direction. */
@@ -164,9 +157,8 @@ interface SetSortAction {
  * @internal Used by the state reducer and dispatch function.
  */
 export type ContentListAction =
-  | SetSearchAction
-  | ClearFiltersAction
-  | ToggleFilterAction
+  | SetQueryAction
+  | ResetQueryAction
   | SetSortAction
   | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_INDEX; payload: { index: number } }
   | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_SIZE; payload: { size: number } }
@@ -181,6 +173,15 @@ export interface ContentListStateContextValue {
   state: ContentListState;
   /** Dispatch function for client state updates (search, filters, sort). */
   dispatch: Dispatch<ContentListAction>;
-  /** Function to manually refetch items from the data source. */
-  refetch: () => void;
+  /**
+   * Full refetch: clears the data-source cache (`onInvalidate`) then
+   * re-executes the query. Use after item mutations (edit, delete, create).
+   */
+  refetch: () => Promise<void>;
+  /**
+   * Lightweight refresh: re-decorates cached items with external data
+   * (`onRefresh`) then re-executes the query without clearing the cache.
+   * Use after external data mutations (star/unstar).
+   */
+  refresh: () => Promise<void>;
 }

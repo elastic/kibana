@@ -7,16 +7,16 @@
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Condition, StreamlangDSL, StreamlangProcessorDefinition } from '@kbn/streamlang';
-import { conditionToPainless, isConditionBlock, transpileIngestPipeline } from '@kbn/streamlang';
+import {
+  combineConditionsAsAnd,
+  combineConditionsForElseBranch,
+  conditionToPainless,
+  isConditionBlock,
+  transpileIngestPipeline,
+} from '@kbn/streamlang';
 import type { StreamlangResolverOptions } from '@kbn/streamlang/types/resolvers';
 
 type StreamlangStep = StreamlangDSL['steps'][number];
-
-function combineConditionsAsAnd(condA?: Condition, condB?: Condition): Condition | undefined {
-  if (!condA) return condB;
-  if (!condB) return condA;
-  return { and: [condA, condB] };
-}
 
 function createConditionNoopProcessor({
   conditionId,
@@ -77,7 +77,7 @@ async function buildSimulationProcessorsFromSteps({
   for (const step of steps) {
     if (isConditionBlock(step)) {
       const conditionId = step.customIdentifier;
-      const { steps: nestedSteps, ...restCondition } = step.condition;
+      const { steps: nestedSteps, else: elseSteps, ...restCondition } = step.condition;
       const combinedCondition = combineConditionsAsAnd(parentCondition, restCondition);
 
       // Only emit no-op processors for identified condition blocks
@@ -89,6 +89,7 @@ async function buildSimulationProcessorsFromSteps({
         );
       }
 
+      // Process if-branch steps
       processors.push(
         ...(await buildSimulationProcessorsFromSteps({
           steps: nestedSteps,
@@ -96,6 +97,29 @@ async function buildSimulationProcessorsFromSteps({
           resolverOptions,
         }))
       );
+
+      // Process else-branch steps with negated condition
+      if (elseSteps && elseSteps.length > 0) {
+        const negatedCondition = combineConditionsForElseBranch(parentCondition, restCondition);
+
+        // Emit noop for else-branch condition tracking
+        if (conditionId && negatedCondition) {
+          processors.push(
+            ...createConditionNoopProcessor({
+              conditionId: `${conditionId}:else`,
+              condition: negatedCondition,
+            })
+          );
+        }
+
+        processors.push(
+          ...(await buildSimulationProcessorsFromSteps({
+            steps: elseSteps,
+            parentCondition: negatedCondition,
+            resolverOptions,
+          }))
+        );
+      }
 
       continue;
     }

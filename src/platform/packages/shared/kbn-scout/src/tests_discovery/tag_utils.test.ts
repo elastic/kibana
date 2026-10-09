@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { collectUniqueTags, getServerRunFlagsFromTags, getTestTagsForTarget } from './tag_utils';
+import {
+  collectUniqueTags,
+  getServerRunFlagsFromTags,
+  getTestTagsForTarget,
+  isScoutTestFile,
+} from './tag_utils';
 
 describe('getTestTagsForTarget', () => {
   it('returns only @local-* tags for target "local"', () => {
@@ -52,7 +57,7 @@ describe('getTestTagsForTarget', () => {
 });
 
 describe('collectUniqueTags', () => {
-  it('returns unique tags from tests with passed status and .spec.ts file', () => {
+  it('returns unique tags from runnable tests', () => {
     const tests = [
       {
         expectedStatus: 'passed',
@@ -83,15 +88,37 @@ describe('collectUniqueTags', () => {
     expect(collectUniqueTags(tests)).toEqual([]);
   });
 
-  it('ignores tests whose file does not end with .spec.ts', () => {
+  it('includes tests registered from a shared factory file', () => {
     const tests = [
       {
         expectedStatus: 'passed',
-        location: { file: '/path/to/setup.ts' },
+        location: { file: 'test/scout/foo/ui/fixtures/artifact_tabs_suite.ts' },
         tags: ['@local-stateful-classic'],
       },
     ];
+    expect(collectUniqueTags(tests)).toEqual(['@local-stateful-classic']);
+  });
+
+  it('ignores global setup and teardown hooks', () => {
+    const tests = [
+      {
+        expectedStatus: 'passed',
+        location: { file: 'test/scout/foo/ui/parallel_tests/global.setup.ts' },
+        tags: ['@local-stateful-classic'],
+      },
+      {
+        expectedStatus: 'passed',
+        location: { file: 'test/scout/foo/ui/parallel_tests/global.teardown.ts' },
+        tags: ['@local-serverless-security_complete'],
+      },
+    ];
     expect(collectUniqueTags(tests)).toEqual([]);
+    expect(
+      isScoutTestFile({
+        expectedStatus: 'passed',
+        location: { file: 'test/scout/foo/ui/parallel_tests/global.setup.ts' },
+      })
+    ).toBe(false);
   });
 
   it('ignores tests without tags', () => {
@@ -119,13 +146,12 @@ describe('getServerRunFlagsFromTags', () => {
     expect(result).toContain('--arch stateful --domain classic');
   });
 
-  it('returns one flag per tag when multiple tags map to same arch/domain', () => {
+  it('dedupes flags when multiple tag aliases map to the same arch/domain', () => {
     const result = getServerRunFlagsFromTags([
       '@local-stateful-classic',
       '@cloud-stateful-classic',
     ]);
-    expect(result).toContain('--arch stateful --domain classic');
-    expect(result).toHaveLength(2);
+    expect(result).toEqual(['--arch stateful --domain classic']);
   });
 
   it('returns only flags for supported arch/domain combinations', () => {

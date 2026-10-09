@@ -11,20 +11,17 @@ import { expect } from '@playwright/test';
 import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
 
-test.beforeEach(async ({ page }) => {
-  await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
+test.beforeEach(async ({ page, onboardingHomePage }) => {
+  await onboardingHomePage.maybeClickIntroducingAIAgentModalContinueBtn();
+  await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding/firehose`);
 });
 
-test('Firehose', async ({ page, onboardingHomePage, firehoseFlowPage }) => {
+test('Firehose', async ({ page, firehoseFlowPage }) => {
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
   assertEnv(process.env.ELASTICSEARCH_HOST, 'ELASTICSEARCH_HOST is not defined.');
 
   const fileName = 'code_snippet_firehose.sh';
   const outputPath = path.join(__dirname, '..', process.env.ARTIFACTS_FOLDER, fileName);
-
-  await onboardingHomePage.useCaseCloud.click();
-  await onboardingHomePage.awsCollectionCard.click();
-  await onboardingHomePage.firehoseQuickstartCard.click();
 
   await firehoseFlowPage.cliOptionButton.click();
   await firehoseFlowPage.copyToClipboardButton.click();

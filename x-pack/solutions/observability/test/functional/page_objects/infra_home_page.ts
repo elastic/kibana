@@ -15,7 +15,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
   const retry = getService('retry');
   const find = getService('find');
   const browser = getService('browser');
-  const pageObjects = getPageObjects(['common', 'header']);
+  const pageObjects = getPageObjects(['common', 'header', 'timePicker']);
   const comboBox = getService('comboBox');
 
   return {
@@ -358,6 +358,20 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       return testSubjects.findAll('anomalyRow');
     },
     async setAnomaliesDate(date: string) {
+      if (await pageObjects.timePicker.isNewDateRangePicker()) {
+        // New DateRangePicker: open custom range panel and set the start date,
+        // leaving the existing end date untouched.
+        await testSubjects.click('dateRangePickerControlButton');
+        await testSubjects.click('dateRangePickerCustomRangeNavItem');
+        await testSubjects.existOrFail('dateRangePickerCustomRangePanel', { timeout: 5000 });
+        await testSubjects.click('dateRangePickerStartAbsoluteTab');
+        const startInput = await testSubjects.find('dateRangePickerStartAbsoluteInput');
+        await startInput.clearValueWithKeyboard();
+        await startInput.type(date);
+        await testSubjects.click('dateRangePickerCustomRangeApplyButton');
+        await testSubjects.missingOrFail('dateRangePickerPopoverPanel', { timeout: 5000 });
+        return;
+      }
       await testSubjects.click('superDatePickerShowDatesButton');
       await testSubjects.click('superDatePickerAbsoluteTab');
       const datePickerInput = await testSubjects.find('superDatePickerAbsoluteDateInput');
@@ -399,9 +413,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     async dismissDatePickerTooltip() {
       const datePicker = await this.getDatePickerInput();
       return retry.try(async () => {
-        const isTooltipOpen = await testSubjects.exists(`waffleDatePickerIntervalTooltip`, {
-          timeout: 3000,
-        });
+        const isTooltipOpen = await testSubjects.exists(`waffleDatePickerIntervalTooltip`);
 
         if (isTooltipOpen) {
           await datePicker.pressKeys(browser.keys.ESCAPE);
@@ -488,10 +500,6 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.find('infraSuggestionsPanel');
     },
 
-    async ensureInventoryFeedbackLinkIsVisible() {
-      await testSubjects.existOrFail('infraInventoryFeedbackLink');
-    },
-
     async ensureKubernetesTourIsVisible() {
       const container = await testSubjects.find('infra-kubernetesTour-text');
       const containerText = await container.getVisibleText();
@@ -500,10 +508,6 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async ensureKubernetesTourIsClosed() {
       await testSubjects.missingOrFail('infra-kubernetesTour-text');
-    },
-
-    async ensureKubernetesFeedbackLinkIsVisible() {
-      return testSubjects.existOrFail('infra-kubernetes-feedback-link');
     },
 
     async clickDismissKubernetesTourButton() {
@@ -522,9 +526,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     async closeFlyoutWithEscape() {
       await retry.tryForTime(5000, async () => {
         await browser.pressKeys(browser.keys.ESCAPE);
-        const flyoutClosed = !(await testSubjects.exists('euiFlyoutCloseButton', {
-          timeout: 1000,
-        }));
+        const flyoutClosed = !(await testSubjects.exists('euiFlyoutCloseButton'));
         if (!flyoutClosed) {
           throw new Error('Flyout still open');
         }

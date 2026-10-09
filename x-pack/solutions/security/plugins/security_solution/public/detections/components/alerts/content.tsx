@@ -5,28 +5,31 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import styled from '@emotion/styled';
+import { isEqual } from 'lodash';
 import { noop } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { SecurityAppHeader } from '../../../common/components/app_header';
 import { PAGE_TITLE } from '../../pages/alerts/translations';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { HeaderPage } from '../../../common/components/header_page';
 import { KPIsSection } from './kpis/kpis_section';
 import { FiltersSection } from './filters/filters_section';
-import { HeaderSection } from './header/header_section';
+import { useAlertsHeaderMenu } from './header/use_alerts_header_menu';
+import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
 import { SearchBarSection } from './search_bar/search_bar_section';
 import { TableSection } from './table/table_section';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
-import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
+import {
+  useGlobalFullScreen,
+  useHasFullScreenContent,
+} from '../../../common/containers/use_full_screen';
 import { Display } from '../../../explore/hosts/pages/display';
 import {
   focusUtilityBarAction,
@@ -37,6 +40,9 @@ import type { Status } from '../../../../common/api/detection_engine';
 
 export const CONTENT_TEST_ID = 'alerts-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'alerts-page-security-solution-page-wrapper';
+export const ALERTS_PAGE_ASSIGNEE_FILTER_TEST_ID = 'alerts-page-assignee-filter';
+export const ALERTS_PAGE_STANDARD_FILTERS_TEST_ID = 'alerts-page-standard-filters';
+const FILTERS_SECTION_MIN_WIDTH = 480;
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -47,117 +53,133 @@ const StyledFullHeightContainer = styled.div`
   flex: 1 1 auto;
 `;
 
+const VerticalDivider = styled(EuiFlexItem)`
+  align-self: stretch;
+  border-left: ${({ theme: { euiTheme } }) => euiTheme.border.thin};
+`;
+
 export interface AlertsPageContentProps {
   /**
    * DataView for the alerts page
    */
   dataView: DataView;
-  // TODO remove when we remove the newDataViewPickerEnabled feature flag
-  /**
-   * DataViewSpec used to fetch the alerts data when the newDataViewPickerEnabled feature flag is false
-   */
-  oldSourcererDataViewSpec: DataViewSpec;
-  // TODO remove when we remove the newDataViewPickerEnabled feature flag
-  /**
-   * runTimeMappings used in the KPIsSection, when the newDataViewPickerEnabled feature flag is false
-   */
-  runtimeMappings: RunTimeMappings;
 }
 
 /**
- * Renders the content of the alerts page: search bar, header, filters, KPIs, and table sections.
+ * Renders the alerts page: header, search bar, filters, KPIs, and table.
  */
-export const AlertsPageContent = memo(
-  ({ dataView, oldSourcererDataViewSpec, runtimeMappings }: AlertsPageContentProps) => {
-    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-    const containerElement = useRef<HTMLDivElement | null>(null);
+export const AlertsPageContent = memo(({ dataView }: AlertsPageContentProps) => {
+  const containerElement = useRef<HTMLDivElement | null>(null);
 
-    const { globalFullScreen } = useGlobalFullScreen();
+  const { globalFullScreen } = useGlobalFullScreen();
+  // The sticky AppHeader and KQL input stack above EuiDataGrid's own full screen mode.
+  const hasFullScreenContent = useHasFullScreenContent();
+  const headerMenu = useAlertsHeaderMenu();
 
-    const [assignees, setAssignees] = useState<AssigneesIdsSelection[]>([]);
-    const [statusFilter, setStatusFilter] = useState<Status[]>([]);
-    const [pageFilters, setPageFilters] = useState<Filter[]>();
-    const [pageFilterHandler, setPageFilterHandler] = useState<FilterGroupHandler | undefined>();
+  const [assignees, setAssignees] = useState<AssigneesIdsSelection[]>([]);
+  const [statusFilter, setStatusFilter] = useState<Status[]>([]);
+  const [pageFilters, setPageFilters] = useState<Filter[]>();
+  const [pageFilterHandler, setPageFilterHandler] = useState<FilterGroupHandler | undefined>();
 
-    const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
-    const isTableLoading = useShallowEqualSelector(
-      (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).isLoading
-    );
+  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
+  const isTableLoading = useShallowEqualSelector(
+    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).isLoading
+  );
 
-    const onSkipFocusBeforeEventsTable = useCallback(() => {
-      focusUtilityBarAction(containerElement.current);
-    }, [containerElement]);
+  const onAssigneesSelectionChange = useCallback(
+    (newAssignees: AssigneesIdsSelection[]) => {
+      if (!isEqual(newAssignees, assignees)) {
+        setAssignees(newAssignees);
+      }
+    },
+    [assignees, setAssignees]
+  );
 
-    const onSkipFocusAfterEventsTable = useCallback(() => {
-      resetKeyboardFocus();
-    }, []);
+  const onSkipFocusBeforeEventsTable = useCallback(() => {
+    focusUtilityBarAction(containerElement.current);
+  }, [containerElement]);
 
-    const onKeyDown = useCallback(
-      (keyboardEvent: React.KeyboardEvent) => {
-        if (isTab(keyboardEvent)) {
-          onTimelineTabKeyPressed({
-            containerElement: containerElement.current,
-            keyboardEvent,
-            onSkipFocusBeforeEventsTable,
-            onSkipFocusAfterEventsTable,
-          });
-        }
-      },
-      [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
-    );
+  const onSkipFocusAfterEventsTable = useCallback(() => {
+    resetKeyboardFocus();
+  }, []);
 
-    useEffect(() => {
-      if (!pageFilterHandler) return;
-      // if Alert is reloaded because of action by the user.
-      // We want reload the values in the detection Page filters
-      if (!isTableLoading) pageFilterHandler.reload();
-    }, [isTableLoading, pageFilterHandler]);
+  const onKeyDown = useCallback(
+    (keyboardEvent: React.KeyboardEvent) => {
+      if (isTab(keyboardEvent)) {
+        onTimelineTabKeyPressed({
+          containerElement: containerElement.current,
+          keyboardEvent,
+          onSkipFocusBeforeEventsTable,
+          onSkipFocusAfterEventsTable,
+        });
+      }
+    },
+    [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
+  );
 
-    return (
-      <StyledFullHeightContainer
-        data-test-subj={CONTENT_TEST_ID}
-        onKeyDown={onKeyDown}
-        ref={containerElement}
+  useEffect(() => {
+    if (!pageFilterHandler) return;
+    // if Alert is reloaded because of action by the user.
+    // We want reload the values in the detection Page filters
+    if (!isTableLoading) pageFilterHandler.reload();
+  }, [isTableLoading, pageFilterHandler]);
+
+  return (
+    <StyledFullHeightContainer
+      data-test-subj={CONTENT_TEST_ID}
+      onKeyDown={onKeyDown}
+      ref={containerElement}
+    >
+      <EuiWindowEvent event="resize" handler={noop} />
+      <SecuritySolutionPageWrapper
+        noPadding={globalFullScreen}
+        data-test-subj={SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID}
       >
-        <EuiWindowEvent event="resize" handler={noop} />
-        <SearchBarSection dataView={dataView} sourcererDataViewSpec={oldSourcererDataViewSpec} />
-        <SecuritySolutionPageWrapper
-          noPadding={globalFullScreen}
-          data-test-subj={SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID}
-        >
-          <Display show={!globalFullScreen}>
-            <HeaderPage title={PAGE_TITLE}>
-              <HeaderSection assignees={assignees} setAssignees={setAssignees} />
-            </HeaderPage>
-            <EuiHorizontalRule margin="none" />
-            <EuiSpacer size="l" />
-            <FiltersSection
-              assignees={assignees}
-              dataView={newDataViewPickerEnabled ? dataView : oldSourcererDataViewSpec}
-              pageFilters={pageFilters}
-              setStatusFilter={setStatusFilter}
-              setPageFilters={setPageFilters}
-              setPageFilterHandler={setPageFilterHandler}
-            />
-            <EuiSpacer size="l" />
-            <KPIsSection
-              assignees={assignees}
-              pageFilters={pageFilters}
-              runtimeMappings={runtimeMappings}
-            />
-            <EuiSpacer size="l" />
-          </Display>
-          <TableSection
-            assignees={assignees}
-            dataView={dataView}
-            dataViewSpec={oldSourcererDataViewSpec}
-            pageFilters={pageFilters}
-            statusFilter={statusFilter}
-          />
-        </SecuritySolutionPageWrapper>
-      </StyledFullHeightContainer>
-    );
-  }
-);
+        {/* Must stay a direct child of the page wrapper: CSS sticky is confined to its parent's height. */}
+        {!hasFullScreenContent && (
+          <SecurityAppHeader title={PAGE_TITLE} menu={headerMenu} spacing="largeBleed" />
+        )}
+        <Display show={!hasFullScreenContent}>
+          <EuiSpacer size="m" />
+          <SearchBarSection dataView={dataView} />
+          <EuiSpacer size="m" />
+          <EuiFlexGroup direction="row" responsive={false} wrap={true}>
+            <EuiFlexItem grow={false} data-test-subj={ALERTS_PAGE_ASSIGNEE_FILTER_TEST_ID}>
+              <FilterByAssigneesPopover
+                selectedUserIds={assignees}
+                onSelectionChange={onAssigneesSelectionChange}
+                compressed={true}
+              />
+            </EuiFlexItem>
+            <VerticalDivider grow={false} aria-hidden={true} />
+            <EuiFlexItem
+              grow={1}
+              style={{ minWidth: FILTERS_SECTION_MIN_WIDTH }}
+              data-test-subj={ALERTS_PAGE_STANDARD_FILTERS_TEST_ID}
+            >
+              <FiltersSection
+                assignees={assignees}
+                dataView={dataView}
+                pageFilters={pageFilters}
+                setStatusFilter={setStatusFilter}
+                setPageFilters={setPageFilters}
+                setPageFilterHandler={setPageFilterHandler}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <KPIsSection assignees={assignees} pageFilters={pageFilters} dataView={dataView} />
+          <EuiSpacer size="l" />
+        </Display>
+        <TableSection
+          assignees={assignees}
+          dataView={dataView}
+          pageFilters={pageFilters}
+          statusFilter={statusFilter}
+        />
+      </SecuritySolutionPageWrapper>
+    </StyledFullHeightContainer>
+  );
+});
 
 AlertsPageContent.displayName = 'AlertsPageContent';

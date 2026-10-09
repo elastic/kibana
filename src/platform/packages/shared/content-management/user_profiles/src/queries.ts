@@ -13,6 +13,7 @@ import { useUserProfilesServices } from './services';
 export const userProfileKeys = {
   get: (uid: string) => ['user-profile', uid],
   bulkGet: (uids: string[]) => ['user-profile', { uids }],
+  suggest: (name: string) => ['user-profile', 'suggest', name],
 };
 
 export const useUserProfile = (uid: string) => {
@@ -36,4 +37,26 @@ export const useUserProfiles = (uids: string[], opts?: { enabled?: boolean }) =>
     enabled: opts?.enabled ?? true,
   });
   return query;
+};
+
+/**
+ * React Query hook for searching user profiles by name, email, or username.
+ *
+ * Uses a 30s `staleTime` since suggest results are transient queries.
+ * Disabled when `suggestUserProfiles` is not provided (graceful degradation)
+ * or when `name` is empty. The caller is responsible for debouncing the `name` input.
+ */
+export const useSuggestUserProfiles = (name: string, opts?: { enabled?: boolean }) => {
+  const { suggestUserProfiles } = useUserProfilesServices();
+  return useQuery({
+    queryKey: userProfileKeys.suggest(name),
+    queryFn: () => {
+      if (!suggestUserProfiles) {
+        return [];
+      }
+      return suggestUserProfiles(name);
+    },
+    enabled: (opts?.enabled ?? true) && !!suggestUserProfiles && name.length > 0,
+    staleTime: 30_000,
+  });
 };

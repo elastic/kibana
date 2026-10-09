@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { selectServiceLocationsState } from '../../../state';
 import { selectOverviewStatus } from '../../../state/overview_status';
@@ -31,7 +31,8 @@ export const useCanUsePublicLocById = (configId: string) => {
   const hasManagedLocation = useMemo(
     () =>
       allConfigs?.some(
-        (mon) => mon.configId === configId && managedLocationIds.has(mon.locationId)
+        (mon) =>
+          mon.configId === configId && mon.locations.some((loc) => managedLocationIds.has(loc.id))
       ) ?? false,
     [allConfigs, configId, managedLocationIds]
   );

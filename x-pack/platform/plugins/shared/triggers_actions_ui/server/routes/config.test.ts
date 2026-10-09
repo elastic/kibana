@@ -55,6 +55,7 @@ describe('createConfigRoute', () => {
         maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
         run: { alerts: { max: 1000 }, actions: { max: 100000 } },
+        apiKeyType: 'es' as const,
       }),
       getRulesClientWithRequest: async () => mockRulesClient,
     });
@@ -65,12 +66,13 @@ describe('createConfigRoute', () => {
     const mockResponse = httpServerMock.createResponseFactory();
     await handler({}, httpServerMock.createKibanaRequest(), mockResponse);
 
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok).toHaveBeenCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({
       body: {
         isUsingSecurity: true,
         maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
+        apiKeyType: 'es',
       },
     });
   });
@@ -90,6 +92,7 @@ describe('createConfigRoute', () => {
         maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
         run: { alerts: { max: 1000 }, actions: { max: 100000 } },
+        apiKeyType: 'es' as const,
       }),
       getRulesClientWithRequest: async () => mockRulesClient,
     });
@@ -100,7 +103,7 @@ describe('createConfigRoute', () => {
     const mockResponse = httpServerMock.createResponseFactory();
     await handler({}, httpServerMock.createKibanaRequest(), mockResponse);
 
-    expect(mockResponse.forbidden).toBeCalled();
+    expect(mockResponse.forbidden).toHaveBeenCalled();
     expect(mockResponse.forbidden.mock.calls[0][0]).toEqual({
       body: { message: 'Unauthorized to access config' },
     });

@@ -9,5 +9,5 @@ import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import type { IUiSettingsClient } from '@kbn/core/public';
 
 export function isPreExecutionWorkflowEnabled(uiSettingsClient: IUiSettingsClient) {
-  return uiSettingsClient.get(WORKFLOWS_UI_SETTING_ID, false);
+  return uiSettingsClient.get<boolean>(WORKFLOWS_UI_SETTING_ID);
 }

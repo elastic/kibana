@@ -47,6 +47,7 @@ viewer:
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
         - feature_siemV5.endpoint_exceptions_read
+        - feature_siemV5.custom_yara_signatures_read
         - feature_securitySolutionRulesV2.read
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
@@ -117,6 +118,14 @@ editor:
         - '.ml-anomalies-*'
       privileges:
         - read
+    - names:
+        - 'kibana_sample_data_*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'write'
+        - 'manage'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -130,6 +139,7 @@ editor:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_siemV5.policy_management_read # Elastic Defend Policy Management
         - feature_siemV5.host_isolation_all
         - feature_siemV5.process_operations_all
@@ -193,6 +203,7 @@ t1_analyst:
         - feature_ml.read
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
+        - feature_siemV5.custom_yara_signatures_read
         - feature_securitySolutionRulesV2.read
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
@@ -254,6 +265,7 @@ t2_analyst:
         - feature_ml.read
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
+        - feature_siemV5.custom_yara_signatures_read
         - feature_securitySolutionRulesV2.read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
@@ -327,6 +339,7 @@ t3_analyst:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_siemV5.policy_management_read # Elastic Defend Policy Management
         - feature_siemV5.host_isolation_all
         - feature_siemV5.process_operations_all
@@ -400,6 +413,7 @@ threat_intelligence_analyst:
         - feature_siemV5.global_artifact_management_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_read
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
@@ -478,6 +492,7 @@ rule_author:
         - feature_siemV5.host_isolation_exceptions_read
         - feature_siemV5.blocklist_all # Elastic Defend Policy Management
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_siemV5.actions_log_management_read
         - feature_siemV5.workflow_insights_all
         - feature_securitySolutionRulesV2.all
@@ -559,6 +574,7 @@ soc_manager:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_siemV5.host_isolation_all
         - feature_siemV5.process_operations_all
         - feature_siemV5.actions_log_management_all
@@ -637,6 +653,7 @@ detections_admin:
         - feature_siemV5.all
         - feature_siemV5.global_artifact_management_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
@@ -705,6 +722,7 @@ platform_engineer:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all # Elastic Defend Policy Management
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_read
         - feature_siemV5.actions_log_management_read
         - feature_siemV5.workflow_insights_all
         - feature_securitySolutionRulesV2.all
@@ -784,6 +802,7 @@ endpoint_operations_analyst:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_read
         - feature_siemV5.host_isolation_all
         - feature_siemV5.process_operations_all
         - feature_siemV5.actions_log_management_all # Response History
@@ -868,6 +887,7 @@ endpoint_policy_manager:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all # Elastic Defend Policy Management
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_siemV5.workflow_insights_all
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionCases.all

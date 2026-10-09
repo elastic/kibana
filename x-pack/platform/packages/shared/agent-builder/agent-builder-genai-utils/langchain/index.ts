@@ -20,6 +20,8 @@ export {
   createToolResultEvent,
   createThinkingCompleteEvent,
   createPromptRequestEvent,
+  createBackgroundAgentCompleteEvent,
+  createSubagentRosterUpdatedEvent,
 } from './graph_events';
 export {
   extractTextContent,
@@ -31,6 +33,7 @@ export {
   createToolResultMessage,
   createToolCallMessage,
   generateFakeToolCallId,
+  wrapToolResultContent,
   type ToolCall,
   type ToolCallWithReasoning,
 } from './messages';
@@ -43,4 +46,6 @@ export {
   reverseMap,
   type ToolIdMapping,
   type ToolsAndMappings,
+  type BuildToolContentParams,
+  type BuildToolContentFn,
 } from './tools';

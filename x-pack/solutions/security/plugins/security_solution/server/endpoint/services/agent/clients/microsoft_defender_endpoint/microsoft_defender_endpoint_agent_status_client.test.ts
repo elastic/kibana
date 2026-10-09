@@ -186,4 +186,31 @@ describe('Microsoft Defender Agent Status client', () => {
       });
     }
   );
+
+  it('should log errors and still return expected data structure', async () => {
+    clientConstructorOptions.connectorActionsClient!.execute = jest
+      .fn()
+      .mockRejectedValue(new Error('foo error'));
+
+    await expect(msAgentStatusClientMock.getAgentStatuses(['1-2-3'])).resolves.toEqual({
+      '1-2-3': {
+        agentId: '1-2-3',
+        agentType: 'microsoft_defender_endpoint',
+        error:
+          'Attempt to execute [getAgentList] with connector [Name: some mock name | Type: .microsoft_defender_endpoint | ID: ms-connector-instance-id)] failed with : foo error',
+        found: false,
+        isolated: false,
+        lastSeen: '',
+        pendingActions: {},
+        status: 'offline',
+      },
+    });
+
+    expect(clientConstructorOptions.endpointService.createLogger().error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message:
+          'Failed to fetch agent status for [microsoft_defender_endpoint] agentIds: [1-2-3]: Attempt to execute [getAgentList] with connector [Name: some mock name | Type: .microsoft_defender_endpoint | ID: ms-connector-instance-id)] failed with : foo error',
+      })
+    );
+  });
 });

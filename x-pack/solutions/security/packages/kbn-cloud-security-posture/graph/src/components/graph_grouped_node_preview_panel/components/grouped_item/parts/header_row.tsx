@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -18,27 +19,24 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
   DOCUMENT_TYPE_ENTITY,
   DOCUMENT_TYPE_EVENT,
   DOCUMENT_TYPE_ALERT,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import {
   GROUPED_ITEM_TITLE_TEST_ID_LINK,
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
   GROUPED_ITEM_TITLE_TOOLTIP_TEST_ID,
+  GROUPED_ITEM_RISK_TEST_ID,
 } from '../../../test_ids';
+import { getRiskLevel, getRiskScoreColors } from '../../../../node/utils/risk_score';
 import type { EntityOrEventItem, EntityItem, EventItem, AlertItem } from '../types';
 import { displayEntityName, displayEventName } from '../utils';
 import { EntityActionsButton } from './entity_actions_button';
 import { EventActionsButton } from './event_actions_button';
-import {
-  DocumentDetailsPreviewPanelKey,
-  ALERT_PREVIEW_BANNER,
-  EVENT_PREVIEW_BANNER,
-} from '../../../constants';
-import { useOpenEntityPreviewPanel } from '../../../hooks/use_open_entity_preview_panel';
+import { isInitialEntityForScope } from '../../../../filters/filter_store';
 
 const entityUnavailableTooltip = i18n.translate(
   'securitySolutionPackages.csp.graph.groupedItem.entityUnavailable.tooltip',
@@ -53,12 +51,30 @@ export interface HeaderRowProps {
    * Unique identifier for the graph instance, used to scope filter state.
    */
   scopeId: string;
+  /** Invoked to open the event/alert details preview for the clicked item. */
+  onShowDocument: (docId: string, indexName?: string, isEvent?: boolean) => void;
+  /** Invoked to open the entity details preview for the clicked item. */
+  onShowEntity: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
 }
 
-export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
+export const HeaderRow = ({ item, scopeId, onShowDocument, onShowEntity }: HeaderRowProps) => {
   const { euiTheme } = useEuiTheme();
-  const { openPreviewPanel } = useExpandableFlyoutApi();
-  const openEntityPreviewPanel = useOpenEntityPreviewPanel();
+
+  const riskBadge = useMemo(() => {
+    if (item.itemType !== DOCUMENT_TYPE_ENTITY) return null;
+    const risk = (item as EntityItem).risk;
+    if (risk == null) return null;
+    const level = getRiskLevel(risk);
+    const colors = getRiskScoreColors(euiTheme, level);
+    return { display: (Math.round(risk * 100) / 100).toFixed(2), colors };
+  }, [item, euiTheme]);
+  // Async-hydrated: `null` until the EUID chunk loads, in which case entity filters fall back to
+  // the unnarrowed sourceFields (see getIdentityFilterFields).
+  const euidApi = useEntityStoreEuidApi()?.euid;
 
   const title = useMemo(() => {
     switch (item.itemType) {
@@ -78,24 +94,24 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
 
       if (item.itemType === DOCUMENT_TYPE_ENTITY) {
         const entityItem = item as EntityItem;
-        openEntityPreviewPanel(entityItem.id, scopeId, entityItem.entity);
+        onShowEntity({
+          engineType: entityItem.entity.engine_type,
+          entityId: entityItem.id,
+          entityName: entityItem.entity.name,
+        });
       } else {
         // event or alert
         const eventOrAlertItem = item as EventItem | AlertItem;
-        openPreviewPanel({
-          id: DocumentDetailsPreviewPanelKey,
-          params: {
-            id: eventOrAlertItem.docId,
-            indexName: eventOrAlertItem.index,
-            scopeId,
-            banner:
-              item.itemType === DOCUMENT_TYPE_ALERT ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
-            isPreviewMode: true,
-          },
-        });
+        if (eventOrAlertItem.docId) {
+          onShowDocument(
+            eventOrAlertItem.docId,
+            eventOrAlertItem.index,
+            eventOrAlertItem.itemType === DOCUMENT_TYPE_EVENT
+          );
+        }
       }
     },
-    [item, openPreviewPanel, openEntityPreviewPanel, scopeId]
+    [item, onShowDocument, onShowEntity]
   );
 
   const isClickable =
@@ -162,11 +178,43 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
           </EuiToolTip>
         )}
       </EuiFlexItem>
+      {riskBadge && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            data-test-subj={GROUPED_ITEM_RISK_TEST_ID}
+            color={riskBadge.colors.background}
+            css={css`
+              flex-shrink: 0;
+              white-space: nowrap;
+            `}
+          >
+            <EuiText
+              size="xs"
+              css={css`
+                font-weight: ${euiTheme.font.weight.semiBold};
+                color: ${riskBadge.colors.text};
+              `}
+            >
+              {riskBadge.display}
+            </EuiText>
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         {item.itemType === DOCUMENT_TYPE_ENTITY ? (
-          <EntityActionsButton item={item as EntityItem} scopeId={scopeId} />
+          <EntityActionsButton
+            item={item as EntityItem}
+            scopeId={scopeId}
+            isInitialEntity={isInitialEntityForScope(scopeId, (item as EntityItem).id)}
+            onShowEntity={onShowEntity}
+            euidApi={euidApi}
+          />
         ) : (
-          <EventActionsButton item={item as EventItem | AlertItem} scopeId={scopeId} />
+          <EventActionsButton
+            item={item as EventItem | AlertItem}
+            scopeId={scopeId}
+            onShowDocument={onShowDocument}
+          />
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

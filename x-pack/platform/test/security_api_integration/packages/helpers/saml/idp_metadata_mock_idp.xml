@@ -33,12 +33,12 @@
       </ds:KeyInfo>
     </md:KeyDescriptor>
     <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-                            Location="http://localhost:5620/mock_idp/logout"/>
+                            Location="/mock_idp/logout"/>
     <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-                            Location="http://localhost:5620/mock_idp/logout"/>
+                            Location="/mock_idp/logout"/>
     <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-                            Location="http://localhost:5620/mock_idp/login"/>
+                            Location="/mock_idp/login"/>
     <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-                            Location="http://localhost:5620/mock_idp/login"/>
+                            Location="/mock_idp/login"/>
   </md:IDPSSODescriptor>
 </md:EntityDescriptor>

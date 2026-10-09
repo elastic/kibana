@@ -1,0 +1,27 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getCategoriesExample:
+            description: 'List of integration categories'
+            value:
+              items:
+                - id: 'security'
+                  title: 'Security'
+                  count: 42
+                - id: 'observability'
+                  title: 'Observability'
+                  count: 38
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

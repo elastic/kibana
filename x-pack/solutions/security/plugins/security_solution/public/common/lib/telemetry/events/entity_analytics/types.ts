@@ -26,6 +26,9 @@ export enum EntityEventTypes {
   PrivilegedUserMonitoringCsvImported = 'Privileged User Monitoring CSV Imported',
   AnomaliesCountClicked = 'Anomalies Count Clicked',
   MLJobUpdate = 'ML Job Update',
+  LeadGenerationGenerateClicked = 'Lead Generation Generate Clicked',
+  LeadGenerationLeadClicked = 'Lead Generation Lead Clicked',
+  LeadGenerationHuntWithAiClicked = 'Lead Generation Hunt With AI Clicked',
 }
 
 export enum ML_JOB_TELEMETRY_STATUS {
@@ -110,6 +113,13 @@ interface ReportMLJobUpdateParams {
   errorMessage?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface ReportLeadGenerationGenerateClickedParams {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface ReportLeadGenerationLeadClickedParams {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface ReportLeadGenerationHuntWithAiClickedParams {}
+
 export interface EntityAnalyticsTelemetryEventsMap {
   [EntityEventTypes.EntityDetailsClicked]: ReportEntityDetailsClickedParams;
   [EntityEventTypes.EntityAlertsClicked]: ReportEntityAlertsClickedParams;
@@ -128,6 +138,9 @@ export interface EntityAnalyticsTelemetryEventsMap {
   [EntityEventTypes.PrivilegedUserMonitoringCsvImported]: ReportAssetCriticalityCsvImportedParams;
   [EntityEventTypes.AnomaliesCountClicked]: ReportAnomaliesCountClickedParams;
   [EntityEventTypes.MLJobUpdate]: ReportMLJobUpdateParams;
+  [EntityEventTypes.LeadGenerationGenerateClicked]: ReportLeadGenerationGenerateClickedParams;
+  [EntityEventTypes.LeadGenerationLeadClicked]: ReportLeadGenerationLeadClickedParams;
+  [EntityEventTypes.LeadGenerationHuntWithAiClicked]: ReportLeadGenerationHuntWithAiClickedParams;
 }
 
 export interface EntityAnalyticsTelemetryEvent {

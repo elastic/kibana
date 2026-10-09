@@ -18,13 +18,20 @@ import {
   type GetWorkflowsConnectorTypeArgs,
   resolveAlertStates,
 } from '.';
+import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
+
+const mockWorkflowsManagementApi = {
+  getWorkflow: jest.fn(),
+  runWorkflow: jest.fn(),
+  scheduleWorkflow: jest.fn(),
+} as unknown as WorkflowsManagementApi;
 
 describe('Workflows Connector', () => {
   const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
   describe('getConnectorType', () => {
     it('should return correct connector type configuration', () => {
-      const connectorType = getConnectorType();
+      const connectorType = getConnectorType(mockWorkflowsManagementApi);
 
       expect(connectorType.id).toBe('.workflows');
       expect(connectorType.minimumLicenseRequired).toBe('gold');
@@ -37,7 +44,7 @@ describe('Workflows Connector', () => {
     });
 
     it('should have correct validation schemas', () => {
-      const connectorType = getConnectorType();
+      const connectorType = getConnectorType(mockWorkflowsManagementApi);
 
       expect(connectorType.validate).toBeDefined();
       expect(connectorType.validate.config).toBeDefined();
@@ -49,11 +56,28 @@ describe('Workflows Connector', () => {
   describe('executor', () => {
     const mockRequest = {} as KibanaRequest;
 
-    it('should execute workflow successfully', async () => {
-      const mockWorkflowsService = jest.fn().mockResolvedValue('workflow-run-123');
-      const deps: GetWorkflowsConnectorTypeArgs = {
-        getWorkflowsService: jest.fn().mockResolvedValue(mockWorkflowsService),
-      };
+    it('should schedule workflow successfully', async () => {
+      jest.mocked(mockWorkflowsManagementApi.getWorkflow).mockResolvedValue({
+        id: 'test-workflow-id',
+        name: 'Private workflow',
+        yaml: 'name: Private workflow',
+        enabled: true,
+        valid: true,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        createdBy: 'owner',
+        lastUpdatedAt: '2026-01-01T00:00:00.000Z',
+        lastUpdatedBy: 'owner',
+        definition: {
+          version: '1',
+          name: 'Private workflow',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [],
+        },
+      });
+      jest
+        .mocked(mockWorkflowsManagementApi.scheduleWorkflow)
+        .mockResolvedValue('workflow-run-123');
 
       const execOptions = {
         actionId: 'test-action-id',
@@ -89,19 +113,26 @@ describe('Workflows Connector', () => {
         request: mockRequest,
       };
 
-      const result = await executor(execOptions, deps);
+      const connector = getConnectorType(mockWorkflowsManagementApi);
+      if (!connector.executor) throw new Error('Workflows connector executor is missing');
+      const result = await connector.executor(execOptions);
 
       expect(result).toEqual({
         status: 'ok',
         data: {
           workflowRunId: 'workflow-run-123',
-          status: 'executed',
+          status: 'scheduled',
         },
         actionId: 'test-action-id',
       });
 
-      expect(mockWorkflowsService).toHaveBeenCalledWith(
+      expect(mockWorkflowsManagementApi.getWorkflow).toHaveBeenCalledWith(
         'test-workflow-id',
+        'default',
+        mockRequest
+      );
+      expect(mockWorkflowsManagementApi.scheduleWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'test-workflow-id' }),
         'default',
         {
           event: {
@@ -118,14 +149,15 @@ describe('Workflows Connector', () => {
             spaceId: 'default',
           },
         },
-        mockRequest
+        mockRequest,
+        'alert'
       );
     });
 
     it('should skip execution when no alerts are provided', async () => {
-      const mockWorkflowsService = jest.fn().mockResolvedValue('workflow-run-123');
+      const mockScheduleWorkflowService = jest.fn().mockResolvedValue('workflow-run-123');
       const deps: GetWorkflowsConnectorTypeArgs = {
-        getWorkflowsService: jest.fn().mockResolvedValue(mockWorkflowsService),
+        getScheduleWorkflowService: jest.fn().mockResolvedValue(mockScheduleWorkflowService),
       };
 
       const execOptions = {
@@ -173,7 +205,7 @@ describe('Workflows Connector', () => {
         actionId: 'test-action-id',
       });
 
-      expect(mockWorkflowsService).not.toHaveBeenCalled();
+      expect(mockScheduleWorkflowService).not.toHaveBeenCalled();
     });
 
     it('should throw error for unsupported subAction', async () => {
@@ -201,10 +233,10 @@ describe('Workflows Connector', () => {
       );
     });
 
-    it('should handle workflows service errors', async () => {
+    it('should handle schedule workflows service errors', async () => {
       const serviceError = new Error('Service unavailable');
       const deps: GetWorkflowsConnectorTypeArgs = {
-        getWorkflowsService: jest.fn().mockRejectedValue(serviceError),
+        getScheduleWorkflowService: jest.fn().mockRejectedValue(serviceError),
       };
 
       const execOptions = {
@@ -242,11 +274,11 @@ describe('Workflows Connector', () => {
       };
 
       await expect(executor(execOptions, deps)).rejects.toThrow(
-        'Unable to run workflow test-workflow-id'
+        'Unable to schedule workflow test-workflow-id'
       );
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        'Failed to get workflows service: Service unavailable'
+        'Failed to get schedule workflows service: Service unavailable'
       );
     });
   });

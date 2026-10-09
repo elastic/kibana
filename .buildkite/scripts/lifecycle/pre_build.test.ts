@@ -69,7 +69,7 @@ if [[ "$*" == *".version"* ]]; then
   exit 0
 fi
 if [[ "$*" == *".bucket"* ]]; then
-  echo "mock-bucket"
+  echo "\${MOCK_BUCKET:-kibana-ci-es-snapshots-daily/9.9.9/archives/20260930-000000_abcdef12}"
   exit 0
 fi
 exit 0
@@ -77,12 +77,12 @@ exit 0
   );
 
   writeExecutable(
-    Path.join(binDir, 'ts-node'),
+    Path.join(binDir, 'node'),
     `#!/usr/bin/env bash
 set -euo pipefail
-echo "ts-node $*" >> "$CALLS_FILE"
-if [[ "\${MOCK_FAIL_CMD:-}" == "ts-node" ]]; then
-  echo "forced ts-node failure" >&2
+echo "node $*" >> "$CALLS_FILE"
+if [[ "\${MOCK_FAIL_CMD:-}" == "node" ]]; then
+  echo "forced node failure" >&2
   exit 1
 fi
 exit 0
@@ -112,7 +112,17 @@ const runPreBuildScript = (overrides: Record<string, string> = {}) => {
     ...process.env,
     PATH: `${binDir}:${process.env.PATH ?? ''}`,
     CALLS_FILE: callsFile,
-    GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true',
+    KIBANA_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true',
+    // Neutralize ambient vars that CI injects (e.g. ES_SNAPSHOT_MANIFEST) and that alter
+    // pre_build.sh's control flow. Without this the manifest-resolution branch is skipped on
+    // CI but taken locally, so tests pass locally and fail on CI. Each test sets what it needs
+    // via `overrides`, which still win because they are spread last.
+    ES_SNAPSHOT_MANIFEST: '',
+    BUILDKITE_PULL_REQUEST_BASE_BRANCH: '',
+    GITHUB_PR_DRAFT: '',
+    GITHUB_PR_LABELS: '',
+    KIBANA_BUILD_ID: '',
+    KIBANA_REUSABLE_BUILD_JOB_URL: '',
     ...overrides,
   };
 
@@ -150,10 +160,9 @@ describe('lifecycle pre_build.sh', () => {
     expect(result.status).toBe(0);
     expect(result.calls).toEqual(
       expect.arrayContaining([
-        expect.stringContaining('ts-node '),
-        expect.stringContaining('ci_stats_start.ts'),
+        expect.stringMatching(/node .*ci_stats_start\.ts/),
         expect.stringContaining(
-          'buildkite-agent meta-data set ES_SNAPSHOT_MANIFEST_DEFAULT https://storage.googleapis.com/mock-bucket/manifest.json'
+          'buildkite-agent meta-data set ES_SNAPSHOT_MANIFEST_DEFAULT https://storage.googleapis.com/kibana-ci-es-snapshots-daily/9.9.9/archives/20260930-000000_abcdef12/manifest.json'
         ),
         expect.stringContaining('buildkite-agent meta-data set ingest:is_draft_pr true'),
         expect.stringContaining('buildkite-agent meta-data set ingest:pr_labels ci:foo,ci:bar'),
@@ -165,8 +174,8 @@ describe('lifecycle pre_build.sh', () => {
     const result = runPreBuildScript();
 
     expect(result.status).toBe(0);
-    // We stub ts-node itself, so ci_stats_start.ts is not executed in tests.
-    expect(hasCall(result.calls, 'ts-node ')).toBe(true);
+    // We stub node itself, so ci_stats_start.ts is not executed in tests.
+    expect(result.calls.some((call) => /node .*ci_stats_start\.ts/.test(call))).toBe(true);
     // If ci_stats_start.ts had run, it would set ci_stats_build_id via buildkite-agent meta-data.
     expect(hasCall(result.calls, 'buildkite-agent meta-data set ci_stats_build_id')).toBe(false);
   });
@@ -224,6 +233,18 @@ describe('lifecycle pre_build.sh', () => {
     expect(result.calls).toEqual(
       expect.arrayContaining([expect.stringContaining('buildkite-agent meta-data set')])
     );
+  });
+
+  it.each([
+    'other-bucket/9.9.9/archives/20260930-000000_abcdef12',
+    'kibana-ci-es-snapshots-daily/9.9.8/archives/20260930-000000_abcdef12',
+    'kibana-ci-es-snapshots-daily/9.9.9/archives/../../other',
+    'null',
+  ])('fails on unexpected manifest bucket %s', (bucket) => {
+    const result = runPreBuildScript({ MOCK_BUCKET: bucket });
+
+    expect(result.status).not.toBe(0);
+    expect(hasCall(result.calls, 'meta-data set ES_SNAPSHOT_MANIFEST_DEFAULT')).toBe(false);
   });
 
   it('fails when manifest resolution command fails', () => {

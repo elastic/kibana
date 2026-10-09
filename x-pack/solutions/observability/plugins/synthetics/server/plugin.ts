@@ -22,7 +22,8 @@ import type {
   SyntheticsPluginsStartDependencies,
   SyntheticsServerSetup,
 } from './types';
-import { TelemetryEventsSender } from './telemetry/sender';
+import { registerSyntheticsEventTypes } from './telemetry/events';
+import { SyntheticsTelemetry } from './telemetry/synthetics_telemetry';
 import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { initSyntheticsServer } from './server';
 import { syntheticsFeature } from './feature';
@@ -32,13 +33,20 @@ import { SyntheticsService } from './synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
-import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_monitors_task';
+import {
+  SyncPrivateLocationMonitorsTask,
+  PRIVATE_LOCATIONS_SYNC_TASK_ID,
+} from './tasks/sync_private_locations_monitors_task';
+import { RebalancePrivateLocationShardsTask } from './tasks/rebalance_private_location_shards_task';
+import { ensureCleanUpTaskScheduled } from './tasks/clean_up_package_policies_task';
+import { flushPendingAgentPolicyRevisionBumps } from './synthetics_service/private_location/package_policy_service';
 import { getTransforms as getStatsTransforms } from '../common/embeddables/stats_overview/get_transforms';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../common/embeddables/stats_overview/constants';
 import { getTransforms as getMonitorsTransforms } from '../common/embeddables/monitors_overview/get_transforms';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../common/embeddables/monitors_overview/constants';
 import { getStatsOverviewEmbeddableSchema, syntheticsMonitorsEmbeddableSchema } from './schemas';
 import { registerDataProviders } from './agent_builder/register_data_provider';
+import { SyntheticsIndicesCache } from './services/synthetics_indices_cache';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
@@ -46,13 +54,13 @@ export class Plugin implements PluginType {
   private server?: SyntheticsServerSetup;
   private syntheticsService?: SyntheticsService;
   private syntheticsMonitorClient?: SyntheticsMonitorClient;
-  private readonly telemetryEventsSender: TelemetryEventsSender;
+  private telemetry?: SyntheticsTelemetry;
   private syncPrivateLocationMonitorsTask?: SyncPrivateLocationMonitorsTask;
+  private rebalancePrivateLocationShardsTask?: RebalancePrivateLocationShardsTask;
   private syncGlobalParamsTask?: SyncGlobalParamsPrivateLocationsTask;
 
   constructor(private readonly initContext: PluginInitializerContext<UptimeConfig>) {
     this.logger = initContext.logger.get();
-    this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
   }
 
   public setup(core: CoreSetup, plugins: SyntheticsPluginsSetupDependencies) {
@@ -73,6 +81,8 @@ export class Plugin implements PluginType {
       ],
     });
 
+    this.telemetry = new SyntheticsTelemetry(core.analytics, this.logger);
+
     this.server = {
       config,
       router: core.http.createRouter(),
@@ -80,10 +90,12 @@ export class Plugin implements PluginType {
       stackVersion: this.initContext.env.packageInfo.version,
       basePath: core.http.basePath,
       logger: this.logger,
-      telemetry: this.telemetryEventsSender,
+      telemetry: this.telemetry,
       isDev: this.initContext.env.mode.dev,
       share: plugins.share,
       alerting: plugins.alerting,
+      syntheticsIndicesCache: new SyntheticsIndicesCache(),
+      isCpsEnabled: plugins.cps?.getCpsEnabled() ?? false,
     } as SyntheticsServerSetup;
 
     this.syntheticsService = new SyntheticsService(this.server);
@@ -92,7 +104,7 @@ export class Plugin implements PluginType {
 
     this.syntheticsMonitorClient = new SyntheticsMonitorClient(this.syntheticsService, this.server);
 
-    this.telemetryEventsSender.setup(plugins.telemetry);
+    registerSyntheticsEventTypes(core.analytics);
 
     plugins.features.registerKibanaFeature(syntheticsFeature);
 
@@ -106,6 +118,12 @@ export class Plugin implements PluginType {
     );
     this.syncPrivateLocationMonitorsTask.registerTaskDefinition(plugins.taskManager);
 
+    this.rebalancePrivateLocationShardsTask = new RebalancePrivateLocationShardsTask(
+      this.server,
+      this.syntheticsMonitorClient
+    );
+    this.rebalancePrivateLocationShardsTask.registerTaskDefinition(plugins.taskManager);
+
     this.syncGlobalParamsTask = new SyncGlobalParamsPrivateLocationsTask(
       this.server,
       plugins.taskManager,
@@ -115,13 +133,15 @@ export class Plugin implements PluginType {
     this.syncGlobalParamsTask.registerTaskDefinition(plugins.taskManager);
 
     // Register transforms and schema for SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE
-    plugins.embeddable.registerTransforms(SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE, {
+    plugins.embeddable.registerEmbeddableServerDefinition(SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE, {
+      title: 'Synthetics stats overview',
       getTransforms: getStatsTransforms,
       getSchema: getStatsOverviewEmbeddableSchema,
     });
 
     // Register transforms and schema for SYNTHETICS_MONITORS_EMBEDDABLE
-    plugins.embeddable.registerTransforms(SYNTHETICS_MONITORS_EMBEDDABLE, {
+    plugins.embeddable.registerEmbeddableServerDefinition(SYNTHETICS_MONITORS_EMBEDDABLE, {
+      title: 'Synthetics monitors',
       getTransforms: getMonitorsTransforms,
       getSchema: () => syntheticsMonitorsEmbeddableSchema,
     });
@@ -155,14 +175,47 @@ export class Plugin implements PluginType {
       this.server.isElasticsearchServerless = coreStart.elasticsearch.getCapabilities().serverless;
       this.server.getMaintenanceWindowClientInternal = getMaintenanceWindowClientInternal;
     }
-    this.syncPrivateLocationMonitorsTask?.start().catch((e) => {
-      this.logger.error('Failed to start sync private location monitors task', { error: e });
+    this.syncPrivateLocationMonitorsTask
+      ?.start()
+      .then(() => {
+        // Kick the existing TM sync task when MW definitions change so private-location
+        // package policies refresh without waiting for the periodic interval.
+        pluginsStart.maintenanceWindows?.registerSyncTask(PRIVATE_LOCATIONS_SYNC_TASK_ID);
+      })
+      .catch((e) => {
+        this.logger.error('Failed to start sync private location monitors task', { error: e });
+      });
+
+    this.rebalancePrivateLocationShardsTask?.start().catch((e) => {
+      this.logger.error('Failed to start rebalance private location shards task', { error: e });
     });
+
+    if (this.server) {
+      ensureCleanUpTaskScheduled(this.server).catch((e) => {
+        this.logger.error('Failed to schedule package policy clean up task', { error: e });
+      });
+    }
 
     this.syntheticsService?.start(pluginsStart.taskManager);
 
-    this.telemetryEventsSender.start(pluginsStart.telemetry, coreStart).catch(() => {});
+    this.telemetry?.loadLicenseInfo(coreStart.elasticsearch.client.asInternalUser).catch(() => {});
   }
 
-  public stop() {}
+  public async stop() {
+    // No server means setup never ran, so nothing was ever batched.
+    if (!this.server) {
+      return;
+    }
+
+    // Scalable private-location package policies are written with
+    // `bumpRevision: false` and rely on a debounced batch to bump the agent
+    // policy afterwards. Dropping a pending batch here would leave those
+    // policies attached to an un-bumped agent policy, so Fleet would never
+    // redeploy and the monitors would silently never reach an agent.
+    try {
+      await flushPendingAgentPolicyRevisionBumps(this.server);
+    } catch (error) {
+      this.logger.error('Failed to flush pending agent policy revision bumps on stop', { error });
+    }
+  }
 }

@@ -11,19 +11,39 @@ import {
   AddEvaluationDatasetExamplesRequestParams,
   EVALS_DATASET_EXAMPLES_URL,
   INTERNAL_API_ACCESS,
-  buildRouteValidationWithZod,
+  MAX_DATASET_EXAMPLES_REQUEST_BYTES,
 } from '@kbn/evals-common';
-import { PLUGIN_ID } from '../../../common';
-import { ExampleAlreadyExistsError } from '../../storage/example_already_exists_error';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { EVALS_API_PRIVILEGES } from '../../../common';
+import {
+  ENCRYPTION_NOT_CONFIGURED_MESSAGE,
+  RemoteDecryptionError,
+  forwardToRemoteKibana,
+  getDestinationFromRequest,
+} from '../../remote_kibana/forward_to_remote_kibana';
+import { ExampleAlreadyExistsError } from '../../storage/datasets/example_already_exists_error';
+import { DatasetExamplesLimitExceededError } from '../../storage/datasets/dataset_examples_limit_exceeded_error';
 import type { RouteDependencies } from '../register_routes';
 
-export const registerAddExamplesRoute = ({ router, logger }: RouteDependencies) => {
+export const registerAddExamplesRoute = ({
+  router,
+  logger,
+  canEncrypt,
+  getEncryptedSavedObjectsStart,
+  getSpaceId,
+}: RouteDependencies) => {
   router.versioned
     .post({
       path: EVALS_DATASET_EXAMPLES_URL,
       access: INTERNAL_API_ACCESS,
+      options: {
+        body: {
+          maxBytes: MAX_DATASET_EXAMPLES_REQUEST_BYTES,
+        },
+      },
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
       },
       summary: 'Add examples to evaluation dataset',
     })
@@ -39,28 +59,72 @@ export const registerAddExamplesRoute = ({ router, logger }: RouteDependencies) 
       },
       async (context, request, response) => {
         try {
-          const { datasetId } = request.params;
-          const { examples } = request.body;
-          const coreContext = await context.core;
-          const evalsContext = await context.evals;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
-          const datasetClient = evalsContext.datasetService.getClient(esClient);
+          const destination = getDestinationFromRequest(request);
+          if (destination && destination !== 'local') {
+            if (!canEncrypt) {
+              return response.customError({
+                statusCode: 501,
+                body: { message: ENCRYPTION_NOT_CONFIGURED_MESSAGE },
+              });
+            }
+            const encryptedSavedObjects = await getEncryptedSavedObjectsStart();
+            const forwarded = await forwardToRemoteKibana({
+              encryptedSavedObjects,
+              remoteId: destination,
+              request,
+              method: 'POST',
+              body: request.body,
+            });
 
-          const dataset = await datasetClient.get(datasetId);
-          if (!dataset) {
+            if (forwarded.statusCode === 200) {
+              return response.ok({ body: forwarded.body });
+            }
+            if (forwarded.statusCode === 404) {
+              return response.notFound({ body: forwarded.body as any });
+            }
+            if (forwarded.statusCode === 409) {
+              return response.customError({ statusCode: 409, body: forwarded.body as any });
+            }
+
+            return response.customError({
+              statusCode: forwarded.statusCode,
+              body: forwarded.body as any,
+            });
+          }
+
+          const { datasetId } = request.params;
+          const { examples, source, on_duplicate: onDuplicate } = request.body;
+          const activeSpaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
+          const evalsContext = await context.evals;
+          const datasetClient = evalsContext.datasetService.getClient({ spaceId: activeSpaceId });
+
+          const exists = await datasetClient.datasetExists(datasetId);
+          if (!exists) {
             return response.notFound({
               body: { message: `Evaluation dataset not found: ${datasetId}` },
             });
           }
 
-          const { added } = await datasetClient.addExamples(datasetId, examples);
+          const { added, conflicts } = await datasetClient.addExamples(datasetId, examples, {
+            rejectDuplicates: onDuplicate !== 'skip',
+            ...(source ? { source } : {}),
+          });
 
           return response.ok({
             body: {
               added,
+              skipped_duplicates: conflicts,
             },
           });
         } catch (error) {
+          if (error instanceof RemoteDecryptionError) {
+            logger.error(`Remote decryption failed: ${error.message}`);
+            return response.customError({
+              statusCode: 400,
+              body: { message: error.message },
+            });
+          }
+
           if (error instanceof ExampleAlreadyExistsError) {
             return response.customError({
               statusCode: 409,
@@ -68,7 +132,15 @@ export const registerAddExamplesRoute = ({ router, logger }: RouteDependencies) 
             });
           }
 
-          logger.error(`Failed to add evaluation dataset examples: ${error}`);
+          if (error instanceof DatasetExamplesLimitExceededError) {
+            return response.customError({
+              statusCode: 409,
+              body: { message: error.message },
+            });
+          }
+
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(`Failed to add evaluation dataset examples: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to add evaluation dataset examples' },

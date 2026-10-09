@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ConnectorSelector } from '.';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { mockAssistantAvailability, TestProviders } from '../../mock/test_providers/test_providers';
 import { mockActionTypes, mockConnectors } from '../../mock/connectors';
 import * as i18n from '../translations';
@@ -139,8 +139,7 @@ describe('Connector selector', () => {
     expect(addButton).toBeDisabled();
   });
 
-  it('shows tooltip with missing privileges message when hovering disabled add connector button', () => {
-    jest.useFakeTimers();
+  it('shows tooltip with missing privileges message when hovering disabled add connector button', async () => {
     jest.mocked(useLoadConnectors).mockReturnValue(
       createMockUseLoadConnectorsResult({
         data: [],
@@ -168,14 +167,12 @@ describe('Connector selector', () => {
     expect(addButton).toBeDisabled();
 
     fireEvent.mouseOver(addButton);
-    act(() => {
-      jest.runAllTimers();
-    });
 
-    expect(screen.getByRole('tooltip')).toHaveTextContent(
-      i18n.ADD_CONNECTOR_MISSING_PRIVILEGES_DESCRIPTION
-    );
-    jest.useRealTimers();
+    await waitFor(() => {
+      expect(screen.getByRole('tooltip', { hidden: true })).toHaveTextContent(
+        i18n.ADD_CONNECTOR_MISSING_PRIVILEGES_DESCRIPTION
+      );
+    });
   });
 
   it('renders add new connector button if no selected connector is provided', () => {

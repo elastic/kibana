@@ -7,10 +7,7 @@
 
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  OBSERVABILITY_AGENT_ID,
-  OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID,
-} from '@kbn/observability-agent-builder-plugin/public';
+import { OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import React, { useEffect } from 'react';
 import { Redirect, useHistory } from 'react-router-dom';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -43,6 +40,7 @@ export function TransactionDetails() {
     kuery,
     traceId,
     transactionId,
+    latencyAggregationType,
   } = query;
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const apmRouter = useApmRouter();
@@ -78,7 +76,6 @@ export function TransactionDetails() {
     }
 
     agentBuilder.setChatConfig({
-      agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
         {
           type: OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID,
@@ -167,9 +164,12 @@ export function TransactionDetails() {
           start={start}
           end={end}
           transactionName={transactionName}
+          rangeFrom={rangeFrom}
+          rangeTo={rangeTo}
           isServerlessContext={isServerless}
           comparisonEnabled={comparisonEnabled}
           offset={offset}
+          latencyAggregationType={latencyAggregationType}
         />
       </ChartPointerEventContextProvider>
 

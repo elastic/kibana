@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { OpenAPIV3 } from 'openapi-types';
 import {
   is,
   convert,
@@ -25,7 +26,7 @@ describe('convert', () => {
       schema: {
         additionalProperties: false,
         properties: {
-          any: {},
+          any: { description: 'any type', nullable: true },
           array: {
             items: {
               additionalProperties: false,
@@ -175,6 +176,598 @@ describe('convert', () => {
       },
     });
   });
+
+  test('does not require referenced fields that are optional at runtime', () => {
+    const maybeObjectSchema = schema.object(
+      { a: schema.string() },
+      { meta: { id: 'maybeObjectSchema' } }
+    );
+    const maybeOneOfSchema = schema.oneOf([schema.literal('s'), schema.literal('m')], {
+      meta: { id: 'maybeOneOfSchema' },
+    });
+    const objectWithDefaultSchema = schema.object(
+      { b: schema.string() },
+      { defaultValue: { b: 'default' }, meta: { id: 'objectWithDefaultSchema' } }
+    );
+    const requiredObjectSchema = schema.object(
+      { c: schema.string() },
+      { meta: { id: 'requiredObjectSchema' } }
+    );
+    const otherSchema = schema.object({
+      maybeObject: schema.maybe(maybeObjectSchema),
+      maybeOneOf: schema.maybe(maybeOneOfSchema),
+      objectWithDefault: objectWithDefaultSchema,
+      requiredObject: requiredObjectSchema,
+    });
+
+    expect(convert(otherSchema)).toEqual({
+      schema: {
+        additionalProperties: false,
+        properties: {
+          maybeObject: {
+            $ref: '#/components/schemas/maybeObjectSchema',
+          },
+          maybeOneOf: {
+            $ref: '#/components/schemas/maybeOneOfSchema',
+          },
+          objectWithDefault: {
+            $ref: '#/components/schemas/objectWithDefaultSchema',
+          },
+          requiredObject: {
+            $ref: '#/components/schemas/requiredObjectSchema',
+          },
+        },
+        required: ['requiredObject'],
+        type: 'object',
+      },
+      shared: {
+        maybeObjectSchema: {
+          title: 'maybeObjectSchema',
+          additionalProperties: false,
+          properties: {
+            a: {
+              type: 'string',
+            },
+          },
+          required: ['a'],
+          type: 'object',
+        },
+        maybeOneOfSchema: {
+          enum: ['s', 'm'],
+          title: 'maybeOneOfSchema',
+          type: 'string',
+        },
+        objectWithDefaultSchema: {
+          title: 'objectWithDefaultSchema',
+          additionalProperties: false,
+          default: {
+            b: 'default',
+          },
+          properties: {
+            b: {
+              type: 'string',
+            },
+          },
+          required: ['b'],
+          type: 'object',
+        },
+        requiredObjectSchema: {
+          title: 'requiredObjectSchema',
+          additionalProperties: false,
+          properties: {
+            c: {
+              type: 'string',
+            },
+          },
+          required: ['c'],
+          type: 'object',
+        },
+      },
+    });
+
+    expect(
+      convert(
+        schema.object({
+          maybeObject: schema.maybe(maybeObjectSchema),
+          objectWithDefault: objectWithDefaultSchema,
+        })
+      ).schema
+    ).not.toHaveProperty('required');
+  });
+
+  test('does not require nullable fields that are optional at runtime', () => {
+    const type = schema.object({
+      str: schema.string(),
+      nullableStr: schema.nullable(schema.string()),
+    });
+
+    expect(convert(type)).toEqual({
+      schema: {
+        additionalProperties: false,
+        properties: {
+          str: {
+            type: 'string',
+          },
+          nullableStr: {
+            default: null,
+            nullable: true,
+            type: 'string',
+          },
+        },
+        required: ['str'],
+        type: 'object',
+      },
+      shared: {},
+    });
+  });
+
+  test('ignores inner defaultValue when converting schema.nullable', () => {
+    expect(
+      convert(
+        schema.object({
+          nullableStr: schema.nullable(
+            schema.string({
+              defaultValue: 'ignored',
+            })
+          ),
+        })
+      )
+    ).toEqual({
+      schema: {
+        additionalProperties: false,
+        properties: {
+          nullableStr: {
+            default: null,
+            nullable: true,
+            type: 'string',
+          },
+        },
+        type: 'object',
+      },
+      shared: {},
+    });
+  });
+
+  test('includes null in enum when converting schema.nullable oneOf literals', () => {
+    expect(
+      convert(
+        schema.nullable(schema.oneOf([schema.literal(1), schema.literal(2), schema.literal(3)]))
+      )
+    ).toEqual({
+      schema: {
+        default: null,
+        enum: [1, 2, 3, null],
+        nullable: true,
+        type: 'integer',
+      },
+      shared: {},
+    });
+  });
+
+  test('materializes function defaults once for referenced schemas', () => {
+    const defaultValue = jest.fn(() => ({ b: 'default' }));
+    const objectWithFunctionDefaultSchema = schema.object(
+      { b: schema.string() },
+      { defaultValue, meta: { id: 'objectWithFunctionDefaultSchema' } }
+    );
+
+    const converted = convert(
+      schema.object({ objectWithFunctionDefault: objectWithFunctionDefaultSchema })
+    );
+
+    expect(converted.schema).not.toHaveProperty('required');
+    expect(converted.shared.objectWithFunctionDefaultSchema.default).toEqual({ b: 'default' });
+    expect(defaultValue).toHaveBeenCalledTimes(1);
+  });
+
+  test('does not require maybe referenced fields in array item schemas', () => {
+    const timeRangeSchema = schema.object(
+      {
+        from: schema.string(),
+        to: schema.string(),
+      },
+      { meta: { id: 'arrayItemTimeRangeSchema' } }
+    );
+
+    const converted = convert(
+      schema.object({
+        dashboards: schema.arrayOf(
+          schema.object({
+            data: schema.object({
+              time_range: schema.maybe(timeRangeSchema),
+              title: schema.string(),
+            }),
+          })
+        ),
+      })
+    );
+
+    const dashboardsSchema = converted.schema.properties!.dashboards as OpenAPIV3.ArraySchemaObject;
+    const dashboardItemSchema = dashboardsSchema.items as OpenAPIV3.SchemaObject;
+    const dataSchema = dashboardItemSchema.properties!.data as OpenAPIV3.SchemaObject;
+
+    expect(dataSchema.required).toEqual(['title']);
+  });
+
+  test('does not require maybe referenced fields in shared array item schemas', () => {
+    const timeRangeSchema = schema.object(
+      {
+        from: schema.string(),
+        to: schema.string(),
+      },
+      { meta: { id: 'sharedArrayItemTimeRangeSchema' } }
+    );
+    const dashboardSchema = schema.object(
+      {
+        data: schema.object({
+          time_range: schema.maybe(timeRangeSchema),
+          title: schema.string(),
+        }),
+      },
+      { meta: { id: 'sharedArrayItemDashboardSchema' } }
+    );
+
+    const converted = convert(
+      schema.object({
+        dashboards: schema.arrayOf(dashboardSchema),
+      })
+    );
+
+    const dashboardsSchema = converted.schema.properties!.dashboards as OpenAPIV3.ArraySchemaObject;
+    const dashboardItemSchema = converted.shared
+      .sharedArrayItemDashboardSchema as OpenAPIV3.SchemaObject;
+    const dataSchema = dashboardItemSchema.properties!.data as OpenAPIV3.SchemaObject;
+
+    expect(dashboardsSchema.items).toEqual({
+      $ref: '#/components/schemas/sharedArrayItemDashboardSchema',
+    });
+    expect(dataSchema.required).toEqual(['title']);
+  });
+
+  test('strips internal "x-oas-" markers from converted schemas', () => {
+    const referencedSchema = schema.object(
+      { value: schema.string() },
+      { meta: { id: 'optionalMarkerReferenceSchema' } }
+    );
+
+    const converted = convert(
+      schema.maybe(
+        schema.object({
+          inline: schema.maybe(
+            schema.object({
+              value: schema.arrayOf(schema.maybe(schema.string())),
+              value2: schema.number({ defaultValue: () => 42 }),
+              value3: schema.maybe(
+                schema.object({ foo: schema.string({ maxLength: 33 }) }, { meta: { id: 'Value3' } })
+              ),
+              value4: schema.oneOf([schema.string(), schema.maybe(schema.number())]),
+              value5: schema.discriminatedUnion('type', [
+                schema.object(
+                  { type: schema.literal('1'), value: schema.maybe(schema.number()) },
+                  { meta: { id: 'one' } }
+                ),
+                schema.object(
+                  { type: schema.literal('2'), value: schema.maybe(schema.string()) },
+                  { meta: { id: 'two' } }
+                ),
+              ]),
+            })
+          ),
+          referenced: schema.maybe(referencedSchema),
+        })
+      )
+    );
+
+    const xOasKeys: string[] = [];
+    JSON.stringify(converted, (key, value) => {
+      if (typeof key === 'string' && key.startsWith('x-oas')) xOasKeys.push(key);
+      return value;
+    });
+
+    expect(xOasKeys).toEqual([]);
+  });
+
+  test('does not leak maybe metadata into later uses of the same shared schema', () => {
+    const sharedSchemas = new Map();
+    const sharedSchema = schema.object(
+      { a: schema.string() },
+      { meta: { id: 'reusedSharedSchema' } }
+    );
+
+    // Using the maybe and non-maybe variants in the same object is rejected by Joi because
+    // both schemas have the same id. This models the realistic route-to-route reuse instead.
+    expect(
+      convert(schema.object({ optionalRef: schema.maybe(sharedSchema) }), { sharedSchemas }).schema
+    ).toEqual({
+      additionalProperties: false,
+      properties: {
+        optionalRef: {
+          $ref: '#/components/schemas/reusedSharedSchema',
+        },
+      },
+      type: 'object',
+    });
+
+    expect(convert(schema.object({ requiredRef: sharedSchema }), { sharedSchemas })).toEqual({
+      schema: {
+        additionalProperties: false,
+        properties: {
+          requiredRef: {
+            $ref: '#/components/schemas/reusedSharedSchema',
+          },
+        },
+        required: ['requiredRef'],
+        type: 'object',
+      },
+      shared: {
+        reusedSharedSchema: {
+          title: 'reusedSharedSchema',
+          additionalProperties: false,
+          properties: {
+            a: {
+              type: 'string',
+            },
+          },
+          required: ['a'],
+          type: 'object',
+        },
+      },
+    });
+
+    expect(
+      convert(schema.object({ optionalRef: schema.maybe(sharedSchema) }), { sharedSchemas })
+    ).toEqual({
+      schema: {
+        additionalProperties: false,
+        properties: {
+          optionalRef: {
+            $ref: '#/components/schemas/reusedSharedSchema',
+          },
+        },
+        type: 'object',
+      },
+      shared: {
+        reusedSharedSchema: {
+          title: 'reusedSharedSchema',
+          additionalProperties: false,
+          properties: {
+            a: {
+              type: 'string',
+            },
+          },
+          required: ['a'],
+          type: 'object',
+        },
+      },
+    });
+  });
+
+  test('does not make nested required references optional when the same shared schema is also maybe', () => {
+    const sharedSchema = schema.object(
+      { a: schema.string() },
+      { meta: { id: 'nestedReusedSharedSchema' } }
+    );
+
+    expect(
+      convert(
+        schema.object({
+          nested: schema.object({ optionalRef: schema.maybe(sharedSchema) }),
+          requiredRef: sharedSchema,
+        })
+      ).schema
+    ).toEqual({
+      additionalProperties: false,
+      properties: {
+        nested: {
+          additionalProperties: false,
+          properties: {
+            optionalRef: {
+              $ref: '#/components/schemas/nestedReusedSharedSchema',
+            },
+          },
+          type: 'object',
+        },
+        requiredRef: {
+          $ref: '#/components/schemas/nestedReusedSharedSchema',
+        },
+      },
+      required: ['nested', 'requiredRef'],
+      type: 'object',
+    });
+  });
+
+  test('does not require maybe referenced fields added through object extends', () => {
+    const baseSchema = schema.object({
+      format: schema.string(),
+    });
+
+    expect(
+      convert(
+        baseSchema.extends(
+          {
+            field: schema.string(),
+            timeScale: schema.maybe(
+              schema.oneOf([schema.literal('s'), schema.literal('m')], {
+                meta: { id: 'extendedTimeScaleSchema' },
+              })
+            ),
+          },
+          { meta: { id: 'extendedMetricOperation' } }
+        )
+      )
+    ).toEqual({
+      schema: {
+        $ref: '#/components/schemas/extendedMetricOperation',
+      },
+      shared: {
+        extendedMetricOperation: {
+          additionalProperties: false,
+          properties: {
+            field: {
+              type: 'string',
+            },
+            format: {
+              type: 'string',
+            },
+            timeScale: {
+              $ref: '#/components/schemas/extendedTimeScaleSchema',
+            },
+          },
+          required: ['format', 'field'],
+          title: 'extendedMetricOperation',
+          type: 'object',
+        },
+        extendedTimeScaleSchema: {
+          enum: ['s', 'm'],
+          title: 'extendedTimeScaleSchema',
+          type: 'string',
+        },
+      },
+    });
+  });
+
+  test('does not require maybe referenced fields inherited through chained object extends', () => {
+    const genericOptionsSchema = schema.object({
+      format: schema.string(),
+    });
+    const sharedOperationSchema = genericOptionsSchema.extends({
+      timeScale: schema.maybe(
+        schema.oneOf([schema.literal('s'), schema.literal('m')], {
+          meta: { id: 'chainedTimeScaleSchema' },
+        })
+      ),
+    });
+    const fieldBasedOperationSchema = sharedOperationSchema.extends({
+      field: schema.string(),
+    });
+    const concreteOperationSchema = fieldBasedOperationSchema.extends(
+      {
+        operation: schema.literal('count'),
+      },
+      { meta: { id: 'chainedMetricOperation' } }
+    );
+
+    expect(convert(concreteOperationSchema).shared.chainedMetricOperation.required).toEqual([
+      'format',
+      'field',
+      'operation',
+    ]);
+  });
+
+  test('does not require maybe referenced fields in id schemas inside oneOf', () => {
+    const genericOptionsSchema = schema.object({
+      format: schema.string(),
+    });
+    const sharedOperationSchema = genericOptionsSchema.extends({
+      timeScale: schema.maybe(
+        schema.oneOf([schema.literal('s'), schema.literal('m')], {
+          meta: { id: 'oneOfTimeScaleSchema' },
+        })
+      ),
+    });
+    const countOperationSchema = sharedOperationSchema.extends(
+      {
+        operation: schema.literal('count'),
+      },
+      { meta: { id: 'oneOfCountOperation' } }
+    );
+
+    expect(
+      convert(schema.oneOf([countOperationSchema])).shared.oneOfCountOperation.required
+    ).toEqual(['format', 'operation']);
+  });
+
+  test('does not require reused maybe referenced fields across oneOf id schemas', () => {
+    const timeScaleSchema = schema.maybe(
+      schema.oneOf([schema.literal('s'), schema.literal('m')], {
+        meta: { id: 'reusedOneOfTimeScaleSchema' },
+      })
+    );
+    const genericOptionsSchema = schema.object({
+      format: schema.string(),
+      time_scale: timeScaleSchema,
+    });
+    const countOperationSchema = genericOptionsSchema.extends(
+      {
+        operation: schema.literal('count'),
+      },
+      { meta: { id: 'reusedOneOfCountOperation' } }
+    );
+    const sumOperationSchema = genericOptionsSchema.extends(
+      {
+        operation: schema.literal('sum'),
+      },
+      { meta: { id: 'reusedOneOfSumOperation' } }
+    );
+
+    const converted = convert(schema.oneOf([countOperationSchema, sumOperationSchema]));
+
+    expect(converted.shared.reusedOneOfCountOperation.required).toEqual(['format', 'operation']);
+    expect(converted.shared.reusedOneOfSumOperation.required).toEqual(['format', 'operation']);
+  });
+
+  test('does not require reused maybe referenced fields across discriminated union id schemas', () => {
+    const timeScaleSchema = schema.maybe(
+      schema.oneOf([schema.literal('s'), schema.literal('m')], {
+        meta: { id: 'discriminatedTimeScaleSchema' },
+      })
+    );
+    const genericOptionsSchema = schema.object({
+      format: schema.string(),
+      time_scale: timeScaleSchema,
+    });
+    const countOperationSchema = genericOptionsSchema.extends(
+      {
+        type: schema.literal('count'),
+      },
+      { meta: { id: 'discriminatedCountOperation' } }
+    );
+    const sumOperationSchema = genericOptionsSchema.extends(
+      {
+        type: schema.literal('sum'),
+      },
+      { meta: { id: 'discriminatedSumOperation' } }
+    );
+
+    const converted = convert(
+      schema.discriminatedUnion('type', [countOperationSchema, sumOperationSchema])
+    );
+
+    expect(converted.shared.discriminatedCountOperation.required).toEqual(['format', 'type']);
+    expect(converted.shared.discriminatedSumOperation.required).toEqual(['format', 'type']);
+  });
+
+  test('does not require maybe referenced fields in conditional id schemas', () => {
+    const timeScaleSchema = schema.maybe(
+      schema.oneOf([schema.literal('s'), schema.literal('m')], {
+        meta: { id: 'conditionalTimeScaleSchema' },
+      })
+    );
+    const thenSchema = schema.object(
+      {
+        time_scale: timeScaleSchema,
+        required: schema.string(),
+      },
+      { meta: { id: 'conditionalThenSchema' } }
+    );
+    const otherwiseSchema = schema.object(
+      {
+        time_scale: timeScaleSchema,
+        required: schema.string(),
+      },
+      { meta: { id: 'conditionalOtherwiseSchema' } }
+    );
+
+    const converted = convert(
+      schema.object({
+        kind: schema.string(),
+        value: schema.conditional(schema.siblingRef('kind'), 'then', thenSchema, otherwiseSchema),
+      })
+    );
+
+    expect(converted.shared.conditionalThenSchema.required).toEqual(['required']);
+    expect(converted.shared.conditionalOtherwiseSchema.required).toEqual(['required']);
+  });
 });
 
 describe('convertPathParameters', () => {
@@ -217,7 +810,7 @@ describe('convertPathParameters', () => {
         {
           in: 'path',
           name: 'a',
-          required: false,
+          required: true,
           schema: {
             type: 'string',
           },

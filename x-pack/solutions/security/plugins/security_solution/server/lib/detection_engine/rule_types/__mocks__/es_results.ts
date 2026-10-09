@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { EqlHitsEvent } from '@elastic/elasticsearch/lib/api/types';
 import { set } from '@kbn/safer-lodash-set';
 import type {
@@ -90,7 +91,7 @@ export const sampleDocNoSortIdNoVersion = (someUuid: string = sampleIdGuid): Sig
 
 export const sampleDocWithSortId = (
   someUuid: string = sampleIdGuid,
-  sortIds: string[] = ['1234567891111', '2233447556677'],
+  sortIds: estypes.SortResults = ['1234567891111', '2233447556677'],
   ip?: string | string[],
   destIp?: string | string[]
 ): SignalSourceHit => ({
@@ -646,7 +647,7 @@ export const repeatedHitsWithSortId = (
   guids: string[],
   ips?: Array<string | string[]>,
   destIps?: Array<string | string[]>,
-  sortIds?: string[]
+  sortIds?: estypes.SortResults
 ): SignalSourceHit[] => {
   return Array.from({ length: count }).map((x, index) => ({
     ...sampleDocWithSortId(
@@ -664,7 +665,7 @@ export const repeatedSearchResultsWithSortId = (
   guids: string[],
   ips?: Array<string | string[]>,
   destIps?: Array<string | string[]>,
-  sortIds?: string[]
+  sortIds?: estypes.SortResults
 ): SignalSearchResponse => ({
   took: 10,
   timed_out: false,

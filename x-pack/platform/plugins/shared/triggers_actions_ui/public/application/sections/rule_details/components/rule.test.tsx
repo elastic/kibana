@@ -18,6 +18,8 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { RuleComponent, alertToListItem } from './rule';
 import type { RuleSummary, AlertStatus, RuleType, RuleTypeModel } from '../../../../types';
 import type { AlertStatusValues } from '@kbn/alerting-plugin/common';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { RULE_DETAILS_FILTER_CONTROLS } from '../../alerts_search_bar/constants';
 import { mockRule, mockLogResponse } from './test_helpers';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -58,6 +60,18 @@ jest.mock('../../../hooks/use_multiple_spaces', () => ({
   })),
 }));
 
+const mockAlertSummaryWidget = jest.fn((_props: Record<string, unknown>) => (
+  <div data-test-subj="alertSummaryWidget" />
+));
+jest.mock('../../alert_summary_widget', () => ({
+  AlertSummaryWidget: (props: Record<string, unknown>) => mockAlertSummaryWidget(props),
+}));
+
+jest.mock('@kbn/kibana-utils-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-utils-plugin/public'),
+  setStateToKbnUrl: jest.fn(() => '/mocked-path'),
+}));
+
 const mockAlertsTable = jest.fn(() => {
   return <div data-test-subj="alertsTable" />;
 });
@@ -66,6 +80,28 @@ jest.mock('@kbn/response-ops-alerts-table/components/alerts_table', () => ({
   AlertsTable: mockAlertsTable,
   default: mockAlertsTable,
 }));
+
+// Mock the rule-details alert search bar to immediately signal control readiness so the
+// rule details alerts table renders during these tests (the real search bar's readiness
+// depends on the control group initializing asynchronously, which doesn't happen in jsdom).
+jest.mock('./rule_alert_search_bar', () => {
+  const ReactLib = jest.requireActual('react');
+  return {
+    RuleAlertSearchBar: ({
+      onFilterControlsChange,
+      onControlApiAvailable,
+    }: {
+      onFilterControlsChange?: (filters: unknown[]) => void;
+      onControlApiAvailable?: (api: unknown) => void;
+    }) => {
+      ReactLib.useEffect(() => {
+        onControlApiAvailable?.({});
+        onFilterControlsChange?.([]);
+      }, [onControlApiAvailable, onFilterControlsChange]);
+      return ReactLib.createElement('div', { 'data-test-subj': 'ruleAlertSearchBar' });
+    },
+  };
+});
 
 const { loadExecutionLogAggregations } = jest.requireMock(
   '../../../lib/rule_api/load_execution_log_aggregations'
@@ -538,7 +574,7 @@ describe('disable/enable functionality', () => {
       />
     );
 
-    const actionsElem = await screen.findByTestId('statusDropdown');
+    const actionsElem = await screen.findByTestId('ruleStatusText');
 
     expect(actionsElem).toHaveTextContent('Enabled');
   });
@@ -560,7 +596,7 @@ describe('disable/enable functionality', () => {
       />
     );
 
-    const actionsElem = await screen.findByTestId('statusDropdown');
+    const actionsElem = await screen.findByTestId('ruleStatusText');
 
     expect(actionsElem).toHaveTextContent('Disabled');
   });
@@ -683,6 +719,67 @@ describe('tabbed content', () => {
   });
 });
 
+describe('alert details navigation based on observability access', () => {
+  const getNoObservabilityAccessCapabilities = () => ({
+    ...capabilities,
+    navLinks: {
+      ...capabilities.navLinks,
+      apm: false,
+      metrics: false,
+      uptime: false,
+      synthetics: false,
+      slo: false,
+    },
+    logs: { show: false },
+    observabilityAlerts: { show: false },
+  });
+
+  const renderRuleComponent = async () => {
+    const rule = mockRule();
+    const ruleType = mockRuleType({ hasAlertsMappings: true });
+    const ruleSummary = mockRuleSummary();
+
+    renderWithProviders(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        readOnly={false}
+      />
+    );
+
+    await screen.findByTestId('alertsTable');
+  };
+
+  it('does not set alertDetailsNavigation when the user has no observability capabilities', async () => {
+    useKibanaMock().services.application.capabilities = getNoObservabilityAccessCapabilities();
+
+    await renderRuleComponent();
+
+    expect(mockAlertsTable).toHaveBeenCalledWith(
+      expect.objectContaining({ alertDetailsNavigation: undefined }),
+      expect.anything()
+    );
+  });
+
+  it('sets alertDetailsNavigation when the user has the observabilityAlerts capability', async () => {
+    useKibanaMock().services.application.capabilities = {
+      ...getNoObservabilityAccessCapabilities(),
+      observabilityAlerts: { show: true },
+    };
+
+    await renderRuleComponent();
+
+    expect(mockAlertsTable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alertDetailsNavigation: expect.objectContaining({ appId: 'observability' }),
+      }),
+      expect.anything()
+    );
+  });
+});
+
 describe('cases ownership based on solution context', () => {
   const renderWithSolution = async (navId: string | null) => {
     solutionNavId$.next(navId);
@@ -746,6 +843,39 @@ describe('cases ownership based on solution context', () => {
       }),
       expect.anything()
     );
+  });
+});
+
+describe('scrollAlertsIntoView', () => {
+  it('uses RULE_DETAILS_FILTER_CONTROLS for controlConfigs written to the URL', async () => {
+    const rule = mockRule();
+    const ruleType = mockRuleType({ hasAlertsMappings: true });
+    const ruleSummary = mockRuleSummary();
+
+    renderWithProviders(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        readOnly={false}
+      />
+    );
+
+    await screen.findByTestId('alertSummaryWidget');
+    Element.prototype.scrollIntoView = jest.fn();
+
+    const { onClick } = mockAlertSummaryWidget.mock.calls[0][0] as unknown as {
+      onClick: (status?: string) => void;
+    };
+    onClick('active');
+
+    const { controlConfigs } = (setStateToKbnUrl as jest.Mock).mock.calls[0][1] as {
+      controlConfigs: Array<{ field_name: string }>;
+    };
+    const controlFields = controlConfigs.map((c) => c.field_name);
+    const expectedFields = RULE_DETAILS_FILTER_CONTROLS.map((c) => c.field_name);
+    expect(controlFields).toEqual(expectedFields);
   });
 });
 

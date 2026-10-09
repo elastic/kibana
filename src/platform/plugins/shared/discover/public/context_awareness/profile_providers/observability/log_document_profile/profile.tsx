@@ -20,10 +20,12 @@ export type LogDocumentProfileProvider = DocumentProfileProvider<{
   logOverviewContext$: BehaviorSubject<LogOverviewContext | undefined>;
 }>;
 
+export const OBSERVABILITY_LOG_DOCUMENT_PROFILE_ID = 'observability-log-document-profile';
+
 export const createObservabilityLogDocumentProfileProvider = (
   services: ProfileProviderServices
 ): LogDocumentProfileProvider => ({
-  profileId: 'observability-log-document-profile',
+  profileId: OBSERVABILITY_LOG_DOCUMENT_PROFILE_ID,
   profile: {
     getDocViewer: createGetDocViewer(services),
   },

@@ -9,12 +9,14 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiToolTip,
+  type EuiToolTipRef,
   EuiPopover,
   EuiSelectable,
   EuiPopoverTitle,
   EuiFlexItem,
   EuiButtonIcon,
   EuiIconTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
@@ -55,16 +57,17 @@ export const SessionViewDisplayOptions = ({
 }) => {
   const [isOptionDropdownOpen, setOptionDropdownOpen] = useState(false);
   const styles = useStyles();
-  const tooltipRef = useRef(null);
+  const tooltipRef = useRef<EuiToolTipRef>(null);
+  const popoverTitleId = useGeneratedHtmlId();
 
   useEffect(() => {
     if (tooltipRef.current) {
       setTimeout(() => {
         if (tooltipRef.current) {
-          (tooltipRef.current as EuiToolTip).onFocus();
+          tooltipRef.current.showToolTip();
           setTimeout(() => {
             if (tooltipRef.current) {
-              (tooltipRef.current as EuiToolTip).onBlur();
+              tooltipRef.current.hideToolTip();
             }
           }, TOOLTIP_HIDE_DELAY);
         }
@@ -118,14 +121,16 @@ export const SessionViewDisplayOptions = ({
 
   const OptionButton = (
     <EuiFlexItem grow={false}>
-      <EuiButtonIcon
-        iconType="eye"
-        display={displayOptions.verboseMode || displayOptions.timestamp ? 'fill' : 'empty'}
-        onClick={toggleOptionButton}
-        size="m"
-        aria-label="Session view display option"
-        data-test-subj="sessionView:sessionViewOptionButton"
-      />
+      <EuiToolTip content="Session view display option" disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="eye"
+          display={displayOptions.verboseMode || displayOptions.timestamp ? 'fill' : 'empty'}
+          onClick={toggleOptionButton}
+          size="m"
+          aria-label="Session view display option"
+          data-test-subj="sessionView:sessionViewOptionButton"
+        />
+      </EuiToolTip>
     </EuiFlexItem>
   );
 
@@ -146,6 +151,7 @@ export const SessionViewDisplayOptions = ({
 
   const popOver = (
     <EuiPopover
+      aria-labelledby={popoverTitleId}
       button={OptionButton}
       isOpen={isOptionDropdownOpen}
       closePopover={closeOptionButton}
@@ -153,7 +159,7 @@ export const SessionViewDisplayOptions = ({
       <EuiSelectable options={optionsList} onChange={handleSelect}>
         {(list) => (
           <div css={styles.selectable}>
-            <EuiPopoverTitle>
+            <EuiPopoverTitle id={popoverTitleId}>
               <FormattedMessage
                 defaultMessage="Display options"
                 id="xpack.sessionView.sessionViewToggle.sessionViewToggleTitle"

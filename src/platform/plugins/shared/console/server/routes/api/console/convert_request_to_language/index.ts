@@ -10,7 +10,6 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { convertRequests } from '@elastic/request-converter';
 import type { RouteDependencies } from '../../..';
 
 import { acceptedHttpVerb, nonEmptyString } from '../proxy/validation_config';
@@ -26,7 +25,7 @@ const routeValidationConfig = {
       schema.object({
         method: acceptedHttpVerb,
         url: nonEmptyString,
-        data: schema.arrayOf(schema.string({ maxLength: 10000 }), { maxSize: 1000 }),
+        data: schema.arrayOf(schema.string({ maxLength: 100000 }), { maxSize: 1000 }),
       }),
       { maxSize: 100 }
     )
@@ -45,6 +44,11 @@ export const registerConvertRequestRoute = ({
     const { language, esHost, kibanaHost } = query;
 
     try {
+      // Lazy-loaded so that prettier (a transitive dependency of
+      // @elastic/request-converter's JavaScript exporter) doesn't sit in the
+      // server's idle heap on instances that never use this feature.
+      const { convertRequests } = await import('@elastic/request-converter');
+
       // Iterate over each request and build all the requests into a single string
       // that can be passed to the request-converter library
       let devtoolsScript = '';

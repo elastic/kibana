@@ -1,0 +1,11 @@
+steps:
+  - name: 'Bump package.json versions (to main)'
+    key: bump-package-json-versions-to-main
+    command: .buildkite/scripts/steps/version_bump/bump_package_json_versions.sh
+    env:
+      OVERRIDE_BRANCH: main
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4

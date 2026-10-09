@@ -22,13 +22,17 @@ import { prebuiltRuleAssetType } from './lib/detection_engine/prebuilt_rules';
 import { type as signalsMigrationType } from './lib/detection_engine/migrations/saved_objects';
 import { manifestType, unifiedManifestType } from './endpoint/lib/artifacts/saved_object_mappings';
 import { riskEngineConfigurationType } from './lib/entity_analytics/risk_engine/saved_object';
-import { entityEngineDescriptorType } from './lib/entity_analytics/entity_store/saved_object';
+import { v1EntityEngineDescriptorType } from './lib/entity_analytics/entity_store/v1_entity_engine_descriptor_type';
 import {
   privilegeMonitoringType,
   monitoringEntitySourceType,
 } from './lib/entity_analytics/privilege_monitoring/saved_objects';
 import { watchlistConfigType } from './lib/entity_analytics/watchlists/management/saved_object/watchlist_config_type';
-import { watchlistEntitySourceType } from './lib/entity_analytics/watchlists/entity_sources/infra';
+import {
+  watchlistEntitySourceType,
+  WatchlistEntitySourceApiKeyEncryptionParams,
+} from './lib/entity_analytics/watchlists/entity_sources/infra';
+import { leadGenerationConfigType } from './lib/entity_analytics/lead_generation/saved_object';
 import {
   PrivilegeMonitoringApiKeyEncryptionParams,
   PrivilegeMonitoringApiKeyType,
@@ -51,12 +55,13 @@ const types = [
   unifiedManifestType,
   signalsMigrationType,
   riskEngineConfigurationType,
-  entityEngineDescriptorType,
+  v1EntityEngineDescriptorType,
   privilegeMonitoringType,
   watchlistConfigType,
   PrivilegeMonitoringApiKeyType,
   monitoringEntitySourceType,
   watchlistEntitySourceType,
+  leadGenerationConfigType,
   protectionUpdatesNoteType,
   promptType,
   referenceDataSavedObjectType,
@@ -105,4 +110,5 @@ export const initEncryptedSavedObjects = ({
     return;
   }
   encryptedSavedObjects.registerType(PrivilegeMonitoringApiKeyEncryptionParams);
+  encryptedSavedObjects.registerType(WatchlistEntitySourceApiKeyEncryptionParams);
 };

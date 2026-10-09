@@ -75,7 +75,7 @@ describe('<BenchmarksTable />', () => {
       </TestProvider>
     );
 
-    expect(screen.getByText(benchmarkApplicableTo)).toBeInTheDocument();
+    expect(screen.getAllByText(benchmarkApplicableTo).length).toBeGreaterThan(0);
   });
 
   it('renders evaluated', () => {

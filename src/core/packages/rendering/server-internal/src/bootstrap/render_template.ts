@@ -12,6 +12,7 @@ export interface BootstrapTemplateData {
   themeTagName: string;
   jsDependencyPaths: string[];
   publicPathMap: string;
+  useHMR?: boolean;
 }
 
 export const renderTemplate = ({
@@ -19,11 +20,38 @@ export const renderTemplate = ({
   colorMode,
   jsDependencyPaths,
   publicPathMap,
+  useHMR = false,
 }: BootstrapTemplateData) => {
   const kbnThemeTagTemplate =
     colorMode === 'system'
       ? `window.__kbnThemeTag__ = window.matchMedia('(prefers-color-scheme: dark)').matches ? '${themeTagName}dark' : '${themeTagName}light';`
       : `window.__kbnThemeTag__ = '${themeTagName}${colorMode}';`;
+
+  // React Fast Refresh requires __REACT_DEVTOOLS_GLOBAL_HOOK__ to exist
+  // BEFORE React-DOM loads so that the renderer calls hook.inject().
+  // Without this stub, react-refresh/runtime (loaded later in kibana.bundle.js)
+  // cannot capture the renderer and performReactRefresh() becomes a no-op.
+  const reactDevtoolsHookStub = useHMR
+    ? [
+        '',
+        "    if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ === 'undefined') {",
+        '      var __hmrNextId = 0;',
+        '      __REACT_DEVTOOLS_GLOBAL_HOOK__ = {',
+        '        renderers: new Map(),',
+        '        supportsFiber: true,',
+        '        inject: function(internals) {',
+        '          var id = __hmrNextId++;',
+        '          __REACT_DEVTOOLS_GLOBAL_HOOK__.renderers.set(id, internals);',
+        '          return id;',
+        '        },',
+        '        onScheduleFiberRoot: function() {},',
+        '        onCommitFiberRoot: function() {},',
+        '        onCommitFiberUnmount: function() {},',
+        '      };',
+        '    }',
+        '',
+      ].join('\n')
+    : '';
 
   return `
 function kbnBundlesLoader() {
@@ -61,6 +89,7 @@ window.__kbnHardenPrototypes__ = kbnHardenPrototypes.hardenPrototypes;
 window.__kbnStrictCsp__ = kbnCsp.strictCsp;
 ${kbnThemeTagTemplate}
 window.__kbnPublicPath__ = ${publicPathMap};
+${useHMR ? 'window.__kbnHmrActive__ = true;' : ''}
 window.__kbnBundles__ = kbnBundlesLoader();
 
 if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
@@ -73,7 +102,11 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
   var loadingMessage = document.getElementById('kbn_loading_message');
   loadingMessage.style.display = 'flex';
 
-  window.onload = function () {
+  // The IIFE executes immediately -- safe because this script is at the bottom
+  // of <body> (DOM parsed) and <head> CSS is parser-blocking (loaded). Unlike
+  // window.onload, this avoids blocking on font/favicon downloads before
+  // starting bundle loads.
+  (function () {
     function failure() {
       // make subsequent calls to failure() noop
       failure = function () {};
@@ -84,26 +117,36 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
 
       var err = document.createElement('div');
       err.style.textAlign = 'center';
-      err.style.padding = '120px 20px';
+      err.style.padding = 'min(240px, 20vh) 20px';
       err.style.fontFamily = 'Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif';
+      err.style.maxInlineSize = '420px';
+      err.style.margin = '0 auto';
 
       var errorTitleEl = document.createElement('h1');
+      errorTitleEl.className = 'kbnBootstrapErrorTitle';
       errorTitleEl.innerText = errorTitle;
-      errorTitleEl.style.margin = '20px';
-      errorTitleEl.style.color = '#1a1c21';
+      errorTitleEl.style.fontSize = '24px';
+      errorTitleEl.style.fontWeight = '600';
+      errorTitleEl.style.lineHeight = '2rem';
+      errorTitleEl.style.letterSpacing = '-0.2px';
+      errorTitleEl.style.margin = '0 0 8px';
 
       var errorTextEl = document.createElement('p');
+      errorTextEl.className = 'kbnBootstrapErrorText';
       errorTextEl.innerText = errorText;
-      errorTextEl.style.margin = '20px';
-      errorTextEl.style.color = '#343741';
+      errorTextEl.style.fontSize = '14px';
+      errorTextEl.style.fontWeight = '400';
+      errorTextEl.style.lineHeight = '1.5';
+      errorTextEl.style.margin = '0 auto 24px';
 
       var errorReloadEl = document.createElement('button');
+      errorReloadEl.className = 'kbnBootstrapErrorButton';
       errorReloadEl.innerText = errorReload;
       errorReloadEl.onclick = function () {
         location.reload();
       };
       errorReloadEl.setAttribute('style',
-       'cursor: pointer; padding-inline: 12px; block-size: 40px; font-size: 1rem; line-height: 1.4286rem; border-radius: 6px; min-inline-size: 112px; color: rgb(255, 255, 255); background-color: rgb(0, 119, 204); outline-color: rgb(0, 0, 0); border:none'
+       'cursor: pointer; padding-inline: 12px; block-size: 40px; font-size: 14px; font-weight: 450; line-height: 40px; border-radius: 8px; border:none'
       );
 
       err.appendChild(errorTitleEl);
@@ -154,17 +197,21 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
         }
       });
     }
-
+${reactDevtoolsHookStub}
     performance.mark('kbnLoad', {
       detail: 'load_started',
     })
 
     load([
       ${jsDependencyPaths.map((path) => `'${path}'`).join(',')}
-    ], function () {
+    ], async function () {
+      // RSPack progressive loading: wait for async plugin chunks to load
+      if (window.__kbnPluginsLoaded) {
+        await window.__kbnPluginsLoaded;
+      }
       __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
     });
-  }
+  })();
 }
   `;
 };

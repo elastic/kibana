@@ -80,11 +80,21 @@ describe('Update profile routes', () => {
       expect(
         bodySchema.validate({
           avatar: { initials: 'some-initials', color: 'some-color', imageUrl: 'some-image-url' },
-          userSettings: { darkMode: 'dark', contrastMode: 'high' },
+          userSettings: {
+            darkMode: 'dark',
+            contrastMode: 'high',
+            agentBuilderAnnouncementModalSeen: true,
+            agentBuilderAnnouncementModalSeenBySpaceJson: '{}',
+          },
         })
       ).toEqual({
         avatar: { initials: 'some-initials', color: 'some-color', imageUrl: 'some-image-url' },
-        userSettings: { darkMode: 'dark', contrastMode: 'high' },
+        userSettings: {
+          darkMode: 'dark',
+          contrastMode: 'high',
+          agentBuilderAnnouncementModalSeen: true,
+          agentBuilderAnnouncementModalSeenBySpaceJson: '{}',
+        },
       });
     });
 
@@ -296,6 +306,7 @@ describe('Update profile routes', () => {
         userSettings: {
           darkMode: 'dark',
           contrastMode: 'high',
+          rememberSelectedSpace: true,
         },
       };
 
@@ -309,8 +320,8 @@ describe('Update profile routes', () => {
         )
       ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
 
-      expect(userProfileService.update).toBeCalledTimes(1);
-      expect(userProfileService.update).toBeCalledWith('u_some_id', ALLOWED_SETTINGS);
+      expect(userProfileService.update).toHaveBeenCalledTimes(1);
+      expect(userProfileService.update).toHaveBeenCalledWith('u_some_id', ALLOWED_SETTINGS);
 
       await expect(
         routeHandler(
@@ -324,6 +335,62 @@ describe('Update profile routes', () => {
           kibanaResponseFactory
         )
       ).resolves.toEqual(expect.objectContaining({ status: 403 }));
+    });
+
+    it('allows Elastic Cloud users to update agentBuilderAnnouncementModalSeenBySpaceJson.', async () => {
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+      });
+      authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser({ elastic_cloud_user: true }));
+
+      await expect(
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({
+            body: {
+              userSettings: {
+                agentBuilderAnnouncementModalSeenBySpaceJson: '{}',
+              },
+            },
+          }),
+          kibanaResponseFactory
+        )
+      ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
+
+      expect(userProfileService.update).toHaveBeenCalledWith('u_some_id', {
+        userSettings: {
+          agentBuilderAnnouncementModalSeenBySpaceJson: '{}',
+        },
+      });
+    });
+
+    it('allows Elastic Cloud users to update agentBuilderAnnouncementModalSeen.', async () => {
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+      });
+      authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser({ elastic_cloud_user: true }));
+
+      await expect(
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({
+            body: {
+              userSettings: {
+                agentBuilderAnnouncementModalSeen: true,
+              },
+            },
+          }),
+          kibanaResponseFactory
+        )
+      ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
+
+      expect(userProfileService.update).toHaveBeenCalledWith('u_some_id', {
+        userSettings: {
+          agentBuilderAnnouncementModalSeen: true,
+        },
+      });
     });
 
     it('updates profile.', async () => {
@@ -341,8 +408,8 @@ describe('Update profile routes', () => {
         )
       ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
 
-      expect(userProfileService.update).toBeCalledTimes(1);
-      expect(userProfileService.update).toBeCalledWith('u_some_id', { some: 'property' });
+      expect(userProfileService.update).toHaveBeenCalledTimes(1);
+      expect(userProfileService.update).toHaveBeenCalledWith('u_some_id', { some: 'property' });
     });
 
     it('rejects invalid avatar color.', async () => {
@@ -375,7 +442,7 @@ describe('Update profile routes', () => {
         )
       ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
 
-      expect(userProfileService.update).toBeCalledTimes(1);
+      expect(userProfileService.update).toHaveBeenCalledTimes(1);
     });
   });
 });

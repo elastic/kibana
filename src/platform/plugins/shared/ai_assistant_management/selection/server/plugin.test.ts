@@ -123,19 +123,20 @@ describe('plugin', () => {
         await expect(getValue!({ request: {} as any })).resolves.toBe(AIChatExperience.Agent);
       });
 
-      it('should return Classic when no request is provided', async () => {
+      it('should return Agent when no request is provided', async () => {
         const plugin = createPlugin();
         const { coreSetup } = setupPlugin(plugin);
         const getValue = getChatExperienceGetValue(coreSetup);
 
-        await expect(getValue!()).resolves.toBe(AIChatExperience.Classic);
+        await expect(getValue!()).resolves.toBe(AIChatExperience.Agent);
       });
 
       it.each([
         { solution: 'es', expected: AIChatExperience.Agent },
-        { solution: 'oblt', expected: AIChatExperience.Classic },
-        { solution: 'security', expected: AIChatExperience.Classic },
-        { solution: 'classic', expected: AIChatExperience.Classic },
+        { solution: 'oblt', expected: AIChatExperience.Agent },
+        { solution: 'security', expected: AIChatExperience.Agent },
+        { solution: 'classic', expected: AIChatExperience.Agent },
+        { solution: 'workplaceai', expected: AIChatExperience.Classic },
       ])(
         'should return $expected when active space solution is "$solution"',
         async ({ solution, expected }) => {
@@ -153,7 +154,7 @@ describe('plugin', () => {
         }
       );
 
-      it('should handle error and fallback to Classic', async () => {
+      it('should handle error and fallback to Agent', async () => {
         const plugin = createPlugin();
         const spaces = spacesMock.createStart();
         spaces.spacesService.getActiveSpace.mockRejectedValue(new Error('something went wrong'));
@@ -164,7 +165,7 @@ describe('plugin', () => {
           auth: { isAuthenticated: true },
         };
         await expect(getValue!({ request: requestMock as any })).resolves.toBe(
-          AIChatExperience.Classic
+          AIChatExperience.Agent
         );
       });
     });

@@ -10,21 +10,23 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
 
-export const UnhealthyCountBadge = ({ item }: { item: { id: string; label: string } }) => {
-  const { getUnhealthyMonitorCountForLocation, getUnhealthyConfigIdsForLocation } =
-    useMonitorIntegrationHealth();
+export const UnhealthyCountBadge = ({
+  item,
+  unhealthyConfigIds,
+}: {
+  item: { id: string; label: string };
+  unhealthyConfigIds: string[];
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const history = useHistory();
 
-  const unhealthyMonitorCount = getUnhealthyMonitorCountForLocation(item.id);
+  const unhealthyMonitorCount = unhealthyConfigIds.length;
 
   if (unhealthyMonitorCount === 0) {
     return null;
   }
 
-  const unhealthyConfigIds = getUnhealthyConfigIdsForLocation(item.id);
   const href = history.createHref({
     pathname: '/monitors',
     search: `?locations=${JSON.stringify([item.label])}&configIds=${JSON.stringify(
@@ -52,6 +54,9 @@ export const UnhealthyCountBadge = ({ item }: { item: { id: string; label: strin
         button={badge}
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}
+        aria-label={i18n.translate('xpack.synthetics.unhealthyCountBadge.popoverAriaLabel', {
+          defaultMessage: 'Unhealthy monitors details',
+        })}
       >
         <EuiText size="s">
           <FormattedMessage

@@ -10,14 +10,17 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { SimilarErrorsOccurrencesChart } from '.';
-import { where } from '@kbn/esql-composer';
+import { esql } from '@elastic/esql';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
 import { mockUnifiedDocViewerServices } from '../../../../../__mocks__';
 import { merge } from 'lodash';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+
+const NULLIFY_HEADER = 'SET unmapped_fields = "NULLIFY";';
 
 const mockUseDataSourcesContext = jest.fn(() => ({
   indexes: { logs: 'logs-*', apm: {} },
+  profileId: 'test-profile',
 }));
 
 jest.mock('../../../../../hooks/use_data_sources', () => ({
@@ -65,7 +68,7 @@ setUnifiedDocViewerServices(
   })
 );
 
-jest.mock('@kbn/lens-embeddable-utils/config_builder', () => {
+jest.mock('@kbn/lens-embeddable-utils', () => {
   return {
     LensConfigBuilder: jest.fn().mockImplementation(() => ({
       build: mockBuild,
@@ -81,6 +84,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
     capturedGetParentApi = undefined;
     mockUseDataSourcesContext.mockReturnValue({
       indexes: { logs: 'logs-*', apm: {} },
+      profileId: 'test-profile',
     });
     mockBuild.mockResolvedValue({
       visualizationType: 'lnsXY',
@@ -93,7 +97,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
   });
 
   it('constructs ESQL query with stats and sort', async () => {
-    const baseQuery = where('service.name == ?serviceName', { serviceName: 'test-service' });
+    const baseQuery = esql.exp`${esql.col(['service', 'name'])} == ${esql.str('test-service')}`;
     render(<SimilarErrorsOccurrencesChart baseEsqlQuery={baseQuery} />);
 
     await waitFor(() => {
@@ -104,6 +108,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
     const lensConfig = buildCall[0];
     const esqlQuery = lensConfig.dataset.esql;
 
+    expect(esqlQuery.startsWith(NULLIFY_HEADER)).toBe(true);
     expect(esqlQuery).toContain('FROM logs-*');
     expect(esqlQuery).toContain('STATS');
     expect(esqlQuery).toContain('occurrences = COUNT(*)');
@@ -112,14 +117,14 @@ describe('SimilarErrorsOccurrencesChart', () => {
   });
 
   it('shows loading state initially', () => {
-    const baseQuery = where('service.name == ?serviceName', { serviceName: 'test-service' });
+    const baseQuery = esql.exp`${esql.col(['service', 'name'])} == ${esql.str('test-service')}`;
     render(<SimilarErrorsOccurrencesChart baseEsqlQuery={baseQuery} />);
 
     expect(screen.getByTestId('similarErrorsOccurrencesChartLoading')).toBeInTheDocument();
   });
 
   it('renders chart when attributes are built successfully', async () => {
-    const baseQuery = where('service.name == ?serviceName', { serviceName: 'test-service' });
+    const baseQuery = esql.exp`${esql.col(['service', 'name'])} == ${esql.str('test-service')}`;
     render(<SimilarErrorsOccurrencesChart baseEsqlQuery={baseQuery} />);
 
     await waitFor(() => {
@@ -131,7 +136,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
 
   it('shows error message when build fails', async () => {
     mockBuild.mockRejectedValueOnce(new Error('Build failed'));
-    const baseQuery = where('service.name == ?serviceName', { serviceName: 'test-service' });
+    const baseQuery = esql.exp`${esql.col(['service', 'name'])} == ${esql.str('test-service')}`;
     render(<SimilarErrorsOccurrencesChart baseEsqlQuery={baseQuery} />);
 
     await waitFor(() => {
@@ -152,8 +157,9 @@ describe('SimilarErrorsOccurrencesChart', () => {
   it('does not build chart when indexes.logs is undefined', async () => {
     mockUseDataSourcesContext.mockReturnValueOnce({
       indexes: { logs: undefined, apm: {} } as any,
+      profileId: 'test-profile',
     });
-    const baseQuery = where('service.name == ?serviceName', { serviceName: 'test-service' });
+    const baseQuery = esql.exp`${esql.col(['service', 'name'])} == ${esql.str('test-service')}`;
     render(<SimilarErrorsOccurrencesChart baseEsqlQuery={baseQuery} />);
 
     await waitFor(() => {
@@ -164,7 +170,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
   });
 
   it('adds annotation layer when currentDocumentTimestamp is provided', async () => {
-    const baseQuery = where('service.name == ?serviceName', { serviceName: 'test-service' });
+    const baseQuery = esql.exp`${esql.col(['service', 'name'])} == ${esql.str('test-service')}`;
     const timestamp = '2024-01-15T10:30:00Z';
     render(
       <SimilarErrorsOccurrencesChart
@@ -187,7 +193,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
   });
 
   it('passes time_range in serialized state so Lens can resolve ?_tstart/?_tend', async () => {
-    const baseQuery = where('service.name == ?serviceName', { serviceName: 'test-service' });
+    const baseQuery = esql.exp`${esql.col(['service', 'name'])} == ${esql.str('test-service')}`;
     render(<SimilarErrorsOccurrencesChart baseEsqlQuery={baseQuery} />);
 
     await waitFor(() => {
@@ -200,7 +206,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
   });
 
   it('does not add annotation layer when currentDocumentTimestamp is not provided', async () => {
-    const baseQuery = where('service.name == ?serviceName', { serviceName: 'test-service' });
+    const baseQuery = esql.exp`${esql.col(['service', 'name'])} == ${esql.str('test-service')}`;
     render(<SimilarErrorsOccurrencesChart baseEsqlQuery={baseQuery} />);
 
     await waitFor(() => {

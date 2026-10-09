@@ -14,4 +14,6 @@ export interface ConfigType {
     roleMappingManagementEnabled: boolean;
   };
   roleManagementEnabled: boolean | undefined;
+  uiam?: { enabled: boolean };
+  serviceAccounts?: { enabled: boolean };
 }

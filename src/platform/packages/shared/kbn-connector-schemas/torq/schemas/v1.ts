@@ -6,20 +6,22 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 const configSchemaProps = {
   webhookIntegrationUrl: z.string(),
 };
-export const ConfigSchema = z.object(configSchemaProps).strict();
+export const ConfigSchema = lazySchema(() => z.object(configSchemaProps).strict());
 
 const secretSchemaProps = {
   token: z.string(),
 };
-export const SecretsSchema = z.object(secretSchemaProps).strict();
+export const SecretsSchema = lazySchema(() => z.object(secretSchemaProps).strict());
 
-export const ParamsSchema = z
-  .object({
-    body: z.string(),
-  })
-  .strict();
+export const ParamsSchema = lazySchema(() =>
+  z
+    .object({
+      body: z.string(),
+    })
+    .strict()
+);

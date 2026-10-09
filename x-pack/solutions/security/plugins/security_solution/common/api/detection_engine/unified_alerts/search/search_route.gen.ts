@@ -14,19 +14,19 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { QueryAlertsBodyParams } from '../../signals/query_signals/query_signals_route.gen';
 
 /**
  * Elasticsearch query and aggregation request
  */
+export const SearchUnifiedAlertsRequestBody = lazySchema(() => QueryAlertsBodyParams);
 export type SearchUnifiedAlertsRequestBody = z.infer<typeof SearchUnifiedAlertsRequestBody>;
-export const SearchUnifiedAlertsRequestBody = QueryAlertsBodyParams;
 export type SearchUnifiedAlertsRequestBodyInput = z.input<typeof SearchUnifiedAlertsRequestBody>;
 
 /**
  * Elasticsearch search response
  */
+export const SearchUnifiedAlertsResponse = lazySchema(() => z.object({}).catchall(z.unknown()));
 export type SearchUnifiedAlertsResponse = z.infer<typeof SearchUnifiedAlertsResponse>;
-export const SearchUnifiedAlertsResponse = z.object({}).catchall(z.unknown());

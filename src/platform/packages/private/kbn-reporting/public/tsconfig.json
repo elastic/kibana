@@ -29,5 +29,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/actions-plugin",
     "@kbn/licensing-types",
+    "@kbn/es-query",
+    "@kbn/utility-types"
   ]
 }

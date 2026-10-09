@@ -5,17 +5,13 @@
  * 2.0.
  */
 
+import type { AgentConfigurationEnvironmentsResponse } from '@kbn/apm-api-shared';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import { getAllEnvironments } from '../../../environments/get_all_environments';
 import { getExistingEnvironmentsForService } from './get_existing_environments_for_service';
 import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
 import type { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import type { APMInternalESClient } from '../../../../lib/helpers/create_es_client/create_internal_es_client';
-
-export type EnvironmentsResponse = Array<{
-  name: string;
-  alreadyConfigured: boolean;
-}>;
 
 export async function getEnvironments({
   serviceName,
@@ -29,7 +25,7 @@ export async function getEnvironments({
   apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   size: number;
-}): Promise<EnvironmentsResponse> {
+}): Promise<AgentConfigurationEnvironmentsResponse> {
   return withApmSpan('get_environments_for_agent_configuration', async () => {
     const [allEnvironments, existingEnvironments] = await Promise.all([
       getAllEnvironments({

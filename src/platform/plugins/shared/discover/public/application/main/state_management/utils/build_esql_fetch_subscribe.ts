@@ -9,55 +9,61 @@
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
+import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 import { isEqual } from 'lodash';
+import type { DataSourceService, EsqlSource } from '@kbn/data-source';
+import { unregisterFromDataViewsCache } from '@kbn/data-source';
 import type { DataDocumentsMsg, SavedSearchData } from '../discover_data_state_container';
 import { FetchStatus } from '../../../types';
 import type { InternalStateStore, TabActionInjector, TabState } from '../redux';
 import { internalStateActions } from '../redux';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
+import { shouldResetProfileAppStateDefaultField } from './profile_app_state_defaults';
 
 const ESQL_MAX_NUM_OF_COLUMNS = 50;
 const ESQL_TABLE_VIEW_COLUMN_THRESHOLD = 5;
 
 /*
- * Takes care of ES|QL state transformations when a new result is returned
- * If necessary this is setting displayed columns and selected data view
+ * Takes care of ES|QL state transformations when a new result is returned.
+ * Decides which columns to display in the grid.
+ *
+ * Column discovery uses EsqlSource.getColumns() — the source is resolved
+ * before fetch (tab init or query change) and provides result columns from
+ * LIMIT 0. This function only decides WHICH of those known columns to display.
  */
 export const buildEsqlFetchSubscribe = ({
   internalState,
   dataSubjects,
   getCurrentTab,
   injectCurrentTab,
+  dataSourceService,
 }: {
   internalState: InternalStateStore;
   dataSubjects: SavedSearchData;
   getCurrentTab: () => TabState;
   injectCurrentTab: TabActionInjector;
+  dataSourceService: DataSourceService;
 }) => {
-  let prevEsqlData: {
-    initialFetch: boolean;
-    query: string;
-    allColumns: string[];
-    defaultColumns: string[];
-  } = {
-    initialFetch: true,
-    query: '',
-    allColumns: [],
-    defaultColumns: [],
-  };
+  // EsqlSource from the last completed fetch. Undefined = no successful fetch yet (initial fetch).
+  // Carries .query and .getColumns() so we no longer need to track those separately.
+  let prevEsqlSource: EsqlSource | undefined;
+  // Default columns last written to appState — tracked to avoid redundant URL updates.
+  let prevDefaultColumns: string[] = [];
+  let registeredEsqlSourceId: string | undefined;
 
   const cleanupEsql = () => {
-    if (!prevEsqlData.query) {
+    if (!prevEsqlSource) {
       return;
     }
 
-    // cleanup when it's not an ES|QL query
-    prevEsqlData = {
-      initialFetch: true,
-      query: '',
-      allColumns: [],
-      defaultColumns: [],
-    };
+    if (registeredEsqlSourceId) {
+      dataSourceService.unregisterEsqlSource(registeredEsqlSourceId);
+      unregisterFromDataViewsCache(registeredEsqlSourceId);
+      registeredEsqlSourceId = undefined;
+    }
+
+    prevEsqlSource = undefined;
+    prevDefaultColumns = [];
   };
 
   const esqlFetchSubscribe = async (next: DataDocumentsMsg) => {
@@ -68,32 +74,25 @@ export const buildEsqlFetchSubscribe = ({
     }
 
     if (!isOfAggregateQueryType(nextQuery)) {
-      // cleanup for a "regular" query
       cleanupEsql();
       return;
     }
 
-    // We need to mark profile state fields to reset on index pattern changes
-    // when loading starts to ensure the correct pre fetch state is available
-    // before data fetching is triggered
     if (next.fetchStatus === FetchStatus.LOADING) {
-      // We have to grab the current query from appState
-      // here since nextQuery has not been updated yet
+      if (next.dataSource?.kind === 'esql') {
+        registeredEsqlSourceId = next.dataSource.id;
+      }
+
       const appStateQuery = getCurrentTab().appState.query;
 
-      if (isOfAggregateQueryType(appStateQuery)) {
-        if (prevEsqlData.initialFetch) {
-          prevEsqlData.query = appStateQuery.esql;
-        }
-
+      if (isOfAggregateQueryType(appStateQuery) && prevEsqlSource) {
         const indexPatternChanged =
           getIndexPatternFromESQLQuery(appStateQuery.esql) !==
-          getIndexPatternFromESQLQuery(prevEsqlData.query);
+          getIndexPatternFromESQLQuery(prevEsqlSource.query);
 
-        // Mark all profile state fields to reset when the index pattern changes
         if (indexPatternChanged) {
           internalState.dispatch(
-            injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+            injectCurrentTab(internalStateActions.setProfileAppStateDefaultFieldsToReset)({
               fieldsToReset: 'all',
             })
           );
@@ -103,76 +102,82 @@ export const buildEsqlFetchSubscribe = ({
       return;
     }
 
-    if (next.fetchStatus === FetchStatus.ERROR) {
-      // An error occurred, but it's still considered an initial fetch
-      prevEsqlData.initialFetch = false;
+    if (next.fetchStatus === FetchStatus.ERROR || next.fetchStatus !== FetchStatus.PARTIAL) {
       return;
     }
 
-    if (next.fetchStatus !== FetchStatus.PARTIAL) {
+    // Always promote PARTIAL → COMPLETE so fetch_all and the cancel button can
+    // settle. Column-default URL updates need EsqlSource; skip them if missing.
+    if (next.dataSource?.kind !== 'esql') {
+      dataSubjects.documents$.next({
+        ...next,
+        fetchStatus: FetchStatus.COMPLETE,
+      });
       return;
     }
 
-    let nextAllColumns = prevEsqlData.allColumns;
-    let nextDefaultColumns = prevEsqlData.defaultColumns;
+    const esqlSource = next.dataSource;
+    const allColumns = esqlSource.getColumns().map((c) => c.name);
 
-    if (next.result?.length) {
-      nextAllColumns = Object.keys(next.result[0].raw);
+    const nextDefaultColumns =
+      hasTransformationalCommand(nextQuery.esql) ||
+      allColumns.length <= ESQL_TABLE_VIEW_COLUMN_THRESHOLD
+        ? allColumns.slice(0, ESQL_MAX_NUM_OF_COLUMNS)
+        : [];
 
-      if (
-        hasTransformationalCommand(nextQuery.esql) ||
-        nextAllColumns.length <= ESQL_TABLE_VIEW_COLUMN_THRESHOLD
-      ) {
-        nextDefaultColumns = nextAllColumns.slice(0, ESQL_MAX_NUM_OF_COLUMNS);
-      } else {
-        nextDefaultColumns = [];
-      }
-    }
+    const isInitialFetch = prevEsqlSource === undefined;
 
-    if (prevEsqlData.initialFetch) {
-      prevEsqlData.initialFetch = false;
-      prevEsqlData.query = nextQuery.esql;
-      prevEsqlData.allColumns = nextAllColumns;
-
+    if (isInitialFetch) {
       const appStateColumns = getCurrentTab().appState.columns;
       const hasNoKnownAppStateColumns = appStateColumns === undefined;
       const shouldTriggerColumnsUpdate = nextDefaultColumns.length > 0 && hasNoKnownAppStateColumns;
-
-      prevEsqlData.defaultColumns = shouldTriggerColumnsUpdate ? [] : nextDefaultColumns;
+      prevDefaultColumns = shouldTriggerColumnsUpdate ? [] : nextDefaultColumns;
     }
 
+    // On initial fetch prevEsqlSource is undefined — compare against current query (no change).
+    const prevQuery = prevEsqlSource?.query ?? nextQuery.esql;
     const indexPatternChanged =
-      getIndexPatternFromESQLQuery(nextQuery.esql) !==
-      getIndexPatternFromESQLQuery(prevEsqlData.query);
+      getIndexPatternFromESQLQuery(nextQuery.esql) !== getIndexPatternFromESQLQuery(prevQuery);
 
-    const allColumnsChanged = !isEqual(nextAllColumns, prevEsqlData.allColumns);
+    const appStateColumns = getCurrentTab().appState.columns ?? [];
 
+    const summaryDefault = nextDefaultColumns.length === 0;
+    const selectionStillValid =
+      appStateColumns.length > 0 &&
+      appStateColumns.every((column) => column === SOURCE_COLUMN || allColumns.includes(column));
     const changeDefaultColumns =
-      indexPatternChanged || !isEqual(nextDefaultColumns, prevEsqlData.defaultColumns);
+      indexPatternChanged ||
+      (!isEqual(nextDefaultColumns, prevDefaultColumns) &&
+        !(summaryDefault && selectionStillValid));
+
+    const stickSource = !shouldResetProfileAppStateDefaultField(
+      getCurrentTab().profileAppStateDefaults,
+      'columns'
+    );
+    const columnsFromResponse = appStateColumns.filter((column) => allColumns.includes(column));
+    const nextSelectedColumns = withStickySource(appStateColumns, columnsFromResponse, stickSource);
+    const changeSelectedColumns = !isInitialFetch && !isEqual(nextSelectedColumns, appStateColumns);
 
     const { viewMode } = getCurrentTab().appState;
     const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
 
-    // If the index pattern hasn't changed, but the available columns have changed
-    // due to transformational commands, mark the associated profile state fields to reset
-    if (!indexPatternChanged && allColumnsChanged) {
-      internalState.dispatch(
-        injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
-          fieldsToReset: ['columns'],
-        })
-      );
-    }
+    // Commit the new source as "previous" before any async work below.
+    prevEsqlSource = esqlSource;
+    registeredEsqlSourceId = esqlSource.id;
 
-    prevEsqlData.allColumns = nextAllColumns;
+    if (indexPatternChanged || changeDefaultColumns || changeSelectedColumns || changeViewMode) {
+      prevDefaultColumns = nextDefaultColumns;
 
-    if (indexPatternChanged || changeDefaultColumns || changeViewMode) {
-      prevEsqlData.query = nextQuery.esql;
-      prevEsqlData.defaultColumns = nextDefaultColumns;
+      if (changeDefaultColumns || changeSelectedColumns || changeViewMode) {
+        let nextColumns: string[] | undefined;
+        if (changeDefaultColumns) {
+          nextColumns = withStickySource(appStateColumns, nextDefaultColumns, stickSource);
+        } else if (changeSelectedColumns) {
+          nextColumns = nextSelectedColumns;
+        }
 
-      // just change URL state if necessary
-      if (changeDefaultColumns || changeViewMode) {
         const nextState = {
-          ...(changeDefaultColumns && { columns: nextDefaultColumns }),
+          ...(nextColumns && { columns: nextColumns }),
           ...(changeViewMode && { viewMode: undefined }),
         };
 
@@ -191,4 +196,31 @@ export const buildEsqlFetchSubscribe = ({
   };
 
   return { esqlFetchSubscribe, cleanupEsql };
+};
+
+/**
+ * Inserts Summary (`_source`) into the new ES|QL column list at its previous index
+ * when `stickSource` is true. Does not re-insert Summary if the user turned it off.
+ */
+const withStickySource = (
+  previousColumns: string[],
+  nextColumns: string[],
+  stickSource: boolean
+): string[] => {
+  if (!stickSource) {
+    return nextColumns;
+  }
+
+  const sourceIndex = previousColumns.indexOf(SOURCE_COLUMN);
+  if (sourceIndex === -1) {
+    return nextColumns;
+  }
+
+  const columnsWithoutSource = nextColumns.filter((column) => column !== SOURCE_COLUMN);
+  const insertAt = Math.min(sourceIndex, columnsWithoutSource.length);
+  return [
+    ...columnsWithoutSource.slice(0, insertAt),
+    SOURCE_COLUMN,
+    ...columnsWithoutSource.slice(insertAt),
+  ];
 };

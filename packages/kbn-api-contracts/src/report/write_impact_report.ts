@@ -9,21 +9,41 @@
 
 import { writeFileSync, mkdirSync } from 'fs';
 import { resolve } from 'path';
-import type { TerraformImpactResult } from '../terraform/check_terraform_impact';
+import type { StabilityTier } from '../stability';
 
-export const writeImpactReport = (
-  reportPath: string,
-  terraformImpact: TerraformImpactResult
-): void => {
-  const report = {
-    impactedChanges: terraformImpact.impactedChanges.map((impact) => ({
-      path: impact.change.path,
-      method: impact.change.method,
-      reason: impact.change.reason,
-      terraformResource: impact.terraformResource,
-      owners: impact.owners,
-    })),
-  };
+/**
+ * A single breaking change, tier-classified. Every reported change carries its
+ * tier: stable and tech_preview gate the build, experimental is reported for
+ * visibility only. A change can also be report-only regardless of tier, when the
+ * declared rule policy says Kibana treats that oasdiff rule as non-breaking. An
+ * allowlisted entry is a stable or tech_preview change that matched an approved
+ * allowlist entry: it no longer gates, but still ships as a breaking change. The
+ * notifier and CI log key their sections off these fields.
+ */
+export interface ImpactReportEntry {
+  path: string;
+  method?: string;
+  reason: string;
+  oasdiffId?: string;
+  source?: string;
+  tier: StabilityTier;
+  since?: string;
+  reportOnly?: boolean;
+  policyReason?: string;
+  allowlisted?: boolean;
+}
+
+/** The published spec a report was produced from. One report covers one distribution. */
+export type ReportDistribution = 'stack' | 'serverless';
+
+export interface ImpactReport {
+  // Optional so a report written by an older revision still parses.
+  distribution?: ReportDistribution;
+  entries: ImpactReportEntry[];
+}
+
+/** Write the tier-labeled impact report consumed by the PR notifier. */
+export const writeImpactReport = (reportPath: string, report: ImpactReport): void => {
   mkdirSync(resolve(reportPath, '..'), { recursive: true });
   writeFileSync(reportPath, JSON.stringify(report, null, 2));
 };

@@ -53,7 +53,7 @@ export const MergeCandidates = ({
   return (
     <div css={gphSidebarPanelStyles}>
       <div css={gphSidebarHeaderStyles}>
-        <EuiIcon type="link" />{' '}
+        <EuiIcon type="link" aria-hidden={true} />{' '}
         {i18n.translate('xpack.graph.sidebar.linkSummaryTitle', {
           defaultMessage: 'Link summary',
         })}
@@ -112,6 +112,7 @@ export const MergeCandidates = ({
             <span>
               <EuiToolTip content={mergeTerm1ToTerm2ButtonMsg} disableScreenReaderOutput>
                 <EuiButtonIcon
+                  data-test-subj="graphMergeLeftIntoRight"
                   iconType="chevronDoubleRight"
                   size="xs"
                   style={{ opacity: 0.2 + mc.overlap / mc.v1 }}
@@ -120,15 +121,24 @@ export const MergeCandidates = ({
                 />
               </EuiToolTip>
 
-              <span className="gphLinkSummary__term--1" css={styles.term1}>
+              <span
+                className="gphLinkSummary__term--1"
+                data-test-subj="graphVennLargeTerm1"
+                css={styles.term1}
+              >
                 {mc.term1}
               </span>
-              <span className="gphLinkSummary__term--2" css={styles.term2}>
+              <span
+                className="gphLinkSummary__term--2"
+                data-test-subj="graphVennLargeTerm2"
+                css={styles.term2}
+              >
                 {mc.term2}
               </span>
 
               <EuiToolTip content={mergeTerm2ToTerm1ButtonMsg} disableScreenReaderOutput>
                 <EuiButtonIcon
+                  data-test-subj="graphMergeRightIntoLeft"
                   iconType="chevronDoubleLeft"
                   size="xs"
                   style={{ opacity: 0.2 + mc.overlap / mc.v2 }}
@@ -141,17 +151,32 @@ export const MergeCandidates = ({
             <VennDiagram leftValue={mc.v1} rightValue={mc.v2} overlap={mc.overlap} />
 
             <EuiToolTip content={leftTermCountMsg}>
-              <small tabIndex={0} className="gphLinkSummary__term--1" css={styles.term1}>
+              <small
+                tabIndex={0}
+                className="gphLinkSummary__term--1"
+                data-test-subj="graphVennSmallTerm1"
+                css={styles.term1}
+              >
                 {mc.v1}
               </small>
             </EuiToolTip>
             <EuiToolTip content={bothTermsCountMsg}>
-              <small tabIndex={0} className="gphLinkSummary__term--1-2" css={styles.term1_2}>
+              <small
+                tabIndex={0}
+                className="gphLinkSummary__term--1-2"
+                data-test-subj="graphVennSmallOverlap"
+                css={styles.term1_2}
+              >
                 &nbsp;({mc.overlap})&nbsp;
               </small>
             </EuiToolTip>
             <EuiToolTip content={rightTermCountMsg}>
-              <small tabIndex={0} className="gphLinkSummary__term--2" css={styles.term2}>
+              <small
+                tabIndex={0}
+                className="gphLinkSummary__term--2"
+                data-test-subj="graphVennSmallTerm2"
+                css={styles.term2}
+              >
                 {mc.v2}
               </small>
             </EuiToolTip>

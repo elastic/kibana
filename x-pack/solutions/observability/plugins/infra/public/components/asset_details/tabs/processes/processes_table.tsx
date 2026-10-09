@@ -180,7 +180,7 @@ export const ProcessesTable = ({
 
         {error ? (
           <ProcessesTableMessage visibleColumnsCount={visibleColumns.length}>
-            <EuiIcon type="minusCircle" color="danger" /> {error}
+            <EuiIcon type="minusCircle" color="danger" aria-hidden={true} /> {error}
           </ProcessesTableMessage>
         ) : (
           <ProcessesTableBody

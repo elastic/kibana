@@ -21,6 +21,7 @@ import { type SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type {
   LayerAction,
+  LensAppServices,
   RegisterLibraryAnnotationGroupFunction,
   LensStartServices as StartServices,
   StateSetter,
@@ -31,7 +32,6 @@ import type {
   XYVisualizationState,
 } from '../../types';
 import {
-  getAnnotationLayerTitle,
   getGroupMetadataFromAnnotationLayer,
   isByReferenceAnnotationsLayer,
 } from '../../visualization_helpers';
@@ -43,18 +43,22 @@ export const SaveModal = ({
   domElement,
   savedObjectsTagging,
   onSave,
+  lastSavedTitle,
   title,
   description,
   tags,
   showCopyOnSave,
+  eventAnnotationService,
 }: {
   domElement: HTMLDivElement;
   savedObjectsTagging: SavedObjectTaggingPluginStart | undefined;
   onSave: (props: ModalOnSaveProps) => Promise<void>;
+  lastSavedTitle: string;
   title: string;
   description: string;
   tags: string[];
   showCopyOnSave: boolean;
+  eventAnnotationService: LensAppServices['eventAnnotationService'];
 }) => {
   const [selectedTags, setSelectedTags] = useState<string[]>(tags);
 
@@ -62,10 +66,12 @@ export const SaveModal = ({
 
   return (
     <SavedObjectSaveModal
+      hasLibraryItemWithTitle={eventAnnotationService.groupExistsWithTitle}
       onSave={async (props) => {
         await onSave({ ...props, closeModal, newTags: selectedTags });
       }}
       onClose={closeModal}
+      lastSavedTitle={lastSavedTitle}
       title={title}
       description={description}
       showCopyOnSave={showCopyOnSave}
@@ -145,28 +151,6 @@ const saveAnnotationGroupToLibrary = async (
   return { id: savedId, config: groupConfig };
 };
 
-const shouldStopBecauseDuplicateTitle = async (
-  newTitle: string,
-  existingTitle: string,
-  newCopyOnSave: ModalOnSaveProps['newCopyOnSave'],
-  onTitleDuplicate: ModalOnSaveProps['onTitleDuplicate'],
-  isTitleDuplicateConfirmed: ModalOnSaveProps['isTitleDuplicateConfirmed'],
-  eventAnnotationService: EventAnnotationServiceType
-) => {
-  if (isTitleDuplicateConfirmed || (newTitle === existingTitle && !newCopyOnSave)) {
-    return false;
-  }
-
-  const duplicateExists = await eventAnnotationService.groupExistsWithTitle(newTitle);
-
-  if (duplicateExists) {
-    onTitleDuplicate();
-    return true;
-  } else {
-    return false;
-  }
-};
-
 /** @internal exported for testing only */
 export const onSave = async ({
   state,
@@ -175,15 +159,7 @@ export const onSave = async ({
   registerLibraryAnnotationGroup,
   eventAnnotationService,
   toasts,
-  modalOnSaveProps: {
-    newTitle,
-    newDescription,
-    newTags,
-    closeModal,
-    newCopyOnSave,
-    onTitleDuplicate,
-    isTitleDuplicateConfirmed,
-  },
+  modalOnSaveProps: { newTitle, newDescription, newTags, closeModal, newCopyOnSave },
   dataViews,
   goToAnnotationLibrary,
   startServices,
@@ -202,17 +178,6 @@ export const onSave = async ({
   goToAnnotationLibrary: () => Promise<void>;
   startServices: StartServices;
 }) => {
-  const shouldStop = await shouldStopBecauseDuplicateTitle(
-    newTitle,
-    getAnnotationLayerTitle(layer),
-    newCopyOnSave,
-    onTitleDuplicate,
-    isTitleDuplicateConfirmed,
-    eventAnnotationService
-  );
-
-  if (shouldStop) return;
-
   let savedInfo: Awaited<ReturnType<typeof saveAnnotationGroupToLibrary>>;
   try {
     savedInfo = await saveAnnotationGroupToLibrary(
@@ -343,8 +308,10 @@ export const getSaveLayerAction = ({
         render(
           <KibanaRenderContextProvider {...startServices}>
             <SaveModal
+              eventAnnotationService={eventAnnotationService}
               domElement={domElement}
               savedObjectsTagging={savedObjectsTagging}
+              lastSavedTitle={''}
               onSave={async (props) => {
                 await onSave({
                   state,

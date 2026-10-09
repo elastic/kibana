@@ -74,4 +74,17 @@ describe('riskEnginConfigureSavedObjectRoute', () => {
       excludeAlertTags: ['tag1'],
     });
   });
+
+  it('passes page_size to updateRiskEngineSavedObject', async () => {
+    const request = buildRequest({
+      page_size: 5000,
+    });
+    const response = await server.inject(request, context);
+    expect(response.status).toEqual(200);
+    expect(mockRiskEngineDataClient.updateRiskEngineSavedObject).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pageSize: 5000,
+      })
+    );
+  });
 });

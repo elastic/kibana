@@ -12,24 +12,15 @@ import React from 'react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { ResumeExecutionButton } from './resume_execution_button';
-import { TestWrapper } from '../../../shared/test_utils';
+import { createTestQueryClient, TestWrapper } from '../../../shared/test_utils';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsCapabilities: jest.fn(),
-}));
-
 jest.mock('@kbn/workflows/spec/lib/build_fields_zod_validator', () => ({
   convertJsonSchemaToZod: jest.fn(),
-}));
-
-jest.mock('../../../../common/lib/generate_sample_from_json_schema', () => ({
-  generateSampleFromJsonSchema: jest.fn(),
 }));
 
 const { convertJsonSchemaToZod } = jest.requireMock(
@@ -37,17 +28,22 @@ const { convertJsonSchemaToZod } = jest.requireMock(
 );
 
 // Capture callbacks and props exposed by ResumeExecutionModal so tests can inspect them.
-let capturedOnSubmit: ((params: { stepInputs: Record<string, unknown> }) => void) | undefined;
+let capturedOnSubmit:
+  | ((params: { stepInputs: Record<string, unknown> }) => Promise<void>)
+  | undefined;
 let capturedContextOverride: ContextOverrideData | undefined;
 
-jest.mock('./resume_execution_modal', () => ({
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
+  useWorkflowsCapabilities: jest.fn(),
+  generateSampleFromJsonSchema: jest.fn(),
   ResumeExecutionModal: ({
     onSubmit,
     onClose,
     resumeMessage,
     initialcontextOverride,
   }: {
-    onSubmit?: (params: { stepInputs: Record<string, unknown> }) => void;
+    onSubmit?: (params: { stepInputs: Record<string, unknown> }) => Promise<void>;
     onClose: () => void;
     resumeMessage?: string;
     initialcontextOverride?: ContextOverrideData;
@@ -71,9 +67,11 @@ describe('ResumeExecutionButton', () => {
   const mockHttpPost = jest.fn();
   const mockAddSuccess = jest.fn();
   const mockAddError = jest.fn();
+  const queryClient = createTestQueryClient();
 
   const defaultProps = {
     executionId: 'exec-123',
+    waitingStepExecutionId: 'wait-step-exec-1',
   };
 
   beforeEach(() => {
@@ -96,7 +94,7 @@ describe('ResumeExecutionButton', () => {
 
   const renderComponent = (props = {}) =>
     render(
-      <TestWrapper>
+      <TestWrapper queryClient={queryClient}>
         <ResumeExecutionButton {...defaultProps} {...props} />
       </TestWrapper>
     );
@@ -185,7 +183,10 @@ describe('ResumeExecutionButton', () => {
       });
       await waitFor(() => {
         expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/executions/exec-123/resume', {
-          body: JSON.stringify({ input: { approved: true } }),
+          body: JSON.stringify({
+            input: { approved: true },
+            stepExecutionId: 'wait-step-exec-1',
+          }),
           version: '2023-10-31',
         });
       });
@@ -195,13 +196,11 @@ describe('ResumeExecutionButton', () => {
       renderComponent();
       fireEvent.click(screen.getByTestId('provideActionButton'));
       await waitFor(() => expect(capturedOnSubmit).toBeDefined());
-      act(() => {
-        capturedOnSubmit!({ stepInputs: {} });
+      await act(async () => {
+        await capturedOnSubmit?.({ stepInputs: {} });
       });
-      await waitFor(() => {
-        expect(mockAddSuccess).toHaveBeenCalledTimes(1);
-        expect(screen.queryByTestId('resume-execution-modal')).not.toBeInTheDocument();
-      });
+      expect(mockAddSuccess).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('resume-execution-modal')).not.toBeInTheDocument();
     });
 
     it('shows error toast and keeps modal open on failed submit', async () => {
@@ -259,6 +258,237 @@ describe('ResumeExecutionButton', () => {
         expect(mockAddError).toHaveBeenCalledTimes(1);
         // Button must remain enabled so the user can retry
         expect(screen.getByTestId('provideActionButton')).not.toBeDisabled();
+      });
+    });
+
+    it('re-enables the button when waitingStepExecutionId changes after a successful submit', async () => {
+      const { rerender } = render(
+        <TestWrapper queryClient={queryClient}>
+          <ResumeExecutionButton {...defaultProps} waitingStepExecutionId="wait-step-exec-1" />
+        </TestWrapper>
+      );
+      fireEvent.click(screen.getByTestId('provideActionButton'));
+      await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+      act(() => {
+        capturedOnSubmit!({ stepInputs: { approved: true } });
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('provideActionButton')).toBeDisabled();
+      });
+
+      rerender(
+        <TestWrapper queryClient={queryClient}>
+          <ResumeExecutionButton {...defaultProps} waitingStepExecutionId="wait-step-exec-2" />
+        </TestWrapper>
+      );
+      expect(screen.getByTestId('provideActionButton')).not.toBeDisabled();
+    });
+
+    it('does not lock a newly opened run when the previous run resume resolves late', async () => {
+      let resolvePost: (value: unknown) => void = () => {};
+      mockHttpPost.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolvePost = resolve;
+          })
+      );
+
+      // Mirrors WorkflowExecutionFlyout: shared submit state reset on executionId change.
+      const FlyoutLike = ({ executionId }: { executionId: string }) => {
+        const [isSubmitting, setSubmitting] = React.useState(false);
+        const [isSubmitted, setSubmitted] = React.useState(false);
+        React.useEffect(() => {
+          setSubmitting(false);
+          setSubmitted(false);
+        }, [executionId]);
+        return (
+          <ResumeExecutionButton
+            {...defaultProps}
+            executionId={executionId}
+            submitState={{ isSubmitting, isSubmitted, setSubmitting, setSubmitted }}
+          />
+        );
+      };
+
+      const { rerender } = render(
+        <TestWrapper queryClient={queryClient}>
+          <FlyoutLike executionId="exec-1" />
+        </TestWrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('provideActionButton'));
+      await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+      act(() => {
+        void capturedOnSubmit!({ stepInputs: {} });
+      });
+      await waitFor(() => expect(screen.getByTestId('provideActionButton')).toBeDisabled());
+
+      rerender(
+        <TestWrapper queryClient={queryClient}>
+          <FlyoutLike executionId="exec-2" />
+        </TestWrapper>
+      );
+      await waitFor(() => expect(screen.getByTestId('provideActionButton')).toBeEnabled());
+
+      await act(async () => {
+        resolvePost({});
+      });
+
+      expect(mockHttpPost.mock.calls[0][0]).toContain('exec-1');
+      expect(screen.getByTestId('provideActionButton')).toBeEnabled();
+    });
+
+    it('does not re-enable shared submit state when a second instance mounts', async () => {
+      const SharedResume = ({ showSecond }: { showSecond: boolean }) => {
+        const [isSubmitting, setSubmitting] = React.useState(false);
+        const [isSubmitted, setSubmitted] = React.useState(false);
+        const submitState = { isSubmitting, isSubmitted, setSubmitting, setSubmitted };
+        return (
+          <>
+            <ResumeExecutionButton {...defaultProps} submitState={submitState} />
+            {showSecond && <ResumeExecutionButton {...defaultProps} submitState={submitState} />}
+          </>
+        );
+      };
+
+      const { rerender } = render(
+        <TestWrapper queryClient={queryClient}>
+          <SharedResume showSecond={false} />
+        </TestWrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('provideActionButton'));
+      await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+      act(() => {
+        capturedOnSubmit!({ stepInputs: {} });
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('provideActionButton')).toBeDisabled();
+      });
+
+      rerender(
+        <TestWrapper queryClient={queryClient}>
+          <SharedResume showSecond />
+        </TestWrapper>
+      );
+
+      expect(
+        screen
+          .getAllByTestId('provideActionButton')
+          .every((button) => button.hasAttribute('disabled'))
+      ).toBe(true);
+    });
+
+    it('disables both instances when they share submit state', async () => {
+      const SharedResume = () => {
+        const [isSubmitting, setSubmitting] = React.useState(false);
+        const [isSubmitted, setSubmitted] = React.useState(false);
+        const submitState = { isSubmitting, isSubmitted, setSubmitting, setSubmitted };
+        return (
+          <>
+            <ResumeExecutionButton {...defaultProps} submitState={submitState} />
+            <ResumeExecutionButton {...defaultProps} submitState={submitState} />
+          </>
+        );
+      };
+
+      render(
+        <TestWrapper queryClient={queryClient}>
+          <SharedResume />
+        </TestWrapper>
+      );
+
+      const buttons = screen.getAllByTestId('provideActionButton');
+      expect(buttons).toHaveLength(2);
+      fireEvent.click(buttons[0]);
+      await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+      act(() => {
+        capturedOnSubmit!({ stepInputs: {} });
+      });
+      await waitFor(() => {
+        expect(
+          screen
+            .getAllByTestId('provideActionButton')
+            .every((button) => button.hasAttribute('disabled'))
+        ).toBe(true);
+      });
+    });
+  });
+
+  describe('approval mode', () => {
+    const approvalProps = {
+      approvalLabels: { approveLabel: 'Approve', rejectLabel: 'Decline' },
+      resumeMessage: 'Approve deployment?',
+    };
+
+    it('renders approve and reject buttons instead of the JSON modal flow', () => {
+      renderComponent(approvalProps);
+      expect(screen.getByTestId('waitForApprovalCallout')).toBeInTheDocument();
+      expect(screen.getByTestId('approveActionButton')).toHaveTextContent('Approve');
+      expect(screen.getByTestId('rejectActionButton')).toHaveTextContent('Decline');
+      expect(screen.queryByTestId('provideActionButton')).not.toBeInTheDocument();
+    });
+
+    it('renders a markdown message inside the scroll region, with the actions outside it', () => {
+      renderComponent({ ...approvalProps, resumeMessage: '**Approve** this' });
+      const message = screen.getByTestId('waitForApprovalMessage');
+      expect(message.querySelector('strong')).toHaveTextContent('Approve');
+      expect(message).toHaveTextContent('Approve this');
+      expect(message).not.toContainElement(screen.getByTestId('approveActionButton'));
+      expect(message).not.toContainElement(screen.getByTestId('rejectActionButton'));
+    });
+
+    it('submits approved=true when Approve is clicked', async () => {
+      renderComponent(approvalProps);
+      fireEvent.click(screen.getByTestId('approveActionButton'));
+      await waitFor(() => {
+        expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/executions/exec-123/resume', {
+          body: JSON.stringify({
+            input: { approved: true },
+            stepExecutionId: 'wait-step-exec-1',
+          }),
+          version: '2023-10-31',
+        });
+      });
+    });
+
+    it('submits approved=false when Decline is clicked', async () => {
+      renderComponent(approvalProps);
+      fireEvent.click(screen.getByTestId('rejectActionButton'));
+      await waitFor(() => {
+        expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/executions/exec-123/resume', {
+          body: JSON.stringify({
+            input: { approved: false },
+            stepExecutionId: 'wait-step-exec-1',
+          }),
+          version: '2023-10-31',
+        });
+      });
+    });
+
+    it('shows loading only on the clicked button while both stay disabled', async () => {
+      let resolvePost!: () => void;
+      mockHttpPost.mockImplementationOnce(
+        () => new Promise<void>((resolve) => (resolvePost = resolve))
+      );
+
+      renderComponent(approvalProps);
+      fireEvent.click(screen.getByTestId('approveActionButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('approveActionButton')).toBeDisabled();
+        expect(screen.getByTestId('rejectActionButton')).toBeDisabled();
+      });
+      expect(
+        screen.getByTestId('approveActionButton').querySelector('.euiLoadingSpinner')
+      ).not.toBeNull();
+      expect(
+        screen.getByTestId('rejectActionButton').querySelector('.euiLoadingSpinner')
+      ).toBeNull();
+
+      resolvePost();
+      await waitFor(() => {
+        expect(mockAddSuccess).toHaveBeenCalledTimes(1);
       });
     });
   });

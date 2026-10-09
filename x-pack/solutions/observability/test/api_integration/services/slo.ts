@@ -43,7 +43,6 @@ async function waitForIndexToBeEmpty<T>({
       }
       return response;
     },
-    retryCount: 10,
   });
 }
 
@@ -60,8 +59,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
         await security.user.delete(username);
         await security.role.delete(roleName);
       } catch (error) {
-        const status = error.response.status;
-        if (status !== 404) {
+        if (error.status !== 404) {
           throw error;
         }
       }

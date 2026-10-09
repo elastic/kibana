@@ -7,19 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  FieldBasedIndexPatternColumn,
-  PercentileIndexPatternColumn,
-  PercentileRanksIndexPatternColumn,
-  TermsIndexPatternColumn,
+import {
+  LENS_DOCUMENT_FIELD_NAME,
+  type FieldBasedIndexPatternColumn,
+  type LastValueOrderAggColumn,
+  type PercentileIndexPatternColumn,
+  type PercentileRanksIndexPatternColumn,
+  type TermsIndexPatternColumn,
+  type CountIndexPatternColumn,
 } from '@kbn/lens-common';
 import type {
   LensApiTermsOperation,
-  TermOperationRankByCustomBaseType,
+  TermOperationRankByCustomCountOperationType,
+  TermOperationRankByCustomLastValueType,
+  TermOperationRankByCustomOperationType,
   TermOperationRankByCustomPercentileRankType,
   TermOperationRankByCustomPercentileType,
 } from '../../schema/bucket_ops';
-import { fromFormatAPIToLensState } from './format';
+import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';
 import type { AnyLensStateColumn } from './types';
 
@@ -35,9 +40,21 @@ function isPercentileRanksOrderAgg(
   return orderAgg.operationType === 'percentile_rank';
 }
 
+function isCountOrderAgg(
+  orderAgg: FieldBasedIndexPatternColumn
+): orderAgg is CountIndexPatternColumn {
+  return orderAgg.operationType === 'count';
+}
+
+function isLastValueOrderAgg(
+  orderAgg: FieldBasedIndexPatternColumn
+): orderAgg is LastValueOrderAggColumn {
+  return orderAgg.operationType === 'last_value';
+}
+
 function isBaseCustomOperation(
   operation: string
-): operation is TermOperationRankByCustomBaseType['operation'] {
+): operation is TermOperationRankByCustomOperationType['operation'] {
   const ops: string[] = [
     'min',
     'max',
@@ -45,9 +62,7 @@ function isBaseCustomOperation(
     'median',
     'standard_deviation',
     'unique_count',
-    'count',
     'sum',
-    'last_value',
   ];
   return ops.includes(operation);
 }
@@ -108,13 +123,10 @@ export function fromTermsLensApiToLensState(
       size: limit, // it cannot be 0 (zero)
       ...(increase_accuracy != null ? { accuracyMode: increase_accuracy } : {}),
       ...(includes?.values
-        ? { include: includes?.values, includeIsRegex: includes?.as_regex ?? false }
+        ? { include: includes.values, includeIsRegex: includes?.as_regex ?? false }
         : {}),
       ...(excludes?.values
-        ? {
-            exclude: excludes.values,
-            excludeIsRegex: excludes?.as_regex ?? false,
-          }
+        ? { exclude: excludes.values, excludeIsRegex: excludes?.as_regex ?? false }
         : {}),
       ...(other_bucket != null ? { otherBucket: true } : {}),
       ...(other_bucket?.include_documents_without_field != null
@@ -124,14 +136,18 @@ export function fromTermsLensApiToLensState(
       orderDirection,
       ...(rank_by?.type === 'custom' ? { orderAgg: getCustomOrderAgg(rank_by) } : {}),
       ...(format ? { format } : {}),
-      parentFormat: { id: 'terms' },
+      // Mirror runtime `getParentFormatter` (`terms/index.tsx`): multi-field terms columns render
+      // through the `multi_terms` parent formatter, single-field ones through `terms`.
+      parentFormat: { id: secondaryFields.length ? 'multi_terms' : 'terms' },
     },
   };
 }
 
 function getCustomOrderAgg(
   rankBy:
-    | TermOperationRankByCustomBaseType
+    | TermOperationRankByCustomOperationType
+    | TermOperationRankByCustomLastValueType
+    | TermOperationRankByCustomCountOperationType
     | TermOperationRankByCustomPercentileType
     | TermOperationRankByCustomPercentileRankType
 ): TermsIndexPatternColumn['params']['orderAgg'] {
@@ -157,6 +173,34 @@ function getCustomOrderAgg(
     };
     return orderAgg;
   }
+
+  if (rankBy.operation === 'count') {
+    const orderAgg: CountIndexPatternColumn = {
+      operationType: rankBy.operation,
+      sourceField: rankBy.field || LENS_DOCUMENT_FIELD_NAME,
+      dataType: 'number',
+      isBucketed: false,
+      label: '',
+    };
+    return orderAgg;
+  }
+
+  if (rankBy.operation === 'last_value') {
+    const orderAgg: LastValueOrderAggColumn = {
+      operationType: rankBy.operation,
+      sourceField: rankBy.field,
+      dataType: 'number',
+      isBucketed: false,
+      label: '',
+      // `time_field` maps to the state `sortField` (the date field the last value is sorted by) and is
+      // read at render. It is optional on the API: when omitted, the render path falls back to the data
+      // view's default time field to sort, and the editor prompts the user to re-save to persist it.
+      // This solution was needed to avoid a breaking change in the API.
+      ...(rankBy.time_field ? { params: { sortField: rankBy.time_field } } : {}),
+    };
+    return orderAgg;
+  }
+
   return {
     operationType: rankBy.operation,
     sourceField: rankBy.field,
@@ -192,8 +236,31 @@ function getCustomRankByFromOrderAgg(
     };
     return rankBy;
   }
+
+  if (isCountOrderAgg(orderAgg)) {
+    const rankBy: TermOperationRankByCustomCountOperationType = {
+      type: 'custom',
+      operation: 'count',
+      direction: orderDirection,
+      ...(sourceField !== LENS_DOCUMENT_FIELD_NAME ? { field: sourceField } : {}),
+    };
+    return rankBy;
+  }
+
+  if (isLastValueOrderAgg(orderAgg)) {
+    const rankBy: TermOperationRankByCustomLastValueType = {
+      type: 'custom',
+      operation: 'last_value',
+      field: sourceField,
+      direction: orderDirection,
+      // Real persisted order-aggs always carry `sortField`. Only API persisted ones may omit it.
+      ...(orderAgg.params?.sortField ? { time_field: orderAgg.params.sortField } : {}),
+    };
+    return rankBy;
+  }
+
   if (isBaseCustomOperation(orderAgg.operationType)) {
-    const rankBy: TermOperationRankByCustomBaseType = {
+    const rankBy: TermOperationRankByCustomOperationType = {
       type: 'custom',
       operation: orderAgg.operationType,
       field: sourceField,
@@ -254,7 +321,10 @@ export function fromTermsLensStateToAPI(
       ? {
           includes: {
             as_regex: column.params.includeIsRegex,
-            values: column.params.include?.map((value) => String(value)) || [],
+            // Preserve the value type verbatim: numeric fields store numbers and the runtime terms
+            // agg drops stringified numbers at render (`migrateIncludeExcludeFormat` filters with
+            // `Number.isFinite`), so coercing to strings would silently lose the include filter.
+            values: column.params.include ?? [],
           },
         }
       : {}),
@@ -262,7 +332,10 @@ export function fromTermsLensStateToAPI(
       ? {
           excludes: {
             as_regex: column.params.excludeIsRegex,
-            values: column.params.exclude?.map((value) => String(value)) || [],
+            // Preserve the value type verbatim: numeric fields store numbers and the runtime terms
+            // agg drops stringified numbers at render (`migrateIncludeExcludeFormat` filters with
+            // `Number.isFinite`), so coercing to strings would silently lose the exclude filter.
+            values: column.params.exclude ?? [],
           },
         }
       : {}),
@@ -274,5 +347,6 @@ export function fromTermsLensStateToAPI(
         }
       : {}),
     ...(column.params.orderBy ? { rank_by: getRankByConfig(column.params, columns) } : {}),
+    ...(column.params.format ? { format: fromFormatLensStateToAPI(column.params.format) } : {}),
   };
 }

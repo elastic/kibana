@@ -7,7 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { load } from 'js-yaml';
+
+import { validateSslPathInput, validateSslPathsCombo } from '../ssl_form_validators';
+export { validateSslPathInput, validateSslPathsCombo };
 
 const toSecretValidator =
   (validator: (value: string) => string[] | undefined) =>
@@ -18,6 +20,8 @@ const toSecretValidator =
 
     return validator(value ?? '');
   };
+
+const validKafkaTopicToken = /%\{\[[^\]]+\](?::[^}]*)?\}/g;
 
 export function validateKafkaHosts(value: string[]) {
   const res: Array<{ message: string; index?: number }> = [];
@@ -217,19 +221,21 @@ export function validateLogstashHosts(value: string[]) {
   }
 }
 
-export function validateYamlConfig(value: string) {
+export type YamlParseFn = (value: string) => unknown;
+
+export const createValidateYamlConfig = (parse: YamlParseFn) => (value: string) => {
   try {
-    load(value);
+    parse(value);
     return;
   } catch (error) {
     return [
       i18n.translate('xpack.fleet.settings.outputForm.invalidYamlFormatErrorMessage', {
         defaultMessage: 'Invalid YAML: {reason}',
-        values: { reason: error.message },
+        values: { reason: (error as Error).message },
       }),
     ];
   }
-}
+};
 
 export function validateName(value: string) {
   if (!value || value === '') {
@@ -335,6 +341,7 @@ export function validateSSLCertificate(value: string) {
       }),
     ];
   }
+  return validateSslPathInput(value);
 }
 
 export function validateSSLKey(value: string) {
@@ -345,6 +352,7 @@ export function validateSSLKey(value: string) {
       }),
     ];
   }
+  return validateSslPathInput(value);
 }
 
 export const validateSSLKeySecret = toSecretValidator(validateSSLKey);
@@ -362,12 +370,30 @@ export function validateKafkaStaticTopic(value: string) {
 export function validateDynamicKafkaTopics(value: Array<EuiComboBoxOptionOption<string>>) {
   const res = [];
   value.forEach((val, idx) => {
-    if (!val) {
+    if (!val || !val.value) {
       res.push(
         i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicFieldRequiredMessage', {
           defaultMessage: 'Topic is required',
         })
       );
+    } else {
+      const topic = val.value;
+      const stripped = topic.replace(validKafkaTopicToken, '');
+      if (stripped.includes('%{') || (!stripped.includes('{[') && stripped.includes(']}'))) {
+        res.push(
+          i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicBracketsError', {
+            defaultMessage:
+              'The topic should have a matching number of opening and closing brackets',
+          })
+        );
+      }
+      if (/(?<!%)\{\[/.test(stripped)) {
+        res.push(
+          i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicPercentError', {
+            defaultMessage: 'Opening brackets should be preceded by a percent sign',
+          })
+        );
+      }
     }
   });
 
@@ -378,6 +404,7 @@ export function validateDynamicKafkaTopics(value: Array<EuiComboBoxOptionOption<
       })
     );
   }
+
   if (res.length) {
     return res;
   }

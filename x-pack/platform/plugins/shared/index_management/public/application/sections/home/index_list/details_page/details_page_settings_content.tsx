@@ -10,7 +10,6 @@ import React, { useState, useCallback } from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButton,
-  EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,12 +25,11 @@ import { css } from '@emotion/react';
 import _ from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { CodeEditor } from '@kbn/code-editor';
-import { monaco as monacoEditor } from '@kbn/monaco';
+import { CodeEditor, jsonDefaults } from '@kbn/code-editor';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { IndexSettingsResponse } from '../../../../../../common';
 import type { Error } from '../../../../../shared_imports';
 import { documentationService, updateIndexSettings } from '../../../../services';
-import { notificationService } from '../../../../services/notification';
 import { flattenObject } from '../../../../lib/flatten_object';
 import {
   readOnlySettings,
@@ -83,6 +81,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
 }) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const {
+    services: { notificationService },
     config: { editableIndexSettings },
   } = useAppContext();
   const onEditModeChange = (event: EuiSwitchEvent) => {
@@ -148,7 +147,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
         }),
       });
     }
-  }, [originalSettings, editableSettings, indexName, reloadIndexSettings]);
+  }, [originalSettings, editableSettings, indexName, reloadIndexSettings, notificationService]);
   const settingsSchemaProperties = {} as Record<string, unknown>;
   Object.keys(originalSettings).forEach(
     // allow any type of value
@@ -175,7 +174,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
         <EuiPanel grow={false} paddingSize="l">
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="pencil" />
+              <EuiIcon type="pencil" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
@@ -248,7 +247,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
           {updateError && (
             <>
               <EuiSpacer size="m" />
-              <EuiCallOut
+              <KbnDangerCallout
                 announceOnMount
                 title={i18n.translate(
                   'xpack.idxMgmt.indexDetails.settings.saveSettingsErrorMessage',
@@ -256,11 +255,8 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
                     defaultMessage: 'Unable to save settings',
                   }
                 )}
-                color="danger"
-                iconType="error"
-              >
-                {updateError.message && <p>{updateError.message}</p>}
-              </EuiCallOut>
+                text={updateError.message ? <p>{updateError.message}</p> : undefined}
+              />
             </>
           )}
           <EuiSpacer size="m" />
@@ -288,7 +284,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
             <CodeEditor
               languageId="json"
               editorDidMount={(editor) => {
-                monacoEditor.languages.json.jsonDefaults.setDiagnosticsOptions({
+                jsonDefaults.setDiagnosticsOptions({
                   validate: true,
                   schemas: [
                     {

@@ -178,7 +178,9 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
 
           return (
             <EuiToolTip content={statusTooltip} position="top">
-              <EuiBadge color={badgeColor}>{statusLabel}</EuiBadge>
+              <EuiBadge color={badgeColor} tabIndex={0}>
+                {statusLabel}
+              </EuiBadge>
             </EuiToolTip>
           );
         },
@@ -206,16 +208,22 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
             setExpandedRowMap(itemIdToExpandedRowMapValues);
           };
 
+          const toggleViewLogsAriaLabel = isExpanded
+            ? i18n.GAP_AUTO_FILL_COLLAPSE_ARIA_LABEL
+            : i18n.GAP_AUTO_FILL_EXPAND_ARIA_LABEL;
+
           return (
             <EuiFlexGroup alignItems="center" gutterSize="xs">
               <EuiButtonEmpty size="s" color="primary" onClick={toggleViewLogs}>
                 {i18n.GAP_AUTO_FILL_LOGS_VIEW_LOGS_BUTTON}
               </EuiButtonEmpty>
-              <EuiButtonIcon
-                onClick={toggleViewLogs}
-                aria-label={isExpanded ? 'Collapse' : 'Expand'}
-                iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
-              />
+              <EuiToolTip content={toggleViewLogsAriaLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  onClick={toggleViewLogs}
+                  aria-label={toggleViewLogsAriaLabel}
+                  iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+                />
+              </EuiToolTip>
             </EuiFlexGroup>
           );
         },
@@ -333,6 +341,7 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
               loading={isLogsLoading}
               items={logsData?.data ?? []}
               itemId="id"
+              tableCaption={i18n.GAP_AUTO_FILL_LOGS_TABLE_CAPTION}
               columns={columns as EuiBasicTableColumn<SchedulerLog>[]}
               pagination={{
                 pageIndex,

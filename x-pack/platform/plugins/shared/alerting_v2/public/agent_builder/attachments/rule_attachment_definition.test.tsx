@@ -1,0 +1,366 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render } from '@testing-library/react';
+import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { OBSERVABILITY_ALERTING_HOST } from '../../observability_alerting_host';
+import { createRuleAttachmentDefinition } from './rule_attachment_definition';
+
+const mockUpsertRule = jest.fn().mockImplementation(async (id: string) => ({ id }));
+const mockCreateRule = jest.fn().mockResolvedValue({ id: 'generated-rule-id' });
+const mockRulesNavigateSync = jest.fn();
+const mockAddSuccess = jest.fn();
+
+jest.mock('../../application/bind_locators_to_host', () => ({
+  getAlertingV2Locators: () => ({
+    rulesLocators: { navigateSync: (...args: unknown[]) => mockRulesNavigateSync(...args) },
+  }),
+}));
+
+jest.mock('@kbn/core-di-browser', () => ({
+  Context: {
+    Provider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  },
+  CoreStart: (key: string) => key,
+  useService: (token: unknown) => {
+    if (token === 'notifications') {
+      return { toasts: { addSuccess: mockAddSuccess } };
+    }
+    return { upsertRule: mockUpsertRule, createRule: mockCreateRule };
+  },
+}));
+
+jest.mock('../../services/rules_api', () => ({
+  RulesApi: Symbol('RulesApi'),
+}));
+
+jest.mock('../../components/rule/rule_summary', () => ({
+  RuleSummaryBody: ({ children }: { children: React.ReactNode }) => (
+    <div data-test-subj="mockRuleSummaryBody">{children}</div>
+  ),
+  RuleSummaryAboutSection: () => <div data-test-subj="mockAboutSection" />,
+  RuleSummaryInvestigationSection: () => <div data-test-subj="mockInvestigationSection" />,
+  RuleSummaryArtifactsSection: () => <div data-test-subj="mockArtifactsSection" />,
+}));
+
+jest.mock('../../components/rule/rule_summary/rule_summary_query_preview_section', () => ({
+  RuleSummaryQueryPreviewSection: () => <div data-test-subj="mockQueryPreviewSection" />,
+}));
+
+const createMockServices = () => ({
+  container: {} as any,
+});
+
+const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}) => ({
+  id: 'att-1',
+  type: RULE_ATTACHMENT_TYPE,
+  versions: [],
+  current_version: 1,
+  origin: overrides.origin,
+  data: {
+    kind: 'signal' as const,
+    metadata: { name: 'My Rule', tags: ['tag1'], description: 'A test rule' },
+    schedule: { every: '5m' },
+    time_field: '@timestamp',
+    query: { base: 'FROM logs-*' },
+    enabled: overrides.enabled,
+  } as any,
+});
+
+describe('createRuleAttachmentDefinition', () => {
+  describe('getLabel', () => {
+    it('returns the rule name', () => {
+      const services = createMockServices();
+      const definition = createRuleAttachmentDefinition(services);
+      const attachment = createAttachment();
+
+      expect(definition.getLabel(attachment)).toBe('My Rule');
+    });
+  });
+
+  describe('getIcon', () => {
+    it('returns watchesApp', () => {
+      const services = createMockServices();
+      const definition = createRuleAttachmentDefinition(services);
+
+      expect(definition.getIcon!()).toBe('watchesApp');
+    });
+  });
+
+  describe('getHeader', () => {
+    it.each([
+      ['alert', 'bell'],
+      ['signal', 'chartBarVertical'],
+    ])('returns the %s kind icon', (kind, icon) => {
+      const services = createMockServices();
+      const definition = createRuleAttachmentDefinition(services);
+
+      expect(definition.getHeader!({ attachment: { data: { kind } } as any })).toEqual({ icon });
+    });
+  });
+
+  describe('getActionButtons', () => {
+    it('returns Preview button when not in canvas and openCanvas is provided', () => {
+      const services = createMockServices();
+      const definition = createRuleAttachmentDefinition(services);
+      const attachment = createAttachment();
+
+      const buttons = definition.getActionButtons!({
+        attachment,
+        isSidebar: false,
+        isCanvas: false,
+        updateOrigin: jest.fn(),
+        openCanvas: jest.fn(),
+      });
+
+      expect(buttons.find((b) => b.label === 'Preview')).toBeDefined();
+    });
+
+    it('returns empty array when in canvas', () => {
+      const services = createMockServices();
+      const definition = createRuleAttachmentDefinition(services);
+      const attachment = createAttachment();
+
+      const buttons = definition.getActionButtons!({
+        attachment,
+        isSidebar: false,
+        isCanvas: true,
+        updateOrigin: jest.fn(),
+      });
+
+      expect(buttons).toHaveLength(0);
+    });
+  });
+
+  describe('renderInlineContent', () => {
+    it('shows proposed status when no origin', () => {
+      const services = createMockServices();
+      const definition = createRuleAttachmentDefinition(services);
+      const attachment = createAttachment();
+
+      const { getByText } = render(
+        <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
+      );
+
+      expect(getByText('Draft')).toBeDefined();
+    });
+
+    it('shows enabled status when origin set and enabled is undefined (server default)', () => {
+      const services = createMockServices();
+      const definition = createRuleAttachmentDefinition(services);
+      const attachment = createAttachment({ origin: 'rule-123' });
+
+      const { getByText } = render(
+        <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
+      );
+
+      expect(getByText('Enabled')).toBeDefined();
+    });
+
+    it('shows disabled status when origin set and enabled is false', () => {
+      const services = createMockServices();
+      const definition = createRuleAttachmentDefinition(services);
+      const attachment = createAttachment({ origin: 'rule-123', enabled: false });
+
+      const { getByText } = render(
+        <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
+      );
+
+      expect(getByText('Disabled')).toBeDefined();
+    });
+
+    it('shows schedule interval', () => {
+      const services = createMockServices();
+      const definition = createRuleAttachmentDefinition(services);
+      const attachment = createAttachment();
+
+      const { getByText } = render(
+        <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
+      );
+
+      expect(getByText('Every 5 min')).toBeDefined();
+    });
+  });
+
+  describe('renderCanvasContent', () => {
+    it('renders the Agent Builder summary composition', () => {
+      const services = createMockServices();
+      const definition = createRuleAttachmentDefinition(services);
+      const attachment = createAttachment();
+
+      const { getByTestId } = render(
+        <>
+          {definition.renderCanvasContent!(
+            { attachment, isSidebar: false },
+            {
+              registerActionButtons: jest.fn(),
+              updateOrigin: jest.fn(),
+              closeCanvas: jest.fn(),
+            }
+          )}
+        </>
+      );
+
+      expect(getByTestId('mockRuleSummaryBody')).toBeDefined();
+      expect(getByTestId('mockAboutSection')).toBeDefined();
+      expect(getByTestId('mockInvestigationSection')).toBeDefined();
+      expect(getByTestId('mockQueryPreviewSection')).toBeDefined();
+      expect(getByTestId('mockArtifactsSection')).toBeDefined();
+    });
+
+    it('registers Create rule button for unsaved attachment', () => {
+      const services = createMockServices();
+      const definition = createRuleAttachmentDefinition(services);
+      const attachment = createAttachment();
+      const registerActionButtons = jest.fn();
+
+      render(
+        <>
+          {definition.renderCanvasContent!(
+            { attachment, isSidebar: false },
+            {
+              registerActionButtons,
+              updateOrigin: jest.fn(),
+              closeCanvas: jest.fn(),
+            }
+          )}
+        </>
+      );
+
+      const buttons =
+        registerActionButtons.mock.calls[registerActionButtons.mock.calls.length - 1][0];
+      expect(buttons.find((b: { label: string }) => b.label === 'Create rule')).toBeDefined();
+      expect(buttons.find((b: { label: string }) => b.label === 'Update Rule')).toBeUndefined();
+    });
+
+    it('registers Update Rule and View in Rules buttons for saved attachment', () => {
+      const services = createMockServices();
+      const definition = createRuleAttachmentDefinition(services);
+      const attachment = createAttachment({ origin: 'rule-123' });
+      const registerActionButtons = jest.fn();
+
+      render(
+        <>
+          {definition.renderCanvasContent!(
+            { attachment, isSidebar: false },
+            {
+              registerActionButtons,
+              updateOrigin: jest.fn(),
+              closeCanvas: jest.fn(),
+            }
+          )}
+        </>
+      );
+
+      const buttons =
+        registerActionButtons.mock.calls[registerActionButtons.mock.calls.length - 1][0];
+      expect(buttons.find((b: { label: string }) => b.label === 'Update Rule')).toBeDefined();
+      expect(buttons.find((b: { label: string }) => b.label === 'View in Rules')).toBeDefined();
+      expect(buttons.find((b: { label: string }) => b.label === 'Create rule')).toBeUndefined();
+    });
+
+    describe('Create rule handler', () => {
+      it('calls upsertRule and updateOrigin', async () => {
+        const services = createMockServices();
+        const definition = createRuleAttachmentDefinition(services);
+        const attachment = createAttachment();
+        attachment.data.id = 'pre-assigned-id';
+        const registerActionButtons = jest.fn();
+        const updateOrigin = jest.fn().mockResolvedValue(undefined);
+
+        render(
+          <>
+            {definition.renderCanvasContent!(
+              { attachment, isSidebar: false },
+              {
+                registerActionButtons,
+                updateOrigin,
+                closeCanvas: jest.fn(),
+              }
+            )}
+          </>
+        );
+
+        const buttons =
+          registerActionButtons.mock.calls[registerActionButtons.mock.calls.length - 1][0];
+        const saveButton = buttons.find((b: { label: string }) => b.label === 'Create rule');
+        await saveButton.handler();
+
+        expect(mockUpsertRule).toHaveBeenCalledWith(
+          'pre-assigned-id',
+          expect.objectContaining({ kind: 'signal' })
+        );
+        expect(updateOrigin).toHaveBeenCalledWith('pre-assigned-id');
+      });
+    });
+
+    describe('Update Rule handler', () => {
+      it('calls upsertRule with the origin id', async () => {
+        const services = createMockServices();
+        const definition = createRuleAttachmentDefinition(services);
+        const attachment = createAttachment({ origin: 'rule-123' });
+        const registerActionButtons = jest.fn();
+
+        render(
+          <>
+            {definition.renderCanvasContent!(
+              { attachment, isSidebar: false },
+              {
+                registerActionButtons,
+                updateOrigin: jest.fn(),
+                closeCanvas: jest.fn(),
+              }
+            )}
+          </>
+        );
+
+        const buttons =
+          registerActionButtons.mock.calls[registerActionButtons.mock.calls.length - 1][0];
+        const updateButton = buttons.find((b: { label: string }) => b.label === 'Update Rule');
+        await updateButton.handler();
+
+        expect(mockUpsertRule).toHaveBeenCalledWith(
+          'rule-123',
+          expect.objectContaining({ metadata: attachment.data.metadata })
+        );
+      });
+    });
+
+    describe('View in Rules handler', () => {
+      it('navigates to the rule detail page', () => {
+        const services = createMockServices();
+        const definition = createRuleAttachmentDefinition(services);
+        const attachment = createAttachment({ origin: 'rule-123' });
+        const registerActionButtons = jest.fn();
+
+        render(
+          <>
+            {definition.renderCanvasContent!(
+              { attachment, isSidebar: false },
+              {
+                registerActionButtons,
+                updateOrigin: jest.fn(),
+                closeCanvas: jest.fn(),
+              }
+            )}
+          </>
+        );
+
+        const buttons =
+          registerActionButtons.mock.calls[registerActionButtons.mock.calls.length - 1][0];
+        const viewButton = buttons.find((b: { label: string }) => b.label === 'View in Rules');
+        viewButton.handler();
+
+        expect(mockRulesNavigateSync).toHaveBeenCalledWith({
+          ruleId: 'rule-123',
+          host: OBSERVABILITY_ALERTING_HOST.rules,
+        });
+      });
+    });
+  });
+});

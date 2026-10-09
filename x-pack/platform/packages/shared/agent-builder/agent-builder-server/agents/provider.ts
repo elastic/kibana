@@ -5,18 +5,25 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type {
   Conversation,
   ConversationRound,
+  ConversationRoundAuthor,
   ConverseInput,
   ChatAgentEvent,
-  AgentCapabilities,
   AgentConfigurationOverrides,
-  ConversationAction,
+  AgentExecutionMode,
+  AutoApprovedApi,
+  ChatEvent,
+  ConversationWriteSource,
+  ExecutionStatus,
+  InteractivityConfig,
+  SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
+import type { HttpSelfService, KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type {
@@ -30,12 +37,35 @@ import type {
   ConversationStateManager,
   SkillsService,
   PluginsService,
+  RenderersService,
+  ConversationEventTypesService,
   ToolManager,
+  TodoStateManager,
+  IFilesystemService,
+  IBashService,
+  ConversationTemplatesService,
 } from '../runner';
-import type { IFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
+import type { ExecutionConversationOrigin } from '../execution/types';
 import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
+import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
+import type { AiIndexResolver } from './ai_index_resolver';
+import type { AgentRegistry } from './registry';
+
+/**
+ * Read/write conversation store contract exposed to agent handlers.
+ */
+export interface ConversationClient {
+  /** True if a conversation with the given id exists in the current scope. */
+  exists(conversationId: string): Promise<boolean>;
+  /** Validates, serializes, and merges `updates` into the conversation metadata. */
+  patchMetadata(
+    conversationId: string,
+    updates: Record<string, unknown>,
+    options: { source: ConversationWriteSource }
+  ): Promise<{ changedFields: string[] }>;
+}
 
 export type AgentHandlerFn = (
   params: AgentHandlerParams,
@@ -57,14 +87,137 @@ export interface AgentHandlerReturn {
 }
 
 /**
+ * Result shape returned by every sub-agent execution method.
+ */
+export interface SubAgentExecutionResult {
+  executionId: string;
+  events$: Observable<ChatEvent>;
+}
+
+/** Parameters for a one-shot standalone sub-agent execution. */
+export interface ExecuteSubAgentParams {
+  agentId: string;
+  parentExecutionId: string;
+  prompt: string;
+  connectorId?: string;
+  autoApprovedApis?: AutoApprovedApi[];
+  abortSignal?: AbortSignal;
+}
+
+/** Parameters for creating a new persistent sub-agent (fresh child conversation). */
+export interface CreateSubAgentParams {
+  agentId: string;
+  parentConversationId: string;
+  parentExecutionId: string;
+  subagentName: string;
+  subagentPurpose?: string;
+  /** Pre-allocated id for the child conversation (assigned by the caller). */
+  conversationId: string;
+  prompt: string;
+  connectorId?: string;
+  autoApprovedApis?: AutoApprovedApi[];
+  abortSignal?: AbortSignal;
+}
+
+/** Parameters for sending a message to an existing persistent sub-agent. */
+export interface SendToSubAgentParams {
+  agentId: string;
+  parentExecutionId: string;
+  /** Existing child conversation id */
+  conversationId: string;
+  prompt: string;
+  connectorId?: string;
+  abortSignal?: AbortSignal;
+}
+
+/**
+ * Pre-scoped executor for spawning sub-agent executions.
+ */
+export interface SubAgentExecutor {
+  /** Execute a one-shot standalone sub-agent. */
+  executeSubAgent(params: ExecuteSubAgentParams): Promise<SubAgentExecutionResult>;
+
+  /** Create a new persistent sub-agent backed by a fresh child conversation. */
+  createSubAgent(params: CreateSubAgentParams): Promise<SubAgentExecutionResult>;
+
+  /** Send a message to an existing persistent sub-agent (new round in its conversation). */
+  sendToSubAgent(params: SendToSubAgentParams): Promise<SubAgentExecutionResult>;
+
+  /** Retrieve a sub-agent execution by ID. Returns undefined if not found. */
+  getExecution(executionId: string): Promise<SubAgentExecution | undefined>;
+}
+
+export interface SubAgentExecution {
+  executionId: string;
+  status: ExecutionStatus;
+  error?: SerializedExecutionError;
+  events: ChatEvent[];
+}
+
+/**
  * Experimental features configuration for agent builder.
  */
 export interface ExperimentalFeatures {
-  /** Whether the filestore feature is enabled */
-  filestore: boolean;
   /** Whether the skills feature is enabled */
   skills: boolean;
+  /** Whether AI index instructions are enabled by Context Engine and Agent Builder settings */
+  aiIndices: boolean;
+  /** Whether context-aware skill filtering is enabled */
+  relevantSkills: boolean;
+  /** Whether the todo list tool and task-management prompt are enabled */
+  todos: boolean;
+  /** Whether the bash tool (and the just-bash runtime) is enabled */
+  bash: boolean;
+  /** Whether the `discover_apis` tool is enabled. */
+  apiDiscovery: boolean;
 }
+
+/**
+ * Kind of environment the Kibana instance runs in.
+ * - `serverless`: Elastic Cloud Serverless
+ * - `ech`: Elastic Cloud Hosted
+ * - `ece`: Elastic Cloud Enterprise
+ * - `self_managed`: on-prem / self-managed
+ */
+export type DeploymentEnvironment = 'serverless' | 'ech' | 'ece' | 'self_managed';
+
+/**
+ * Information about the deployment the agent runs in, surfaced to the agent in its system prompt.
+ */
+export interface DeploymentContext {
+  environment: DeploymentEnvironment;
+  /** Stack version. Not set on serverless. */
+  version?: string;
+  /** Whether Kibana is configured to run without access to the public internet. */
+  airgapped: boolean;
+  /** Serverless project details. Only set on serverless. */
+  serverless?: {
+    /** Project type, e.g. `observability` or `search`. */
+    projectType: string;
+    /** Product tier, for project types that have tiers, e.g. `complete`. */
+    productTier?: string;
+  };
+  /** Solution view of the active space, e.g. `oblt` or `classic`. Not set on serverless. */
+  solution?: string;
+  /** License of the deployment. Not set on serverless. */
+  license?: {
+    type?: string;
+    status?: string;
+  };
+}
+
+/**
+ * How a run relates to its conversation:
+ * - `readWrite`: the run persists what belongs to its conversation (round, metadata, workspace,
+ *   child conversations).
+ * - `readOnly`: the run loaded an existing conversation as context and stores nothing to it
+ *   (ephemeral run). Unrelated to the presentational `read_only` conversation flag.
+ * - `none`: the run stores nothing and its conversation, if any, is a placeholder that is never
+ *   persisted (one-shot run).
+ *
+ * Unrelated to conversation access control: the caller's permissions are checked separately.
+ */
+export type ExecutionConversationAccess = 'readWrite' | 'readOnly' | 'none';
 
 export interface AgentHandlerContext {
   /**
@@ -77,14 +230,26 @@ export interface AgentHandlerContext {
    */
   spaceId: string;
   /**
+   * Information about the deployment (environment, version, license...) the agent runs in.
+   */
+  deployment: DeploymentContext;
+  /**
+   * The resolved connector ID for this execution, if any.
+   */
+  defaultConnectorId?: string;
+  /**
    * A cluster client scoped to the current user.
    * Can be used to access ES on behalf of either the current user or the system user.
    */
   esClient: IScopedClusterClient;
   /**
+   * Client for calling Kibana's own HTTP APIs on behalf of the current user.
+   */
+  selfClient: HttpSelfService;
+  /**
    * Saved objects client scoped to the current user.
    */
-  savedObjectsClient?: SavedObjectsClientContract;
+  savedObjectsClient: SavedObjectsClientContract;
   /**
    * Inference model provider scoped to the current user.
    * Can be used to access the inference APIs or chatModel.
@@ -108,9 +273,27 @@ export interface AgentHandlerContext {
    */
   attachments: AttachmentsService;
   /**
+   * Renderers service, giving read access to the renderer types registered in
+   * agent builder (used to advertise them to the agent in the prompt).
+   * Optional: absent when the context is constructed outside agentBuilder's
+   * runner (treated as no renderers).
+   */
+  renderers?: RenderersService;
+  /**
+   * Conversation event types service, giving read access to the custom conversation
+   * event types registered in agent builder (used to format stored events for the LLM).
+   * Optional: absent when the context is constructed outside agentBuilder's runner
+   * (custom events are then omitted from the agent context).
+   */
+  conversationEvents?: ConversationEventTypesService;
+  /**
    * Skills service to interact with skills.
    */
   skills: SkillsService;
+  /**
+   * Conversation template service, to interact with conversation templates.
+   */
+  conversationTemplates: ConversationTemplatesService;
   /**
    * Plugins service to resolve plugin-contributed skill IDs during execution.
    */
@@ -133,6 +316,10 @@ export interface AgentHandlerContext {
    */
   attachmentStateManager: AttachmentStateManager;
   /**
+   * Manages the active todo list for this conversation execution.
+   */
+  todoStateManager: TodoStateManager;
+  /**
    * Used to manage interruptions.
    */
   promptManager: PromptManager;
@@ -153,19 +340,81 @@ export interface AgentHandlerContext {
    */
   hooks: AgentBuilderHooks;
   /**
-   * File store to access data from the agent's virtual filesystem
+   * Unified virtual filesystem service.
    */
-  filestore: IFileStore;
+  filesystemService: IFilesystemService;
+  /**
+   * Bash runtime service. Present only when `experimentalFeatures.bash` is on.
+   */
+  bashService?: IBashService;
   /**
    * Experimental features configuration for this agent execution.
    * Determined by the UI setting at the start of execution.
    */
   experimentalFeatures: ExperimentalFeatures;
+  /**
+   * The execution mode for this agent run — `conversation` for
+   * conversation-backed executions, `standalone` for one-shot runs with no
+   * conversation persistence.
+   */
+  executionMode: AgentExecutionMode;
+  /**
+   * Interactivity config for this run (controls thinks such as HITL support)
+   */
+  interactivity: InteractivityConfig;
+  /**
+   * Id of the parent execution that spawned this one, when applicable.
+   */
+  parentExecutionId?: string;
+  /**
+   * How this run relates to its conversation, see {@link ExecutionConversationAccess}.
+   */
+  conversationAccess: ExecutionConversationAccess;
+  /**
+   * Sub-agent executor for spawning child agent executions.
+   */
+  subAgentExecutor: SubAgentExecutor;
+  /**
+   * Agent registry scoped to the current user
+   */
+  agentRegistry: AgentRegistry;
+  /**
+   * Conversation store client scoped to the current user. Prefer this over
+   * issuing raw ES queries against the conversation index.
+   */
+  conversationClient: ConversationClient;
+  /**
+   * Resolved runtime configuration for the external Deductive execution path.
+   * Populated from Advanced Settings (agentBuilder:deductive*) when the
+   * per-deployment feature flag is enabled; empty when the path is inactive.
+   */
+  deductive?: DeductiveRuntimeConfig;
+  /**
+   * Optional analytics surface for emitting agent-runtime events such as
+   * SkillInvoked. Provided by the plugin when telemetry is wired.
+   */
+  analyticsService?: AgentBuilderAnalytics;
+  /**
+   * Optional tracking surface for emitting agent-runtime counters such as
+   * skill-invocation counts. Provided by the plugin when telemetry is wired.
+   */
+  trackingService?: AgentBuilderTracking;
+  /**
+   * Resolves AI index details. Absent when no resolver is registered, in which case
+   * non-default AI indices are omitted from the prompt.
+   */
+  aiIndexResolver?: AiIndexResolver;
 }
 
 /**
  * Event handler function to listen to run events during execution of tools, agents or other agentBuilder primitives.
  */
+export interface DeductiveRuntimeConfig {
+  enabled: boolean;
+  endpoint: string;
+  apiKey: string | undefined;
+}
+
 export type AgentEventEmitterFn = (event: ChatAgentEvent) => void;
 
 export interface AgentEventEmitter {
@@ -180,13 +429,22 @@ export interface AgentParams {
    */
   conversation?: Conversation;
   /**
+   * Pre-minted id for the round the agent is about to run.
+   */
+  roundId?: string;
+  /**
    * The input triggering this round.
    */
   nextInput: ConverseInput;
   /**
-   * Agent capabilities to enable.
+   * External origin that initiated this execution, when it originated outside Kibana.
    */
-  capabilities?: AgentCapabilities;
+  origin?: ExecutionConversationOrigin;
+  /**
+   * Resolved author for the round input (external system author, or the Kibana user for
+   * public conversations). Stamped onto the completed round.
+   */
+  author?: ConversationRoundAuthor;
   browserApiTools?: BrowserApiToolMetadata[];
   /**
    * Whether to use structured output mode. When true, the agent will return structured data instead of plain text.
@@ -203,9 +461,9 @@ export interface AgentParams {
    */
   configurationOverrides?: AgentConfigurationOverrides;
   /**
-   * The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).
+   * The execution ID for this run. Used for sub-agent parent tracking.
    */
-  action?: ConversationAction;
+  executionId?: string;
 }
 
 export interface AgentResponse {

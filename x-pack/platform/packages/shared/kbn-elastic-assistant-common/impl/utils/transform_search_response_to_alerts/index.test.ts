@@ -10,6 +10,7 @@ import {
   ALERT_RULE_EXECUTION_UUID,
   ALERT_START,
   ALERT_UPDATED_AT,
+  ALERT_WORKFLOW_REASON,
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
 } from '@kbn/rule-data-utils';
 import cloneDeep from 'lodash/cloneDeep';
@@ -261,6 +262,22 @@ describe('transformSearchResponseToAlerts', () => {
     });
 
     expect(result.data[0].alert_workflow_status_updated_at).toBe(testDate);
+  });
+
+  it('correctly transforms the ALERT_WORKFLOW_REASON field', () => {
+    const response = getResponseMock();
+    if (response.hits.hits[0]._source) {
+      response.hits.hits[0]._source[ALERT_WORKFLOW_REASON] = 'false_positive';
+    }
+
+    const result = transformSearchResponseToAlerts({
+      enableFieldRendering: true,
+      logger,
+      response,
+      withReplacements: false,
+    });
+
+    expect(result.data[0].alert_workflow_reason).toBe('false_positive');
   });
 
   it("returns undefined for mitreAttackTactics when it's not an array", () => {

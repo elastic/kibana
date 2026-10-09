@@ -18,7 +18,6 @@ project:
   sourceRoot: src/platform/packages/shared/content-management/content_list/kbn-content-list-footer
 dependsOn:
   - '@kbn/content-list-provider'
-  - '@kbn/content-list-mock-data'
 tags:
   - shared-browser
   - package

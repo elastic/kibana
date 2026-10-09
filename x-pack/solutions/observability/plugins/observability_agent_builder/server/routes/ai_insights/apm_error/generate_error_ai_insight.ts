@@ -16,7 +16,7 @@ import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../../types';
 import { fetchApmErrorContext } from './fetch_apm_error_context';
-import { getEntityLinkingInstructions } from '../../../agent/register_observability_agent';
+import { getEntityLinkingInstructions } from '../../../utils/get_entity_linking_instructions';
 import { createAiInsightResult, type AiInsightResult } from '../types';
 
 function getErrorAiInsightSystemPrompt({ urlPrefix }: { urlPrefix: string }) {

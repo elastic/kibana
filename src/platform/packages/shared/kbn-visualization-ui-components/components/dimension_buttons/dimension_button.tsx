@@ -103,37 +103,44 @@ function DimensionButtonImpl({
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiButtonIcon
-        className="lnsLayerPanel__dimensionRemove"
-        data-test-subj="indexPattern-dimension-remove"
-        iconType="trash"
-        size="xs"
-        color="danger"
-        aria-label={i18n.translate('visualizationUiComponents.dimensionButton.removeColumnLabel', {
+      <EuiToolTip
+        content={i18n.translate('visualizationUiComponents.dimensionButton.removeColumnLabel', {
           defaultMessage: 'Remove configuration from "{groupLabel}"',
           values: { groupLabel },
         })}
-        title={i18n.translate('visualizationUiComponents.dimensionButton.removeColumnLabel', {
-          defaultMessage: 'Remove configuration from "{groupLabel}"',
-          values: { groupLabel },
-        })}
-        onClick={() => onRemoveClick(accessorConfig.columnId)}
-        css={css`
-          color: ${euiTheme.colors.textSubdued}
-          transition: ${euiTheme.animation.fast} ease-in-out;
-          transition-property: color, opacity, background-color, transform;
-          opacity: 0;
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          className="lnsLayerPanel__dimensionRemove"
+          data-test-subj="indexPattern-dimension-remove"
+          iconType="trash"
+          size="xs"
+          color="danger"
+          aria-label={i18n.translate(
+            'visualizationUiComponents.dimensionButton.removeColumnLabel',
+            {
+              defaultMessage: 'Remove configuration from "{groupLabel}"',
+              values: { groupLabel },
+            }
+          )}
+          onClick={() => onRemoveClick(accessorConfig.columnId)}
+          css={css`
+            color: ${euiTheme.colors.textSubdued}
+            transition: ${euiTheme.animation.fast} ease-in-out;
+            transition-property: color, opacity, background-color, transform;
+            opacity: 0;
 
-          .domDraggable:hover &,
-          .domDraggable:focus-within & {
-            opacity: 1;
-          }
-          &:hover,
-          &:focus {
-            color: ${euiTheme.colors.textDanger};
-          }
-        `}
-      />
+            .domDraggable:hover &,
+            .domDraggable:focus-within & {
+              opacity: 1;
+            }
+            &:hover,
+            &:focus {
+              color: ${euiTheme.colors.textDanger};
+            }
+          `}
+        />
+      </EuiToolTip>
       <PaletteIndicator accessorConfig={accessorConfig} />
     </div>
   );

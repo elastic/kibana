@@ -8,8 +8,9 @@
 import type { FC } from 'react';
 import React, { useState, useContext, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiSwitch } from '@elastic/eui';
+import { EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 
@@ -27,6 +28,9 @@ export const AnnotationsSwitch: FC = () => {
   }, [annotationsEnabled]);
 
   useEffect(() => {
+    if (jobCreator.modelChangeAnnotations !== annotationsEnabled) {
+      setAnnotationsEnabled(jobCreator.modelChangeAnnotations);
+    }
     setShowCallout(jobCreator.modelPlot && !annotationsEnabled);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated, annotationsEnabled]);
@@ -52,7 +56,7 @@ export const AnnotationsSwitch: FC = () => {
         />
       </Description>
       {showCallOut && (
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount
           data-test-subj="mlJobWizardAlsoEnableAnnotationsRecommendationCallout"
           title={
@@ -61,8 +65,6 @@ export const AnnotationsSwitch: FC = () => {
               defaultMessage="If you enable model plot with this configuration, we recommend you also enable annotations."
             />
           }
-          color="primary"
-          iconType="question"
         />
       )}
     </>

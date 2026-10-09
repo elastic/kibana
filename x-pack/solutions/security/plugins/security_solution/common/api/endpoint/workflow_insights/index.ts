@@ -6,4 +6,3 @@
  */
 
 export * from './workflow_insights';
-export * from './workflow_insights.gen';

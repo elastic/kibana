@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/babel-register').install();
+require('@kbn/swc-register').install();
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
@@ -126,7 +126,7 @@ module.exports = [
               loader: 'postcss-loader',
               options: {
                 postcssOptions: {
-                  config: require.resolve('@kbn/optimizer/postcss.config'),
+                  config: require.resolve('@kbn/optimizer-webpack-helpers/postcss.config'),
                 },
               },
             },
@@ -160,7 +160,7 @@ module.exports = [
               options: {
                 sourceMap: !isProd,
                 postcssOptions: {
-                  config: require.resolve('@kbn/optimizer/postcss.config'),
+                  config: require.resolve('@kbn/optimizer-webpack-helpers/postcss.config'),
                 },
               },
             },
@@ -196,7 +196,7 @@ module.exports = [
       extensions: ['.js', '.ts', '.tsx', '.scss', '.css'],
     },
     optimization: {
-      minimize: false,
+      minimize: true,
       noEmitOnErrors: true,
       splitChunks: false,
       runtimeChunk: false,
@@ -205,6 +205,7 @@ module.exports = [
       new CleanWebpackPlugin({
         cleanOnceBeforeBuildPatterns: ['**/*'],
         dangerouslyAllowCleanPatternsOutsideProject: true,
+        dry: false,
       }),
       new NodeLibsBrowserPlugin(),
     ],

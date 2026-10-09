@@ -14,7 +14,6 @@ const KIBANA_ROOT = findKibanaRoot();
 
 // Allowlist (most temporary) of files permitted to use non-FIPS algorithms.
 const ALLOWED_UNSAFE_HASHES = [
-  { path: 'packages/kbn-optimizer/src/common/dll_manifest.ts', algorithms: ['sha1'] },
   {
     path: 'src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts',
     algorithms: ['sha1'],
@@ -22,18 +21,6 @@ const ALLOWED_UNSAFE_HASHES = [
   {
     path: 'x-pack/platform/test/cases_api_integration/common/plugins/cases/server/routes.ts',
     algorithms: ['sha1'],
-  },
-  {
-    path: 'src/platform/packages/shared/kbn-babel-register/cache/lmdb_cache.js',
-    algorithms: ['sha1'],
-  },
-  {
-    path: 'packages/kbn-failed-test-reporter-cli/failed_tests_reporter/report_failures_to_file.ts',
-    algorithms: ['md5'],
-  },
-  {
-    path: 'packages/kbn-failed-test-reporter-cli/failed_tests_reporter/generate_scout_test_failure_artifacts.ts',
-    algorithms: ['md5'],
   },
 ];
 
@@ -54,23 +41,14 @@ module.exports = {
     },
     schema: [],
   },
-  create(context) {
-    let isCreateHashImported = false;
-    let createHashName = 'createHash';
-    let cryptoLocalName = 'crypto';
-    let usedFunctionName = '';
-    const sourceCode = context.getSourceCode();
-
-    const disallowedAlgorithmNodes = new Set();
-
-    const filename = context.getFilename();
-    const relativeFilename = path.relative(KIBANA_ROOT, filename);
-    const fileAllowlistEntry = ALLOWED_UNSAFE_HASHES.find(
-      (entry) => entry.path === relativeFilename
-    );
-    const fileScopedAllowedAlgorithms = fileAllowlistEntry
-      ? [...allowedAlgorithms, ...fileAllowlistEntry.algorithms]
-      : allowedAlgorithms;
+  createOnce(context) {
+    let isCreateHashImported;
+    let createHashName;
+    let cryptoLocalName;
+    let usedFunctionName;
+    let sourceCode;
+    let disallowedAlgorithmNodes;
+    let fileScopedAllowedAlgorithms;
 
     function isAllowedAlgorithm(algorithm) {
       return fileScopedAllowedAlgorithms.includes(algorithm);
@@ -104,6 +82,23 @@ module.exports = {
     }
 
     return {
+      before() {
+        isCreateHashImported = false;
+        createHashName = 'createHash';
+        cryptoLocalName = 'crypto';
+        usedFunctionName = '';
+        sourceCode = context.sourceCode;
+        disallowedAlgorithmNodes = new Set();
+
+        const relativeFilename = path.relative(KIBANA_ROOT, context.filename);
+        const fileAllowlistEntry = ALLOWED_UNSAFE_HASHES.find(
+          (entry) => entry.path === relativeFilename
+        );
+        fileScopedAllowedAlgorithms = fileAllowlistEntry
+          ? [...allowedAlgorithms, ...fileAllowlistEntry.algorithms]
+          : allowedAlgorithms;
+      },
+
       ImportDeclaration(node) {
         if (node.source.value === 'crypto' || node.source.value === 'node:crypto') {
           node.specifiers.forEach((specifier) => {

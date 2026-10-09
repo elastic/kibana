@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import { merge } from 'rxjs';
 import { LENS_EMBEDDABLE_TYPE, type LensRuntimeState } from '@kbn/lens-common';
-import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
+import type { LensApi, LensWireAPIConfig } from '@kbn/lens-common-2';
 
 import { loadEmbeddableData } from './data_loader';
 import { isTextBasedLanguage, deserializeState } from './helper';
@@ -35,7 +35,7 @@ import type { LensEmbeddableStartServices } from './types';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
-): EmbeddableFactory<LensSerializedAPIConfig, LensApi> => {
+): EmbeddablePublicDefinition<LensWireAPIConfig, LensApi> => {
   return {
     type: LENS_EMBEDDABLE_TYPE,
     /**
@@ -62,7 +62,7 @@ export const createLensEmbeddableFactory = (
     }) => {
       const titleManager = initializeTitleManager(initialState);
 
-      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
 
       const initialRuntimeState = await deserializeState(services, initialState);
 
@@ -139,7 +139,13 @@ export const createLensEmbeddableFactory = (
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<LensSerializedAPIConfig>({
+      /**
+       * Tracks the most recent applySerializedState call so a slow-resolving
+       * older call cannot overwrite newer state.
+       */
+      let applyGeneration = 0;
+
+      const stateApi = initializeStateApi<LensWireAPIConfig>({
         uuid,
         parentApi,
         serializeState: () => {
@@ -173,13 +179,14 @@ export const createLensEmbeddableFactory = (
           }
           return comparators;
         },
-        onReset: async (lastSaved) => {
-          actionsConfig.reinitializeState(lastSaved);
-          dashboardConfig.reinitializeState(lastSaved);
-          searchContextConfig.reinitializeState(lastSaved);
-          if (!lastSaved) return;
-          const lastSavedRuntimeState = await deserializeState(services, lastSaved);
-          stateConfig.reinitializeRuntimeState(lastSavedRuntimeState);
+        applySerializedState: async (nextState) => {
+          const generation = ++applyGeneration;
+          const nextRuntimeState = await deserializeState(services, nextState);
+          if (generation !== applyGeneration) return; // superseded by a newer apply
+          actionsConfig.reinitializeState(nextState);
+          dashboardConfig.reinitializeState(nextRuntimeState);
+          searchContextConfig.reinitializeState(nextState);
+          stateConfig.reinitializeRuntimeState(nextRuntimeState);
         },
       });
 
@@ -192,7 +199,7 @@ export const createLensEmbeddableFactory = (
         // dashboardConfig who owns the savedObjectId after the
         // stateConfig one who owns the inline editing
         {
-          ...unsavedChangesApi,
+          ...stateApi,
           ...editConfig.api,
           ...inspectorConfig.api,
           ...searchContextConfig.api,
@@ -200,6 +207,11 @@ export const createLensEmbeddableFactory = (
           ...integrationsConfig.api,
           ...stateConfig.api,
           ...dashboardConfig.api,
+          supportsJsonExport: true,
+          cancelRequests: (reason) => {
+            const abortController = internalApi.expressionAbortController$.getValue();
+            abortController.abort(reason);
+          },
         }
       );
 
@@ -212,7 +224,9 @@ export const createLensEmbeddableFactory = (
         api,
         parentApi,
         internalApi,
-        services
+        services,
+        undefined,
+        searchContextConfig.internalApi.setApproximationApplied
       );
 
       const onUnmount = () => {

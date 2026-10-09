@@ -228,7 +228,7 @@ export const TimeSeries = ({
             id={id}
             domainType={AnnotationDomainType.XDomain}
             dataValues={dataValues}
-            marker={<EuiIcon type={ICON_TYPES_MAP[icon] || 'asterisk'} />}
+            marker={<EuiIcon type={ICON_TYPES_MAP[icon] || 'asterisk'} aria-hidden={true} />}
             hideLinesTooltips={true}
             style={style}
           />

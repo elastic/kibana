@@ -20,6 +20,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
@@ -87,6 +88,52 @@ export default function QualityIssueFlyout() {
     sendTelemetry,
   });
 
+  const banner = useMemo(() => {
+    if (
+      expandedDegradedField?.type !== 'degraded' ||
+      !isUserViewingTheIssueOnLatestBackingIndex ||
+      isAnalysisInProgress ||
+      !degradedFieldAnalysisFormattedResult ||
+      degradedFieldAnalysisFormattedResult.identifiedUsingHeuristics ||
+      isDegradedFieldsValueLoading ||
+      view === 'wired'
+    ) {
+      return undefined;
+    }
+
+    return (
+      <KbnInfoCallout
+        announceOnMount
+        data-test-subj="datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist"
+        title={
+          <FormattedMessage
+            id="xpack.datasetQuality.details.degradedField.potentialCause.ignoreMalformedWarning"
+            defaultMessage="If you've recently updated your {field_limit} settings, this quality issue may not be relevant. Rollover the data stream to verify."
+            values={{
+              field_limit: (
+                <strong>
+                  {i18n.translate(
+                    'xpack.datasetQuality.degradedFieldFlyout.strong.fieldLimitLabel',
+                    {
+                      defaultMessage: 'field limit',
+                    }
+                  )}
+                </strong>
+              ),
+            }}
+          />
+        }
+      />
+    );
+  }, [
+    expandedDegradedField?.type,
+    isUserViewingTheIssueOnLatestBackingIndex,
+    isAnalysisInProgress,
+    degradedFieldAnalysisFormattedResult,
+    isDegradedFieldsValueLoading,
+    view,
+  ]);
+
   return (
     <EuiFlyout
       type="push"
@@ -104,14 +151,10 @@ export default function QualityIssueFlyout() {
                   {expandedDegradedField?.name} {fieldIgnoredText}
                 </>
               ) : (
-                <span style={{ fontWeight: 400 }}>
-                  {i18n.translate(
-                    'xpack.datasetQuality.datasetQualityDetails.qualityIssueFlyout.failedDocsTitle',
-                    {
-                      defaultMessage: 'Documents indexing failed',
-                    }
-                  )}
-                </span>
+                <FormattedMessage
+                  id="xpack.datasetQuality.details.qualityIssues.documentIndexFailed"
+                  defaultMessage="Documents indexing failed"
+                />
               )}
             </EuiText>
           </EuiTitle>
@@ -128,38 +171,8 @@ export default function QualityIssueFlyout() {
               </EuiTextColor>
             </>
           )}
-        {expandedDegradedField?.type === 'degraded' &&
-          isUserViewingTheIssueOnLatestBackingIndex &&
-          !isAnalysisInProgress &&
-          degradedFieldAnalysisFormattedResult &&
-          !degradedFieldAnalysisFormattedResult.identifiedUsingHeuristics &&
-          !isDegradedFieldsValueLoading &&
-          view !== 'wired' && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiTextColor
-                color="danger"
-                data-test-subj="datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist"
-              >
-                <FormattedMessage
-                  id="xpack.datasetQuality.details.degradedField.potentialCause.ignoreMalformedWarning"
-                  defaultMessage="If you've recently updated your {field_limit} settings, this quality issue may not be relevant. Rollover the data stream to verify."
-                  values={{
-                    field_limit: (
-                      <strong>
-                        {i18n.translate(
-                          'xpack.datasetQuality.degradedFieldFlyout.strong.fieldLimitLabel',
-                          { defaultMessage: 'field limit' }
-                        )}
-                      </strong>
-                    ),
-                  }}
-                />
-              </EuiTextColor>
-            </>
-          )}
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody banner={banner}>
         {expandedDegradedField?.type === 'degraded' && <DegradedFieldFlyout />}
         {expandedDegradedField?.type === 'failed' && <FailedDocsFlyout />}
       </EuiFlyoutBody>

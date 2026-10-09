@@ -204,7 +204,8 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
       });
 
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('UIAM APIKey is already revoked')
+        expect.stringContaining('UIAM APIKey is already revoked'),
+        expect.objectContaining({ tags: expect.arrayContaining(['uiam-api-key-invalidate']) })
       );
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         'api_key_pending_invalidation',
@@ -234,7 +235,8 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
       });
 
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('UIAM APIKey not found, will retry (1/5)')
+        expect.stringContaining('UIAM APIKey not found, will retry (1/5)'),
+        expect.objectContaining({ tags: expect.arrayContaining(['uiam-api-key-invalidate']) })
       );
       expect(internalSavedObjectsRepository.delete).not.toHaveBeenCalled();
       expect(result.totalInvalidated).toEqual(0);
@@ -262,7 +264,8 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
       });
 
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('UIAM APIKey not found after 5 attempts')
+        expect.stringContaining('UIAM APIKey not found after 5 attempts'),
+        expect.objectContaining({ tags: expect.arrayContaining(['uiam-api-key-invalidate']) })
       );
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         'api_key_pending_invalidation',
@@ -343,7 +346,8 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
       });
 
       expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to invalidate UIAM APIKey')
+        expect.stringContaining('Failed to invalidate UIAM APIKey'),
+        expect.objectContaining({ tags: expect.arrayContaining(['uiam-api-key-invalidate']) })
       );
       expect(internalSavedObjectsRepository.delete).not.toHaveBeenCalled();
       expect(result.totalInvalidated).toEqual(0);

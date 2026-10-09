@@ -14,5 +14,6 @@ export const TIMEZONE_OPTIONS = [
     .names()
     // We need to filter out some time zones, that moment.js knows about, but Elasticsearch
     // does not understand and would fail thus with a 400 bad request when using them.
-    .filter((tz) => !['America/Nuuk', 'EST', 'HST', 'ROC', 'MST'].includes(tz)),
+    // Europe/Kiev was renamed to Europe/Kyiv (IANA 2022b); moment-timezone returns both, keep only the canonical one.
+    .filter((tz) => !['America/Nuuk', 'EST', 'HST', 'ROC', 'MST', 'Europe/Kiev'].includes(tz)),
 ];

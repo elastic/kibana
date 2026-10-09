@@ -31,7 +31,7 @@ export const ConnectorScheduling: React.FC<ConnectorSchedulingPanels> = ({
         dataTelemetryIdPrefix="serverlessSearch"
         hasChanges={hasChanges}
         hasIngestionError={connector?.status === ConnectorStatus.ERROR}
-        hasPlatinumLicense={false}
+        hasPlatinumLicense={true}
         setHasChanges={setHasChanges}
         shouldShowAccessControlSync={false}
         shouldShowIncrementalSync={shouldShowIncrementalSync}

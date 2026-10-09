@@ -1,0 +1,200 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FunctionComponent } from 'react';
+import React, { useMemo } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiButton, EuiInMemoryTable, EuiSpacer, EuiTextBlockTruncate } from '@elastic/eui';
+import { useHistory } from 'react-router-dom';
+import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
+
+import type { DataSetWithName, DataSource } from '../common';
+import { CREATE_DATASET_PATH, getEditDatasetPath } from './app_paths';
+import { DatasetRowActions } from './dataset_row_actions';
+import { getDataSourceTypeVerbose } from './get_data_source_type_label';
+import { getDatasetEsqlQuery } from './get_dataset_esql_query';
+import { mainTranslations } from './main_i18n';
+import type { DataFederationKibanaServices } from './types';
+
+/** Data set row in the table; `type` is resolved from the linked data source. */
+export type DataSetListRow = DataSetWithName & { type?: DataSource['type'] };
+
+export interface DatasetsTableProps {
+  items: DataSetListRow[];
+  selectedItems: DataSetListRow[];
+  dataSourceNames: string[];
+  onSelectionChange: (next: DataSetListRow[]) => void;
+  onDelete: (item: DataSetListRow) => void;
+  onDeleteSelected: (items: DataSetListRow[]) => void;
+}
+
+export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
+  items,
+  selectedItems,
+  dataSourceNames,
+  onSelectionChange,
+  onDelete,
+  onDeleteSelected,
+}) => {
+  const {
+    services: { discoverLocator },
+  } = useKibana<DataFederationKibanaServices>();
+  const history = useHistory();
+  const createDatasetNav = reactRouterNavigate(history, CREATE_DATASET_PATH);
+
+  const columns = useMemo<Array<EuiBasicTableColumn<DataSetListRow>>>(
+    () => [
+      {
+        field: 'name',
+        name: mainTranslations.columns.dataSets.name,
+        sortable: true,
+        width: '16%',
+        'data-test-subj': 'dataSetsSetsColName',
+      },
+      {
+        field: 'data_source',
+        name: mainTranslations.columns.dataSets.dataSourceId,
+        sortable: true,
+        width: '12%',
+        'data-test-subj': 'dataSetsSetsColDataSourceId',
+      },
+      {
+        field: 'type',
+        name: mainTranslations.columns.dataSets.dataSourceType,
+        render: (type: DataSetListRow['type']) =>
+          type
+            ? getDataSourceTypeVerbose(type)
+            : mainTranslations.columns.dataSets.dataSourceTypeMissing,
+        sortable: true,
+        width: '12%',
+        'data-test-subj': 'dataSetsSetsColDataSourceType',
+      },
+      {
+        field: 'resource',
+        name: mainTranslations.columns.dataSets.resource,
+        sortable: true,
+        width: '20%',
+        'data-test-subj': 'dataSetsSetsColResource',
+      },
+      {
+        field: 'description',
+        name: mainTranslations.columns.dataSets.description,
+        render: (description: DataSetListRow['description']) => (
+          <EuiTextBlockTruncate lines={2} title={description}>
+            {description}
+          </EuiTextBlockTruncate>
+        ),
+        sortable: true,
+        width: '30%',
+        'data-test-subj': 'dataSetsSetsColDescription',
+      },
+      {
+        name: mainTranslations.columns.dataSets.actions,
+        width: '8%',
+        actions: [
+          {
+            render: (item, enabled) => (
+              <DatasetRowActions
+                disabled={!enabled}
+                onOpenInDiscover={
+                  discoverLocator
+                    ? () =>
+                        discoverLocator.navigateSync({
+                          query: { esql: getDatasetEsqlQuery(item.name) },
+                        })
+                    : undefined
+                }
+                onEdit={() => history.push(getEditDatasetPath(item.name))}
+                onDelete={() => onDelete(item)}
+              />
+            ),
+          },
+        ],
+      },
+    ],
+    [discoverLocator, history, onDelete]
+  );
+
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <EuiInMemoryTable<DataSetListRow>
+        items={items}
+        itemId="name"
+        columns={columns}
+        search={{
+          onChange: () => {
+            onSelectionChange([]);
+            return true;
+          },
+          box: {
+            incremental: true,
+            placeholder: mainTranslations.columns.dataSets.searchPlaceholder,
+            'data-test-subj': 'dataSetsSetsSearch',
+            schema: {
+              fields: {
+                name: { type: 'string' },
+                data_source: { type: 'string' },
+                type: { type: 'string' },
+                resource: { type: 'string' },
+                description: { type: 'string' },
+              },
+            },
+          },
+          filters: [
+            {
+              type: 'field_value_selection',
+              field: 'data_source',
+              name: mainTranslations.filters.allDataSources,
+              multiSelect: 'or',
+              operator: 'exact',
+              options: dataSourceNames.map((name) => ({ value: name })),
+            },
+          ],
+          toolsLeft:
+            selectedItems.length > 0 ? (
+              <EuiButton
+                color="danger"
+                data-test-subj="dataSetsSetsDeleteButton"
+                iconType="trash"
+                onClick={() => {
+                  onDeleteSelected(selectedItems);
+                }}
+              >
+                {mainTranslations.actions.deleteButtonLabel}
+              </EuiButton>
+            ) : undefined,
+          toolsRight: (
+            <EuiButton
+              fill
+              color="primary"
+              data-test-subj="dataSetsSetsCreateButton"
+              {...createDatasetNav}
+            >
+              {mainTranslations.columns.dataSets.addButtonLabel}
+            </EuiButton>
+          ),
+        }}
+        rowHeader="name"
+        selection={{
+          selected: selectedItems,
+          onSelectionChange,
+        }}
+        sorting
+        pagination={{
+          pageSizeOptions: [5, 10, 20],
+          initialPageSize: 10,
+        }}
+        data-test-subj="dataSetsSetsTable"
+        tableCaption={mainTranslations.columns.dataSets.caption}
+        noItemsMessage={mainTranslations.columns.dataSets.noItems}
+        tableLayout="auto"
+        responsiveBreakpoint={false}
+      />
+    </>
+  );
+};

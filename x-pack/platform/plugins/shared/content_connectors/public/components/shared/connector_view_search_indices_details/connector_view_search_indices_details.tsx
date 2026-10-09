@@ -19,6 +19,7 @@ export const ConnectorViewIndexLink: React.FC<{
 
   return (
     <EuiLink
+      data-test-subj="contentConnectorsConnectorViewIndexLinkLink"
       target={target ? '_blank' : undefined}
       external={target ?? false}
       href={`${http?.basePath.prepend(

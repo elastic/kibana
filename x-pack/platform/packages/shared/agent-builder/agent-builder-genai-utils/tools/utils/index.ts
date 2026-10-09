@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-export { esqlResponseToJson, extractEsqlQueries, executeEsql, interpolateEsqlQuery } from './esql';
+export {
+  esqlResponseToJson,
+  extractEsqlQueries,
+  executeEsql,
+  interpolateEsqlQuery,
+  validateEsqlQuery,
+} from './esql';
+export { listDatasets, getDatasetFields, type DatasetInfo } from './datasets';
+export { listViews, getViewFields, type ViewInfo } from './views';
+export { FROZEN_TIER, excludeFrozenTierQuery, applyFrozenTierExclusion } from './data_tiers';
 export {
   flattenMapping,
   cleanupMapping,
@@ -14,6 +23,7 @@ export {
   type MappingField,
 } from './mappings';
 export {
+  fetchFieldCaps,
   processFieldCapsResponse,
   processFieldCapsResponsePerIndex,
   type FieldListFromFieldCapsResponse,
@@ -25,6 +35,7 @@ export {
   getBatchedFieldsFromFieldCaps,
   getIndexFields,
   type IndexFieldsResult,
+  type IndexFieldType,
 } from './ccs';
 export { generateXmlTree, type XmlNode } from './formatting';
 export { errorResult, otherResult } from './results';

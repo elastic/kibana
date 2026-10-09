@@ -1,0 +1,144 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildSimulationFeedback includes per-processor top_errors with attribution 1`] = `
+Object {
+  "errors": Array [
+    "Processor \\"root.steps[0]\\" has a failure rate of 100.00% (maximum allowed: 20%). Review the processor configuration.",
+    "[root.steps[0]] generic_processor_failure: Text could not be parsed (occurred in 2 documents)",
+  ],
+  "metrics": Object {
+    "fields": Array [
+      "message (text) - 1 distinct value (\`hello\`)",
+    ],
+    "parse_rate": 0,
+    "sampled": 2,
+  },
+  "processors": Object {
+    "root.steps[0]": Object {
+      "failure_rate": 100,
+      "top_errors": Array [
+        "root.steps[0]: generic_processor_failure: Text could not be parsed (occurred in 2 documents)",
+      ],
+    },
+  },
+  "temporary_fields": Array [],
+  "valid": false,
+}
+`;
+
+exports[`buildSimulationFeedback reports per-processor failure rates when above 20% 1`] = `
+Object {
+  "errors": Array [
+    "Processor \\"root.steps[0]\\" has a failure rate of 100.00% (maximum allowed: 20%). Review the processor configuration.",
+    "[root.steps[0]] generic_processor_failure: bad pattern",
+  ],
+  "metrics": Object {
+    "fields": Array [
+      "message (text) - 1 distinct value (\`hello\`)",
+    ],
+    "parse_rate": 0,
+    "sampled": 1,
+  },
+  "processors": Object {
+    "root.steps[0]": Object {
+      "failure_rate": 100,
+      "top_errors": Array [
+        "root.steps[0]: generic_processor_failure: bad pattern",
+      ],
+    },
+  },
+  "temporary_fields": Array [],
+  "valid": false,
+}
+`;
+
+exports[`buildSimulationFeedback reports temporary fields as informational without gating valid 1`] = `
+Object {
+  "errors": Array [],
+  "metrics": Object {
+    "fields": Array [
+      "message (text) - 1 distinct value (\`hello\`)",
+    ],
+    "parse_rate": 100,
+    "sampled": 1,
+  },
+  "processors": Object {},
+  "temporary_fields": Array [
+    "custom.timestamp",
+  ],
+  "valid": true,
+}
+`;
+
+exports[`buildSimulationFeedback returns invalid feedback when definition_error is present 1`] = `
+Object {
+  "errors": Array [
+    "bad pipeline",
+  ],
+  "metrics": Object {
+    "fields": Array [],
+    "parse_rate": 0,
+    "sampled": 0,
+  },
+  "processors": Object {},
+  "temporary_fields": Array [],
+  "valid": false,
+}
+`;
+
+exports[`buildSimulationFeedback returns invalid feedback when simulation returns no documents 1`] = `
+Object {
+  "errors": Array [
+    "Simulation returned no documents. The pipeline may be dropping all documents.",
+  ],
+  "metrics": Object {
+    "fields": Array [],
+    "parse_rate": 0,
+    "sampled": 0,
+  },
+  "processors": Object {},
+  "temporary_fields": Array [],
+  "valid": false,
+}
+`;
+
+exports[`buildSimulationFeedback returns valid feedback when all processors pass 1`] = `
+Object {
+  "errors": Array [],
+  "metrics": Object {
+    "fields": Array [
+      "message (text) - 1 distinct value (\`hello\`)",
+    ],
+    "parse_rate": 100,
+    "sampled": 1,
+  },
+  "processors": Object {
+    "root.steps[0]": Object {
+      "failure_rate": 0,
+      "top_errors": Array [],
+    },
+  },
+  "temporary_fields": Array [],
+  "valid": true,
+}
+`;
+
+exports[`detectTemporaryFields deduplicates and sorts 1`] = `
+Array [
+  "attributes.custom.c",
+  "custom.a",
+  "custom.b",
+]
+`;
+
+exports[`detectTemporaryFields detects attributes.custom.* fields 1`] = `
+Array [
+  "attributes.custom.level",
+]
+`;
+
+exports[`detectTemporaryFields detects custom.* fields 1`] = `
+Array [
+  "custom.timestamp",
+]
+`;

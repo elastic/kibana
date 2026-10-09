@@ -25,9 +25,8 @@ import {
   AvailableReferenceLineIcons,
   isPersistedByReferenceAnnotationsLayer,
   isPersistedLinkedByValueAnnotationsLayer,
+  isRuntimeByReferenceAnnotationsLayer,
 } from '@kbn/lens-common';
-import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
-import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type {
   AnnotationLayerByValueType,
   AnnotationLayerType,
@@ -39,10 +38,16 @@ import type {
   ReferenceLineLayerTypeNoESQL,
 } from '../../../schema/charts/xy';
 import { LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE } from '../../../schema/constants';
-import type { DataSourceType } from '../../../schema/data_source';
+import type { DataSourceTypeNoESQL } from '../../../schema/data_source';
 import type { LensApiStaticValueOperation } from '../../../schema/metric_ops';
 import { isEsqlTableTypeDataSource } from '../../../utils';
-import { fromColorMappingLensStateToAPI, fromStaticColorLensStateToAPI } from '../../coloring';
+import {
+  AUTO_COLOR,
+  DEFAULT_CATEGORICAL_COLOR_MAPPING,
+  fromColorMappingLensStateToAPI,
+  fromStaticColorLensStateToAPI,
+} from '../../coloring';
+import { DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING, DEFAULT_REFERENCE_LINE_AXIS } from './defaults';
 import { getValueApiColumn } from '../../columns/esql_column';
 import { toApiFilterLanguage } from '../../columns/filter';
 import {
@@ -52,12 +57,14 @@ import {
 } from '../../columns/utils';
 import {
   buildDataSourceState,
+  buildDataViewDataSource,
   generateApiLayer,
-  isDataViewSpec,
+  getXYAnnotationLayerReferenceName,
   isFormBasedLayer,
   isTextBasedLayer,
   nonNullable,
   operationFromColumn,
+  resolveDataViewId,
 } from '../../utils';
 import { stripUndefined } from '../utils';
 import { getYAccessorAxisModeMap, type ResolveAxisId } from './chart';
@@ -82,6 +89,10 @@ function convertDataLayerToAPI(
   | Omit<DataLayerTypeESQL, 'type' | 'data_source'> {
   const yConfigMap = new Map(visualization.yConfig?.map((y) => [y.forAccessor, y]));
   const yAccessorModesMap = getYAccessorAxisModeMap(visualization, (accessor) => accessor);
+  const defaultColorMapping =
+    visualization.seriesType === 'line'
+      ? DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING
+      : DEFAULT_CATEGORICAL_COLOR_MAPPING;
 
   if (isFormBasedLayer(layer)) {
     const x = visualization.xAccessor
@@ -115,16 +126,13 @@ function convertDataLayerToAPI(
           }
           const yConfig = yConfigMap.get(accessor);
 
+          const onAxis = resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left');
           return {
             ...apiOperation,
-            ...(visualization.colorMapping
+            ...(breakdown_by
               ? {}
-              : yConfig?.color
-              ? {
-                  color: fromStaticColorLensStateToAPI(yConfig.color),
-                }
-              : {}),
-            axis_id: resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left'),
+              : { color: fromStaticColorLensStateToAPI(yConfig?.color) ?? AUTO_COLOR }),
+            axis: onAxis,
           };
         })
         .filter(nonNullable) ?? [];
@@ -135,7 +143,9 @@ function convertDataLayerToAPI(
       visualization.xAccessor &&
       layer.columnOrder[0] === visualization.splitAccessors[0]; // TODO temp fix for this PR until XY API will be upgraded to support multiple splits
 
-    const color = fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette);
+    const color =
+      fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette) ??
+      defaultColorMapping;
     return {
       ...generateApiLayer(layer),
       ...(x ? { x } : {}),
@@ -146,7 +156,7 @@ function convertDataLayerToAPI(
               ...breakdown_by,
               ...(visualization.collapseFn ? { collapse_by: visualization.collapseFn } : {}),
               ...(aggregate_first ? { aggregate_first: true } : {}),
-              ...(color ? { color } : {}),
+              color,
             },
           }
         : {}),
@@ -160,15 +170,18 @@ function convertDataLayerToAPI(
       ? getValueApiColumn(visualization.splitAccessors[0], layer) // TODO temp fix for this PR until XY API will be upgraded to support multiple splits
       : undefined;
   const y = visualization.accessors?.map((accessor) => {
-    const { color } = yConfigMap.get(accessor) || {};
+    const { color: yColor } = yConfigMap.get(accessor) || {};
+    const axis = resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left');
     return {
       ...getValueApiColumn(accessor, layer),
-      ...(color ? { color: fromStaticColorLensStateToAPI(color) } : {}),
-      axis_id: resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left'),
+      ...(breakdown_by ? {} : { color: fromStaticColorLensStateToAPI(yColor) ?? AUTO_COLOR }),
+      axis,
     };
   });
 
-  const color = fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette);
+  const color =
+    fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette) ??
+    defaultColorMapping;
   return {
     ...generateApiLayer(layer),
     ...(x ? { x } : {}),
@@ -177,7 +190,7 @@ function convertDataLayerToAPI(
       ? {
           breakdown_by: {
             ...breakdown_by,
-            ...(color ? { color } : {}),
+            color,
             ...(visualization.collapseFn ? { collapse_by: visualization.collapseFn } : {}),
           },
         }
@@ -264,15 +277,15 @@ function convertReferenceLinesDecorationsToAPIFormat(
   resolveAxisId: ResolveAxisId
 ): Pick<
   ReferenceLineDef,
-  'color' | 'stroke_dash' | 'stroke_width' | 'icon' | 'position' | 'fill' | 'axis_id' | 'text'
+  'color' | 'stroke_dash' | 'stroke_width' | 'icon' | 'position' | 'fill' | 'axis' | 'text'
 > {
-  const resolvedAxisId = (): ReferenceLineDef['axis_id'] | undefined => {
-    if (!yConfig.axisMode || yConfig.axisMode === 'auto') return undefined;
+  const resolvedOnAxis = (): ReferenceLineDef['axis'] => {
+    if (!yConfig.axisMode || yConfig.axisMode === 'auto') return DEFAULT_REFERENCE_LINE_AXIS;
     if (yConfig.axisMode === 'bottom') return 'x';
     return resolveAxisId(yConfig.axisMode);
   };
   return stripUndefined({
-    color: yConfig.color ? fromStaticColorLensStateToAPI(yConfig.color) : undefined,
+    color: fromStaticColorLensStateToAPI(yConfig.color) ?? AUTO_COLOR,
     stroke_dash: yConfig.lineStyle,
     stroke_width: yConfig.lineWidth,
     icon:
@@ -281,19 +294,9 @@ function convertReferenceLinesDecorationsToAPIFormat(
         : undefined,
     position: yConfig.iconPosition,
     fill: yConfig.fill && yConfig.fill !== 'none' ? yConfig.fill : undefined,
-    axis_id: resolvedAxisId(),
+    axis: resolvedOnAxis(),
     text: yConfig.textVisibility != null ? { visible: yConfig.textVisibility } : undefined,
   });
-}
-
-function getLabelFromLayer(
-  forAccessor: string,
-  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer
-): string | undefined {
-  if (isFormBasedLayer(layer)) {
-    return layer.columns[forAccessor]?.label;
-  }
-  return layer.columns.find((col) => col.columnId === forAccessor)?.label;
 }
 
 function convertReferenceLineLayerToAPI(
@@ -314,7 +317,6 @@ function convertReferenceLineLayerToAPI(
   const yConfigMap = new Map(visualization.yConfig?.map((y) => [y.forAccessor, y]));
   const thresholds = (visualization.accessors
     ?.map((accessor): ReferenceLineDef | undefined => {
-      const label = getLabelFromLayer(accessor, layer);
       const { forAccessor, ...yConfigRest } = yConfigMap.get(accessor) || {};
       const decorationConfig = convertReferenceLinesDecorationsToAPIFormat(
         yConfigRest,
@@ -330,7 +332,6 @@ function convertReferenceLineLayerToAPI(
         }
         return {
           ...op,
-          ...(label != null ? { label } : {}),
           ...decorationConfig,
         };
       }
@@ -340,7 +341,6 @@ function convertReferenceLineLayerToAPI(
       }
       return {
         ...op,
-        ...(label != null ? { label } : {}),
         ...decorationConfig,
       };
     })
@@ -407,11 +407,6 @@ export function buildAPIReferenceLinesLayer(
   };
 }
 
-function findAnnotationDataView(layerId: string, references: SavedObjectReference[]) {
-  const ref = references.find((r) => r.name === `xy-visualization-layer-${layerId}`);
-  return ref?.id;
-}
-
 function getTextConfigurationForQueryAnnotation(
   annotation: XYByValueAnnotationLayerConfig['annotations'][number]
 ): Pick<
@@ -445,6 +440,13 @@ export function buildAPIAnnotationsLayer(
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): AnnotationLayerType {
+  if (isRuntimeByReferenceAnnotationsLayer(layer)) {
+    return {
+      type: 'annotation_group',
+      group_id: layer.annotationGroupId,
+    };
+  }
+
   if (
     isPersistedByReferenceAnnotationsLayer(layer) ||
     isPersistedLinkedByValueAnnotationsLayer(layer)
@@ -460,40 +462,36 @@ export function buildAPIAnnotationsLayer(
     };
   }
 
-  const indexPatternId =
-    'indexPatternId' in layer
-      ? layer.indexPatternId
-      : findAnnotationDataView(layer.layerId, references);
+  // XY annotation layers resolve their data view exactly like data layers, except
+  // it is persisted under the `xy-visualization-layer-<layerId>` reference name
+  // (in top-level `references` when persisted, in `state.internalReferences` when
+  // ad hoc), or carried inline via `indexPatternId` on a runtime by-value layer.
+  const inlineDataViewId = 'indexPatternId' in layer ? layer.indexPatternId : undefined;
+  const dataViewId = resolveDataViewId(
+    references,
+    adhocReferences ?? [],
+    getXYAnnotationLayerReferenceName(layer.layerId),
+    inlineDataViewId
+  );
 
-  if (!indexPatternId) {
-    // shouldn't happen unless data is corrupt
+  // Only query annotations actually query an index, so the data view is only
+  // meaningful for them. Manual point/range annotations are positioned purely by
+  // timestamp and don't need a data view: we omit `data_source` for those layers
+  // so the API output isn't polluted with an unused data view, and the data view
+  // is re-derived from the chart's data layers when converting back to state.
+  const hasQueryAnnotation = layer.annotations.some(isQueryAnnotationConfig);
+
+  if (hasQueryAnnotation && !dataViewId) {
+    // A query annotation without a resolvable data view cannot be represented.
     throw new Error('XY visualization: cannot find data view ID for annotation layer.');
   }
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const ignore_global_filters =
-    layer.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE;
-  const adHocDataView = adHocDataViews[layer.layerId];
-  const referencedDataView = findAnnotationDataView(layer.layerId, references);
-  const dataSource = (
-    isDataViewSpec(adHocDataView) && adHocDataView?.id === indexPatternId
-      ? {
-          type: AS_CODE_DATA_VIEW_SPEC_TYPE,
-          index_pattern: indexPatternId,
-          time_field: adHocDataView.timeFieldName,
-        }
-      : {
-          type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-          ref_id: referencedDataView ?? indexPatternId,
-        }
-  ) satisfies Extract<
-    DataSourceType,
-    { type: typeof AS_CODE_DATA_VIEW_REFERENCE_TYPE | typeof AS_CODE_DATA_VIEW_SPEC_TYPE }
-  >;
+  const dataSource: DataSourceTypeNoESQL | null =
+    !hasQueryAnnotation || !dataViewId ? null : buildDataViewDataSource(dataViewId, adHocDataViews);
   return {
     type: 'annotations',
-    data_source: dataSource,
-    ignore_global_filters,
+    ...(dataSource ? { data_source: dataSource } : {}),
+    ignore_global_filters: layer.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
     events: layer.annotations.map((annotation) => {
       if (isQueryAnnotationConfig(annotation)) {
         return {
@@ -510,7 +508,7 @@ export function buildAPIAnnotationsLayer(
 
           time_field: annotation.timeField!,
           ...(annotation.extraFields ? { extra_fields: annotation.extraFields } : {}),
-          color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
+          color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
           ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
           ...getTextConfigurationForQueryAnnotation(annotation),
           ...(annotation.icon ? { icon: xyIconCompat.toAPI(annotation.icon) } : {}),
@@ -532,7 +530,7 @@ export function buildAPIAnnotationsLayer(
             from: annotation.key.timestamp,
             to: annotation.key.endTimestamp,
           },
-          color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
+          color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
           fill: annotation.outside ? 'outside' : 'inside',
           ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
           ...(annotation.label ? { label: annotation.label } : {}),
@@ -542,7 +540,7 @@ export function buildAPIAnnotationsLayer(
       return {
         type: 'point',
         timestamp: annotation.key.timestamp,
-        color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
+        color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
         ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
         ...(annotation.textVisibility != null
           ? {

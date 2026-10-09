@@ -7,10 +7,16 @@
 
 import { core } from '@elastic/opentelemetry-node/sdk';
 import { createWithActiveSpan, withActiveSpan } from '@kbn/tracing-utils';
-import { propagation, trace } from '@opentelemetry/api';
+import { propagation } from '@opentelemetry/api';
 import { createInferenceContext } from './create_inference_context';
-import { EVAL_RUN_ID_BAGGAGE_KEY } from './baggage';
+import { getInferenceTracer } from './inference_tracer_provider';
+import {
+  EXECUTION_ID_BAGGAGE_KEY,
+  EVAL_EXPERIMENT_ID_BAGGAGE_KEY,
+  CONVERSATION_ID_BAGGAGE_KEY,
+} from './baggage';
 import { IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME } from './root_inference_span';
+import { GenAISemanticConventions } from './types';
 
 /**
  * Creates an active "inference"-scoped span, that is, every span created in this
@@ -18,36 +24,35 @@ import { IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME } from './root_inference_span';
  * a subset of spans to external systems like Phoenix.
  */
 
-const TRACER = trace.getTracer('inference');
-
-export const withActiveInferenceSpan = createWithActiveSpan(
-  {
-    tracer: TRACER,
-  },
-  (name, opts, ctx, cb) => {
-    if (core.isTracingSuppressed(ctx)) {
-      return cb();
-    }
-
-    const { context: parentContext, isRoot } = createInferenceContext();
-    const evalRunId = propagation
-      .getBaggage(parentContext)
-      ?.getEntry(EVAL_RUN_ID_BAGGAGE_KEY)?.value;
-
-    return withActiveSpan(
-      name,
-      {
-        ...opts,
-        attributes: {
-          ...opts.attributes,
-          [IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME]: isRoot,
-          ...(evalRunId ? { [EVAL_RUN_ID_BAGGAGE_KEY]: evalRunId } : {}),
-        },
-      },
-      parentContext,
-      (span) => {
-        return cb(span);
-      }
-    );
+export const withActiveInferenceSpan = createWithActiveSpan({}, (name, opts, ctx, cb) => {
+  if (core.isTracingSuppressed(ctx)) {
+    return cb();
   }
-);
+
+  const { context: parentContext, isRoot } = createInferenceContext();
+  const baggage = propagation.getBaggage(parentContext);
+  const executionId = baggage?.getEntry(EXECUTION_ID_BAGGAGE_KEY)?.value;
+  const experimentId = baggage?.getEntry(EVAL_EXPERIMENT_ID_BAGGAGE_KEY)?.value;
+  const conversationId = baggage?.getEntry(CONVERSATION_ID_BAGGAGE_KEY)?.value;
+
+  return withActiveSpan(
+    name,
+    {
+      ...opts,
+      tracer: getInferenceTracer(),
+      attributes: {
+        [IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME]: isRoot,
+        ...(executionId ? { [EXECUTION_ID_BAGGAGE_KEY]: executionId } : {}),
+        ...(experimentId ? { [EVAL_EXPERIMENT_ID_BAGGAGE_KEY]: experimentId } : {}),
+        ...(conversationId
+          ? { [GenAISemanticConventions.GenAIConversationId]: conversationId }
+          : {}),
+        ...opts.attributes,
+      },
+    },
+    parentContext,
+    (span) => {
+      return cb(span);
+    }
+  );
+});

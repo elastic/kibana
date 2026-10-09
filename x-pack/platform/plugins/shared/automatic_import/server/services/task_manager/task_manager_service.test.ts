@@ -7,7 +7,8 @@
 
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { isUnrecoverableError } from '@kbn/task-manager-plugin/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   DATA_STREAM_CREATION_TASK_TYPE,
   TaskManagerService,
@@ -94,7 +95,7 @@ describe('runTask abort handling', () => {
     ownerId: null,
   };
 
-  const mockFakeRequest = {} as unknown;
+  const mockFakeRequest = httpServerMock.createKibanaRequest();
 
   const mockCoreStart = {
     elasticsearch: { client: { asInternalUser: {} } },
@@ -127,6 +128,7 @@ describe('runTask abort handling', () => {
 
     mockSavedObjectService = {
       updateDataStreamSavedObjectAttributes: jest.fn().mockResolvedValue(undefined),
+      updateDataStreamPhase: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<AutomaticImportSavedObjectService>;
 
     const mockTaskManagerSetup = {
@@ -160,32 +162,41 @@ describe('runTask abort handling', () => {
     service.initialize({} as never, mockSavedObjectService);
   });
 
-  const createRunner = (abortController: AbortController) => {
+  const createRunner = (signal: AbortSignal) => {
     const def = taskDefinition[DATA_STREAM_CREATION_TASK_TYPE];
-    return def.createTaskRunner({
-      taskInstance: mockTaskInstance,
-      fakeRequest: mockFakeRequest,
-      abortController,
-    });
+    return def.createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: mockTaskInstance,
+        fakeRequest: mockFakeRequest,
+        signal,
+      })
+    );
   };
 
   it('completes successfully when not aborted', async () => {
-    const abortController = new AbortController();
-    const runner = createRunner(abortController);
+    const { signal } = new AbortController();
+    const runner = createRunner(signal);
 
     const result = await runner.run();
 
     expect(result.state.task_status).toBe(TASK_STATUSES.completed);
     expect(mockSavedObjectService.updateDataStreamSavedObjectAttributes).toHaveBeenCalledWith(
+      expect.objectContaining({ status: TASK_STATUSES.processing })
+    );
+    expect(mockSavedObjectService.updateDataStreamPhase).toHaveBeenCalled();
+    expect(mockSavedObjectService.updateDataStreamSavedObjectAttributes).toHaveBeenCalledWith(
       expect.objectContaining({ status: TASK_STATUSES.completed }),
-      abortController.signal
+      signal
+    );
+    expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ success: true })
     );
   });
 
   it('passes agent field_mappings to generateFieldMappings', async () => {
-    const abortController = new AbortController();
-    const runner = createRunner(abortController);
-
+    const { signal } = new AbortController();
+    const runner = createRunner(signal);
     await runner.run();
 
     expect(generateFieldMappings).toHaveBeenCalledWith(expect.any(Array), expect.anything(), [
@@ -220,7 +231,7 @@ describe('runTask abort handling', () => {
     );
     service.initialize({} as never, mockSavedObjectService);
 
-    const runner = createRunner(abortController);
+    const runner = createRunner(abortController.signal);
     const result = await runner.run();
 
     expect(result.state.task_status).toBe(TASK_STATUSES.cancelled);
@@ -237,7 +248,7 @@ describe('runTask abort handling', () => {
       return [{ name: 'f', type: 'keyword', is_ecs: false }];
     });
 
-    const runner = createRunner(abortController);
+    const runner = createRunner(abortController.signal);
     const result = await runner.run();
 
     expect(result.state.task_status).toBe(TASK_STATUSES.cancelled);
@@ -254,7 +265,7 @@ describe('runTask abort handling', () => {
       throw new DOMException('The operation was aborted', 'AbortError');
     });
 
-    const runner = createRunner(abortController);
+    const runner = createRunner(abortController.signal);
     const result = await runner.run();
 
     expect(result.state.task_status).toBe(TASK_STATUSES.cancelled);
@@ -272,7 +283,7 @@ describe('runTask abort handling', () => {
       return result;
     });
 
-    const runner = createRunner(abortController);
+    const runner = createRunner(abortController.signal);
     const res = await runner.run();
 
     expect(res.state.task_status).toBe(TASK_STATUSES.cancelled);
@@ -294,7 +305,7 @@ describe('runTask abort handling', () => {
       }
     );
 
-    const runner = createRunner(abortController);
+    const runner = createRunner(abortController.signal);
     const result = await runner.run();
 
     expect(result.state.task_status).toBe(TASK_STATUSES.cancelled);
@@ -321,7 +332,7 @@ describe('runTask abort handling', () => {
     );
     service.initialize({} as never, mockSavedObjectService);
 
-    const runner = createRunner(abortController);
+    const runner = createRunner(abortController.signal);
     await runner.run();
 
     const cancelCall = mockSavedObjectService.updateDataStreamSavedObjectAttributes.mock.calls.find(
@@ -341,8 +352,12 @@ describe('runTask abort handling', () => {
       }),
     }));
 
-    mockSavedObjectService.updateDataStreamSavedObjectAttributes.mockRejectedValue(
-      new Error('SO update failed')
+    mockSavedObjectService.updateDataStreamSavedObjectAttributes.mockImplementation(
+      async (params: { status: string }) => {
+        if (params.status === TASK_STATUSES.cancelled) {
+          throw new Error('SO update failed');
+        }
+      }
     );
 
     const service = new TaskManagerService(
@@ -358,7 +373,7 @@ describe('runTask abort handling', () => {
     );
     service.initialize({} as never, mockSavedObjectService);
 
-    const runner = createRunner(abortController);
+    const runner = createRunner(abortController.signal);
     const result = await runner.run();
 
     expect(result.state.task_status).toBe(TASK_STATUSES.cancelled);
@@ -384,7 +399,7 @@ describe('runTask abort handling', () => {
     );
     service.initialize({} as never, mockSavedObjectService);
 
-    const runner = createRunner(abortController);
+    const runner = createRunner(abortController.signal);
     const result = await runner.run();
 
     expect(result.state.task_status).toBe(TASK_STATUSES.failed);
@@ -395,7 +410,7 @@ describe('runTask abort handling', () => {
 
   it('cancel() returns cancelled state', async () => {
     const abortController = new AbortController();
-    const runner = createRunner(abortController);
+    const runner = createRunner(abortController.signal);
 
     const cancelResult = await runner.cancel();
 
@@ -429,19 +444,17 @@ describe('removeDataStreamCreationTask', () => {
     service.initialize({ removeIfExists } as never, {} as never);
 
     const taskId = 'data-stream-task-myint-mydstream';
-    const controller = new AbortController();
-    const abortSpy = jest.spyOn(controller, 'abort');
+    const { signal } = new AbortController();
 
     (
-      service as unknown as { inFlightRunAbortControllers: Map<string, AbortController> }
-    ).inFlightRunAbortControllers.set(taskId, controller);
+      service as unknown as { inFlightRunAbortSignals: Map<string, AbortSignal> }
+    ).inFlightRunAbortSignals.set(taskId, signal);
 
     await service.removeDataStreamCreationTask({
       integrationId: 'myint',
       dataStreamId: 'mydstream',
     });
 
-    expect(abortSpy).toHaveBeenCalled();
     expect(removeIfExists).toHaveBeenCalledWith(taskId);
   });
 
@@ -489,8 +502,8 @@ describe('removeDataStreamCreationTask', () => {
     const abortSpy = jest.spyOn(controller, 'abort');
 
     (
-      service as unknown as { inFlightRunAbortControllers: Map<string, AbortController> }
-    ).inFlightRunAbortControllers.set(taskId, controller);
+      service as unknown as { inFlightRunAbortSignals: Map<string, AbortController> }
+    ).inFlightRunAbortSignals.set(taskId, controller);
 
     await service.removeDataStreamCreationTask({
       integrationId: 'x',
@@ -677,7 +690,7 @@ describe('runTask error edge cases', () => {
     ownerId: null,
   };
 
-  const mockFakeRequest = {} as unknown;
+  const mockFakeRequest = httpServerMock.createKibanaRequest();
 
   const mockCoreStart = {
     elasticsearch: { client: { asInternalUser: {} } },
@@ -728,6 +741,7 @@ describe('runTask error edge cases', () => {
 
     mockSavedObjectService = {
       updateDataStreamSavedObjectAttributes: jest.fn().mockResolvedValue(undefined),
+      updateDataStreamPhase: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<AutomaticImportSavedObjectService>;
 
     AgentService.mockImplementation(() => ({
@@ -741,13 +755,15 @@ describe('runTask error edge cases', () => {
     validateFieldMappings.mockResolvedValue({ valid: true, errors: [] });
   });
 
-  const createRunner = (abortController: AbortController) => {
+  const createRunner = (signal: AbortSignal) => {
     const def = taskDefinition[DATA_STREAM_CREATION_TASK_TYPE];
-    return def.createTaskRunner({
-      taskInstance: mockTaskInstance,
-      fakeRequest: mockFakeRequest,
-      abortController,
-    });
+    return def.createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: mockTaskInstance,
+        fakeRequest: mockFakeRequest,
+        signal,
+      })
+    );
   };
 
   it('fails with error when required task params are missing', async () => {
@@ -771,12 +787,15 @@ describe('runTask error edge cases', () => {
     ).initialize({} as never, mockSavedObjectService);
 
     const def = taskDefinition[DATA_STREAM_CREATION_TASK_TYPE];
-    const abortController = new AbortController();
-    const runner = def.createTaskRunner({
-      taskInstance: incompleteTaskInstance,
-      fakeRequest: mockFakeRequest,
-      abortController,
-    });
+    const { signal } = new AbortController();
+
+    const runner = def.createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: incompleteTaskInstance,
+        fakeRequest: mockFakeRequest,
+        signal,
+      })
+    );
 
     const result = await runner.run();
 
@@ -795,8 +814,8 @@ describe('runTask error edge cases', () => {
     }));
 
     buildService();
-    const abortController = new AbortController();
-    const runner = createRunner(abortController);
+    const { signal } = new AbortController();
+    const runner = createRunner(signal);
     const result = await runner.run();
 
     expect(result.state.task_status).toBe(TASK_STATUSES.failed);
@@ -812,8 +831,8 @@ describe('runTask error edge cases', () => {
     }));
 
     buildService();
-    const abortController = new AbortController();
-    const runner = createRunner(abortController);
+    const { signal } = new AbortController();
+    const runner = createRunner(signal);
 
     await expect(runner.run()).rejects.toThrow('Forbidden');
 
@@ -827,8 +846,8 @@ describe('runTask error edge cases', () => {
     }));
 
     buildService();
-    const abortController = new AbortController();
-    const runner = createRunner(abortController);
+    const { signal } = new AbortController();
+    const runner = createRunner(signal);
     const result = await runner.run();
 
     expect(result.state.task_status).toBe(TASK_STATUSES.failed);
@@ -841,8 +860,8 @@ describe('runTask error edge cases', () => {
     }));
 
     buildService();
-    const abortController = new AbortController();
-    const runner = createRunner(abortController);
+    const { signal } = new AbortController();
+    const runner = createRunner(signal);
     await runner.run();
 
     expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
@@ -864,7 +883,7 @@ describe('runTask error edge cases', () => {
     }));
 
     buildService();
-    const runner = createRunner(abortController);
+    const runner = createRunner(abortController.signal);
     await runner.run();
 
     expect(mockAnalytics.reportEvent).not.toHaveBeenCalled();
@@ -880,8 +899,8 @@ describe('runTask error edge cases', () => {
     );
 
     buildService();
-    const abortController = new AbortController();
-    const runner = createRunner(abortController);
+    const { signal } = new AbortController();
+    const runner = createRunner(signal);
     const result = await runner.run();
 
     expect(result.state.task_status).toBe(TASK_STATUSES.failed);
@@ -891,14 +910,14 @@ describe('runTask error edge cases', () => {
     );
   });
 
-  it('cleans up inFlightRunAbortControllers after run completes', async () => {
+  it('cleans up inFlightRunAbortSignals after run completes', async () => {
     buildService();
-    const abortController = new AbortController();
-    const runner = createRunner(abortController);
+    const { signal } = new AbortController();
+    const runner = createRunner(signal);
 
     await runner.run();
 
-    expect(abortController.signal.aborted).toBe(false);
+    expect(signal.aborted).toBe(false);
   });
 
   it('passes undefined agent field_mappings when agent does not provide them', async () => {
@@ -910,8 +929,8 @@ describe('runTask error edge cases', () => {
     }));
 
     buildService();
-    const abortController = new AbortController();
-    const runner = createRunner(abortController);
+    const { signal } = new AbortController();
+    const runner = createRunner(signal);
     await runner.run();
 
     expect(generateFieldMappings).toHaveBeenCalledWith(
@@ -928,8 +947,8 @@ describe('runTask error edge cases', () => {
     });
 
     buildService();
-    const abortController = new AbortController();
-    const runner = createRunner(abortController);
+    const { signal } = new AbortController();
+    const runner = createRunner(signal);
     const result = await runner.run();
 
     expect(result.state.task_status).toBe(TASK_STATUSES.completed);
@@ -941,8 +960,8 @@ describe('runTask error edge cases', () => {
     }));
 
     buildService();
-    const abortController = new AbortController();
-    const runner = createRunner(abortController);
+    const { signal } = new AbortController();
+    const runner = createRunner(signal);
     const result = await runner.run();
 
     expect(result.state.task_status).toBe(TASK_STATUSES.failed);

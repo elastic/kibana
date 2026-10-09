@@ -11,8 +11,8 @@ import { useMemo } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
 import { get, find, each } from 'lodash';
 import { map } from 'rxjs';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlApi } from './ml_api_service';
-import type { Job } from '../../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../contexts/kibana';
 
 export interface AggType {

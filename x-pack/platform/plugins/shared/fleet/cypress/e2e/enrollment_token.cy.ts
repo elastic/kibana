@@ -52,17 +52,20 @@ describe('Enrollment token page', () => {
 
   it('Delete Token - inactivates the token', () => {
     cy.visit('app/fleet/enrollment-tokens');
-    cy.getBySel(ENROLLMENT_TOKENS.LIST_TABLE).find('tr').should('have.length', 2);
-    cy.getBySel(ENROLLMENT_TOKENS.TABLE_REVOKE_BTN).first().click();
-    cy.get('.euiPanel').contains('Are you sure you want to revoke');
-    cy.get('.euiButton').contains('Revoke enrollment token').click({ force: true });
+    cy.getBySel(ENROLLMENT_TOKENS.LIST_TABLE)
+      .find('.euiTableRow')
+      .should('have.length.at.least', 1);
 
-    cy.getBySel(ENROLLMENT_TOKENS.LIST_TABLE).within(() => {
-      cy.get('.euiTableRow')
-        .first()
-        .within(() => {
-          cy.getBySel(ENROLLMENT_TOKENS.TABLE_REVOKE_BTN).should('not.exist');
-        });
-    });
+    // Open the per-row actions menu and click revoke
+    cy.getBySel(ENROLLMENT_TOKENS.TABLE_ACTIONS_MENU).first().click();
+    cy.getBySel(ENROLLMENT_TOKENS.TABLE_REVOKE_BTN).click();
+    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
+
+    // Default filter is "Active", so the revoked token should disappear from the list.
+    // Switch to "Inactive" to verify it was revoked.
+    cy.getBySel(ENROLLMENT_TOKENS.FILTER_INACTIVE).click();
+    cy.getBySel(ENROLLMENT_TOKENS.LIST_TABLE)
+      .find('.euiTableRow')
+      .should('have.length.at.least', 1);
   });
 });

@@ -6,18 +6,15 @@
  */
 
 import { type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import {
   EXTENDED_TIMEOUT,
   KUBERNETES_TOUR_STORAGE_KEY,
   KUBERNETES_CARD_DISMISSED_STORAGE_KEY,
-  KUBERNETES_TOAST_STORAGE_KEY,
 } from '../constants';
 import type { SavedViews } from './saved_views';
 
 export class InventoryPage {
-  public readonly feedbackLink: Locator;
-  public readonly k8sFeedbackLink: Locator;
-
   public readonly datePickerInput: Locator;
 
   public readonly inventorySwitcherButton: Locator;
@@ -27,6 +24,10 @@ export class InventoryPage {
 
   public readonly metricSwitcherButton: Locator;
   public readonly metricsContextMenu: Locator;
+
+  public readonly schemaSelect: Locator;
+  public readonly schemaHelpText: Locator;
+  public readonly schemaSelectorInvalidToken: Locator;
 
   public readonly k8sTourText: Locator;
   public readonly k8sTourDismissButton: Locator;
@@ -41,9 +42,19 @@ export class InventoryPage {
   public readonly nodesOverviewTable: Locator;
 
   public readonly noDataPrompt: Locator;
+  public readonly noDataSwitchSchemaLink: Locator;
+
+  public readonly contextMenuLogsLink: Locator;
+  public readonly contextMenuApmLink: Locator;
+  public readonly contextMenuMetricsLink: Locator;
+
+  public readonly waffleGroupByDropdown: Locator;
+  public readonly groupByContextMenu: Locator;
 
   public readonly noDataPage: Locator;
   public readonly noDataPageActionButton: Locator;
+
+  public readonly noRemoteClusterPrompt: Locator;
 
   public readonly k8sPodWaffleContextMenu: Locator;
 
@@ -61,15 +72,25 @@ export class InventoryPage {
   public readonly alertsFlyout: Locator;
   public readonly alertsFlyoutRuleDefinitionSection: Locator;
   public readonly alertsFlyoutRuleTypeName: Locator;
+  public readonly alertsFlyoutDetailsStep: Locator;
+  public readonly alertsFlyoutLinkedDashboards: Locator;
+
+  public readonly ruleFlyoutForExpressionButton: Locator;
+  public readonly ruleFlyoutSchemaExpressionButton: Locator;
+  public readonly ruleFlyoutNodeTypeSelect: Locator;
+  public readonly ruleFlyoutSchemaSelect: Locator;
+  public readonly ruleFlyoutThresholdButton: Locator;
+  public readonly ruleFlyoutThresholdInput: Locator;
+  public readonly ruleFlyoutThresholdCloseButton: Locator;
+  public readonly ruleFlyoutNameInput: Locator;
+  public readonly ruleFlyoutSaveButton: Locator;
+  public readonly ruleFlyoutConfirmCreateButton: Locator;
 
   constructor(
     private readonly page: ScoutPage,
     private readonly kbnUrl: KibanaUrl,
     private readonly savedViews: SavedViews
   ) {
-    this.feedbackLink = this.page.getByTestId('infraInventoryFeedbackLink');
-    this.k8sFeedbackLink = this.page.getByTestId('infra-kubernetes-feedback-link');
-
     this.datePickerInput = this.page.getByTestId('waffleDatePicker').getByRole('textbox');
 
     this.inventorySwitcherButton = this.page.getByTestId('openInventorySwitcher');
@@ -79,6 +100,10 @@ export class InventoryPage {
 
     this.metricSwitcherButton = this.page.getByTestId('infraInventoryMetricDropdown');
     this.metricsContextMenu = this.page.getByTestId('infraInventoryMetricsContextMenu');
+
+    this.schemaSelect = this.page.getByTestId('infraSchemaSelect');
+    this.schemaHelpText = this.page.getByText(/available in another schema/);
+    this.schemaSelectorInvalidToken = this.page.getByTestId('infraSchemaSelectorInvalidToken');
 
     this.k8sTourText = this.page.getByTestId('infra-kubernetesTour-text');
     this.k8sTourDismissButton = this.page.getByTestId('infra-kubernetesTour-dismiss');
@@ -93,9 +118,19 @@ export class InventoryPage {
     this.nodesOverviewTable = this.page.getByTestId('infraNodesOverviewTable');
 
     this.noDataPrompt = this.page.getByTestId('noMetricsDataPrompt');
+    this.noDataSwitchSchemaLink = this.page.getByTestId('infraInventoryViewNoDataInSelectedSchema');
+
+    this.contextMenuLogsLink = this.page.getByTestId('viewLogsContextMenuItem');
+    this.contextMenuApmLink = this.page.getByTestId('viewApmTracesContextMenuItem');
+    this.contextMenuMetricsLink = this.page.getByTestId('viewAssetDetailsContextMenuItem');
+
+    this.waffleGroupByDropdown = this.page.getByTestId('waffleGroupByDropdown');
+    this.groupByContextMenu = this.page.getByTestId('groupByContextMenu');
 
     this.noDataPage = this.page.getByTestId('kbnNoDataPage');
     this.noDataPageActionButton = this.noDataPage.getByTestId('noDataDefaultActionButton');
+
+    this.noRemoteClusterPrompt = this.page.getByTestId('infraHostsNoRemoteCluster');
 
     this.k8sPodWaffleContextMenu = this.page
       .getByRole('dialog')
@@ -104,17 +139,15 @@ export class InventoryPage {
     this.alertsHeaderButton = this.page.getByTestId('infrastructure-alerts-and-rules');
     this.alertsMenu = this.page.getByTestId('metrics-alert-menu');
 
-    this.inventoryAlertsMenuOption = this.alertsMenu.getByTestId('inventory-alerts-menu-option');
-    this.createInventoryRuleButton = this.alertsMenu.getByTestId('inventory-alerts-create-rule');
+    this.inventoryAlertsMenuOption = this.page.getByTestId('inventory-alerts-menu-option');
+    this.createInventoryRuleButton = this.page.getByTestId('inventory-alerts-create-rule');
 
-    this.metricsAlertsMenuOption = this.alertsMenu.getByTestId(
-      'metrics-threshold-alerts-menu-option'
-    );
-    this.createMetricsThresholdRuleButton = this.alertsMenu.getByTestId(
+    this.metricsAlertsMenuOption = this.page.getByTestId('metrics-threshold-alerts-menu-option');
+    this.createMetricsThresholdRuleButton = this.page.getByTestId(
       'metrics-threshold-alerts-create-rule'
     );
 
-    this.customThresholdAlertMenuOption = this.alertsMenu.getByTestId(
+    this.customThresholdAlertMenuOption = this.page.getByTestId(
       'custom-threshold-alerts-menu-option'
     );
 
@@ -123,12 +156,42 @@ export class InventoryPage {
     this.alertsFlyoutRuleTypeName = this.alertsFlyout.getByTestId(
       'ruleDefinitionHeaderRuleTypeName'
     );
+    this.alertsFlyoutDetailsStep = this.alertsFlyout.getByRole('button', { name: 'Details' });
+    this.alertsFlyoutLinkedDashboards = this.alertsFlyout.getByTestId('ruleLinkedDashboards');
+
+    // The "For" and "Schema" expression buttons share the `nodeTypeExpression` test subject.
+    this.ruleFlyoutForExpressionButton = this.alertsFlyout
+      .getByTestId('nodeTypeExpression')
+      .filter({ hasText: 'For' });
+    this.ruleFlyoutSchemaExpressionButton = this.alertsFlyout
+      .getByTestId('nodeTypeExpression')
+      .filter({ hasText: 'Schema' });
+    // The expression popovers render in a portal, outside the flyout dialog.
+    this.ruleFlyoutNodeTypeSelect = this.page.getByTestId('forExpressionSelect');
+    this.ruleFlyoutSchemaSelect = this.page.getByTestId('schemaExpressionSelect');
+    this.ruleFlyoutThresholdButton = this.alertsFlyout.getByTestId('thresholdPopover');
+    this.ruleFlyoutThresholdInput = this.page.getByTestId('alertThresholdInput0');
+    this.ruleFlyoutThresholdCloseButton = this.page.getByTestId('closablePopoverTitleButton');
+    this.ruleFlyoutNameInput = this.alertsFlyout.getByTestId('ruleDetailsNameInput');
+    this.ruleFlyoutSaveButton = this.alertsFlyout.getByTestId('ruleFlyoutFooterSaveButton');
+    this.ruleFlyoutConfirmCreateButton = this.page
+      .getByTestId('confirmCreateRuleModal')
+      .getByTestId('confirmModalConfirmButton');
   }
 
   public async waitForNodesToLoad() {
     await this.page
       .getByTestId('infraNodesOverviewLoadingPanel')
       .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
+  }
+
+  /**
+   * Waits for the snapshot "Loading data" panel (`infraNodesOverviewLoadingPanel`) to finish,
+   * then for the onboarding empty state (`kbnNoDataPage`).
+   */
+  public async waitForOnboardingNoDataPage() {
+    await this.waitForNodesToLoad();
+    await this.noDataPage.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   private async waitForPageToLoad() {
@@ -141,6 +204,7 @@ export class InventoryPage {
     await this.page.goto(`${this.kbnUrl.app('metrics')}/inventory`);
     if (!opts.skipLoadWait) {
       await this.waitForPageToLoad();
+      await this.waitForNodesToLoad();
     }
   }
 
@@ -222,20 +286,13 @@ export class InventoryPage {
     );
   }
 
-  public async addDismissK8sToastInitScript() {
-    // Dismiss k8s tour if it's present to avoid interference with other test assertions
-    await this.page.addInitScript(
-      ([k8sToastStorageKey]) => {
-        window.localStorage.setItem(k8sToastStorageKey, 'true');
-      },
-      [KUBERNETES_TOAST_STORAGE_KEY]
-    );
-  }
-
   public async goToTime(time: string) {
+    await this.datePickerInput.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await this.datePickerInput.fill(time);
-    await this.datePickerInput.press('Escape');
+    await this.datePickerInput.press('Enter', { delay: 50 });
+    await this.datePickerInput.press('Escape', { delay: 50 });
     await this.waitForNodesToLoad();
+    await this.waitForPageToLoad();
   }
 
   public async getWaffleNode(nodeName: string) {
@@ -246,6 +303,29 @@ export class InventoryPage {
       name: container.getByTestId('nodeName'),
       value: container.getByTestId('nodeValue'),
     };
+  }
+
+  /** Exact tile name. `pod-0` must not match `semconv-pod-0`. */
+  public async podWaffleNodeByName(podName: string) {
+    const container = this.waffleMap.getByTestId('nodeContainer').filter({
+      has: this.page.getByTestId('nodeName').getByText(podName, { exact: true }),
+    });
+
+    return {
+      container,
+      name: container.getByTestId('nodeName'),
+      value: container.getByTestId('nodeValue'),
+    };
+  }
+
+  public async selectGroupBy(field: string) {
+    await this.waffleGroupByDropdown.click();
+    await this.groupByContextMenu.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    // EuiContextMenu assigns role="menuitem" to panel items (not button).
+    await this.groupByContextMenu
+      .getByRole('menuitem', { name: field, exact: true })
+      .click({ timeout: EXTENDED_TIMEOUT });
+    await this.waitForNodesToLoad();
   }
 
   public async clickWaffleNode(nodeName: string) {
@@ -277,8 +357,12 @@ export class InventoryPage {
 
   public async filterByQueryBar(query: string) {
     const queryBar = this.page.getByTestId('queryInput');
+    await queryBar.waitFor();
     await queryBar.clear();
+    await expect(queryBar).toHaveValue('');
     await queryBar.fill(query);
+    await expect(queryBar).toHaveValue(query);
+    await queryBar.press('Escape');
     await queryBar.press('Enter');
     await this.waitForNodesToLoad();
   }
@@ -297,7 +381,80 @@ export class InventoryPage {
 
   public async selectMetric(metricName: string) {
     await this.metricSwitcherButton.click();
-    await this.metricsContextMenu.getByRole('button', { name: metricName }).click();
+    await this.metricsContextMenu.getByRole('menuitem', { name: metricName }).click();
     await this.waitForNodesToLoad();
+  }
+
+  public async selectSchema(schema: 'OpenTelemetry' | string) {
+    await this.schemaSelect.click();
+    await this.page.getByRole('option', { name: schema }).waitFor();
+    await this.page.getByRole('option', { name: schema }).click();
+    // Wait for the control to reflect the selection before callers assert URL/tiles.
+    await this.schemaSelect
+      .filter({ hasText: schema })
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await this.waitForNodesToLoad();
+  }
+
+  public async openInventoryRuleFlyout() {
+    await this.alertsHeaderButton.click();
+    await this.inventoryAlertsMenuOption.click();
+    await this.createInventoryRuleButton.click();
+    await this.alertsFlyout.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
+  /**
+   * Opens the inventory rule flyout from a waffle pod tile: click the tile, then
+   * "Create inventory rule" in the resulting Kubernetes Pod details context menu.
+   */
+  public async openInventoryRuleFlyoutFromPodWaffleNode(podName: string) {
+    const pod = await this.podWaffleNodeByName(podName);
+    await pod.container.click();
+    await this.k8sPodWaffleContextMenu.waitFor({
+      state: 'visible',
+      timeout: EXTENDED_TIMEOUT,
+    });
+    await this.k8sPodWaffleContextMenu
+      .getByRole('button', { name: 'Create inventory rule' })
+      .click();
+    await this.alertsFlyout.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
+  /** Picks a node type in the rule flyout "For" expression; the popover closes on selection. */
+  public async selectRuleNodeType(nodeType: 'host' | 'pod' | 'container') {
+    await this.ruleFlyoutForExpressionButton.click();
+    await this.ruleFlyoutNodeTypeSelect.selectOption(nodeType);
+  }
+
+  /** Picks a schema in the rule flyout "Schema" expression; the popover closes on selection. */
+  public async selectRuleSchema(schema: 'ecs' | 'semconv') {
+    await this.ruleFlyoutSchemaExpressionButton.click();
+    await this.ruleFlyoutSchemaSelect.selectOption(schema);
+  }
+
+  /** Fills the first condition threshold, which the rule form requires before it can be saved. */
+  public async setRuleThreshold(threshold: number) {
+    await this.ruleFlyoutThresholdButton.click();
+    await this.ruleFlyoutThresholdInput.fill(String(threshold));
+    // The expression button only opens the popover, so close it from its own title
+    // to stop it overlaying the flyout steps and footer.
+    await this.ruleFlyoutThresholdCloseButton.click();
+    await this.ruleFlyoutThresholdInput.waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
+  }
+
+  /** Names the rule on the "Details" step and saves it, confirming the no-actions dialog. */
+  public async saveRule(name: string) {
+    await this.alertsFlyoutDetailsStep.click();
+    await this.ruleFlyoutNameInput.fill(name);
+    await this.ruleFlyoutSaveButton.click();
+    await this.ruleFlyoutConfirmCreateButton.click();
+    await this.alertsFlyout.waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
+  }
+
+  public async openMetricsThresholdRuleFlyout() {
+    await this.alertsHeaderButton.click();
+    await this.metricsAlertsMenuOption.click();
+    await this.createMetricsThresholdRuleButton.click();
+    await this.alertsFlyout.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 }

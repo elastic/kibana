@@ -156,7 +156,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
 
     this._changes.processing = computeChange({
       isExistingStream,
-      hasMeaningfulValue: (this._definition.ingest.processing.steps || []).length > 0,
+      hasMeaningfulValue: getProcessingItemCount(this._definition.ingest.processing) > 0,
       hasChanged: () =>
         !_.isEqual(
           _.omit(this._definition.ingest.processing, ['updated_at']),
@@ -346,7 +346,10 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     validateBracketsInFieldNames(this._definition);
 
     // Validate Streamlang processing
-    if (this._definition.ingest.processing.steps.length > 0) {
+    if (
+      !isNativeProcessing(this._definition.ingest.processing) &&
+      this._definition.ingest.processing.steps.length > 0
+    ) {
       const validationResult = validateStreamlang(this._definition.ingest.processing, {
         reservedFields: [],
         streamType: 'classic',
@@ -406,8 +409,13 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
   // These actions are merged across ClassicStream instances as part of ExecutionPlan.plan()
   // This is to enable us to clean up any pipeline Streams creates when it is no longer needed
   protected async doDetermineCreateActions(): Promise<ElasticsearchAction[]> {
+    const dataStream = await this.fetchDataStream();
+    if (dataStream?.replicated === true) {
+      return this.elasticsearchActionsForReplicatedFollower();
+    }
+
     const actions: ElasticsearchAction[] = [];
-    if (this._definition.ingest.processing.steps.length > 0) {
+    if (getProcessingItemCount(this._definition.ingest.processing) > 0) {
       actions.push(...(await this.createUpsertPipelineActions()));
     }
     if (!isInheritLifecycle(this.getLifecycle())) {
@@ -487,12 +495,23 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     startingState: State,
     startingStateStream: ClassicStream
   ): Promise<ElasticsearchAction[]> {
+    const dataStream = await this.fetchDataStream();
+    if (dataStream?.replicated === true) {
+      return this.elasticsearchActionsForReplicatedFollower();
+    }
+
     const actions: ElasticsearchAction[] = [];
-    if (this._changes.processing && this._definition.ingest.processing.steps.length > 0) {
+    if (
+      this._changes.processing &&
+      getProcessingItemCount(this._definition.ingest.processing) > 0
+    ) {
       actions.push(...(await this.createUpsertPipelineActions()));
     }
 
-    if (this._changes.processing && this._definition.ingest.processing.steps.length === 0) {
+    if (
+      this._changes.processing &&
+      getProcessingItemCount(this._definition.ingest.processing) === 0
+    ) {
       const streamManagedPipelineName = getProcessingPipelineName(this._definition.name);
       actions.push({
         type: 'delete_ingest_pipeline',
@@ -566,7 +585,12 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       const mappings = getClassicFieldOverrideMappings(
         this._definition.ingest.classic.field_overrides
       );
-      if (mappings) {
+      const previousMappings = getClassicFieldOverrideMappings(
+        startingStateStream.definition.ingest.classic.field_overrides
+      );
+      // Only write or reset when Streams previously wrote an override, or is
+      // writing one now. undefined -> {} must stay a no-op.
+      if (mappings || previousMappings) {
         actions.push({
           type: 'update_data_stream_mappings',
           request: {
@@ -665,7 +689,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       },
     ];
 
-    if (this._definition.ingest.processing.steps.length > 0) {
+    if (getProcessingItemCount(this._definition.ingest.processing) > 0) {
       const streamManagedPipelineName = getProcessingPipelineName(this._definition.name);
       actions.push({
         type: 'delete_ingest_pipeline',
@@ -696,6 +720,20 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     if (!dataStream) {
       return undefined;
     }
+    if (dataStream.replicated === true) {
+      if (!useFallbackName) {
+        return undefined;
+      }
+      const template = dataStream.template;
+      if (typeof template !== 'string' || template.length === 0) {
+        return undefined;
+      }
+      return {
+        pipeline: `${template}-pipeline`,
+        template,
+      };
+    }
+
     const unmanagedAssets = await getUnmanagedElasticsearchAssets({
       dataStream,
       esClient: this.dependencies.esClient,
@@ -720,12 +758,35 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     };
   }
 
+  private elasticsearchActionsForReplicatedFollower(): ElasticsearchAction[] {
+    const esLevelChanges =
+      this._changes.processing ||
+      this._changes.lifecycle ||
+      this._changes.failure_store ||
+      this._changes.settings ||
+      this._changes.field_overrides;
+
+    if (esLevelChanges) {
+      throw new StatusError(
+        'Cannot apply Elasticsearch-level changes to a replicated data stream',
+        422
+      );
+    }
+
+    return [
+      {
+        type: 'upsert_dot_streams_document',
+        request: this._definition,
+      },
+    ];
+  }
+
   private async getEffectiveSettings() {
     if (!this._effectiveSettings) {
       // Replicated data streams have no local index template and the
       // getDataStreamSettings ES API returns HTTP 400, so return empty settings.
       const dataStream = await this.fetchDataStream();
-      if (dataStream?.replicated) {
+      if (dataStream?.replicated === true) {
         this._effectiveSettings = {};
         return this._effectiveSettings;
       }
@@ -738,3 +799,18 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     return this._effectiveSettings;
   }
 }
+
+const isNativeProcessing = (
+  processing: Streams.ClassicStream.Definition['ingest']['processing']
+): processing is Extract<
+  Streams.ClassicStream.Definition['ingest']['processing'],
+  { processors: unknown[] }
+> => {
+  return 'processors' in processing;
+};
+
+const getProcessingItemCount = (
+  processing: Streams.ClassicStream.Definition['ingest']['processing']
+) => {
+  return isNativeProcessing(processing) ? processing.processors.length : processing.steps.length;
+};

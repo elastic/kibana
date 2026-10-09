@@ -6,13 +6,12 @@
  */
 
 import React, { useMemo, useCallback, useState } from 'react';
-import { EuiLoadingSpinner, EuiSpacer, EuiSearchBar } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiLiveAnnouncer, EuiSpacer, EuiSearchBar } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import type { ToolSelection, ToolDefinition } from '@kbn/agent-builder-common';
-import {
-  filterToolsBySelection,
-  activeToolsCountWarningThreshold,
-} from '@kbn/agent-builder-common';
-import { toggleToolSelection } from '../../../utils/tool_selection_utils';
+import { activeToolsCountWarningThreshold, defaultAgentToolIds } from '@kbn/agent-builder-common';
+import { getActiveTools, toggleToolSelection } from '../../../utils/tool_selection_utils';
 import { ActiveToolsStatus } from './active_tools_status';
 import { ToolsSearchControls } from './tools_search_controls';
 import { ToolsFlatView } from './tools_flat_view';
@@ -25,6 +24,7 @@ interface ToolsSelectionProps {
   disabled?: boolean;
   showActiveOnly?: boolean;
   onShowActiveOnlyChange?: (showActiveOnly: boolean) => void;
+  areElasticCapabilitiesEnabled?: boolean;
 }
 
 export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
@@ -35,24 +35,27 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   disabled = false,
   showActiveOnly = false,
   onShowActiveOnlyChange,
+  areElasticCapabilitiesEnabled = false,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
+  const defaultToolIdSet = useMemo(() => new Set<string>(defaultAgentToolIds), []);
+
+  const activeTools = useMemo(
+    () => getActiveTools(tools, selectedTools, areElasticCapabilitiesEnabled, defaultToolIdSet),
+    [tools, selectedTools, areElasticCapabilitiesEnabled, defaultToolIdSet]
+  );
+
+  const activeToolIdSet = useMemo(() => new Set(activeTools.map((t) => t.id)), [activeTools]);
+
   const displayTools = useMemo(() => {
-    let result = tools;
-
     if (showActiveOnly) {
-      result = tools.filter((tool) => {
-        return selectedTools.some((selection) => {
-          return selection.tool_ids.includes(tool.id) || selection.tool_ids.includes('*');
-        });
-      });
+      return tools.filter((tool) => activeToolIdSet.has(tool.id));
     }
-
-    return result;
-  }, [tools, showActiveOnly, selectedTools]);
+    return tools;
+  }, [tools, showActiveOnly, activeToolIdSet]);
 
   const filteredTools = useMemo(() => {
     if (!searchQuery) {
@@ -64,16 +67,27 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
     });
   }, [searchQuery, displayTools]);
 
-  const activeToolsCount = useMemo(() => {
-    return filterToolsBySelection(tools, selectedTools).length;
-  }, [tools, selectedTools]);
+  const activeToolsCount = activeTools.length;
+
+  const [liveAnnouncement, setLiveAnnouncement] = useState('');
+
+  // only announce when the table actually reloads in response to user input, not on first mount.
+  useUpdateEffect(() => {
+    setLiveAnnouncement(
+      i18n.translate('xpack.agentBuilder.tools.tableUpdatedAnnouncement', {
+        defaultMessage: 'Table updated. Showing {count, plural, one {# tool} other {# tools}}.',
+        values: { count: filteredTools.length },
+      })
+    );
+  }, [filteredTools]);
 
   const handleToggleTool = useCallback(
     (toolId: string) => {
+      if (areElasticCapabilitiesEnabled && defaultToolIdSet.has(toolId)) return;
       const newSelection = toggleToolSelection(toolId, tools, selectedTools);
       onToolsChange(newSelection);
     },
-    [selectedTools, onToolsChange, tools]
+    [selectedTools, onToolsChange, tools, areElasticCapabilitiesEnabled, defaultToolIdSet]
   );
 
   const handleSearchChange = useCallback((query: string) => {
@@ -96,6 +110,8 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
 
   return (
     <div>
+      <EuiLiveAnnouncer>{liveAnnouncement}</EuiLiveAnnouncer>
+
       <ActiveToolsStatus
         activeToolsCount={activeToolsCount}
         warningThreshold={activeToolsCountWarningThreshold}
@@ -123,6 +139,8 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
         onPageChange={handlePageChange}
         pageSize={pageSize}
         onPageSizeChange={handlePageSizeChange}
+        areElasticCapabilitiesEnabled={areElasticCapabilitiesEnabled}
+        defaultToolIdSet={defaultToolIdSet}
       />
     </div>
   );

@@ -34,6 +34,7 @@ const log = new ToolingLog({
 });
 
 let doc: PluginApi;
+let pluginBDoc: PluginApi;
 let mdxOutputFolder: string;
 let pluginAStats: ApiStats;
 let pluginBStats: ApiStats;
@@ -128,6 +129,7 @@ beforeAll(async () => {
   } = getPluginApiMap(project, plugins, plugins, log, { collectReferences: false });
 
   doc = pluginApiMap.pluginA;
+  pluginBDoc = pluginApiMap.pluginB;
 
   pluginAStats = collectApiStatsForPlugin(doc, {
     missingApiItems,
@@ -192,6 +194,19 @@ it('Stats', () => {
   // Type "imAnAny"
   expect(pluginAStats.isAnyType.length).toBe(1);
   expect(pluginBStats.isAnyType.length).toBe(0);
+});
+
+it('pluginB keeps external referenced params in missingComments', () => {
+  const fn = pluginBDoc.client.find((c) => c.label === 'anIdFun');
+  expect(fn).toBeDefined();
+
+  const depParam = fn!.children?.find((c) => c.label === 'dep');
+  expect(depParam).toBeDefined();
+  expect(depParam!.docsReferencedTypeName).toBe('AnotherInterface');
+
+  expect(pluginBStats.missingComments.map(({ id }) => id)).toEqual(
+    expect.arrayContaining([fn!.id, depParam!.id])
+  );
 });
 
 it('Setup type is extracted', () => {
@@ -847,7 +862,7 @@ describe('validation and stats', () => {
       expect(searchSpecParam!.children!.length).toBe(2); // username and password
     });
 
-    it('validates missing property-level comments on inline object parameters', () => {
+    it('flags missing property-level comments on inline object parameter children', () => {
       const grouped = groupPluginApi(doc.client);
       const setup = grouped.setup;
       expect(setup).toBeDefined();
@@ -861,20 +876,10 @@ describe('validation and stats', () => {
       const usernameProp = searchSpecParam!.children?.find((c) => c.label === 'username');
       expect(usernameProp).toBeDefined();
 
-      // Current behavior: property without comment is flagged
-      // Note: This is a false positive that will be fixed in Phase 4.2
-      // Verify the property structure exists and check if it's in missingComments
-      expect(usernameProp!.description).toBeDefined();
-      const hasDescription = usernameProp!.description!.length > 0;
+      // Inline object parameter children remain part of the same undocumented shape,
+      // so they should continue to contribute to missingComments.
       const missingComment = pluginAStats.missingComments.find((d) => d.id === usernameProp!.id);
-
-      // If property has no description, it should be in missingComments
-      // If it has a description, it should not be in missingComments
-      if (!hasDescription) {
-        expect(missingComment).toBeDefined();
-      } else {
-        expect(missingComment).toBeUndefined();
-      }
+      expect(missingComment).toBeDefined();
     });
 
     it('validates deeply nested inline object parameters', () => {

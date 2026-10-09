@@ -9,7 +9,7 @@ import type { KibanaRequest, SavedObject } from '@kbn/core/server';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
 import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugin/server';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ScheduleType } from '@kbn/reporting-server';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { EXPORT_TYPE_SCHEDULED } from '@kbn/reporting-common';
@@ -152,7 +152,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
           title,
           filename,
           objectType: scheduledReport.attributes.meta.objectType,
-          date: scheduledReport.attributes.schedule?.rrule?.dtstart,
+          date: runAt.toISOString(),
         } satisfies ScheduledReportTemplateVariables;
         const subject = renderMustacheString(
           this.logger,

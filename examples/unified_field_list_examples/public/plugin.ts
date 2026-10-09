@@ -56,7 +56,6 @@ export class UnifiedFieldListExamplesPlugin
           href: 'https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-unified-field-list/README.md',
           iconType: 'logoGithub',
           target: '_blank',
-          size: 's',
         },
       ],
     });

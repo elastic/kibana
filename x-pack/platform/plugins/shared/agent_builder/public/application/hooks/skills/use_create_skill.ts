@@ -41,7 +41,7 @@ export const useCreateSkillService = ({ onSuccess, onError }: UseCreateSkillServ
     mutationFn: (skill) => skillsService.create(skill),
     onSuccess,
     onError,
-    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.skills.all }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.skills.list }),
   });
 
   return { createSkillSync: mutate, createSkill: mutateAsync, isLoading };
@@ -58,7 +58,7 @@ export const useCreateSkill = ({ onSuccess, onError }: UseCreateSkillProps = {})
   const handleSuccess = useCallback<CreateSkillSuccessCallback>(
     (response, variables, context) => {
       addSuccessToast({
-        title: labels.skills.createSkillSuccessToast(response.id),
+        title: labels.skills.createSkillSuccessToast(response.name),
       });
       onSuccess?.(response, variables, context);
     },

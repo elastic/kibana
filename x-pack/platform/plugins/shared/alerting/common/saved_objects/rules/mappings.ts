@@ -67,6 +67,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         },
         params: {
           type: 'flattened',
+          ignore_above: 4096,
         },
         // NO NEED TO BE INDEXED
         // frequency: {
@@ -139,6 +140,18 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     },
     mutedInstanceIds: {
       type: 'keyword',
+    },
+    snoozedInstances: {
+      type: 'nested',
+      properties: {
+        instanceId: {
+          type: 'keyword',
+        },
+        snoozeSnapshot: {
+          type: 'object',
+          dynamic: false,
+        },
+      },
     },
     // NO NEED TO BE INDEXED
     // meta: {

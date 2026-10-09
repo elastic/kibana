@@ -10,3 +10,5 @@ export { toSpaceIdentifier, isValidSpaceIdentifier } from './space_identifier_ut
 export { SpaceValidator } from './validate_space';
 
 export { sortRolesForListing } from './sort_roles';
+
+export { haveFormValuesChanged } from './form_values';

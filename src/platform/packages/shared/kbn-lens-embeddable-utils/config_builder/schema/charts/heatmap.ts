@@ -7,173 +7,213 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
-
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { z, lazySchema } from '@kbn/zod';
 
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
-import { colorByValueSchema } from '../color';
+import { colorByValueSchema, autoColorSchema, AUTO_COLOR } from '../color';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import {
   sharedPanelInfoSchema,
   layerSettingsSchema,
   dslOnlyPanelInfoSchema,
-  axisTitleSchemaProps,
+  axisTitleSchema,
   legendTruncateAfterLinesSchema,
 } from '../shared';
 import {
   baseLegendVisibilitySchema,
   legendSizeSchema,
-  mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
+  getMetricsWithChartDimensionSchemaWithRefBasedOps,
   xScaleSchema,
 } from './shared';
-import { builderEnums } from '../enums';
+import { orientationSchema } from '../enums';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
-import { objectUnion } from './utils/object_union';
+import { positionSchema } from '../alignments';
 
-const legendSchemaProps = {
-  truncate_after_lines: legendTruncateAfterLinesSchema,
-  visibility: baseLegendVisibilitySchema,
-  size: legendSizeSchema,
-};
-
-const labelsSchemaProps = {
-  visible: schema.maybe(
-    schema.boolean({ defaultValue: true, meta: { description: 'Show axis labels' } })
-  ),
-  orientation: schema.maybe(
-    builderEnums.orientation({
-      defaultValue: 'horizontal',
-      meta: { description: 'Orientation of the axis labels' },
+const legendSchema = lazySchema(() =>
+  z
+    .object({
+      truncate_after_lines: legendTruncateAfterLinesSchema,
+      visibility: baseLegendVisibilitySchema,
+      position: positionSchema.optional(),
+      size: legendSizeSchema,
     })
-  ),
-};
+    .strict()
+);
 
-const simpleLabelsSchema = schema.object(omit(labelsSchemaProps, 'orientation'));
-
-const heatmapSortPredicateSchema = schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-  meta: { description: 'Axis sort order; omit or use undefined for no sorting' },
-});
-
-const heatmapSharedStateSchema = {
-  type: schema.literal('heatmap'),
-  legend: schema.maybe(
-    schema.object(legendSchemaProps, {
-      meta: {
-        id: 'heatmapLegend',
-        title: 'Legend',
-        description: 'Legend configuration',
-      },
+const labelsSchema = lazySchema(() =>
+  z
+    .object({
+      visible: z.boolean().default(true).optional().meta({ description: 'Show axis labels' }),
+      orientation: orientationSchema.default('horizontal').optional().meta({
+        description: 'Orientation of the axis labels',
+      }),
     })
-  ),
-  ...sharedPanelInfoSchema,
-  ...layerSettingsSchema,
-  axes: schema.maybe(
-    schema.object(
-      {
-        x: schema.maybe(
-          schema.object(
-            {
-              title: schema.maybe(schema.object(axisTitleSchemaProps)),
-              labels: schema.maybe(schema.object(labelsSchemaProps)),
-              sort: schema.maybe(heatmapSortPredicateSchema),
-              scale: xScaleSchema,
-            },
-            {
-              meta: {
-                id: 'heatmapXAxis',
-                title: 'X Axis',
-                description: 'X axis configuration',
-              },
-            }
-          )
-        ),
-        y: schema.maybe(
-          schema.object(
-            {
-              title: schema.maybe(schema.object(axisTitleSchemaProps)),
-              labels: schema.maybe(simpleLabelsSchema),
-              sort: schema.maybe(heatmapSortPredicateSchema),
-            },
-            {
-              meta: {
-                id: 'heatmapYAxis',
-                title: 'Y Axis',
-                description: 'Y axis configuration',
-              },
-            }
-          )
-        ),
-      },
-      {
-        meta: {
-          id: 'heatmapAxes',
-          title: 'Axes',
-          description: 'Axis configuration for X and Y axes',
-        },
-      }
-    )
-  ),
-  cells: schema.maybe(
-    schema.object(
-      {
-        labels: schema.maybe(
-          schema.object({
-            visible: schema.maybe(
-              schema.boolean({
-                defaultValue: false,
-                meta: { description: 'Show cell labels' },
-              })
-            ),
-          })
-        ),
-      },
-      { meta: { id: 'heatmapCells', title: 'Cells', description: 'Cells configuration' } }
-    )
-  ),
-};
+    .strict()
+);
 
-const heatmapAxesStateSchemaProps = {
+const simpleLabelsSchema = lazySchema(() => labelsSchema.omit({ orientation: true }));
+
+const heatmapSortPredicateSchema = lazySchema(() =>
+  z
+    .union([z.literal('asc'), z.literal('desc')])
+    .meta({ description: 'Axis sort order; omit or use undefined for no sorting' })
+);
+
+const visHeatmapCellsSchema = lazySchema(() =>
+  z
+    .object({
+      labels: z
+        .object({
+          visible: z.boolean().default(false).optional().meta({ description: 'Show cell labels' }),
+        })
+        .strict()
+        .optional(),
+    })
+    .strict()
+    .optional()
+    .meta({ id: 'visHeatmapCells', title: 'Cells', description: 'Cells configuration' })
+);
+
+const heatmapStylingSchema = lazySchema(() =>
+  z
+    .object({
+      cells: visHeatmapCellsSchema,
+    })
+    .strict()
+    .meta({
+      id: 'visHeatmapStyling',
+      title: 'Heatmap styling',
+      description: 'Visual chart styling options',
+    })
+);
+
+const visHeatmapLegendSchema = lazySchema(() =>
+  legendSchema.optional().meta({
+    id: 'visHeatmapLegend',
+    title: 'Legend',
+    description: 'Legend configuration',
+  })
+);
+
+const visHeatmapXAxisSchema = lazySchema(() =>
+  z
+    .object({
+      title: axisTitleSchema.optional(),
+      labels: labelsSchema.optional(),
+      sort: heatmapSortPredicateSchema.optional(),
+      scale: xScaleSchema,
+    })
+    .strict()
+    .optional()
+    .meta({
+      id: 'visHeatmapXAxis',
+      title: 'X Axis',
+      description: 'X axis configuration',
+    })
+);
+
+const visHeatmapYAxisSchema = lazySchema(() =>
+  z
+    .object({
+      title: axisTitleSchema.optional(),
+      labels: simpleLabelsSchema.optional(),
+      sort: heatmapSortPredicateSchema.optional(),
+    })
+    .strict()
+    .optional()
+    .meta({
+      id: 'visHeatmapYAxis',
+      title: 'Y Axis',
+      description: 'Y axis configuration',
+    })
+);
+
+const visHeatmapAxesSchema = lazySchema(() =>
+  z
+    .object({
+      x: visHeatmapXAxisSchema,
+      y: visHeatmapYAxisSchema,
+    })
+    .strict()
+    .optional()
+    .meta({
+      id: 'visHeatmapAxes',
+      title: 'Axes',
+      description: 'Axis configuration for X and Y axes',
+    })
+);
+
+const heatmapSharedConfigSchema = lazySchema(() =>
+  z.object({
+    type: z.literal('heatmap'),
+    legend: visHeatmapLegendSchema,
+    ...sharedPanelInfoSchema.shape,
+    ...layerSettingsSchema.shape,
+    axis: visHeatmapAxesSchema,
+  })
+);
+
+const heatmapAxesConfigShape = {
   x: bucketOperationDefinitionSchema,
-  y: schema.maybe(bucketOperationDefinitionSchema),
+  y: bucketOperationDefinitionSchema.optional(),
 };
 
-const heatmapAxesStateESQLSchemaProps = {
+const heatmapAxesConfigESQLShape = {
   x: esqlColumnWithFormatSchema,
-  y: schema.maybe(esqlColumnWithFormatSchema),
+  y: esqlColumnWithFormatSchema.optional(),
 };
 
-const heatmapStateMetricOptionsSchemaProps = {
-  color: schema.maybe(colorByValueSchema),
+const heatmapConfigMetricOptionsShape = {
+  color: z
+    .union([colorByValueSchema, autoColorSchema])
+    .default(AUTO_COLOR)
+    .optional()
+    .meta({ description: 'Color scale configuration for the heatmap cells.' }),
 };
 
-export const heatmapStateSchemaNoESQL = schema.object(
-  {
-    ...heatmapSharedStateSchema,
-    ...heatmapAxesStateSchemaProps,
-    ...dslOnlyPanelInfoSchema,
-    ...dataSourceSchema,
-    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-      heatmapStateMetricOptionsSchemaProps
-    ),
-  },
-  { meta: { id: 'heatmapNoESQL', title: 'Heatmap Chart (DSL)' } }
+export const heatmapConfigSchemaNoESQL = lazySchema(() =>
+  heatmapSharedConfigSchema
+    .extend({
+      ...heatmapAxesConfigShape,
+      ...dslOnlyPanelInfoSchema.shape,
+      ...dataSourceSchema.shape,
+      styling: heatmapStylingSchema.optional(),
+      metric: getMetricsWithChartDimensionSchemaWithRefBasedOps('heatmapMetric').and(
+        z.object(heatmapConfigMetricOptionsShape)
+      ),
+    })
+    .meta({
+      id: 'visHeatmapNoESQL',
+      title: 'Heatmap Chart (DSL)',
+      description: 'Heatmap configuration using a data view.',
+    })
 );
 
-export const heatmapStateSchemaESQL = schema.object(
-  {
-    ...heatmapSharedStateSchema,
-    ...heatmapAxesStateESQLSchemaProps,
-    ...dataSourceEsqlTableSchema,
-    metric: esqlColumnWithFormatSchema.extends(heatmapStateMetricOptionsSchemaProps),
-  },
-  { meta: { id: 'heatmapESQL', title: 'Heatmap Chart (ES|QL)' } }
+export const heatmapConfigSchemaESQL = lazySchema(() =>
+  heatmapSharedConfigSchema
+    .extend({
+      ...heatmapAxesConfigESQLShape,
+      ...dataSourceEsqlTableSchema.shape,
+      styling: heatmapStylingSchema.optional(),
+      metric: esqlColumnWithFormatSchema.extend(heatmapConfigMetricOptionsShape),
+    })
+    .meta({
+      id: 'visHeatmapESQL',
+      title: 'Heatmap Chart (ES|QL)',
+      description: 'Heatmap configuration using an ES|QL query.',
+    })
 );
 
-export const heatmapStateSchema = objectUnion([heatmapStateSchemaNoESQL, heatmapStateSchemaESQL], {
-  meta: { id: 'heatmapChart', title: 'Heatmap Chart' },
-});
+export const heatmapConfigSchema = lazySchema(() =>
+  z.union([heatmapConfigSchemaNoESQL, heatmapConfigSchemaESQL]).meta({
+    id: 'visHeatmapChart',
+    title: 'Heatmap Chart',
+    description:
+      'A grid of colored cells where color intensity represents the metric value at each X/Y intersection.',
+  })
+);
 
-export type HeatmapState = TypeOf<typeof heatmapStateSchema>;
-export type HeatmapStateNoESQL = TypeOf<typeof heatmapStateSchemaNoESQL>;
-export type HeatmapStateESQL = TypeOf<typeof heatmapStateSchemaESQL>;
+export type HeatmapConfig = z.output<typeof heatmapConfigSchema>;
+export type HeatmapConfigInput = z.input<typeof heatmapConfigSchema>;
+export type HeatmapConfigNoESQL = z.output<typeof heatmapConfigSchemaNoESQL>;
+export type HeatmapConfigESQL = z.output<typeof heatmapConfigSchemaESQL>;

@@ -23,6 +23,10 @@ export const KIBANA_SEARCH_SOLUTION = 'search' as const;
  * Constant for the Kibana Workplace AI solution.
  */
 export const KIBANA_WORKPLACE_AI_SOLUTION = 'workplaceai' as const;
+/**
+ * Constant for the Kibana Vectordb solution.
+ */
+export const KIBANA_VECTORDB_SOLUTION = 'vectordb' as const;
 
 /**
  * A list of all Kibana solutions.
@@ -32,6 +36,7 @@ export const KIBANA_SOLUTIONS = [
   KIBANA_SECURITY_SOLUTION,
   KIBANA_SEARCH_SOLUTION,
   KIBANA_WORKPLACE_AI_SOLUTION,
+  KIBANA_VECTORDB_SOLUTION,
 ] as const; // BOOKMARK - List of Kibana solutions
 
 /**
@@ -75,6 +80,7 @@ export const KIBANA_PRODUCT_TIERS = {
   ] as const,
   [KIBANA_SEARCH_SOLUTION]: [] as const,
   [KIBANA_WORKPLACE_AI_SOLUTION]: [] as const,
+  [KIBANA_VECTORDB_SOLUTION]: [] as const,
 } as const;
 
 /**

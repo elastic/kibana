@@ -5,20 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const NoPermissionPrompt = () => (
+interface NoPermissionPromptProps {
+  /** Overrides the default "No permissions to read rules and alerts" title. */
+  title?: ReactNode;
+}
+
+export const NoPermissionPrompt = ({ title }: NoPermissionPromptProps = {}) => (
   <EuiPageTemplate.EmptyPrompt
     data-test-subj="noPermissionPrompt"
     iconType="securityApp"
     title={
       <h1>
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.rulesList.noPermissionToReadTitle"
-          defaultMessage="No permissions to read rules and alerts"
-        />
+        {title ?? (
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.rulesList.noPermissionToReadTitle"
+            defaultMessage="No permissions to read rules and alerts"
+          />
+        )}
       </h1>
     }
     body={

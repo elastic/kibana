@@ -43,25 +43,6 @@ export class UiActionsService {
     return trigger;
   };
 
-  /**
-   * @deprecated
-   *
-   * Use `plugins.uiActions.registerActionAsync` instead.
-   */
-  public readonly registerAction = <Context extends object>(
-    definition: ActionDefinition<Context>
-  ): Action<Context> => {
-    if (this.actions.has(definition.id)) {
-      throw new Error(`Action [action.id = ${definition.id}] already registered.`);
-    }
-
-    const action = new ActionInternal(definition);
-
-    this.actions.set(action.id, async () => action as unknown as ActionInternal<object>);
-
-    return action;
-  };
-
   public readonly registerActionAsync = <Context extends object>(
     id: string,
     getDefinition: () => Promise<ActionDefinition<Context>>
@@ -122,17 +103,7 @@ export class UiActionsService {
   };
 
   /**
-   * @deprecated
-   *
-   * Use `plugins.uiActions.addTriggerActionAsync` instead.
-   */
-  public readonly addTriggerAction = (triggerId: string, action: ActionDefinition<any>): void => {
-    if (!this.actions.has(action.id)) this.registerAction(action);
-    this.attachAction(triggerId, action.id);
-  };
-
-  /**
-   * `addTriggerAction` is similar to `attachAction` as it attaches action to a
+   * `addTriggerActionAsync` is similar to `attachAction` as it attaches action to a
    * trigger, but it also registers the action, if it has not been registered, yet.
    */
   public readonly addTriggerActionAsync = (

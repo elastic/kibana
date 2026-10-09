@@ -24,12 +24,22 @@ describe('createAutomaticTroubleshootingSkill', () => {
 
       expect(skill).toBeDefined();
       expect(skill.id).toBe('automatic_troubleshooting');
-      expect(skill.name).toBe('elastic_defend_configuration_troubleshooting');
+      expect(skill.name).toBe('elastic-defend-configuration-troubleshooting');
       expect(skill.basePath).toBe('skills/security/endpoint');
       expect(skill.description).toContain(
-        'Troubleshoot Elastic Defend endpoint configuration issues'
+        'observed Elastic Defend endpoint behavior and operational outcomes'
       );
       expect(skill.content).toContain('Elastic Defend Configuration Troubleshooting');
+    });
+
+    it('claims endpoint diagnosis intents near the start of the description', () => {
+      const skill = createAutomaticTroubleshootingSkill(mockEndpointAppContextService);
+      const description = skill.description ?? '';
+
+      expect(description.slice(0, 400)).toMatch(/offline.*unhealthy|unhealthy.*offline/is);
+      expect(description).toMatch(/missing or not reporting/i);
+      expect(description).toMatch(/isolation or release failed|response action .* failed/is);
+      expect(description.length).toBeLessThanOrEqual(1024);
     });
 
     it('includes available indices in referenced content', () => {
@@ -50,7 +60,19 @@ describe('createAutomaticTroubleshootingSkill', () => {
       expect(skill.content).toContain('Available Indices');
       expect(skill.content).toContain('Troubleshooting Tools');
       expect(skill.content).toContain('Troubleshooting Approach');
+      expect(skill.content).toContain('Scoped investigation framework');
+      expect(skill.content).toContain('Example integration knowledge queries');
       expect(skill.content).toContain('Constraints');
+    });
+
+    it('documents every scoped-investigation classification the framework branches on', () => {
+      const skill = createAutomaticTroubleshootingSkill(mockEndpointAppContextService);
+
+      expect(skill.content).toContain('CURRENTLY_HEALTHY');
+      expect(skill.content).toContain('CURRENT_POLICY_FAILURE');
+      expect(skill.content).toContain('RECOVERED_POLICY_FAILURE');
+      expect(skill.content).toContain('NON_POLICY_HEALTH_FAILURE');
+      expect(skill.content).toContain('OTHER_CURRENT_ISSUE');
     });
   });
 
@@ -69,13 +91,13 @@ describe('createAutomaticTroubleshootingSkill', () => {
   });
 
   describe('getInlineTools', () => {
-    it('returns two inline tools', () => {
+    it('returns four inline tools', () => {
       const skill = createAutomaticTroubleshootingSkill(mockEndpointAppContextService);
 
       const inlineTools = skill.getInlineTools?.();
 
       expect(inlineTools).toBeDefined();
-      expect(inlineTools).toHaveLength(2);
+      expect(inlineTools).toHaveLength(4);
     });
 
     it('includes get_package_configurations tool', async () => {

@@ -34,6 +34,9 @@ export const createMarkdownAction = (): ActionDefinition<EmbeddableApiContext> =
         panelType: MARKDOWN_EMBEDDABLE_TYPE,
         serializedState: {
           content: '',
+          settings: {
+            open_links_in_new_tab: true,
+          },
         },
       },
       { displaySuccessMessage: true }

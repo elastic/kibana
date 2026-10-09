@@ -19,3 +19,4 @@ export { useTruncateText } from './src/use_truncate_text';
 export { useResizeChecker } from './src/use_resize_checker';
 export type { UseAbortableAsync, AbortableAsyncState } from './src/use_abortable_async';
 export type { UseBooleanHandlers, UseBooleanResult } from './src/use_boolean';
+export { useStableCallback } from './src/use_stable_callback';

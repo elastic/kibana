@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { render, screen, renderHook, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, renderHook, waitFor } from '@testing-library/react';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type { WorkflowListItemDto } from '@kbn/workflows';
+import type { RunWorkflowPanelProps } from '@kbn/workflows-ui';
 import {
-  DocumentWorkflowsPanel,
   useRunDocumentWorkflowPanel,
   RUN_DOCUMENT_WORKFLOW_PANEL_ID,
   type DocumentTableContextMenuItem,
@@ -20,6 +20,23 @@ import {
 import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import * as i18n from '../translations';
+
+const mockCaseRunWorkflow = jest.fn();
+const OUTSIDE_CASE_RUN_PROPS = {
+  runWorkflow: undefined,
+  showSuccessToast: true,
+};
+const CASES_ROUTED_RUN_PROPS = {
+  runWorkflow: mockCaseRunWorkflow,
+  showSuccessToast: false,
+};
+const mockUseCaseAttachmentWorkflowRun = jest.fn();
+const mockUseCaseAttachmentWorkflowRouting = jest.fn();
+
+jest.mock('@kbn/cases-plugin/public', () => ({
+  useCaseAttachmentWorkflowRun: (params: unknown) => mockUseCaseAttachmentWorkflowRun(params),
+  useCaseAttachmentWorkflowRouting: () => mockUseCaseAttachmentWorkflowRouting(),
+}));
 
 const mockMutate = jest.fn();
 const mockUseRunWorkflow = jest.fn(() => ({ mutate: mockMutate }));
@@ -33,6 +50,7 @@ const mockUseWorkflowsCapabilities = jest.fn(() => ({
   canCancelWorkflowExecution: true,
 }));
 const mockUseWorkflowsUIEnabledSetting = jest.fn(() => true);
+const mockRunWorkflowPanelProps: RunWorkflowPanelProps[] = [];
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
@@ -42,6 +60,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 });
 jest.mock('@kbn/workflows-ui', () => ({
   useRunWorkflow: () => mockUseRunWorkflow(),
+  useWorkflows: () => ({ data: { results: [] } }),
   useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
   useWorkflowsUIEnabledSetting: () => mockUseWorkflowsUIEnabledSetting(),
   WorkflowSelector: ({ onWorkflowChange }: { onWorkflowChange: (id: string) => void }) => (
@@ -56,6 +75,20 @@ jest.mock('@kbn/workflows-ui', () => ({
       </button>
     </div>
   ),
+  // RunWorkflowPanel now lives in @kbn/workflows-ui.
+  // Its full behavior is tested in src/platform/packages/shared/kbn-workflows-ui.
+  // This stub captures caller-owned inputs and sorting.
+  RunWorkflowPanel: (props: RunWorkflowPanelProps) => {
+    mockRunWorkflowPanelProps.push(props);
+    return (
+      <div>
+        <div data-test-subj="workflow-selector-mock">{'Workflow selector stub'}</div>
+        <button data-test-subj="run-workflow-execute-button" type="button">
+          {'Run workflow'}
+        </button>
+      </div>
+    );
+  },
 }));
 
 const useKibanaMock = jest.requireMock('@kbn/kibana-react-plugin/public').useKibana as jest.Mock;
@@ -70,6 +103,18 @@ const defaultProps: UseRunDocumentWorkflowPanelProps = {
     },
   ],
 };
+
+const createMockWorkflow = (id: string, triggerType: 'alert' | 'manual'): WorkflowListItemDto => ({
+  id,
+  name: id,
+  description: '',
+  enabled: true,
+  valid: true,
+  createdAt: '',
+  definition: {
+    triggers: [{ type: triggerType }],
+  } as WorkflowListItemDto['definition'],
+});
 
 const createMockKibana = (
   overrides: {
@@ -98,19 +143,23 @@ const renderContextMenu = (
   const panelsToRender = [{ id: 0, items }, ...panels];
   return render(
     <EuiPopover
+      aria-label="Context menu"
       isOpen={true}
       panelPaddingSize="none"
       anchorPosition="downLeft"
       closePopover={() => {}}
       button={<></>}
     >
-      <EuiContextMenu size="s" initialPanelId={panels[0]?.id ?? 1} panels={panelsToRender} />
+      <EuiContextMenu initialPanelId={panels[0]?.id ?? 1} panels={panelsToRender} />
     </EuiPopover>
   );
 };
 
 describe('useRunDocumentWorkflowPanel', () => {
   beforeEach(() => {
+    mockRunWorkflowPanelProps.length = 0;
+    mockUseCaseAttachmentWorkflowRun.mockReturnValue(OUTSIDE_CASE_RUN_PROPS);
+    mockUseCaseAttachmentWorkflowRouting.mockReturnValue('outside');
     mockUseRunWorkflow.mockReturnValue({ mutate: mockMutate });
     mockUseWorkflowsCapabilities.mockReturnValue({
       canCreateWorkflow: true,
@@ -129,6 +178,85 @@ describe('useRunDocumentWorkflowPanel', () => {
     jest.clearAllMocks();
   });
 
+  describe('originEventId and Cases executor', () => {
+    it('calls the generic attachment hook with the event target', async () => {
+      const { result } = renderHook(
+        () => useRunDocumentWorkflowPanel({ ...defaultProps, originEventId: 'event-123' }),
+        { wrapper: TestProviders }
+      );
+      renderContextMenu(
+        result.current.runWorkflowMenuItem,
+        result.current.runDocumentWorkflowPanel
+      );
+      await waitFor(() => {
+        expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith({
+          attachmentType: 'security.event',
+          target: { attachmentId: 'event-123' },
+        });
+      });
+    });
+
+    it('calls the generic attachment hook with a bulk target of the document ids when originEventId is absent', async () => {
+      const { result } = renderHook(
+        () =>
+          useRunDocumentWorkflowPanel({
+            ...defaultProps,
+            documents: [
+              { _id: 'doc-1', _index: 'documents-index' },
+              { _id: 'doc-2', _index: 'documents-index' },
+            ],
+          }),
+        { wrapper: TestProviders }
+      );
+      renderContextMenu(
+        result.current.runWorkflowMenuItem,
+        result.current.runDocumentWorkflowPanel
+      );
+      await waitFor(() => {
+        expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith({
+          attachmentType: 'security.event',
+          target: { attachmentIds: ['doc-1', 'doc-2'] },
+        });
+      });
+    });
+
+    it('passes the Cases executor as runWorkflow when originEventId is set and hook returns an executor', async () => {
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
+      mockUseCaseAttachmentWorkflowRun.mockReturnValue(CASES_ROUTED_RUN_PROPS);
+      const { result } = renderHook(
+        () => useRunDocumentWorkflowPanel({ ...defaultProps, originEventId: 'event-123' }),
+        { wrapper: TestProviders }
+      );
+      renderContextMenu(
+        result.current.runWorkflowMenuItem,
+        result.current.runDocumentWorkflowPanel
+      );
+      await waitFor(() => {
+        expect(mockRunWorkflowPanelProps.length).toBeGreaterThan(0);
+      });
+      const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+      expect(panelProps?.runWorkflow).toBe(mockCaseRunWorkflow);
+      expect(panelProps?.showSuccessToast).toBe(false);
+    });
+
+    it('passes undefined as runWorkflow outside a case', async () => {
+      const { result } = renderHook(
+        () => useRunDocumentWorkflowPanel({ ...defaultProps, originEventId: 'event-123' }),
+        { wrapper: TestProviders }
+      );
+      renderContextMenu(
+        result.current.runWorkflowMenuItem,
+        result.current.runDocumentWorkflowPanel
+      );
+      await waitFor(() => {
+        expect(mockRunWorkflowPanelProps.length).toBeGreaterThan(0);
+      });
+      const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+      expect(panelProps?.runWorkflow).toBeUndefined();
+      expect(panelProps?.showSuccessToast).toBe(true);
+    });
+  });
+
   describe('hook return values', () => {
     it('returns run workflow menu item and panel when workflow UI is enabled and user has execute capability', () => {
       const { result } = renderHook(() => useRunDocumentWorkflowPanel(defaultProps), {
@@ -141,6 +269,7 @@ describe('useRunDocumentWorkflowPanel', () => {
       );
       expect(result.current.runWorkflowMenuItem[0].key).toBe('run-document-workflow-action');
       expect(result.current.runWorkflowMenuItem[0].name).toBe(i18n.CONTEXT_MENU_RUN_WORKFLOW);
+      expect(result.current.runWorkflowMenuItem[0].icon).toBe('workflow');
       expect(result.current.runWorkflowMenuItem[0].panel).toBe(RUN_DOCUMENT_WORKFLOW_PANEL_ID);
 
       expect(result.current.runDocumentWorkflowPanel).toHaveLength(1);
@@ -184,120 +313,105 @@ describe('useRunDocumentWorkflowPanel', () => {
     });
   });
 
+  describe('case routing', () => {
+    it('returns the menu item outside a case without originEventId', () => {
+      const { result } = renderHook(() => useRunDocumentWorkflowPanel(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.runWorkflowMenuItem).toHaveLength(1);
+      expect(result.current.runDocumentWorkflowPanel).toHaveLength(1);
+    });
+
+    it('returns the menu item inside a case with originEventId when Cases runs are available', () => {
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
+
+      const { result } = renderHook(
+        () => useRunDocumentWorkflowPanel({ ...defaultProps, originEventId: 'event-123' }),
+        { wrapper: TestProviders }
+      );
+
+      expect(result.current.runWorkflowMenuItem).toHaveLength(1);
+      expect(result.current.runDocumentWorkflowPanel).toHaveLength(1);
+    });
+
+    it('returns the menu item inside a case for a bulk selection without originEventId', () => {
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
+
+      const { result } = renderHook(() => useRunDocumentWorkflowPanel(defaultProps), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.runWorkflowMenuItem).toHaveLength(1);
+      expect(result.current.runDocumentWorkflowPanel).toHaveLength(1);
+    });
+
+    it('returns empty lists inside a case with no documents and no originEventId', () => {
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
+
+      const { result } = renderHook(
+        () => useRunDocumentWorkflowPanel({ ...defaultProps, documents: [] }),
+        { wrapper: TestProviders }
+      );
+
+      expect(result.current.runWorkflowMenuItem).toEqual([]);
+      expect(result.current.runDocumentWorkflowPanel).toEqual([]);
+    });
+
+    it('returns empty lists inside a case where Cases workflow runs are unavailable', () => {
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('unavailable');
+
+      const { result } = renderHook(
+        () => useRunDocumentWorkflowPanel({ ...defaultProps, originEventId: 'event-123' }),
+        { wrapper: TestProviders }
+      );
+
+      expect(result.current.runWorkflowMenuItem).toEqual([]);
+      expect(result.current.runDocumentWorkflowPanel).toEqual([]);
+    });
+  });
+
   describe('panel content', () => {
-    it('renders the workflow panel with selector and execute button', async () => {
+    it('renders the workflow panel with the document caller configuration', async () => {
       const { result } = renderHook(() => useRunDocumentWorkflowPanel(defaultProps), {
         wrapper: TestProviders,
       });
       const items = result.current.runWorkflowMenuItem;
       const panels = result.current.runDocumentWorkflowPanel;
-      const { getByTestId, getByRole } = renderContextMenu(items, panels);
+      const { getByTestId } = renderContextMenu(items, panels);
 
       await waitFor(() => {
         expect(getByTestId('workflow-selector-mock')).toBeInTheDocument();
       });
-      expect(getByTestId('execute-document-workflow-button')).toBeInTheDocument();
-      expect(getByRole('button', { name: i18n.RUN_WORKFLOW_BUTTON })).toBeInTheDocument();
-    });
-  });
-});
+      expect(getByTestId('run-workflow-execute-button')).toBeInTheDocument();
 
-describe('DocumentWorkflowsPanel', () => {
-  beforeEach(() => {
-    useKibanaMock.mockReturnValue(
-      createMockKibana({
-        application: { navigateToApp: jest.fn() },
-        rendering: {},
-      })
-    );
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('execute button is disabled when no workflow is selected', () => {
-    const { result } = renderHook(() => useRunDocumentWorkflowPanel(defaultProps), {
-      wrapper: TestProviders,
-    });
-    const panels = result.current.runDocumentWorkflowPanel;
-    render(<TestProviders>{panels[0].content}</TestProviders>);
-
-    const executeButton = screen.getByTestId('execute-document-workflow-button');
-    expect(executeButton).toBeDisabled();
-  });
-
-  it('calls runWorkflow.mutate with document payload when workflow is selected and execute is clicked', async () => {
-    const user = userEvent.setup();
-    const closePopoverFn = jest.fn();
-    mockMutate.mockImplementation((_vars: unknown, { onSettled }: { onSettled?: () => void }) => {
-      onSettled?.();
-    });
-
-    const { result } = renderHook(
-      () =>
-        useRunDocumentWorkflowPanel({
-          ...defaultProps,
-          closePopover: closePopoverFn,
-        }),
-      { wrapper: TestProviders }
-    );
-    const panels = result.current.runDocumentWorkflowPanel;
-
-    render(<TestProviders>{panels[0].content}</TestProviders>);
-
-    const selectButton = screen.getByTestId('select-workflow-option');
-    await user.click(selectButton);
-
-    const executeButton = screen.getByTestId('execute-document-workflow-button');
-    expect(executeButton).not.toBeDisabled();
-    await user.click(executeButton);
-
-    expect(mockMutate).toHaveBeenCalledWith(
-      {
-        id: 'test-workflow-id',
-        inputs: {
-          event: {
-            triggerType: 'document',
-            documents: [
-              {
-                _id: 'doc-123',
-                _index: 'documents-index',
-                'host.name': 'test-host',
-              },
-            ],
-          },
+      const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+      if (!panelProps) {
+        throw new Error('Expected RunWorkflowPanel to render');
+      }
+      expect(panelProps.inputs).toEqual({
+        event: {
+          triggerType: 'document',
+          documents: defaultProps.documents,
         },
-      },
-      expect.objectContaining({
-        onSuccess: expect.any(Function),
-        onError: expect.any(Function),
-        onSettled: expect.any(Function),
-      })
-    );
-    expect(closePopoverFn).toHaveBeenCalled();
-  });
+      });
+      expect(panelProps.visibility).toBeUndefined();
+      expect(panelProps.filterWorkflow).toBeUndefined();
+      expect(panelProps.onClose).toBe(defaultProps.closePopover);
 
-  it('calls onExecute callback when workflow execution is triggered', async () => {
-    const user = userEvent.setup();
-    const onExecuteFn = jest.fn();
-    mockMutate.mockImplementation((_vars: unknown, { onSettled }: { onSettled?: () => void }) => {
-      onSettled?.();
+      const { sortWorkflow } = panelProps;
+      if (!sortWorkflow) {
+        throw new Error('Expected document workflow sorting');
+      }
+
+      const alertWorkflow = createMockWorkflow('alert-workflow', 'alert');
+      const manualWorkflow = createMockWorkflow('manual-workflow', 'manual');
+      expect([alertWorkflow, manualWorkflow].sort(sortWorkflow)).toEqual([
+        manualWorkflow,
+        alertWorkflow,
+      ]);
     });
-
-    render(
-      <TestProviders>
-        <DocumentWorkflowsPanel
-          documents={[{ _id: 'doc-123', _index: 'documents-index' }]}
-          onClose={jest.fn()}
-          onExecute={onExecuteFn}
-        />
-      </TestProviders>
-    );
-
-    await user.click(screen.getByTestId('select-workflow-option'));
-    await user.click(screen.getByTestId('execute-document-workflow-button'));
-
-    expect(onExecuteFn).toHaveBeenCalledTimes(1);
   });
 });
+// Full RunWorkflowPanel behavior (mutate, toasts, manual inputs) is covered by:
+//   src/platform/packages/shared/kbn-workflows-ui/src/components/run_workflow_panel/run_workflow_panel.test.tsx

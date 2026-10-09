@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { convertValueToString } from './convert_value_to_string';
-import { formatFieldValue } from './format_value';
+import { formatFieldValueText } from './format_value';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { buildDataViewMock } from '../__mocks__';
 
@@ -47,7 +48,7 @@ export const dataViewComplexMock = buildDataViewMock({
 
 // The format_value file has its own test suite, so we can mock it here to avoid duplication.
 jest.mock('./format_value');
-const mockFormatFieldValue = jest.mocked(formatFieldValue);
+const mockFormatFieldValueText = jest.mocked(formatFieldValueText);
 
 describe('convertValueToString', () => {
   describe('when the data view field type is _source', () => {
@@ -75,7 +76,7 @@ describe('convertValueToString', () => {
   describe('when the data view field type is not _source', () => {
     describe('when the flattened value is an array', () => {
       it('should format the values and join them with a comma', () => {
-        mockFormatFieldValue.mockReturnValueOnce('value1').mockReturnValueOnce('value2');
+        mockFormatFieldValueText.mockReturnValueOnce('value1').mockReturnValueOnce('value2');
 
         const result = convertValueToString({
           dataView: dataViewComplexMock,
@@ -99,7 +100,7 @@ describe('convertValueToString', () => {
 
     describe('when the flattened value is not an array', () => {
       it('should format the value', () => {
-        mockFormatFieldValue.mockReturnValue('formattedValue');
+        mockFormatFieldValueText.mockReturnValue('formattedValue');
 
         const result = convertValueToString({
           dataView: dataViewComplexMock,
@@ -118,6 +119,58 @@ describe('convertValueToString', () => {
           formattedString: `formattedValue`,
           withFormula: false,
         });
+      });
+    });
+
+    describe('when the flattened value is missing', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it.each([
+        ['null', null],
+        ['undefined', undefined],
+        ['a missing bucket', MISSING_TOKEN],
+      ])('should return the dash the grid renders for %s', (_name, flattenedValue) => {
+        const result = convertValueToString({
+          dataView: dataViewComplexMock,
+          dataViewField: mockStringField,
+          flattenedValue,
+          dataTableRecord: {
+            id: '1',
+            raw: {},
+            flattened: { testKey: 'testValue' },
+          },
+          fieldFormats: fieldFormatsMock,
+          options: { compatibleWithCSV: true },
+        });
+
+        // "-" starts a formula, but the dash is our own constant rather than document content,
+        // so it must not come back escaped as "'-" even when the value is CSV compatible.
+        expect(result).toEqual({
+          formattedString: '-',
+          withFormula: false,
+        });
+        expect(mockFormatFieldValueText).not.toHaveBeenCalled();
+      });
+
+      it('should keep populated values alongside a missing one', () => {
+        mockFormatFieldValueText.mockReturnValueOnce('value2');
+
+        const result = convertValueToString({
+          dataView: dataViewComplexMock,
+          dataViewField: mockStringField,
+          flattenedValue: [null, 'value2'],
+          dataTableRecord: {
+            id: '1',
+            raw: {},
+            flattened: { testKey: 'testValue' },
+          },
+          fieldFormats: fieldFormatsMock,
+          options: { compatibleWithCSV: true },
+        });
+
+        expect(result.formattedString).toBe('-, value2');
       });
     });
   });

@@ -19,18 +19,17 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
+  - '@kbn/task-manager-plugin'
+  - '@kbn/response-ops-scheduling-types'
 tags:
   - plugin
   - prod
   - group-platform
   - private
-  - jest-unit-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

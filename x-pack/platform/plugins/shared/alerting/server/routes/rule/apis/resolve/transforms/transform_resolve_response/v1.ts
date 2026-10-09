@@ -7,12 +7,12 @@
 
 import type { ResolvedRule } from '../../../../../../application/rule/methods/resolve/types';
 import type { RuleParams } from '../../../../../../application/rule/types';
-import { transformRuleToRuleResponseV1 } from '../../../../transforms';
+import { transformRuleToRuleResponseInternalV1 } from '../../../../transforms';
 
-export const transformResolveResponse = <Params extends RuleParams = never>(
+export const transformResolveResponseInternal = <Params extends RuleParams = never>(
   rule: ResolvedRule<Params>
 ) => ({
-  ...transformRuleToRuleResponseV1<Params>(rule),
+  ...transformRuleToRuleResponseInternalV1<Params>(rule),
   outcome: rule.outcome,
   alias_target_id: rule.alias_target_id,
   ...(rule.artifacts !== undefined ? { artifacts: rule.artifacts } : {}),

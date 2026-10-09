@@ -32,7 +32,14 @@ export {
   ChartSwitchTrigger,
 } from './components';
 
-export { isFieldLensCompatible, sharedSetOfIcons, hasIcon, iconSortCriteria } from './util';
+export {
+  isFieldLensCompatible,
+  sharedSetOfIcons,
+  hasIcon,
+  iconSortCriteria,
+  annotationReferenceLineSharedSetOfIcons,
+  emptyIconEntry,
+} from './util';
 
 export type {
   DataType,
@@ -44,4 +51,9 @@ export type {
   ColorPickerProps,
 } from './components';
 
-export type { FormatFactory, LineStyle, SharedSetOfIcons } from './types';
+export type {
+  FormatFactory,
+  LineStyle,
+  SharedSetOfIcons,
+  AnnotationReferenceLineIcons,
+} from './types';

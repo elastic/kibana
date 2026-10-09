@@ -98,6 +98,9 @@ export const EntityConfig: FC<EntityConfigProps> = ({
       closePopover={() => {
         setIsEntityConfigPopoverOpen(false);
       }}
+      aria-label={i18n.translate('xpack.ml.timeSeriesExplorer.entityConfig.popoverAriaLabel', {
+        defaultMessage: 'Entity field configuration',
+      })}
     >
       <div data-test-subj={`mlSingleMetricViewerEntitySelectionConfigPopover_${entity.fieldName}`}>
         <EuiFormRow
@@ -109,7 +112,7 @@ export const EntityConfig: FC<EntityConfigProps> = ({
           }
         >
           <EuiRadioGroup
-            name="entitySortBy"
+            name={`entitySortBy_${entity.fieldName}`}
             options={sortOptions}
             idSelected={forceSortByName ? 'name' : config?.sort?.by}
             onChange={(id) => {
@@ -130,7 +133,7 @@ export const EntityConfig: FC<EntityConfigProps> = ({
           }
         >
           <EuiRadioGroup
-            name="entitySortOrder"
+            name={`entitySortOrder_${entity.fieldName}`}
             options={orderOptions}
             idSelected={config?.sort?.order}
             onChange={(id) => {

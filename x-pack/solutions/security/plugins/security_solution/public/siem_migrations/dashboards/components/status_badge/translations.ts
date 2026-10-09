@@ -17,6 +17,6 @@ export const DASHBOARD_STATUS_INSTALLED = i18n.translate(
 export const DASHBOARD_STATUS_FAILED = i18n.translate(
   'xpack.securitySolution.siemMigrations.dashboards.status.failedLabel',
   {
-    defaultMessage: 'Error',
+    defaultMessage: 'Failed',
   }
 );

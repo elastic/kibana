@@ -8,9 +8,9 @@
 import type { FC } from 'react';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { parse } from 'query-string';
+import queryString from 'query-string';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlKibana } from '../../../contexts/kibana';
-import { ML_PAGES } from '../../../../locator';
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
@@ -23,7 +23,7 @@ export const fromLensRouteFactory = (): MlRoute => ({
 });
 
 const PageWrapper: FC<PageProps> = ({ location }) => {
-  const { vis, from, to, query, filters, layerIndex }: Record<string, any> = parse(
+  const { vis, from, to, query, filters, layerIndex }: Record<string, any> = queryString.parse(
     location.search,
     {
       sort: false,
@@ -41,6 +41,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
       mlServices: { mlApi },
       lens,
       share,
+      cps,
     },
   } = useMlKibana();
 
@@ -54,6 +55,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
           timeFilter,
           kibanaConfig,
           share,
+          cps,
         },
         vis,
         from,

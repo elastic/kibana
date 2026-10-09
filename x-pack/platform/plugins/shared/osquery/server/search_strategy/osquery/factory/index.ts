@@ -11,6 +11,7 @@ import { OsqueryQueries } from '../../../../common/search_strategy/osquery';
 import { allActions, actionDetails, actionResults } from './actions';
 import { allResults } from './results';
 import { scheduledActionResults } from './scheduled_action_results';
+import { exportResults } from './export_results';
 
 import type { OsqueryFactory } from './types';
 
@@ -20,4 +21,5 @@ export const osqueryFactory: Record<FactoryQueryTypes, OsqueryFactory<FactoryQue
   [OsqueryQueries.actionResults]: actionResults,
   [OsqueryQueries.results]: allResults,
   [OsqueryQueries.scheduledActionResults]: scheduledActionResults,
+  [OsqueryQueries.exportResults]: exportResults,
 };

@@ -25,9 +25,19 @@ import {
   createErrorResponse,
 } from '../lib/openai_format';
 import { resolveConnector } from '../lib/resolve_connector';
+import {
+  MAX_SESSION_ID_LENGTH,
+  resolvePromptCaching,
+  type PromptCaching,
+} from '../lib/prompt_caching';
 import { isElasticConsoleEnabled } from './is_enabled';
 
 const SOCKET_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+// Agent conversations (long histories, tool results, base64 images) easily exceed the 1MB default.
+const MAX_BODY_BYTES = 20 * 1024 * 1024; // 20MB
+// Long agent sessions accumulate many messages; the body size limit bounds the total payload.
+export const MAX_MESSAGES = 10_000;
+export const MAX_CONTENT_PARTS = 2_000;
 
 export const registerChatCompletionsRoute = ({
   router,
@@ -46,6 +56,9 @@ export const registerChatCompletionsRoute = ({
       },
       options: {
         access: 'internal',
+        body: {
+          maxBytes: MAX_BODY_BYTES,
+        },
         timeout: {
           idleSocket: SOCKET_TIMEOUT_MS,
         },
@@ -60,7 +73,9 @@ export const registerChatCompletionsRoute = ({
                 content: schema.nullable(
                   schema.oneOf([
                     schema.string(),
-                    schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
+                    schema.arrayOf(schema.recordOf(schema.string(), schema.any()), {
+                      maxSize: MAX_CONTENT_PARTS,
+                    }),
                   ])
                 ),
                 tool_calls: schema.maybe(
@@ -72,13 +87,14 @@ export const registerChatCompletionsRoute = ({
                         name: schema.string(),
                         arguments: schema.string(),
                       }),
-                    })
+                    }),
+                    { maxSize: 128 }
                   )
                 ),
                 tool_call_id: schema.maybe(schema.string()),
                 name: schema.maybe(schema.string()),
               }),
-              { minSize: 1 }
+              { minSize: 1, maxSize: MAX_MESSAGES }
             ),
             stream: schema.boolean({ defaultValue: false }),
             temperature: schema.maybe(schema.number()),
@@ -92,7 +108,8 @@ export const registerChatCompletionsRoute = ({
                     description: schema.maybe(schema.string()),
                     parameters: schema.maybe(schema.recordOf(schema.string(), schema.any())),
                   }),
-                })
+                }),
+                { maxSize: 256 }
               )
             ),
             tool_choice: schema.maybe(
@@ -112,6 +129,11 @@ export const registerChatCompletionsRoute = ({
               schema.object({
                 include_usage: schema.maybe(schema.boolean()),
               })
+            ),
+            // OpenAI prompt caching fields; mapped to the EIS session id / cache control.
+            prompt_cache_key: schema.maybe(schema.string({ maxLength: MAX_SESSION_ID_LENGTH })),
+            prompt_cache_retention: schema.maybe(
+              schema.oneOf([schema.literal('in_memory'), schema.literal('24h')])
             ),
           },
           { unknowns: 'allow' }
@@ -135,7 +157,15 @@ export const registerChatCompletionsRoute = ({
           temperature,
           tools,
           tool_choice: toolChoice,
+          prompt_cache_key: promptCacheKey,
+          prompt_cache_retention: promptCacheRetention,
         } = request.body;
+
+        const promptCaching = resolvePromptCaching({
+          promptCacheKey,
+          promptCacheRetention,
+          headers: request.headers,
+        });
 
         // Resolve connector: use x-connector-id header, or try model as connector ID, or use default
         const connectorIdHeader = request.headers['x-connector-id'];
@@ -161,6 +191,7 @@ export const registerChatCompletionsRoute = ({
             temperature,
             tools: inferenceTools,
             toolChoice: inferenceToolChoice,
+            promptCaching,
             model,
             request,
             response,
@@ -176,6 +207,7 @@ export const registerChatCompletionsRoute = ({
           temperature,
           tools: inferenceTools,
           toolChoice: inferenceToolChoice,
+          promptCaching,
           model,
           request,
           response,
@@ -220,6 +252,7 @@ const handleStreamingRequest = async ({
   temperature,
   tools,
   toolChoice,
+  promptCaching,
   model,
   request,
   response,
@@ -232,6 +265,7 @@ const handleStreamingRequest = async ({
   temperature?: number;
   tools?: any;
   toolChoice?: any;
+  promptCaching: PromptCaching;
   model: string;
   request: any;
   response: any;
@@ -254,6 +288,7 @@ const handleStreamingRequest = async ({
     temperature,
     tools,
     toolChoice,
+    ...promptCaching,
     stream: true,
     abortSignal: abortController.signal,
   });
@@ -321,6 +356,7 @@ const handleNonStreamingRequest = async ({
   temperature,
   tools,
   toolChoice,
+  promptCaching,
   model,
   request,
   response,
@@ -333,6 +369,7 @@ const handleNonStreamingRequest = async ({
   temperature?: number;
   tools?: any;
   toolChoice?: any;
+  promptCaching: PromptCaching;
   model: string;
   request: any;
   response: any;
@@ -346,6 +383,7 @@ const handleNonStreamingRequest = async ({
       temperature,
       tools,
       toolChoice,
+      ...promptCaching,
       stream: false,
     });
 

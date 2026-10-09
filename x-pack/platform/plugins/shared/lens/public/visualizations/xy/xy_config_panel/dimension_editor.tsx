@@ -12,7 +12,7 @@ import { ColorPicker } from '@kbn/visualization-ui-components';
 
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
 import type { PaletteRegistry, ColorMapping, PaletteOutput } from '@kbn/coloring';
-import { canCreateCustomMatch } from '@kbn/coloring';
+import { DEFAULT_COLOR_MAPPING_CONFIG, canCreateCustomMatch } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { ValuesType } from 'utility-types';
 import type { KbnPalettes } from '@kbn/palettes';
@@ -31,6 +31,7 @@ import {
   getAssignedColorConfig,
   getLayerPaletteName,
 } from '../color_assignment';
+import { getDefaultPalette } from '../default_palette';
 import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';
 
 export const idPrefix = htmlIdGenerator()();
@@ -170,11 +171,15 @@ export function DataDimensionEditor(
       formatter = props.formatFactory(columnMeta?.params);
     }
 
+    const defaultColorMapping = !layer.palette
+      ? { ...DEFAULT_COLOR_MAPPING_CONFIG, paletteId: getDefaultPalette(layer.seriesType) }
+      : undefined;
+
     return !layer.collapseFn ? (
       <div className="lnsIndexPatternDimensionEditor--padded">
         <ColorMappingByTerms
           isDarkMode={isDarkMode}
-          colorMapping={layer.colorMapping}
+          colorMapping={layer.colorMapping ?? defaultColorMapping}
           palette={layer.palette}
           isInlineEditing={isInlineEditing}
           setPalette={setPalette}

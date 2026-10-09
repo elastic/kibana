@@ -11,10 +11,16 @@ import type { ManagementSetup } from '@kbn/management-plugin/public';
 import { GenAiSettingsPlugin } from './plugin';
 
 describe('GenAI Settings Plugin', () => {
-  describe('Licensing', () => {
-    const createManagementMock = () => {
-      const registerApp = jest.fn();
-      return {
+  const createAppMock = () => ({
+    enable: jest.fn(),
+    disable: jest.fn(),
+  });
+
+  const createManagementMock = (app = createAppMock()) => {
+    const registerApp = jest.fn().mockReturnValue(app);
+    return {
+      app,
+      management: {
         sections: {
           section: {
             ai: {
@@ -24,101 +30,181 @@ describe('GenAI Settings Plugin', () => {
         },
       } as unknown as ManagementSetup & {
         sections: { section: { ai: { registerApp: jest.Mock } } };
-      };
+      },
     };
+  };
 
-    const createCoreSetupMock = (
-      coreStart: Partial<CoreStart>,
-      licensing: any
-    ): CoreSetup<any, any> =>
-      ({
-        getStartServices: jest.fn().mockResolvedValue([coreStart, { licensing } as any, {} as any]),
-      } as any);
+  const createCoreSetupMock = (): CoreSetup<any, any> =>
+    ({
+      getStartServices: jest.fn(),
+    } as any);
 
-    const createPlugin = () =>
-      new GenAiSettingsPlugin({
-        config: { get: jest.fn(() => ({})) },
-        env: { packageInfo: { buildFlavor: 'traditional', branch: 'main' } },
-      } as unknown as PluginInitializerContext);
+  const createCoreStartMock = (
+    capabilities: Partial<CoreStart['application']['capabilities']>
+  ): CoreStart =>
+    ({
+      application: { capabilities },
+    } as any);
 
-    it('does not register the app when license is not enterprise', async () => {
+  const createPlugin = () =>
+    new GenAiSettingsPlugin({
+      config: { get: jest.fn(() => ({})) },
+      env: { packageInfo: { buildFlavor: 'traditional', branch: 'main' } },
+    } as unknown as PluginInitializerContext);
+
+  describe('setup()', () => {
+    it('always registers the app synchronously', () => {
       const plugin = createPlugin();
-      const management = createManagementMock();
+      const { management } = createManagementMock();
 
-      const license$ = new BehaviorSubject<any>({ hasAtLeast: () => false });
-      const coreStart: Partial<CoreStart> = {
-        application: {
-          capabilities: {
-            actions: { show: true, execute: true },
-          },
-        },
-      } as any;
-      const coreSetup = createCoreSetupMock(coreStart, { license$ });
-
-      await plugin.setup(coreSetup, { management });
-
-      expect(management.sections.section.ai.registerApp).not.toHaveBeenCalled();
-    });
-
-    it('registers the app only when license is enterprise and capabilities allow it', async () => {
-      const plugin = createPlugin();
-      const management = createManagementMock();
-
-      const license$ = new BehaviorSubject<any>({
-        hasAtLeast: (level: string) => level === 'enterprise',
-      });
-      const coreStart: Partial<CoreStart> = {
-        application: {
-          capabilities: {
-            actions: { show: true, execute: true },
-          },
-        },
-      } as any;
-      const coreSetup = createCoreSetupMock(coreStart, { license$ });
-
-      await plugin.setup(coreSetup, { management });
+      plugin.setup(createCoreSetupMock(), { management });
 
       expect(management.sections.section.ai.registerApp).toHaveBeenCalledTimes(1);
     });
 
-    it('registers the app when enterprise license and anonymization capabilities allow it', async () => {
+    it('disables the app immediately after registration', () => {
+      const app = createAppMock();
+      const { management } = createManagementMock(app);
+
       const plugin = createPlugin();
-      const management = createManagementMock();
+      plugin.setup(createCoreSetupMock(), { management });
 
-      const license$ = new BehaviorSubject<any>({
-        hasAtLeast: (level: string) => level === 'enterprise',
-      });
-      const coreStart: Partial<CoreStart> = {
-        application: {
-          capabilities: {
-            anonymization: { show: true, manage: false },
-          },
-        },
-      } as any;
-      const coreSetup = createCoreSetupMock(coreStart, { license$ });
-
-      await plugin.setup(coreSetup, { management });
-
-      expect(management.sections.section.ai.registerApp).toHaveBeenCalledTimes(1);
+      expect(app.disable).toHaveBeenCalledTimes(1);
+      expect(app.enable).not.toHaveBeenCalled();
     });
+  });
 
-    it('does not register the app when anonymization capabilities exist but license is not enterprise', async () => {
+  describe('start()', () => {
+    describe('Licensing', () => {
+      it('enables the app when license is enterprise and connectors capabilities allow it', () => {
+        const app = createAppMock();
+        const { management } = createManagementMock(app);
+        const plugin = createPlugin();
+        plugin.setup(createCoreSetupMock(), { management });
+
+        const license$ = new BehaviorSubject<any>({
+          hasAtLeast: (level: string) => level === 'enterprise',
+        });
+        const coreStart = createCoreStartMock({
+          actions: { show: true, execute: true },
+        });
+
+        plugin.start(coreStart, { licensing: { license$ } } as any);
+
+        expect(app.enable).toHaveBeenCalledTimes(1);
+      });
+
+      it('enables the app when license is enterprise and anonymization capabilities allow it', () => {
+        const app = createAppMock();
+        const { management } = createManagementMock(app);
+        const plugin = createPlugin();
+        plugin.setup(createCoreSetupMock(), { management });
+
+        const license$ = new BehaviorSubject<any>({
+          hasAtLeast: (level: string) => level === 'enterprise',
+        });
+        const coreStart = createCoreStartMock({
+          anonymization: { show: true, manage: false },
+        });
+
+        plugin.start(coreStart, { licensing: { license$ } } as any);
+
+        expect(app.enable).toHaveBeenCalledTimes(1);
+      });
+
+      it('keeps the app disabled when license is not enterprise', () => {
+        const app = createAppMock();
+        const { management } = createManagementMock(app);
+        const plugin = createPlugin();
+        plugin.setup(createCoreSetupMock(), { management });
+
+        const license$ = new BehaviorSubject<any>({ hasAtLeast: () => false });
+        const coreStart = createCoreStartMock({
+          actions: { show: true, execute: true },
+        });
+
+        plugin.start(coreStart, { licensing: { license$ } } as any);
+
+        expect(app.enable).not.toHaveBeenCalled();
+        // disable() called once from setup() and once from start() subscription
+        expect(app.disable).toHaveBeenCalledTimes(2);
+      });
+
+      it('keeps the app disabled when enterprise license exists but no capabilities match', () => {
+        const app = createAppMock();
+        const { management } = createManagementMock(app);
+        const plugin = createPlugin();
+        plugin.setup(createCoreSetupMock(), { management });
+
+        const license$ = new BehaviorSubject<any>({
+          hasAtLeast: (level: string) => level === 'enterprise',
+        });
+        const coreStart = createCoreStartMock({
+          actions: { show: false, execute: false },
+          anonymization: { show: false, manage: false },
+        });
+
+        plugin.start(coreStart, { licensing: { license$ } } as any);
+
+        expect(app.enable).not.toHaveBeenCalled();
+        expect(app.disable).toHaveBeenCalledTimes(2);
+      });
+
+      it('keeps the app disabled when anonymization capabilities exist but license is not enterprise', () => {
+        const app = createAppMock();
+        const { management } = createManagementMock(app);
+        const plugin = createPlugin();
+        plugin.setup(createCoreSetupMock(), { management });
+
+        const license$ = new BehaviorSubject<any>({ hasAtLeast: () => false });
+        const coreStart = createCoreStartMock({
+          anonymization: { show: true, manage: true },
+        });
+
+        plugin.start(coreStart, { licensing: { license$ } } as any);
+
+        expect(app.enable).not.toHaveBeenCalled();
+        expect(app.disable).toHaveBeenCalledTimes(2);
+      });
+
+      it('reacts to license changes — disables then re-enables when license upgrades', () => {
+        const app = createAppMock();
+        const { management } = createManagementMock(app);
+        const plugin = createPlugin();
+        plugin.setup(createCoreSetupMock(), { management });
+
+        const license$ = new BehaviorSubject<any>({ hasAtLeast: () => false });
+        const coreStart = createCoreStartMock({
+          actions: { show: true, execute: true },
+        });
+
+        plugin.start(coreStart, { licensing: { license$ } } as any);
+        expect(app.enable).not.toHaveBeenCalled();
+
+        // License upgrades to enterprise
+        license$.next({ hasAtLeast: (level: string) => level === 'enterprise' });
+        expect(app.enable).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  describe('stop()', () => {
+    it('unsubscribes from the license observable', () => {
+      const app = createAppMock();
+      const { management } = createManagementMock(app);
       const plugin = createPlugin();
-      const management = createManagementMock();
+      plugin.setup(createCoreSetupMock(), { management });
 
       const license$ = new BehaviorSubject<any>({ hasAtLeast: () => false });
-      const coreStart: Partial<CoreStart> = {
-        application: {
-          capabilities: {
-            anonymization: { show: true, manage: true },
-          },
-        },
-      } as any;
-      const coreSetup = createCoreSetupMock(coreStart, { license$ });
+      const coreStart = createCoreStartMock({
+        actions: { show: true, execute: true },
+      });
 
-      await plugin.setup(coreSetup, { management });
+      plugin.start(coreStart, { licensing: { license$ } } as any);
+      expect(license$.observed).toBe(true);
 
-      expect(management.sections.section.ai.registerApp).not.toHaveBeenCalled();
+      plugin.stop();
+      expect(license$.observed).toBe(false);
     });
   });
 });

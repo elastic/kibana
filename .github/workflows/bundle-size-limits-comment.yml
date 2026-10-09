@@ -1,0 +1,34 @@
+name: bundle-size-limits-comment
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+      - edited
+    # No `paths:` filter. A retarget can drop limits.yml from the diff, and the run is what
+    # deletes a stale comment. The script checks the PR's files itself.
+
+jobs:
+  comment:
+    # Ignore title and description edits; only react to base branch changes.
+    if: github.event.action != 'edited' || github.event.changes.base
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: .github
+          sparse-checkout-cone-mode: true
+          fetch-depth: 1
+
+      - name: Comment on large bundle size increases
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const run = require('./.github/scripts/bundle_size_limits_comment');
+            await run({ github, context });

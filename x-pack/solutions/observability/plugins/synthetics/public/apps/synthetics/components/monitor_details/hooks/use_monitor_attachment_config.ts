@@ -8,10 +8,7 @@
 import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  OBSERVABILITY_AGENT_ID,
-  OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,
-} from '@kbn/observability-agent-builder-plugin/public';
+import { OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { useSelectedMonitor } from './use_selected_monitor';
@@ -49,7 +46,6 @@ export const useMonitorAttachmentConfigWithMonitor = (
     }
 
     agentBuilder.setChatConfig({
-      agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
         {
           type: OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,

@@ -56,7 +56,7 @@ describe('BasicTransitionStrategy', () => {
     it('returns true for any rule (acts as fallback)', () => {
       expect(strategy.canHandle(createRuleResponse())).toBe(true);
       expect(
-        strategy.canHandle(createRuleResponse({ state_transition: { pending_count: 3 } }))
+        strategy.canHandle(createRuleResponse({ state_transition: { pending: { count: 3 } } }))
       ).toBe(true);
     });
   });
@@ -159,6 +159,59 @@ describe('BasicTransitionStrategy', () => {
         }),
       });
       expect(result).toEqual({ status: alertEpisodeStatus.active });
+    });
+  });
+
+  describe('no_data event branching on rule.no_data.strategy', () => {
+    it.each<[AlertEpisodeStatus]>([
+      [alertEpisodeStatus.inactive],
+      [alertEpisodeStatus.pending],
+      [alertEpisodeStatus.active],
+      [alertEpisodeStatus.recovering],
+    ])("'alert' sets %s to active", (from) => {
+      const result = getNextState({
+        eventStatus: alertEventStatus.no_data,
+        noDataStrategy: 'alert',
+        previousEpisode: buildLatestAlertEvent({
+          episodeStatus: from,
+          eventStatus: alertEventStatus.no_data,
+        }),
+      });
+      expect(result).toEqual({ status: alertEpisodeStatus.active });
+    });
+
+    it.each<[AlertEpisodeStatus]>([
+      [alertEpisodeStatus.inactive],
+      [alertEpisodeStatus.pending],
+      [alertEpisodeStatus.active],
+      [alertEpisodeStatus.recovering],
+    ])("'keep_last' preserves %s", (from) => {
+      const result = getNextState({
+        eventStatus: alertEventStatus.no_data,
+        noDataStrategy: 'keep_last',
+        previousEpisode: buildLatestAlertEvent({
+          episodeStatus: from,
+          eventStatus: alertEventStatus.no_data,
+        }),
+      });
+      expect(result).toEqual({ status: from });
+    });
+
+    it.each<[AlertEpisodeStatus, AlertEpisodeStatus]>([
+      [alertEpisodeStatus.inactive, alertEpisodeStatus.inactive],
+      [alertEpisodeStatus.pending, alertEpisodeStatus.inactive],
+      [alertEpisodeStatus.active, alertEpisodeStatus.inactive],
+      [alertEpisodeStatus.recovering, alertEpisodeStatus.inactive],
+    ])("'resolve' transitions %s → %s (resolves immediately to inactive)", (from, to) => {
+      const result = getNextState({
+        eventStatus: alertEventStatus.no_data,
+        noDataStrategy: 'resolve',
+        previousEpisode: buildLatestAlertEvent({
+          episodeStatus: from,
+          eventStatus: alertEventStatus.no_data,
+        }),
+      });
+      expect(result).toEqual({ status: to });
     });
   });
 });

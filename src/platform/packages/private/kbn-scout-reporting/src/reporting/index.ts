@@ -13,6 +13,7 @@ import type { ScoutPlaywrightReporterOptions } from './playwright/scout_playwrig
 
 export * from './report';
 export * from './stats';
+export * from './flaky_tests';
 
 // Playwright event-based reporting
 export const scoutPlaywrightReporter = (
@@ -30,4 +31,13 @@ export const scoutFailedTestsReporter = (
   return SCOUT_REPORTER_ENABLED
     ? ['@kbn/scout-reporting/src/reporting/playwright/failed_test', options]
     : ['null'];
+};
+
+// Playwright failure summary reporting (local development only — disabled in CI)
+export const scoutFailureSummaryReporter = (
+  options?: ScoutPlaywrightReporterOptions
+): ReporterDescription => {
+  return process.env.CI
+    ? ['null']
+    : ['@kbn/scout-reporting/src/reporting/playwright/failure_summary', options];
 };

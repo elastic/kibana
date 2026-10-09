@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { type InferenceConnector, defaultInferenceEndpoints } from '@kbn/inference-common';
 import { INFERENCE_SETTINGS_SO_TYPE, INFERENCE_SETTINGS_ID } from '../common/constants';
 import type { InferenceSettingsAttributes } from '../common/types';
 import type { InferenceFeatureRegistry } from './inference_feature_registry';
-import type { ResolvedInferenceEndpoints } from './types';
+import type { GetForFeatureOptions, ResolvedInferenceEndpoints } from './types';
 
 /**
  * Returns the resolved inference endpoints for a feature.
@@ -24,19 +24,21 @@ import type { ResolvedInferenceEndpoints } from './types';
  * @param getConnectorById - Function that returns a connector by ID.
  * @param featureId - The feature to resolve endpoints for.
  * @param logger - Logger instance for warnings.
+ * @param opts - Optional resolution options (see {@link GetForFeatureOptions}).
  */
 export const getForFeature = async (
   registry: InferenceFeatureRegistry,
-  soClient: ISavedObjectsRepository,
+  soClient: SavedObjectsClientContract,
   getConnectorById: (id: string) => Promise<InferenceConnector>,
   featureId: string,
-  logger: Logger
+  logger: Logger,
+  opts?: GetForFeatureOptions
 ): Promise<ResolvedInferenceEndpoints> => {
   const {
     ids,
     warnings: resolveWarnings,
     soEntryFound,
-  } = await resolveEndpointIds(registry, soClient, featureId, logger);
+  } = await resolveEndpointIds(registry, soClient, featureId, logger, opts);
   if (ids.length === 0) {
     return { endpoints: [], warnings: resolveWarnings, soEntryFound };
   }
@@ -83,12 +85,24 @@ interface ResolvedEndpointIds {
   soEntryFound: boolean;
 }
 
-const resolveEndpointIds = async (
+/**
+ * Pure resolution logic that walks the fallback chain for a feature using
+ * pre-fetched data. Exported so the settings route can reuse it without
+ * re-reading the saved object.
+ *
+ * Fallback order:
+ * 1. Admin-configured SO override for the feature itself
+ * 2. Walk parentFeatureId chain, checking SO overrides at each level
+ * 3. First non-empty recommendedEndpoints found in the chain
+ * 4. Kibana default chat-completion endpoint
+ */
+export const resolveFeatureEndpointIds = (
   registry: InferenceFeatureRegistry,
-  soClient: ISavedObjectsRepository,
+  soFeaturesMap: Map<string, InferenceSettingsAttributes['features'][number]>,
   featureId: string,
-  logger: Logger
-): Promise<ResolvedEndpointIds> => {
+  logger: Logger,
+  opts?: GetForFeatureOptions
+): ResolvedEndpointIds => {
   let current = registry.get(featureId);
   if (!current) {
     logger.warn(
@@ -102,8 +116,6 @@ const resolveEndpointIds = async (
   let recEntry = current.recommendedEndpoints?.length
     ? { featureId: current.featureId, recommendedEndpoints: current.recommendedEndpoints }
     : undefined;
-  const soFeatures = await readSettingsFeatures(soClient, logger);
-  const soFeaturesMap = new Map(soFeatures.map((f) => [f.feature_id, f]));
 
   // Walk the fallback chain for the feature:
   // 1. Check for an admin-configured SO override for the current feature
@@ -177,16 +189,30 @@ const resolveEndpointIds = async (
   }
 
   return {
-    ids: recEntry?.recommendedEndpoints ?? [
-      defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION,
-    ],
+    ids:
+      recEntry?.recommendedEndpoints ??
+      (opts?.onlyReturnConfigured
+        ? []
+        : [defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION]),
     warnings: [],
     soEntryFound: false,
   };
 };
 
+const resolveEndpointIds = async (
+  registry: InferenceFeatureRegistry,
+  soClient: SavedObjectsClientContract,
+  featureId: string,
+  logger: Logger,
+  opts?: GetForFeatureOptions
+): Promise<ResolvedEndpointIds> => {
+  const soFeatures = await readSettingsFeatures(soClient, logger);
+  const soFeaturesMap = new Map(soFeatures.map((f) => [f.feature_id, f]));
+  return resolveFeatureEndpointIds(registry, soFeaturesMap, featureId, logger, opts);
+};
+
 const readSettingsFeatures = async (
-  soClient: ISavedObjectsRepository,
+  soClient: SavedObjectsClientContract,
   logger: Logger
 ): Promise<InferenceSettingsAttributes['features']> => {
   try {

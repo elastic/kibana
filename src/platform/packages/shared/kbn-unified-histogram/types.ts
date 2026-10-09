@@ -10,7 +10,7 @@
 import type React from 'react';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { IUiSettingsClient, Capabilities, AnalyticsServiceStart } from '@kbn/core/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
@@ -37,6 +37,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import { UnifiedHistogramSuggestionType } from '@kbn/discover-session-constants';
 
 /**
  * The fetch status of a Unified Histogram request
@@ -142,12 +143,7 @@ export enum UnifiedHistogramExternalVisContextStatus {
   manuallyCustomized = 'manuallyCustomized',
 }
 
-export enum UnifiedHistogramSuggestionType {
-  unsupported = 'unsupported',
-  lensSuggestion = 'lensSuggestion',
-  histogramForESQL = 'histogramForESQL',
-  histogramForDataView = 'histogramForDataView',
-}
+export { UnifiedHistogramSuggestionType };
 
 export interface UnifiedHistogramSuggestionContext {
   suggestion: Suggestion | undefined;
@@ -194,9 +190,10 @@ export interface UnifiedHistogramFetchParamsExternal {
    */
   abortController?: AbortController;
   /**
-   * The current data view
+   * The current data source. For DSL queries use a `DataViewSource`; for ES|QL use an
+   * `EsqlSource`.
    */
-  dataView: DataView;
+  dataSource: DataSource;
   /**
    * The current query
    */
@@ -217,6 +214,10 @@ export interface UnifiedHistogramFetchParamsExternal {
    * The ES|QL variables to use for the chart
    */
   esqlVariables?: ESQLControlVariable[];
+  /**
+   * When true, ES|QL queries use approximate execution for faster, estimated results
+   */
+  isApproximate?: boolean;
   /**
    * The controls state to use for the chart
    */
@@ -322,4 +323,14 @@ export interface ChartSectionProps {
    * Controls whether or not the chart is visible (used for Show and Hide toggle)
    */
   isComponentVisible: boolean;
+  /**
+   * Optional callback for registering a request adapter for custom chart section requests
+   * in the Inspector. When called, the adapter will be synced to
+   * inspectorAdapters.lensRequests via the unified histogram state service.
+   */
+  setLensRequestAdapter?: (adapter: RequestAdapter | undefined) => void;
+  /**
+   * Indicates whether the current tab is selected/active.
+   */
+  isTabSelected: boolean;
 }

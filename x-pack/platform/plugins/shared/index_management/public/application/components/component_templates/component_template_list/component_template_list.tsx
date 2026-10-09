@@ -33,6 +33,7 @@ import { EmptyPrompt } from './empty_prompt';
 import { ComponentTable } from './table';
 import { ComponentTemplatesDeleteModal } from './delete_modal';
 import { useRedirectPath } from '../../../hooks/redirect_path';
+import { useAppContext } from '../../../app_context';
 
 interface Props {
   componentTemplateName?: string;
@@ -50,6 +51,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
     useGlobalFlyout();
   const { api, trackMetric, documentation } = useComponentTemplatesContext();
+  const { privs } = useAppContext();
   const redirectTo = useRedirectPath(history);
 
   useEffect(() => {
@@ -129,13 +131,14 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
         props: {
           onClose: goToComponentTemplateList,
           componentTemplateName,
-          showSummaryCallToAction: true,
-          actions,
+          showSummaryCallToAction: privs.manageIndexTemplates,
+          actions: privs.manageIndexTemplates ? actions : [],
         },
         flyoutProps: { ...defaultFlyoutProps, onClose: goToComponentTemplateList },
       });
     }
   }, [
+    privs.manageIndexTemplates,
     componentTemplateName,
     goToComponentTemplateList,
     goToEditComponentTemplate,

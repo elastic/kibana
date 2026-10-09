@@ -82,7 +82,7 @@ describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
     const expectedNumberCustomRulesToBeExported = 2;
     cy.get(TOASTER).should(
       'have.text',
-      `Successfully exported ${expectedNumberCustomRulesToBeExported} timelines`
+      `Successfully exported ${expectedNumberCustomRulesToBeExported} Timelines`
     );
 
     cy.wait('@export').then(({ response }) => {

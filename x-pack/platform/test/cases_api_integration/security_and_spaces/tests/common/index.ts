@@ -15,7 +15,13 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./comments/find_comments'));
     loadTestFile(require.resolve('./comments/get_comment'));
     loadTestFile(require.resolve('./comments/patch_comment'));
+    loadTestFile(require.resolve('./attachments/find_attachments'));
+    loadTestFile(require.resolve('./attachments/get_attachment'));
+    loadTestFile(require.resolve('./attachments/delete_attachment'));
+    loadTestFile(require.resolve('./attachments/delete_attachments'));
+    loadTestFile(require.resolve('./attachments/attachments_crud'));
     loadTestFile(require.resolve('./files/post_file'));
+    loadTestFile(require.resolve('./files/post_file_attachment'));
     loadTestFile(require.resolve('./alerts/get_cases'));
     loadTestFile(require.resolve('./alerts/get_alerts_attached_to_case'));
     loadTestFile(require.resolve('./cases/import_export'));
@@ -33,7 +39,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./configure/post_configure'));
     loadTestFile(require.resolve('./internal/metrics/get_case_metrics'));
     loadTestFile(require.resolve('./internal/metrics/get_case_metrics_alerts'));
-    loadTestFile(require.resolve('./internal/metrics/get_case_metrics_actions'));
     loadTestFile(require.resolve('./internal/metrics/get_case_metrics_connectors'));
     loadTestFile(require.resolve('./internal/metrics/get_cases_metrics'));
 
@@ -50,12 +55,8 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/replace_custom_field'));
     loadTestFile(require.resolve('./internal/find_user_actions.ts'));
 
-    /**
-     * Attachments framework
-     */
-
-    loadTestFile(require.resolve('./attachments_framework/external_references.ts'));
-    loadTestFile(require.resolve('./attachments_framework/persistable_state.ts'));
+    // NOTE: The attachments-framework suites are flag-sensitive and run under
+    // their own configs with the feature flag pinned
 
     /**
      * Cases client
@@ -65,11 +66,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     // NOTE: Migrations are not included because they can inadvertently remove the .kibana indices which removes the users and spaces
     // which causes errors in any tests after them that relies on those
 
-    /**
-     * Cases analytics
-     */
-    loadTestFile(require.resolve('./cases/analytics_index/creation'));
-    loadTestFile(require.resolve('./cases/analytics_index/backfill'));
-    loadTestFile(require.resolve('./cases/analytics_index/synchronization'));
+    // NOTE: Cases analytics v1 tests run under their own config (config_analytics_v1.ts)
+    // with attachments.enabled=false, since v1 only reads cases-comments SO type.
   });
 };

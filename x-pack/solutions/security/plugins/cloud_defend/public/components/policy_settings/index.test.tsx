@@ -13,6 +13,9 @@ import { getCloudDefendNewPolicyMock } from '../../test/mocks';
 import { PolicySettings } from '.';
 import { getInputFromPolicy } from '../../../common/utils/helpers';
 import { INPUT_CONTROL } from '../../../common/constants';
+import { useConfigModel } from '../control_yaml_view/hooks/use_config_model';
+
+jest.mock('../control_yaml_view/hooks/use_config_model');
 
 describe('<PolicySettings />', () => {
   const onChange = jest.fn();
@@ -25,12 +28,28 @@ describe('<PolicySettings />', () => {
     );
   };
 
+  // The name/description fields don't depend on the control input. Rendering with it
+  // disabled skips the heavy ControlSettings subtree so these tests stay well under timeout.
+  const getPolicyWithControlDisabled = () => {
+    const policy = getCloudDefendNewPolicyMock();
+    const controlInput = getInputFromPolicy(policy, INPUT_CONTROL);
+    if (controlInput) {
+      controlInput.enabled = false;
+    }
+    return policy;
+  };
+
   beforeEach(() => {
     onChange.mockClear();
+    // Set default mock for useConfigModel to return non null value
+    (useConfigModel as jest.Mock).mockReturnValue({
+      getValue: jest.fn(() => ''),
+      setValue: jest.fn(),
+    });
   });
 
   it('allows user to set name of integration', async () => {
-    const { getByTestId } = render(<WrappedComponent />);
+    const { getByTestId } = render(<WrappedComponent policy={getPolicyWithControlDisabled()} />);
     const input = getByTestId('cloud-defend-policy-name');
 
     if (input) {
@@ -45,7 +64,7 @@ describe('<PolicySettings />', () => {
   });
 
   it('allows user to set description of integration', async () => {
-    const { getByTestId } = render(<WrappedComponent />);
+    const { getByTestId } = render(<WrappedComponent policy={getPolicyWithControlDisabled()} />);
     const input = getByTestId('cloud-defend-policy-description');
 
     if (input) {

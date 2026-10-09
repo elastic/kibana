@@ -14,6 +14,10 @@ import {
   API_VERSIONS,
   TRACES_INDEX_PATTERN,
 } from '@kbn/evals-common';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { registerGetProjectTracesRoute } from './get_project_traces';
 
 const emptySpanCountResponse = {
@@ -26,7 +30,15 @@ describe('GET /internal/evals/tracing/projects/{projectName}/traces', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    registerGetProjectTracesRoute({ router, logger });
+    registerGetProjectTracesRoute({
+      router,
+      logger,
+      canEncrypt: false,
+      evaluatorRegistry: createEvaluatorRegistryMock(),
+      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
+      getEncryptedSavedObjectsStart: async () => ({} as EncryptedSavedObjectsPluginStart),
+      getInternalRemoteConfigsSoClient: async () => ({} as SavedObjectsClientContract),
+    });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
     const { handler } = versionedRouter.getRoute('get', EVALS_TRACING_PROJECT_TRACES_URL).versions[
@@ -69,7 +81,12 @@ describe('GET /internal/evals/tracing/projects/{projectName}/traces', () => {
     const searchCall = esClient.search.mock.calls[0][0] as any;
     expect(searchCall.query.bool.must_not).toEqual([
       { exists: { field: 'parent_span_id' } },
-      { exists: { field: 'attributes.evaluator.name' } },
+      {
+        bool: {
+          filter: [{ exists: { field: 'attributes.evaluator.name' } }],
+          must_not: [{ prefix: { name: 'judge · ' } }],
+        },
+      },
     ]);
     expect(searchCall.query.bool.filter).toEqual(
       expect.arrayContaining([
@@ -130,6 +147,29 @@ describe('GET /internal/evals/tracing/projects/{projectName}/traces', () => {
       },
     ]);
     expect(boolFilter.bool.minimum_should_match).toBe(1);
+  });
+
+  it('escapes wildcard metacharacters in the name filter', async () => {
+    const { handler, context, esClient } = setup();
+    esClient.search.mockResolvedValueOnce({
+      hits: { hits: [], total: { value: 0 } },
+    } as any);
+
+    await handler(
+      context,
+      makeRequest({ query: { name: 'foo*bar?baz\\qux' } }),
+      kibanaResponseFactory
+    );
+
+    const searchCall = esClient.search.mock.calls[0][0] as any;
+    const boolFilter = searchCall.query.bool.filter.find(
+      (f: Record<string, unknown>) => f.bool !== undefined
+    );
+    const expectedValue = '*foo\\*bar\\?baz\\\\qux*';
+    for (const clause of boolFilter.bool.should) {
+      const [wildcardBody] = Object.values(clause.wildcard) as Array<{ value: string }>;
+      expect(wildcardBody.value).toBe(expectedValue);
+    }
   });
 
   it('does not add name filter when name is not provided', async () => {

@@ -1,0 +1,11 @@
+description: An example of a successful response from `GET /api/apm/services/{serviceName}/annotation/search`, which returns the annotations associated with a service over the given time range.
+value:
+  annotations:
+    - type: version
+      id: opbeans-node@2.0.0
+      "@timestamp": 1735689600000
+      text: opbeans-node@2.0.0
+    - type: version
+      id: opbeans-node@2.1.0
+      "@timestamp": 1736294400000
+      text: opbeans-node@2.1.0

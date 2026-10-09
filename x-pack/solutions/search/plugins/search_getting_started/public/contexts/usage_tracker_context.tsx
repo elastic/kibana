@@ -13,6 +13,7 @@ import type {
 
 import { createUsageTracker, createEmptyUsageTracker } from '../usage_tracker';
 import type { AppUsageTracker } from '../types';
+import { AnalyticsEvents } from '../analytics/constants';
 
 const UsageTrackerContext = createContext<AppUsageTracker>(createEmptyUsageTracker());
 
@@ -26,7 +27,7 @@ export function UsageTrackerContextProvider({
 }: UsageTrackerContextProviderProps) {
   const usageTracker = useMemo(() => {
     const gettingStartedUsageTracker = createUsageTracker(usageCollection);
-    gettingStartedUsageTracker.load('opened_app');
+    gettingStartedUsageTracker.load(AnalyticsEvents.openedApp);
     return gettingStartedUsageTracker;
   }, [usageCollection]);
   return (

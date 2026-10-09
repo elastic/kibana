@@ -92,6 +92,12 @@ export function RGBPicker({
           color={customColorHex}
           display="inline"
           swatches={[]}
+          aria-label={i18n.translate(
+            'coloring.colorMapping.colorPicker.selectCustomColorAriaLabel',
+            {
+              defaultMessage: 'Select a custom color',
+            }
+          )}
         />
       </EuiFlexItem>
       <EuiFlexItem>

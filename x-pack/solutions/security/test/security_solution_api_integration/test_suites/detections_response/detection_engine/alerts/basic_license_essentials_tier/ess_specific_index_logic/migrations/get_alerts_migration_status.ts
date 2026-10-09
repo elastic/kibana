@@ -107,12 +107,16 @@ export default ({ getService }: FtrProviderContext): void => {
     it('rejects the request if the user does not have sufficient privileges', async () => {
       await createUserAndRole(getService, ROLES.t1_analyst);
 
+      // `t1_analyst` has no `view_index_metadata`/`manage` privilege on `.siem-signals-*`, so it
+      // cannot read the signals migration status. Because the role does hold `view_index_metadata`
+      // on the Attack Discovery indices, Elasticsearch authorizes the `_alias` action and then hides
+      // the inaccessible `.siem-signals-*` indices, returning 404 instead of rejecting outright (403).
       await supertestWithoutAuth
         .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
         .set('kbn-xsrf', 'true')
         .auth(ROLES.t1_analyst, 'changeme')
         .query({ from: '2020-10-10' })
-        .expect(403);
+        .expect(404);
 
       await deleteUserAndRole(getService, ROLES.t1_analyst);
     });

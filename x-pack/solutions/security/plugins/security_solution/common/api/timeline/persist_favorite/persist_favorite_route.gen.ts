@@ -14,18 +14,20 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { TimelineType, FavoriteTimelineResponse } from '../model/components.gen';
 
+export const PersistFavoriteRouteRequestBody = lazySchema(() =>
+  z.object({
+    timelineId: z.string().nullable(),
+    templateTimelineId: z.string().nullable(),
+    templateTimelineVersion: z.number().nullable(),
+    timelineType: TimelineType.nullable(),
+  })
+);
 export type PersistFavoriteRouteRequestBody = z.infer<typeof PersistFavoriteRouteRequestBody>;
-export const PersistFavoriteRouteRequestBody = z.object({
-  timelineId: z.string().nullable(),
-  templateTimelineId: z.string().nullable(),
-  templateTimelineVersion: z.number().nullable(),
-  timelineType: TimelineType.nullable(),
-});
 export type PersistFavoriteRouteRequestBodyInput = z.input<typeof PersistFavoriteRouteRequestBody>;
 
+export const PersistFavoriteRouteResponse = lazySchema(() => FavoriteTimelineResponse);
 export type PersistFavoriteRouteResponse = z.infer<typeof PersistFavoriteRouteResponse>;
-export const PersistFavoriteRouteResponse = FavoriteTimelineResponse;

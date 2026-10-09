@@ -14,11 +14,9 @@ import {
   createAndSyncRuleAndAlertsFactory,
   readRiskScores,
   normalizeScores,
-  waitForRiskScoresToBePresent,
   waitForRiskScoreForId,
   EntityStoreUtils,
   entityMaintainerRouteHelpersFactory,
-  waitForMaintainerRun,
   cleanUpRiskScoreMaintainer,
   assetCriticalityRouteHelpersFactory,
   cleanAssetCriticality,
@@ -28,7 +26,6 @@ import {
   riskScoreMaintainerScenarioFactory,
   riskScoreMaintainerEntityBuilders,
   waitForEntityScoreResetToZero,
-  waitForEntityStoreEntities,
   indexListOfDocumentsFactory,
   waitForEntityStoreDoc,
   setupMaintainerLogsDataStream,
@@ -61,8 +58,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/261100
-  describe.skip('@ess @serverless @serverlessQA Risk Score Maintainer Entity Calculation', function () {
+  describe('@ess @serverless @serverlessQA Risk Score Maintainer Entity Calculation', function () {
     this.tags(['esGate']);
 
     context('with test log data', () => {
@@ -113,7 +109,10 @@ export default ({ getService }: FtrProviderContext): void => {
       it('calculates and persists risk score for a single host entity', async () => {
         const documentId = uuidv4();
         const { documentIds, testEntities } = await maintainerScenario.seedEntities([
-          riskScoreMaintainerEntityBuilders.host({ hostName: 'host-1', documentId }),
+          riskScoreMaintainerEntityBuilders.host({
+            hostName: `host-single-${uuidv4().slice(0, 8)}`,
+            documentId,
+          }),
         ]);
         const [host] = testEntities;
         await maintainerScenario.createAlertsForDocumentIds({
@@ -159,7 +158,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           await maintainerScenario.installAndRunMaintainer({ dataViewPattern: testLogsIndex });
-          await waitForRiskScoresToBePresent({ es, log, scoreCount: 1 });
+          await waitForRiskScoreForId({ es, log, idValue: host.expectedEuid });
 
           const rawScores = await readRiskScores(es);
           const ecsDoc = rawScores.find((s) => s.host?.risk?.id_value === host.expectedEuid);
@@ -226,7 +225,6 @@ export default ({ getService }: FtrProviderContext): void => {
             entityTypes: ['user', 'host'],
             dataViewPattern: testLogsIndex,
           });
-          await waitForEntityStoreEntities({ es, log, count: 1 });
 
           // Set up both modifiers while the maintainer runs freely in the
           // background. Any scoring runs that happen before both modifiers
@@ -268,7 +266,8 @@ export default ({ getService }: FtrProviderContext): void => {
           // Both modifiers are confirmed in the entity store. Capture the
           // current run count as the baseline and trigger a fresh run — any
           // run that starts now will see both modifiers.
-          await waitForMaintainerRun({ retry, routes: maintainerRoutes, minRuns: 1 });
+          await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, 'default') });
+          await maintainerRoutes.runMaintainerSync('risk-score');
 
           let risk: Record<string, unknown> = {};
           await retry.waitForWithTimeout(
@@ -323,8 +322,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('calculates risk scores for hosts and users together', async () => {
         const { documentIds, testEntities } = await maintainerScenario.seedEntities([
-          riskScoreMaintainerEntityBuilders.host({ hostName: 'host-1' }),
-          riskScoreMaintainerEntityBuilders.idpUser({ userName: 'user-1' }),
+          riskScoreMaintainerEntityBuilders.host({ hostName: `host-pair-${uuidv4().slice(0, 8)}` }),
+          riskScoreMaintainerEntityBuilders.idpUser({
+            userName: `user-pair-${uuidv4().slice(0, 8)}`,
+          }),
         ]);
         const [host, idpUser] = testEntities;
         await maintainerScenario.createAlertsForDocumentIds({
@@ -332,8 +333,22 @@ export default ({ getService }: FtrProviderContext): void => {
           alerts: 2,
           riskScore: 21,
         });
-        await maintainerScenario.installAndRunMaintainer({ dataViewPattern: testLogsIndex });
-        await waitForRiskScoresToBePresent({ es, log, scoreCount: 2 });
+
+        // Install separately so we can wait for both entities to be extracted
+        // before running the maintainer. installAndRunMaintainer only waits for
+        // count:1 entity internally, so the IdP user can lag behind the host and
+        // the maintainer runs before it is scored.
+        await entityStoreUtils.installEntityStoreV2({
+          entityTypes: ['user', 'host'],
+          dataViewPattern: testLogsIndex,
+        });
+        await waitForEntityStoreDoc({ es, retry, entityId: host.expectedEuid });
+        await waitForEntityStoreDoc({ es, retry, entityId: idpUser.expectedEuid });
+        await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, 'default') });
+        await maintainerRoutes.runMaintainerSync('risk-score');
+
+        await waitForRiskScoreForId({ es, log, idValue: host.expectedEuid });
+        await waitForRiskScoreForId({ es, log, idValue: idpUser.expectedEuid });
 
         const scores = await readRiskScores(es);
         const normalized = normalizeScores(scores);
@@ -364,7 +379,8 @@ export default ({ getService }: FtrProviderContext): void => {
           dataViewPattern: testLogsIndex,
         });
         await waitForEntityStoreDoc({ es, retry, entityId: localUser.expectedEuid });
-        await waitForMaintainerRun({ retry, routes: maintainerRoutes, minRuns: 1 });
+        await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, 'default') });
+        await maintainerRoutes.runMaintainerSync('risk-score');
         const score = await waitForRiskScoreForId({
           es,
           log,
@@ -391,7 +407,8 @@ export default ({ getService }: FtrProviderContext): void => {
           dataViewPattern: testLogsIndex,
         });
         await waitForEntityStoreDoc({ es, retry, entityId: serviceEntity.expectedEuid });
-        await waitForMaintainerRun({ retry, routes: maintainerRoutes, minRuns: 1 });
+        await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, 'default') });
+        await maintainerRoutes.runMaintainerSync('risk-score');
 
         let ecsDoc: Awaited<ReturnType<typeof readRiskScores>>[number] | undefined;
         await retry.waitForWithTimeout(
@@ -456,9 +473,8 @@ export default ({ getService }: FtrProviderContext): void => {
           });
           await waitForEntityStoreDoc({ es, retry, entityId: testHost.expectedEuid });
 
-          // Stop the maintainer while we update criticality so a stale run
-          // doesn't score the entity before the modifier is in place.
-          await maintainerRoutes.stopMaintainer('risk-score');
+          // The maintainer is not auto-started, so we can safely set up the criticality
+          // relationship before running it.
 
           await maintainerScenario.setEntityCriticality({
             testEntity: testHost,
@@ -471,8 +487,8 @@ export default ({ getService }: FtrProviderContext): void => {
             requireCriticality: 'high_impact',
           });
 
-          await maintainerRoutes.startMaintainer('risk-score');
-          await waitForMaintainerRun({ retry, routes: maintainerRoutes, minRuns: 1 });
+          await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, 'default') });
+          await maintainerRoutes.runMaintainerSync('risk-score');
           const score = await waitForRiskScoreForId({
             es,
             log,
@@ -562,7 +578,8 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(entityDoc?.entity?.attributes?.watchlists ?? []).to.contain(watchlistId);
 
           // Watchlist confirmed in entity store — trigger a fresh run.
-          await waitForMaintainerRun({ retry, routes: maintainerRoutes, minRuns: 1 });
+          await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, 'default') });
+          await maintainerRoutes.runMaintainerSync('risk-score');
           await retry.waitForWithTimeout(
             `risk score with watchlist modifier for ${idpUser.expectedEuid}`,
             60_000,
@@ -621,12 +638,13 @@ export default ({ getService }: FtrProviderContext): void => {
           });
           expect(firstScore.calculated_score_norm).to.be.greaterThan(0);
 
-          await maintainerRoutes.stopMaintainer('risk-score');
+          // The maintainer is not auto-started, so we can safely set up the rules
+          // before running it.
           await deleteAllRules(supertest, log);
           await deleteAllAlerts(supertest, log, es);
 
-          await maintainerRoutes.startMaintainer('risk-score');
-          await waitForMaintainerRun({ retry, routes: maintainerRoutes, minRuns: 1 });
+          await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, 'default') });
+          await maintainerRoutes.runMaintainerSync('risk-score');
           await waitForEntityScoreResetToZero({ es, retry, entityId: host.expectedEuid });
         });
 
@@ -660,11 +678,12 @@ export default ({ getService }: FtrProviderContext): void => {
             .send({ enable_reset_to_zero: false })
             .expect(200);
 
-          await maintainerRoutes.stopMaintainer('risk-score');
+          // The maintainer is not auto-started, so we can safely set up the rules
+          // before running it.
           await deleteAllRules(supertest, log);
           await deleteAllAlerts(supertest, log, es);
-          await maintainerRoutes.startMaintainer('risk-score');
-          await waitForMaintainerRun({ retry, routes: maintainerRoutes, minRuns: 1 });
+          await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, 'default') });
+          await maintainerRoutes.runMaintainerSync('risk-score');
 
           // The entity should NOT have been reset to zero — only positive scores should exist
           const scores = normalizeScores(await readRiskScores(es));

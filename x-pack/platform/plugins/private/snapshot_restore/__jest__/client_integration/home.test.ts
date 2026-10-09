@@ -7,8 +7,10 @@
 
 import './helpers/mocks';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { getRandomString } from '@kbn/test-jest-helpers';
-import { screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import * as fixtures from '../../test/fixtures';
@@ -20,6 +22,7 @@ import {
 import { REPOSITORY_NAME } from './helpers/constant';
 import { setupEnvironment } from './helpers/setup_environment';
 import { renderHome } from './helpers/render_home';
+import { resolvePath } from './helpers/http_requests';
 
 type Repository = ReturnType<typeof fixtures.getRepository>;
 type Snapshot = ReturnType<typeof fixtures.getSnapshot>;
@@ -68,6 +71,11 @@ describe('<SnapshotRestoreHome />', () => {
     const env = setupEnvironment();
     httpSetup = env.httpSetup;
     httpRequestsMockHelpers = env.httpRequestsMockHelpers;
+    httpRequestsMockHelpers.setLoadDefaultRepositoryResponse({ repositoryName: null });
+    httpRequestsMockHelpers.setSetDefaultRepositoryResponse({
+      acknowledged: true,
+      repositoryName: null,
+    });
   });
 
   describe('on component mount', () => {
@@ -78,7 +86,7 @@ describe('<SnapshotRestoreHome />', () => {
 
       renderHomePage();
 
-      const appTitle = await screen.findByTestId('appTitle');
+      const appTitle = await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
       expect(appTitle).toHaveTextContent('Snapshot and Restore');
     });
 
@@ -109,8 +117,10 @@ describe('<SnapshotRestoreHome />', () => {
 
       renderHomePage();
 
-      const docLink = await screen.findByTestId('documentationLink');
-      expect(docLink).toHaveTextContent('Snapshot and Restore docs');
+      await openAppMenuOverflow();
+      const docLink = await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation);
+      expect(docLink).toHaveAttribute('href');
+      expect(docLink).toHaveAttribute('target', '_blank');
     });
 
     describe('tabs', () => {
@@ -213,15 +223,24 @@ describe('<SnapshotRestoreHome />', () => {
         renderHomePage();
 
         await screen.findByTestId('reloadButton');
+        // Clear out any initial calls done during mount. We only care about what the Reload click triggers.
+        httpSetup.get.mockClear();
+
         const user = userEvent.setup();
         await user.click(screen.getByTestId('reloadButton'));
 
         await waitFor(() => {
-          expect(httpSetup.get).toHaveBeenLastCalledWith(
-            `${API_BASE_PATH}repositories`,
-            expect.anything()
-          );
+          expect(httpSetup.get).toHaveBeenCalledTimes(2);
         });
+
+        const calledPaths = httpSetup.get.mock.calls.map((call) => resolvePath(call[0]));
+
+        expect(calledPaths).toEqual(
+          expect.arrayContaining([
+            `${API_BASE_PATH}repositories`,
+            `${API_BASE_PATH}default_repository`,
+          ])
+        );
       });
 
       test('should have a button to register a new repository', async () => {
@@ -236,8 +255,15 @@ describe('<SnapshotRestoreHome />', () => {
 
         const table = await screen.findByTestId('repositoryTable');
         const firstRow = within(table).getAllByTestId('row')[0];
-        expect(within(firstRow).getByTestId('editRepositoryButton')).toBeInTheDocument();
-        expect(within(firstRow).getByTestId('deleteRepositoryButton')).toBeInTheDocument();
+        expect(
+          within(firstRow).getByTestId(`editRepositoryButton-${repo1.name}`)
+        ).toBeInTheDocument();
+
+        const user = userEvent.setup();
+        await user.click(within(firstRow).getByTestId(`repositoryActionsMenuButton-${repo1.name}`));
+        expect(
+          await screen.findByTestId(`deleteRepositoryButton-${repo1.name}`)
+        ).toBeInTheDocument();
       });
 
       describe('delete repository', () => {
@@ -248,7 +274,10 @@ describe('<SnapshotRestoreHome />', () => {
           const firstRow = within(table).getAllByTestId('row')[0];
 
           const user = userEvent.setup();
-          await user.click(within(firstRow).getByTestId('deleteRepositoryButton'));
+          await user.click(
+            within(firstRow).getByTestId(`repositoryActionsMenuButton-${repo1.name}`)
+          );
+          fireEvent.click(await screen.findByTestId(`deleteRepositoryButton-${repo1.name}`));
 
           const modal = await within(document.body).findByTestId('deleteRepositoryConfirmation');
           expect(modal).toHaveTextContent(`Remove repository '${repo1.name}'?`);
@@ -261,7 +290,10 @@ describe('<SnapshotRestoreHome />', () => {
           const firstRow = within(table).getAllByTestId('row')[0];
 
           const user = userEvent.setup();
-          await user.click(within(firstRow).getByTestId('deleteRepositoryButton'));
+          await user.click(
+            within(firstRow).getByTestId(`repositoryActionsMenuButton-${repo1.name}`)
+          );
+          fireEvent.click(await screen.findByTestId(`deleteRepositoryButton-${repo1.name}`));
 
           await within(document.body).findByTestId('deleteRepositoryConfirmation');
           await user.click(within(document.body).getByTestId('confirmModalConfirmButton'));

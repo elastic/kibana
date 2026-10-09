@@ -21,6 +21,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 interface PromptModalProps {
   prompt: string;
@@ -29,12 +31,13 @@ interface PromptModalProps {
 
 export const PromptModal: React.FC<PromptModalProps> = ({ prompt, onClose }) => {
   const modalTitleId = useGeneratedHtmlId({ prefix: 'promptModal' });
+  const usageTracker = useUsageTracker();
 
   return (
     <EuiModal onClose={onClose} aria-labelledby={modalTitleId} maxWidth={600}>
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
-          {i18n.translate('xpack.gettingStarted.promptModal.title', {
+          {i18n.translate('xpack.searchGettingStarted.promptModal.title', {
             defaultMessage: 'Copy prompt to your coding agent',
           })}
         </EuiModalHeaderTitle>
@@ -42,7 +45,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({ prompt, onClose }) => 
       <EuiModalBody>
         <EuiText size="s" color="subdued">
           <p>
-            {i18n.translate('xpack.gettingStarted.promptModal.description', {
+            {i18n.translate('xpack.searchGettingStarted.promptModal.description', {
               defaultMessage:
                 'Paste this prompt into any coding agent to install the Elasticsearch onboarding skills.',
             })}
@@ -55,14 +58,21 @@ export const PromptModal: React.FC<PromptModalProps> = ({ prompt, onClose }) => 
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onClose} data-test-subj="promptModalCloseBtn">
-          {i18n.translate('xpack.gettingStarted.promptModal.close', {
+          {i18n.translate('xpack.searchGettingStarted.promptModal.close', {
             defaultMessage: 'Close',
           })}
         </EuiButtonEmpty>
         <EuiCopy textToCopy={prompt}>
           {(copy) => (
-            <EuiButton onClick={copy} fill data-test-subj="promptModalCopyBtn">
-              {i18n.translate('xpack.gettingStarted.promptModal.copy', {
+            <EuiButton
+              onClick={() => {
+                usageTracker.click(AnalyticsEvents.claudeCliPromptCopied);
+                copy();
+              }}
+              fill
+              data-test-subj="promptModalCopyBtn"
+            >
+              {i18n.translate('xpack.searchGettingStarted.promptModal.copy', {
                 defaultMessage: 'Copy to clipboard',
               })}
             </EuiButton>

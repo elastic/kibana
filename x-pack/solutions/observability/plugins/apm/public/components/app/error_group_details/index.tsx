@@ -11,10 +11,8 @@ import React, { useEffect } from 'react';
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import {
-  OBSERVABILITY_AGENT_ID,
-  OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
-} from '@kbn/observability-agent-builder-plugin/public';
+import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { isOpenTelemetryAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -24,7 +22,6 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { ErrorSampler } from './error_sampler';
 import { ErrorDistribution } from './distribution';
 import { TopErroneousTransactions } from './top_erroneous_transactions';
@@ -210,7 +207,6 @@ export function ErrorGroupDetails() {
 
     agentBuilder.setChatConfig({
       newConversation: true,
-      agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
         {
           type: OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,

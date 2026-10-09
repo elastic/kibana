@@ -17,14 +17,15 @@ export {
   type TabStateGlobalState,
   type RecentlyClosedTabState,
   type DiscoverAppState,
+  type ExpandedDocCascadePath,
   type InternalStateDataRequestParams,
   type CascadedDocumentsState,
-  type DefaultProfileStateField,
-  type DefaultProfileStateFields,
-  type DefaultProfileState,
-  type ProfileStateSnapshot,
+  type ProfileAppStateDefaultField,
+  type ProfileAppStateDefaultFields,
+  type ProfileAppStateDefaults,
+  type ProfileAppStateSnapshot,
   type UpdateESQLQueryActionPayload,
-  DEFAULT_PROFILE_STATE_FIELDS,
+  PROFILE_APP_STATE_DEFAULT_FIELDS,
   TabInitializationStatus,
   TabsBarVisibility,
 } from './types';
@@ -42,9 +43,14 @@ export const internalStateActions = {
   ...omit(
     internalStateSlice.actions,
     'setTabs',
+    'setPersistedDiscoverSession',
+    'setDraftSessionTitle',
+    'disconnectTab',
     'setDefaultProfileAdHocDataViewIds',
     'setAppState',
-    'syncProfileStateSnapshot'
+    'setProfileState',
+    'syncProfileAppStateSnapshot',
+    'setExpandedDoc'
   ),
   ...actions,
   syncLocallyPersistedTabState,
@@ -67,6 +73,8 @@ export {
 export {
   selectAllTabs,
   selectRecentlyClosedTabs,
+  selectPersistedDiscoverSession,
+  selectSavedDataViews,
   selectTab,
   selectTabAppState,
   selectTabCombinedFilters,
@@ -74,6 +82,7 @@ export {
   selectHasUnsavedChanges,
   searchSourceComparator,
   selectTabSavedSearch,
+  selectTabSavedSearchByValueAttributes,
 } from './selectors';
 
 export {
@@ -86,6 +95,11 @@ export {
   useRuntimeState,
   selectTabRuntimeState,
   selectDataSourceProfileId,
+  selectCurrentProfileStateDefinition,
+  selectCurrentProfileUrlState,
+  selectCurrentProfileLocatorState,
+  selectCurrentTabType,
+  selectTabTypeForPersistence,
   selectIsDataViewUsedInMultipleRuntimeTabStates,
   selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,
@@ -94,6 +108,7 @@ export {
   RuntimeStateManagerProvider,
   useRuntimeStateManager,
   useCurrentDataView,
+  useCurrentDataSource,
   useAdHocDataViews,
 } from './runtime_state';
 
@@ -108,6 +123,7 @@ export {
 
 export {
   fromSavedObjectTabToSearchSource,
+  fromSavedObjectTabToAppState,
   fromSavedObjectTabToTabState,
   fromSavedObjectTabToSavedSearch,
   fromTabStateToSavedObjectTab,

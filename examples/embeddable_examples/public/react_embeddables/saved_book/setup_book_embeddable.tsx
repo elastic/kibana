@@ -18,7 +18,7 @@ export function setupBookEmbeddable(
   embeddable: EmbeddableSetup,
   contentManagement: ContentManagementPublicSetup
 ) {
-  embeddable.registerReactEmbeddableFactory(BOOK_EMBEDDABLE_TYPE, async () => {
+  embeddable.registerEmbeddablePublicDefinition(BOOK_EMBEDDABLE_TYPE, async () => {
     const { getSavedBookEmbeddableFactory } = await import('./saved_book_react_embeddable');
     const [coreStart] = await core.getStartServices();
     return getSavedBookEmbeddableFactory(coreStart);

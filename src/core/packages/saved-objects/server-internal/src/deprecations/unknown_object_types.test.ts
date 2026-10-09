@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getIndexForTypeMock } from './unknown_object_types.test.mocks';
+import './unknown_object_types.test.mocks';
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { deleteUnknownTypeObjects, getUnknownTypesDeprecations } from './unknown_object_types';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { type SavedObjectsType, MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { type SavedObjectsType, ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 
 const createAggregateTypesSearchResponse = (
   typesIds: Record<string, string[]> = {}
@@ -48,10 +48,12 @@ const createAggregateTypesSearchResponse = (
 
 describe('unknown saved object types deprecation', () => {
   const kibanaVersion = '8.0.0';
+  const expectedTargetIndices = ALL_SAVED_OBJECT_INDICES.map(
+    (index) => `${index}_${kibanaVersion}`
+  );
 
   let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
   let esClient: ReturnType<typeof elasticsearchClientMock.createScopedClusterClient>;
-  const kibanaIndex = MAIN_SAVED_OBJECT_INDEX;
 
   beforeEach(() => {
     typeRegistry = typeRegistryMock.create();
@@ -61,11 +63,6 @@ describe('unknown saved object types deprecation', () => {
       { name: 'foo' },
       { name: 'bar' },
     ] as SavedObjectsType[]);
-    getIndexForTypeMock.mockImplementation(({ type }: { type: string }) => `${type}-index`);
-  });
-
-  afterEach(() => {
-    getIndexForTypeMock.mockReset();
   });
 
   describe('getUnknownTypesDeprecations', () => {
@@ -73,43 +70,38 @@ describe('unknown saved object types deprecation', () => {
       esClient.asInternalUser.search.mockResponse(createAggregateTypesSearchResponse());
     });
 
-    it('calls `esClient.asInternalUser.search` with the correct parameters', async () => {
+    it('searches all known Kibana SO indices for the current version', async () => {
       await getUnknownTypesDeprecations({
         esClient,
         typeRegistry,
-        kibanaIndex,
         kibanaVersion,
       });
 
       expect(esClient.asInternalUser.search).toHaveBeenCalledTimes(1);
-      expect(esClient.asInternalUser.search).toHaveBeenCalledWith({
-        index: ['foo-index', 'bar-index'],
-        size: 0,
-        aggs: {
-          typesAggregation: {
-            terms: {
-              missing: '__UNKNOWN__',
-              field: 'type',
-              size: 1000,
-            },
-            aggs: {
-              docs: {
-                top_hits: {
-                  size: 100,
-                  _source: {
-                    excludes: ['*'],
-                  },
-                },
-              },
-            },
-          },
-        },
-        query: {
-          bool: {
-            must_not: [{ term: { type: 'foo' } }, { term: { type: 'bar' } }],
-          },
-        },
+      expect(esClient.asInternalUser.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: expectedTargetIndices,
+          ignore_unavailable: true,
+        })
+      );
+    });
+
+    it('excludes all registered types from the search query', async () => {
+      await getUnknownTypesDeprecations({
+        esClient,
+        typeRegistry,
+        kibanaVersion,
       });
+
+      expect(esClient.asInternalUser.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must_not: [{ term: { type: 'foo' } }, { term: { type: 'bar' } }],
+            },
+          },
+        })
+      );
     });
 
     it('returns no deprecation if no unknown type docs are found', async () => {
@@ -118,7 +110,6 @@ describe('unknown saved object types deprecation', () => {
       const deprecations = await getUnknownTypesDeprecations({
         esClient,
         typeRegistry,
-        kibanaIndex,
         kibanaVersion,
       });
 
@@ -137,7 +128,6 @@ describe('unknown saved object types deprecation', () => {
       const deprecations = await getUnknownTypesDeprecations({
         esClient,
         typeRegistry,
-        kibanaIndex,
         kibanaVersion,
       });
 
@@ -158,22 +148,41 @@ describe('unknown saved object types deprecation', () => {
         },
       });
     });
+
+    it('detects unknown types even when no types are registered (all plugins disabled)', async () => {
+      typeRegistry.getAllTypes.mockReturnValue([]);
+
+      esClient.asInternalUser.search.mockResponse(
+        createAggregateTypesSearchResponse({
+          'cloud-security-posture-settings': ['id1'],
+        })
+      );
+
+      const deprecations = await getUnknownTypesDeprecations({
+        esClient,
+        typeRegistry,
+        kibanaVersion,
+      });
+
+      // ALL_SAVED_OBJECT_INDICES ensures the index is still scanned even without registered
+      // types; documents from disabled plugins are detected.
+      expect(deprecations.length).toEqual(1);
+    });
   });
 
   describe('deleteUnknownTypeObjects', () => {
-    it('calls `esClient.asInternalUser.search` with the correct parameters', async () => {
+    it('deletes from all known Kibana SO indices for the current version', async () => {
       await deleteUnknownTypeObjects({
         esClient,
         typeRegistry,
-        kibanaIndex,
         kibanaVersion,
       });
 
       expect(esClient.asInternalUser.deleteByQuery).toHaveBeenCalledTimes(1);
-
       expect(esClient.asInternalUser.deleteByQuery).toHaveBeenCalledWith({
-        index: ['foo-index', 'bar-index'],
+        index: expectedTargetIndices,
         wait_for_completion: false,
+        ignore_unavailable: true,
         query: {
           bool: {
             must_not: [{ term: { type: 'foo' } }, { term: { type: 'bar' } }],

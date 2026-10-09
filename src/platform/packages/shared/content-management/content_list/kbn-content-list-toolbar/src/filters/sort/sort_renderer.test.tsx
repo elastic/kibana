@@ -99,7 +99,7 @@ describe('SortRenderer', () => {
   });
 
   describe('default sort options', () => {
-    it('shows default title sort options when no sorting config is provided', () => {
+    it('shows default Name and Last updated sort options when no sorting config is provided', () => {
       const Wrapper = createWrapper();
       render(
         <Wrapper>
@@ -110,10 +110,11 @@ describe('SortRenderer', () => {
       // Open the popover.
       fireEvent.click(screen.getByTestId('contentListSortRenderer'));
 
-      // "A-Z" appears in both the button label and the selectable option.
-      expect(screen.getAllByText('A-Z').length).toBeGreaterThanOrEqual(1);
-      // "Z-A" should appear in the selectable list.
+      // Default fields generate 4 options: A-Z, Z-A, Oldest first, Newest first.
+      expect(screen.getByRole('option', { name: /A-Z/i })).toBeInTheDocument();
       expect(screen.getByRole('option', { name: /Z-A/i })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: /Newest first/i })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: /Oldest first/i })).toBeInTheDocument();
     });
 
     it('selects the current sort option by default (A-Z)', () => {
@@ -124,7 +125,7 @@ describe('SortRenderer', () => {
         </Wrapper>
       );
 
-      // The button label should reflect the current sort.
+      // Default initial sort is title asc ("A-Z").
       const button = screen.getByTestId('contentListSortRenderer');
       expect(button).toHaveTextContent('A-Z');
     });
@@ -240,6 +241,83 @@ describe('SortRenderer', () => {
       expect(screen.getByRole('option', { name: /Format \(ascending\)/i })).toBeInTheDocument();
       expect(screen.getByRole('option', { name: /Format \(descending\)/i })).toBeInTheDocument();
       expect(screen.queryByRole('option', { name: /Oldest first/i })).not.toBeInTheDocument();
+    });
+
+    it('offers only the listed directions', () => {
+      const Wrapper = createWrapper({
+        sortFields: [
+          {
+            field: 'accessedAt',
+            name: 'Recently viewed',
+            descLabel: 'Recently viewed',
+            allowedDirections: ['desc'],
+          },
+        ],
+        initialSort: { field: 'accessedAt', direction: 'desc' },
+      });
+      render(
+        <Wrapper>
+          <SortRenderer query={mockQuery} />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('contentListSortRenderer'));
+
+      const options = screen.getAllByRole('option');
+      expect(options).toHaveLength(1);
+      expect(options[0]).toHaveTextContent('Recently viewed');
+    });
+
+    it('shows a help icon on every option of a field that has a description', () => {
+      const Wrapper = createWrapper({
+        sortFields: [
+          { field: 'status', name: 'Status', description: 'Stored in your browser.' },
+          { field: 'title', name: 'Name' },
+        ],
+      });
+      render(
+        <Wrapper>
+          <SortRenderer query={mockQuery} />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('contentListSortRenderer'));
+
+      expect(screen.getByRole('option', { name: /Status \(ascending\)/i })).toHaveTextContent(
+        'Additional information'
+      );
+      expect(screen.getByRole('option', { name: /Status \(descending\)/i })).toHaveTextContent(
+        'Additional information'
+      );
+      expect(screen.getByRole('option', { name: /A-Z/i })).not.toHaveTextContent(
+        'Additional information'
+      );
+    });
+
+    it('shows only the help icon when the field offers a single direction', () => {
+      const Wrapper = createWrapper({
+        sortFields: [
+          {
+            field: 'accessedAt',
+            name: 'Recently viewed',
+            descLabel: 'Recently viewed',
+            allowedDirections: ['desc'],
+            description: 'Stored in your browser.',
+          },
+        ],
+        initialSort: { field: 'accessedAt', direction: 'desc' },
+      });
+      render(
+        <Wrapper>
+          <SortRenderer query={mockQuery} />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('contentListSortRenderer'));
+
+      const option = screen.getByRole('option', { name: /Recently viewed/i });
+      expect(option).toHaveTextContent('Additional information');
+      expect(option.querySelector('[data-euiicon-type="sortDown"]')).not.toBeInTheDocument();
     });
   });
 

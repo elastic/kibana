@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   isCcsTarget,
   partitionByCcs,
@@ -14,6 +16,12 @@ import {
   getIndexFields,
 } from './ccs';
 import { getIndexMappings } from './mappings';
+
+const fieldCapsRequest = (index: string) => ({
+  index,
+  fields: ['*'],
+  index_filter: { bool: { must_not: [{ term: { _tier: 'data_frozen' } }] } },
+});
 
 describe('isCcsTarget', () => {
   it('returns true for a CCS pattern with cluster prefix', () => {
@@ -111,15 +119,28 @@ describe('getFieldsFromFieldCaps', () => {
       esClient,
     });
 
-    expect(esClient.fieldCaps).toHaveBeenCalledWith({
-      index: 'remote:my-index',
-      fields: ['*'],
-    });
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('remote:my-index'));
 
     expect(fields.sort((a, b) => a.path.localeCompare(b.path))).toEqual([
       { path: 'message', type: 'text', meta: {}, searchable: true },
       { path: 'status', type: 'keyword', meta: {}, searchable: true },
     ]);
+  });
+
+  it('keeps frozen tier indices when they are included', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.fieldCaps.mockResolvedValue({ indices: ['remote:my-index'], fields: {} });
+
+    await getFieldsFromFieldCaps({
+      resource: 'remote:my-index',
+      esClient,
+      includeFrozen: true,
+    });
+
+    expect(esClient.fieldCaps).toHaveBeenCalledWith({
+      index: 'remote:my-index',
+      fields: ['*'],
+    });
   });
 });
 
@@ -131,10 +152,24 @@ jest.mock('./mappings', () => ({
 const getIndexMappingsMock = getIndexMappings as jest.MockedFunction<typeof getIndexMappings>;
 
 describe('getIndexFields', () => {
-  const createEsClient = (fieldCapsResponse?: unknown) =>
+  const createEsClient = (overrides?: {
+    fieldCapsResponse?: unknown;
+    resolveIndex?: jest.Mock;
+    transport?: jest.Mock;
+  }) =>
     ({
-      fieldCaps: jest.fn().mockResolvedValue(fieldCapsResponse ?? { indices: [], fields: {} }),
-      indices: { getMapping: jest.fn() },
+      fieldCaps: jest
+        .fn()
+        .mockResolvedValue(overrides?.fieldCapsResponse ?? { indices: [], fields: {} }),
+      indices: {
+        getMapping: jest.fn(),
+        resolveIndex:
+          overrides?.resolveIndex ??
+          jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
+      },
+      transport: {
+        request: overrides?.transport ?? jest.fn(),
+      },
     } as unknown as ElasticsearchClient);
 
   beforeEach(() => {
@@ -142,7 +177,12 @@ describe('getIndexFields', () => {
   });
 
   it('returns rawMapping for local indices via _mapping API', async () => {
-    const esClient = createEsClient();
+    const resolveIndex = jest.fn().mockResolvedValue({
+      indices: [{ name: 'my-index' }],
+      aliases: [],
+      data_streams: [],
+    });
+    const esClient = createEsClient({ resolveIndex });
     getIndexMappingsMock.mockResolvedValue({
       'my-index': {
         mappings: {
@@ -159,11 +199,19 @@ describe('getIndexFields', () => {
       esClient,
     });
 
+    expect(resolveIndex).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: ['my-index'],
+        allow_no_indices: true,
+      })
+    );
     expect(getIndexMappingsMock).toHaveBeenCalledWith({
       indices: ['my-index'],
       cleanup: true,
+      skipUnauthorized: false,
       esClient,
     });
+    expect(result['my-index'].type).toBe('index');
     expect(result['my-index'].rawMapping).toBeDefined();
     expect(result['my-index'].rawMapping?._meta?.description).toBe('test index');
     expect(result['my-index'].fields).toEqual([
@@ -171,12 +219,61 @@ describe('getIndexFields', () => {
     ]);
   });
 
+  it('uses _field_caps for a data-stream input, keyed by the user-supplied name', async () => {
+    const resolveIndex = jest.fn().mockResolvedValue({
+      indices: [],
+      aliases: [],
+      data_streams: [{ name: 'metrics-k8sclusterreceiver.otel-default' }],
+    });
+    const esClient = createEsClient({
+      resolveIndex,
+      fieldCapsResponse: {
+        indices: ['.ds-metrics-k8sclusterreceiver.otel-default-001'],
+        fields: {
+          'k8s.cluster.name': {
+            keyword: { type: 'keyword', searchable: true, aggregatable: true },
+          },
+        },
+      },
+    });
+
+    const result = await getIndexFields({
+      indices: ['metrics-k8sclusterreceiver.otel-default'],
+      esClient,
+    });
+
+    expect(resolveIndex).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: ['metrics-k8sclusterreceiver.otel-default'],
+        allow_no_indices: true,
+      })
+    );
+    // Data streams use _field_caps (not _data_stream/_mappings) so that
+    // dynamically-added fields under passthrough properties are included.
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(
+      fieldCapsRequest('metrics-k8sclusterreceiver.otel-default')
+    );
+    expect(esClient.transport.request).not.toHaveBeenCalled();
+    expect(getIndexMappingsMock).not.toHaveBeenCalled();
+
+    // Attribution: the key is the caller's input, not some backing .ds-* name.
+    const entry = result['metrics-k8sclusterreceiver.otel-default'];
+    expect(entry).toBeDefined();
+    expect(entry.type).toBe('dataStream');
+    expect(entry.rawMapping).toBeUndefined();
+    expect(entry.fields).toEqual([
+      { path: 'k8s.cluster.name', type: 'keyword', meta: {}, searchable: true },
+    ]);
+  });
+
   it('returns fields without rawMapping for CCS indices via _field_caps API', async () => {
     const esClient = createEsClient({
-      indices: ['remote:logs'],
-      fields: {
-        status: {
-          keyword: { type: 'keyword', searchable: true, aggregatable: true },
+      fieldCapsResponse: {
+        indices: ['remote:logs'],
+        fields: {
+          status: {
+            keyword: { type: 'keyword', searchable: true, aggregatable: true },
+          },
         },
       },
     });
@@ -186,11 +283,9 @@ describe('getIndexFields', () => {
       esClient,
     });
 
-    expect(esClient.fieldCaps).toHaveBeenCalledWith({
-      index: 'remote:logs',
-      fields: ['*'],
-    });
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('remote:logs'));
     expect(getIndexMappingsMock).not.toHaveBeenCalled();
+    expect(result['remote:logs'].type).toBe('indexPattern');
     expect(result['remote:logs'].rawMapping).toBeUndefined();
     expect(result['remote:logs'].fields).toEqual([
       { path: 'status', type: 'keyword', meta: {}, searchable: true },
@@ -208,13 +303,21 @@ describe('getIndexFields', () => {
       },
     });
 
+    const resolveIndex = jest.fn().mockResolvedValue({
+      indices: [{ name: 'local-index' }],
+      aliases: [],
+      data_streams: [],
+    });
     const esClient = createEsClient({
-      indices: ['cluster:remote-index'],
-      fields: {
-        timestamp: {
-          date: { type: 'date', searchable: true, aggregatable: true },
+      fieldCapsResponse: {
+        indices: ['cluster:remote-index'],
+        fields: {
+          timestamp: {
+            date: { type: 'date', searchable: true, aggregatable: true },
+          },
         },
       },
+      resolveIndex,
     });
 
     const result = await getIndexFields({
@@ -225,15 +328,18 @@ describe('getIndexFields', () => {
     expect(getIndexMappingsMock).toHaveBeenCalledWith({
       indices: ['local-index'],
       cleanup: true,
+      skipUnauthorized: false,
       esClient,
     });
     expect(esClient.fieldCaps).toHaveBeenCalled();
 
+    expect(result['local-index'].type).toBe('index');
     expect(result['local-index'].rawMapping).toBeDefined();
     expect(result['local-index'].fields).toEqual([
       { path: 'name', type: 'keyword', meta: {}, searchable: true },
     ]);
 
+    expect(result['cluster:remote-index'].type).toBe('indexPattern');
     expect(result['cluster:remote-index'].rawMapping).toBeUndefined();
     expect(result['cluster:remote-index'].fields).toEqual([
       { path: 'timestamp', type: 'date', meta: {}, searchable: true },
@@ -251,6 +357,330 @@ describe('getIndexFields', () => {
     expect(result).toEqual({});
     expect(getIndexMappingsMock).not.toHaveBeenCalled();
     expect(esClient.fieldCaps).not.toHaveBeenCalled();
+  });
+
+  it('routes an alias input through _field_caps via the dedicated alias bucket', async () => {
+    const resolveIndex = jest.fn().mockResolvedValue({
+      indices: [],
+      aliases: [{ name: 'my-alias', indices: ['backing-idx'] }],
+      data_streams: [],
+    });
+    const esClient = createEsClient({
+      resolveIndex,
+      fieldCapsResponse: {
+        indices: ['backing-idx'],
+        fields: {
+          status: {
+            keyword: { type: 'keyword', searchable: true, aggregatable: true },
+          },
+        },
+      },
+    });
+
+    const result = await getIndexFields({ indices: ['my-alias'], esClient });
+
+    expect(getIndexMappingsMock).not.toHaveBeenCalled();
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('my-alias'));
+    expect(result['my-alias'].type).toBe('alias');
+    expect(result['my-alias'].rawMapping).toBeUndefined();
+    expect(result['my-alias'].fields).toEqual([
+      { path: 'status', type: 'keyword', meta: {}, searchable: true },
+    ]);
+  });
+
+  it('routes a wildcard resolving to multiple resources through the indexPattern bucket', async () => {
+    const resolveIndex = jest.fn().mockResolvedValue({
+      indices: [{ name: 'logs-2026.04.21' }, { name: 'logs-2026.04.22' }],
+      aliases: [],
+      data_streams: [],
+    });
+    const esClient = createEsClient({
+      resolveIndex,
+      fieldCapsResponse: {
+        indices: ['logs-2026.04.21', 'logs-2026.04.22'],
+        fields: {
+          '@timestamp': {
+            date: { type: 'date', searchable: true, aggregatable: true },
+          },
+        },
+      },
+    });
+
+    const result = await getIndexFields({ indices: ['logs-*'], esClient });
+
+    expect(getIndexMappingsMock).not.toHaveBeenCalled();
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('logs-*'));
+    expect(result['logs-*'].type).toBe('indexPattern');
+    expect(result['logs-*'].rawMapping).toBeUndefined();
+    expect(result['logs-*'].fields).toEqual([
+      { path: '@timestamp', type: 'date', meta: {}, searchable: true },
+    ]);
+  });
+
+  it('returns an empty field list when the input does not resolve to anything', async () => {
+    const resolveIndex = jest.fn().mockResolvedValue({
+      indices: [],
+      aliases: [],
+      data_streams: [],
+    });
+    const esClient = createEsClient({ resolveIndex });
+
+    const result = await getIndexFields({ indices: ['does-not-exist'], esClient });
+
+    expect(getIndexMappingsMock).not.toHaveBeenCalled();
+    expect(result['does-not-exist'].type).toBe('indexPattern');
+    expect(result['does-not-exist'].rawMapping).toBeUndefined();
+    expect(result['does-not-exist'].fields).toEqual([]);
+  });
+
+  it('handles the k8s-otel data-stream reproduction (four data streams in one call)', async () => {
+    const inputs = [
+      'metrics-k8sclusterreceiver.otel-default',
+      'metrics-kubeletstatsreceiver.otel-default',
+      'logs-k8seventsreceiver.otel-default',
+      'logs-k8sobjectsreceiver.otel-default',
+    ];
+    const resolveIndex = jest.fn().mockImplementation(({ name }: { name: string[] }) => {
+      expect(name).toHaveLength(1);
+      return Promise.resolve({
+        indices: [],
+        aliases: [],
+        data_streams: [{ name: name[0] }],
+      });
+    });
+    const esClient = createEsClient({ resolveIndex });
+    // Per-input field_caps mock: each data stream returns its own dynamic field.
+    (esClient.fieldCaps as jest.Mock).mockImplementation(({ index }: { index: string }) =>
+      Promise.resolve({
+        indices: [`.ds-${index}-001`],
+        fields: {
+          [`field_for_${index}`]: {
+            keyword: { type: 'keyword', searchable: true, aggregatable: true },
+          },
+        },
+      })
+    );
+
+    const result = await getIndexFields({ indices: inputs, esClient });
+
+    expect(resolveIndex).toHaveBeenCalledTimes(4);
+    expect(esClient.fieldCaps).toHaveBeenCalledTimes(4);
+    for (const input of inputs) {
+      expect(result[input]).toBeDefined();
+      expect(result[input].type).toBe('dataStream');
+      // _field_caps doesn't expose raw mappings.
+      expect(result[input].rawMapping).toBeUndefined();
+      expect(result[input].fields).toEqual([
+        { path: `field_for_${input}`, type: 'keyword', meta: {}, searchable: true },
+      ]);
+    }
+  });
+
+  it('returns view output columns when the name is an ES|QL view', async () => {
+    const resolveIndex = jest.fn().mockRejectedValue(
+      new esErrors.ResponseError({
+        statusCode: 404,
+        body: { error: { type: 'index_not_found_exception' } },
+        headers: {},
+        meta: {} as any,
+        warnings: [],
+      } as any)
+    );
+    const esClient = {
+      ...createEsClient({ resolveIndex }),
+      esql: {
+        getView: jest.fn().mockResolvedValue({
+          views: [{ name: 'logs-proxy-parsed', query: 'FROM logs-* | KEEP status' }],
+        }),
+        query: jest.fn().mockResolvedValue({
+          columns: [{ name: 'status', type: 'integer' }],
+          values: [],
+        }),
+      },
+    } as unknown as ElasticsearchClient;
+
+    const result = await getIndexFields({
+      indices: ['logs-proxy-parsed'],
+      includeViews: true,
+      esClient,
+    });
+
+    expect(result['logs-proxy-parsed'].type).toBe('view');
+    expect(result['logs-proxy-parsed'].fields).toEqual([
+      { path: 'status', type: 'integer', meta: {} },
+    ]);
+    expect(esClient.fieldCaps).not.toHaveBeenCalled();
+  });
+
+  it('treats a wildcard that matches one view as an index pattern', async () => {
+    const resolveIndex = jest.fn().mockResolvedValue({
+      indices: [],
+      aliases: [],
+      data_streams: [],
+    });
+    const query = jest.fn();
+    const esClient = {
+      ...createEsClient({ resolveIndex }),
+      esql: {
+        getView: jest.fn().mockResolvedValue({
+          views: [{ name: 'logs-parsed', query: 'FROM logs-* | KEEP status' }],
+        }),
+        query,
+      },
+    } as unknown as ElasticsearchClient;
+
+    const result = await getIndexFields({
+      indices: ['logs-*'],
+      includeViews: true,
+      esClient,
+    });
+
+    expect(result['logs-*'].type).toBe('indexPattern');
+    expect(query).not.toHaveBeenCalled();
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('logs-*'));
+  });
+
+  it('does not list views when every local name resolves to an index', async () => {
+    const resolveIndex = jest.fn().mockImplementation(({ name }: { name: string[] }) =>
+      Promise.resolve({
+        indices: [{ name: name[0] }],
+        aliases: [],
+        data_streams: [],
+      })
+    );
+    const getView = jest.fn();
+    const esClient = {
+      ...createEsClient({ resolveIndex }),
+      esql: { getView },
+    } as unknown as ElasticsearchClient;
+    getIndexMappingsMock.mockResolvedValue({
+      'logs-a': { mappings: { properties: { message: { type: 'text' } } } },
+      'logs-b': { mappings: { properties: { message: { type: 'text' } } } },
+    });
+
+    const result = await getIndexFields({
+      indices: ['logs-a', 'logs-b'],
+      includeViews: true,
+      esClient,
+    });
+
+    expect(getView).not.toHaveBeenCalled();
+    expect(result['logs-a'].type).toBe('index');
+    expect(result['logs-b'].type).toBe('index');
+  });
+
+  it('lists views once for names that do not resolve to an index', async () => {
+    const resolveIndex = jest.fn().mockRejectedValue(
+      new esErrors.ResponseError({
+        statusCode: 404,
+        body: { error: { type: 'index_not_found_exception' } },
+        headers: {},
+        meta: {} as any,
+        warnings: [],
+      } as any)
+    );
+    const getView = jest.fn().mockResolvedValue({
+      views: [
+        { name: 'logs-proxy-parsed', query: 'FROM logs-*' },
+        { name: 'errors-only', query: 'FROM logs-* | WHERE status >= 400' },
+      ],
+    });
+    const esClient = {
+      ...createEsClient({ resolveIndex }),
+      esql: {
+        getView,
+        query: jest.fn().mockResolvedValue({
+          columns: [{ name: 'status', type: 'integer' }],
+          values: [],
+        }),
+      },
+    } as unknown as ElasticsearchClient;
+
+    const result = await getIndexFields({
+      indices: ['logs-proxy-parsed', 'errors-only', 'still-missing'],
+      includeViews: true,
+      esClient,
+    });
+
+    expect(getView).toHaveBeenCalledTimes(1);
+    expect(result['logs-proxy-parsed'].type).toBe('view');
+    expect(result['errors-only'].type).toBe('view');
+    expect(result['still-missing'].type).toBe('indexPattern');
+  });
+
+  it('keeps a healthy index when a view in the same request cannot be introspected', async () => {
+    const notFound = new esErrors.ResponseError({
+      statusCode: 404,
+      body: { error: { type: 'index_not_found_exception' } },
+      headers: {},
+      meta: {} as any,
+      warnings: [],
+    } as any);
+    const resolveIndex = jest.fn().mockImplementation(({ name }: { name: string[] }) => {
+      if (name[0] === 'logs-hot') {
+        return Promise.resolve({
+          indices: [{ name: 'logs-hot' }],
+          aliases: [],
+          data_streams: [],
+        });
+      }
+      return Promise.reject(notFound);
+    });
+    const esClient = {
+      ...createEsClient({ resolveIndex }),
+      esql: {
+        getView: jest.fn().mockResolvedValue({
+          views: [
+            { name: 'logs-proxy-parsed', query: 'FROM missing | KEEP status' },
+            { name: 'errors-only', query: 'FROM logs-* | KEEP status' },
+          ],
+        }),
+        query: jest.fn().mockImplementation(({ query }: { query: string }) => {
+          if (query.startsWith('FROM errors-only')) {
+            return Promise.resolve({
+              columns: [{ name: 'status', type: 'integer' }],
+              values: [],
+            });
+          }
+          return Promise.reject(new Error('Unknown index [missing]'));
+        }),
+      },
+    } as unknown as ElasticsearchClient;
+    getIndexMappingsMock.mockResolvedValue({
+      'logs-hot': { mappings: { properties: { message: { type: 'text' } } } },
+    });
+
+    const result = await getIndexFields({
+      indices: ['logs-hot', 'logs-proxy-parsed', 'errors-only'],
+      includeViews: true,
+      esClient,
+    });
+
+    expect(result['logs-hot'].type).toBe('index');
+    expect(result['logs-hot'].fields).toEqual([
+      { path: 'message', type: 'text', meta: {}, searchable: true },
+    ]);
+    expect(result['logs-proxy-parsed']).toEqual({ type: 'view', fields: [] });
+    expect(result['errors-only'].type).toBe('view');
+    expect(result['errors-only'].fields).toEqual([{ path: 'status', type: 'integer', meta: {} }]);
+  });
+
+  it('treats a 404 from resolveIndex as indexPattern (empty fields)', async () => {
+    const notFound = new esErrors.ResponseError({
+      statusCode: 404,
+      body: { error: { type: 'index_not_found_exception' } },
+      headers: {},
+      meta: {} as any,
+      warnings: [],
+    } as any);
+    const resolveIndex = jest.fn().mockRejectedValue(notFound);
+    const esClient = createEsClient({ resolveIndex });
+
+    const result = await getIndexFields({ indices: ['missing'], esClient });
+
+    expect(result.missing.type).toBe('indexPattern');
+    expect(result.missing.fields).toEqual([]);
+    expect(result.missing.rawMapping).toBeUndefined();
   });
 });
 

@@ -68,12 +68,16 @@ describe('InferenceFeatureRegistry', () => {
       );
     });
 
-    it('returns error for duplicate featureId', () => {
-      registry.register(createValidFeature());
-      const result = registry.register(createValidFeature());
+    it('returns error for duplicate featureId and keeps the first registration', () => {
+      const first = createValidFeature({ featureName: 'First' });
+      const second = createValidFeature({ featureName: 'Second' });
+
+      registry.register(first);
+      const result = registry.register(second);
 
       expect(result).toEqual({ ok: false, error: expect.stringContaining('already registered') });
       expect(registry.getAll()).toHaveLength(1);
+      expect(registry.get(first.featureId)).toEqual(first);
       expect(mockLogger.get().error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to register inference feature')
       );
@@ -137,6 +141,81 @@ describe('InferenceFeatureRegistry', () => {
 
     it('getAll() returns empty array when no features registered', () => {
       expect(registry.getAll()).toEqual([]);
+    });
+  });
+
+  describe('updateRecommendedEndpoints', () => {
+    it('mutates recommendedEndpoints for a registered feature', () => {
+      registry.register(createValidFeature({ featureId: 'my_feature' }));
+
+      registry.updateRecommendedEndpoints('my_feature', ['ep-1', 'ep-2']);
+
+      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['ep-1', 'ep-2']);
+    });
+
+    it('replaces endpoints on successive calls (does not append)', () => {
+      registry.register(
+        createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['old'] })
+      );
+
+      registry.updateRecommendedEndpoints('my_feature', ['new-1', 'new-2']);
+      registry.updateRecommendedEndpoints('my_feature', ['final']);
+
+      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['final']);
+    });
+
+    it('does not mutate other fields on the feature', () => {
+      const feature = createValidFeature({ featureId: 'my_feature', featureName: 'Keep Me' });
+      registry.register(feature);
+
+      registry.updateRecommendedEndpoints('my_feature', ['ep-1']);
+
+      const updated = registry.get('my_feature');
+      expect(updated?.featureName).toBe('Keep Me');
+      expect(updated?.featureDescription).toBe(feature.featureDescription);
+    });
+
+    it('throws and does not update for an unknown featureId', () => {
+      expect(() => registry.updateRecommendedEndpoints('unknown', ['ep-1'])).toThrow('"unknown"');
+    });
+
+    it('throws and does not update when endpoints array is empty', () => {
+      registry.register(
+        createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['original'] })
+      );
+
+      expect(() => registry.updateRecommendedEndpoints('my_feature', [])).toThrow('not be empty');
+      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['original']);
+    });
+
+    it('throws and does not update when endpoints contain an empty string', () => {
+      registry.register(
+        createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['original'] })
+      );
+
+      expect(() => registry.updateRecommendedEndpoints('my_feature', ['ep-1', ''])).toThrow(
+        'empty strings'
+      );
+      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['original']);
+    });
+
+    it('throws and does not update when endpoints contain a whitespace-only string', () => {
+      registry.register(
+        createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['original'] })
+      );
+
+      expect(() => registry.updateRecommendedEndpoints('my_feature', ['ep-1', '   '])).toThrow(
+        'empty strings'
+      );
+      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['original']);
+    });
+
+    it('logs a debug message on success', () => {
+      registry.register(createValidFeature({ featureId: 'my_feature' }));
+
+      registry.updateRecommendedEndpoints('my_feature', ['ep-1']);
+
+      expect(mockLogger.get().debug).toHaveBeenCalledWith(expect.stringContaining('"my_feature"'));
     });
   });
 });

@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
 import { i18n } from '@kbn/i18n';
-import { isLeft } from 'fp-ts/Either';
-import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
 import { omit, isEmpty } from 'lodash';
-import { schema } from '@kbn/config-schema';
-import { AlertConfigSchema } from '../../../common/runtime_types/monitor_management/alert_config_schema';
+import { z } from '@kbn/zod';
+import { AlertConfigSchema } from '../../../common/runtime_types/schemas/alert_config_schema';
+import { formatZodErrors } from '../../../common/runtime_types/schemas/format_errors';
+import { isJsonObjectString } from '../../../common/utils/is_json_object_string';
 import type { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { flattenAndFormatObject } from '../../synthetics_service/project_monitor/normalizers/common_fields';
 import type {
@@ -21,17 +20,12 @@ import type {
   SyntheticsMonitor,
 } from '../../../common/runtime_types';
 import {
-  BrowserFieldsCodec,
   CodeEditorMode,
   ConfigKey,
   FormMonitorType,
-  HTTPFieldsCodec,
-  ICMPFieldsCodec,
-  MonitorTypeCodec,
+  KerberosAuthType,
   MonitorTypeEnum,
-  ProjectMonitorCodec,
   type SyntheticsPrivateLocations,
-  TCPFieldsCodec,
 } from '../../../common/runtime_types';
 
 import {
@@ -39,18 +33,34 @@ import {
   DEFAULT_FIELDS,
   HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS,
 } from '../../../common/constants/monitor_defaults';
+import {
+  hasPublicServiceLocation,
+  monitorTypeRequiresPrivateLocations,
+} from '../../../common/utils/monitor_location_support';
+import { privateLocationCoversAllMonitorSpaces } from './monitor_locations_utils';
+import {
+  APIFieldsCodec,
+  BrowserFieldsCodec,
+  HTTPFieldsCodec,
+  ICMPFieldsCodec,
+  TCPFieldsCodec,
+} from '../../../common/runtime_types/schemas/monitor_types';
+import { MonitorTypeCodec } from '../../../common/runtime_types/schemas/monitor_configs';
+import { ProjectMonitorCodec } from '../../../common/runtime_types/schemas/monitor_types_project';
 
 type MonitorCodecType =
   | typeof ICMPFieldsCodec
   | typeof TCPFieldsCodec
   | typeof HTTPFieldsCodec
-  | typeof BrowserFieldsCodec;
+  | typeof BrowserFieldsCodec
+  | typeof APIFieldsCodec;
 
 const monitorTypeToCodecMap: Record<MonitorTypeEnum, MonitorCodecType> = {
   [MonitorTypeEnum.ICMP]: ICMPFieldsCodec,
   [MonitorTypeEnum.TCP]: TCPFieldsCodec,
   [MonitorTypeEnum.HTTP]: HTTPFieldsCodec,
   [MonitorTypeEnum.BROWSER]: BrowserFieldsCodec,
+  [MonitorTypeEnum.API]: APIFieldsCodec,
 };
 
 export interface ValidationResult {
@@ -69,16 +79,46 @@ export class MonitorValidationError extends Error {
   }
 }
 
+// TODO: API Journey isn't supported on Serverless yet; remove this helper and
+// its call sites once it ships there (planned after the 9.6.0 stack release).
+const getApiServerlessValidationError = (
+  monitorType: string | undefined,
+  isServerless: boolean,
+  payload: object
+): ValidationResult | undefined => {
+  if (monitorType === MonitorTypeEnum.API && isServerless) {
+    return {
+      valid: false,
+      reason: API_NOT_SUPPORTED_ON_SERVERLESS_ERROR,
+      details: API_NOT_SUPPORTED_ON_SERVERLESS_DETAILS,
+      payload,
+    };
+  }
+};
+
 /**
  * Validates monitor fields with respect to the relevant Codec identified by object's 'type' property.
  * @param monitorFields {MonitorFields} The mixed type representing the possible monitor payload from UI.
  * @param spaceId
  */
-export function validateMonitor(monitorFields: MonitorFields, spaceId: string): ValidationResult {
+export function validateMonitor(
+  monitorFields: MonitorFields,
+  spaceId: string,
+  isServerless = false
+): ValidationResult {
   const { [ConfigKey.MONITOR_TYPE]: monitorType, [ConfigKey.KIBANA_SPACES]: kSpaces } =
     monitorFields;
 
-  if (monitorType !== MonitorTypeEnum.BROWSER && !monitorFields.name) {
+  const serverlessError = getApiServerlessValidationError(monitorType, isServerless, monitorFields);
+  if (serverlessError) {
+    return serverlessError;
+  }
+
+  if (
+    monitorType !== MonitorTypeEnum.BROWSER &&
+    monitorType !== MonitorTypeEnum.API &&
+    !monitorFields.name
+  ) {
     monitorFields.name = monitorFields.urls || monitorFields.hosts;
   }
 
@@ -91,13 +131,15 @@ export function validateMonitor(monitorFields: MonitorFields, spaceId: string): 
     };
   }
 
-  const decodedType = MonitorTypeCodec.decode(monitorType);
+  const decodedType = MonitorTypeCodec.safeParse(monitorType);
 
-  if (isLeft(decodedType)) {
+  if (!decodedType.success) {
     return {
       valid: false,
       reason: INVALID_TYPE_ERROR,
-      details: formatErrors(decodedType.left).join(' | '),
+      details: formatZodErrors(decodedType.error, { rootName: 'type', input: monitorType }).join(
+        ' | '
+      ),
       payload: monitorFields,
     };
   }
@@ -116,13 +158,12 @@ export function validateMonitor(monitorFields: MonitorFields, spaceId: string): 
 
   const alert = monitorFields.alert;
   if (alert) {
-    try {
-      AlertConfigSchema.validate(alert);
-    } catch (e) {
+    const decodedAlert = AlertConfigSchema.safeParse(alert);
+    if (!decodedAlert.success) {
       return {
         valid: false,
         reason: 'Invalid alert configuration',
-        details: e.message,
+        details: formatZodErrors(decodedAlert.error, { input: alert }).join(' | '),
         payload: monitorFields,
       };
     }
@@ -137,46 +178,147 @@ export function validateMonitor(monitorFields: MonitorFields, spaceId: string): 
     };
   }
 
-  const ExactSyntheticsMonitorCodec = t.exact(SyntheticsMonitorCodec);
-  const decodedMonitor = ExactSyntheticsMonitorCodec.decode(monitorFields);
+  const ExactSyntheticsMonitorCodec = SyntheticsMonitorCodec.strip();
+  const decodedMonitor = ExactSyntheticsMonitorCodec.safeParse(monitorFields);
 
-  if (isLeft(decodedMonitor)) {
+  if (!decodedMonitor.success) {
     return {
       valid: false,
       reason: INVALID_SCHEMA_ERROR(monitorType),
-      details: formatErrors(decodedMonitor.left).join(' | '),
+      details: formatZodErrors(decodedMonitor.error, { input: monitorFields }).join(' | '),
       payload: monitorFields,
     };
   }
 
-  if (monitorType === MonitorTypeEnum.BROWSER) {
+  if (monitorType === MonitorTypeEnum.HTTP) {
+    const hasBasicAuth = Boolean(
+      monitorFields[ConfigKey.USERNAME] || monitorFields[ConfigKey.PASSWORD]
+    );
+    const kerberos = monitorFields[ConfigKey.KERBEROS];
+    const ntlm = monitorFields[ConfigKey.NTLM];
+    const enabledAuthSchemes = [
+      hasBasicAuth,
+      Boolean(kerberos?.enabled),
+      Boolean(ntlm?.enabled),
+    ].filter(Boolean);
+
+    if (enabledAuthSchemes.length > 1) {
+      return {
+        valid: false,
+        reason: INVALID_AUTH_CONFIGURATION_ERROR,
+        details: INVALID_AUTH_CONFIGURATION_DETAILS,
+        payload: monitorFields,
+      };
+    }
+
+    // Heartbeat: exactly one of config_path / krb5_conf when Kerberos is enabled.
+    if (kerberos?.enabled) {
+      const hasPath = Boolean(kerberos.config_path?.trim());
+      const hasInline = Boolean(kerberos.krb5_conf?.trim());
+      if (hasPath === hasInline) {
+        return {
+          valid: false,
+          reason: INVALID_AUTH_CONFIGURATION_ERROR,
+          details: INVALID_KERBEROS_CONFIG_DETAILS,
+          payload: monitorFields,
+        };
+      }
+
+      if (kerberos.auth_type === KerberosAuthType.PASSWORD) {
+        if (!kerberos.username?.trim() || !kerberos.password?.trim()) {
+          return {
+            valid: false,
+            reason: INVALID_AUTH_CONFIGURATION_ERROR,
+            details: INVALID_KERBEROS_PASSWORD_CREDENTIALS_DETAILS,
+            payload: monitorFields,
+          };
+        }
+      } else if (kerberos.auth_type === KerberosAuthType.KEYTAB) {
+        // Heartbeat: NewWithKeytab(config.Username, ...) — principal is required with the keytab path.
+        if (!kerberos.username?.trim() || !kerberos.keytab?.trim()) {
+          return {
+            valid: false,
+            reason: INVALID_AUTH_CONFIGURATION_ERROR,
+            details: INVALID_KERBEROS_KEYTAB_CREDENTIALS_DETAILS,
+            payload: monitorFields,
+          };
+        }
+      }
+
+      // Host-file paths (config_path / keytab) are not provisionable on managed public locations.
+      const usesHostFile =
+        hasPath ||
+        (kerberos.auth_type === KerberosAuthType.KEYTAB && Boolean(kerberos.keytab?.trim()));
+      if (usesHostFile && hasPublicServiceLocation(monitorFields.locations)) {
+        return {
+          valid: false,
+          reason: INVALID_AUTH_CONFIGURATION_ERROR,
+          details: INVALID_KERBEROS_HOST_FILE_PUBLIC_LOCATION_DETAILS,
+          payload: monitorFields,
+        };
+      }
+    }
+
+    if (ntlm?.enabled && (!ntlm.username?.trim() || !ntlm.password?.trim())) {
+      return {
+        valid: false,
+        reason: INVALID_AUTH_CONFIGURATION_ERROR,
+        details: INVALID_NTLM_CREDENTIALS_DETAILS,
+        payload: monitorFields,
+      };
+    }
+  }
+
+  if (monitorType === MonitorTypeEnum.BROWSER || monitorType === MonitorTypeEnum.API) {
     const inlineScript = monitorFields[ConfigKey.SOURCE_INLINE];
     const projectContent = monitorFields[ConfigKey.SOURCE_PROJECT_CONTENT];
     if (!inlineScript && !projectContent) {
       return {
         valid: false,
-        reason: 'Monitor is not a valid monitor of type browser',
+        reason:
+          monitorType === MonitorTypeEnum.API
+            ? 'Monitor is not a valid monitor of type api'
+            : 'Monitor is not a valid monitor of type browser',
         details: i18n.translate('xpack.synthetics.createMonitor.validation.noScript', {
-          defaultMessage: 'source.inline.script: Script is required for browser monitor.',
+          defaultMessage: 'source.inline.script: Script is required for {monitorType} monitor.',
+          values: { monitorType },
         }),
         payload: monitorFields,
       };
     }
 
-    const timeout = monitorFields[ConfigKey.TIMEOUT];
-    if (timeout) {
-      const timeoutSeconds = typeof timeout === 'string' ? parseInt(timeout, 10) : timeout;
-      const hasPrivateLocations = monitorFields.locations?.some((loc) => !loc.isServiceManaged);
-      if (
-        timeoutSeconds < HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS &&
-        hasPrivateLocations
-      ) {
-        return {
-          valid: false,
-          reason: BROWSER_INVALID_TIMEOUT_ERROR,
-          details: BROWSER_INVALID_TIMEOUT_DETAILS(timeoutSeconds),
-          payload: monitorFields,
-        };
+    if (
+      monitorTypeRequiresPrivateLocations(monitorType) &&
+      hasPublicServiceLocation(monitorFields.locations)
+    ) {
+      return {
+        valid: false,
+        reason: API_PUBLIC_LOCATION_ERROR,
+        details: API_PUBLIC_LOCATION_DETAILS,
+        payload: monitorFields,
+      };
+    }
+
+    // The 30s overhead requirement exists because Chromium needs ~30s to spin
+    // up on a private location. API monitors do not launch Chromium (per
+    // Heartbeat's `api` plugin, elastic/beats#50802), so the lower bound does
+    // not apply.
+    if (monitorType === MonitorTypeEnum.BROWSER) {
+      const timeout = monitorFields[ConfigKey.TIMEOUT];
+      if (timeout) {
+        const timeoutSeconds = typeof timeout === 'string' ? parseInt(timeout, 10) : timeout;
+        const hasPrivateLocations = monitorFields.locations?.some((loc) => !loc.isServiceManaged);
+        if (
+          timeoutSeconds < HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS &&
+          hasPrivateLocations
+        ) {
+          return {
+            valid: false,
+            reason: BROWSER_INVALID_TIMEOUT_ERROR,
+            details: BROWSER_INVALID_TIMEOUT_DETAILS(timeoutSeconds),
+            payload: monitorFields,
+          };
+        }
       }
     }
   }
@@ -201,17 +343,23 @@ export function validateMonitor(monitorFields: MonitorFields, spaceId: string): 
     reason: '',
     details: '',
     payload: monitorFields,
-    decodedMonitor: decodedMonitor.right,
+    decodedMonitor: decodedMonitor.data,
   };
 }
 
-export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
+export const normalizeAPIConfig = (
+  monitor: CreateMonitorPayLoad,
+  { previousParams }: { previousParams?: string } = {}
+) => {
   const monitorType = monitor.type as MonitorTypeEnum;
-  const decodedType = MonitorTypeCodec.decode(monitorType);
+  const decodedType = MonitorTypeCodec.safeParse(monitorType);
 
-  if (isLeft(decodedType)) {
+  if (!decodedType.success) {
     return {
-      errorMessage: formatErrors(decodedType.left).join(' | '),
+      errorMessage: formatZodErrors(decodedType.error, {
+        rootName: 'type',
+        input: monitorType,
+      }).join(' | '),
     };
   }
 
@@ -242,6 +390,13 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
     };
   }
 
+  // The monitor form always includes its empty `urls` default. API journeys
+  // define request targets in their script, so accept that UI default without
+  // allowing an actual URL configuration for this monitor type.
+  if (monitor.type === MonitorTypeEnum.API && rawConfig[ConfigKey.URLS] === '') {
+    delete rawConfig[ConfigKey.URLS];
+  }
+
   if (rawUrl) {
     // since api accept url key as well
     rawConfig[ConfigKey.URLS] = rawUrl;
@@ -254,11 +409,14 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
     rawConfig[ConfigKey.HOSTS] = rawHost;
   }
   if (
-    monitor.type === 'browser' &&
-    monitor[ConfigKey.FORM_MONITOR_TYPE] !== FormMonitorType.SINGLE &&
-    monitor[ConfigKey.FORM_MONITOR_TYPE] !== FormMonitorType.MULTISTEP
+    (monitor.type === MonitorTypeEnum.BROWSER &&
+      monitor[ConfigKey.FORM_MONITOR_TYPE] !== FormMonitorType.SINGLE &&
+      monitor[ConfigKey.FORM_MONITOR_TYPE] !== FormMonitorType.MULTISTEP) ||
+    // API monitors never use URLs at the SO level; the script defines its own
+    // request targets via Playwright's APIRequestContext.
+    monitor.type === MonitorTypeEnum.API
   ) {
-    // urls isn't supported for browser but is needed for SO AAD
+    // urls isn't supported for browser/api but is needed for SO AAD
     supportedKeys = supportedKeys.filter((key) => key !== ConfigKey.URLS);
   }
   // needed for SO AAD
@@ -289,8 +447,13 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
     };
   }
 
-  if (rawParams) {
-    const { value, error } = validateParams(rawParams);
+  // An empty string clears params. Any other explicitly supplied value, including falsy ones such
+  // as `false`, `0` or `null`, must be validated: skipping them would silently drop the stored
+  // params. `null` is only tolerated when there was no stored value to lose.
+  const isParamsProvided = rawParams !== undefined && rawParams !== '';
+  const isNullWithoutStoredParams = rawParams == null && previousParams == null;
+  if (isParamsProvided && !isNullWithoutStoredParams) {
+    const { value, error } = validateParams(rawParams, previousParams);
     if (error) {
       formattedConfig[ConfigKey.PARAMS] = rawParams as string;
       return {
@@ -342,21 +505,29 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
   }
   return { formattedConfig };
 };
-const RecordSchema = schema.recordOf(schema.string(), schema.string());
+const RecordSchema = z.record(z.string(), z.string());
 
-const validateParams = (jsonString: string | any) => {
+const validateParams = (jsonString: string | any, previousParams?: string) => {
   if (typeof jsonString === 'string') {
     try {
       JSON.parse(jsonString);
+      // Params are spread into an object before reaching Heartbeat, so arrays and scalars never
+      // arrive intact. Stored values are exempt so unrelated edits of older monitors still save.
+      if (!isJsonObjectString(jsonString) && jsonString !== previousParams) {
+        return { error: new Error('Params must be a JSON object.') };
+      }
       return { value: jsonString };
     } catch (e) {
       return { error: e };
     }
   }
   try {
-    RecordSchema.validate(jsonString);
+    RecordSchema.parse(jsonString);
     return { value: JSON.stringify(jsonString) };
   } catch (e) {
+    if (e instanceof z.ZodError) {
+      return { error: new Error(formatZodErrors(e, { input: jsonString }).join(' | ')) };
+    }
     return { error: e };
   }
 };
@@ -380,17 +551,27 @@ const validateJSON = (jsonString: string | any) => {
 export function validateProjectMonitor(
   monitorFields: ProjectMonitor,
   publicLocations: Locations,
-  privateLocations: SyntheticsPrivateLocations
+  privateLocations: SyntheticsPrivateLocations,
+  isServerless = false
 ): ValidationResult {
+  const serverlessError = getApiServerlessValidationError(
+    monitorFields.type,
+    isServerless,
+    monitorFields
+  );
+  if (serverlessError) {
+    return serverlessError;
+  }
+
   const locationsError = validateLocation(monitorFields, publicLocations, privateLocations);
   // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
-  const decodedMonitor = ProjectMonitorCodec.decode(monitorFields);
+  const decodedMonitor = ProjectMonitorCodec.safeParse(monitorFields);
 
-  if (isLeft(decodedMonitor)) {
+  if (!decodedMonitor.success) {
     return {
       valid: false,
       reason: INVALID_CONFIGURATION_ERROR,
-      details: [...formatErrors(decodedMonitor.left), locationsError]
+      details: [...formatZodErrors(decodedMonitor.error, { input: monitorFields }), locationsError]
         .filter((error) => error !== '' && error !== undefined)
         .join(' | '),
       payload: monitorFields,
@@ -416,6 +597,10 @@ export function validateLocation(
 ) {
   const hasPublicLocationsConfigured = (monitorFields.locations || []).length > 0;
   const hasPrivateLocationsConfigured = (monitorFields.privateLocations || []).length > 0;
+
+  if (monitorTypeRequiresPrivateLocations(monitorFields.type) && hasPublicLocationsConfigured) {
+    return API_PUBLIC_LOCATION_PROJECT_ERROR;
+  }
 
   if (hasPublicLocationsConfigured) {
     let invalidLocation = '';
@@ -459,6 +644,22 @@ export function validateLocation(
       return INVALID_PRIVATE_LOCATION_ERROR(invalidLocation);
     }
   }
+
+  if (hasPrivateLocationsConfigured && monitorFields.spaces && monitorFields.spaces.length > 0) {
+    for (const locationName of monitorFields.privateLocations ?? []) {
+      const loc = locationName.toLowerCase();
+      const matchedLocation = privateLocations.find(
+        (privateLocation) =>
+          privateLocation.label.toLowerCase() === loc || privateLocation.id.toLowerCase() === loc
+      );
+      if (matchedLocation) {
+        if (!privateLocationCoversAllMonitorSpaces(monitorFields.spaces, matchedLocation.spaces)) {
+          return PRIVATE_LOCATION_SPACE_COVERAGE_ERROR(matchedLocation.label);
+        }
+      }
+    }
+  }
+
   const hasEmptyLocations =
     monitorFields.locations &&
     monitorFields.locations.length === 0 &&
@@ -486,6 +687,58 @@ const INVALID_PAYLOAD_ERROR = i18n.translate(
 const INVALID_TYPE_ERROR = i18n.translate('xpack.synthetics.server.monitors.invalidTypeError', {
   defaultMessage: 'Monitor type is invalid',
 });
+
+const INVALID_AUTH_CONFIGURATION_ERROR = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidAuthConfigurationError',
+  {
+    defaultMessage: 'Monitor authentication configuration is invalid',
+  }
+);
+
+const INVALID_AUTH_CONFIGURATION_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidAuthConfigurationDetails',
+  {
+    defaultMessage:
+      'Only one authentication method can be enabled per HTTP monitor. Choose one of basic authentication (username/password), Kerberos, or NTLM.',
+  }
+);
+
+const INVALID_KERBEROS_CONFIG_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidKerberosConfigDetails',
+  {
+    defaultMessage:
+      'Kerberos requires exactly one of config_path (file on the agent) or krb5_conf (inline krb5.conf body).',
+  }
+);
+
+const INVALID_KERBEROS_PASSWORD_CREDENTIALS_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidKerberosPasswordCredentialsDetails',
+  {
+    defaultMessage: 'Kerberos password authentication requires both username and password.',
+  }
+);
+
+const INVALID_KERBEROS_KEYTAB_CREDENTIALS_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidKerberosKeytabCredentialsDetails',
+  {
+    defaultMessage: 'Kerberos keytab authentication requires both username and a keytab path.',
+  }
+);
+
+const INVALID_KERBEROS_HOST_FILE_PUBLIC_LOCATION_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidKerberosHostFilePublicLocationDetails',
+  {
+    defaultMessage:
+      'Kerberos host-file settings (config_path or keytab) are only supported on private locations. Use an inline krb5_conf on public locations, or a private location for keytab auth.',
+  }
+);
+
+const INVALID_NTLM_CREDENTIALS_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidNtlmCredentialsDetails',
+  {
+    defaultMessage: 'NTLM authentication requires both username and password.',
+  }
+);
 
 const INVALID_SCHEDULE_ERROR = i18n.translate(
   'xpack.synthetics.server.monitors.invalidScheduleError',
@@ -537,11 +790,58 @@ const INVALID_PUBLIC_LOCATION_ERROR = (location: string) =>
     },
   });
 
+const PRIVATE_LOCATION_SPACE_COVERAGE_ERROR = (location: string) =>
+  i18n.translate('xpack.synthetics.server.projectMonitors.privateLocationSpaceCoverageError', {
+    defaultMessage:
+      'Private location "{location}" is not available in all spaces this monitor is shared to. ' +
+      'Either share the private location to all monitor spaces, or remove those spaces from the monitor.',
+    values: {
+      location,
+    },
+  });
+
 export const LOCATION_REQUIRED_ERROR = i18n.translate(
   'xpack.synthetics.createMonitor.validation.noLocations',
   {
     defaultMessage:
       'At least one location is required, either elastic managed or private e.g locations: ["us-east"] or private_locations:["test private location"]',
+  }
+);
+
+const API_PUBLIC_LOCATION_ERROR = i18n.translate(
+  'xpack.synthetics.server.monitors.apiPublicLocationErrorMessage',
+  {
+    defaultMessage: 'API Journey monitors cannot run on Elastic managed locations',
+  }
+);
+
+const API_PUBLIC_LOCATION_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.apiPublicLocationDetailsErrorMessage',
+  {
+    defaultMessage:
+      'API Journey monitors can only run on private locations. Remove Elastic managed locations from this monitor.',
+  }
+);
+
+const API_PUBLIC_LOCATION_PROJECT_ERROR = i18n.translate(
+  'xpack.synthetics.server.projectMonitors.apiPublicLocationErrorMessage',
+  {
+    defaultMessage:
+      'API Journey monitors can only run on private locations. Remove "locations" or replace them with "privateLocations".',
+  }
+);
+
+const API_NOT_SUPPORTED_ON_SERVERLESS_ERROR = i18n.translate(
+  'xpack.synthetics.server.monitors.apiNotSupportedOnServerlessErrorMessage',
+  {
+    defaultMessage: 'API Journey monitors are not yet supported on Serverless',
+  }
+);
+
+const API_NOT_SUPPORTED_ON_SERVERLESS_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.apiNotSupportedOnServerlessDetailsErrorMessage',
+  {
+    defaultMessage: 'API Journey monitor support is not yet available on Serverless.',
   }
 );
 

@@ -15,7 +15,6 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
-import type { UpdateESQLQueryFn } from '../../context_awareness';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
 import type { CascadedDocumentsContext } from '../../application/main/components/layout/cascaded_documents';
@@ -28,7 +27,6 @@ import {
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
   cascadedDocumentsContext?: CascadedDocumentsContext;
-  onUpdateESQLQuery?: UpdateESQLQueryFn;
 }
 
 /**
@@ -39,27 +37,23 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
   ({
     query,
     cascadedDocumentsContext,
+    dataSource,
     externalAdditionalControls: customExternalAdditionalControls,
     rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
-    onUpdateESQLQuery,
     onFullScreenChange,
     ...props
   }) => {
-    const { dataView, setExpandedDoc, renderDocumentView } = props;
+    const { dataView } = props;
     const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
     const getRowIndicator = useMemo(() => {
-      return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
-    }, [getRowIndicatorProvider, props.dataView]);
+      return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView, dataSource });
+    }, [dataSource, getRowIndicatorProvider, props.dataView]);
 
     const getRowAdditionalLeadingControlsAccessor = useProfileAccessor(
       'getRowAdditionalLeadingControls'
     );
     const rowAdditionalLeadingControls = useMemo(() => {
       return getRowAdditionalLeadingControlsAccessor(() => customRowAdditionalLeadingControls)({
-        actions: {
-          updateESQLQuery: onUpdateESQLQuery,
-          setExpandedDoc: renderDocumentView ? setExpandedDoc : undefined,
-        },
         dataView,
         query,
       });
@@ -67,10 +61,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       customRowAdditionalLeadingControls,
       dataView,
       getRowAdditionalLeadingControlsAccessor,
-      onUpdateESQLQuery,
       query,
-      setExpandedDoc,
-      renderDocumentView,
     ]);
 
     const getPaginationConfigAccessor = useProfileAccessor('getPaginationConfig');
@@ -98,7 +89,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     });
 
     const isCascadedDocumentsAvailable =
-      props.isPlainRecord && !!cascadedDocumentsContext?.availableCascadeGroups.length;
+      dataSource?.kind === 'esql' && !!cascadedDocumentsContext?.availableCascadeGroups.length;
 
     const externalAdditionalControls = useMemo(() => {
       const additionalControls: ReactNode[] = [];
@@ -143,8 +134,8 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         canDragAndDropColumns
         enableComparisonMode
         enableInTableSearch
+        showSummaryColumnToggle
         renderCustomToolbar={renderCustomToolbar}
-        getRowIndicator={getRowIndicator}
         rowAdditionalLeadingControls={rowAdditionalLeadingControls}
         visibleCellActions={3} // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
         paginationMode={paginationModeConfig.paginationMode}
@@ -153,6 +144,8 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         externalAdditionalControls={externalAdditionalControls}
         onFullScreenChange={onFullScreenChange}
         {...props}
+        dataSource={dataSource}
+        getRowIndicator={getRowIndicator}
       />
     );
   }

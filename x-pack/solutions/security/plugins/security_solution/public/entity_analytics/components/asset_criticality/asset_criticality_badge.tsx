@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiHealth, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
+import { type EuiHealthProps, EuiHealth, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import type { CSSObject } from '@emotion/react';
 import { CRITICALITY_LEVEL_TITLE } from './translations';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
@@ -31,16 +31,19 @@ export const getCriticalityLevelColor = (
   return map[criticalityLevel] || map.unassigned;
 };
 
-export const AssetCriticalityBadge: React.FC<{
-  criticalityLevel?: CriticalityLevelWithUnassigned;
-  style?: CSSObject;
-  className?: string;
-  dataTestSubj?: string;
-}> = ({
+export const AssetCriticalityBadge: React.FC<
+  {
+    criticalityLevel?: CriticalityLevelWithUnassigned;
+    style?: CSSObject;
+    className?: string;
+    dataTestSubj?: string;
+  } & EuiHealthProps
+> = ({
   criticalityLevel = 'unassigned',
   style,
   dataTestSubj = 'asset-criticality-badge',
   className,
+  ...props
 }) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -49,6 +52,7 @@ export const AssetCriticalityBadge: React.FC<{
       color={getCriticalityLevelColor(euiTheme, criticalityLevel)}
       css={style}
       className={className}
+      {...props}
     >
       {CRITICALITY_LEVEL_TITLE[criticalityLevel]}
     </EuiHealth>

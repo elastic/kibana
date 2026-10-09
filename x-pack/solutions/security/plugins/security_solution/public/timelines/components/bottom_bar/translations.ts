@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const ADD_TIMELINE = i18n.translate(
   'xpack.securitySolution.timeline.bottomBar.addButtonLabel',
   {
-    defaultMessage: 'Add new timeline or template',
+    defaultMessage: 'Add new Timeline or template',
   }
 );
 export const NEW_TIMELINE = i18n.translate(
@@ -35,5 +35,5 @@ export const OPEN_TIMELINE = i18n.translate(
 export const OPEN_TIMELINE_BUTTON = (title: string) =>
   i18n.translate('xpack.securitySolution.timeline.bottomBar.toggleButtonAriaLabel', {
     values: { title },
-    defaultMessage: 'Open timeline {title}',
+    defaultMessage: 'Open Timeline {title}',
   });

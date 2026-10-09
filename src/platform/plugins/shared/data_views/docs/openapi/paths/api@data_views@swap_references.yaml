@@ -2,10 +2,24 @@ post:
   summary: Swap saved object references
   operationId: swapDataViewsDefault
   description: >
-    Changes saved object references from one data view identifier to another.
-    WARNING: Misuse can break large numbers of saved objects! Practicing with a backup is recommended.
+    Swap saved object references from one data view to another.
+    Use this endpoint to update dashboards, visualizations, and other saved objects that reference a data view.
+    WARNING: Misuse can break large numbers of saved objects! Use the [`_preview`](https://www.elastic.co/docs/api/doc/kibana/operation/operation-previewswapdataviewsdefault) endpoint to see which saved objects would be affected before making changes.
   tags:
     - data views
+  x-codeSamples:
+    - lang: curl
+      source: |
+        curl \
+          -X POST "${KIBANA_URL}/api/data_views/swap_references" \
+          -H "Authorization: ApiKey ${API_KEY}" \
+          -H "kbn-xsrf: true" \
+          -H "Content-Type: application/json" \
+          -d '{"fromId":"abcd-efg","toId":"xyz-123","delete":true}'
+    - lang: Console
+      source: |
+        POST kbn://api/data_views/swap_references
+        {"fromId":"abcd-efg","toId":"xyz-123","delete":true}
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
   requestBody:
@@ -43,3 +57,6 @@ post:
                     type:
                       type: string
                       description: The saved object type.
+          examples:
+            swapDataViewResponse:
+              $ref: '../components/examples/swap_data_view_response.yaml'

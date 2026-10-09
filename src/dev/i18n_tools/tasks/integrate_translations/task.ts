@@ -14,6 +14,7 @@ import { ErrorReporter } from '../../utils/error_reporter';
 import { makeAbsolutePath } from '../../utils';
 import { updateTranslationFile } from '../validate_translation_files';
 import { groupMessagesByNamespace } from '../validate_translation_files/group_messages_by_namespace';
+import { getLocaleFromFile } from '../validate_translation_files/get_locale_from_file';
 
 export interface TaskOptions {
   source: string;
@@ -43,6 +44,7 @@ export const integrateTranslations: TaskSignature<TaskOptions> = (
 
           const sourceFilePath = makeAbsolutePath(source);
           const localizedMessages = JSON.parse((await readFileAsync(sourceFilePath)).toString());
+          context.localizedMessages = localizedMessages;
           const namespacedTranslatedMessages = groupMessagesByNamespace(
             localizedMessages,
             namespaces
@@ -51,6 +53,7 @@ export const integrateTranslations: TaskSignature<TaskOptions> = (
             namespacedTranslatedMessages,
             targetFilePath: target,
             formats: localizedMessages.formats,
+            locale: getLocaleFromFile(target),
           });
         },
       },

@@ -21,7 +21,8 @@
  *   node scripts/sync_logs.js --source-host=https://... --source-api-key=...
  *
  * Source (required): SOURCE_ELASTICSEARCH_HOST, SOURCE_ELASTICSEARCH_API_KEY (or --source-host, --source-api-key)
- * Destination: read from config/kibana.dev.yml (or --config), env ELASTICSEARCH_HOST, ELASTICSEARCH_USERNAME, ELASTICSEARCH_PASSWORD
+ * Destination: read from config/kibana.dev.yml (or --config), env ELASTICSEARCH_HOST, ELASTICSEARCH_API_KEY, ELASTICSEARCH_USERNAME, ELASTICSEARCH_PASSWORD.
+ * Local dest is detected like kibana_api_common.sh: HTTP/HTTPS × elastic/elastic_serverless.
  * Sync options: SYNC_* env or --index-pattern, --size, --interval, --sample-mode, --target-index, etc.
  * Set env vars in the shell (e.g. export SOURCE_ELASTICSEARCH_HOST=...) or pass inline; CLI flags override env.
  */
@@ -30,7 +31,7 @@ require('@kbn/setup-node-env');
 
 var path = require('path');
 var fs = require('fs');
-var yaml = require('js-yaml');
+var yaml = require('yaml');
 var getopts = require('getopts');
 var elasticsearch = require('@elastic/elasticsearch');
 var Client = elasticsearch.Client;
@@ -54,7 +55,7 @@ function readKibanaConfig(configPath, log) {
 
   if (fs.existsSync(configPathToUse)) {
     try {
-      var loaded = yaml.load(fs.readFileSync(configPathToUse, 'utf8')) || {};
+      var loaded = yaml.parse(fs.readFileSync(configPathToUse, 'utf8')) || {};
       // Support flat keys (elasticsearch.hosts) or nested (elasticsearch: { hosts })
       if (loaded.elasticsearch && typeof loaded.elasticsearch === 'object') {
         esConfigValues = loaded.elasticsearch;
@@ -80,9 +81,11 @@ function readKibanaConfig(configPath, log) {
   var esHost = process.env.ELASTICSEARCH_HOST;
   var esUser = process.env.ELASTICSEARCH_USERNAME;
   var esPass = process.env.ELASTICSEARCH_PASSWORD;
+  var esApiKey = process.env.ELASTICSEARCH_API_KEY;
   if (esHost) envOverrides.hosts = esHost;
   if (esUser) envOverrides.username = esUser;
   if (esPass) envOverrides.password = esPass;
+  if (esApiKey) envOverrides.apiKey = esApiKey;
 
   var baseConfig = {
     hosts: 'http://localhost:9200',
@@ -133,6 +136,7 @@ function parseConfig(log) {
       'config',
       'source-host',
       'source-api-key',
+      'dest-api-key',
       'index-pattern',
       'size',
       'interval',
@@ -160,7 +164,7 @@ function parseConfig(log) {
   var interval = get('interval', 'SYNC_INTERVAL_SECONDS', '1');
   var sampleMode = get('sample-mode', 'SYNC_SAMPLE_MODE', 'random');
   var randomSeed = get('random-seed', 'SYNC_RANDOM_SEED', undefined);
-  var targetIndex = get('target-index', 'SYNC_TARGET_INDEX', 'logs-generic-default');
+  var targetIndex = get('target-index', 'SYNC_TARGET_INDEX', undefined);
   var batchSize = get('batch-size', 'SYNC_BATCH_SIZE', '100');
   var from = get('from', 'SYNC_FROM', undefined);
   var to = get('to', 'SYNC_TO', undefined);
@@ -193,6 +197,8 @@ function parseConfig(log) {
     translateTimestamps = false;
   }
 
+  var destApiKey = get('dest-api-key', 'ELASTICSEARCH_API_KEY', undefined);
+
   var destEsConfig = readKibanaConfig(opts.config, log);
   var destHost;
   if (typeof destEsConfig.hosts === 'string') {
@@ -203,10 +209,14 @@ function parseConfig(log) {
     destHost = 'http://localhost:9200';
   }
 
+  // CLI flag takes precedence, then env (already in destApiKey), then config file
+  var resolvedDestApiKey = destApiKey || destEsConfig.apiKey || undefined;
+
   var config = {
     sourceHost: sourceHost,
     sourceApiKey: sourceApiKey,
     destHost: destHost.replace(/\/$/, ''),
+    destApiKey: resolvedDestApiKey,
     destUsername: destEsConfig.username || 'elastic',
     destPassword: destEsConfig.password || 'changeme',
     indexPattern: indexPattern,
@@ -263,6 +273,121 @@ function parseConfig(log) {
   return config;
 }
 
+function isLocalhostUrl(nodeUrl) {
+  try {
+    var hostname = new URL(nodeUrl).hostname;
+    return (
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '[::1]' ||
+      hostname === 'host.docker.internal'
+    );
+  } catch (err) {
+    return false;
+  }
+}
+
+// Same permutations as scripts/kibana_api_common.sh and @kbn/connector-cli.
+var DEFAULT_DEST_AUTHS = [
+  { username: 'elastic', password: 'changeme' },
+  { username: 'elastic_serverless', password: 'changeme' },
+];
+
+function destHostCandidates(config) {
+  var host = config.destHost.replace(/\/$/, '');
+  if (!isLocalhostUrl(host)) {
+    return [host];
+  }
+  try {
+    var parsed = new URL(host);
+    var port = parsed.port || '9200';
+    var httpCandidate = new URL(host);
+    var httpsCandidate = new URL(host);
+    httpCandidate.protocol = 'http:';
+    httpsCandidate.protocol = 'https:';
+    httpCandidate.port = port;
+    httpsCandidate.port = port;
+    return [
+      httpCandidate.toString().replace(/\/$/, ''),
+      httpsCandidate.toString().replace(/\/$/, ''),
+    ];
+  } catch (err) {
+    return ['http://localhost:9200', 'https://localhost:9200'];
+  }
+}
+
+function destAuthCandidates(config) {
+  if (config.destApiKey) {
+    return [{ apiKey: config.destApiKey }];
+  }
+
+  var configured = { username: config.destUsername, password: config.destPassword };
+  if (!isLocalhostUrl(config.destHost)) {
+    return [configured];
+  }
+
+  var isStockUser =
+    config.destUsername === 'elastic' || config.destUsername === 'elastic_serverless';
+  if (config.destPassword !== 'changeme' || !isStockUser) {
+    return [configured];
+  }
+
+  return DEFAULT_DEST_AUTHS.slice();
+}
+
+function destCandidates(config) {
+  var hosts = destHostCandidates(config);
+  var auths = destAuthCandidates(config);
+  var out = [];
+  hosts.forEach(function (host) {
+    auths.forEach(function (auth) {
+      out.push({
+        destHost: host,
+        destApiKey: auth.apiKey,
+        destUsername: auth.username,
+        destPassword: auth.password,
+      });
+    });
+  });
+  return out;
+}
+
+function formatDestCandidate(candidate) {
+  if (candidate.destApiKey) {
+    return candidate.destHost + ' (api key)';
+  }
+  return candidate.destHost + ' as ' + candidate.destUsername;
+}
+
+function formatDestCandidatesTried(config) {
+  return destCandidates(config).map(formatDestCandidate).join(', ');
+}
+
+function applyDestCandidate(config, candidate) {
+  config.destHost = candidate.destHost;
+  config.destApiKey = candidate.destApiKey;
+  config.destUsername = candidate.destUsername;
+  config.destPassword = candidate.destPassword;
+}
+
+// Match kibana_api_common.sh (`curl -k`) and connector-cli (rejectUnauthorized: false).
+function getTlsOptions(nodeUrl, noVerifyCerts) {
+  try {
+    var parsed = new URL(nodeUrl);
+    if (parsed.protocol !== 'https:') {
+      return undefined;
+    }
+    if (noVerifyCerts || isLocalhostUrl(nodeUrl)) {
+      return { rejectUnauthorized: false };
+    }
+  } catch (err) {
+    if (noVerifyCerts) {
+      return { rejectUnauthorized: false };
+    }
+  }
+  return undefined;
+}
+
 function createSourceClient(config) {
   var node = config.sourceHost.replace(/\/$/, '');
   var client = new Client({
@@ -274,27 +399,94 @@ function createSourceClient(config) {
   return client;
 }
 
-function createDestClient(config) {
+function createDestClient(config, clientOptions) {
+  clientOptions = clientOptions || {};
   var node = config.destHost.replace(/\/$/, '');
-  var client = new Client({
+  var auth = config.destApiKey
+    ? { apiKey: config.destApiKey }
+    : { username: config.destUsername, password: config.destPassword };
+  var clientConfig = {
     node: node,
-    auth: { username: config.destUsername, password: config.destPassword },
-    requestTimeout: requestTimeoutMs,
-    tls: config.noVerifyCerts ? { rejectUnauthorized: false } : undefined,
+    auth: auth,
+    requestTimeout:
+      clientOptions.requestTimeout != null ? clientOptions.requestTimeout : requestTimeoutMs,
+    tls: getTlsOptions(node, config.noVerifyCerts),
+  };
+  if (clientOptions.maxRetries != null) {
+    clientConfig.maxRetries = clientOptions.maxRetries;
+  }
+  return new Client(clientConfig);
+}
+
+function connectedLabel(info) {
+  var name = (info.body ? info.body.cluster_name : info.cluster_name) || 'unknown';
+  var version =
+    (info.body
+      ? info.body.version && info.body.version.number
+      : info.version && info.version.number) || 'unknown';
+  return name + ' (' + version + ')';
+}
+
+function tryDestCandidate(config, candidate) {
+  var probe = createDestClient(Object.assign({}, config, candidate), {
+    requestTimeout: 2000,
+    maxRetries: 0,
   });
-  return client;
+  return probe
+    .info()
+    .then(function (info) {
+      return { candidate: candidate, info: info };
+    })
+    .finally(function () {
+      return probe.close().catch(function () {});
+    });
+}
+
+function resolveDestClient(config, log) {
+  var candidates = destCandidates(config);
+
+  if (candidates.length === 1) {
+    applyDestCandidate(config, candidates[0]);
+    var client = createDestClient(config);
+    return pingCluster(client, 'dest', log).then(function () {
+      return client;
+    });
+  }
+
+  var index = 0;
+  function tryNext(lastErr) {
+    if (index >= candidates.length) {
+      log('[dest] Connection failed: could not detect a running Elasticsearch instance.');
+      throw new Error(
+        'Tried: ' +
+          formatDestCandidatesTried(config) +
+          (lastErr ? '. Last error: ' + lastErr.message : '')
+      );
+    }
+    var candidate = candidates[index];
+    index += 1;
+    return tryDestCandidate(config, candidate).catch(function (err) {
+      return tryNext(err);
+    });
+  }
+
+  return tryNext().then(function (result) {
+    applyDestCandidate(config, result.candidate);
+    log(
+      '[dest] Connected: ' +
+        connectedLabel(result.info) +
+        ' via ' +
+        formatDestCandidate(result.candidate)
+    );
+    return createDestClient(config);
+  });
 }
 
 function pingCluster(client, label, log) {
   return client
     .info()
     .then(function (info) {
-      var name = (info.body ? info.body.cluster_name : info.cluster_name) || 'unknown';
-      var version =
-        (info.body
-          ? info.body.version && info.body.version.number
-          : info.version && info.version.number) || 'unknown';
-      log('[' + label + '] Connected: ' + name + ' (' + version + ')');
+      log('[' + label + '] Connected: ' + connectedLabel(info));
     })
     .catch(function (err) {
       log('[' + label + '] Connection failed: ' + err.message);
@@ -585,7 +777,13 @@ Source (required):
   SOURCE_ELASTICSEARCH_API_KEY or  --source-api-key    Source API key
 
 Destination (same cluster as Kibana, like otel_demo):
-  Read from config/kibana.dev.yml (or --config). Set ELASTICSEARCH_HOST, ELASTICSEARCH_USERNAME, ELASTICSEARCH_PASSWORD in the shell or pass inline. Defaults: http://localhost:9200, elastic, changeme.
+  Read from config/kibana.dev.yml (or --config). Local dest is detected like
+  kibana_api_common.sh: http://localhost:9200 and https://localhost:9200 with
+  elastic:changeme and elastic_serverless:changeme. Local HTTPS skips TLS verify.
+  ELASTICSEARCH_HOST             or  --config           Destination cluster URL
+  ELASTICSEARCH_API_KEY          or  --dest-api-key     Destination API key (takes precedence over username/password)
+  ELASTICSEARCH_USERNAME                                Destination username (default: elastic)
+  ELASTICSEARCH_PASSWORD                                Destination password (default: changeme)
 
 Set env vars in the shell (e.g. export SOURCE_ELASTICSEARCH_HOST=...) or pass inline; CLI flags override env.
 
@@ -595,7 +793,7 @@ Sync options:
   SYNC_INTERVAL_SECONDS        or  --interval         (default: 5)
   SYNC_SAMPLE_MODE             or  --sample-mode      recent|random (default: random)
   SYNC_RANDOM_SEED             or  --random-seed      For random mode
-  SYNC_TARGET_INDEX            or  --target-index     Single target index/stream (default: logs-generic-default)
+  SYNC_TARGET_INDEX            or  --target-index     Single target index/stream (default: preserve original index names)
   SYNC_BATCH_SIZE              or  --batch-size       (default: 100)
   SYNC_FROM                    or  --from             Start of the time range for syncing (ISO 8601 format)
   SYNC_TO                      or  --to               End of the time range for syncing (ISO 8601 format)
@@ -638,7 +836,7 @@ function main() {
   }
 
   var sourceClient = createSourceClient(config);
-  var destClient = createDestClient(config);
+  var destClient;
 
   var shutdownRequested = false;
   var onSignal = function () {
@@ -729,9 +927,10 @@ function main() {
 
   pingCluster(sourceClient, 'source', log)
     .then(function () {
-      return pingCluster(destClient, 'dest', log);
+      return resolveDestClient(config, log);
     })
-    .then(function () {
+    .then(function (client) {
+      destClient = client;
       loop();
     })
     .catch(function (err) {
@@ -748,6 +947,10 @@ module.exports = {
   parseConfig: parseConfig,
   createSourceClient: createSourceClient,
   createDestClient: createDestClient,
+  destCandidates: destCandidates,
+  resolveDestClient: resolveDestClient,
+  getTlsOptions: getTlsOptions,
+  isLocalhostUrl: isLocalhostUrl,
   search: search,
   transform: transform,
   backingIndexToStreamName: backingIndexToStreamName,

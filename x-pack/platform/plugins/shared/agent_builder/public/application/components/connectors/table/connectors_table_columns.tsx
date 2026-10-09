@@ -11,15 +11,20 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useConnectorOAuthConnect, OAuthRedirectMode } from '@kbn/response-ops-oauth-hooks';
 import React, { useMemo } from 'react';
+import { isEarsExperimentalConnector } from '@kbn/connector-specs';
 import type { ConnectorItem } from '../../../../../common/http_api/tools';
 import { OAUTH_STATUS } from '../../../../../common/http_api/tools';
 import { useConnectorsActions } from '../../../context/connectors_provider';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../hooks/use_kibana';
 import { labels } from '../../../utils/i18n';
 import { ConnectorTypeIcon } from '../connector_type_icon';
@@ -66,6 +71,10 @@ const NotAuthorizedBadge: React.FC<{ connector: ConnectorItem }> = ({ connector 
           padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
           cursor: 'pointer',
         })}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+          action: AGENT_BUILDER_UI_EBT.action.connectors.OAUTH_CONNECT,
+        })}
       >
         {labels.connectors.statusNotAuthorized} <EuiIcon type="link" size="s" aria-hidden={true} />
       </EuiBadge>
@@ -84,20 +93,49 @@ export const useConnectorsTableColumns = (): Array<EuiBasicTableColumn<Connector
   const canDelete = application.capabilities.actions?.delete === true;
   const { actionTypeRegistry } = triggersActionsUi;
 
-  return useMemo(
-    () => [
+  const { isEarsEnabled, isEarsExperimentalEnabled } = useAgentBuilderServices();
+
+  return useMemo(() => {
+    const isDisabledEarsConnector = (connector: ConnectorItem): boolean =>
+      connector.config?.authType === 'ears' &&
+      (!isEarsEnabled ||
+        (isEarsExperimentalConnector(connector.actionTypeId) && !isEarsExperimentalEnabled));
+
+    return [
       {
         field: 'name',
         name: labels.connectors.nameColumn,
         width: '45%',
-        render: (name: string, connector: ConnectorItem) => (
-          <EuiLink
-            data-test-subj={`agentBuilderConnectorsTableNameLink-${connector.id}`}
-            onClick={() => editConnector(connector)}
-          >
-            {name}
-          </EuiLink>
-        ),
+        render: (name: string, connector: ConnectorItem) => {
+          const disabled = isDisabledEarsConnector(connector);
+          return (
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  data-test-subj={`agentBuilderConnectorsTableNameLink-${connector.id}`}
+                  onClick={() => editConnector(connector)}
+                  disabled={disabled}
+                  {...getEbtProps({
+                    element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                    action: AGENT_BUILDER_UI_EBT.action.connectors.EDIT_CONNECTOR,
+                  })}
+                >
+                  {name}
+                </EuiLink>
+              </EuiFlexItem>
+              {disabled && (
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    type="warning"
+                    color="warning"
+                    content={labels.connectors.statusEarsDisabledTooltip}
+                    position="right"
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          );
+        },
       },
       {
         field: 'actionTypeId',
@@ -125,6 +163,20 @@ export const useConnectorsTableColumns = (): Array<EuiBasicTableColumn<Connector
         name: labels.connectors.statusColumn,
         width: '25%',
         render: (oauthStatus: ConnectorItem['oauthStatus'], connector: ConnectorItem) => {
+          if (isDisabledEarsConnector(connector)) {
+            return (
+              <EuiToolTip content={labels.connectors.statusEarsDisabledTooltip}>
+                <EuiBadge
+                  color="warning"
+                  tabIndex={0}
+                  data-test-subj={`agentBuilderConnectorsEarsDisabledBadge-${connector.id}`}
+                  css={({ euiTheme }) => ({ padding: `${euiTheme.size.xs} ${euiTheme.size.s}` })}
+                >
+                  {labels.connectors.statusEarsDisabled}
+                </EuiBadge>
+              </EuiToolTip>
+            );
+          }
           if (!oauthStatus) return <EuiText size="s">-</EuiText>;
           if (oauthStatus === OAUTH_STATUS.AUTHORIZED) {
             return (
@@ -149,7 +201,6 @@ export const useConnectorsTableColumns = (): Array<EuiBasicTableColumn<Connector
           </EuiFlexGroup>
         ),
       },
-    ],
-    [editConnector, actionTypeRegistry, canDelete]
-  );
+    ];
+  }, [editConnector, actionTypeRegistry, canDelete, isEarsEnabled, isEarsExperimentalEnabled]);
 };

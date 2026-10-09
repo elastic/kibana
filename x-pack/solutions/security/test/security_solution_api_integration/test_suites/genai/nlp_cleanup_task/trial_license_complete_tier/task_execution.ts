@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext) => {
             logger
           );
         } catch (e) {
-          expect(e.message).to.eql('Request failed with status code 404');
+          expect(e.status).to.eql(404);
 
           return;
         }

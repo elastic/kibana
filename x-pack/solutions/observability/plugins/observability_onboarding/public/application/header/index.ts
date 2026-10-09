@@ -7,3 +7,4 @@
 
 export { CustomHeader } from './custom_header';
 export { Header } from './header';
+export { LandingHeader } from './landing_header';

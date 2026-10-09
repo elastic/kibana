@@ -8,7 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, map, skip } from 'rxjs';
 
 import type { DataControlState } from '@kbn/controls-schemas';
 import {
@@ -68,7 +68,10 @@ export const initializeLabelManager = <StateType extends ControlTitleState = Con
       },
       label$,
     },
-    anyStateChange$: label$.pipe(map(() => undefined)),
+    anyStateChange$: label$.pipe(
+      skip(1),
+      map(() => undefined)
+    ),
     getLatestState: () => ({
       title: title$.getValue(),
     }),

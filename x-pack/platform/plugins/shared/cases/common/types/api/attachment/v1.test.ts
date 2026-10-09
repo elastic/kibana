@@ -18,11 +18,18 @@ import {
   AttachmentsFindResponseRt,
   BulkCreateAttachmentsRequestRt,
   BulkDeleteFileAttachmentsRequestRt,
-  BulkGetAttachmentsRequestRt,
-  BulkGetAttachmentsResponseRt,
   FindAttachmentsQueryParamsRt,
   PostFileAttachmentRequestRt,
 } from './v1';
+import {
+  AttachmentPatchRequestSchema,
+  AttachmentRequestSchema,
+  AttachmentsFindResponseSchema,
+  BulkCreateAttachmentsRequestSchema,
+  BulkDeleteFileAttachmentsRequestSchema,
+  FindAttachmentsQueryParamsSchema,
+  PostFileAttachmentRequestSchema,
+} from '../../api_zod/attachment/v1';
 
 describe('Attachments', () => {
   describe('BulkDeleteFileAttachmentsRequestRt', () => {
@@ -45,6 +52,21 @@ describe('Attachments', () => {
         _tag: 'Right',
         right: { ids: ['abc', 'xyz'] },
       });
+    });
+
+    it('zod: has expected attributes in request', () => {
+      const result = BulkDeleteFileAttachmentsRequestSchema.safeParse({ ids: ['abc', 'xyz'] });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({ ids: ['abc', 'xyz'] });
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = BulkDeleteFileAttachmentsRequestSchema.safeParse({
+        ids: ['abc', 'xyz'],
+        foo: 'bar',
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({ ids: ['abc', 'xyz'] });
     });
   });
 
@@ -71,6 +93,18 @@ describe('Attachments', () => {
         _tag: 'Right',
         right: defaultRequest,
       });
+    });
+
+    it('zod: has expected attributes in request', () => {
+      const result = AttachmentRequestSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = AttachmentRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
     describe('errors', () => {
@@ -166,6 +200,18 @@ describe('Attachments', () => {
         right: defaultRequest,
       });
     });
+
+    it('zod: has expected attributes in request', () => {
+      const result = AttachmentPatchRequestSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = AttachmentPatchRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('AttachmentsFindResponseRt', () => {
@@ -222,6 +268,18 @@ describe('Attachments', () => {
         right: defaultRequest,
       });
     });
+
+    it('zod: has expected attributes in request', () => {
+      const result = AttachmentsFindResponseSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = AttachmentsFindResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('FindAttachmentsQueryParamsRt', () => {
@@ -247,6 +305,18 @@ describe('Attachments', () => {
         _tag: 'Right',
         right: defaultRequest,
       });
+    });
+
+    it('zod: has expected attributes in request', () => {
+      const result = FindAttachmentsQueryParamsSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = FindAttachmentsQueryParamsSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
@@ -279,6 +349,20 @@ describe('Attachments', () => {
       });
     });
 
+    it('zod: has expected attributes in request', () => {
+      const result = BulkCreateAttachmentsRequestSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = BulkCreateAttachmentsRequestSchema.safeParse([
+        { comment: 'Solve this fast!', type: AttachmentType.user, owner: 'cases', foo: 'bar' },
+      ]);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
     describe('errors', () => {
       it(`throws error when attachments are more than ${MAX_BULK_CREATE_ATTACHMENTS}`, () => {
         const comment = {
@@ -297,100 +381,6 @@ describe('Attachments', () => {
         expect(PathReporter.report(BulkCreateAttachmentsRequestRt.decode([]))).toStrictEqual([
           'No errors!',
         ]);
-      });
-    });
-  });
-
-  describe('BulkGetAttachmentsRequestRt', () => {
-    it('has expected attributes in request', () => {
-      const query = BulkGetAttachmentsRequestRt.decode({ ids: ['abc', 'xyz'] });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ids: ['abc', 'xyz'] },
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = BulkGetAttachmentsRequestRt.decode({ ids: ['abc', 'xyz'], foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ids: ['abc', 'xyz'] },
-      });
-    });
-  });
-
-  describe('BulkGetAttachmentsResponseRt', () => {
-    const defaultRequest = {
-      attachments: [
-        {
-          comment: 'Solve this fast!',
-          type: AttachmentType.user,
-          owner: 'cases',
-          id: 'basic-comment-id',
-          version: 'WzQ3LDFc',
-          created_at: '2020-02-19T23:06:33.798Z',
-          created_by: {
-            full_name: 'Leslie Knope',
-            username: 'lknope',
-            email: 'leslie.knope@elastic.co',
-          },
-          pushed_at: null,
-          pushed_by: null,
-          updated_at: null,
-          updated_by: null,
-        },
-      ],
-      errors: [
-        {
-          error: 'error',
-          message: 'not found',
-          status: 404,
-          savedObjectId: 'abc',
-        },
-      ],
-    };
-
-    it('has expected attributes in request', () => {
-      const query = BulkGetAttachmentsResponseRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = BulkGetAttachmentsResponseRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from attachments', () => {
-      const query = BulkGetAttachmentsResponseRt.decode({
-        ...defaultRequest,
-        attachments: [{ ...defaultRequest.attachments[0], foo: 'bar' }],
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from errors', () => {
-      const query = BulkGetAttachmentsResponseRt.decode({
-        ...defaultRequest,
-        errors: [{ ...defaultRequest.errors[0], foo: 'bar' }],
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
       });
     });
   });
@@ -417,6 +407,18 @@ describe('Attachments', () => {
         _tag: 'Right',
         right: defaultRequest,
       });
+    });
+
+    it('zod: has expected attributes in request', () => {
+      const result = PostFileAttachmentRequestSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = PostFileAttachmentRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
     describe('errors', () => {

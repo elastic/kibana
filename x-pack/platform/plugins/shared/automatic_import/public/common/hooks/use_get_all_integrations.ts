@@ -6,13 +6,15 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import { isHttpFetchError } from '@kbn/core-http-browser';
+
 import type { AllIntegrationsResponseIntegration } from '../../../common';
 import { getAllIntegrations } from '../lib/api';
 import { useKibana } from './use_kibana';
 
 export interface UseGetAllIntegrationsResult {
   integrations: AllIntegrationsResponseIntegration[];
-  isLoading: boolean;
+  isInitialLoading: boolean;
   isError: boolean;
   error: Error | null;
   refetch: () => void;
@@ -24,18 +26,29 @@ export interface UseGetAllIntegrationsResult {
 export function useGetAllIntegrations(): UseGetAllIntegrationsResult {
   const { http } = useKibana().services;
 
-  const { data, isLoading, isError, error, refetch } = useQuery({
+  const { data, isInitialLoading, isError, error, refetch } = useQuery({
     queryKey: ['all-integrations'],
     queryFn: async ({ signal }) => {
       return getAllIntegrations({ http, abortSignal: signal });
     },
     refetchInterval: 30 * 1000,
     refetchOnWindowFocus: true,
+    retry: (failureCount, err) => {
+      if (failureCount >= 3) {
+        return false;
+      }
+
+      if (isHttpFetchError(err) && err.response?.status === 404) {
+        return false;
+      }
+
+      return true;
+    },
   });
 
   return {
     integrations: data ?? [],
-    isLoading,
+    isInitialLoading,
     isError,
     error: error as Error | null,
     refetch,

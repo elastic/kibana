@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { AxiosInstance } from 'axios';
-import axios from 'axios';
 import { format as formatUrl } from 'url';
 import util from 'util';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -14,49 +12,51 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import type { Features } from '../features';
 
 export class FeaturesService {
-  private readonly axios: AxiosInstance;
-
-  constructor(url: string, private readonly log: ToolingLog) {
-    this.axios = axios.create({
-      headers: { 'kbn-xsrf': 'x-pack/ftr/services/features' },
-      baseURL: url,
-      allowAbsoluteUrls: false,
-      maxRedirects: 0,
-      validateStatus: () => true, // we'll handle our own statusCodes and throw informative errors
-    });
-  }
+  constructor(
+    private readonly url: string,
+    private readonly credentials: { username: string; password: string },
+    private readonly log: ToolingLog
+  ) {}
 
   public async get({ ignoreValidLicenses } = { ignoreValidLicenses: false }): Promise<Features> {
     this.log.debug('requesting /api/features to get the features');
-    const response = await this.axios.get(
-      `/api/features?ignoreValidLicenses=${ignoreValidLicenses}`
+    const { username, password } = this.credentials;
+    const response = await fetch(
+      `${this.url}/api/features?ignoreValidLicenses=${ignoreValidLicenses}`,
+      {
+        headers: {
+          'kbn-xsrf': 'x-pack/ftr/services/features',
+          authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
+        },
+        redirect: 'manual', // we'll handle our own statusCodes and throw informative errors
+      }
     );
 
     if (response.status !== 200) {
       throw new Error(
         `Expected status code of 200, received ${response.status} ${
           response.statusText
-        }: ${util.inspect(response.data)}`
+        }: ${util.inspect(await response.text())}`
       );
     }
 
-    const features = response.data.reduce(
-      (acc: Features, feature: any) => ({
+    return ((await response.json()) as Array<{ id: string; app: string[] }>).reduce<Features>(
+      (acc, feature) => ({
         ...acc,
-        [feature.id]: {
-          app: feature.app,
-        },
+        [feature.id]: { app: feature.app },
       }),
       {}
     );
-    return features;
   }
 }
 
 export function FeaturesProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
-  const url = formatUrl(config.get('servers.kibana'));
+  // `fetch` rejects URLs that embed credentials, so keep them out of the URL
+  // and send them as a Basic auth header instead.
+  const { username, password } = config.get('servers.kibana');
+  const url = formatUrl({ ...config.get('servers.kibana'), auth: undefined });
 
-  return new FeaturesService(url, log);
+  return new FeaturesService(url, { username, password }, log);
 }

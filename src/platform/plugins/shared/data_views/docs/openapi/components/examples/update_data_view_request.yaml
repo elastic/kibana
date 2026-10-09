@@ -1,4 +1,5 @@
 summary: Update some properties for a data view.
+description: Update the title, time field, and other properties of an existing data view.
 value:
   {
     "data_view": {

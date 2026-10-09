@@ -15,16 +15,36 @@ import type { PrebuiltRuleAsset } from '../../../../model/rule_assets/prebuilt_r
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import { validatePrebuiltRuleAssets } from '../../prebuilt_rule_assets_validation';
 import { invariant } from '../../../../../../../../common/utils/invariant';
+import { fetchDeprecatedRules } from './fetch_deprecated_rules';
+
+export interface FetchLatestAssetsOptions {
+  size: number;
+}
 
 /**
  * Fetches the latest version of each prebuilt rule asset.
+ *
+ * Rule_ids that have any deprecated asset are excluded from the search
+ * via a `NOT (rule_id: ...)` KQL filter that is built from the result of
+ * `fetchDeprecatedRules`. Deprecation is monotonic per rule_id, so the
+ * presence of a deprecated stub means the whole rule_id is deprecated
+ * and must not flow into `validatePrebuiltRuleAssets` (the deprecated
+ * stub schema is a strict subset of `PrebuiltRuleAsset` and would fail
+ * validation). The deprecated rule_id lookup runs first so its result
+ * can scope the main aggregation.
  *
  * @param savedObjectsClient - The saved objects client used to query the saved objects store
  * @returns A promise that resolves to an array of prebuilt rule assets.
  */
 export async function fetchLatestAssets(
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  options: FetchLatestAssetsOptions = {
+    size: MAX_PREBUILT_RULES_COUNT,
+  }
 ): Promise<PrebuiltRuleAsset[]> {
+  const deprecatedRuleAssets = await fetchDeprecatedRules(savedObjectsClient);
+  const deprecatedRuleIds = deprecatedRuleAssets.map((asset) => asset.rule_id);
+
   const findResult = await savedObjectsClient.find<
     PrebuiltRuleAsset,
     {
@@ -34,14 +54,16 @@ export async function fetchLatestAssets(
     }
   >({
     type: PREBUILT_RULE_ASSETS_SO_TYPE,
-    // Exclude deprecated rule assets so they are not returned as installable/upgradeable
-    filter: `NOT ${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.deprecated: true`,
-    // Aggregation groups prebuilt rule assets by rule_id and gets a rule with the highest version for each group.
+    ...(deprecatedRuleIds.length > 0 && {
+      filter: `NOT (${deprecatedRuleIds
+        .map((id) => `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id: "${id}"`)
+        .join(' OR ')})`,
+    }),
     aggs: {
       rules: {
         terms: {
           field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id`,
-          size: MAX_PREBUILT_RULES_COUNT,
+          size: options.size,
         },
         aggs: {
           latest_version: {

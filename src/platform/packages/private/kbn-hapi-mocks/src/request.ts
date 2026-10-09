@@ -21,7 +21,7 @@ export const createRequestMock = (customization: DeepPartial<Request> = {}): Req
   );
   if (customization.query) {
     Object.entries(customization.query).forEach(([key, value]) => {
-      url.searchParams.set(key, value);
+      url.searchParams.set(key, Array.isArray(value) ? value.join(',') : String(value ?? ''));
     });
   }
 

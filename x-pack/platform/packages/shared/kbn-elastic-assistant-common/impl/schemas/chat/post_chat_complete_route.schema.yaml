@@ -6,6 +6,15 @@ paths:
   /api/security_ai_assistant/chat/complete:
     post:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/security_ai_assistant/chat/complete' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"connectorId":"conn-001","persist":true,"messages":[{"role":"user","content":"What are common phishing techniques?"}]}'
       x-labels: [ess, serverless]
       operationId: ChatComplete
       description: Create a model response for the given chat conversation.
@@ -27,24 +36,26 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ChatCompleteProps'
-            example:
-              conversationId: "abc123"
-              promptId: "prompt_456"
-              isStream: true
-              responseLanguage: "en"
-              langSmithProject: "security_ai_project"
-              langSmithApiKey: "sk-abc123"
-              connectorId: "conn-001"
-              model: "gpt-4"
-              persist: true
-              messages:
-                - role: "user"
-                  content: "What are some common phishing techniques?"
-                  data:
-                    user_id: "user_789"
-                  fields_to_anonymize:
-                    - "user.name"
-                    - "source.ip"
+            examples:
+              ChatCompleteRequest:
+                value:
+                  conversationId: "abc123"
+                  promptId: "prompt_456"
+                  isStream: true
+                  responseLanguage: "en"
+                  langSmithProject: "security_ai_project"
+                  langSmithApiKey: "<LANGSMITH_API_KEY>"
+                  connectorId: "conn-001"
+                  model: "gpt-4"
+                  persist: true
+                  messages:
+                    - role: "user"
+                      content: "What are some common phishing techniques?"
+                      data:
+                        user_id: "user_789"
+                      fields_to_anonymize:
+                        - "user.name"
+                        - "source.ip"
 
       responses:
         200:
@@ -54,8 +65,11 @@ paths:
               schema:
                 type: string
                 format: binary
+              examples:
+                ChatCompleteResponse200Example:
+                  value: "(streaming binary response)"
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -73,6 +87,12 @@ paths:
                     type: string
                     description: Human-readable error message.
                     example: "Invalid request payload."
+              examples:
+                ChatCompleteResponse400Example:
+                  value:
+                    statusCode: 400
+                    error: "Bad Request"
+                    message: "Invalid request payload."
 
 components:
   schemas:
@@ -151,7 +171,7 @@ components:
         langSmithApiKey:
           type: string
           description: API key for LangSmith integration.
-          example: "sk-abc123"
+          example: "<LANGSMITH_API_KEY>"
         connectorId:
           type: string
           description: Required connector identifier to route the request.
@@ -179,7 +199,7 @@ components:
         isStream: true
         responseLanguage: "en"
         langSmithProject: "security_ai_project"
-        langSmithApiKey: "sk-abc123"
+        langSmithApiKey: "<LANGSMITH_API_KEY>"
         connectorId: "conn-001"
         model: "gpt-4"
         persist: true

@@ -234,8 +234,13 @@ export function conditionToStatement(
     if ('exists' in condition) {
       return shorthandUnaryToPainless(condition as ShorthandUnaryFilterCondition, varMap);
     }
-    // Shorthand binary
-    return `(${safePainlessField(condition, varMap)} !== null && ${shorthandBinaryToPainless(
+    // Shorthand binary. `neq` treats a missing field as a match (mirroring ES|QL's
+    // `COALESCE(field != value, TRUE)` and `not(eq)` semantics), so the null-guard is
+    // disjunctive (`=== null ||`) rather than conjunctive (`!== null &&`). Every other
+    // shorthand binary leaf treats a missing field as a non-match.
+    const isNeq = (condition as ShorthandBinaryFilterCondition).neq !== undefined;
+    const nullGuard = isNeq ? '=== null ||' : '!== null &&';
+    return `(${safePainlessField(condition, varMap)} ${nullGuard} ${shorthandBinaryToPainless(
       condition as ShorthandBinaryFilterCondition,
       varMap
     )})`;

@@ -6,6 +6,7 @@
  */
 
 import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 export interface QueryActivitySetupDependencies {
@@ -13,6 +14,7 @@ export interface QueryActivitySetupDependencies {
 }
 
 export interface QueryActivityStartDependencies {
+  data: DataPublicPluginStart;
   share: SharePluginStart;
 }
 

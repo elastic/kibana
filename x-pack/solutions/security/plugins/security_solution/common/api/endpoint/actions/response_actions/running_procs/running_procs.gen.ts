@@ -14,23 +14,26 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 
-import { BaseActionSchema } from '../../../model/schema/common.gen';
+import {
+  ResponseActionCreateSuccessResponse,
+  BaseActionSchema,
+} from '../../../model/schema/common.gen';
 
+export const GetProcessesRouteRequestBody = lazySchema(() => BaseActionSchema);
 export type GetProcessesRouteRequestBody = z.infer<typeof GetProcessesRouteRequestBody>;
-export const GetProcessesRouteRequestBody = BaseActionSchema;
 
-export type GetProcessesRouteResponse = z.infer<typeof GetProcessesRouteResponse>;
-export const GetProcessesRouteResponse = z.object({});
-
+export const EndpointGetProcessesActionRequestBody = lazySchema(() => GetProcessesRouteRequestBody);
 export type EndpointGetProcessesActionRequestBody = z.infer<
   typeof EndpointGetProcessesActionRequestBody
 >;
-export const EndpointGetProcessesActionRequestBody = GetProcessesRouteRequestBody;
 export type EndpointGetProcessesActionRequestBodyInput = z.input<
   typeof EndpointGetProcessesActionRequestBody
 >;
 
+export const EndpointGetProcessesActionResponse = lazySchema(
+  () => ResponseActionCreateSuccessResponse
+);
 export type EndpointGetProcessesActionResponse = z.infer<typeof EndpointGetProcessesActionResponse>;
-export const EndpointGetProcessesActionResponse = GetProcessesRouteResponse;

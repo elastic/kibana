@@ -28,7 +28,7 @@ const startServicesMock = {
 export const renderComponentTemplateList = (
   httpSetup: HttpSetup,
   coreStart: CoreStart,
-  options: { filter?: string } = {}
+  options: { filter?: string; appContextMerge?: Record<string, unknown> } = {}
 ) => {
   const route = `${BASE_PATH}/component_templates${
     options.filter ? `?filter=${options.filter}` : ''
@@ -44,7 +44,9 @@ export const renderComponentTemplateList = (
 
   return render(
     <KibanaRenderContextProvider {...startServicesMock}>
-      {React.createElement(WithAppDependencies(ListWithRouter, httpSetup, coreStart))}
+      {React.createElement(
+        WithAppDependencies(ListWithRouter, httpSetup, coreStart, options.appContextMerge)
+      )}
     </KibanaRenderContextProvider>
   );
 };

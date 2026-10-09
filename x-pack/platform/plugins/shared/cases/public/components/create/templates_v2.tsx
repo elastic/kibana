@@ -47,6 +47,7 @@ export const TemplateSelectorComponent: React.FC<Props> = ({ isLoading, isDisabl
     () => [
       EMPTY_TEMPLATE_OPTION,
       ...(templatesData?.templates ?? []).map((template) => ({
+        key: template.templateId,
         label: template.name,
         value: template.templateId,
       })),

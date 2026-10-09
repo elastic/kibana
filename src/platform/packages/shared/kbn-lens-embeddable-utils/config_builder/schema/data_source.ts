@@ -7,52 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
-import { dataViewSchema } from '@kbn/as-code-data-views-schema';
+import { z, lazySchema } from '@kbn/zod';
+import { dataViewSchema, esqlDataSourceSchema } from '@kbn/as-code-data-views-schema';
 
-export const dataSourceEsqlTypeSchema = schema.object(
-  {
-    type: schema.literal('esql'),
-    /**
-     * An ES|QL query that drives the visualization. The query must produce a tabular result set;
-     * column names from the result are used as field references in metrics and breakdowns.
-     * Example: 'FROM logs-* | STATS count = COUNT(*) BY host.name'
-     */
-    query: schema.string({
-      meta: {
-        description:
-          'An ES|QL query that drives the visualization. The query must produce a tabular result set; column names are used as field references in metrics and breakdowns. Example: "FROM logs-* | STATS count = COUNT(*) BY host.name".',
-      },
-    }),
-  },
-  {
-    meta: {
-      id: 'esqlDataset',
-      title: 'ES|QL Dataset',
-      description:
-        'Uses an ES|QL query as the data source. The query is executed at render time and the resulting columns are available as fields for the visualization.',
-    },
-  }
-);
-
-const anyDataSourceSchema = schema.oneOf([dataViewSchema, dataSourceEsqlTypeSchema], {
-  meta: {
-    id: 'viz_data_source',
+const anyDataSourceSchema = lazySchema(() =>
+  z.union([dataViewSchema, esqlDataSourceSchema]).meta({
+    id: 'visDataSource',
     title: 'Data Source configuration',
     description:
       'Defines where the visualization reads its data. Choose a data view (by reference or ad hoc) for index-pattern-based queries, or an ES|QL dataset for query-driven results.',
-  },
-});
+  })
+);
 
-export const dataSourceSchema = {
-  data_source: dataViewSchema,
-};
+export const dataSourceSchema = lazySchema(() =>
+  z.object({
+    data_source: dataViewSchema,
+  })
+);
 
-export const dataSourceEsqlTableSchema = {
-  data_source: dataSourceEsqlTypeSchema,
-};
+export const dataSourceEsqlTableSchema = lazySchema(() =>
+  z.object({
+    data_source: esqlDataSourceSchema,
+  })
+);
 
-export type DataSourceTypeNoESQL = TypeOf<typeof dataViewSchema>;
-export type DataSourceTypeESQL = TypeOf<typeof dataSourceEsqlTypeSchema>;
+export type DataSourceTypeNoESQL = z.output<typeof dataViewSchema>;
+export type DataSourceTypeESQL = z.output<typeof esqlDataSourceSchema>;
 
-export type DataSourceType = TypeOf<typeof anyDataSourceSchema>;
+export type DataSourceType = z.output<typeof anyDataSourceSchema>;

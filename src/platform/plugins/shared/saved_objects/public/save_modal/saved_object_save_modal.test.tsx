@@ -34,6 +34,7 @@ jest.mock('@elastic/eui', () => {
 });
 
 const mockSave = jest.fn();
+const mockHasLibraryItemWithTitle = jest.fn().mockResolvedValue(false);
 const mockClose = jest.fn();
 
 describe('SavedObjectSaveModal', () => {
@@ -41,8 +42,10 @@ describe('SavedObjectSaveModal', () => {
     const { findByTestId, getByText } = render(
       <I18nProvider>
         <SavedObjectSaveModal
+          hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
           onSave={mockSave}
           onClose={mockClose}
+          lastSavedTitle={''}
           title={'Saved Object title'}
           showCopyOnSave={false}
           objectType="visualization"
@@ -59,8 +62,10 @@ describe('SavedObjectSaveModal', () => {
     const { getByText } = render(
       <I18nProvider>
         <SavedObjectSaveModal
+          hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
           onSave={mockSave}
           onClose={mockClose}
+          lastSavedTitle={''}
           title={'Saved Object title'}
           showCopyOnSave={false}
           objectType="visualization"
@@ -78,8 +83,10 @@ describe('SavedObjectSaveModal', () => {
     const { getByText, rerender } = render(
       <I18nProvider>
         <SavedObjectSaveModal
+          hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
           onSave={mockSave}
           onClose={mockClose}
+          lastSavedTitle={''}
           title={'Saved Object title'}
           showCopyOnSave={false}
           objectType="visualization"
@@ -93,8 +100,10 @@ describe('SavedObjectSaveModal', () => {
     rerender(
       <I18nProvider>
         <SavedObjectSaveModal
+          hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
           onSave={mockSave}
           onClose={mockClose}
+          lastSavedTitle={''}
           title={'Saved Object title'}
           showCopyOnSave={false}
           objectType="visualization"
@@ -112,8 +121,10 @@ describe('SavedObjectSaveModal', () => {
     render(
       <I18nProvider>
         <SavedObjectSaveModal
+          hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
           onSave={mockSave}
           onClose={mockClose}
+          lastSavedTitle={''}
           title={'Saved Object title'}
           showCopyOnSave={false}
           objectType="visualization"
@@ -133,8 +144,10 @@ describe('SavedObjectSaveModal', () => {
       <EuiProvider>
         <I18nProvider>
           <SavedObjectSaveModal
+            hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
             onSave={onSave}
             onClose={mockClose}
+            lastSavedTitle={''}
             title={'Saved Object title'}
             objectType="visualization"
             showDescription={true}
@@ -156,6 +169,24 @@ describe('SavedObjectSaveModal', () => {
     });
   });
 
+  it('renders the form with noValidate to suppress native browser validation', () => {
+    render(
+      <I18nProvider>
+        <SavedObjectSaveModal
+          hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
+          onSave={mockSave}
+          onClose={mockClose}
+          lastSavedTitle={''}
+          title={'Saved Object title'}
+          showCopyOnSave={false}
+          objectType="visualization"
+          showDescription={true}
+        />
+      </I18nProvider>
+    );
+    expect(document.querySelector('form')).toHaveAttribute('novalidate');
+  });
+
   describe('handle title duplication logic', () => {
     it('should append "[1]" to title if no number is present', async () => {
       const onSave = jest.fn();
@@ -163,8 +194,10 @@ describe('SavedObjectSaveModal', () => {
       render(
         <I18nProvider>
           <SavedObjectSaveModal
+            hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
             onSave={onSave}
             onClose={() => {}}
+            lastSavedTitle={''}
             title="Saved Object"
             objectType="visualization"
             showDescription={true}
@@ -187,8 +220,10 @@ describe('SavedObjectSaveModal', () => {
       render(
         <I18nProvider>
           <SavedObjectSaveModal
+            hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
             onSave={onSave}
             onClose={() => {}}
+            lastSavedTitle={''}
             title="Saved Object [1]"
             objectType="visualization"
             showDescription={true}

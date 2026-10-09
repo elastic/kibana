@@ -8,7 +8,15 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { initializeUiamContainers, runUiamContainer, UIAM_CONTAINERS } from './docker_uiam';
+import {
+  getUiamContainers,
+  initializeUiamContainers,
+  runUiamContainer,
+  UIAM_CONTAINERS,
+} from './docker_uiam';
+
+// Pin the published loopback addresses, which otherwise follow the host's IPv6 support.
+jest.mock('./has_ipv6_loopback', () => ({ hasIpv6Loopback: () => true }));
 
 jest.mock('timers/promises', () => ({
   setTimeout: jest.fn(() => Promise.resolve()),
@@ -50,6 +58,50 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
+describe('#getUiamContainers()', () => {
+  const ephemeralExpirationParam = (container: { params: string[] }) =>
+    container.params.find((param) => param.startsWith('uiam.tokens.ephemeral.expiration='));
+
+  test('leaves the ephemeral token lifetime to UIAM by default', () => {
+    expect(getUiamContainers({ includeOAuth: true }).map(ephemeralExpirationParam)).toEqual([
+      undefined,
+      undefined,
+      undefined,
+    ]);
+  });
+
+  test('sets the ephemeral token lifetime on the UIAM container only', () => {
+    const containers = getUiamContainers({ includeOAuth: true, ephemeralTokenExpiration: 'PT1M' });
+
+    expect(containers.map(({ name }) => name)).toEqual(['uiam-cosmosdb', 'uiam', 'uiam-oauth']);
+    expect(containers.map(ephemeralExpirationParam)).toEqual([
+      undefined,
+      'uiam.tokens.ephemeral.expiration=PT1M',
+      undefined,
+    ]);
+    expect(containers[1].params.slice(-2)).toEqual([
+      '--env',
+      'uiam.tokens.ephemeral.expiration=PT1M',
+    ]);
+  });
+
+  test.each(['PT1M', 'PT90S', 'PT2M30S', 'PT5M'])('accepts %s', (expiration) => {
+    expect(() => getUiamContainers({ ephemeralTokenExpiration: expiration })).not.toThrow();
+  });
+
+  test.each(['PT30S', 'PT5M1S', 'PT10M', 'P1D', '60', 'PT1H'])('rejects %s', (expiration) => {
+    expect(() => getUiamContainers({ ephemeralTokenExpiration: expiration })).toThrow(
+      `Invalid UIAM ephemeral token expiration [${expiration}]: expected an ISO-8601 duration from PT1M to PT5M, such as PT1M or PT90S.`
+    );
+  });
+
+  test('does not change the shared container definitions', () => {
+    getUiamContainers({ ephemeralTokenExpiration: 'PT1M' });
+
+    expect(UIAM_CONTAINERS.map(ephemeralExpirationParam)).toEqual([undefined, undefined]);
+  });
+});
+
 describe(`#runUiamContainer()`, () => {
   test('should be able to run UIAM containers', async () => {
     const [cosmosDbContainer, uiamContainer] = UIAM_CONTAINERS;
@@ -82,12 +134,20 @@ describe(`#runUiamContainer()`, () => {
             "3s",
             "--net",
             "elastic",
+            "--memory",
+            "1536m",
+            "--memory-swap",
+            "1536m",
             "--volume",
             "/some_path/uiam_cosmosdb.pfx:/scripts/certs/uiam_cosmosdb.pfx:z",
             "-p",
             "127.0.0.1:8081:8081",
             "-p",
+            "[::1]:8081:8081",
+            "-p",
             "127.0.0.1:8082:1234",
+            "-p",
+            "[::1]:8082:1234",
             "--env",
             "AZURE_COSMOS_EMULATOR_PARTITION_COUNT=1",
             "--env",
@@ -99,7 +159,7 @@ describe(`#runUiamContainer()`, () => {
             "--env",
             "LOG_LEVEL=error",
             "--health-cmd",
-            "curl -sk http://127.0.0.1:8080/ready | grep -q \\"\\\\\\"overall\\\\\\": true\\"",
+            "curl -sk http://127.0.0.1:8080/ready | grep -q '\\"overall\\": true' && [ \\"$(curl -sk -o /dev/null -w '%{http_code}' https://127.0.0.1:8081/)\\" = \\"200\\" ]",
             "--name",
             "uiam-cosmosdb",
             "docker.elastic.co/kibana-ci/uiam-azure-cosmos-emulator:latest-verified",
@@ -151,6 +211,10 @@ describe(`#runUiamContainer()`, () => {
             "3s",
             "--net",
             "elastic",
+            "--memory",
+            "2g",
+            "--memory-swap",
+            "2g",
             "--volume",
             "/some_path/run_java_with_custom_ca.sh:/opt/jboss/container/java/run/run-java-with-custom-ca.sh:z",
             "--volume",
@@ -163,8 +227,12 @@ describe(`#runUiamContainer()`, () => {
             "/some/path/kibana.crt:/tmp/server.crt:z",
             "-p",
             "127.0.0.1:8443:8443",
+            "-p",
+            "[::1]:8443:8443",
             "--entrypoint",
             "/opt/jboss/container/java/run/run-java-with-custom-ca.sh",
+            "--env",
+            "JAVA_OPTS_APPEND=-Xms256m -Xmx1g",
             "--env",
             "uiam.apikey.convert.validation.endpoint.enabled=false",
             "--env",
@@ -188,7 +256,7 @@ describe(`#runUiamContainer()`, () => {
             "--env",
             "quarkus.log.category.\\"org\\".level=INFO",
             "--env",
-            "quarkus.log.category.\\"co.elastic.cloud.uiam\\".level=DEBUG",
+            "quarkus.log.category.\\"co.elastic.cloud.uiam\\".level=INFO",
             "--env",
             "quarkus.log.category.\\"co.elastic.cloud.uiam.app.authentication.ClientCertificateExtractor\\".level=INFO",
             "--env",
@@ -210,6 +278,16 @@ describe(`#runUiamContainer()`, () => {
             "--env",
             "uiam.cosmos.container.apikey=api-keys",
             "--env",
+            "uiam.cosmos.container.oauth_authorization_code=oauth-authorization-codes",
+            "--env",
+            "uiam.cosmos.container.oauth_client=oauth-clients",
+            "--env",
+            "uiam.cosmos.container.oauth_app_connection=oauth-app-connections",
+            "--env",
+            "uiam.cosmos.container.organization_service_account=organization-service-accounts",
+            "--env",
+            "uiam.cosmos.organization_service_account.enabled=true",
+            "--env",
             "uiam.cosmos.container.token_invalidation=token-invalidation",
             "--env",
             "uiam.cosmos.container.users=users",
@@ -218,7 +296,7 @@ describe(`#runUiamContainer()`, () => {
             "--env",
             "uiam.cosmos.gateway_connection_mode=true",
             "--env",
-            "uiam.internal.shared.secrets=Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=",
+            "uiam.internal.shared.secrets=Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=,3KyUueOHfXAbZbcxM/sL7nfyUFOgX7u8ONBKHbz2AqI=",
             "--env",
             "uiam.tokens.jwt.signature.secrets=MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=",
             "--env",
@@ -352,11 +430,11 @@ describe(`#runUiamContainer()`, () => {
     await expect(
       runUiamContainer(new ToolingLog(), cosmosDbContainer)
     ).rejects.toMatchInlineSnapshot(
-      `[Error: The "uiam-cosmosdb" container failed to start within the expected time. Last known status: running. Check the logs with [1mdocker logs -f uiam-cosmosdb[22m]`
+      `[Error: The "uiam-cosmosdb" container failed to start within 180 seconds. Last known status: running. Check the logs with [1mdocker logs -f uiam-cosmosdb[22m]`
     );
 
     // Skip the first call to `docker run` as we checked it in the previous test.
-    expect(execa.mock.calls.slice(1)).toHaveLength(31);
+    expect(execa.mock.calls.slice(1)).toHaveLength(91);
 
     execa.mockClear();
 
@@ -366,11 +444,11 @@ describe(`#runUiamContainer()`, () => {
       .mockResolvedValue({ stdout: ` running ` });
 
     await expect(runUiamContainer(new ToolingLog(), uiamContainer)).rejects.toMatchInlineSnapshot(
-      `[Error: The "uiam" container failed to start within the expected time. Last known status: running. Check the logs with [1mdocker logs -f uiam[22m]`
+      `[Error: The "uiam" container failed to start within 180 seconds. Last known status: running. Check the logs with [1mdocker logs -f uiam[22m]`
     );
 
     // Skip the first call to `docker run` as we checked it in the previous test.
-    expect(execa.mock.calls.slice(1)).toHaveLength(31);
+    expect(execa.mock.calls.slice(1)).toHaveLength(91);
   });
 });
 
@@ -394,7 +472,7 @@ describe('#initializeUiamContainers', () => {
     expect(mockUndiciAgent).toHaveBeenCalledTimes(1);
     expect(mockUndiciAgent).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
 
-    expect(mockUndiciFetch).toHaveBeenCalledTimes(4);
+    expect(mockUndiciFetch).toHaveBeenCalledTimes(8);
     expect(mockUndiciFetch.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -465,6 +543,74 @@ describe('#initializeUiamContainers', () => {
             "method": "POST",
           },
         ],
+        Array [
+          "https://localhost:8081/dbs/uiam-db/colls",
+          Object {
+            "body": "{\\"id\\":\\"oauth-clients\\",\\"partitionKey\\":{\\"paths\\":[\\"/creator_id\\"],\\"kind\\":\\"Hash\\"}}",
+            "dispatcher": Object {
+              "dispatch": [MockFunction],
+              "name": "I'm the danger. I'm the one who knocks.",
+            },
+            "headers": Object {
+              "Authorization": "type%3Dmaster%26ver%3D1.0%26sig%3Djxrkp7JRqa5BKBelNeJSwradPgHYz2aTrP8%2Bce0zMQY%3D",
+              "Content-Type": "application/json",
+              "x-ms-date": "Sat, 01 Jan 2000 00:00:00 GMT",
+              "x-ms-version": "2018-12-31",
+            },
+            "method": "POST",
+          },
+        ],
+        Array [
+          "https://localhost:8081/dbs/uiam-db/colls",
+          Object {
+            "body": "{\\"id\\":\\"oauth-authorization-codes\\",\\"partitionKey\\":{\\"paths\\":[\\"/id\\"],\\"kind\\":\\"Hash\\"}}",
+            "dispatcher": Object {
+              "dispatch": [MockFunction],
+              "name": "I'm the danger. I'm the one who knocks.",
+            },
+            "headers": Object {
+              "Authorization": "type%3Dmaster%26ver%3D1.0%26sig%3Djxrkp7JRqa5BKBelNeJSwradPgHYz2aTrP8%2Bce0zMQY%3D",
+              "Content-Type": "application/json",
+              "x-ms-date": "Sat, 01 Jan 2000 00:00:00 GMT",
+              "x-ms-version": "2018-12-31",
+            },
+            "method": "POST",
+          },
+        ],
+        Array [
+          "https://localhost:8081/dbs/uiam-db/colls",
+          Object {
+            "body": "{\\"id\\":\\"oauth-app-connections\\",\\"partitionKey\\":{\\"paths\\":[\\"/client_id\\"],\\"kind\\":\\"Hash\\"}}",
+            "dispatcher": Object {
+              "dispatch": [MockFunction],
+              "name": "I'm the danger. I'm the one who knocks.",
+            },
+            "headers": Object {
+              "Authorization": "type%3Dmaster%26ver%3D1.0%26sig%3Djxrkp7JRqa5BKBelNeJSwradPgHYz2aTrP8%2Bce0zMQY%3D",
+              "Content-Type": "application/json",
+              "x-ms-date": "Sat, 01 Jan 2000 00:00:00 GMT",
+              "x-ms-version": "2018-12-31",
+            },
+            "method": "POST",
+          },
+        ],
+        Array [
+          "https://localhost:8081/dbs/uiam-db/colls",
+          Object {
+            "body": "{\\"id\\":\\"organization-service-accounts\\",\\"partitionKey\\":{\\"paths\\":[\\"/id\\"],\\"kind\\":\\"Hash\\"}}",
+            "dispatcher": Object {
+              "dispatch": [MockFunction],
+              "name": "I'm the danger. I'm the one who knocks.",
+            },
+            "headers": Object {
+              "Authorization": "type%3Dmaster%26ver%3D1.0%26sig%3Djxrkp7JRqa5BKBelNeJSwradPgHYz2aTrP8%2Bce0zMQY%3D",
+              "Content-Type": "application/json",
+              "x-ms-date": "Sat, 01 Jan 2000 00:00:00 GMT",
+              "x-ms-version": "2018-12-31",
+            },
+            "method": "POST",
+          },
+        ],
       ]
     `);
   });
@@ -477,7 +623,7 @@ describe('#initializeUiamContainers', () => {
     expect(mockUndiciAgent).toHaveBeenCalledTimes(1);
     expect(mockUndiciAgent).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
 
-    expect(mockUndiciFetch).toHaveBeenCalledTimes(4);
+    expect(mockUndiciFetch).toHaveBeenCalledTimes(8);
   });
 
   test('fails if cannot create database', async () => {

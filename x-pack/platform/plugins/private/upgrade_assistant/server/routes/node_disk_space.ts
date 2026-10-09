@@ -34,7 +34,6 @@ export function getNodesWithLowDiskSpace(
     const node = nodeStats.nodes[nodeId];
 
     node?.fs?.data?.forEach((dataPath) => {
-      // @ts-expect-error low_watermark_free_space_in_bytes is missing from the types
       const lowWatermark = dataPath.low_watermark_free_space_in_bytes;
       const bytesAvailable = dataPath.available_in_bytes;
       const fsWithLowDiskSpace = [];

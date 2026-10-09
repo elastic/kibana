@@ -27,12 +27,13 @@ describe('get_npre_value route', () => {
     return { handler, routeConfig };
   };
 
-  it('registers route with required privileges', () => {
+  it('registers route with authz disabled', () => {
     const { routeConfig } = createHandler();
 
     expect(routeConfig.path).toBe('/internal/cps/project_routing/{projectRoutingName}');
     expect(routeConfig.security?.authz).toEqual({
-      requiredPrivileges: ['cluster:monitor/project_routing/get'],
+      enabled: false,
+      reason: expect.stringContaining('Kibana internal user'),
     });
   });
 

@@ -5,9 +5,30 @@
  * 2.0.
  */
 
-import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
+import { esFieldTypeToKibanaFieldType, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { ParsedPanel } from '../../../../../../../../../../common/siem_migrations/parsers/types';
 import type { EsqlColumn } from '../../types';
+
+const kbnFieldTypeValues = new Set<string>(Object.values(KBN_FIELD_TYPES));
+
+/**
+ * Converts a field type string to a valid Kibana field type.
+ * First attempts to map as an Elasticsearch field type (e.g. "double" -> "number").
+ * If that yields "unknown", checks whether the input is already a valid Kibana
+ * field type (e.g. "number") and uses it directly. This handles LLM responses
+ * that return Kibana types instead of Elasticsearch types.
+ */
+export const toKibanaFieldType = (type: string): string => {
+  const mapped = esFieldTypeToKibanaFieldType(type);
+  if (mapped !== KBN_FIELD_TYPES.UNKNOWN) {
+    return mapped;
+  }
+  if (kbnFieldTypeValues.has(type)) {
+    return type;
+  }
+  return KBN_FIELD_TYPES.UNKNOWN;
+};
 
 interface ColumnInfo {
   columnId: string;
@@ -41,9 +62,11 @@ interface PanelJSON {
                 columns?: ColumnInfo[];
               };
             };
+            indexPatternRefs?: Array<{ id: string; title: string }>;
           };
         };
         query?: { esql: string };
+        adHocDataViews?: Record<string, { title: string; name: string; [key: string]: unknown }>;
       };
     };
   };
@@ -94,22 +117,14 @@ function parseColumns(extractedColumns: EsqlColumn[]): {
   const columnList: ColumnInfo[] = [];
   const columnNames: string[] = [];
   extractedColumns.forEach(({ name: columnName, type }, index) => {
-    if (index === 0) {
-      columnList.push({
-        columnId: columnName,
-        fieldName: columnName,
-        meta: { type: esFieldTypeToKibanaFieldType(type) },
-        /* The first column is mostly a metric so here we are making that assumption
-         * unless we have better way to do this. */
-        inMetricDimension: true,
-      });
-    } else {
-      columnList.push({
-        columnId: columnName,
-        fieldName: columnName,
-        meta: { type: 'string' },
-      });
-    }
+    columnList.push({
+      columnId: columnName,
+      fieldName: columnName,
+      meta: { type: toKibanaFieldType(type) },
+      /* The first column is mostly a metric so here we are making that assumption
+       * unless we have better way to do this. */
+      ...(index === 0 ? { inMetricDimension: true } : {}),
+    });
     columnNames.push(columnName);
   });
 
@@ -239,16 +254,22 @@ function configureStackedProperties(
   columns: string[]
 ): void {
   if ((vizType.includes('stacked') || vizType.includes('line')) && columns.length > 2) {
-    if (panelJSON.embeddableConfig?.attributes?.state?.visualization?.layers?.[0]) {
-      panelJSON.embeddableConfig.attributes.state.visualization.layers[0].splitAccessors[0] =
-        columns[columns.length - 2];
+    const layer = panelJSON.embeddableConfig?.attributes?.state?.visualization?.layers?.[0];
+    if (layer) {
+      if (!layer.splitAccessors) {
+        layer.splitAccessors = [];
+      }
+      layer.splitAccessors[0] = columns[columns.length - 2];
     }
   }
 
   if (vizType.includes('stacked') && columns.length === 2) {
-    if (panelJSON.embeddableConfig?.attributes?.state?.visualization?.layers?.[0]) {
-      panelJSON.embeddableConfig.attributes.state.visualization.layers[0].splitAccessors[0] =
-        columns[columns.length - 1];
+    const layer = panelJSON.embeddableConfig?.attributes?.state?.visualization?.layers?.[0];
+    if (layer) {
+      if (!layer.splitAccessors) {
+        layer.splitAccessors = [];
+      }
+      layer.splitAccessors[0] = columns[columns.length - 1];
     }
   }
 }
@@ -259,18 +280,30 @@ function configureDatasourceProperties(
   query: string,
   columnList: ColumnInfo[]
 ): void {
-  if (panelJSON.embeddableConfig?.attributes?.state?.datasourceStates?.textBased?.layers) {
+  const indexPattern = getIndexPatternFromESQLQuery(query);
+
+  const textBased = panelJSON.embeddableConfig?.attributes?.state?.datasourceStates?.textBased;
+  if (textBased?.layers) {
     const layerId = '3a5310ab-2832-41db-bdbe-1b6939dd5651';
-    if (panelJSON.embeddableConfig.attributes.state.datasourceStates.textBased.layers[layerId]) {
-      panelJSON.embeddableConfig.attributes.state.datasourceStates.textBased.layers[layerId].query =
-        { esql: query };
-      panelJSON.embeddableConfig.attributes.state.datasourceStates.textBased.layers[
-        layerId
-      ].columns = columnList;
+    if (textBased.layers[layerId]) {
+      textBased.layers[layerId].query = { esql: query };
+      textBased.layers[layerId].columns = columnList;
+    }
+
+    if (textBased.indexPatternRefs?.[0]) {
+      textBased.indexPatternRefs[0].title = indexPattern;
     }
   }
 
-  if (panelJSON.embeddableConfig?.attributes?.state?.query) {
-    panelJSON.embeddableConfig.attributes.state.query.esql = query;
+  const state = panelJSON.embeddableConfig?.attributes?.state;
+  if (state?.query) {
+    state.query.esql = query;
+  }
+
+  if (state?.adHocDataViews) {
+    for (const spec of Object.values(state.adHocDataViews)) {
+      spec.title = indexPattern;
+      spec.name = indexPattern;
+    }
   }
 }

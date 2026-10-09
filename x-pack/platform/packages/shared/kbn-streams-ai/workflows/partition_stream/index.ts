@@ -8,7 +8,8 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import type { Feature, Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import type { Feature } from '@kbn/significant-events-schema';
 import { conditionSchema, type Condition } from '@kbn/streamlang';
 import { DeepStrict } from '@kbn/zod-helpers/v4';
 import { clusterLogs } from '../../src/cluster_logs/cluster_logs';
@@ -46,7 +47,6 @@ export async function partitionStream({
   getFeatures,
   userPrompt,
   existingPartitions = [],
-  refinementHistory = [],
 }: {
   definition: Streams.WiredStream.Definition;
   inferenceClient: BoundInferenceClient;
@@ -63,7 +63,6 @@ export async function partitionStream({
   }): Promise<Feature[]>;
   userPrompt?: string;
   existingPartitions?: Array<{ name: string; condition: Condition }>;
-  refinementHistory?: string[];
 }): Promise<PartitionStreamResponse> {
   const enabledChildConditions = definition.ingest.wired.routing
     .filter((route) => route.status !== 'disabled')
@@ -131,13 +130,6 @@ export async function partitionStream({
       ...(userPrompt ? { user_prompt: userPrompt } : {}),
       ...(existingPartitions.length > 0
         ? { existing_partitions: JSON.stringify(existingPartitions) }
-        : {}),
-      ...(refinementHistory.length > 0
-        ? {
-            refinement_history: refinementHistory
-              .map((prompt, i) => `${i + 1}. "${prompt}"`)
-              .join('\n'),
-          }
         : {}),
     },
     maxSteps,

@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from '@emotion/styled';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { InventoryView } from '../../../../../common/inventory_views';
 import type { SnapshotNode } from '../../../../../common/http_api';
@@ -23,11 +22,10 @@ import type { WaffleLegendOptions } from '../hooks/use_waffle_options';
 import { DEFAULT_LEGEND, useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import type { InfraWaffleMapBounds } from '../../../../common/inventory/types';
 import { InfraFormatterType } from '../../../../common/inventory/types';
-import { Toolbar } from './toolbars/toolbar';
-import { ViewSwitcher } from './waffle/view_switcher';
 import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_formatter';
 import { createLegend } from '../lib/create_legend';
 import { BottomDrawer } from './bottom_drawer';
+import { InventoryHeaderContent } from './header_content';
 import { LegendControls } from './waffle/legend_controls';
 import { KubernetesDashboardCard } from '../../../../components/kubernetes_dashboard_promotion/kubernetes_dashboard_promotion';
 import { useKubernetesDashboardPromotion } from '../../../../hooks/use_kubernetes_dashboard_promotion';
@@ -54,7 +52,6 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
     groupBy,
     sort,
     nodeType,
-    changeView,
     view,
     autoBounds,
     boundsOverride,
@@ -82,6 +79,10 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
 
   const showEcsK8sDashboardCard = hasEcsSchema && !dismissedCards?.ecs;
   const showSemconvK8sDashboardCard = hasSemconvSchema && !dismissedCards?.semconv;
+  // Match NodesOverview `showLoading`: keep promotion cards mounted while
+  // auto-reload refetches so they do not unmount and shift the waffle.
+  const showK8sDashboardPromotion =
+    (showEcsK8sDashboardCard || showSemconvK8sDashboardCard) && (!loading || isAutoReloading);
 
   const options = {
     formatter: InfraFormatterType.percent,
@@ -138,41 +139,49 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
     [changeBoundsOverride, changeAutoBounds, changeLegend]
   );
 
+  const legendControls =
+    view === 'map' ? (
+      <LegendControls
+        options={legend != null ? legend : DEFAULT_LEGEND}
+        dataBounds={dataBounds}
+        bounds={bounds}
+        autoBounds={autoBounds}
+        boundsOverride={boundsOverride}
+        onChange={handleLegendControlChange}
+      />
+    ) : undefined;
+
   return (
-    <>
-      <PageContent>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <TopActionContainer grow={false}>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
-              <Toolbar nodeType={nodeType} currentTime={currentTime} />
-              <EuiFlexGroup
-                responsive={false}
-                css={css`
-                  margin: 0;
-                  justify-content: flex-end;
-                `}
-              >
-                {view === 'map' && (
-                  <EuiFlexItem grow={false}>
-                    <LegendControls
-                      options={legend != null ? legend : DEFAULT_LEGEND}
-                      dataBounds={dataBounds}
-                      bounds={bounds}
-                      autoBounds={autoBounds}
-                      boundsOverride={boundsOverride}
-                      onChange={handleLegendControlChange}
-                    />
-                  </EuiFlexItem>
-                )}
-                <EuiFlexItem grow={false}>
-                  <ViewSwitcher view={view} onChange={changeView} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexGroup>
-          </TopActionContainer>
-          {nodeType === 'pod' &&
-            (showEcsK8sDashboardCard || showSemconvK8sDashboardCard) &&
-            !loading && (
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      css={css`
+        flex: 1;
+        min-height: 0;
+      `}
+    >
+      <EuiFlexItem grow={false}>
+        <InventoryHeaderContent legendControls={legendControls} />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow
+        css={css`
+          min-height: 0;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+        `}
+      >
+        <PageContent>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="s"
+            css={css`
+              flex: 1;
+              min-height: 0;
+            `}
+          >
+            {nodeType === 'pod' && showK8sDashboardPromotion && (
               <EuiFlexGroup css={{ flexGrow: 0 }} direction="row">
                 {showEcsK8sDashboardCard && (
                   <EuiFlexItem>
@@ -204,36 +213,37 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
                 )}
               </EuiFlexGroup>
             )}
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              position: relative;
-              flex: 1 1 auto;
-            `}
-          >
-            <AutoSizer bounds>
-              {({ bounds: { height = 0 } }) => (
-                <NodesOverview
-                  nodes={nodes}
-                  options={options}
-                  nodeType={nodeType}
-                  loading={loading}
-                  showLoading={showLoading}
-                  onDrilldown={onDrilldown}
-                  currentTime={currentTime}
-                  view={view}
-                  autoBounds={autoBounds}
-                  boundsOverride={boundsOverride}
-                  formatter={formatter}
-                  bottomMargin={height}
-                  isAutoReloading={isAutoReloading}
-                  refreshInterval={AUTO_REFRESH_INTERVAL}
-                />
-              )}
-            </AutoSizer>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </PageContent>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                position: relative;
+                flex: 1 1 auto;
+              `}
+            >
+              <AutoSizer bounds>
+                {({ bounds: { height = 0 } }) => (
+                  <NodesOverview
+                    nodes={nodes}
+                    options={options}
+                    nodeType={nodeType}
+                    loading={loading}
+                    showLoading={showLoading}
+                    onDrilldown={onDrilldown}
+                    currentTime={currentTime}
+                    view={view}
+                    autoBounds={autoBounds}
+                    boundsOverride={boundsOverride}
+                    formatter={formatter}
+                    bottomMargin={height}
+                    isAutoReloading={isAutoReloading}
+                    refreshInterval={AUTO_REFRESH_INTERVAL}
+                  />
+                )}
+              </AutoSizer>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </PageContent>
+      </EuiFlexItem>
       <BottomDrawer
         interval={interval}
         formatter={formatter}
@@ -241,10 +251,6 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
         nodeType={nodeType}
         loading={loading}
       />
-    </>
+    </EuiFlexGroup>
   );
 });
-
-const TopActionContainer = styled(EuiFlexItem)`
-  padding: ${(props) => `${props.theme.euiTheme.size.m} 0`};
-`;

@@ -32,6 +32,7 @@ import type {
 } from '../../types';
 import { agentPolicyService } from '../../services';
 import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 } from '../../constants';
+import { throwIfSslPathInvalid } from '../utils/ssl_utils';
 
 async function bumpRelatedPolicies(
   soClient: SavedObjectsClientContract,
@@ -40,37 +41,37 @@ async function bumpRelatedPolicies(
   outputs: Output[],
   downloadSources: DownloadSource[]
 ) {
-  if (
-    fleetServerHosts.some((host) => host.is_default) ||
-    outputs.some((output) => output.is_default || output.is_default_monitoring)
-  ) {
-    await agentPolicyService.bumpAllAgentPolicies(esClient);
-  } else {
-    await pMap(
-      outputs,
-      (output) => agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id),
-      {
-        concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
-      }
-    );
-    await pMap(
-      fleetServerHosts,
-      (fleetServerHost) =>
-        agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, fleetServerHost.id),
-      {
-        concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
-      }
-    );
-
-    await pMap(
-      downloadSources,
-      (downloadSource) =>
-        agentPolicyService.bumpAllAgentPoliciesForDownloadSource(esClient, downloadSource.id),
-      {
-        concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
-      }
-    );
-  }
+  await pMap(
+    outputs,
+    (output) =>
+      agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id, {
+        isDefault: output.is_default,
+        isDefaultMonitoring: output.is_default_monitoring,
+      }),
+    {
+      concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
+    }
+  );
+  await pMap(
+    fleetServerHosts,
+    (fleetServerHost) =>
+      agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, fleetServerHost.id, {
+        isDefault: fleetServerHost.is_default,
+      }),
+    {
+      concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
+    }
+  );
+  await pMap(
+    downloadSources,
+    (downloadSource) =>
+      agentPolicyService.bumpAllAgentPoliciesForDownloadSource(esClient, downloadSource.id, {
+        isDefault: downloadSource.is_default,
+      }),
+    {
+      concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
+    }
+  );
 }
 
 export const postFleetProxyHandler: RequestHandler<
@@ -81,6 +82,7 @@ export const postFleetProxyHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const { id, ...data } = request.body;
+  throwIfSslPathInvalid([data.certificate_authorities, data.certificate, data.certificate_key]);
   const proxy = await createFleetProxy(soClient, { ...data, is_preconfigured: false }, { id });
 
   const body = {
@@ -101,6 +103,11 @@ export const putFleetProxyHandler: RequestHandler<
     const soClient = coreContext.savedObjects.client;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
 
+    throwIfSslPathInvalid([
+      request.body.certificate_authorities,
+      request.body.certificate,
+      request.body.certificate_key,
+    ]);
     const item = await updateFleetProxy(soClient, proxyId, request.body);
     const body = {
       item,

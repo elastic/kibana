@@ -12,7 +12,6 @@ import type {
   PluginInitializerContext,
   Logger,
 } from '@kbn/core/server';
-import { registerObservabilityAgent } from './agent/register_observability_agent';
 import { registerTools } from './tools/register_tools';
 import { registerAttachments } from './attachments/register_attachments';
 import { registerSkills } from './skills/register_skills';
@@ -53,10 +52,6 @@ export class ObservabilityAgentBuilderPlugin
     >,
     plugins: ObservabilityAgentBuilderPluginSetupDependencies
   ): ObservabilityAgentBuilderPluginSetup {
-    registerObservabilityAgent({ core, plugins, logger: this.logger }).catch((error) => {
-      this.logger.error(`Error registering observability agent: ${error}`);
-    });
-
     registerSkills({ plugins, logger: this.logger });
 
     registerTools({

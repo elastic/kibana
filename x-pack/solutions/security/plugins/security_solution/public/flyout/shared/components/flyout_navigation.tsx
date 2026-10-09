@@ -15,15 +15,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  useExpandableFlyoutApi,
-  useExpandableFlyoutHistory,
-  useExpandableFlyoutState,
-} from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi, useExpandableFlyoutHistory } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { FlyoutHistory } from './flyout_history';
 import { getProcessedHistory } from '../utils/history_utils';
+import { useStableExpandableFlyoutState } from '../hooks/use_stable_expandable_flyout_state';
 import {
   COLLAPSE_DETAILS_BUTTON_TEST_ID,
   EXPAND_DETAILS_BUTTON_TEST_ID,
@@ -64,7 +61,7 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
     const history = useExpandableFlyoutHistory();
     const historyArray = useMemo(() => getProcessedHistory({ history, maxCount: 10 }), [history]);
 
-    const panels = useExpandableFlyoutState();
+    const panels = useStableExpandableFlyoutState();
     const isExpanded: boolean = !!panels.left;
 
     const { closeLeftPanel } = useExpandableFlyoutApi();

@@ -9,7 +9,7 @@ import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import type { TopNodesRequest } from '../../../../common/http_api/overview_api';
-import { TIMESTAMP_FIELD } from '../../../../common/constants';
+import { DEFAULT_SCHEMA, TIMESTAMP_FIELD } from '../../../../common/constants';
 
 const getNodeFilter = (schema: DataSchemaFormat) => {
   const inventoryModel = findInventoryModel('host');
@@ -142,12 +142,18 @@ const getSemconvAggs = (options: TopNodesRequest) => ({
       buckets_path: 'cpu_idle.avg',
     },
   },
+  cpu_idle_stats: {
+    stats_bucket: {
+      buckets_path: 'cpu_idle.avg',
+    },
+  },
   cpu: {
     bucket_script: {
       buckets_path: {
+        cpuIdleCount: 'cpu_idle_stats.count',
         cpuIdleTotal: 'cpu_idle_total',
       },
-      script: '1 - params.cpuIdleTotal',
+      script: 'params.cpuIdleCount > 0 ? 1 - params.cpuIdleTotal : null',
       gap_policy: 'skip',
     },
   },
@@ -184,12 +190,18 @@ const getSemconvAggs = (options: TopNodesRequest) => ({
           buckets_path: 'cpu_idle.avg',
         },
       },
+      cpu_idle_stats: {
+        stats_bucket: {
+          buckets_path: 'cpu_idle.avg',
+        },
+      },
       cpu: {
         bucket_script: {
           buckets_path: {
+            cpuIdleCount: 'cpu_idle_stats.count',
             cpuIdleTotal: 'cpu_idle_total',
           },
-          script: '1 - params.cpuIdleTotal',
+          script: 'params.cpuIdleCount > 0 ? 1 - params.cpuIdleTotal : null',
           gap_policy: 'skip',
         },
       },
@@ -205,7 +217,7 @@ const getSemconvAggs = (options: TopNodesRequest) => ({
 export const createTopNodesQuery = (
   options: TopNodesRequest,
   source: MetricsSourceConfiguration,
-  schema: DataSchemaFormat = 'ecs'
+  schema: DataSchemaFormat = DEFAULT_SCHEMA
 ) => {
   const isEcs = schema === 'ecs';
 

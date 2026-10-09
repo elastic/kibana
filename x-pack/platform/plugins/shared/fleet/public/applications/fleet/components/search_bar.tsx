@@ -28,8 +28,13 @@ import {
 } from '../constants';
 
 const NoWrapQueryStringInput = styled(QueryStringInput)`
+  height: ${(props) => props.theme.eui.euiSizeXXL};
+
   .kbnQueryBar__textarea {
     white-space: nowrap;
+    height: ${(props) => props.theme.eui.euiSizeXXL};
+    padding-block: ${(props) => props.theme.eui.euiSizeS};
+    padding-top: calc(${(props) => props.theme.eui.euiSizeS} + 2px);
   }
 `;
 
@@ -94,7 +99,7 @@ const concatKeys = (obj: any, parentKey = '') => {
   for (const key in obj) {
     if (typeof obj[key] === 'object') {
       result = result.concat(concatKeys(obj[key], `${parentKey}${key}.`));
-    } else {
+    } else if (typeof obj[key] !== 'number') {
       result.push(`${parentKey}${key}:${obj[key]}`);
     }
   }

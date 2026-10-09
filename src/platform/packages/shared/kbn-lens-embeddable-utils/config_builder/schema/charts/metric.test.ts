@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
-import type { MetricState } from './metric';
-import { metricStateSchema } from './metric';
+import type { MetricConfig } from './metric';
+import { metricConfigSchema } from './metric';
 
 describe('Metric Schema', () => {
   const baseMetricConfig = {
@@ -19,14 +20,14 @@ describe('Metric Schema', () => {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       ref_id: 'test-data-view',
     },
-  } satisfies Partial<MetricState>;
+  } satisfies Partial<MetricConfig>;
 
   const defaultValues = {
     sampling: 1,
     ignore_global_filters: false,
-  } satisfies Partial<MetricState>;
+  } satisfies Partial<MetricConfig>;
 
-  type MetricInput = Omit<MetricState, keyof typeof defaultValues>;
+  type MetricInput = Omit<MetricConfig, keyof typeof defaultValues>;
 
   describe('primary metric configuration', () => {
     it('validates count metric operation', () => {
@@ -49,8 +50,8 @@ describe('Metric Schema', () => {
         },
       } satisfies MetricInput;
 
-      const validated = metricStateSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
+      const validated = metricConfigSchema.parse(input);
+      expect(validated).toMatchObject({ ...defaultValues, ...input });
     });
 
     it('validates metric with icon configuration', () => {
@@ -65,19 +66,19 @@ describe('Metric Schema', () => {
           },
         ],
         styling: {
+          icon: {
+            name: 'star_empty',
+            alignment: 'left',
+          },
           primary: {
-            icon: {
-              name: 'star_empty',
-              alignment: 'left',
-            },
             labels: { alignment: 'left' },
             value: { sizing: 'auto', alignment: 'left' },
           },
         },
       } satisfies MetricInput;
 
-      const validated = metricStateSchema.validate(input);
-      expect(validated).toEqual({
+      const validated = metricConfigSchema.parse(input);
+      expect(validated).toMatchObject({
         ...defaultValues,
         ...input,
       });
@@ -109,8 +110,8 @@ describe('Metric Schema', () => {
         },
       } satisfies MetricInput;
 
-      const validated = metricStateSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
+      const validated = metricConfigSchema.parse(input);
+      expect(validated).toMatchObject({ ...defaultValues, ...input });
     });
 
     it('validates metric with background chart', () => {
@@ -139,8 +140,8 @@ describe('Metric Schema', () => {
         },
       } satisfies MetricInput;
 
-      const validated = metricStateSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
+      const validated = metricConfigSchema.parse(input);
+      expect(validated).toMatchObject({ ...defaultValues, ...input });
     });
 
     describe('coloring configuration', () => {
@@ -164,8 +165,9 @@ describe('Metric Schema', () => {
           ],
         } satisfies MetricInput;
 
-        expect(() => metricStateSchema.validate(input)).toThrow(
-          'When using percentage-based dynamic coloring, a breakdown dimension or max must be defined.'
+        const result = metricConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ When using percentage-based dynamic coloring, a breakdown dimension or max must be defined."`
         );
       });
 
@@ -195,7 +197,7 @@ describe('Metric Schema', () => {
           },
         };
 
-        expect(() => metricStateSchema.validate(input)).not.toThrow();
+        expect(() => metricConfigSchema.parse(input)).not.toThrow();
       });
 
       it('accepts percentage-based dynamic coloring with bar background_chart', () => {
@@ -222,7 +224,7 @@ describe('Metric Schema', () => {
           ],
         };
 
-        expect(() => metricStateSchema.validate(input)).not.toThrow();
+        expect(() => metricConfigSchema.parse(input)).not.toThrow();
       });
     });
   });
@@ -256,8 +258,8 @@ describe('Metric Schema', () => {
         },
       } satisfies MetricInput;
 
-      const validated = metricStateSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
+      const validated = metricConfigSchema.parse(input);
+      expect(validated).toMatchObject({ ...defaultValues, ...input });
     });
 
     it('validates with colored secondary metric', () => {
@@ -288,8 +290,39 @@ describe('Metric Schema', () => {
         },
       } satisfies MetricInput;
 
-      const validated = metricStateSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
+      const validated = metricConfigSchema.parse(input);
+      expect(validated).toMatchObject({ ...defaultValues, ...input });
+    });
+
+    it('validates a tooltip secondary label placement', () => {
+      const input = {
+        ...baseMetricConfig,
+        metrics: [
+          {
+            type: 'primary',
+            operation: 'sum',
+            field: 'revenue',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          },
+          {
+            type: 'secondary',
+            operation: 'sum',
+            field: 'cost',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          },
+        ],
+        styling: {
+          secondary: {
+            label: { visible: true, placement: 'tooltip' },
+          },
+        },
+      } satisfies MetricInput;
+
+      const validated = metricConfigSchema.parse(input);
+      expect(validated.styling?.secondary?.label).toEqual({
+        visible: true,
+        placement: 'tooltip',
+      });
     });
   });
 
@@ -314,8 +347,8 @@ describe('Metric Schema', () => {
         },
       } satisfies MetricInput;
 
-      const validated = metricStateSchema.validate(input);
-      expect(validated).toEqual({
+      const validated = metricConfigSchema.parse(input);
+      expect(validated).toMatchObject({
         ...defaultValues,
         ...input,
         breakdown_by: { ...input.breakdown_by, limit: 5 },
@@ -344,8 +377,8 @@ describe('Metric Schema', () => {
         },
       } satisfies MetricInput;
 
-      const validated = metricStateSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
+      const validated = metricConfigSchema.parse(input);
+      expect(validated).toMatchObject({ ...defaultValues, ...input });
     });
   });
 
@@ -362,7 +395,8 @@ describe('Metric Schema', () => {
         ],
       } satisfies MetricInput;
 
-      expect(() => metricStateSchema.validate(input)).toThrow();
+      const result = metricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws on invalid styling alignment value', () => {
@@ -386,7 +420,8 @@ describe('Metric Schema', () => {
         },
       } satisfies MetricInput;
 
-      expect(() => metricStateSchema.validate(input)).toThrow();
+      const result = metricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws on invalid breakdown collapse_by value', () => {
@@ -408,7 +443,8 @@ describe('Metric Schema', () => {
         },
       } satisfies MetricInput;
 
-      expect(() => metricStateSchema.validate(input)).toThrow();
+      const result = metricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws if metric type is missing', () => {
@@ -424,7 +460,8 @@ describe('Metric Schema', () => {
         ],
       } satisfies MetricInput;
 
-      expect(() => metricStateSchema.validate(input)).toThrow();
+      const result = metricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws for two primary metrics', () => {
@@ -446,7 +483,11 @@ describe('Metric Schema', () => {
         ],
       } satisfies MetricInput;
 
-      expect(() => metricStateSchema.validate(input)).toThrow();
+      const result = metricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ When two metrics are defined, the primary metric must be the first item and the secondary metric the second item.
+          → at metrics"
+      `);
     });
 
     it('throws for two secondary metrics', () => {
@@ -466,7 +507,11 @@ describe('Metric Schema', () => {
         ],
       };
 
-      expect(() => metricStateSchema.validate(input)).toThrow();
+      const result = metricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ When two metrics are defined, the primary metric must be the first item and the secondary metric the second item.
+          → at metrics"
+      `);
     });
 
     it('throws if the only metric is secondary', () => {
@@ -482,7 +527,11 @@ describe('Metric Schema', () => {
         ],
       } satisfies MetricInput;
 
-      expect(() => metricStateSchema.validate(input)).toThrow();
+      const result = metricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ The first metric must be the primary metric.
+          → at metrics"
+      `);
     });
 
     it('throws if the icon name is invalid', () => {
@@ -490,12 +539,10 @@ describe('Metric Schema', () => {
         ...baseMetricConfig,
 
         styling: {
-          primary: {
-            icon: {
-              // @ts-expect-error - camelCase icon name
-              name: 'starEmpty',
-              alignment: 'right',
-            },
+          icon: {
+            // @ts-expect-error - camelCase icon name
+            name: 'starEmpty',
+            alignment: 'right',
           },
         },
         metrics: [
@@ -508,7 +555,8 @@ describe('Metric Schema', () => {
         ],
       } satisfies MetricInput;
 
-      expect(() => metricStateSchema.validate(input)).toThrow();
+      const result = metricConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
   });
 
@@ -556,10 +604,10 @@ describe('Metric Schema', () => {
           limit: 5,
         },
         styling: {
+          icon: { name: 'star_empty', alignment: 'right' },
           primary: {
             labels: { alignment: 'left' },
             value: { sizing: 'auto', alignment: 'right' },
-            icon: { name: 'star_empty', alignment: 'right' },
           },
           secondary: {
             label: { visible: true, placement: 'before' },
@@ -567,8 +615,8 @@ describe('Metric Schema', () => {
         },
       } satisfies MetricInput;
 
-      const validated = metricStateSchema.validate(input);
-      expect(validated).toEqual({
+      const validated = metricConfigSchema.parse(input);
+      expect(validated).toMatchObject({
         ...defaultValues,
         ...input,
         breakdown_by: { ...input.breakdown_by, limit: 5 },
@@ -596,8 +644,8 @@ describe('Metric Schema', () => {
         },
       } satisfies MetricInput;
 
-      const validated = metricStateSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
+      const validated = metricConfigSchema.parse(input);
+      expect(validated).toMatchObject({ ...defaultValues, ...input });
     });
   });
 });

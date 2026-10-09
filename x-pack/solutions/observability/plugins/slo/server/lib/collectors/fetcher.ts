@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import type { StoredSLODefinition } from '../../domain/models';
@@ -63,7 +63,7 @@ export const fetcher = async (context: CollectorFetchContext) => {
         total: acc.total + 1, // deprecated in favor of definitions.total
         definitions: {
           total: acc.definitions.total + 1,
-          total_with_ccs: isCCSRemoteIndexName(so.attributes.indicator.params.index)
+          total_with_ccs: isNonLocalIndexName(so.attributes.indicator.params.index)
             ? acc.definitions.total_with_ccs + 1
             : acc.definitions.total_with_ccs,
           total_with_groups: [so.attributes.groupBy].flat().includes(ALL_VALUE)

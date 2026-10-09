@@ -30,12 +30,20 @@ export const groupedActorMockData = {
       count: 4,
       label: 'Mixed Entities',
       tag: 'Actor',
+      riskScore: { min: 55.0, max: 92.0 },
+      assetCriticality: [
+        { level: 'high_impact', count: 2 },
+        { level: 'medium_impact', count: 1 },
+        { level: 'low_impact', count: 1 },
+      ],
       documentsData: [
         {
           id: 'user-entity-1',
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
             availableInEntityStore: false,
+            engine_type: 'user',
+            sources: ['okta'],
             sourceFields: { 'user.email': 'user1@example.com' },
           },
         },
@@ -44,6 +52,8 @@ export const groupedActorMockData = {
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
             availableInEntityStore: false,
+            engine_type: 'service',
+            sources: ['endpoint'],
             sourceFields: { 'service.name': 'auth-service' },
           },
         },
@@ -52,6 +62,7 @@ export const groupedActorMockData = {
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
             availableInEntityStore: false,
+            sources: ['cloud_asset_inventory'],
             sourceFields: { 'host.id': 'host-abc', 'host.name': 'web-server-1' },
           },
         },
@@ -60,6 +71,7 @@ export const groupedActorMockData = {
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
             availableInEntityStore: false,
+            sources: ['active_directory'],
             sourceFields: { 'entity.id': 'entity-entity-1' },
           },
         },
@@ -72,6 +84,8 @@ export const groupedActorMockData = {
       icon: 'question',
       label: 'Target Role',
       tag: 'Role',
+      riskScore: { min: 74.5, max: 74.5 },
+      assetCriticality: [{ level: 'low_impact', count: 1 }],
       documentsData: [
         {
           id: 'target-role',
@@ -80,7 +94,8 @@ export const groupedActorMockData = {
             name: 'Target Role',
             type: 'role',
             availableInEntityStore: true,
-            sourceFields: { 'entity.target.id': 'target-role' },
+            sources: ['cloud_asset_inventory'],
+            sourceFields: { 'entity.id': 'target-role' },
           },
         },
       ],
@@ -153,6 +168,7 @@ export const groupedTargetMockData = {
             name: 'Single Actor',
             type: 'user',
             availableInEntityStore: true,
+            engine_type: 'user',
             sourceFields: {
               'user.id': 'single-actor',
               'user.email': 'actor@example.com',
@@ -192,9 +208,10 @@ export const groupedTargetMockData = {
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
             availableInEntityStore: false,
+            engine_type: 'host',
             sourceFields: {
-              'host.target.id': 'target-host-abc',
-              'host.target.hostname': 'db-server-1',
+              'host.id': 'target-host-abc',
+              'host.hostname': 'db-server-1',
             },
           },
         },
@@ -203,7 +220,8 @@ export const groupedTargetMockData = {
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
             availableInEntityStore: false,
-            sourceFields: { 'entity.target.id': 'entity-target-1' },
+            engine_type: 'generic',
+            sourceFields: { 'entity.id': 'entity-target-1' },
           },
         },
       ],
@@ -274,6 +292,7 @@ export const singleActorMockData = {
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
             availableInEntityStore: false,
+            engine_type: 'user',
             sourceFields: { 'user.email': 'admin@example.com', 'user.name': 'admin' },
           },
         },
@@ -294,8 +313,9 @@ export const singleActorMockData = {
             name: 'Custom Role',
             type: 'role',
             availableInEntityStore: true,
+            engine_type: 'generic',
             sourceFields: {
-              'entity.target.id': 'projects/your-project-id/roles/customRole',
+              'entity.id': 'projects/your-project-id/roles/customRole',
             },
           },
         },

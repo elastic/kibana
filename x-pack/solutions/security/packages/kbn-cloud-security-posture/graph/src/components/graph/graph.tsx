@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback, useEffect, useRef, memo, useMemo } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { size, isEmpty, isEqual, xorWith } from 'lodash';
 import {
   Background,
@@ -16,8 +17,18 @@ import {
   useNodesState,
 } from '@xyflow/react';
 import type { Edge, FitViewOptions, Node, ReactFlowInstance, FitView } from '@xyflow/react';
-import { useGeneratedHtmlId, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiToolTip,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import type { CommonProps } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { SvgDefsMarker } from '../edge/markers';
 import {
   HexagonNode,
@@ -35,11 +46,18 @@ import { Minimap } from '../minimap/minimap';
 import type { EdgeViewModel, NodeViewModel } from '../types';
 import { isConnectorShape } from '../utils';
 import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from '../constants';
+import { GRAPH_DISPLAY_OPTIONS_STORAGE_KEY } from '../../common/constants';
 
 import '@xyflow/react/dist/style.css';
 import { GlobalGraphStyles } from './styles';
 import { Controls } from '../controls/controls';
-import { GRAPH_ID } from '../test_ids';
+import { LayersPanel } from '../controls/layers_panel';
+import {
+  GraphDisplayOptionsContext,
+  DEFAULT_GRAPH_DISPLAY_OPTIONS,
+  type GraphDisplayOptions,
+} from './graph_display_options_context';
+import { GRAPH_CONTROLS_LAYERS_ID, GRAPH_ID } from '../test_ids';
 
 export interface GraphProps extends CommonProps {
   /**
@@ -67,11 +85,6 @@ export interface GraphProps extends CommonProps {
    * Additional children to be rendered inside the graph component.
    */
   children?: React.ReactNode;
-  /**
-   * Optional content to be rendered in the bottom-right corner of the graph.
-   * Typically used for callouts or other contextual messages displayed next to the controls.
-   */
-  interactiveBottomRightContent?: React.ReactNode;
   /**
    * Callback invoked when the graph is updated with new nodes.
    * Receives one argument with the list of newly added nodes.
@@ -104,6 +117,15 @@ const fitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
   duration: 200,
 };
 
+const LayersLabel = i18n.translate('securitySolutionPackages.csp.graph.controls.layers', {
+  defaultMessage: 'Layers',
+});
+
+const nonInteractiveFitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
+  ...fitViewOptions,
+  maxZoom: 0.85,
+};
+
 /**
  * Graph component renders a graph visualization using ReactFlow.
  * It takes nodes and edges as input and provides interactive controls
@@ -126,11 +148,23 @@ export const Graph = memo<GraphProps>(
     isLocked = false,
     showMinimap = false,
     children,
-    interactiveBottomRightContent,
     onCenterGraphAfterRefresh,
     ...rest
   }: GraphProps) => {
+    const { euiTheme } = useEuiTheme();
     const backgroundId = useGeneratedHtmlId();
+    const [storedDisplayOptions, setStoredDisplayOptions] = useLocalStorage(
+      GRAPH_DISPLAY_OPTIONS_STORAGE_KEY,
+      DEFAULT_GRAPH_DISPLAY_OPTIONS
+    );
+    // Merge with defaults so new fields added in future releases are always visible
+    // even for users who have an older stored value missing those keys.
+    const displayOptions: GraphDisplayOptions = {
+      entity: { ...DEFAULT_GRAPH_DISPLAY_OPTIONS.entity, ...storedDisplayOptions?.entity },
+      event: { ...DEFAULT_GRAPH_DISPLAY_OPTIONS.event, ...storedDisplayOptions?.event },
+    };
+    const [isLayersPanelOpen, setIsLayersPanelOpen] = useState(false);
+    const setDisplayOptions = (opts: GraphDisplayOptions) => setStoredDisplayOptions(opts);
     const fitViewRef = useRef<FitView<Node<NodeViewModel>> | null>(null);
     const currNodesRef = useRef<NodeViewModel[]>([]);
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
@@ -261,13 +295,17 @@ export const Graph = memo<GraphProps>(
 
     const onInitCallback = useCallback(
       (xyflow: ReactFlowInstance<Node<NodeViewModel>, Edge<EdgeViewModel>>) => {
-        xyflow.fitView();
+        if (interactive) {
+          xyflow.fitView();
+        } else {
+          xyflow.fitView(nonInteractiveFitViewOptions);
+        }
         fitViewRef.current = xyflow.fitView;
 
         // When the graph is not initialized as interactive, we need to fit the view on resize
         if (!interactive) {
           const resizeObserver = new ResizeObserver(() => {
-            xyflow.fitView();
+            xyflow.fitView(nonInteractiveFitViewOptions);
           });
           resizeObserver.observe(document.querySelector('.react-flow') as Element);
           return () => resizeObserver.disconnect();
@@ -277,52 +315,95 @@ export const Graph = memo<GraphProps>(
     );
 
     return (
-      <div {...rest}>
-        <SvgDefsMarker />
-        <ReactFlow
-          key={reactFlowKey}
-          data-test-subj={GRAPH_ID}
-          fitView={true}
-          onInit={onInitCallback}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          nodes={nodesState}
-          edges={edgesState}
-          nodesConnectable={false}
-          edgesFocusable={false}
-          onlyRenderVisibleElements={ONLY_RENDER_VISIBLE_ELEMENTS}
-          snapToGrid={true} // Snap to grid is enabled to avoid sub-pixel positioning
-          snapGrid={[GRID_SIZE, GRID_SIZE]} // Snap nodes to a 10px grid
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          proOptions={{ hideAttribution: true }}
-          panOnDrag={isGraphInteractive && !isLocked}
-          zoomOnScroll={isGraphInteractive && !isLocked}
-          zoomOnPinch={isGraphInteractive && !isLocked}
-          zoomOnDoubleClick={isGraphInteractive && !isLocked}
-          preventScrolling={interactive}
-          nodesDraggable={interactive && isGraphInteractive && !isLocked}
-          maxZoom={1.3}
-          minZoom={0.1}
-        >
-          {interactive && (
-            <Panel position="bottom-right">
-              <EuiFlexGroup direction="row" gutterSize="s" alignItems="flexEnd">
-                {interactiveBottomRightContent}
-                <EuiFlexItem grow={false}>
-                  <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={originNodeIds} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </Panel>
-          )}
-          {children}
-          <Background id={backgroundId} />
-          {interactive && showMinimap && (
-            <Minimap zoomable={!isLocked} pannable={!isLocked} nodesState={nodesState} />
-          )}
-        </ReactFlow>
-        <GlobalGraphStyles />
-      </div>
+      <GraphDisplayOptionsContext.Provider value={displayOptions}>
+        <div {...rest}>
+          <SvgDefsMarker />
+          <ReactFlow
+            key={reactFlowKey}
+            data-test-subj={GRAPH_ID}
+            fitView={true}
+            fitViewOptions={interactive ? undefined : nonInteractiveFitViewOptions}
+            onInit={onInitCallback}
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            nodes={nodesState}
+            edges={edgesState}
+            nodesConnectable={false}
+            edgesFocusable={false}
+            // Disable React Flow's built-in selection/focus in non-interactive mode (e.g. flyout
+            // preview) so nodes never receive a selected/focused state through keyboard focus or
+            // programmatic selection, which would otherwise show selection visuals.
+            nodesFocusable={interactive}
+            elementsSelectable={interactive}
+            onlyRenderVisibleElements={ONLY_RENDER_VISIBLE_ELEMENTS}
+            snapToGrid={true} // Snap to grid is enabled to avoid sub-pixel positioning
+            snapGrid={[GRID_SIZE, GRID_SIZE]} // Snap nodes to a 10px grid
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            proOptions={{ hideAttribution: true }}
+            panOnDrag={isGraphInteractive && !isLocked}
+            zoomOnScroll={isGraphInteractive && !isLocked}
+            zoomOnPinch={isGraphInteractive && !isLocked}
+            zoomOnDoubleClick={isGraphInteractive && !isLocked}
+            preventScrolling={interactive}
+            nodesDraggable={interactive && isGraphInteractive && !isLocked}
+            maxZoom={1.3}
+            minZoom={0.1}
+          >
+            {interactive && (
+              <Panel position="bottom-left">
+                <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={originNodeIds} />
+              </Panel>
+            )}
+            {interactive && (
+              <Panel position="bottom-center">
+                <EuiFlexGroup
+                  direction="row"
+                  gutterSize="none"
+                  css={css`
+                    border: ${euiTheme.border.thin};
+                    border-radius: ${euiTheme.border.radius.medium};
+                    background-color: ${euiTheme.colors.backgroundBasePlain};
+                  `}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
+                      aria-label={LayersLabel}
+                      isOpen={isLayersPanelOpen}
+                      closePopover={() => setIsLayersPanelOpen(false)}
+                      anchorPosition="upCenter"
+                      panelPaddingSize="none"
+                      button={
+                        <EuiToolTip content={LayersLabel} disableScreenReaderOutput>
+                          <EuiButtonIcon
+                            iconType="layers"
+                            aria-label={LayersLabel}
+                            size="m"
+                            color={isLayersPanelOpen ? 'primary' : 'text'}
+                            data-test-subj={GRAPH_CONTROLS_LAYERS_ID}
+                            css={css`
+                              border-radius: ${euiTheme.border.radius.medium};
+                            `}
+                            onClick={() => setIsLayersPanelOpen((prev) => !prev)}
+                          />
+                        </EuiToolTip>
+                      }
+                    >
+                      <LayersPanel displayOptions={displayOptions} onChange={setDisplayOptions} />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </Panel>
+            )}
+            {children}
+            <Background id={backgroundId} />
+            {interactive && showMinimap && (
+              <Minimap zoomable={!isLocked} pannable={!isLocked} nodesState={nodesState} />
+            )}
+          </ReactFlow>
+          <GlobalGraphStyles />
+        </div>
+      </GraphDisplayOptionsContext.Provider>
     );
   }
 );

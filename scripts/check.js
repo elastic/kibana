@@ -8,5 +8,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Quick check that bootstrap has likely been run before loading linked packages
+var fs = require('fs');
+var path = require('path');
+
+// pnpm writes this manifest after a successful install
+var installMarker = path.resolve(__dirname, '..', 'node_modules', '.modules.yaml');
+if (!fs.existsSync(installMarker)) {
+  console.error('\nDependencies not installed. Run `node scripts/kbn bootstrap` first.\n');
+  process.exit(1);
+}
+
 require('@kbn/setup-node-env');
-require('../src/dev/run_check');
+require('@kbn/dev/run_check');

@@ -42,29 +42,59 @@ export function esqlLiteralFromAny(value: unknown): ESQLAstItem {
   return Builder.expression.literal.string(JSON.stringify(value));
 }
 
+/**
+ * Wrap a potentially-null-producing boolean predicate in `COALESCE(<predicate>, FALSE)`
+ * so ES|QL's three-valued logic can't leak NULL into downstream `WHERE` / `CASE` callers.
+ *
+ * Positive leaves (`eq`, `gt`, `range`, `contains`, ...) use `FALSE` as the default: a
+ * missing field "doesn't match" the predicate.
+ *
+ * Negative leaves (`neq`) use `TRUE` as the default via coalesceToTrue: a missing
+ * field "is not equal to" any concrete value, which mirrors `not(eq)` and Query DSL
+ * semantics and keeps `neq` and `not(eq)` interchangeable.
+ */
+const coalesceToFalse = (expression: ESQLSingleAstItem): ESQLSingleAstItem =>
+  Builder.expression.func.call('COALESCE', [expression, Builder.expression.literal.boolean(false)]);
+
+const coalesceToTrue = (expression: ESQLSingleAstItem): ESQLSingleAstItem =>
+  Builder.expression.func.call('COALESCE', [expression, Builder.expression.literal.boolean(true)]);
+
 export function conditionToESQLAst(condition: Condition): ESQLSingleAstItem {
   if (isFilterCondition(condition)) {
     const field = Builder.expression.column(condition.field);
 
     if ('eq' in condition) {
-      return Builder.expression.func.binary('==', [field, esqlLiteralFromAny(condition.eq)]);
+      return coalesceToFalse(
+        Builder.expression.func.binary('==', [field, esqlLiteralFromAny(condition.eq)])
+      );
     }
     if ('neq' in condition) {
-      return Builder.expression.func.binary('!=', [field, esqlLiteralFromAny(condition.neq)]);
+      return coalesceToTrue(
+        Builder.expression.func.binary('!=', [field, esqlLiteralFromAny(condition.neq)])
+      );
     }
     if ('gt' in condition) {
-      return Builder.expression.func.binary('>', [field, esqlLiteralFromAny(condition.gt)]);
+      return coalesceToFalse(
+        Builder.expression.func.binary('>', [field, esqlLiteralFromAny(condition.gt)])
+      );
     }
     if ('gte' in condition) {
-      return Builder.expression.func.binary('>=', [field, esqlLiteralFromAny(condition.gte)]);
+      return coalesceToFalse(
+        Builder.expression.func.binary('>=', [field, esqlLiteralFromAny(condition.gte)])
+      );
     }
     if ('lt' in condition) {
-      return Builder.expression.func.binary('<', [field, esqlLiteralFromAny(condition.lt)]);
+      return coalesceToFalse(
+        Builder.expression.func.binary('<', [field, esqlLiteralFromAny(condition.lt)])
+      );
     }
     if ('lte' in condition) {
-      return Builder.expression.func.binary('<=', [field, esqlLiteralFromAny(condition.lte)]);
+      return coalesceToFalse(
+        Builder.expression.func.binary('<=', [field, esqlLiteralFromAny(condition.lte)])
+      );
     }
     if ('exists' in condition) {
+      // `IS NULL` is total (never returns NULL itself) so no COALESCE wrapping is needed.
       if (condition.exists === true) {
         return Builder.expression.func.call('NOT', [
           Builder.expression.func.postfix('IS NULL', field),
@@ -92,35 +122,43 @@ export function conditionToESQLAst(condition: Condition): ESQLSingleAstItem {
           Builder.expression.func.binary('<=', [field, esqlLiteralFromAny(condition.range.lte)])
         );
 
-      if (parts.length === 1) return parts[0];
-      return parts.reduce((acc, part) => Builder.expression.func.binary('and', [acc, part]));
+      const combined =
+        parts.length === 1
+          ? parts[0]
+          : parts.reduce((acc, part) => Builder.expression.func.binary('and', [acc, part]));
+      return coalesceToFalse(combined);
     }
     if ('contains' in condition) {
       // Make contains case-insensitive by lowercasing both field and value
       const lowerField = Builder.expression.func.call('TO_LOWER', [field]);
       const lowerValue = String(condition.contains).toLowerCase();
-      return Builder.expression.func.call('CONTAINS', [
-        lowerField,
-        Builder.expression.literal.string(lowerValue),
-      ]);
+      return coalesceToFalse(
+        Builder.expression.func.call('CONTAINS', [
+          lowerField,
+          Builder.expression.literal.string(lowerValue),
+        ])
+      );
     }
     if ('startsWith' in condition) {
-      return Builder.expression.func.call('STARTS_WITH', [
-        field,
-        Builder.expression.literal.string(String(condition.startsWith)),
-      ]);
+      return coalesceToFalse(
+        Builder.expression.func.call('STARTS_WITH', [
+          field,
+          Builder.expression.literal.string(String(condition.startsWith)),
+        ])
+      );
     }
     if ('endsWith' in condition) {
-      return Builder.expression.func.call('ENDS_WITH', [
-        field,
-        Builder.expression.literal.string(String(condition.endsWith)),
-      ]);
+      return coalesceToFalse(
+        Builder.expression.func.call('ENDS_WITH', [
+          field,
+          Builder.expression.literal.string(String(condition.endsWith)),
+        ])
+      );
     }
     if ('includes' in condition) {
-      return Builder.expression.func.call('MV_CONTAINS', [
-        field,
-        esqlLiteralFromAny(condition.includes),
-      ]);
+      return coalesceToFalse(
+        Builder.expression.func.call('MV_CONTAINS', [field, esqlLiteralFromAny(condition.includes)])
+      );
     }
   } else if (isAndCondition(condition)) {
     const andConditions = condition.and.map((c) => conditionToESQLAst(c));

@@ -19,19 +19,16 @@ export const installDataView = async (
   logger: Logger
 ) => {
   try {
-    const currentSpaceDataViewId = `${dataViewId}-${currentSpaceId}`;
-
-    logger.info(`Creating and saving data view with ID: ${currentSpaceDataViewId}`);
+    logger.info(`Creating and saving data view with ID: ${dataViewId}`);
 
     return await dataViewsService.createAndSave(
       {
-        id: currentSpaceDataViewId,
-        title: `${indexPattern}${currentSpaceId}`,
+        id: dataViewId,
+        title: indexPattern,
         name: `${dataViewName} - ${currentSpaceId}`,
         namespaces: [currentSpaceId],
         allowNoIndex: true,
         timeFieldName: DATA_VIEW_TIME_FIELD,
-        allowHidden: true,
       },
       false,
       true

@@ -8,13 +8,13 @@ import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from '@emotion/styled';
+import { truncate, unit } from '@kbn/apm-common';
 import { getServiceNodeName, SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
 import { asDynamicBytes, asInteger, asPercent } from '../../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { truncate, unit } from '../../../../utils/style';
 import { ServiceNodeMetricOverviewLink } from '../../../shared/links/apm/service_node_metric_overview_link';
 import type { ITableColumn } from '../../../shared/managed_table';
 import { ManagedTable } from '../../../shared/managed_table';
@@ -70,7 +70,13 @@ export function JvmMetricsOverview() {
             {i18n.translate('xpack.apm.jvmsTable.nameColumnLabel', {
               defaultMessage: 'Name',
             })}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </>
         </EuiToolTip>
       ),
@@ -154,6 +160,7 @@ export function JvmMetricsOverview() {
       initialSortField={INITIAL_SORT_FIELD}
       initialSortDirection={INITIAL_SORT_DIRECTION}
       initialPageSize={25}
+      data-test-subj="apmJvmMetricsTable"
     />
   );
 }

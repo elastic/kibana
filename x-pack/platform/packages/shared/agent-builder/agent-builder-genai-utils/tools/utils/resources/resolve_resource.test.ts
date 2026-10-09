@@ -10,6 +10,12 @@ import { EsResourceType } from '@kbn/agent-builder-common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { resolveResource, resolveResourceForEsql } from './resolve_resource';
 
+const fieldCapsRequest = (index: string) => ({
+  index,
+  fields: ['*'],
+  index_filter: { bool: { must_not: [{ term: { _tier: 'data_frozen' } }] } },
+});
+
 describe('resolveResource', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
@@ -50,10 +56,7 @@ describe('resolveResource', () => {
       });
 
       // Should use _field_caps, not _mapping
-      expect(esClient.fieldCaps).toHaveBeenCalledWith({
-        index: 'remote_cluster:my-index',
-        fields: ['*'],
-      });
+      expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('remote_cluster:my-index'));
       expect(esClient.indices.getMapping).not.toHaveBeenCalled();
 
       expect(result).toEqual({
@@ -63,6 +66,7 @@ describe('resolveResource', () => {
           expect.objectContaining({ path: 'message', type: 'text' }),
           expect.objectContaining({ path: 'status', type: 'keyword' }),
         ]),
+        isTsdb: false,
       });
 
       // CCS resources should not have description (not available via _field_caps)
@@ -96,10 +100,7 @@ describe('resolveResource', () => {
       });
 
       // Should use _field_caps, not _data_stream/_mappings
-      expect(esClient.fieldCaps).toHaveBeenCalledWith({
-        index: 'remote_cluster:logs-ds',
-        fields: ['*'],
-      });
+      expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('remote_cluster:logs-ds'));
       expect(esClient.transport.request).not.toHaveBeenCalled();
 
       expect(result).toEqual({
@@ -109,6 +110,7 @@ describe('resolveResource', () => {
           expect.objectContaining({ path: '@timestamp', type: 'date' }),
           expect.objectContaining({ path: 'level', type: 'keyword' }),
         ]),
+        isTsdb: false,
       });
 
       // CCS resources should not have description
@@ -134,6 +136,9 @@ describe('resolveResource', () => {
           },
         },
       });
+      esClient.indices.getSettings.mockResolvedValue({
+        'my-local-index': { settings: {} },
+      } as any);
 
       const result = await resolveResource({
         resourceName: 'my-local-index',
@@ -149,6 +154,7 @@ describe('resolveResource', () => {
         type: EsResourceType.index,
         fields: [{ path: 'title', type: 'text', meta: {}, searchable: true }],
         description: 'A test index',
+        isTsdb: false,
       });
     });
   });
@@ -171,6 +177,9 @@ describe('resolveResource', () => {
           },
         },
       });
+      esClient.indices.getSettings.mockResolvedValue({
+        'logs-1': { settings: {} },
+      } as any);
 
       const result = await resolveResourceForEsql({ resourceName: 'logs-1', esClient });
 
@@ -187,6 +196,7 @@ describe('resolveResource', () => {
         type: EsResourceType.index,
         fields: [{ path: 'message', type: 'text', searchable: true, meta: {} }],
         description: 'logs index',
+        isTsdb: false,
       });
     });
 
@@ -211,10 +221,7 @@ describe('resolveResource', () => {
 
       const result = await resolveResourceForEsql({ resourceName: 'logs-*', esClient });
 
-      expect(esClient.fieldCaps).toHaveBeenCalledWith({
-        index: 'logs-*',
-        fields: ['*'],
-      });
+      expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('logs-*'));
       expect(esClient.indices.getMapping).not.toHaveBeenCalled();
       expect(result).toEqual({
         name: 'logs-*',
@@ -222,6 +229,7 @@ describe('resolveResource', () => {
         fields: expect.arrayContaining([
           expect.objectContaining({ path: '@timestamp', type: 'date' }),
         ]),
+        isTsdb: false,
       });
     });
 
@@ -234,7 +242,7 @@ describe('resolveResource', () => {
 
       await expect(
         resolveResourceForEsql({ resourceName: 'no-match-*', esClient })
-      ).rejects.toThrow('No resource found for pattern no-match-*');
+      ).rejects.toThrow("No resource found for 'no-match-*'");
     });
 
     it('maps not_found from resolveIndex to a clear error', async () => {
@@ -245,6 +253,128 @@ describe('resolveResource', () => {
       await expect(
         resolveResourceForEsql({ resourceName: 'missing-index', esClient })
       ).rejects.toThrow("No resource found for 'missing-index'");
+    });
+
+    it('falls back to an external ES|QL dataset when resolveIndex throws not_found', async () => {
+      esClient.indices.resolveIndex.mockRejectedValue(
+        new esErrors.ResponseError({ statusCode: 404 } as any)
+      );
+      esClient.transport.request.mockResolvedValue({
+        datasets: [
+          { name: 'employees', data_source: 'local_minio', resource: 's3://my-bucket/*.csv' },
+        ],
+      });
+      esClient.esql.query.mockResolvedValue({
+        columns: [
+          { name: 'emp_no', type: 'integer' },
+          { name: 'department', type: 'keyword' },
+        ],
+        values: [],
+      });
+
+      const result = await resolveResourceForEsql({
+        resourceName: 'employees',
+        esClient,
+        includeDatasets: true,
+      });
+
+      expect(esClient.esql.query).toHaveBeenCalledWith(
+        expect.objectContaining({ query: 'FROM employees | LIMIT 0' }),
+        expect.anything()
+      );
+      expect(result).toEqual({
+        name: 'employees',
+        type: EsResourceType.dataset,
+        fields: [
+          { path: 'emp_no', type: 'integer', meta: {} },
+          { path: 'department', type: 'keyword', meta: {} },
+        ],
+        isTsdb: false,
+      });
+    });
+
+    it('falls back to an ES|QL view when resolveIndex throws not_found', async () => {
+      esClient.indices.resolveIndex.mockRejectedValue(
+        new esErrors.ResponseError({ statusCode: 404 } as any)
+      );
+      esClient.esql.getView.mockResolvedValue({
+        views: [
+          {
+            name: 'logs-proxy-parsed',
+            query: 'FROM logs-* | KEEP status',
+            description: 'Parsed proxy logs',
+          },
+        ],
+      } as never);
+      esClient.esql.query.mockResolvedValue({
+        columns: [
+          { name: 'status', type: 'integer' },
+          { name: 'host.name', type: 'keyword' },
+        ],
+        values: [],
+      });
+
+      const result = await resolveResourceForEsql({
+        resourceName: 'logs-proxy-parsed',
+        esClient,
+        includeViews: true,
+      });
+
+      expect(esClient.esql.query).toHaveBeenCalledWith(
+        expect.objectContaining({ query: 'FROM logs-proxy-parsed | LIMIT 0' }),
+        expect.anything()
+      );
+      expect(result).toEqual({
+        name: 'logs-proxy-parsed',
+        type: EsResourceType.view,
+        fields: [
+          { path: 'status', type: 'integer', meta: {} },
+          { path: 'host.name', type: 'keyword', meta: {} },
+        ],
+        description: 'Parsed proxy logs',
+        query: 'FROM logs-* | KEEP status',
+        isTsdb: false,
+      });
+    });
+
+    it('does not resolve views when includeViews is not set', async () => {
+      esClient.indices.resolveIndex.mockRejectedValue(
+        new esErrors.ResponseError({ statusCode: 404 } as any)
+      );
+      esClient.esql.getView.mockResolvedValue({
+        views: [{ name: 'logs-proxy-parsed', query: 'FROM logs-*' }],
+      } as never);
+
+      await expect(
+        resolveResourceForEsql({ resourceName: 'logs-proxy-parsed', esClient })
+      ).rejects.toThrow("No resource found for 'logs-proxy-parsed'");
+      expect(esClient.esql.getView).not.toHaveBeenCalled();
+    });
+
+    it('falls back to an external ES|QL dataset when resolveIndex finds no resources', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [],
+        aliases: [],
+        data_streams: [],
+      });
+      esClient.transport.request.mockResolvedValue({
+        datasets: [
+          { name: 'employees', data_source: 'local_minio', resource: 's3://my-bucket/*.csv' },
+        ],
+      });
+      esClient.esql.query.mockResolvedValue({
+        columns: [{ name: 'emp_no', type: 'integer' }],
+        values: [],
+      });
+
+      const result = await resolveResourceForEsql({
+        resourceName: 'employees',
+        esClient,
+        includeDatasets: true,
+      });
+
+      expect(result.type).toBe(EsResourceType.dataset);
+      expect(result.fields).toEqual([{ path: 'emp_no', type: 'integer', meta: {} }]);
     });
 
     it('uses field caps with index pattern type when multiple aliases match and no indices', async () => {
@@ -266,17 +396,73 @@ describe('resolveResource', () => {
 
       const result = await resolveResourceForEsql({ resourceName: 'alias-a,alias-b', esClient });
 
-      expect(esClient.fieldCaps).toHaveBeenCalledWith({
-        index: 'alias-a,alias-b',
-        fields: ['*'],
-      });
+      expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('alias-a,alias-b'));
       expect(result).toEqual({
         name: 'alias-a,alias-b',
         type: EsResourceType.indexPattern,
         fields: expect.arrayContaining([
           expect.objectContaining({ path: 'host', type: 'keyword' }),
         ]),
+        isTsdb: false,
       });
+    });
+
+    it('bypasses _resolve/index for a named-cluster CCS pattern and uses _field_caps', async () => {
+      esClient.indices.resolveIndex.mockRejectedValue(
+        new esErrors.ResponseError({
+          statusCode: 403,
+          body: { error: { type: 'security_exception' } },
+        } as any)
+      );
+
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['remote_cluster:logs-1'],
+        fields: {
+          '@timestamp': { date: { type: 'date', searchable: true, aggregatable: true } },
+          message: { text: { type: 'text', searchable: true, aggregatable: false } },
+        },
+      });
+
+      const result = await resolveResourceForEsql({
+        resourceName: 'remote_cluster:logs-*',
+        esClient,
+      });
+
+      expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
+      expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('remote_cluster:logs-*'));
+      expect(result.name).toBe('remote_cluster:logs-*');
+      expect(result.type).toBe(EsResourceType.indexPattern);
+      expect(result.fields).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ path: '@timestamp', type: 'date' }),
+          expect.objectContaining({ path: 'message', type: 'text' }),
+        ])
+      );
+    });
+
+    it('bypasses _resolve/index for a wildcard-cluster CCS pattern and uses _field_caps', async () => {
+      esClient.indices.resolveIndex.mockRejectedValue(
+        new esErrors.ResponseError({
+          statusCode: 403,
+          body: { error: { type: 'security_exception' } },
+        } as any)
+      );
+
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['cluster_a:logs-1', 'cluster_b:logs-1'],
+        fields: {
+          level: { keyword: { type: 'keyword', searchable: true, aggregatable: true } },
+        },
+      });
+
+      const result = await resolveResourceForEsql({ resourceName: '*:logs-*', esClient });
+
+      expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
+      expect(result.name).toBe('*:logs-*');
+      expect(result.type).toBe(EsResourceType.indexPattern);
+      expect(result.fields).toEqual(
+        expect.arrayContaining([expect.objectContaining({ path: 'level', type: 'keyword' })])
+      );
     });
 
     it('uses field caps with index pattern type when multiple data streams match', async () => {
@@ -303,6 +489,311 @@ describe('resolveResource', () => {
       expect(result.fields).toEqual(
         expect.arrayContaining([expect.objectContaining({ path: '@timestamp', type: 'date' })])
       );
+    });
+  });
+
+  describe('isTsdb flag', () => {
+    it('ignores field markers for concrete index and follows index.mode setting', async () => {
+      // Index advertises time_series in settings, even with no field-level markers -> true
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [{ name: 'metrics-host', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+      esClient.indices.getMapping.mockResolvedValue({
+        'metrics-host': { mappings: { properties: { '@timestamp': { type: 'date' } } } },
+      } as any);
+      esClient.indices.getSettings.mockResolvedValue({
+        'metrics-host': { settings: { 'index.mode': 'time_series' } },
+      } as any);
+
+      const result = await resolveResource({ resourceName: 'metrics-host', esClient });
+      expect(result.isTsdb).toBe(true);
+    });
+
+    it('is false when no field carries tsdb markers (index branch)', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [{ name: 'logs', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+      esClient.indices.getMapping.mockResolvedValue({
+        logs: {
+          mappings: {
+            properties: {
+              message: { type: 'text' },
+              level: { type: 'keyword' },
+            },
+          },
+        },
+      } as any);
+      esClient.indices.getSettings.mockResolvedValue({
+        logs: { settings: {} },
+      } as any);
+
+      const result = await resolveResource({ resourceName: 'logs', esClient });
+
+      expect(result.isTsdb).toBe(false);
+    });
+
+    it('is true for an alias whose merged field_caps surfaces tsdb markers', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [],
+        aliases: [{ name: 'metrics-alias', indices: ['metrics-host'] }],
+        data_streams: [],
+      });
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['metrics-host'],
+        fields: {
+          'host.name': {
+            keyword: {
+              type: 'keyword',
+              searchable: true,
+              aggregatable: true,
+              time_series_dimension: true,
+            },
+          },
+        },
+      });
+
+      const result = await resolveResource({ resourceName: 'metrics-alias', esClient });
+
+      expect(result.isTsdb).toBe(true);
+    });
+
+    it('is set on multi-target resolveResourceForEsql results', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [
+          { name: 'metrics-1', attributes: ['open'] },
+          { name: 'metrics-2', attributes: ['open'] },
+        ],
+        aliases: [],
+        data_streams: [],
+      });
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['metrics-1', 'metrics-2'],
+        fields: {
+          'system.cpu.pct': {
+            float: {
+              type: 'float',
+              searchable: true,
+              aggregatable: true,
+              time_series_metric: 'gauge',
+            },
+          },
+        },
+      });
+
+      const result = await resolveResourceForEsql({ resourceName: 'metrics-*', esClient });
+
+      expect(result.isTsdb).toBe(true);
+    });
+  });
+
+  describe('isTsdb — authoritative detection for indices', () => {
+    it('reads index.mode from _settings and returns true for time_series', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [{ name: 'metrics-host', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+      esClient.indices.getMapping.mockResolvedValue({
+        'metrics-host': {
+          mappings: { properties: { 'host.name': { type: 'keyword' } } },
+        },
+      } as any);
+      esClient.indices.getSettings.mockResolvedValue({
+        'metrics-host': { settings: { 'index.mode': 'time_series' } },
+      } as any);
+
+      const result = await resolveResource({ resourceName: 'metrics-host', esClient });
+
+      expect(esClient.indices.getSettings).toHaveBeenCalledWith({
+        index: 'metrics-host',
+        flat_settings: true,
+      });
+      expect(result.isTsdb).toBe(true);
+    });
+
+    it('returns isTsdb=false for a logsdb index even when fields carry time_series_dimension', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [{ name: 'logs-app', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+      esClient.indices.getMapping.mockResolvedValue({
+        'logs-app': {
+          mappings: {
+            properties: {
+              'agent.name': { type: 'keyword', time_series_dimension: true } as any,
+            },
+          },
+        },
+      } as any);
+      esClient.indices.getSettings.mockResolvedValue({
+        'logs-app': { settings: { 'index.mode': 'logsdb' } },
+      } as any);
+
+      const result = await resolveResource({ resourceName: 'logs-app', esClient });
+
+      expect(result.isTsdb).toBe(false);
+    });
+
+    it('returns isTsdb=false when index.mode setting is absent', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [{ name: 'standard-idx', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+      esClient.indices.getMapping.mockResolvedValue({
+        'standard-idx': { mappings: { properties: {} } },
+      } as any);
+      esClient.indices.getSettings.mockResolvedValue({
+        'standard-idx': { settings: {} },
+      } as any);
+
+      const result = await resolveResource({ resourceName: 'standard-idx', esClient });
+
+      expect(result.isTsdb).toBe(false);
+    });
+  });
+
+  describe('isTsdb — authoritative detection for data streams', () => {
+    it('reads index_mode from _data_stream and returns true for time_series', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [],
+        aliases: [],
+        data_streams: [
+          {
+            name: 'metrics-host',
+            backing_indices: ['.ds-metrics-host-001'],
+            timestamp_field: '@timestamp',
+          },
+        ],
+      });
+      // Fields come from _field_caps now (avoids template-level effective_mappings
+      // which would miss dynamically added fields).
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['.ds-metrics-host-001'],
+        fields: { '@timestamp': { date: { type: 'date', searchable: true, aggregatable: true } } },
+      });
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          {
+            name: 'metrics-host',
+            indices: [{ index_name: '.ds-metrics-host-001', index_mode: 'time_series' }],
+          },
+        ],
+      } as any);
+
+      const result = await resolveResource({ resourceName: 'metrics-host', esClient });
+
+      expect(esClient.indices.getDataStream).toHaveBeenCalledWith({ name: 'metrics-host' });
+      expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('metrics-host'));
+      expect(result.isTsdb).toBe(true);
+    });
+
+    it('returns isTsdb=false for a logsdb data stream even when fields carry tsdb markers', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [],
+        aliases: [],
+        data_streams: [
+          {
+            name: 'logs-app',
+            backing_indices: ['.ds-logs-app-001'],
+            timestamp_field: '@timestamp',
+          },
+        ],
+      });
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['.ds-logs-app-001'],
+        fields: {
+          'agent.name': {
+            keyword: {
+              type: 'keyword',
+              searchable: true,
+              aggregatable: true,
+              time_series_dimension: true,
+            },
+          },
+        },
+      });
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          {
+            name: 'logs-app',
+            indices: [{ index_name: '.ds-logs-app-001', index_mode: 'logsdb' }],
+          },
+        ],
+      } as any);
+
+      const result = await resolveResource({ resourceName: 'logs-app', esClient });
+      expect(result.isTsdb).toBe(false);
+    });
+
+    it('returns isTsdb=false when index_mode is missing from the data stream response', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [],
+        aliases: [],
+        data_streams: [
+          { name: 'plain-ds', backing_indices: ['.ds-plain-001'], timestamp_field: '@timestamp' },
+        ],
+      });
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['.ds-plain-001'],
+        fields: {},
+      });
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [{ name: 'plain-ds', indices: [{ index_name: '.ds-plain-001' }] }],
+      } as any);
+
+      const result = await resolveResource({ resourceName: 'plain-ds', esClient });
+      expect(result.isTsdb).toBe(false);
+    });
+
+    it('does NOT call _data_stream for a CCS data stream target (uses field caps fallback)', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [],
+        aliases: [],
+        data_streams: [
+          {
+            name: 'remote_cluster:logs-ds',
+            backing_indices: [],
+            timestamp_field: '@timestamp',
+          },
+        ],
+      });
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['remote_cluster:logs-ds'],
+        fields: { '@timestamp': { date: { type: 'date', searchable: true, aggregatable: true } } },
+      });
+
+      await resolveResource({ resourceName: 'remote_cluster:logs-ds', esClient });
+
+      expect(esClient.indices.getDataStream).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('frozen tier', () => {
+    beforeEach(() => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [],
+        aliases: [{ name: 'my-alias', indices: ['backing-idx'] }],
+        data_streams: [],
+      });
+      esClient.fieldCaps.mockResolvedValue({ indices: ['backing-idx'], fields: {} });
+    });
+
+    it('excludes frozen tier indices from field caps by default', async () => {
+      await resolveResource({ resourceName: 'my-alias', esClient });
+
+      expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('my-alias'));
+    });
+
+    it('keeps frozen tier indices in field caps when they are included', async () => {
+      await resolveResource({ resourceName: 'my-alias', esClient, includeFrozen: true });
+
+      expect(esClient.fieldCaps).toHaveBeenCalledWith({ index: 'my-alias', fields: ['*'] });
     });
   });
 });

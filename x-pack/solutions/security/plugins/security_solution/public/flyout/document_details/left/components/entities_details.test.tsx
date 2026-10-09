@@ -48,8 +48,8 @@ jest.mock('react-router-dom', () => {
 jest.mock('../../../../resolver/view/use_resolver_query_params_cleaner');
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
 
   return {
     ...original,
@@ -79,12 +79,6 @@ const mockUseMlUserPermissions = useMlCapabilities as jest.Mock;
 const mockUseHasSecurityCapability = jest.fn().mockReturnValue(false);
 jest.mock('../../../../helper_hooks', () => ({
   useHasSecurityCapability: () => mockUseHasSecurityCapability(),
-}));
-
-jest.mock('../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest
-    .fn()
-    .mockReturnValue({ selectedPatterns: ['index'], sourcererDataView: {} }),
 }));
 
 jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => ({
@@ -206,7 +200,7 @@ describe('<EntitiesDetails />', () => {
     expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('with entity store v2, omits user and host panels when store has no entity records and fields API omits user.*', () => {
+  it('with entity store v2, renders host panel but omits user panel when store has no entity records and fields API omits user.*', () => {
     mockUseUiSetting.mockReturnValue(true);
     mockUseEntityFromStore.mockReturnValue({
       entityRecord: null,
@@ -237,13 +231,13 @@ describe('<EntitiesDetails />', () => {
         user: { name: ['fields-api-missing-but-ecs-has-user'] },
       },
     } as DocumentDetailsContext;
-    const { getByText, queryByTestId } = renderEntitiesDetails(contextValue);
-    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
+    const { queryByText, getByTestId, queryByTestId } = renderEntitiesDetails(contextValue);
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
     expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(HOST_TEST_ID)).toBeInTheDocument();
   });
 
-  it('with entity store v2 and no entity records, shows empty state even when document has user.name', () => {
+  it('with entity store v2 and no entity records, renders user and host details from document fields', () => {
     mockUseUiSetting.mockReturnValue(true);
     mockUseEntityFromStore.mockReturnValue({
       entityRecord: null,
@@ -254,9 +248,28 @@ describe('<EntitiesDetails />', () => {
       error: null,
       refetch: jest.fn(),
     });
-    const { getByText, queryByTestId } = renderEntitiesDetails(mockContextValue);
-    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
-    expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
+    const { queryByText, getByTestId } = renderEntitiesDetails(mockContextValue);
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
+    expect(getByTestId(USER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(HOST_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('renders host panel from document fields when EUID host identifiers are unavailable (mirrors the user fallback)', () => {
+    // dataAsNestedObject is what EUID identifier extraction reads from. Emptying `host` here
+    // means getEntityIdentifiersFromDocument('host', ...) returns nothing, even though the
+    // fields API (getFieldsData, via mockGetFieldsData) still resolves host.name. This
+    // reproduces the flyout_v2 Entities tool bug where the host was dropped because its
+    // visibility gate incorrectly required EUID identifiers while the user gate did not.
+    const contextValue = {
+      ...mockContextValue,
+      dataAsNestedObject: {
+        ...mockContextValue.dataAsNestedObject,
+        host: {},
+      },
+    } as DocumentDetailsContext;
+    const { queryByText, getByTestId } = renderEntitiesDetails(contextValue);
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
+    expect(getByTestId(USER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(HOST_TEST_ID)).toBeInTheDocument();
   });
 });

@@ -14,7 +14,7 @@ import type { InternalUserActivityServiceStart } from '@kbn/core-user-activity-s
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { InternalElasticsearchServiceStart } from '@kbn/core-elasticsearch-server-internal';
 import type { InternalExecutionContextStart } from '@kbn/core-execution-context-server-internal';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
+import type { InternalFeatureFlagsStart } from '@kbn/core-feature-flags-server-internal';
 import type { InternalHttpServiceStart } from '@kbn/core-http-server-internal';
 import type { InternalMetricsServiceStart } from '@kbn/core-metrics-server-internal';
 import type { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-server-internal';
@@ -26,6 +26,7 @@ import type { InternalUserProfileServiceStart } from '@kbn/core-user-profile-ser
 import type { PricingServiceStart } from '@kbn/core-pricing-server';
 import type { InternalCoreDiServiceStart } from '@kbn/core-di-internal';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
+import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
 
 /**
  * @internal
@@ -34,7 +35,7 @@ export interface InternalCoreStart {
   analytics: AnalyticsServiceStart;
   capabilities: CapabilitiesStart;
   elasticsearch: InternalElasticsearchServiceStart;
-  featureFlags: FeatureFlagsStart;
+  featureFlags: InternalFeatureFlagsStart;
   docLinks: DocLinksServiceStart;
   http: InternalHttpServiceStart;
   metrics: InternalMetricsServiceStart;
@@ -50,5 +51,5 @@ export interface InternalCoreStart {
   pricing: PricingServiceStart;
   injection: InternalCoreDiServiceStart;
   dataStreams: DataStreamsStart;
-  _plugins?: Map<string, any>;
+  userStorage: UserStorageServiceStart;
 }

@@ -10,7 +10,7 @@
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, LogDocumentOverview } from '../..';
-import { fieldConstants, formatFieldValue } from '../..';
+import { fieldConstants, formatFieldValueText } from '../..';
 import { getFieldValueWithFallback } from './get_field_value_with_fallback';
 
 export function getLogDocumentOverview(
@@ -20,10 +20,18 @@ export function getLogDocumentOverview(
   const formatField = <T extends keyof LogDocumentOverview>(field: T) => {
     // Use fallback to check both ECS and OTel field names
     const result = getFieldValueWithFallback(doc.flattened, field);
-    const value = result.value;
+    let value = result.value;
+    if (value && Array.isArray(value)) {
+      value = value.length === 1 ? value[0] : value;
+    }
     return (
       value !== undefined && value !== null
-        ? formatFieldValue(value, doc.raw, fieldFormats, dataView, dataView.fields.getByName(field))
+        ? formatFieldValueText({
+            value,
+            fieldFormats,
+            dataView,
+            field: dataView.fields.getByName(field),
+          })
         : undefined
     ) as LogDocumentOverview[T];
   };

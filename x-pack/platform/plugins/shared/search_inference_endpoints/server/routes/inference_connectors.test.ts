@@ -8,9 +8,14 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { InferenceConnectorType } from '@kbn/inference-common';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
 import { MockRouter } from '../../__mocks__/router.mock';
 import { ROUTE_VERSIONS } from '../../common/constants';
 import { APIRoutes } from '../../common/types';
+import type { InferenceFeatureRegistry } from '../inference_feature_registry';
 import { defineInferenceConnectorsRoute } from './inference_connectors';
 
 const inferenceConnector = (connectorId: string) => ({
@@ -23,20 +28,50 @@ const inferenceConnector = (connectorId: string) => ({
   isPreconfigured: false,
 });
 
+interface SettingsValues {
+  defaultConnectorId?: string;
+  defaultConnectorOnly?: boolean;
+}
+
+const createContext = ({
+  defaultConnectorId,
+  defaultConnectorOnly,
+}: SettingsValues = {}): jest.Mocked<RequestHandlerContext> =>
+  ({
+    core: Promise.resolve({
+      uiSettings: {
+        client: {
+          get: jest.fn(async (key: string) => {
+            if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) return defaultConnectorId;
+            if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY)
+              return defaultConnectorOnly ?? false;
+            return undefined;
+          }),
+        },
+      },
+    }),
+  } as unknown as jest.Mocked<RequestHandlerContext>);
+
+const makeFeatureRegistry = (ignoreGlobalDefault = false): InferenceFeatureRegistry =>
+  ({
+    get: jest.fn(() =>
+      ignoreGlobalDefault ? { featureId: 'my_feature', ignoreGlobalDefault: true } : undefined
+    ),
+  } as unknown as InferenceFeatureRegistry);
+
 describe('GET /internal/search_inference_endpoints/connectors', () => {
   const mockLogger = loggingSystemMock.createLogger().get();
   let mockRouter: MockRouter;
-  let context: jest.Mocked<RequestHandlerContext>;
   let getForFeature: jest.Mock;
   let getConnectorList: jest.Mock;
+  let getConnectorById: jest.Mock;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    context = {} as jest.Mocked<RequestHandlerContext>;
-    getForFeature = jest.fn();
-    getConnectorList = jest.fn();
+  const registerRoute = (
+    settings: SettingsValues = {},
+    featureRegistry: InferenceFeatureRegistry = makeFeatureRegistry()
+  ) => {
     mockRouter = new MockRouter({
-      context,
+      context: createContext(settings),
       method: 'get',
       path: APIRoutes.GET_INFERENCE_CONNECTORS,
       version: ROUTE_VERSIONS.v1,
@@ -44,20 +79,29 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
     defineInferenceConnectorsRoute({
       logger: mockLogger,
       router: mockRouter.router,
+      featureRegistry,
       getForFeature,
       getConnectorList,
+      getConnectorById,
     });
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    getForFeature = jest.fn();
+    getConnectorList = jest.fn();
+    getConnectorById = jest.fn();
   });
 
-  it('returns SO endpoints when soEntryFound is true', async () => {
+  it('returns SO-configured endpoints as-is when soEntryFound is true', async () => {
     const resolved = inferenceConnector('feature-ep');
-    const fullCatalog = [resolved, inferenceConnector('other')];
     getForFeature.mockResolvedValue({
       endpoints: [resolved],
       warnings: [],
       soEntryFound: true,
     });
-    getConnectorList.mockResolvedValue(fullCatalog);
+    getConnectorList.mockResolvedValue([resolved, inferenceConnector('other')]);
+    registerRoute();
 
     await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
 
@@ -66,90 +110,227 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
         connectors: [resolved],
-        allConnectors: fullCatalog,
         soEntryFound: true,
       },
     });
   });
 
-  it('returns recommended endpoints with soEntryFound false when no SO override', async () => {
+  it('marks recommended endpoints with isRecommended and appends the rest of the catalog', async () => {
     const recommended = inferenceConnector('rec-ep');
-    const fullCatalog = [recommended, inferenceConnector('noise')];
+    const other = inferenceConnector('noise');
+    getForFeature.mockResolvedValue({
+      endpoints: [recommended],
+      warnings: [],
+      soEntryFound: false,
+    });
+    getConnectorList.mockResolvedValue([recommended, other]);
+    registerRoute();
+
+    await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
+
+    expect(mockRouter.response.ok).toHaveBeenCalledWith({
+      body: {
+        connectors: [{ ...recommended, isRecommended: true }, other],
+        soEntryFound: false,
+      },
+    });
+  });
+
+  it('returns the catalog alone when there are no recommendations or SO override', async () => {
+    const a = inferenceConnector('a');
+    const b = inferenceConnector('b');
+    getForFeature.mockResolvedValue({
+      endpoints: [],
+      warnings: [],
+      soEntryFound: false,
+    });
+    getConnectorList.mockResolvedValue([a, b]);
+    registerRoute();
+
+    await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
+
+    expect(mockRouter.response.ok).toHaveBeenCalledWith({
+      body: {
+        connectors: [a, b],
+        soEntryFound: false,
+      },
+    });
+  });
+
+  it('returns an empty list when SO explicitly configures no endpoints', async () => {
+    getForFeature.mockResolvedValue({
+      endpoints: [],
+      warnings: [],
+      soEntryFound: true,
+    });
+    getConnectorList.mockResolvedValue([inferenceConnector('a')]);
+    registerRoute();
+
+    await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
+
+    expect(mockRouter.response.ok).toHaveBeenCalledWith({
+      body: {
+        connectors: [],
+        soEntryFound: true,
+      },
+    });
+  });
+
+  it('returns only the default connector when defaultConnectorOnly is set', async () => {
+    const defaultConnector = inferenceConnector('default-id');
+    getConnectorById.mockResolvedValue(defaultConnector);
+    registerRoute({ defaultConnectorId: 'default-id', defaultConnectorOnly: true });
+
+    await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
+
+    expect(getConnectorById).toHaveBeenCalledWith('default-id', expect.anything());
+    expect(getForFeature).not.toHaveBeenCalled();
+    expect(getConnectorList).not.toHaveBeenCalled();
+    expect(mockRouter.response.ok).toHaveBeenCalledWith({
+      body: {
+        connectors: [defaultConnector],
+        soEntryFound: false,
+      },
+    });
+  });
+
+  it('returns an empty list when defaultConnectorOnly is set but no default is configured', async () => {
+    registerRoute({ defaultConnectorOnly: true });
+
+    await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
+
+    expect(getConnectorById).not.toHaveBeenCalled();
+    expect(getForFeature).not.toHaveBeenCalled();
+    expect(getConnectorList).not.toHaveBeenCalled();
+    expect(mockRouter.response.ok).toHaveBeenCalledWith({
+      body: {
+        connectors: [],
+        soEntryFound: false,
+      },
+    });
+  });
+
+  it('returns an empty list when defaultConnectorOnly is set but the default connector lookup fails', async () => {
+    getConnectorById.mockRejectedValue(new Error('Connector not found'));
+    registerRoute({ defaultConnectorId: 'missing', defaultConnectorOnly: true });
+
+    await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
+
+    expect(mockRouter.response.ok).toHaveBeenCalledWith({
+      body: {
+        connectors: [],
+        soEntryFound: false,
+      },
+    });
+  });
+
+  it('prepends the default connector when soEntryFound is false and a default is configured', async () => {
+    const recommended = inferenceConnector('rec');
+    const other = inferenceConnector('other');
+    const defaultConnector = inferenceConnector('default');
+    getForFeature.mockResolvedValue({
+      endpoints: [recommended],
+      warnings: [],
+      soEntryFound: false,
+    });
+    getConnectorList.mockResolvedValue([recommended, other]);
+    getConnectorById.mockResolvedValue(defaultConnector);
+    registerRoute({ defaultConnectorId: 'default' });
+
+    await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
+
+    expect(getConnectorById).toHaveBeenCalledWith('default', expect.anything());
+    expect(mockRouter.response.ok).toHaveBeenCalledWith({
+      body: {
+        connectors: [defaultConnector, { ...recommended, isRecommended: true }, other],
+        soEntryFound: false,
+      },
+    });
+  });
+
+  it('replaces an existing entry when the default connector is already in the merged list', async () => {
+    const recommended = inferenceConnector('rec');
+    const defaultInCatalog = inferenceConnector('default');
+    const fullCatalog = [recommended, defaultInCatalog];
     getForFeature.mockResolvedValue({
       endpoints: [recommended],
       warnings: [],
       soEntryFound: false,
     });
     getConnectorList.mockResolvedValue(fullCatalog);
+    getConnectorById.mockResolvedValue(defaultInCatalog);
+    registerRoute({ defaultConnectorId: 'default' });
 
     await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
 
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
-        connectors: [recommended],
-        allConnectors: fullCatalog,
+        connectors: [defaultInCatalog, { ...recommended, isRecommended: true }],
         soEntryFound: false,
       },
     });
   });
 
-  it('returns empty connectors with soEntryFound false when no SO and no recommendations', async () => {
-    const fullCatalog = [inferenceConnector('a'), inferenceConnector('b')];
+  it('ignores the default connector when soEntryFound is true', async () => {
+    const resolved = inferenceConnector('feature-ep');
     getForFeature.mockResolvedValue({
-      endpoints: [],
-      warnings: [],
-      soEntryFound: false,
-    });
-    getConnectorList.mockResolvedValue(fullCatalog);
-
-    await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
-
-    expect(mockRouter.response.ok).toHaveBeenCalledWith({
-      body: {
-        connectors: [],
-        allConnectors: fullCatalog,
-        soEntryFound: false,
-      },
-    });
-  });
-
-  it('returns empty connectors with soEntryFound true when SO explicitly lists empty', async () => {
-    const fullCatalog = [inferenceConnector('a'), inferenceConnector('b')];
-    getForFeature.mockResolvedValue({
-      endpoints: [],
+      endpoints: [resolved],
       warnings: [],
       soEntryFound: true,
     });
-    getConnectorList.mockResolvedValue(fullCatalog);
+    getConnectorList.mockResolvedValue([resolved]);
+    registerRoute({ defaultConnectorId: 'default' });
 
     await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
 
+    expect(getConnectorById).not.toHaveBeenCalled();
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
-        connectors: [],
-        allConnectors: fullCatalog,
+        connectors: [resolved],
         soEntryFound: true,
       },
     });
   });
 
-  it('returns allConnectors when getForFeature fails', async () => {
-    const fullCatalog = [inferenceConnector('a'), inferenceConnector('b')];
-    getForFeature.mockRejectedValue(new Error('SO unavailable'));
-    getConnectorList.mockResolvedValue(fullCatalog);
+  it('returns the merged list without the default connector when its lookup fails', async () => {
+    const recommended = inferenceConnector('rec');
+    getForFeature.mockResolvedValue({
+      endpoints: [recommended],
+      warnings: [],
+      soEntryFound: false,
+    });
+    getConnectorList.mockResolvedValue([recommended]);
+    getConnectorById.mockRejectedValue(new Error('Default connector unavailable'));
+    registerRoute({ defaultConnectorId: 'default' });
 
     await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
 
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
-        connectors: [],
-        allConnectors: fullCatalog,
+        connectors: [{ ...recommended, isRecommended: true }],
         soEntryFound: false,
       },
     });
   });
 
-  it('returns feature endpoints when getConnectorList fails', async () => {
+  it('falls back to the catalog when getForFeature fails', async () => {
+    const a = inferenceConnector('a');
+    const b = inferenceConnector('b');
+    getForFeature.mockRejectedValue(new Error('SO unavailable'));
+    getConnectorList.mockResolvedValue([a, b]);
+    registerRoute();
+
+    await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
+
+    expect(mockRouter.response.ok).toHaveBeenCalledWith({
+      body: {
+        connectors: [a, b],
+        soEntryFound: false,
+      },
+    });
+  });
+
+  it('falls back to the feature endpoints when getConnectorList fails', async () => {
     const resolved = inferenceConnector('feature-ep');
     getForFeature.mockResolvedValue({
       endpoints: [resolved],
@@ -157,28 +338,48 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
       soEntryFound: true,
     });
     getConnectorList.mockRejectedValue(new Error('Inference API unavailable'));
+    registerRoute();
 
     await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
 
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
         connectors: [resolved],
-        allConnectors: [],
         soEntryFound: true,
       },
     });
   });
 
-  it('returns empty result when both getForFeature and getConnectorList fail', async () => {
+  it('returns an empty result when both getForFeature and getConnectorList fail', async () => {
     getForFeature.mockRejectedValue(new Error('SO unavailable'));
     getConnectorList.mockRejectedValue(new Error('Inference API unavailable'));
+    registerRoute();
 
     await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
 
     expect(mockRouter.response.ok).toHaveBeenCalledWith({
       body: {
         connectors: [],
-        allConnectors: [],
+        soEntryFound: false,
+      },
+    });
+  });
+
+  it('still returns only the default connector when ignoreGlobalDefault is true and defaultConnectorOnly is set', async () => {
+    const defaultConnector = inferenceConnector('default-id');
+    getConnectorById.mockResolvedValue(defaultConnector);
+    registerRoute(
+      { defaultConnectorId: 'default-id', defaultConnectorOnly: true },
+      makeFeatureRegistry(true)
+    );
+
+    await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
+
+    expect(getForFeature).not.toHaveBeenCalled();
+    expect(getConnectorList).not.toHaveBeenCalled();
+    expect(mockRouter.response.ok).toHaveBeenCalledWith({
+      body: {
+        connectors: [defaultConnector],
         soEntryFound: false,
       },
     });

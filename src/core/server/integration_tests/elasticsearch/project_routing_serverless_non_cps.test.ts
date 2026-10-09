@@ -202,10 +202,8 @@ const serverlessInstances = (cpsPlugin: boolean) => {
   return createTestServerlessInstances({
     adjustTimeout: (timeout: number) => jest.setTimeout(timeout),
     enableCPS: false,
-    // Match `yarn es serverless --projectType observability ...`
+    // Match `pnpm es serverless --projectType observability ...`
     projectType: 'oblt',
-    // Required to apply the UIAM/serverless ES args block (mock IDP/project metadata).
-    kibanaUrl: 'http://localhost:5601/',
     // Setup-only: use superuser so tests can create temp indices.
     kibana: {
       settings: {

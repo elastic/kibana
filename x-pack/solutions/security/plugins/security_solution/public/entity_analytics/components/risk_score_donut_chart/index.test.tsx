@@ -11,6 +11,17 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { RiskScoreDonutChart } from '.';
 import { TestProviders } from '../../../common/mock';
+import { DonutChart } from '../../../common/components/charts/donutchart';
+
+jest.mock('../../../common/components/charts/donutchart', () => {
+  const actual = jest.requireActual('../../../common/components/charts/donutchart');
+  return {
+    ...actual,
+    DonutChart: jest.fn(() => <div data-test-subj="mock-donut-chart" />),
+  };
+});
+
+const mockDonutChart = DonutChart as unknown as jest.Mock;
 
 const severityCount: SeverityCount = {
   [RiskSeverity.Low]: 1,
@@ -21,6 +32,10 @@ const severityCount: SeverityCount = {
 };
 
 describe('RiskScoreDonutChart', () => {
+  beforeEach(() => {
+    mockDonutChart.mockClear();
+  });
+
   it('renders legends', () => {
     const { getByTestId } = render(
       <TestProviders>
@@ -33,5 +48,38 @@ describe('RiskScoreDonutChart', () => {
     expect(getByTestId('legend')).toHaveTextContent('Moderate');
     expect(getByTestId('legend')).toHaveTextContent('High');
     expect(getByTestId('legend')).toHaveTextContent('Critical');
+  });
+
+  it('does not pass an onPartitionClick handler to the donut when none is provided', () => {
+    render(
+      <TestProviders>
+        <RiskScoreDonutChart severityCount={severityCount} showLegend={false} />
+      </TestProviders>
+    );
+
+    expect(mockDonutChart).toHaveBeenCalled();
+    const props = mockDonutChart.mock.calls[0][0];
+    expect(props.onPartitionClick).toBeUndefined();
+  });
+
+  it('invokes the onPartitionClick callback with the clicked RiskSeverity', () => {
+    const onPartitionClick = jest.fn();
+
+    render(
+      <TestProviders>
+        <RiskScoreDonutChart
+          severityCount={severityCount}
+          showLegend={false}
+          onPartitionClick={onPartitionClick}
+        />
+      </TestProviders>
+    );
+
+    expect(mockDonutChart).toHaveBeenCalled();
+    const props = mockDonutChart.mock.calls[0][0];
+    expect(typeof props.onPartitionClick).toBe('function');
+
+    props.onPartitionClick(RiskSeverity.Critical);
+    expect(onPartitionClick).toHaveBeenCalledWith(RiskSeverity.Critical);
   });
 });

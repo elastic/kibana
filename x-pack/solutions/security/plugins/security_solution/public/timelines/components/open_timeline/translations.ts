@@ -33,10 +33,17 @@ export const DELETE_SELECTED = i18n.translate(
   }
 );
 
+export const DELETE_TIMELINE_MODAL_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.open.timeline.deleteTimelineModalAriaLabel',
+  {
+    defaultMessage: 'Delete Timeline',
+  }
+);
+
 export const DELETE_TIMELINE_WARNING = i18n.translate(
   'xpack.securitySolution.open.timeline.deleteWarningLabel',
   {
-    defaultMessage: 'You will not be able to recover this timeline or its notes once deleted.',
+    defaultMessage: 'You will not be able to recover this Timeline or its notes once deleted.',
   }
 );
 
@@ -44,7 +51,7 @@ export const DELETE_TIMELINE_TEMPLATE_WARNING = i18n.translate(
   'xpack.securitySolution.open.timeline.deleteTemplateWarningLabel',
   {
     defaultMessage:
-      'You will not be able to recover this timeline template or its notes once deleted.',
+      'You will not be able to recover this Timeline template or its notes once deleted.',
   }
 );
 
@@ -112,35 +119,35 @@ export const ONLY_FAVORITES = i18n.translate(
 export const CREATE_RULE_FROM_TIMELINE = i18n.translate(
   'xpack.securitySolution.open.timeline.createRuleFromTimelineTooltip',
   {
-    defaultMessage: 'Create query rule from timeline',
+    defaultMessage: 'Create query rule from Timeline',
   }
 );
 
 export const CREATE_RULE_FROM_TIMELINE_CORRELATION = i18n.translate(
   'xpack.securitySolution.open.timeline.createRuleFromTimelineEqlTooltip',
   {
-    defaultMessage: 'Create EQL rule from timeline',
+    defaultMessage: 'Create EQL rule from Timeline',
   }
 );
 
 export const CREATE_TEMPLATE_FROM_TIMELINE = i18n.translate(
   'xpack.securitySolution.open.timeline.createTemplateFromTimelineTooltip',
   {
-    defaultMessage: 'Create template from timeline',
+    defaultMessage: 'Create template from Timeline',
   }
 );
 
 export const CREATE_TIMELINE_FROM_TEMPLATE = i18n.translate(
   'xpack.securitySolution.open.timeline.createTimelineFromTemplateTooltip',
   {
-    defaultMessage: 'Create timeline from template',
+    defaultMessage: 'Create Timeline from template',
   }
 );
 
 export const OPEN_AS_DUPLICATE = i18n.translate(
   'xpack.securitySolution.open.timeline.openAsDuplicateTooltip',
   {
-    defaultMessage: 'Duplicate timeline',
+    defaultMessage: 'Duplicate Timeline',
   }
 );
 
@@ -172,7 +179,7 @@ export const REFRESH = i18n.translate('xpack.securitySolution.open.timeline.refr
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.open.timeline.searchPlaceholder',
   {
-    defaultMessage: 'e.g. timeline name, or description',
+    defaultMessage: 'e.g. Timeline name, or description',
   }
 );
 
@@ -200,7 +207,7 @@ export const TIMELINE_TEMPLATE_NAME = i18n.translate(
 export const UNTITLED_TIMELINE = i18n.translate(
   'xpack.securitySolution.open.timeline.untitledTimelineLabel',
   {
-    defaultMessage: 'Untitled timeline',
+    defaultMessage: 'Untitled Timeline',
   }
 );
 
@@ -215,14 +222,14 @@ export const LOADING = i18n.translate('xpack.securitySolution.open.timeline.load
 export const ZERO_TIMELINES_MATCH = i18n.translate(
   'xpack.securitySolution.open.timeline.zeroTimelinesMatchLabel',
   {
-    defaultMessage: '0 timelines match the search criteria',
+    defaultMessage: '0 Timelines match the search criteria',
   }
 );
 
 export const ZERO_TIMELINE_TEMPLATES_MATCH = i18n.translate(
   'xpack.securitySolution.open.timeline.zeroTimelineTemplatesMatchLabel',
   {
-    defaultMessage: '0 timeline templates match the search criteria',
+    defaultMessage: '0 Timeline templates match the search criteria',
   }
 );
 
@@ -237,7 +244,7 @@ export const SELECTED_TIMELINES = (selectedTimelines: number) =>
   i18n.translate('xpack.securitySolution.open.timeline.selectedTimelinesTitle', {
     values: { selectedTimelines },
     defaultMessage:
-      'Selected {selectedTimelines} {selectedTimelines, plural, =1 {timeline} other {timelines}}',
+      'Selected {selectedTimelines} {selectedTimelines, plural, =1 {Timeline} other {Timelines}}',
   });
 
 export const SHOWING = i18n.translate('xpack.securitySolution.open.timeline.showingLabel', {
@@ -248,7 +255,7 @@ export const SUCCESSFULLY_EXPORTED_TIMELINES = (totalTimelines: number) =>
   i18n.translate('xpack.securitySolution.open.timeline.successfullyExportedTimelinesTitle', {
     values: { totalTimelines },
     defaultMessage:
-      'Successfully exported {totalTimelines, plural, =0 {all timelines} =1 {{totalTimelines} timeline} other {{totalTimelines} timelines}}',
+      'Successfully exported {totalTimelines, plural, =0 {all Timelines} =1 {{totalTimelines} Timeline} other {{totalTimelines} Timelines}}',
   });
 
 export const SUCCESSFULLY_EXPORTED_TIMELINE_TEMPLATES = (totalTimelineTemplates: number) =>
@@ -257,7 +264,7 @@ export const SUCCESSFULLY_EXPORTED_TIMELINE_TEMPLATES = (totalTimelineTemplates:
     {
       values: { totalTimelineTemplates },
       defaultMessage:
-        'Successfully exported {totalTimelineTemplates, plural, =0 {all timelines} =1 {{totalTimelineTemplates} timeline template} other {{totalTimelineTemplates} timeline templates}}',
+        'Successfully exported {totalTimelineTemplates, plural, =0 {all Timelines} =1 {{totalTimelineTemplates} Timeline template} other {{totalTimelineTemplates} Timeline templates}}',
     }
   );
 
@@ -265,14 +272,14 @@ export const SUCCESSFULLY_DELETED_TIMELINES = (totalTimelines: number) =>
   i18n.translate('xpack.securitySolution.open.timeline.successfullyDeletedTimelinesTitle', {
     values: { totalTimelines },
     defaultMessage:
-      'Successfully deleted {totalTimelines, plural, =0 {all timelines} =1 {{totalTimelines} timeline} other {{totalTimelines} timelines}}',
+      'Successfully deleted {totalTimelines, plural, =0 {all Timelines} =1 {{totalTimelines} Timeline} other {{totalTimelines} Timelines}}',
   });
 
 export const SUCCESSFULLY_DELETED_TIMELINE_TEMPLATES = (totalTimelineTemplates: number) =>
   i18n.translate('xpack.securitySolution.open.timeline.successfullyDeletedTimelineTemplatesTitle', {
     values: { totalTimelineTemplates },
     defaultMessage:
-      'Successfully deleted {totalTimelineTemplates, plural, =0 {all timelines} =1 {{totalTimelineTemplates} timeline template} other {{totalTimelineTemplates} timeline templates}}',
+      'Successfully deleted {totalTimelineTemplates, plural, =0 {all Timelines} =1 {{totalTimelineTemplates} Timeline template} other {{totalTimelineTemplates} Timeline templates}}',
   });
 
 export const TAB_TIMELINES = i18n.translate(
@@ -313,7 +320,7 @@ export const IMPORT_TIMELINE_BTN_TITLE = i18n.translate(
 export const SELECT_TIMELINE = i18n.translate(
   'xpack.securitySolution.timelines.components.importTimelineModal.selectTimelineDescription',
   {
-    defaultMessage: 'Select a timeline or timeline template file to import',
+    defaultMessage: 'Select a Timeline or Timeline template file to import',
   }
 );
 
@@ -340,7 +347,7 @@ export const IMPORT_FAILED = (totalTimelines: number) =>
     {
       values: { totalTimelines },
       defaultMessage:
-        'Failed to import {totalTimelines} {totalTimelines, plural, =1 {timeline} other {timelines}}',
+        'Failed to import {totalTimelines} {totalTimelines, plural, =1 {Timeline} other {Timelines}}',
     }
   );
 
@@ -355,5 +362,12 @@ export const TIMELINE_TABLE_CAPTION = i18n.translate(
   'xpack.securitySolution.timelines.components.open.timeline.timelines.table.tableCaption',
   {
     defaultMessage: 'Timelines Table',
+  }
+);
+
+export const VIEW_SUPER_TIMELINE = i18n.translate(
+  'xpack.securitySolution.open.timeline.viewSuperTimeline',
+  {
+    defaultMessage: 'View Super Timeline',
   }
 );

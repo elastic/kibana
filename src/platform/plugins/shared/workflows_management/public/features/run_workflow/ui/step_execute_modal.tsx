@@ -9,6 +9,7 @@
 
 import {
   EuiButton,
+  EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
@@ -16,7 +17,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiRadio,
   EuiText,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -26,6 +26,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import { useWorkflowsMonacoTheme } from '@kbn/workflows-ui';
 import { z } from '@kbn/zod/v4';
 import { ENABLED_STEP_TRIGGER_TABS } from './constants';
 import { NOT_READY_SENTINEL, StepExecuteHistoricalForm } from './step_execute_historical_form';
@@ -33,7 +34,6 @@ import { StepExecuteManualForm } from './step_execute_manual_form';
 import type { WorkflowStepTriggerTab } from './types';
 import { sanitizeText } from '../../../shared/lib/sanitize_text';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
-import { useWorkflowsMonacoTheme } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
 const STEP_TAB_LABELS: Record<WorkflowStepTriggerTab, string> = {
   manual: i18n.translate('workflows.testStepModal.manualTab', { defaultMessage: 'Manual' }),
@@ -207,43 +207,25 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
               <EuiFlexGroup direction="row" gutterSize="m">
                 {ENABLED_STEP_TRIGGER_TABS.map((tab) => (
                   <EuiFlexItem key={tab}>
-                    <EuiButton
-                      color={selectedTab === tab ? 'primary' : 'text'}
-                      onClick={() => handleChangeTab(tab)}
-                      iconSide="right"
-                      contentProps={{
-                        style: {
-                          justifyContent: 'flex-start',
-                          flexDirection: 'column',
-                          alignItems: 'flex-start',
-                          textAlign: 'left',
-                        },
-                      }}
+                    <EuiCheckableCard
+                      id={`test-step-tab-${tab}`}
+                      name="stepTriggerTab"
+                      label={<strong>{STEP_TAB_LABELS[tab]}</strong>}
+                      checked={selectedTab === tab}
+                      onChange={() => handleChangeTab(tab)}
                       css={css`
-                        width: 100%;
-                        height: fit-content;
-                        min-height: 100%;
-                        padding: ${euiTheme.size.m};
+                        height: 100%;
                       `}
                     >
-                      <EuiRadio
-                        name={STEP_TAB_LABELS[tab]}
-                        label={STEP_TAB_LABELS[tab]}
-                        id={`test-step-tab-${tab}`}
-                        checked={selectedTab === tab}
-                        onChange={() => {}}
-                        css={{ fontWeight: euiTheme.font.weight.bold }}
-                      />
                       <EuiText
                         size="s"
                         css={css`
                           text-wrap: auto;
-                          margin-left: ${euiTheme.size.l};
                         `}
                       >
                         {STEP_TAB_DESCRIPTIONS[tab]}
                       </EuiText>
-                    </EuiButton>
+                    </EuiCheckableCard>
                   </EuiFlexItem>
                 ))}
               </EuiFlexGroup>

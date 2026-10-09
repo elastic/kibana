@@ -7,11 +7,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { parse } from '@kbn/datemath';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useAssetDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
 
+import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import { useAssetDetailsUrlState } from '../hooks/use_asset_details_url_state';
 
 export interface LinkToNodeDetailsProps {
@@ -36,23 +37,21 @@ export const LinkToNodeDetails = ({ entityId, entityName, entityType }: LinkToNo
       from: parse(dateRange?.from ?? '')?.valueOf(),
       to: parse(dateRange?.to ?? '')?.valueOf(),
     },
-    preferredSchema: preferredSchema ?? 'semconv',
+    preferredSchema: preferredSchema ?? DEFAULT_SCHEMA,
   });
 
   return (
-    <EuiButtonEmpty
+    <EuiLink
       aria-label={i18n.translate('xpack.infra.linkToNodeDetails.openaspageButton.ariaLabel', {
         defaultMessage: 'Open as page',
       })}
       data-test-subj="infraAssetDetailsOpenAsPageButton"
-      size="xs"
-      flush="both"
       {...assetDetailMenuItemLinkProps}
     >
       <FormattedMessage
         id="xpack.infra.infra.nodeDetails.openAsPage"
         defaultMessage="Open as page"
       />
-    </EuiButtonEmpty>
+    </EuiLink>
   );
 };

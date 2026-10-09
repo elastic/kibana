@@ -34,7 +34,7 @@ export async function ensureWorktree(
 
   log.info(`Creating worktree at ${path} for ref ${ref}`);
 
-  await exec(`git worktree add --detach ../${path} ${ref}`, {
+  await exec('git', ['worktree', 'add', '--detach', `../${path}`, ref], {
     log,
     cwd: baseCloneDir,
   });

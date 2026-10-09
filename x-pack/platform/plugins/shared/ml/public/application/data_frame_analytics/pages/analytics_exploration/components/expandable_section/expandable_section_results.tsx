@@ -335,22 +335,38 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
             isOpen={isPopoverVisible}
             panelPaddingSize="none"
             anchorPosition="upCenter"
+            aria-label={i18n.translate(
+              'xpack.ml.dataframe.analytics.exploration.dataGridActions.popoverAriaLabel',
+              {
+                defaultMessage: 'Row actions',
+              }
+            )}
             button={
-              <EuiButtonIcon
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.ml.dataframe.analytics.exploration.dataGridActions.showActionsAriaLabel',
                   {
                     defaultMessage: 'Show actions',
                   }
                 )}
-                iconType="gear"
-                color="text"
-                onClick={() => setIsPopoverVisible(!isPopoverVisible)}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'xpack.ml.dataframe.analytics.exploration.dataGridActions.showActionsAriaLabel',
+                    {
+                      defaultMessage: 'Show actions',
+                    }
+                  )}
+                  iconType="gear"
+                  color="text"
+                  onClick={() => setIsPopoverVisible(!isPopoverVisible)}
+                />
+              </EuiToolTip>
             }
             closePopover={closePopover}
           >
-            <EuiContextMenuPanel items={actions} size="s" />
+            <EuiContextMenuPanel items={actions} />
           </EuiPopover>
         );
       },

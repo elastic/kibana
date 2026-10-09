@@ -17,6 +17,7 @@ import {
 } from '../../extractors/formatjs';
 import type { ErrorReporter } from '../../utils';
 import { globNamespacePaths, descriptorDetailsStack } from '../../utils';
+import { I18N_CALL_PATTERN } from '../../constants';
 
 export const validateMessages = ({
   extractedMessages,
@@ -52,8 +53,19 @@ const formatJsRunner = async (
 ) => {
   const allNamespaceMessages = new Map();
   const { ignoreMalformed } = ignoreFlags;
-  for (const filePath of filePaths) {
-    const source = await readFileAsync(filePath, 'utf8');
+
+  const fileContents = await Promise.all(
+    filePaths.map(async (filePath) => ({
+      filePath,
+      source: await readFileAsync(filePath, 'utf8'),
+    }))
+  );
+
+  for (const { filePath, source } of fileContents) {
+    if (!I18N_CALL_PATTERN.test(source)) {
+      continue;
+    }
+
     const extractedMessages = await extractI18nMessageDescriptors(filePath, source);
 
     try {

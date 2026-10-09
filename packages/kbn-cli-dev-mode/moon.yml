@@ -20,7 +20,7 @@ dependsOn:
   - '@kbn/config'
   - '@kbn/config-schema'
   - '@kbn/logging'
-  - '@kbn/optimizer'
+  - '@kbn/rspack-optimizer'
   - '@kbn/server-http-tools'
   - '@kbn/repo-info'
   - '@kbn/ci-stats-reporter'
@@ -32,6 +32,8 @@ dependsOn:
   - '@kbn/picomatcher'
   - '@kbn/repo-packages'
   - '@kbn/dev-utils'
+  - '@kbn/es'
+  - '@kbn/projects-solutions-groups'
 tags:
   - shared-server
   - package

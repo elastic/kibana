@@ -7,9 +7,9 @@
 
 import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
-import { withExecuteToolSpan } from '@kbn/inference-tracing';
+import { withExecuteToolSpan, markToolSpanAsError } from '@kbn/inference-tracing';
 import { tool as toTool } from '@langchain/core/tools';
-import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
+import type { ModelProvider, ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { TimeRange } from '@kbn/agent-builder-common';
 import type { Resource, ResourceListResult, ToolResult } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools';
@@ -42,12 +42,14 @@ export const createRelevanceSearchTool = ({
   events,
   logger,
   topSnippetsConfig,
+  includeFrozen = false,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   events?: ToolEventEmitter;
   logger: Logger;
   topSnippetsConfig?: TopSnippetsConfig;
+  includeFrozen?: boolean;
 }) => {
   return toTool(
     async ({ term, index, size }) => {
@@ -64,6 +66,7 @@ export const createRelevanceSearchTool = ({
             esClient,
             logger,
             topSnippetsConfig,
+            includeFrozen,
           });
           const resources = rawResults.map(convertMatchResult);
 
@@ -98,39 +101,48 @@ export const createRelevanceSearchTool = ({
 export const naturalLanguageSearchToolName = 'natural_language_search';
 
 export const createNaturalLanguageSearchTool = ({
-  model,
+  modelProvider,
   esClient,
+  internalEsClient,
   events,
   logger,
   rowLimit,
   customInstructions,
   timeRange,
+  includeDatasets = false,
+  includeFrozen = false,
 }: {
-  model: ScopedModel;
+  modelProvider: ModelProvider;
   esClient: ElasticsearchClient;
+  internalEsClient?: ElasticsearchClient;
   events: ToolEventEmitter;
   logger: Logger;
   rowLimit?: number;
   customInstructions?: string;
   timeRange: TimeRange;
+  includeDatasets?: boolean;
+  includeFrozen?: boolean;
 }) => {
   return toTool(
     async ({ query, index }) => {
       return withExecuteToolSpan(
         naturalLanguageSearchToolName,
         { tool: { input: { query, index } } },
-        async () => {
+        async (span) => {
           events?.reportProgress(progressMessages.performingNlSearch({ query }));
           const response = await naturalLanguageSearch({
             nlQuery: query,
             target: index,
-            model,
+            modelProvider,
             esClient,
+            internalEsClient,
             events,
             logger,
             rowLimit,
             customInstructions,
             timeRange,
+            includeDatasets,
+            includeFrozen,
           });
 
           const results: ToolResult[] = response.esqlData
@@ -154,14 +166,18 @@ export const createNaturalLanguageSearchTool = ({
                   },
                 },
               ]
-            : [
-                createErrorResult({
+            : (() => {
+                const errorResult = createErrorResult({
                   message: response.error ?? 'Query was not executed',
                   metadata: {
                     query: response.generatedQuery,
                   },
-                }),
-              ];
+                });
+                if (span) {
+                  markToolSpanAsError(span, { result: [errorResult] });
+                }
+                return [errorResult];
+              })();
 
           const content = JSON.stringify(results);
           const artifact = { results };
@@ -183,6 +199,28 @@ Example of natural language queries which can be passed to the tool:
   - "what is the average order value?"
   - "list all products where status is 'in_stock' and price is less than 50"
   - "how many errors were logged in the past hour?"`,
+    }
+  );
+};
+
+export const noMatchingResourceToolName = 'no_matching_resource';
+
+export const NO_MATCHING_RESOURCE_ERROR = 'Could not figure out which data source to use';
+
+export const createNoMatchingResourceTool = () => {
+  return toTool(
+    async () => {
+      const result = createErrorResult({ message: NO_MATCHING_RESOURCE_ERROR });
+      const content = JSON.stringify({ results: [result] });
+      const artifact = { results: [result] };
+      return [content, artifact];
+    },
+    {
+      name: noMatchingResourceToolName,
+      responseFormat: 'content_and_artifact',
+      schema: z.object({}),
+      description:
+        'Call this ONLY when none of the available resources can plausibly answer the query. Prefer attempting a search with one of the other tools when any resource plausibly fits.',
     }
   );
 };

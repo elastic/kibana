@@ -6,7 +6,7 @@
  */
 
 import type { DockerContainerMetrics, KubernetesContainerMetrics } from './charts/types';
-import { IntegrationEventModules } from './types';
+import { ContentTabIds, IntegrationEventModules } from './types';
 
 export const ASSET_DETAILS_FLYOUT_COMPONENT_NAME = 'infraAssetDetailsFlyout';
 export const ASSET_DETAILS_PAGE_COMPONENT_NAME = 'infraAssetDetailsPage';
@@ -26,6 +26,16 @@ export const DOCKER_METRIC_TYPES: DockerContainerMetrics[] = ['cpu', 'memory', '
 export const KUBERNETES_METRIC_TYPES: KubernetesContainerMetrics[] = ['cpu', 'memory'];
 
 export const APM_HOST_TROUBLESHOOTING_LINK = 'https://ela.st/host-troubleshooting';
+
+export const DATE_PICKER_VISIBLE_TABS = [
+  ContentTabIds.OVERVIEW,
+  ContentTabIds.LOGS,
+  ContentTabIds.METADATA,
+  ContentTabIds.METRICS,
+  ContentTabIds.PROCESSES,
+  ContentTabIds.ANOMALIES,
+  ContentTabIds.DASHBOARDS,
+];
 
 // Regex pattern to match formulas where 'avg' is the first function
 // Matches: "avg(...)", "1 - avg(...)", "100 * avg(...)", "(avg(...))",

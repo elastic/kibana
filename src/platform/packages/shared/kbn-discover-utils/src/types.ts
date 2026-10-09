@@ -8,7 +8,7 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+import type { ESQLColumnsWithHighlights } from '@kbn/esql-utils';
 
 export type { IgnoredReason, ShouldShowFieldInTableHandler } from './utils';
 export type {
@@ -26,6 +26,11 @@ export interface EsHitRecord extends Omit<DiscoverSearchHit, '_index' | '_id' | 
   _index?: DiscoverSearchHit['_index'];
   _id?: DiscoverSearchHit['_id'];
   _source?: DiscoverSearchHit['_source'];
+  /**
+   * As oposed to DSL, ES|QL highlights are inlined in the hit value.
+   * This record holds which columns have highlights and what tag was used for it.
+   */
+  inline_highlights?: ESQLColumnsWithHighlights;
 }
 
 /**
@@ -50,25 +55,16 @@ export interface DataTableRecord {
   isAnchor?: boolean;
 }
 
-/**
- * Custom column types per column name
- */
-export type DataTableColumnsMeta = Record<
-  string,
-  {
-    type: DatatableColumnMeta['type'];
-    esType?: DatatableColumnMeta['esType'];
-  }
->;
+import type { ReactNode } from 'react';
 
 type FormattedHitPair = readonly [
   fieldDisplayName: string,
-  formattedValue: string,
+  formattedValue: ReactNode,
   fieldName: string | null // `null` is when number of fields is limited and there is an extra pair about it
 ];
 
 /**
- * Pairs array for each field in the hit
+ * Pairs array for each field in the hit where values are ReactNodes
  */
 export type FormattedHit = FormattedHitPair[];
 
@@ -189,15 +185,4 @@ export interface SpanFields {
 export interface UserAgentFields {
   'user_agent.name': string;
   'user_agent.version': string;
-}
-
-export interface TraceDocumentOverview
-  extends TraceFields,
-    Partial<ServiceFields>,
-    Partial<SpanFields>,
-    Partial<UserAgentFields>,
-    Partial<TransactionFields> {
-  duration?: number;
-  kind?: string;
-  'resource.attributes.telemetry.sdk.language'?: string;
 }

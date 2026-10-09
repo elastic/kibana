@@ -12,6 +12,7 @@ import {
   addEventsStepDefinition,
   addObservablesStepDefinition,
   addTagsStepDefinition,
+  removeTagsStepDefinition,
   assignCaseStepDefinition,
   closeCaseStepDefinition,
   deleteCasesStepDefinition,
@@ -21,14 +22,15 @@ import {
   getAllAttachmentsStepDefinition,
   getCasesByAlertIdStepDefinition,
   getCasesStepDefinition,
-  setCategoryStepDefinition,
   setDescriptionStepDefinition,
+  setExtendedFieldsStepDefinition,
   setSeverityStepDefinition,
   setStatusStepDefinition,
   setTitleStepDefinition,
   unassignCaseStepDefinition,
   updateObservableStepDefinition,
 } from './simple_steps';
+import { setCategoryStepDefinition } from './set_category';
 
 describe('new cases public step definitions', () => {
   const steps = [
@@ -44,9 +46,11 @@ describe('new cases public step definitions', () => {
     findSimilarCasesStepDefinition,
     findCasesStepDefinition,
     setDescriptionStepDefinition,
+    setExtendedFieldsStepDefinition,
     setTitleStepDefinition,
     addObservablesStepDefinition,
     addTagsStepDefinition,
+    removeTagsStepDefinition,
     setCategoryStepDefinition,
     getCasesByAlertIdStepDefinition,
     getAllAttachmentsStepDefinition,

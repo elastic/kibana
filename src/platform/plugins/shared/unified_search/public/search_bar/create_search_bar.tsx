@@ -18,6 +18,9 @@ import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { EsqlPluginStart } from '@kbn/esql/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { SearchSessionsManagementPluginStart } from '@kbn/search-sessions-management-plugin/public';
 import { SearchBar } from '.';
 import type { SearchBarOwnProps } from '.';
 import { useFilterManager } from './lib/use_filter_manager';
@@ -34,6 +37,9 @@ export interface StatefulSearchBarDeps {
   isScreenshotMode?: boolean;
   kql: { autocomplete: KqlPluginStart['autocomplete'] };
   cps: CPSPluginStart;
+  esql?: EsqlPluginStart;
+  licensing?: LicensingPluginStart;
+  searchSessionsManagement?: SearchSessionsManagementPluginStart;
 }
 
 export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> = Omit<
@@ -168,6 +174,9 @@ export function createSearchBar({
   isScreenshotMode = false,
   kql,
   cps,
+  esql,
+  licensing,
+  searchSessionsManagement,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
@@ -241,6 +250,9 @@ export function createSearchBar({
           usageCollection,
           kql,
           cps,
+          esql,
+          licensing,
+          searchSessionsManagement,
           ...core,
         }}
       >
@@ -255,6 +267,7 @@ export function createSearchBar({
             showSubmitButton={props.showSubmitButton}
             submitButtonStyle={props.submitButtonStyle}
             isDisabled={props.isDisabled}
+            disableSubmitAction={props.disableSubmitAction}
             screenTitle={props.screenTitle}
             indexPatterns={props.indexPatterns}
             indicateNoData={props.indicateNoData}
@@ -308,6 +321,9 @@ export function createSearchBar({
             useBackgroundSearchButton={props.useBackgroundSearchButton}
             esqlQueryStats={props.esqlQueryStats}
             enableResourceBrowser={props.enableResourceBrowser}
+            enableCreateView={props.enableCreateView}
+            enableDateRangePicker={props.enableDateRangePicker}
+            esqlApproximation={props.esqlApproximation}
           />
         </core.i18n.Context>
       </KibanaContextProvider>

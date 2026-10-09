@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import type { SavedObjectsBulkUpdateObject, SavedObjectsFindResult } from '@kbn/core/server';
 import {
+  authorizeRuleTypeParams,
   getRuleNotifyWhenType,
   validateMutatedRuleTypeParams,
   validateRuleTypeParams,
@@ -15,7 +17,7 @@ import type { RuleDomain, RuleParams } from '../../../application/rule/types';
 import {
   injectReferencesIntoActions,
   injectReferencesIntoArtifacts,
-  addMissingUiamKeyTagIfNeeded,
+  API_KEY_ATTRIBUTES_TO_STRIP,
 } from '..';
 import { createNewAPIKeySet, extractReferences, updateMeta } from '../../lib';
 import type {
@@ -52,6 +54,7 @@ export interface UpdateRuleInMemoryOpts<Params extends RuleParams> {
   skipped: BulkEditActionSkipResult[];
   errors: BulkOperationError[];
   username: string | null;
+  profileUid: string | null;
   updateAttributesFn: (
     opts: UpdateAttributesFnOpts<Params>
   ) => Promise<UpdateAttributesFnResult<Params>>;
@@ -71,6 +74,7 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     skipped,
     errors,
     username,
+    profileUid,
     shouldInvalidateApiKeys,
     shouldIncrementRevision = () => true,
   }: UpdateRuleInMemoryOpts<Params>
@@ -151,6 +155,10 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     rule.attributes.params,
     ruleType.validate.params
   );
+  await authorizeRuleTypeParams(validatedMutatedAlertTypeParams, ruleType.authorize?.params, {
+    request: context.request,
+    previousParams: rule.attributes.params,
+  });
 
   const {
     references,
@@ -184,7 +192,8 @@ export async function updateRuleInMemory<Params extends RuleParams>(
       apiKeysMap,
       ruleAttributes,
       hasUpdateApiKeyOperation,
-      username
+      username,
+      profileUid
     );
     apiKeyAttributes = preparedApiKeyAttributes;
   }
@@ -196,6 +205,7 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     updatedParams,
     rawAlertActions: ruleAttributes.actions,
     username,
+    profileUid,
   });
 
   rules.push({ ...rule, references, attributes: updatedAttributes });
@@ -208,14 +218,18 @@ async function prepareApiKeys(
   apiKeysMap: ApiKeysMap,
   attributes: RawRule,
   hasUpdateApiKeyOperation: boolean,
-  username: string | null
+  username: string | null,
+  profileUid: string | null
 ): Promise<{ apiKeyAttributes: ApiKeyAttributes }> {
   const apiKeyAttributes = await createNewAPIKeySet(context, {
     id: ruleType.id,
     ruleName: attributes.name,
     username,
+    profileUid,
     shouldUpdateApiKey: attributes.enabled || hasUpdateApiKeyOperation,
     errorMessage: 'Error updating rule: could not create API key',
+    apiKeyOwnership: { apiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser },
+    refresh: false,
   });
 
   // collect generated API keys
@@ -242,6 +256,7 @@ async function updateAttributes({
   updatedParams,
   rawAlertActions,
   username,
+  profileUid,
 }: {
   context: RulesClientContext;
   attributes: RawRule;
@@ -249,6 +264,7 @@ async function updateAttributes({
   updatedParams: RuleParams;
   rawAlertActions: RawRuleAction[];
   username: string | null;
+  profileUid: string | null;
 }): Promise<{
   updatedAttributes: RawRule;
 }> {
@@ -258,24 +274,19 @@ async function updateAttributes({
     attributes.throttle ?? null
   );
 
-  const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
-    attributes.tags,
-    apiKeyAttributes?.uiamApiKey,
-    apiKeyAttributes?.apiKeyCreatedByUser,
-    context.isServerless,
-    context.featureFlags
-  );
-
   // TODO (http-versioning) Remove casts when updateMeta has been converted
-  const castedAttributes = attributes;
   const updatedAttributes = updateMeta(context, {
-    ...castedAttributes,
-    ...(apiKeyAttributes ? { ...apiKeyAttributes } : {}),
-    tags: tagsWithUiamCheck,
+    ...(apiKeyAttributes
+      ? {
+          ...omit(attributes, [...API_KEY_ATTRIBUTES_TO_STRIP]),
+          ...apiKeyAttributes,
+        }
+      : attributes),
     params: updatedParams,
     actions: rawAlertActions,
     notifyWhen,
     updatedBy: username,
+    updatedByProfileUid: profileUid,
     updatedAt: new Date().toISOString(),
   });
 

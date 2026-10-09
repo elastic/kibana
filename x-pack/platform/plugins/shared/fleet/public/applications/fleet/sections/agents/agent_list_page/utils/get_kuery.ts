@@ -6,11 +6,12 @@
  */
 import { i18n } from '@kbn/i18n';
 
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../../../../../../common/services';
 import { AgentStatusKueryHelper } from '../../../../services';
 import { AGENTS_PREFIX } from '../../../../constants';
 
 const NO_TAGS_VALUE = i18n.translate('xpack.fleet.noTagsValue', {
-  defaultMessage: 'No Tags',
+  defaultMessage: 'No tags',
 });
 export const getKuery = ({
   search,
@@ -34,9 +35,11 @@ export const getKuery = ({
     if (kueryBuilder) {
       kueryBuilder = `(${kueryBuilder}) and`;
     }
-    kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.policy_id : (${selectedAgentPolicies
-      .map((agentPolicy) => `"${agentPolicy}"`)
-      .join(' or ')})`;
+    kueryBuilder = `${kueryBuilder} ${buildPolicyBaseIdsWithFallbackKuery(
+      selectedAgentPolicies,
+      `${AGENTS_PREFIX}.policy_base_id`,
+      `${AGENTS_PREFIX}.policy_id`
+    )}`;
   }
 
   if (selectedTags?.length) {

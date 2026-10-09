@@ -10,7 +10,7 @@ import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import {
   ML_JOB_SAVED_OBJECT_TYPE,
   ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
-} from '../../common/types/saved_objects';
+} from '@kbn/ml-common-types/saved_objects';
 
 export function authorizationProvider(authorization: SecurityPluginSetup['authz']) {
   async function authorizationCheck(request: KibanaRequest) {

@@ -13,6 +13,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { ConfigSchema } from '@kbn/file-upload-common';
+import { fieldStatsTableEmbeddableSchema } from '@kbn/data-visualizer-server-schemas/embeddables/field_stats';
 import type { StartDeps, SetupDeps } from './types';
 import { registerWithCustomIntegrations } from './register_custom_integration';
 import { routes } from './routes';
@@ -33,7 +34,9 @@ export class DataVisualizerPlugin implements Plugin<void, void, SetupDeps, Start
     }
     routes(coreSetup, this._logger);
 
-    plugins.embeddable.registerTransforms(FIELD_STATS_EMBEDDABLE_TYPE, {
+    plugins.embeddable.registerEmbeddableServerDefinition(FIELD_STATS_EMBEDDABLE_TYPE, {
+      title: 'Field statistics table',
+      getSchema: () => fieldStatsTableEmbeddableSchema,
       getTransforms: () => ({
         transformIn,
         transformOut,

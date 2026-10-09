@@ -33,18 +33,36 @@ describe('agent_policy_settings', () => {
   });
 
   describe('zodStringWithYamlValidation', () => {
-    it('should accept valid YAML string', () => {
-      const result = zodStringWithYamlValidation.safeParse(
+    it('should accept valid YAML string', async () => {
+      const result = await zodStringWithYamlValidation.safeParseAsync(
         'nested:\n  key1: value1\n  key2: value2'
       );
       expect(result.success).toBe(true);
     });
 
-    it('should reject invalid YAML string', () => {
-      const result = zodStringWithYamlValidation.safeParse(
-        'nested:\n  key1: value1\n  key1: value2'
-      );
+    it('should reject invalid YAML string', async () => {
+      const result = await zodStringWithYamlValidation.safeParseAsync('invalidyaml: [unclosed');
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe('include_tags_in_events setting', () => {
+    it('should include agent.features.include_tags_in_events.enabled in AGENT_POLICY_ADVANCED_SETTINGS', () => {
+      const setting = AGENT_POLICY_ADVANCED_SETTINGS.find(
+        (s) => s.name === 'agent.features.include_tags_in_events.enabled'
+      );
+      expect(setting).toBeDefined();
+      expect(setting?.api_field.name).toBe('agent_features_include_tags_in_events_enabled');
+    });
+
+    it('should accept boolean values and default to false', () => {
+      const setting = AGENT_POLICY_ADVANCED_SETTINGS.find(
+        (s) => s.name === 'agent.features.include_tags_in_events.enabled'
+      )!;
+      expect(setting.schema.safeParse(true).success).toBe(true);
+      expect(setting.schema.safeParse(false).success).toBe(true);
+      expect(setting.schema.safeParse(undefined).success).toBe(true);
+      expect(setting.schema.parse(undefined)).toBe(false);
     });
   });
 

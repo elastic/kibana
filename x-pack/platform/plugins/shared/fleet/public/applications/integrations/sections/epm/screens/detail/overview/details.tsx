@@ -35,9 +35,11 @@ import type {
 } from '../../../../../types';
 import { entries } from '../../../../../types';
 import {
+  useAuthz,
   useConfig,
   useGetCategoriesQuery,
   useGetPackageDependencies,
+  useGetSettingsQuery,
   useStartServices,
 } from '../../../../../hooks';
 import { AssetTitleMap, DisplayedAssetsFromPackageInfo, ServiceTitleMap } from '../../../constants';
@@ -74,7 +76,10 @@ const Replacements = euiStyled(EuiFlexItem)`
 
 export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) => {
   const { notifications } = useStartServices();
+  const authz = useAuthz();
   const config = useConfig();
+  const { data: settings } = useGetSettingsQuery({ enabled: authz.fleet.readSettings });
+  const integrationKnowledgeEnabled = Boolean(settings?.item.integration_knowledge_enabled);
   const { data: categoriesData, isLoading: isLoadingCategories } = useGetCategoriesQuery();
   const {
     changelog,
@@ -157,7 +162,8 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
         (acc: any, [asset, value]) => {
           if (
             DisplayedAssetsFromPackageInfo[service].includes(asset) &&
-            (!config?.hideDashboards || asset !== 'dashboard')
+            (!config?.hideDashboards || asset !== 'dashboard') &&
+            (integrationKnowledgeEnabled || asset !== 'knowledge_base')
           ) {
             acc[asset] = value;
           }
@@ -194,7 +200,9 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
                     <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="spaceBetween">
                       <EuiFlexItem grow={false}>{AssetTitleMap[type]}</EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiNotificationBadge color="subdued">{assetCount}</EuiNotificationBadge>
+                        <EuiNotificationBadge color="subdued" className="eui-textNoWrap">
+                          {assetCount}
+                        </EuiNotificationBadge>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
@@ -387,6 +395,7 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
     packageInfo.owner.type,
     packageInfo.version,
     config?.hideDashboards,
+    integrationKnowledgeEnabled,
     toggleLicenseModal,
     toggleNoticeModal,
     toggleChangelogModal,

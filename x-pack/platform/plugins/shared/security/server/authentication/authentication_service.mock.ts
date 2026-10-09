@@ -13,6 +13,21 @@ import type { InternalAuthenticationServiceStart } from './authentication_servic
 export const authenticationServiceMock = {
   createStart: (): DeeplyMockedKeys<InternalAuthenticationServiceStart> => ({
     apiKeys: apiKeysMock.create(),
+    oauth: {
+      createClient: jest.fn(),
+      listClients: jest.fn(),
+      updateClient: jest.fn(),
+      revokeClient: jest.fn(),
+      deleteClient: jest.fn(),
+      listConnections: jest.fn(),
+      updateConnection: jest.fn(),
+      revokeConnection: jest.fn(),
+      deleteConnection: jest.fn(),
+      resolveUsers: jest.fn(),
+    },
+    systemIdentity: {
+      createEphemeralToken: jest.fn().mockResolvedValue('essu_mock-kibana-token'),
+    },
     login: jest.fn(),
     logout: jest.fn(),
     getCurrentUser: jest.fn(),

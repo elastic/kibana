@@ -1,0 +1,189 @@
+openapi: 3.0.0
+info:
+  title: Compare Evaluation Experiments API endpoint
+  version: '1'
+paths:
+  /internal/evals/experiments/compare:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: CompareExperiments
+      description: >-
+        Compare two evaluation experiments with a paired statistical test per
+        dataset and evaluator.
+      summary: Compare two evaluation experiments
+      tags:
+        - Evals API
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [experiment, execution]
+            default: experiment
+          description: Comparison type — compare individual experiments or suite executions
+        - name: baseline_id
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+          description: Baseline experiment or execution ID (depends on type)
+        - name: target_id
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+          description: Target experiment or execution ID (depends on type)
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ComparisonResult'
+                  pairing:
+                    type: object
+                    properties:
+                      totalPairs:
+                        type: integer
+                      skippedMissingPairs:
+                        type: integer
+                      skippedNullScores:
+                        type: integer
+                      truncatedBaseline:
+                        type: boolean
+                        description: Whether the baseline scores were truncated due to size limits
+                      truncatedTarget:
+                        type: boolean
+                        description: Whether the target scores were truncated due to size limits
+                    required:
+                      - totalPairs
+                      - skippedMissingPairs
+                      - skippedNullScores
+                      - truncatedBaseline
+                      - truncatedTarget
+                required:
+                  - results
+                  - pairing
+
+components:
+  schemas:
+    StatisticalTestId:
+      type: string
+      enum:
+        - paired_t
+        - wilcoxon_signed_rank
+        - mcnemar
+      description: >-
+        Paired hypothesis test applied to one (dataset, evaluator) slice.
+        `paired_t` compares mean differences, `wilcoxon_signed_rank` is its
+        rank-based alternative, `mcnemar` compares paired binary outcomes.
+
+    MetricType:
+      type: string
+      enum:
+        - binary
+        - continuous_bounded
+        - continuous_unbounded
+        - count
+        - ordinal_k
+      description: >-
+        Shape of the observed scores: every score is 0 or 1 (`binary`), a
+        fraction within [0, 1] (`continuous_bounded`), any real number
+        (`continuous_unbounded`), a non-negative integer (`count`) or a level
+        on a dense 1..k scale (`ordinal_k`).
+
+    HypothesisTest:
+      type: object
+      description: The paired hypothesis test run on one (dataset, evaluator) slice.
+      properties:
+        id:
+          $ref: '#/components/schemas/StatisticalTestId'
+        method:
+          type: string
+          maxLength: 64
+          description: >-
+            Variant of the test that produced the p-value, when the test has
+            more than one (for example `mid-p`, `exact`, `asymptotic`).
+        statistic:
+          type: number
+          nullable: true
+          description: Test statistic, null when the test could not run
+        discordantPairs:
+          type: object
+          description: >-
+            Only for binary metrics: the pairs on which the two arms disagree,
+            the counts behind the McNemar statistic. Combine with `direction`
+            to read them as improvements or regressions.
+          properties:
+            targetOnly:
+              type: integer
+              description: Pairs where the target scored 1 and the baseline 0
+            baselineOnly:
+              type: integer
+              description: Pairs where the baseline scored 1 and the target 0
+          required:
+            - targetOnly
+            - baselineOnly
+      required:
+        - id
+        - statistic
+
+    ComparisonResult:
+      type: object
+      properties:
+        datasetId:
+          type: string
+          maxLength: 1024
+        datasetName:
+          type: string
+          maxLength: 256
+        evaluatorName:
+          type: string
+          maxLength: 256
+        sampleSize:
+          type: integer
+          description: Number of paired scores in this slice
+        meanBaseline:
+          type: number
+          description: Mean score of the baseline experiment
+        meanTarget:
+          type: number
+          description: Mean score of the target experiment
+        pValue:
+          type: number
+          nullable: true
+          description: Two-sided p-value of `hypothesisTest`, null when the test could not run
+        direction:
+          type: string
+          enum:
+            - maximize
+            - minimize
+            - neutral
+          description: >-
+            Whether a higher score is an improvement (`maximize`), a lower
+            score is an improvement (`minimize`), or the score cannot be
+            compared across arms at all (`neutral`) for this evaluator.
+        metricType:
+          $ref: '#/components/schemas/MetricType'
+        hypothesisTest:
+          $ref: '#/components/schemas/HypothesisTest'
+      required:
+        - datasetId
+        - datasetName
+        - evaluatorName
+        - sampleSize
+        - meanBaseline
+        - meanTarget
+        - pValue
+        - direction
+        - metricType
+        - hypothesisTest

@@ -13,10 +13,9 @@ import type { FunctionComponent } from 'react';
 import type React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { Query, TimeRange } from '@kbn/es-query';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type {
   ErrorsByTraceId,
-  FocusedTraceWaterfallProps,
-  FullTraceWaterfallProps,
   SpanLinks,
   TraceRootSpan,
   UnifiedSpanDocument,
@@ -41,12 +40,20 @@ import type { FeaturesRegistry } from '../../../common';
 export interface ObservabilityStreamsFeatureRenderDeps {
   doc: DataTableRecord;
   dataView: DataView;
-  renderCpsWarning?: boolean;
+  cpsHasLinkedProjects?: boolean;
+}
+
+export interface ObservabilityStreamsFeatureRenderByStreamNameDeps {
+  streamName: string;
+  cpsHasLinkedProjects?: boolean;
 }
 
 export interface ObservabilityStreamsFeature {
   id: 'streams';
   renderFlyoutStreamField: (deps: ObservabilityStreamsFeatureRenderDeps) => JSX.Element;
+  renderFlyoutStreamFieldByStreamName: (
+    deps: ObservabilityStreamsFeatureRenderByStreamNameDeps
+  ) => JSX.Element;
   renderFlyoutStreamProcessingLink: (deps: ObservabilityStreamsFeatureRenderDeps) => JSX.Element;
 }
 
@@ -73,6 +80,26 @@ export interface ObservabilityCreateSLOFeature {
     initialValues: Record<string, unknown>;
     formSettings?: { isEditMode?: boolean; allowedIndicatorTypes?: IndicatorType[] };
   }) => React.ReactNode;
+}
+
+export interface ObservabilityServiceFlyoutFeatureRenderDeps {
+  service: { name: string; agentName?: string };
+  filters: { environment: string; rangeFrom: string; rangeTo: string };
+  source: string;
+  onClose: () => void;
+  flyoutHistoryKey?: symbol;
+  contextActions?: {
+    openInNewDiscoverTab?: (params: {
+      esqlQuery: string;
+      timeRange: TimeRange;
+      tabLabel: string;
+    }) => void;
+  };
+}
+
+export interface ObservabilityServiceFlyoutFeature {
+  id: 'observability-service-flyout';
+  renderServiceFlyout: (deps: ObservabilityServiceFlyoutFeatureRenderDeps) => React.ReactNode;
 }
 
 export interface ObservabilityLogsFetchDocumentByIdFeature {
@@ -104,6 +131,7 @@ export interface ObservabilityLogEventsFeature {
       enableDocumentViewer: false;
       enableFilters: false;
     };
+    executionContext?: KibanaExecutionContext;
   }) => JSX.Element;
 }
 
@@ -135,26 +163,55 @@ export interface SecuritySolutionAlertFlyoutFooterFeature {
   renderFooter: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
 }
 
+export interface SecuritySolutionIOCFlyoutOverviewTabFeature {
+  id: 'security-solution-ioc-flyout-overview-tab';
+  render: (props: DocViewRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionIOCFlyoutHeaderFeature {
+  id: 'security-solution-ioc-flyout-header';
+  renderHeader: (props: DocViewRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionIOCFlyoutFooterFeature {
+  id: 'security-solution-ioc-flyout-footer';
+  renderFooter: (props: DocViewRenderProps) => JSX.Element;
+}
+
+interface SecuritySolutionAttackFlyoutRenderProps extends DocViewRenderProps {
+  onAttackUpdated: () => void;
+}
+
+export interface SecuritySolutionAttackFlyoutOverviewTabFeature {
+  id: 'security-solution-attack-flyout-overview-tab';
+  render: (props: SecuritySolutionAttackFlyoutRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionAttackFlyoutHeaderFeature {
+  id: 'security-solution-attack-flyout-header';
+  renderHeader: (props: SecuritySolutionAttackFlyoutRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionAttackFlyoutFooterFeature {
+  id: 'security-solution-attack-flyout-footer';
+  renderFooter: (props: SecuritySolutionAttackFlyoutRenderProps) => JSX.Element;
+}
+
 export type SecuritySolutionFeature =
   | SecuritySolutionCellRendererFeature
   | SecuritySolutionAlertFlyoutOverviewTabFeature
   | SecuritySolutionAlertFlyoutHeaderTitleFeature
-  | SecuritySolutionAlertFlyoutFooterFeature;
+  | SecuritySolutionAlertFlyoutFooterFeature
+  | SecuritySolutionIOCFlyoutOverviewTabFeature
+  | SecuritySolutionIOCFlyoutHeaderFeature
+  | SecuritySolutionIOCFlyoutFooterFeature
+  | SecuritySolutionAttackFlyoutOverviewTabFeature
+  | SecuritySolutionAttackFlyoutHeaderFeature
+  | SecuritySolutionAttackFlyoutFooterFeature;
 
 /** ****************************************************************************************/
 
 /** **************** Observability Traces ****************/
-
-interface ObservabilityFocusedTraceWaterfallFeature {
-  id: 'observability-focused-trace-waterfall';
-  render: (props: FocusedTraceWaterfallProps) => JSX.Element;
-}
-
-interface ObservabilityFullTraceWaterfallFeature {
-  id: 'observability-full-trace-waterfall';
-  render: (props: FullTraceWaterfallProps) => JSX.Element;
-}
-
 export interface ObservabilityTracesSpanLinksFeature {
   id: 'observability-traces-fetch-span-links';
   fetchSpanLinks: (
@@ -253,9 +310,7 @@ export type ObservabilityTracesFeature =
   | ObservabilityTracesFetchRootSpanByTraceIdFeature
   | ObservabilityTracesFetchSpanFeature
   | ObservabilityTracesFetchLatencyOverallTransactionDistributionFeature
-  | ObservabilityTracesFetchLatencyOverallSpanDistributionFeature
-  | ObservabilityFocusedTraceWaterfallFeature
-  | ObservabilityFullTraceWaterfallFeature;
+  | ObservabilityTracesFetchLatencyOverallSpanDistributionFeature;
 
 /** ****************************************************************************************/
 
@@ -265,6 +320,7 @@ export type DiscoverFeature =
   | ObservabilityLogsAIAssistantFeature
   | ObservabilityLogsAIInsightFeature
   | ObservabilityCreateSLOFeature
+  | ObservabilityServiceFlyoutFeature
   | ObservabilityLogEventsFeature
   | ObservabilityTracesFeature
   | ObservabilityLogsFetchDocumentByIdFeature

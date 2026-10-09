@@ -43,7 +43,6 @@ export const ViewAlertDetailsAlertAction = typedMemo(
         <EuiContextMenuItem
           data-test-subj="viewAlertDetailsPage"
           key="viewAlertDetailsPage"
-          size="s"
           href={linkToAlert}
           target={openLinksInNewTab ? '_blank' : undefined}
         >
@@ -58,7 +57,6 @@ export const ViewAlertDetailsAlertAction = typedMemo(
       <EuiContextMenuItem
         data-test-subj="viewAlertDetailsFlyout"
         key="viewAlertDetailsFlyout"
-        size="s"
         onClick={() => {
           onActionExecuted?.();
           onExpandedAlertIndexChange(rowIndex);

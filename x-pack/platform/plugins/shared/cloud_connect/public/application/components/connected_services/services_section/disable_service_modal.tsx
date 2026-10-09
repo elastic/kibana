@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface DisableServiceModalProps {
@@ -22,8 +22,11 @@ export const DisableServiceModal: React.FC<DisableServiceModalProps> = ({
   onConfirm,
   isLoading,
 }) => {
+  const confirmModalTitleId = useGeneratedHtmlId({ prefix: 'disableServiceModalTitle' });
+
   return (
     <EuiConfirmModal
+      aria-labelledby={confirmModalTitleId}
       title={
         <FormattedMessage
           id="xpack.cloudConnect.services.disable.modalTitle"
@@ -50,6 +53,7 @@ export const DisableServiceModal: React.FC<DisableServiceModalProps> = ({
       confirmButtonDisabled={isLoading}
       isLoading={isLoading}
       data-test-subj="disableServiceModal"
+      titleProps={{ id: confirmModalTitleId }}
     >
       <p data-test-subj="disableServiceModalDescription">
         <FormattedMessage

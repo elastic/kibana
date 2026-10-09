@@ -26,6 +26,8 @@ paths:
         - name: namespace_type
           in: query
           required: false
+          description: |
+            `single` deletes the item in the current Kibana space; `agnostic` deletes an item in a space-agnostic list. Must match the list that owns the item.
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
             default: single
@@ -76,10 +78,12 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
-                example:
-                  statusCode: 400
-                  error: Bad Request
-                  message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
         401:
           description: Unsuccessful authentication response
           content:

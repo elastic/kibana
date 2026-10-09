@@ -14,7 +14,7 @@ import { padJobIds, lmdJobIds } from '../../src/ml_helpers';
  *
  * These specs validate that cross-domain prompts correctly route to MULTIPLE
  * tools when Entity Store V2 is enabled: combinations of security.get_entity /
- * security.search_entities with security.ml.jobs.
+ * security.search_entities with find.security.ml.jobs.
  *
  * Tool routing assertions work without pre-seeded data; the tools may return
  * "entity not found" or "no anomalies" but they MUST both be called.
@@ -48,9 +48,9 @@ evaluate.describe(
                     ],
                   },
                   {
-                    id: 'security.ml.jobs',
+                    id: 'find.security.ml.jobs',
                     criteria: [
-                      'The response uses security.ml.jobs to check for anomalous behavior related to the user.',
+                      'The response uses find.security.ml.jobs to check for anomalous behavior related to the user.',
                     ],
                   },
                 ],
@@ -74,9 +74,9 @@ evaluate.describe(
                     ],
                   },
                   {
-                    id: 'security.ml.jobs',
+                    id: 'find.security.ml.jobs',
                     criteria: [
-                      'The response uses security.ml.jobs to detect anomalous login patterns via security auth or related ML jobs.',
+                      'The response uses find.security.ml.jobs to detect anomalous login patterns via security auth or related ML jobs.',
                     ],
                   },
                 ],
@@ -100,9 +100,9 @@ evaluate.describe(
                     ],
                   },
                   {
-                    id: 'security.ml.jobs',
+                    id: 'find.security.ml.jobs',
                     criteria: [
-                      `The response uses security.ml.jobs with LMD job IDs (e.g. ${lmdJobIds
+                      `The response uses find.security.ml.jobs with LMD job IDs (e.g. ${lmdJobIds
                         .slice(0, 2)
                         .join(
                           ', '
@@ -131,9 +131,9 @@ evaluate.describe(
                     ],
                   },
                   {
-                    id: 'security.ml.jobs',
+                    id: 'find.security.ml.jobs',
                     criteria: [
-                      `The response uses security.ml.jobs with PAD job IDs (e.g. ${padJobIds
+                      `The response uses find.security.ml.jobs with PAD job IDs (e.g. ${padJobIds
                         .slice(0, 2)
                         .join(
                           ', '

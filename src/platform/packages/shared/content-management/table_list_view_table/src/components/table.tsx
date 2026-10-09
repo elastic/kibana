@@ -130,6 +130,7 @@ export function Table<T extends UserContentCommonSchema>({
       <EuiButton
         color="danger"
         iconType="trash"
+        size="s"
         onClick={() => dispatch({ type: 'showConfirmDeleteItemsModal' })}
         data-test-subj="deleteSelectedItems"
       >
@@ -267,6 +268,7 @@ export function Table<T extends UserContentCommonSchema>({
     const showHint = !!searchQuery.error && searchQuery.error.containsForbiddenChars;
     return {
       onChange: onTableSearchChange,
+      compressed: true,
       toolsLeft: renderToolsLeft(),
       toolsRight: renderCreateButton(),
       query: searchQuery.query ?? undefined,
@@ -390,13 +392,13 @@ export function Table<T extends UserContentCommonSchema>({
           columns={tableColumns}
           pagination={pagination}
           loading={isFetchingItems}
-          noItemsMessage={noItemsMessage}
+          noItemsMessage={isFetchingItems ? '' : noItemsMessage}
           selection={selection}
           search={search}
           executeQueryOptions={{ enabled: false }}
           sorting={sorting}
           onChange={onTableChange}
-          data-test-subj="itemsInMemTable"
+          data-test-subj={isFetchingItems ? 'listingTable-isLoading' : 'listingTable-isLoaded'}
           rowHeader="attributes.title"
           tableCaption={tableCaption}
           scrollableInline

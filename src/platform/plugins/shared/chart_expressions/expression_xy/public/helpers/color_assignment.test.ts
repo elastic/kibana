@@ -93,7 +93,7 @@ describe('color_assignment', () => {
         split1: {
           format: { id: 'string' },
           formatter: {
-            convert: (x) => x,
+            convertToText: (x) => x,
           } as FieldFormat,
         },
       },
@@ -103,7 +103,7 @@ describe('color_assignment', () => {
         split2: {
           format: { id: 'string' },
           formatter: {
-            convert: (x) => x,
+            convertToText: (x) => x,
           } as FieldFormat,
         },
       },
@@ -184,7 +184,7 @@ describe('color_assignment', () => {
         },
         layers[1],
       ];
-      fieldFormats.first.splitSeriesAccessors.split1.formatter.convert = formatMock;
+      fieldFormats.first.splitSeriesAccessors.split1.formatter.convertToText = formatMock;
       const newFormattedDatatables = {
         first: {
           formattedColumns: formattedDatatables.first.formattedColumns,
@@ -206,7 +206,7 @@ describe('color_assignment', () => {
         newFormattedDatatables
       );
 
-      fieldFormats.first.splitSeriesAccessors.split1.formatter.convert = (x) => x as string;
+      fieldFormats.first.splitSeriesAccessors.split1.formatter.convertToText = (x) => x as string;
       expect(formatMock).toHaveBeenCalledWith(complexObject);
       expect(assignments.palette1.totalSeriesCount).toEqual(2 * 2);
       expect(assignments.palette2.totalSeriesCount).toEqual(2 * 3);
@@ -273,7 +273,7 @@ describe('color_assignment', () => {
         },
         layers[1],
       ];
-      fieldFormats.first.splitSeriesAccessors.split1.formatter.convert = (value: unknown) =>
+      fieldFormats.first.splitSeriesAccessors.split1.formatter.convertToText = (value: unknown) =>
         (typeof value === 'object' ? 'formatted' : value) as string;
       const newFormattedDatatables = {
         first: {
@@ -296,7 +296,7 @@ describe('color_assignment', () => {
         newFormattedDatatables
       );
 
-      fieldFormats.first.splitSeriesAccessors.split1.formatter.convert = (x) => x as string;
+      fieldFormats.first.splitSeriesAccessors.split1.formatter.convertToText = (x) => x as string;
       // 3 series in front of (complex object)/y1 - abc/y1, abc/y2
       expect(assignments.palette1.getRank(layers[0].layerId, 'formatted - test1')).toEqual(2);
     });
@@ -344,13 +344,13 @@ describe('color_assignment', () => {
             split1: {
               format: { id: 'string' },
               formatter: {
-                convert: (x) => x,
+                convertToText: (x) => x,
               } as FieldFormat,
             },
             split2: {
               format: { id: 'string' },
               formatter: {
-                convert: (x) => x,
+                convertToText: (x) => x,
               } as FieldFormat,
             },
           },

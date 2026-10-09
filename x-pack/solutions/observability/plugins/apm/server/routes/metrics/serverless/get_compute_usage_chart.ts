@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import type { GenericMetricsChart } from '@kbn/apm-api-shared';
 import type { APMConfig } from '../../..';
 import {
   FAAS_BILLED_DURATION,
@@ -18,7 +19,6 @@ import {
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getMetricsDateHistogramParams } from '../../../lib/helpers/metrics';
-import type { GenericMetricsChart } from '../fetch_and_transform_metrics';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { convertComputeUsageToGbSec } from './helper';
 

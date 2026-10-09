@@ -9,19 +9,22 @@ import pMap from 'p-map';
 import { chunk, flatten, omit } from 'lodash';
 import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
-import type {
-  ApiKeyOptions,
-  ConcreteTaskInstance,
-  IntervalSchedule,
-  RruleSchedule,
-  ScheduleOptions,
-  TaskInstanceWithDeprecatedFields,
-  TaskInstanceWithId,
+import {
+  TaskStatus,
+  type TaskPriority,
+  type ApiKeyOptions,
+  type ConcreteTaskInstance,
+  type IntervalSchedule,
+  type RruleSchedule,
+  type ScheduleOptions,
+  type TaskCredential,
+  type TaskInstanceWithDeprecatedFields,
+  type TaskInstanceWithId,
 } from './task';
-import { TaskStatus } from './task';
 import type { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { retryableBulkUpdate } from './lib/retryable_bulk_update';
@@ -29,7 +32,36 @@ import type { ErrorOutput } from './lib/bulk_operation_buffer';
 import { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
 import { TaskAlreadyRunningError } from './lib/errors';
 import type { TaskPollingLifecycle } from './polling_lifecycle';
+import type { TaskTypeDictionary } from './task_type_dictionary';
 import { getExecutionId } from './lib/get_execution_id';
+import { credentialMatchesRunAs } from './lib/service_account_credential';
+import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
+import {
+  taskManagerClaimNudgeTelemetry,
+  type ClaimNudgeSource,
+} from './otel/claim_nudge_telemetry';
+
+const scheduleOptionsToStoreApiKeyOptions = (
+  options?: ScheduleOptions
+): ApiKeyOptions | undefined => {
+  if (!options) {
+    return undefined;
+  }
+  const storeOpts: ApiKeyOptions = {};
+  if (options.request) {
+    storeOpts.request = options.request;
+  }
+  if (options.onEsKey === true) {
+    storeOpts.onEsKey = true;
+  }
+  if (options.cloneApiKey === true) {
+    storeOpts.cloneApiKey = true;
+  }
+  if (options.regenerateApiKey !== undefined) {
+    storeOpts.regenerateApiKey = options.regenerateApiKey;
+  }
+  return Object.keys(storeOpts).length ? storeOpts : undefined;
+};
 
 const VERSION_CONFLICT_STATUS = 409;
 const NOT_FOUND_STATUS = 404;
@@ -39,7 +71,9 @@ export interface TaskSchedulingOpts {
   taskStore: TaskStore;
   middleware: Middleware;
   taskManagerId: string;
+  definitions: TaskTypeDictionary;
   taskPollingLifecycle?: TaskPollingLifecycle; // subscribe to task lifecycle events
+  claimNudgeService?: TaskManagerClaimNudgeService;
 }
 
 /**
@@ -56,9 +90,36 @@ export interface BulkUpdateTaskResult {
    */
   errors: ErrorOutput[];
 }
+
+export interface BulkUpdateSchedulesOptions extends ApiKeyOptions {
+  /** When true, also update tasks that are currently running or claiming, not just idle ones. */
+  includeRunningTasks?: boolean;
+}
+
+export interface RunSoonOptions {
+  /** Run even when the task is already running on another node. */
+  force?: boolean;
+  /** Overrides the task priority in the same version-checked write as `runAt`. */
+  priority?: TaskPriority;
+  /**
+   * Also requests a best-effort extra claim cycle on background nodes. The cycle may claim other
+   * eligible tasks too, so any required delay must be part of a task's eligibility.
+   */
+  requestImmediateClaim?: boolean;
+}
+
 export interface RunSoonResult {
   id: ConcreteTaskInstance['id'];
   forced: boolean;
+  /**
+   * `true` when the task store update raced with another concurrent update
+   * and was rejected with a 409 version conflict. The conflict is otherwise
+   * swallowed (the task is not rescheduled), so callers that need to know
+   * whether the task was actually rescheduled should inspect this flag and
+   * retry as appropriate. Omitted when there was no conflict.
+   * See https://github.com/elastic/kibana/issues/259686.
+   */
+  conflict?: boolean;
 }
 
 export interface RunNowResult {
@@ -70,7 +131,9 @@ export class TaskScheduling {
   private store: TaskStore;
   private logger: Logger;
   private middleware: Middleware;
+  private readonly definitions: TaskTypeDictionary;
   private readonly taskPolling: TaskPollingLifecycle | undefined;
+  private readonly claimNudgeService: TaskManagerClaimNudgeService | undefined;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -81,7 +144,29 @@ export class TaskScheduling {
     this.logger = opts.logger;
     this.middleware = opts.middleware;
     this.store = opts.taskStore;
+    this.definitions = opts.definitions;
     this.taskPolling = opts.taskPollingLifecycle;
+    this.claimNudgeService = opts.claimNudgeService;
+  }
+
+  private get claimNudgeEnabled(): boolean {
+    return this.claimNudgeService !== undefined;
+  }
+
+  private async notifyClaimNudge(taskId: string, source: ClaimNudgeSource) {
+    if (!this.claimNudgeService) {
+      return;
+    }
+    try {
+      taskManagerClaimNudgeTelemetry.recordClaimNudge(source);
+      await this.claimNudgeService.notify();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      // Not "failed": a timed-out write may still have been applied.
+      this.logger.warn(
+        `Could not confirm the Task Manager claim nudge for task ${taskId}; it will run on the next poll cycle: ${message}`
+      );
+    }
   }
 
   /**
@@ -94,9 +179,10 @@ export class TaskScheduling {
     taskInstance: TaskInstanceWithDeprecatedFields,
     options?: ScheduleOptions
   ): Promise<ConcreteTaskInstance> {
+    const { runAs, ...taskInstanceWithoutRunAs } = taskInstance;
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...omit(options, 'apiKey', 'request'),
-      taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
+      taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstanceWithoutRunAs, this.logger),
     });
 
     const traceparent =
@@ -106,15 +192,12 @@ export class TaskScheduling {
 
     return await this.store.schedule(
       {
-        ...modifiedTask,
+        ...omit(modifiedTask, 'runAs'),
+        ...(runAs ? { runAs } : {}),
         traceparent: traceparent || '',
         enabled: modifiedTask.enabled ?? true,
       },
-      options?.request
-        ? {
-            request: options?.request,
-          }
-        : undefined
+      scheduleOptionsToStoreApiKeyOptions(options)
     );
   }
 
@@ -133,26 +216,34 @@ export class TaskScheduling {
         ? agent.currentTraceparent
         : '';
     const modifiedTasks = await Promise.all(
-      taskInstances.map(async (taskInstance) => {
-        const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
+      taskInstances.map(async ({ runAs, ...taskInstance }, i, arr) => {
+        const { taskInstance: middlewareTask } = await this.middleware.beforeSave({
           ...omit(options, 'apiKey', 'request'),
           taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
         });
+        const modifiedTask = { ...omit(middlewareTask, 'runAs'), ...(runAs ? { runAs } : {}) };
+        const enabled = modifiedTask.enabled ?? true;
+        let scheduling: Partial<{ runAt: Date; scheduledAt: Date }> = {};
+        if (enabled) {
+          // Run now if there is only a single task.
+          // Otherwise add jitter to avoid them firing together.
+          scheduling =
+            arr.length === 1
+              ? { runAt: new Date(), scheduledAt: new Date() }
+              : addJitter(modifiedTask.schedule?.interval) ?? {};
+        }
         return {
           ...modifiedTask,
           traceparent: traceparent || '',
-          enabled: modifiedTask.enabled ?? true,
+          enabled,
+          ...scheduling,
         };
       })
     );
 
     return await this.store.bulkSchedule(
       modifiedTasks,
-      options?.request
-        ? {
-            request: options?.request,
-          }
-        : undefined
+      scheduleOptionsToStoreApiKeyOptions(options)
     );
   }
 
@@ -185,15 +276,13 @@ export class TaskScheduling {
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
       filter: (task) => !task.enabled,
-      map: (task, i) => {
+      map: (task, i, arr) => {
         if (runSoon) {
-          // Run the first task now. Run all other tasks a random number of ms in the future,
-          // with a maximum of 5 minutes or the task interval, whichever is smaller.
-          const taskToRun =
-            i === 0
-              ? { ...task, runAt: new Date(), scheduledAt: new Date() }
-              : randomlyOffsetRunTimestamp(task);
-          return { ...taskToRun, enabled: true };
+          // Run now if there is only a single task.
+          // Otherwise add jitter to avoid them firing together.
+          return arr.length === 1
+            ? { ...task, enabled: true, runAt: new Date(), scheduledAt: new Date() }
+            : { ...task, enabled: true, ...addJitter(task.schedule?.interval ?? '0s') };
         }
         return { ...task, enabled: true };
       },
@@ -223,24 +312,43 @@ export class TaskScheduling {
 
   /**
    * Bulk updates schedules for tasks by ids.
-   * Only tasks with `idle` status will be updated, as for the tasks which have `running` status,
-   * `schedule` and `runAt` will be recalculated after task run finishes
-   *
+   * By default only tasks with `idle` status are updated. Pass `includeRunningTasks: true` to also
+   * update running/claiming tasks; for those only `schedule` (and API keys) are written, and the
+   * next `runAt` is derived from the new schedule when the current run finishes.
    * @param {string[]} taskIds  - list of task ids
    * @param {IntervalSchedule | RruleSchedule} schedule  - new schedule
+   * @param {BulkUpdateSchedulesOptions} options  - API key options and `includeRunningTasks` flag
    * @returns {Promise<BulkUpdateTaskResult>}
    */
   public async bulkUpdateSchedules(
     taskIds: string[],
     schedule: IntervalSchedule | RruleSchedule,
-    options?: ApiKeyOptions
+    options?: BulkUpdateSchedulesOptions
   ): Promise<BulkUpdateTaskResult> {
+    const { includeRunningTasks = false, ...apiKeyOptions } = options ?? {};
+    const shouldRegenerateApiKey = apiKeyOptions.regenerateApiKey === true;
+    const updatableStatuses = includeRunningTasks
+      ? new Set([TaskStatus.Idle, TaskStatus.Running, TaskStatus.Claiming])
+      : new Set([TaskStatus.Idle]);
+
     return retryableBulkUpdate({
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
-      filter: (task) => task.status === TaskStatus.Idle && !isEqual(task.schedule, schedule),
+      filter: (task) =>
+        updatableStatuses.has(task.status) &&
+        (shouldRegenerateApiKey || !isEqual(task.schedule, schedule)),
       map: (task) => {
+        if (isEqual(task.schedule, schedule)) {
+          return task;
+        }
+
+        // For a running/claiming task `runAt` is the time the current execution was due; the task
+        // runner computes the next `runAt` from it and the new schedule once the run completes.
+        if (task.status !== TaskStatus.Idle) {
+          return { ...task, schedule };
+        }
+
         const newRunAtInMs = calculateNextRunAtFromSchedule({
           schedule,
           startDate: task.scheduledAt,
@@ -254,7 +362,7 @@ export class TaskScheduling {
        * where both are defined by passing mergeAttributes: false here.
        */
       mergeAttributes: false,
-      options,
+      options: apiKeyOptions,
     });
   }
 
@@ -268,14 +376,29 @@ export class TaskScheduling {
   }
 
   /**
-   * Run task.
+   * Makes a task eligible to run now, optionally updating its priority in the same version-checked write.
    *
    * @param taskId - The task being scheduled.
-   * @returns {Promise<RunSoonResult>}
+   * @param forceOrOptions - Legacy positional `force`, or the options bag. Set
+   * `requestImmediateClaim` to also request a best-effort extra claim cycle.
    */
-  public async runSoon(taskId: string, force: boolean = false): Promise<RunSoonResult> {
+  public async runSoon(
+    taskId: string,
+    forceOrOptions?: boolean | RunSoonOptions
+  ): Promise<RunSoonResult> {
+    const options: RunSoonOptions =
+      typeof forceOrOptions === 'boolean' ? { force: forceOrOptions } : forceOrOptions ?? {};
+    const force = options.force === true;
+    const { priority } = options;
+    // The refresh only serves the nudge, so both are skipped together.
+    const nudge = options.requestImmediateClaim === true && this.claimNudgeEnabled;
     let forced: boolean = false;
+    let conflict: boolean = false;
     const task = await this.store.get(taskId);
+
+    if (priority !== undefined && !this.definitions.get(task.taskType)?.allowPriorityOverride) {
+      throw new Error(`Task type "${task.taskType}" does not allow priority overrides`);
+    }
 
     if (task.status === TaskStatus.Unrecognized) {
       throw new Error(`Failed to run task "${taskId}" with status ${task.status}`);
@@ -308,20 +431,27 @@ export class TaskScheduling {
           status: TaskStatus.Idle,
           scheduledAt: new Date(),
           runAt: new Date(),
+          ...(priority !== undefined ? { priority } : {}),
         },
-        { validate: false }
+        { validate: false, refresh: nudge }
       );
     } catch (e) {
       if (e.statusCode === 409) {
         this.logger.debug(
           `Failed to update the task (${taskId}) for runSoon due to conflict (409)`
         );
+        conflict = true;
       } else {
         this.logger.error(`Failed to update the task (${taskId}) for runSoon`);
         throw e;
       }
     }
-    return { id: task.id, forced };
+
+    if (!conflict && nudge) {
+      void this.notifyClaimNudge(taskId, 'run_soon');
+    }
+
+    return conflict ? { id: task.id, forced, conflict: true } : { id: task.id, forced };
   }
 
   /**
@@ -334,43 +464,89 @@ export class TaskScheduling {
     taskInstance: TaskInstanceWithId,
     options?: ScheduleOptions
   ): Promise<TaskInstanceWithId> {
+    // Scheduling grants the API keys before it writes the task, so scheduling an id that already
+    // exists mints a key pair that the version conflict below then throws away. Callers treat this
+    // as an idempotent "make sure this exists" and call it on a loop, so check first rather than
+    // leaking a key pair per call. Racing callers still land on the conflict path. The store's
+    // predicate keeps this guard aligned with the actual grant condition (and skips the lookup
+    // when no key would be granted anyway, e.g. security disabled).
+    if (this.store.willGrantApiKeys(options) && (await this.store.taskExists(taskInstance.id))) {
+      return this.updateScheduleOfExistingTask(taskInstance, options);
+    }
+
     try {
       return await this.schedule(taskInstance, options);
     } catch (err) {
       if (err.statusCode === VERSION_CONFLICT_STATUS) {
-        // check if task specifies a schedule interval
-        // if so,try to update the just the schedule
-        // only works for interval schedule
-        if (taskInstance.schedule && taskInstance.schedule.interval) {
-          const result = await this.bulkUpdateSchedules([taskInstance.id], taskInstance.schedule);
-          if (
-            result.errors.length &&
-            result.errors[0].error.statusCode !== VERSION_CONFLICT_STATUS &&
-            result.errors[0].error.statusCode !== NOT_FOUND_STATUS
-          ) {
-            throw new Error(
-              `Tried to update schedule for existing task "${taskInstance.id}" but failed with error: ${result.errors[0].error.message}`
-            );
-          }
-        }
-        return taskInstance;
+        return this.updateScheduleOfExistingTask(taskInstance, options);
       }
       throw err;
     }
   }
+
+  private async updateScheduleOfExistingTask(
+    taskInstance: TaskInstanceWithId,
+    options?: ScheduleOptions
+  ): Promise<TaskInstanceWithId> {
+    await this.ensureExistingCredentialMatchesRunAs(taskInstance);
+
+    // check if task specifies a schedule interval
+    // if so,try to update the just the schedule
+    // only works for interval schedule
+    if (taskInstance.schedule && taskInstance.schedule.interval) {
+      const result = await this.bulkUpdateSchedules(
+        [taskInstance.id],
+        taskInstance.schedule,
+        options
+      );
+      if (
+        result.errors.length &&
+        result.errors[0].error.statusCode !== VERSION_CONFLICT_STATUS &&
+        result.errors[0].error.statusCode !== NOT_FOUND_STATUS
+      ) {
+        throw new Error(
+          `Tried to update schedule for existing task "${taskInstance.id}" but failed with error: ${result.errors[0].error.message}`
+        );
+      }
+    }
+    return taskInstance;
+  }
+
+  // A task's identity is only set when it is created, so a different `runAs` can't be applied to an
+  // existing task, and keeping the old identity would run it as an account the caller didn't ask for.
+  // The schedule update reads the task again, so a task removed and scheduled again with another
+  // `runAs` in between gets this schedule. That's accepted: the update keeps the task's credential.
+  private async ensureExistingCredentialMatchesRunAs({ id, runAs }: TaskInstanceWithId) {
+    let credential: TaskCredential | undefined;
+    try {
+      credential = await this.store.getCredential(id);
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        return;
+      }
+      throw e;
+    }
+
+    if (!credentialMatchesRunAs(credential, runAs)) {
+      const error = SavedObjectsErrorHelpers.decorateConflictError(
+        new Error(`Task "${id}" exists with a different runAs. Remove it and schedule it again.`)
+      );
+      // `bulkSchedule`'s conflict only has a top-level `statusCode`, so set it here too.
+      throw Object.assign(error, { statusCode: VERSION_CONFLICT_STATUS });
+    }
+  }
 }
 
-const randomlyOffsetRunTimestamp: (task: ConcreteTaskInstance) => ConcreteTaskInstance = (task) => {
+const addJitter = (interval?: string): { runAt: Date; scheduledAt: Date } | undefined => {
+  // Adhoc tasks run immediately.
+  if (!interval) return { runAt: new Date(), scheduledAt: new Date() };
+
   const now = Date.now();
   const maximumOffsetTimestamp = now + 1000 * 60 * 5; // now + 5 minutes
-  const taskIntervalInMs = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
+  const taskIntervalInMs = parseIntervalAsMillisecond(interval);
   const maximumRunAt = Math.min(now + taskIntervalInMs, maximumOffsetTimestamp);
 
   // Offset between 1 and maximumRunAt ms
   const runAt = new Date(now + Math.floor(Math.random() * (maximumRunAt - now) + 1));
-  return {
-    ...task,
-    runAt,
-    scheduledAt: runAt,
-  };
+  return { runAt, scheduledAt: runAt };
 };

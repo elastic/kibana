@@ -5,18 +5,17 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 export const NoPermissionBanner = () => {
   return (
     <>
-      <EuiCallOut
+      <KbnWarningCallout
         title={i18n.translate('xpack.streams.noAccessToFailureStore.title', {
           defaultMessage: 'You do not have access to failure store information',
         })}
-        color="warning"
-        iconType="warning"
       />
       <EuiSpacer size="s" />
     </>

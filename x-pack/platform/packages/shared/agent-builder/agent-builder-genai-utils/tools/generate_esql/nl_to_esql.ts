@@ -7,28 +7,47 @@
 
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
 import type { TimeRange } from '@kbn/agent-builder-common';
-import type { ScopedModel } from '@kbn/agent-builder-server';
+import { EffortLevels } from '@kbn/agent-builder-common';
+import type { ModelProvider, ScopedModel } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
-import { buildServerESQLCallbacks } from '@kbn/esql/server';
+import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import type { EsqlResponse } from '../utils/esql';
-import { createNlToEsqlGraph } from './graph';
+import { createNlToEsqlGraph, requestDocumentationSchema } from './graph';
+import type { RequestDocumentationAction } from './actions';
 import { indexExplorer } from '../index_explorer';
+import { loadDocumentation } from './documentation';
+import { createRequestDocumentationPromptNoResource } from './prompts';
+import { withPromqlKeyword } from './promql_keyword';
+
+export class GenerateEsqlNoDataError extends Error {
+  readonly code = 'NO_DATA' as const;
+  constructor(message: string) {
+    super(message);
+    this.name = 'GenerateEsqlNoDataError';
+  }
+}
 
 export interface GenerateEsqlResponse {
   /**
-   * The ES|QL query which was generated
+   * The ES|QL query which was generated.
+   *
+   * `undefined` when the model failed to produce a query after exhausting retries — in that
+   * case {@link GenerateEsqlResponse.error} is always set. Consumers should check `error`
+   * before using `query`.
    */
-  query: string;
+  query?: string;
   /**
    * The full text answer which was provided by the LLM when generating the query.
    */
-  answer: string;
+  answer?: string;
   /**
    * Results from executing the query.
-   * Available if `executeQuery` was true and if a successful query was executed.
+   * Available when {@link GenerateEsqlOptions.execute} is `'data'` or `'schema'`
+   * and the query ran successfully. When `'schema'`, `values` is a probe sample
+   * of at most one row, not the full result set.
    */
   results?: EsqlResponse;
   /**
@@ -37,12 +56,22 @@ export interface GenerateEsqlResponse {
   error?: string;
 }
 
-export interface GenerateEsqlDeps {
-  model: ScopedModel;
+/**
+ * Model input for {@link generateEsql}.
+ * Either a `modelProvider` (allowing model selection) or an already-resolved `model` (legacy path).
+ */
+export type GenerateEsqlModelDeps =
+  | { modelProvider: ModelProvider; model?: never }
+  | { model: ScopedModel; modelProvider?: never };
+
+export type GenerateEsqlDeps = GenerateEsqlModelDeps & {
   esClient: ElasticsearchClient;
+  internalEsClient?: ElasticsearchClient;
   logger: Logger;
   events?: ToolEventEmitter;
-}
+};
+
+type GenerateEsqlExecute = 'none' | 'schema' | 'data';
 
 export interface GenerateEsqlOptions {
   /**
@@ -50,7 +79,7 @@ export interface GenerateEsqlOptions {
    */
   nlQuery: string;
   /**
-   * The resource (index/datastream/alias) to target
+   * The resource (index, datastream, alias, or ES|QL view) to target
    */
   index?: string;
   /**
@@ -62,13 +91,20 @@ export interface GenerateEsqlOptions {
    */
   additionalInstructions?: string;
   /**
-   * If true, will attempt to execute the query and will return the results.
-   * Defaults to `true`
+   * How to run the generated query.
+   * - `'data'` (default): execute and return rows — search and other callers that
+   *   need the result set.
+   * - `'schema'`: probe-execute to validate and collect columns (`LIMIT 1`,
+   *   keep all-null columns). Does not change the generated query text.
+   *   `results.values` is a sample of at most one row, not the dataset.
+   *   Use this when rows are not the product (e.g. visualization authoring).
+   * - `'none'`: do not execute; AST-validate only.
    */
-  executeQuery?: boolean;
+  execute?: GenerateEsqlExecute;
   /**
    * Maximum number of retries if the query fails (execute or AST validation).
-   * When `executeQuery` is true: retries after execution errors; when false: retries after AST validation errors.
+   * When `execute` is `'data'` or `'schema'`: retries after execution errors;
+   * when `'none'`: retries after AST validation errors.
    * Defaults to `3`
    * */
   maxRetries?: number;
@@ -87,6 +123,22 @@ export interface GenerateEsqlOptions {
    * for time range filtering in generated queries.
    */
   disableNamedParams?: boolean;
+  /**
+   * If true, external ES|QL datasets are considered when discovering and resolving the target.
+   */
+  includeDatasets?: boolean;
+  /**
+   * If true, ES|QL views are considered when discovering and resolving the target.
+   */
+  includeViews?: boolean;
+  /**
+   * If true, frozen tier indices are queried.
+   */
+  includeFrozen?: boolean;
+  /**
+   * EIS session id for best-effort provider stickiness across calls. Non-EIS connectors ignore it.
+   */
+  sessionId?: string;
 }
 
 export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
@@ -94,30 +146,48 @@ export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
 export const generateEsql = async ({
   nlQuery,
   index,
-  executeQuery = true,
+  execute = 'data',
   additionalInstructions,
   additionalContext,
   maxRetries = 3,
   rowLimit,
   timeRange: inputTimeRange,
   disableNamedParams,
-  model,
+  includeDatasets = false,
+  includeViews = false,
+  includeFrozen = false,
+  model: inputModel,
+  modelProvider,
   esClient,
+  internalEsClient,
   logger,
+  sessionId,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
+  const model = modelProvider
+    ? await modelProvider.selectModel({ effortLevel: EffortLevels.low })
+    : inputModel!;
   const timeRange = inputTimeRange ?? { from: 'now-24h', to: 'now' };
   const docBase = await EsqlDocumentBase.load();
-  const esqlCallbacks = buildServerESQLCallbacks({ client: esClient });
+  const documentation = await loadDocumentation();
+  const esqlCallbacks = buildServerESQLCallbacks({
+    esClient: { asCurrentUser: esClient, asInternalUser: internalEsClient ?? esClient },
+    logger,
+  });
 
   const graph = createNlToEsqlGraph({
     model,
     esClient,
     docBase,
+    documentation,
     esqlCallbacks,
+    includeDatasets,
+    includeViews,
+    includeFrozen,
+    sessionId,
   });
 
   return withActiveInferenceSpan(
-    'GenerateEsqlGraph',
+    'generate_esql',
     {
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
@@ -125,39 +195,81 @@ export const generateEsql = async ({
     },
     async () => {
       try {
-        // Discover index if not provided
+        const nlQueryWithContext = additionalContext?.trim()
+          ? `${nlQuery.trim()}\n\n${additionalContext.trim()}`
+          : nlQuery.trim();
+
         let selectedTarget = index;
+        let precomputedDocAction: RequestDocumentationAction | undefined;
+
         if (!selectedTarget) {
-          logger?.debug('No index provided, discovering target index using indexExplorer');
-          const {
-            resources: [selectedResource],
-          } = await indexExplorer({
-            nlQuery,
-            esClient,
-            limit: 1,
-            model,
-            logger,
+          // Pre-fetch doc keywords from the NL query alone, in parallel with index discovery.
+          // The resource-less prompt is an accepted quality tradeoff for the latency win.
+          const requestDocModel = model.chatModel.withStructuredOutput(requestDocumentationSchema, {
+            name: 'request_documentation',
           });
+          const docPromise = requestDocModel
+            .invoke(
+              createRequestDocumentationPromptNoResource({
+                nlQuery,
+                documentation,
+                additionalContext,
+              })
+            )
+            .then(({ commands = [], functions = [] }) => {
+              const requestedKeywords = withPromqlKeyword(
+                [...commands, ...functions],
+                nlQuery,
+                additionalContext
+              );
+              return {
+                type: 'request_documentation' as const,
+                requestedKeywords,
+                fetchedDoc: docBase.getDocumentation(requestedKeywords),
+              };
+            });
+
+          const [
+            {
+              resources: [selectedResource],
+            },
+            docAction,
+          ] = await Promise.all([
+            indexExplorer({
+              nlQuery: nlQueryWithContext,
+              esClient,
+              limit: 1,
+              includeDatasets,
+              includeViews,
+              includeFrozen,
+              model,
+              logger,
+            }),
+            docPromise,
+          ]);
           if (!selectedResource) {
-            throw new Error(
+            throw new GenerateEsqlNoDataError(
               'Could not discover a suitable index for the query. Please specify an index explicitly.'
             );
           }
           selectedTarget = selectedResource.name;
           logger?.debug(`Discovered target index: ${selectedTarget}`);
+          precomputedDocAction = docAction;
         }
 
         const outState = await graph.invoke(
           {
             nlQuery,
             target: selectedTarget,
-            executeQuery,
+            execute,
             maxRetries,
             additionalInstructions,
             additionalContext,
             rowLimit,
             disableNamedParams,
             timeRange,
+            // Empty when index is known — graph runs request_documentation in-graph with resource context.
+            actions: precomputedDocAction ? [precomputedDocAction] : [],
           },
           {
             recursionLimit: 25,
@@ -173,6 +285,9 @@ export const generateEsql = async ({
           results: outState.results,
         };
       } catch (e) {
+        if (e instanceof GenerateEsqlNoDataError) {
+          throw e;
+        }
         throw new Error(`Could not generate ESQL query: ${e.message}`);
       }
     }

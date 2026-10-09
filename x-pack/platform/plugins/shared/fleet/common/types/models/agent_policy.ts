@@ -35,6 +35,7 @@ export interface NewAgentPolicy {
   data_output_id?: string | null;
   monitoring_output_id?: string | null;
   download_source_id?: string | null;
+  download_source_ids?: string[];
   fleet_server_host_id?: string | null;
   schema_version?: string;
   agent_features?: Array<{ name: string; enabled: boolean }>;
@@ -44,7 +45,7 @@ export interface NewAgentPolicy {
   keep_monitoring_alive?: boolean | null;
   supports_agentless?: boolean | null;
   global_data_tags?: GlobalDataTag[];
-  agentless?: AgentlessPolicy;
+  agentless?: AgentlessAgentPolicyConfig;
   monitoring_pprof_enabled?: boolean;
   monitoring_http?: {
     enabled?: boolean;
@@ -79,7 +80,8 @@ export interface CloudConnectors {
   target_csp?: CloudProvider;
   enabled?: boolean;
 }
-export interface AgentlessPolicy {
+/** Agentless-specific configuration embedded in an AgentPolicy (cloud connectors, resources). */
+export interface AgentlessAgentPolicyConfig {
   cloud_connectors?: CloudConnectors;
   resources?: {
     requests?: {
@@ -87,14 +89,7 @@ export interface AgentlessPolicy {
       cpu?: string;
     };
   };
-}
-
-/**
- * An agentless policy with cloud_connectors guaranteed to be present and enabled.
- * Used by verifier agent policies that target a specific cloud provider.
- */
-export interface VerifierAgentlessPolicy extends AgentlessPolicy {
-  cloud_connectors: Required<CloudConnectors> & { enabled: true };
+  cluster_id?: string;
 }
 
 export interface GlobalDataTag {
@@ -176,12 +171,15 @@ export interface FullAgentPolicyAddFields {
 
 export type FullAgentPolicyOutputPermissions = Record<string, SecurityRoleDescriptor>;
 
-export type FullAgentPolicyOutput = Pick<Output, 'type' | 'hosts' | 'ca_sha256'> & {
+export interface FullAgentPolicyOutput {
+  type: Output['type'];
+  hosts?: string[];
+  ca_sha256?: string | null;
   proxy_url?: string;
   proxy_headers?: any;
   ssl?: BaseSSLConfig;
   [key: string]: any;
-};
+}
 
 export interface FullAgentPolicyMonitoring {
   namespace?: string;
@@ -231,6 +229,7 @@ export interface FullAgentPolicyDownloadSecrets extends BaseSSLSecrets {
 
 export interface FullAgentPolicyDownload {
   sourceURI: string;
+  sources?: string[];
   ssl?: BaseSSLConfig;
   auth?: FullAgentPolicyDownloadAuth;
   secrets?: FullAgentPolicyDownloadSecrets;
@@ -321,6 +320,10 @@ export interface FleetServerPolicy {
    */
   policy_id: string;
   /**
+   * The base policy ID (policy_id without version suffix) for efficient querying.
+   */
+  policy_base_id?: string;
+  /**
    * The revision index of the policy
    */
   revision_idx: number;
@@ -372,6 +375,7 @@ export interface AgentlessApiListDeploymentResponse {
   deployments: Array<{
     policy_id: string;
     revision_idx?: number;
+    cluster_id?: string;
   }>;
   next_token?: string;
 }

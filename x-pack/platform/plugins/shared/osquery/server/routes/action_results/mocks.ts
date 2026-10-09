@@ -43,6 +43,15 @@ export const createMockOsqueryContext = (): OsqueryAppContext => {
         get: jest.fn().mockReturnValue(''),
       },
     },
+    elasticsearch: {
+      client: {
+        asInternalUser: {
+          search: jest.fn(),
+          indices: { exists: jest.fn().mockResolvedValue(false) },
+        },
+        asScoped: jest.fn().mockReturnValue({ asCurrentUser: { search: jest.fn() } }),
+      },
+    },
   };
 
   return {
@@ -54,6 +63,7 @@ export const createMockOsqueryContext = (): OsqueryAppContext => {
       getActiveSpace: jest.fn().mockResolvedValue({ id: 'default', name: 'Default' }),
     },
     getStartServices: jest.fn().mockResolvedValue([mockCoreStart, {}, {}]),
+    isCpsActive: jest.fn().mockResolvedValue(false),
   } as unknown as OsqueryAppContext;
 };
 
@@ -165,7 +175,7 @@ export const createMockSearchStrategy = (actionResultsResponse?: ActionResultsSt
   jest.fn(
     (
       request: { factoryQueryType: string; [key: string]: unknown },
-      options: { abortSignal?: AbortSignal; strategy: string }
+      options: { abortSignal?: AbortSignal; strategy: string | symbol }
     ) => {
       if (request.factoryQueryType === OsqueryQueries.actionResults) {
         return of(actionResultsResponse || createMockActionResultsResponse());

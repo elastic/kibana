@@ -85,8 +85,13 @@ const datasetTypesPrivilegesRoute = createDatasetQualityServerRoute({
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
   params: t.type({
+    // Each branch declares both keys so strict excess-key validation accepts
+    // requests that carry `types` and `datasetQuery` together.
     query: t.intersection([
-      t.union([t.type({ types: typesRt }), t.type({ datasetQuery: t.string })]),
+      t.union([
+        t.intersection([t.type({ types: typesRt }), t.partial({ datasetQuery: t.string })]),
+        t.intersection([t.type({ datasetQuery: t.string }), t.partial({ types: typesRt })]),
+      ]),
       t.partial({ includeCreationDate: toBooleanRt }),
     ]),
   }),

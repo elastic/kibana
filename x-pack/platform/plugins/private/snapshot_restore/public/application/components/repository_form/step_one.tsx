@@ -10,10 +10,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCard,
   EuiDescribedFormGroup,
   EuiFieldText,
+  EuiFlexGroup,
   EuiFlexGrid,
   EuiFlexItem,
   EuiFormRow,
@@ -23,6 +23,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnWarningCallout, KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { Error } from '@kbn/es-ui-shared-plugin/public';
 import { SectionError } from '@kbn/es-ui-shared-plugin/public';
@@ -41,6 +42,7 @@ import { getRepositoryTypeDocUrl } from '../../lib/type_to_doc_url';
 interface Props {
   repository: Repository | EmptyRepository;
   onNext: () => void;
+  onCancel: () => void;
   updateRepository: (updatedFields: any) => void;
   validation: RepositoryValidation;
 }
@@ -48,6 +50,7 @@ interface Props {
 export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
   repository,
   onNext,
+  onCancel,
   updateRepository,
   validation,
 }) => {
@@ -196,7 +199,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
 
     if (!repositoryTypes.length) {
       return (
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount
           title={
             <FormattedMessage
@@ -204,17 +207,17 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
               defaultMessage="No repository types available"
             />
           }
-          color="warning"
           data-test-subj="noRepositoryTypesError"
-        >
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.noRepositoryTypesErrorMessage"
-            defaultMessage="You can install plugins to enable different repository types. {docLink}"
-            values={{
-              docLink: snapshotRepoDocLink,
-            }}
-          />
-        </EuiCallOut>
+          text={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.noRepositoryTypesErrorMessage"
+              defaultMessage="You can install plugins to enable different repository types. {docLink}"
+              values={{
+                docLink: snapshotRepoDocLink,
+              }}
+            />
+          }
+        />
       );
     }
 
@@ -329,19 +332,31 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
   );
 
   const renderActions = () => (
-    <EuiButton
-      color="primary"
-      onClick={onNext}
-      fill
-      iconType="chevronSingleRight"
-      iconSide="right"
-      data-test-subj="nextButton"
-    >
-      <FormattedMessage
-        id="xpack.snapshotRestore.repositoryForm.nextButtonLabel"
-        defaultMessage="Next"
-      />
-    </EuiButton>
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty flush="left" onClick={onCancel} data-test-subj="cancelButton">
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          color="primary"
+          onClick={onNext}
+          fill
+          iconType="chevronSingleRight"
+          iconSide="right"
+          data-test-subj="nextButton"
+        >
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.nextButtonLabel"
+            defaultMessage="Next"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   const renderFormValidationError = () => {
@@ -350,7 +365,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
     }
     return (
       <Fragment>
-        <EuiCallOut
+        <KbnDangerCallout
           title={
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.validationErrorTitle"
@@ -358,7 +373,6 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
             />
           }
           role="alert"
-          color="danger"
           data-test-subj="repositoryFormError"
         />
         <EuiSpacer size="m" />

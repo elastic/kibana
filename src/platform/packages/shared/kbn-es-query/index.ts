@@ -59,6 +59,7 @@ export {
   fromCombinedFilter,
   isOfQueryType,
   isOfAggregateQueryType,
+  isEmptyEsqlQuery,
   getAggregateQueryMode,
   getLanguageDisplayName,
 } from './src/es_query';
@@ -116,6 +117,7 @@ export {
   extractTimeFilter,
   extractTimeRange,
   convertRangeFilterToTimeRange,
+  convertRangeFilterToTimeRangeString,
   BooleanRelation,
 } from './src/filters';
 
@@ -141,7 +143,7 @@ export {
   getDataViewFieldSubtypeNested,
   isDataViewFieldSubtypeMulti,
   isDataViewFieldSubtypeNested,
-  isCCSRemoteIndexName,
+  isNonLocalIndexName,
   getTimeZoneFromSettings,
 } from './src/utils';
 

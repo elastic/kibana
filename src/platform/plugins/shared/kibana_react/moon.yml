@@ -17,7 +17,6 @@ project:
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/platform/plugins/shared/kibana_react
 dependsOn:
-  - '@kbn/storybook'
   - '@kbn/core'
   - '@kbn/test-jest-helpers'
   - '@kbn/i18n'
@@ -28,7 +27,6 @@ dependsOn:
   - '@kbn/core-theme-browser'
   - '@kbn/react-kibana-context-common'
   - '@kbn/react-kibana-context-styled'
-  - '@kbn/code-editor'
   - '@kbn/core-analytics-browser'
   - '@kbn/core-user-profile-browser'
 tags:
@@ -39,7 +37,6 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - .storybook/**/*
     - common/**/*
     - public/**/*
     - '!target/**/*'

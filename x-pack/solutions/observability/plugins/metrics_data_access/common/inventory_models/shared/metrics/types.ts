@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChartType, LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import type { ChartType, LensBaseLayer } from '@kbn/lens-embeddable-utils';
 import type {
   InventoryTsvbType,
   LensConfigWithId,

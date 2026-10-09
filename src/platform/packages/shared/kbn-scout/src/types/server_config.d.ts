@@ -9,13 +9,25 @@
 
 import type { UrlParts } from './url_parts';
 
+type ServerUrlParts = UrlParts & {
+  certificateAuthorities?: Array<string | Buffer>;
+};
+
 export interface ScoutServerConfig {
   serverless?: boolean;
+  http2?: boolean;
+  /**
+   * Set when the test servers boot Kibana into the `preboot` stage on purpose and it never reaches
+   * the `available` status (first-boot / interactive setup suites). Scout skips the post-startup
+   * steps that require a fully booted, security-enabled Kibana, such as pre-creating the
+   * Elasticsearch Security indexes via SAML authentication.
+   */
+  prebootOnly?: boolean;
   servers: {
-    kibana: UrlParts;
-    elasticsearch: UrlParts;
-    linkedElasticsearch?: UrlParts;
-    fleet?: UrlParts;
+    kibana: ServerUrlParts;
+    elasticsearch: ServerUrlParts;
+    linkedElasticsearch?: ServerUrlParts;
+    fleet?: ServerUrlParts;
   };
   dockerServers: any;
   esTestCluster: {
@@ -23,15 +35,31 @@ export interface ScoutServerConfig {
     license?: string;
     files: string[];
     serverArgs: string[];
+    esJavaOpts?: string;
     ssl: boolean;
     secureFiles?: string[];
   };
-  esServerlessOptions?: { uiam: boolean; cps?: boolean };
+  esServerlessOptions?: {
+    uiam: boolean;
+    uiamOAuth?: boolean;
+    /** ISO-8601 lifetime of UIAM ephemeral tokens, from PT1M to PT5M (UIAM defaults to PT5M). */
+    uiamEphemeralTokenExpiration?: string;
+    cps?: boolean;
+    /**
+     * Extra host IP to publish the serverless ES port on. Docker otherwise
+     * binds loopback only, which an Endpoint VM cannot reach.
+     */
+    host?: string;
+  };
   kbnTestServer: {
     env: any;
     buildArgs: string[];
     sourceArgs: string[];
     serverArgs: string[];
     useDedicatedTestRunner?: boolean;
+    runOptions?: {
+      wait?: RegExp;
+      alwaysUseSource?: boolean;
+    };
   };
 }

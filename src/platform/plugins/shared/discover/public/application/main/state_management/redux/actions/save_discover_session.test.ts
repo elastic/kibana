@@ -15,7 +15,8 @@ import { getTabStateMock } from '../__mocks__/internal_state.mocks';
 import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverServices } from '../../../../../build_services';
 import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
-import { internalStateActions } from '..';
+import { internalStateActions, selectHasUnsavedChanges } from '..';
+import { createDiscoverSessionService, type DiscoverSessionClient } from '../../../../../session';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { internalStateSlice } from '../internal_state';
@@ -35,8 +36,6 @@ const getSaveDiscoverSessionParams = (
   newTimeRestore: false,
   newDescription: 'new description',
   newTags: [],
-  isTitleDuplicateConfirmed: false,
-  onTitleDuplicate: jest.fn(),
   ...overrides,
 });
 
@@ -49,7 +48,7 @@ const setup = async ({
 } = {}) => {
   const services = createDiscoverServicesMock();
   const saveDiscoverSessionSpy = jest
-    .spyOn(services.savedSearch, 'saveDiscoverSession')
+    .spyOn(services.discoverSessionService, 'save')
     .mockImplementation((discoverSession) =>
       Promise.resolve({
         ...discoverSession,
@@ -111,11 +110,10 @@ describe('saveDiscoverSession', () => {
       ],
     });
     const discoverSession = toolkit.internalState.getState().persistedDiscoverSession;
-    const onTitleDuplicate = jest.fn();
 
     await toolkit.internalState.dispatch(
       internalStateActions.saveDiscoverSession(
-        getSaveDiscoverSessionParams({ newTags: ['tag1', 'tag2'], onTitleDuplicate })
+        getSaveDiscoverSessionParams({ newTags: ['tag1', 'tag2'] })
       )
     );
 
@@ -128,9 +126,7 @@ describe('saveDiscoverSession', () => {
     };
 
     expect(saveDiscoverSessionSpy).toHaveBeenCalledWith(updatedDiscoverSession, {
-      onTitleDuplicate,
       copyOnSave: false,
-      isTitleDuplicateConfirmed: false,
     });
 
     expect(toolkit.internalState.getState().persistedDiscoverSession).toEqual({
@@ -175,6 +171,52 @@ describe('saveDiscoverSession', () => {
     expect(toolkit.getCurrentTab().appState.breakdownField).toBe('breakdown-test');
   });
 
+  it('should preserve current sidebar state for initialized tabs', async () => {
+    const { toolkit, saveDiscoverSessionSpy } = await setup({ initializeTab: true });
+    const currentTabId = toolkit.getCurrentTab().id;
+
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: currentTabId,
+        appState: {
+          hideSidebar: true,
+        },
+      })
+    );
+
+    await toolkit.internalState.dispatch(
+      internalStateActions.saveDiscoverSession(getSaveDiscoverSessionParams())
+    );
+
+    expect(saveDiscoverSessionSpy).toHaveBeenCalled();
+
+    const savedTab = saveDiscoverSessionSpy.mock.calls[0][0].tabs.find(
+      (tab) => tab.id === currentTabId
+    );
+
+    expect(savedTab).not.toHaveProperty('hideSidebar');
+    expect(toolkit.getCurrentTab().appState.hideSidebar).toBe(true);
+  });
+
+  it('should clear the draft session title once a new session is saved', async () => {
+    const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
+    await toolkit.initializeTabs();
+    await toolkit.internalState
+      .dispatch(internalStateActions.renameDiscoverSession({ newTitle: 'Draft title' }))
+      .unwrap();
+
+    await toolkit.internalState
+      .dispatch(
+        internalStateActions.saveDiscoverSession(
+          getSaveDiscoverSessionParams({ newTitle: 'Draft title' })
+        )
+      )
+      .unwrap();
+
+    expect(toolkit.internalState.getState().draftSessionTitle).toBeUndefined();
+    expect(toolkit.internalState.getState().persistedDiscoverSession?.title).toBe('Draft title');
+  });
+
   it('should not update local state if saveDiscoverSession returns undefined', async () => {
     const resetOnSavedSearchChangeSpy = jest.spyOn(
       internalStateSlice.actions,
@@ -193,25 +235,63 @@ describe('saveDiscoverSession', () => {
     expect(resetOnSavedSearchChangeSpy).not.toHaveBeenCalled();
   });
 
-  it('should allow errors thrown at the persistence layer to bubble up and not modify local state', async () => {
-    const resetOnSavedSearchChangeSpy = jest.spyOn(
-      internalStateSlice.actions,
-      'resetOnSavedSearchChange'
-    );
-    const { toolkit, saveDiscoverSessionSpy } = await setup();
-    const initialPersisted = toolkit.internalState.getState().persistedDiscoverSession;
+  it.each([
+    { action: 'Save', copyOnSave: false, method: 'upsert' as const },
+    { action: 'Save As', copyOnSave: true, method: 'create' as const },
+  ])(
+    'should propagate HTTP $action errors without resetting the session or pending changes',
+    async ({ copyOnSave, method }) => {
+      const { toolkit, services, saveDiscoverSessionSpy } = await setup({ initializeTab: true });
+      const initialPersisted = toolkit.internalState.getState().persistedDiscoverSession;
+      const tabId = toolkit.getCurrentTab().id;
+      const resetOnSavedSearchChangeSpy = jest.spyOn(
+        internalStateSlice.actions,
+        'resetOnSavedSearchChange'
+      );
+      const apiClient: jest.Mocked<DiscoverSessionClient> = {
+        get: jest.fn(),
+        create: jest.fn(),
+        upsert: jest.fn(),
+      };
+      const saveError = new Error('Save failed');
+      apiClient[method].mockRejectedValueOnce(saveError);
+      const discoverSessionService = createDiscoverSessionService({
+        apiClient,
+        legacyClient: services.savedSearch,
+        useHttpApi: true,
+      });
+      saveDiscoverSessionSpy.mockImplementation(discoverSessionService.save);
 
-    saveDiscoverSessionSpy.mockRejectedValueOnce(new Error('boom'));
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({ tabId, appState: { columns: ['message'] } })
+      );
+      const expectedChanges = { hasUnsavedChanges: true, unsavedTabIds: [tabId] };
+      const comparisonContext = { runtimeStateManager: toolkit.runtimeStateManager, services };
+      expect(selectHasUnsavedChanges(toolkit.internalState.getState(), comparisonContext)).toEqual(
+        expectedChanges
+      );
 
-    await expect(
-      toolkit.internalState
-        .dispatch(internalStateActions.saveDiscoverSession(getSaveDiscoverSessionParams()))
-        .unwrap()
-    ).rejects.toHaveProperty('message', 'boom');
+      await expect(
+        toolkit.internalState
+          .dispatch(
+            internalStateActions.saveDiscoverSession(
+              getSaveDiscoverSessionParams({ newCopyOnSave: copyOnSave })
+            )
+          )
+          .unwrap()
+      ).rejects.toHaveProperty('message', saveError.message);
 
-    expect(toolkit.internalState.getState().persistedDiscoverSession).toBe(initialPersisted);
-    expect(resetOnSavedSearchChangeSpy).not.toHaveBeenCalled();
-  });
+      expect(apiClient[method]).toHaveBeenCalledTimes(1);
+      expect(apiClient.get).not.toHaveBeenCalled();
+      expect(toolkit.internalState.getState().persistedDiscoverSession).toBe(initialPersisted);
+      expect(toolkit.getCurrentTab().id).toBe(tabId);
+      expect(toolkit.getCurrentTab().appState.columns).toEqual(['message']);
+      expect(resetOnSavedSearchChangeSpy).not.toHaveBeenCalled();
+      expect(selectHasUnsavedChanges(toolkit.internalState.getState(), comparisonContext)).toEqual(
+        expectedChanges
+      );
+    }
+  );
 
   describe('timeRestore, timeRange, and refreshInterval handling', () => {
     const TIME_RANGE_30M = { from: 'now-30m', to: 'now' };
@@ -421,6 +501,7 @@ describe('saveDiscoverSession', () => {
             }),
             services,
             currentDataView: undefined,
+            tabType: undefined,
           }),
         ],
       });
@@ -467,6 +548,7 @@ describe('saveDiscoverSession', () => {
             }),
             services,
             currentDataView: undefined,
+            tabType: undefined,
           }),
         ],
       });
@@ -510,6 +592,7 @@ describe('saveDiscoverSession', () => {
             }),
             services,
             currentDataView: undefined,
+            tabType: undefined,
           }),
         ],
       });

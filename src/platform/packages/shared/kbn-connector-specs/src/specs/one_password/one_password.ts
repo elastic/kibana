@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 
-const BASE_URL = 'https://api.1password.com/v1beta1';
+const BASE_URL = 'https://api.1password.com/v1';
 
 // So we get something like: 1Password API error (403): {"code":7,"message":"no_owner_remain","details":[]}
 const throwWithApiError = (error: unknown): never => {
@@ -38,13 +38,14 @@ export const OnePasswordConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows'],
+    docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana/one-password-action-type`,
   },
   auth: {
     types: [
       {
         type: 'oauth_client_credentials',
         defaults: {
-          tokenUrl: `${BASE_URL}/users/oauth2/token`,
+          tokenUrl: `${BASE_URL}/oauth/token`,
           scope: 'openid',
           tokenEndpointAuthMethod: 'client_secret_basic',
         },
@@ -60,34 +61,53 @@ export const OnePasswordConnector: ConnectorSpec = {
       'User-Agent': 'ElasticKibana',
     },
   },
-  schema: z.object({
-    accountUuid: z
-      .string()
-      .min(1, {
-        message: i18n.translate(
-          'core.kibanaConnectorSpecs.onePassword.config.accountUuidRequired',
-          { defaultMessage: 'Account UUID is required' }
-        ),
-      })
-      .meta({
-        label: i18n.translate('core.kibanaConnectorSpecs.onePassword.config.accountUuid', {
-          defaultMessage: 'Account UUID',
+  schema: lazySchema(() =>
+    z.object({
+      accountUuid: z
+        .string()
+        .min(1, {
+          message: i18n.translate(
+            'core.kibanaConnectorSpecs.onePassword.config.accountUuidRequired',
+            { defaultMessage: 'Account UUID is required' }
+          ),
+        })
+        .meta({
+          label: i18n.translate('core.kibanaConnectorSpecs.onePassword.config.accountUuid', {
+            defaultMessage: 'Account UUID',
+          }),
         }),
-      }),
-  }),
+    })
+  ),
 
   actions: {
     listUsers: {
       isTool: true,
+      scope: 'read',
       description: i18n.translate(
         'core.kibanaConnectorSpecs.onePassword.actions.listUsers.description',
         { defaultMessage: 'List users in the 1Password account, optionally filtered by state' }
       ),
-      input: z.object({
-        filter: z.enum(['user.isActive()', 'user.isSuspended()']).optional(),
-        maxPageSize: z.number().optional(),
-        pageToken: z.string().optional(),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          filter: z
+            .enum(['user.isActive()', 'user.isSuspended()'])
+            .optional()
+            .describe(
+              'Filter users by state: "user.isActive()" or "user.isSuspended()". Omit to list all users'
+            ),
+          maxPageSize: z
+            .number()
+            .optional()
+            .describe(
+              'Maximum number of users to return per page. Uses the API default if omitted'
+            ),
+          pageToken: z
+            .string()
+            .max(2048)
+            .optional()
+            .describe('Pagination token from a previous response to fetch the next page'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           filter?: 'user.isActive()' | 'user.isSuspended()';
@@ -113,13 +133,16 @@ export const OnePasswordConnector: ConnectorSpec = {
 
     getUser: {
       isTool: true,
+      scope: 'read',
       description: i18n.translate(
         'core.kibanaConnectorSpecs.onePassword.actions.getUser.description',
         { defaultMessage: 'Get details for a single user by their UUID' }
       ),
-      input: z.object({
-        uuid: z.string().min(1),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          uuid: z.string().min(1).max(200).describe('UUID of the 1Password user to retrieve'),
+        })
+      ),
       handler: async (ctx, input) => {
         const { uuid } = input as { uuid: string };
         const { accountUuid } = ctx.config as { accountUuid: string };
@@ -137,6 +160,7 @@ export const OnePasswordConnector: ConnectorSpec = {
 
     suspendUser: {
       isTool: true,
+      scope: 'destroy',
       description: i18n.translate(
         'core.kibanaConnectorSpecs.onePassword.actions.suspendUser.description',
         {
@@ -144,9 +168,11 @@ export const OnePasswordConnector: ConnectorSpec = {
             'Suspend an active user, preventing them from accessing the 1Password account',
         }
       ),
-      input: z.object({
-        uuid: z.string().min(1),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          uuid: z.string().min(1).max(200).describe('UUID of the active 1Password user to suspend'),
+        })
+      ),
       handler: async (ctx, input) => {
         const { uuid } = input as { uuid: string };
         const { accountUuid } = ctx.config as { accountUuid: string };
@@ -164,13 +190,20 @@ export const OnePasswordConnector: ConnectorSpec = {
 
     reactivateUser: {
       isTool: true,
+      scope: 'destroy',
       description: i18n.translate(
         'core.kibanaConnectorSpecs.onePassword.actions.reactivateUser.description',
         { defaultMessage: 'Reactivate a suspended user, restoring their access to 1Password' }
       ),
-      input: z.object({
-        uuid: z.string().min(1),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          uuid: z
+            .string()
+            .min(1)
+            .max(200)
+            .describe('UUID of the suspended 1Password user to reactivate'),
+        })
+      ),
       handler: async (ctx, input) => {
         const { uuid } = input as { uuid: string };
         const { accountUuid } = ctx.config as { accountUuid: string };
@@ -194,20 +227,15 @@ export const OnePasswordConnector: ConnectorSpec = {
     handler: async (ctx) => {
       ctx.log.debug('1Password test handler');
       const { accountUuid } = ctx.config as { accountUuid: string };
-
       try {
-        const response = await ctx.client.get(`${BASE_URL}/accounts/${accountUuid}/users`, {
+        await ctx.client.get(`${BASE_URL}/accounts/${accountUuid}/users`, {
           params: { maxPageSize: 1 },
         });
-
-        if (response.status === 200) {
-          return { ok: true, message: 'Successfully connected to 1Password Users API' };
-        }
-
-        return { ok: false, message: 'Failed to connect to 1Password Users API' };
       } catch (error) {
-        return throwWithApiError(error);
+        throwWithApiError(error);
       }
+      return {};
     },
+    enabled: true,
   },
 };

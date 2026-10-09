@@ -11,7 +11,7 @@ import {
   MORE_ACTIONS_BUTTON_TEST_ID,
   MoreActionsRowControlColumn,
 } from './more_actions_row_control_column';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { Alert } from '@kbn/alerting-types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
@@ -33,28 +33,26 @@ describe('MoreActionsRowControlColumn', () => {
               createComment: true,
             }),
             getRuleIdFromEvent: jest.fn(),
-            getObservablesFromEcs: jest.fn().mockReturnValue([]),
           },
         },
       },
     });
 
-    const ecsAlert: Ecs = {
+    const mockAlert: Alert = {
       _id: '_id',
       _index: '_index',
-      event: { kind: ['signal'] },
-      kibana: { alert: { workflow_tags: [] } },
+      'event.kind': ['signal'],
+      'kibana.alert.workflow_tags': [],
     };
 
-    const { getByTestId } = render(<MoreActionsRowControlColumn ecsAlert={ecsAlert} />);
+    const { getByTestId } = render(<MoreActionsRowControlColumn alert={mockAlert} />);
 
     const button = getByTestId(MORE_ACTIONS_BUTTON_TEST_ID);
     expect(button).toBeInTheDocument();
 
     await userEvent.click(button);
 
-    expect(getByTestId('add-to-existing-case-action')).toBeInTheDocument();
-    expect(getByTestId('add-to-new-case-action')).toBeInTheDocument();
+    expect(getByTestId('add-to-case-action')).toBeInTheDocument();
     expect(getByTestId('alert-tags-context-menu-item')).toBeInTheDocument();
   });
 
@@ -70,21 +68,20 @@ describe('MoreActionsRowControlColumn', () => {
               createComment: false,
             }),
             getRuleIdFromEvent: jest.fn(),
-            getObservablesFromEcs: jest.fn().mockReturnValue([]),
           },
         },
       },
     });
 
-    const ecsAlert: Ecs = {
+    const mockAlert: Alert = {
       _id: '_id',
       _index: '_index',
-      event: { kind: ['signal'] },
-      kibana: { alert: { workflow_tags: [] } },
+      'event.kind': ['signal'],
+      'kibana.alert.workflow_tags': [],
     };
 
     const { getByTestId, queryByTestId } = render(
-      <MoreActionsRowControlColumn ecsAlert={ecsAlert} />
+      <MoreActionsRowControlColumn alert={mockAlert} />
     );
 
     const button = getByTestId(MORE_ACTIONS_BUTTON_TEST_ID);
@@ -92,8 +89,7 @@ describe('MoreActionsRowControlColumn', () => {
 
     await userEvent.click(button);
 
-    expect(queryByTestId('add-to-existing-case-action')).not.toBeInTheDocument();
-    expect(queryByTestId('add-to-new-case-action')).not.toBeInTheDocument();
+    expect(queryByTestId('add-to-case-action')).not.toBeInTheDocument();
   });
 
   it('should not show tags actions if user is not authorized', async () => {
@@ -108,21 +104,20 @@ describe('MoreActionsRowControlColumn', () => {
               createComment: true,
             }),
             getRuleIdFromEvent: jest.fn(),
-            getObservablesFromEcs: jest.fn().mockReturnValue([]),
           },
         },
       },
     });
 
-    const ecsAlert: Ecs = {
+    const mockAlert: Alert = {
       _id: '_id',
       _index: '_index',
-      event: { kind: ['signal'] },
-      kibana: { alert: { workflow_tags: [] } },
+      'event.kind': ['signal'],
+      'kibana.alert.workflow_tags': [],
     };
 
     const { getByTestId, queryByTestId } = render(
-      <MoreActionsRowControlColumn ecsAlert={ecsAlert} />
+      <MoreActionsRowControlColumn alert={mockAlert} />
     );
 
     const button = getByTestId(MORE_ACTIONS_BUTTON_TEST_ID);

@@ -8,17 +8,9 @@
 import { i18n } from '@kbn/i18n';
 
 export const progressMessages = {
-  selectingTarget: () => {
-    return i18n.translate('xpack.agentBuilder.tools.search.progress.selectingTarget', {
-      defaultMessage: 'Identifying the most relevant data source',
-    });
-  },
-  resolvingSearchStrategy: ({ target }: { target: string }) => {
-    return i18n.translate('xpack.agentBuilder.tools.search.progress.searchStrategy', {
-      defaultMessage: 'Analyzing strategy to search against "{target}"',
-      values: {
-        target,
-      },
+  dispatchingSearch: () => {
+    return i18n.translate('xpack.agentBuilder.tools.search.progress.dispatchingSearch', {
+      defaultMessage: 'Identifying the best data source and search strategy',
     });
   },
   performingRelevanceSearch: ({ term }: { term: string }) => {

@@ -13,6 +13,7 @@ import {
   getTestSubActionConnector,
   getTestSubActionConnectorWithoutSubActions,
 } from './sub_action_connector';
+import { getOAuthExecutorActionType } from './oauth_executor_connector';
 
 export function defineActionTypes(
   core: CoreSetup<FixtureStartDeps>,
@@ -39,6 +40,8 @@ export function defineActionTypes(
     name: 'Test: Throw',
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
+    // Fail on the first attempt without a retry so error-log counts stay deterministic
+    maxAttempts: 1,
     validate: {
       config: { schema: z.object({}).strict().default({}) },
       secrets: { schema: z.object({}).strict().default({}) },
@@ -110,6 +113,7 @@ export function defineActionTypes(
     },
   };
   actions.registerType(oauthTestConnector);
+  actions.registerType(getOAuthExecutorActionType(actions));
 
   /**
    * System actions

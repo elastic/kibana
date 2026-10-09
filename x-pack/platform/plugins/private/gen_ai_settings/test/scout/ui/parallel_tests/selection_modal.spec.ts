@@ -16,7 +16,8 @@ spaceTest.describe(
   'GenAI Settings - AI Selection Modal Changes',
   { tag: [...tags.stateful.classic] },
   () => {
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects, scoutSpace }) => {
+      await scoutSpace.uiSettings.set({ [AI_CHAT_EXPERIENCE_TYPE]: AIChatExperience.Classic });
       await browserAuth.loginAsPrivilegedUser();
       await pageObjects.genAiSettings.navigateTo();
     });
@@ -50,15 +51,9 @@ spaceTest.describe(
           });
         });
 
-        await spaceTest.step('select AI Agent card', async () => {
+        await spaceTest.step('select AI Agent card and apply', async () => {
           await pageObjects.genAiSettings.getCardSwitch('agent').click();
           await pageObjects.genAiSettings.getSelectionModalApplyButton().click();
-        });
-
-        await spaceTest.step('proceed with confirmation modal', async () => {
-          const confirmationModal = pageObjects.genAiSettings.getConfirmModal();
-          await expect(confirmationModal).toBeVisible();
-          await pageObjects.genAiSettings.getConfirmModalConfirmButton().click();
           const cardSelectionModal = pageObjects.genAiSettings.getCardSelectionModal();
           await expect(cardSelectionModal).toBeHidden();
         });

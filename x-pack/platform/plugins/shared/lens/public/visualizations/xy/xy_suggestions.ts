@@ -10,8 +10,7 @@ import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import { LegendLayout } from '@kbn/chart-expressions-common';
-import { FittingFunctions, LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { AreaFillOptions, FittingFunctions, LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { Parser } from '@elastic/esql';
 
 import type {
@@ -643,13 +642,12 @@ function buildSuggestion({
     : [];
 
   const state: XYVisualizationState = {
-    legend: currentState
-      ? currentState.legend
-      : { isVisible: true, position: Position.Bottom, layout: LegendLayout.List },
+    legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     valueLabels: currentState?.valueLabels || 'hide',
     fittingFunction: currentState?.fittingFunction ?? FittingFunctions.LINEAR,
     curveType: currentState?.curveType,
     fillOpacity: currentState?.fillOpacity,
+    areaFill: currentState ? currentState.areaFill : AreaFillOptions.SOLID,
     pointVisibility: currentState?.pointVisibility,
     xTitle: currentState?.xTitle,
     yTitle: currentState?.yTitle,

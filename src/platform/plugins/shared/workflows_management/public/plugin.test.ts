@@ -7,14 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { coreMock } from '@kbn/core/public/mocks';
+import { waitFor } from '@testing-library/react';
+import { BehaviorSubject, Subject } from 'rxjs';
+import type { App, AppUpdatableFields, AppUpdater } from '@kbn/core/public';
+import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
+import {
+  WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
+  WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
+  WORKFLOWS_MANAGEMENT_FEATURE_ID,
+  WORKFLOWS_UI_SETTING_ID,
+} from '@kbn/workflows/common/constants';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
+import { renderApp } from './application';
+import { createStartServicesMock, workflowsManagementMocks } from './mocks';
 import { WorkflowsPlugin } from './plugin';
 import { triggerSchemas } from './trigger_schemas';
 import { PLUGIN_ID } from '../common';
 import { stepSchemas } from '../common/step_schemas';
+
+jest.mock('./application', () => ({ renderApp: jest.fn(() => jest.fn()) }));
 
 jest.mock('./common/lib/telemetry/telemetry_service', () => {
   return {
@@ -37,12 +50,23 @@ jest.mock('./connectors/workflows', () => ({
   getWorkflowsConnectorType: jest.fn(() => ({ id: 'workflows', actionTypeId: 'workflows' })),
 }));
 
+const createPlugin = () =>
+  new WorkflowsPlugin(
+    coreMock.createPluginInitializerContext({
+      enabled: true,
+      logging: { console: false },
+      available: true,
+    })
+  );
+
 describe('WorkflowsPlugin', () => {
   let plugin: WorkflowsPlugin;
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let setupDeps: {
+    actions: { isInboundEventsEnabled: boolean };
     triggersActionsUi: { actionTypeRegistry: { register: jest.Mock } };
+    workflowsExtensions: ReturnType<typeof workflowsExtensionsMock.createSetup>;
   };
   let startDeps: {
     workflowsExtensions: ReturnType<typeof workflowsExtensionsMock.createStart>;
@@ -51,11 +75,14 @@ describe('WorkflowsPlugin', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    plugin = new WorkflowsPlugin();
+    plugin = createPlugin();
     coreSetup = coreMock.createSetup();
     coreStart = coreMock.createStart();
+    coreSetup.plugins.onStart.mockReturnValue(Promise.resolve({ found: false }));
     setupDeps = {
+      actions: { isInboundEventsEnabled: false },
       triggersActionsUi: { actionTypeRegistry: { register: jest.fn() } },
+      workflowsExtensions: workflowsExtensionsMock.createSetup(),
     };
     startDeps = {
       workflowsExtensions: workflowsExtensionsMock.createStart(),
@@ -64,6 +91,33 @@ describe('WorkflowsPlugin', () => {
   });
 
   describe('setup()', () => {
+    it('keeps Core service accounts when the Security plugin also supplies a contract', async () => {
+      coreSetup.uiSettings.get.mockReturnValue(true);
+      const dependencies = { ...createStartServicesMock(), security: securityMock.createStart() };
+      coreSetup.getStartServices.mockResolvedValue([
+        coreStart,
+        dependencies,
+        workflowsManagementMocks.createStart(),
+      ]);
+      plugin.setup(coreSetup, {
+        actions: {
+          ...setupDeps.actions,
+          validateEmailAddresses: jest.fn(),
+          enabledEmailServices: ['*'],
+          isEarsEnabled: false,
+          isEarsExperimentalEnabled: false,
+        },
+        triggersActionsUi: dependencies.triggersActionsUi,
+        workflowsExtensions: setupDeps.workflowsExtensions,
+      });
+      const [application] = coreSetup.application.register.mock.calls[0];
+      await application.mount(applicationServiceMock.createAppMountParameters());
+      expect(renderApp).toHaveBeenCalledWith(
+        expect.objectContaining({ security: coreStart.security }),
+        expect.anything()
+      );
+    });
+
     it('should return an empty object when workflows UI is disabled', () => {
       coreSetup.uiSettings.get.mockReturnValue(false);
 
@@ -73,8 +127,12 @@ describe('WorkflowsPlugin', () => {
       expect(coreSetup.application.register).not.toHaveBeenCalled();
     });
 
-    it('should register the workflows app when workflows UI is enabled', () => {
-      coreSetup.uiSettings.get.mockReturnValueOnce(true);
+    it('should register the workflows list, executions, and library deep links at bootstrap', () => {
+      plugin = createPlugin();
+      coreSetup.uiSettings.get.mockImplementation((key: string, fallback?: unknown) => {
+        if (key === WORKFLOWS_UI_SETTING_ID) return true;
+        return fallback;
+      });
 
       const result = plugin.setup(coreSetup, setupDeps as any);
 
@@ -84,38 +142,310 @@ describe('WorkflowsPlugin', () => {
           id: PLUGIN_ID,
           title: 'Workflows',
           appRoute: '/app/workflows',
+          // Both links are on at bootstrap, matching getDeepLinks defaults, then refined
+          // reactively at start() from the global uiSettings.
+          deepLinks: [
+            expect.objectContaining({ id: 'list', path: '/' }),
+            expect.objectContaining({ id: 'executions', path: '/executions' }),
+            expect.objectContaining({ id: 'library', path: '/library' }),
+          ],
         })
       );
       expect(result).toEqual({});
     });
+
+    it('does not register inboundWebhook.received when inbound events are disabled', () => {
+      coreSetup.uiSettings.get.mockReturnValue(true);
+
+      plugin.setup(coreSetup, setupDeps as any);
+
+      expect(setupDeps.workflowsExtensions.registerTriggerDefinition).not.toHaveBeenCalled();
+    });
+
+    it('registers inboundWebhook.received when inbound events are enabled', () => {
+      coreSetup.uiSettings.get.mockReturnValue(true);
+      setupDeps.actions.isInboundEventsEnabled = true;
+
+      plugin.setup(coreSetup, setupDeps as any);
+
+      expect(setupDeps.workflowsExtensions.registerTriggerDefinition).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'inboundWebhook.received',
+          stability: 'tech_preview',
+          requiresConnectorId: true,
+        })
+      );
+    });
   });
 
   describe('start()', () => {
-    it('should initialize step and trigger schema registries and return an empty object', () => {
+    it('should initialize step and trigger schema registries', () => {
       // Setup first (UI disabled path is fine for start testing)
       coreSetup.uiSettings.get.mockReturnValue(false);
       plugin.setup(coreSetup, setupDeps as any);
 
-      const result = plugin.start(coreStart, startDeps as any);
+      plugin.start(coreStart, startDeps as any);
 
       expect(stepSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
       expect(triggerSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
-      expect(result).toEqual({});
     });
 
-    it('should subscribe to license changes', () => {
-      coreSetup.uiSettings.get.mockReturnValue(false);
-      plugin.setup(coreSetup, setupDeps as any);
+    describe('disabling workflows from Advanced Settings', () => {
+      let updates$: Subject<{ key: string; oldValue: boolean; newValue: boolean }>;
 
-      const license$ = new BehaviorSubject({
-        isActive: true,
-        hasAtLeast: jest.fn().mockReturnValue(true),
+      beforeEach(() => {
+        updates$ = new Subject();
+        coreStart.settings.client.getUpdate$.mockReturnValue(updates$);
+        plugin.start(coreStart, {
+          ...createStartServicesMock(),
+          ...startDeps,
+          security: securityMock.createStart(),
+        });
       });
-      startDeps.licensing.license$ = license$ as any;
 
-      plugin.start(coreStart, startDeps as any);
+      afterEach(() => plugin.stop());
 
-      expect(license$.observed).toBe(true);
+      const disableWorkflows = () =>
+        updates$.next({
+          key: WORKFLOWS_UI_SETTING_ID,
+          oldValue: true,
+          newValue: false,
+        });
+
+      it('warns when a successful HTTP response contains workflow failures', async () => {
+        coreStart.http.post.mockResolvedValue({
+          total: 2,
+          disabled: 1,
+          failures: [{ id: 'shared', error: 'Access denied' }],
+        });
+
+        disableWorkflows();
+
+        await waitFor(() =>
+          expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledWith({
+            title: 'Some workflows could not be disabled',
+            text: '1 workflow could not be disabled and may still run.',
+          })
+        );
+        expect(coreStart.http.post).toHaveBeenCalledWith('/internal/workflows/disable', {
+          version: '1',
+        });
+        expect(coreStart.notifications.toasts.addDanger).not.toHaveBeenCalled();
+      });
+
+      it('does not warn when all workflows were disabled', async () => {
+        coreStart.http.post.mockResolvedValue({ total: 2, disabled: 2, failures: [] });
+
+        disableWorkflows();
+        await coreStart.http.post.mock.results[0].value;
+
+        expect(coreStart.notifications.toasts.addWarning).not.toHaveBeenCalled();
+        expect(coreStart.notifications.toasts.addDanger).not.toHaveBeenCalled();
+      });
+
+      it('shows an error when the disable request fails', async () => {
+        coreStart.http.post.mockRejectedValue(new Error('Request failed'));
+
+        disableWorkflows();
+
+        await waitFor(() =>
+          expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith({
+            title: 'Could not disable workflows',
+            text: 'Workflows may still run. Try again.',
+          })
+        );
+      });
+    });
+
+    describe('app visibility (visibleIn)', () => {
+      const setReadCapability = (canReadWorkflow: boolean) => {
+        coreStart.application.capabilities = {
+          ...coreStart.application.capabilities,
+          [WORKFLOWS_MANAGEMENT_FEATURE_ID]: { readWorkflow: canReadWorkflow },
+        } as any;
+      };
+
+      const setLicenseValid = (isValid: boolean) => {
+        startDeps.licensing.license$ = new BehaviorSubject({
+          isActive: true,
+          isAvailable: true,
+          hasAtLeast: jest.fn().mockReturnValue(isValid),
+        }) as any;
+      };
+
+      // Deep-link visibility is driven by feature-flag settings read via
+      // settings.globalClient.get$. Which flags exist changes over time, so instead of
+      // stubbing a specific setting we serve a BehaviorSubject per requested key. This keeps
+      // the tests agnostic to the concrete flags and lets a test flip any/all of them.
+      const deepLinkSettings$ = new Map<string, BehaviorSubject<boolean>>();
+
+      /**
+       * Registers the workflows app via setup() and subscribes to its updater$
+       * before start() runs, so the synchronous emission triggered by
+       * subscribeAppVisibilityChanges() is captured.
+       */
+      const captureAppUpdates = (): Array<Partial<AppUpdatableFields>> => {
+        const uiSettingsGetImpl = (key: string, fallback?: unknown) => {
+          if (key === WORKFLOWS_UI_SETTING_ID) return true;
+          return fallback;
+        };
+        coreSetup.uiSettings.get.mockImplementation(uiSettingsGetImpl);
+        coreStart.uiSettings.get.mockImplementation(uiSettingsGetImpl);
+        // Real globalClient.get$ emits the current value synchronously (BehaviorSubject-like);
+        // the default mock returns a Subject that never emits, so combineLatest would never fire.
+        deepLinkSettings$.clear();
+        coreStart.settings.globalClient.get$.mockImplementation((key: string, fallback = false) => {
+          const existing = deepLinkSettings$.get(key);
+          if (existing) return existing;
+          const created = new BehaviorSubject<boolean>(Boolean(fallback));
+          deepLinkSettings$.set(key, created);
+          return created;
+        });
+
+        plugin.setup(coreSetup, setupDeps as any);
+
+        const registeredApp = coreSetup.application.register.mock.calls[0][0] as App;
+        const updates: Array<Partial<AppUpdatableFields>> = [];
+        registeredApp.updater$!.subscribe((updater: AppUpdater) => {
+          const fields = updater({} as App);
+          if (fields) updates.push(fields);
+        });
+        return updates;
+      };
+
+      it('should make the app visible everywhere when authorized and available', () => {
+        setReadCapability(true);
+        setLicenseValid(true);
+        const updates = captureAppUpdates();
+
+        plugin.start(coreStart, startDeps as any);
+
+        const visibleInUpdates = updates.filter((u) => u.visibleIn !== undefined);
+        expect(visibleInUpdates.length).toBeGreaterThanOrEqual(1);
+        expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).toEqual([
+          'globalSearch',
+          'home',
+          'kibanaOverview',
+          'classicSideNav',
+          'projectSideNav',
+        ]);
+      });
+
+      it('should hide the app from classicSideNav and projectSideNav when the user lacks read capability', () => {
+        setReadCapability(false);
+        setLicenseValid(true);
+        const updates = captureAppUpdates();
+
+        plugin.start(coreStart, startDeps as any);
+
+        const visibleInUpdates = updates.filter((u) => u.visibleIn !== undefined);
+        expect(visibleInUpdates.length).toBeGreaterThanOrEqual(1);
+        expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).toEqual(['globalSearch']);
+        expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).not.toContain(
+          'classicSideNav'
+        );
+        expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).not.toContain(
+          'projectSideNav'
+        );
+      });
+
+      it('should keep the app in classicSideNav and projectSideNav and globalSearch when authorized but unavailable', () => {
+        setReadCapability(true);
+        setLicenseValid(false);
+        const updates = captureAppUpdates();
+
+        plugin.start(coreStart, startDeps as any);
+
+        const visibleInUpdates = updates.filter((u) => u.visibleIn !== undefined);
+        expect(visibleInUpdates.length).toBeGreaterThanOrEqual(1);
+        expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).toEqual([
+          'globalSearch',
+          'classicSideNav',
+          'projectSideNav',
+        ]);
+      });
+
+      it('should hide the app from classicSideNav and projectSideNav for unauthorized users even when unavailable', () => {
+        setReadCapability(false);
+        setLicenseValid(false);
+        const updates = captureAppUpdates();
+
+        plugin.start(coreStart, startDeps as any);
+
+        const visibleInUpdates = updates.filter((u) => u.visibleIn !== undefined);
+        expect(visibleInUpdates.length).toBeGreaterThanOrEqual(1);
+        expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).toEqual([
+          'globalSearch',
+          'classicSideNav',
+          'projectSideNav',
+        ]);
+      });
+
+      it('should emit visibleIn and deepLinks together in a single updater', () => {
+        setReadCapability(true);
+        setLicenseValid(true);
+        const updates = captureAppUpdates();
+
+        plugin.start(coreStart, startDeps as any);
+
+        const combined = updates.filter((u) => u.visibleIn !== undefined);
+        expect(combined.length).toBeGreaterThanOrEqual(1);
+        // The race-condition fix means each updater carries both fields, not one or the other.
+        expect(combined[combined.length - 1].deepLinks).toBeDefined();
+      });
+
+      it('should re-emit the app updater when a deep-link feature-flag setting changes', () => {
+        setReadCapability(true);
+        setLicenseValid(true);
+        const updates = captureAppUpdates();
+
+        plugin.start(coreStart, startDeps as any);
+
+        const emissionsBefore = updates.length;
+        // Flip whichever deep-link feature-flag settings the plugin subscribed to, without
+        // depending on any specific flag, and assert the change flows into the app updater.
+        expect(deepLinkSettings$.size).toBeGreaterThanOrEqual(1);
+        deepLinkSettings$.forEach((setting$) => setting$.next(!setting$.getValue()));
+
+        expect(updates.length).toBeGreaterThan(emissionsBefore);
+        expect(updates[updates.length - 1].deepLinks).toBeDefined();
+      });
+
+      it('should include the executions deep link by default and drop it when the uiSetting is disabled', () => {
+        setReadCapability(true);
+        setLicenseValid(true);
+        const updates = captureAppUpdates();
+
+        plugin.start(coreStart, startDeps as any);
+
+        expect(updates[updates.length - 1].deepLinks).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ id: 'executions', path: '/executions' }),
+          ])
+        );
+
+        deepLinkSettings$.get(WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID)?.next(false);
+
+        expect(updates[updates.length - 1].deepLinks).not.toEqual(
+          expect.arrayContaining([expect.objectContaining({ id: 'executions' })])
+        );
+      });
+
+      it('should include the library deep link by default after startup', () => {
+        setReadCapability(true);
+        setLicenseValid(true);
+        const updates = captureAppUpdates();
+
+        plugin.start(coreStart, startDeps as any);
+
+        expect(coreStart.settings.globalClient.get$).toHaveBeenCalledWith(
+          WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
+          true
+        );
+        expect(updates[updates.length - 1].deepLinks).toEqual(
+          expect.arrayContaining([expect.objectContaining({ id: 'library', path: '/library' })])
+        );
+      });
     });
   });
 });

@@ -14,7 +14,7 @@ import { useApmDefaultValues } from '../apm_common/use_apm_default_values';
 import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 import { useCreateDataView } from '../../../../../hooks/use_create_data_view';
 import { GroupByField } from '../../common/group_by_field';
-import { useFetchApmIndex } from '../../../../../hooks/use_fetch_apm_indices';
+import { useFetchApmIndices } from '../../../../../hooks/use_fetch_apm_indices';
 import type { CreateSLOForm } from '../../../types';
 import { FieldSelector } from '../apm_common/field_selector';
 import { DataPreviewChart } from '../../common/data_preview_chart';
@@ -26,7 +26,7 @@ export function ApmAvailabilityIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm<APMTransactionErrorRateIndicator>>();
   const {
     data: { metric: apmIndex },
-  } = useFetchApmIndex();
+  } = useFetchApmIndices();
   const dataViewId = watch(DATA_VIEW_FIELD);
 
   const [

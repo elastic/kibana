@@ -20,36 +20,63 @@ import {
   useEuiTheme,
   transparentize,
 } from '@elastic/eui';
-import { rgba } from 'polished';
 import { css } from '@emotion/react';
 import { getSpanIcon } from './get_span_icon';
 import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
 import { GRAPH_ENTITY_NODE_BUTTON_ID } from '../test_ids';
 
 /**
- * The total height of an entity node including the shape and details below, in pixels.
- * Required to calculate total node's height in layout_graph.ts
+ * The total height Dagre reserves per entity node in the layout, set to the
+ * fully-expanded card height (header + all metadata rows visible + hover actions).
+ * Pre-reserving this space prevents nodes from overlapping their neighbours.
+ *
+ * Calculation (worst-case: grouped node, 5 metadata rows):
+ *   60px (header) + 1px (metadata border-top) + 5 × 56px (rows) = 341px → 360px (snapped to GRID_SIZE×2=20).
+ *
  * Must be a multiple of `GRID_SIZE * 2`.
  */
-export const ENTITY_NODE_TOTAL_HEIGHT = 200;
+export const ENTITY_NODE_TOTAL_HEIGHT = 360;
 
 /**
- * The width of a node in the graph, in pixels.
+ * The width of an entity card node in the graph, in pixels.
  * Must be a multiple of `GRID_SIZE * 2`.
  */
-export const NODE_WIDTH = 100;
+export const NODE_WIDTH = 300;
 
 /**
- * The height of a node in the graph, in pixels.
+ * The visual height of the entity card node body (header + metadata rows).
+ * Used to anchor the node's Y position in the Dagre layout:
+ *   entity_node_top = dagreNode.y − NODE_HEIGHT / 2
+ * so the card's visual centre aligns with the Dagre Y, which is where
+ * relationship/event nodes are placed by the layout algorithm.
+ * Approximate actual rendered height ranges from ~196 px (single entity, 2 metadata rows)
+ * to ~223 px (grouped entity with multiple criticality levels). With justify-content: center
+ * on NodeShapeContainer, any card from ~196–223 px is centred so its visual midpoint lands
+ * at exactly NODE_HEIGHT / 2 = 120 px — matching the handle and connector node positions.
  * Must be a multiple of `GRID_SIZE * 2`.
  */
-export const NODE_HEIGHT = 100;
+export const NODE_HEIGHT = 240;
+
+/**
+ * The height of the entity card's fixed header row (icon | name+tag | risk badge), in pixels.
+ * Used for all visual 60px elements: header, stacked card decoration, expand button centering.
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const ENTITY_CARD_HEADER_HEIGHT = 60;
 
 /**
  * The width of a node label in the graph, in pixels.
+ * 220px = 200px baseline + ~20px to compensate for the badge (icon + gap) on the left.
  * Must be a multiple of `GRID_SIZE * 2`.
  */
-export const NODE_LABEL_WIDTH = 200;
+export const NODE_LABEL_WIDTH = 220;
+
+/**
+ * The width of the identity label rendered below an entity node, in pixels.
+ * Narrower than `NODE_LABEL_WIDTH` to limit overflow past the entity shape.
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const ENTITY_NODE_LABEL_WIDTH = 160;
 
 /**
  * The total height of a label node including the shape and details below, in pixels.
@@ -73,7 +100,7 @@ export const LABEL_BORDER_WIDTH = 1;
 export const ACTUAL_LABEL_HEIGHT = 24 + LABEL_BORDER_WIDTH * 2;
 export const LABEL_PADDING_X = 8;
 
-const LABEL_BORDER_RADIUS = 8;
+const LABEL_BORDER_RADIUS = 9999;
 
 type NodeColor = EntityNodeViewModel['color'] | LabelNodeViewModel['color'];
 
@@ -91,6 +118,8 @@ interface LabelShapeProps extends EuiTextProps {
   borderColor?: string;
   shadow?: string;
 }
+
+const HOVER_BORDER_COLOR = '#1750BA';
 
 export const LabelShape = styled(EuiText, {
   shouldForwardProp(propName) {
@@ -111,6 +140,21 @@ export const LabelShape = styled(EuiText, {
   border-radius: ${LABEL_BORDER_RADIUS}px;
   min-height: 100%;
   min-width: 100%;
+  transition: border-color 0.2s ease;
+
+  /* Change border colour on hover/focus for interactive nodes */
+  .react-flow__node:not(.non-interactive) ${LabelNodeContainer}:hover & {
+    border-color: ${HOVER_BORDER_COLOR};
+  }
+
+  .react-flow__node:not(.non-interactive):focus:focus-visible & {
+    border-color: ${HOVER_BORDER_COLOR};
+  }
+
+  /* Retain blue border when node is selected (click-to-select, one at a time) */
+  .react-flow__node:not(.non-interactive).selected & {
+    border-color: ${HOVER_BORDER_COLOR};
+  }
 
   ${({ shadow }) => `
     /* Apply shadow when node is selected (only for interactive nodes) */
@@ -127,44 +171,15 @@ export const LabelShape = styled(EuiText, {
   `};
 `;
 
-export const LabelStackedShape = styled.div<{ borderColor: string }>`
+export const LabelStackedShape = styled.div<{ borderColor: string; backgroundColor: string }>`
   position: absolute;
   width: 100%;
   height: 100%;
   transform: scale(0.9) translateY(calc(-100% + 3px));
   z-index: -1;
+  background-color: ${(props) => props.backgroundColor};
   border: ${(props) => `${LABEL_BORDER_WIDTH}px solid ${props.borderColor}`};
   border-radius: ${LABEL_BORDER_RADIUS}px;
-`;
-
-export const LabelShapeOnHover = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-
-  opacity: 0; /* Hidden by default */
-  transition: opacity 0.2s ease; /* Smooth transition */
-  border: ${(props) => {
-    const { euiTheme } = useEuiTheme();
-    return `dashed ${rgba(
-      euiTheme.colors[props.color as keyof typeof euiTheme.colors] as string,
-      0.5
-    )} 1px`;
-  }};
-  border-radius: ${LABEL_BORDER_RADIUS}px;
-  background: transparent;
-  width: calc(100% + 12px);
-  height: calc(100% + 12px);
-
-  /* Only show hover effects for interactive nodes */
-  .react-flow__node:not(.non-interactive) ${LabelNodeContainer}:hover & {
-    opacity: 1; /* Show on hover */
-  }
-
-  .react-flow__node:not(.non-interactive):focus:focus-visible & {
-    opacity: 1; /* Show on focus */
-  }
 `;
 
 export const NodeContainer = styled.div`
@@ -184,30 +199,30 @@ export const getLabelColors = (
 ): { backgroundColor: string; borderColor: string; textColor: string } => {
   if (color === 'danger') {
     return {
-      backgroundColor: euiTheme.colors.danger,
-      borderColor: euiTheme.colors.danger,
-      textColor: euiTheme.colors.textInverse,
+      backgroundColor: euiTheme.colors.backgroundLightPrimary,
+      borderColor: euiTheme.colors.borderBasePlain,
+      textColor: euiTheme.colors.textHeading,
     };
   }
 
   return {
-    backgroundColor: euiTheme.colors.backgroundBasePrimary,
-    borderColor: euiTheme.colors.borderStrongPrimary,
-    textColor: euiTheme.colors.textPrimary,
+    backgroundColor: euiTheme.colors.backgroundLightPrimary,
+    borderColor: euiTheme.colors.borderBasePlain,
+    textColor: euiTheme.colors.textHeading,
   };
 };
 
 /**
- * Gets the background, border and text colors for relationship nodes
- * Relationship nodes have fixed colors (dark background with light text)
+ * Gets the background, border and text colors for relationship nodes.
+ * Uses the same colors as event/label nodes for visual consistency.
  */
 export const getRelationshipColors = (
   euiTheme: EuiThemeComputed
 ): { backgroundColor: string; borderColor: string; textColor: string } => {
   return {
-    backgroundColor: euiTheme.colors.backgroundFilledText,
-    borderColor: euiTheme.colors.borderBaseProminent,
-    textColor: euiTheme.colors.textInverse,
+    backgroundColor: euiTheme.colors.backgroundLightPrimary,
+    borderColor: euiTheme.colors.borderBasePlain,
+    textColor: euiTheme.colors.textHeading,
   };
 };
 
@@ -346,7 +361,12 @@ export const NodeIcon = ({ icon, color, x, y }: NodeIconProps) => {
       <div
         css={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}
       >
-        <EuiIcon type={getSpanIcon(icon) ?? icon} size="l" color={color ?? 'primary'} />
+        <EuiIcon
+          type={getSpanIcon(icon) ?? icon}
+          size="l"
+          color={color ?? 'primary'}
+          aria-hidden={true}
+        />
       </div>
     </foreignObject>
   );
@@ -419,7 +439,7 @@ const ThemedRoundedBadge = styled.div<{
   background-color: ${({ euiTheme, bgColor }) => bgColor || euiTheme.colors.backgroundBasePlain};
   border: ${({ euiTheme }) =>
     `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`};
-  border-radius: ${({ euiTheme }) => euiTheme.border.radius.small};
+  border-radius: 9999px;
 
   font-weight: ${({ euiTheme }) => euiTheme.font.weight.bold};
 `;

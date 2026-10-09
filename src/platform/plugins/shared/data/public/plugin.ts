@@ -25,7 +25,9 @@ import type {
 } from './types';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query';
+import { DateRangePickerPresetsService } from './date_range_picker_presets';
 import {
+  setHttp,
   setIndexPatterns,
   setOverlays,
   setSearchService,
@@ -68,14 +70,7 @@ export class DataPublicPlugin
 
   public setup(
     core: CoreSetup<DataStartDependencies, DataPublicPluginStart>,
-    {
-      expressions,
-      uiActions,
-      usageCollection,
-      inspector,
-      fieldFormats,
-      management,
-    }: DataSetupDependencies
+    { expressions, uiActions, usageCollection, inspector, fieldFormats }: DataSetupDependencies
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
@@ -84,7 +79,6 @@ export class DataPublicPlugin
     const searchService = this.searchService.setup(core, {
       usageCollection,
       expressions,
-      management,
       nowProvider: this.nowProvider,
     });
 
@@ -136,19 +130,12 @@ export class DataPublicPlugin
 
   public start(
     core: CoreStart,
-    {
-      uiActions,
-      fieldFormats,
-      dataViews,
-      inspector,
-      screenshotMode,
-      share,
-      cps,
-    }: DataStartDependencies
+    { uiActions, fieldFormats, dataViews, inspector, screenshotMode, cps }: DataStartDependencies
   ): DataPublicPluginStart {
-    const { uiSettings, overlays } = core;
+    const { uiSettings, overlays, http } = core;
     setOverlays(overlays);
     setUiSettings(uiSettings);
+    setHttp(http);
     setIndexPatterns(dataViews);
 
     const query = this.queryService.start({
@@ -157,12 +144,16 @@ export class DataPublicPlugin
       uiSettings,
     });
 
+    const dateRangePickerPresets = new DateRangePickerPresetsService({
+      userStorage: core.userStorage,
+      uiSettings,
+    });
+
     const search = this.searchService.start(core, {
       fieldFormats,
       dataViews,
       inspector,
       screenshotMode,
-      share,
       scriptedFieldsEnabled: dataViews.scriptedFieldsEnabled,
       cps,
     });
@@ -217,6 +208,7 @@ export class DataPublicPlugin
       dataViews,
       query,
       search,
+      dateRangePickerPresets,
       nowProvider: this.nowProvider,
     };
 

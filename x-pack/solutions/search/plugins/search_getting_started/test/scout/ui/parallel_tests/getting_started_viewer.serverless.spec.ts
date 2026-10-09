@@ -26,5 +26,21 @@ test.describe(
         await expect(versionBadge).toContainText('Changelog');
       }
     );
+
+    test('connection details flyout shows API Keys tab for viewer', async ({ pageObjects }) => {
+      // On serverless Search, the viewer preset role includes manage_own_api_key, which grants
+      // capabilities.api_keys.save. Viewers can therefore create personal API keys scoped to
+      // their own permissions via the Connection Details flyout.
+      await pageObjects.gettingStarted.clickViewConnectionDetailsLink();
+
+      const modalTitle = await pageObjects.gettingStarted.getConnectionDetailsModalTitle();
+      await expect(modalTitle).toBeVisible();
+
+      const endpointsTab = await pageObjects.gettingStarted.getConnectionDetailsEndpointsTab();
+      await expect(endpointsTab).toBeVisible();
+
+      const apiKeysTab = await pageObjects.gettingStarted.getConnectionDetailsApiKeysTab();
+      await expect(apiKeysTab).toBeVisible();
+    });
   }
 );

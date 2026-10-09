@@ -9,6 +9,7 @@ import React from 'react';
 import { render, renderHook, screen } from '@testing-library/react';
 import type { RenderContentPanelProps, TimelineItem } from '@kbn/response-ops-alerts-table/types';
 import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
+import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { useBulkRunAlertWorkflowPanel } from './use_bulk_run_alert_workflow_panel';
 import { RUN_WORKFLOW_BULK_PANEL_ID } from '../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { TestProviders } from '../../../common/mock';
@@ -20,6 +21,11 @@ jest.mock('@kbn/workflows-ui', () => ({
   useWorkflowsUIEnabledSetting: jest.fn(),
 }));
 jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges');
+
+const mockUseCaseAttachmentWorkflowRouting = jest.fn();
+jest.mock('@kbn/cases-plugin/public', () => ({
+  useCaseAttachmentWorkflowRouting: () => mockUseCaseAttachmentWorkflowRouting(),
+}));
 
 const useWorkflowsCapabilitiesMock = useWorkflowsCapabilities as jest.MockedFunction<
   typeof useWorkflowsCapabilities
@@ -36,13 +42,8 @@ const createCapabilities = (
   const { canExecuteWorkflow = true } = overrides;
 
   return {
-    canCreateWorkflow: true,
-    canReadWorkflow: true,
-    canUpdateWorkflow: true,
-    canDeleteWorkflow: true,
+    ...createMockWorkflowsCapabilities(),
     canExecuteWorkflow,
-    canReadWorkflowExecution: true,
-    canCancelWorkflowExecution: true,
   };
 };
 
@@ -74,6 +75,7 @@ describe('useBulkRunAlertWorkflowPanel', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
     useWorkflowsCapabilitiesMock.mockReturnValue(createCapabilities());
     useWorkflowsUIEnabledSettingMock.mockReturnValue(true);
+    mockUseCaseAttachmentWorkflowRouting.mockReturnValue('outside');
   });
 
   afterEach(() => {
@@ -94,6 +96,8 @@ describe('useBulkRunAlertWorkflowPanel', () => {
       expect(result.current.runWorkflowItems[0].label).toBe(i18n.CONTEXT_MENU_RUN_WORKFLOW);
       expect(result.current.runWorkflowItems[0].panel).toBe(RUN_WORKFLOW_BULK_PANEL_ID);
       expect(result.current.runWorkflowItems[0].disableOnQuery).toBe(false);
+      expect(result.current.runWorkflowItems[0].icon).toBe('workflow');
+      expect(result.current.runWorkflowItems[0].groupId).toBe('workflow');
 
       expect(result.current.runWorkflowPanels).toHaveLength(1);
       expect(result.current.runWorkflowPanels[0].id).toBe(RUN_WORKFLOW_BULK_PANEL_ID);
@@ -137,6 +141,28 @@ describe('useBulkRunAlertWorkflowPanel', () => {
 
       expect(result.current.runWorkflowItems).toEqual([]);
       expect(result.current.runWorkflowPanels).toEqual([]);
+    });
+
+    it('returns empty arrays inside a case where Cases workflow runs are unavailable', () => {
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('unavailable');
+
+      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.runWorkflowItems).toEqual([]);
+      expect(result.current.runWorkflowPanels).toEqual([]);
+    });
+
+    it('returns run workflow items inside a case where Cases workflow runs are available', () => {
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
+
+      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.runWorkflowItems).toHaveLength(1);
+      expect(result.current.runWorkflowPanels).toHaveLength(1);
     });
   });
 

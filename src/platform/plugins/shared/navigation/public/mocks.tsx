@@ -49,6 +49,8 @@ const createStartContract = (): jest.Mocked<Start> => {
         .mockImplementation(createTopNav(unifiedSearchMock, [])),
     },
     addSolutionNavigation: jest.fn(),
+    initNavigation: jest.fn(),
+    registerNavigationLinks: jest.fn(),
     isSolutionNavEnabled$: of(false),
   };
   return startContract;

@@ -22,6 +22,7 @@ import type {
 import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
+import { getConnectorDefaultModel } from '@kbn/inference-common';
 import { MAX_ATTEMPTS_AI_WORKFLOWS, TASK_TIMEOUT_DURATION } from '../constants';
 import { TASK_STATUSES } from '../saved_objects/constants';
 import { AgentService } from '../agents/agent_service';
@@ -33,6 +34,7 @@ import type { LangSmithOptions } from '../../routes/types';
 import type { AutomaticImportPluginStartDependencies } from '../../types';
 import type { AutomaticImportSavedObjectService } from '../saved_objects/saved_objects_service';
 import { AutomaticImportTelemetryEventType } from '../../../common';
+import { DATA_STREAM_PHASES, type DataStreamPhase } from '../../../common/phases';
 
 export const DATA_STREAM_CREATION_TASK_TYPE = 'autoImport-dataStream-task';
 
@@ -74,7 +76,7 @@ export class TaskManagerService {
   private agentService: AgentService;
   private automaticImportSavedObjectService: AutomaticImportSavedObjectService | null = null;
   private analytics: AnalyticsServiceSetup;
-  private readonly inFlightRunAbortControllers = new Map<string, AbortController>();
+  private readonly inFlightRunAbortSignals = new Map<string, AbortSignal>();
 
   constructor(
     logger: LoggerFactory,
@@ -94,25 +96,25 @@ export class TaskManagerService {
         timeout: TASK_TIMEOUT_DURATION,
         maxAttempts: MAX_ATTEMPTS_AI_WORKFLOWS,
         cost: TaskCost.Normal,
-        priority: TaskPriority.Normal,
-        createTaskRunner: ({ taskInstance, fakeRequest, abortController }: RunContext) => ({
+        priority: TaskPriority.Standard,
+        createTaskRunner: ({ taskInstance, fakeRequest, signal }: RunContext) => ({
           run: async () => {
             assert(
               this.automaticImportSavedObjectService,
               'Automatic import saved object service not initialized'
             );
             const tmTaskId = taskInstance.id;
-            this.inFlightRunAbortControllers.set(tmTaskId, abortController);
+            this.inFlightRunAbortSignals.set(tmTaskId, signal);
             try {
               return await this.runTask(
                 taskInstance,
                 core,
                 this.automaticImportSavedObjectService,
                 fakeRequest as KibanaRequest,
-                abortController.signal
+                signal
               );
             } finally {
-              this.inFlightRunAbortControllers.delete(tmTaskId);
+              this.inFlightRunAbortSignals.delete(tmTaskId);
             }
           },
           cancel: async () => {
@@ -165,10 +167,9 @@ export class TaskManagerService {
     assert(this.taskManager, 'TaskManager not initialized');
     const taskId = this.generateDataStreamTaskId(dataStreamParams);
     try {
-      const inFlightController = this.inFlightRunAbortControllers.get(taskId);
-      if (inFlightController && !inFlightController.signal.aborted) {
-        inFlightController.abort();
-        this.logger.debug(`Aborted in-flight run for task ${taskId} before removing task document`);
+      const inFlightSignal = this.inFlightRunAbortSignals.get(taskId);
+      if (inFlightSignal && !inFlightSignal.aborted) {
+        this.logger.debug(`Task ${taskId} is still in-flight, removing task document`);
       }
       await this.taskManager.removeIfExists(taskId);
       this.logger.debug(`Task deleted: ${taskId}`);
@@ -225,6 +226,9 @@ export class TaskManagerService {
     );
 
     const startTime = Date.now();
+    let modelName: string | undefined;
+    let connectorType: string | undefined;
+    let connectorName: string | undefined;
 
     try {
       if (!integrationId || !dataStreamId || !connectorId) {
@@ -251,7 +255,37 @@ export class TaskManagerService {
         },
       });
 
+      try {
+        const inferenceConnector = model.getConnector();
+        modelName = getConnectorDefaultModel(inferenceConnector);
+        connectorType = inferenceConnector.type;
+        connectorName = inferenceConnector.name;
+      } catch (resolveErr) {
+        this.logger.warn(`Failed to resolve model info for telemetry: ${resolveErr}`);
+      }
+
       const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
+
+      await automaticImportSavedObjectService.updateDataStreamSavedObjectAttributes({
+        integrationId,
+        dataStreamId,
+        status: TASK_STATUSES.processing,
+      });
+      await automaticImportSavedObjectService.updateDataStreamPhase(
+        dataStreamId,
+        integrationId,
+        DATA_STREAM_PHASES.analyzingLogs
+      );
+      this.throwIfAborted(abortSignal);
+
+      const reportPhase = async (phase: DataStreamPhase) => {
+        this.throwIfAborted(abortSignal);
+        await automaticImportSavedObjectService.updateDataStreamPhase(
+          dataStreamId,
+          integrationId,
+          phase
+        );
+      };
 
       const result = await this.agentService.invokeAutomaticImportAgent(
         integrationId,
@@ -260,7 +294,8 @@ export class TaskManagerService {
         model,
         fieldsMetadataClient,
         langSmithOptions,
-        abortSignal
+        abortSignal,
+        reportPhase
       );
 
       this.logger.debug(`Task ${taskId} completed successfully`);
@@ -279,6 +314,8 @@ export class TaskManagerService {
       );
 
       const agentFieldMappings = (result.field_mappings as FieldMapping[] | undefined) ?? undefined;
+
+      await reportPhase(DATA_STREAM_PHASES.mappingEventFields);
       const fieldMapping = await generateFieldMappings(
         (pipelineGenerationResultsObjects ?? []) as Array<Record<string, unknown>>,
         fieldsMetadataClient,
@@ -287,6 +324,9 @@ export class TaskManagerService {
       this.logger.debug(`Generated field mappings: ${JSON.stringify(fieldMapping)}`);
       this.throwIfAborted(abortSignal);
 
+      await reportPhase(DATA_STREAM_PHASES.mappingRelatedFields);
+
+      await reportPhase(DATA_STREAM_PHASES.finalizing);
       const validationResult = await validateFieldMappings(
         esClient,
         fieldMapping,
@@ -317,6 +357,19 @@ export class TaskManagerService {
 
       this.logger.debug(`Data stream ${dataStreamId} updated successfully`);
       this.logger.debug(`Task ${taskId} result: ${JSON.stringify(result)}`);
+
+      this.reportDataStreamCreationComplete({
+        integrationId,
+        integrationName,
+        dataStreamId,
+        dataStreamName,
+        connectorId,
+        modelName,
+        connectorType,
+        connectorName,
+        durationMs: Date.now() - startTime,
+        success: true,
+      });
 
       return {
         state: {
@@ -371,6 +424,10 @@ export class TaskManagerService {
         integrationName,
         dataStreamId,
         dataStreamName,
+        connectorId,
+        modelName,
+        connectorType,
+        connectorName,
         durationMs: Date.now() - startTime,
         success: false,
         errorMessage,
@@ -388,6 +445,10 @@ export class TaskManagerService {
     integrationName: string;
     dataStreamId: string;
     dataStreamName: string;
+    connectorId: string;
+    modelName?: string;
+    connectorType?: string;
+    connectorName?: string;
     durationMs: number;
     success: boolean;
     errorMessage?: string;
@@ -399,8 +460,12 @@ export class TaskManagerService {
         integrationName: params.integrationName,
         dataStreamId: params.dataStreamId,
         dataStreamName: params.dataStreamName,
+        connectorId: params.connectorId,
         durationMs: params.durationMs,
         success: params.success,
+        ...(params.modelName ? { modelName: params.modelName } : {}),
+        ...(params.connectorType ? { connectorType: params.connectorType } : {}),
+        ...(params.connectorName ? { connectorName: params.connectorName } : {}),
         ...(params.errorMessage ? { errorMessage: params.errorMessage } : {}),
       });
     } catch (telemetryError) {

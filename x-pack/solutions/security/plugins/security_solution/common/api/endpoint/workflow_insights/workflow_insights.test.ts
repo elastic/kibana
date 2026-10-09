@@ -10,6 +10,8 @@ import { schema } from '@kbn/config-schema';
 import {
   GetWorkflowInsightsRequestSchema,
   UpdateWorkflowInsightRequestSchema,
+  CreateWorkflowInsightRequestSchema,
+  GetPendingInsightsRequestSchema,
 } from './workflow_insights';
 
 describe('Workflow Insights', () => {
@@ -165,6 +167,20 @@ describe('Workflow Insights', () => {
         expect(() =>
           validateQuery({ query: { actionTypes: Array(21).fill('refreshed') } })
         ).toThrow();
+      });
+    });
+
+    describe('maxLength bounds', () => {
+      it('should not accept an ids element longer than 256 characters', () => {
+        expect(() => validateQuery({ query: { ids: ['a'.repeat(257)] } })).toThrow();
+      });
+
+      it('should not accept a sourceIds element longer than 256 characters', () => {
+        expect(() => validateQuery({ query: { sourceIds: ['a'.repeat(257)] } })).toThrow();
+      });
+
+      it('should not accept a targetIds element longer than 256 characters', () => {
+        expect(() => validateQuery({ query: { targetIds: ['a'.repeat(257)] } })).toThrow();
       });
     });
 
@@ -503,6 +519,78 @@ describe('Workflow Insights', () => {
       });
     });
 
+    describe('maxLength bounds', () => {
+      const baseRequest = {
+        params: { insightId: 'valid-insight-id' },
+        body: {},
+      };
+
+      it('should reject a message that exceeds the max length', () => {
+        expect(() =>
+          validateRequest({ ...baseRequest, body: { message: 'a'.repeat(10001) } })
+        ).toThrow();
+      });
+
+      it('should reject an @timestamp that exceeds the max length', () => {
+        expect(() =>
+          validateRequest({ ...baseRequest, body: { '@timestamp': 'a'.repeat(65) } })
+        ).toThrow();
+      });
+
+      it('should reject an insightId that exceeds the max length', () => {
+        expect(() =>
+          validateRequest({ params: { insightId: 'a'.repeat(257) }, body: {} })
+        ).toThrow();
+      });
+
+      it('should reject a target id element that exceeds the max length', () => {
+        expect(() =>
+          validateRequest({ ...baseRequest, body: { target: { ids: ['a'.repeat(257)] } } })
+        ).toThrow();
+      });
+
+      it('should reject a metadata.notes key that exceeds the max length', () => {
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: { metadata: { notes: { ['a'.repeat(257)]: 'value' } } },
+          })
+        ).toThrow();
+      });
+
+      it('should reject a metadata.notes value that exceeds the max length', () => {
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: { metadata: { notes: { note: 'a'.repeat(1001) } } },
+          })
+        ).toThrow();
+      });
+
+      it('should reject a remediation.link that exceeds the max length', () => {
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: { remediation: { link: 'a'.repeat(2049) } },
+          })
+        ).toThrow();
+      });
+
+      it('should accept values at the max length', () => {
+        expect(() =>
+          validateRequest({
+            params: { insightId: 'a'.repeat(256) },
+            body: {
+              message: 'a'.repeat(10000),
+              target: { ids: ['a'.repeat(256)] },
+              remediation: { link: 'a'.repeat(2048) },
+              metadata: { notes: { ['a'.repeat(256)]: 'a'.repeat(1000) } },
+            },
+          })
+        ).not.toThrow();
+      });
+    });
+
     it('should throw an error if target ids contain empty strings', () => {
       const invalidRequest = {
         params: {
@@ -581,6 +669,164 @@ describe('Workflow Insights', () => {
       expect(() => validateRequest(invalidRequest)).toThrowErrorMatchingInlineSnapshot(
         '"[body.remediation.exception_list_items.0.entries]: could not parse array value from json input"'
       );
+    });
+  });
+
+  describe('CreateWorkflowInsightRequestSchema', () => {
+    const validateBody = (body: Record<string, unknown>) => {
+      return schema.object(CreateWorkflowInsightRequestSchema).validate({ body });
+    };
+
+    it('should validate successfully with valid insightTypes and endpointIds', () => {
+      expect(() =>
+        validateBody({
+          insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
+          endpointIds: ['endpoint-1', 'endpoint-2'],
+        })
+      ).not.toThrow();
+    });
+
+    it('should throw when insightTypes is missing', () => {
+      expect(() => validateBody({ endpointIds: ['endpoint-1'] })).toThrow(/insightTypes/);
+    });
+
+    it('should throw when endpointIds is missing', () => {
+      expect(() => validateBody({ insightTypes: ['incompatible_antivirus'] })).toThrow(
+        /endpointIds/
+      );
+    });
+
+    it('should throw when insightTypes contains an invalid value', () => {
+      expect(() =>
+        validateBody({ insightTypes: ['invalid_type'], endpointIds: ['endpoint-1'] })
+      ).toThrow();
+    });
+
+    it('should throw when endpointIds contains an empty string', () => {
+      expect(() =>
+        validateBody({ insightTypes: ['incompatible_antivirus'], endpointIds: [''] })
+      ).toThrow();
+    });
+
+    it('should throw when insightTypes exceeds maxSize of 10', () => {
+      const tooManyTypes = Array(11).fill('incompatible_antivirus');
+      expect(() =>
+        validateBody({ insightTypes: tooManyTypes, endpointIds: ['endpoint-1'] })
+      ).toThrow();
+    });
+
+    it('should throw when endpointIds exceeds maxSize of 50', () => {
+      const tooManyIds = Array(51).fill('endpoint-1');
+      expect(() =>
+        validateBody({ insightTypes: ['incompatible_antivirus'], endpointIds: tooManyIds })
+      ).toThrow();
+    });
+
+    it('should validate successfully with optional connectorId', () => {
+      expect(() =>
+        validateBody({
+          insightTypes: ['incompatible_antivirus'],
+          endpointIds: ['endpoint-1'],
+          connectorId: 'connector-123',
+        })
+      ).not.toThrow();
+    });
+
+    it('should throw when connectorId is an empty string', () => {
+      expect(() =>
+        validateBody({
+          insightTypes: ['incompatible_antivirus'],
+          endpointIds: ['endpoint-1'],
+          connectorId: '',
+        })
+      ).toThrow();
+    });
+
+    it('should throw when an endpointIds element exceeds the max length', () => {
+      expect(() =>
+        validateBody({
+          insightTypes: ['incompatible_antivirus'],
+          endpointIds: ['a'.repeat(257)],
+        })
+      ).toThrow();
+    });
+
+    it('should throw when connectorId exceeds the max length', () => {
+      expect(() =>
+        validateBody({
+          insightTypes: ['incompatible_antivirus'],
+          endpointIds: ['endpoint-1'],
+          connectorId: 'a'.repeat(257),
+        })
+      ).toThrow();
+    });
+  });
+
+  describe('GetPendingInsightsRequestSchema', () => {
+    const validateQuery = (query: Record<string, unknown>) => {
+      return schema.object(GetPendingInsightsRequestSchema).validate({ query });
+    };
+
+    it('should validate successfully with no params', () => {
+      expect(() => validateQuery({})).not.toThrow();
+    });
+
+    it('should validate successfully with insightTypes array', () => {
+      expect(() =>
+        validateQuery({ insightTypes: ['incompatible_antivirus', 'policy_response_failure'] })
+      ).not.toThrow();
+    });
+
+    it('should validate successfully with a single insightTypes value', () => {
+      expect(() => validateQuery({ insightTypes: ['incompatible_antivirus'] })).not.toThrow();
+    });
+
+    it('should validate successfully with endpointIds array', () => {
+      expect(() => validateQuery({ endpointIds: ['endpoint-1', 'endpoint-2'] })).not.toThrow();
+    });
+
+    it('should throw when insightTypes contains an invalid value', () => {
+      expect(() => validateQuery({ insightTypes: ['invalid_type'] })).toThrow();
+    });
+
+    it('should throw when insightTypes exceeds maxSize of 10', () => {
+      const tooManyTypes = Array(11).fill('incompatible_antivirus');
+      expect(() => validateQuery({ insightTypes: tooManyTypes })).toThrow();
+    });
+
+    it('should throw when endpointIds contains an empty string', () => {
+      expect(() => validateQuery({ endpointIds: ['endpoint-1', ''] })).toThrow();
+    });
+
+    it('should throw when endpointIds exceeds maxSize of 50', () => {
+      const tooManyIds = Array(51).fill('endpoint-1');
+      expect(() => validateQuery({ endpointIds: tooManyIds })).toThrow();
+    });
+
+    it('should throw when an endpointIds element exceeds the max length', () => {
+      expect(() => validateQuery({ endpointIds: ['a'.repeat(257)] })).toThrow();
+    });
+
+    it('should validate successfully with both insightTypes and endpointIds', () => {
+      expect(() =>
+        validateQuery({
+          insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
+          endpointIds: ['endpoint-1', 'endpoint-2'],
+        })
+      ).not.toThrow();
+    });
+
+    it('should throw when endpointIds contains a whitespace-only string', () => {
+      expect(() => validateQuery({ endpointIds: ['endpoint-1', '   '] })).toThrow();
+    });
+
+    it('should validate successfully with single-element arrays for both fields', () => {
+      expect(() =>
+        validateQuery({
+          insightTypes: ['incompatible_antivirus'],
+          endpointIds: ['endpoint-1'],
+        })
+      ).not.toThrow();
     });
   });
 });

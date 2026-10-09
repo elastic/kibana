@@ -61,7 +61,7 @@ function ListItem({
     >
       {!isDisabled && (
         <span css={[styles.itemIcon, state === 'done' && styles.doneIcon]} aria-hidden={true}>
-          <EuiIcon type={state === 'active' ? 'sortRight' : 'check'} />
+          <EuiIcon type={state === 'active' ? 'sortRight' : 'check'} aria-hidden={true} />
         </span>
       )}
       <EuiText>{children}</EuiText>
@@ -82,7 +82,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
 
   useEffect(() => {
     const checkIfDataViewsExist = async () => {
-      setHasDataViews(await data.dataViews.hasData.hasUserDataView());
+      setHasDataViews(await data.dataViews.hasData.hasDataView());
     };
     checkIfDataViewsExist();
   }, [setHasDataViews, data.dataViews]);
@@ -97,7 +97,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
     <EuiPanel data-test-subj="graphGuidancePanel">
       <EuiFlexGroup direction="column" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="graphApp" size="xxl" />
+          <EuiIcon type="graphApp" size="xxl" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText>

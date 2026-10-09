@@ -125,6 +125,30 @@ describe('AlertDelayField', () => {
     expect(screen.getByTestId('stateTransitionDelayMode')).toBeInTheDocument();
   });
 
+  it('uses default count when switching from immediate (pendingCount: 0) to breaches', () => {
+    getFormValues = undefined;
+    render(
+      <>
+        <CaptureFormGetValues />
+        <AlertDelayField />
+      </>,
+      {
+        wrapper: createFormWrapper({
+          kind: 'alert',
+          stateTransitionAlertDelayMode: 'immediate',
+          stateTransition: { pendingCount: 0 },
+        }),
+      }
+    );
+
+    const alertRow = screen.getByTestId('alertDelayFormRow');
+    fireEvent.click(within(alertRow).getByText('Breaches'));
+
+    const values = getFormValues!();
+    expect(values.stateTransitionAlertDelayMode).toBe('breaches');
+    expect(values.stateTransition?.pendingCount).toBe(2);
+  });
+
   it('clears alert delay (pending) when switching to immediate while recovery delay stays on breaches', () => {
     getFormValues = undefined;
     render(
@@ -136,6 +160,7 @@ describe('AlertDelayField', () => {
       {
         wrapper: createFormWrapper({
           kind: 'alert',
+          recovery: { strategy: 'no_breach' },
           stateTransitionAlertDelayMode: 'breaches',
           stateTransitionRecoveryDelayMode: 'recoveries',
           stateTransition: {
@@ -158,7 +183,39 @@ describe('AlertDelayField', () => {
     expect(values.stateTransition?.recoveringCount).toBe(3);
 
     expect(mapFormValuesToUpdateRequest(values).state_transition).toEqual({
-      recovering_count: 3,
+      pending: { count: 0, timeframe: null, operator: null },
+      recovering: { count: 3, timeframe: null, operator: null },
     });
+  });
+
+  it('clears a pending operator when the alert delay mode drops a threshold', () => {
+    getFormValues = undefined;
+    render(
+      <>
+        <CaptureFormGetValues />
+        <AlertDelayField />
+      </>,
+      {
+        wrapper: createFormWrapper({
+          kind: 'alert',
+          stateTransitionAlertDelayMode: 'duration',
+          stateTransition: {
+            pendingCount: 3,
+            pendingTimeframe: '5m',
+            pendingOperator: 'and',
+            recoveringCount: 4,
+            recoveringTimeframe: '20m',
+            recoveringOperator: 'or',
+          },
+        }),
+      }
+    );
+
+    fireEvent.click(within(screen.getByTestId('alertDelayFormRow')).getByText('Breaches'));
+
+    const values = getFormValues!();
+    expect(values.stateTransition?.pendingOperator).toBeNull();
+    expect(values.stateTransition?.pendingTimeframe).toBeNull();
+    expect(values.stateTransition?.recoveringOperator).toBe('or');
   });
 });

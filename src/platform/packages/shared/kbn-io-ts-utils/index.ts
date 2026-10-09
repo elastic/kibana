@@ -43,3 +43,5 @@ export {
   type TimeKey,
   type UniqueTimeKey,
 } from './src/time_key_rt';
+
+export { stringFromBufferRt } from './src/string_from_buffer_rt';

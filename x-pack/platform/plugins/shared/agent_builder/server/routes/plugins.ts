@@ -57,7 +57,7 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
       access: 'public',
       summary: 'List plugins',
       description:
-        'List all installed plugins and their managed assets. Plugins are installable packages that bundle agent capabilities such as skills, following the [Claude agent plugin specification](https://code.claude.com/docs/en/plugins).',
+        'List all installed plugins and their managed assets. Plugins are installable packages that bundle agent capabilities such as skills, following the [Claude agent plugin specification](https://code.claude.com/docs/en/plugins). To learn more about Agent Builder plugins, refer to the [plugins documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/plugins).',
       options: {
         tags: ['plugins', 'oas-tag:agent builder'],
         availability: {
@@ -93,7 +93,8 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
       security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'Get a plugin by id',
-      description: 'Get a specific plugin by ID.',
+      description:
+        'Get a specific plugin by ID. To learn more about Agent Builder plugins, refer to the [plugins documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/plugins).',
       options: {
         tags: ['plugins', 'oas-tag:agent builder'],
         availability: {
@@ -132,7 +133,8 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
       security: AGENT_BUILDER_WRITE_SECURITY,
       access: 'public',
       summary: 'Delete a plugin',
-      description: 'Delete an installed plugin by ID. This action cannot be undone.',
+      description:
+        'Delete an installed plugin by ID. This action cannot be undone. To learn more about Agent Builder plugins, refer to the [plugins documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/plugins).',
       options: {
         tags: ['plugins', 'oas-tag:agent builder'],
         availability: {
@@ -206,7 +208,7 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
       access: 'public',
       summary: 'Install a plugin',
       description:
-        'Install a plugin from a [GitHub Claude plugin URL](https://code.claude.com/docs/en/plugins) or a direct ZIP URL. Plugins bundle agent capabilities such as skills.',
+        'Install a plugin from a [GitHub Claude plugin URL](https://code.claude.com/docs/en/plugins) or a direct ZIP URL. Plugins bundle agent capabilities such as skills. To learn more about Agent Builder plugins, refer to the [plugins documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/plugins).',
       options: {
         tags: ['plugins', 'oas-tag:agent builder'],
         availability: {

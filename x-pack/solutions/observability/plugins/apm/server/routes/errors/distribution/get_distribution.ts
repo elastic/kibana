@@ -5,24 +5,15 @@
  * 2.0.
  */
 
+import type { ErrorDistributionResponse } from '@kbn/apm-api-shared';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
 import { BUCKET_TARGET_COUNT } from '../../transactions/constants';
 import { getBuckets } from './get_buckets';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import type { Maybe } from '../../../../typings/common';
 
 function getBucketSize({ start, end }: { start: number; end: number }) {
   return Math.floor((end - start) / BUCKET_TARGET_COUNT);
-}
-
-export interface ErrorDistributionResponse {
-  currentPeriod: Array<{ x: number; y: number }>;
-  previousPeriod: Array<{
-    x: number;
-    y: Maybe<number>;
-  }>;
-  bucketSize: number;
 }
 
 export async function getErrorDistribution({
@@ -30,19 +21,23 @@ export async function getErrorDistribution({
   kuery,
   serviceName,
   groupId,
+  transactionName,
   apmEventClient,
   start,
   end,
   offset,
+  bucketSizeInSeconds,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
   groupId?: string;
+  transactionName?: string;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
   offset?: string;
+  bucketSizeInSeconds?: number;
 }): Promise<ErrorDistributionResponse> {
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
@@ -50,16 +45,16 @@ export async function getErrorDistribution({
     offset,
   });
 
-  const bucketSize = getBucketSize({
-    start: startWithOffset,
-    end: endWithOffset,
-  });
+  const bucketSize = bucketSizeInSeconds
+    ? bucketSizeInSeconds * 1000
+    : getBucketSize({ start: startWithOffset, end: endWithOffset });
 
   const commonProps = {
     environment,
     kuery,
     serviceName,
     groupId,
+    transactionName,
     apmEventClient,
     bucketSize,
   };

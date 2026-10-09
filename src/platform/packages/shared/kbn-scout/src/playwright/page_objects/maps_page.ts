@@ -8,38 +8,57 @@
  */
 
 import type { ScoutPage } from '..';
-import { EuiComboBoxWrapper } from '..';
+import { expect } from '..';
+import { AppMenu } from './app_menu';
+import { InspectorPage } from './inspector';
+import { QueryBar } from './query_bar';
+import { SavedObjectSaveModal } from './saved_object_save_modal';
 
-// Increased timeout because new map container is not always loaded within default one
+// Maps first paint regularly exceeds Scout's 10s actionTimeout under parallel load.
 const DEFAULT_MAP_LOADING_TIMEOUT = 20_000;
 
 export class MapsPage {
-  public readonly mapContainer;
+  public readonly mapsPlugin;
   public readonly mapRenderComplete;
   public readonly saveAndReturnButton;
   public readonly saveButton;
   public readonly addLayerButton;
   public readonly layerAddForm;
   public readonly importFileButton;
-  public readonly savedObjectTitleInput;
   public readonly returnToOriginSwitch;
-  public readonly confirmSaveButton;
   public readonly documentsItem;
+  public readonly fullScreenModeButton;
+  public readonly exitFullScreenButton;
+  private readonly layerTocTooltip;
+  private readonly appMenu: AppMenu;
+  private readonly queryBar: QueryBar;
+  private readonly mapContainer;
+  private readonly setViewForm;
+  /** Save modal locators/actions, shared with other apps (e.g. Visualize) via `SavedObjectSaveModal`. */
+  public readonly saveModal: SavedObjectSaveModal;
+  public readonly inspector: InspectorPage;
 
   constructor(private readonly page: ScoutPage) {
-    this.mapContainer = this.page.locator('#maps-plugin');
-    this.mapRenderComplete = this.mapContainer.locator(
-      'div[data-dom-id][data-render-complete="true"]'
-    );
+    // Only present when Maps is the top-level app (standalone). Not available in embeddable contexts (e.g. dashboard panels).
+    this.mapsPlugin = this.page.locator('#maps-plugin');
+    // Only present when Maps is the top-level app (standalone). Not available in embeddable contexts (e.g. dashboard panels).
+    this.mapRenderComplete = this.page.locator('#maps-plugin[data-map-loaded="true"]');
     this.saveAndReturnButton = this.page.testSubj.locator('mapSaveAndReturnButton');
     this.saveButton = this.page.testSubj.locator('mapSaveButton');
     this.addLayerButton = this.page.testSubj.locator('addLayerButton');
     this.layerAddForm = this.page.testSubj.locator('layerAddForm');
     this.importFileButton = this.page.testSubj.locator('importFileButton');
-    this.savedObjectTitleInput = this.page.testSubj.locator('savedObjectTitle');
     this.returnToOriginSwitch = this.page.testSubj.locator('returnToOriginModeSwitch');
-    this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
     this.documentsItem = this.page.testSubj.locator('documents');
+    this.fullScreenModeButton = this.page.testSubj.locator('mapsFullScreenMode');
+    this.exitFullScreenButton = this.page.testSubj.locator('exitFullScreenModeButton');
+    this.appMenu = new AppMenu(this.page);
+    this.queryBar = new QueryBar(this.page);
+    this.layerTocTooltip = this.page.testSubj.locator('layerTocTooltip');
+    this.mapContainer = this.page.testSubj.locator('mapContainer');
+    this.setViewForm = this.page.testSubj.locator('mapSetViewForm');
+    this.saveModal = new SavedObjectSaveModal(this.page);
+    this.inspector = new InspectorPage(this.page);
   }
 
   async gotoNewMap() {
@@ -47,9 +66,25 @@ export class MapsPage {
     await this.waitForRenderComplete();
   }
 
+  /** Opens the AppHeader overflow menu when Full screen is not inline. */
+  async revealFullScreenModeButton() {
+    await this.appMenu.revealItem(this.fullScreenModeButton);
+  }
+
+  async clickFullScreenMode() {
+    await this.revealFullScreenModeButton();
+    await this.fullScreenModeButton.click();
+  }
+
+  /** Save sits in overflow during save-and-return; primary is Save and return. */
+  async clickSaveButton() {
+    await this.appMenu.revealItem(this.saveButton);
+    await this.saveButton.click();
+  }
+
   async waitForRenderComplete() {
     // first wait for the top level container to be present
-    await this.mapContainer.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
+    await this.mapsPlugin.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
     // then wait for the map to be fully rendered
     return this.mapRenderComplete.waitFor({
       state: 'attached',
@@ -68,15 +103,14 @@ export class MapsPage {
   }
 
   async saveFromModal(title: string, { redirectToOrigin = true }: { redirectToOrigin?: boolean }) {
-    await this.savedObjectTitleInput.fill(title);
+    await this.saveModal.fillTitle(title);
     if (await this.returnToOriginSwitch.isVisible()) {
       const isChecked = (await this.returnToOriginSwitch.getAttribute('aria-checked')) === 'true';
       if (isChecked !== redirectToOrigin) {
         await this.returnToOriginSwitch.click();
       }
     }
-    await this.confirmSaveButton.click();
-    await this.confirmSaveButton.waitFor({ state: 'hidden' });
+    await this.saveModal.confirm();
   }
 
   getLayerToggleButton(displayName: string) {
@@ -88,10 +122,224 @@ export class MapsPage {
     await this.addLayerButton.click();
     await this.layerAddForm.waitFor({ state: 'visible' });
     await this.documentsItem.click();
-    const comboBox = new EuiComboBoxWrapper(this.page, 'mapGeoIndexPatternSelect');
-    await comboBox.selectSingleOption(documentSelector);
+    const comboBox = this.page.components.comboBox('mapGeoIndexPatternSelect');
+    await comboBox.setSelectedOptions([documentSelector]);
     await this.importFileButton.click();
     await this.waitForRenderComplete();
     await this.saveAndReturnButton.click();
+  }
+
+  /** Waits until map layers are loaded. */
+  async waitForLayersToLoad() {
+    await this.mapContainer.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
+
+    // Mapbox GL renders a <canvas> only after mapApi is initialised; mapContainer is
+    // visible before that, so gate on this signal before checking loading state.
+    await this.page.waitForFunction(
+      () =>
+        Boolean(document.querySelector('[data-test-subj="mapContainer"]')?.querySelector('canvas')),
+      undefined,
+      { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
+    );
+
+    await this.waitForLoadCycleIfNeeded();
+
+    await expect
+      .poll(() => this.mapContainer.getAttribute('data-map-loading').then((v) => v === 'true'), {
+        timeout: DEFAULT_MAP_LOADING_TIMEOUT,
+      })
+      .toBe(false);
+  }
+
+  /**
+   * If the map is not currently loading, waits up to 1000 ms for a load cycle to begin —
+   * bridging the gap between a triggering action resolving and the new request's loading
+   * state reaching the DOM. Falls through if no load starts in that window
+   * (e.g. the action required no re-fetch).
+   */
+  private async waitForLoadCycleIfNeeded() {
+    const alreadyLoading = (await this.mapContainer.getAttribute('data-map-loading')) === 'true';
+    if (!alreadyLoading) {
+      await this.page
+        .waitForFunction(
+          () =>
+            document
+              .querySelector('[data-test-subj="mapContainer"]')
+              ?.getAttribute('data-map-loading') === 'true',
+          undefined,
+          { timeout: 1000 }
+        )
+        .catch(() => {});
+    }
+  }
+
+  async getLayerTocTooltipMsg(layerName: string): Promise<string> {
+    await this.getLayerToggleButton(layerName).hover();
+    await this.layerTocTooltip.waitFor({ state: 'visible' });
+    // Normalize whitespace — tooltip lines can include leading spaces from TOC layout.
+    return (await this.layerTocTooltip.innerText())
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .join('\n');
+  }
+
+  /** Reloads the page and dismisses the unsaved-changes browser dialog if present. */
+  async refreshAndClearUnsavedChangesWarning() {
+    this.page.once('dialog', async (dialog) => {
+      await dialog.accept();
+    });
+    await this.page.reload();
+  }
+
+  private async openSetViewPopover() {
+    // timeout: 0 prevents waiting for the element to appear — the form only exists in
+    // the DOM when the popover is open, so without it Playwright retries for 10s and throws.
+    if (!(await this.setViewForm.isVisible({ timeout: 1_000 }))) {
+      await this.page.testSubj.click('toggleSetViewVisibilityButton');
+      await this.setViewForm.waitFor({ state: 'visible' });
+    }
+  }
+
+  async setView(lat: number, lon: number, zoom: number) {
+    await this.openSetViewPopover();
+    await this.page.testSubj.locator('latitudeInput').fill(lat.toString());
+    await this.page.testSubj.locator('longitudeInput').fill(lon.toString());
+    await this.page.testSubj.locator('zoomInput').fill(zoom.toString());
+    await this.page.testSubj.click('submitViewButton');
+    await this.waitForMapPanAndZoom();
+  }
+
+  async waitForMapPanAndZoom(origView?: { lat: number; lon: number; zoom: number }) {
+    if (origView) {
+      // Wait until the view has changed from origView (pan has started).
+      await expect
+        .poll(
+          async () => {
+            const currentView = await this.getView();
+            return JSON.stringify(currentView) !== JSON.stringify(origView);
+          },
+          { timeout: DEFAULT_MAP_LOADING_TIMEOUT, intervals: [500] }
+        )
+        .toBe(true);
+    }
+
+    let prevView: { lat: number; lon: number; zoom: number } | undefined;
+    await expect
+      .poll(
+        async () => {
+          const currentView = await this.getView();
+          const stable =
+            prevView !== undefined && JSON.stringify(prevView) === JSON.stringify(currentView);
+          prevView = currentView;
+          return stable;
+        },
+        { timeout: DEFAULT_MAP_LOADING_TIMEOUT, intervals: [1000] }
+      )
+      .toBe(true);
+    await this.waitForLayersToLoad();
+  }
+
+  async getView(): Promise<{ lat: number; lon: number; zoom: number }> {
+    const attrs = await this.mapContainer.evaluate((el) => ({
+      lat: (el as HTMLElement).dataset.mapLat,
+      lon: (el as HTMLElement).dataset.mapLon,
+      zoom: (el as HTMLElement).dataset.mapZoom,
+    }));
+    if (attrs.lat === undefined || attrs.lon === undefined || attrs.zoom === undefined) {
+      throw new Error('Map view data attributes not found on mapContainer');
+    }
+    return { lat: parseFloat(attrs.lat), lon: parseFloat(attrs.lon), zoom: parseFloat(attrs.zoom) };
+  }
+
+  async openMapWithId(id: string) {
+    await this.page.gotoApp(`maps/map/${id}`);
+    await this.waitForLayersToLoad();
+  }
+
+  /**
+   * Opens the inspector, selects a request by name, reads its raw JSON response,
+   * closes the inspector, and returns the parsed response body.
+   */
+  async getResponse(requestName: string): ReturnType<typeof this.inspector.getResponse> {
+    await this.inspector.open();
+    try {
+      await this.inspector.openInspectorRequestsView();
+
+      const comboBox = this.page.components.comboBox('inspectorRequestChooser');
+      await comboBox.setSelectedOptions([requestName]);
+
+      return await this.inspector.getResponse();
+    } finally {
+      await this.inspector.close();
+    }
+  }
+
+  /**
+   * Opens the inspector, reads the "Hits" value from the request statistics table,
+   * closes the inspector, and returns it as a string.
+   */
+  async getHits(): Promise<string> {
+    await this.inspector.open();
+    try {
+      await this.inspector.openInspectorRequestsView();
+      await this.inspector.openRequestsStatisticsTab();
+
+      const rows = await this.inspector.getTableData();
+      const hitsRow = rows.find((row) => row[0] === 'Hits');
+      const hits = hitsRow?.[1];
+
+      if (!hits) {
+        throw new Error(`Unable to find "Hits" in table data: ${JSON.stringify(rows, null, '')}`);
+      }
+
+      return hits;
+    } finally {
+      await this.inspector.close();
+    }
+  }
+
+  /** Opens the map settings panel and enables "Auto fit map to data bounds". */
+  async enableAutoFitToBounds() {
+    await this.appMenu.clickItem('openSettingsButton');
+    const autoFitSwitch = this.page.testSubj.locator('autoFitToDataBoundsSwitch');
+    await autoFitSwitch.waitFor({ state: 'visible' });
+    if ((await autoFitSwitch.getAttribute('aria-checked')) !== 'true') {
+      await autoFitSwitch.click();
+      await this.page.waitForFunction(
+        (subj) =>
+          document.querySelector(`[data-test-subj="${subj}"]`)?.getAttribute('aria-checked') ===
+          'true',
+        'autoFitToDataBoundsSwitch'
+      );
+    }
+    await this.page.testSubj.click('mapSettingSubmitButton');
+  }
+
+  /** Sets the KQL query in the search bar, submits it, and waits for layers to load. */
+  async setAndSubmitQuery(query: string) {
+    await this.queryBar.setQuery(query);
+    await this.queryBar.submitQuery();
+    await this.waitForLayersToLoad();
+  }
+
+  /**
+   * Clicks the map at a position relative to the container's center to lock the tooltip.
+   * xOffset/yOffset follow the FTR convention: positive x = right, negative y = up.
+   * Waits for layers to be ready before clicking, then asserts the locked tooltip separately.
+   */
+  async lockTooltipAtPosition(xOffset: number, yOffset: number) {
+    await this.waitForLayersToLoad();
+
+    const box = await this.mapContainer.boundingBox();
+    if (!box) throw new Error('Map container bounding box not found');
+    const x = box.x + box.width / 2 + xOffset;
+    const y = box.y + box.height / 2 + yOffset;
+    await this.page.mouse.move(x, y);
+    await this.page.mouse.click(x, y);
+
+    await this.page.testSubj
+      .locator('mapTooltipCloseButton')
+      .waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
   }
 }

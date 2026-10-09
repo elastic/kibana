@@ -8,7 +8,7 @@
 import type { IconType } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { PropsWithChildren } from 'react';
+import type { ButtonHTMLAttributes, PropsWithChildren } from 'react';
 import React from 'react';
 
 const truncateStyles = css`
@@ -20,23 +20,33 @@ const truncateStyles = css`
   }
 `;
 
-export const InputPopoverButton: React.FC<
-  PropsWithChildren<{
-    open: boolean;
-    disabled: boolean;
-    iconType: IconType;
-    onClick: () => void;
-    'aria-labelledby'?: string;
-    'data-test-subj'?: string;
-  }>
-> = ({
+export type ToolTipAnchorProps = Pick<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  'onFocus' | 'onBlur' | 'aria-describedby'
+>;
+
+export interface InputPopoverButtonProps extends ToolTipAnchorProps {
+  open: boolean;
+  disabled: boolean;
+  hasAriaDisabled?: boolean;
+  iconType: IconType;
+  onClick?: () => void;
+  'aria-label'?: string;
+  'data-test-subj'?: string;
+  ebtProps?: Record<string, string>;
+}
+
+export const InputPopoverButton: React.FC<PropsWithChildren<InputPopoverButtonProps>> = ({
   open,
   disabled,
+  hasAriaDisabled,
   iconType,
   onClick,
   children,
-  'aria-labelledby': ariaLabelledBy,
+  'aria-label': ariaLabel,
   'data-test-subj': dataTestSubj,
+  ebtProps,
+  ...toolTipAnchorProps
 }) => {
   const openStyles = css`
     text-decoration: underline;
@@ -45,18 +55,22 @@ export const InputPopoverButton: React.FC<
     <EuiButtonEmpty
       css={[truncateStyles, open && openStyles]}
       color="text"
+      size="xs"
       iconSide="left"
       flush="both"
       iconType={iconType}
       onClick={() => {
         if (!disabled) {
-          onClick();
+          onClick?.();
         }
       }}
       disabled={disabled}
+      hasAriaDisabled={hasAriaDisabled}
       aria-haspopup="menu"
-      aria-labelledby={ariaLabelledBy}
+      aria-label={ariaLabel}
       data-test-subj={dataTestSubj}
+      {...toolTipAnchorProps}
+      {...ebtProps}
     >
       {children}
     </EuiButtonEmpty>

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ESQLMessage, EditorError } from '@elastic/esql/types';
+import type { EditorError } from '@elastic/esql/types';
+import type { ESQLMessage } from '@kbn/esql-language';
 import { compact } from 'lodash';
 
 export function formatQueryWithErrors(

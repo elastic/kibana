@@ -7,13 +7,13 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 
-import { ServerlessSearchPlugin } from './plugin';
 export { config } from './config';
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { ServerlessSearchPlugin } = await import('./plugin');
   return new ServerlessSearchPlugin(initializerContext);
 }
 

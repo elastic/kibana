@@ -43,13 +43,13 @@ export {
   DEFAULT_DURATION_OUTPUT_FORMAT,
   DURATION_INPUT_FORMATS,
   DURATION_OUTPUT_FORMATS,
+  getDurationUnitFromOutputFormat,
+  getDurationUnitInSeconds,
 } from './constants/duration_formats';
 export { FIELD_FORMAT_IDS } from './types';
-export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
 
 export type {
   FieldFormatsGetConfigFn,
-  FieldFormatsContentType,
   FieldFormatConfig,
   FieldFormatId,
   SerializedFieldFormat,
@@ -59,10 +59,9 @@ export type {
   FieldFormatsStartCommon,
   FieldFormatParams,
   FieldFormatMetaParams,
-  FieldFormatConvert,
-  FieldFormatConvertFunction,
-  HtmlContextTypeConvert,
-  HtmlContextTypeOptions,
+  ReactContextTypeConvert,
+  ReactConvertFunction,
+  ReactContextTypeOptions,
   TextContextTypeConvert,
   TextContextTypeOptions,
 } from './types';

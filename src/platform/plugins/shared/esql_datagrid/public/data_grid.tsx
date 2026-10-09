@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
-import { zipObject } from 'lodash';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { zipObject, isEqual } from 'lodash';
 import type { UnifiedDataTableRenderCustomToolbarProps } from '@kbn/unified-data-table';
 import {
   UnifiedDataTable,
@@ -24,7 +24,8 @@ import type { ESQLRow } from '@kbn/es-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
-import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { EsqlSource } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -45,6 +46,7 @@ interface ESQLDataGridProps {
   initialColumns?: DatatableColumn[];
   initialRowHeight?: number;
   controlColumnIds?: string[];
+  isApproximate: boolean;
 }
 
 const sortOrder: SortOrder[] = [];
@@ -54,9 +56,16 @@ const ROWS_PER_PAGE_OPTIONS = [10, 25];
 
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
-  const [activeColumns, setActiveColumns] = useState<string[]>(
-    (props.initialColumns || (props.isTableView ? props.columns : [])).map((c) => c.name)
+  const columnsIdentity = useMemo(
+    () => (props.initialColumns || (props.isTableView ? props.columns : [])).map((c) => c.name),
+    [props.initialColumns, props.isTableView, props.columns]
   );
+  const [prevColumnsIdentity, setPrevColumnsIdentity] = useState(columnsIdentity);
+  const [activeColumns, setActiveColumns] = useState<string[]>(columnsIdentity);
+  if (!isEqual(columnsIdentity, prevColumnsIdentity)) {
+    setPrevColumnsIdentity(columnsIdentity);
+    setActiveColumns(columnsIdentity);
+  }
   const [rowHeight, setRowHeight] = useState<number>(
     props.initialRowHeight ?? DEFAULT_INITIAL_ROW_HEIGHT
   );
@@ -66,13 +75,25 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     setActiveColumns(columns);
   }, []);
 
+  const [esqlSource, setEsqlSource] = useState<EsqlSource>();
+  useEffect(() => {
+    let cancelled = false;
+    EsqlSource.create({ query: props.query.esql }).then((source) => {
+      if (!cancelled) {
+        setEsqlSource(source);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [props.query.esql]);
+  const dataSource = useMemo(
+    () => esqlSource?.withColumns(props.columns),
+    [esqlSource, props.columns]
+  );
+
   const renderDocumentView = useCallback(
-    (
-      hit: DataTableRecord,
-      displayedRows: DataTableRecord[],
-      displayedColumns: string[],
-      customColumnsMeta?: DataTableColumnsMeta
-    ) => (
+    (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => (
       <RowViewer
         dataView={props.dataView}
         notifications={props.core.notifications}
@@ -80,7 +101,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         hit={hit}
         hits={displayedRows}
         columns={displayedColumns}
-        columnsMeta={customColumnsMeta}
+        dataSource={dataSource}
         flyoutType={props.flyoutType ?? 'push'}
         onRemoveColumn={(column) => {
           setActiveColumns(activeColumns.filter((c) => c !== column));
@@ -92,18 +113,15 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         setExpandedDoc={setExpandedDoc}
       />
     ),
-    [activeColumns, props.core.notifications, props.core.chrome, props.dataView, props.flyoutType]
+    [
+      activeColumns,
+      dataSource,
+      props.core.notifications,
+      props.core.chrome,
+      props.dataView,
+      props.flyoutType,
+    ]
   );
-
-  const columnsMeta = useMemo(() => {
-    return props.columns.reduce((acc, column) => {
-      acc[column.id] = {
-        type: column.meta?.type,
-        esType: column.meta?.esType ?? column.meta?.type,
-      };
-      return acc;
-    }, {} as DataTableColumnsMeta);
-  }, [props.columns]);
 
   const rows: DataTableRecord[] = useMemo(() => {
     const columnNames = props.columns?.map(({ name }) => name);
@@ -148,6 +166,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         timeRange: props.data.query.timefilter.timefilter.getTime(),
         query: props.query,
         columns: activeColumns,
+        esqlApproximation: props.isApproximate,
       });
       return renderCustomToolbar({
         ...customToolbarProps,
@@ -156,7 +175,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
           hasRoomForGridControls: true,
         },
         gridProps: {
-          inTableSearchControl: customToolbarProps.gridProps.inTableSearchControl,
+          inTableSearchButton: customToolbarProps.gridProps.inTableSearchButton,
+          inTableSearchInput: customToolbarProps.gridProps.inTableSearchInput,
           additionalControls: (
             <EuiLink
               href={discoverLink}
@@ -172,6 +192,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
                 type="discoverApp"
                 size="s"
                 color="primary"
+                aria-hidden={true}
                 css={css`
                   margin-right: 4px;
                 `}
@@ -192,8 +213,13 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       props.data.query.timefilter.timefilter,
       props.dataView,
       props.query,
+      props.isApproximate,
     ]
   );
+
+  if (!dataSource) {
+    return null;
+  }
 
   return (
     <UnifiedDataTable
@@ -204,10 +230,9 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         }
       `}
       rows={rows}
-      columnsMeta={columnsMeta}
+      dataSource={dataSource}
       services={services}
       enableInTableSearch
-      isPlainRecord
       isSortEnabled={false}
       loadingState={DataLoadingState.loaded}
       dataView={props.dataView}

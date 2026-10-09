@@ -15,7 +15,7 @@ import type {
 } from '@kbn/lens-common';
 
 import { ACCESSOR } from './constants';
-import type { ColorByValueType, ColorMappingType } from '../../../schema/color';
+import type { AutoColorType, ColorByValueType, ColorMappingType } from '../../../schema/color';
 import { isColorByValueColor, isColorMappingColor } from '../../coloring';
 import { getReversibleMappings } from '../utils';
 
@@ -27,9 +27,12 @@ const colorModeCompat = getReversibleMappings([
 
 type ApiColorTarget = 'value' | 'badge' | 'background';
 
-export const colorModeToApplyColorTo = (
-  mode: Exclude<NonNullable<ColumnState['colorMode']>, 'none'>
-): ApiColorTarget => colorModeCompat.toAPI(mode);
+// 'progress' is a numeric-only cell decoration and is rejected at the as-code export boundary
+// until the datatable API grows an explicit representation for it.
+type ApiColorMode = Exclude<NonNullable<ColumnState['colorMode']>, 'none' | 'progress'>;
+
+export const colorModeToApplyColorTo = (mode: ApiColorMode): ApiColorTarget =>
+  colorModeCompat.toAPI(mode);
 
 export const applyColorToToColorMode = (
   target: ApiColorTarget
@@ -83,7 +86,7 @@ export function getAccessorName(
  * - No color → uses the provided default
  */
 export function inferDatatypeFromColor(
-  color: ColorByValueType | ColorMappingType | undefined,
+  color: ColorByValueType | ColorMappingType | AutoColorType | undefined,
   defaultType: Extract<DataType, 'number' | 'string'>
 ): Extract<DataType, 'number' | 'string'> {
   if (isColorByValueColor(color)) {

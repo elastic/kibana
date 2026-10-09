@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/core-chrome-navigation",
-  "owner": "@elastic/appex-sharedux",
-  "group": "platform",
-  "visibility": "private"
-}

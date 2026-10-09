@@ -1,0 +1,28 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { MenuItem, SecondaryMenuSection } from '../../types';
+
+/**
+ * Sections shown in the hover popover. `popoverSections` wins; otherwise `sections`.
+ */
+export const getPopoverSections = (item: MenuItem): SecondaryMenuSection[] | undefined =>
+  item.popoverSections ?? item.sections;
+
+/**
+ * Whether the hover popover has content. `popoverSections` wins; otherwise `sections`.
+ */
+export const getHasSubmenu = (item: MenuItem): boolean => {
+  return (getPopoverSections(item)?.length ?? 0) > 0;
+};
+
+/**
+ * Nested submenu in More. Tree `sections` only — hover `popoverSections` stay out.
+ */
+export const getHasMoreSubmenu = (item: MenuItem): boolean => (item.sections?.length ?? 0) > 0;

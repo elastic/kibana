@@ -13,7 +13,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { SearchGettingStartedSetupDependencies } from './types';
-import { registerSearchAgent } from './agent/register_search_agent';
+import { registerSearchSkills } from './skills/register_search_skills';
 
 export class SearchGettingStartedPlugin
   implements Plugin<{}, {}, SearchGettingStartedSetupDependencies>
@@ -25,7 +25,7 @@ export class SearchGettingStartedPlugin
   }
 
   public setup(_core: CoreSetup, plugins: SearchGettingStartedSetupDependencies) {
-    registerSearchAgent({ plugins, logger: this.logger });
+    registerSearchSkills({ plugins, logger: this.logger });
     return {};
   }
 

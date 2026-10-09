@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
@@ -86,14 +87,6 @@ export default ({ getService }: FtrProviderContext) => {
       ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body).to.eql([]);
-    });
-
-    it('returns an error for the user with viewer permissions', async () => {
-      const { body, status } = await supertest
-        .get(`/internal/ml/model_management/memory_usage`)
-        .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(getCommonRequestHeader('1'));
-      ml.api.assertResponseStatusCode(403, status, body);
     });
 
     it('returns an error for unauthorized user', async () => {

@@ -8,15 +8,17 @@ import React from 'react';
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { AddFile } from './add_file';
+import type { AttachedFile } from './utils';
 
 interface FilesUtilityBarProps {
   caseId: string;
+  existingFiles?: AttachedFile[];
 }
 
-export const FilesUtilityBar = ({ caseId }: FilesUtilityBarProps) => {
+export const FilesUtilityBar = ({ caseId, existingFiles }: FilesUtilityBarProps) => {
   return (
     <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="none">
-      <AddFile caseId={caseId} />
+      <AddFile caseId={caseId} existingFiles={existingFiles} />
     </EuiFlexGroup>
   );
 };

@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 export const PRECONFIGURED_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.preconfigured',
@@ -36,39 +35,6 @@ export const TECH_PREVIEW_TOOLTIP = i18n.translate(
       'This functionality is experimental and not supported. It may change or be removed at any time.',
   }
 );
-
-export const TASK_TYPE_TOOLTIPS: Partial<Record<InferenceTaskType, string>> = {
-  text_embedding: i18n.translate(
-    'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.textEmbedding',
-    {
-      defaultMessage: 'Converts text into dense vector representations for semantic search',
-    }
-  ),
-  sparse_embedding: i18n.translate(
-    'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.sparseEmbedding',
-    {
-      defaultMessage: 'Converts text into sparse vector representations for semantic search',
-    }
-  ),
-  rerank: i18n.translate(
-    'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.rerank',
-    {
-      defaultMessage: 'Re-ranks search results by relevance',
-    }
-  ),
-  completion: i18n.translate(
-    'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.completion',
-    {
-      defaultMessage: 'Generates text completions from a given input',
-    }
-  ),
-  chat_completion: i18n.translate(
-    'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.chatCompletion',
-    {
-      defaultMessage: 'Generates conversational responses from a chat input',
-    }
-  ),
-};
 
 export const COPY_ID_TO_CLIPBOARD = i18n.translate(
   'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.copyIdToClipboard',

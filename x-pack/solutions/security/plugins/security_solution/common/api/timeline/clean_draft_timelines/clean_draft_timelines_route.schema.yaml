@@ -26,13 +26,29 @@ paths:
               properties:
                 timelineType:
                   $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
+            examples:
+              defaultDraft:
+                summary: Create a default draft timeline
+                value:
+                  timelineType: default
       responses:
         '200':
-          description: Indicates that the draft Timeline was successfully created. In the event the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
                 $ref: '../model/components.schema.yaml#/components/schemas/PersistTimelineResponse'
+              examples:
+                draftResponse:
+                  summary: Draft after reset or creation
+                  value:
+                    savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    version: WzE0LDFd
+                    title: ''
+                    timelineType: default
+                    status: draft
+                    templateTimelineId: null
+                    templateTimelineVersion: null
         '403':
           description: Indicates that the user does not have the required permissions to create a draft Timeline.
           content:
@@ -44,6 +60,12 @@ paths:
                     type: string
                   status_code:
                     type: number
+              examples:
+                forbidden:
+                  summary: Permission denied
+                  value:
+                    message: Forbidden
+                    status_code: 403
         '409':
           description: Indicates that there is already a draft Timeline with the given `timelineId`.
           content:
@@ -55,3 +77,9 @@ paths:
                     type: string
                   status_code:
                     type: number
+              examples:
+                conflict:
+                  summary: Draft conflict
+                  value:
+                    message: Conflict
+                    status_code: 409

@@ -357,7 +357,7 @@ export const createAuditbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
+      textPost: cloudPasswordAndResetLink(),
     },
     DEB: {
       title: i18n.translate('home.tutorials.common.auditbeatCloudInstructions.config.debTitle', {
@@ -373,7 +373,7 @@ export const createAuditbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
+      textPost: cloudPasswordAndResetLink(),
     },
     RPM: {
       title: i18n.translate('home.tutorials.common.auditbeatCloudInstructions.config.rpmTitle', {
@@ -389,7 +389,7 @@ export const createAuditbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
+      textPost: cloudPasswordAndResetLink(),
     },
     WINDOWS: {
       title: i18n.translate(
@@ -408,7 +408,7 @@ export const createAuditbeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
+      textPost: cloudPasswordAndResetLink(),
     },
   },
 });
@@ -437,7 +437,7 @@ export const createAuditbeatCloudInstructionsServerless = () => ({
         '  hosts: ["<elasticsearch_endpoint_url>"]',
         '  api_key: "<your_api_key>"',
       ],
-      textPost: cloudServerlessApiKeyNote,
+      textPost: cloudServerlessApiKeyNote(),
     },
     DEB: {
       title: i18n.translate(
@@ -461,7 +461,7 @@ export const createAuditbeatCloudInstructionsServerless = () => ({
         '  hosts: ["<elasticsearch_endpoint_url>"]',
         '  api_key: "<your_api_key>"',
       ],
-      textPost: cloudServerlessApiKeyNote,
+      textPost: cloudServerlessApiKeyNote(),
     },
     RPM: {
       title: i18n.translate(
@@ -485,7 +485,7 @@ export const createAuditbeatCloudInstructionsServerless = () => ({
         '  hosts: ["<elasticsearch_endpoint_url>"]',
         '  api_key: "<your_api_key>"',
       ],
-      textPost: cloudServerlessApiKeyNote,
+      textPost: cloudServerlessApiKeyNote(),
     },
     WINDOWS: {
       title: i18n.translate(
@@ -509,7 +509,7 @@ export const createAuditbeatCloudInstructionsServerless = () => ({
         '  hosts: ["<elasticsearch_endpoint_url>"]',
         '  api_key: "<your_api_key>"',
       ],
-      textPost: cloudServerlessApiKeyNote,
+      textPost: cloudServerlessApiKeyNote(),
     },
   },
 });

@@ -90,19 +90,13 @@ export type NotAnArrowFnType = typeof notAnArrowFn;
 export const iShouldBeInternalFn = () => 'hi';
 
 // Expected issues:
-//   missing comments (18):
+//   missing comments (12):
 //     line 24 - a
 //     line 24 - a
 //     line 24 - a
 //     line 25 - b
 //     line 25 - b
 //     line 25 - b
-//     line 26 - c
-//     line 26 - c
-//     line 26 - c
-//     line 27 - d
-//     line 27 - d
-//     line 27 - d
 //     line 28 - e
 //     line 28 - e
 //     line 28 - e

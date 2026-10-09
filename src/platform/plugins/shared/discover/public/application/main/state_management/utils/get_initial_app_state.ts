@@ -14,15 +14,22 @@ import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import {
   DEFAULT_COLUMNS_SETTING,
+  DEFAULT_ESQL_QUERY_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
+  getChartHidden,
+  getTableHidden,
+  getSidebarHidden,
   getDefaultSort,
   getSortArray,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import { getChartHidden } from '@kbn/unified-histogram';
 import { cloneDeep } from 'lodash';
 import { ENABLE_ESQL, getInitialESQLQuery } from '@kbn/esql-utils';
-import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
+import {
+  DISCOVER_QUERY_MODE_KEY,
+  isPersistedQueryMode,
+  type QueryMode,
+} from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState } from '../redux';
 import {
@@ -41,6 +48,7 @@ export function getInitialAppState({
   dataView,
   services,
   defaultProfileEsqlQuery,
+  query,
 }: {
   initialUrlState: DiscoverAppState | undefined;
   hasGlobalState?: boolean;
@@ -48,6 +56,8 @@ export function getInitialAppState({
   dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   services: DiscoverServices;
   defaultProfileEsqlQuery?: DefaultEsqlQueryConfig;
+  /** The query the tab opens with, when already decided; otherwise the default is derived. */
+  query?: Query | AggregateQuery;
 }) {
   const defaultAppState = getDefaultAppState({
     persistedTab,
@@ -56,6 +66,7 @@ export function getInitialAppState({
     initialUrlState,
     hasGlobalState,
     defaultProfileEsqlQuery,
+    query,
   });
   const mergedState = { ...defaultAppState, ...initialUrlState };
 
@@ -66,6 +77,10 @@ export function getInitialAppState({
 
   if (typeof mergedState.hideTable !== 'boolean') {
     mergedState.hideTable = undefined;
+  }
+
+  if (typeof mergedState.hideSidebar !== 'boolean') {
+    mergedState.hideSidebar = undefined;
   }
 
   if (mergedState.hideChart && mergedState.hideTable) {
@@ -96,38 +111,69 @@ function getDefaultColumns(
     : undefined;
 }
 
-function getDefaultQuery({
-  initialUrlState,
-  hasGlobalState,
-  persistedTab,
-  services,
-  dataView,
-  defaultProfileEsqlQuery,
-}: {
+interface DefaultQueryArgs {
   persistedTab: DiscoverSessionTab | undefined;
   services: DiscoverServices;
-  dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   initialUrlState: DiscoverAppState | undefined;
   hasGlobalState: boolean;
   defaultProfileEsqlQuery?: DefaultEsqlQueryConfig;
-}): Query | AggregateQuery | undefined {
+}
+
+// URL state (_g or _a) is respected and assumed classic; this also reuses the query mode when
+// opening a new tab from an existing one.
+const hasUrlState = ({ initialUrlState, hasGlobalState }: DefaultQueryArgs) =>
+  hasGlobalState || Object.keys(initialUrlState || {}).length > 0;
+
+const opensInEsqlByDefault = ({ services }: DefaultQueryArgs): boolean => {
+  // Only use the persisted query mode if it was recorded against today's resolved
+  // default mode - otherwise (legacy value, or the default has changed since) discard
+  // it so the current default can take effect.
+  const isEsqlDefault = services.discoverFeatureFlags.getIsEsqlDefault();
+  const liveDefaultMode: QueryMode = isEsqlDefault ? 'esql' : 'classic';
+  const persistedQueryMode = services.storage.get(DISCOVER_QUERY_MODE_KEY);
+  const queryMode =
+    isPersistedQueryMode(persistedQueryMode) && persistedQueryMode.defaultMode === liveDefaultMode
+      ? persistedQueryMode.currentMode
+      : undefined;
+
+  return (
+    queryMode !== 'classic' &&
+    Boolean(services.uiSettings.get(ENABLE_ESQL)) &&
+    (queryMode === 'esql' || isEsqlDefault)
+  );
+};
+
+// Precedence: defaultEsqlQuery space setting > default profile setting
+const getConfiguredEsqlQuery = ({ services, defaultProfileEsqlQuery }: DefaultQueryArgs) =>
+  services.uiSettings.get<string>(DEFAULT_ESQL_QUERY_SETTING)?.trim() ||
+  defaultProfileEsqlQuery?.query;
+
+/**
+ * The default ES|QL query of a new tab when it comes from the space setting or the profile,
+ * so it can be resolved without loading a data view.
+ */
+export function getConfiguredDefaultEsqlQuery(args: DefaultQueryArgs): AggregateQuery | undefined {
+  if (args.persistedTab?.serializedSearchSource.query || hasUrlState(args)) return undefined;
+  if (!opensInEsqlByDefault(args)) return undefined;
+  const esql = getConfiguredEsqlQuery(args);
+  return esql ? { esql } : undefined;
+}
+
+/** The query a tab opens with when neither the URL nor the saved tab has one. */
+export function getDefaultQuery(
+  args: DefaultQueryArgs & {
+    dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
+  }
+): Query | AggregateQuery | undefined {
+  const { persistedTab, initialUrlState, services, dataView } = args;
   if (persistedTab?.serializedSearchSource.query) return persistedTab.serializedSearchSource.query;
 
-  // If there is global or app state (_g or _a) in the URL we should respect it and assume it's a classic query
-  // This is also useful to reuse the query mode if we are opening a new tab from an existing one
-  const hasInitialUrlState = Object.keys(initialUrlState || {}).length > 0;
-  if (hasGlobalState || hasInitialUrlState)
+  if (hasUrlState(args))
     return initialUrlState?.query || services.data.query.queryString.getDefaultQuery();
 
-  // If the last query mode used by the user was classic, just return the default query
-  const queryMode = services.storage.get(DISCOVER_QUERY_MODE_KEY);
-  if (queryMode === 'classic') return services.data.query.queryString.getDefaultQuery();
-
-  // If the last query mode used by the user was esql, or if esql is default, return the initial esql query
-  const canUseEsql = services.uiSettings.get(ENABLE_ESQL) && dataView instanceof DataView;
-  const isEsqlDefault = services.discoverFeatureFlags.getIsEsqlDefault();
-  if (canUseEsql && (queryMode === 'esql' || isEsqlDefault))
-    return { esql: defaultProfileEsqlQuery?.query ?? getInitialESQLQuery(dataView) };
+  if (dataView instanceof DataView && opensInEsqlByDefault(args)) {
+    return { esql: getConfiguredEsqlQuery(args) || getInitialESQLQuery(dataView) };
+  }
 
   // Lastly, fall back to classic if we can't use anything else
   return services.data.query.queryString.getDefaultQuery();
@@ -140,6 +186,7 @@ function getDefaultAppState({
   initialUrlState,
   hasGlobalState,
   defaultProfileEsqlQuery,
+  query: openingQuery,
 }: {
   persistedTab: DiscoverSessionTab | undefined;
   dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
@@ -147,16 +194,19 @@ function getDefaultAppState({
   initialUrlState: DiscoverAppState | undefined;
   hasGlobalState: boolean;
   defaultProfileEsqlQuery?: DefaultEsqlQueryConfig;
+  query?: Query | AggregateQuery;
 }) {
   const { uiSettings, storage } = services;
-  const query = getDefaultQuery({
-    persistedTab,
-    services,
-    dataView,
-    initialUrlState,
-    hasGlobalState,
-    defaultProfileEsqlQuery,
-  });
+  const query =
+    openingQuery ??
+    getDefaultQuery({
+      persistedTab,
+      services,
+      dataView,
+      initialUrlState,
+      hasGlobalState,
+      defaultProfileEsqlQuery,
+    });
   const isEsqlQuery = isOfAggregateQueryType(query);
   // If the data view doesn't have a getFieldByName method (e.g. if it's a spec or list item),
   // we assume the sort array is valid since we can't know for sure
@@ -166,6 +216,8 @@ function getDefaultAppState({
       : persistedTab?.sort ?? [];
   const columns = getDefaultColumns(persistedTab, uiSettings);
   const chartHidden = getChartHidden(storage, 'discover');
+  const tableHidden = getTableHidden(storage, 'discover');
+  const sidebarHidden = getSidebarHidden(storage, 'discover');
   const dataSource = createDataSource({
     dataView: dataView ?? persistedTab?.serializedSearchSource.index,
     query,
@@ -186,6 +238,8 @@ function getDefaultAppState({
     interval: 'auto',
     filters: cloneDeep(persistedTab?.serializedSearchSource.filter),
     hideChart: chartHidden,
+    hideTable: tableHidden,
+    hideSidebar: sidebarHidden,
     viewMode: undefined,
     hideAggregatedPreview: undefined,
     savedQuery: undefined,
@@ -196,6 +250,8 @@ function getDefaultAppState({
     grid: undefined,
     breakdownField: undefined,
     density: undefined,
+    documentsDisplayMode: undefined,
+    jsonModeSettings: undefined,
   };
 
   if (persistedTab?.grid) {
@@ -236,6 +292,12 @@ function getDefaultAppState({
   }
   if (persistedTab?.density) {
     defaultState.density = persistedTab.density;
+  }
+  if (persistedTab?.documentsDisplayMode) {
+    defaultState.documentsDisplayMode = persistedTab.documentsDisplayMode;
+  }
+  if (persistedTab?.jsonModeSettings) {
+    defaultState.jsonModeSettings = persistedTab.jsonModeSettings;
   }
 
   return defaultState;

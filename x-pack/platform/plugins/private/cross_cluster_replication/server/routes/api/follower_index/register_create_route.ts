@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import type { CcrFollowRequest } from '@elastic/elasticsearch/lib/api/types';
 import { serializeFollowerIndex } from '../../../../common/services/follower_index_serialization';
-import type { FollowerIndex } from '../../../../common/types';
 import { addBasePath } from '../../../services';
 import { removeEmptyFields } from '../../../../common/services/utils';
 import type { RouteDependencies } from '../../../types';
@@ -52,8 +51,8 @@ export const registerCreateRoute = ({
     },
     license.guardApiRoute(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const { name, ...rest } = request.body;
-      const body = removeEmptyFields(serializeFollowerIndex(rest as FollowerIndex));
+      const { name, ...followerIndex } = request.body;
+      const body = removeEmptyFields(serializeFollowerIndex(followerIndex));
 
       try {
         const responseBody = await client.asCurrentUser.ccr.follow({

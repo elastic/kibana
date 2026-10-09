@@ -36,7 +36,8 @@ import {
   tagDescriptionMaxLength,
 } from '../../../common';
 import { TagBadge } from '..';
-import { getRandomColor, useIfMounted } from './utils';
+import { getRandomColor } from '../../../common';
+import { useIfMounted } from './utils';
 
 interface CreateOrEditModalProps {
   onClose: () => void;

@@ -6,10 +6,12 @@
  */
 
 export const storageKeys = {
-  agentId: 'agentBuilder.agentId',
   lastUsedConnector: 'agentBuilder.lastUsedConnector',
   welcomeMessageDismissed: 'agentBuilder.welcomeMessageDismissed',
   autoIncludeWarningDismissed: 'agentBuilder.autoIncludeWarningDismissed',
+  mcpClientBannerDismissedIds: 'agentBuilder.mcpClientBannerDismissedIds',
+
+  getAgentIdKey: (spaceId: string): string => `agentBuilder.agentId.${spaceId}`,
 
   getLastConversationKey: (sessionTag?: string, agentId?: string): string => {
     const tag = sessionTag || 'default';

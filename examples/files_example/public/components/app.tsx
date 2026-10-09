@@ -21,6 +21,7 @@ import {
   EuiIcon,
   EuiButtonIcon,
   EuiLink,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import type { CoreStart } from '@kbn/core/public';
@@ -61,7 +62,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
       <EuiButton
         onClick={() => setShowUploadModal(true)}
         isDisabled={isLoading || isDeletingFile}
-        iconType="exportAction"
+        iconType="upload"
       >
         Upload image
       </EuiButton>,
@@ -85,7 +86,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
       name: 'Status',
       render: (status: FileJSON['status']) =>
         status === 'READY' ? (
-          <EuiIcon color="success" type="checkInCircleFilled" aria-label={status} />
+          <EuiIcon color="success" type="checkCircleFill" aria-label={status} />
         ) : status === 'AWAITING_UPLOAD' ? (
           <EuiIcon type="clock" aria-label={status} />
         ) : (
@@ -100,12 +101,14 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
           description: 'View file',
           isPrimary: true,
           render: (item) => (
-            <EuiButtonIcon
-              disabled={isDeletingFile}
-              aria-label="View file details"
-              iconType="eye"
-              onClick={() => setSelectedItem(item)}
-            />
+            <EuiToolTip content="View file details" disableScreenReaderOutput>
+              <EuiButtonIcon
+                disabled={isDeletingFile}
+                aria-label="View file details"
+                iconType="eye"
+                onClick={() => setSelectedItem(item)}
+              />
+            </EuiToolTip>
           ),
         },
         {

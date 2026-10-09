@@ -8,11 +8,8 @@
  */
 
 import type { Filter, Query } from '@kbn/es-query';
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type { DashboardState, DashboardPinnedPanelsState, DashboardPinnedPanel } from '../server';
-
-export type { DashboardState, DashboardPinnedPanelsState, DashboardPinnedPanel };
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
 /**
  * Capabilities object for the Dashboard application.
@@ -63,11 +60,5 @@ export type DashboardLocatorParams = Partial<
      * (Background search)
      */
     searchSessionId?: string;
-
-    /**
-     * Set to pass state from solution to embeddables.
-     * See PassThroughContext presentation container interface for details
-     */
-    passThroughContext?: SerializableRecord;
   }
 >;

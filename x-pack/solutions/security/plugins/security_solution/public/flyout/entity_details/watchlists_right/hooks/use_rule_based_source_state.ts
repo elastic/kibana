@@ -18,7 +18,9 @@ import {
   splitInitialSources,
   stateFromSource,
   toggleToType,
+  validateRuleBasedSource,
 } from './rule_based_source_helpers';
+import { useValidateIndexPatternTimestamp } from './use_validate_index_pattern_timestamp';
 
 // Re-export so consumers can keep importing from here
 export { ENTITY_FIELD_OPTIONS } from './rule_based_source_helpers';
@@ -73,8 +75,9 @@ export const useRuleBasedSourceState = ({
   }, [initialized, initialByType]);
 
   // Derived — which type is currently being viewed / edited.
+  // 'none' toggle has no associated source type.
   const currentType = toggleToType(activeToggle);
-  const currentState = byType[currentType];
+  const currentState = currentType ? byType[currentType] : byType.store;
 
   // Core updater: patch one type, mark dirty, emit to parent form.
   // Uses the functional updater form of setByType so that rapid calls
@@ -100,18 +103,18 @@ export const useRuleBasedSourceState = ({
   const onToggleChange = useCallback(
     (id: string) => {
       setActiveToggle(id as ToggleId);
-      if (!isManaged) {
-        onFieldChange(
-          'entitySources',
-          buildEntitySources(byType, id as ToggleId, isManaged, watchlistName)
-        );
-      }
+      onFieldChange(
+        'entitySources',
+        buildEntitySources(byType, id as ToggleId, isManaged, watchlistName)
+      );
     },
     [isManaged, byType, watchlistName, onFieldChange]
   );
 
   const onQueryChange = useCallback(
-    (query: Query) => updateTypeAndEmit(currentType, { filterQuery: query }),
+    (query: Query) => {
+      if (currentType) updateTypeAndEmit(currentType, { filterQuery: query });
+    },
     [currentType, updateTypeAndEmit]
   );
 
@@ -126,26 +129,47 @@ export const useRuleBasedSourceState = ({
     [updateTypeAndEmit]
   );
 
+  const onRangeChange = useCallback(
+    (range: { start: string; end: string }) => {
+      if (currentType) updateTypeAndEmit(currentType, { range });
+    },
+    [currentType, updateTypeAndEmit]
+  );
+
   const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
 
-  const toggleButtons = useMemo(
-    () =>
-      getToggleButtons(isEditMode, isManaged, isManaged ? undefined : initialEntitySources?.[0]),
-    [isEditMode, isManaged, initialEntitySources]
+  const toggleButtons = useMemo(() => getToggleButtons(), []);
+
+  const validation = useMemo(
+    () => validateRuleBasedSource(activeToggle, byType),
+    [activeToggle, byType]
   );
+
+  const { hasTimestamp, isLoading: isValidatingTimestamp } = useValidateIndexPatternTimestamp(
+    currentState.indexPatterns
+  );
+  const indexPatternMissingTimestamp = hasTimestamp === false;
+  const isValid = validation.isValid && !indexPatternMissingTimestamp;
 
   return {
     activeToggle,
     filterQuery: currentState.filterQuery,
     selectedIndexPatterns: currentState.indexPatterns,
     entityField: currentState.entityField,
+    range: currentState.range,
+    isNone: activeToggle === 'none',
     isEntityStore: activeToggle === 'entityStore',
     savedQuery,
     toggleButtons,
+    validation,
+    isValid,
+    isValidatingTimestamp,
+    indexPatternMissingTimestamp,
     onToggleChange,
     onQueryChange,
     onSavedQueryChange: setSavedQuery,
     onIndexPatternsChange,
     onEntityFieldChange,
+    onRangeChange,
   };
 };

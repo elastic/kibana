@@ -16,18 +16,85 @@ import type {
   NewPackagePolicy,
   PackagePolicyConfigRecordEntry,
   RegistryStreamWithDataStream,
+  RegistryDataStream,
 } from '../types';
+
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
 
 import { doesPackageHaveIntegrations } from '.';
 import {
   getNormalizedDataStreams,
   getNormalizedInputs,
-  isIntegrationPolicyTemplate,
+  getPolicyTemplateDataStreamPaths,
 } from './policy_template';
 
 type PackagePolicyStream = RegistryStream & {
   data_stream: { type?: string; dataset: string };
 };
+
+/**
+ * Returns the effective discriminator for an input, regardless of whether it comes from
+ * the registry (`RegistryInput`) or a stored package policy (`NewPackagePolicyInput`).
+ *
+ * Uses the explicit `name` field when present, falling back to `type`. This value is
+ * used as the keying and matching discriminator throughout Fleet so that multiple inputs
+ * of the same `type` within one policy template can be distinguished.
+ */
+export const getInputEffectiveName = (input: { name?: string; type: string }): string =>
+  input.name ?? input.type;
+
+/**
+ * Returns true if the given data stream must be treated as OTel for Elasticsearch asset naming.
+ *
+ * A data stream is considered OTel when either:
+ * - it has no streams and its manifest sets `use_otel_suffix: true`, or
+ * - any of its `streams[].input` values is the literal type `'otelcol'`, or the `name` of an input
+ *   within `pkgInfo.policy_templates[*].inputs` whose `type` is `'otelcol'`.
+ *
+ * The named input case handles the package-spec 3.6.1+ feature where multiple inputs of the same
+ * type coexist in one policy template and data streams reference them by name instead of by type.
+ * The `use_otel_suffix` opt-in covers packages that ship only field mappings and ingest pipelines,
+ * and therefore have no streams to derive the input from.
+ *
+ * This drives Elasticsearch asset naming only (see `getRegistryDataStreamAssetBaseName`); it must
+ * not be used to decide whether a package produces OTel collector configuration, since a
+ * `use_otel_suffix` data stream has no `otelcol` input to generate that config from.
+ */
+export const dataStreamUsesOtelInput = (
+  pkgInfo: Pick<PackageInfo, 'policy_templates'>,
+  dataStream: Pick<RegistryDataStream, 'streams' | 'use_otel_suffix'>
+): boolean => {
+  // package-spec (SVR00011) only allows `use_otel_suffix` on data streams without inputs; data
+  // streams with inputs get `.otel` naming from the `otelcol` input instead. Ignore the flag when
+  // both are set so asset naming stays aligned with where the agent actually writes.
+  if (dataStream.use_otel_suffix === true && !dataStream.streams?.length) {
+    return true;
+  }
+
+  const namedOtelInputs = new Set<string>();
+  for (const tpl of pkgInfo.policy_templates ?? []) {
+    for (const input of getNormalizedInputs(tpl)) {
+      if (input.type === OTEL_COLLECTOR_INPUT_TYPE && input.name) {
+        namedOtelInputs.add(input.name);
+      }
+    }
+  }
+  return (dataStream.streams ?? []).some(
+    (stream) => stream.input === OTEL_COLLECTOR_INPUT_TYPE || namedOtelInputs.has(stream.input)
+  );
+};
+
+/**
+ * Builds the composite key used to index input validation results and var definitions.
+ * For packages with integrations (multiple policy templates), the key is prefixed with
+ * the policy template name to avoid collisions across templates.
+ */
+export const buildInputKey = (
+  effectiveName: string,
+  policyTemplateName: string | undefined,
+  hasIntegrations: boolean
+): string =>
+  hasIntegrations && policyTemplateName ? `${policyTemplateName}-${effectiveName}` : effectiveName;
 
 export const getStreamsForInputType = (
   inputType: string,
@@ -114,13 +181,15 @@ export const packageToPackagePolicyInputs = (
 
   packageInfo.policy_templates?.forEach((packagePolicyTemplate) => {
     const normalizedInputs = getNormalizedInputs(packagePolicyTemplate);
+    // Scope stream resolution to this policy template's own data stream(s). For input packages
+    // with several templates that share the same input type, this prevents each template's input
+    // from picking up every template's stream (which duplicated stream vars like data_stream.dataset).
+    const dataStreamPaths = getPolicyTemplateDataStreamPaths(packageInfo, packagePolicyTemplate);
     normalizedInputs?.forEach((packageInput) => {
-      const inputKey = `${packagePolicyTemplate.name}-${packageInput.type}`;
+      const inputKey = `${packagePolicyTemplate.name}-${getInputEffectiveName(packageInput)}`;
       const input = {
         ...packageInput,
-        ...(isIntegrationPolicyTemplate(packagePolicyTemplate) && packagePolicyTemplate.data_streams
-          ? { data_streams: packagePolicyTemplate.data_streams }
-          : {}),
+        ...(dataStreamPaths.length ? { data_streams: dataStreamPaths } : {}),
         policy_template: packagePolicyTemplate.name,
       };
       packageInputsByPolicyTemplateAndType[inputKey] = input;
@@ -131,9 +200,13 @@ export const packageToPackagePolicyInputs = (
     const streamsForInput: NewPackagePolicyInputStream[] = [];
     let varsForInput: PackagePolicyConfigRecord = {};
 
+    // Use the input's id as the discriminator for stream matching when present,
+    // so that stream.input values reference the input id rather than the type.
+    const streamMatchKey = getInputEffectiveName(packageInput);
+
     // Map each package input stream into package policy input stream
     const streams = getStreamsForInputType(
-      packageInput.type,
+      streamMatchKey,
       packageInfo,
       packageInput.data_streams
     ).map((packageStream) => {
@@ -178,6 +251,7 @@ export const packageToPackagePolicyInputs = (
 
     const input: NewPackagePolicyInput = {
       type: packageInput.type,
+      ...(packageInput.name ? { name: packageInput.name } : {}),
       policy_template: packageInput.policy_template,
       enabled: enableInput,
       streams: streamsForInput,

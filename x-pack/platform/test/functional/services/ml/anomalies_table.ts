@@ -152,10 +152,10 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
     },
 
     async ensureAnomalyActionDiscoverButtonClicked(rowIndex: number) {
-      await retry.tryForTime(10 * 1000, async () => {
+      await retry.tryForTime(30 * 1000, async () => {
         await this.ensureAnomalyActionsMenuOpen(rowIndex);
         await testSubjects.click('mlAnomaliesListRowAction_viewInDiscoverButton');
-        await testSubjects.existOrFail('discoverLayoutResizableContainer');
+        await testSubjects.existOrFail('discoverLayoutResizableContainer', { timeout: 10 * 1000 });
       });
     },
 

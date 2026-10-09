@@ -5,56 +5,49 @@
  * 2.0.
  */
 
-import type { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold';
 import type { Rule } from '@kbn/alerts-ui-shared';
-import type { Filter } from '@kbn/es-query';
-import {
-  FilterStateStore,
-  buildCustomFilter,
-  fromKueryExpression,
-  toElasticsearchQuery,
-} from '@kbn/es-query';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { ALERT_GROUPING, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { getViewInAppLocatorParams } from '../../../../../../common/custom_threshold_rule/get_view_in_app_url';
+import { getDataViewId } from '../../../../../../common/custom_threshold_rule/helpers/get_data_view_id';
+import { getGroupsFromGroupingObject } from '../../../../../../common/custom_threshold_rule/helpers/get_group';
+import type {
+  CustomThresholdExpressionMetric,
+  SearchConfigurationWithExtractedReferenceType,
+} from '../../../../../../common/custom_threshold_rule/types';
+import type { TopAlert } from '../../../../../typings/alerts';
 
-export const getCustomThresholdRuleData = ({ rule }: { rule: Rule }) => {
-  const ruleParams = rule.params as CustomThresholdParams;
-  const { index } = ruleParams.searchConfiguration;
-  let dataViewId: string | undefined;
-  if (typeof index === 'string') {
-    dataViewId = index;
-  } else if (index) {
-    dataViewId = index.title;
+interface SnapshotCriterion {
+  metrics?: CustomThresholdExpressionMetric[];
+}
+
+const toCriteria = (criteria: unknown): SnapshotCriterion[] => {
+  if (Array.isArray(criteria)) {
+    return criteria as SnapshotCriterion[];
+  }
+  return criteria ? [criteria as SnapshotCriterion] : [];
+};
+
+export const getCustomThresholdRuleData = ({ alert }: { rule: Rule; alert: TopAlert }) => {
+  const ruleParams = alert.fields[ALERT_RULE_PARAMETERS] as
+    | {
+        searchConfiguration?: SearchConfigurationWithExtractedReferenceType;
+        criteria?: unknown;
+      }
+    | undefined;
+  const searchConfiguration = ruleParams?.searchConfiguration;
+  if (!searchConfiguration) {
+    return {};
   }
 
-  const filters = ruleParams.criteria
-    .flatMap(({ metrics }) =>
-      metrics.map((metric) => {
-        return metric.filter && dataViewId
-          ? buildCustomFilter(
-              dataViewId,
-              toElasticsearchQuery(fromKueryExpression(metric.filter)),
-              true,
-              false,
-              null,
-              FilterStateStore.APP_STATE
-            )
-          : undefined;
-      })
-    )
-    .filter((f): f is Filter => f !== undefined);
+  const criteria = toCriteria(ruleParams?.criteria);
+  const dataViewId = getDataViewId(searchConfiguration);
 
   return {
-    discoverAppLocatorParams: {
-      ...getViewInAppLocatorParams({
-        dataViewId,
-        searchConfiguration: {
-          index: ruleParams.searchConfiguration.index as DataViewSpec | string,
-          query: ruleParams.searchConfiguration.query,
-          filter: ruleParams.searchConfiguration.filter,
-        },
-      }),
-      filters,
-    },
+    discoverAppLocatorParams: getViewInAppLocatorParams({
+      dataViewId,
+      groups: getGroupsFromGroupingObject(alert.fields[ALERT_GROUPING]),
+      metrics: criteria.flatMap((criterion) => criterion.metrics ?? []),
+      searchConfiguration,
+    }),
   };
 };

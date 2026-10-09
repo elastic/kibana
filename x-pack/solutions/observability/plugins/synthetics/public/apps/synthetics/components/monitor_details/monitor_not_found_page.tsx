@@ -13,16 +13,36 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useParams } from 'react-router-dom';
 import { CreateMonitorButton } from '../monitors_page/create_monitor_button';
+import { useMonitorListBreadcrumbs } from '../monitors_page/hooks/use_breadcrumbs';
+import { MONITORS_ROUTE } from '../../../../../common/constants';
 import { PLUGIN } from '../../../../../common/constants/plugin';
 import type { ClientPluginsStart } from '../../../../plugin';
+import { MONITORS_TITLE, SyntheticsPage } from '../common/app_header';
 
 export const MonitorNotFoundPage: React.FC = () => {
+  useMonitorListBreadcrumbs([{ text: MONITOR_NOT_FOUND_TITLE }]);
+  const { application } = useKibana<ClientPluginsStart>().services;
+
+  return (
+    <SyntheticsPage
+      title={MONITORS_TITLE}
+      back={{
+        href: `${application.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID)}${MONITORS_ROUTE}`,
+        label: MONITORS_TITLE,
+      }}
+    >
+      <MonitorNotFoundPrompt />
+    </SyntheticsPage>
+  );
+};
+
+export const MonitorNotFoundPrompt: React.FC = () => {
   const { application } = useKibana<ClientPluginsStart>().services;
   const { monitorId } = useParams<{ monitorId: string }>();
 
   return (
     <NotFoundPrompt
-      title={NOT_FOUND_TITLE}
+      title={MONITOR_NOT_FOUND_TITLE}
       body={
         <FormattedMessage
           id="xpack.synthetics.prompt.errors.notFound.body"
@@ -49,6 +69,9 @@ export const MonitorNotFoundPage: React.FC = () => {
   );
 };
 
-const NOT_FOUND_TITLE = i18n.translate('xpack.synthetics.prompt.errors.notFound.title', {
-  defaultMessage: 'Monitor not found',
-});
+export const MONITOR_NOT_FOUND_TITLE = i18n.translate(
+  'xpack.synthetics.prompt.errors.notFound.title',
+  {
+    defaultMessage: 'Monitor not found',
+  }
+);

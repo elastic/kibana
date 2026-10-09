@@ -6,6 +6,13 @@
  */
 
 import {
+  ConnectorTypeFieldsSchema,
+  CaseUserActionConnectorSchema,
+  CaseConnectorSchema,
+  ConnectorMappingsSchema,
+  ConnectorMappingsAttributesSchema,
+} from '../../domain_zod/connector/v1';
+import {
   ConnectorTypeFieldsRt,
   CaseUserActionConnectorRt,
   CaseConnectorRt,
@@ -57,6 +64,27 @@ describe('Connector', () => {
         right: defaultRequest,
       });
     });
+
+    it('zod: has expected attributes in request', () => {
+      const result = ConnectorTypeFieldsSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = ConnectorTypeFieldsSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields from fields', () => {
+      const result = ConnectorTypeFieldsSchema.safeParse({
+        ...defaultRequest,
+        fields: { ...defaultRequest.fields, foo: 'bar' },
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('CaseUserActionConnectorRt', () => {
@@ -101,6 +129,18 @@ describe('Connector', () => {
         _tag: 'Right',
         right: defaultRequest,
       });
+    });
+
+    it('zod: has expected attributes in request', () => {
+      const result = CaseUserActionConnectorSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = CaseUserActionConnectorSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
@@ -147,6 +187,18 @@ describe('Connector', () => {
         _tag: 'Right',
         right: defaultRequest,
       });
+    });
+
+    it('zod: has expected attributes in request', () => {
+      const result = CaseConnectorSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = CaseConnectorSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
@@ -206,6 +258,21 @@ describe('Connector', () => {
           right: mappings,
         });
       });
+
+      it('zod: has expected attributes in request', () => {
+        const result = ConnectorMappingsSchema.safeParse(mappings);
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(mappings);
+      });
+
+      it('zod: strips unknown fields from mappings', () => {
+        const result = ConnectorMappingsSchema.safeParse([
+          { ...mappings[0] },
+          { action_type: 'append', source: 'description', target: 'not_mapped', foo: 'bar' },
+        ]);
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(mappings);
+      });
     });
 
     describe('ConnectorMappingsAttributesRt', () => {
@@ -237,6 +304,27 @@ describe('Connector', () => {
           _tag: 'Right',
           right: { ...attributes, mappings: [{ ...attributes.mappings[0] }] },
         });
+      });
+
+      it('zod: has expected attributes in request', () => {
+        const result = ConnectorMappingsAttributesSchema.safeParse(attributes);
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(attributes);
+      });
+
+      it('zod: strips unknown fields', () => {
+        const result = ConnectorMappingsAttributesSchema.safeParse({ ...attributes, foo: 'bar' });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(attributes);
+      });
+
+      it('zod: strips unknown fields from mappings', () => {
+        const result = ConnectorMappingsAttributesSchema.safeParse({
+          ...attributes,
+          mappings: [{ ...attributes.mappings[0], foo: 'bar' }],
+        });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual({ ...attributes, mappings: [attributes.mappings[0]] });
       });
     });
   });

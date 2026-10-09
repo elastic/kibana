@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const ReadPrivilegesCheckResponse = lazySchema(() => z.object({}));
 export type ReadPrivilegesCheckResponse = z.infer<typeof ReadPrivilegesCheckResponse>;
-export const ReadPrivilegesCheckResponse = z.object({});

@@ -10,6 +10,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -91,7 +92,10 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
               {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiButton
                 fill
-                onClick={props.onClose}
+                onClick={(e: React.MouseEvent) => {
+                  if (hasActiveModifierKey(e)) return;
+                  props.onClose();
+                }}
                 data-test-subj="manageSearchesBtn"
                 href={addBasePath(
                   `/app/management/kibana/objects?initialQuery=type:("${SavedSearchTypeDisplayName}")`

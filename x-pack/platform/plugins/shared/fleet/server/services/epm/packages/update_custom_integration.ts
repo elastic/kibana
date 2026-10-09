@@ -9,7 +9,7 @@ import type {
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { load, dump } from 'js-yaml';
+import { parse, stringify } from 'yaml';
 
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -98,10 +98,10 @@ export async function incrementVersionAndUpdate(
 
   const assetsMap = [...installedPkg!.assetsMap.entries()].reduce((acc, [path, content]) => {
     if (path === `${pkgName}-${installedPkg!.installation.install_version}/manifest.yml`) {
-      const yaml = load(content!.toString());
+      const yaml = parse(content!.toString());
       yaml.version = data.version;
 
-      content = Buffer.from(dump(yaml));
+      content = Buffer.from(stringify(yaml));
     }
 
     acc.set(
@@ -116,10 +116,10 @@ export async function incrementVersionAndUpdate(
     const manifestPath = `${pkgName}-${data.version}/manifest.yml`;
     const manifest = assetsMap.get(manifestPath);
     if (manifest) {
-      const yaml = load(manifest?.toString());
+      const yaml = parse(manifest?.toString());
       if (yaml) {
         yaml.categories = data.categories || [];
-        assetsMap.set(manifestPath, Buffer.from(dump(yaml)));
+        assetsMap.set(manifestPath, Buffer.from(stringify(yaml)));
       }
     }
   }
@@ -133,7 +133,7 @@ export async function incrementVersionAndUpdate(
   const changelogPath = `${pkgName}-${data.version}/changelog.yml`;
   const changelog = assetsMap.get(changelogPath);
   if (changelog) {
-    const yaml = load(changelog?.toString());
+    const yaml = parse(changelog?.toString());
     if (yaml) {
       const newChangelogItem = {
         version: data.version,
@@ -147,7 +147,7 @@ export async function incrementVersionAndUpdate(
         ],
       };
       yaml.push(newChangelogItem);
-      assetsMap.set(changelogPath, Buffer.from(dump(yaml)));
+      assetsMap.set(changelogPath, Buffer.from(stringify(yaml)));
     }
   }
 

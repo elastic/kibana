@@ -11,13 +11,22 @@ import { execSync } from 'child_process';
 import { writeFileSync, mkdirSync, rmSync } from 'fs';
 import { resolve } from 'path';
 import { run } from '@kbn/dev-cli-runner';
-import { runOasdiff, parseOasdiff, applyAllowlist } from '../src/diff';
+import { createFailError } from '@kbn/dev-cli-errors';
+import {
+  runOasdiff,
+  runOasdiffStructural,
+  parseOasdiff,
+  applyAllowlist,
+  buildRequestBodyIndex,
+  detectAdditionalPropertiesTightening,
+} from '../src/diff';
+import { loadOas } from '../src/input/load_oas';
 import { formatFailure } from '../src/report/format_failure';
 import { writeImpactReport } from '../src/report/write_impact_report';
+import type { ImpactReportEntry } from '../src/report/write_impact_report';
+import type { BreakingChange } from '../src/diff';
 import { loadAllowlist } from '../src/allowlist/load_allowlist';
-import { checkTerraformImpact } from '../src/terraform/check_terraform_impact';
-import { loadTerraformApis } from '../src/terraform/load_terraform_apis';
-import { buildMatchPath } from '../src/terraform/build_match_path';
+import { resolveTier, isGatingTier } from '../src/stability';
 
 type Distribution = 'stack' | 'serverless';
 
@@ -29,7 +38,6 @@ interface CheckContractsOptions {
   baseBranch: string;
   mergeBase?: string;
   allowlistPath?: string;
-  terraformApisPath?: string;
   reportPath?: string;
 }
 
@@ -155,7 +163,6 @@ run(
       baseBranch: (flags.baseBranch as string) || 'main',
       mergeBase: (flags.mergeBase as string) || undefined,
       allowlistPath: (flags.allowlistPath as string) || undefined,
-      terraformApisPath: (flags.terraformApisPath as string) || undefined,
       reportPath: (flags.reportPath as string) || undefined,
     };
 
@@ -179,14 +186,11 @@ run(
 
     try {
       const currentPath = resolve(process.cwd(), opts.specPath);
-      const terraformApis = loadTerraformApis(opts.terraformApisPath);
-      const matchPath = buildMatchPath(terraformApis);
-      if (matchPath) {
-        log.info(`Filtering oasdiff to ${terraformApis.length} Terraform provider API paths`);
-      }
       let diffEntries;
+      let structuralDiff: unknown;
       try {
-        diffEntries = runOasdiff(basePath, currentPath, { matchPath });
+        diffEntries = runOasdiff(basePath, currentPath);
+        structuralDiff = runOasdiffStructural(basePath, currentPath);
       } catch (error: unknown) {
         // Some older branch specs (e.g. 9.3) have example objects incorrectly
         // placed under `#/components/schemas/` instead of `#/components/examples/`.
@@ -202,61 +206,130 @@ run(
         }
         throw error;
       }
-      const allBreakingChanges = parseOasdiff(diffEntries);
+
+      const currentOas = await loadOas(currentPath);
+      const requestBodyIndex = buildRequestBodyIndex(currentOas);
+      const { entries: syntheticEntries, warnings: detectorWarnings } =
+        detectAdditionalPropertiesTightening(structuralDiff, requestBodyIndex);
+
+      for (const warning of detectorWarnings) {
+        log.warning(warning);
+      }
+
+      const allBreakingChanges = parseOasdiff([...diffEntries, ...syntheticEntries]);
+
+      // Every completed run writes a report, even an empty one, so the notifier can
+      // tell a clean run apart from a skipped or failed one and clear a stale comment.
+      const writeReport = (entries: ImpactReportEntry[]) => {
+        if (!opts.reportPath) {
+          return;
+        }
+        writeImpactReport(opts.reportPath, { distribution: opts.distribution, entries });
+        log.info(`Impact report written to ${opts.reportPath}`);
+      };
 
       if (allBreakingChanges.length === 0) {
+        writeReport([]);
         log.success('No breaking changes detected');
         return;
       }
 
-      const terraformImpact = checkTerraformImpact(allBreakingChanges, opts.terraformApisPath);
-
-      const tfBreakingChanges = terraformImpact.hasImpact
-        ? terraformImpact.impactedChanges.map((i) => i.change)
-        : [];
-
-      if (tfBreakingChanges.length === 0) {
-        log.success(
-          `${allBreakingChanges.length} breaking change(s) detected, none affect Terraform provider APIs`
-        );
-        return;
-      }
-
+      // Suppress approved breaks across the whole surface. The allowlist is the
+      // per-change escape hatch, tier-agnostic: an entry here clears the change
+      // whether it is stable or tech_preview.
       const allowlist = loadAllowlist(opts.allowlistPath);
-      const { breakingChanges, allowlistedChanges } = applyAllowlist(tfBreakingChanges, allowlist);
+      const { breakingChanges, allowlistedChanges } = applyAllowlist(allBreakingChanges, allowlist);
 
       if (allowlistedChanges.length > 0) {
         log.info(`${allowlistedChanges.length} allowlisted change(s) ignored`);
       }
 
+      // Tier from the base spec (the API as it existed before the break).
+      const baseOas = await loadOas(basePath);
+
+      const toEntry = (change: BreakingChange): ImpactReportEntry => {
+        const { tier, since } = resolveTier(baseOas, change);
+        const entry: ImpactReportEntry = {
+          path: change.path,
+          method: change.method,
+          reason: change.reason,
+          oasdiffId: change.oasdiffId,
+          source: change.source,
+          tier,
+        };
+        if (since !== undefined) {
+          entry.since = since;
+        }
+        if (change.reportOnly) {
+          entry.reportOnly = true;
+          entry.policyReason = change.policyReason;
+        }
+        return entry;
+      };
+
+      // Classify every breaking change by tier. All tiers are reported so the PR
+      // notifier can surface experimental breaks as an informational section, but
+      // only stable and tech_preview gate: experimental APIs do not
+      const entries = breakingChanges.map(toEntry);
+
+      // Allowlisted stable and tech_preview changes no longer gate, but they still
+      // ship as breaking changes, so they stay in the report to keep the release
+      // note guidance in front of the author.
+      const allowlistedEntries: ImpactReportEntry[] = allowlistedChanges
+        .map(toEntry)
+        .filter((entry) => isGatingTier(entry.tier) && !entry.reportOnly)
+        .map((entry) => ({ ...entry, allowlisted: true }));
+      const reportEntries = [...entries, ...allowlistedEntries];
+
+      writeReport(reportEntries);
+
       if (breakingChanges.length === 0) {
-        log.success('All Terraform-impacting breaking changes are allowlisted');
+        if (allowlistedEntries.length > 0) {
+          log.info(formatFailure(reportEntries));
+        }
+        log.success('All breaking changes are allowlisted');
         return;
       }
 
-      const filteredImpact = {
-        hasImpact: true,
-        impactedChanges: terraformImpact.impactedChanges.filter((i) =>
-          breakingChanges.includes(i.change)
-        ),
-      };
-
-      if (opts.reportPath) {
-        writeImpactReport(opts.reportPath, filteredImpact);
-        log.info(`Impact report written to ${opts.reportPath}`);
+      const gatingEntries = entries.filter(
+        (entry) => isGatingTier(entry.tier) && !entry.reportOnly
+      );
+      const reportOnlyCount = entries.filter((entry) => entry.reportOnly).length;
+      const experimentalCount = entries.filter(
+        (entry) => !entry.reportOnly && !isGatingTier(entry.tier)
+      ).length;
+      if (experimentalCount > 0) {
+        log.info(
+          `${experimentalCount} experimental-tier breaking change(s) reported (informational, not blocking)`
+        );
+      }
+      if (reportOnlyCount > 0) {
+        log.info(
+          `${reportOnlyCount} change(s) matched a report-only rule (informational, not blocking)`
+        );
       }
 
-      const report = formatFailure(breakingChanges, filteredImpact);
-      log.error(report);
-      throw new Error(
-        `Found ${breakingChanges.length} breaking change(s) affecting Terraform provider APIs`
+      if (gatingEntries.length === 0) {
+        log.info(formatFailure(reportEntries));
+        log.success('No breaking changes detected in stable or tech_preview APIs');
+        return;
+      }
+
+      const stableCount = gatingEntries.filter((entry) => entry.tier === 'stable').length;
+      const techPreviewCount = gatingEntries.length - stableCount;
+
+      log.error(formatFailure(reportEntries));
+      throw createFailError(
+        `Detected ${gatingEntries.length} breaking change(s) in stable/tech_preview APIs: ` +
+          `${stableCount} stable, ${techPreviewCount} tech_preview`
       );
     } finally {
       cleanup(basePath);
     }
   },
   {
-    description: 'Check API contracts for breaking changes affecting Terraform provider APIs',
+    description:
+      'Check API contracts for breaking changes across the stable and tech_preview API surface',
     flags: {
       string: [
         'distribution',
@@ -264,7 +337,6 @@ run(
         'baseBranch',
         'mergeBase',
         'allowlistPath',
-        'terraformApisPath',
         'reportPath',
       ],
       help: `
@@ -273,7 +345,6 @@ run(
         --baseBranch         Base branch to compare against (default: main)
         --mergeBase          Merge base commit SHA (used in CI, skips remote resolution)
         --allowlistPath      Override allowlist path (default: packages/kbn-api-contracts/allowlist.json)
-        --terraformApisPath  Override Terraform provider APIs config path
         --reportPath         Write a JSON impact report to this path (used by CI for PR notifications)
 
         Examples:

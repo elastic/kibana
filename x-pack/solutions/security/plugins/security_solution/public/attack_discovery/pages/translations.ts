@@ -14,6 +14,13 @@ export const CONNECTOR_ERROR = i18n.translate(
   }
 );
 
+export const ALERTS_INDEX_PATTERN_ERROR = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.errorAlertsIndexPattern',
+  {
+    defaultMessage: 'Alerts index pattern is required to generate attack discoveries',
+  }
+);
+
 export const ERROR_GENERATING_ATTACK_DISCOVERIES = i18n.translate(
   'xpack.securitySolution.attackDiscovery.errorGeneratingAttackDiscoveriesToastTitle',
   {

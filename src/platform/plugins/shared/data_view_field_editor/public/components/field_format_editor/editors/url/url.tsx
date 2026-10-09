@@ -78,7 +78,6 @@ export class UrlFormatEditor extends DefaultFormatEditor<
         img: ['go', 'stop', ['de', 'ne', 'us', 'ni'], 'cv'],
         audio: ['hello.mp3'],
       },
-      sampleConverterType: 'html',
       showUrlTemplateHelp: false,
       showLabelTemplateHelp: false,
     };
@@ -149,7 +148,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
 
   render() {
     const { formatParams, format } = this.props;
-    const { error, samples, sampleConverterType } = this.state;
+    const { error, samples } = this.state;
 
     const urlType = formatParams.type ?? `${format.getParamDefaults().type}`;
     return (
@@ -266,7 +265,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
 
         {urlType === 'img' && this.renderWidthHeightParameters()}
 
-        <FormatEditorSamples samples={samples} sampleType={sampleConverterType} />
+        <FormatEditorSamples samples={samples} />
       </Fragment>
     );
   }

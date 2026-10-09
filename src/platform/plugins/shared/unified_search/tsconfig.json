@@ -3,8 +3,9 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["public/**/*", "public/**/*.json", "../../../../../typings/**/*"],
+  "include": ["public/**/*", "public/**/*.json", "test/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
+    "@kbn/search-sessions-management-plugin",
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
@@ -41,10 +42,15 @@
     "@kbn/field-utils",
     "@kbn/esql-types",
     "@kbn/background-search",
-    "@kbn/split-button",
     "@kbn/cps",
     "@kbn/css-utils",
     "@kbn/kql",
+    "@kbn/date-range-picker",
+    "@kbn/date-range-picker-presets",
+    "@kbn/scout",
+    "@kbn/esql-utils",
+    "@kbn/licensing-plugin",
+    "@kbn/field-formats-common",
   ],
   "exclude": ["target/**/*"]
 }

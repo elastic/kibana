@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { NonEmptyString, SafeIdentifier, SemVer } from '../../primitive.gen';
 import {
@@ -28,221 +28,245 @@ import {
 /**
  * The intent of the download request.
  */
+export const DownloadIntent = lazySchema(() => z.enum(['download', 'install']));
 export type DownloadIntent = z.infer<typeof DownloadIntent>;
-export const DownloadIntent = z.enum(['download', 'install']);
 export type DownloadIntentEnum = typeof DownloadIntent.enum;
 export const DownloadIntentEnum = DownloadIntent.enum;
 
+export const ApproveIntegrationRequest = lazySchema(() =>
+  z
+    .object({
+      /**
+       * The version of the integration
+       */
+      version: SemVer,
+      /**
+       * The categories of the integration
+       */
+      categories: z.array(NonEmptyString).min(1).max(50),
+      /**
+       * The LangSmith tracing options
+       */
+      langSmithOptions: LangSmithOptions.optional(),
+    })
+    .strict()
+);
 export type ApproveIntegrationRequest = z.infer<typeof ApproveIntegrationRequest>;
-export const ApproveIntegrationRequest = z
-  .object({
-    /**
-     * The version of the integration
-     */
-    version: SemVer,
-    /**
-     * The categories of the integration
-     */
-    categories: z.array(NonEmptyString).min(1).max(50),
-    /**
-     * The LangSmith tracing options
-     */
-    langSmithOptions: LangSmithOptions.optional(),
-  })
-  .strict();
 
+export const ApproveAutoImportIntegrationRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The integration identifier
+     */
+    integration_id: SafeIdentifier,
+  })
+);
 export type ApproveAutoImportIntegrationRequestParams = z.infer<
   typeof ApproveAutoImportIntegrationRequestParams
 >;
-export const ApproveAutoImportIntegrationRequestParams = z.object({
-  /**
-   * The integration identifier
-   */
-  integration_id: SafeIdentifier,
-});
 export type ApproveAutoImportIntegrationRequestParamsInput = z.input<
   typeof ApproveAutoImportIntegrationRequestParams
 >;
 
+export const ApproveAutoImportIntegrationRequestBody = lazySchema(() => ApproveIntegrationRequest);
 export type ApproveAutoImportIntegrationRequestBody = z.infer<
   typeof ApproveAutoImportIntegrationRequestBody
 >;
-export const ApproveAutoImportIntegrationRequestBody = ApproveIntegrationRequest;
 export type ApproveAutoImportIntegrationRequestBodyInput = z.input<
   typeof ApproveAutoImportIntegrationRequestBody
 >;
 
+export const CreateAutoImportIntegrationRequestBody = lazySchema(() =>
+  z
+    .object({
+      /**
+       * The connector id
+       */
+      connectorId: NonEmptyString,
+      /**
+       * The integration id
+       */
+      integrationId: SafeIdentifier,
+      /**
+       * The title of the integration
+       */
+      title: NonEmptyString,
+      /**
+       * The description of the integration
+       */
+      description: NonEmptyString,
+      /**
+       * The LangSmith tracing options
+       */
+      langSmithOptions: LangSmithOptions.optional(),
+      /**
+       * The logo of the integration
+       */
+      logo: NonEmptyString.optional(),
+      /**
+       * The data streams of the integration
+       */
+      dataStreams: z.array(DataStream).max(50).optional(),
+    })
+    .strict()
+);
 export type CreateAutoImportIntegrationRequestBody = z.infer<
   typeof CreateAutoImportIntegrationRequestBody
 >;
-export const CreateAutoImportIntegrationRequestBody = z
-  .object({
-    /**
-     * The connector id
-     */
-    connectorId: NonEmptyString,
-    /**
-     * The integration id
-     */
-    integrationId: SafeIdentifier,
-    /**
-     * The title of the integration
-     */
-    title: NonEmptyString,
-    /**
-     * The description of the integration
-     */
-    description: NonEmptyString,
-    /**
-     * The LangSmith tracing options
-     */
-    langSmithOptions: LangSmithOptions.optional(),
-    /**
-     * The logo of the integration
-     */
-    logo: NonEmptyString.optional(),
-    /**
-     * The data streams of the integration
-     */
-    dataStreams: z.array(DataStream).max(50).optional(),
-  })
-  .strict();
 export type CreateAutoImportIntegrationRequestBodyInput = z.input<
   typeof CreateAutoImportIntegrationRequestBody
 >;
 
+export const CreateAutoImportIntegrationResponse = lazySchema(() =>
+  z
+    .object({
+      /**
+       * The integration id created in state.
+       */
+      integration_id: NonEmptyString.optional(),
+    })
+    .strict()
+);
 export type CreateAutoImportIntegrationResponse = z.infer<
   typeof CreateAutoImportIntegrationResponse
 >;
-export const CreateAutoImportIntegrationResponse = z
-  .object({
-    /**
-     * The integration id created in state.
-     */
-    integration_id: NonEmptyString.optional(),
-  })
-  .strict();
 
+export const DeleteAutoImportIntegrationRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The integration identifier
+     */
+    integration_id: SafeIdentifier,
+  })
+);
 export type DeleteAutoImportIntegrationRequestParams = z.infer<
   typeof DeleteAutoImportIntegrationRequestParams
 >;
-export const DeleteAutoImportIntegrationRequestParams = z.object({
-  /**
-   * The integration identifier
-   */
-  integration_id: SafeIdentifier,
-});
 export type DeleteAutoImportIntegrationRequestParamsInput = z.input<
   typeof DeleteAutoImportIntegrationRequestParams
 >;
 
+export const DownloadAutoImportIntegrationRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * The intent of the download request. When set to 'install', install telemetry is reported.
+     */
+    intent: DownloadIntent.optional(),
+  })
+);
 export type DownloadAutoImportIntegrationRequestQuery = z.infer<
   typeof DownloadAutoImportIntegrationRequestQuery
 >;
-export const DownloadAutoImportIntegrationRequestQuery = z.object({
-  /**
-   * The intent of the download request. When set to 'install', install telemetry is reported.
-   */
-  intent: DownloadIntent.optional(),
-});
 export type DownloadAutoImportIntegrationRequestQueryInput = z.input<
   typeof DownloadAutoImportIntegrationRequestQuery
 >;
 
+export const DownloadAutoImportIntegrationRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The integration identifier
+     */
+    integration_id: SafeIdentifier,
+  })
+);
 export type DownloadAutoImportIntegrationRequestParams = z.infer<
   typeof DownloadAutoImportIntegrationRequestParams
 >;
-export const DownloadAutoImportIntegrationRequestParams = z.object({
-  /**
-   * The integration identifier
-   */
-  integration_id: SafeIdentifier,
-});
 export type DownloadAutoImportIntegrationRequestParamsInput = z.input<
   typeof DownloadAutoImportIntegrationRequestParams
 >;
 
+export const GetAllAutoImportIntegrationsResponse = lazySchema(() =>
+  z.array(AllIntegrationsResponseIntegration)
+);
 export type GetAllAutoImportIntegrationsResponse = z.infer<
   typeof GetAllAutoImportIntegrationsResponse
 >;
-export const GetAllAutoImportIntegrationsResponse = z.array(AllIntegrationsResponseIntegration);
 
+export const GetAutoImportIntegrationRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The integration identifier
+     */
+    integration_id: SafeIdentifier,
+  })
+);
 export type GetAutoImportIntegrationRequestParams = z.infer<
   typeof GetAutoImportIntegrationRequestParams
 >;
-export const GetAutoImportIntegrationRequestParams = z.object({
-  /**
-   * The integration identifier
-   */
-  integration_id: SafeIdentifier,
-});
 export type GetAutoImportIntegrationRequestParamsInput = z.input<
   typeof GetAutoImportIntegrationRequestParams
 >;
 
+export const GetAutoImportIntegrationResponse = lazySchema(() =>
+  z
+    .object({
+      integrationResponse: IntegrationResponse,
+    })
+    .strict()
+);
 export type GetAutoImportIntegrationResponse = z.infer<typeof GetAutoImportIntegrationResponse>;
-export const GetAutoImportIntegrationResponse = z
-  .object({
-    integrationResponse: IntegrationResponse,
-  })
-  .strict();
 
+export const UpdateAutoImportIntegrationRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The integration identifier
+     */
+    integration_id: SafeIdentifier,
+  })
+);
 export type UpdateAutoImportIntegrationRequestParams = z.infer<
   typeof UpdateAutoImportIntegrationRequestParams
 >;
-export const UpdateAutoImportIntegrationRequestParams = z.object({
-  /**
-   * The integration identifier
-   */
-  integration_id: SafeIdentifier,
-});
 export type UpdateAutoImportIntegrationRequestParamsInput = z.input<
   typeof UpdateAutoImportIntegrationRequestParams
 >;
 
+export const UpdateAutoImportIntegrationRequestBody = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Integration description
+       */
+      description: NonEmptyString.optional(),
+      /**
+       * Integration logo image blob
+       */
+      logo: NonEmptyString.optional(),
+      /**
+       * The LangSmith tracing options
+       */
+      langSmithOptions: LangSmithOptions.optional(),
+      /**
+       * The data streams of the integration
+       */
+      dataStreams: z
+        .array(
+          z
+            .object({
+              /**
+               * The description of the data stream
+               */
+              description: NonEmptyString.optional(),
+              /**
+               * The input types of the data stream
+               */
+              inputTypes: z.array(InputType).max(100).optional(),
+              /**
+               * The raw samples of the data stream
+               */
+              rawSamples: z.array(NonEmptyString).max(1000).optional(),
+            })
+            .strict()
+        )
+        .max(50)
+        .optional(),
+    })
+    .strict()
+);
 export type UpdateAutoImportIntegrationRequestBody = z.infer<
   typeof UpdateAutoImportIntegrationRequestBody
 >;
-export const UpdateAutoImportIntegrationRequestBody = z
-  .object({
-    /**
-     * Integration description
-     */
-    description: NonEmptyString.optional(),
-    /**
-     * Integration logo image blob
-     */
-    logo: NonEmptyString.optional(),
-    /**
-     * The LangSmith tracing options
-     */
-    langSmithOptions: LangSmithOptions.optional(),
-    /**
-     * The data streams of the integration
-     */
-    dataStreams: z
-      .array(
-        z
-          .object({
-            /**
-             * The description of the data stream
-             */
-            description: NonEmptyString.optional(),
-            /**
-             * The input types of the data stream
-             */
-            inputTypes: z.array(InputType).max(100).optional(),
-            /**
-             * The raw samples of the data stream
-             */
-            rawSamples: z.array(NonEmptyString).max(1000).optional(),
-          })
-          .strict()
-      )
-      .max(50)
-      .optional(),
-  })
-  .strict();
 export type UpdateAutoImportIntegrationRequestBodyInput = z.input<
   typeof UpdateAutoImportIntegrationRequestBody
 >;

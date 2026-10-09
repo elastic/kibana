@@ -17,12 +17,14 @@ import { msToSeconds } from '../utils';
  * @param isPaused - Whether the auto-refresh timer is paused.
  * @param intervalMs - The interval in milliseconds.
  * @param onRefresh - The callback to fire when the auto-refresh interval is reached.
+ * @param refreshEpoch - Increment this value to reset the countdown immediately (e.g. when an
+ *   external timer fires a refresh). `undefined` on initial render is ignored.
  *
  * When `isPaused` is false and `intervalMs > 0`, fires `onRefresh` repeatedly
  * at the given interval and tracks the seconds remaining until the next refresh.
  *
  * Pausing freezes the countdown; resuming continues from where it left off.
- * The countdown resets only when `intervalMs` changes.
+ * The countdown resets when `intervalMs` changes or when `refreshEpoch` increments.
  * `onRefresh` is kept in a ref so changing it never restarts the timer.
  *
  * @returns The seconds remaining until the next refresh, or `null` when the interval is invalid.
@@ -31,10 +33,12 @@ export function useAutoRefresh({
   isPaused,
   intervalMs,
   onRefresh,
+  refreshEpoch,
 }: {
   isPaused: boolean;
   intervalMs: number;
   onRefresh: (() => void) | undefined;
+  refreshEpoch?: number;
 }): { secondsRemaining: number | null } {
   const [secondsRemaining, setSecondsRemaining] = useState<number | null>(null);
 
@@ -53,7 +57,8 @@ export function useAutoRefresh({
     setSecondsRemaining(value);
   }, [intervalMs]);
 
-  // Run the countdown; pause without resetting, resume from current position
+  // Run the countdown; pause without resetting, resume from current position.
+  // Resets to the full interval when `refreshEpoch` increments (external refresh signal).
   useEffect(() => {
     const total = msToSeconds(intervalMs);
 
@@ -61,6 +66,14 @@ export function useAutoRefresh({
 
     let remaining = secondsRemainingRef.current ?? total;
     if (remaining <= 0) remaining = total;
+
+    // External refresh: reset to the full interval so the countdown stays in sync
+    // with the actual query cadence driven by the Kibana timefilter.
+    if (refreshEpoch != null) {
+      remaining = total;
+      secondsRemainingRef.current = total;
+      setSecondsRemaining(total);
+    }
 
     const tick = setInterval(() => {
       remaining -= 1;
@@ -74,7 +87,7 @@ export function useAutoRefresh({
     }, 1000);
 
     return () => clearInterval(tick);
-  }, [isPaused, intervalMs]);
+  }, [isPaused, intervalMs, refreshEpoch]);
 
   return { secondsRemaining };
 }

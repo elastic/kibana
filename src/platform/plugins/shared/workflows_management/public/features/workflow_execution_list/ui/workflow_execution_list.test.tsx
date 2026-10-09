@@ -11,30 +11,8 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import React from 'react';
 import { ExecutionStatus, type WorkflowExecutionListDto } from '@kbn/workflows';
 import { WorkflowExecutionList, type WorkflowExecutionListProps } from './workflow_execution_list';
-import { TestWrapper } from '../../../shared/test_utils';
-
-jest.mock('./workflow_execution_list_item', () => ({
-  WorkflowExecutionListItem: ({
-    status,
-    onClick,
-    selected,
-  }: {
-    status: string;
-    onClick: () => void;
-    selected: boolean;
-  }) => (
-    <div
-      data-test-subj="workflowExecutionListItem"
-      data-selected={selected}
-      onClick={onClick}
-      role="button"
-      onKeyDown={() => {}}
-      tabIndex={0}
-    >
-      {status}
-    </div>
-  ),
-}));
+import { createStartServicesMock, type StartServicesMock } from '../../../mocks';
+import { getTestProvider } from '../../../shared/mocks/test_providers';
 
 jest.mock('./workflow_execution_list_filters', () => ({
   ExecutionListFilters: () => <div data-test-subj="executionListFilters">{'Filters'}</div>,
@@ -92,18 +70,23 @@ describe('WorkflowExecutionList', () => {
     error: null,
     onExecutionClick: jest.fn(),
     selectedId: null,
+    lastViewedId: null,
     setPaginationObserver: jest.fn(),
     canCancel: true,
     isCancelInProgress: false,
     onConfirmCancel: jest.fn().mockResolvedValue(undefined),
+    hasNextPage: false,
   };
 
-  const renderComponent = (overrides: Partial<WorkflowExecutionListProps> = {}) => {
-    return render(
-      <TestWrapper>
-        <WorkflowExecutionList {...defaultProps} {...overrides} />
-      </TestWrapper>
-    );
+  const renderComponent = (
+    overrides: Partial<WorkflowExecutionListProps> = {},
+    services: StartServicesMock = createStartServicesMock()
+  ) => {
+    services.userProfile.bulkGet.mockResolvedValue([]);
+
+    return render(<WorkflowExecutionList {...defaultProps} {...overrides} />, {
+      wrapper: getTestProvider({ services }),
+    });
   };
 
   beforeEach(() => {
@@ -156,13 +139,18 @@ describe('WorkflowExecutionList', () => {
   });
 
   describe('with execution data', () => {
-    it('renders all execution items', () => {
+    it('renders a non-responsive four-column table of execution rows', () => {
       renderComponent();
-      const items = screen.getAllByTestId('workflowExecutionListItem');
-      expect(items).toHaveLength(2);
+      const table = screen.getByTestId('workflowExecutionListTable');
+      expect(table).toBeInTheDocument();
+      expect(screen.getByText('Status')).toBeInTheDocument();
+      expect(screen.getByText('Started')).toBeInTheDocument();
+      expect(screen.getByText('Triggered by')).toBeInTheDocument();
+      expect(screen.getByText('Duration')).toBeInTheDocument();
+      expect(screen.getAllByTestId('workflowExecutionListItem')).toHaveLength(2);
     });
 
-    it('calls onExecutionClick when an execution item is clicked', () => {
+    it('calls onExecutionClick when an execution row is clicked', () => {
       const onExecutionClick = jest.fn();
       renderComponent({ onExecutionClick });
       const items = screen.getAllByTestId('workflowExecutionListItem');
@@ -175,6 +163,36 @@ describe('WorkflowExecutionList', () => {
       const items = screen.getAllByTestId('workflowExecutionListItem');
       expect(items[0]).toHaveAttribute('data-selected', 'true');
       expect(items[1]).toHaveAttribute('data-selected', 'false');
+    });
+
+    it('shows unresolved executor labels on ESS', () => {
+      const services = createStartServicesMock();
+      services.cloud.isCloudEnabled = true;
+      services.cloud.isServerlessEnabled = false;
+
+      renderComponent({ showExecutor: true }, services);
+
+      expect(screen.getAllByTestId('workflowExecutionListItem')[0]).toHaveAttribute(
+        'data-executed-by-label',
+        'user1'
+      );
+    });
+
+    it('hides unresolved executor labels on Serverless', () => {
+      const services = createStartServicesMock();
+      services.cloud.isCloudEnabled = true;
+      services.cloud.isServerlessEnabled = true;
+
+      renderComponent({ showExecutor: true }, services);
+
+      expect(screen.getAllByTestId('workflowExecutionListItem')[0]).not.toHaveAttribute(
+        'data-executed-by-label'
+      );
+    });
+
+    it('shows a test-run flask on test executions', () => {
+      renderComponent();
+      expect(screen.getByLabelText('Test run')).toBeInTheDocument();
     });
   });
 
@@ -205,6 +223,39 @@ describe('WorkflowExecutionList', () => {
       const setPaginationObserver = jest.fn();
       renderComponent({ setPaginationObserver });
       expect(setPaginationObserver).toHaveBeenCalled();
+    });
+  });
+
+  describe('startedAt date handling', () => {
+    it('passes through a valid ISO startedAt string', () => {
+      renderComponent();
+      const items = screen.getAllByTestId('workflowExecutionListItem');
+      expect(items[0]).toHaveAttribute('data-started-at', '2024-01-01T10:00:00Z');
+    });
+
+    it('passes null when startedAt is an empty string', () => {
+      const withEmptyStartedAt: WorkflowExecutionListDto = {
+        results: [
+          {
+            id: 'exec-empty',
+            spaceId: 'default',
+            status: ExecutionStatus.PENDING,
+            isTestRun: false,
+            startedAt: '',
+            finishedAt: '',
+            error: null,
+            duration: null,
+            workflowId: 'wf-1',
+            workflowName: 'Test Workflow',
+          },
+        ],
+        page: 1,
+        size: 100,
+        total: 1,
+      };
+      renderComponent({ executions: withEmptyStartedAt });
+      const items = screen.getAllByTestId('workflowExecutionListItem');
+      expect(items[0]).toHaveAttribute('data-started-at', 'null');
     });
   });
 

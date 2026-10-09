@@ -30,16 +30,15 @@ import { useBulkEditFormFlyout } from './bulk_actions/use_bulk_edit_form_flyout'
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useAsyncConfirmation } from './rules_table/use_async_confirmation';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
-import { AllRulesTabs } from './rules_table_toolbar';
+import { AllRulesTabs, RULES_TABLE_PAGE_SIZE_OPTIONS } from './constants';
 import { RulesTableUtilityBar } from '../rules_table_utility_bar/rules_table_utility_bar';
 import { useMonitoringColumns, useRulesColumns } from './use_columns';
 import { useBulkDuplicateExceptionsConfirmation } from './bulk_actions/use_bulk_duplicate_confirmation';
 import { BulkActionDuplicateExceptionsConfirmation } from './bulk_actions/bulk_duplicate_exceptions_confirmation';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
-import { RULES_TABLE_PAGE_SIZE_OPTIONS } from './constants';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
 import type { FindRulesSortField } from '../../../../../common/api/detection_engine/rule_management';
-import { useIsUpgradingSecurityPackages } from '../../../rule_management/logic/use_upgrade_security_packages';
+import { useIsInitializingPrebuiltRulesPackage } from '../../../rule_management/logic/prebuilt_rules/use_is_initializing_prebuilt_rules_package';
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
 import { BulkManualRuleRunLimitErrorModal } from './bulk_actions/bulk_manual_rule_run_limit_error_modal';
@@ -77,7 +76,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const {
     rules: { read: canReadRules },
   } = useUserPrivileges().rulesPrivileges;
-  const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
+  const isInitializingPrebuiltRulesPackage = useIsInitializingPrebuiltRulesPackage();
 
   const rulesTableContext = useRulesTableContext();
   const { data: ruleManagementFilters } = useRuleManagementFilters();
@@ -281,7 +280,8 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       break;
   }
 
-  const shouldShowLinearProgress = (isFetched && isRefetching) || isUpgradingSecurityPackages;
+  const shouldShowLinearProgress =
+    (isFetched && isRefetching) || isInitializingPrebuiltRulesPackage;
   const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isPreflightInProgress;
   const rulesCount = Math.max(isAllSelected ? pagination.total : selectedRuleIds?.length ?? 0, 1);
 
@@ -393,6 +393,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
           <EuiBasicTable
             itemId="id"
             items={rules}
+            tableCaption={i18n.RULES_TABLE_CAPTION}
             noItemsMessage={NO_ITEMS_MESSAGE}
             onChange={tableOnChangeCallback}
             pagination={paginationMemo}

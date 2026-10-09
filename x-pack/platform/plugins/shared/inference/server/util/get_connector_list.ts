@@ -17,6 +17,8 @@ import {
 import type { ActionsClientProvider } from '../types';
 import { getInferenceEndpoints } from './get_inference_endpoints';
 
+const OCR_ONLY_PROPERTY = 'ocr-only';
+
 interface GetConnectorListWithRequestOptions {
   actions: ActionsClientProvider;
   request: KibanaRequest;
@@ -71,6 +73,9 @@ export const getConnectorList = async (
 
   const connectors = connectorsResult.status === 'fulfilled' ? connectorsResult.value : [];
   const endpoints = endpointsResult.status === 'fulfilled' ? endpointsResult.value : [];
+  const selectableEndpoints = endpoints.filter(
+    (ep) => !ep.metadata?.heuristics?.properties?.includes(OCR_ONLY_PROPERTY)
+  );
 
   const stackConnectorByInferenceId = new Map(
     connectors
@@ -78,27 +83,30 @@ export const getConnectorList = async (
       .map((c) => [c.config?.inferenceId as string, c])
   );
 
-  const inferenceEndpointConnectors: InferenceConnector[] = endpoints.map((ep) => ({
-    type: InferenceConnectorType.Inference,
-    name:
-      ep.metadata.display?.name ??
-      stackConnectorByInferenceId.get(ep.inferenceId)?.name ??
-      ep.inferenceId,
-    connectorId: ep.inferenceId,
-    config: {
-      inferenceId: ep.inferenceId,
-      providerConfig: {
-        model_id: ep.serviceSettings?.model_id, // for backwards compatibility, consider removing in future
+  const inferenceEndpointConnectors: (InferenceConnector & { creator?: string })[] =
+    selectableEndpoints.map((ep) => ({
+      type: InferenceConnectorType.Inference,
+      name:
+        ep.metadata?.display?.name ??
+        stackConnectorByInferenceId.get(ep.inferenceId)?.name ??
+        ep.inferenceId,
+      creator: ep.metadata?.display?.model_creator,
+      connectorId: ep.inferenceId,
+      config: {
+        inferenceId: ep.inferenceId,
+        providerConfig: {
+          model_id: ep.serviceSettings?.model_id, // for backwards compatibility, consider removing in future
+        },
+        taskType: ep.taskType,
+        service: ep.service,
+        modelCreator: ep.metadata?.display?.model_creator,
       },
-      taskType: ep.taskType,
-      service: ep.service,
-      serviceSettings: ep.serviceSettings,
-    },
-    capabilities: {},
-    isInferenceEndpoint: true,
-    isPreconfigured: !!ep.metadata.display?.name,
-    isEis: ep.service === 'elastic',
-  }));
+      capabilities: {},
+      isInferenceEndpoint: true,
+      isPreconfigured: !!ep.metadata?.display?.name,
+      isEis: ep.service === 'elastic',
+      metadata: ep.metadata,
+    }));
 
   // Exclude .inference stack connectors that have a corresponding ES inference endpoint,
   // since the endpoint representation is preferred (includes native endpoints too).

@@ -16,8 +16,15 @@ import { DEFAULT_TIMEPICKER_QUICK_RANGES, INTEGRATED_SOLUTIONS } from '../../../
 import { SyntheticsApp } from './synthetics_app';
 
 export const getSyntheticsAppProps = (): SyntheticsAppProps => {
-  const { isDev, isServerless, coreStart, startPlugins, setupPlugins, appMountParameters } =
-    kibanaService;
+  const {
+    isDev,
+    isServerless,
+    isCCSEnabled,
+    coreStart,
+    startPlugins,
+    setupPlugins,
+    appMountParameters,
+  } = kibanaService;
 
   const {
     application: { capabilities },
@@ -62,6 +69,7 @@ export const getSyntheticsAppProps = (): SyntheticsAppProps => {
     setBadge,
     appMountParameters,
     isServerless,
+    isCCSEnabled,
   };
 };
 

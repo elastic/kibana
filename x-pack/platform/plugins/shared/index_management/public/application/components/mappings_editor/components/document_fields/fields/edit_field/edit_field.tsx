@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyoutHeader,
@@ -17,7 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiCallOut,
   EuiText,
   EuiToolTip,
   EuiIcon,
@@ -26,6 +25,7 @@ import {
 import type SemVer from 'semver/classes/semver';
 
 import { useFormIsModified } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { documentationService } from '../../../../../../services/documentation';
 import type { FormHook } from '../../../../shared_imports';
 import { Form, FormDataProvider } from '../../../../shared_imports';
@@ -66,11 +66,16 @@ const FormWrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => 
 
 export const EditField = React.memo(
   ({ form, field, allFields, exitEdit, updateField, kibanaVersion }: Props) => {
+    const formBodyRef = useRef<HTMLDivElement>(null);
     const submitForm = async () => {
       const { isValid, data } = await form.submit();
 
       if (isValid) {
         updateField({ ...field, source: data });
+      } else {
+        const firstInvalidField =
+          formBodyRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]');
+        firstInvalidField?.focus();
       }
     };
 
@@ -152,43 +157,45 @@ export const EditField = React.memo(
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
-          <EditFieldHeaderForm
-            defaultValue={field.source}
-            isRootLevelField={field.parentId === undefined}
-            isMultiField={isMultiField}
-          />
+          <div ref={formBodyRef}>
+            <EditFieldHeaderForm
+              defaultValue={field.source}
+              isRootLevelField={field.parentId === undefined}
+              isMultiField={isMultiField}
+            />
 
-          <FormDataProvider pathsToWatch={['type', 'subType']}>
-            {({ type, subType }) => {
-              const ParametersForm = getParametersFormForType(
-                type?.[0]?.value,
-                subType?.[0]?.value
-              );
+            <FormDataProvider pathsToWatch={['type', 'subType']}>
+              {({ type, subType }) => {
+                const ParametersForm = getParametersFormForType(
+                  type?.[0]?.value,
+                  subType?.[0]?.value
+                );
 
-              if (!ParametersForm) {
-                return null;
-              }
+                if (!ParametersForm) {
+                  return null;
+                }
 
-              return (
-                <ParametersForm
-                  // As the component "ParametersForm" does not change when switching type, and all the props
-                  // also remain the same (===), adding a key give us *a new instance* each time we change the type or subType.
-                  // This will trigger an unmount of all the previous form fields and then mount the new ones.
-                  key={subType ?? type}
-                  field={field}
-                  allFields={allFields}
-                  isMultiField={isMultiField}
-                  kibanaVersion={kibanaVersion}
-                />
-              );
-            }}
-          </FormDataProvider>
+                return (
+                  <ParametersForm
+                    // As the component "ParametersForm" does not change when switching type, and all the props
+                    // also remain the same (===), adding a key give us *a new instance* each time we change the type or subType.
+                    // This will trigger an unmount of all the previous form fields and then mount the new ones.
+                    key={subType ?? type}
+                    field={field}
+                    allFields={allFields}
+                    isMultiField={isMultiField}
+                    kibanaVersion={kibanaVersion}
+                  />
+                );
+              }}
+            </FormDataProvider>
+          </div>
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
           {form.isSubmitted && !form.isValid && (
             <>
-              <EuiCallOut
+              <KbnDangerCallout
                 announceOnMount
                 title={i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.editFieldFlyout.validationErrorTitle',
@@ -196,8 +203,6 @@ export const EditField = React.memo(
                     defaultMessage: 'Fix errors in form before continuing.',
                   }
                 )}
-                color="danger"
-                iconType="cross"
                 data-test-subj="formError"
               />
               <EuiSpacer size="m" />
@@ -229,7 +234,7 @@ export const EditField = React.memo(
                               }
                             )}
                           </EuiTextColor>
-                          <EuiIcon type="question" />
+                          <EuiIcon type="question" aria-hidden={true} />
                         </span>
                       </EuiToolTip>
                     </p>

@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useContext, useCallback } from 'react';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 // @ts-expect-error untyped local
 import * as pageActions from '../../state/actions/pages';
 import { canUserWrite } from '../../state/selectors/app';

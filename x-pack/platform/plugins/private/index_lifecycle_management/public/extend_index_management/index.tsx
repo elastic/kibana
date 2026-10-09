@@ -12,6 +12,7 @@ import { EuiSearchBar } from '@elastic/eui';
 import type { ApplicationStart } from '@kbn/core/public';
 
 import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import { PHASE_NAMES } from '../application/lib';
 import type { Index } from '../../common/types';
 
 import { retryLifecycleForIndex } from '../application/services/api';
@@ -21,6 +22,17 @@ import { AddLifecyclePolicyConfirmModal } from './components/add_lifecycle_confi
 import { RemoveLifecyclePolicyConfirmModal } from './components/remove_lifecycle_confirm_modal';
 
 const stepPath = 'ilm.step';
+
+const isLookupIndex = (index: Index) => index.mode === 'lookup';
+
+// ILM reports lookup indices as unmanaged even when `index.lifecycle.name` is configured, so the
+// configured policy name is the only signal that a stale lifecycle setting can be removed.
+const hasRemovableLifecyclePolicy = (index: Index) => {
+  if (index.ilm?.managed) {
+    return true;
+  }
+  return isLookupIndex(index) && Boolean(index.ilmPolicyName);
+};
 
 export const retryLifecycleActionExtension = ({ indices }: { indices: Index[] }) => {
   const indicesWithFailedStep = indices.filter((index) => {
@@ -54,9 +66,7 @@ export const removeLifecyclePolicyActionExtension = ({
   indices: Index[];
   reloadIndices: () => void;
 }) => {
-  const allHaveIlm = every(indices, (index) => {
-    return index.ilm && index.ilm.managed;
-  });
+  const allHaveIlm = every(indices, hasRemovableLifecyclePolicy);
   if (!allHaveIlm) {
     return null;
   }
@@ -94,7 +104,9 @@ export const addLifecyclePolicyActionExtension = ({
   const index = indices[0];
   const hasIlm = index.ilm && index.ilm.managed;
 
-  if (hasIlm) {
+  // ILM does not run policies on lookup indices; adding one only writes `index.lifecycle.*` settings that
+  // ILM never executes (though the policy still counts as in use).
+  if (hasIlm || isLookupIndex(index)) {
     return null;
   }
   const indexName = index.name;
@@ -193,36 +205,11 @@ export const ilmFilterExtension = (indices: Index[]) => {
         multiSelect: 'or',
         autoSortOptions: false,
         options: [
-          {
-            value: 'hot',
-            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.hotLabel', {
-              defaultMessage: 'Hot',
-            }),
-          },
-          {
-            value: 'warm',
-            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.warmLabel', {
-              defaultMessage: 'Warm',
-            }),
-          },
-          {
-            value: 'frozen',
-            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.frozenLabel', {
-              defaultMessage: 'Frozen',
-            }),
-          },
-          {
-            value: 'cold',
-            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.coldLabel', {
-              defaultMessage: 'Cold',
-            }),
-          },
-          {
-            value: 'delete',
-            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.deleteLabel', {
-              defaultMessage: 'Delete',
-            }),
-          },
+          { value: 'hot', view: PHASE_NAMES.hot },
+          { value: 'warm', view: PHASE_NAMES.warm },
+          { value: 'frozen', view: PHASE_NAMES.frozen },
+          { value: 'cold', view: PHASE_NAMES.cold },
+          { value: 'delete', view: PHASE_NAMES.delete },
         ],
       },
     ];

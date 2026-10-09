@@ -93,6 +93,28 @@ describe('testWorkflowThunk', () => {
     expect(result.payload).toEqual(mockResponse);
   });
 
+  it('tests only the saved definition for an executor, even if editor YAML differs', async () => {
+    store.dispatch({ type: 'detail/setYamlString', payload: 'name: Modified draft\nsteps: []' });
+    store.dispatch({
+      type: 'detail/setWorkflow',
+      payload: {
+        id: 'saved-workflow',
+        enabled: false,
+        permissions: { read: true, execute: true, edit: false, manage: false },
+      },
+    });
+    mockWorkflowApi.testWorkflow.mockResolvedValue({ workflowExecutionId: 'saved-test' });
+
+    const result = await store.dispatch(testWorkflowThunk({ inputs: { message: 'Saved test' } }));
+
+    expect(result.type).toBe('detail/testWorkflowThunk/fulfilled');
+    expect(mockWorkflowApi.testWorkflow).toHaveBeenCalledWith({
+      workflowId: 'saved-workflow',
+      workflowYaml: undefined,
+      inputs: { message: 'Saved test' },
+    });
+  });
+
   it('should reject when no YAML content to test', async () => {
     // Set up state with empty yaml
     store.dispatch({ type: 'detail/setYamlString', payload: '' });
@@ -122,6 +144,57 @@ describe('testWorkflowThunk', () => {
     );
     expect(result.type).toBe('detail/testWorkflowThunk/rejected');
     expect(result.payload).toBe('Workflow test failed');
+  });
+
+  it('should surface validation reasons from body.attributes.validationErrors', async () => {
+    const error = {
+      body: {
+        message: 'Workflow validation failed',
+        attributes: {
+          validationErrors: [
+            'Parallel step "outer" has a branch body containing unsupported flow-control ("enter-parallel").',
+            'Parallel step "fan_out" requires at least 2 branches.',
+          ],
+        },
+      },
+      message: 'Bad Request',
+    };
+
+    store.dispatch({ type: 'detail/setYamlString', payload: 'name: Test Workflow\nsteps: []' });
+    mockWorkflowApi.testWorkflow.mockRejectedValue(error);
+
+    const result = await store.dispatch(testWorkflowThunk({ inputs: {} }));
+
+    const expectedMessage =
+      'Workflow validation failed:\n' +
+      '• Parallel step "outer" has a branch body containing unsupported flow-control ("enter-parallel").\n' +
+      '• Parallel step "fan_out" requires at least 2 branches.';
+    expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
+      new Error(expectedMessage),
+      {
+        title: 'Failed to test workflow',
+      }
+    );
+    expect(result.type).toBe('detail/testWorkflowThunk/rejected');
+    expect(result.payload).toBe(expectedMessage);
+  });
+
+  it('should fall back to body message when validationErrors is empty', async () => {
+    const error = {
+      body: { message: 'Workflow validation failed', attributes: { validationErrors: [] } },
+      message: 'Bad Request',
+    };
+
+    store.dispatch({ type: 'detail/setYamlString', payload: 'name: Test Workflow\nsteps: []' });
+    mockWorkflowApi.testWorkflow.mockRejectedValue(error);
+
+    const result = await store.dispatch(testWorkflowThunk({ inputs: {} }));
+
+    expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
+      new Error('Workflow validation failed'),
+      { title: 'Failed to test workflow' }
+    );
+    expect(result.payload).toBe('Workflow validation failed');
   });
 
   it('should handle HTTP error without body message', async () => {

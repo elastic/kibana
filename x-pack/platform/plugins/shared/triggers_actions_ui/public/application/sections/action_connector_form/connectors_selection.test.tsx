@@ -8,12 +8,11 @@
 import * as React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen } from '@testing-library/react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ConnectorsSelection } from './connectors_selection';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import type { ActionType, GenericValidationResult } from '../../../types';
-import { EuiFieldText } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
@@ -86,7 +85,7 @@ describe('connectors_selection', () => {
   beforeEach(() => {});
 
   it('renders a selector', () => {
-    const wrapper = mountWithIntl(
+    render(
       <KibanaThemeProvider {...core}>
         <ConnectorsSelection
           accordionIndex={0}
@@ -99,9 +98,7 @@ describe('connectors_selection', () => {
       </KibanaThemeProvider>
     );
 
-    expect(
-      wrapper.find('[data-test-subj="selectActionConnector-.pagerduty-0"]').exists()
-    ).toBeTruthy();
+    expect(screen.getByTestId('selectActionConnector-.pagerduty-0')).toBeInTheDocument();
   });
 
   it('renders the title of the connector', () => {
@@ -119,5 +116,69 @@ describe('connectors_selection', () => {
     );
 
     expect(screen.getByRole('combobox')).toHaveValue('test pagerduty');
+  });
+
+  it('announces the label of the wrapping EuiFormRow', () => {
+    render(
+      <KibanaThemeProvider {...core}>
+        <EuiFormRow label="Test connector">
+          <ConnectorsSelection
+            accordionIndex={0}
+            actionItem={actionItem}
+            actionTypesIndex={actionTypeIndex}
+            actionTypeRegistered={actionType}
+            connectors={connectors}
+            onConnectorSelected={jest.fn()}
+          />
+        </EuiFormRow>
+      </KibanaThemeProvider>
+    );
+
+    expect(screen.getByRole('combobox', { name: 'Test connector' })).toBeInTheDocument();
+    expect(
+      screen.queryByRole('combobox', { name: 'Incident management system' })
+    ).not.toBeInTheDocument();
+  });
+
+  it('announces the element referenced by an explicit aria-labelledby', () => {
+    render(
+      <KibanaThemeProvider {...core}>
+        <>
+          <span id="connectorLabel">{'Use another Test connector'}</span>
+          <ConnectorsSelection
+            aria-labelledby="connectorLabel"
+            accordionIndex={0}
+            actionItem={actionItem}
+            actionTypesIndex={actionTypeIndex}
+            actionTypeRegistered={actionType}
+            connectors={connectors}
+            onConnectorSelected={jest.fn()}
+          />
+        </>
+      </KibanaThemeProvider>
+    );
+
+    expect(
+      screen.getByRole('combobox', { name: 'Use another Test connector' })
+    ).toBeInTheDocument();
+  });
+
+  it('falls back to a static aria-label without a visible label', () => {
+    render(
+      <KibanaThemeProvider {...core}>
+        <ConnectorsSelection
+          accordionIndex={0}
+          actionItem={actionItem}
+          actionTypesIndex={actionTypeIndex}
+          actionTypeRegistered={actionType}
+          connectors={connectors}
+          onConnectorSelected={jest.fn()}
+        />
+      </KibanaThemeProvider>
+    );
+
+    expect(
+      screen.getByRole('combobox', { name: 'Incident management system' })
+    ).toBeInTheDocument();
   });
 });

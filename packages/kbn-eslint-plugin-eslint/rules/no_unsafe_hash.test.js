@@ -9,7 +9,8 @@
 
 const path = require('path');
 const { RuleTester } = require('eslint');
-const { allowedAlgorithms, ...rule } = require('./no_unsafe_hash');
+const { allowedAlgorithms } = require('./no_unsafe_hash');
+const rule = require('..').rules.no_unsafe_hash;
 const findKibanaRoot = require('../helpers/find_kibana_root');
 
 const dedent = require('dedent');
@@ -67,17 +68,9 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
        import { createHash } from 'crypto';
        createHash('sha1');
       `,
-      filename: path.resolve(KIBANA_ROOT, 'packages/kbn-optimizer/src/common/dll_manifest.ts'),
-    },
-    // valid: md5 in a file that has an allowlist entry for md5
-    {
-      code: dedent`
-       import { createHash } from 'crypto';
-       createHash('md5');
-      `,
       filename: path.resolve(
         KIBANA_ROOT,
-        'packages/kbn-failed-test-reporter-cli/failed_tests_reporter/report_failures_to_file.ts'
+        'src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts'
       ),
     },
   ],
@@ -181,7 +174,10 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
        import { createHash } from 'crypto';
        createHash('md5');
       `,
-      filename: path.resolve(KIBANA_ROOT, 'packages/kbn-optimizer/src/common/dll_manifest.ts'),
+      filename: path.resolve(
+        KIBANA_ROOT,
+        'src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts'
+      ),
       errors: [
         {
           line: 2,

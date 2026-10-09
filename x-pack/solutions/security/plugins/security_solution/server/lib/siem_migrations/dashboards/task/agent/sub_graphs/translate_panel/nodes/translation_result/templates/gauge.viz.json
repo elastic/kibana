@@ -34,8 +34,7 @@
                                             },
                                             "inMetricDimension": true
                                         }
-                                    ],
-                                    "timeField": "@timestamp"
+                                    ]
                                 },
                                 "3b1b0102-bb45-40f5-9ef2-419d2eaaa56c":
                                 {
@@ -62,8 +61,7 @@
                             [
                                 {
                                     "id": "047b9ce1c481e9105458e4238be7cbb304abc176b09c3b4d196d84686c42b5d0",
-                                    "title": "logs*",
-                                    "timeField": "@timestamp"
+                                    "title": "logs*"
                                 }
                             ]
                         }
@@ -145,7 +143,6 @@
                         {
                             "id": "047b9ce1c481e9105458e4238be7cbb304abc176b09c3b4d196d84686c42b5d0",
                             "title": "logs*",
-                            "timeFieldName": "@timestamp",
                             "sourceFilters":
                             [],
                             "type": "esql",

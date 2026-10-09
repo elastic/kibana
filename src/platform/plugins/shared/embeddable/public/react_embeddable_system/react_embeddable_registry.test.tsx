@@ -8,27 +8,25 @@
  */
 
 import {
-  registerReactEmbeddableFactory,
-  getReactEmbeddableFactory,
+  registerEmbeddablePublicDefinition,
+  getEmbeddableDefinition,
 } from './react_embeddable_registry';
-import type { EmbeddableFactory } from './types';
+import type { EmbeddablePublicDefinition } from './types';
 
 describe('embeddable registry', () => {
   const getTestEmbeddableFactory = () =>
     Promise.resolve({
       type: 'test',
       buildEmbeddable: jest.fn(),
-    } as EmbeddableFactory);
+    } as EmbeddablePublicDefinition);
 
-  it('throws an error if requested embeddable factory type is not registered', () => {
-    expect(() => getReactEmbeddableFactory('notRegistered')).rejects.toThrow(
-      'No embeddable factory found for type: notRegistered'
-    );
+  it('throws an error if type is not lower case', () => {
+    expect(() => registerEmbeddablePublicDefinition('FOO_BAR', getTestEmbeddableFactory)).toThrow();
   });
 
   it('can register and get an embeddable factory', () => {
     const returnedFactory = getTestEmbeddableFactory();
-    registerReactEmbeddableFactory('test', getTestEmbeddableFactory);
-    expect(getReactEmbeddableFactory('test')).toEqual(returnedFactory);
+    registerEmbeddablePublicDefinition('test', getTestEmbeddableFactory);
+    expect(getEmbeddableDefinition('test')).toEqual(returnedFactory);
   });
 });

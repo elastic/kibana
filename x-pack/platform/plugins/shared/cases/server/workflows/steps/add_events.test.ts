@@ -35,9 +35,79 @@ describe('addEventsStepDefinition', () => {
       caseId: 'case-1',
       attachments: [
         {
-          type: 'event',
-          eventId: 'event-1',
-          index: '.ds-logs-*',
+          type: 'security.event',
+          attachmentId: ['event-1'],
+          metadata: { index: ['.ds-logs-*'] },
+          owner: createCaseResponseFixture.owner,
+        },
+      ],
+    });
+  });
+
+  it('creates a single event attachment for multiple events with the same index', async () => {
+    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { get },
+      attachments: { bulkCreate },
+    } as unknown as CasesClient);
+    const definition = addEventsStepDefinition(getCasesClient);
+
+    await definition.handler(
+      createContext({
+        case_id: 'case-1',
+        events: [
+          { eventId: 'event-1', index: '.ds-logs-*' },
+          { eventId: 'event-2', index: '.ds-logs-*' },
+        ],
+      })
+    );
+
+    expect(bulkCreate).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      attachments: [
+        {
+          type: 'security.event',
+          attachmentId: ['event-1', 'event-2'],
+          metadata: { index: ['.ds-logs-*', '.ds-logs-*'] },
+          owner: createCaseResponseFixture.owner,
+        },
+      ],
+    });
+  });
+
+  it('creates one event attachment per distinct index', async () => {
+    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { get },
+      attachments: { bulkCreate },
+    } as unknown as CasesClient);
+    const definition = addEventsStepDefinition(getCasesClient);
+
+    await definition.handler(
+      createContext({
+        case_id: 'case-1',
+        events: [
+          { eventId: 'event-1', index: 'idx-a' },
+          { eventId: 'event-2', index: 'idx-b' },
+        ],
+      })
+    );
+
+    expect(bulkCreate).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      attachments: [
+        {
+          type: 'security.event',
+          attachmentId: ['event-1'],
+          metadata: { index: ['idx-a'] },
+          owner: createCaseResponseFixture.owner,
+        },
+        {
+          type: 'security.event',
+          attachmentId: ['event-2'],
+          metadata: { index: ['idx-b'] },
           owner: createCaseResponseFixture.owner,
         },
       ],

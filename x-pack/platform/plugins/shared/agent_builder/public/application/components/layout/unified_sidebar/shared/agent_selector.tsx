@@ -6,13 +6,14 @@
  */
 
 import React, { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom-v5-compat';
+import { useHistory } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { i18n } from '@kbn/i18n';
 
 import { useAgentBuilderAgents } from '../../../../hooks/agents/use_agents';
 import { storageKeys } from '../../../../storage_keys';
+import { useActiveSpaceId } from '../../../../context/active_space_context';
 import { AgentSelectorDropdown } from '../../../common/agent_selector/agent_selector_dropdown';
 
 const deletedAgentLabel = i18n.translate('xpack.agentBuilder.sidebar.agentSelector.deletedAgent', {
@@ -26,17 +27,18 @@ interface AgentSelectorProps {
 
 export const AgentSelector: React.FC<AgentSelectorProps> = ({ agentId, getNavigationPath }) => {
   const { agents, isLoading } = useAgentBuilderAgents();
-  const navigate = useNavigate();
-  const [, setStoredAgentId] = useLocalStorage<string>(storageKeys.agentId);
+  const history = useHistory();
+  const spaceId = useActiveSpaceId();
+  const [, setStoredAgentId] = useLocalStorage<string>(storageKeys.getAgentIdKey(spaceId));
 
   const currentAgent = agents.find((a) => a.id === agentId);
 
   const handleAgentChange = useCallback(
     (newAgentId: string) => {
       setStoredAgentId(newAgentId);
-      navigate(getNavigationPath(newAgentId));
+      history.push(getNavigationPath(newAgentId));
     },
-    [navigate, setStoredAgentId, getNavigationPath]
+    [history, setStoredAgentId, getNavigationPath]
   );
 
   return (

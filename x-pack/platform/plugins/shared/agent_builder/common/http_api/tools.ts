@@ -32,10 +32,15 @@ export interface AgentRef {
   name: string;
 }
 
-export type CreateToolPayload = Omit<ToolDefinition, 'description' | 'tags' | 'readonly'> &
+export type CreateToolPayload = Omit<
+  ToolDefinition,
+  'description' | 'tags' | 'readonly' | 'experimental'
+> &
   Partial<Pick<ToolDefinition, 'description' | 'tags'>>;
 
-export type UpdateToolPayload = Partial<Pick<ToolDefinition, 'description' | 'tags'>> & {
+export type UpdateToolPayload = Partial<
+  Pick<ToolDefinition, 'description' | 'tags' | 'confirmation'>
+> & {
   configuration?: Partial<ToolDefinition['configuration']>;
 };
 
@@ -84,6 +89,7 @@ export interface WorkflowItem {
   id: string;
   name: string;
   description: string;
+  enabled: boolean;
 }
 
 export interface GetWorkflowResponse {
@@ -178,6 +184,11 @@ export interface BulkCreateMcpToolsResponse {
   };
 }
 
+export interface ConnectorSubAction {
+  name: string;
+  description?: string;
+}
+
 export interface ConnectorItem {
   id: string;
   name: string;
@@ -190,6 +201,8 @@ export interface ConnectorItem {
   isConnectorTypeDeprecated: boolean;
   authMode?: 'shared' | 'per-user';
   oauthStatus?: OAuthStatus;
+  /** Sub-actions derived from the connector spec (isTool: true actions) */
+  subActions: ConnectorSubAction[];
 }
 
 export const OAUTH_STATUS = {
@@ -263,4 +276,30 @@ export interface ListMcpToolsHealthResponse {
 export interface ValidateNamespaceResponse {
   isValid: boolean;
   conflictingNamespaces: string[];
+}
+
+/** Lightweight connector summary returned by the agent-scoped list endpoint. */
+export interface AgentConnectorSummary {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+}
+
+export type ListAgentConnectorsResponse = AgentConnectorSummary[];
+
+/** A single sub-action with its human-readable parameter schema string. */
+export interface AgentConnectorSubActionDetail {
+  name: string;
+  description: string;
+  params: string;
+}
+
+/** Full connector detail returned by the sub-actions endpoint. */
+export interface AgentConnectorDetailResponse {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  subActions: AgentConnectorSubActionDetail[];
 }

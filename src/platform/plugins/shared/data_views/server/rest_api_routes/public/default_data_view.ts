@@ -22,7 +22,9 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  GET_DEFAULT_DATA_VIEW_SUMMARY,
   GET_DEFAULT_DATA_VIEW_DESCRIPTION,
+  SET_DEFAULT_DATA_VIEW_SUMMARY,
   SET_DEFAULT_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
 
@@ -61,7 +63,14 @@ export const setDefault = async ({
 };
 
 const manageDefaultIndexPatternRoutesFactory =
-  (path: string, serviceKey: string, getDescription?: string, postDescription?: string) =>
+  (
+    path: string,
+    serviceKey: string,
+    getSummary?: string,
+    getDescription?: string,
+    postSummary?: string,
+    postDescription?: string
+  ) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -74,6 +83,7 @@ const manageDefaultIndexPatternRoutesFactory =
       .get({
         path,
         access: 'public',
+        summary: getSummary,
         description: getDescription,
         security: {
           authz: {
@@ -123,6 +133,7 @@ const manageDefaultIndexPatternRoutesFactory =
       .post({
         path,
         access: 'public',
+        summary: postSummary,
         description: postDescription,
         security: {
           authz: {
@@ -140,9 +151,19 @@ const manageDefaultIndexPatternRoutesFactory =
                   schema.string({
                     minLength: 1,
                     maxLength: 1_000,
+                    meta: {
+                      description:
+                        'The unique identifier of the data view to set as default. Set to `null` to clear the default.',
+                    },
                   })
                 ),
-                force: schema.boolean({ defaultValue: false }),
+                force: schema.boolean({
+                  defaultValue: false,
+                  meta: {
+                    description:
+                      'When `true`, sets the default data view even if a default is already configured.',
+                  },
+                }),
               }),
             },
             response: {
@@ -186,11 +207,17 @@ const manageDefaultIndexPatternRoutesFactory =
 export const registerManageDefaultDataViewRoute = manageDefaultIndexPatternRoutesFactory(
   `${SERVICE_PATH}/default`,
   SERVICE_KEY,
+  GET_DEFAULT_DATA_VIEW_SUMMARY,
   GET_DEFAULT_DATA_VIEW_DESCRIPTION,
+  SET_DEFAULT_DATA_VIEW_SUMMARY,
   SET_DEFAULT_DATA_VIEW_DESCRIPTION
 );
 
 export const registerManageDefaultDataViewRouteLegacy = manageDefaultIndexPatternRoutesFactory(
   `${SERVICE_PATH_LEGACY}/default`,
-  SERVICE_KEY_LEGACY
+  SERVICE_KEY_LEGACY,
+  GET_DEFAULT_DATA_VIEW_SUMMARY,
+  'Deprecated in 8.0.0. Use the data_views/default endpoint instead.',
+  SET_DEFAULT_DATA_VIEW_SUMMARY,
+  'Deprecated in 8.0.0. Use the data_views/default endpoint instead.'
 );

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PureComponent } from 'react';
+import React, { PureComponent, type ReactNode } from 'react';
 import { css } from '@emotion/react';
 
 import { EuiBasicTable, EuiFormRow } from '@elastic/eui';
@@ -18,16 +18,11 @@ import type { Sample } from '../types';
 
 interface FormatEditorSamplesProps {
   samples: Sample[];
-  sampleType: string;
 }
 
 export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps> {
-  static defaultProps = {
-    sampleType: 'text',
-  };
-
   render() {
-    const { samples, sampleType } = this.props;
+    const { samples } = this.props;
 
     const columns = [
       {
@@ -44,18 +39,8 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
         name: i18n.translate('indexPatternFieldEditor.samples.outputHeader', {
           defaultMessage: 'Output',
         }),
-        render: (output: string) => {
-          return sampleType === 'html' ? (
-            <div
-              /*
-               * Justification for dangerouslySetInnerHTML:
-               * Sample output may contain HTML tags, like URL image/audio format.
-               */
-              dangerouslySetInnerHTML={{ __html: output }} // eslint-disable-line react/no-danger
-            />
-          ) : (
-            <div>{output}</div>
-          );
+        render: (output: ReactNode) => {
+          return <div>{output}</div>;
         },
       },
     ];

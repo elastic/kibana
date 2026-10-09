@@ -1,0 +1,82 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { CompositeSLOWithSummaryResponse } from '@kbn/slo-schema';
+import { compositeSloWithSummaryResponseSchema } from '@kbn/slo-schema';
+import { z } from '@kbn/zod';
+import type { SLODefinitionRepository } from '../slo_definition_repository';
+import type { SummaryClient } from '../summary_client';
+import type { CompositeSLORepository } from './composite_slo_repository';
+import {
+  fetchCompositeSloSummariesFromIndex,
+  type PersistedCompositeSummary,
+} from './composite_slo_summary_index';
+import { computeLiveCompositeSummary } from './compute_composite_summary';
+
+export class GetCompositeSLO {
+  constructor(
+    private compositeRepository: CompositeSLORepository,
+    private repository: SLODefinitionRepository,
+    private summaryClient: SummaryClient,
+    private esClient: ElasticsearchClient
+  ) {}
+
+  public async executeBatch(
+    ids: string[],
+    spaceId: string
+  ): Promise<CompositeSLOWithSummaryResponse[]> {
+    const persistedSummaryById = await this.loadPersistedSummaries(ids, spaceId);
+    const results = await Promise.all(ids.map((id) => this.executeOne(id, persistedSummaryById)));
+    return z.array(compositeSloWithSummaryResponseSchema).encode(results);
+  }
+
+  public async execute(id: string, spaceId: string): Promise<CompositeSLOWithSummaryResponse> {
+    const persistedSummaryById = await this.loadPersistedSummaries([id], spaceId);
+    const result = await this.executeOne(id, persistedSummaryById);
+    return compositeSloWithSummaryResponseSchema.encode(result);
+  }
+
+  private async loadPersistedSummaries(
+    ids: string[],
+    spaceId: string
+  ): Promise<Map<string, PersistedCompositeSummary>> {
+    if (ids.length === 0) {
+      return new Map();
+    }
+    return await fetchCompositeSloSummariesFromIndex(this.esClient, spaceId, ids);
+  }
+
+  private async executeOne(
+    id: string,
+    persistedSummaryById: Map<string, PersistedCompositeSummary>
+  ): Promise<CompositeSLOWithSummaryResponse> {
+    const compositeSlo = await this.compositeRepository.findById(id);
+    const persisted = persistedSummaryById.get(id);
+
+    // When the persisted summary lacks members, recompute live so the expand flow can show
+    // per-member data even if the background task has not refreshed the document yet.
+    if (!persisted?.members) {
+      const { compositeSummary, members } = await computeLiveCompositeSummary(compositeSlo, {
+        repository: this.repository,
+        summaryClient: this.summaryClient,
+      });
+
+      return {
+        ...compositeSlo,
+        summary: compositeSummary,
+        members,
+      };
+    }
+
+    return {
+      ...compositeSlo,
+      summary: persisted.summary,
+      members: persisted.members,
+    };
+  }
+}

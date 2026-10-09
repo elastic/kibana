@@ -9,12 +9,16 @@
 
 import type { ScoutTestConfig, ScoutTestConfigStatsEntry } from '@kbn/scout-reporting';
 import { ScoutTestConfigStats } from '@kbn/scout-reporting';
+import type { ScoutTestChannel } from '@kbn/scout-info';
 import { ScoutTestTarget } from '@kbn/scout-info';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { findPackageForPath } from '@kbn/repo-packages';
+import { TestTrack } from '../execution/test_track';
 import {
   msToHuman,
   identifyTestLoads,
   buildTrack,
+  combineShortLanes,
   type ScoutCIConfig,
   type ScoutCITestLoad,
 } from './create_test_tracks';
@@ -30,6 +34,12 @@ jest.mock('@kbn/scout-reporting', () => {
     },
   };
 });
+
+jest.mock('@kbn/repo-packages', () => ({
+  findPackageForPath: jest.fn(),
+}));
+
+const mockFindPackageForPath = findPackageForPath as jest.Mock;
 
 let mockTestConfigs: ScoutTestConfig[] = [];
 
@@ -47,6 +57,7 @@ const createMockConfig = (overrides: Partial<ScoutTestConfig> = {}): ScoutTestCo
   path: 'plugin/test/scout/ui/config.playwright.config.ts',
   category: 'ui',
   type: 'standard',
+  namespace: undefined,
   module: {
     name: 'test-plugin',
     group: 'platform',
@@ -58,6 +69,7 @@ const createMockConfig = (overrides: Partial<ScoutTestConfig> = {}): ScoutTestCo
     path: 'plugin/test/scout/.meta/ui/standard.json',
     exists: true,
     sha1: 'abc123',
+    testChannels: [],
     tests: [
       {
         id: 'test-1',
@@ -155,7 +167,7 @@ describe('identifyTestLoads', () => {
       configs: [],
     });
 
-    const loads = identifyTestLoads(ciConfig, stats, testTarget, log);
+    const loads = identifyTestLoads(ciConfig, stats, testTarget, [], log);
     expect(loads).toHaveLength(0);
   });
 
@@ -166,6 +178,7 @@ describe('identifyTestLoads', () => {
         path: 'matching/.meta/ui/standard.json',
         exists: true,
         sha1: 'abc',
+        testChannels: [],
         tests: [
           {
             id: 't1',
@@ -184,6 +197,7 @@ describe('identifyTestLoads', () => {
         path: 'non-matching/.meta/ui/standard.json',
         exists: true,
         sha1: 'def',
+        testChannels: [],
         tests: [
           {
             id: 't2',
@@ -211,7 +225,7 @@ describe('identifyTestLoads', () => {
       configs: [],
     });
 
-    const loads = identifyTestLoads(ciConfig, stats, testTarget, log);
+    const loads = identifyTestLoads(ciConfig, stats, testTarget, [], log);
     expect(loads).toHaveLength(1);
     expect(loads[0].config.path).toBe('matching/config.ts');
   });
@@ -241,7 +255,7 @@ describe('identifyTestLoads', () => {
       configs: [],
     });
 
-    const loads = identifyTestLoads(ciConfig, stats, testTarget, log);
+    const loads = identifyTestLoads(ciConfig, stats, testTarget, [], log);
     expect(loads).toHaveLength(1);
     expect(loads[0].enabled).toBe(false);
   });
@@ -263,7 +277,7 @@ describe('identifyTestLoads', () => {
       configs: [],
     });
 
-    const loads = identifyTestLoads(ciConfig, stats, testTarget, log);
+    const loads = identifyTestLoads(ciConfig, stats, testTarget, [], log);
     expect(loads).toHaveLength(1);
     expect(loads[0].enabled).toBe(true);
   });
@@ -293,7 +307,7 @@ describe('identifyTestLoads', () => {
       configs: [],
     });
 
-    const loads = identifyTestLoads(ciConfig, stats, testTarget, log);
+    const loads = identifyTestLoads(ciConfig, stats, testTarget, [], log);
     expect(loads).toHaveLength(1);
     expect(loads[0].enabled).toBe(false);
   });
@@ -317,7 +331,7 @@ describe('identifyTestLoads', () => {
       configs: [statsEntry],
     });
 
-    const loads = identifyTestLoads(ciConfig, stats, testTarget, log);
+    const loads = identifyTestLoads(ciConfig, stats, testTarget, [], log);
     expect(loads).toHaveLength(1);
     expect(loads[0].stats).toBeDefined();
     expect(loads[0].stats!.path).toBe('plugin/config.ts');
@@ -340,9 +354,252 @@ describe('identifyTestLoads', () => {
       configs: [],
     });
 
-    const loads = identifyTestLoads(ciConfig, stats, testTarget, log);
+    const loads = identifyTestLoads(ciConfig, stats, testTarget, [], log);
     expect(loads).toHaveLength(1);
     expect(loads[0].stats).toBeUndefined();
+  });
+
+  describe('testing-scope filter', () => {
+    const ciConfig: ScoutCIConfig = {
+      plugins: { enabled: [], disabled: [] },
+      packages: { enabled: [], disabled: [] },
+      excluded_configs: [],
+    };
+    const stats = new ScoutTestConfigStats({
+      lastUpdated: new Date(),
+      lookbackDays: 3,
+      buildkite: {},
+      configs: [],
+    });
+
+    beforeEach(() => {
+      mockFindPackageForPath.mockReset();
+    });
+
+    describe('null filter (full scope)', () => {
+      it('includes all configs and never resolves module IDs', () => {
+        const config = createMockConfig({ path: 'plugin/config.ts' });
+        mockTestConfigs = [config];
+
+        const loads = identifyTestLoads(ciConfig, stats, testTarget, [], log);
+        expect(loads).toHaveLength(1);
+        expect(mockFindPackageForPath).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('kind: "modules" (dependency-tree scope)', () => {
+      it('includes configs whose resolved module ID is in the filter set', () => {
+        const config = createMockConfig({ path: 'plugin/config.ts' });
+        mockTestConfigs = [config];
+        mockFindPackageForPath.mockReturnValue({ id: '@kbn/test-plugin' });
+
+        const loads = identifyTestLoads(
+          ciConfig,
+          stats,
+          testTarget,
+          [{ kind: 'modules', ids: new Set(['@kbn/test-plugin']) }],
+          log
+        );
+        expect(loads).toHaveLength(1);
+      });
+
+      it('excludes configs whose resolved module ID is not in the filter set', () => {
+        const config = createMockConfig({ path: 'plugin/config.ts' });
+        mockTestConfigs = [config];
+        mockFindPackageForPath.mockReturnValue({ id: '@kbn/other-plugin' });
+
+        const loads = identifyTestLoads(
+          ciConfig,
+          stats,
+          testTarget,
+          [{ kind: 'modules', ids: new Set(['@kbn/test-plugin']) }],
+          log
+        );
+        expect(loads).toHaveLength(0);
+      });
+
+      it('excludes configs that cannot be resolved to a module ID', () => {
+        const config = createMockConfig({ path: 'plugin/config.ts' });
+        mockTestConfigs = [config];
+        mockFindPackageForPath.mockReturnValue(undefined);
+
+        const loads = identifyTestLoads(
+          ciConfig,
+          stats,
+          testTarget,
+          [{ kind: 'modules', ids: new Set(['@kbn/test-plugin']) }],
+          log
+        );
+        expect(loads).toHaveLength(0);
+      });
+
+      it('excludes all configs when ids set is empty', () => {
+        const config = createMockConfig({ path: 'plugin/config.ts' });
+        mockTestConfigs = [config];
+
+        const loads = identifyTestLoads(
+          ciConfig,
+          stats,
+          testTarget,
+          [{ kind: 'modules', ids: new Set() }],
+          log
+        );
+        expect(loads).toHaveLength(0);
+        expect(mockFindPackageForPath).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('kind: "configs" (tests-only scope)', () => {
+      it('includes only configs whose path is in the affected paths set', () => {
+        const affected = createMockConfig({ path: 'plugin-a/test/scout/ui/playwright.config.ts' });
+        const other = createMockConfig({ path: 'plugin-b/test/scout/ui/playwright.config.ts' });
+        mockTestConfigs = [affected, other];
+
+        const loads = identifyTestLoads(
+          ciConfig,
+          stats,
+          testTarget,
+          [{ kind: 'configs', paths: new Set([affected.path]) }],
+          log
+        );
+        expect(loads).toHaveLength(1);
+        expect(loads[0].config.path).toBe(affected.path);
+        expect(mockFindPackageForPath).not.toHaveBeenCalled();
+      });
+
+      it('excludes everything when affected paths set is empty', () => {
+        mockTestConfigs = [createMockConfig({ path: 'plugin/config.ts' })];
+
+        const loads = identifyTestLoads(
+          ciConfig,
+          stats,
+          testTarget,
+          [{ kind: 'configs', paths: new Set() }],
+          log
+        );
+        expect(loads).toHaveLength(0);
+      });
+    });
+
+    describe('kind: "channels" (test channel scope)', () => {
+      it('includes only configs whose manifest test channels overlap the selected channels', () => {
+        const onCommit = createMockConfig({
+          path: 'plugin-a/test/scout/ui/playwright.config.ts',
+          manifest: {
+            path: 'plugin-a/.meta/ui/standard.json',
+            exists: true,
+            sha1: 'abc',
+            testChannels: ['ci-on-commit'],
+            tests: [
+              {
+                id: 't1',
+                title: 'Test',
+                expectedStatus: 'passed',
+                tags: ['@local-stateful-classic'],
+                location: { file: 'test.spec.ts', line: 1, column: 1 },
+              },
+            ],
+          },
+        });
+
+        const batchDaily = createMockConfig({
+          path: 'plugin-b/test/scout/ui/playwright.config.ts',
+          manifest: {
+            path: 'plugin-b/.meta/ui/standard.json',
+            exists: true,
+            sha1: 'def',
+            testChannels: ['ci-batch-daily'],
+            tests: [
+              {
+                id: 't2',
+                title: 'Test',
+                expectedStatus: 'passed',
+                tags: ['@local-stateful-classic'],
+                location: { file: 'test.spec.ts', line: 1, column: 1 },
+              },
+            ],
+          },
+        });
+
+        mockTestConfigs = [onCommit, batchDaily];
+
+        const loads = identifyTestLoads(
+          ciConfig,
+          stats,
+          testTarget,
+          [{ kind: 'channels', channels: new Set<ScoutTestChannel>(['ci-batch-daily']) }],
+          log
+        );
+
+        expect(loads).toHaveLength(1);
+        expect(loads[0].config.path).toBe(batchDaily.path);
+        expect(mockFindPackageForPath).not.toHaveBeenCalled();
+      });
+
+      it('excludes configs when no manifest test channels overlap', () => {
+        const config = createMockConfig({
+          path: 'plugin/config.ts',
+          manifest: {
+            path: 'plugin/.meta/ui/standard.json',
+            exists: true,
+            sha1: 'abc',
+            testChannels: ['ci-on-commit'],
+            tests: [
+              {
+                id: 't1',
+                title: 'Test',
+                expectedStatus: 'passed',
+                tags: ['@local-stateful-classic'],
+                location: { file: 'test.spec.ts', line: 1, column: 1 },
+              },
+            ],
+          },
+        });
+        mockTestConfigs = [config];
+
+        const loads = identifyTestLoads(
+          ciConfig,
+          stats,
+          testTarget,
+          [{ kind: 'channels', channels: new Set<ScoutTestChannel>(['ci-batch-weekly']) }],
+          log
+        );
+
+        expect(loads).toHaveLength(0);
+      });
+
+      it('includes all configs when the channel set is empty', () => {
+        const config = createMockConfig({
+          path: 'plugin/config.ts',
+          manifest: {
+            path: 'plugin/.meta/ui/standard.json',
+            exists: true,
+            sha1: 'abc',
+            testChannels: ['ci-on-commit'],
+            tests: [
+              {
+                id: 't1',
+                title: 'Test',
+                expectedStatus: 'passed',
+                tags: ['@local-stateful-classic'],
+                location: { file: 'test.spec.ts', line: 1, column: 1 },
+              },
+            ],
+          },
+        });
+        mockTestConfigs = [config];
+
+        const loads = identifyTestLoads(
+          ciConfig,
+          stats,
+          testTarget,
+          [{ kind: 'channels', channels: new Set<ScoutTestChannel>() }],
+          log
+        );
+
+        expect(loads).toHaveLength(1);
+      });
+    });
   });
 
   it('returns empty array and logs warning when no configs match', () => {
@@ -361,7 +618,7 @@ describe('identifyTestLoads', () => {
       configs: [],
     });
 
-    const loads = identifyTestLoads(ciConfig, stats, testTarget, log);
+    const loads = identifyTestLoads(ciConfig, stats, testTarget, [], log);
     expect(loads).toHaveLength(0);
     expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('No test loads discovered'));
   });
@@ -433,5 +690,105 @@ describe('buildTrack', () => {
     // so we expect 2 lanes: lane 1 gets [large, small], lane 2 gets [medium]
     expect(track.laneCount).toBe(2);
     expect(track.lanes[0].loads[0].id).toBe('large.ts');
+  });
+});
+
+describe('combineShortLanes', () => {
+  const testTarget = new ScoutTestTarget('local', 'stateful', 'classic');
+  // Lanes shorter than half of the runtime target are considered short
+  const runtimeTarget = 1000;
+  const shortLaneThreshold = runtimeTarget / 2;
+  const laneSetupDuration = 100;
+  let log: ToolingLog;
+
+  beforeEach(() => {
+    log = createMockLog();
+  });
+
+  const createTrack = (
+    configSet: string,
+    loadEstimates: number[],
+    { agentQueue = 'n2-4-spot', target = testTarget } = {}
+  ): TestTrack => {
+    const track = new TestTrack({ runtimeTarget, estimatedLaneSetupDuration: laneSetupDuration });
+    track.metadata.testTarget = target;
+    track.metadata.server = { configSet };
+
+    loadEstimates.forEach((estimate, index) => {
+      const lane = track.addLane();
+      lane.loads.push({
+        id: `${configSet}-${index}.ts`,
+        stats: {
+          runCount: 1,
+          runtime: { avg: 0, median: 0, pc95th: 0, pc99th: 0, max: 0, estimate },
+        },
+        metadata: {},
+      });
+      lane.metadata.buildkite = { agentQueue };
+    });
+
+    return track;
+  };
+
+  it('moves short lanes into a combined track and keeps the other lanes in place', () => {
+    const defaultTrack = createTrack('default', [700, 100]);
+    const tracks = combineShortLanes(
+      [defaultTrack, createTrack('config_a', [150]), createTrack('config_b', [200])],
+      shortLaneThreshold,
+      log
+    );
+
+    expect(tracks).toHaveLength(2);
+    expect(tracks[0]).toBe(defaultTrack);
+    expect(defaultTrack.lanes.map((lane) => [lane.number, lane.loads[0].id])).toEqual([
+      [1, 'default-0.ts'],
+    ]);
+
+    const [combinedLane] = tracks[1].lanes;
+    expect(tracks[1].metadata.testTarget).toBe(testTarget);
+    expect(tracks[1].laneCount).toBe(1);
+    expect(combinedLane.metadata.buildkite.agentQueue).toBe('n2-4-spot');
+    // Each group restarts the server, so every combined lane keeps its setup duration
+    expect(combinedLane.estimatedSetupDuration).toBe(3 * laneSetupDuration);
+    expect(combinedLane.runtimeEstimate).toBe(750);
+    expect(tracks[1].specification.lanes[0].metadata.loadGroups).toEqual([
+      { configSet: 'config_b', loads: ['config_b-0.ts'] },
+      { configSet: 'config_a', loads: ['config_a-0.ts'] },
+      { configSet: 'default', loads: ['default-1.ts'] },
+    ]);
+  });
+
+  it('does not combine lanes with different agent queues or test targets', () => {
+    const tracks = [
+      createTrack('config_a', [100]),
+      createTrack('config_b', [100], { agentQueue: 'n2-8-spot' }),
+      createTrack('config_c', [100], {
+        target: new ScoutTestTarget('local', 'serverless', 'search'),
+      }),
+    ];
+
+    expect(combineShortLanes([...tracks], shortLaneThreshold, log)).toEqual(tracks);
+    tracks.forEach((track) => expect(track.laneCount).toBe(1));
+  });
+
+  it('places the longest short lanes first and opens a new lane when the runtime target is exceeded', () => {
+    const tracks = combineShortLanes(
+      [
+        createTrack('config_a', [100]),
+        createTrack('config_b', [300]),
+        createTrack('config_c', [300]),
+        createTrack('config_d', [300]),
+      ],
+      shortLaneThreshold,
+      log
+    );
+
+    expect(tracks).toHaveLength(1);
+    expect(
+      tracks[0].lanes.map((lane) =>
+        lane.metadata.loadGroups.map(({ configSet }: { configSet: string }) => configSet)
+      )
+    ).toEqual([['config_b', 'config_c', 'config_a'], ['config_d']]);
+    tracks[0].lanes.forEach((lane) => expect(lane.isCongested).toBe(false));
   });
 });

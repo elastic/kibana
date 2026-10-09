@@ -15,8 +15,10 @@ import type {
   ConnectorMappingsService,
   AttachmentService,
   TemplatesService,
+  FieldDefinitionsService,
 } from '.';
 import type { AttachmentGetter } from './attachments/operations/get';
+import type { DeleteAttachmentArgs } from './attachments/types';
 import type { LicensingService } from './licensing';
 import type { EmailNotificationService } from './notifications/email_notification_service';
 import type { UserActionPersister } from './user_actions/operations/create';
@@ -46,6 +48,7 @@ export type AttachmentServiceMock = jest.Mocked<AttachmentService & AttachmentSe
 export type LicensingServiceMock = jest.Mocked<LicensingService>;
 export type NotificationServiceMock = jest.Mocked<EmailNotificationService>;
 export type TemplatesServiceMock = jest.Mocked<TemplatesService>;
+export type FieldDefinitionsServiceMock = jest.Mocked<FieldDefinitionsService>;
 
 export const createCaseServiceMock = (): CaseServiceMock => {
   const service: PublicMethodsOf<CaseServiceMock> = lazyObject({
@@ -118,7 +121,9 @@ const createUserActionPersisterServiceMock = (): CaseUserActionPersisterServiceM
 const createUserActionFinderServiceMock = (): CaseUserActionFinderServiceMock => {
   const service: PublicMethodsOf<UserActionFinder> = {
     find: jest.fn(),
+    findAll: jest.fn(),
     findStatusChanges: jest.fn(),
+    decodeUserActions: jest.fn((userActions) => userActions),
   };
 
   return service as unknown as CaseUserActionFinderServiceMock;
@@ -152,6 +157,7 @@ export const createAlertServiceMock = (): AlertServiceMock => {
     executeAggregations: jest.fn(),
     bulkUpdateCases: jest.fn(),
     ensureAlertsAuthorized: jest.fn(),
+    ensureDocumentsExist: jest.fn(),
     removeCaseIdFromAlerts: jest.fn(),
     removeCaseIdsFromAllAlerts: jest.fn(),
   });
@@ -165,6 +171,7 @@ const createAttachmentGetterServiceMock = (): AttachmentGetterServiceMock => {
     get: jest.fn(),
     bulkGet: jest.fn(),
     getAllDocumentsAttachedToCase: jest.fn(),
+    getUnifiedAttachmentsByTypes: jest.fn().mockResolvedValue([]),
     getCaseAttatchmentStats: jest.fn(),
     getAttachmentIdsForCases: jest.fn(),
     getFileAttachments: jest.fn(),
@@ -180,14 +187,16 @@ type FakeAttachmentService = PublicMethodsOf<AttachmentService> & AttachmentServ
 export const createAttachmentServiceMock = (): AttachmentServiceMock => {
   const service: FakeAttachmentService = lazyObject({
     getter: createAttachmentGetterServiceMock(),
-    bulkDelete: jest.fn(),
+    bulkDelete: jest
+      .fn()
+      .mockImplementation(async ({ savedObjectIds }: DeleteAttachmentArgs) => savedObjectIds),
     create: jest.fn(),
     bulkCreate: jest.fn(),
     update: jest.fn(),
     bulkUpdate: jest.fn(),
     find: jest.fn(),
     countAlertsAttachedToCase: jest.fn(),
-    executeCaseActionsAggregations: jest.fn(),
+    countAlertsWithinCase: jest.fn(),
     executeCaseAggregations: jest.fn(),
     countPersistableStateAndExternalReferenceAttachments: jest.fn(),
   });
@@ -228,10 +237,29 @@ export const createTemplatesServiceMock = (): TemplatesServiceMock => {
     updateTemplate: jest.fn(),
     incrementUsageStats: jest.fn(),
     deleteTemplate: jest.fn(),
+    validateWriteInput: jest.fn(),
     getTags: jest.fn(),
     getAuthors: jest.fn(),
+    getTemplateVersionsForExtendedFieldSearch: jest.fn().mockResolvedValue([]),
+    getActiveTemplatesReferencingField: jest.fn().mockResolvedValue([]),
   });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
   return service as unknown as TemplatesServiceMock;
+};
+
+export const createFieldDefinitionsServiceMock = (): FieldDefinitionsServiceMock => {
+  const service: PublicMethodsOf<FieldDefinitionsService> = lazyObject({
+    getFieldDefinitions: jest.fn().mockResolvedValue({ fieldDefinitions: [], total: 0 }),
+    getGlobalFieldDefinitionsForSearch: jest.fn().mockResolvedValue([]),
+    getFieldDefinition: jest.fn(),
+    getFieldDefinitionSavedObjects: jest.fn().mockResolvedValue([]),
+    createFieldDefinition: jest.fn(),
+    setLegacyKey: jest.fn(),
+    updateFieldDefinition: jest.fn(),
+    deleteFieldDefinition: jest.fn(),
+    assertFieldDefinitionIsValid: jest.fn(),
+  });
+
+  return service as unknown as FieldDefinitionsServiceMock;
 };

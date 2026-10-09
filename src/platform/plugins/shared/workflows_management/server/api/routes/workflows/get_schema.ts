@@ -13,7 +13,7 @@ import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerGetSchemaRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
@@ -48,7 +48,7 @@ export function registerGetSchemaRoute({ router, api, spaces }: RouteDependencie
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const { loose } = request.query;
           const spaceId = spaces.getSpaceId(request);

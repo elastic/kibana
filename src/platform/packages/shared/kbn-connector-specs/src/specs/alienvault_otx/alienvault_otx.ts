@@ -19,7 +19,7 @@
  * MVP implementation focusing on core community intelligence actions.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
 
@@ -41,22 +41,34 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
   actions: {
     getIndicator: {
       isTool: true,
-      input: z.object({
-        indicatorType: z
-          .enum([
-            'IPv4',
-            'IPv6',
-            'domain',
-            'hostname',
-            'url',
-            'FileHash-MD5',
-            'FileHash-SHA1',
-            'FileHash-SHA256',
-          ])
-          .describe('Indicator type'),
-        indicator: z.string().describe('Indicator value'),
-        section: z.string().optional().describe('Specific section to retrieve'),
-      }),
+      scope: 'read',
+      description:
+        'Look up threat intelligence for a single indicator (IP, domain, hostname, URL, or file hash) in AlienVault OTX. ' +
+        'Returns the requested section of indicator data (defaults to "general"); use getRelatedPulses to list the pulses referencing it.',
+      input: lazySchema(() =>
+        z.object({
+          indicatorType: z
+            .enum([
+              'IPv4',
+              'IPv6',
+              'domain',
+              'hostname',
+              'url',
+              'FileHash-MD5',
+              'FileHash-SHA1',
+              'FileHash-SHA256',
+            ])
+            .describe('Indicator type'),
+          indicator: z.string().max(2048).describe('Indicator value'),
+          section: z
+            .string()
+            .max(50)
+            .optional()
+            .describe(
+              'Specific section to retrieve (e.g. general, reputation, geo, malware, url_list, passive_dns, analysis). Defaults to general'
+            ),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { indicatorType: string; indicator: string; section?: string };
         const section = typedInput.section || 'general';
@@ -73,11 +85,24 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
 
     searchPulses: {
       isTool: true,
-      input: z.object({
-        query: z.string().optional().describe('Search query'),
-        page: z.number().int().min(1).optional().default(1).describe('Page number'),
-        limit: z.number().int().min(1).max(100).optional().default(20).describe('Results per page'),
-      }),
+      scope: 'read',
+      description:
+        'List threat pulses from the OTX feeds the API key is subscribed to, optionally filtered by a search query. ' +
+        'Returns a paginated list with total count and a next-page link; use getPulse for full details of one pulse.',
+      input: lazySchema(() =>
+        z.object({
+          query: z.string().max(2000).optional().describe('Search query'),
+          page: z.number().int().min(1).optional().default(1).describe('Page number'),
+          limit: z
+            .number()
+            .int()
+            .min(1)
+            .max(100)
+            .optional()
+            .default(20)
+            .describe('Results per page'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { query?: string; page?: number; limit?: number };
         const response = await ctx.client.get(
@@ -100,9 +125,14 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
 
     getPulse: {
       isTool: true,
-      input: z.object({
-        pulseId: z.string().describe('Pulse ID'),
-      }),
+      scope: 'read',
+      description:
+        'Get the full details of a single OTX pulse by ID, including name, description, author, timestamps, tags, and its indicators of compromise.',
+      input: lazySchema(() =>
+        z.object({
+          pulseId: z.string().max(200).describe('Pulse ID'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { pulseId: string };
         const response = await ctx.client.get(
@@ -123,21 +153,27 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
 
     getRelatedPulses: {
       isTool: true,
-      input: z.object({
-        indicatorType: z
-          .enum([
-            'IPv4',
-            'IPv6',
-            'domain',
-            'hostname',
-            'url',
-            'FileHash-MD5',
-            'FileHash-SHA1',
-            'FileHash-SHA256',
-          ])
-          .describe('Indicator type'),
-        indicator: z.string().describe('Indicator value'),
-      }),
+      scope: 'read',
+      description:
+        'List the OTX pulses that reference a given indicator (IP, domain, hostname, URL, or file hash). ' +
+        'Use this to find threat campaigns associated with an indicator; returns the pulse count and pulse summaries.',
+      input: lazySchema(() =>
+        z.object({
+          indicatorType: z
+            .enum([
+              'IPv4',
+              'IPv6',
+              'domain',
+              'hostname',
+              'url',
+              'FileHash-MD5',
+              'FileHash-SHA1',
+              'FileHash-SHA256',
+            ])
+            .describe('Indicator type'),
+          indicator: z.string().max(2048).describe('Indicator value'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { indicatorType: string; indicator: string };
         const response = await ctx.client.get(
@@ -154,23 +190,14 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
 
   test: {
     handler: async (ctx) => {
-      try {
-        await ctx.client.get('https://otx.alienvault.com/api/v1/pulses/subscribed', {
-          params: { limit: 1 },
-        });
-        return {
-          ok: true,
-          message: 'Successfully connected to AlienVault OTX API',
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: `Failed to connect: ${error}`,
-        };
-      }
+      await ctx.client.get('https://otx.alienvault.com/api/v1/pulses/subscribed', {
+        params: { limit: 1 },
+      });
+      return {};
     },
     description: i18n.translate('connectorSpecs.alienvaultOtx.test.description', {
       defaultMessage: 'Verifies AlienVault OTX API key',
     }),
+    enabled: true,
   },
 };

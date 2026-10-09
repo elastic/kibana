@@ -6,9 +6,36 @@
  */
 
 export { Streams, streamDefinitionSchema } from './src/models/streams';
+export type * as StreamsV2 from './src/v2';
+export * as StreamsV2Examples from './src/v2/__examples__';
+export {
+  collectUnitComponentIds,
+  findDuplicateUnitComponentIds,
+  streamsConfigEntrySchema,
+  streamsOttlRoutingContextSchema,
+  streamsPipelineConfigEntrySchema,
+  streamsPipelineRouteSchema,
+  streamsPipelineSchema,
+  streamsSignalSchema,
+  streamsSupportedTelemetrySchema,
+  streamsUnitIdentifierSchema,
+  streamsUnitResponseSchema,
+  streamsUnitSchema,
+  streamsUnitSecretsSchema,
+  streamsUnitUiMetadataSchema,
+  streamsUnitUpsertRequestSchema,
+} from './src/models/unit';
+export type { StreamsUnit } from './src/models/unit';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
-export { WiredIngest, WiredStream, WiredIngestUpsertRequest } from './src/models/ingest/wired';
+export {
+  WiredIngest,
+  WiredStream,
+  WiredIngestUpsertRequest,
+  isDraftStream,
+  isDraftGetResponse,
+  type DraftStreamDefinition,
+} from './src/models/ingest/wired';
 export {
   ClassicIngest,
   ClassicStream,
@@ -34,14 +61,25 @@ export { getStreamTypeFromDefinition } from './src/helpers/get_stream_type_from_
 export type { StreamType } from './src/helpers/get_stream_type_from_definition';
 export { isRootStreamDefinition } from './src/helpers/is_root_stream_definition';
 export {
+  isBuiltInRootStreamField,
+  otelRootBuiltInFieldNames,
+  ecsRootBuiltInFieldNames,
+} from './src/helpers/is_built_in_root_stream_field';
+export {
   isOtelStream,
   OTEL_CONTENT_FIELD,
   ECS_CONTENT_FIELD,
   OTEL_SEVERITY_FIELD,
   ECS_SEVERITY_FIELD,
 } from './src/helpers/is_otel_stream';
-export { getIndexPatternsForStream, getSourcesForStream } from './src/helpers/hierarchy_helpers';
+export {
+  getIndexPatternsForStream,
+  getSourcesForStream,
+  getStreamSamplingSource,
+} from './src/helpers/hierarchy_helpers';
 export { getDiscoverEsqlQuery } from './src/helpers/get_discover_esql_query';
+export { definitionToESQLQuery } from './src/helpers/definition_to_esql_query';
+export type { DefinitionToESQLQueryOptions } from './src/helpers/definition_to_esql_query';
 export {
   convertUpsertRequestIntoDefinition,
   convertGetResponseIntoUpsertRequest,
@@ -51,6 +89,7 @@ export {
   keepFields,
   namespacePrefixes,
   otelReservedFields,
+  aliases as otelFieldAliases,
   isNamespacedEcsField,
   isOtelReservedField,
   getRegularEcsField,
@@ -60,10 +99,24 @@ export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fie
 export { getInheritedSettings } from './src/helpers/get_inherited_settings';
 export {
   buildMetadataOption,
+  withUnmappedFieldsDirective,
+  deriveQueryType,
   ensureMetadata,
+  extractBucketColumnName,
+  extractBucketIntervalMs,
+  extractBucketTargetField,
+  extractReferencedColumns,
+  extractStatsGroupColumns,
   extractWhereExpression,
+  findOverBroadMatchPredicates,
+  renderOverBroadMatchError,
   getFromSources,
+  getStatsQueryHints,
+  hasStatsCommand,
+  MS_PER_UNIT,
   normalizeEsqlQuery,
+  normalizeEsqlSafe,
+  hasSameEsql,
   replaceFromSources,
   rewriteFromSources,
 } from './src/helpers/esql_helpers';
@@ -74,6 +127,8 @@ export {
   type SampleDocument,
   type FlattenRecord,
   flattenRecord,
+  boundedFlattenRecord,
+  boundedJsonValue,
   recursiveRecord,
 } from './src/shared/record_types';
 export { isSchema, createIsNarrowSchema, isRecord } from './src/shared/type_guards';
@@ -111,18 +166,9 @@ export {
   ALL_FIELD_DEFINITION_TYPES,
   fieldDefinitionConfigSchema,
   namedFieldDefinitionConfigSchema,
+  boundedFieldDefinitionConfigSchema,
+  boundedNamedFieldDefinitionSchema,
 } from './src/fields';
-
-export {
-  type EsqlQuery,
-  esqlQuerySchema,
-  type StreamQuery,
-  type QueryLink,
-  type QueriesGetResponse,
-  type QueriesOccurrencesGetResponse,
-  upsertStreamQueryRequestSchema,
-  streamQuerySchema,
-} from './src/queries';
 
 export {
   findInheritedLifecycle,
@@ -148,6 +194,7 @@ export {
   type IngestStreamLifecycleInherit,
   type IngestStreamEffectiveLifecycle,
   type PhaseName,
+  TIER_TO_PHASE,
   type IlmPolicy,
   type IlmPolicyWithUsage,
   type IlmPolicyUsage,
@@ -174,16 +221,6 @@ export {
   isEnabledLifecycleFailureStore,
 } from './src/models/ingest/failure_store';
 
-export type {
-  SignificantEventsResponse,
-  SignificantEventsGetResponse,
-  SignificantEventsPreviewResponse,
-  SignificantEventsGenerateResponse,
-  GeneratedSignificantEventQuery,
-  SignificantEventsQueriesGenerationResult,
-  SignificantEventsQueriesGenerationTaskResult,
-} from './src/api/significant_events';
-
 export { emptyAssets } from './src/helpers/empty_assets';
 export {
   validateStreamName,
@@ -192,32 +229,6 @@ export {
   MAX_STREAM_NAME_LENGTH,
   INVALID_STREAM_NAME_CHARACTERS,
 } from './src/helpers/stream_name_validation';
-
-export {
-  type Feature,
-  type FeatureWithFilter,
-  type BaseFeature,
-  type IdentifiedFeature,
-  type IgnoredFeature,
-  type FeatureStatus,
-  DATASET_ANALYSIS_FEATURE_TYPE,
-  LOG_SAMPLES_FEATURE_TYPE,
-  LOG_PATTERNS_FEATURE_TYPE,
-  ERROR_LOGS_FEATURE_TYPE,
-  COMPUTED_FEATURE_TYPES,
-  isFeature,
-  isFeatureWithFilter,
-  isComputedFeature,
-  isDuplicateFeature,
-  hasSameFingerprint,
-  mergeFeature,
-  toBaseFeature,
-  featureSchema,
-  baseFeatureSchema,
-  identifiedFeatureSchema,
-  ignoredFeatureSchema,
-  featureStatusSchema,
-} from './src/feature';
 
 export {
   type BaseSimulationError,
@@ -233,44 +244,17 @@ export {
 
 export { type IngestStreamProcessing } from './src/models/ingest/processing';
 
-export { TaskStatus, type TaskResult } from './src/tasks/types';
-
-export type { GenerateDescriptionResult } from './src/api/description_generation';
-export type { IdentifyFeaturesResult, IterationResult } from './src/api/features';
-
-export {
-  type GenerateInsightsResult,
-  type Insight,
-  type InsightCore,
-  type InsightEvidence,
-  type InsightImpactLevel,
-  type InsightImpactLevelNumeric,
-  type InsightUserEvaluation,
-  type InsightMeta,
-  type SaveInsightBody,
-  insightSchema,
-  insightCoreSchema,
-  insightMetaSchema,
-  insightEvidenceSchema,
-  insightImpactLevelSchema,
-  insightImpactLevelNumericSchema,
-  insightUserEvaluationSchema,
-  INSIGHT_IMPACT_LEVEL_MAP,
-  getImpactLevel,
-} from './src/insights';
-export type { OnboardingResult } from './src/onboarding';
-export { OnboardingStep } from './src/onboarding';
 export { streamsOasDefinitions } from './src/oas_definitions';
 export type { StreamsOasDefinitions } from './src/oas_definitions';
 
+export { stripOtelAliases } from './src/helpers/strip_otel_aliases';
+export { mergeSourceIntoDocuments } from './src/helpers/merge_esql_source';
+
 export { streamMatchesIndexPatterns } from './src/helpers/stream_matches_index_patterns';
 export { DEFAULT_INDEX_PATTERNS } from './src/helpers/default_index_patterns';
+export { parseIndexPatterns } from './src/helpers/parse_index_patterns';
 
 export {
-  STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-  STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-  STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   STREAMS_INFERENCE_PARENT_FEATURE_ID,
   STREAMS_PARTITIONING_SUGGESTIONS_INFERENCE_FEATURE_ID,
   STREAMS_PROCESSING_SUGGESTIONS_INFERENCE_FEATURE_ID,
