@@ -34,6 +34,10 @@ export const AppMenuSwitchComponent = ({ switchConfig }: AppMenuSwitchComponentP
     'data-test-subj': dataTestSubj,
   } = switchConfig;
 
+  const switchCss = css`
+    margin-right: ${euiTheme.size.s};
+  `;
+
   const labelCss = css`
     font-weight: ${euiTheme.font.weight.medium};
   `;
@@ -57,6 +61,7 @@ export const AppMenuSwitchComponent = ({ switchConfig }: AppMenuSwitchComponentP
       onChange={handleChange}
       disabled={disabled}
       compressed
+      css={switchCss}
       data-test-subj={dataTestSubj ?? APP_MENU_TEST_SUBJECTS.switch}
     />
   );
