@@ -117,18 +117,17 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     const timestamp = input.startedAt.toISOString();
     const { executionUuid } = input;
 
-    for (const summary of aggregateByPolicy(plan.toDispatch, outcome).values()) {
-      this.emitPolicySummary({
-        timestamp,
-        executionUuid,
-        summary,
-        action: ACTION_POLICY_EVENT_ACTIONS.DISPATCHED,
-        rules,
-      });
-    }
+    emitDispatchedSummaries({
+      eventLogService: this.eventLogService,
+      groups: plan.toDispatch,
+      outcome,
+      rules,
+      timestamp,
+      executionUuid,
+    });
 
     for (const summary of aggregateByPolicy(plan.throttled, DispatchOutcome.empty()).values()) {
-      this.emitPolicySummary({
+      emitPolicySummary(this.eventLogService, {
         timestamp,
         executionUuid,
         summary,
@@ -150,48 +149,6 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     }
 
     return { type: 'continue' };
-  }
-
-  private emitPolicySummary({
-    timestamp,
-    executionUuid,
-    summary,
-    action,
-    rules,
-  }: {
-    timestamp: string;
-    executionUuid: string;
-    summary: PolicySummary;
-    action: ActionPolicyEventAction;
-    rules: RuleCatalog;
-  }): void {
-    const ruleIds = Array.from(summary.ruleIds);
-    const { refs, spillOver } = buildPolicyAndRuleRefs(
-      summary.policyId,
-      summary.spaceId,
-      ruleIds,
-      rules
-    );
-
-    this.eventLogService.logEvent(
-      buildEvent({
-        timestamp,
-        executionUuid,
-        action,
-        spaceId: summary.spaceId,
-        savedObjects: refs,
-        dispatcherFields: {
-          alert_count: summary.alertIds.size,
-          alert_ids: Array.from(summary.alertIds),
-          rule_count: summary.ruleIds.size,
-          rule_ids: spillOver.length > 0 ? spillOver : undefined,
-          action_group_count: summary.actionGroupIds.size,
-          action_group_ids: Array.from(summary.actionGroupIds),
-          workflow_ids: Array.from(summary.workflowIds),
-          workflow_execution_ids: Array.from(summary.workflowExecutionIds),
-        },
-      })
-    );
   }
 
   private emitUnmatchedSummary({
@@ -268,6 +225,78 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
       })
     );
   }
+}
+
+/** Emits one `dispatched` event-log summary per policy for the given dispatched groups. */
+export function emitDispatchedSummaries({
+  eventLogService,
+  groups,
+  outcome,
+  rules,
+  timestamp,
+  executionUuid,
+}: {
+  eventLogService: EventLogServiceContract;
+  groups: readonly ActionGroup[];
+  outcome: DispatchOutcome;
+  rules: RuleCatalog;
+  timestamp: string;
+  executionUuid: string;
+}): void {
+  for (const summary of aggregateByPolicy(groups, outcome).values()) {
+    emitPolicySummary(eventLogService, {
+      timestamp,
+      executionUuid,
+      summary,
+      action: ACTION_POLICY_EVENT_ACTIONS.DISPATCHED,
+      rules,
+    });
+  }
+}
+
+function emitPolicySummary(
+  eventLogService: EventLogServiceContract,
+  {
+    timestamp,
+    executionUuid,
+    summary,
+    action,
+    rules,
+  }: {
+    timestamp: string;
+    executionUuid: string;
+    summary: PolicySummary;
+    action: ActionPolicyEventAction;
+    rules: RuleCatalog;
+  }
+): void {
+  const ruleIds = Array.from(summary.ruleIds);
+  const { refs, spillOver } = buildPolicyAndRuleRefs(
+    summary.policyId,
+    summary.spaceId,
+    ruleIds,
+    rules
+  );
+
+  eventLogService.logEvent(
+    buildEvent({
+      timestamp,
+      executionUuid,
+      action,
+      spaceId: summary.spaceId,
+      savedObjects: refs,
+      dispatcherFields: {
+        alert_count: summary.alertIds.size,
+        alert_ids: Array.from(summary.alertIds),
+        rule_count: summary.ruleIds.size,
+        rule_ids: spillOver.length > 0 ? spillOver : undefined,
+        action_group_count: summary.actionGroupIds.size,
+        action_group_ids: Array.from(summary.actionGroupIds),
+        workflow_ids: Array.from(summary.workflowIds),
+        workflow_execution_ids: Array.from(summary.workflowExecutionIds),
+      },
+    })
+  );
 }
 
 /**

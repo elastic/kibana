@@ -411,6 +411,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         });
 
         expect(action.action_group_id).toBeDefined();
+        expect(action.alert_id).toBeDefined();
         expect(action.alert_status).toBeDefined();
 
         notifiedEpisodeStatuses.add(action.alert_status as string);
@@ -486,6 +487,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         });
 
         expect(action.action_group_id).toBeDefined();
+        expect(action.alert_id).toBeDefined();
         expect(action.alert_status).toBeDefined();
         expect(action.group_hash).toBe('rule-1-series-1');
       }
@@ -1181,7 +1183,8 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         ruleId: 'rule-groupby',
         actionTypes: ['notified'],
       });
-      expect(notifiedActions).toHaveLength(2);
+      // One notified record per (action group, alert): two host groups of two alerts each.
+      expect(notifiedActions).toHaveLength(4);
 
       const groupIds = notifiedActions.map((action) => action.action_group_id);
       expect(new Set(groupIds).size).toBe(2);
@@ -1290,6 +1293,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
 
       for (const action of notifiedActions) {
         expect(action.action_group_id).toBeDefined();
+        expect(action.alert_id).toBeDefined();
         expect(action.alert_status).toBeDefined();
       }
     }
@@ -1405,8 +1409,8 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         }),
       ]);
 
-      // Digest mode dispatches one notified per policy run while still
-      // writing one fire per episode.
+      // Digest mode dispatches the policy's single group once; it writes one
+      // fire and one notified record per alert of that group.
       const fires = await expectStableCount(apiServices, 3, {
         ruleId: 'rule-1',
         actionTypes: ['fire'],
@@ -1418,7 +1422,8 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         actionTypes: ['notified'],
       });
 
-      expect(notifiedActions).toHaveLength(1);
+      expect(notifiedActions).toHaveLength(3);
+      expect(new Set(notifiedActions.map((action) => action.action_group_id)).size).toBe(1);
     }
   );
 
@@ -1481,10 +1486,11 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         ruleId: 'rule-groupby',
         actionTypes: ['notified'],
       });
-      // Two host groups → exactly two notified actions across the entire
-      // throttle interval, regardless of how many dispatcher ticks observe
-      // the same episodes.
-      expect(notified).toHaveLength(2);
+      // Two host groups of two alerts each → exactly four notified records
+      // (one per group and alert) across the entire throttle interval,
+      // regardless of how many dispatcher ticks observe the same episodes.
+      expect(notified).toHaveLength(4);
+      expect(new Set(notified.map((action) => action.action_group_id)).size).toBe(2);
     }
   );
 

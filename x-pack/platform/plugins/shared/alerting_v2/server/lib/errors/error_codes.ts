@@ -338,6 +338,18 @@ export const ALERTING_LOG_CODES = {
   /** Scheduling a workflow execution for a dispatch group failed. */
   DISPATCH_WORKFLOW_SCHEDULE_FAILED: 'DISPATCH_WORKFLOW_SCHEDULE_FAILED',
   /**
+   * Writing the `notified` records for a dispatched chunk failed after its
+   * workflows were scheduled. If the tick aborts before StoreActionsStep, those
+   * groups are dispatched again on the next tick.
+   */
+  DISPATCH_NOTIFIED_COMMIT_FAILED: 'DISPATCH_NOTIFIED_COMMIT_FAILED',
+  /**
+   * An already-notified query chunk returned the ES|QL row limit, so rows past
+   * it were dropped. The affected alerts are treated as not notified and may be
+   * dispatched again.
+   */
+  DISPATCH_ALREADY_NOTIFIED_ROW_LIMIT_REACHED: 'DISPATCH_ALREADY_NOTIFIED_ROW_LIMIT_REACHED',
+  /**
    * The cluster license does not allow action policies. Alert actions are still
    * recorded, but no workflow is scheduled until the license is upgraded.
    */

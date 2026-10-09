@@ -87,9 +87,10 @@ The pipeline then moves through these phases:
 7. Load enabled action policies
 8. Evaluate policy matchers
 9. Build action groups
-10. Apply throttling
-11. Dispatch eligible groups
-12. Store final actions and reasons
+10. Set aside alerts an earlier, aborted tick already delivered
+11. Apply throttling
+12. Dispatch eligible groups, committing `notified` records after each chunk
+13. Store final actions and reasons
 
 ### Decision outcomes written to `.alert-actions`
 
@@ -97,7 +98,8 @@ By the end of a dispatcher run, every alert that reached the later pipeline stag
 
 | Outcome      | What happened                                                                                              | Action documents written                             |
 | ------------ | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| `dispatch`   | The alert matched a policy, survived suppression and throttling, and was selected for delivery.            | `fire` per alert, plus `notified` per action group   |
+| `dispatch`   | The alert matched a policy, survived suppression and throttling, and was selected for delivery.            | `fire` per alert, plus `notified` per (action group, alert), written after each dispatch chunk |
+| `already notified` | An earlier tick delivered this alert's content to the group but aborted before recording it.     | `fire` with an `already notified by policy` reason   |
 | `throttled`  | The alert matched a policy, but the action group was held back by throttling.                              | `suppress` with a throttle-related reason            |
 | `suppressed` | The alert was explicitly filtered out by suppression logic such as ack, snooze, or deactivate semantics.   | `suppress` with the suppression reason               |
 | `unmatched`  | The alert remained dispatchable but matched no enabled action policy.                                      | `unmatched`                                          |
@@ -192,9 +194,10 @@ The dispatcher carries state forward through `DispatcherPipelineState` in `types
 | `rules`            | `RuleCatalog`      | `FetchRulesStep`                                                                    | Rule metadata keyed by rule id; owns the orphaned-internal-alert guard.                                                                                         |
 | `policies`         | `PolicyCatalog`    | `FetchPoliciesStep`                                                                 | Enabled action policies keyed by id and grouped by space.                                                                                                       |
 | `matched`          | plain array        | `EvaluateMatchersStep`                                                              | Concrete `(alert, policy)` matches.                                                                                                                            |
-| `groups`           | plain array        | `BuildGroupsStep`                                                                   | Action groups to consider for delivery (transient — consumed by `ApplyThrottlingStep`).                                                                        |
-| `plan`             | `DispatchPlan`     | `ApplyThrottlingStep`                                                               | Delivery decision: `toDispatch` vs `throttled`, plus the `unmatched` alerts that landed in no group.                                              |
-| `outcome`          | `DispatchOutcome`  | `DispatchStep`                                                                      | What happened: workflow execution ids per group and failed (group, destination) attempts; `deliveredDestinationsFor()` filters totally-failed groups.           |
+| `groups`           | plain array        | `BuildGroupsStep`; narrowed by `ApplyAlreadyNotifiedStep`                          | Action groups to consider for delivery (transient — consumed by `ApplyThrottlingStep`).                                                                        |
+| `alreadyNotified`  | plain array        | `ApplyAlreadyNotifiedStep`                                                          | Groups narrowed to the alerts an earlier tick already delivered (committed `notified` records); recorded as `fire`, never dispatched again.                     |
+| `plan`             | `DispatchPlan`     | `ApplyThrottlingStep`                                                               | Delivery decision: `toDispatch` vs `throttled`, the `alreadyNotified` groups, plus the `unmatched` alerts that landed in no group.                |
+| `outcome`          | `DispatchOutcome`  | `DispatchStep`                                                                      | What happened: workflow execution ids per group, failed (group, destination) attempts, and the groups whose `notified` records were committed; `deliveredDestinationsFor()` filters totally-failed groups. |
 | `recordedAlerts`   | plain number       | `StoreActionsStep`                                                                  | Count of alerts that received an `.alert-actions` record this tick.                                                                                            |
 
 ## Execution steps
@@ -213,10 +216,11 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 | 8   | `FetchPoliciesStep`          | Load enabled action policies for the space.                                                      |
 | 9   | `EvaluateMatchersStep`       | Evaluate each policy matcher against each alert context.                                         |
 | 10  | `BuildGroupsStep`            | Build `ActionGroup` objects based on policy grouping settings.                                   |
-| 11  | `ApplyThrottlingStep`        | Compare candidate groups with action history and split them into dispatch vs throttled.          |
-| 12  | `DispatchStep`               | Perform delivery side effects for eligible groups.                                               |
-| 13  | `StoreActionsStep`           | Persist the execution outcome to `.alert-actions`.                                               |
-| 14  | `StoreExecutionHistoryStep`  | Emit per-policy `dispatched` / `throttled` / `unmatched` / `dispatch_failed` event-log summaries. |
+| 11  | `ApplyAlreadyNotifiedStep`   | Move alerts whose content a group already delivered (committed `notified` records) out of the group. |
+| 12  | `ApplyThrottlingStep`        | Compare candidate groups with action history and split them into dispatch vs throttled.          |
+| 13  | `DispatchStep`               | Perform delivery side effects for eligible groups in group-aligned chunks; write `notified` after each chunk. |
+| 14  | `StoreActionsStep`           | Persist the execution outcome to `.alert-actions`.                                               |
+| 15  | `StoreExecutionHistoryStep`  | Emit per-policy `dispatched` / `throttled` / `unmatched` / `dispatch_failed` event-log summaries. |
 
 ### Suppression queries
 
@@ -277,7 +281,10 @@ Alerts in the skipped window are **not dispatched** (accepted data loss). Once t
 
 ## Delivery guarantees and limits
 
-- Delivery is effectively at-least-once. If delivery succeeds but action recording fails or the process crashes, a later run may re-deliver.
+- Delivery is effectively at-least-once. `DispatchStep` writes `notified` records (one per action group and alert, stamped with the alert's event time) after each `bulkScheduleWorkflow` chunk, and `ApplyAlreadyNotifiedStep` reads them back, so a tick that aborts after scheduling does not deliver those groups again. The remaining duplicate window is the chunk in flight when the process crashes or its `notified` write fails.
+- An aborted tick emits `dispatched` event-log summaries for the groups it committed, since the next tick records them as already notified.
+- `notified` commits are written with `refresh: false`; the next tick sees them because the `.alert-actions` refresh interval (about 1 s) is shorter than the time between ticks plus the steps before `ApplyAlreadyNotifiedStep`.
+- `notified` records written before this guard existed carry no `alert_id`, so they never mark content as delivered.
 - Destination handlers should therefore be idempotent.
 - Workflow destinations are scheduled in `DISPATCH_CHUNK_SIZE` (250) batches via `bulkScheduleWorkflow`, not per-group `pLimit(3)`.
 - The alert query is capped at `ESQL_QUERY_ROW_LIMIT` (10 000) rows per run. A truncated tick advances the watermark only to the last returned row's timestamp; the deferred tail is scanned next tick.
