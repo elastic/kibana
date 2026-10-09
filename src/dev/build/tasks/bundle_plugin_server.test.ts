@@ -147,6 +147,62 @@ describe('bundlePluginServer', () => {
     expect(loaded.legacyType).toBe('single');
   });
 
+  it('leaves modules required from outside the bundle as a single instance', async () => {
+    const root = makePlugin();
+    const server = Path.join(root, 'server');
+    Fs.mkdirSync(server, { recursive: true });
+
+    Fs.writeFileSync(
+      Path.join(server, 'plugin.js'),
+      [
+        '"use strict";',
+        'exports.priv = require("./private");',
+        'exports.hub = require("./hub");',
+        'exports.config = require("./config");',
+        'exports.loadLazy = () => require("./lazy");',
+        '',
+      ].join('\n')
+    );
+    Fs.writeFileSync(
+      Path.join(server, 'index.js'),
+      '"use strict";\nexports.config = require("./config");\n'
+    );
+    Fs.writeFileSync(
+      Path.join(server, 'private.js'),
+      '"use strict";\nexports.marker = "private-marker";\n'
+    );
+    Fs.writeFileSync(
+      Path.join(server, 'hub.js'),
+      '"use strict";\nexports.helper = require("./helper");\nexports.marker = "hub-marker";\n'
+    );
+    Fs.writeFileSync(
+      Path.join(server, 'helper.js'),
+      '"use strict";\nexports.state = { marker: "helper-marker" };\n'
+    );
+    Fs.writeFileSync(
+      Path.join(server, 'config.js'),
+      '"use strict";\nexports.state = { marker: "config-marker" };\n'
+    );
+    Fs.writeFileSync(
+      Path.join(server, 'lazy.js'),
+      '"use strict";\nexports.hub = require("./hub");\n'
+    );
+
+    await bundlePluginServer(root);
+
+    const bundle = Fs.readFileSync(Path.join(server, 'plugin.js'), 'utf8');
+    expect(bundle).toContain('private-marker');
+    expect(bundle).not.toContain('hub-marker');
+    expect(bundle).not.toContain('helper-marker');
+    expect(bundle).not.toContain('config-marker');
+
+    const loaded = requireFromTest(Path.join(server, 'plugin.js'));
+    expect(loaded.priv.marker).toBe('private-marker');
+    expect(loaded.loadLazy().hub).toBe(loaded.hub);
+    expect(loaded.hub.helper).toBe(requireFromTest(Path.join(server, 'helper.js')));
+    expect(loaded.config).toBe(requireFromTest(Path.join(server, 'index.js')).config);
+  });
+
   it('leaves a plugin entry with no local files unchanged', async () => {
     const root = makePlugin();
     const server = Path.join(root, 'server');

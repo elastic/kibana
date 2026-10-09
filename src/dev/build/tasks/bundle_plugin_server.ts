@@ -54,8 +54,9 @@ export const BundlePluginServers: Task = {
 };
 
 /**
- * Replace `server/plugin.js` with one CommonJS bundle of the files Node loads
- * when that entry is imported. Packages and lazy requires stay as separate files.
+ * Replace `server/plugin.js` with one CommonJS bundle of the files that only
+ * that entry loads. Packages, lazy requires, and modules also required from outside
+ * the bundle stay as separate files so Node loads a single instance of each.
  */
 export async function bundlePluginServer(pkgDistPath: string): Promise<void> {
   const packageRoot = Fs.realpathSync(pkgDistPath);
@@ -64,7 +65,7 @@ export async function bundlePluginServer(pkgDistPath: string): Promise<void> {
     return;
   }
 
-  const closure = collectStartupGraph(entry, packageRoot);
+  const closure = collectInlineGraph(entry, packageRoot);
   // A single file has no local import walk to collapse.
   if (closure.size < 2) {
     return;
@@ -130,6 +131,96 @@ function pluginServerBundlePlugin(closure: Set<string>, serverDir: string): Plug
   };
 }
 
+function collectInlineGraph(entry: string, packageRoot: string): Set<string> {
+  const startup = collectStartupGraph(entry, packageRoot);
+  if (startup.size < 2) {
+    return startup;
+  }
+  return excludeSharedModules(startup, entry, packageRoot);
+}
+
+/**
+ * Drop modules that a file outside the bundle can require. Their on-disk copy
+ * would be a second instance, so the bundle require()s them instead.
+ */
+function excludeSharedModules(
+  inline: Set<string>,
+  entry: string,
+  packageRoot: string
+): Set<string> {
+  const requiresByFile = new Map<string, readonly string[]>();
+  const requireTargets = (file: string): readonly string[] => {
+    const cached = requiresByFile.get(file);
+    if (cached) {
+      return cached;
+    }
+
+    const targets: string[] = [];
+    for (const specifier of requireSpecifiers(Fs.readFileSync(file, 'utf8'), file, false)) {
+      if (!specifier.startsWith('.')) {
+        continue;
+      }
+      const resolved = resolveExisting(Path.dirname(file), specifier);
+      if (resolved && Path.extname(resolved) === '.js' && isInside(packageRoot, resolved)) {
+        targets.push(resolved);
+      }
+    }
+    requiresByFile.set(file, targets);
+    return targets;
+  };
+
+  const queue = listPackageJsFiles(packageRoot).filter((file) => !inline.has(file));
+  const seen = new Set(queue);
+
+  for (let index = 0; index < queue.length; index++) {
+    const file = queue[index];
+    if (!file) {
+      continue;
+    }
+    for (const target of requireTargets(file)) {
+      if (target === entry || !inline.has(target)) {
+        continue;
+      }
+      inline.delete(target);
+      if (!seen.has(target)) {
+        seen.add(target);
+        queue.push(target);
+      }
+    }
+  }
+
+  return inline;
+}
+
+function listPackageJsFiles(packageRoot: string): string[] {
+  const files: string[] = [];
+  const seen = new Set<string>();
+
+  const visit = (dir: string) => {
+    for (const entry of Fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.name === 'node_modules') {
+        continue;
+      }
+      const abs = Path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        visit(abs);
+        continue;
+      }
+      if (!entry.isFile() || !entry.name.endsWith('.js') || entry.name === 'plugin.bundle.js') {
+        continue;
+      }
+      const real = Fs.realpathSync(abs);
+      if (!seen.has(real) && isInside(packageRoot, real)) {
+        seen.add(real);
+        files.push(real);
+      }
+    }
+  };
+
+  visit(packageRoot);
+  return files;
+}
+
 function collectStartupGraph(entry: string, packageRoot: string): Set<string> {
   const closure = new Set<string>();
 
@@ -148,7 +239,7 @@ function collectStartupGraph(entry: string, packageRoot: string): Set<string> {
       throw new Error(`Failed to read ${abs} while bundling the server plugin: ${message}`);
     }
 
-    for (const specifier of topLevelRequireSpecifiers(code, abs)) {
+    for (const specifier of requireSpecifiers(code, abs, true)) {
       if (!specifier.startsWith('.')) {
         continue;
       }
@@ -163,7 +254,7 @@ function collectStartupGraph(entry: string, packageRoot: string): Set<string> {
   return closure;
 }
 
-function topLevelRequireSpecifiers(code: string, filename: string): string[] {
+function requireSpecifiers(code: string, filename: string, topLevelOnly: boolean): string[] {
   let body: unknown;
   try {
     body = parseSync(code, { syntax: 'ecmascript' }).body;
@@ -187,7 +278,7 @@ function topLevelRequireSpecifiers(code: string, filename: string): string[] {
       callee?: { type?: string; value?: string };
       arguments?: Array<{ expression?: { type?: string; value?: string } }>;
     };
-    if (record.type && FUNCTION_NODES.has(record.type)) {
+    if (topLevelOnly && record.type && FUNCTION_NODES.has(record.type)) {
       return;
     }
     if (
