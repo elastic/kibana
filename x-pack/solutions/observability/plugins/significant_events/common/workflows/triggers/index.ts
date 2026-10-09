@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
-import { SIGNIFICANT_EVENT_STATUS_OPTIONS, SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
+import { SIGNIFICANT_EVENT_STATUS_OPTIONS, severitySchema } from '@kbn/significant-events-schema';
 
 // Trigger ids: kebab-case namespace, camelCase event.
 export const EVENT_CREATED_TRIGGER_ID = 'significant-events.eventCreated' as const;
@@ -18,15 +18,12 @@ const baseEventSchema = z.object({
   event_id: z
     .string()
     .describe('Stable incident key shared across every version of this significant event.'),
-  event_uuid: z.string().describe('Unique ID of this specific (append-only) event version.'),
   title: z.string().describe('Human-readable incident label.'),
   summary: z.string().describe('Short human-readable description of what is happening.'),
   status: z
     .enum(SIGNIFICANT_EVENT_STATUS_OPTIONS)
-    .describe('Current lifecycle status: "pending", "open", "closed", or "dismissed".'),
-  severity: z
-    .enum(SEVERITY_OPTIONS)
-    .describe('Severity: "80-critical", "60-high", "40-medium", or "20-low".'),
+    .describe('Current lifecycle status: "active" or "inactive".'),
+  severity: severitySchema.describe('Severity: "critical", "high", "medium", or "low".'),
   stream_names: z.array(z.string()).describe('Data streams associated with this event.'),
   occurred_at: z.string().describe('When the triggered event happened (ISO 8601 timestamp).'),
 });
@@ -81,14 +78,14 @@ export const eventCreatedTriggerCommonDefinition: CommonTriggerDefinition = {
 triggers:
   - type: {triggerId}
     on:
-      condition: 'event.severity: "80-critical"'
+      condition: 'event.severity: "critical"'
 \`\`\``,
           values: { triggerId: EVENT_CREATED_TRIGGER_ID },
         }
       ),
     ],
   },
-  snippets: { condition: 'event.severity: "80-critical"' },
+  snippets: { condition: 'event.severity: "critical"' },
 };
 
 export const eventStatusChangedTriggerCommonDefinition: CommonTriggerDefinition = {
@@ -109,26 +106,26 @@ export const eventStatusChangedTriggerCommonDefinition: CommonTriggerDefinition 
       'xpack.significantEvents.workflowTriggers.eventStatusChanged.documentation.details',
       {
         defaultMessage:
-          'Emitted when a significant event moves between statuses. The payload includes event.status and event.previous_status.',
+          'Emitted when a significant event moves between statuses. The payload includes event.status and event.previous_status. event.status: "inactive" fires both when an event recovers and when an operator deactivates it.',
       }
     ),
     examples: [
       i18n.translate(
         'xpack.significantEvents.workflowTriggers.eventStatusChanged.documentation.example',
         {
-          defaultMessage: `## Run when an event is closed
+          defaultMessage: `## Run when an event becomes inactive (recovery or operator deactivation)
 \`\`\`yaml
 triggers:
   - type: {triggerId}
     on:
-      condition: 'event.status: "closed"'
+      condition: 'event.status: "inactive"'
 \`\`\``,
           values: { triggerId: EVENT_STATUS_CHANGED_TRIGGER_ID },
         }
       ),
     ],
   },
-  snippets: { condition: 'event.status: "closed"' },
+  snippets: { condition: 'event.status: "inactive"' },
 };
 
 export const significantEventsTriggerCommonDefinitions: CommonTriggerDefinition[] = [

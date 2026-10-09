@@ -7,11 +7,14 @@
 
 import type { Investigation } from '../../../types';
 
+/** The slice of a queue row the Impact pills and filter read. */
+export type ImpactFilterable = Pick<Investigation, 'entityIds' | 'affectedSurface'>;
+
 /** Entity ids the Impact pills and filter operate on. */
-export const investigationEntityIds = (investigation: Investigation): string[] => {
-  if (investigation.entityIds && investigation.entityIds.length > 0) {
-    return investigation.entityIds;
+export const investigationEntityIds = (item: ImpactFilterable): string[] => {
+  if (item.entityIds && item.entityIds.length > 0) {
+    return item.entityIds;
   }
-  const surface = investigation.affectedSurface?.trim();
+  const surface = item.affectedSurface?.trim();
   return surface ? [surface] : [];
 };

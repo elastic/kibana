@@ -10,7 +10,10 @@ import Boom from '@hapi/boom';
 import type { CreateServiceAccountParams } from '@kbn/core-security-server';
 
 import type { ServiceAccountRoleLimits } from '../../common/service_accounts';
-import { getCreateServiceAccountParamsSchema } from '../../common/service_accounts';
+import {
+  getCreateServiceAccountParamsSchema,
+  serviceAccountNameSchema,
+} from '../../common/service_accounts';
 
 /** Create parameters, once validated: the same shape the route accepts. */
 export type ParsedCreateServiceAccountParams = ReturnType<
@@ -42,4 +45,15 @@ export const parseCreateServiceAccountParams = (
   }
 
   return parsed.data;
+};
+
+/**
+ * The name a refused create can safely name in its audit event, or `undefined` when there is none.
+ * The Elasticsearch backend checks the caller's privilege before
+ * {@link parseCreateServiceAccountParams} has vouched for anything, so the name is checked on its
+ * own here rather than written to the log as received.
+ */
+export const auditableName = (params: CreateServiceAccountParams): { name: string } | undefined => {
+  const parsed = serviceAccountNameSchema.safeParse(params.name);
+  return parsed.success ? { name: parsed.data } : undefined;
 };

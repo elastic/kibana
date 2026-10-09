@@ -11,7 +11,6 @@ import { AppStatus, type AppUpdater } from '@kbn/core/public';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
-import { getInvestigationTabIds } from '@kbn/agentic-investigations-common';
 import {
   BehaviorSubject,
   EMPTY,
@@ -246,66 +245,29 @@ describe('AlertZeroPublicPlugin app registration', () => {
 });
 
 describe('AlertZeroPublicPlugin conversation template UI registration', () => {
-  const startPlugin = (setting$: Observable<boolean>, enabled = true) => {
-    const plugin = new AlertZeroPublicPlugin(createContext(createConfig({ enabled })));
+  it('leaves the investigation and escalation template UI to the agenticInvestigations plugin', () => {
+    const plugin = new AlertZeroPublicPlugin(createContext(createConfig({ enabled: true })));
     const agentBuilder = agentBuilderMocks.createStart();
 
-    plugin.start(withSetting(coreMock.createStart(), setting$), {
+    plugin.start(withSetting(coreMock.createStart(), new BehaviorSubject(true)), {
       licensing: createLicensing(),
       agenticInvestigations: {},
       proposals: {},
       agentBuilder,
     } as never);
 
-    return { agentBuilder, plugin };
-  };
-
-  it('registers the investigation template UI and its tabs when the setting is on', () => {
-    const { agentBuilder } = startPlugin(new BehaviorSubject(true));
-    const { conversationTemplates } = agentBuilder;
-
-    expect(conversationTemplates.registerTemplateUIDefinition).toHaveBeenCalledWith(
-      'investigation',
-      expect.any(Function)
-    );
-    for (const tabId of getInvestigationTabIds('investigation')) {
-      expect(conversationTemplates.registerTab).toHaveBeenCalledWith(tabId, expect.any(Function));
-    }
-  });
-
-  it('registers nothing while the setting is off', () => {
-    const { agentBuilder } = startPlugin(new BehaviorSubject(false));
-
     expect(agentBuilder.conversationTemplates.registerTemplateUIDefinition).not.toHaveBeenCalled();
     expect(agentBuilder.conversationTemplates.registerTab).not.toHaveBeenCalled();
-  });
-
-  it('registers once the setting is turned on, and only once', () => {
-    const setting$ = new BehaviorSubject(false);
-    const { agentBuilder } = startPlugin(setting$);
-
-    setting$.next(true);
-    setting$.next(false);
-    setting$.next(true);
-
-    // Both investigation and escalation templates are registered exactly once on the first `true`
-    // emission; subsequent `true` emissions are ignored because of `take(1)`.
-    expect(agentBuilder.conversationTemplates.registerTemplateUIDefinition).toHaveBeenCalledTimes(
-      2
-    );
-  });
-
-  it('registers nothing when the deployment kill switch is off', () => {
-    const { agentBuilder } = startPlugin(new BehaviorSubject(true), false);
-
-    expect(agentBuilder.conversationTemplates.registerTemplateUIDefinition).not.toHaveBeenCalled();
   });
 });
 
 describe('AlertZeroPublicPlugin Serverless entitlement', () => {
+  // The attachment registrar uses `await import(...)`, so let it settle before asserting.
+  const flushRegistration = () => new Promise((resolve) => setTimeout(resolve, 0));
+
   it.each([true, false])(
     'uses tier entitlement independently of license availability (%s)',
-    (hasLicense) => {
+    async (hasLicense) => {
       const context = coreMock.createPluginInitializerContext(createConfig({ enabled: true }), {
         buildFlavor: 'serverless',
       });
@@ -315,14 +277,14 @@ describe('AlertZeroPublicPlugin Serverless entitlement', () => {
       const contract = plugin.start(core, {
         licensing: hasLicense ? createLicensing() : { ...createLicensing(), license$: EMPTY },
         agentBuilder,
-        agenticInvestigations: {},
+        agenticInvestigations: { registerImpactEntityOpener: jest.fn() },
         proposals: {},
       });
-      expect(
-        agentBuilder.conversationTemplates.registerTemplateUIDefinition
-      ).not.toHaveBeenCalled();
+      await flushRegistration();
+      expect(agentBuilder.attachments.addAttachmentType).not.toHaveBeenCalled();
       contract.setServerlessTierAvailable(true);
-      expect(agentBuilder.conversationTemplates.registerTemplateUIDefinition).toHaveBeenCalled();
+      await flushRegistration();
+      expect(agentBuilder.attachments.addAttachmentType).toHaveBeenCalled();
       plugin.stop();
     }
   );
@@ -379,7 +341,9 @@ describe('AlertZeroPublicPlugin attachment UI registration', () => {
 
   it('derives the space id from the base path so registration never waits on a round trip', async () => {
     // A non-default space is carried by the base path as `/s/<id>`, and that id scopes the
-    // threat-report lookup, so assert it reaches the ES|QL the action button is built from.
+    // SSE's alerts lookup (every alert ref is pinned to the *current* space's alerts alias,
+    // never its persisted `index` — see `buildSignificantSecurityEventActionButtons`), so
+    // assert it reaches the ES|QL the action button is built from.
     const locator = { getRedirectUrl: jest.fn().mockReturnValue('/app/discover#/?x=1') };
     const share = {
       url: { locators: { get: jest.fn().mockReturnValue(locator) } },
@@ -388,16 +352,39 @@ describe('AlertZeroPublicPlugin attachment UI registration', () => {
     const { attachments } = startPlugin({ basePath: '/s/soc', share });
     await flushRegistration();
 
-    const [, threatDefinition] =
-      attachments.addAttachmentType.mock.calls.find(([type]) => type === 'security.threat') ?? [];
-    threatDefinition?.getActionButtons?.({
-      attachment: { id: 'a-1', type: 'security.threat', data: { report_id: 'report-7' } },
+    const [, sseDefinition] =
+      attachments.addAttachmentType.mock.calls.find(
+        ([type]) => type === 'security.significant_security_event'
+      ) ?? [];
+    sseDefinition?.getActionButtons?.({
+      attachment: {
+        id: 'a-1',
+        type: 'security.significant_security_event',
+        data: {
+          title: 'Suspicious lateral movement',
+          severity: 'high',
+          confidence: 0.8,
+          status: 'open',
+          source_watch: 'watch-1',
+          capability: 'lateral-movement-detector',
+          run_id: 'run-1',
+          report_id: 'ti-report-1',
+          security_knowledge_indicators: [],
+          entities: [],
+          timeline: [],
+          hypothesis_tested: 'hyp',
+          evidence_for: [],
+          evidence_against: [],
+          evaluation_record_ref: 'eval-1',
+          alerts: [{ alert_id: 'alert-1', index: '.alerts-security.alerts-other' }],
+        },
+      },
     } as never);
 
     expect(locator.getRedirectUrl).toHaveBeenCalledWith(
       expect.objectContaining({
         query: expect.objectContaining({
-          esql: expect.stringContaining('space_id IN ("soc", "*")'),
+          esql: expect.stringContaining('.alerts-security.alerts-soc'),
         }),
       })
     );
