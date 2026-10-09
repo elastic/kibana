@@ -149,7 +149,7 @@ Use `features={{ urlSync: false }}` for embedded lists, modals, sidebars, or sec
 
 ### Sort persistence
 
-The sort a user picks (from the sort dropdown or a table header) is saved in `localStorage` under `contentList:sort:<queryKeyScope>` as `field:direction` (for example `contentList:sort:dashboard-listing:title:asc`). `queryKeyScope` defaults to `${id}-listing`, so each listing keeps its own sort.
+The sort a user picks (from the sort dropdown or a table header) is saved in `localStorage` under `contentList:sort:<queryKeyScope>` as `field:direction` (for example, key `contentList:sort:dashboard-listing`, value `title:asc`). `queryKeyScope` defaults to `${id}-listing`, so each listing keeps its own sort.
 
 The sort a list opens with is resolved once at mount:
 
