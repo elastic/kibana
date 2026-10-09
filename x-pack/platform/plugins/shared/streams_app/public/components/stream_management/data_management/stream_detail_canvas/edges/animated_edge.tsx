@@ -22,6 +22,8 @@ import { useBoolean, useDebounceFn } from '@kbn/react-hooks';
 const DASH = 4;
 const GAP = 8;
 const DASH_PERIOD = DASH + GAP;
+const DEBOUNCE_OPTS = { wait: 250 };
+const PATH_OPACITY = { opacity: 0.85 };
 
 const flowMarch = keyframes`
   from {
@@ -42,8 +44,6 @@ const flowStyles = css`
     animation: none;
   }
 `;
-
-const pathOpacity = { opacity: 0.85 };
 
 export function AnimatedEdge({
   id,
@@ -99,13 +99,12 @@ export function AnimatedEdge({
     [canUnhook]
   );
 
-  const { run: close, cancel: cancelClose } = useDebounceFn(
-    () => {
-      hover.off();
-      menu.off();
-    },
-    { wait: 250 }
-  );
+  const closeAll = useCallback(() => {
+    hover.off();
+    menu.off();
+  }, [hover, menu]);
+
+  const { run: close, cancel: cancelClose } = useDebounceFn(closeAll, DEBOUNCE_OPTS);
 
   const show = useCallback(() => {
     hover.on();
@@ -168,7 +167,7 @@ export function AnimatedEdge({
           stroke={euiTheme.colors.primary}
           strokeWidth={1}
           strokeLinecap="round"
-          style={pathOpacity}
+          style={PATH_OPACITY}
         />
       ) : null}
       <EdgeToolbar edgeId={id} x={centerX} y={centerY} isVisible={isActive}>
