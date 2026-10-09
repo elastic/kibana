@@ -7,6 +7,7 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { enableAlertAnalysisInSpace } from './alert_analysis_setting';
 import { enableAlertZeroInSpace } from './alertzero_setting';
 import { WORKER_IDS } from './constants';
 import { provisionWorkerServiceAccounts } from './service_accounts';
@@ -26,6 +27,8 @@ export interface WorkerChainHarnessState {
   snapshots: WorkerAutonomySnapshot[];
   /** Puts `securitySolution:enableAlertZero` back; set as soon as the setting is written. */
   restoreAlertZeroSetting?: () => Promise<void>;
+  /** Puts the space's alert-analysis workflow setting back; set as soon as it is written. */
+  restoreAlertAnalysisSetting?: () => Promise<void>;
   /** R1/R4: service account each Worker runs as. */
   workerServiceAccounts: Record<string, string>;
 }
@@ -59,6 +62,8 @@ export const setupWorkerChainHarness = async ({
 }): Promise<void> => {
   state.restoreAlertZeroSetting = await enableAlertZeroInSpace(ctx);
   log.info(`Enabled securitySolution:enableAlertZero in space "${ctx.spaceId}"`);
+  state.restoreAlertAnalysisSetting = await enableAlertAnalysisInSpace(ctx);
+  log.info(`Alert analysis workflow enabled in space "${ctx.spaceId}" (Alert Triage requires it)`);
 
   const workerIds = Object.values(WORKER_IDS);
   const provisioned = pinnedServiceAccountId
@@ -103,6 +108,11 @@ export const teardownWorkerChainHarness = async ({
       log.warning(`Could not restore worker ${snapshot.workerId}: ${error.message}`)
     );
   }
+  await state
+    .restoreAlertAnalysisSetting?.()
+    .catch((error: Error) =>
+      log.warning(`Could not restore the alert analysis workflow setting: ${error.message}`)
+    );
   await state
     .restoreAlertZeroSetting?.()
     .catch((error: Error) =>

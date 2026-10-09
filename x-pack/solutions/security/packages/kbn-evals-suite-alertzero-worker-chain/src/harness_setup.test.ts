@@ -7,7 +7,7 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { ALERTZERO_ENABLED_SETTING_ID, WORKER_IDS } from './constants';
+import { ALERTZERO_ENABLED_SETTING_ID, ALERT_ANALYSIS_SETTINGS_URL, WORKER_IDS } from './constants';
 import {
   createHarnessState,
   setupWorkerChainHarness,
@@ -43,12 +43,20 @@ interface Opts {
   /** Workers install on enable (the product behaviour); false simulates a failed install. */
   installOnEnable?: boolean;
   existingAccounts?: Account[];
+  /** Whether the space's alert-analysis workflow is already on (default: off, as on a fresh stack). */
+  priorAnalysis?: boolean;
 }
 
 /** A tiny in-memory Kibana: the setting gates the Workers routes exactly like the product. */
-const makeStack = ({ priorSetting, installOnEnable = true, existingAccounts = [] }: Opts = {}) => {
+const makeStack = ({
+  priorSetting,
+  installOnEnable = true,
+  existingAccounts = [],
+  priorAnalysis = false,
+}: Opts = {}) => {
   const calls: string[] = [];
   let setting: unknown = priorSetting;
+  let analysis = priorAnalysis;
   const accounts = [...existingAccounts];
   const workers: Record<string, FakeWorker> = Object.fromEntries(
     Object.values(WORKER_IDS).map((id) => [
@@ -72,12 +80,21 @@ const makeStack = ({ priorSetting, installOnEnable = true, existingAccounts = []
           setting === undefined ? {} : { [ALERTZERO_ENABLED_SETTING_ID]: { userValue: setting } },
       };
     }
+    if (path === ALERT_ANALYSIS_SETTINGS_URL) {
+      if (method === 'PUT') analysis = JSON.parse(options.body ?? '{}').workflowEnabled;
+      return { settings: { workflowEnabled: analysis, tagPrefix: 'alert-analysis' } };
+    }
     if (path.startsWith(WORKERS_URL)) {
       if (setting !== true) throw notFound();
       if (method === 'GET') return { workers: Object.values(workers) };
       const id = decodeURIComponent(path.slice(WORKERS_URL.length + 1));
       const body = JSON.parse(options.body ?? '{}');
       const w = workers[id];
+      if (id === WORKER_IDS.alertTriage && body.enabled && !analysis) {
+        throw Object.assign(new Error('Alert Triage requires alert analysis to be turned on'), {
+          status: 400,
+        });
+      }
       if (body.enabled && !w.settings.serviceAccountId && !body.settings?.serviceAccountId) {
         throw Object.assign(new Error('enabled without a service account'), { status: 400 });
       }
@@ -101,7 +118,13 @@ const makeStack = ({ priorSetting, installOnEnable = true, existingAccounts = []
     if (path.startsWith('/api/security/role/')) return {};
     throw new Error(`unexpected ${method} ${path}`);
   });
-  return { fetch: fetch as unknown as HttpHandler, calls, accounts, getSetting: () => setting };
+  return {
+    fetch: fetch as unknown as HttpHandler,
+    calls,
+    accounts,
+    getSetting: () => setting,
+    getAnalysis: () => analysis,
+  };
 };
 
 const makeLog = () => ({ info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog);
@@ -193,6 +216,32 @@ describe('setupWorkerChainHarness / teardownWorkerChainHarness', () => {
     expect(stack.getSetting()).toBe(true);
     await teardownWorkerChainHarness({ ctx: ctxFor(stack.fetch), state, log });
     expect(stack.getSetting()).toBeUndefined();
+  });
+
+  it('turns the alert-analysis workflow on before enabling Alert Triage, and off again in teardown', async () => {
+    const stack = makeStack();
+    const state = createHarnessState();
+    const log = makeLog();
+    await setupWorkerChainHarness({ fetch: stack.fetch, ctx: ctxFor(stack.fetch), state, log });
+    expect(stack.getAnalysis()).toBe(true);
+    const analysisWrite = stack.calls.indexOf(`PUT ${ALERT_ANALYSIS_SETTINGS_URL}`);
+    const firstWorkerPatch = stack.calls.findIndex((c) => c.startsWith(`PATCH ${WORKERS_URL}`));
+    expect(analysisWrite).toBeGreaterThanOrEqual(0);
+    expect(analysisWrite).toBeLessThan(firstWorkerPatch);
+
+    await teardownWorkerChainHarness({ ctx: ctxFor(stack.fetch), state, log });
+    expect(stack.getAnalysis()).toBe(false);
+    expect(log.warning).not.toHaveBeenCalled();
+  });
+
+  it('leaves an already-enabled alert-analysis workflow alone (no write, no restore)', async () => {
+    const stack = makeStack({ priorAnalysis: true });
+    const state = createHarnessState();
+    const log = makeLog();
+    await setupWorkerChainHarness({ fetch: stack.fetch, ctx: ctxFor(stack.fetch), state, log });
+    await teardownWorkerChainHarness({ ctx: ctxFor(stack.fetch), state, log });
+    expect(stack.calls.filter((c) => c === `PUT ${ALERT_ANALYSIS_SETTINGS_URL}`)).toHaveLength(0);
+    expect(stack.getAnalysis()).toBe(true);
   });
 
   it('teardown restores Workers while the setting is still on, then the setting last (to its prior value)', async () => {

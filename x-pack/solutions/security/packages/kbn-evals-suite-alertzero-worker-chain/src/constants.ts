@@ -65,6 +65,11 @@ export const ALERTZERO_WORKERS_URL = '/internal/alertzero/workers';
 /** ALERTZERO_ENABLED_SETTING_ID (@kbn/alertzero-common): per-space gate on every alertzero route. */
 export const ALERTZERO_ENABLED_SETTING_ID = 'securitySolution:enableAlertZero';
 
+/** security_solution's per-space alert-analysis settings route (the setting itself is readonly). */
+export const ALERT_ANALYSIS_SETTINGS_URL =
+  '/internal/security_solution/alert_analysis_workflow/settings';
+export const ALERT_ANALYSIS_SETTINGS_API_VERSION = '1';
+
 /** SECURITY_SERVICE_ACCOUNT_URL (@kbn/alertzero-common). */
 export const SECURITY_SERVICE_ACCOUNT_URL = '/internal/security/service_account';
 export const PROPOSALS_URL = '/internal/proposals';
