@@ -9,7 +9,9 @@
   "kbn_references": [
     "@kbn/core-base-server-internal",
     "@kbn/core-base-server-mocks",
+    "@kbn/core-http-server-utils",
     "@kbn/core-pubsub-server",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/logging-mocks"
   ]
 }
