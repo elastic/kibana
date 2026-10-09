@@ -53,7 +53,7 @@ const mockNightshiftApis = async (page: any) => {
 
 test.describe(
   'Observability Alerting v2 Inbox investigation actions',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ esClient, kbnClient }) => {
       await setAlertingV2EnabledSetting(kbnClient, true);

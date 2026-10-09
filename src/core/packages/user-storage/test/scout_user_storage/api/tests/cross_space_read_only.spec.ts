@@ -51,7 +51,7 @@ const READ_ONLY_TWO_SPACES: KibanaRole = {
 
 apiTest.describe(
   'User Storage - Read-only user across two spaces',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     let cookieHeader: Record<string, string>;
     const h = createHelpers(() => cookieHeader);

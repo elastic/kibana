@@ -33,7 +33,7 @@ const COUNT = 'example-restorable-state-doc-view-count';
  */
 spaceTest.describe(
   'Discover context awareness - extension getDocViewer, restorable state',
-  { tag: tags.stateful.classic },
+  { tag: tags.local.stateful.classic },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await setupContextAwareness(scoutSpace);

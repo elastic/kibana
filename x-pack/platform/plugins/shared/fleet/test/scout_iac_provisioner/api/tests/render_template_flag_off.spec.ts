@@ -17,7 +17,7 @@ import { apiTest, testData } from '../fixtures';
  */
 apiTest.describe(
   'Fleet IaC Provisioner render route when the feature flag is off',
-  { tag: tags.serverless.security.complete },
+  { tag: tags.local.serverless.security.complete },
   () => {
     apiTest.beforeAll(async ({ apiServices }) => {
       await apiServices.core.settings({

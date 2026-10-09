@@ -26,7 +26,7 @@ const times = seedTimeWindow(1);
 
 apiTest.describe(
   'investigations are isolated per space',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
   () => {
     let cookieHeader: Record<string, string>;
 

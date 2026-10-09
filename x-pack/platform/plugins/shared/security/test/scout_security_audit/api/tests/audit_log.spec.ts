@@ -31,7 +31,7 @@ const waitForAuditEvent = async (
 
 apiTest.describe(
   'Audit log — ECS field shape (local file appender)',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.security.complete] },
   () => {
     apiTest('user_login success: core ECS fields present', async ({ apiClient, samlAuth }) => {
       const testStart = Date.now();

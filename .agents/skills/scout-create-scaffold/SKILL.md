@@ -104,6 +104,7 @@ There is no need to run `node scripts/scout update-test-config-manifests`. CI ta
 - Custom server config sets:
   - If you create/use `test/scout_<configSet>`, you typically also need a matching server config under `src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/<configSet>`.
   - `start-server` requires `--serverConfigSet <configSet>` when using a custom server config set.
+  - Tests under `test/scout_<configSet>` only run locally (never on Cloud), so tag them with the local-only sets, e.g. `tags.local.stateful.classic`. ESLint rejects `tags.stateful.*` / `tags.serverless.*` / `tags.deploymentAgnostic` there.
 
 ## Path Conventions (Specs)
 

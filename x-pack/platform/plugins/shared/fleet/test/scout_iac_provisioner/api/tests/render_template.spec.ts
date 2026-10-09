@@ -28,7 +28,7 @@ const { VALID_RENDER_BODY } = testData;
  */
 apiTest.describe(
   'Fleet IaC Provisioner render route',
-  { tag: tags.serverless.security.complete },
+  { tag: tags.local.serverless.security.complete },
   () => {
     apiTest.beforeAll(async ({ apiServices }) => {
       await apiServices.core.settings({

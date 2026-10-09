@@ -13,7 +13,7 @@ import { apiTest, createHelpers } from '../fixtures';
 
 apiTest.describe(
   'User Storage - Forbidden (no user profile)',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     let apiKeyHeader: Record<string, string>;
     const h = createHelpers(() => apiKeyHeader);

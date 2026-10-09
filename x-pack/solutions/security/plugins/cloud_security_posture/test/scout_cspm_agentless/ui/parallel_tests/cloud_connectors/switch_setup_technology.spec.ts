@@ -27,7 +27,7 @@ type AgentlessPolicyRequestBody = CreateAgentlessPolicyRequest['body'];
 
 spaceTest.describe(
   'Cloud Connectors - Switch Setup Technology',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth }) => {
       // Use admin for stateful tests (has all permissions including fleet-cloud-connector)

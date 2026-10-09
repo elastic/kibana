@@ -41,7 +41,7 @@ const RUN = `scout-query-${Date.now()}`;
 
 apiTest.describe(
   'GET /internal/investigations/investigations — investigation query API',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     let cookieHeader: Record<string, string>;
     let highId: string;

@@ -23,7 +23,7 @@ test.describe('Inference Navigation', () => {
 
   test(
     'EIS Models Page: displays correct breadcrumbs in classic navigation',
-    { tag: [...tags.stateful.classic] },
+    { tag: [...tags.local.stateful.classic] },
     async ({ page, pageObjects }) => {
       await mockInferenceEndpoints(page, eisEndpointsMockData);
       await pageObjects.eisModels.goto();
@@ -39,7 +39,7 @@ test.describe('Inference Navigation', () => {
 
   test(
     'EIS Models Page: displays correct navigation in serverless search',
-    { tag: [...tags.serverless.search] },
+    { tag: [...tags.local.serverless.search] },
     async ({ page, pageObjects }) => {
       await mockInferenceEndpoints(page, eisEndpointsMockData);
       await pageObjects.eisModels.goto();
@@ -56,7 +56,7 @@ test.describe('Inference Navigation', () => {
 
   test(
     'External Inference Page: displays correct breadcrumbs in classic navigation',
-    { tag: [...tags.stateful.classic] },
+    { tag: [...tags.local.stateful.classic] },
     async ({ page, pageObjects }) => {
       await mockInferenceEndpoints(page, externalInferenceEndpointsMockData);
       await pageObjects.externalInference.goto();
@@ -72,7 +72,7 @@ test.describe('Inference Navigation', () => {
 
   test(
     'External Inference Page: displays correct navigation in serverless search',
-    { tag: [...tags.serverless.search] },
+    { tag: [...tags.local.serverless.search] },
     async ({ page, pageObjects }) => {
       await mockInferenceEndpoints(page, externalInferenceEndpointsMockData);
       await pageObjects.externalInference.goto();
@@ -89,7 +89,7 @@ test.describe('Inference Navigation', () => {
 
   test(
     'Feature Settings Page: displays correct breadcrumbs in classic navigation',
-    { tag: [...tags.stateful.classic] },
+    { tag: [...tags.local.stateful.classic] },
     async ({ page, pageObjects }) => {
       await mockInferenceEndpoints(page, eisEndpointsMockData);
       await pageObjects.featureSettings.goto();
@@ -105,7 +105,7 @@ test.describe('Inference Navigation', () => {
 
   test(
     'Feature Settings Page: displays correct navigation in serverless search',
-    { tag: [...tags.serverless.search] },
+    { tag: [...tags.local.serverless.search] },
     async ({ page, pageObjects }) => {
       await mockInferenceEndpoints(page, eisEndpointsMockData);
       await pageObjects.featureSettings.goto();

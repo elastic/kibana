@@ -28,7 +28,7 @@ const ACTIONS_MENU_CONTROL = 'unifiedDataTable_additionalRowControl_actionsMenu'
  */
 spaceTest.describe(
   'Discover context awareness - extension getRowAdditionalLeadingControls',
-  { tag: tags.deploymentAgnostic },
+  { tag: tags.local.deploymentAgnostic },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await setupContextAwareness(scoutSpace);

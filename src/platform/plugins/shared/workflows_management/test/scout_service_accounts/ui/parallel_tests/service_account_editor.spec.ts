@@ -14,7 +14,7 @@ import { test, workflowYaml } from '../fixtures';
 
 test.describe(
   'Service account editor with the feature flag enabled',
-  { tag: tags.stateful.classic },
+  { tag: tags.local.stateful.classic },
   () => {
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();

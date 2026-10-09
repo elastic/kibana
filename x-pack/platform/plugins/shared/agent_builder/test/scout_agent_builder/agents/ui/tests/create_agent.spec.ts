@@ -12,7 +12,7 @@ import { test } from '../fixtures';
 
 test.describe(
   'Agent Builder — create agent',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     let createdAgentId: string | undefined;
 

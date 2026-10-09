@@ -147,7 +147,7 @@ const judgedConverse = async (
 
 apiTest.describe(
   'Agent Builder — LLM smoke (converse API)',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     apiTest.setTimeout(300_000);
 

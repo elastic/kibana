@@ -37,7 +37,7 @@ const slug = (name: string) => `${name}-${suffix}`;
  */
 apiTest.describe(
   'Semantic Memory write routes are authorized on the server',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     const seeded: SeededMemory[] = [];
 

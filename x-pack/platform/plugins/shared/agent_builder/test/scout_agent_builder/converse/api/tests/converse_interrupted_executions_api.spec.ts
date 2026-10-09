@@ -129,7 +129,7 @@ const eventsOfExecution = (conversation: Conversation, executionId: string): Con
 
 apiTest.describe(
   'Agent Builder — interrupted executions are persisted on the conversation',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     let adminCredentials: RoleApiCredentials;
     let adminInteractiveCookieHeader: Record<string, string>;

@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout';
 
-export const UPGRADE_ASSISTANT_INTEGRATION_TAGS = tags.stateful.classic;
+export const UPGRADE_ASSISTANT_INTEGRATION_TAGS = tags.local.stateful.classic;
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',

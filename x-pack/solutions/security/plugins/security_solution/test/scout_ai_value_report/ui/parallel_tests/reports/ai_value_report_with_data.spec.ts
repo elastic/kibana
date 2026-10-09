@@ -12,9 +12,9 @@ spaceTest.describe(
   'AI Value Report - with Attack Discovery data',
   {
     tag: [
-      ...tags.stateful.classic,
-      ...tags.serverless.security.complete,
-      ...tags.serverless.security.ease,
+      ...tags.local.stateful.classic,
+      ...tags.local.serverless.security.complete,
+      ...tags.local.serverless.security.ease,
     ],
   },
   () => {

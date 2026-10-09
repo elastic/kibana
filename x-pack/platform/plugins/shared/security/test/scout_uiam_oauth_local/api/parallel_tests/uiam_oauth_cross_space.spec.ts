@@ -36,7 +36,7 @@ const mcpInitBody = (id: number) => ({
 
 apiTest.describe(
   '[NON-MKI] Cross-space OAuth token audience isolation',
-  { tag: [...tags.serverless.security.complete] },
+  { tag: [...tags.local.serverless.security.complete] },
   () => {
     const SPACE_A = 'oauth-space-a';
     const SPACE_B = 'oauth-space-b';

@@ -121,7 +121,7 @@ const getProjectRouting = async (
 
 test.describe(
   'Transform CPS project scope UI flows',
-  { tag: tags.serverless.security.complete },
+  { tag: tags.local.serverless.security.complete },
   () => {
     test.beforeAll(async ({ kbnClient }) => {
       await createDataView(kbnClient);

@@ -46,7 +46,7 @@ const ROUND_BOUNDARY_EVENT_TYPES = [
  */
 apiTest.describe(
   'Agent Builder — conversations events persistence',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     let adminCredentials: RoleApiCredentials;
     let llmProxy: LlmProxy;

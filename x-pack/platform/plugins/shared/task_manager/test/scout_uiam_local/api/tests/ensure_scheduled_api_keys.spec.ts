@@ -22,7 +22,7 @@ const TASK_ID = 'scout-ensure-scheduled-api-key-leak';
 
 apiTest.describe(
   'Task Manager ensureScheduled API keys',
-  { tag: tags.serverless.observability.complete },
+  { tag: tags.local.serverless.observability.complete },
   () => {
     let taskToCleanup: ScheduledTaskWithApiKeyIds | undefined;
 

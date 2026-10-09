@@ -17,7 +17,7 @@ import {
 
 apiTest.describe(
   'automatic_import Integration API (manager approve & download)',
-  { tag: tags.stateful.all },
+  { tag: tags.local.stateful.all },
   () => {
     let cookieHeader: Record<string, string>;
 

@@ -22,7 +22,7 @@ const agent = {
 
 test.describe(
   'Agent Builder — agent connectors page',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     test.beforeAll(async ({ kbnClient }) => {
       await createAgentViaKbn(kbnClient, {

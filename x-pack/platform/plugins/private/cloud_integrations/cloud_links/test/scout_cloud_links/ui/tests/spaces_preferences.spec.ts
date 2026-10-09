@@ -14,7 +14,7 @@ import {
   updateInteractiveUserSettings,
 } from '../fixtures/user_profile_test_helpers';
 
-test.describe('Spaces preferences modal', { tag: tags.stateful.classic }, () => {
+test.describe('Spaces preferences modal', { tag: tags.local.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
     await pageObjects.home.goto();

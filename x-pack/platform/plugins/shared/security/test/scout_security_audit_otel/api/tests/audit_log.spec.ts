@@ -55,7 +55,7 @@ apiTest.describe(
   // Serverless-only: the audit OTel field transforms + minimal resource are gated on the serverless
   // build flavor. Traditional/stateful behavior (raw ECS through the OTel appender) is covered by
   // audit_log_traditional.spec.ts.
-  { tag: [...tags.serverless.security.complete] },
+  { tag: [...tags.local.serverless.security.complete] },
   () => {
     apiTest.beforeAll(async ({ kbnClient }) => {
       await receiver.start(OTEL_RECEIVER_PORT);

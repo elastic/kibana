@@ -15,7 +15,7 @@ import { apiTest, API_AGENT_BUILDER, spaceUrl } from '../fixtures';
 
 apiTest.describe(
   'Agent Builder — spaces API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     const SPACE_1 = 'spaces-api-test-1';
     const SPACE_2 = 'spaces-api-test-2';

@@ -58,7 +58,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
 
   apiTest.describe(
     `Rule executor (${responseFormat} ES|QL response format)`,
-    { tag: isArrow ? '@local-stateful-classic' : tags.stateful.classic },
+    { tag: isArrow ? '@local-stateful-classic' : tags.local.stateful.classic },
     () => {
       const SOURCE_INDEX = `test-alerting-v2-rule-executor-source-${responseFormat}`;
       /**

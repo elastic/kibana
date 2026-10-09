@@ -31,7 +31,7 @@ import { apiTest, API_AGENT_BUILDER } from '../fixtures';
 
 apiTest.describe(
   'Agent Builder — conversation attachments API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     let llmProxy: LlmProxy;
     let connectorId: string;

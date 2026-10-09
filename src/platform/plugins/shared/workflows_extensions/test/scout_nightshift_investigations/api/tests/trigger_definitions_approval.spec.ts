@@ -16,7 +16,7 @@ import { COMMON_HEADERS } from '../fixtures/constants';
 apiTest.describe(
   'Workflows Extensions - Event-Driven Trigger Definitions Approval',
   {
-    tag: [...tags.stateful.classic],
+    tag: [...tags.local.stateful.classic],
   },
   () => {
     let adminApiCredentials: RoleApiCredentials;

@@ -33,7 +33,7 @@ const AZURE_CREDENTIALS_TYPE_KEY = 'azure.credentials.type';
 
 spaceTest.describe(
   'Cloud Connectors - Create New',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth }) => {
       // Use admin for stateful tests (has all permissions including fleet-cloud-connector)

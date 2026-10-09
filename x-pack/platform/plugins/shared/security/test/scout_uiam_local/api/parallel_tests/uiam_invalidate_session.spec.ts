@@ -23,7 +23,7 @@ import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../../common/constants';
 import { COMMON_HEADERS, extractAttributeValue } from '../fixtures';
 
 // These tests cannot be run on MKI because we cannot obtain the raw UIAM tokens required to verify their invalidation.
-apiTest.describe('[NON-MKI] Invalidate UIAM session', { tag: tags.serverless.all }, () => {
+apiTest.describe('[NON-MKI] Invalidate UIAM session', { tag: tags.local.serverless.all }, () => {
   let userSessionCookieFactory: () => Promise<
     [string, { accessToken: string; refreshToken: string }]
   >;

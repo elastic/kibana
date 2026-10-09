@@ -10,13 +10,13 @@
 import { tags } from '@kbn/scout';
 
 /** Deployments running classic navigation, where `example-root-profile` resolves. */
-export const CLASSIC_NAV_DEPLOYMENTS = tags.stateful.classic;
+export const CLASSIC_NAV_DEPLOYMENTS = tags.local.stateful.classic;
 
 /** Deployments running a solution view, where `example-solution-view-root-profile` resolves. */
 export const SOLUTION_VIEW_DEPLOYMENTS = [
-  ...tags.serverless.search,
-  ...tags.serverless.observability.complete,
-  ...tags.serverless.security.complete,
+  ...tags.local.serverless.search,
+  ...tags.local.serverless.observability.complete,
+  ...tags.local.serverless.security.complete,
 ];
 
 /** `my-example-logs` and `my-example-metrics` indices, 6 documents each. */

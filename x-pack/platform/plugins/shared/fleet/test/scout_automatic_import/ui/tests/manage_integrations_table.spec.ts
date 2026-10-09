@@ -105,7 +105,7 @@ async function mockIntegrationDetails(
   );
 }
 
-test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () => {
+test.describe('Manage Integrations Table', { tag: tags.local.stateful.classic }, () => {
   test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
     await mockIntegrationsList(page, ALL_INTEGRATIONS);
     await browserAuth.loginWithCustomRole(getManageIntegrationsRole());

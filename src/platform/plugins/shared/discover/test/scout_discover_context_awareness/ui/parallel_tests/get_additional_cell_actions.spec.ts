@@ -41,7 +41,7 @@ const ANOTHER_ACTION_MESSAGE = 'Another example data source action executed';
  */
 spaceTest.describe(
   'Discover context awareness - extension getAdditionalCellActions',
-  { tag: tags.deploymentAgnostic },
+  { tag: tags.local.deploymentAgnostic },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await setupContextAwareness(scoutSpace);

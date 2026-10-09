@@ -119,7 +119,7 @@ const sanitizeSpan = (span: Record<string, unknown>): Record<string, unknown> =>
 
 apiTest.describe(
   'Agent Builder — tracing snapshot',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     let adminCredentials: RoleApiCredentials;
     let llmProxy: LlmProxy;

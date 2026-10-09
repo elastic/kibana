@@ -15,7 +15,7 @@ import {
 
 apiTest.describe(
   'automatic_import Data Stream API (no automatic_import privilege)',
-  { tag: tags.stateful.all },
+  { tag: tags.local.stateful.all },
   () => {
     let cookieHeader: Record<string, string>;
     const dsBasePath = dataStreamsApiBasePath(DATA_STREAMS_INTEGRATION_ID);

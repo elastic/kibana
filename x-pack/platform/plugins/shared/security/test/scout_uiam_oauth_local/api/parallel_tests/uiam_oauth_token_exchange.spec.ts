@@ -15,7 +15,7 @@ const MCP_ENDPOINT = 'api/agent_builder/mcp';
 
 apiTest.describe(
   '[NON-MKI] UIAM OAuth token exchange on MCP endpoint',
-  { tag: [...tags.serverless.security.complete] },
+  { tag: [...tags.local.serverless.security.complete] },
   () => {
     let oauthAccessToken: string;
 

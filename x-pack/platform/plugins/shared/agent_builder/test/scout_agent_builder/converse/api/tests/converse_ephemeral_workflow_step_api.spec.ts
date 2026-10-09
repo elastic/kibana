@@ -50,7 +50,7 @@ steps:
 
 apiTest.describe(
   'Agent Builder — ephemeral ai.agent workflow step',
-  { tag: tags.stateful.classic },
+  { tag: tags.local.stateful.classic },
   () => {
     let llmProxy: LlmProxy;
     let connectorId: string;

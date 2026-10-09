@@ -71,7 +71,7 @@ const expectKeyMarkedOrInvalidated = async (
 
 apiTest.describe(
   'Task Manager bulkSchedule API keys',
-  { tag: tags.serverless.observability.complete },
+  { tag: tags.local.serverless.observability.complete },
   () => {
     const tasksToCleanup: ScheduledTaskWithApiKeyIds[] = [];
 

@@ -19,7 +19,7 @@ import { apiTest } from '../fixtures';
 
 apiTest.describe(
   'MCP connector — tools with outputSchema',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     let mcpServer: McpServerSimulator;
     let connectorId: string | undefined;

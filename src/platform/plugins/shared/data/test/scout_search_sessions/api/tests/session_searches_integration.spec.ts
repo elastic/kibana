@@ -36,7 +36,7 @@ const ONE_MINUTE_MS = 60_000;
 
 apiTest.describe(
   'search session - searches integration (stateful only)',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     let cookieHeader: Record<string, string>;
 

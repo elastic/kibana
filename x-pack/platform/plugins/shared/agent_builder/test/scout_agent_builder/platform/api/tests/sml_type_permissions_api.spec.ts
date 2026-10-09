@@ -138,7 +138,7 @@ const indexEntryWithCount = async (sysEsClient: Client, count: number): Promise<
  */
 apiTest.describe(
   'Agent Builder — SML type permission contract',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     let smlReadOnlyCredentials: RoleApiCredentials;
     let gatedTypeCredentials: RoleApiCredentials;

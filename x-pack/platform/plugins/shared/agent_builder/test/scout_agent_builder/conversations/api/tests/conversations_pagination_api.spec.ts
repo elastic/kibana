@@ -32,7 +32,7 @@ const CONVERSATIONS_PATH = `${API_AGENT_BUILDER}/conversations`;
 
 apiTest.describe(
   'Agent Builder — conversations list pagination API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     const agentId = 'pagination-test-agent';
     // IDs of the conversations created in beforeAll, ordered newest→oldest as the

@@ -25,7 +25,7 @@ import { apiTest, buildCreateActionPolicyData, buildCreateRuleData } from '../fi
 const sortByName = (buckets: NameValuePair[] | undefined): NameValuePair[] =>
   [...(buckets ?? [])].sort((a, b) => a.name.localeCompare(b.name));
 
-apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => {
+apiTest.describe('Alerting V2 Telemetry', { tag: tags.local.stateful.classic }, () => {
   apiTest.beforeAll(async ({ apiServices }) => {
     await Promise.all([
       apiServices.alertingV2.rules.cleanUp(),

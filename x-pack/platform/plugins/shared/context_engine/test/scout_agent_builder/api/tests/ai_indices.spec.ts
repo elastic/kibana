@@ -88,7 +88,7 @@ const emptyAiIndex = (destValue: string, traces: AiIndexTrace[] = []) => ({
   traces,
 });
 
-apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }, () => {
+apiTest.describe('context engine AI indices API', { tag: tags.local.stateful.classic }, () => {
   let adminApiCredentials: RoleApiCredentials;
   let viewerApiCredentials: RoleApiCredentials;
 

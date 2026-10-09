@@ -15,7 +15,7 @@ import {
 
 apiTest.describe(
   'automatic_import Integration API (manager delete & lifecycle)',
-  { tag: tags.stateful.all },
+  { tag: tags.local.stateful.all },
   () => {
     let cookieHeader: Record<string, string>;
 

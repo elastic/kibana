@@ -21,7 +21,7 @@ const LINKED_ES_NODES = ['es01-linked', 'es02-linked'];
 // Constants
 // ---------------------------------------------------------------------------
 
-export const CPS_TAGS = [...tags.serverless.security.complete];
+export const CPS_TAGS = [...tags.local.serverless.security.complete];
 
 /** Like CPS_TAGS but restricted to local runners only — use for tests that require Docker. */
 export const LOCAL_CPS_TAGS = CPS_TAGS.filter((tag) => tag.startsWith('@local-'));

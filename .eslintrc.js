@@ -2358,6 +2358,23 @@ module.exports = {
       },
     },
     {
+      // Custom server configs (`test/scout_*`) start Kibana with their own server args, so
+      // they only run locally and are never scheduled against Cloud. Their tests must use the
+      // local-only tag sets, otherwise the `@cloud-*` tags claim a run that never happens.
+      files: ['**/test/scout_*/**/*.ts'],
+      rules: {
+        'no-restricted-syntax': [
+          'error',
+          {
+            selector:
+              'MemberExpression[object.name="tags"][property.name=/^(serverless|stateful|deploymentAgnostic)$/]',
+            message:
+              "Tests under 'test/scout_*' (custom server configs) never run on Cloud. Use the local-only tag sets instead, e.g. 'tags.local.stateful.classic'.",
+          },
+        ],
+      },
+    },
+    {
       // Default for every Scout suite; the solution overrides below re-declare
       // `no-restricted-imports` for their own paths and take precedence.
       files: SCOUT_TEST_FILE_GLOBS,

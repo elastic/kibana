@@ -20,7 +20,7 @@ import {
 
 apiTest.describe(
   'Investigation assignees endpoint — authorization',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     let adminCookieHeader: Record<string, string>;
     let editorCookieHeader: Record<string, string>;

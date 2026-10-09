@@ -22,7 +22,7 @@ const agent = { id: 'overview_edit_agent', name: 'Overview Edit Agent', labels: 
 // come back unnoticed. See elastic/search-team#15698.
 test.describe(
   'Agent Builder — edit agent from overview page',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     test.beforeAll(async ({ kbnClient }) => {
       await createAgentViaKbn(kbnClient, {

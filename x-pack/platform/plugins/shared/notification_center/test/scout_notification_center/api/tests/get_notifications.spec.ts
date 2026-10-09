@@ -25,7 +25,7 @@ const ids = (body: { items: Array<{ notification_id: string }> }) =>
 
 apiTest.describe(
   'Notification Center - GET notifications',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     let cookieHeader: Record<string, string>;
     const h = createHelpers(() => cookieHeader);

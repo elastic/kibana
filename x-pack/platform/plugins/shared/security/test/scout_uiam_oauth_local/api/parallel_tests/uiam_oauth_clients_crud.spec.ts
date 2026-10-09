@@ -17,7 +17,7 @@ const CLIENTS_BASE = 'internal/security/oauth/clients';
 
 apiTest.describe(
   '[NON-MKI] UIAM OAuth client CRUD via Kibana proxy',
-  { tag: [...tags.serverless.security.complete] },
+  { tag: [...tags.local.serverless.security.complete] },
   () => {
     let authHeaders: Record<string, string>;
 

@@ -64,7 +64,7 @@ const authenticateAtUiam = (token: string, headers: Record<string, string>, agen
   });
 
 // These tests cannot be run on MKI because they talk to UIAM directly with the local dev certificate.
-apiTest.describe('[NON-MKI] UIAM system identity', { tag: tags.serverless.all }, () => {
+apiTest.describe('[NON-MKI] UIAM system identity', { tag: tags.local.serverless.all }, () => {
   const mintToken = async (apiClient: { post: (url: string, options?: any) => Promise<any> }) => {
     const response = await apiClient.post('test_endpoints/uiam/system_identity/_token', {
       headers: COMMON_UNSAFE_HEADERS,

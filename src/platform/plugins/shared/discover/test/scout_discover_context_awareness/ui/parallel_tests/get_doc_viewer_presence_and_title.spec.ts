@@ -34,7 +34,7 @@ const ROW_DETAILS_TITLE = 'docViewerRowDetailsTitle';
  */
 spaceTest.describe(
   'Discover context awareness - extension getDocViewer, tab presence and title',
-  { tag: tags.deploymentAgnostic },
+  { tag: tags.local.deploymentAgnostic },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await setupContextAwareness(scoutSpace);

@@ -10,7 +10,7 @@ import { expect } from '@kbn/scout-security/api';
 
 spaceTest.describe(
   'Attacks execution with EIS inference connector',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.security.complete] },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.cleanStandardList();

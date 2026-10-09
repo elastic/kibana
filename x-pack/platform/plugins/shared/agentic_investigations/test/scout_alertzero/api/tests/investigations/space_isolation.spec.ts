@@ -24,7 +24,7 @@ const SPACE_ID = `inv-query-space-${Date.now()}`;
 
 apiTest.describe(
   'Investigations are isolated per Space',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     let cookieHeader: Record<string, string>;
     let spaceInvestigationId: string;

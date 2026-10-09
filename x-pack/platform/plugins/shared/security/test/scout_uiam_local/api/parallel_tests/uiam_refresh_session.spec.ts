@@ -15,7 +15,7 @@ import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS } from '../fixtures';
 
 // These tests cannot be run on MKI because we cannot control the UIAM session lifetime to reduce it (it's 1h by default).
-apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: tags.serverless.all }, () => {
+apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: tags.local.serverless.all }, () => {
   let userSessionCookieFactory: (params: {
     lifetime: { accessToken: number; refreshToken?: number };
   }) => Promise<string>;

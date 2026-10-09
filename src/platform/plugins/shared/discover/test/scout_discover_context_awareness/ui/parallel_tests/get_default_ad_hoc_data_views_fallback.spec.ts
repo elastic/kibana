@@ -29,7 +29,7 @@ import {
  */
 spaceTest.describe(
   'Discover context awareness - extension getDefaultAdHocDataViews, fallback',
-  { tag: tags.deploymentAgnostic },
+  { tag: tags.local.deploymentAgnostic },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.cleanStandardList();

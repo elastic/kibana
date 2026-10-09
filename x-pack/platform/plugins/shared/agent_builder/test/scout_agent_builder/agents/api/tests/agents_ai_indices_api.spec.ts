@@ -23,7 +23,7 @@ import { apiTest, API_AGENT_BUILDER } from '../fixtures';
 // by the route unit tests in `server/routes/agents.test.ts`.
 apiTest.describe(
   'Agent Builder — agent ai_indices API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     const createdAgentIds: string[] = [];
 

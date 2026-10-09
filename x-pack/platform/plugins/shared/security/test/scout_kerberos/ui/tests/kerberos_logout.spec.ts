@@ -11,7 +11,7 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { KERBEROS_REALM_NAME, KIBANA_TLS_ORIGIN } from '../fixtures/constants';
 
-test.describe('Kerberos authentication — logout', { tag: tags.stateful.classic }, () => {
+test.describe('Kerberos authentication — logout', { tag: tags.local.stateful.classic }, () => {
   test.beforeAll(async ({ esClient }) => {
     await esClient.security.putRoleMapping({
       name: 'kerb_admin',

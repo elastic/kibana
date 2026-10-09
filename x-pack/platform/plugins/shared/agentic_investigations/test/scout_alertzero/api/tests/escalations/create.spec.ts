@@ -21,7 +21,7 @@ const ESCALATION_TEMPLATE_ID = 'escalation';
 
 apiTest.describe(
   'POST /internal/investigations/escalations — create escalation',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     let cookieHeader: Record<string, string>;
     let viewerCookieHeader: Record<string, string>;

@@ -29,7 +29,7 @@ import { COMMON_HEADERS, COMMON_UNSAFE_HEADERS, extractAttributeValue } from '..
 // These tests cannot be run on MKI because we cannot obtain the raw UIAM tokens and spin up Mock IdP plugin.
 apiTest.describe(
   '[NON-MKI] Use UIAM credentials for various purposes in real and fake requests',
-  { tag: tags.serverless.all },
+  { tag: tags.local.serverless.all },
   () => {
     let userSessionCookieFactory: () => Promise<[string, { accessToken: string }]>;
 

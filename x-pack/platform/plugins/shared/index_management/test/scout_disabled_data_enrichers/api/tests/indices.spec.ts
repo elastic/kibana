@@ -31,32 +31,36 @@ const EXPECTED_KEYS = [
   'uuid',
 ].sort();
 
-apiTest.describe('Indices API with disabled data enrichers', { tag: tags.stateful.classic }, () => {
-  let credentials: RoleApiCredentials;
+apiTest.describe(
+  'Indices API with disabled data enrichers',
+  { tag: tags.local.stateful.classic },
+  () => {
+    let credentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    credentials = await requestAuth.getApiKey('admin');
-  });
-
-  apiTest.beforeEach(async ({ esClient }) => {
-    await esClient.indices.delete({ index: INDEX_NAME }, { ignore: [404] });
-    await esClient.indices.create({ index: INDEX_NAME });
-  });
-
-  apiTest.afterEach(async ({ esClient }) => {
-    await esClient.indices.delete({ index: INDEX_NAME }, { ignore: [404] });
-  });
-
-  apiTest("doesn't send ILM, CCR and Rollups requests", async ({ apiClient }) => {
-    const response = await apiClient.get(`${API_BASE_PATH}/indices`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      credentials = await requestAuth.getApiKey('admin');
     });
 
-    expect(response).toHaveStatusCode(200);
-    const index = (response.body as Array<{ name: string }>).find(
-      ({ name }) => name === INDEX_NAME
-    );
-    expect(Object.keys(index ?? {}).sort()).toStrictEqual(EXPECTED_KEYS);
-  });
-});
+    apiTest.beforeEach(async ({ esClient }) => {
+      await esClient.indices.delete({ index: INDEX_NAME }, { ignore: [404] });
+      await esClient.indices.create({ index: INDEX_NAME });
+    });
+
+    apiTest.afterEach(async ({ esClient }) => {
+      await esClient.indices.delete({ index: INDEX_NAME }, { ignore: [404] });
+    });
+
+    apiTest("doesn't send ILM, CCR and Rollups requests", async ({ apiClient }) => {
+      const response = await apiClient.get(`${API_BASE_PATH}/indices`, {
+        headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      const index = (response.body as Array<{ name: string }>).find(
+        ({ name }) => name === INDEX_NAME
+      );
+      expect(Object.keys(index ?? {}).sort()).toStrictEqual(EXPECTED_KEYS);
+    });
+  }
+);

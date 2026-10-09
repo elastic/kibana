@@ -13,7 +13,7 @@ import { waitForSuccessfulEventLogEntry } from '../../../scout/api/lib/wait_for_
 
 apiTest.describe(
   '[NON-MKI] Missing UIAM API key tag reconciliation',
-  { tag: tags.serverless.security.complete },
+  { tag: tags.local.serverless.security.complete },
   () => {
     let ruleId: string | undefined;
 

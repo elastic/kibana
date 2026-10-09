@@ -14,23 +14,27 @@ test.use({
   clientCertificates: [{ origin: KIBANA_TLS_ORIGIN, pfx: FIRST_CLIENT_P12, passphrase: '' }],
 });
 
-test.describe('PKI authentication — with role mapping', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ esClient }) => {
-    await esClient.security.putRoleMapping({
-      name: 'first_client_pki',
-      enabled: true,
-      roles: ['kibana_admin'],
-      rules: { field: { dn: 'CN=first_client' } },
+test.describe(
+  'PKI authentication — with role mapping',
+  { tag: tags.local.stateful.classic },
+  () => {
+    test.beforeAll(async ({ esClient }) => {
+      await esClient.security.putRoleMapping({
+        name: 'first_client_pki',
+        enabled: true,
+        roles: ['kibana_admin'],
+        rules: { field: { dn: 'CN=first_client' } },
+      });
     });
-  });
 
-  test.afterAll(async ({ esClient }) => {
-    await esClient.security.deleteRoleMapping({ name: 'first_client_pki' }, { ignore: [404] });
-  });
+    test.afterAll(async ({ esClient }) => {
+      await esClient.security.deleteRoleMapping({ name: 'first_client_pki' }, { ignore: [404] });
+    });
 
-  test('logs in via client certificate without the login form', async ({ page }) => {
-    await page.goto(`${KIBANA_TLS_ORIGIN}/app/home`);
-    await expect(page.testSubj.locator('userMenuButton')).toBeVisible();
-    await expect(page.testSubj.locator('loginUsername')).toHaveCount(0);
-  });
-});
+    test('logs in via client certificate without the login form', async ({ page }) => {
+      await page.goto(`${KIBANA_TLS_ORIGIN}/app/home`);
+      await expect(page.testSubj.locator('userMenuButton')).toBeVisible();
+      await expect(page.testSubj.locator('loginUsername')).toHaveCount(0);
+    });
+  }
+);

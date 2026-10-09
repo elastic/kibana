@@ -148,7 +148,7 @@ const findLoggedTriggerEvent = async (
 
 apiTest.describe(
   'Agent Builder — ai.conversation.updated workflow trigger',
-  { tag: tags.stateful.classic },
+  { tag: tags.local.stateful.classic },
   () => {
     const createdConversationIds: string[] = [];
 

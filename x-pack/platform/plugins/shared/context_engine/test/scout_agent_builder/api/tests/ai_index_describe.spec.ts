@@ -159,157 +159,102 @@ const registerAiIndex = (id: string, dest: { type: 'index' | 'data_stream'; valu
 // The `agent_builder` Scout config set pins `contextEngine:enabled=true` through
 // `uiSettings.overrides`. Memory remains runtime-configurable so this suite enables only the
 // behavior it exercises.
-apiTest.describe('context engine AI index describe API', { tag: tags.stateful.classic }, () => {
-  let adminCredentials: RoleApiCredentials;
-  let describeCredentials: RoleApiCredentials;
-  let readOnlyCredentials: RoleApiCredentials;
-  let metadataOnlyCredentials: RoleApiCredentials;
-  let otherIndexCredentials: RoleApiCredentials;
+apiTest.describe(
+  'context engine AI index describe API',
+  { tag: tags.local.stateful.classic },
+  () => {
+    let adminCredentials: RoleApiCredentials;
+    let describeCredentials: RoleApiCredentials;
+    let readOnlyCredentials: RoleApiCredentials;
+    let metadataOnlyCredentials: RoleApiCredentials;
+    let otherIndexCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth, esClient, apiClient, kbnClient }) => {
-    await kbnClient.uiSettings.updateGlobal({
-      [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: true,
-    });
-    await kbnClient.uiSettings.waitForEventualCacheRefresh();
+    apiTest.beforeAll(async ({ requestAuth, esClient, apiClient, kbnClient }) => {
+      await kbnClient.uiSettings.updateGlobal({
+        [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: true,
+      });
+      await kbnClient.uiSettings.waitForEventualCacheRefresh();
 
-    adminCredentials = await requestAuth.getApiKey('admin');
-    describeCredentials = await requestAuth.getApiKeyForCustomRole(DESCRIBE_ROLE);
-    readOnlyCredentials = await requestAuth.getApiKeyForCustomRole(READ_ONLY_ROLE);
-    metadataOnlyCredentials = await requestAuth.getApiKeyForCustomRole(METADATA_ONLY_ROLE);
-    otherIndexCredentials = await requestAuth.getApiKeyForCustomRole(OTHER_INDEX_ROLE);
+      adminCredentials = await requestAuth.getApiKey('admin');
+      describeCredentials = await requestAuth.getApiKeyForCustomRole(DESCRIBE_ROLE);
+      readOnlyCredentials = await requestAuth.getApiKeyForCustomRole(READ_ONLY_ROLE);
+      metadataOnlyCredentials = await requestAuth.getApiKeyForCustomRole(METADATA_ONLY_ROLE);
+      otherIndexCredentials = await requestAuth.getApiKeyForCustomRole(OTHER_INDEX_ROLE);
 
-    await esClient.indices.create({
-      index: INDEX_A,
-      mappings: {
-        properties: {
-          title: { type: 'text', fields: { keyword: { type: 'keyword' } } },
-          description: { type: 'text' },
-          content: { type: 'text' },
-          type: { type: 'keyword' },
-          tags: { type: 'keyword' },
-          status: { type: 'keyword' },
-          expires_at: { type: 'date' },
-          governance: {
-            properties: { lifecycle: { properties: { status: { type: 'keyword' } } } },
-          },
-          permissions: {
-            properties: {
-              kibana: {
-                properties: {
-                  privileges: {
-                    type: 'nested',
-                    properties: { space: { type: 'keyword' } },
+      await esClient.indices.create({
+        index: INDEX_A,
+        mappings: {
+          properties: {
+            title: { type: 'text', fields: { keyword: { type: 'keyword' } } },
+            description: { type: 'text' },
+            content: { type: 'text' },
+            type: { type: 'keyword' },
+            tags: { type: 'keyword' },
+            status: { type: 'keyword' },
+            expires_at: { type: 'date' },
+            governance: {
+              properties: { lifecycle: { properties: { status: { type: 'keyword' } } } },
+            },
+            permissions: {
+              properties: {
+                kibana: {
+                  properties: {
+                    privileges: {
+                      type: 'nested',
+                      properties: { space: { type: 'keyword' } },
+                    },
                   },
                 },
               },
             },
           },
         },
-      },
-    });
-    await esClient.indices.create({ index: INDEX_B });
-    await esClient.indices.createDataStream({ name: DATA_STREAM });
-    await esClient.bulk({
-      index: INDEX_A,
-      refresh: true,
-      operations: Object.entries(KI_DOCS).flatMap(([id, doc]) => [{ index: { _id: id } }, doc]),
-    });
-
-    for (const body of [
-      registerAiIndex(SINGLE_AI_INDEX_ID, { type: 'index', value: INDEX_A }),
-      registerAiIndex(TEMPLATE_AI_INDEX_ID, { type: 'index', value: INDEX_B }),
-      registerAiIndex(DATA_STREAM_AI_INDEX_ID, { type: 'data_stream', value: DATA_STREAM }),
-      registerAiIndex(MISSING_AI_INDEX_ID, { type: 'index', value: MISSING_INDEX }),
-    ]) {
-      const response = await apiClient.post(AI_INDEX_COLLECTION_PATH, {
-        headers: { ...adminCredentials.apiKeyHeader, ...API_HEADERS },
-        responseType: 'json',
-        body,
       });
-      expect(response).toHaveStatusCode(201);
-    }
-  });
-
-  apiTest.afterAll(async ({ apiClient, esClient, kbnClient }) => {
-    await kbnClient.uiSettings.updateGlobal({
-      [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: false,
-    });
-    await kbnClient.uiSettings.waitForEventualCacheRefresh();
-
-    for (const id of [
-      SINGLE_AI_INDEX_ID,
-      TEMPLATE_AI_INDEX_ID,
-      DATA_STREAM_AI_INDEX_ID,
-      MISSING_AI_INDEX_ID,
-    ]) {
-      await apiClient.delete(`${AI_INDEX_COLLECTION_PATH}/${id}`, {
-        headers: { ...adminCredentials.apiKeyHeader, ...API_HEADERS },
-        responseType: 'json',
+      await esClient.indices.create({ index: INDEX_B });
+      await esClient.indices.createDataStream({ name: DATA_STREAM });
+      await esClient.bulk({
+        index: INDEX_A,
+        refresh: true,
+        operations: Object.entries(KI_DOCS).flatMap(([id, doc]) => [{ index: { _id: id } }, doc]),
       });
-    }
-    await esClient.indices.delete({ index: [INDEX_A, INDEX_B] }, { ignore: [404] });
-    await esClient.indices.deleteDataStream({ name: DATA_STREAM }, { ignore: [404] });
-  });
 
-  apiTest('describes the fields of a single index', async ({ apiClient }) => {
-    const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
-      headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
-      responseType: 'json',
+      for (const body of [
+        registerAiIndex(SINGLE_AI_INDEX_ID, { type: 'index', value: INDEX_A }),
+        registerAiIndex(TEMPLATE_AI_INDEX_ID, { type: 'index', value: INDEX_B }),
+        registerAiIndex(DATA_STREAM_AI_INDEX_ID, { type: 'data_stream', value: DATA_STREAM }),
+        registerAiIndex(MISSING_AI_INDEX_ID, { type: 'index', value: MISSING_INDEX }),
+      ]) {
+        const response = await apiClient.post(AI_INDEX_COLLECTION_PATH, {
+          headers: { ...adminCredentials.apiKeyHeader, ...API_HEADERS },
+          responseType: 'json',
+          body,
+        });
+        expect(response).toHaveStatusCode(201);
+      }
     });
 
-    expect(response).toHaveStatusCode(200);
-    const block = blockOf(response.body);
-    expect(block.split('\n').slice(0, 3)).toStrictEqual([
-      `AI-index registry ID: ${SINGLE_AI_INDEX_ID}`,
-      `Scout describe fixture ${SINGLE_AI_INDEX_ID}`,
-      `Backing Elasticsearch target (use only in ES|QL queries): ${INDEX_A}`,
-    ]);
-    // Fields not truncated: plain heading, no `(showing …)`.
-    expect(block).toContain('\n\nFields\n');
+    apiTest.afterAll(async ({ apiClient, esClient, kbnClient }) => {
+      await kbnClient.uiSettings.updateGlobal({
+        [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: false,
+      });
+      await kbnClient.uiSettings.waitForEventualCacheRefresh();
 
-    expect(fieldLine(block, 'status')).toBe('status: keyword, searchable, aggregatable');
-    expect(fieldLine(block, 'title.keyword')).toBe(
-      'title.keyword: keyword, searchable, aggregatable'
-    );
-    expect(fieldLine(block, 'permissions.kibana.privileges')).toMatch(
-      /^permissions\.kibana\.privileges: nested/
-    );
-    const paths = fieldPaths(block);
-    expect(paths).toStrictEqual([...paths].sort());
-  });
-
-  apiTest('lists the semantic fields from the built-in template', async ({ apiClient }) => {
-    const response = await apiClient.get(describePath(TEMPLATE_AI_INDEX_ID), {
-      headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
-      responseType: 'json',
+      for (const id of [
+        SINGLE_AI_INDEX_ID,
+        TEMPLATE_AI_INDEX_ID,
+        DATA_STREAM_AI_INDEX_ID,
+        MISSING_AI_INDEX_ID,
+      ]) {
+        await apiClient.delete(`${AI_INDEX_COLLECTION_PATH}/${id}`, {
+          headers: { ...adminCredentials.apiKeyHeader, ...API_HEADERS },
+          responseType: 'json',
+        });
+      }
+      await esClient.indices.delete({ index: [INDEX_A, INDEX_B] }, { ignore: [404] });
+      await esClient.indices.deleteDataStream({ name: DATA_STREAM }, { ignore: [404] });
     });
 
-    expect(response).toHaveStatusCode(200);
-    const block = blockOf(response.body);
-    const semanticFields = sectionLines(block, 'Semantic fields');
-    expect(semanticFields.length).toBeGreaterThan(0);
-    for (const path of semanticFields) {
-      expect(fieldLine(block, path)).toBe(`${path}: semantic_text, searchable`);
-    }
-  });
-
-  apiTest('resolves a data stream through its backing indices', async ({ apiClient }) => {
-    const response = await apiClient.get(describePath(DATA_STREAM_AI_INDEX_ID), {
-      headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(200);
-    const block = blockOf(response.body);
-    expect(block).toContain(
-      `\nBacking Elasticsearch target (use only in ES|QL queries): ${DATA_STREAM}\n`
-    );
-    expect(fieldLine(block, '@timestamp')).toMatch(/^@timestamp: date/);
-  });
-
-  apiTest(
-    'describes memory capability and excludes stored memory from ordinary counts',
-    async ({ apiClient }) => {
+    apiTest('describes the fields of a single index', async ({ apiClient }) => {
       const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
         headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
         responseType: 'json',
@@ -317,130 +262,189 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
 
       expect(response).toHaveStatusCode(200);
       const block = blockOf(response.body);
-      expect(sectionLines(block, 'Memory')).toStrictEqual(
-        expect.arrayContaining([
-          'Memory writes are enabled for this AI-index registry entry.',
-          'memory.session',
-          'memory.session_fact',
-          'Use platform.context_engine.remember to write memory.',
-          'Use platform.context_engine.forget with a memory id to tombstone memory.',
-        ])
-      );
-      expect(sectionLines(block, 'Knowledge item types')).toStrictEqual([
-        '"document": 2',
-        '"detection": 1',
+      expect(block.split('\n').slice(0, 3)).toStrictEqual([
+        `AI-index registry ID: ${SINGLE_AI_INDEX_ID}`,
+        `Scout describe fixture ${SINGLE_AI_INDEX_ID}`,
+        `Backing Elasticsearch target (use only in ES|QL queries): ${INDEX_A}`,
       ]);
-      expect(sectionLines(block, 'Tags')).toStrictEqual(['"billing": 2', '"errors": 1']);
-    }
-  );
+      // Fields not truncated: plain heading, no `(showing …)`.
+      expect(block).toContain('\n\nFields\n');
 
-  apiTest('lists example queries that run as-is through _query', async ({ apiClient }) => {
-    const described = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
-      headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
-      responseType: 'json',
+      expect(fieldLine(block, 'status')).toBe('status: keyword, searchable, aggregatable');
+      expect(fieldLine(block, 'title.keyword')).toBe(
+        'title.keyword: keyword, searchable, aggregatable'
+      );
+      expect(fieldLine(block, 'permissions.kibana.privileges')).toMatch(
+        /^permissions\.kibana\.privileges: nested/
+      );
+      const paths = fieldPaths(block);
+      expect(paths).toStrictEqual([...paths].sort());
     });
-    expect(described).toHaveStatusCode(200);
-    const block = blockOf(described.body);
-    const exampleQuery = (title: string) => sectionLines(block, title).join('\n');
 
-    // Semantic branch needs a deployed inference endpoint: checked structurally here, and by the
-    // ES|QL parser in unit tests.
-    const hybrid = exampleQuery('Full text search, lexical and semantic fused together');
-    expect(
-      hybrid.startsWith(
-        `FROM ${INDEX_A} METADATA _id, _index, _score\n` +
-          '| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n' +
-          '| WHERE expires_at IS NULL OR expires_at > NOW()\n' +
-          '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")\n' +
-          '| FORK\n'
-      )
-    ).toBe(true);
-    expect(hybrid).toContain('\n| FUSE\n');
-
-    const run = async (query: string, params?: Record<string, string>) => {
-      const response = await apiClient.post(QUERY_PATH, {
+    apiTest('lists the semantic fields from the built-in template', async ({ apiClient }) => {
+      const response = await apiClient.get(describePath(TEMPLATE_AI_INDEX_ID), {
         headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
         responseType: 'json',
-        body: { query, ...(params && { params }) },
       });
+
       expect(response).toHaveStatusCode(200);
-      return response.body as EsqlResponse;
-    };
-
-    const filtered = await run(exampleQuery('Filter by knowledge item type and tag'), {
-      type: 'document',
-      tag: 'billing',
-    });
-    expect(columnValues(filtered, 'title')).toStrictEqual(['Billing guide']);
-
-    const counted = await run(exampleQuery('Count by type'));
-    expect(columnValues(counted, 'type')).toStrictEqual(['document', 'detection']);
-    expect(columnValues(counted, 'count')).toStrictEqual([2, 1]);
-  });
-
-  apiTest('returns 404 for an unregistered AI index', async ({ apiClient }) => {
-    const missingId = `scout-describe-missing-${RUN_ID}`;
-    const response = await apiClient.get(describePath(missingId), {
-      headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
-      responseType: 'json',
+      const block = blockOf(response.body);
+      const semanticFields = sectionLines(block, 'Semantic fields');
+      expect(semanticFields.length).toBeGreaterThan(0);
+      for (const path of semanticFields) {
+        expect(fieldLine(block, path)).toBe(`${path}: semantic_text, searchable`);
+      }
     });
 
-    expect(response).toHaveStatusCode(404);
-    expect(response.body.message).toBe(`AI index '${missingId}' not found`);
-  });
-
-  apiTest(
-    'returns Elasticsearch 403 when the caller lacks view_index_metadata privilege',
-    async ({ apiClient }) => {
-      const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
-        headers: { ...readOnlyCredentials.apiKeyHeader, ...API_HEADERS },
+    apiTest('resolves a data stream through its backing indices', async ({ apiClient }) => {
+      const response = await apiClient.get(describePath(DATA_STREAM_AI_INDEX_ID), {
+        headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
         responseType: 'json',
       });
 
-      expect(response).toHaveStatusCode(403);
-      // Elasticsearch refused `_mapping`; not Kibana's own authz layer.
-      expect(response.body.message).toMatch(/security_exception|unauthorized/i);
-    }
-  );
-
-  apiTest(
-    'returns Elasticsearch 403 when the caller lacks read privilege',
-    async ({ apiClient }) => {
-      const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
-        headers: { ...metadataOnlyCredentials.apiKeyHeader, ...API_HEADERS },
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(403);
-      // No `read` anywhere: Elasticsearch refuses the whole readability probe.
-      expect(response.body.message).toMatch(/security_exception|unauthorized/i);
-    }
-  );
-
-  apiTest(
-    'returns 403 when the caller holds no privilege on the backing index',
-    async ({ apiClient }) => {
-      const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
-        headers: { ...otherIndexCredentials.apiKeyHeader, ...API_HEADERS },
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(403);
-      expect(response.body.message).toContain(`AI index '${SINGLE_AI_INDEX_ID}' is not readable`);
-    }
-  );
-
-  apiTest('describes an entry whose backing index does not exist yet', async ({ apiClient }) => {
-    const response = await apiClient.get(describePath(MISSING_AI_INDEX_ID), {
-      headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
-      responseType: 'json',
+      expect(response).toHaveStatusCode(200);
+      const block = blockOf(response.body);
+      expect(block).toContain(
+        `\nBacking Elasticsearch target (use only in ES|QL queries): ${DATA_STREAM}\n`
+      );
+      expect(fieldLine(block, '@timestamp')).toMatch(/^@timestamp: date/);
     });
 
-    expect(response).toHaveStatusCode(200);
-    const block = blockOf(response.body);
-    expect(block).toContain(
-      `\nBacking Elasticsearch target (use only in ES|QL queries): ${MISSING_INDEX}\n`
+    apiTest(
+      'describes memory capability and excludes stored memory from ordinary counts',
+      async ({ apiClient }) => {
+        const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
+          headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(200);
+        const block = blockOf(response.body);
+        expect(sectionLines(block, 'Memory')).toStrictEqual(
+          expect.arrayContaining([
+            'Memory writes are enabled for this AI-index registry entry.',
+            'memory.session',
+            'memory.session_fact',
+            'Use platform.context_engine.remember to write memory.',
+            'Use platform.context_engine.forget with a memory id to tombstone memory.',
+          ])
+        );
+        expect(sectionLines(block, 'Knowledge item types')).toStrictEqual([
+          '"document": 2',
+          '"detection": 1',
+        ]);
+        expect(sectionLines(block, 'Tags')).toStrictEqual(['"billing": 2', '"errors": 1']);
+      }
     );
-    expect(sectionLines(block, 'Fields')).toStrictEqual(['(none)']);
-  });
-});
+
+    apiTest('lists example queries that run as-is through _query', async ({ apiClient }) => {
+      const described = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
+        headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
+        responseType: 'json',
+      });
+      expect(described).toHaveStatusCode(200);
+      const block = blockOf(described.body);
+      const exampleQuery = (title: string) => sectionLines(block, title).join('\n');
+
+      // Semantic branch needs a deployed inference endpoint: checked structurally here, and by the
+      // ES|QL parser in unit tests.
+      const hybrid = exampleQuery('Full text search, lexical and semantic fused together');
+      expect(
+        hybrid.startsWith(
+          `FROM ${INDEX_A} METADATA _id, _index, _score\n` +
+            '| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n' +
+            '| WHERE expires_at IS NULL OR expires_at > NOW()\n' +
+            '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")\n' +
+            '| FORK\n'
+        )
+      ).toBe(true);
+      expect(hybrid).toContain('\n| FUSE\n');
+
+      const run = async (query: string, params?: Record<string, string>) => {
+        const response = await apiClient.post(QUERY_PATH, {
+          headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
+          responseType: 'json',
+          body: { query, ...(params && { params }) },
+        });
+        expect(response).toHaveStatusCode(200);
+        return response.body as EsqlResponse;
+      };
+
+      const filtered = await run(exampleQuery('Filter by knowledge item type and tag'), {
+        type: 'document',
+        tag: 'billing',
+      });
+      expect(columnValues(filtered, 'title')).toStrictEqual(['Billing guide']);
+
+      const counted = await run(exampleQuery('Count by type'));
+      expect(columnValues(counted, 'type')).toStrictEqual(['document', 'detection']);
+      expect(columnValues(counted, 'count')).toStrictEqual([2, 1]);
+    });
+
+    apiTest('returns 404 for an unregistered AI index', async ({ apiClient }) => {
+      const missingId = `scout-describe-missing-${RUN_ID}`;
+      const response = await apiClient.get(describePath(missingId), {
+        headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(404);
+      expect(response.body.message).toBe(`AI index '${missingId}' not found`);
+    });
+
+    apiTest(
+      'returns Elasticsearch 403 when the caller lacks view_index_metadata privilege',
+      async ({ apiClient }) => {
+        const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
+          headers: { ...readOnlyCredentials.apiKeyHeader, ...API_HEADERS },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(403);
+        // Elasticsearch refused `_mapping`; not Kibana's own authz layer.
+        expect(response.body.message).toMatch(/security_exception|unauthorized/i);
+      }
+    );
+
+    apiTest(
+      'returns Elasticsearch 403 when the caller lacks read privilege',
+      async ({ apiClient }) => {
+        const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
+          headers: { ...metadataOnlyCredentials.apiKeyHeader, ...API_HEADERS },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(403);
+        // No `read` anywhere: Elasticsearch refuses the whole readability probe.
+        expect(response.body.message).toMatch(/security_exception|unauthorized/i);
+      }
+    );
+
+    apiTest(
+      'returns 403 when the caller holds no privilege on the backing index',
+      async ({ apiClient }) => {
+        const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
+          headers: { ...otherIndexCredentials.apiKeyHeader, ...API_HEADERS },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(403);
+        expect(response.body.message).toContain(`AI index '${SINGLE_AI_INDEX_ID}' is not readable`);
+      }
+    );
+
+    apiTest('describes an entry whose backing index does not exist yet', async ({ apiClient }) => {
+      const response = await apiClient.get(describePath(MISSING_AI_INDEX_ID), {
+        headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      const block = blockOf(response.body);
+      expect(block).toContain(
+        `\nBacking Elasticsearch target (use only in ES|QL queries): ${MISSING_INDEX}\n`
+      );
+      expect(sectionLines(block, 'Fields')).toStrictEqual(['(none)']);
+    });
+  }
+);

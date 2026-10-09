@@ -14,7 +14,7 @@ import { apiTest, API_AGENT_BUILDER } from '../fixtures';
 
 apiTest.describe(
   'Agent Builder — legacy ES|QL tool type migration API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     let sysEsClient: Client;
     const legacyToolId = 'legacy-esql-tool-types-migration';

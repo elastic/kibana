@@ -39,6 +39,34 @@ describe('getPlaywrightTagsFor', () => {
   });
 });
 
+describe('tags.local', () => {
+  it('mirrors the tag sets with local-only tags', () => {
+    expect(tags.local.stateful.classic).toEqual(['@local-stateful-classic']);
+    expect(tags.local.serverless.search).toEqual(['@local-serverless-search']);
+    expect(tags.local.serverless.security.complete).toEqual([
+      '@local-serverless-security_complete',
+    ]);
+    expect(tags.local.serverless.observability.complete).toEqual([
+      '@local-serverless-observability_complete',
+    ]);
+  });
+
+  it('never contains cloud tags, including aggregates', () => {
+    const all = [
+      ...tags.local.stateful.all,
+      ...tags.local.serverless.all,
+      ...tags.local.deploymentAgnostic,
+    ];
+    expect(all.length).toBeGreaterThan(0);
+    expect(all.filter((tag) => tag.startsWith('@cloud-'))).toEqual([]);
+  });
+
+  it('is the local subset of the default tag sets', () => {
+    expect(tags.deploymentAgnostic).toEqual(expect.arrayContaining(tags.local.deploymentAgnostic));
+    expect(tags.serverless.all).toEqual(expect.arrayContaining(tags.local.serverless.all));
+  });
+});
+
 describe('tags', () => {
   describe('stateful', () => {
     it('classic includes local and cloud tags', () => {

@@ -48,7 +48,7 @@ async function ingestSshLogin(
 
 apiTest.describe(
   'CPS relationship maintainer — accesses from linked serverless project',
-  { tag: tags.serverless.security.complete },
+  { tag: tags.local.serverless.security.complete },
   () => {
     let defaultHeaders: Record<string, string>;
     let internalHeaders: Record<string, string>;

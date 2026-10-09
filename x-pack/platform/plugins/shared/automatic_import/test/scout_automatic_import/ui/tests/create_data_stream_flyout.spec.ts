@@ -22,7 +22,7 @@ const INDICES_API = '**/api/index_management/indices**';
 
 test.describe(
   'Add Integration — Automatic Import V2 — Create Data Stream Flyout',
-  { tag: tags.stateful.classic },
+  { tag: tags.local.stateful.classic },
   () => {
     test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
       await page.route(CONNECTORS_API, (route) =>

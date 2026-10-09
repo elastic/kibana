@@ -16,7 +16,7 @@ import { expect } from '@kbn/scout/ui';
 const TEST_STRING_KEY_DEFAULT = 'default_value';
 const LAZY_TEST_STRING_KEY_DEFAULT = 'lazy_default_value';
 
-test.describe('User Storage - first paint', { tag: [...tags.stateful.classic] }, () => {
+test.describe('User Storage - first paint', { tag: [...tags.local.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsViewer();
     await page.gotoApp('userStorageTest');

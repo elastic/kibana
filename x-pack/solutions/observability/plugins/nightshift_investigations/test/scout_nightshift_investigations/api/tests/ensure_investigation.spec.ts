@@ -20,7 +20,7 @@ import {
 
 apiTest.describe(
   'POST /internal/nightshift/investigations/{id}/_ensure',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
   () => {
     const TEST_ID = uniqueId('ensure-test-investigation');
     let cookieHeader: Record<string, string>;

@@ -13,7 +13,7 @@ import { expect } from '@kbn/scout/ui';
 
 test.describe(
   'dashboard save modal - no access control for anonymous user',
-  { tag: tags.stateful.classic },
+  { tag: tags.local.stateful.classic },
   () => {
     let capturedRequestBody: Record<string, unknown> | null = null;
     let dataViewId: string;

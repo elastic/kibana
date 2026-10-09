@@ -10,14 +10,14 @@ import { tags } from '@kbn/scout';
 
 /** Domains where CPS tier eligibility is true (Complete). */
 export const CPS_ELIGIBLE_TIER_TAGS = [
-  ...tags.serverless.security.complete,
-  ...tags.serverless.observability.complete,
+  ...tags.local.serverless.security.complete,
+  ...tags.local.serverless.observability.complete,
 ];
 
 /** Domains where CPS tier eligibility is false (Essentials / logs_essentials). */
 export const CPS_INELIGIBLE_TIER_TAGS = [
-  ...tags.serverless.security.essentials,
-  ...tags.serverless.observability.logs_essentials,
+  ...tags.local.serverless.security.essentials,
+  ...tags.local.serverless.observability.logs_essentials,
 ];
 
 /**

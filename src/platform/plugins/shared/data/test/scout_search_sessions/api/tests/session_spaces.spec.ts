@@ -21,7 +21,7 @@ import {
 
 apiTest.describe(
   'search session - non-default space (stateful only)',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     let cookieHeader: Record<string, string>;
     const spaceId = 'session-test-space';

@@ -13,7 +13,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, workflowYaml } from '../fixtures';
 
-test.describe('Service account picker states', { tag: tags.stateful.classic }, () => {
+test.describe('Service account picker states', { tag: tags.local.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
   });

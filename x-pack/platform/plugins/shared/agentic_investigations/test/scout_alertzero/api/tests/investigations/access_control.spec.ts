@@ -30,7 +30,7 @@ const RUN = `scout-access-${Date.now()}`;
 
 apiTest.describe(
   'Investigation query API access control',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     let adminCookieHeader: Record<string, string>;
     let investigationId: string;

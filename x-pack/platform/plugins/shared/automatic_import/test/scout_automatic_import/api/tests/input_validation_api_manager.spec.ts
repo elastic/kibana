@@ -56,7 +56,7 @@ const expectZodBadRequest = (body: unknown): void => {
 
 apiTest.describe(
   'automatic_import input validation & abuse sketches (manager)',
-  { tag: tags.stateful.all },
+  { tag: tags.local.stateful.all },
   () => {
     let cookieHeader: Record<string, string>;
     const dsBasePath = dataStreamsApiBasePath(VALIDATION_INTEGRATION_ID);

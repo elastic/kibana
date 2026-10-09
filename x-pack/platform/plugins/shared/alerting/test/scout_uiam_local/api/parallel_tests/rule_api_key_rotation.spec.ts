@@ -28,7 +28,7 @@ const getRuleBody = (name: string, enabled: boolean) => ({
 // These tests cannot be run on MKI because they rely on the Mock IdP UIAM setup.
 apiTest.describe(
   '[NON-MKI] Rule execution survives API key rotation',
-  { tag: tags.serverless.all },
+  { tag: tags.local.serverless.all },
   () => {
     const createdRuleIds: string[] = [];
 

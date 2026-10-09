@@ -18,7 +18,7 @@ import { CONTEXT_AWARENESS_ES_ARCHIVE } from '../fixtures';
  */
 globalSetupHook(
   'Setup Discover context awareness tests data',
-  { tag: tags.deploymentAgnostic },
+  { tag: tags.local.deploymentAgnostic },
   async ({ esArchiver, log }) => {
     log.debug('[setup:context_awareness] loading context awareness ES data...');
     await esArchiver.loadIfNeeded(CONTEXT_AWARENESS_ES_ARCHIVE);

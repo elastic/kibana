@@ -112,7 +112,7 @@ const addMappingField = async ({
 
 test.describe(
   'ES|QL Data Federation — create CSV dataset wizard',
-  { tag: tags.stateful.classic },
+  { tag: tags.local.stateful.classic },
   () => {
     let dataSourceName: string | undefined;
     let dataSetName: string | undefined;

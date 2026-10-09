@@ -20,7 +20,7 @@ import {
 
 apiTest.describe(
   'GET /internal/nightshift/investigations',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
   () => {
     const IDS = [
       uniqueId('list-inv-1'),

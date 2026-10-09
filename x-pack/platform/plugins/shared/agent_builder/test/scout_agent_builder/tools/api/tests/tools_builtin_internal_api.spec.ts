@@ -12,7 +12,7 @@ import { apiTest, API_AGENT_BUILDER, COMMON_HEADERS, INTERNAL_AGENT_BUILDER } fr
 
 apiTest.describe(
   'Agent Builder — builtin tools internal API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     let adminInteractiveCookieHeader: Record<string, string>;
 

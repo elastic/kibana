@@ -72,7 +72,7 @@ const postChatMessage = (
  */
 apiTest.describe(
   'Agent Builder — chat API message (/api/chat/message)',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     let adminCredentials: RoleApiCredentials;
     let llmProxy: LlmProxy;

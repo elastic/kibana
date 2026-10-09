@@ -80,7 +80,7 @@ async function resolveProfileUid(
 
 apiTest.describe(
   'Escalation assignees endpoint — authorization and ACL sync',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     let adminCookieHeader: Record<string, string>;
     let editorCookieHeader: Record<string, string>;

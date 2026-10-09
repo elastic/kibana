@@ -154,7 +154,7 @@ const seedLinkedProcessIndex = async (
 
 apiTest.describe(
   'Analyzer resolver entity to tree for linked-cluster events',
-  { tag: tags.serverless.security.complete },
+  { tag: tags.local.serverless.security.complete },
   () => {
     const runId = randomUUID().slice(0, 8);
     const index = `scout-cps-analyzer-${runId}`;

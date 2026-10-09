@@ -14,7 +14,7 @@ const ENABLE_NEW_FLYOUT_SETTING = 'securitySolution:enableNewFlyout';
 
 spaceTest.describe(
   'Attack details flyout',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.security.complete] },
   () => {
     spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
       await scoutSpace.savedObjects.cleanStandardList();

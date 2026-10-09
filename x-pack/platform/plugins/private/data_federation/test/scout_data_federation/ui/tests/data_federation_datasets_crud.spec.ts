@@ -11,7 +11,7 @@ import { tags } from '@kbn/scout';
 import { getDataSetByIdApiPath, getDataSourceByIdApiPath } from '../fixtures/api_paths';
 import { test, CUSTOM_ROLES } from '../fixtures';
 
-test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.classic }, () => {
+test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.local.stateful.classic }, () => {
   let dataSourceName: string | undefined;
   let dataSetName: string | undefined;
 

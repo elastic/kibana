@@ -27,7 +27,7 @@ const NAMESPACE = 'nc_api_read_state_test';
  */
 apiTest.describe(
   'Notification Center - read-state annotation',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     let cookieHeader: Record<string, string>;
     let apiKeyHeader: Record<string, string>;

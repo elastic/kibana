@@ -75,7 +75,7 @@ const COLLABORATOR_ROLE: KibanaRole = {
 
 apiTest.describe(
   'Escalation access control — private escalations and assignees',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     let adminCookieHeader: Record<string, string>;
     let editorCookieHeader: Record<string, string>;

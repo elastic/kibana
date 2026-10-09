@@ -11,7 +11,7 @@ import { apiTest, API_AGENT_BUILDER } from '../fixtures';
 
 apiTest.describe(
   'Agent Builder — skills CRUD API (stateful)',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     const createdSkillIds: string[] = [];
     const BUILTIN_SKILL_ID = 'visualization-creation';

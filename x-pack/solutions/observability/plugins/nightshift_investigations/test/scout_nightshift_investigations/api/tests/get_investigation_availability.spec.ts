@@ -19,7 +19,7 @@ const AVAILABILITY_PATH = 'internal/nightshift/investigations/availability';
 
 apiTest.describe(
   'GET /internal/nightshift/investigations/availability',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
   () => {
     apiTest(
       'returns availability for a user with agentBuilder:write',

@@ -20,7 +20,7 @@ const getOnboardingState = async (page: ScoutPage, kbnUrl: KibanaUrl) => {
   return response.json();
 };
 
-test.describe('Cloud onboarding', { tag: tags.stateful.classic }, () => {
+test.describe('Cloud onboarding', { tag: tags.local.stateful.classic }, () => {
   test.beforeAll(async ({ uiSettings }) => {
     // The onboarding route reads 'defaultRoute' via uiSettings.client (space-level setting).
     // Set it to a known path so the "no token" redirect assertion is deterministic.

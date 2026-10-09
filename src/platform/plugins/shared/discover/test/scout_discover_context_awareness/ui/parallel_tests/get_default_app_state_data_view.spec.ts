@@ -34,7 +34,7 @@ import {
  */
 spaceTest.describe(
   'Discover context awareness - extension getDefaultAppState, data view mode',
-  { tag: tags.deploymentAgnostic },
+  { tag: tags.local.deploymentAgnostic },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await setupContextAwareness(scoutSpace);

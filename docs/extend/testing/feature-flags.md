@@ -128,6 +128,8 @@ Scout detects a custom config in two ways:
 1. **Path convention**: name your test directory `test/scout_<name>/` instead of `test/scout/` and Scout automatically maps it to the `<name>` config set.
 2. **Explicit flag**: pass `--serverConfigSet <name>` when starting the local server.
 
+Custom config sets only run locally. Cloud attaches to an existing deployment and cannot apply server args, so these tests are never scheduled against MKI or ECH. Tag them with the local-only tag sets (`tags.local.stateful.classic`, `tags.local.serverless.security.complete`, ...). ESLint rejects `tags.stateful.*`, `tags.serverless.*` and `tags.deploymentAgnostic` under `test/scout_<name>/`.
+
 ### Example [scout-feature-flags-custom-config-example]
 
 The `uiam_local` config set extends the default serverless config to enable UIAM authentication with a mock IdP:

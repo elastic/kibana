@@ -33,7 +33,7 @@ const UPDATED_ESQL_QUERY = 'FROM my-example-logs | LIMIT 5';
  */
 spaceTest.describe(
   'Discover context awareness - extension getDocViewer, interactions',
-  { tag: tags.deploymentAgnostic },
+  { tag: tags.local.deploymentAgnostic },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await setupContextAwareness(scoutSpace);

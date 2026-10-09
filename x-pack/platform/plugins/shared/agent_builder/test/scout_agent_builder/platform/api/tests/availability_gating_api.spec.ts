@@ -28,7 +28,7 @@ const GATED_SKILL_ID = 'cases-management';
 
 apiTest.describe(
   'Agent Builder — availability gating across space solutions',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     const ES_SPACE = 'avail-gate-es';
     const SECURITY_SPACE = 'avail-gate-security';

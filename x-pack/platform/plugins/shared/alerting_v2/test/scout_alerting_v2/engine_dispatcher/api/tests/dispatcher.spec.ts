@@ -153,7 +153,7 @@ const expectStableCount = async (
   return actions;
 };
 
-apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
+apiTest.describe('Dispatcher', { tag: tags.local.stateful.classic }, () => {
   apiTest.beforeAll(async ({ apiServices }) => {
     await apiServices.alertingV2.maintenanceWindows.cleanUp();
     await apiServices.alertingV2.actionPolicies.cleanUp();

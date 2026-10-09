@@ -51,7 +51,7 @@ const messageOf = (body: { message: string }): string => body.message;
 
 // The `agent_builder` Scout config set pins `contextEngine:enabled=true` through `uiSettings.overrides`,
 // which is read-only and applies to every space, so the tests never toggle it.
-apiTest.describe('context engine AI index query API', { tag: tags.stateful.classic }, () => {
+apiTest.describe('context engine AI index query API', { tag: tags.local.stateful.classic }, () => {
   let queryCredentials: RoleApiCredentials;
   let noIndexReadCredentials: RoleApiCredentials;
 

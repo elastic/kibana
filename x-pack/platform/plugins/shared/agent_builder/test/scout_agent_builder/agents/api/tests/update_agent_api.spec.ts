@@ -35,7 +35,7 @@ const BASE_AGENT = {
 
 apiTest.describe(
   'Agent Builder — update agent API (PUT /agents/:id)',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     /** IDs of agents created during this worker run; cleaned up in afterAll. */
     const createdAgentIds: string[] = [];

@@ -19,7 +19,7 @@ const CONVERSATIONS_PATH = `${API_AGENT_BUILDER}/conversations`;
 
 apiTest.describe(
   'Agent Builder — POST /conversations',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     apiTest.afterAll(async ({ esClient }) => {
       await esClient.deleteByQuery({

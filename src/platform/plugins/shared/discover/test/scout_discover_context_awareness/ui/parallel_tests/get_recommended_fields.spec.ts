@@ -28,7 +28,7 @@ import {
  */
 spaceTest.describe(
   'Discover context awareness - extension getRecommendedFields',
-  { tag: tags.deploymentAgnostic },
+  { tag: tags.local.deploymentAgnostic },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await setupContextAwareness(scoutSpace);

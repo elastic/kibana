@@ -14,7 +14,7 @@ import { createHelpers } from '../fixtures/helpers';
 // read-state routes have nowhere to persist. GET carries no read-state and stays available.
 apiTest.describe(
   'Notification Center - read-state routes without a user profile',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     let apiKeyHeader: Record<string, string>;
     const h = createHelpers(() => apiKeyHeader);

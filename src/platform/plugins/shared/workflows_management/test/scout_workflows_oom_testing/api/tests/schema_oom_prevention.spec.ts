@@ -62,7 +62,7 @@ steps:
  *   node scripts/playwright test --project local --grep @stateful-classic \
  *     --config src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts
  */
-spaceTest.describe('Workflow schema OOM prevention', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Workflow schema OOM prevention', { tag: tags.local.deploymentAgnostic }, () => {
   let workflowsApi: WorkflowsApiService;
 
   const expectHeapUsageWithinBudget = async () => {

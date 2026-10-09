@@ -21,7 +21,7 @@ const INDICES_API = '**/api/index_management/indices**';
 
 test.describe(
   'Automatic Import — accessibility — create data stream flyout',
-  { tag: tags.stateful.classic },
+  { tag: tags.local.stateful.classic },
   () => {
     test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
       await page.route(CONNECTORS_API, (route) =>

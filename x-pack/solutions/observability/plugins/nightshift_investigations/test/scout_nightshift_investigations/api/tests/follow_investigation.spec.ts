@@ -18,7 +18,7 @@ const FOLLOW_PATH = 'internal/nightshift/investigations';
 
 apiTest.describe(
   'GET /internal/nightshift/investigations/{id}/follow',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
   () => {
     apiTest('returns 404 for a non-existent investigation id', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_READ_ROLE);

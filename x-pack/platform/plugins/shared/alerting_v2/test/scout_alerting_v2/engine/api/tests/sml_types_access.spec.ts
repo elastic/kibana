@@ -126,7 +126,7 @@ const runSmlCrawlerSoon = async (kbnClient: KbnClient, typeId: string): Promise<
 // Failing: See https://github.com/elastic/kibana/issues/289954
 apiTest.describe.skip(
   'Agent Builder — alerting V2 SML type access',
-  { tag: tags.stateful.classic },
+  { tag: tags.local.stateful.classic },
   () => {
     const searchRunId = randomUUID();
     const searchToken = `alertingv2sml${searchRunId.replaceAll('-', '')}`;

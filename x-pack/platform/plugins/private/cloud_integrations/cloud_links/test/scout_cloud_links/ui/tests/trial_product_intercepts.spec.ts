@@ -13,7 +13,7 @@ import { TRIAL_TRIGGER_DEF_ID } from '../fixtures/constants';
 // Matches the server default (xpack.product_intercept.trialInterceptInterval: '7d')
 const CONFIGURED_TRIAL_INTERCEPT_INTERVAL = 7 * 24 * 60 * 60 * 1000;
 
-test.describe('Trial Product Intercept', { tag: tags.stateful.classic }, () => {
+test.describe('Trial Product Intercept', { tag: tags.local.stateful.classic }, () => {
   let trialTriggerDefId: string;
 
   test.beforeAll(async ({ kbnClient }) => {

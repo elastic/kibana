@@ -25,7 +25,7 @@ import { apiTest, API_AGENT_BUILDER, CHAT_CONVERSATIONS_INDEX } from '../fixture
 
 apiTest.describe(
   'Agent Builder — conversations API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     let llmProxy: LlmProxy;
     let connectorId: string;

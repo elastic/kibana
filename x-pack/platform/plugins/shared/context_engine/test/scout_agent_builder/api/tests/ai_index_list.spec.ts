@@ -58,7 +58,7 @@ const listedIds = (body: { ai_indices: Array<{ id: string }> }): string[] =>
 
 // The `agent_builder` Scout config set pins `contextEngine:enabled=true` through `uiSettings.overrides`,
 // which is read-only and applies to every space, so the tests never toggle it.
-apiTest.describe('context engine AI Index list', { tag: tags.stateful.classic }, () => {
+apiTest.describe('context engine AI Index list', { tag: tags.local.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
   let listCredentials: RoleApiCredentials;
 

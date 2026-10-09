@@ -9,7 +9,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-test.describe('global pages', { tag: tags.stateful.classic }, () => {
+test.describe('global pages', { tag: tags.local.stateful.classic }, () => {
   test('displays the global banner on the login page', async ({ pageObjects }) => {
     await pageObjects.login.goto();
 

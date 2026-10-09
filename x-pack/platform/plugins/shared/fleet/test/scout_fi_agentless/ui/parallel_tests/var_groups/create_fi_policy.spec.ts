@@ -82,7 +82,7 @@ function expectNoExternalId(body: unknown) {
 
 test.describe(
   'AWS Federated Identity — create, save, and edit round-trip',
-  { tag: tags.stateful.classic },
+  { tag: tags.local.stateful.classic },
   () => {
     test.setTimeout(3 * 60 * 1000);
 

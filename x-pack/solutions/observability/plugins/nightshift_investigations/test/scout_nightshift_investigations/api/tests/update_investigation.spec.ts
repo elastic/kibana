@@ -20,7 +20,7 @@ import {
 
 apiTest.describe(
   'PATCH /internal/nightshift/investigations/{id}',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
   () => {
     const TEST_ID = uniqueId('persist-test-investigation');
     let cookieHeader: Record<string, string>;

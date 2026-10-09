@@ -10,7 +10,7 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { EXPECTED_CLOUD_ID, EXPECTED_ES_URL } from '../fixtures/constants';
 
-test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
+test.describe('Cloud Links integration', { tag: tags.local.stateful.classic }, () => {
   // The billing link requires _ec_billing_admin. Mirror the FTR setup: map the SAML realm to
   // include the role for the duration of this suite, then restore it afterwards.
   let originalMapping: { roles: string[]; existed: boolean } = { roles: [], existed: false };

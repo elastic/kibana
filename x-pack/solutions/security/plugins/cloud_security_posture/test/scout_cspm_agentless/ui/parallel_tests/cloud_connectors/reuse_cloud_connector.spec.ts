@@ -89,7 +89,7 @@ function createMockCloudConnector(
  */
 spaceTest.describe(
   'Cloud Connectors - Reuse Existing Connector',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth }) => {
       // Use admin for stateful tests (has all permissions including fleet-cloud-connector)

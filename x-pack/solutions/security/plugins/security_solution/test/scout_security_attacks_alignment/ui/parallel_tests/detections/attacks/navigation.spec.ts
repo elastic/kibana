@@ -14,7 +14,7 @@ const ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING =
 // Failing: See https://github.com/elastic/kibana/issues/266341
 spaceTest.describe.skip(
   'Attacks navigation',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsT1Analyst();

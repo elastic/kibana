@@ -19,7 +19,7 @@ const START_PATH = 'internal/nightshift/investigations';
 
 apiTest.describe(
   'POST /internal/nightshift/investigations',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
   () => {
     apiTest('returns 400 when the request body is empty', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);

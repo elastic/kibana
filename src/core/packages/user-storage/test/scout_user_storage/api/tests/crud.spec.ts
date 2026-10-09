@@ -11,7 +11,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, ALL_KEYS, DEFAULT_VALUES, createHelpers } from '../fixtures';
 
-apiTest.describe('User Storage - CRUD', { tag: [...tags.stateful.classic] }, () => {
+apiTest.describe('User Storage - CRUD', { tag: [...tags.local.stateful.classic] }, () => {
   let cookieHeader: Record<string, string>;
   const h = createHelpers(() => cookieHeader);
 

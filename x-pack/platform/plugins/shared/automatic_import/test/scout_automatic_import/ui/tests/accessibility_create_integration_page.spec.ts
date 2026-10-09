@@ -19,7 +19,7 @@ import {
 
 test.describe(
   'Automatic Import — accessibility — create integration page',
-  { tag: tags.stateful.classic },
+  { tag: tags.local.stateful.classic },
   () => {
     test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
       await page.route(CONNECTORS_API, (route) =>

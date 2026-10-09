@@ -35,7 +35,7 @@ const ACTION_POLICY_ID = 'end-to-end-policy';
 
 apiTest.describe(
   'End-to-end (executor -> director -> dispatcher)',
-  { tag: tags.stateful.classic },
+  { tag: tags.local.stateful.classic },
   () => {
     apiTest.beforeAll(async ({ apiServices }) => {
       await apiServices.alertingV2.alertActionsEvents.cleanUp();

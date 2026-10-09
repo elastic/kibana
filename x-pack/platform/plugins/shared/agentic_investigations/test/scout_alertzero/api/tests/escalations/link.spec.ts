@@ -20,7 +20,7 @@ import {
 
 apiTest.describe(
   'POST /internal/investigations/escalations/{id}/_link — link investigation to escalation',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     let cookieHeader: Record<string, string>;
     let viewerCookieHeader: Record<string, string>;

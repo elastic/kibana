@@ -12,7 +12,7 @@ import { test } from '../fixtures';
 
 test.describe(
   'Agent Builder — manage tool',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();

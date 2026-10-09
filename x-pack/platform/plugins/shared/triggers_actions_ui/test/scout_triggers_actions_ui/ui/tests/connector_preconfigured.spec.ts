@@ -71,7 +71,7 @@ const openConnectorFlyout = async (page: ScoutPage) => {
   await page.locator('[data-test-subj="connectorsTableCell-name"] button').click();
 };
 
-test.describe('Preconfigured connector functionality', { tag: tags.stateful.classic }, () => {
+test.describe('Preconfigured connector functionality', { tag: tags.local.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginWithCustomRole(CONNECTORS_ROLE);
   });

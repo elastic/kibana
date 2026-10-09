@@ -25,7 +25,7 @@ const CONVERSATION_DATA = [
 // Failing: See https://github.com/elastic/kibana/issues/289099
 test.describe.skip(
   'Agent Builder — sidebar conversation history',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();

@@ -39,7 +39,7 @@ function esqlToolPayload(id: string, description: string) {
 
 apiTest.describe(
   'Agent Builder — tool delete force API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     let adminInteractiveCookieHeader: Record<string, string>;
 

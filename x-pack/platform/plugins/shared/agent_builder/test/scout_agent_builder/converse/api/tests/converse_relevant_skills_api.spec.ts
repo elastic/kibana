@@ -27,7 +27,7 @@ import { apiTest, API_AGENT_BUILDER, getConversation, postConverse } from '../fi
 // Happy-path coverage lives in unit tests (and, for real end to end, the EIS-backed smoke suite).
 apiTest.describe(
   'Agent Builder — relevant-skills stays off without a fast model API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     let adminCredentials: RoleApiCredentials;
     let llmProxy: LlmProxy;

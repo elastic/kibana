@@ -48,7 +48,7 @@ apiTest.describe(
   'Audit log — OTel appender on traditional (no Serverless transforms)',
   // Traditional-only: verifies the Serverless field transforms are NOT applied off Serverless.
   // The transformed Serverless shape is covered by audit_log.spec.ts.
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     apiTest.beforeAll(async () => {
       await receiver.start(OTEL_RECEIVER_PORT);

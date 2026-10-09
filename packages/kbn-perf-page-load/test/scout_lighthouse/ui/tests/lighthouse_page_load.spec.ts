@@ -158,7 +158,7 @@ const extractMetrics = (result: RunnerResult, kbnMarks: KbnLoadMark[]): PageMetr
 
 perfLighthouseTest.describe(
   'Lighthouse Page Load Performance',
-  { tag: [...tags.stateful.classic, ...tags.performance] },
+  { tag: [...tags.local.stateful.classic, ...tags.performance] },
   () => {
     const auditOptions = getAuditOptions();
 

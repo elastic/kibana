@@ -20,7 +20,7 @@ const alertIndex = '.alerts-observability.apm.alerts-default';
 
 test.describe(
   'Observability alert investigation action',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ esClient }) => {
       const timestamp = new Date().toISOString();

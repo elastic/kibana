@@ -17,7 +17,7 @@ import {
 // Failing: See https://github.com/elastic/kibana/issues/259261
 apiTest.describe.skip(
   'automatic_import Data Stream API (manager)',
-  { tag: tags.stateful.all },
+  { tag: tags.local.stateful.all },
   () => {
     let cookieHeader: Record<string, string>;
     const dsBasePath = dataStreamsApiBasePath(MANAGER_DS_FLOW_INTEGRATION_ID);

@@ -41,7 +41,7 @@ const mcpInitBody = (id: number) => ({
 
 apiTest.describe(
   '[NON-MKI] MCP OAuth discovery and SDK client flow',
-  { tag: [...tags.serverless.security.complete] },
+  { tag: [...tags.local.serverless.security.complete] },
   () => {
     let oauthAccessToken: string;
     let kibanaBaseUrl: string;

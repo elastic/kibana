@@ -96,7 +96,7 @@ const seedAliasedMarkerIndex = async (
 
 apiTest.describe(
   'CPS routing with a non-existent NPRE',
-  { tag: tags.serverless.security.complete },
+  { tag: tags.local.serverless.security.complete },
   () => {
     const runId = randomUUID().slice(0, 8);
     // Avoid `logs-*` so serverless data-stream templates do not hijack the index.

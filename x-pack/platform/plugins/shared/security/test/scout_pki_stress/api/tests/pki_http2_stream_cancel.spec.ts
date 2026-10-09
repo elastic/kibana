@@ -23,7 +23,7 @@ const PREAUTH_HOLD_HEADER = 'x-elastic-preauth-hold';
 // mid-authenticate must leave the socket readable, and the session intact. The pki.ts
 // degraded-socket guard still covers the residual cases (HTTP/1.1 closed sockets, streams already
 // destroyed before the request was constructed) and keeps its own unit coverage in pki.test.ts.
-apiTest.describe('PKI HTTP/2 stream cancel', { tag: tags.stateful.classic }, () => {
+apiTest.describe('PKI HTTP/2 stream cancel', { tag: tags.local.stateful.classic }, () => {
   apiTest.beforeAll(async ({ esClient }) => {
     await esClient.security.putRoleMapping({
       name: 'first_client_pki',

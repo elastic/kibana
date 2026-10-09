@@ -12,7 +12,7 @@ import { apiTest, API_AGENT_BUILDER } from '../fixtures';
 
 apiTest.describe(
   'Agent Builder — builtin tools API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     apiTest('DELETE read-only builtin tool returns 400', async ({ asAdmin }) => {
       const toolId = platformCoreTools.generateEsql;

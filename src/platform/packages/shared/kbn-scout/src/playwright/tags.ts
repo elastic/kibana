@@ -29,9 +29,9 @@ export const getPlaywrightTagsFor = (
     .map((target) => target.playwrightTag);
 };
 
-export const tags = {
+const buildTags = (location: ScoutTargetLocation | 'all') => ({
   stateful: {
-    classic: getPlaywrightTagsFor('stateful', 'classic'),
+    classic: getPlaywrightTagsFor('stateful', 'classic', location),
 
     // `search` / `observability` / `security` are intentionally not exposed for `stateful`:
     // CI only schedules stateful runs tagged `classic` (see `getServerRunFlagsFromTags` in
@@ -46,10 +46,14 @@ export const tags = {
     },
   },
   serverless: {
-    search: getPlaywrightTagsFor('serverless', 'search'),
+    search: getPlaywrightTagsFor('serverless', 'search', location),
     observability: {
-      complete: getPlaywrightTagsFor('serverless', 'observability_complete'),
-      logs_essentials: getPlaywrightTagsFor('serverless', 'observability_logs_essentials'),
+      complete: getPlaywrightTagsFor('serverless', 'observability_complete', location),
+      logs_essentials: getPlaywrightTagsFor(
+        'serverless',
+        'observability_logs_essentials',
+        location
+      ),
 
       /**
        * All observability project types
@@ -59,9 +63,9 @@ export const tags = {
       },
     },
     security: {
-      complete: getPlaywrightTagsFor('serverless', 'security_complete'),
-      essentials: getPlaywrightTagsFor('serverless', 'security_essentials'),
-      ease: getPlaywrightTagsFor('serverless', 'security_ease'),
+      complete: getPlaywrightTagsFor('serverless', 'security_complete', location),
+      essentials: getPlaywrightTagsFor('serverless', 'security_essentials', location),
+      ease: getPlaywrightTagsFor('serverless', 'security_ease', location),
 
       /**
        * All security project types
@@ -70,8 +74,8 @@ export const tags = {
         return [...this.complete, ...this.essentials, ...this.ease];
       },
     },
-    workplaceai: getPlaywrightTagsFor('serverless', 'workplaceai'),
-    vectordb: getPlaywrightTagsFor('serverless', 'vectordb'),
+    workplaceai: getPlaywrightTagsFor('serverless', 'workplaceai', location),
+    vectordb: getPlaywrightTagsFor('serverless', 'vectordb', location),
 
     /**
      * All serverless project types
@@ -102,5 +106,16 @@ export const tags = {
       ...this.serverless.security.complete,
     ];
   },
+});
+
+export const tags = {
+  ...buildTags('all'),
+
+  /**
+   * Local-only variants of the tag sets above (`@local-*` tags, no `@cloud-*`).
+   * Required for tests under `test/scout_*` (custom server configs): those configs start
+   * Kibana with custom server args, so they only run locally and never against Cloud.
+   */
+  local: buildTags('local'),
   performance: ['@perf'],
 };

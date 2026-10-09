@@ -83,7 +83,7 @@ function basicAuthHeader(username: string, password: string): Record<string, str
 
 apiTest.describe(
   'Agent Builder — conversations access-control API',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     const testRunId = randomUUID();
     const accessControlSpaceId = `${ACCESS_CONTROL_TEST_PREFIX}-space-${testRunId}`;

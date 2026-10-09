@@ -13,7 +13,7 @@ import { apiTest, SESSION_API_PATH, COMMON_HEADERS, randomSessionId } from '../f
 
 apiTest.describe(
   'search session - permissions (stateful only)',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     let analystCookieHeader: Record<string, string>;
 

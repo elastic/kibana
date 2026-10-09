@@ -40,7 +40,7 @@ function mockAgent(id: string) {
 
 apiTest.describe(
   'Agent Builder — per-space default agent',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     const testRunId = randomUUID();
     const SPACE_A = `${TEST_PREFIX}-a-${testRunId}`;

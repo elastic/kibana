@@ -13,7 +13,7 @@ const ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING =
 
 spaceTest.describe(
   'Attacks UI manual execution smoke',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.security.complete] },
   () => {
     spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
       await scoutSpace.savedObjects.cleanStandardList();

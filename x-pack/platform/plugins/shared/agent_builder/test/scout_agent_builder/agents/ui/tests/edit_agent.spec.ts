@@ -22,7 +22,7 @@ type Agent = (typeof agents)[number];
 
 test.describe(
   'Agent Builder — edit agent',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     test.beforeAll(async ({ kbnClient }) => {
       for (const agent of agents) {

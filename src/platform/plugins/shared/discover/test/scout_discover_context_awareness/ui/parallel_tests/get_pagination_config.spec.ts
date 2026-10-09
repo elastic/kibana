@@ -28,7 +28,7 @@ import {
  */
 spaceTest.describe(
   'Discover context awareness - extension getPaginationConfig',
-  { tag: tags.deploymentAgnostic },
+  { tag: tags.local.deploymentAgnostic },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await setupContextAwareness(scoutSpace);

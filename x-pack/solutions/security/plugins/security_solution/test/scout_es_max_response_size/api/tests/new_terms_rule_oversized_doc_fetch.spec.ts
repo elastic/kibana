@@ -60,7 +60,7 @@ const FINISHED_EXECUTION_STATUSES = ['succeeded', 'partial failure', 'failed'];
 
 apiTest.describe(
   'New Terms rule with an oversized document fetch response',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.security.complete] },
   () => {
     const runId = randomUUID().slice(0, 8);
     const sourceIndex = `scout-new-terms-oversized-${runId}`;

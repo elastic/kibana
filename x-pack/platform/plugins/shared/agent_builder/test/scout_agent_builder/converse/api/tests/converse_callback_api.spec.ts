@@ -51,7 +51,7 @@ const INTERNAL_API_VERSION = '1';
 // Failing: See https://github.com/elastic/kibana/issues/293847
 apiTest.describe.skip(
   'Agent Builder - converse callback API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     let adminCredentials: RoleApiCredentials;
     let adminInteractiveCookieHeader: Record<string, string>;

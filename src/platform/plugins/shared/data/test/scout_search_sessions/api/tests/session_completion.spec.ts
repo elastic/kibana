@@ -21,7 +21,7 @@ import {
 
 apiTest.describe(
   'search session - completion (stateful only)',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     let cookieHeader: Record<string, string>;
 

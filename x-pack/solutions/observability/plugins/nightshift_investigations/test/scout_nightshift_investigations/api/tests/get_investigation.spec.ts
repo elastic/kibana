@@ -21,7 +21,7 @@ const TEST_ID = uniqueId('get-test-investigation');
 
 apiTest.describe(
   'GET /internal/nightshift/investigations/{id}',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
   () => {
     let cookieHeader: Record<string, string>;
 

@@ -31,7 +31,7 @@ steps:
 
 spaceTest.describe(
   '[NON-MKI] Workflow execution with an organization-level UIAM API key',
-  { tag: [...tags.serverless.observability.complete] },
+  { tag: [...tags.local.serverless.observability.complete] },
   () => {
     let workflowId: string | undefined;
 

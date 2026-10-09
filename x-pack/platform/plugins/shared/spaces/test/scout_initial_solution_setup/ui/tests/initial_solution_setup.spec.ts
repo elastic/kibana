@@ -10,7 +10,7 @@ import { expect } from '@kbn/scout/ui';
 
 import { test } from '../fixtures';
 
-test.describe('Initial solution setup', { tag: tags.stateful.classic }, () => {
+test.describe('Initial solution setup', { tag: tags.local.stateful.classic }, () => {
   // Setup is a one-way, cluster-wide transition. The API and UI suites use separate Scout
   // config sets to get fresh servers; a retry cannot restore state after completion.
 

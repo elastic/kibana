@@ -55,7 +55,7 @@ const pollUntilTaskHasRun = async (esClient: Client, taskId: string): Promise<vo
 // org-level key) from the local UIAM server config set.
 apiTest.describe(
   '[NON-MKI] Task Manager task scheduled with a user-created (external) UIAM API key',
-  { tag: tags.serverless.observability.complete },
+  { tag: tags.local.serverless.observability.complete },
   () => {
     const taskIdsToCleanup: string[] = [];
 

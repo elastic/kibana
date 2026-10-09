@@ -21,7 +21,7 @@ interface GetDataSetResponse {
 
 test.describe(
   'ES|QL Data Federation — dataset API-only settings passthrough',
-  { tag: tags.stateful.classic },
+  { tag: tags.local.stateful.classic },
   () => {
     let dataSourceName: string | undefined;
     let dataSetName: string | undefined;

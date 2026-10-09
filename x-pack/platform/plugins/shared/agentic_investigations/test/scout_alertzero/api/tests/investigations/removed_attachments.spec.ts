@@ -31,7 +31,7 @@ interface RowBody {
 
 apiTest.describe(
   'Investigation documents whose attachment the user removed',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     let cookieHeader: Record<string, string>;
     // An unattached subject plus a removed impact: two unconfirmed documents.

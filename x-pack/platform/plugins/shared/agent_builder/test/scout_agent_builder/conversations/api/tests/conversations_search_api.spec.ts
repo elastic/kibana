@@ -32,7 +32,7 @@ const WIDGET_PER_PAGE = 5;
 
 apiTest.describe(
   'Agent Builder — conversations search API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     const agentId = 'search-test-agent';
     const otherAgentId = 'search-test-agent-other';

@@ -15,7 +15,7 @@ const DISCOVER_BUTTON_NAME = 'Open in Discover';
 
 test.describe(
   'ES|QL Data Federation — dataset Discover link',
-  { tag: tags.stateful.classic },
+  { tag: tags.local.stateful.classic },
   () => {
     const dataSourceName = `scout-data-source-${randomUUID().slice(0, 8)}`;
     const dataSetName = `scout-dataset-discover-${randomUUID().slice(0, 8)}`;

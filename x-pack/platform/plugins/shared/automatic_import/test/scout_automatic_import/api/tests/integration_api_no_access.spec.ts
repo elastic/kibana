@@ -12,7 +12,7 @@ import { INTEGRATION_API_BASE_PATH, SHARED_INTEGRATION_ID } from '../fixtures/ap
 
 apiTest.describe(
   'automatic_import Integration API (no automatic_import privilege)',
-  { tag: tags.stateful.all },
+  { tag: tags.local.stateful.all },
   () => {
     let cookieHeader: Record<string, string>;
 

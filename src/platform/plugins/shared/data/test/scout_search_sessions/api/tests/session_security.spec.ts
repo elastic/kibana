@@ -19,7 +19,7 @@ import {
 
 apiTest.describe(
   'search session - cross-user security (stateful only)',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     let adminCookieHeader: Record<string, string>;
     let otherUserCookieHeader: Record<string, string>;

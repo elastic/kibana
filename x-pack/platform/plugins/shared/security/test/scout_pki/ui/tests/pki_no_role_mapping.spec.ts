@@ -14,7 +14,7 @@ test.use({
   clientCertificates: [{ origin: KIBANA_TLS_ORIGIN, pfx: SECOND_CLIENT_P12, passphrase: '' }],
 });
 
-test.describe('PKI authentication — no role mapping', { tag: tags.stateful.classic }, () => {
+test.describe('PKI authentication — no role mapping', { tag: tags.local.stateful.classic }, () => {
   test('redirects to the reset session page when the cert user has no privileges', async ({
     page,
   }) => {

@@ -228,7 +228,7 @@ const seenSpaceIds = async (
 
 apiTest.describe(
   'Alerting v2 alerts implicit index privileges',
-  { tag: tags.stateful.classic },
+  { tag: tags.local.stateful.classic },
   () => {
     apiTest.beforeAll(async ({ esClient, kbnClient, apiServices }) => {
       // Pre-create spaces.

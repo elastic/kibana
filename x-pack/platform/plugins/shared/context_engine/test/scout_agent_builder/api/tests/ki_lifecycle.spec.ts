@@ -57,7 +57,7 @@ const registerAiIndex = (id: string, dest: { type: 'index' | 'data_stream'; valu
   sources: [],
 });
 
-apiTest.describe('context engine KI lifecycle filter', { tag: tags.stateful.classic }, () => {
+apiTest.describe('context engine KI lifecycle filter', { tag: tags.local.stateful.classic }, () => {
   let adminApiCredentials: RoleApiCredentials;
 
   const run = async (apiClient: ApiClientFixture, query: string): Promise<EsqlResponse> => {

@@ -20,7 +20,7 @@ const CUSTOM_AGENT_NAME = 'Sidebar Test Agent';
 
 test.describe(
   'Agent Builder — sidebar agent switch',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     test.beforeAll(async ({ kbnClient }) => {
       try {

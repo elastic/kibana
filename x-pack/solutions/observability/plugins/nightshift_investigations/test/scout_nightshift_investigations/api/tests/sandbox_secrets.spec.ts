@@ -37,7 +37,7 @@ const setNightshiftEnabled = (apiServices: ApiServicesFixture, enabled: boolean 
 
 apiTest.describe(
   '/internal/nightshift/sandbox_secrets',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
   () => {
     let manageCookie: Record<string, string>;
 

@@ -14,7 +14,7 @@ import { apiTest, COMMON_HEADERS, COMMON_UNSAFE_HEADERS, TEST_USERNAME } from '.
 
 apiTest.describe(
   '[NON-MKI] Inbound UIAM ephemeral token client authentication',
-  { tag: tags.serverless.security.complete },
+  { tag: tags.local.serverless.security.complete },
   () => {
     apiTest(
       'preserves the gateway secret for primary Elasticsearch authentication',

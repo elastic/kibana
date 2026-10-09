@@ -11,7 +11,7 @@ import { apiTest, API_AGENT_BUILDER, COMMON_HEADERS, INTERNAL_AGENT_BUILDER } fr
 
 apiTest.describe(
   'Agent Builder — ES|QL tools internal API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     const createdToolIds: string[] = [];
 

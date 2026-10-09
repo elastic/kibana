@@ -25,7 +25,7 @@ const NOTE_EVENT = { type: TEXT_NOTE_EVENT_TYPE, data: { text: 'test note' } };
 
 apiTest.describe(
   'Agent Builder — POST /conversations/{id}/_add_events',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.search] },
   () => {
     let conversationId: string;
 

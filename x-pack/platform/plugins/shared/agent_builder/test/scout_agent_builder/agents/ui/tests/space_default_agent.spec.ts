@@ -43,7 +43,7 @@ async function setSpaceDefaultAgentViaApi(kbnClient: KbnClient, defaultAgentId: 
 
 test.describe(
   'Agent Builder — per-space default agent',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     test.beforeAll(async ({ kbnClient }) => {
       // createAgentViaKbn deletes-then-creates by id, so no index-wide wipe is

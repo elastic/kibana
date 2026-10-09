@@ -14,7 +14,7 @@ import { mockInferenceEndpoints, unmockInferenceEndpoints } from '../fixtures/mo
 
 spaceTest.describe(
   'Inference Navigation - Search Solution Space',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.local.stateful.classic] },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.setSolutionView('es');

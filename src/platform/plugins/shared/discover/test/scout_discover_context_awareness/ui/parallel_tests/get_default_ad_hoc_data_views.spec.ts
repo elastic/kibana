@@ -31,7 +31,7 @@ const managedBadge = (dataViewName: string) => `dataViewItemManagedBadge-${dataV
  */
 spaceTest.describe(
   'Discover context awareness - extension getDefaultAdHocDataViews',
-  { tag: tags.deploymentAgnostic },
+  { tag: tags.local.deploymentAgnostic },
   () => {
     // The last row's timestamp is asserted, and the grid only mounts rows that fit the viewport.
     spaceTest.use({ viewport: GRID_VIEWPORT });

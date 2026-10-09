@@ -95,7 +95,7 @@ const completeAuthCodeFlow = async (
 
 apiTest.describe(
   '[NON-MKI] MCP OAuth authorization_code flow via SDK StreamableHTTPClientTransport',
-  { tag: [...tags.serverless.security.complete] },
+  { tag: [...tags.local.serverless.security.complete] },
   () => {
     apiTest(
       'should complete full MCP handshake via SAML-backed authorization_code flow (default space)',

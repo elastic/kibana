@@ -48,7 +48,7 @@ const createTransformWithProjectRouting = async (
 
 apiTest.describe(
   '/internal/transform/transforms/{transformId} create with project routing',
-  { tag: tags.serverless.security.complete },
+  { tag: tags.local.serverless.security.complete },
   () => {
     const transformId = 'test_transform_id_create_with_project_routing';
     const bulkTransformIds = [

@@ -136,7 +136,7 @@ async function waitForCredentialTypeSelector(page: ScoutPage) {
 
 test.describe(
   'AWS var_groups — Identity Federation option visibility',
-  { tag: tags.stateful.classic },
+  { tag: tags.local.stateful.classic },
   () => {
     test.setTimeout(3 * 60 * 1000);
 

@@ -12,7 +12,7 @@ import { INTEGRATION_API_BASE_PATH } from '../fixtures/api_test_constants';
 
 apiTest.describe(
   'automatic_import Integration API (manager create / validation)',
-  { tag: tags.stateful.all },
+  { tag: tags.local.stateful.all },
   () => {
     let cookieHeader: Record<string, string>;
 

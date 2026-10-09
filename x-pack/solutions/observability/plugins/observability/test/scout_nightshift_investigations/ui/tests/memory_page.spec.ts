@@ -124,7 +124,7 @@ test.describe(
     // Stateful classic only. Semantic Memory needs its own Kibana flag, which the
     // `nightshift_investigations` config set turns on for the stateful flavor only,
     // so the serverless lanes of this config must not run these tests.
-    tag: tags.stateful.classic,
+    tag: tags.local.stateful.classic,
   },
   () => {
     test.beforeAll(async ({ esClient, apiServices }) => {
