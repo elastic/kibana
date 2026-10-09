@@ -16,6 +16,7 @@ import {
   RegistryError,
   RegistryConnectionError,
   RegistryResponseError,
+  PackageFipsIncompatibleError,
   PackageNotFoundError,
   PackageUnsupportedMediaTypeError,
   defaultFleetErrorHandler,
@@ -117,6 +118,18 @@ describe('defaultFleetErrorHandler', () => {
       // logging
       expect(mockContract.logger?.error).toHaveBeenCalledTimes(1);
       expect(mockContract.logger?.error).toHaveBeenCalledWith(error.message);
+    });
+
+    it('400: PackageFipsIncompatibleError', async () => {
+      const error = new PackageFipsIncompatibleError('not FIPS compatible');
+      const response = httpServerMock.createResponseFactory();
+
+      await defaultFleetErrorHandler({ error, response });
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: { message: error.message },
+      });
     });
 
     it('400: FleetError', async () => {
