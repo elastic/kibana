@@ -88,7 +88,7 @@ describe('monitor delete route ids', () => {
     const { execute } = installExecuteResult({ errors: [] });
 
     await deleteSyntheticsMonitorRoute().handler(
-      mockRouteContext({ body: undefined, params: { monitorId: 'mon-path' } })
+      mockRouteContext({ body: undefined, params: { id: 'mon-path' } })
     );
 
     expect(execute).toHaveBeenCalledWith({ monitorIds: ['mon-path'] });

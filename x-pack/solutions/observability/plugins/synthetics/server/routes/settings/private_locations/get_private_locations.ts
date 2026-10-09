@@ -42,12 +42,11 @@ const getPrivateLocationsHandler: SyntheticsRouteHandler<SyntheticsPrivateLocati
   routeContext
 ) => loadPrivateLocations(routeContext);
 
-const getPrivateLocationHandler: SyntheticsRouteHandler<
-  PrivateLocation,
-  { locationId: string }
-> = async (routeContext) => {
+const getPrivateLocationHandler: SyntheticsRouteHandler<PrivateLocation, { id: string }> = async (
+  routeContext
+) => {
   const { request, response } = routeContext;
-  const { locationId: id } = request.params;
+  const { id } = request.params;
 
   const list = await loadPrivateLocations(routeContext);
   const location = list.find((loc) => loc.id === id || loc.label === id);
@@ -72,15 +71,15 @@ export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<
 
 export const getPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   PrivateLocation,
-  { locationId: string }
+  { id: string }
 > = () => ({
   method: 'GET',
-  path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{locationId}',
+  path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{id}',
   validate: {},
   validation: {
     request: {
       params: z.strictObject({
-        locationId: routeId,
+        id: routeId,
       }),
     },
   },
