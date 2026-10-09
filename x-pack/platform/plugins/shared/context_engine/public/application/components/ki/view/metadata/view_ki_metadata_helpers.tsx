@@ -34,7 +34,7 @@ export const buildKiMetadataListItems = (
   const createdAt = document['@timestamp'];
 
   return [
-    ...whenDefined(kiId.trim, () => ({
+    ...whenDefined(kiId, () => ({
       title: i18n.translate('xpack.contextEngine.viewKi.metadata.id', { defaultMessage: 'ID' }),
       description: <ViewKiSidebarBreakableText>{kiId}</ViewKiSidebarBreakableText>,
     })),

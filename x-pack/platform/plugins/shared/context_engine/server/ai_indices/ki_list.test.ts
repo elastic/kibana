@@ -46,6 +46,23 @@ const rowsResponse = (
   ],
   values: rows,
 });
+const rowsResponseWithExpiresAt = (
+  rows: Array<
+    [string, string, string | null, string | null, string | null, string | null, string | null]
+  >
+) => ({
+  columns: [
+    { name: '_index' },
+    { name: 'id' },
+    { name: 'type' },
+    { name: 'title' },
+    { name: 'updated_at' },
+    { name: 'expires_at' },
+    { name: 'governance.lifecycle.status' },
+  ],
+  values: rows,
+});
+const FIELDS_WITH_EXPIRES_AT = [...ALL_FIELDS, 'expires_at'];
 const totalsResponse = (total: number, filtered?: number) =>
   filtered === undefined
     ? { columns: [{ name: 'total' }], values: [[total]] }
@@ -124,8 +141,9 @@ describe('ki_list', () => {
         'INLINE STATS latest_doc = MAX(_id) BY _index, id',
         'WHERE _id == latest_doc',
         'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted"',
+        'EVAL expires_at = TO_STRING(NULL)',
         'SORT revision_time DESC, id ASC',
-        'KEEP _index, id, type, title, updated_at, governance.lifecycle.status',
+        'KEEP _index, id, type, title, updated_at, expires_at, governance.lifecycle.status',
         'LIMIT 25',
       ].join('\n| ')
     );
@@ -134,6 +152,93 @@ describe('ki_list', () => {
       '| WHERE type IS NOT NULL\n| STATS count = COUNT(*) BY type\n| SORT count DESC, type ASC'
     );
     expect(queryText(2)).not.toContain('| LIMIT');
+  });
+
+  it('returns expired KIs without filtering on expires_at', async () => {
+    query.mockReset();
+    query
+      .mockResolvedValueOnce(probeResponse(FIELDS_WITH_EXPIRES_AT))
+      .mockResolvedValueOnce(
+        rowsResponseWithExpiresAt([
+          [
+            BACKING_INDEX,
+            'ki-expired',
+            'memory.session',
+            'Expired memory',
+            null,
+            '2020-01-01T00:00:00.000Z',
+            'active',
+          ],
+        ])
+      )
+      .mockResolvedValueOnce(totalsResponse(1))
+      .mockResolvedValueOnce(bucketsResponse([[1, 'memory.session']]));
+
+    await expect(getKis(esClient, { dest: INDEX_DEST, size: 25 })).resolves.toEqual({
+      total: 1,
+      summary: { total: 1, counts_by_type: [{ type: 'memory.session', count: 1 }] },
+      kis: [
+        {
+          id: 'ki-expired',
+          index: BACKING_INDEX,
+          type: 'memory.session',
+          title: 'Expired memory',
+          expires_at: '2020-01-01T00:00:00.000Z',
+          lifecycle_status: 'active',
+        },
+      ],
+    });
+
+    expect(queryText(0)).toContain('KEEP _index, id, type, title, updated_at, expires_at');
+    expect(queryText(0)).not.toMatch(/expires_at\s+IS\s+NULL/);
+    expect(queryText(0)).not.toMatch(/expires_at\s+>/);
+  });
+
+  it('returns no KIs when lifecycleStatuses is empty', async () => {
+    query
+      .mockResolvedValueOnce(rowsResponse([]))
+      .mockResolvedValueOnce(totalsResponse(0))
+      .mockResolvedValueOnce(bucketsResponse([]));
+
+    await expect(
+      getKis(esClient, { dest: INDEX_DEST, size: 25, lifecycleStatuses: [] })
+    ).resolves.toEqual({
+      total: 0,
+      summary: { total: 0, counts_by_type: [] },
+      kis: [],
+    });
+
+    expect(queryText(0)).toContain('WHERE FALSE');
+  });
+
+  it('lists only deleted KIs when lifecycleStatuses is deleted', async () => {
+    query
+      .mockResolvedValueOnce(
+        rowsResponse([
+          [BACKING_INDEX, 'ki-deleted', 'memory.session', 'Forgotten', null, 'deleted'],
+        ])
+      )
+      .mockResolvedValueOnce(totalsResponse(1))
+      .mockResolvedValueOnce(bucketsResponse([[1, 'memory.session']]));
+
+    await expect(
+      getKis(esClient, { dest: INDEX_DEST, size: 25, lifecycleStatuses: ['deleted'] })
+    ).resolves.toEqual({
+      total: 1,
+      summary: { total: 1, counts_by_type: [{ type: 'memory.session', count: 1 }] },
+      kis: [
+        {
+          id: 'ki-deleted',
+          index: BACKING_INDEX,
+          type: 'memory.session',
+          title: 'Forgotten',
+          lifecycle_status: 'deleted',
+        },
+      ],
+    });
+
+    expect(queryText(0)).toContain('WHERE governance.lifecycle.status == "deleted"');
+    expect(queryText(0)).not.toContain('governance.lifecycle.status == "active"');
   });
 
   it('includes deleted KIs when lifecycleStatuses lists active and deleted', async () => {
@@ -346,8 +451,9 @@ describe('ki_list', () => {
         `FROM "${BACKING_INDEX}" METADATA _id, _index`,
         'EVAL id = _id',
         'EVAL updated_at = TO_STRING(NULL)',
+        'EVAL expires_at = TO_STRING(NULL)',
         'SORT id ASC',
-        'KEEP _index, id, type, title, updated_at',
+        'KEEP _index, id, type, title, updated_at, expires_at',
         'LIMIT 25',
       ].join('\n| ')
     );

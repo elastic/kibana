@@ -32,4 +32,5 @@ export const getListKiTypeFilterLabel = (type: string): string =>
       })
     : formatKiTypeLabel(type);
 
-export const getKiDisplayTitle = (title?: string): string => title ?? noneValueLabel;
+export const getKiDisplayTitle = (title?: string): string =>
+  title !== undefined && title.length > 0 ? title : noneValueLabel;

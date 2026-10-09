@@ -14,6 +14,7 @@ export interface KiListItem {
   type?: string;
   title?: string;
   updated_at?: string;
+  expires_at?: string;
   lifecycle_status?: KiLifecycleStatus;
 }
 

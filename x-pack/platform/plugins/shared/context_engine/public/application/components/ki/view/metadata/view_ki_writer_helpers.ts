@@ -22,13 +22,6 @@ export interface KiReferenceDisplayRow {
   description: string;
 }
 
-export const getKiReferenceRelationLabel = (relation: KiReferenceRelation): string => relation;
-
-export const formatWriterMetadata = (metadata: Record<string, KiJsonValue>): string =>
-  Object.entries(metadata)
-    .map(([key, value]) => `${key}: ${formatKiJsonValueAsString(value)}`)
-    .join(', ');
-
 export interface ParsedWriterUri {
   scheme: string;
   identifier: string;

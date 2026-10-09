@@ -12,7 +12,7 @@ import {
   renderListKiWithProviders,
   SAMPLE_DISCOVER_URL,
   SAMPLE_INDEX_MANAGEMENT_URL,
-} from './list_ki_test_helpers';
+} from './test_helpers';
 import { ListKiPanel } from './list_ki_panel';
 
 const mockUseListKi = jest.fn();

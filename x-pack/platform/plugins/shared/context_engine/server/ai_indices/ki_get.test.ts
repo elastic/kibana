@@ -6,11 +6,31 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { getKi, kiIdQuery } from './ki_get';
+import { getKi, kiIdQuery, pickCurrentRevision } from './ki_get';
 import { KiNotFoundError } from './errors';
 
 const DEST_VALUE = 'ai-index-idx-sample*';
 const BACKING_INDEX = 'ai-index-idx-sample';
+
+describe('pickCurrentRevision', () => {
+  it('returns undefined when there are no hits', () => {
+    expect(pickCurrentRevision([])).toBeUndefined();
+  });
+
+  it('returns the only hit', () => {
+    const hit = { _id: 'rev-a', sort: [100] };
+    expect(pickCurrentRevision([hit])).toBe(hit);
+  });
+
+  it('picks the greatest _id among hits that share the newest timestamp', () => {
+    const hits = [
+      { _id: 'rev-a', sort: [100] },
+      { _id: 'rev-z', sort: [100] },
+      { _id: 'rev-m', sort: [50] },
+    ];
+    expect(pickCurrentRevision(hits)?._id).toBe('rev-z');
+  });
+});
 
 describe('kiIdQuery', () => {
   it('matches by _id only for documents without an id field', () => {
@@ -159,6 +179,57 @@ describe('ki_get', () => {
         governance: { lifecycle: { status: 'deleted' } },
       },
     });
+  });
+
+  it('throws KiNotFoundError when lifecycleStatuses is deleted only and status is unset', async () => {
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'ki-1',
+            _index: BACKING_INDEX,
+            _source: { type: 'playbook', title: 'Active by default' },
+          },
+        ],
+      },
+    });
+
+    await expect(
+      getKi(esClient, {
+        aiIndexId: 'sample',
+        dest: { type: 'index', value: DEST_VALUE },
+        index: BACKING_INDEX,
+        kiId: 'ki-1',
+        lifecycleStatuses: ['deleted'],
+      })
+    ).rejects.toThrow(new KiNotFoundError('sample', 'ki-1'));
+  });
+
+  it('throws KiNotFoundError when lifecycleStatuses is deleted only and status is active', async () => {
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'ki-1',
+            _index: BACKING_INDEX,
+            _source: {
+              type: 'playbook',
+              governance: { lifecycle: { status: 'active' } },
+            },
+          },
+        ],
+      },
+    });
+
+    await expect(
+      getKi(esClient, {
+        aiIndexId: 'sample',
+        dest: { type: 'index', value: DEST_VALUE },
+        index: BACKING_INDEX,
+        kiId: 'ki-1',
+        lifecycleStatuses: ['deleted'],
+      })
+    ).rejects.toThrow(new KiNotFoundError('sample', 'ki-1'));
   });
 
   it('throws KiNotFoundError when the current revision is deleted', async () => {

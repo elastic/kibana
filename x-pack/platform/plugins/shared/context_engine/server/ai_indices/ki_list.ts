@@ -22,6 +22,7 @@ const KI_LIST_FIELDS = [
   'updated_at',
   'type',
   'title',
+  'expires_at',
   KI_LIFECYCLE_STATUS_FIELD,
 ] as const;
 type KiListField = (typeof KI_LIST_FIELDS)[number];
@@ -45,8 +46,9 @@ const toOptionalString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.length > 0 ? value : undefined;
 
 const toKiListItem = (row: Record<string, unknown>): KiListItem => {
-  const { _index: index, id, type, title, updated_at: updatedAt } = row;
+  const { _index: index, id, type, title, updated_at: updatedAt, expires_at: expiresAt } = row;
   const updatedAtValue = toOptionalString(updatedAt);
+  const expiresAtValue = toOptionalString(expiresAt);
   const lifecycleStatus = toOptionalKiLifecycleStatus(row[KI_LIFECYCLE_STATUS_FIELD]);
   return {
     id: String(id),
@@ -54,6 +56,7 @@ const toKiListItem = (row: Record<string, unknown>): KiListItem => {
     ...(typeof type === 'string' ? { type } : {}),
     ...(typeof title === 'string' ? { title } : {}),
     ...(updatedAtValue !== undefined ? { updated_at: updatedAtValue } : {}),
+    ...(expiresAtValue !== undefined ? { expires_at: expiresAtValue } : {}),
     ...(lifecycleStatus !== undefined ? { lifecycle_status: lifecycleStatus } : {}),
   };
 };
@@ -139,6 +142,7 @@ const currentKisQuery = (
     ...(has('type') ? [] : ['EVAL type = TO_STRING(NULL)']),
     ...(has('title') ? [] : ['EVAL title = TO_STRING(NULL)']),
     ...(has('updated_at') ? [] : ['EVAL updated_at = TO_STRING(NULL)']),
+    ...(has('expires_at') ? [] : ['EVAL expires_at = TO_STRING(NULL)']),
   ].join('\n| ');
 };
 
@@ -174,6 +178,7 @@ export const getKis = async (
     'type',
     'title',
     'updated_at',
+    'expires_at',
     ...(has(KI_LIFECYCLE_STATUS_FIELD) ? [KI_LIFECYCLE_STATUS_FIELD] : []),
   ].join(', ');
 

@@ -7,7 +7,7 @@
 
 import { screen } from '@testing-library/react';
 import React from 'react';
-import { listKiTestAiIndex, renderListKiWithProviders } from './list_ki_test_helpers';
+import { listKiTestAiIndex, renderListKiWithProviders } from './test_helpers';
 import { ListKiPanel } from './list_ki_panel';
 
 const mockUseListKi = jest.fn();

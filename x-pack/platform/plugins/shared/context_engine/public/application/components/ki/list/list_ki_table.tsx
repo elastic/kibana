@@ -78,7 +78,9 @@ export const ListKiTable = ({ aiIndexId, kis }: ListKiTableProps) => {
         }),
         sortable: false,
         width: '10%',
-        render: (_, ki) => <KiLifecycleStatusBadge lifecycleStatus={ki.lifecycle_status} />,
+        render: (_, ki) => (
+          <KiLifecycleStatusBadge lifecycleStatus={ki.lifecycle_status} expiresAt={ki.expires_at} />
+        ),
       },
       {
         field: 'updated_at',

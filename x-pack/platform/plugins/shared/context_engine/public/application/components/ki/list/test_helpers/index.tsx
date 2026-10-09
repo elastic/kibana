@@ -15,7 +15,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render } from '@testing-library/react';
 import React from 'react';
-import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
+import type { GetAiIndexResponse } from '../../../../../../common/http_api/ai_indices';
 
 export const listKiTestAiIndex: GetAiIndexResponse = {
   id: 'sample-ki',

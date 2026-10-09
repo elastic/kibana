@@ -8,7 +8,7 @@
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import { getViewKiPath } from '../../../paths';
-import { listKiTestAiIndex, renderListKiWithProviders } from './list_ki_test_helpers';
+import { listKiTestAiIndex, renderListKiWithProviders } from './test_helpers';
 import { ListKiPanel } from './list_ki_panel';
 
 const mockUseListKi = jest.fn();
@@ -60,5 +60,26 @@ describe('ListKiTable', () => {
   it('renders row title', () => {
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
     expect(screen.getByTestId('contextKiRowTitle')).toHaveTextContent('Refund playbook');
+  });
+
+  it('renders an expired status badge when expires_at is in the past', () => {
+    mockUseListKi.mockReturnValue({
+      kis: [
+        {
+          id: 'ki-expired',
+          index: 'ai-index-idx-sample-ki',
+          title: 'Old memory',
+          expires_at: '2000-01-01T00:00:00.000Z',
+        },
+      ],
+      total: 1,
+      summary: { total: 1, countsByType: [] },
+      isLoading: false,
+      isFetching: false,
+      error: undefined,
+      refetch: jest.fn(),
+    });
+    renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
+    expect(screen.getByTestId('contextKiRowLifecycleStatus')).toHaveTextContent('expired');
   });
 });

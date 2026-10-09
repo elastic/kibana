@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { readKiDocumentLifecycleStatus } from '../../../../../../common/ki_lifecycle_status';
+import {
+  isKiJsonObject,
+  readKiDocumentLifecycleStatus,
+} from '../../../../../../common/ki_lifecycle_status';
 import type {
   KiJsonValue,
   KiDocument,
@@ -22,11 +25,6 @@ export interface KiGovernanceView {
   createdBy?: KiGovernanceWriter;
   updatedBy?: KiGovernanceWriter;
 }
-
-export const isKiJsonObject = (
-  value: KiJsonValue | undefined
-): value is { [key: string]: KiJsonValue } =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const parseWriter = (value: KiJsonValue | undefined): KiGovernanceWriter | undefined => {
   if (typeof value === 'string') {

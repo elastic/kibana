@@ -7,24 +7,26 @@
 
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
+import { KI_STATUS_BADGE_COLOR, resolveKiStatus } from '../../../../../common/ki_expiry';
 import type { KiLifecycleStatus } from '../../../../../common/step_types/ki';
-import { normalizeKiLifecycleStatus } from '../../../utils/ki_display';
 import { kiLabelCapitalizeCss } from './ki_type_display';
 
 interface KiLifecycleStatusBadgeProps {
   lifecycleStatus?: KiLifecycleStatus;
+  expiresAt?: string;
   'data-test-subj'?: string;
 }
 
 export const KiLifecycleStatusBadge = ({
   lifecycleStatus,
+  expiresAt,
   'data-test-subj': dataTestSubj = 'contextKiRowLifecycleStatus',
 }: KiLifecycleStatusBadgeProps) => {
-  const status = normalizeKiLifecycleStatus(lifecycleStatus);
+  const status = resolveKiStatus(lifecycleStatus, expiresAt);
 
   return (
     <EuiBadge
-      color={status === 'deleted' ? 'danger' : 'success'}
+      color={KI_STATUS_BADGE_COLOR[status]}
       data-test-subj={dataTestSubj}
       css={kiLabelCapitalizeCss}
     >

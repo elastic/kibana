@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import type { KiDocument } from './http_api/knowledge_indicators';
+import type { KiDocument, KiJsonValue } from './http_api/knowledge_indicators';
 import type { KiLifecycleStatus } from './step_types/ki';
 
 export const isKiJsonRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
+
+export const isKiJsonObject = (
+  value: KiJsonValue | undefined
+): value is { [key: string]: KiJsonValue } => isKiJsonRecord(value);
 
 export const toOptionalKiLifecycleStatus = (value: unknown): KiLifecycleStatus | undefined => {
   if (value === 'active' || value === 'deleted') {

@@ -163,10 +163,33 @@ describe('ViewKiPage', () => {
 
     renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
 
-    expect(screen.getByTestId('contextViewKiDeletedBadge')).toHaveTextContent('deleted');
+    expect(screen.getByTestId('contextViewKiStatusBadge')).toHaveTextContent('deleted');
   });
 
-  it('does not render deleted badge for active lifecycle', () => {
+  it('renders expired status badge when expires_at is in the past', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(Date.parse('2026-06-15T12:00:00.000Z'));
+
+    mockUseKi.mockReturnValue({
+      ki: {
+        ...defaultKi,
+        document: {
+          ...defaultKi.document,
+          expires_at: '2020-01-01T00:00:00.000Z',
+        },
+      },
+      isLoading: false,
+      error: undefined,
+    });
+
+    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
+
+    expect(screen.getByTestId('contextViewKiStatusBadge')).toHaveTextContent('expired');
+
+    jest.useRealTimers();
+  });
+
+  it('does not render status badge for active lifecycle', () => {
     mockUseKi.mockReturnValue({
       ki: {
         ...defaultKi,
@@ -181,6 +204,6 @@ describe('ViewKiPage', () => {
 
     renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
 
-    expect(screen.queryByTestId('contextViewKiDeletedBadge')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextViewKiStatusBadge')).not.toBeInTheDocument();
   });
 });

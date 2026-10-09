@@ -8,11 +8,7 @@
 import { DEFAULT_KI_PAGE_SIZE, MAX_KI_PAGE_SIZE } from '../../../../../common/constants';
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
-import {
-  listKiTestAiIndex,
-  renderListKiWithProviders,
-  SAMPLE_DISCOVER_URL,
-} from './list_ki_test_helpers';
+import { listKiTestAiIndex, renderListKiWithProviders, SAMPLE_DISCOVER_URL } from './test_helpers';
 import { ListKiPanel } from './list_ki_panel';
 
 const mockUseListKi = jest.fn();
