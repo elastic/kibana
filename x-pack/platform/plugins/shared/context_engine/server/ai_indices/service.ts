@@ -45,6 +45,10 @@ const toAiIndexDocument = (source: StoredAiIndexDocument, docId: string): AiInde
   space: source.space ?? DEFAULT_SPACE_ID,
 });
 
+const resolveMemoryEnabled = (
+  document: Pick<AiIndexDocument, 'managed' | 'memory_enabled'>
+): boolean => document.memory_enabled ?? !document.managed;
+
 const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
   id: document.id,
   ...(document.description !== undefined && { description: document.description }),
@@ -52,6 +56,7 @@ const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
     feedback_analysis: document.feedback_analysis,
   }),
   managed: document.managed ?? false,
+  memory_enabled: resolveMemoryEnabled(document),
   dest: document.dest,
   automations: document.automations,
   sources: document.sources,
@@ -199,7 +204,13 @@ export class AiIndexService {
     return this.writeDocument(
       aiIndexId,
       spaceId,
-      { ...properties, id: aiIndexId, space: spaceId, managed: true },
+      {
+        ...properties,
+        id: aiIndexId,
+        space: spaceId,
+        managed: true,
+        memory_enabled: properties.memory_enabled ?? false,
+      },
       existing,
       { docId: buildManagedAiIndexDocId(spaceId, aiIndexId) }
     );
@@ -215,6 +226,7 @@ export class AiIndexService {
     const now = new Date().toISOString();
     const fullDocument: AiIndexDocument = {
       ...document,
+      memory_enabled: document.memory_enabled ?? true,
       date_created: existing?.document.date_created ?? now,
       date_modified: now,
     };
@@ -280,7 +292,11 @@ export class AiIndexService {
     await this.writeDocument(
       aiIndexId,
       spaceId,
-      { ...existing.document, feedback_analysis: feedbackAnalysis },
+      {
+        ...existing.document,
+        memory_enabled: resolveMemoryEnabled(existing.document),
+        feedback_analysis: feedbackAnalysis,
+      },
       existing
     );
 

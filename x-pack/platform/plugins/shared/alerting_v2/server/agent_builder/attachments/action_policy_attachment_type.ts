@@ -38,7 +38,7 @@ const formatActionPolicyDescription = (
       ? `${workflowIds.length} workflow(s): ${workflowIds.join(', ')}`
       : 'none';
   const matcherSnippet = data.matcher ? formatMatcher(data.matcher) : 'match all (catch-all)';
-  const grouping = data.grouping_mode ?? 'per_episode';
+  const grouping = data.grouping_mode ?? 'per_alert';
   const throttle = data.throttle?.strategy ?? 'none';
 
   return `Action Policy "${data.name}" (actionPolicyAttachment.id: "${attachmentId}")

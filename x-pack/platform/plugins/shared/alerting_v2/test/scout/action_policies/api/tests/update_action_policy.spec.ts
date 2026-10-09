@@ -222,7 +222,7 @@ apiTest.describe('Update action policy API', { tag: testData.API_ENGINE_TAG }, (
           name: 'mode-update-policy',
           description: 'will update grouping mode',
           destinations: [{ type: 'workflow', id: 'wf-1' }],
-          grouping_mode: 'per_episode',
+          grouping_mode: 'per_alert',
           throttle: { strategy: 'on_status_change' },
         })
       );
@@ -253,7 +253,7 @@ apiTest.describe('Update action policy API', { tag: testData.API_ENGINE_TAG }, (
           name: 'strategy-transition-policy',
           description: 'transitions from per_status_interval to on_status_change',
           destinations: [{ type: 'workflow', id: 'wf-1' }],
-          grouping_mode: 'per_episode',
+          grouping_mode: 'per_alert',
           throttle: { strategy: 'per_status_interval', interval: '10m' },
         })
       );

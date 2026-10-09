@@ -69,6 +69,7 @@ export type {
 export {
   getToolResultId,
   createErrorResult,
+  createNonInteractiveDeclinedResult,
   createOtherResult,
   isToolResultId,
   isToolHandlerStandardReturn,
@@ -76,6 +77,7 @@ export {
 export type {
   AgentHandlerParams,
   AgentHandlerContext,
+  ExecutionConversationAccess,
   AgentHandlerReturn,
   AgentHandlerFn,
   RunAgentFn,
@@ -87,6 +89,8 @@ export type {
   AgentEventEmitterFn,
   RunAgentOnEventFn,
   ExperimentalFeatures,
+  DeploymentContext,
+  DeploymentEnvironment,
   SubAgentExecutor,
   SubAgentExecution,
   ConversationClient,

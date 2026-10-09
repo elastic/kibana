@@ -60,7 +60,7 @@ apiTest.describe('Create unack episode action API', { tag: testData.API_ENGINE_T
     expect(actions[0]).toMatchObject({
       action_type: 'unack',
       group_hash: groupHash,
-      episode_id: episodeId,
+      alert_id: episodeId,
       rule_id: ruleId,
       space_id: 'default',
     });
@@ -109,7 +109,7 @@ apiTest.describe('Create unack episode action API', { tag: testData.API_ENGINE_T
       expect(actions[0]).toMatchObject({
         action_type: 'unack',
         group_hash: groupHash,
-        episode_id: olderEpisodeId,
+        alert_id: olderEpisodeId,
       });
     }
   );

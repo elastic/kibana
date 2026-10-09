@@ -58,6 +58,7 @@ exit 0
     Path.resolve(fakeBin, 'gh'),
     `#!/usr/bin/env bash
 if [[ "\${1:-} \${2:-}" == "pr list" ]]; then
+  printf '%s\\n' "$*" > "\${TEST_ROOT}/pr-list-args"
   if [[ "\${TEST_EXISTING_PR}" == "true" ]]; then
     echo "\${TEST_PR_TITLE}"
   fi
@@ -103,6 +104,9 @@ printf '%s\\n' "$*" > "\${TEST_ROOT}/buildkite-agent-args"
     cleanup: () => fs.rmSync(root, { force: true, recursive: true }),
     output: `${result.stdout}${result.stderr}`,
     status: result.status,
+    prListArgs: fs.existsSync(Path.resolve(root, 'pr-list-args'))
+      ? fs.readFileSync(Path.resolve(root, 'pr-list-args'), 'utf8')
+      : undefined,
     prCreateArgs: fs.existsSync(Path.resolve(root, 'pr-create-args'))
       ? fs.readFileSync(Path.resolve(root, 'pr-create-args'), 'utf8')
       : undefined,
@@ -149,6 +153,10 @@ describe('WHEN Console definitions are synchronized', () => {
       expect(result.prCreateArgs).toBeUndefined();
       expect(result.autoMergeCalled).toBe(false);
       expect(result.buildkiteAgentArgs).toContain('slack:console_defs_existing_pr:body');
+      expect(result.prListArgs).toContain(
+        '(author:kibanamachine OR author:app/elastic-vault-github-plugin-prod)'
+      );
+      expect(result.prListArgs).not.toContain('--author');
     } finally {
       result.cleanup();
     }

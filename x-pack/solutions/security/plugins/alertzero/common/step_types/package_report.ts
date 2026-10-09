@@ -15,6 +15,20 @@ export const PACKAGE_REPORT_STEP_ID = 'hunt.packageReport' as const;
 /** AI index Detection Watch's coverage sweep polls. Must stay in lockstep with coverage_worker.yaml. */
 export const HUNT_COVERAGE_AI_INDEX_ID = 'security-investigations' as const;
 
+/**
+ * Upper bound on per-proposal bullets embedded in the run conclusion. The conclusion lands in a
+ * journal note whose `message` is capped at 8,000 characters (`journal_note.yaml`); uncapped,
+ * 50 hosts x 2 actions overflowed it and failed the note's input validation.
+ */
+export const MAX_SUMMARY_PROPOSAL_BULLETS = 20;
+
+/**
+ * Character budget for the bullets, as well as the count cap above: titles (256) and host names
+ * (schema allows far more than a DNS name) are variable-length, so a count alone does not bound
+ * the note. Sits well under the 8,000 limit to leave room for the rest of the conclusion.
+ */
+export const MAX_SUMMARY_BULLETS_CHARS = 5000;
+
 const boundedId = z.string().trim().min(1).max(256);
 
 export const packageReportInputSchema = z.object({
@@ -41,6 +55,30 @@ export const packageReportInputSchema = z.object({
     .boolean()
     .describe(
       "Whether the hunt cleared the confirmed-hit bar (the coordinator's top-level `has_confirmed_hit`: a required-or-baseline index hit from Tier 1, or a Tier 2 behavior that executed and hit). False covers both an environment that is clean and one where nothing was searchable."
+    ),
+  /**
+   * Number of SSE attachments the hunt child prepared for this run (`hunt.yaml`'s `sse_count`
+   * output). Compared against the current-run SSE attachments packaging actually finds: the
+   * hunt's `attach_sse` foreach swallows a per-item attach failure with `continue`, so without
+   * this count a shortfall is invisible and packaging would read a partial finding set as
+   * complete.
+   *
+   * Optional, not required: this workflow is a plain `yaml` definition, so its own content
+   * hash propagates to every space on the next reconciliation regardless of version, but the
+   * Worker that calls it (`hunt_continuous_threat_hunt.ts`) is a `yamlTemplate` definition,
+   * whose hash covers only the function source, not the imported YAML it renders -- an
+   * already-installed Worker only picks up the call site that supplies this field once its own
+   * `version` bumps. Making it required here would fail every such Worker's packaging call in
+   * the gap between the two. Omitting it instead skips the shortfall check below, which is the
+   * same as not having this fix yet -- never a hard failure.
+   */
+  expectedSseCount: z
+    .number()
+    .int()
+    .min(0)
+    .optional()
+    .describe(
+      'Number of significant security event attachments the hunt child prepared for this run (its `sse_count` output). A packaging read that finds fewer than this is a partial attach, reported as `run_incomplete` rather than packaged. Omit to skip the shortfall check (e.g. an already-installed Worker that does not supply it yet).'
     ),
 });
 
@@ -79,6 +117,16 @@ export const packageReportOutputSchema = z.discriminatedUnion('status', [
       skipped: z.array(coverageSkippedSchema),
     }),
     proposals: z.array(packageReportMintPayloadSchema),
+    /**
+     * Bounded markdown bullets, one per proposal up to `MAX_SUMMARY_PROPOSAL_BULLETS`, for the run
+     * conclusion's prose. `proposals` itself stays complete because it drives the gate fan-out; this
+     * is only what gets embedded in the journal note, whose `message` is capped at 8,000 characters.
+     */
+    proposalBullets: z
+      .array(z.string().max(MAX_SUMMARY_BULLETS_CHARS))
+      .max(MAX_SUMMARY_PROPOSAL_BULLETS),
+    /** Proposals past the bullet cap that the prose states as a count instead of listing. */
+    omittedProposalCount: z.number().int().min(0),
     dismiss: z.boolean(),
     closureSummary: z.string(),
     expectedProposalCount: z.number().int().min(0),
@@ -97,6 +145,21 @@ export const packageReportOutputSchema = z.discriminatedUnion('status', [
      * for real instead of suppressing wholesale.
      */
     mintSuppression: z.enum(['none', 'existing_proposals', 'check_failed']),
+    /**
+     * `none` unless this run was a clean one (no confirmed hit) whose dismissal was withheld
+     * because the Investigation still carries an open (`pending`/`executing`) Proposal from an
+     * earlier run: closing it as benign would strand a decision or an in-flight action.
+     * `open_proposal` means the lookup found one; `check_failed` means the lookup itself failed,
+     * so the dismissal fails closed without asserting a Proposal exists. Either way `dismiss` is
+     * `false` and the Investigation stays open. Narrower than `mintSuppression` on purpose: settled
+     * Proposals never hold a dismissal.
+     *
+     * Not airtight: a gate's Proposal is created asynchronously, after the packaging workflow has
+     * released its concurrency slot, so a clean run that lands in that create window sees no open
+     * Proposal and still dismisses. Same gap, and same Proposals-side fix, as `mintSuppression`
+     * (see `hunt_package_report.yaml`'s concurrency comment).
+     */
+    dismissHold: z.enum(['none', 'open_proposal', 'check_failed']),
   }),
   z.object({
     status: z.literal('run_incomplete'),
@@ -148,6 +211,7 @@ export const packageReportStepCommonDefinition: CommonStepDefinition<
     runId: "{{ inputs.runId }}"
     huntStatus: "{{ inputs.huntStatus }}"
     hasConfirmedHit: "\${{ inputs.hasConfirmedHit }}"
+    expectedSseCount: "\${{ inputs.expectedSseCount }}"
 \`\`\``,
     ],
   },

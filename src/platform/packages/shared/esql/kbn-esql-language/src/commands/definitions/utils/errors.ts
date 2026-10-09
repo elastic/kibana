@@ -485,13 +485,6 @@ Expected one of:
         }),
         type: 'error',
       };
-    case 'forkNotAllowedWithSubqueries':
-      return {
-        message: i18n.translate('kbn-esql-language.esql.validation.forkNotAllowedWithSubqueries', {
-          defaultMessage: '[FORK] Command is not allowed inside a subquery.',
-        }),
-        type: 'error',
-      };
     case 'invalidSettingValue':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.invalidSettingValue', {
@@ -553,10 +546,27 @@ Expected one of:
         }),
         type: 'error',
       };
-    case 'highlightMissingOnClause':
+    case 'highlightInvalidOnPattern':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.highlightMissingOnClause', {
-          defaultMessage: '[HIGHLIGHT] Missing ON clause. Specify the fields to highlight.',
+        message: i18n.translate('kbn-esql-language.esql.validation.highlightInvalidOnPattern', {
+          defaultMessage:
+            '[HIGHLIGHT] Invalid pattern [{pattern}] in ON, expected field names or [*]',
+          values: { pattern: out.pattern },
+        }),
+        type: 'error',
+      };
+    case 'highlightWildcardWithFields':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.highlightWildcardWithFields', {
+          defaultMessage: '[HIGHLIGHT] [*] cannot be combined with other fields in ON',
+        }),
+        type: 'error',
+      };
+    case 'highlightQueryFieldNotInOn':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.highlightQueryFieldNotInOn', {
+          defaultMessage: '[HIGHLIGHT] Query field [{field}] is not in the ON fields [{fields}]',
+          values: { field: out.field, fields: out.fields },
         }),
         type: 'error',
       };
@@ -910,9 +920,6 @@ export const errors = {
 
   forkTooManyBranches: (command: ESQLAstAllCommands): ESQLMessage =>
     errors.byId('forkTooManyBranches', command.location, {}),
-
-  forkNotAllowedWithSubqueries: (command: ESQLAstAllCommands): ESQLMessage =>
-    errors.byId('forkNotAllowedWithSubqueries', command.location, {}),
 };
 
 export const buildSignatureTypes = (sig: Signature) =>

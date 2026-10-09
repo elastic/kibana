@@ -64,11 +64,11 @@ apiTest.describe('Create unsnooze series action API', { tag: testData.API_ENGINE
       });
       expect(actions).toHaveLength(1);
       // Series actions target the series as a whole, so the persisted doc
-      // carries `episode_id: null` even though an episode exists.
+      // carries `alert_id: null` even though an episode exists.
       expect(actions[0]).toMatchObject({
         action_type: 'unsnooze',
         group_hash: groupHash,
-        episode_id: null,
+        alert_id: null,
         rule_id: ruleId,
         space_id: 'default',
       });

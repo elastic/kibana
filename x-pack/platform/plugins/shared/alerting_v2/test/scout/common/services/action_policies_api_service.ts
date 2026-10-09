@@ -14,17 +14,24 @@ import type {
   FindActionPoliciesResponse,
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
-import {
-  ALERTING_V2_ACTION_POLICY_API_PATH,
-  ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH,
-} from '@kbn/alerting-v2-constants';
+import { ALERTING_V2_ACTION_POLICY_API_PATH } from '@kbn/alerting-v2-constants';
 import { COMMON_HEADERS } from '../constants';
 
+export interface ActionPolicyApiSpaceOptions {
+  spaceId?: string;
+}
+
 export interface ActionPoliciesApiService {
-  create: (data: CreateActionPolicyDataInput) => Promise<ActionPolicyResponse>;
+  create: (
+    data: CreateActionPolicyDataInput,
+    options?: ActionPolicyApiSpaceOptions
+  ) => Promise<ActionPolicyResponse>;
   upsert: (id: string, data: CreateActionPolicyDataInput) => Promise<ActionPolicyResponse>;
   get: (id: string) => Promise<ActionPolicyResponse>;
-  list: (query?: Record<string, string | number | boolean>) => Promise<FindActionPoliciesResponse>;
+  list: (
+    query?: Record<string, string | number | boolean>,
+    options?: ActionPolicyApiSpaceOptions
+  ) => Promise<FindActionPoliciesResponse>;
   patch: (id: string, data: UpdateActionPolicyData) => Promise<ActionPolicyResponse>;
   enable: (id: string) => Promise<ActionPolicyResponse>;
   disable: (id: string) => Promise<ActionPolicyResponse>;
@@ -32,13 +39,16 @@ export interface ActionPoliciesApiService {
   unsnooze: (id: string) => Promise<void>;
   delete: (id: string) => Promise<void>;
   bulkDelete: (ids: string[]) => Promise<BulkResponse>;
-  cleanUp: () => Promise<void>;
+  cleanUp: (options?: ActionPolicyApiSpaceOptions) => Promise<void>;
 }
 
 /** Resolves the headers that authenticate action policy requests. */
 export type AuthHeadersProvider = () => Promise<Record<string, string>>;
 
 const noAuthHeaders: AuthHeadersProvider = async () => ({});
+
+const withSpace = (path: string, spaceId: string | undefined): string =>
+  spaceId ? `/s/${encodeURIComponent(spaceId)}${path}` : path;
 
 export const getActionPoliciesApiService = ({
   log,
@@ -68,21 +78,25 @@ export const getActionPoliciesApiService = ({
       return response.data;
     });
 
-  const list: ActionPoliciesApiService['list'] = (query = {}) =>
+  const list: ActionPoliciesApiService['list'] = (query = {}, options) =>
     measurePerformanceAsync(log, 'actionPolicies.list', async () => {
       const response = await request<FindActionPoliciesResponse>({
         method: 'GET',
-        path: ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH,
+        path: withSpace(ALERTING_V2_ACTION_POLICY_API_PATH, options?.spaceId),
         query,
       });
       return response.data;
     });
 
-  const postBulk = (operation: string, body: Record<string, unknown>) =>
+  const postBulk = (
+    operation: string,
+    body: Record<string, unknown>,
+    options?: ActionPolicyApiSpaceOptions
+  ) =>
     measurePerformanceAsync(log, `actionPolicies.${operation}`, async () => {
       const response = await request<BulkResponse>({
         method: 'POST',
-        path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/_${operation}`,
+        path: withSpace(`${ALERTING_V2_ACTION_POLICY_API_PATH}/_${operation}`, options?.spaceId),
         headers: COMMON_HEADERS,
         body,
       });
@@ -101,11 +115,11 @@ export const getActionPoliciesApiService = ({
     });
 
   return {
-    create: (data) =>
+    create: (data, options) =>
       measurePerformanceAsync(log, 'actionPolicies.create', async () => {
         const response = await request<ActionPolicyResponse>({
           method: 'POST',
-          path: ALERTING_V2_ACTION_POLICY_API_PATH,
+          path: withSpace(ALERTING_V2_ACTION_POLICY_API_PATH, options?.spaceId),
           headers: COMMON_HEADERS,
           body: data,
         });
@@ -183,12 +197,12 @@ export const getActionPoliciesApiService = ({
 
     bulkDelete: (ids) => postBulk('bulk_delete', { ids }),
 
-    cleanUp: () =>
+    cleanUp: (options) =>
       measurePerformanceAsync(log, 'actionPolicies.cleanUp', async () => {
-        const { items } = await list({ per_page: 100 });
+        const { items } = await list({ per_page: 100 }, options);
         if (items.length === 0) return;
 
-        await postBulk('bulk_delete', { ids: items.map((item) => item.id) });
+        await postBulk('bulk_delete', { ids: items.map((item) => item.id) }, options);
       }),
   };
 };

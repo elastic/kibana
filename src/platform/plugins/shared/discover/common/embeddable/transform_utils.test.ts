@@ -20,16 +20,14 @@ import {
   fromStoredSearchEmbeddable,
   fromStoredSearchEmbeddableByRef,
   fromStoredSearchEmbeddableByValue,
+  fromStoredTableSettings,
   toStoredSearchEmbeddable,
   toStoredSearchEmbeddableByRef,
   toStoredSearchEmbeddableByValue,
   toStoredTab,
 } from './transform_utils';
 import { toByValuePanelState } from './transform_utils.fixtures';
-import {
-  fromStoredTableSettings,
-  toStoredTableSettings,
-} from '../session/search_and_table_mapping';
+import { toStoredTableSettings } from '../session/search_and_table_mapping';
 import type {
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableByValueState,
@@ -692,6 +690,13 @@ describe('search embeddable transform utils', () => {
   });
 
   describe('fromStoredTableSettings', () => {
+    it.each([1, 9])('raises sample size %s to the API minimum of 10', (sampleSize) => {
+      const storedState = { sampleSize };
+
+      expect(fromStoredTableSettings(storedState)).toEqual({ sample_size: 10 });
+      expect(storedState.sampleSize).toBe(sampleSize);
+    });
+
     it('converts stored state with all fields to panel overrides', () => {
       const storedState: StoredSearchEmbeddableState = {
         sort: [['@timestamp', 'desc']],

@@ -56,7 +56,11 @@ describe('updateConversationMetadataStepDefinition', () => {
       })
     );
 
-    expect(patchMetadata).toHaveBeenCalledWith('conv-1', { status: 'resolved', severity: 'low' });
+    expect(patchMetadata).toHaveBeenCalledWith(
+      'conv-1',
+      { status: 'resolved', severity: 'low' },
+      { access: 'owner', source: 'workflow' }
+    );
     expect(result).toEqual({
       output: {
         conversation_id: 'conv-1',

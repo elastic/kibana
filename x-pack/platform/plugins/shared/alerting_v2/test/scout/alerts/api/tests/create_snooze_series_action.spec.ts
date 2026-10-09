@@ -61,12 +61,12 @@ apiTest.describe('Create snooze series action API', { tag: testData.API_ENGINE_T
       });
       expect(actions).toHaveLength(1);
       // Series actions target the series as a whole, so the persisted doc
-      // carries `episode_id: null` even though an episode exists. The
+      // carries `alert_id: null` even though an episode exists. The
       // `.alert-actions` mapping keeps the legacy `expiry` field name.
       expect(actions[0]).toMatchObject({
         action_type: 'snooze',
         group_hash: groupHash,
-        episode_id: null,
+        alert_id: null,
         rule_id: ruleId,
         space_id: 'default',
         expiry: snoozedUntil,
@@ -99,7 +99,7 @@ apiTest.describe('Create snooze series action API', { tag: testData.API_ENGINE_T
       expect(actions[0]).toMatchObject({
         action_type: 'snooze',
         group_hash: groupHash,
-        episode_id: null,
+        alert_id: null,
         rule_id: ruleId,
       });
       expect(actions[0].expiry).toBeUndefined();

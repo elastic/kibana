@@ -15,14 +15,18 @@ The plugin proxies create/read/delete operations through Kibana's server to the 
 
 When running on Elastic Cloud, data sources can authenticate using the workload identity issuer instead of static credentials. The creation flyout shows the JWT issuer URL and deployment/project ID that the user needs to configure the trust policy on the CSP side (AWS IAM, GCP workload identity, Azure federated credentials).
 
-The issuer URL is injected by the kibana-controller via `xpack.dataFederation.workloadIdentityIssuerUrl`. If that config key is absent the read-only fields are hidden — no derived URL is shown.
+The issuer URL is injected by the kibana-controller via `xpack.dataFederation.workloadIdentityIssuerUrl`. If that config key is absent, the federated identity auth option is hidden and the read-only fields are not shown.
+
+## Advanced setting
+
+`dataFederation:enabled` (registered by this plugin, disabled by default) controls whether the management app is enabled in the browser. The app also requires the `manageFederatedData` capability and, in stateful, an Enterprise license. It only affects the UI: data sources and datasets keep working through the API and in ES|QL queries. It is the user-facing switch, as opposed to `xpack.dataFederation.enabled`, which is a deploy-time kill switch resolved by core: when it is `false` the plugin is not loaded at all, so neither the routes nor the advanced setting exist.
 
 ## Feature flags
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `xpack.dataFederation.enabled` | `true` | Enables data federation management app |
-| `xpack.dataFederation.enableFederatedIdentityAuth` | `false` | Enable federated identity auth option |
+| `xpack.dataFederation.enabled` | `true` | Loads the plugin. The management UI is hidden until the `dataFederation:enabled` advanced setting is turned on |
+| `xpack.dataFederation.enableFederatedIdentityAuth` | `false` | No effect; federated identity auth is controlled by `xpack.dataFederation.workloadIdentityIssuerUrl` |
 | `xpack.dataFederation.enableGoogleCloudStorageDataSourceType` | `false` | Show GCS as a data source type |
 | `xpack.dataFederation.enableAzureDataSourceType` | `false` | Show Azure Blob as a data source type |
 

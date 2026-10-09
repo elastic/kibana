@@ -23,12 +23,25 @@ apiTest.describe('Match action policies API', { tag: testData.API_ENGINE_TAG }, 
   });
 
   apiTest(
+    'validation: rejects rule.tags (policies match on routing tags)',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(MATCH_ACTION_POLICIES_URL, {
+        headers: readerHeaders,
+        body: { rule: { tags: ['prod'] } },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
+
+  apiTest(
     'validation: rejects body with unknown top-level keys (strict schema)',
     async ({ apiClient }) => {
       const response = await apiClient.post(MATCH_ACTION_POLICIES_URL, {
         headers: readerHeaders,
         body: {
-          rule: { tags: ['prod'] },
+          rule: { routing_tags: ['prod'] },
           unknownField: 'x',
         },
       });

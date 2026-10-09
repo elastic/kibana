@@ -88,6 +88,7 @@ export class ContextEnginePlugin
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       title: APP_TITLE,
       euiIconType: 'logoElasticsearch',
+      order: 2061,
       visibleIn: [...VISIBLE_LOCATIONS],
       // Inaccessible by default: the app and its routes are gated until the advanced
       // setting is on. While inaccessible, core also removes it from every navigation

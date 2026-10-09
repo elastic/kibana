@@ -245,7 +245,6 @@ export function getDataStateContainer({
     getCurrentTab,
     injectCurrentTab,
     dataSourceService: services.dataSourceService,
-    dataViews: services.dataViews,
   });
 
   // The main subscription to handle state changes
@@ -311,17 +310,12 @@ export function getDataStateContainer({
             scopedEbtManager$,
             currentDataView$,
             currentDataSource$,
+            cascadedLeafDataSource$,
           } = selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
           const scopedEbtManager = scopedEbtManager$.getValue();
           const existingSource = currentDataSource$.getValue();
-          const dataView = currentDataView$.getValue();
-          const lookedUp = dataView ? services.dataSourceService.fromDataView(dataView) : undefined;
-          const source = lookedUp ?? existingSource;
-          if (source && source.kind !== existingSource?.kind) {
-            currentDataSource$.next(source);
-          }
-          const esqlSource = source?.kind === 'esql' ? source : undefined;
+          const esqlSource = existingSource?.kind === 'esql' ? existingSource : undefined;
 
           let searchSessionId: string;
           let isSearchSessionRestored: boolean;
@@ -390,11 +384,11 @@ export function getDataStateContainer({
             injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
               cascadedDocumentsState: {
                 ...getCurrentTab().cascadedDocumentsState,
-                columnsMeta: {},
                 cascadedDocumentsMap: {},
               },
             })
           );
+          cascadedLeafDataSource$.next(undefined);
 
           const { didProfileChange, isFirstResolution } =
             await scopedProfilesManager.resolveDataSourceProfile(
@@ -597,7 +591,10 @@ export function getDataStateContainer({
             );
           }
 
-          fetchAllTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
+          fetchAllTracker.reportEvent({
+            requestAdapter: inspectorAdapters.requests,
+            approximation: dataSubjects.documents$.getValue().approximationApplied,
+          });
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
           // replacing this current one, call it to make sure we tell that the auto refresh is done

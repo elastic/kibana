@@ -68,7 +68,7 @@ apiTest.describe('Create deactivate episode action API', { tag: testData.API_ENG
       expect(actions[0]).toMatchObject({
         action_type: 'deactivate',
         group_hash: groupHash,
-        episode_id: episodeId,
+        alert_id: episodeId,
         rule_id: ruleId,
         space_id: 'default',
         reason,

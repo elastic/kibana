@@ -502,7 +502,13 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       });
 
       expect(breachEvents).toHaveLength(2);
-      expect(breachEvents[0].group_hash).not.toBe(breachEvents[1].group_hash);
+      // An ungrouped rule is a single series: every returned row is a rule
+      // event sharing one group_hash and one episode (alert.id), while each
+      // event still carries its own row data.
+      expect(breachEvents[0].group_hash).toBe(breachEvents[1].group_hash);
+
+      const episodeIds = new Set(breachEvents.map((event) => event.alert?.id).filter(Boolean));
+      expect(episodeIds.size).toBe(1);
 
       const eventsByHost = groupEventsByHost(breachEvents);
       expect(eventsByHost['host-grouping-fallback-a'].data).toMatchObject({
