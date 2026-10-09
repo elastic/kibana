@@ -22,7 +22,7 @@ const mockFetch = fetchMonitorAgentAssignments as jest.MockedFunction<
 const assignment = (agentId: string): MonitorLocationAssignment => ({
   locationId: 'loc-1',
   locationLabel: 'Location 1',
-  isAgentSharding: true,
+  isShardingActive: true,
   agentPolicyId: 'policy-1',
   agentPolicyName: 'Policy One',
   agents: [{ agentId, host: agentId, healthy: true, agentVersion: '9.6.0', enrolled: true }],

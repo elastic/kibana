@@ -8,38 +8,44 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import {
+import type {
   useMaintenanceStatus,
   useSignificantEventsMaintenanceActions,
 } from '../hooks/use_significant_events_maintenance';
 import { MaintenanceSection } from './maintenance_section';
 
-jest.mock('../hooks/use_significant_events_maintenance');
-
-const mockUseMaintenanceStatus = useMaintenanceStatus as jest.MockedFunction<
-  typeof useMaintenanceStatus
->;
-const mockUseMaintenanceActions = useSignificantEventsMaintenanceActions as jest.MockedFunction<
-  typeof useSignificantEventsMaintenanceActions
->;
 const pause = jest.fn();
 const resume = jest.fn();
+const refetch = jest.fn();
+let mockMaintenanceStatus: Pick<
+  ReturnType<typeof useMaintenanceStatus>,
+  'data' | 'isLoading' | 'isError' | 'refetch'
+>;
+let mockMaintenanceActions: Pick<
+  ReturnType<typeof useSignificantEventsMaintenanceActions>,
+  'pause' | 'resume' | 'isPausing' | 'isResuming'
+>;
+
+jest.mock('../hooks/use_significant_events_maintenance', () => ({
+  useMaintenanceStatus: () => mockMaintenanceStatus,
+  useSignificantEventsMaintenanceActions: () => mockMaintenanceActions,
+}));
 
 describe('MaintenanceSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseMaintenanceStatus.mockReturnValue({
+    mockMaintenanceStatus = {
       data: { state: 'enabled' },
       isLoading: false,
       isError: false,
-      refetch: jest.fn(),
-    } as never);
-    mockUseMaintenanceActions.mockReturnValue({
+      refetch,
+    };
+    mockMaintenanceActions = {
       pause,
       resume,
       isPausing: false,
       isResuming: false,
-    });
+    };
   });
 
   it('confirms pausing the detection engine with a warning action', () => {
@@ -64,12 +70,14 @@ describe('MaintenanceSection', () => {
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
   });
 
-  it('shows the pause result as a compact summary below the resume action', () => {
-    mockUseMaintenanceStatus.mockReturnValue({
+  it('shows disabled activity counts below the resume action while paused', () => {
+    mockMaintenanceStatus = {
       data: {
         state: 'paused',
         updatedBy: 'elastic',
         lastSummary: {
+          state: 'paused',
+          executionsCancelled: 0,
           workflowsDisabled: 12,
           rulesDisabled: 28,
           partialFailures: [],
@@ -77,8 +85,8 @@ describe('MaintenanceSection', () => {
       },
       isLoading: false,
       isError: false,
-      refetch: jest.fn(),
-    } as never);
+      refetch,
+    };
 
     render(
       <I18nProvider>
@@ -87,15 +95,42 @@ describe('MaintenanceSection', () => {
     );
 
     const resumeButton = screen.getByTestId('streams-settings-maintenance-toggle-button');
-    const summary = screen.getByTestId('streams-settings-maintenance-paused-status');
+    const automationsCount = screen.getByTestId(
+      'streams-settings-maintenance-automations-disabled'
+    );
+    const rulesCount = screen.getByTestId('streams-settings-maintenance-rules-disabled');
     expect(resumeButton).toHaveTextContent('Resume detection engine');
-    expect(resumeButton.compareDocumentPosition(summary)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(summary).toHaveTextContent('Detection engine is paused');
-    expect(summary).toHaveTextContent('Paused by elastic.');
-    expect(summary).toHaveTextContent('12 automations paused');
-    expect(summary).toHaveTextContent('28 rules paused');
+    expect(automationsCount).toHaveTextContent('12 automations disabled');
+    expect(rulesCount).toHaveTextContent('28 rules disabled');
+    expect(automationsCount.querySelector('[data-euiicon-type="check"]')).toBeInTheDocument();
+    expect(rulesCount.querySelector('[data-euiicon-type="check"]')).toBeInTheDocument();
+  });
+
+  it('does not show activity counts while enabled', () => {
+    mockMaintenanceStatus = {
+      data: {
+        state: 'enabled',
+        lastSummary: {
+          state: 'paused',
+          executionsCancelled: 0,
+          workflowsDisabled: 12,
+          rulesDisabled: 28,
+          partialFailures: [],
+        },
+      },
+      isLoading: false,
+      isError: false,
+      refetch,
+    };
+
+    render(
+      <I18nProvider>
+        <MaintenanceSection canManage />
+      </I18nProvider>
+    );
+
     expect(
-      screen.queryByTestId('streams-settings-maintenance-partial-failures')
+      screen.queryByTestId('streams-settings-maintenance-activity-counts')
     ).not.toBeInTheDocument();
   });
 });
