@@ -7,7 +7,7 @@
 
 import { OutputInvalidError } from '../../errors';
 
-import { ensureSecretStorageForOAuth2Secrets, validateKafkaOAuth2 } from './validators';
+import { validateKafkaOAuth2 } from './validators';
 
 const kafkaOutput = (fields: Record<string, unknown>) =>
   ({
@@ -122,35 +122,6 @@ describe('validateKafkaOAuth2', () => {
           oauth2: { ...jwtOauth2, client_certificate_key_file: '/etc/key.pem' },
         })
       )
-    ).not.toThrow();
-  });
-});
-
-describe('ensureSecretStorageForOAuth2Secrets', () => {
-  it('throws when the output has an OAuth2 secret', () => {
-    expect(() =>
-      ensureSecretStorageForOAuth2Secrets(
-        kafkaOutput({ secrets: { oauth2: { client_secret: 'secret' } } })
-      )
-    ).toThrow(OutputInvalidError);
-    expect(() =>
-      ensureSecretStorageForOAuth2Secrets(
-        kafkaOutput({ secrets: { oauth2: { client_certificate_key: 'key' } } })
-      )
-    ).toThrow(OutputInvalidError);
-  });
-
-  it('accepts an output without OAuth2 secrets', () => {
-    expect(() =>
-      ensureSecretStorageForOAuth2Secrets(kafkaOutput({ secrets: { password: 'pass' } }))
-    ).not.toThrow();
-    expect(() => ensureSecretStorageForOAuth2Secrets(kafkaOutput({}))).not.toThrow();
-    expect(() =>
-      ensureSecretStorageForOAuth2Secrets({
-        name: 'es',
-        type: 'elasticsearch',
-        secrets: { oauth2: { client_secret: 'secret' } },
-      } as any)
     ).not.toThrow();
   });
 });

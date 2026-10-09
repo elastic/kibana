@@ -19,6 +19,7 @@ import {
   validateKafkaOAuth2ClientId,
   validateKafkaOAuth2ClientSecretSecret,
   validateKafkaOAuth2EndpointParams,
+  validateKafkaOAuth2Seconds,
   validateKafkaOAuth2TokenUrl,
   validateKibanaURL,
   validateKibanaAPIKey,
@@ -540,6 +541,23 @@ describe('Output form validation', () => {
           ]);
         }
       );
+    });
+
+    describe('validateKafkaOAuth2Seconds', () => {
+      it('should accept no value or a number of seconds, decimals included', () => {
+        expect(validateKafkaOAuth2Seconds('')).toBeUndefined();
+        expect(validateKafkaOAuth2Seconds('  ')).toBeUndefined();
+        expect(validateKafkaOAuth2Seconds('0')).toBeUndefined();
+        expect(validateKafkaOAuth2Seconds('30')).toBeUndefined();
+        expect(validateKafkaOAuth2Seconds('1.5')).toBeUndefined();
+        expect(validateKafkaOAuth2Seconds('86400')).toBeUndefined();
+      });
+
+      it.each(['-1', '86401', 'abc', '10s', 'Infinity'])('should reject %s', (value) => {
+        expect(validateKafkaOAuth2Seconds(value)).toEqual([
+          'Specify a number of seconds between 0 and 86400',
+        ]);
+      });
     });
 
     describe('validateKafkaOAuth2TokenUrl', () => {

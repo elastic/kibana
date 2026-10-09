@@ -118,7 +118,6 @@ import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpe
 import {
   validateOutputSslPaths,
   ensureNoDuplicateSecrets,
-  ensureSecretStorageForOAuth2Secrets,
   validateKafkaOAuth2,
   validateOutputServerless,
 } from './outputs/validators';
@@ -909,7 +908,6 @@ class OutputService {
       }
 
       if (output.type === outputType.Kafka && data.type === outputType.Kafka) {
-        ensureSecretStorageForOAuth2Secrets(output);
         if (!output.password && output.secrets?.password) {
           data.password = output.secrets?.password as string;
         }
@@ -1611,7 +1609,6 @@ class OutputService {
         }
       }
       if (updateData.type === outputType.Kafka && typedFullUpdateData.type === outputType.Kafka) {
-        ensureSecretStorageForOAuth2Secrets(typedFullUpdateData);
         if (!typedFullUpdateData.password && typedFullUpdateData.secrets?.password) {
           updateData.password = typedFullUpdateData.secrets.password as string;
         }

@@ -11,6 +11,9 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { validateSslPathInput, validateSslPathsCombo } from '../ssl_form_validators';
 export { validateSslPathInput, validateSslPathsCombo };
 
+// 1 day, as in the API
+const MAX_OAUTH2_DURATION_SECONDS = 86400;
+
 const toSecretValidator =
   (validator: (value: string) => string[] | undefined) =>
   (value: string | { id: string } | undefined) => {
@@ -335,6 +338,23 @@ export function validateKafkaOAuth2ClientCertificateKey(value: string) {
 export const validateKafkaOAuth2ClientCertificateKeySecret = toSecretValidator(
   validateKafkaOAuth2ClientCertificateKey
 );
+
+/** A duration in seconds: optional, and a number that is not negative. */
+export function validateKafkaOAuth2Seconds(value: string) {
+  if (!value || value.trim() === '') {
+    return;
+  }
+
+  const seconds = Number(value);
+  if (!Number.isFinite(seconds) || seconds < 0 || seconds > MAX_OAUTH2_DURATION_SECONDS) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2SecondsInvalid', {
+        defaultMessage: 'Specify a number of seconds between 0 and {max}',
+        values: { max: MAX_OAUTH2_DURATION_SECONDS },
+      }),
+    ];
+  }
+}
 
 export function validateKafkaOAuth2Claims(value: string) {
   if (!value || value.trim() === '') {

@@ -103,6 +103,14 @@ export function usesKafkaOAuth2(output: {
   );
 }
 
+const isNumber = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value);
+
+/**
+ * The agent reads a duration as a number of nanoseconds: it does not convert a text such as `10s`.
+ */
+const secondsToNanoseconds = (seconds: number) => Math.round(seconds * 1e9);
+
 /** Removes the unset (null, undefined, empty) settings, so they are not sent to the agent. */
 const pruneEmpty = (value: unknown): unknown => {
   if (Array.isArray(value)) {
@@ -129,10 +137,21 @@ export function buildKafkaAuthData(
   const { username, password, sasl, oauth2 } = output;
 
   if (output.auth_type === kafkaAuthType.OAuth2) {
+    const { timeout, expiry_buffer: expiryBuffer, ...otherSettings } = oauth2 ?? {};
+
     // the settings follow the `oauth2clientauthextension` of the collector, as the agent expects
     return {
       sasl: { mechanism: KAFKA_OAUTHBEARER_SASL_MECHANISM },
-      auth: { oauth2client: pruneEmpty(oauth2) ?? {} },
+      auth: {
+        oauth2client:
+          pruneEmpty({
+            ...otherSettings,
+            ...(isNumber(timeout) ? { timeout: secondsToNanoseconds(timeout) } : {}),
+            ...(isNumber(expiryBuffer)
+              ? { expiry_buffer: secondsToNanoseconds(expiryBuffer) }
+              : {}),
+          }) ?? {},
+      },
     };
   }
 

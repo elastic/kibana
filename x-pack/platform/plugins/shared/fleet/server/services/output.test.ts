@@ -1545,16 +1545,6 @@ describe('Output Service', () => {
         );
       });
 
-      it('should require the secrets storage, there is no plain text setting for the secrets', async () => {
-        const soClient = getMockedSoClient({ defaultOutputId: 'output-test' });
-        mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
-
-        await expect(
-          outputService.create(soClient, esClientMock, oauth2Output(), { id: 'output-1' })
-        ).rejects.toThrow('can only be stored as secrets');
-        expect(soClient.create).not.toHaveBeenCalled();
-      });
-
       it('should require the settings the OAuth2 authentication needs', async () => {
         const soClient = getMockedSoClient({ defaultOutputId: 'output-test' });
 
@@ -3062,21 +3052,6 @@ describe('Output Service', () => {
           expect.anything(),
           expect.objectContaining({ oauth2: null })
         );
-      });
-
-      it('should require the secrets storage, there is no plain text setting for the secrets', async () => {
-        const soClient = getMockedSoClient({});
-        mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
-
-        await expect(
-          outputService.update(
-            soClient,
-            esClientMock,
-            'existing-kafka-output',
-            oauth2Update({ secrets: { oauth2: { client_secret: 'my-secret' } } })
-          )
-        ).rejects.toThrow('can only be stored as secrets');
-        expect(soClient.update).not.toHaveBeenCalled();
       });
     });
 

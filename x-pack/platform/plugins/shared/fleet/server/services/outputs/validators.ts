@@ -61,23 +61,6 @@ export const validateKafkaOAuth2 = (output: UpdateTypedOutput | NewOutput): void
   }
 };
 
-/**
- * The secrets of the OAuth2 authentication method have no plain text setting to fall back to, so
- * they can only be stored with the output secrets storage.
- */
-export const ensureSecretStorageForOAuth2Secrets = (
-  output: UpdateTypedOutput | NewOutput
-): void => {
-  if (
-    output.type === outputType.Kafka &&
-    (output.secrets?.oauth2?.client_secret || output.secrets?.oauth2?.client_certificate_key)
-  ) {
-    throw new OutputInvalidError(
-      'The OAuth2 client secret and client certificate key can only be stored as secrets, and the output secrets storage is not enabled yet: it needs all Fleet Servers to be on a version that supports it'
-    );
-  }
-};
-
 export const ensureNoDuplicateSecrets = (output: UpdateTypedOutput | NewOutput): void => {
   if (output.type === outputType.Kafka && output?.password && output?.secrets?.password) {
     throw new OutputInvalidError('Cannot specify both password and secrets.password');

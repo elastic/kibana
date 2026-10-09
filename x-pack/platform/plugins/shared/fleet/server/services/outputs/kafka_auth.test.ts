@@ -299,6 +299,42 @@ describe('buildKafkaAuthData with OAuth2', () => {
     });
   });
 
+  it('gives the durations to the agent in nanoseconds, it does not convert a text such as 10s', () => {
+    expect(
+      buildKafkaAuthData({
+        auth_type: kafkaAuthType.OAuth2,
+        oauth2: {
+          client_id: 'my-client',
+          token_url: 'https://idp.example.com/oauth2/token',
+          timeout: 10,
+          expiry_buffer: 90.5,
+        },
+      }).auth
+    ).toEqual({
+      oauth2client: {
+        client_id: 'my-client',
+        token_url: 'https://idp.example.com/oauth2/token',
+        timeout: 10_000_000_000,
+        expiry_buffer: 90_500_000_000,
+      },
+    });
+  });
+
+  it('keeps a duration of 0, and leaves out the durations that are not set', () => {
+    const emitted = (oauth2: Record<string, unknown>) =>
+      (buildKafkaAuthData({ auth_type: kafkaAuthType.OAuth2, oauth2 } as any).auth as any)
+        .oauth2client;
+
+    expect(emitted({ token_url: 'https://idp', timeout: 0, expiry_buffer: 0 })).toEqual({
+      token_url: 'https://idp',
+      timeout: 0,
+      expiry_buffer: 0,
+    });
+    expect(emitted({ token_url: 'https://idp', timeout: null, expiry_buffer: undefined })).toEqual({
+      token_url: 'https://idp',
+    });
+  });
+
   it('does not emit the oauth2client settings for another auth type', () => {
     expect(
       buildKafkaAuthData({

@@ -28,6 +28,7 @@ import {
   validateKafkaOAuth2ClientId,
   validateKafkaOAuth2ClientSecretSecret,
   validateKafkaOAuth2EndpointParams,
+  validateKafkaOAuth2Seconds,
   validateKafkaOAuth2TokenUrl,
 } from './output_form_validators';
 
@@ -42,6 +43,8 @@ const EDITED_OAUTH2_SETTINGS = [
   'token_url',
   'scopes',
   'endpoint_params',
+  'timeout',
+  'expiry_buffer',
   'tls',
   'client_certificate_key_id',
   'client_certificate_key_file',
@@ -130,6 +133,18 @@ export function useKafkaOAuth2Inputs(
     disabled
   );
 
+  // in seconds
+  const kafkaOAuth2TimeoutInput = useInput(
+    config?.timeout === undefined ? undefined : `${config.timeout}`,
+    isSelected ? validateKafkaOAuth2Seconds : undefined,
+    disabled
+  );
+  const kafkaOAuth2ExpiryBufferInput = useInput(
+    config?.expiry_buffer === undefined ? undefined : `${config.expiry_buffer}`,
+    isSelected ? validateKafkaOAuth2Seconds : undefined,
+    disabled
+  );
+
   // jwt-bearer grant only
   const kafkaOAuth2ClientCertificateKeyIdInput = useInput(
     config?.client_certificate_key_id,
@@ -180,6 +195,8 @@ export function useKafkaOAuth2Inputs(
     kafkaOAuth2TokenUrlInput,
     kafkaOAuth2ScopesInput,
     kafkaOAuth2EndpointParamsInput,
+    kafkaOAuth2TimeoutInput,
+    kafkaOAuth2ExpiryBufferInput,
     kafkaOAuth2TlsCaFileInput,
     kafkaOAuth2TlsCertFileInput,
     kafkaOAuth2TlsKeyFileInput,
@@ -203,6 +220,8 @@ export const validateKafkaOAuth2Inputs = (inputs: KafkaOAuth2Inputs): boolean =>
     inputs.kafkaOAuth2ClientCertificateKeyInput.validate(),
     inputs.kafkaOAuth2TokenUrlInput.validate(),
     inputs.kafkaOAuth2EndpointParamsInput.validate(),
+    inputs.kafkaOAuth2TimeoutInput.validate(),
+    inputs.kafkaOAuth2ExpiryBufferInput.validate(),
     inputs.kafkaOAuth2ClaimsInput.validate(),
   ].every(Boolean);
 
@@ -250,6 +269,12 @@ export function buildKafkaOAuth2Config(
     insecure_skip_verify: inputs.kafkaOAuth2TlsInsecureSkipVerifyInput.value ? true : undefined,
   });
 
+  // in seconds: an empty input leaves the setting out
+  const seconds = (input: { value?: string }) => {
+    const value = text(input);
+    return value === undefined ? undefined : Number(value);
+  };
+
   const claimsText = text(inputs.kafkaOAuth2ClaimsInput);
   const claims = claimsText ? JSON.parse(claimsText) : undefined;
   const signatureAlgorithm = inputs.kafkaOAuth2SignatureAlgorithmInput.value;
@@ -265,6 +290,10 @@ export function buildKafkaOAuth2Config(
       client_id_file: text(inputs.kafkaOAuth2ClientIdFileInput),
     }),
     token_url: inputs.kafkaOAuth2TokenUrlInput.value.trim(),
+    ...defined({
+      timeout: seconds(inputs.kafkaOAuth2TimeoutInput),
+      expiry_buffer: seconds(inputs.kafkaOAuth2ExpiryBufferInput),
+    }),
     ...(scopes.length ? { scopes } : {}),
     ...(Object.keys(endpointParams).length ? { endpoint_params: endpointParams } : {}),
     ...(Object.keys(tls).length ? { tls } : {}),

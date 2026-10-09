@@ -738,6 +738,58 @@ describe('EditOutputFlyout', () => {
         });
       });
 
+      it('should save the durations in seconds, and keep the ones already set', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: { ...oauth2Fields, timeout: 10 },
+          secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+        });
+
+        expect(
+          (utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2TimeoutInput') as any).value
+        ).toEqual('10');
+        change(utils, 'kafkaOAuth2ExpiryBufferInput', '90.5');
+        save(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputK',
+            expect.objectContaining({
+              oauth2: { ...oauth2Fields, timeout: 10, expiry_buffer: 90.5 },
+            })
+          );
+        });
+      });
+
+      it('should leave a duration out when it is cleared, and not save an invalid one', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: { ...oauth2Fields, timeout: 10 },
+          secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+        });
+
+        change(utils, 'kafkaOAuth2ExpiryBufferInput', '-5');
+        save(utils);
+        await waitFor(() => {
+          expect(
+            utils.getByText('Specify a number of seconds between 0 and 86400')
+          ).toBeInTheDocument();
+        });
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
+
+        change(utils, 'kafkaOAuth2ExpiryBufferInput', '');
+        change(utils, 'kafkaOAuth2TimeoutInput', '');
+        save(utils);
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputK',
+            expect.objectContaining({ oauth2: oauth2Fields })
+          );
+        });
+      });
+
       it('should drop the settings of the JWT bearer grant when the output goes back to client credentials', async () => {
         const { utils } = renderFlyout({
           ...kafkaOutput,

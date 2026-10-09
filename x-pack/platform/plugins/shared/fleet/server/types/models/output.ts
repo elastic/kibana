@@ -251,6 +251,9 @@ const LogstashUpdateSchema = {
   ),
 };
 
+// 1 day. The agent is given the durations in nanoseconds, so this also keeps them safe integers.
+const MAX_OAUTH2_DURATION_SECONDS = 86400;
+
 /**
  * Settings of the OAuth2 authentication method, they follow the `oauth2clientauthextension` of the
  * OpenTelemetry collector. The client secret and the client certificate key are in `secrets`.
@@ -281,6 +284,27 @@ const KafkaOAuth2Schema = schema.object({
       server_name_override: schema.maybe(schema.string()),
       min_version: schema.maybe(schema.string()),
       max_version: schema.maybe(schema.string()),
+    })
+  ),
+  // in seconds, the agent is given them in nanoseconds
+  timeout: schema.maybe(
+    schema.number({
+      min: 0,
+      max: MAX_OAUTH2_DURATION_SECONDS,
+      meta: {
+        description:
+          'How long, in seconds, a request to the token endpoint can take. There is no limit when it is not set.',
+      },
+    })
+  ),
+  expiry_buffer: schema.maybe(
+    schema.number({
+      min: 0,
+      max: MAX_OAUTH2_DURATION_SECONDS,
+      meta: {
+        description:
+          'How long, in seconds, before a token expires it is refreshed. It is 5 minutes when it is not set.',
+      },
     })
   ),
   // jwt-bearer grant only

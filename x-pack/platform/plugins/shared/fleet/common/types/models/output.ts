@@ -319,6 +319,9 @@ export interface KafkaOAuth2Config {
     min_version?: string;
     max_version?: string;
   };
+  // in seconds
+  timeout?: number;
+  expiry_buffer?: number;
   // jwt-bearer grant only
   client_certificate_key_id?: string;
   client_certificate_key_file?: string;

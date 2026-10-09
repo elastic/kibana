@@ -258,6 +258,42 @@ describe('Output model', () => {
         ).toThrow();
       });
 
+      it('should accept the durations in seconds', () => {
+        const withDurations = (durations: Record<string, unknown>) =>
+          oauth2Output({
+            oauth2: {
+              client_id: 'my-client',
+              token_url: 'https://idp.example.com/oauth2/token',
+              ...durations,
+            },
+          });
+
+        expect(() =>
+          schema.object(KafkaSchema).validate(withDurations({ timeout: 10, expiry_buffer: 90.5 }))
+        ).not.toThrow();
+        expect(() =>
+          schema.object(KafkaSchema).validate(withDurations({ timeout: 0, expiry_buffer: 86400 }))
+        ).not.toThrow();
+      });
+
+      it.each([
+        ['a negative duration', { timeout: -1 }],
+        ['a duration over a day', { expiry_buffer: 86401 }],
+        ['a text such as 10s', { timeout: '10s' }],
+      ])('should reject %s', (_, durations) => {
+        expect(() =>
+          schema.object(KafkaSchema).validate(
+            oauth2Output({
+              oauth2: {
+                client_id: 'my-client',
+                token_url: 'https://idp.example.com/oauth2/token',
+                ...durations,
+              },
+            })
+          )
+        ).toThrow();
+      });
+
       it('should accept the oauth2 auth type in an update payload', () => {
         expect(() =>
           UpdateOutputSchema.validate({

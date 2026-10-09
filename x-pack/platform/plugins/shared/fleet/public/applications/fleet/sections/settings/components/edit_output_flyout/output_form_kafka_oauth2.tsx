@@ -216,6 +216,8 @@ export const OutputFormKafkaOAuth2: React.FunctionComponent<{ inputs: OutputForm
     [
       inputs.kafkaOAuth2ClientIdFileInput,
       inputs.kafkaOAuth2ClientSecretFileInput,
+      inputs.kafkaOAuth2TimeoutInput,
+      inputs.kafkaOAuth2ExpiryBufferInput,
       inputs.kafkaOAuth2ClientCertificateKeyFileInput,
       inputs.kafkaOAuth2ClientCertificateKeyIdInput,
       inputs.kafkaOAuth2IssInput,
@@ -490,6 +492,39 @@ export const OutputFormKafkaOAuth2: React.FunctionComponent<{ inputs: OutputForm
             testSubj="kafkaOAuth2ClientSecretFileInput"
           />
         )}
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem>
+            <TextSetting
+              label={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2TimeoutLabel',
+                { defaultMessage: 'Token request timeout in seconds (optional)' }
+              )}
+              helpText={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2TimeoutHelpText',
+                { defaultMessage: 'How long a request to the token URL can take.' }
+              )}
+              input={inputs.kafkaOAuth2TimeoutInput}
+              testSubj="kafkaOAuth2TimeoutInput"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <TextSetting
+              label={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2ExpiryBufferLabel',
+                { defaultMessage: 'Token expiry buffer in seconds (optional)' }
+              )}
+              helpText={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2ExpiryBufferHelpText',
+                {
+                  defaultMessage:
+                    'How long before a token expires it is refreshed. 5 minutes if not set.',
+                }
+              )}
+              input={inputs.kafkaOAuth2ExpiryBufferInput}
+              testSubj="kafkaOAuth2ExpiryBufferInput"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiTitle size="xxs">
           <h4>
