@@ -54,8 +54,6 @@ outputs:
       type: boolean
     attachments_written:
       type: boolean
-    assessment_written:
-      type: boolean
 
 consts:
   # Journal notes call `system-alertzero-journal-note` by literal id, not a const:
@@ -742,34 +740,20 @@ steps:
               description: Extracted indicators of compromise
               data: "${{ steps.forensic_analysis.output.structured_output.iocs }}"
 
-          # The assessment is the one note this run cannot afford to lose silently:
-          # it exists only in this run's agent output, and a later sweep skips the
-          # agent once the findings are attached. The journal note workflow swallows
-          # its own append failure and reports nothing back, so a lost assessment
-          # through it would look exactly like a written one. This posts the same
-          # converse request directly (as `rule_tuning_review` does) so that, under
-          # `continue: true`, a failure stays readable as `steps.journal_rationale.error`
-          # for `resolve_run_outcome`. `continue` keeps the attachments above from
-          # being undone by a bad note.
           - name: journal_rationale
-            type: kibana.request
+            type: workflow.execute
             if: >-
               ${{ steps.forensic_analysis.error == null
                 and steps.forensic_analysis.output.structured_output.rationale != blank }}
             on-failure:
               continue: true
             with:
-              method: POST
-              path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-              headers:
-                kbn-xsrf: "true"
-                elastic-api-version: "2023-10-31"
-                Content-Type: application/json
-              body:
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
+              inputs:
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
-                input: >-
+                message: >-
                   {%- if steps.forensic_analysis.output.structured_output.propose == true -%}Rationale for proposed actions{%- else -%}Rationale for ending investigation{%- endif -%}: {{ steps.forensic_analysis.output.structured_output.rationale }}
-                trigger_mode: never
 
         else:
           - name: journal_no_host
@@ -871,25 +855,19 @@ steps:
       # that was never shipped. `checked` keeps a run that did not look (findings
       # already attached, or a recorded attempt) from reading as "no telemetry".
       # One of this indicator's attachments is a partial write, not a finished
-      # run. The assessment is a journal note and is tracked separately below.
+      # run. The assessment is a journal note and is not part of this check.
       settled: >-
         ${{ (steps.resolve_written_findings.output.ids contains steps.finding_ids.output.timeline
           and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs)
           or steps.resolve_host.output.host_name == blank
           or (steps.resolve_endpoint_telemetry.output.checked == true
             and steps.resolve_endpoint_telemetry.output.present != true) }}
-      # The agent produced an assessment this run and the note carrying it did
-      # not land. `journal_rationale` continues on failure, which leaves its
-      # error readable here; a skipped note (agent failed, or no rationale) has
-      # no error, so it does not read as a lost one. The assessment exists only
-      # in this run's agent output, so a later sweep cannot rewrite it.
-      assessment_lost: "${{ steps.journal_rationale.error != null }}"
       # Both findings are on the investigation, but not from this run: an
       # earlier run attached them and never recorded how it ended, whether
       # because its verdict write failed or because it died between the
       # attachments and the verdict. This run has no agent output to check the
-      # assessment or the proposals against, so it cannot vouch for either, and
-      # must not retire the indicator as `processed` on their behalf.
+      # proposals against, so it cannot vouch for them, and must not retire the
+      # indicator as `processed` on their behalf.
       outcome_unrecorded: >-
         ${{ steps.resolve_written_findings.output.ids contains steps.finding_ids.output.timeline
           and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs
@@ -1013,7 +991,6 @@ steps:
         and steps.verify_investigation.output.metadata != null
         and steps.resolve_run_outcome.output.settled == true
         and steps.resolve_run_outcome.output.outcome_unrecorded != true
-        and steps.resolve_run_outcome.output.assessment_lost != true
         and steps.resolve_proposals.output.proposals_lost != true }}
     on-failure:
       retry:
@@ -1124,20 +1101,12 @@ steps:
   # The note names which case it was and links the execution. It does not include
   # `error.message`: a later agent round reads this journal as user input, and the
   # error itself stays on the execution.
-  #
-  # Also covers the findings-attached-but-assessment-lost case, which the
-  # `proposals_lost` path above does not: a lost proposal still has a written
-  # assessment to explain it, while a lost assessment leaves attachments with no
-  # account of what the agent made of them. When the proposals were lost too,
-  # that path wins and this one stays quiet, matching `mark_failed`.
   - name: journal_analysis_problem
     type: workflow.execute
     if: >-
       ${{ steps.resolve_request.output.has_request == true
         and steps.verify_investigation.output.metadata != null
-        and (steps.resolve_run_outcome.output.settled != true
-          or (steps.resolve_run_outcome.output.assessment_lost == true
-            and steps.resolve_proposals.output.proposals_lost != true)) }}
+        and steps.resolve_run_outcome.output.settled != true }}
     on-failure:
       continue: true
     with:
@@ -1146,29 +1115,21 @@ steps:
       inputs:
         conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
         message: >-
-          {%- if steps.resolve_run_outcome.output.settled == true -%}
-          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` attached its findings to this investigation, but its assessment could not be written here.
-          {%- else -%}
           Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` left no findings on this investigation.
           {% if steps.forensic_analysis.error != null %}The forensic agent failed.{% elsif steps.resolve_request.output.forensic_attempted_at != blank %}A previous attempt did not finish, so this run did not start another analysis.{% else %}The analysis finished but none of its findings could be attached.{% endif %}
-          {%- endif %}
           See execution `{{ execution.id }}` ([full per-stage detail]({{ execution.url }})).
 
   # The run had a host to analyze but still landed no findings — e.g. no
   # OWNER access on the conversation, a deleted investigation, a rejected
-  # attachment payload, or an agent error — or landed them without the
-  # assessment that explains them. A retry won't fix any of those, so it's
-  # retired rather than left pending re-running every minute. Kept distinct
-  # from `processed` so the indicator reflects that something did not land,
-  # and `failure_reason` says which.
+  # attachment payload, or an agent error. A retry won't fix any of those, so
+  # it's retired rather than left pending re-running every minute. Kept
+  # distinct from `processed` so the indicator reflects that nothing landed.
   - name: mark_failed
     type: context-engine.updateKi
     if: >-
       ${{ steps.resolve_request.output.has_request == true
         and steps.verify_investigation.output.metadata != null
-        and (steps.resolve_run_outcome.output.settled != true
-          or (steps.resolve_run_outcome.output.assessment_lost == true
-            and steps.resolve_proposals.output.proposals_lost != true)) }}
+        and steps.resolve_run_outcome.output.settled != true }}
     on-failure:
       retry:
         max-attempts: 3
@@ -1180,12 +1141,7 @@ steps:
       ki:
         attributes:
           status: failed
-          failure_reason: >-
-            {%- if steps.resolve_run_outcome.output.settled == true -%}
-            Findings reached investigation {{ steps.resolve_request.output.investigation_id }} but the assessment note did not
-            {%- else -%}
-            No findings reached investigation {{ steps.resolve_request.output.investigation_id }}
-            {%- endif -%}
+          failure_reason: "No findings reached investigation {{ steps.resolve_request.output.investigation_id }}"
 
   - name: emit_result
     type: workflow.output
@@ -1196,7 +1152,3 @@ steps:
       # Reported so a run that analyzed a host but landed nothing on the investigation
       # is visible from its own output, which is what makes the handoff desk-testable.
       attachments_written: "${{ steps.resolve_run_outcome.output.attached == true }}"
-      # Distinguishes a note that landed from one that was skipped (no rationale,
-      # or the agent did not run) or lost. A skipped or failed request has no
-      # output; the indicator's `failure_reason` says when it was lost.
-      assessment_written: "${{ steps.journal_rationale.output != null }}"

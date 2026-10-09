@@ -14,7 +14,6 @@ import {
 } from '.';
 import { ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID } from './create_proposal';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './forensics_endpoint_analysis.yaml';
-import { ALERTZERO_JOURNAL_NOTE_WORKFLOW } from './journal_note';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 interface YamlStep {
@@ -277,21 +276,11 @@ describe('Endpoint analysis run', () => {
         ki: {
           attributes: {
             status: 'failed',
-            failure_reason: expect.any(String),
+            failure_reason:
+              'No findings reached investigation {{ steps.resolve_request.output.investigation_id }}',
           },
         },
       });
-
-      const reason = (markFailed?.with?.ki as { attributes: { failure_reason: string } }).attributes
-        .failure_reason;
-      const renderReason = (settled: boolean): string =>
-        liquid.parseAndRenderSync(reason, {
-          steps: {
-            resolve_request: { output: { investigation_id: 'inv-1' } },
-            resolve_run_outcome: { output: { settled } },
-          },
-        });
-      expect(renderReason(false)).toBe('No findings reached investigation inv-1');
     });
 
     it('retires a run that had no host to analyze as processed, not failed', () => {
@@ -301,59 +290,6 @@ describe('Endpoint analysis run', () => {
       const attached = String(stepByName('resolve_run_outcome')?.with?.attached);
       expect(attached).not.toContain('host_name');
       expect(attached).not.toContain('telemetry');
-    });
-
-    // The attachments landed, but the one note that explains them did not, and no later
-    // sweep can rewrite it: the agent is skipped once the findings are attached, and the
-    // rationale lived only in this run's output. So this is a failure the indicator has
-    // to record, and a different one from "nothing reached the investigation".
-    it('is told apart from a run that attached its findings but lost the assessment', () => {
-      const markFailed = stepByName('mark_failed');
-      const terminal = (
-        settled: boolean,
-        assessmentLost: boolean,
-        proposalsLost: boolean
-      ): Record<string, unknown> => ({
-        steps: {
-          resolve_request: { output: { has_request: true, investigation_id: 'inv-1' } },
-          verify_investigation: { output: { metadata: { id: 'inv-1' } } },
-          resolve_run_outcome: { output: { settled, assessment_lost: assessmentLost } },
-          resolve_proposals: { output: { proposals_lost: proposalsLost } },
-        },
-      });
-      const fails = (ctx: Record<string, unknown>): unknown =>
-        evaluate(String(markFailed?.if), ctx);
-      const processes = (ctx: Record<string, unknown>): unknown =>
-        evaluate(String(stepByName('mark_processed')?.if), ctx);
-
-      // Findings attached and the assessment written: processed.
-      expect(processes(terminal(true, false, false))).toBe(true);
-      expect(fails(terminal(true, false, false))).toBe(false);
-      // Findings attached, assessment lost: failed, with its own reason.
-      expect(processes(terminal(true, true, false))).toBe(false);
-      expect(fails(terminal(true, true, false))).toBe(true);
-      // Nothing attached: failed regardless of the note.
-      expect(fails(terminal(false, false, false))).toBe(true);
-      // Lost proposals already retire the indicator with a more specific reason.
-      expect(fails(terminal(true, true, true))).toBe(false);
-      expect(processes(terminal(true, true, true))).toBe(false);
-
-      const reason = (markFailed?.with?.ki as { attributes: { failure_reason: string } }).attributes
-        .failure_reason;
-      expect(liquid.parseAndRenderSync(reason, terminal(true, true, false))).toBe(
-        'Findings reached investigation inv-1 but the assessment note did not'
-      );
-
-      // Under `continue: true` a failed step keeps its error readable and a skipped
-      // step has none, which is what tells a lost note from one with nothing to say.
-      const lost = String(stepByName('resolve_run_outcome')?.with?.assessment_lost);
-      const lostWhen = (journalRationale: Record<string, unknown>): unknown =>
-        evaluate(lost, { steps: { journal_rationale: journalRationale } });
-      expect(lostWhen({ output: { conversation_id: 'inv-1' } })).toBe(false);
-      expect(lostWhen({ error: { message: '403' } })).toBe(true);
-      // A skipped note is not a lost one: nothing to write, nothing lost.
-      expect(lostWhen({})).toBe(false);
-      expect(stepByName('journal_rationale')?.['on-failure']).toEqual({ continue: true });
     });
 
     it('leaves no valid request on a status the sweep still selects', () => {
@@ -418,20 +354,6 @@ describe('Endpoint analysis run', () => {
       expect(stepByName('emit_result')?.with?.attachments_written).toBe(
         '${{ steps.resolve_run_outcome.output.attached == true }}'
       );
-    });
-
-    // The assessment note continues past failure, so the run output has to say whether it
-    // landed: a skipped or failed request leaves no output, a successful one does.
-    it('reports whether the assessment note landed', () => {
-      const written = String(stepByName('emit_result')?.with?.assessment_written);
-      expect(written).toBe('${{ steps.journal_rationale.output != null }}');
-      expect(
-        evaluate(written, { steps: { journal_rationale: { output: { conversation_id: 'c' } } } })
-      ).toBe(true);
-      expect(evaluate(written, { steps: { journal_rationale: { error: { message: 'x' } } } })).toBe(
-        false
-      );
-      expect(evaluate(written, { steps: { journal_rationale: {} } })).toBe(false);
     });
   });
 
@@ -669,7 +591,7 @@ describe('Endpoint analysis run', () => {
         'system-alertzero-journal-note'
     );
 
-    it('narrates problem paths as journal notes rather than attachments', () => {
+    it('narrates problem paths and the assessment as journal notes rather than attachments', () => {
       expect(journalSteps.map(({ name }) => name).sort()).toEqual([
         'journal_analysis_problem',
         'journal_analysis_started',
@@ -681,40 +603,12 @@ describe('Endpoint analysis run', () => {
         'journal_outcome_unrecorded',
         'journal_proposals_lost',
         'journal_proposals_queued',
+        'journal_rationale',
         'journal_timeline',
       ]);
       expect(
         journalSteps.every(({ with: withInputs }) => withInputs?.['run-as-mode'] === 'inherit')
       ).toBe(true);
-    });
-
-    // The helper continues past its own append and reports nothing back, so an
-    // assessment lost through it would look exactly like one that landed. The one note
-    // the outcome depends on posts the same request directly, so its failure stays
-    // readable on the step. Everything the helper sends, this sends.
-    it('posts the assessment itself so a lost note is visible to the outcome', () => {
-      const journal = stepByName('journal_rationale');
-      const helper = parse(ALERTZERO_JOURNAL_NOTE_WORKFLOW.yaml) as { steps: YamlStep[] };
-      const append = helper.steps.find(({ name }) => name === 'append_note');
-      const request = (step?: YamlStep) =>
-        step?.with as
-          | { method?: string; path?: string; headers?: unknown; body?: Record<string, unknown> }
-          | undefined;
-
-      expect(journal?.type).toBe('kibana.request');
-      expect(request(journal)?.method).toBe(request(append)?.method);
-      expect(request(journal)?.path).toBe(request(append)?.path);
-      expect(request(journal)?.headers).toEqual(request(append)?.headers);
-      expect(request(journal)?.body?.trigger_mode).toBe('never');
-      expect(request(journal)?.body?.conversation_id).toBe(
-        '{{ steps.resolve_request.output.investigation_id }}'
-      );
-      expect(Object.keys(request(journal)?.body ?? {}).sort()).toEqual(
-        Object.keys(request(append)?.body ?? {}).sort()
-      );
-      expect(String(stepByName('resolve_run_outcome')?.with?.assessment_lost)).toContain(
-        'steps.journal_rationale.error != null'
-      );
     });
 
     // A missing discovery alert is narrated and then falls through to the no-host
@@ -755,10 +649,9 @@ describe('Endpoint analysis run', () => {
     });
 
     // `system-alertzero-journal-note` bounds `message` at 8000 characters and rejects a
-    // longer one whole. The assessment posts directly, but stays within the same cap so
-    // it carries the same size note as every other journal entry. The note prefixes the
-    // assessment, and the longer prefix is "Rationale for ending investigation: " (36
-    // characters), so the schema cap stays under that.
+    // longer one whole. The note prefixes the assessment, and the longer prefix is
+    // "Rationale for ending investigation: " (36 characters), so the schema cap
+    // stays under that.
     it('caps the assessment at the length a journal note can carry', () => {
       const schema = stepByName('forensic_analysis')?.with?.schema as {
         properties?: { rationale?: { maxLength?: number } };
@@ -769,7 +662,11 @@ describe('Endpoint analysis run', () => {
 
       expect(rationaleCap).toBe(7900);
       expect(rationaleCap + longerPrefix.length).toBeLessThanOrEqual(JOURNAL_MESSAGE_MAX_LENGTH);
-      const message = (journal?.with as { body?: { input?: string } })?.body?.input ?? '';
+      expect(journal?.type).toBe('workflow.execute');
+      expect((journal?.with as { 'workflow-id'?: string })?.['workflow-id']).toBe(
+        'system-alertzero-journal-note'
+      );
+      const message = (journal?.with as { inputs?: { message?: string } })?.inputs?.message ?? '';
       expect(message).toContain('{{ steps.forensic_analysis.output.structured_output.rationale }}');
       expect(message).toContain('Rationale for proposed actions');
       expect(message).toContain('Rationale for ending investigation');
@@ -1029,11 +926,7 @@ describe('Endpoint analysis run', () => {
           resolve_request: { output: { has_request: true, investigation_id: 'inv-1' } },
           verify_investigation: { output: { metadata: { id: 'inv-1' } } },
           resolve_run_outcome: {
-            output: {
-              settled: true,
-              assessment_lost: false,
-              outcome_unrecorded: outcomeUnrecorded,
-            },
+            output: { settled: true, outcome_unrecorded: outcomeUnrecorded },
           },
           resolve_proposals: { output: { proposals_lost: false } },
         },
@@ -1253,31 +1146,27 @@ describe('Endpoint analysis run', () => {
       expect(journal?.['on-failure']).toEqual({ continue: true });
       expect(names.indexOf('journal_analysis_problem')).toBeLessThan(names.indexOf('mark_failed'));
 
-      // The same note covers a lost assessment, which is the only failure left once the
-      // findings are attached. Each case renders one sentence about what happened.
+      // Each case renders one sentence about what happened, and never the error body.
       const message = String((journal?.with?.inputs as { message?: string } | undefined)?.message);
-      const render = (settled: boolean, agentError: string | null, attemptedAt: string): string =>
+      const render = (agentError: string | null, attemptedAt: string): string =>
         liquid.parseAndRenderSync(message, {
           execution: { id: 'exec-1', url: 'https://kibana/exec-1' },
           steps: {
             resolve_host: { output: { host_name: 'host-a' } },
-            resolve_run_outcome: { output: { settled } },
             resolve_request: { output: { forensic_attempted_at: attemptedAt } },
             forensic_analysis: agentError === null ? {} : { error: { message: agentError } },
           },
         });
 
-      expect(render(true, null, '')).toContain('but its assessment could not be written');
-      expect(render(true, null, '')).not.toContain('left no findings');
-      expect(render(false, 'boom', '')).toContain('left no findings');
-      expect(render(false, 'boom', '')).toContain('The forensic agent failed.');
-      expect(render(false, 'boom', '')).not.toContain('boom');
-      expect(render(false, null, '2026-09-23T14:00:00.000Z')).toContain(
+      expect(render('boom', '')).toContain('left no findings');
+      expect(render('boom', '')).toContain('The forensic agent failed.');
+      expect(render('boom', '')).not.toContain('boom');
+      expect(render(null, '2026-09-23T14:00:00.000Z')).toContain(
         'A previous attempt did not finish'
       );
-      expect(render(false, null, '')).toContain('none of its findings could be attached');
-      expect(render(false, null, '')).toContain('exec-1');
-      expect(render(false, null, '')).toContain('https://kibana/exec-1');
+      expect(render(null, '')).toContain('none of its findings could be attached');
+      expect(render(null, '')).toContain('exec-1');
+      expect(render(null, '')).toContain('https://kibana/exec-1');
     });
   });
 
