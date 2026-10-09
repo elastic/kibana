@@ -91,7 +91,6 @@ export function registerUpdateRoute(
     async (ctx, req, res) =>
       telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
-          console.log({ spacesService });
           const { body, operation } = await update(
             ctx,
             getCachedDashboardStateSchema(),

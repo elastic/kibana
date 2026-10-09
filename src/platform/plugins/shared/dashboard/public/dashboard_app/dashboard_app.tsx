@@ -15,6 +15,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+import { QueryClientProvider } from '@kbn/react-query';
 import type { DashboardApi } from '..';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
@@ -40,9 +41,7 @@ import { type DashboardEmbedSettings } from './types';
 import { startSyncingExpandedPanelState } from './url';
 import type { DashboardInternalApi } from '../dashboard_api/types';
 import { DashboardChangeHistoryProvider } from '../dashboard_history/dashboard_change_history_provider';
-import { QueryClientProvider } from '@tanstack/react-query';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
-import { ChangeHistoryTrigger } from '@kbn/change-history-ui';
 
 export interface DashboardAppProps {
   history: History;

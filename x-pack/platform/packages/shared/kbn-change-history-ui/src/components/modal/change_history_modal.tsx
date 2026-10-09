@@ -67,10 +67,6 @@ export function ChangeHistoryModal(): JSX.Element | null {
     enabled: isOpen,
   });
 
-  useEffect(() => {
-    console.log({ items });
-  }, [items]);
-
   const reportChangeSelected = useCallback(
     (item: ChangeHistoryListItem, selectionSource: ChangeHistorySelectionSource) => {
       if (lastReportedChangeIdBySourceRef.current[selectionSource] === item.id) {
@@ -329,11 +325,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
               />
             </ChangeHistoryPreviewShell>
 
-            <ChangeHistorySidebarPanel
-              title={i18n.TIMELINE_PANEL_TITLE}
-              onClose={closeModal}
-              headerActions={<>test</>}
-            >
+            <ChangeHistorySidebarPanel title={i18n.TIMELINE_PANEL_TITLE} onClose={closeModal}>
               {renderSidebarContent()}
             </ChangeHistorySidebarPanel>
           </div>

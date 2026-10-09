@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import equal from 'fast-deep-equal';
-
 import type { ObjectChange } from '@kbn/change-history';
 import type { RequestHandlerContext } from '@kbn/core/server';
 
@@ -41,23 +39,14 @@ export const addToHistory = async ({
     client = getChangeHistoryClient();
   } catch {
     return;
-    // return res.customError({ statusCode: 503, body: 'Change history service is not ready' });
   }
 
-  const { items: previousHistoryItem } = await client.getHistory(
-    spaceId,
-    'dashboard',
-    dashboardId,
-    {
-      size: 1,
-    }
-  );
-  if (equal(previousHistoryItem[0]?.object.snapshot, snapshot)) return; // do not log new version if no changes
+  if (sequence.previous === sequence.current) return; // content is unchanged: no new version
 
   const change: ObjectChange = {
     objectType: 'dashboard',
     objectId: dashboardId,
-    ...(sequence.previous !== sequence.current ? { sequence: sequence.current } : {}),
+    sequence: sequence.current,
     snapshot, // post-change state
   };
 
@@ -70,9 +59,7 @@ export const addToHistory = async ({
       ...(typeof restoredFrom === 'number' && { data: { metadata: { restoredFrom } } }),
       refresh: restoredFrom ? 'wait_for' : undefined, // wait for ES to update so that we fetch the updated list
     });
-  } catch (e) {
-    // console.log('!!!!!', { e });
+  } catch {
+    // history is best-effort; a failed write must not fail the save
   }
-
-  // return res.ok();
 };

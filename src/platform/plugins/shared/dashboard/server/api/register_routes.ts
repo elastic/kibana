@@ -10,7 +10,7 @@
 import type { CoreSetup, Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import type { SetupDeps, StartDeps } from '../plugin';
+import type { StartDeps } from '../plugin';
 import type { DashboardPluginStart } from '../types';
 import { registerTrackUserActivityRoute } from '../user_activity/register_routes';
 import { registerCreateRoute } from './create';
@@ -23,7 +23,6 @@ import { registerChangeHistoryRoute } from '../change_history/register_routes';
 
 export function registerRoutes(
   core: CoreSetup<StartDeps, DashboardPluginStart>,
-  deps: SetupDeps,
   usageCounter: UsageCounter | undefined,
   logger: Logger
 ) {

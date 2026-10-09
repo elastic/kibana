@@ -13,8 +13,7 @@ import { z } from '@kbn/zod';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
 import { getDashboardStateSchema } from '../api/dashboard_state_schemas';
-import { getChangeHistoryClient } from './change_history_service';
-import { spacesService } from '../kibana_services';
+import { CHANGE_HISTORY_ROUTE_SECURITY, getChangeHistoryContext } from './route_utils';
 import { update } from '../api/update/update';
 
 export type RestoreChangeResponse = DashboardState;
@@ -39,37 +38,12 @@ export const registerRestoreChangeRoute = (router: IRouter<RequestHandlerContext
           },
         },
       },
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the scoped ES client',
-        },
-      },
+      security: CHANGE_HISTORY_ROUTE_SECURITY,
     },
     async (ctx, req, res) => {
-      const core = await ctx.core;
-      const esClient = core.elasticsearch.client.asCurrentUser;
-      const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
-        application: [
-          {
-            application: `kibana-.kibana`,
-            resources: ['*'],
-            privileges: [`feature_dashboard_v2.edit`],
-          },
-        ],
-      });
-
-      if (!hasAllPrivileges) {
-        return res.forbidden();
-      }
-
-      let client;
-      try {
-        client = getChangeHistoryClient();
-      } catch {
-        return res.customError({ statusCode: 503, body: 'Change history service is not ready' });
-      }
-      const spaceId = spacesService?.getSpaceId(req) ?? 'default';
+      const context = await getChangeHistoryContext(ctx, req, res);
+      if (context.error) return context.error;
+      const { client, spaceId } = context;
 
       const { items } = await client.getHistory(spaceId, 'dashboard', req.params.id, {
         additionalFilters: [{ term: { 'event.id': req.params.changeId } }],
@@ -86,11 +60,10 @@ export const registerRestoreChangeRoute = (router: IRouter<RequestHandlerContext
         req.params.id,
         item.object.snapshot as DashboardState,
         undefined,
-        spacesService?.getSpaceId(req),
+        spaceId,
         true,
         item.object.sequence
       );
-      console.log({ result });
       return res.ok({ body: result.body.data });
     }
   );

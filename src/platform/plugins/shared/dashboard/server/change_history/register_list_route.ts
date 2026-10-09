@@ -16,8 +16,7 @@ import { z } from '@kbn/zod';
 
 import type { StartDeps } from '../plugin';
 import type { DashboardPluginStart } from '../types';
-import { getChangeHistoryClient } from './change_history_service';
-import { spacesService } from '../kibana_services';
+import { CHANGE_HISTORY_ROUTE_SECURITY, getChangeHistoryContext } from './route_utils';
 
 const listResponseSchema = z.object({
   items: z.array(
@@ -62,37 +61,12 @@ export const registerHistoryListRoute = (
           },
         },
       },
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the scoped ES client',
-        },
-      },
+      security: CHANGE_HISTORY_ROUTE_SECURITY,
     },
     async (ctx, req, res) => {
-      const core = await ctx.core;
-      const esClient = core.elasticsearch.client.asCurrentUser;
-      const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
-        application: [
-          {
-            application: `kibana-.kibana`,
-            resources: ['*'],
-            privileges: [`feature_dashboard_v2.edit`],
-          },
-        ],
-      });
-
-      if (!hasAllPrivileges) {
-        return res.forbidden();
-      }
-
-      let client;
-      try {
-        client = getChangeHistoryClient();
-      } catch {
-        return res.customError({ statusCode: 503, body: 'Change history service is not ready' });
-      }
-      const spaceId = spacesService?.getSpaceId(req) ?? 'default';
+      const context = await getChangeHistoryContext(ctx, req, res);
+      if (context.error) return context.error;
+      const { client, spaceId } = context;
 
       const { page = 1, per_page: perPage } = req.query;
       const { total, items } = await client.getHistory(spaceId, 'dashboard', req.params.id, {
@@ -100,18 +74,19 @@ export const registerHistoryListRoute = (
         from: perPage ? (page - 1) * perPage : undefined, // `page` is 1-indexed; `from` is an offset
       });
 
-      const [coreStart] = await coreSetup.getStartServices();
       const uids = new Set(items.flatMap((item) => (item.user?.id ? [item.user.id] : [])));
-
-      const profiles = await coreStart.userProfile.bulkGet({ uids });
-      const fullNameByUid = new Map(profiles.map((profile) => [profile.uid, profile]));
+      const profiles =
+        uids.size > 0
+          ? await (await coreSetup.getStartServices())[0].userProfile.bulkGet({ uids })
+          : [];
+      const profileByUid = new Map(profiles.map((profile) => [profile.uid, profile]));
 
       return res.ok({
         body: {
           total,
           items: items.map((item, index) => {
             const user = item.user;
-            const profile = user.id ? fullNameByUid.get(user.id) : undefined;
+            const profile = user.id ? profileByUid.get(user.id) : undefined;
             const changes =
               index + 1 < items.length
                 ? jsonpatchFormatter.format(
@@ -121,7 +96,7 @@ export const registerHistoryListRoute = (
             return {
               id: item.event.id,
               action: item.event.action,
-              isCurrent: (req.query.page ?? 1) === 1 && index === 0,
+              isCurrent: page === 1 && index === 0,
               timestamp: item['@timestamp'],
               actor: {
                 name: profile?.user.full_name || user.name,
@@ -130,7 +105,7 @@ export const registerHistoryListRoute = (
               ...(changes ? { changes: { count: changes.length } } : {}),
               ...('restoredFrom' in (item.metadata ?? {})
                 ? {
-                    comment: i18n.translate('dashboard.changeHistory.versionBadge', {
+                    comment: i18n.translate('dashboard.changeHistory.restoredFromComment', {
                       defaultMessage: 'Restored from v{version}',
                       values: { version: item.metadata!.restoredFrom as number },
                     }),

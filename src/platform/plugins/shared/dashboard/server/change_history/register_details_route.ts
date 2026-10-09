@@ -12,8 +12,7 @@ import type { IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 
 import { getDashboardStateSchema } from '../api/dashboard_state_schemas';
-import { getChangeHistoryClient } from './change_history_service';
-import { spacesService } from '../kibana_services';
+import { CHANGE_HISTORY_ROUTE_SECURITY, getChangeHistoryContext } from './route_utils';
 
 const detailsResponseSchema = z.object({
   id: z.string(),
@@ -48,55 +47,24 @@ export const registerChangeDetailsRoute = (router: IRouter<RequestHandlerContext
           },
         },
       },
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the scoped ES client',
-        },
-      },
+      security: CHANGE_HISTORY_ROUTE_SECURITY,
     },
     async (ctx, req, res) => {
-      const core = await ctx.core;
-      const esClient = core.elasticsearch.client.asCurrentUser;
-      const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
-        application: [
-          {
-            application: `kibana-.kibana`,
-            resources: ['*'],
-            privileges: [`feature_dashboard_v2.edit`],
-          },
-        ],
-      });
+      const context = await getChangeHistoryContext(ctx, req, res);
+      if (context.error) return context.error;
+      const { client, spaceId } = context;
 
-      if (!hasAllPrivileges) {
-        return res.forbidden();
-      }
-
-      let client;
-      try {
-        client = getChangeHistoryClient();
-      } catch {
-        return res.customError({ statusCode: 503, body: 'Change history service is not ready' });
-      }
-      const spaceId = spacesService?.getSpaceId(req) ?? 'default';
-
-      const { items } = await client.getHistory(spaceId, 'dashboard', req.params.id, {
-        additionalFilters: [{ term: { 'event.id': req.params.changeId } }],
-        size: 1,
-      });
+      const [{ items }, { items: currentHistoryItem }] = await Promise.all([
+        client.getHistory(spaceId, 'dashboard', req.params.id, {
+          additionalFilters: [{ term: { 'event.id': req.params.changeId } }],
+          size: 1,
+        }),
+        client.getHistory(spaceId, 'dashboard', req.params.id, { size: 1 }),
+      ]);
       const item = items[0];
       if (!item) {
         return res.notFound();
       }
-
-      const { items: currentHistoryItem } = await client.getHistory(
-        spaceId,
-        'dashboard',
-        req.params.id,
-        {
-          size: 1,
-        }
-      );
       const currentHistoryId = currentHistoryItem[0]?.event.id;
 
       return res.ok({

@@ -65,7 +65,7 @@ export const DashboardChangeHistoryProvider = ({
       )}
       renderBadge={renderDashboardChangeHistoryBadge}
       labels={{
-        previewBackLabel: i18n.translate('workflows.changeHistory.backToWorkflow', {
+        previewBackLabel: i18n.translate('dashboard.changeHistory.backToDashboard', {
           defaultMessage: 'Back to dashboard',
         }),
         previewTitle,
@@ -81,20 +81,10 @@ export const DashboardChangeHistoryProvider = ({
   );
 };
 
-// export const WorkflowChangeHistoryListItem = (): JSX.Element | null => {
-//   const isEnabled = useWorkflowChangeHistoryEnabled();
-
-//   if (!isEnabled) {
-//     return null;
-//   }
-
-//   return <ChangeHistoryListGroupItem />;
-// };
-
 const DashboardPreview: ChangeHistoryPreviewRenderFn<{
   setPreviewTitle: (title: string) => void;
   inheritedTimeRange?: DashboardState['time_range'];
-}> = ({ objectId, change, compareSpec, diffTelemetry, setPreviewTitle, inheritedTimeRange }) => {
+}> = ({ change, setPreviewTitle, inheritedTimeRange }) => {
   const initialState = useRef<DashboardInitializationState>({
     time_range: inheritedTimeRange,
     ...change,
@@ -105,9 +95,7 @@ const DashboardPreview: ChangeHistoryPreviewRenderFn<{
   useEffect(() => {
     if (!dashboardApi) return;
     setPreviewTitle((change.snapshot as DashboardState).title);
-    dashboardApi.setState({
-      ...(change.snapshot as DashboardState),
-    });
+    dashboardApi.setState(change.snapshot as DashboardState);
   }, [change, dashboardApi, setPreviewTitle]);
 
   const memoized = useMemo(() => {
@@ -120,13 +108,6 @@ const DashboardPreview: ChangeHistoryPreviewRenderFn<{
           })
         }
         onApiAvailable={setDashboardApi}
-        // getCreationOptions={async () => ({
-        //   useSessionStorageIntegration: false,
-        //   getInitialInput: () => ({
-        //     ...(compareSpec ? compareSpec.target.snapshot : change.snapshot),
-        //     viewMode: 'view',
-        //   }),
-        // })}
       />
     );
   }, []);
@@ -134,7 +115,7 @@ const DashboardPreview: ChangeHistoryPreviewRenderFn<{
   const searchBarVisibilityProps = useMemo(() => {
     return {
       showFilterBar: ((change.snapshot as DashboardState).filters ?? []).length > 0,
-      showQueryInput: Boolean((change.snapshot as DashboardState).query?.expression !== ''),
+      showQueryInput: (change.snapshot as DashboardState).query?.expression !== '',
       showDatePicker: Boolean((change.snapshot as DashboardState).time_range), // if time range is saved, then `time_restore` is true
     };
   }, [change.snapshot]);

@@ -30,42 +30,30 @@ const DashboardChangeHistoryBadge = ({
     );
   }
 
-  if (item.isCurrent) {
-    return (
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">
-            {i18n.translate('dashboard.changeHistory.currentVersionOnlyBadge', {
-              defaultMessage: 'Current version',
-            })}
-          </EuiBadge>
-        </EuiFlexItem>
-        {item.metadata?.version ? (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">
-              {i18n.translate('dashboard.changeHistory.versionBadge', {
-                defaultMessage: 'v{version}',
-                values: { version: item.metadata!.version as number },
-              })}
-            </EuiBadge>
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-    );
-  }
+  const version = item.metadata?.version as number | undefined;
+  const versionBadge = version ? (
+    <EuiBadge color="hollow">
+      {i18n.translate('dashboard.changeHistory.versionBadge', {
+        defaultMessage: 'v{version}',
+        values: { version },
+      })}
+    </EuiBadge>
+  ) : null;
 
-  if (item.metadata!.version) {
-    return (
-      <EuiBadge color="hollow">
-        {i18n.translate('dashboard.changeHistory.versionBadge', {
-          defaultMessage: 'v{version}',
-          values: { version: item.metadata!.version as number },
-        })}
-      </EuiBadge>
-    );
-  }
+  if (!item.isCurrent) return versionBadge;
 
-  return null;
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="hollow">
+          {i18n.translate('dashboard.changeHistory.currentVersionOnlyBadge', {
+            defaultMessage: 'Current version',
+          })}
+        </EuiBadge>
+      </EuiFlexItem>
+      {versionBadge ? <EuiFlexItem grow={false}>{versionBadge}</EuiFlexItem> : null}
+    </EuiFlexGroup>
+  );
 };
 
 export const renderDashboardChangeHistoryBadge: ChangeHistoryBadgeRenderFn = ({ item }) => (

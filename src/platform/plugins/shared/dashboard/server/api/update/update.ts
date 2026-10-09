@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import equal from 'fast-deep-equal';
-
 import Boom from '@hapi/boom';
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import type { RequestTiming } from '@kbn/core-http-server';
@@ -87,8 +85,6 @@ export async function update(
       throw e;
     }
   }
-  // await new Promise((r) => setTimeout(r, 30000));
-  // console.log('AFTER AWAIT');
   // Create path
   if (!existing) {
     asCodeIdSchema.parse(id);
@@ -98,6 +94,7 @@ export async function update(
       strictValidationSchema,
       updateBody,
       serverTiming,
+      spaceId,
       isDashboardAppRequest,
       id
     );
@@ -143,7 +140,6 @@ export async function update(
         version: existing.version,
       }
     );
-    console.log({ savedObject });
     await addToHistory({
       ctx: requestCtx,
       dashboardId: id,

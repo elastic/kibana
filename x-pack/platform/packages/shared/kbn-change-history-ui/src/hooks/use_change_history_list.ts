@@ -97,7 +97,6 @@ export const useChangeHistoryList = ({
     }
 
     const pending = resolveChangeHistoryPendingChange(adapter, supports.unsavedChanges);
-    console.log({ pending });
     if (!pending) {
       return items;
     }
@@ -118,7 +117,6 @@ export const useChangeHistoryList = ({
     const result = await refetchQuery();
     return result.data?.pages[0];
   }, [refetchQuery]);
-  console.log({ itemsWithPendingChange });
   return {
     items: itemsWithPendingChange,
     pendingChange,

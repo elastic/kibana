@@ -137,6 +137,7 @@
     "@kbn/zod-helpers",
     "@kbn/as-code-dashboard-schema",
     "@kbn/change-history",
+    "@kbn/change-history-ui",
     "@kbn/spaces-plugin"
   ],
   "exclude": ["target/**/*"]

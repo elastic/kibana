@@ -154,7 +154,7 @@ export class DashboardPlugin
       },
     };
     core.uiSettings.register(dashboardUiSettings);
-    registerRoutes(core, plugins, this.apiUsageCounter, this.logger);
+    registerRoutes(core, this.apiUsageCounter, this.logger);
 
     void registerAccessControl({
       http: core.http,
