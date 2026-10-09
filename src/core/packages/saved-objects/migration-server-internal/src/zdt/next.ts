@@ -79,7 +79,7 @@ export const nextActionMap = (context: MigratorContext) => {
         query: buildPickupMappingsQuery(Object.keys(state.additiveMappingChanges)),
       }),
     UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK: (state: UpdateIndexMappingsWaitForTaskState) =>
-      Actions.waitForPickupUpdatedMappingsTask({
+      Actions.waitForUpdateIndexMappingsTask({
         client,
         taskId: state.updateTargetMappingsTaskId,
         timeout: '60s',
