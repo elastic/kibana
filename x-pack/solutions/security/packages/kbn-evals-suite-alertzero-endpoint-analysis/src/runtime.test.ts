@@ -446,9 +446,7 @@ describe('seedAlertZeroEndpoint', () => {
     const deleted = (es.delete.mock.calls as unknown[][]).map(
       ([params]) => params as { index: string; id: string }
     );
-    const constituent = deleted.find(
-      ({ index }) => index === '.alerts-security.alerts-default'
-    );
+    const constituent = deleted.find(({ index }) => index === '.alerts-security.alerts-default');
     const documents = indexed(es);
     const adAlert = documents.find(
       ({ index }) => index === '.adhoc.alerts-security.attack.discovery.alerts-default'
