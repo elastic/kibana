@@ -665,3 +665,75 @@ describe('WorkflowRepository inherited execution admission', () => {
     ).rejects.toThrow('Unavailable');
   });
 });
+
+describe('getWorkflowsByIds', () => {
+  const logger = loggingSystemMock.create().get();
+
+  const searchHit = (id: string, source: Record<string, unknown> = {}) => ({
+    _index: WORKFLOW_INDEX_NAME,
+    _id: id,
+    _source: {
+      name: id,
+      enabled: true,
+      yaml: 'steps: []',
+      definition: { steps: [] },
+      valid: true,
+      created_at: '2026-01-01T00:00:00.000Z',
+      updated_at: '2026-01-01T00:00:00.000Z',
+      ...source,
+    },
+  });
+
+  it('does not search when given no ids', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const repository = new WorkflowRepository({ esClient, logger });
+
+    await expect(repository.getWorkflowsByIds([], 'default')).resolves.toEqual([]);
+    expect(esClient.search).not.toHaveBeenCalled();
+  });
+
+  it('returns enabled workflows in request order and skips missing ids', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const repository = new WorkflowRepository({ esClient, logger });
+    esClient.search.mockResolvedValue({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, failed: 0 },
+      hits: { hits: [searchHit('wf-2'), searchHit('wf-1')] },
+    } as never);
+
+    const result = await repository.getWorkflowsByIds(['wf-1', 'wf-2', 'wf-missing'], 'default');
+
+    expect(result.map((workflow) => workflow.id)).toEqual(['wf-1', 'wf-2']);
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: WORKFLOW_INDEX_NAME,
+        size: 3,
+        query: {
+          bool: {
+            must: expect.arrayContaining([
+              { ids: { values: ['wf-1', 'wf-2', 'wf-missing'] } },
+              { term: { enabled: true } },
+            ]),
+            must_not: [{ exists: { field: 'deleted_at' } }],
+          },
+        },
+      })
+    );
+  });
+
+  it('fails the read when the search is incomplete', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const repository = new WorkflowRepository({ esClient, logger });
+    esClient.search.mockResolvedValue({
+      took: 1,
+      timed_out: true,
+      _shards: { total: 1, successful: 0, failed: 1 },
+      hits: { hits: [] },
+    } as never);
+
+    await expect(repository.getWorkflowsByIds(['wf-1'], 'default')).rejects.toThrow(
+      'Could not load workflows [wf-1] for trigger subscription resolution.'
+    );
+  });
+});

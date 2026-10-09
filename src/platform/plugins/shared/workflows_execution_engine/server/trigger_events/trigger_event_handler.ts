@@ -28,17 +28,14 @@ import {
 } from './event_context/event_chain_context';
 import { initializeTriggerEventsClient, writeTriggerEvent } from './event_logs';
 import type { TriggerEventsDataStreamClient } from './event_logs/trigger_events_data_stream';
-import {
-  classifyWorkflowTriggerMatch,
-  findMatchingWorkflowTrigger,
-} from './filter_workflows_by_trigger_condition';
+import { findMatchingWorkflowTrigger } from './filter_workflows_by_trigger_condition';
 import { resolveWorkflowEventsModeFromOn } from './lib/resolve_workflow_events_mode_from_on';
+import { groupSubscribedWorkflows, matchSubscriptionGroups } from './subscription_groups';
 import {
   type InvalidateSubscriptionCacheParams,
   SubscriptionResolutionCache,
 } from './subscription_resolution_cache';
 import {
-  createEmptyTriggerResolutionStats,
   createEmptyTriggerScheduleStats,
   type TriggerEventScheduleStats,
 } from './trigger_event_stats';
@@ -400,42 +397,45 @@ export class TriggerEventHandler {
     spaceId: string,
     eventContext: Record<string, unknown>
   ) {
-    const allWorkflows = await this.workflowRepository.getWorkflowsSubscribedToTrigger(
-      triggerId,
-      spaceId
-    );
-
     const requiresConnectorId =
       this.workflowsExtensions.getTriggerDefinition(triggerId)?.requiresConnectorId === true;
-    const stats = createEmptyTriggerResolutionStats();
-    stats.subscribedCount = allWorkflows.length;
-    const workflows: WorkflowDetailDto[] = [];
 
-    for (const workflow of allWorkflows) {
-      const outcome = classifyWorkflowTriggerMatch(workflow, triggerId, eventContext, this.logger, {
-        requiresConnectorId,
-      });
-      switch (outcome) {
-        case 'disabled':
-          stats.disabledCount += 1;
-          break;
-        case 'connector_id_mismatch':
-          stats.connectorIdMismatchCount += 1;
-          break;
-        case 'kql_false':
-          stats.kqlFalseCount += 1;
-          break;
-        case 'kql_error':
-          stats.kqlErrorCount += 1;
-          break;
-        case 'matched':
-          stats.matchedCount += 1;
-          workflows.push(workflow);
-          break;
-      }
-    }
+    let loadedWorkflows: WorkflowDetailDto[] | undefined;
+    const resolution = await this.subscriptionCache.load(spaceId, triggerId, async () => {
+      loadedWorkflows = await this.workflowRepository.getWorkflowsSubscribedToTrigger(
+        triggerId,
+        spaceId
+      );
+      return groupSubscribedWorkflows(loadedWorkflows, triggerId, requiresConnectorId);
+    });
 
+    const { matchedIds, stats } = matchSubscriptionGroups({
+      groups: resolution.entry.groups,
+      event: eventContext,
+      requiresConnectorId,
+      logger: this.logger,
+      triggerId,
+    });
+    const workflows = await this.loadMatchedWorkflows(matchedIds, spaceId, loadedWorkflows);
     return { workflows, stats };
+  }
+
+  private async loadMatchedWorkflows(
+    matchedIds: readonly string[],
+    spaceId: string,
+    loadedWorkflows: WorkflowDetailDto[] | undefined
+  ): Promise<WorkflowDetailDto[]> {
+    if (matchedIds.length === 0) {
+      return [];
+    }
+    if (loadedWorkflows) {
+      const byId = new Map(loadedWorkflows.map((workflow) => [workflow.id, workflow]));
+      return matchedIds.flatMap((id) => {
+        const workflow = byId.get(id);
+        return workflow ? [workflow] : [];
+      });
+    }
+    return this.workflowRepository.getWorkflowsByIds(matchedIds, spaceId);
   }
 
   private async writeTriggerEvents(params: {

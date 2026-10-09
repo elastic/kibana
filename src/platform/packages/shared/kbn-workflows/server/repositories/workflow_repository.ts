@@ -31,6 +31,55 @@ export interface WorkflowLookupOptions {
   managedFilter?: ManagedFilter;
 }
 
+const SUBSCRIPTION_SOURCE = [
+  'name',
+  'description',
+  'enabled',
+  'yaml',
+  'definition',
+  'createdBy',
+  'lastUpdatedBy',
+  'valid',
+  'created_at',
+  'updated_at',
+  'managed',
+  'managedBy',
+  'originManagedWorkflowId',
+  'managedVersion',
+  'version',
+] as const;
+
+const WORKFLOW_IDS_CHUNK_SIZE = 500;
+
+const toWorkflowDetailDto = (id: string, source: Record<string, unknown>): WorkflowDetailDto => ({
+  id,
+  name: source.name as string,
+  description: source.description as string | undefined,
+  enabled: source.enabled as boolean,
+  yaml: source.yaml as string,
+  definition: source.definition as WorkflowDetailDto['definition'],
+  createdBy: source.createdBy as string,
+  lastUpdatedBy: source.lastUpdatedBy as string,
+  valid: source.valid as boolean,
+  createdAt: source.created_at as string,
+  lastUpdatedAt: source.updated_at as string,
+  ...(source.managed === true ? { managed: true } : {}),
+  ...(typeof source.managedBy === 'string' ? { managedBy: source.managedBy } : {}),
+  ...(typeof source.originManagedWorkflowId === 'string'
+    ? { originManagedWorkflowId: source.originManagedWorkflowId }
+    : {}),
+  ...(typeof source.managedVersion === 'number' ? { managedVersion: source.managedVersion } : {}),
+  ...pickWorkflowDocumentVersion(source),
+});
+
+const chunkWorkflowIds = (ids: readonly string[], size: number): string[][] => {
+  const chunks: string[][] = [];
+  for (let index = 0; index < ids.length; index += size) {
+    chunks.push(ids.slice(index, index + size));
+  }
+  return chunks;
+};
+
 export class WorkflowRepository {
   private options: WorkflowRepositoryOptions;
 
@@ -339,23 +388,7 @@ export class WorkflowRepository {
         must_not: workflowFilters.must_not,
       },
     };
-    const _source = [
-      'name',
-      'description',
-      'enabled',
-      'yaml',
-      'definition',
-      'createdBy',
-      'lastUpdatedBy',
-      'valid',
-      'created_at',
-      'updated_at',
-      'managed',
-      'managedBy',
-      'originManagedWorkflowId',
-      'managedVersion',
-      'version',
-    ];
+    const _source = [...SUBSCRIPTION_SOURCE];
 
     const pitResponse = await this.options.esClient.openPointInTime({
       index: this.options.indexName,
@@ -410,28 +443,7 @@ export class WorkflowRepository {
         );
       }
 
-      return allHits.map(({ _id, _source: source }) => ({
-        id: _id,
-        name: source.name as string,
-        description: source.description as string | undefined,
-        enabled: source.enabled as boolean,
-        yaml: source.yaml as string,
-        definition: source.definition as WorkflowDetailDto['definition'],
-        createdBy: source.createdBy as string,
-        lastUpdatedBy: source.lastUpdatedBy as string,
-        valid: source.valid as boolean,
-        createdAt: source.created_at as string,
-        lastUpdatedAt: source.updated_at as string,
-        ...(source.managed === true ? { managed: true } : {}),
-        ...(typeof source.managedBy === 'string' ? { managedBy: source.managedBy } : {}),
-        ...(typeof source.originManagedWorkflowId === 'string'
-          ? { originManagedWorkflowId: source.originManagedWorkflowId }
-          : {}),
-        ...(typeof source.managedVersion === 'number'
-          ? { managedVersion: source.managedVersion }
-          : {}),
-        ...pickWorkflowDocumentVersion(source),
-      }));
+      return allHits.map(({ _id, _source: source }) => toWorkflowDetailDto(_id, source));
     } finally {
       try {
         await this.options.esClient.closePointInTime({ id: pitId });
@@ -439,5 +451,63 @@ export class WorkflowRepository {
         this.options.logger.warn(`Failed to close PIT ${pitId}: ${closeErr}`);
       }
     }
+  }
+
+  /** Loads enabled workflows by id, including global workflows, in request order. */
+  async getWorkflowsByIds(
+    workflowIds: readonly string[],
+    spaceId: string
+  ): Promise<WorkflowDetailDto[]> {
+    const orderedIds = [...new Set(workflowIds)];
+    if (orderedIds.length === 0) {
+      return [];
+    }
+
+    const found = new Map<string, WorkflowDetailDto>();
+    for (const chunk of chunkWorkflowIds(orderedIds, WORKFLOW_IDS_CHUNK_SIZE)) {
+      const docs = await this.searchWorkflowsByIds(chunk, spaceId);
+      for (const doc of docs) {
+        found.set(doc.id, doc);
+      }
+    }
+
+    return orderedIds.flatMap((id) => {
+      const workflow = found.get(id);
+      return workflow ? [workflow] : [];
+    });
+  }
+
+  private async searchWorkflowsByIds(
+    workflowIds: readonly string[],
+    spaceId: string
+  ): Promise<WorkflowDetailDto[]> {
+    const { must, must_not } = buildWorkflowFilters({
+      ids: [...workflowIds],
+      space: { id: spaceId, includeGlobal: true },
+      deleted: 'not_deleted',
+    });
+    must.push({ term: { enabled: true } });
+
+    const response = await this.options.esClient.search({
+      index: this.options.indexName,
+      allow_partial_search_results: false,
+      size: workflowIds.length,
+      track_total_hits: false,
+      _source: [...SUBSCRIPTION_SOURCE],
+      query: { bool: { must, must_not } },
+    });
+
+    if (response.timed_out || response._shards.failed > 0) {
+      throw new Error(
+        `Could not load workflows [${workflowIds.join(', ')}] for trigger subscription resolution.`
+      );
+    }
+
+    return response.hits.hits.flatMap((hit) => {
+      if (!hit._id || !hit._source) {
+        return [];
+      }
+      return [toWorkflowDetailDto(hit._id, hit._source as Record<string, unknown>)];
+    });
   }
 }
