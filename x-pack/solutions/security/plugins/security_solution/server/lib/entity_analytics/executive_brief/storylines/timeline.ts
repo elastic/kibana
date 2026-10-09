@@ -232,7 +232,7 @@ export interface TimelineInput {
 
 export interface DraftEvent extends Omit<StoryEvent, 'evidenceId'> {
   /** Set for relationship_first_seen, so the matching edge can cite the event. */
-  edge?: { type: StoryEdgeType; from: string; to: string };
+  edge?: { type: StoryEdgeType; from: string; to: string; fromName?: string; toName?: string };
 }
 
 /** Importance when a timeline has to be truncated; time order is restored afterwards. */
@@ -313,7 +313,13 @@ export const buildDraftEvents = (input: TimelineInput): DraftEvent[] => {
         STORY_EDGE_CONFIG[relationship.kind].verb
       } ${relationship.toName} (first observed on or around ${relationship.at.slice(0, 10)})`,
       sourceEvidenceIds: [],
-      edge: { type: relationship.kind, from: relationship.from, to: relationship.to },
+      edge: {
+        type: relationship.kind,
+        from: relationship.from,
+        to: relationship.to,
+        fromName: relationship.fromName,
+        toName: relationship.toName,
+      },
     });
   }
   for (const entry of input.cases) {
@@ -719,8 +725,8 @@ export const dedupeRelationshipFirstSeen = (events: DraftEvent[]): DraftEvent[] 
       const isAccessRelationship =
         edgeType === 'accesses_infrequently' || edgeType === 'accesses_frequently';
 
-      const fromName = strongest.edge.from.split(':')[1];
-      const toName = strongest.edge.to.split(':')[1];
+      const fromName = strongest.edge.fromName ?? strongest.edge.from;
+      const toName = strongest.edge.toName ?? strongest.edge.to;
       const summary = isAccessRelationship
         ? `First-ever logon: ${fromName} → ${toName}`
         : `New relationship: ${fromName} ${STORY_EDGE_CONFIG[edgeType].verb} ${toName}`;

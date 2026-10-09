@@ -233,6 +233,8 @@ describe('event building', () => {
       type: 'accesses_infrequently',
       from: 'user:a',
       to: 'host:jump',
+      fromName: 'a.rodriguez',
+      toName: 'jump-box-01',
     });
   });
 
@@ -290,7 +292,33 @@ describe('event deduplication', () => {
       type: edgeType,
       from,
       to,
+      fromName: from.split(':')[1],
+      toName: to.split(':')[1],
     },
+  });
+
+  it('uses display names, not raw euids, in merged summaries', () => {
+    const at = '2026-10-05T23:00:00.000Z';
+    const withNames = (edgeType: StoryEdgeType): DraftEvent => ({
+      ...draftRelationship(
+        edgeType,
+        at,
+        'user:a.rodriguez@acme.example@okta',
+        'host:3e751925-2b1c'
+      ),
+      edge: {
+        type: edgeType,
+        from: 'user:a.rodriguez@acme.example@okta',
+        to: 'host:3e751925-2b1c',
+        fromName: 'a.rodriguez',
+        toName: 'jump-box-01',
+      },
+    });
+    const [merged] = dedupeEvents([
+      withNames('accesses_infrequently'),
+      withNames('accesses_frequently'),
+    ]);
+    expect(merged.summary).toBe('First-ever logon: a.rodriguez → jump-box-01');
   });
 
   const draftRiskJump = (
