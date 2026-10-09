@@ -244,18 +244,28 @@ export const useUpdateAutomation = () => {
 };
 
 export const useDeleteAutomation = () => {
-  const { nightshiftInvestigations } = useKibana().services;
+  const { nightshiftInvestigations, notifications } = useKibana().services;
   const investigationsClient = nightshiftInvestigations?.investigationsClient;
 
-  return useAutomationMutation<string>((id) => {
-    if (!investigationsClient) {
-      throw new Error('Nightshift investigations plugin is unavailable');
-    }
-    return investigationsClient.fetch('DELETE /internal/nightshift/automations/{id}', {
-      params: { path: { id } },
-      signal: null,
-    });
-  }, errorToastTitles.delete);
+  return useAutomationMutation<{ id: string; name: string }>(
+    ({ id }) => {
+      if (!investigationsClient) {
+        throw new Error('Nightshift investigations plugin is unavailable');
+      }
+      return investigationsClient.fetch('DELETE /internal/nightshift/automations/{id}', {
+        params: { path: { id } },
+        signal: null,
+      });
+    },
+    errorToastTitles.delete,
+    ({ name }) =>
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.nightshift.automations.deletedToast', {
+          defaultMessage: 'Automation deleted',
+        }),
+        text: name,
+      })
+  );
 };
 
 export type { Automation, CreateAutomationBody, UpdateAutomationBody };

@@ -218,15 +218,10 @@ export const AutomationsPage = (): React.ReactElement => {
           title={getDeleteConfirmTitle(automationToDelete.name)}
           onCancel={() => setAutomationToDelete(undefined)}
           onConfirm={() => {
-            deleteAutomation.mutate(automationToDelete.id, {
-              onSuccess: () => {
-                services.notifications.toasts.addSuccess({
-                  title: listLabels.deletedToast,
-                  text: automationToDelete.name,
-                });
-                setAutomationToDelete(undefined);
-              },
-            });
+            deleteAutomation.mutate(
+              { id: automationToDelete.id, name: automationToDelete.name },
+              { onSuccess: () => setAutomationToDelete(undefined) }
+            );
           }}
           cancelButtonText={listLabels.cancel}
           confirmButtonText={listLabels.delete}
