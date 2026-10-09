@@ -1,5 +1,5 @@
 {
-  "sha1": "5da5a773ae8dea31380bf088d6ceaa1245157ee2",
+  "sha1": "96036601bea495e12a9de2693fcca449c90f447e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -162,8 +162,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 132,
-        "column": 12
+        "line": 135,
+        "column": 13
       }
     },
     {
@@ -181,8 +181,8 @@
       }
     },
     {
-      "id": "6e5410626ba22b5-686926d85ee73c5",
-      "title": "Rule Builder — threshold create and edit flows builder-to-esql: rule without builder_type opens in ES|QL mode",
+      "id": "6e5410626ba22b5-4c4c58a6af68be9",
+      "title": "Rule Builder — threshold create and edit flows builder-to-esql: rule without builder metadata opens in ES|QL mode",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -262,6 +262,20 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_name_validation_flyout.spec.ts",
         "line": 62,
         "column": 25
+      }
+    },
+    {
+      "id": "8c1e63a2466954b-5cfaaa8b9382bbe",
+      "title": "Rule routing tags — edit via ES|QL form replacing routing tags on the Actions step persists them and leaves tags alone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_routing_tags_edit.spec.ts",
+        "line": 53,
+        "column": 22
       }
     },
     {

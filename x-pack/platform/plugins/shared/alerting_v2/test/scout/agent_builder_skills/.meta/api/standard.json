@@ -1,5 +1,5 @@
 {
-  "sha1": "18f64a9c29225e80ecc0bb5410a6abcc6e7e9d95",
+  "sha1": "6a2d678a38330b1aada302f51830c2ee83599d56",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -20,8 +20,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/agent_builder_skills/api/tests/rule_management_skill_gating.spec.ts",
-        "line": 43,
-        "column": 21
+        "line": 55,
+        "column": 42
       }
     },
     {
@@ -40,8 +40,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/agent_builder_skills/api/tests/rule_management_skill_gating.spec.ts",
-        "line": 56,
-        "column": 42
+        "line": 68,
+        "column": 9
       }
     },
     {
@@ -53,8 +53,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/agent_builder_skills/api/tests/rule_management_skill_gating.spec.ts",
-        "line": 79,
-        "column": 15
+        "line": 91,
+        "column": 18
       }
     },
     {
@@ -67,8 +67,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/agent_builder_skills/api/tests/rule_management_skill_gating.spec.ts",
-        "line": 101,
-        "column": 15
+        "line": 112,
+        "column": 28
       }
     },
     {
@@ -81,8 +81,36 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/agent_builder_skills/api/tests/rule_management_skill_gating.spec.ts",
-        "line": 123,
-        "column": 34
+        "line": 134,
+        "column": 23
+      }
+    },
+    {
+      "id": "eb4d2d37a709979-de6e0421f36c07d",
+      "title": "Agent Builder — alerting V2 skill gating does not list Alerting V2 skills in Security or Search solution spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/agent_builder_skills/api/tests/rule_management_skill_gating.spec.ts",
+        "line": 163,
+        "column": 10
+      }
+    },
+    {
+      "id": "eb4d2d37a709979-27b1a0ed46a0b94",
+      "title": "Agent Builder — alerting V2 skill gating lists Alerting V2 skills in an Observability solution space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/agent_builder_skills/api/tests/rule_management_skill_gating.spec.ts",
+        "line": 202,
+        "column": 17
       }
     }
   ]

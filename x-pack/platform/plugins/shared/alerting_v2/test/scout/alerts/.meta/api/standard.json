@@ -1,5 +1,5 @@
 {
-  "sha1": "51b8e1aead28f07432fa6eb7ddfc6e04ad216c9b",
+  "sha1": "06e7b972e5645453272b560710f6c48dd2ac1eb4",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -601,7 +601,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_series_actions.spec.ts",
         "line": 95,
-        "column": 25
+        "column": 23
       }
     },
     {
@@ -1324,7 +1324,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 30,
+        "line": 31,
         "column": 23
       }
     },
@@ -1344,7 +1344,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 65,
+        "line": 66,
         "column": 22
       }
     },
@@ -1364,7 +1364,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 99,
+        "line": 100,
         "column": 22
       }
     },
@@ -1384,7 +1384,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 150,
+        "line": 151,
         "column": 21
       }
     },
@@ -1404,13 +1404,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 158,
+        "line": 159,
         "column": 22
       }
     },
     {
-      "id": "00849b374697fec-c3cda3c115e146e",
-      "title": "Create assign episode action API schema: rejects assignee_uid over 256 chars with 400",
+      "id": "00849b374697fec-6452a512a6976d5",
+      "title": "Create assign episode action API schema: rejects assignee_uid over 150 chars with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1424,8 +1424,28 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 170,
+        "line": 171,
         "column": 16
+      }
+    },
+    {
+      "id": "00849b374697fec-2f344f444fb4f84",
+      "title": "Create assign episode action API schema: rejects an empty assignee_uid with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 180,
+        "column": 14
       }
     },
     {
@@ -1444,8 +1464,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 177,
-        "column": 76
+        "line": 188,
+        "column": 4
       }
     },
     {
@@ -1464,8 +1484,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 184,
-        "column": 5
+        "line": 195,
+        "column": 12
       }
     },
     {
@@ -1484,8 +1504,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 194,
-        "column": 14
+        "line": 205,
+        "column": 9
       }
     },
     {
@@ -1504,8 +1524,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 201,
-        "column": 56
+        "line": 214,
+        "column": 29
       }
     },
     {
@@ -1524,8 +1544,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 211,
-        "column": 7
+        "line": 223,
+        "column": 29
       }
     },
     {
@@ -1544,8 +1564,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 221,
-        "column": 12
+        "line": 232,
+        "column": 41
       }
     },
     {
@@ -2558,8 +2578,8 @@
       }
     },
     {
-      "id": "063aaf1e88d5c37-a3ceb105eb3f0d9",
-      "title": "List action policy execution history API validation: accepts perPage=0 (count-only read)",
+      "id": "063aaf1e88d5c37-5ebd7738a8f9927",
+      "title": "List action policy execution history API validation: rejects perPage=0",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -2593,8 +2613,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 48,
-        "column": 24
+        "line": 47,
+        "column": 71
       }
     },
     {
@@ -2613,7 +2633,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 56,
+        "line": 55,
         "column": 13
       }
     },
@@ -2633,7 +2653,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 62,
+        "line": 61,
         "column": 14
       }
     },
@@ -2653,7 +2673,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 72,
+        "line": 71,
         "column": 7
       }
     },
@@ -2673,7 +2693,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 78,
+        "line": 77,
         "column": 42
       }
     },
@@ -2693,7 +2713,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 87,
+        "line": 86,
         "column": 67
       }
     },
@@ -2713,7 +2733,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 96,
+        "line": 95,
         "column": 13
       }
     },
@@ -2733,7 +2753,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 106,
+        "line": 105,
         "column": 13
       }
     },
@@ -2753,7 +2773,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 110,
+        "line": 109,
         "column": 8
       }
     },
@@ -2773,7 +2793,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 116,
+        "line": 115,
         "column": 58
       }
     },
@@ -2793,7 +2813,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 122,
+        "line": 121,
         "column": 70
       }
     },
@@ -2813,7 +2833,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 128,
+        "line": 127,
         "column": 14
       }
     },
@@ -2833,7 +2853,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
-        "line": 138,
+        "line": 137,
         "column": 7
       }
     },
@@ -2878,8 +2898,8 @@
       }
     },
     {
-      "id": "30e7de065b28dbd-bb06426c3a1c831",
-      "title": "List rule executions API validation: accepts perPage=0 with a count only read",
+      "id": "30e7de065b28dbd-9c3299cf0e9b518",
+      "title": "List rule executions API validation: rejects page=0",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -2898,8 +2918,8 @@
       }
     },
     {
-      "id": "30e7de065b28dbd-9c3299cf0e9b518",
-      "title": "List rule executions API validation: rejects page=0",
+      "id": "30e7de065b28dbd-554c6ef42ef9692",
+      "title": "List rule executions API validation: rejects perPage=0",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -2913,8 +2933,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 127,
-        "column": 11
+        "line": 123,
+        "column": 14
       }
     },
     {
@@ -2933,8 +2953,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 132,
-        "column": 12
+        "line": 130,
+        "column": 7
       }
     },
     {
@@ -2953,8 +2973,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 138,
-        "column": 78
+        "line": 136,
+        "column": 82
       }
     },
     {
@@ -2973,7 +2993,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 145,
+        "line": 144,
         "column": 69
       }
     },
@@ -2993,7 +3013,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 149,
+        "line": 148,
         "column": 12
       }
     },
@@ -3013,7 +3033,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 154,
+        "line": 153,
         "column": 22
       }
     },
@@ -3033,7 +3053,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 163,
+        "line": 162,
         "column": 16
       }
     },

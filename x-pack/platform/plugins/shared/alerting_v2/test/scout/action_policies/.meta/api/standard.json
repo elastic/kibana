@@ -1,5 +1,5 @@
 {
-  "sha1": "343f8889619bcdcf766e6bedb311116a827f7c71",
+  "sha1": "6eece95d014be14b203f16cf040cea88b0123bad",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1325,8 +1325,8 @@
       }
     },
     {
-      "id": "1b575d98308e7fd-49e176b545fa646",
-      "title": "Create action policy API create: per_episode grouping with on_status_change strategy",
+      "id": "1b575d98308e7fd-32c832c5566dffd",
+      "title": "Create action policy API create: per_alert grouping with on_status_change strategy",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -2345,6 +2345,266 @@
       }
     },
     {
+      "id": "89d97c215ed825f-de184136601bef8",
+      "title": "Get action policy routing tags API returns an empty result when no policy uses a routing tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/get_action_policy_routing_tags.spec.ts",
+        "line": 53,
+        "column": 11
+      }
+    },
+    {
+      "id": "89d97c215ed825f-cb97a94938bcdb4",
+      "title": "Get action policy routing tags API grouping: attributes tags to policies, ignoring catch-all and expression-only policies and counting a repeated tag once",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/get_action_policy_routing_tags.spec.ts",
+        "line": 59,
+        "column": 23
+      }
+    },
+    {
+      "id": "89d97c215ed825f-68d85c8ce5163ea",
+      "title": "Get action policy routing tags API ordering: ranks tags by enabled policies, lists enabled policies first, and puts disabled-only tags last",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/get_action_policy_routing_tags.spec.ts",
+        "line": 97,
+        "column": 23
+      }
+    },
+    {
+      "id": "89d97c215ed825f-0ec061383b44edf",
+      "title": "Get action policy routing tags API policies_per_tag: limits the listed policies without limiting policy_count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/get_action_policy_routing_tags.spec.ts",
+        "line": 163,
+        "column": 14
+      }
+    },
+    {
+      "id": "89d97c215ed825f-059eef7ffac57c7",
+      "title": "Get action policy routing tags API search: filters tags by a case-sensitive prefix and counts only matching tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/get_action_policy_routing_tags.spec.ts",
+        "line": 197,
+        "column": 38
+      }
+    },
+    {
+      "id": "89d97c215ed825f-10fc2b5b5ee3c0c",
+      "title": "Get action policy routing tags API total_tags: reports every matching tag when the list is limited to 20",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/get_action_policy_routing_tags.spec.ts",
+        "line": 228,
+        "column": 95
+      }
+    },
+    {
+      "id": "89d97c215ed825f-a6972fd3c114d08",
+      "title": "Get action policy routing tags API space isolation: only counts policies in the space of the request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/get_action_policy_routing_tags.spec.ts",
+        "line": 240,
+        "column": 9
+      }
+    },
+    {
+      "id": "89d97c215ed825f-d5f4d941919515f",
+      "title": "Get action policy routing tags API rejects an unknown query parameter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/get_action_policy_routing_tags.spec.ts",
+        "line": 418,
+        "column": 31
+      }
+    },
+    {
+      "id": "89d97c215ed825f-1d7673b109a899e",
+      "title": "Get action policy routing tags API rejects policies_per_tag below 1",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/get_action_policy_routing_tags.spec.ts",
+        "line": 418,
+        "column": 31
+      }
+    },
+    {
+      "id": "89d97c215ed825f-b74d5ad981723cb",
+      "title": "Get action policy routing tags API rejects policies_per_tag above 20",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/get_action_policy_routing_tags.spec.ts",
+        "line": 418,
+        "column": 31
+      }
+    },
+    {
+      "id": "89d97c215ed825f-c436e5ed4c53077",
+      "title": "Get action policy routing tags API rejects a non-numeric policies_per_tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/get_action_policy_routing_tags.spec.ts",
+        "line": 418,
+        "column": 31
+      }
+    },
+    {
+      "id": "89d97c215ed825f-088fb446a5f0c23",
+      "title": "Get action policy routing tags API rejects a search longer than 256 characters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/get_action_policy_routing_tags.spec.ts",
+        "line": 418,
+        "column": 31
+      }
+    },
+    {
+      "id": "89d97c215ed825f-cb653eb6557a0ab",
+      "title": "Get action policy routing tags API authorization: should return 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/get_action_policy_routing_tags.spec.ts",
+        "line": 425,
+        "column": 27
+      }
+    },
+    {
       "id": "a6e591c3adf61a2-4110715f02797d7",
       "title": "Get action policy API get: returns full action policy by id with all schema fields populated",
       "expectedStatus": "passed",
@@ -3085,8 +3345,8 @@
       }
     },
     {
-      "id": "fdf24ec1e8e4d94-a5674f6efaf82b6",
-      "title": "Match action policies API validation: rejects body with unknown top-level keys (strict schema)",
+      "id": "fdf24ec1e8e4d94-0a1d1ad5e19389e",
+      "title": "Match action policies API validation: rejects rule.tags (policies match on routing tags)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -3102,6 +3362,26 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/match_action_policies.spec.ts",
         "line": 22,
         "column": 21
+      }
+    },
+    {
+      "id": "fdf24ec1e8e4d94-a5674f6efaf82b6",
+      "title": "Match action policies API validation: rejects body with unknown top-level keys (strict schema)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/match_action_policies.spec.ts",
+        "line": 30,
+        "column": 42
       }
     },
     {
