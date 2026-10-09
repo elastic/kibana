@@ -10,6 +10,10 @@ import { render, screen } from '@testing-library/react';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
 import {
+  clearImpactDetailsRenderer,
+  registerImpactDetailsRenderer,
+} from '../impact/impact_details_renderer';
+import {
   FlyoutGroupedAttachments,
   createFlyoutGroupedAttachmentsRegistry,
 } from '../grouped_attachments';
@@ -65,6 +69,10 @@ const renderTab = ({
   );
 
 describe('OverviewTab', () => {
+  afterEach(() => {
+    clearImpactDetailsRenderer();
+  });
+
   it('shows the host-supplied count of proposals beside the "Proposed actions" heading', () => {
     renderTab({
       proposedActionsContent: <div>Rows</div>,
@@ -93,6 +101,44 @@ describe('OverviewTab', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
+  it('renders a hidden impact attachment as its own section', () => {
+    registerImpactDetailsRenderer(() => <div>Checkout failed for 30% of requests.</div>);
+
+    renderTab({
+      attachments: [
+        {
+          ...attachment,
+          id: 'impact-1',
+          type: 'investigation_impact',
+          hidden: true,
+        },
+      ],
+    });
+
+    expect(screen.getByRole('heading', { name: 'Impact' })).toBeInTheDocument();
+    expect(screen.getByText('Checkout failed for 30% of requests.')).toBeInTheDocument();
+    expect(screen.queryByTestId('groupedAttachmentsSection')).not.toBeInTheDocument();
+  });
+
+  it('shows a host-supplied impact instead of the impact attachment, under one heading', () => {
+    registerImpactDetailsRenderer(() => <div>from the attachment</div>);
+
+    render(
+      <OverviewTab
+        investigation={investigation}
+        attachments={[
+          { ...attachment, id: 'impact-1', type: 'investigation_impact', hidden: true },
+        ]}
+        groupedAttachments={groupedAttachments}
+        sections={{ impact: <span>from the query API</span> }}
+      />
+    );
+
+    expect(screen.getAllByRole('heading', { name: 'Impact' })).toHaveLength(1);
+    expect(screen.getByText('from the query API')).toBeInTheDocument();
+    expect(screen.queryByText('from the attachment')).not.toBeInTheDocument();
+  });
+
   it('puts the grouped attachments under the narrative, inside "What\'s happened"', () => {
     renderTab({ attachments: [attachment] });
 
@@ -109,10 +155,54 @@ describe('OverviewTab', () => {
     expect(screen.getByText("What's happened")).toBeInTheDocument();
   });
 
-  it('renders the card on its own when there is no narrative', () => {
+  it('renders the card under the heading when there is no narrative', () => {
     renderTab({ attachments: [attachment], investigationOverrides: { summary: undefined } });
 
-    expect(screen.queryByText("What's happened")).not.toBeInTheDocument();
+    expect(screen.getByText("What's happened")).toBeInTheDocument();
     expect(screen.getByTestId('groupedAttachmentsSection')).toBeInTheDocument();
+  });
+
+  it('renders the host sections in order and only those supplied', () => {
+    render(
+      <OverviewTab
+        investigation={investigation}
+        attachments={[attachment]}
+        groupedAttachments={groupedAttachments}
+        proposedActionsContent={<span>proposal</span>}
+        sections={{
+          subjects: <span>checkout alert</span>,
+          impact: <span>checkout is down</span>,
+          conclusion: 'A **bad** deploy.',
+          trace: <span>hypotheses</span>,
+        }}
+      />
+    );
+
+    const headings = screen.getAllByRole('heading').map(({ textContent }) => textContent);
+    expect(headings).toEqual([
+      'Subject',
+      "What's happened",
+      'Impact',
+      'Conclusion',
+      'Proposed actions',
+      'Investigation trace',
+    ]);
+    expect(screen.getByTestId('groupedAttachmentsSection')).toBeInTheDocument();
+    expect(screen.getByText('bad')).toBeInTheDocument();
+  });
+
+  it('leaves out the sections an investigation has no data for', () => {
+    renderTab({ attachments: [] });
+
+    expect(screen.queryByText('Subject')).not.toBeInTheDocument();
+    expect(screen.queryByText('Impact')).not.toBeInTheDocument();
+    expect(screen.queryByText('Conclusion')).not.toBeInTheDocument();
+    expect(screen.queryByText('Investigation trace')).not.toBeInTheDocument();
+  });
+
+  it('renders no "What\'s happened" block without a narrative or attachments', () => {
+    renderTab({ attachments: [], investigationOverrides: { summary: undefined } });
+
+    expect(screen.queryByText("What's happened")).not.toBeInTheDocument();
   });
 });
