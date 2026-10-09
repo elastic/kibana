@@ -198,9 +198,15 @@ where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`ver
 
 ## Save Order Reminder
 
-After rendering all three attachments (rule, workflow, action policy), remind the user of the required save order:
+An action policy only requires its destination **workflows** to be saved first. It never requires a rule to be saved, and an unsaved rule attachment must not block creating or rendering a policy.
 
-> "To activate this alerting setup, please save in order: **Rule → Workflow → Action Policy**. The action policy depends on both the rule and the workflow being saved first."
+After rendering the attachments, remind the user to save the workflow before the action policy.
+
+If a rule attachment in the conversation is still unsaved, also remind the user that the rule has not been saved yet. Do not search for or fetch other rules to check this.
+
+Policies are linked to rules only by \`matcher.tags\`, matched against the rule's \`metadata.routing_tags\`. Explain that unless another saved rule already carries the policy's routing tag(s), the policy will not match any alerts until the rule is saved.
+
+Do not add this reminder for catch-all policies.
 
 ## Customization Hints
 
