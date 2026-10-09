@@ -144,6 +144,20 @@ describe('selectProcessActions', () => {
       expect(decision.rule).not.toBe('protected_system_process');
     });
 
+    it.each(['constructor', 'toString', '__proto__', 'hasOwnProperty'])(
+      'does not treat the inherited object member name %s as a protected process',
+      (processName) => {
+        for (const processExecutable of [undefined, '/tmp/' + processName]) {
+          const decision = selectProcessActions({
+            selector: selector({ processName, processExecutable }),
+            host: host(),
+            state: state(),
+          });
+          expect(decision.rule).toBe('suspend_only');
+        }
+      }
+    );
+
     it('falls back to the name alone when there is no executable path', () => {
       const decision = selectProcessActions({
         selector: selector({ processName: 'lsass.exe' }),

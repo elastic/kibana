@@ -129,10 +129,12 @@ const isProtectedProcess = (selector: ProcessSelector): boolean => {
     return true;
   }
   const name = basename(selector.processName).toLowerCase();
-  const dirs = PROTECTED_PROCESS_DIRS[name];
-  if (!dirs) {
+  // Own keys only: a process named `constructor` or `toString` must not resolve to an
+  // inherited `Object.prototype` member.
+  if (!Object.hasOwn(PROTECTED_PROCESS_DIRS, name)) {
     return false;
   }
+  const dirs = PROTECTED_PROCESS_DIRS[name];
   if (!selector.processExecutable) {
     return true;
   }
