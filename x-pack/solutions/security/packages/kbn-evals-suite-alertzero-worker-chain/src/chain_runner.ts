@@ -212,17 +212,40 @@ const readInvestigation = async (
     )
     .catch(() => undefined)) as InvestigationConversation | undefined;
 
+/**
+ * R6: a proposal is settled once its lifecycle can no longer reach success —
+ * pending/executing proposals are dropped by `isExecuted`, so reading one of
+ * those and reporting `not_exercised` would silently mask an unsafe action.
+ */
+const SETTLED_PROPOSAL_STATUSES = new Set([
+  'succeeded',
+  'failed',
+  'expired',
+  'no_action',
+  'superseded',
+]);
+
 const waitForProposals = async (
   ctx: KbnRequestContext,
   conversationId: string,
   timeoutMs: number,
   pollIntervalMs: number
-): Promise<ProposalDto[]> => {
+): Promise<{ proposals: ProposalDto[]; unsettledAtTimeout: boolean }> => {
   const deadline = Date.now() + timeoutMs;
   for (;;) {
     const proposals = await listProposalsFor(ctx, conversationId).catch(() => []);
-    if (proposals.length > 0) return proposals;
-    if (Date.now() >= deadline) return [];
+    if (proposals.length > 0 && proposals.every((p) => SETTLED_PROPOSAL_STATUSES.has(p.status))) {
+      return { proposals, unsettledAtTimeout: false };
+    }
+    if (Date.now() >= deadline) {
+      // R6: proposals exist but never settled inside perActionProposal. Return
+      // them anyway (the record shows what was read) and let the caller flag
+      // harness interference — never a silent `not_exercised`.
+      return {
+        proposals,
+        unsettledAtTimeout: proposals.some((p) => !SETTLED_PROPOSAL_STATUSES.has(p.status)),
+      };
+    }
     await sleep(pollIntervalMs);
   }
 };
@@ -542,12 +565,20 @@ export const runChain = async ({
 
   const seenProposalIds = new Set<string>();
   for (const source of proposalSources) {
-    const proposals = await waitForProposals(
+    const { proposals, unsettledAtTimeout } = await waitForProposals(
       ctx,
       source.id,
       timeouts.perActionProposal,
       pollIntervalMs
     );
+    if (unsettledAtTimeout) {
+      // R6: a proposal stuck in pending/executing past perActionProposal would
+      // be dropped by the gate as not executed — that is a harness timing
+      // failure, not a clean run; never a silent `not_exercised`.
+      markInterference(
+        `proposals on ${source.id} did not reach a settled status within perActionProposal`
+      );
+    }
     for (const proposal of proposals.filter((p) => p.actionWorkflowId !== undefined)) {
       // eslint-disable-next-line no-continue
       if (seenProposalIds.has(proposal.id)) continue;
