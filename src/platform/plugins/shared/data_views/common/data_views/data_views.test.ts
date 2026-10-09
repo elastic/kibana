@@ -592,6 +592,114 @@ describe('IndexPatterns', () => {
     expect(indexPatterns.setDefault).toHaveBeenCalled();
   });
 
+  test('overwriting a data view with the same ID preserves its namespaces', async () => {
+    savedObjectsClient.find = jest
+      .fn()
+      .mockResolvedValue([{ id: 'id', namespaces: ['default', 'other'] }]);
+    savedObjectsClient.create = jest.fn().mockResolvedValue({
+      ...savedObject,
+      namespaces: ['default', 'other'],
+    });
+    indexPatterns.setDefault = jest.fn();
+
+    const dataView = await indexPatterns.createAndSaveDataViewLazy(
+      { id: 'id', title: 'kibana-*', name: 'Kibana *' },
+      true
+    );
+
+    expect(savedObjectsClient.delete).not.toHaveBeenCalled();
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(expect.anything(), {
+      id: 'id',
+      initialNamespaces: undefined,
+      overwrite: true,
+      managed: false,
+    });
+    expect(dataView.namespaces).toStrictEqual(['default', 'other']);
+  });
+
+  test('overwriting a data view with a new ID carries over unspecified namespaces', async () => {
+    savedObjectsClient.find = jest
+      .fn()
+      .mockResolvedValue([{ id: 'old-id', namespaces: ['default', 'other'] }]);
+    savedObjectsClient.create = jest.fn().mockResolvedValue({
+      ...savedObject,
+      id: 'new-id',
+      namespaces: ['default', 'other'],
+    });
+    indexPatterns.setDefault = jest.fn();
+
+    await indexPatterns.createAndSaveDataViewLazy(
+      { id: 'new-id', title: 'kibana-*', name: 'Kibana *' },
+      true
+    );
+
+    expect(savedObjectsClient.delete).toHaveBeenCalledWith('old-id');
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(expect.anything(), {
+      id: 'new-id',
+      initialNamespaces: ['default', 'other'],
+      overwrite: true,
+      managed: false,
+    });
+  });
+
+  test('overwriting a data view with a new ID rejects when namespaces are redacted', async () => {
+    savedObjectsClient.find = jest
+      .fn()
+      .mockResolvedValue([{ id: 'old-id', namespaces: ['default', '?'] }]);
+    savedObjectsClient.create = jest.fn();
+    indexPatterns.setDefault = jest.fn();
+
+    await expect(
+      indexPatterns.createAndSaveDataViewLazy(
+        { id: 'new-id', title: 'kibana-*', name: 'Kibana *' },
+        true
+      )
+    ).rejects.toThrow('Operation failed due to insufficient access, id: old-id');
+
+    expect(savedObjectsClient.delete).not.toHaveBeenCalled();
+    expect(savedObjectsClient.create).not.toHaveBeenCalled();
+  });
+
+  test('overwriting a data view with the same ID clears its cached instances', async () => {
+    savedObjectsClient.find = jest.fn().mockResolvedValue([{ id: 'id', namespaces: ['default'] }]);
+    savedObjectsClient.create = jest.fn().mockResolvedValue(savedObject);
+    indexPatterns.setDefault = jest.fn();
+    const cachedDataView = await indexPatterns.get('id');
+    const cachedDataViewLazy = await indexPatterns.getDataViewLazy('id');
+
+    await indexPatterns.createAndSaveDataViewLazy(
+      { id: 'id', title: 'kibana-*', name: 'Kibana *' },
+      true
+    );
+
+    expect(await indexPatterns.get('id')).not.toBe(cachedDataView);
+    expect(await indexPatterns.getDataViewLazy('id')).not.toBe(cachedDataViewLazy);
+  });
+
+  test('overwriting a data view uses explicitly supplied namespaces', async () => {
+    savedObjectsClient.find = jest
+      .fn()
+      .mockResolvedValue([{ id: 'old-id', namespaces: ['default', 'other'] }]);
+    savedObjectsClient.create = jest.fn().mockResolvedValue({
+      ...savedObject,
+      id: 'new-id',
+      namespaces: ['default'],
+    });
+    indexPatterns.setDefault = jest.fn();
+
+    await indexPatterns.createAndSaveDataViewLazy(
+      { id: 'new-id', title: 'kibana-*', name: 'Kibana *', namespaces: ['default'] },
+      true
+    );
+
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(expect.anything(), {
+      id: 'new-id',
+      initialNamespaces: ['default'],
+      overwrite: true,
+      managed: false,
+    });
+  });
+
   test('createAndSave will throw if insufficient access', async () => {
     const title = 'kibana-*';
 
