@@ -1,5 +1,5 @@
 {
-  "sha1": "fd0ccb4937be813e46aaa906959a3d066395bbcf",
+  "sha1": "4a34a8af6ac8b25f69a8a4bd69d599354c8ba69b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -34,8 +34,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/alerts_management_privileges.spec.ts",
-        "line": 96,
-        "column": 73
+        "line": 95,
+        "column": 65
       }
     },
     {
@@ -49,7 +49,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/alerts_management_privileges.spec.ts",
         "line": 99,
-        "column": 100
+        "column": 10
       }
     },
     {
@@ -62,8 +62,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/alerts_privileges.spec.ts",
-        "line": 100,
-        "column": 7
+        "line": 96,
+        "column": 66
       }
     },
     {
@@ -76,8 +76,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/alerts_privileges.spec.ts",
-        "line": 105,
-        "column": 13
+        "line": 101,
+        "column": 79
       }
     },
     {
@@ -90,8 +90,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 137,
-        "column": 11
+        "line": 133,
+        "column": 89
       }
     },
     {
@@ -105,7 +105,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
         "line": 223,
-        "column": 89
+        "column": 17
       }
     },
     {
@@ -118,8 +118,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 286,
-        "column": 89
+        "line": 285,
+        "column": 26
       }
     },
     {
@@ -132,8 +132,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 339,
-        "column": 26
+        "line": 335,
+        "column": 15
       }
     },
     {
@@ -146,8 +146,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 395,
-        "column": 9
+        "line": 392,
+        "column": 26
       }
     },
     {
@@ -160,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 431,
-        "column": 9
+        "line": 428,
+        "column": 10
       }
     },
     {
@@ -174,8 +174,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 483,
-        "column": 26
+        "line": 480,
+        "column": 9
       }
     },
     {
@@ -188,8 +188,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 535,
-        "column": 13
+        "line": 532,
+        "column": 80
       }
     },
     {
@@ -202,8 +202,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 577,
-        "column": 26
+        "line": 573,
+        "column": 9
       }
     },
     {
@@ -216,8 +216,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 632,
-        "column": 7
+        "line": 629,
+        "column": 9
       }
     },
     {
@@ -230,8 +230,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 659,
-        "column": 15
+        "line": 656,
+        "column": 9
       }
     },
     {
@@ -244,8 +244,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 678,
-        "column": 13
+        "line": 674,
+        "column": 26
       }
     },
     {
@@ -258,8 +258,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 700,
-        "column": 26
+        "line": 697,
+        "column": 13
       }
     },
     {
@@ -272,8 +272,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/discover_alerts_menu.spec.ts",
-        "line": 29,
-        "column": 25
+        "line": 25,
+        "column": 52
       }
     },
     {
@@ -286,8 +286,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/episode_action_policy_history.spec.ts",
-        "line": 40,
-        "column": 25
+        "line": 36,
+        "column": 23
       }
     },
     {
