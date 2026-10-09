@@ -70,20 +70,13 @@ export const tags = {
         return [...this.complete, ...this.essentials, ...this.ease];
       },
     },
-    workplaceai: getPlaywrightTagsFor('serverless', 'workplaceai'),
     vectordb: getPlaywrightTagsFor('serverless', 'vectordb'),
 
     /**
      * All serverless project types
      */
     get all(): string[] {
-      return [
-        ...this.search,
-        ...this.observability.all,
-        ...this.security.all,
-        ...this.workplaceai,
-        ...this.vectordb,
-      ];
+      return [...this.search, ...this.observability.all, ...this.security.all, ...this.vectordb];
     },
   },
 
@@ -92,7 +85,7 @@ export const tags = {
    * - local stateful (self-managed) & Elastic Cloud hosted (ECH) - all types
    * - local serverless (mock-serverless) & Elastic Cloud projects (MKI) - only types that have a **stateful counterpart**
    *
-   * ⚠️ This does NOT include serverless project subtypes or Workplace AI projects.
+   * ⚠️ This does NOT include serverless project subtypes or VectorDB projects.
    */
   get deploymentAgnostic(): string[] {
     return [

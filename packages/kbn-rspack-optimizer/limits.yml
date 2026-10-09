@@ -186,7 +186,6 @@ pageLoadAssetSize:
   serverlessObservability: 14136
   serverlessSearch: 18103
   serverlessVectordb: 9436
-  serverlessWorkplaceAI: 3723
   sessionView: 647
   share: 379
   shared-core: 311749
@@ -237,4 +236,3 @@ pageLoadAssetSize:
   watcher: 5497
   workflowsExtensions: 38186
   workflowsManagement: 36613
-  workplaceAIApp: 1800

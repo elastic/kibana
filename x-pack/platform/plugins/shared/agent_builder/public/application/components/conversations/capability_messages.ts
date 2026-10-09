@@ -143,40 +143,12 @@ const vectordbCapabilityMessages = [
   ),
 ] as const;
 
-const workplaceaiCapabilityMessages = [
-  i18n.translate(
-    'xpack.agentBuilder.conversations.newConversationPrompt.workplaceai.searchKnowledgeBaseDetail',
-    {
-      defaultMessage: 'I can search your knowledge base',
-    }
-  ),
-  i18n.translate(
-    'xpack.agentBuilder.conversations.newConversationPrompt.workplaceai.summarizeDocumentsDetail',
-    {
-      defaultMessage: 'I can summarize documents',
-    }
-  ),
-  i18n.translate(
-    'xpack.agentBuilder.conversations.newConversationPrompt.workplaceai.findRelevantContentDetail',
-    {
-      defaultMessage: 'I can find relevant content',
-    }
-  ),
-  i18n.translate(
-    'xpack.agentBuilder.conversations.newConversationPrompt.workplaceai.answerFromYourDataDetail',
-    {
-      defaultMessage: 'I can answer from your data',
-    }
-  ),
-] as const;
-
 const CAPABILITY_MESSAGES_BY_SOLUTION: Record<SolutionView, readonly string[]> = {
   classic: classicCapabilityMessages,
   oblt: observabilityCapabilityMessages,
   security: securityCapabilityMessages,
   es: elasticsearchCapabilityMessages,
   vectordb: vectordbCapabilityMessages,
-  workplaceai: workplaceaiCapabilityMessages,
 };
 
 export const getCapabilityMessagesForSolution = (solution: SolutionView): readonly string[] =>

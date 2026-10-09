@@ -791,7 +791,6 @@
     "name": "Search & ML UX",
     "areas": [
       "search",
-      "workplaceai",
       "vectordb",
       "platform"
     ],
@@ -1024,7 +1023,7 @@
     "id": "workchat-eng",
     "name": "Agent Builder",
     "areas": [
-      "workplaceai"
+      "platform"
     ],
     "github": {
       "team": "elastic/workchat-eng",

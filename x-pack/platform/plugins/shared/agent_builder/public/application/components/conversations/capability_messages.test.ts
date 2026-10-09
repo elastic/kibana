@@ -15,7 +15,6 @@ describe('getCapabilityMessagesForSolution', () => {
     expect(getCapabilityMessagesForSolution('security')).toHaveLength(4);
     expect(getCapabilityMessagesForSolution('es')).toHaveLength(4);
     expect(getCapabilityMessagesForSolution('vectordb')).toHaveLength(4);
-    expect(getCapabilityMessagesForSolution('workplaceai')).toHaveLength(4);
   });
 
   it('returns different message sets per Solution View', () => {
@@ -24,9 +23,6 @@ describe('getCapabilityMessagesForSolution', () => {
     expect(getCapabilityMessagesForSolution('security')[0]).toBe('I can triage security alerts');
     expect(getCapabilityMessagesForSolution('es')[0]).toBe('I can run ES|QL queries');
     expect(getCapabilityMessagesForSolution('vectordb')[0]).toBe('I can run vector searches');
-    expect(getCapabilityMessagesForSolution('workplaceai')[0]).toBe(
-      'I can search your knowledge base'
-    );
   });
 
   it('falls back to Classic for unknown solutions', () => {

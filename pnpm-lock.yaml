@@ -1925,9 +1925,6 @@ importers:
       '@kbn/deeplinks-workflows':
         specifier: workspace:*
         version: link:src/platform/packages/shared/deeplinks/workflows
-      '@kbn/deeplinks-workplace-ai':
-        specifier: workspace:*
-        version: link:src/platform/packages/shared/deeplinks/workplace_ai
       '@kbn/default-tracer':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-default-tracer
@@ -3524,12 +3521,6 @@ importers:
       '@kbn/serverless-vectordb-settings':
         specifier: workspace:*
         version: link:src/platform/packages/shared/serverless/settings/vectordb_project
-      '@kbn/serverless-workplace-ai':
-        specifier: workspace:*
-        version: link:x-pack/solutions/workplaceai/plugins/serverless_workplace_ai
-      '@kbn/serverless-workplace-ai-settings':
-        specifier: workspace:*
-        version: link:src/platform/packages/shared/serverless/settings/workplace_ai_project
       '@kbn/service-accounts-test-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/security_api_integration/plugins/service_accounts
@@ -4103,9 +4094,6 @@ importers:
       '@kbn/workflows-yaml':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-workflows-yaml
-      '@kbn/workplace-ai-app':
-        specifier: workspace:*
-        version: link:x-pack/solutions/workplaceai/plugins/workplace_ai_app
       '@kbn/xstate-utils':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-xstate-utils
@@ -5937,9 +5925,6 @@ importers:
       '@kbn/test-suites-xpack-vectordb':
         specifier: workspace:*
         version: link:x-pack/solutions/vectordb/test
-      '@kbn/test-suites-xpack-workplace-ai':
-        specifier: workspace:*
-        version: link:x-pack/solutions/workplaceai/test
       '@kbn/tooling-log':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-tooling-log
@@ -7911,8 +7896,6 @@ importers:
 
   src/platform/packages/shared/deeplinks/workflows: {}
 
-  src/platform/packages/shared/deeplinks/workplace_ai: {}
-
   src/platform/packages/shared/esql/kbn-esql-browser: {}
 
   src/platform/packages/shared/esql/kbn-esql-language: {}
@@ -8448,8 +8431,6 @@ importers:
   src/platform/packages/shared/serverless/settings/security_project: {}
 
   src/platform/packages/shared/serverless/settings/vectordb_project: {}
-
-  src/platform/packages/shared/serverless/settings/workplace_ai_project: {}
 
   src/platform/packages/shared/serverless/types: {}
 
@@ -9864,12 +9845,6 @@ importers:
   x-pack/solutions/vectordb/plugins/serverless_vectordb: {}
 
   x-pack/solutions/vectordb/test: {}
-
-  x-pack/solutions/workplaceai/plugins/serverless_workplace_ai: {}
-
-  x-pack/solutions/workplaceai/plugins/workplace_ai_app: {}
-
-  x-pack/solutions/workplaceai/test: {}
 
 packages:
 

@@ -25,7 +25,7 @@ Start the Kibana and Elasticsearch servers once:
 ```bash
 node scripts/scout start-server \
   --arch <stateful|serverless> \
-  --domain <classic|search|observability_complete|observability_logs_essentials|security_complete|security_essentials|security_ease|workplaceai|vectordb>
+  --domain <classic|search|observability_complete|observability_logs_essentials|security_complete|security_essentials|security_ease|vectordb>
 ```
 
 :::::
@@ -53,7 +53,7 @@ We recommend checking out Playwright's [**UI mode**](./debugging.md#playwright-u
 ```bash
 node scripts/scout run-tests \
   --arch <stateful|serverless> \
-  --domain <classic|search|observability_complete|observability_logs_essentials|security_complete|security_essentials|security_ease|workplaceai|vectordb> \
+  --domain <classic|search|observability_complete|observability_logs_essentials|security_complete|security_essentials|security_ease|vectordb> \
   --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
