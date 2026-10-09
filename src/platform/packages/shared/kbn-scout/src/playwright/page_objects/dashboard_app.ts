@@ -184,18 +184,15 @@ export class DashboardApp {
     if (startOfIdIndex < urlSubstring.length) {
       return undefined;
     }
-    const endIndexOfFilters = url.indexOf('?');
-    const endIndexOfMax = url.substring(startOfIdIndex).indexOf('/');
-    if (endIndexOfMax === -1) {
-      return endIndexOfFilters === -1
-        ? url.substring(startOfIdIndex)
-        : url.substring(startOfIdIndex, endIndexOfFilters);
+    const idSubstring = url.substring(startOfIdIndex);
+    const slashIndex = idSubstring.indexOf('/');
+    const queryIndex = idSubstring.indexOf('?');
+    if (slashIndex === -1 && queryIndex === -1) {
+      return idSubstring;
     }
     const endIndex =
-      endIndexOfFilters + startOfIdIndex > endIndexOfMax
-        ? endIndexOfFilters + startOfIdIndex
-        : endIndexOfMax + startOfIdIndex;
-    return url.substring(startOfIdIndex, endIndex < 0 ? url.length : endIndex + startOfIdIndex);
+      slashIndex === -1 ? queryIndex : queryIndex === -1 ? slashIndex : Math.min(slashIndex, queryIndex);
+    return idSubstring.substring(0, endIndex);
   }
 
   /** Navigates to the new dashboard creation page and waits for the editor toolbar to load. */

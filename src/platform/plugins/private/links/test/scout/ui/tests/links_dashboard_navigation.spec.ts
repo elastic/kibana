@@ -116,10 +116,10 @@ test.describe(
       ]);
 
       await expect(newTab).toHaveURL(new RegExp(`/view/${DASHBOARD_IDS.LINKS_003}`));
+      await pageObjects.dashboard.waitForRenderComplete();
       // Should not pass any filters
       await expect(newTab.locator('[data-test-subj~="filter"]')).toHaveCount(0);
       // Should not pass any date range: the dashboard's own saved time range is used
-      await expect(newTab.getByTestId('dshDashboardViewport')).toBeVisible();
       await expect(newTab.getByTestId('dateRangePickerControlButton')).toHaveAttribute(
         'data-date-range',
         '2018-12-24T00:00:00.000Z to 2018-12-26T00:00:00.000Z'
