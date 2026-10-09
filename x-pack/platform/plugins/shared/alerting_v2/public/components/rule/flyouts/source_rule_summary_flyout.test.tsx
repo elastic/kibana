@@ -80,6 +80,12 @@ describe('SourceRuleSummaryFlyout', () => {
     expect(screen.getByTestId('sourceRuleName')).toHaveTextContent('My classic rule');
   });
 
+  it('renders the Classic rules badge', () => {
+    renderFlyout();
+
+    expect(screen.getByTestId('classicRulesBadge')).toHaveTextContent('Classic rules');
+  });
+
   it('renders the enabled badge', () => {
     renderFlyout();
 
