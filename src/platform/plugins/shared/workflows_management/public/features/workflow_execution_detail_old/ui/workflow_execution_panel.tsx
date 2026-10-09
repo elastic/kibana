@@ -102,7 +102,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
                 hasShadow={false}
                 hasBorder={false}
                 borderRadius="none"
-                css={[styles.linkCss, { borderRadius: 0 }]}
+                css={styles.linkCss}
               >
                 <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
                   <EuiFlexItem grow={false}>
@@ -126,7 +126,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
             hasShadow={false}
             hasBorder={false}
             borderRadius="none"
-            css={{ overflowY: 'auto', borderRadius: 0, height: '100%' }}
+            css={{ overflowY: 'auto', height: '100%' }}
           >
             {execution && (
               <StepExecutionsTruncatedCallout
@@ -147,19 +147,9 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
         </EuiFlexItem>
 
         {execution && (showCancelButton || showDoneButton) && (
-          <EuiFlexItem
-            grow={false}
-            css={({ euiTheme }: UseEuiTheme) => ({
-              borderTop: euiTheme.border.thin,
-            })}
-          >
-            <EuiPanel
-              paddingSize="m"
-              hasShadow={false}
-              hasBorder={false}
-              borderRadius="none"
-              css={{ borderRadius: 0 }}
-            >
+          <EuiFlexItem grow={false}>
+            <EuiHorizontalRule margin="none" />
+            <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false} borderRadius="none">
               {showCancelButton ? (
                 <CancelExecutionButton
                   executionId={execution.id}

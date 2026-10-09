@@ -11,6 +11,7 @@ import { parse } from 'yaml';
 import inquirer from 'inquirer';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { resolveEvalSuites, type EvalSuiteDefinition } from './suites';
+import { DEFAULT_SCOUT_TARGET, type ScoutTarget } from './scout_target';
 
 const KIBANA_DEV_YML = 'config/kibana.dev.yml';
 
@@ -253,22 +254,15 @@ export const readLocalEsUrl = (repoRoot: string): string | undefined => {
 
 const DEFAULT_SERVER_CONFIG_SET = 'evals_tracing';
 
-export const SCOUT_EVALS_ARGS = [
+export const scoutEvalsArgs = (
+  serverConfigSet?: string,
+  { arch, domain }: ScoutTarget = DEFAULT_SCOUT_TARGET
+): string[] => [
   'start-server',
   '--arch',
-  'stateful',
+  arch,
   '--domain',
-  'classic',
-  '--serverConfigSet',
-  DEFAULT_SERVER_CONFIG_SET,
-] as const;
-
-export const scoutEvalsArgs = (serverConfigSet?: string): string[] => [
-  'start-server',
-  '--arch',
-  'stateful',
-  '--domain',
-  'classic',
+  domain,
   '--serverConfigSet',
   serverConfigSet ?? DEFAULT_SERVER_CONFIG_SET,
 ];

@@ -599,7 +599,6 @@ describe('dagLayout — analyzeSiblings prevCross symmetry', () => {
 
 describe('dagLayout — reservedLanes', () => {
   // Default separations used by dagLayout when not overridden.
-  const DEFAULT_NODE_SEP = 50;
   const DEFAULT_RANK_SEP = 70;
   // Helper: build the asymmetric-fork fixture used across these tests.
   // Topology (TB): s1→s2→s3 (spine); s2→fb1→fb2 (failure lane, boundary edges).
@@ -774,9 +773,11 @@ describe('dagLayout — reservedLanes', () => {
     //  col 0    col 1    col 2
     //  [s2] ──► [a] ──► [c]
     //            |
-    //           [b]         ← b and c may share a rank but are in different columns
+    //           [b]         ← pushed below c (in-lane D7), different column
     //
-    // c must be one rank below a (its owner), NOT below b.
+    // c must be one rank below a (its owner), NOT below b. b is `a`'s in-lane
+    // successor, so it must also clear c's extent (in-lane D7 — see the
+    // dedicated "in-lane D7" tests below for the case this guards against).
     const nodes = [node('s1'), node('s2'), node('s3'), node('a'), node('b'), node('c')];
     const edgeList = [
       edge('s1-s2', 's1', 's2'),
@@ -800,11 +801,95 @@ describe('dagLayout — reservedLanes', () => {
     expect(a.y).toBeCloseTo(s2.y + s2.height + DEFAULT_RANK_SEP, 0);
     // c one rank below a (its owner), NOT below b.
     expect(c.y).toBeCloseTo(a.y + a.height + DEFAULT_RANK_SEP, 0);
-    // b and c may share a rank — assert they do NOT overlap cross-axis.
-    const bRight = b.x + b.width;
-    const cLeft = c.x;
-    expect(cLeft).toBeGreaterThan(bRight - DEFAULT_NODE_SEP);
+    // b is a's in-lane successor — it must clear c's extent (in-lane D7).
+    expect(b.y).toBeGreaterThanOrEqual(c.y + c.height + DEFAULT_RANK_SEP - CENTER_TOLERANCE);
     expectNoPairwiseOverlap(laid);
+  });
+
+  // ── In-lane D7: a parent lane's own successors must clear a nested lane ────
+  //
+  // Regression for: main-axis clearance only ran for depth-0 SPINE owners, so a
+  // nested lane's owner's successor INSIDE the parent lane was never pushed. A
+  // `continue: true` rejoin from the deepest nested leaf back into that
+  // successor then ran backward (upward) instead of forward (downward).
+
+  it('in-lane D7: parent lane successor clears a nested lane (TB)', () => {
+    // Spine: s1 → s2 → s3
+    // Depth-0 lane (owner=s2): [a, b] — a→b, a is also the owner of a nested lane.
+    // Depth-1 lane (owner=a):  [c, d] — c→d, with a rejoin edge d→b.
+    const nodes = [node('s1'), node('s2'), node('s3'), node('a'), node('b'), node('c'), node('d')];
+    const edgeList = [
+      edge('s1-s2', 's1', 's2'),
+      edge('s2-s3', 's2', 's3'),
+      edge('s2-a', 's2', 'a'), // boundary
+      edge('a-b', 'a', 'b'), // lane-internal (depth-0 lane)
+      edge('a-c', 'a', 'c'), // boundary
+      edge('c-d', 'c', 'd'), // lane-internal (depth-1 lane)
+      edge('d-b', 'd', 'b'), // boundary (rejoin)
+    ];
+    const { nodes: laid } = dagLayout(nodes, edgeList, [], {
+      reservedLanes: [
+        { nodeIds: ['a', 'b'], depth: 0, ownerId: 's2' },
+        { nodeIds: ['c', 'd'], depth: 1, ownerId: 'a' },
+      ],
+    });
+    const s3 = findNode(laid, 's3');
+    const b = findNode(laid, 'b');
+    const d = findNode(laid, 'd');
+
+    // The rejoin target (b) must clear the nested lane's deepest leaf (d) — the
+    // rejoin edge d→b must point forward (down), not backward.
+    expect(b.y).toBeGreaterThanOrEqual(d.y + d.height + DEFAULT_RANK_SEP - CENTER_TOLERANCE);
+    // The spine below s2 still clears the now-extended parent lane.
+    expect(s3.y).toBeGreaterThanOrEqual(b.y + b.height + DEFAULT_RANK_SEP - CENTER_TOLERANCE);
+    expectNoPairwiseOverlap(laid);
+  });
+
+  it('in-lane D7: a sibling in-lane branch is not pushed by an unrelated nested lane (Fix 6 parity)', () => {
+    // Depth-0 lane (owner=s2): [gate, then, els, merge] — an if-fork inside the
+    // fallback. `then` owns a nested lane; `els` is the parallel branch and must
+    // NOT be pushed just because it shares a rank with `then`'s nested lane.
+    const nodes = [
+      node('s1'),
+      node('s2'),
+      node('s3'),
+      node('gate'),
+      node('then'),
+      node('els'),
+      node('merge'),
+      node('nested'),
+    ];
+    const edgeList = [
+      edge('s1-s2', 's1', 's2'),
+      edge('s2-s3', 's2', 's3'),
+      edge('s2-gate', 's2', 'gate'), // boundary
+      edge('gate-then', 'gate', 'then'), // lane-internal
+      edge('gate-els', 'gate', 'els'), // lane-internal
+      edge('then-merge', 'then', 'merge'), // lane-internal
+      edge('els-merge', 'els', 'merge'), // lane-internal
+      edge('then-nested', 'then', 'nested'), // boundary
+    ];
+    const { nodes: laid } = dagLayout(nodes, edgeList, [], {
+      reservedLanes: [
+        { nodeIds: ['gate', 'then', 'els', 'merge'], depth: 0, ownerId: 's2' },
+        { nodeIds: ['nested'], depth: 1, ownerId: 'then' },
+      ],
+    });
+    const then = findNode(laid, 'then');
+    const els = findNode(laid, 'els');
+    const nested = findNode(laid, 'nested');
+    const merge = findNode(laid, 'merge');
+
+    // `nested` cascades one rank below its owner `then` (D3).
+    expect(nested.y).toBeCloseTo(then.y + then.height + DEFAULT_RANK_SEP, 0);
+    // `els` is a parallel branch of `then`, not its successor — it must NOT be
+    // pushed down to clear `nested`.
+    expect(els.y).toBeLessThan(nested.y - CENTER_TOLERANCE);
+    // `merge` IS a real successor of `then` (via then→merge) — it must clear
+    // the nested lane.
+    expect(merge.y).toBeGreaterThanOrEqual(
+      nested.y + nested.height + DEFAULT_RANK_SEP - CENTER_TOLERANCE
+    );
   });
 
   it('two sequential spine owners: each lane head levels against its pushed owner (Fix 2)', () => {
@@ -1304,5 +1389,39 @@ describe('dagLayout — LR direction + reservedLanes invariants', () => {
       nestedN.x + nestedN.width
     );
     expect(nextN.x).toBeGreaterThanOrEqual(laneXEnd + rankSep - 1);
+  });
+
+  it('in-lane D7: parent lane successor clears a nested lane (LR)', () => {
+    // Same shape as the TB "in-lane D7" regression above, asserted on the main
+    // (x) axis: a→b in the depth-0 lane, c→d in the depth-1 lane owned by a,
+    // and a rejoin edge d→b. b must clear d on x, not share/precede its rank.
+    const nodeSep = 50;
+    const rankSep = 70;
+    const nodes = [node('s1'), node('s2'), node('s3'), node('a'), node('b'), node('c'), node('d')];
+    const edgeList = [
+      edge('s1-s2', 's1', 's2'),
+      edge('s2-s3', 's2', 's3'),
+      edge('s2-a', 's2', 'a'), // boundary
+      edge('a-b', 'a', 'b'), // lane-internal (depth-0 lane)
+      edge('a-c', 'a', 'c'), // boundary
+      edge('c-d', 'c', 'd'), // lane-internal (depth-1 lane)
+      edge('d-b', 'd', 'b'), // boundary (rejoin)
+    ];
+    const { nodes: laid } = dagLayout(nodes, edgeList, [], {
+      direction: 'LR',
+      nodeSep,
+      rankSep,
+      reservedLanes: [
+        { nodeIds: ['a', 'b'], depth: 0, ownerId: 's2' },
+        { nodeIds: ['c', 'd'], depth: 1, ownerId: 'a' },
+      ],
+    });
+    const s3 = findNode(laid, 's3');
+    const b = findNode(laid, 'b');
+    const d = findNode(laid, 'd');
+
+    expect(b.x).toBeGreaterThanOrEqual(d.x + d.width + rankSep - 1);
+    expect(s3.x).toBeGreaterThanOrEqual(b.x + b.width + rankSep - 1);
+    expectNoPairwiseOverlap(laid);
   });
 });

@@ -18,7 +18,7 @@ import type { WorkflowProperties, WorkflowStorage } from '../../storage/workflow
 import { unscheduleWorkflowTasks } from '../../task_defs/unschedule_workflow_tasks';
 import type { WorkflowTaskScheduler } from '../../tasks/workflow_task_scheduler';
 
-const mutateWorkflowToDisabled = (source: WorkflowProperties): WorkflowProperties => {
+export const mutateWorkflowToDisabled = (source: WorkflowProperties): WorkflowProperties => {
   const updatedYaml = updateWorkflowYamlFields(source.yaml, { enabled: false }, false);
   return {
     ...source,
@@ -36,7 +36,7 @@ const mutateWorkflowToDisabled = (source: WorkflowProperties): WorkflowPropertie
 export const disableAllWorkflows = async (params: {
   storage: WorkflowStorage;
   accessControlFilter?: estypes.QueryDslQueryContainer;
-  assertCanEdit?: (workflow: WorkflowProperties) => void;
+  assertCanEdit?: (workflow: WorkflowProperties, id: string) => void;
   taskScheduler: WorkflowTaskScheduler | null;
   logger: Logger;
   spaceId?: string;
@@ -102,7 +102,7 @@ export const disableAllWorkflows = async (params: {
           client,
           hits: occHits,
           mutate: (hit) => {
-            assertCanEdit?.(hit._source);
+            assertCanEdit?.(hit._source, hit._id);
             // This runs again on the refreshed document after an OCC conflict.
             if (hit._source.definition?.settings?.run_as && !canModifyBoundWorkflows) {
               throw Boom.forbidden(

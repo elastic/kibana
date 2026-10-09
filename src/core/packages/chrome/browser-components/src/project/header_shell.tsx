@@ -13,6 +13,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { COLLAPSED_WIDTH, EXPANDED_WIDTH } from '@kbn/ui-side-navigation';
 import { useSideNavWidth } from '@kbn/core-chrome-browser-hooks';
+import { HeaderRightGroup } from '../shared/header_right_group';
 import { CHROME_HEADER_TEST_SUBJECTS } from '../test_subjects';
 
 const HEADER_HEIGHT_PX = 48;
@@ -34,13 +35,7 @@ export interface ChromeHeaderShellProps {
   help?: ReactNode;
   actions?: ReactNode;
   userMenu?: ReactNode;
-  appendRight?: ReactNode;
 }
-
-export type GlobalHeaderRightGroupProps = Pick<
-  ChromeHeaderShellProps,
-  'search' | 'help' | 'actions' | 'userMenu' | 'appendRight'
->;
 
 const useChromeHeaderStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -81,42 +76,6 @@ const useChromeHeaderStyles = () => {
       margin-inline-start: ${euiTheme.size.xs};
     `;
 
-
-    const rightGroup = css`
-      display: flex;
-      align-items: center;
-      flex-shrink: 0;
-      gap: ${euiTheme.size.s};
-    `;
-
-    const searchSlot = css`
-      display: flex;
-      align-items: center;
-      flex-shrink: 0;
-    `;
-
-    const actionsSlot = css`
-      display: flex;
-      align-items: center;
-      gap: ${euiTheme.size.s};
-    `;
-
-    const helpSlot = css`
-      display: flex;
-      align-items: center;
-    `;
-
-    const userMenuSlot = css`
-      display: flex;
-      align-items: center;
-    `;
-
-    const appendRightSlot = css`
-      display: flex;
-      align-items: center;
-    `;
-
-
     const separator = css`
       width: 1px;
       height: 24px;
@@ -130,58 +89,13 @@ const useChromeHeaderStyles = () => {
       switcherSlot,
       projectPickerSlot,
       spacer,
-
-      rightGroup,
-      searchSlot,
-      actionsSlot,
-      helpSlot,
-      userMenuSlot,
-      appendRightSlot,
       separator,
     };
   }, [euiTheme]);
 };
 
-export const GlobalHeaderRightGroup = React.memo<GlobalHeaderRightGroupProps>(
-  ({ search, help, actions, userMenu, appendRight }) => {
-    const styles = useChromeHeaderStyles();
-
-    return (
-      <div css={styles.rightGroup}>
-        {search && (
-          <div css={styles.searchSlot} data-test-subj="chromeNextGlobalHeaderSearch">
-            {search}
-          </div>
-        )}
-        {help && (
-          <div css={styles.helpSlot} data-test-subj="chromeNextGlobalHeaderHelp">
-            {help}
-          </div>
-        )}
-        {actions && (
-          <div css={styles.actionsSlot} data-test-subj="chromeNextGlobalHeaderActions">
-            {actions}
-          </div>
-        )}
-        {userMenu && (
-          <div css={styles.userMenuSlot} data-test-subj="chromeNextGlobalHeaderUserMenu">
-            {userMenu}
-          </div>
-        )}
-        {appendRight && (
-          <div css={styles.appendRightSlot} data-test-subj="chromeNextGlobalHeaderAppendRight">
-            {appendRight}
-          </div>
-        )}
-      </div>
-    );
-  }
-);
-
-GlobalHeaderRightGroup.displayName = 'GlobalHeaderRightGroup';
-
 export const ChromeHeaderShell = React.memo<ChromeHeaderShellProps>(
-  ({ logo, switcher, projectPicker, search, help, actions, userMenu, appendRight }) => {
+  ({ logo, switcher, projectPicker, search, help, actions, userMenu }) => {
     const sideNavWidth = useSideNavWidth();
     const styles = useChromeHeaderStyles();
     const logoWidth = sideNavWidth <= COLLAPSED_WIDTH ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
@@ -211,13 +125,7 @@ export const ChromeHeaderShell = React.memo<ChromeHeaderShellProps>(
           </div>
         )}
         <div css={styles.spacer} />
-        <GlobalHeaderRightGroup
-          search={search}
-          help={help}
-          actions={actions}
-          userMenu={userMenu}
-          appendRight={appendRight}
-        />
+        <HeaderRightGroup search={search} help={help} actions={actions} userMenu={userMenu} />
       </header>
     );
   }

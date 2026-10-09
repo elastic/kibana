@@ -27,7 +27,6 @@ import { HeaderActionMenu } from '../shared/header_action_menu';
 import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_extensions';
 import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
 import {
-  useAppendRight,
   useClassicBreadcrumbs,
   useContextSwitcher,
   useHasAppMenuConfig,
@@ -55,14 +54,12 @@ export const ClassicHeader = React.memo(() => {
   const projectPicker = useProjectPicker();
   const isSmall = useIsWithinMaxBreakpoint('s');
   const search = dark(<SearchButton layout={isSmall ? 'compact' : 'expanded'} />);
-  const appendRight = useAppendRight();
   const rightGroup = (
     <HeaderRightGroup
       search={isSmall ? search : undefined}
       help={dark(<HelpButton />)}
       actions={<AiButtonSlot />}
       userMenu={userMenu}
-      appendRight={appendRight ? dark(appendRight) : undefined}
     />
   );
 

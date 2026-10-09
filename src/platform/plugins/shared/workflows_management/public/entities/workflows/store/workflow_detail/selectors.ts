@@ -110,6 +110,11 @@ export const selectReplayExecutionId = createSelector(
   (detail) => detail.replay?.executionId ?? null
 );
 
+export const selectReplayIsTestRun = createSelector(
+  selectDetail,
+  (detail) => detail.replay?.isTestRun === true
+);
+
 export const selectReplayStepExecutionId = createSelector(
   selectDetail,
   (detail) => detail.replay?.stepExecutionId ?? null

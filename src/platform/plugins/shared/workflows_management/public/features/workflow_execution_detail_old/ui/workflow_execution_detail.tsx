@@ -258,9 +258,9 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
         paddingSize="none"
         color="plain"
         hasShadow={false}
-        hasBorder
+        hasBorder={false}
         borderRadius="none"
-        css={{ height: '100%', borderRadius: 0 }}
+        style={{ height: '100%' }}
       >
         <ResizableLayout
           fixedPanel={
@@ -294,6 +294,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               approvalLabels={approvalLabels}
               shouldAutoResume={shouldAutoResume}
               waitingStepExecutionId={waitingStepExecutionId}
+              resumeExecutionId={resolvedExecutionId}
               childWorkflowExecution={selectedStepChildExecution}
               parentWorkflowExecution={parentWorkflowExecution}
             />

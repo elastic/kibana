@@ -78,7 +78,6 @@ export interface ChromeState {
   inlineAppHeaderOwnerId: number;
   appHeader: State<ChromeAppHeaderConfig | undefined>;
   userMenu: State<ReactNode>;
-  appendRight: State<ReactNode>;
 
   /** Help system */
   help: {
@@ -137,7 +136,6 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const inlineAppHeader = createState<InlineAppHeaderState | undefined>(undefined);
   const appHeader = createState<ChromeAppHeaderConfig | undefined>(undefined);
   const userMenu = createState<ReactNode>(null);
-  const appendRight = createState<ReactNode>(null);
 
   // Help System
   const helpExtension = createState<ChromeHelpExtension | undefined>(undefined);
@@ -183,7 +181,6 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     contextSwitcher,
     projectPicker,
     userMenu,
-    appendRight,
     feedbackHandler,
     newsfeedHandler,
   };

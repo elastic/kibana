@@ -73,6 +73,12 @@ export interface WorkflowGraphNodeData extends Record<string, unknown> {
       readonly fallback?: readonly unknown[];
     };
   };
+  /**
+   * Node id of the step that owns this node's fallback lane. Present on every
+   * node inside an `on-failure.fallback` lane; absent elsewhere. Consumed by
+   * the minimap colour callback and specs 03/07 for gestural authoring.
+   */
+  readonly fallbackOf?: string;
 }
 
 /** Matches Run button spacing (`EuiButtonIcon size="s"`). */

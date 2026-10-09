@@ -13,7 +13,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { CheckSetup } from './components/check_setup';
+import { CheckStatus } from './components/check_status';
 import { ProfilingDependenciesContextProvider } from './components/contexts/profiling_dependencies/profiling_dependencies_context';
 import { RouteBreadcrumbsContextProvider } from './components/contexts/route_breadcrumbs_context';
 import { TimeRangeContextProvider } from './components/contexts/time_range_context';
@@ -23,7 +23,7 @@ import type { Services } from './services';
 import type { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
 import { RouterErrorBoundary } from './routing/router_error_boundary';
 import { LicenseProvider } from './components/contexts/license/license_context';
-import { ProfilingSetupStatusContextProvider } from './components/contexts/profiling_setup_status/profiling_setup_status_context';
+import { ProfilingStatusContextProvider } from './components/contexts/profiling_status/profiling_status_context';
 
 interface Props {
   profilingFetchServices: Services;
@@ -69,17 +69,17 @@ function App({
               <RouterErrorBoundary>
                 <TimeRangeContextProvider>
                   <ProfilingDependenciesContextProvider value={profilingDependencies}>
-                    <ProfilingSetupStatusContextProvider>
+                    <ProfilingStatusContextProvider>
                       <LicenseProvider>
-                        <CheckSetup>
+                        <CheckStatus>
                           <RedirectWithDefaultDateRange>
                             <RouteBreadcrumbsContextProvider>
                               <RouteRenderer />
                             </RouteBreadcrumbsContextProvider>
                           </RedirectWithDefaultDateRange>
-                        </CheckSetup>
+                        </CheckStatus>
                       </LicenseProvider>
-                    </ProfilingSetupStatusContextProvider>
+                    </ProfilingStatusContextProvider>
                   </ProfilingDependenciesContextProvider>
                 </TimeRangeContextProvider>
               </RouterErrorBoundary>

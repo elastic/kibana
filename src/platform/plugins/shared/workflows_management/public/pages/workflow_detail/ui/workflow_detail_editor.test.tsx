@@ -7,17 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { SkipUnsavedRunConfirmationStorageKey } from './use_run_workflow_with_confirmation';
 import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import {
   selectEditorWorkflowDefinition,
   selectFocusedStepId,
   selectFocusedTriggerId,
+  selectHasChanges,
   selectIsEditorExecutionYaml,
   selectIsExecutionsTab,
+  selectIsSavingYaml,
+  selectIsYamlSyntaxValid,
   selectWorkflow,
   selectWorkflowId,
   selectYamlString as selectYamlStringSelector,
@@ -67,6 +71,7 @@ const WorkflowYAMLEditorMock = ({
   onStepRun,
   editorRef,
   onToggleEditorMode,
+  onValidationPanelHeightChange,
 }: any) => {
   if (editorRef) {
     editorRef.current = { getPosition: () => ({ lineNumber: 4 }) };
@@ -80,6 +85,13 @@ const WorkflowYAMLEditorMock = ({
         onClick={() => onToggleEditorMode?.()}
       >
         {'Toggle Editor Mode'}
+      </button>
+      <button
+        type="button"
+        data-test-subj="report-validation-panel-height"
+        onClick={() => onValidationPanelHeightChange?.(48)}
+      >
+        {'Report validation panel height'}
       </button>
       <button
         type="button"
@@ -548,6 +560,160 @@ describe('WorkflowDetailEditor', () => {
 
       expect(mockMutateAsync).not.toHaveBeenCalled();
       expect(store?.getState().detail.testStepModalOpenStepId).toBeUndefined();
+    });
+  });
+
+  describe('bottom bar placement', () => {
+    const getBottomBarOffset = (getByTestId: (id: string) => HTMLElement) =>
+      getComputedStyle(getByTestId('workflowDetailBottomBar')).bottom;
+
+    beforeEach(() => {
+      // The bottom bar only mounts when the visual editor is enabled.
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
+    });
+
+    it('floats above the validation panel docked under the YAML editor', () => {
+      const { getByTestId } = renderEditor();
+      expect(getBottomBarOffset(getByTestId)).toBe('16px');
+
+      fireEvent.click(getByTestId('report-validation-panel-height'));
+
+      expect(getBottomBarOffset(getByTestId)).toBe('64px');
+    });
+
+    it('ignores the validation panel height in graph view', () => {
+      mockUseWorkflowUrlState.mockReturnValue({
+        ...mockUseWorkflowUrlState(),
+        editorView: 'graph',
+      });
+      const { getByTestId } = renderEditor();
+
+      fireEvent.click(getByTestId('report-validation-panel-height'));
+
+      expect(getBottomBarOffset(getByTestId)).toBe('16px');
+    });
+  });
+
+  describe('run workflow bottom-bar button', () => {
+    const runButtonTestId = 'workflowBottomBarRunButton';
+
+    const mockRunState = ({
+      isValid = true,
+      hasChanges = false,
+      isSaving = false,
+    }: {
+      isValid?: boolean;
+      hasChanges?: boolean;
+      isSaving?: boolean;
+    } = {}) => {
+      mockUseSelector.mockImplementation((selector: any) => {
+        if (selector === selectIsYamlSyntaxValid) return isValid;
+        if (selector === selectHasChanges) return hasChanges;
+        if (selector === selectIsSavingYaml) return isSaving;
+        return baseUseSelectorImpl(selector);
+      });
+    };
+
+    beforeEach(() => {
+      // The bottom bar only mounts when the visual editor is enabled.
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
+      localStorage.removeItem(SkipUnsavedRunConfirmationStorageKey);
+    });
+
+    afterEach(() => {
+      localStorage.removeItem(SkipUnsavedRunConfirmationStorageKey);
+    });
+
+    it('enables the run button when the yaml syntax is valid', () => {
+      mockRunState();
+      const { getByTestId } = renderEditor();
+      expect(getByTestId(runButtonTestId)).toBeEnabled();
+    });
+
+    it('disables the run button when the yaml has syntax errors', () => {
+      mockRunState({ isValid: false });
+      const { getByTestId } = renderEditor();
+      expect(getByTestId(runButtonTestId)).toBeDisabled();
+    });
+
+    it('disables the run button while a save is in flight', () => {
+      mockRunState({ hasChanges: true, isSaving: true });
+      const { getByTestId, queryByTestId, store } = renderEditor();
+
+      const runButton = getByTestId(runButtonTestId);
+      expect(runButton).toBeDisabled();
+      fireEvent.click(runButton);
+
+      expect(queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
+      expect(store.getState().detail.isTestModalOpen).toBe(false);
+    });
+
+    it('disables the run button without execute privileges', () => {
+      mockRunState();
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...mockWorkflowsManagementCapabilities,
+        canExecuteWorkflow: false,
+      });
+      const { getByTestId } = renderEditor();
+      expect(getByTestId(runButtonTestId)).toBeDisabled();
+    });
+
+    it('opens the test modal directly when there are no unsaved changes', () => {
+      mockRunState();
+      const { getByTestId, queryByTestId, store } = renderEditor();
+
+      fireEvent.click(getByTestId(runButtonTestId));
+
+      expect(queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
+      expect(store.getState().detail.isTestModalOpen).toBe(true);
+    });
+
+    it('asks for confirmation when running with unsaved changes', () => {
+      mockRunState({ hasChanges: true });
+      const { getByTestId, store } = renderEditor();
+
+      fireEvent.click(getByTestId(runButtonTestId));
+
+      expect(getByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeInTheDocument();
+      expect(getByTestId('runWorkflowWithUnsavedChangesDontAskAgain')).toBeInTheDocument();
+      expect(store.getState().detail.isTestModalOpen).toBe(false);
+    });
+
+    it('stores the preference when confirming with "don\'t ask again" selected', () => {
+      mockRunState({ hasChanges: true });
+      const { getByTestId, queryByTestId, store } = renderEditor();
+
+      fireEvent.click(getByTestId(runButtonTestId));
+      fireEvent.click(getByTestId('runWorkflowWithUnsavedChangesDontAskAgain'));
+      fireEvent.click(getByTestId('confirmModalConfirmButton'));
+
+      expect(localStorage.getItem(SkipUnsavedRunConfirmationStorageKey)).toBe('true');
+      expect(queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
+      expect(store.getState().detail.isTestModalOpen).toBe(true);
+    });
+
+    it('does not store the preference when cancelling the confirmation', () => {
+      mockRunState({ hasChanges: true });
+      const { getByTestId, queryByTestId, store } = renderEditor();
+
+      fireEvent.click(getByTestId(runButtonTestId));
+      fireEvent.click(getByTestId('runWorkflowWithUnsavedChangesDontAskAgain'));
+      fireEvent.click(getByTestId('confirmModalCancelButton'));
+
+      expect(localStorage.getItem(SkipUnsavedRunConfirmationStorageKey)).toBeNull();
+      expect(queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
+      expect(store.getState().detail.isTestModalOpen).toBe(false);
+    });
+
+    it('skips the confirmation when the preference is stored', () => {
+      localStorage.setItem(SkipUnsavedRunConfirmationStorageKey, 'true');
+      mockRunState({ hasChanges: true });
+      const { getByTestId, queryByTestId, store } = renderEditor();
+
+      fireEvent.click(getByTestId(runButtonTestId));
+
+      expect(queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
+      expect(store.getState().detail.isTestModalOpen).toBe(true);
     });
   });
 });

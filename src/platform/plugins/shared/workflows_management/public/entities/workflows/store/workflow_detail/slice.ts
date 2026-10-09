@@ -137,11 +137,15 @@ const workflowDetailSlice = createSlice({
     setIsTestModalOpen: (state, action: { payload: boolean }) => {
       state.isTestModalOpen = action.payload;
     },
-    setReplayExecutionId: (state, action: { payload: string | null }) => {
+    setReplayExecutionId: (
+      state,
+      action: { payload: { executionId: string; isTestRun: boolean } | null }
+    ) => {
       if (state.replay === undefined) {
         state.replay = {};
       }
-      state.replay.executionId = action.payload ?? undefined;
+      state.replay.executionId = action.payload?.executionId;
+      state.replay.isTestRun = action.payload?.isTestRun;
       state.replay.stepExecutionId = undefined; // only one replay type at a time
     },
     setReplayStepExecutionId: (state, action: { payload: string | null }) => {
@@ -150,6 +154,7 @@ const workflowDetailSlice = createSlice({
       }
       state.replay.stepExecutionId = action.payload ?? undefined;
       state.replay.executionId = undefined; // only one replay type at a time
+      state.replay.isTestRun = undefined;
     },
     setTestStepModalOpenStepId: (state, action: { payload: string | undefined }) => {
       state.testStepModalOpenStepId = action.payload;

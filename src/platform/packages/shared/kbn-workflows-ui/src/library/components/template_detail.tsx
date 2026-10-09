@@ -243,6 +243,19 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
   }
 
   const { metadata } = data;
+  const sourcePath = `library/workflows/${metadata.slug}/${metadata.slug}.yaml`;
+  const reportIssueUrl = new URL('https://github.com/elastic/workflows/issues/new');
+  reportIssueUrl.search = new URLSearchParams({
+    template: 'template_issue.yml',
+    title: `[Template issue]: ${metadata.name}`,
+    template_details: [
+      `Name: ${metadata.name}`,
+      `Slug: ${metadata.slug}`,
+      `Version: ${metadata.version}`,
+      `Availability: ${metadata.availability}`,
+      `Source: https://github.com/elastic/workflows/blob/main/${sourcePath}`,
+    ].join('\n'),
+  }).toString();
   // No specific solutions listed means all solutions are supported
   const solutions = metadata.solutions?.length ? metadata.solutions : Object.keys(SOLUTION_ICONS);
 
@@ -531,6 +544,48 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
                         <EuiFlexItem grow={false}>
                           <p css={styles.description}>{metadata.description}</p>
                         </EuiFlexItem>
+                        {installMode === 'catalog' ? (
+                          <EuiFlexItem grow={false}>
+                            <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
+                              <EuiFlexItem grow={false}>
+                                <EuiButtonEmpty
+                                  size="s"
+                                  flush="left"
+                                  iconType="logoGithub"
+                                  href={reportIssueUrl.toString()}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  data-test-subj="workflowLibraryTemplateReportIssueLink"
+                                >
+                                  {i18n.translate(
+                                    'workflows.library.templateDetail.reportIssueButtonLabel',
+                                    {
+                                      defaultMessage: 'Report an issue with this template',
+                                    }
+                                  )}
+                                </EuiButtonEmpty>
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <EuiButtonEmpty
+                                  size="s"
+                                  flush="left"
+                                  iconType="pencil"
+                                  href={`https://github.com/elastic/workflows/edit/main/${sourcePath}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  data-test-subj="workflowLibraryTemplateEditLink"
+                                >
+                                  {i18n.translate(
+                                    'workflows.library.templateDetail.editTemplateButtonLabel',
+                                    {
+                                      defaultMessage: 'Edit this template',
+                                    }
+                                  )}
+                                </EuiButtonEmpty>
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          </EuiFlexItem>
+                        ) : null}
                       </EuiFlexGroup>
                     </EuiFlexItem>
                   </EuiFlexGroup>

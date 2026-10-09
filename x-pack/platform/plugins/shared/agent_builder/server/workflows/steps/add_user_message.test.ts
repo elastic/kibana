@@ -28,8 +28,7 @@ describe('addUserMessageStepDefinition', () => {
   };
 
   const buildDefinition = (
-    executionOverrides: Parameters<typeof createWorkflowStepExecutionServiceMock>[0] = {},
-    { experimental = true }: { experimental?: boolean } = {}
+    executionOverrides: Parameters<typeof createWorkflowStepExecutionServiceMock>[0] = {}
   ) => {
     const conv = createWorkflowStepConversationClientMock();
     const agents = createWorkflowStepAgentRegistryMock();
@@ -38,13 +37,11 @@ describe('addUserMessageStepDefinition', () => {
         executionOverrides.maybeExecuteAgent ??
         jest.fn().mockResolvedValue({ conversationId, events$: of() }),
     });
-    const isExperimentalEnabled = jest.fn().mockResolvedValue(experimental);
 
     const definition = addUserMessageStepDefinition({
       getConversationClient: conv.getConversationClient,
       getAgentRegistry: agents.getAgentRegistry,
       getExecutionService: execution.getExecutionService,
-      isExperimentalEnabled,
     });
 
     return { execution, definition };
@@ -73,19 +70,6 @@ describe('addUserMessageStepDefinition', () => {
       },
     });
     expect(result).toEqual({ output: { conversation_id: conversationId } });
-  });
-
-  it('returns an error without writing when experimental features are disabled', async () => {
-    const { execution, definition } = buildDefinition({}, { experimental: false });
-
-    const result = await definition.handler(createStepHandlerContext({ input: baseInput }));
-
-    expect(result).toEqual({
-      error: expect.objectContaining({
-        message: expect.stringMatching(/experimental features/i),
-      }),
-    });
-    expect(execution.maybeExecuteAgent).not.toHaveBeenCalled();
   });
 
   it('propagates a not-found error for a missing conversation', async () => {

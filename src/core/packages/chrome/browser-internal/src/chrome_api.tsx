@@ -150,10 +150,6 @@ export function createChromeApi({
       get$: () => state.userMenu.$,
       set: (content) => state.userMenu.set(content),
     },
-    appendRight: {
-      get$: () => state.appendRight.$,
-      set: (content) => state.appendRight.set(content),
-    },
   };
 
   const help: InternalChromeStart['help'] = {

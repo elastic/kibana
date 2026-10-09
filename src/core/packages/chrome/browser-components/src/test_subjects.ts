@@ -19,7 +19,6 @@ export const CHROME_HEADER_TEST_SUBJECTS = {
   helpButton: 'kbnChromeHeader-helpButton',
   actions: 'kbnChromeHeader-actions',
   userMenu: 'kbnChromeHeader-userMenu',
-  appendRight: 'kbnChromeHeader-appendRight',
   switcher: 'kbnChromeHeader-switcher',
   projectPicker: 'kbnChromeHeader-projectPicker',
 } as const;

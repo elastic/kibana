@@ -42,12 +42,17 @@ jest.mock('../../../../features/ai_integration', () => ({
     start: jest.fn(),
     stop: jest.fn(),
     setAttachmentId: jest.fn(),
+    applyDeferred: jest.fn(),
+    hasDeferred: jest.fn().mockReturnValue(true),
   })),
   ProposalManager: jest.fn().mockImplementation(() => ({
     initialize: jest.fn(),
     dispose: jest.fn(),
     getDiffHunks: jest.fn().mockReturnValue([]),
     hasPendingProposals: jest.fn().mockReturnValue(false),
+    suspend: jest.fn(),
+    resume: jest.fn(),
+    hasSuspendedProposals: jest.fn().mockReturnValue(false),
   })),
   setActiveProposalManager: jest.fn(),
   setLastCreateSessionId: jest.fn(),
@@ -72,9 +77,11 @@ const {
   consumeSidebarRestoreFor: jest.MockedFunction<AiIntegrationModule['consumeSidebarRestoreFor']>;
   hasPersistedConversation: jest.MockedFunction<AiIntegrationModule['hasPersistedConversation']>;
 };
-const { AttachmentBridge: mockAttachmentBridge } = jest.requireMock(
-  '../../../../features/ai_integration'
-) as { AttachmentBridge: jest.Mock };
+const { AttachmentBridge: mockAttachmentBridge, ProposalManager: mockProposalManager } =
+  jest.requireMock('../../../../features/ai_integration') as {
+    AttachmentBridge: jest.Mock;
+    ProposalManager: jest.Mock;
+  };
 jest.mock('../../../../features/ai_integration/proposal_tracker', () => ({
   ProposalTracker: jest.fn().mockImplementation(() => ({
     onAllResolved: jest.fn().mockReturnValue(jest.fn()),
@@ -1369,6 +1376,197 @@ describe('useAgentBuilderIntegration', () => {
 
       expect(agentBuilder.addAttachment).toHaveBeenCalledWith(
         expect.objectContaining({ id: ATTACHMENT_ID, origin: 'workflow-a' })
+      );
+    });
+  });
+
+  describe('read-only editor', () => {
+    it('sends the read-only reason and re-syncs it when the reason changes', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editorRef = { current: createMockEditor(mockModel) };
+
+      const { rerender } = renderHook((props) => useAgentBuilderIntegration(props), {
+        initialProps: {
+          editorRef,
+          isEditorMounted: true,
+          workflowId: 'workflow-a',
+          readOnlyReason: 'executions_tab' as const,
+        } as Parameters<typeof useAgentBuilderIntegration>[0],
+      });
+      await flushChatAccessCheck();
+
+      expect(agentBuilder.addAttachment).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ readOnlyReason: 'executions_tab' }),
+        })
+      );
+
+      agentBuilder.addAttachment.mockClear();
+      rerender({
+        editorRef,
+        isEditorMounted: true,
+        workflowId: 'workflow-a',
+        readOnlyReason: undefined,
+      });
+
+      expect(agentBuilder.addAttachment).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.addAttachment.mock.calls[0][0].data.readOnlyReason).toBeUndefined();
+    });
+
+    it('holds proposals while it cannot apply them and shows them once it can', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editorRef = { current: createMockEditor(mockModel) };
+
+      const onProposalDeferred = jest.fn();
+      const { rerender } = renderHook((props) => useAgentBuilderIntegration(props), {
+        initialProps: {
+          editorRef,
+          isEditorMounted: true,
+          workflowId: 'workflow-a',
+          canApplyProposals: false,
+          onProposalDeferred,
+        },
+      });
+      await flushChatAccessCheck();
+
+      const bridge = mockAttachmentBridge.mock.results.at(-1)?.value;
+      const startOptions = bridge.start.mock.calls[0][3];
+      expect(startOptions.isReadOnly()).toBe(true);
+
+      startOptions.onProposalDeferred();
+      expect(onProposalDeferred).toHaveBeenCalledTimes(1);
+      expect(bridge.applyDeferred).not.toHaveBeenCalled();
+
+      rerender({
+        editorRef,
+        isEditorMounted: true,
+        workflowId: 'workflow-a',
+        canApplyProposals: true,
+        onProposalDeferred,
+      });
+
+      expect(startOptions.isReadOnly()).toBe(false);
+      expect(bridge.applyDeferred).toHaveBeenCalledTimes(1);
+    });
+
+    it('sends the Workflow tab YAML while the user is on the Executions tab', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editorRef = { current: createMockEditor(mockModel) };
+
+      const { rerender } = renderHook((props) => useAgentBuilderIntegration(props), {
+        initialProps: {
+          editorRef,
+          isEditorMounted: true,
+          workflowId: 'workflow-a',
+          readOnlyReason: 'executions_tab',
+          workflowTabYaml: 'name: current',
+        } as Parameters<typeof useAgentBuilderIntegration>[0],
+      });
+      await flushChatAccessCheck();
+
+      expect(agentBuilder.addAttachment).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ yaml: 'name: current' }),
+        })
+      );
+
+      agentBuilder.addAttachment.mockClear();
+      rerender({
+        editorRef,
+        isEditorMounted: true,
+        workflowId: 'workflow-a',
+        workflowTabYaml: 'name: current',
+      });
+
+      expect(agentBuilder.addAttachment.mock.calls[0][0].data.yaml).toBe(INITIAL_YAML);
+    });
+
+    it('waits for the editor to show the workflow YAML before it shows a held proposal', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editorRef = { current: createMockEditor(mockModel) };
+      const baseProps = { editorRef, isEditorMounted: true, workflowId: 'workflow-a' };
+
+      const { rerender } = renderHook((props) => useAgentBuilderIntegration(props), {
+        initialProps: { ...baseProps, canApplyProposals: false, workflowTabYaml: 'name: workflow' },
+      });
+      await flushChatAccessCheck();
+      const bridge = mockAttachmentBridge.mock.results.at(-1)?.value;
+
+      // The editor model still holds the execution YAML for one render.
+      rerender({ ...baseProps, canApplyProposals: true, workflowTabYaml: 'name: workflow' });
+      expect(bridge.applyDeferred).not.toHaveBeenCalled();
+
+      act(() => {
+        mockModel.simulateContentChange('name: workflow');
+      });
+      // Not inside the editor's value write, where `onChange` is muted.
+      expect(bridge.applyDeferred).not.toHaveBeenCalled();
+
+      act(() => {
+        jest.runOnlyPendingTimers();
+      });
+      expect(bridge.applyDeferred).toHaveBeenCalledTimes(1);
+    });
+
+    it('suspends pending proposals while it cannot apply them and resumes them after', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editorRef = { current: createMockEditor(mockModel) };
+      const baseProps = { editorRef, isEditorMounted: true, workflowId: 'workflow-a' };
+
+      const { rerender } = renderHook((props) => useAgentBuilderIntegration(props), {
+        initialProps: { ...baseProps, canApplyProposals: true },
+      });
+      await flushChatAccessCheck();
+      const manager = mockProposalManager.mock.results.at(-1)?.value;
+      const bridge = mockAttachmentBridge.mock.results.at(-1)?.value;
+      bridge.hasDeferred.mockReturnValue(false);
+
+      rerender({ ...baseProps, canApplyProposals: false });
+      expect(manager.suspend).toHaveBeenCalledTimes(1);
+
+      manager.hasSuspendedProposals.mockReturnValue(true);
+      rerender({ ...baseProps, canApplyProposals: true });
+      expect(manager.resume).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not send diagnostics of the past run with the Workflow tab YAML', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: createMockEditor(mockModel) },
+          isEditorMounted: true,
+          workflowId: 'workflow-a',
+          readOnlyReason: 'executions_tab',
+          workflowTabYaml: 'name: current',
+          validationErrors: [
+            {
+              id: 'schema-1',
+              owner: 'yaml',
+              ruleId: 'schemaViolation',
+              severity: 'error',
+              message: 'Error in the past run',
+              startLineNumber: 1,
+              startColumn: 1,
+              endLineNumber: 1,
+              endColumn: 2,
+              hoverMessage: null,
+            },
+          ],
+        })
+      );
+      await flushChatAccessCheck();
+
+      expect(agentBuilder.addAttachment).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ yaml: 'name: current', clientDiagnostics: undefined }),
+        })
       );
     });
   });

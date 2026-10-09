@@ -794,6 +794,7 @@ describe('spec 02 regression — named fixtures', () => {
     expect(centerX(fallbackNode!)).toBeGreaterThan(centerX(ownerNode!) + 100);
   });
 
+
   it('owner with fallback and a plain following step share the spine column', () => {
     // Speculative anchoring (pass 3) translates the owner onto its spine
     // successor's column. Owner and next-step should share the same x-centre.
@@ -1125,6 +1126,61 @@ describe('spec 02 regression — named fixtures', () => {
     const pairs = findOverlappingPairs(result.nodes, groupIds);
     expect(pairs).toHaveLength(0);
   });
+
+  // ── nested continue: true — rejoin must point forward, not backward ────────
+  it.each(['TB', 'LR'] as const)(
+    'nested continue: true — every rejoin edge points forward (%s)',
+    (direction) => {
+      // owner.fallback: [a, b]   a.fallback (continue: true): [c, d]
+      // `a` continues, so its fallback's leaves rejoin into the NEXT sibling in
+      // owner's own fallback lane — `b`. The rejoin edge (isRejoin) must have its
+      // target's main start at or past its source's main end in both directions.
+      const { result, transformed } = runLayout(
+        minimal({
+          steps: [
+            {
+              name: 'owner',
+              type: 'http',
+              'on-failure': {
+                fallback: [
+                  {
+                    name: 'a',
+                    type: 'http',
+                    'on-failure': {
+                      continue: true,
+                      fallback: [
+                        { name: 'c', type: 'http' },
+                        { name: 'd', type: 'http' },
+                      ],
+                    },
+                  },
+                  { name: 'b', type: 'http' },
+                ],
+              },
+            },
+            { name: 'next-step', type: 'http' },
+          ] as unknown as WorkflowYaml['steps'],
+        }),
+        direction
+      );
+
+      const isLR = direction === 'LR';
+      const mainOf = (n: { x: number; y: number }) => (isLR ? n.x : n.y);
+      const mainSpanOf = (n: { width: number; height: number }) => (isLR ? n.width : n.height);
+
+      const rejoinEdges = transformed.edges.filter((e) => e.isRejoin);
+      expect(rejoinEdges.length).toBeGreaterThan(0);
+      for (const e of rejoinEdges) {
+        const source = findNode(result.nodes, e.source);
+        const target = findNode(result.nodes, e.target);
+        expect(mainOf(target)).toBeGreaterThanOrEqual(mainOf(source) + mainSpanOf(source));
+      }
+
+      const groupIds = new Set(transformed.foreachGroups.map((g) => g.id));
+      const pairs = findOverlappingPairs(result.nodes, groupIds);
+      expect(pairs).toHaveLength(0);
+    }
+  );
 
   it('edge whose endpoints move by different deltas: reconcileEdgePoints clears it', () => {
     // Build a fallback owner whose lane head moves a different amount than the

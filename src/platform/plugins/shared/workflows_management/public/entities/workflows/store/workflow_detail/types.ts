@@ -80,6 +80,7 @@ export interface WorkflowDetailState {
   replay?: {
     executionId?: string;
     stepExecutionId?: string;
+    isTestRun?: boolean;
   };
   /** The connectors data */
   connectors?: ConnectorsResponse;

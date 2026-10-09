@@ -183,6 +183,20 @@ export class GraphPageObject extends FtrService {
 
   async clickSettingsButton() {
     await this.appMenu.clickMenuItem('graphSettingsButton');
+    await this.testSubjects.existOrFail('graphSettingsFlyout');
+    // A tab click issued while the flyout still slides in misses the moving target silently.
+    let previousPosition = await (
+      await this.testSubjects.find('graphSettingsFlyout')
+    ).getPosition();
+    await this.retry.waitFor('graph settings flyout to stop animating', async () => {
+      const currentPosition = await (
+        await this.testSubjects.find('graphSettingsFlyout')
+      ).getPosition();
+      const settled =
+        currentPosition.x === previousPosition.x && currentPosition.y === previousPosition.y;
+      previousPosition = currentPosition;
+      return settled;
+    });
   }
 
   async newGraph() {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isAgentNotFoundError, isAgentUnavailableError } from '@kbn/agent-builder-common';
@@ -26,7 +25,7 @@ import type {
   SlackAppStatusResponse,
 } from '../../../common/slack_app/types';
 import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
-import { STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG } from '../../../common/feature_flags';
+import { isSignificantEventsFeatureFlagEnabled } from '../feature_flags/is_significant_events_feature_flag_enabled';
 import {
   RELAY_APP_CONNECTION_SO_ID,
   RELAY_APP_CONNECTION_SO_TYPE,
@@ -59,6 +58,8 @@ const buildConnector = (tenantKey: string): InMemoryConnector => ({
   isDeprecated: false,
   isSystemAction: false,
   isConnectorTypeDeprecated: false,
+  // Events are on for this connector.
+  isInboundEventsEnabled: true,
 });
 
 /** Pagination options for a single page of connected channels. */
@@ -82,21 +83,12 @@ export class SlackAppService {
     this.logger = server.logger.get('slack-app');
   }
 
-  /**
-   * feature flag on + `xpack.actions.relay` configured (the injected singleton client exists) +
-   * agentBuilder available on this deployment.
-   */
   private async getRelayClient(): Promise<RelayClientContract | undefined> {
     const { relayClient, agentBuilder } = this.server;
     if (!relayClient || !agentBuilder) {
       return undefined;
     }
-    const enabled = await firstValueFrom(
-      this.server.core.featureFlags.getBooleanValue$(
-        STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG,
-        false
-      )
-    );
+    const enabled = await isSignificantEventsFeatureFlagEnabled(this.server.core.featureFlags);
     return enabled ? relayClient : undefined;
   }
 
@@ -277,7 +269,7 @@ export class SlackAppService {
     // only happens on success.
     const existingConnection = await this.readConnection(soClient);
 
-    // Mint a managed, read-only, least-privilege ES API key for the agent. The key
+    // Mint a managed, least-privilege ES API key for the agent. The key
     // is granted on behalf of the connecting user but survives their deletion (ES keys
     // outlive their owner). Because the grant intersects with the owner's privileges, the
     // connecting user must themselves hold every privilege below or the key is silently
@@ -286,10 +278,11 @@ export class SlackAppService {
     // - Observability signals get direct ES read: the obs agent tools query them as this key
     //   (asCurrentUser). Broad conventional patterns cover APM/OTel logs, metrics and traces
     //   without regenerating the key when new data is onboarded.
-    // - Nightshift data is reached through the `nightshift` Kibana feature (read includes
-    //   every engine via includeIn), Streams data through `streams` (read), and
-    //   connectors/LLM through `actions` (read). Those go via the internal Kibana client,
-    //   so no grants on system/dot indices (unsupported in serverless) are needed.
+    // - Nightshift gets `minimal_all`, not `read`, because the sandbox tools require
+    //   `manage_nightshift`. `configure_nightshift` stays out. Streams data goes through
+    //   `streams` (read), and connectors/LLM through `actions` (read). Those go via the
+    //   internal Kibana client, so no grants on system/dot indices (unsupported in serverless)
+    //   are needed.
     const apiKeyResult = await this.server.security.authc.apiKeys.grantAsInternalUser(request, {
       name: 'nightshift-relay-agent-builder',
       metadata: { managed: true, managed_by: 'nightshift-relay', type: 'agent_builder_converse' },
@@ -309,7 +302,7 @@ export class SlackAppService {
             {
               spaces: ['*'],
               feature: {
-                nightshift: ['read'],
+                nightshift: ['minimal_all'],
                 streams: ['read'],
                 agentBuilder: ['read'],
                 actions: ['read'],

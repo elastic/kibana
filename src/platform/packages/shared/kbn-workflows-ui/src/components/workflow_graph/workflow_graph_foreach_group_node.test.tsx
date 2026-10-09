@@ -116,6 +116,7 @@ describe('WorkflowGraphForeachGroupNode', () => {
     expect(fallbackCall?.[0].style.right).toBeUndefined();
   });
 
+
   describe('execution outcome colours', () => {
     // EuiIcon renders its `color` prop as a DOM attribute — use that to assert
     // that different execution states produce distinct colours. Each render is

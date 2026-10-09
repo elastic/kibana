@@ -18,7 +18,6 @@ export interface HeaderRightGroupProps {
   help?: ReactNode;
   actions?: ReactNode;
   userMenu?: ReactNode;
-  appendRight?: ReactNode;
 }
 
 const useHeaderRightGroupStyles = () => {
@@ -54,24 +53,18 @@ const useHeaderRightGroupStyles = () => {
       align-items: center;
     `;
 
-    const appendRightSlot = css`
-      display: flex;
-      align-items: center;
-    `;
-
     return {
       rightGroup,
       searchSlot,
       actionsSlot,
       helpSlot,
       userMenuSlot,
-      appendRightSlot,
     };
   }, [euiTheme]);
 };
 
 export const HeaderRightGroup = React.memo<HeaderRightGroupProps>(
-  ({ search, help, actions, userMenu, appendRight }) => {
+  ({ search, help, actions, userMenu }) => {
     const styles = useHeaderRightGroupStyles();
 
     return (
@@ -94,11 +87,6 @@ export const HeaderRightGroup = React.memo<HeaderRightGroupProps>(
         {userMenu && (
           <div css={styles.userMenuSlot} data-test-subj={CHROME_HEADER_TEST_SUBJECTS.userMenu}>
             {userMenu}
-          </div>
-        )}
-        {appendRight && (
-          <div css={styles.appendRightSlot} data-test-subj={CHROME_HEADER_TEST_SUBJECTS.appendRight}>
-            {appendRight}
           </div>
         )}
       </div>

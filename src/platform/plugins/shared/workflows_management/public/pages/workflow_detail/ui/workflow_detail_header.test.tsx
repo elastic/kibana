@@ -344,6 +344,7 @@ describe('WorkflowDetailHeader', () => {
     expect(screen.queryByTestId('runWorkflowHeaderButton')).not.toBeInTheDocument();
   });
 
+
   it('disables enabled toggle when yaml has validation errors', () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
       isValid: true,

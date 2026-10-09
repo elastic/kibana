@@ -45,6 +45,9 @@ const intervalsOverlap = (aStart: number, aEnd: number, bStart: number, bEnd: nu
  * Invariants produced (all axes use the direction-dependent helpers above):
  * - Every lane head starts one rank below its owner's main-axis end (D3, cascade).
  * - The spine below every owner clears the lane's full subtree main extent (D7).
+ *   The same clearance applies one level in: a parent lane's own successors of a
+ *   nested lane's owner clear that nested lane's full subtree too, so a `continue`
+ *   rejoin out of a nested fallback never runs backward.
  * - Every lane's inner (−cross) edge is ≥ nodeSep past the cross extent of all
  *   spine nodes sharing the lane's main band (D5 — local hugging).
  * - Deeper lanes are always further out than shallower lanes containing their
@@ -200,11 +203,67 @@ export function layoutGraphWithLanes(
       });
     }
 
-    // Recursively cascade nested lanes (depth-first pre-order).
+    // Recursively cascade nested lanes, top-down by owner's current main position
+    // (depth-first pre-order). After each nested lane is cascaded, push THIS lane's
+    // own in-lane successors of the nested owner so they clear the nested lane's
+    // full subtree — the same D7 rule the spine loop applies below (§5), scoped to
+    // lane-internal topology so a sibling branch inside this lane is not pushed
+    // (Fix 6 parity). Without this, a `continue` rejoin out of a nested fallback
+    // can run backward into a sibling step that never moved.
     const laneNodeIdSet = new Set(laneLayout.nodes.map((n) => n.id));
-    for (const nestedLane of sortedLanes) {
-      if (laneNodeIdSet.has(nestedLane.ownerId)) {
-        levelLaneCascade(nestedLane, nestedLane.ownerId);
+    const nestedOwnerIds = [
+      ...new Set(sortedLanes.filter((nl) => laneNodeIdSet.has(nl.ownerId)).map((nl) => nl.ownerId)),
+    ].sort((a, b) => mainOf(laneNodeById.get(a)!, isLR) - mainOf(laneNodeById.get(b)!, isLR));
+
+    for (const nestedOwnerId of nestedOwnerIds) {
+      const ownedNestedLanes = sortedLanes.filter(
+        (nl) => nl.ownerId === nestedOwnerId && laneNodeIdSet.has(nl.ownerId)
+      );
+      for (const nestedLane of ownedNestedLanes) {
+        levelLaneCascade(nestedLane, nestedOwnerId);
+
+        // Measure the nested lane's (and anything nested under it) full extent,
+        // then push this lane's in-lane successors of nestedOwnerId to clear it.
+        const required = subtreeMainEnd(nestedLane) + rankSep;
+        const nestedOwnerSuccessors = getLaneTransitiveSuccessors(nestedOwnerId);
+        const successorsInLane = [...laneNodeIdSet]
+          .filter((id) => nestedOwnerSuccessors.has(id))
+          .map((id) => laneNodeById.get(id)!)
+          .sort((a, b) => mainOf(a, isLR) - mainOf(b, isLR));
+
+        if (successorsInLane.length === 0) continue;
+
+        const deficit = Math.max(0, required - mainOf(successorsInLane[0], isLR));
+        if (deficit === 0) continue;
+
+        for (const id of laneNodeIdSet) {
+          if (nestedOwnerSuccessors.has(id)) {
+            laneNodeById.set(id, shiftMain(laneNodeById.get(id)!, deficit, isLR));
+          }
+        }
+
+        // Translate/clear this lane's internal edges across the push boundary,
+        // mirroring the spine push's edge handling below (§5).
+        const currentLaneLayout = laneLayouts.get(lane)!;
+        laneLayouts.set(lane, {
+          nodes: currentLaneLayout.nodes.map((n) => laneNodeById.get(n.id)!),
+          edges: currentLaneLayout.edges.map((e) => {
+            if (!nestedOwnerSuccessors.has(e.target)) return e;
+            if (e.source === nestedOwnerId) {
+              // Owner → successor is straight (same column), clear waypoints.
+              return { ...e, points: [] };
+            } else if (nestedOwnerSuccessors.has(e.source)) {
+              // Both endpoints were pushed — translate.
+              return {
+                ...e,
+                points: translateEdgePoints(e.points, isLR ? deficit : 0, isLR ? 0 : deficit),
+              };
+            } else {
+              // Edge crosses the push boundary — clear waypoints.
+              return { ...e, points: [] };
+            }
+          }),
+        });
       }
     }
   }
@@ -269,6 +328,39 @@ export function layoutGraphWithLanes(
       }
     }
     successorCache.set(startId, visited);
+    return visited;
+  }
+
+  // Lane-internal adjacency, used by levelLaneCascade's in-lane D7 push: the
+  // successors (within a PARENT lane) of a NESTED lane's owner must clear that
+  // nested lane's subtree. Node ids are unique across the whole graph, so every
+  // lane's internal edges can be merged into one map — reachability from a node
+  // in lane L can only traverse edges internal to L (boundary edges, which leave
+  // L, are excluded from laneInternalEdges), so this naturally stays lane-scoped.
+  const laneAdj = new Map<string, string[]>();
+  for (const [, laneEdges] of laneInternalEdges) {
+    for (const e of laneEdges) {
+      if (!laneAdj.has(e.source)) laneAdj.set(e.source, []);
+      laneAdj.get(e.source)!.push(e.target);
+    }
+  }
+
+  const laneSuccessorCache = new Map<string, Set<string>>();
+  function getLaneTransitiveSuccessors(startId: string): Set<string> {
+    const cached = laneSuccessorCache.get(startId);
+    if (cached) return cached;
+    const visited = new Set<string>();
+    const queue = [startId];
+    while (queue.length > 0) {
+      const id = queue.shift()!;
+      for (const next of laneAdj.get(id) ?? []) {
+        if (!visited.has(next)) {
+          visited.add(next);
+          queue.push(next);
+        }
+      }
+    }
+    laneSuccessorCache.set(startId, visited);
     return visited;
   }
 
@@ -395,94 +487,6 @@ export function layoutGraphWithLanes(
           }
         });
       }
-    }
-  }
-
-  // ── 5.5 Upward compaction of fork-branch bodies ─────────────────────────────
-  //
-  // After the D7 spine push, short fork branches may have long gaps between their
-  // head and the next node. This happens because dagre's tight-tree ranker places
-  // the rank slack at the top of a branch (to tighten the tail→join edge), and D7
-  // then pushes the join and everything after it further down.
-  //
-  // For every alignable fork head (same guards as §3.5: sole predecessor is the
-  // fork source, no shortcut from a sibling), compute the dominated body: the set
-  // of nodes reachable from the head where all spine predecessors are already in
-  // the set. In ascending main-axis order, move each body node up to
-  // max(pred end + rankSep, depth-0 lane subtreeMainEnd + rankSep) when that
-  // position is higher than the current one. Re-level owned depth-0 lanes after
-  // each move. Clear waypoints on touched edges. Moves are upward-only, so
-  // joins and the D7 push are untouched; the slack shifts to the tail→join edge.
-  {
-    // Collect body nodes for alignable fork heads.
-    const compactedNodes = new Set<string>();
-    for (const [forkSource, targets] of spineAdj) {
-      if (targets.length < 2) continue;
-      const targetNodes = targets.flatMap((t) => {
-        const n = spineById.get(t);
-        return n ? [n] : [];
-      });
-      if (targetNodes.length < 2) continue;
-      for (const head of targetNodes) {
-        // Guard 1: no sibling can reach this head (shortcut-edge guard).
-        const reachableFromSibling = targetNodes.some(
-          (o) => o.id !== head.id && getTransitiveSuccessors(o.id).has(head.id)
-        );
-        if (reachableFromSibling) continue;
-        // Guard 2: sole spine predecessor is the fork source.
-        const preds = spineRevAdj.get(head.id) ?? [];
-        if (preds.some((p) => p !== forkSource)) continue;
-
-        // BFS to build the dominated set (excluding the head itself).
-        const dom = new Set<string>([head.id]);
-        const queue = [head.id];
-        while (queue.length > 0) {
-          const cur = queue.shift()!;
-          for (const next of spineAdj.get(cur) ?? []) {
-            if (dom.has(next)) continue;
-            if ((spineRevAdj.get(next) ?? []).every((p) => dom.has(p))) {
-              dom.add(next);
-              queue.push(next);
-            }
-          }
-        }
-
-        // Process body nodes (excluding head) in ascending main-axis order.
-        const bodyIds = [...dom].filter((id) => id !== head.id && spineById.has(id));
-        bodyIds.sort((a, b) => mainOf(spineById.get(a)!, isLR) - mainOf(spineById.get(b)!, isLR));
-
-        for (const id of bodyIds) {
-          const node = spineById.get(id)!;
-          let required = -Infinity;
-          for (const p of spineRevAdj.get(id) ?? []) {
-            const pn = spineById.get(p);
-            if (!pn) continue;
-            required = Math.max(required, mainOf(pn, isLR) + mainSpanOf(pn, isLR) + rankSep);
-            for (const lane of sortedLanes) {
-              if (lane.depth === 0 && lane.ownerId === p) {
-                required = Math.max(required, subtreeMainEnd(lane) + rankSep);
-              }
-            }
-          }
-          if (required === -Infinity || required >= mainOf(node, isLR) - 0.5) continue;
-          spineById.set(id, shiftMain(node, required - mainOf(node, isLR), isLR));
-          compactedNodes.add(id);
-          // Re-level any depth-0 lanes owned by this node.
-          for (const lane of sortedLanes) {
-            if (lane.depth === 0 && lane.ownerId === id) {
-              levelLaneCascade(lane, id);
-            }
-          }
-        }
-      }
-    }
-    // Clear waypoints on edges whose endpoints moved.
-    if (compactedNodes.size > 0) {
-      spineLayout.edges.forEach((e, i) => {
-        if (compactedNodes.has(e.source) || compactedNodes.has(e.target)) {
-          spineLayout.edges[i] = { ...e, points: [] };
-        }
-      });
     }
   }
 

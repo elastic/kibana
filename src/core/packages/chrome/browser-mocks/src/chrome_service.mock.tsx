@@ -67,13 +67,6 @@ const createStartContractMock = () => {
       nextUserMenuState$.next(content ?? null);
     }),
   });
-  const nextAppendRightState$ = new BehaviorSubject<ReactNode>(null);
-  const appendRight = lazyObject({
-    get$: jest.fn().mockReturnValue(nextAppendRightState$),
-    set: jest.fn((content?: ReactNode) => {
-      nextAppendRightState$.next(content ?? null);
-    }),
-  });
   const contextSwitcher = lazyObject({
     get$: jest.fn().mockReturnValue(nextContextSwitcherState$),
     set: jest.fn((content?: ReactNode) => {
@@ -126,7 +119,6 @@ const createStartContractMock = () => {
     aiButton,
     globalSearch,
     userMenu,
-    appendRight,
     contextSwitcher,
     projectPicker,
   });

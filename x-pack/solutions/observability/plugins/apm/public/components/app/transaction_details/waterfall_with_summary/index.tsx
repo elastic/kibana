@@ -23,6 +23,7 @@ import {
   getSubtreeIds,
   TRACE_WATERFALL_EBT_ELEMENTS,
 } from '@kbn/apm-ui-shared';
+import { useTimeRangeId } from '../../../../context/time_range_id/use_time_range_id';
 import { TransactionSummary } from '../../../shared/summary/transaction_summary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
 import { MaybeViewTraceLink } from './maybe_view_trace_link';
@@ -77,6 +78,13 @@ export function WaterfallWithSummary<TSample extends {}>({
   const [sampleActivePage, setSampleActivePage] = useState(0);
   const [isFullTraceFlyoutOpen, setIsFullTraceFlyoutOpen] = useState(false);
   const getErrorMarkerHref = useGetErrorMarkerHrefFromRouter();
+  const { pauseAutoRefresh, resumeAutoRefresh } = useTimeRangeId();
+
+  useEffect(() => {
+    if (!isFullTraceFlyoutOpen) return;
+    pauseAutoRefresh();
+    return resumeAutoRefresh;
+  }, [isFullTraceFlyoutOpen, pauseAutoRefresh, resumeAutoRefresh]);
 
   const isControlled = selectedSample !== undefined;
 
@@ -224,7 +232,7 @@ export function WaterfallWithSummary<TSample extends {}>({
       ) : (
         <EuiFlexItem grow={false}>
           <TransactionSummary
-            errorCount={unifiedWaterfallFetchResult.errors.length}
+            errorCount={unifiedWaterfallFetchResult.totalErrors}
             totalDuration={unifiedRootTransactionDuration}
             transaction={entryTransaction}
           />

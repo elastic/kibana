@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiMarkdownFormat,
+  EuiText,
+} from '@elastic/eui';
 import type { JSONSchema7 } from 'json-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -223,17 +230,27 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
     return (
       <EuiCallOut color="warning" announceOnMount={false} data-test-subj="waitForApprovalCallout">
         <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexItem>
-            <EuiText size="s">
-              {resumeMessage ?? (
+          <EuiFlexItem
+            grow={false}
+            data-test-subj="waitForApprovalMessage"
+            css={{
+              maxHeight: 'min(12rem, 30vh)',
+              overflowY: 'auto',
+              overflowWrap: 'anywhere',
+            }}
+          >
+            {resumeMessage ? (
+              <EuiMarkdownFormat textSize="s">{resumeMessage}</EuiMarkdownFormat>
+            ) : (
+              <EuiText size="s">
                 <FormattedMessage
                   id="workflowsManagement.executionDetail.approvalButton.defaultMessage"
                   defaultMessage="Your approval is required to continue this workflow."
                 />
-              )}
-            </EuiText>
+              </EuiText>
+            )}
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButton

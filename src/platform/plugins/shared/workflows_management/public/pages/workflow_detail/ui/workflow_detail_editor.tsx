@@ -25,10 +25,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
 import { isMac } from '@kbn/shared-ux-utility';
-import {
-  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
-  WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
-} from '@kbn/workflows';
+import { WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID } from '@kbn/workflows';
 import {
   ReactFlowProvider,
   useWorkflowsCapabilities,
@@ -86,9 +83,11 @@ const WorkflowVisualEditor = React.lazy(() =>
 
 interface WorkflowDetailEditorProps {
   highlightDiff?: boolean;
+  onAgentProposalHeld?: () => void;
 }
 
-export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ highlightDiff }) => {
+export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props) => {
+  const { highlightDiff, onAgentProposalHeld } = props;
   const styles = useMemoCss(componentStyles);
   const readOnlyBadgeShadow = useEuiShadow('xl');
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -182,9 +181,6 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
     ]
   );
 
-  const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
-    WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
-  );
   const isExecutionGraphEnabled = useWorkflowsExperimentalUiSetting(
     WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID
   );
@@ -200,9 +196,6 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
 
   const handleEditorViewChange = useCallback(
     (next: 'yaml' | 'graph') => {
-      if (!isVisualEditorEnabled) {
-        return;
-      }
       // When switching to graph, focus it on whichever step or trigger block
       // the cursor is currently in — derived entirely from Redux state.
       if (next === 'graph') {
@@ -213,7 +206,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
       }
       setEditorView(next);
     },
-    [dispatch, focusedStepId, focusedTriggerId, isVisualEditorEnabled, setEditorView]
+    [dispatch, focusedStepId, focusedTriggerId, setEditorView]
   );
 
   const openTestModal = useCallback(() => {
@@ -366,6 +359,8 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   // Mount the graph on first open and keep it alive so YAML↔graph toggles are
   // instant (no remount / Suspense flash / fade).
   const [renderGraph, setRenderGraph] = useState(showGraph);
+  // The floating bottom bar would otherwise cover the validation panel docked under the YAML editor.
+  const [validationPanelHeight, setValidationPanelHeight] = useState(0);
   useEffect(() => {
     if (showGraph) setRenderGraph(true);
   }, [showGraph]);
@@ -389,13 +384,15 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
                 onStepRun={handleStepRun}
                 editorRef={editorRef}
                 isActive={!showGraph}
-                hideEditorTools={isVisualEditorEnabled}
+                hideEditorTools
+                onValidationPanelHeightChange={setValidationPanelHeight}
                 openActionsRef={openActionsRef}
                 onToggleEditorMode={() => handleEditorViewChange(showGraph ? 'yaml' : 'graph')}
+                onAgentProposalHeld={onAgentProposalHeld}
               />
             </React.Suspense>
           </div>
-          {isVisualEditorEnabled && renderGraph && (
+          {renderGraph && (
             <div
               css={[
                 styles.editorLayer,
@@ -433,6 +430,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
               testWorkflowButton={testWorkflowButton}
               testWorkflowButtonCompact={testWorkflowButtonCompact}
               disableAutoCollapse={!hideControlsMenu}
+              bottomOffset={showGraph ? 0 : validationPanelHeight}
             />
           )}
         </EuiFlexItem>

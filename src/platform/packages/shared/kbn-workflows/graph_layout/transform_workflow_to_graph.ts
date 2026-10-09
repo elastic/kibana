@@ -685,6 +685,111 @@ function transformInternal(
       }
     }
 
+    // ── fallback lane (on-failure.fallback) ──────────────────────────────
+    // Placed after all control-flow arms so exitIds is already final for
+    // this step. The failure edge goes into `failureEdges` and is appended
+    // at the end — keeping [spine, fallback] declaration order so dagre puts
+    // the lane on the +cross side (Decision 8).
+    let fallbackSteps: Step[] = [];
+    visitStepChildSlots(step, (slot, children) => {
+      if (slot.kind === 'fallback') fallbackSteps = children;
+    });
+
+    if (fallbackSteps.length > 0) {
+      const inner = transformInternal([], fallbackSteps, ids, {
+        graphId: ctx.graphId,
+        fallbackDepth: ctx.fallbackDepth + 1,
+      });
+      Object.assign(nodeRefs, inner.nodeRefs);
+
+      // Stamp fallbackOf on every non-trigger node in the lane (step and
+      // foreachGroup containers). Stamping foreachGroup containers lets the
+      // layout engine place the container in the lane's gutter; its inner nodes
+      // remain in the container's own dagre graph and are not stamped here.
+      // Only stamp where unset so the innermost owner wins in nested fallbacks.
+      // Collect the ids of stamped nodes — these are exactly the lane's node set
+      // (exclusive by construction: nested-lane nodes are already stamped).
+      const laneNodes: string[] = [];
+      for (const n of inner.nodes) {
+        if (n.type !== 'trigger') {
+          const d = n.data as { fallbackOf?: string };
+          if (d.fallbackOf === undefined) {
+            d.fallbackOf = id;
+            laneNodes.push(n.id);
+          }
+        }
+      }
+
+      // Claim synthetic bypass nodes (from unbalanced if/switch inside this
+      // fallback) into the lane's node set. Bypass nodes have no `data.fallbackOf`
+      // so the stamp loop above never reaches them. Without this,
+      // layoutGraphWithLanes classifies them as spine nodes while their sibling
+      // gate nodes are lane nodes — the gate→bypass edge degrades to points:[].
+      // Innermost lane wins: skip any bypass already claimed by a nested lane.
+      const nestedLaneNodeIds = new Set(inner.fallbackLanes.flatMap((l) => l.nodes));
+      for (const bypass of inner.bypassLaneNodes) {
+        if (!nestedLaneNodeIds.has(bypass.id)) {
+          laneNodes.push(bypass.id);
+        }
+      }
+      // Stamp foreachGroup inner nodes for minimap tinting — but do NOT add
+      // them to laneNodes (they belong to the container's own dagre graph).
+      for (const g of inner.foreachGroups) {
+        for (const n of g.innerNodes) {
+          if (n.type === 'step') {
+            const d = n.data as { fallbackOf?: string };
+            if (d.fallbackOf === undefined) d.fallbackOf = id;
+          }
+        }
+      }
+
+      nodes.push(...inner.nodes);
+      bypassLaneNodes.push(...inner.bypassLaneNodes);
+      edges.push(...inner.edges);
+      failureEdges.push(...inner.failureEdges);
+      foreachGroups.push(...inner.foreachGroups);
+      fallbackLanes.push(...inner.fallbackLanes);
+
+      const headId = inner.nodes[0]?.id;
+      if (headId) {
+        const laneLeaves = inner.leafIds;
+        fallbackLanes.push({
+          owner: id,
+          head: headId,
+          leaves: laneLeaves,
+          nodes: laneNodes,
+          depth: ctx.fallbackDepth,
+          graphId: ctx.graphId,
+        });
+
+        // Shape 2: continue → rejoin. Add fallback leaves to exitIds so the
+        // existing fan-in loop emits rejoin edges automatically on the NEXT
+        // sibling step. Uses engine's own rule verbatim (Decision 6).
+        const onFailure = (step as Record<string, unknown>)['on-failure'] as
+          | { continue?: boolean | string }
+          | undefined;
+        const hasContinuePath =
+          typeof onFailure?.continue === 'string' || onFailure?.continue === true;
+        if (hasContinuePath) {
+          exitIds = dedupeIds([...exitIds, ...laneLeaves]);
+          // Record these as rejoin sources so the fan-in loop on the NEXT
+          // sibling step tags those edges `isRejoin: true`.
+          for (const leafId of laneLeaves) {
+            rejoinSourceIds.add(leafId);
+          }
+        }
+
+        // Defer the failure edge — append after all spine/branch edges.
+        failureEdges.push({
+          id: `${id}:${headId}`,
+          source: id,
+          target: headId,
+          isFailure: true,
+          label: 'on failure',
+        });
+      }
+    }
+
     prevExitIds = exitIds;
   }
 

@@ -200,49 +200,6 @@ const applyLaneDelta = (
 };
 
 /**
- * After re-centering a fork source by `forkDelta`, keep its ancestors in sync
- * so the fork doesn't visually drift away from whatever feeds into it —
- * e.g. a trigger (or row of triggers) directly above an `if`/`switch`.
- *
- * Walks upward from `source`, one rank at a time. At each rank every current
- * parent is shifted by the same delta, but only when *all* of them have
- * exactly one out-edge (the one leading to the node we just shifted) — a
- * parent with more than one out-edge also feeds a sibling branch elsewhere
- * and must not move. With exactly one parent the walk continues through it
- * (a straight chain, e.g. trigger → step → if); with several parents (e.g.
- * two triggers fanning into the same fork) all of them are shifted together
- * and the walk stops there, since fan-in parents share no further ancestor
- * to reconcile.
- */
-const propagateForkDeltaToAncestors = (
-  source: string,
-  forkDelta: number,
-  inEdges: ReadonlyMap<string, string[]>,
-  outEdges: ReadonlyMap<string, string[]>,
-  mutableNodes: MutableNodes,
-  crossAxis: 'x' | 'y',
-  containerInnerIds: ReadonlyMap<string, ReadonlySet<string>>
-): void => {
-  const dx = crossAxis === 'x' ? forkDelta : 0;
-  const dy = crossAxis === 'y' ? forkDelta : 0;
-  let cur = source;
-  const visited = new Set<string>([cur]);
-  for (;;) {
-    const parents = inEdges.get(cur) ?? [];
-    if (parents.length === 0) break;
-    if (parents.some((p) => visited.has(p))) break; // cycle guard
-    const eligible = parents.every(
-      (p) => mutableNodes.has(p) && (outEdges.get(p) ?? []).length === 1
-    );
-    if (!eligible) break; // a parent is itself a fork (or missing) — leave it put
-    applyLaneDelta(new Set(parents), mutableNodes, containerInnerIds, dx, dy);
-    for (const p of parents) visited.add(p);
-    if (parents.length !== 1) break; // fan-in parents have no shared further ancestor
-    cur = parents[0];
-  }
-};
-
-/**
  * Run one fork-order enforcement pass over a single graph.
  *
  * Algorithm (rank-aware profile packing):
@@ -276,8 +233,6 @@ const enforceForkLaneOrderForGraph = (
 
   // Group out-edges by source, preserving declaration order.
   const outEdges = new Map<string, string[]>(); // source → targets in order
-  // Build in-edge map for ancestor propagation after fork re-centering.
-  const inEdges = new Map<string, string[]>(); // target → sources
   for (const e of spineEdges) {
     if (mutableNodes.has(e.source)) {
       const existing = outEdges.get(e.source);
@@ -287,16 +242,10 @@ const enforceForkLaneOrderForGraph = (
         outEdges.set(e.source, [e.target]);
       }
     }
-    const existingIn = inEdges.get(e.target);
-    if (existingIn) {
-      existingIn.push(e.source);
-    } else {
-      inEdges.set(e.target, [e.source]);
-    }
   }
 
   // Process each fork in declaration order.
-  for (const [source, heads] of outEdges) {
+  for (const [, heads] of outEdges) {
     if (heads.length >= 2) {
       const laneSets = buildLaneSets(heads, spineEdges);
       if (laneSets) {
@@ -353,53 +302,6 @@ const enforceForkLaneOrderForGraph = (
               }
 
               placedSets.push(laneNodes);
-            }
-
-            // Re-center the fork source over its placed branch heads, then propagate
-            // the same delta up through any straight-chain ancestors (single out-edge).
-            // dagre centres the fork source over its branches, but when lane order is
-            // swapped by this pass the source position is stale — correct it here so
-            // the fork node does not appear visually off-centre.
-            const forkNode = mutableNodes.get(source);
-            if (forkNode) {
-              // Centre on the midpoint of head entry-point centres (the chip columns),
-              // not on the outer box edges. Using box edges shifts the fork by
-              // (widestHead - narrowestHead) / 4 whenever heads have different widths
-              // (e.g. a 300px step vs an 80px bypass lane for an empty default case).
-              const headCentres = orderedHeads.flatMap((h) => {
-                const n = mutableNodes.get(h);
-                if (!n) return [];
-                const span = crossAxis === 'x' ? n.width : n.height;
-                return [n[crossAxis] + span / 2];
-              });
-              if (headCentres.length > 0) {
-                const midpoint = (Math.min(...headCentres) + Math.max(...headCentres)) / 2;
-                const forkSpan = crossAxis === 'x' ? forkNode.width : forkNode.height;
-                const newForkCross = midpoint - forkSpan / 2;
-                const forkDelta = newForkCross - forkNode[crossAxis];
-
-                if (Math.abs(forkDelta) >= 0.001) {
-                  // Move the fork source.
-                  mutableNodes.set(source, {
-                    ...forkNode,
-                    x: crossAxis === 'x' ? newForkCross : forkNode.x,
-                    y: crossAxis === 'y' ? newForkCross : forkNode.y,
-                  });
-
-                  // Propagate upward through ancestors (including fan-in, e.g.
-                  // two triggers feeding the same fork) so the fork doesn't
-                  // visually drift away from whatever feeds into it.
-                  propagateForkDeltaToAncestors(
-                    source,
-                    forkDelta,
-                    inEdges,
-                    outEdges,
-                    mutableNodes,
-                    crossAxis,
-                    containerInnerIds
-                  );
-                }
-              }
             }
           }
         }
@@ -589,15 +491,6 @@ export const enforceForkBranchCompoundOrder = (
   const mutableNodes: MutableNodes = new Map(
     nodes.map((n) => [n.id, { x: n.x, y: n.y, width: n.width, height: n.height }])
   );
-
-  // Heads of every lane re-placed by packBranchCompounds below, across the
-  // outer graph and every foreachGroup body. A lane in this set was already
-  // positioned from scratch against branch-local obstacles (any depth, since
-  // the branch-lane BFS collects nested lanes too) — the caller's post-dagre
-  // "re-sync to owner delta" pass must skip these, since that pass assumes the
-  // lane was *not* independently repositioned and its delta-matching heuristic
-  // does not hold once a lane's own owner was itself repositioned here (see
-  // workflow_layout_pipeline.ts pass 1c).
   const packedLaneHeads = new Set<string>();
 
   // Partition lanes by host graph: outer graph (graphId === undefined) vs per-group.
@@ -656,17 +549,6 @@ export const enforceForkBranchCompoundOrder = (
       }
     }
 
-    // In-edges map: needed to propagate fork re-centering to straight-chain ancestors.
-    const inEdges = new Map<string, string[]>();
-    for (const e of graphSpineEdges) {
-      const existing = inEdges.get(e.target);
-      if (existing) {
-        existing.push(e.source);
-      } else {
-        inEdges.set(e.target, [e.source]);
-      }
-    }
-
     // Reachability BFS for exclusive branch membership computation.
     const adjList = new Map<string, string[]>();
     for (const e of graphSpineEdges) {
@@ -694,7 +576,7 @@ export const enforceForkBranchCompoundOrder = (
       return visited;
     };
 
-    for (const [source, heads] of outEdges) {
+    for (const [, heads] of outEdges) {
       if (heads.length >= 2) {
         // Build exclusive branch node sets (same logic as buildLaneSets).
         const perHeadReachable = new Map(heads.map((h) => [h, reachableFrom(h)]));
@@ -844,44 +726,6 @@ export const enforceForkBranchCompoundOrder = (
           }
 
           if (isFinite(branchCrossEnd)) prevBranchCrossEnd = branchCrossEnd;
-        }
-
-        // Re-center the fork source over its fully-packed branch heads.
-        // Pass 1 (enforceForkLaneOrder) centers the fork based on positions
-        // before pass 1b packing — if pass 1b moves any branch (e.g. closing a
-        // gap left when pass 1 re-ordered a wide branch-span), the fork's center
-        // drifts. Correct it here after all branches are in their final positions.
-        const forkNode = mutableNodes.get(source);
-        if (forkNode) {
-          // Centre on head-entry-point centres (same rationale as pass 1).
-          let centreMin = Infinity;
-          let centreMax = -Infinity;
-          for (const head of heads) {
-            const n = mutableNodes.get(head);
-            if (n) {
-              const centre = n[crossAxis] + n[crossSpan] / 2;
-              if (centre < centreMin) centreMin = centre;
-              if (centre > centreMax) centreMax = centre;
-            }
-          }
-          if (isFinite(centreMin) && isFinite(centreMax)) {
-            const midpoint = (centreMin + centreMax) / 2;
-            const newForkCross = midpoint - forkNode[crossSpan] / 2;
-            const forkDelta = newForkCross - forkNode[crossAxis];
-            if (Math.abs(forkDelta) >= 0.001) {
-              shiftNode(source, forkDelta);
-              // Propagate to ancestors, including fan-in (same rule as pass 1).
-              propagateForkDeltaToAncestors(
-                source,
-                forkDelta,
-                inEdges,
-                outEdges,
-                mutableNodes,
-                crossAxis,
-                containerDescendants
-              );
-            }
-          }
         }
       } // end if (heads.length >= 2)
     }

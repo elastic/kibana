@@ -10,6 +10,7 @@
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter, useHistory } from 'react-router-dom';
+import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { useWorkflowUrlState } from './use_workflow_url_state';
 import { getStoredEditorView, getStoredGraphDirection } from '../lib/workflow_editor_preferences';
 
@@ -38,6 +39,12 @@ describe('useWorkflowUrlState', () => {
     expect(result.current.selectedStepExecutionId).toBeUndefined();
     expect(result.current.selectedStepId).toBeUndefined();
     expect(result.current.shouldAutoResume).toBe(false);
+    expect(result.current.executionListFilters).toEqual({
+      statuses: [],
+      executionTypes: [],
+      executedBy: [],
+    });
+    expect(result.current.lastViewedExecutionId).toBeUndefined();
   });
 
   it('should parse view=yaml and direction=LR from URL', () => {
@@ -106,6 +113,63 @@ describe('useWorkflowUrlState', () => {
     expect(result.current.activeTab).toBe('executions');
   });
 
+  it('parses execution list filters and the last viewed row from the URL', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper([
+        '/?executionStatuses=completed&executionStatuses=not-a-status&executionTypes=production&executedBy=user-1&lastViewedExecutionId=exec-1',
+      ]),
+    });
+
+    expect(result.current.executionListFilters).toEqual({
+      statuses: [ExecutionStatus.COMPLETED],
+      executionTypes: [ExecutionType.PRODUCTION],
+      executedBy: ['user-1'],
+    });
+    expect(result.current.lastViewedExecutionId).toBe('exec-1');
+  });
+
+  it('omits empty execution list filters from the URL', () => {
+    const { result } = renderHook(
+      () => ({ urlState: useWorkflowUrlState(), history: useHistory() }),
+      {
+        wrapper: createWrapper([
+          '/?executionStatuses=completed&executionTypes=test&executedBy=user-1&lastViewedExecutionId=exec-1',
+        ]),
+      }
+    );
+
+    act(() => {
+      result.current.urlState.updateUrlState({
+        executionStatuses: [],
+        executionTypes: [],
+        executedBy: [],
+        lastViewedExecutionId: undefined,
+      });
+    });
+
+    expect(result.current.urlState.executionListFilters).toEqual({
+      statuses: [],
+      executionTypes: [],
+      executedBy: [],
+    });
+    expect(result.current.urlState.lastViewedExecutionId).toBeUndefined();
+    expect(result.current.history.location.search).not.toContain('executionStatuses');
+    expect(result.current.history.location.search).not.toContain('lastViewedExecutionId');
+  });
+
+  it('keeps the last viewed execution when the selected execution is cleared', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?executionId=exec-1&lastViewedExecutionId=exec-1']),
+    });
+
+    act(() => {
+      result.current.setSelectedExecution(null);
+    });
+
+    expect(result.current.selectedExecutionId).toBeUndefined();
+    expect(result.current.lastViewedExecutionId).toBe('exec-1');
+  });
+
   it('should parse executionId from URL', () => {
     const { result } = renderHook(() => useWorkflowUrlState(), {
       wrapper: createWrapper(['/?executionId=exec-1']),
@@ -145,6 +209,16 @@ describe('useWorkflowUrlState', () => {
     });
 
     expect(result.current.replayExecutionId).toBe('exec-1');
+    expect(result.current.replayIsTestRun).toBe(false);
+  });
+
+  it('should parse replayIsTestRun from URL', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?replayExecutionId=exec-1&replayIsTestRun=true']),
+    });
+
+    expect(result.current.replayExecutionId).toBe('exec-1');
+    expect(result.current.replayIsTestRun).toBe(true);
   });
 
   it('should update URL when setActiveTab is called', () => {
@@ -229,7 +303,7 @@ describe('useWorkflowUrlState', () => {
 
   it('should clear replayExecutionId when clearReplayExecutionId is called', () => {
     const { result } = renderHook(() => useWorkflowUrlState(), {
-      wrapper: createWrapper(['/?replayExecutionId=exec-1']),
+      wrapper: createWrapper(['/?replayExecutionId=exec-1&replayIsTestRun=true']),
     });
 
     act(() => {
@@ -237,6 +311,7 @@ describe('useWorkflowUrlState', () => {
     });
 
     expect(result.current.replayExecutionId).toBeUndefined();
+    expect(result.current.replayIsTestRun).toBe(false);
   });
 
   it('should support updateUrlState for arbitrary updates', () => {

@@ -117,6 +117,9 @@ export enum ProductFeatureSecurityKey {
    */
   cloudSecurityPosture = 'cloud_security_posture',
 
+  /** Enables Cloud Defend integration installation. */
+  cloudDefend = 'cloud_defend',
+
   /**
    * enables the automatic import
    */
