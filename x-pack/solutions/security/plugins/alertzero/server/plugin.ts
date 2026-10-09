@@ -92,6 +92,7 @@ export class AlertZeroPlugin
     this.serverlessTierAvailable = available;
   };
   private spaces?: AlertZeroStartDependencies['spaces'];
+  private taskManager?: AlertZeroStartDependencies['taskManager'];
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
 
   /** Created during `start`; routes resolve them lazily after managed-workflow initialization. */
@@ -221,6 +222,7 @@ export class AlertZeroPlugin
       ),
       isContextEngineEnabled: makeIsContextEngineEnabled(() => this.requireCoreStart()),
       getInternalEsClient: () => this.requireCoreStart().elasticsearch.client.asInternalUser,
+      getTaskManager: () => this.requireStarted(this.taskManager, 'Task Manager'),
       logger: stepsLogger,
     });
 
@@ -293,6 +295,7 @@ export class AlertZeroPlugin
 
   start(core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
     this.spaces = plugins.spaces;
+    this.taskManager = plugins.taskManager;
     this.coreStart = core;
     this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
