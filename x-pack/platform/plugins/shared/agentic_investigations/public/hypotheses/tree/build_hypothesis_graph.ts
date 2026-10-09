@@ -127,7 +127,7 @@ const createEdge = (source: string, target: string, isHappyPath: boolean): Hypot
 
 /**
  * Builds the hypothesis tree: Trigger → Hypotheses chip → one flat row of hypotheses →
- * Conclusion → Proposed actions. Only hypotheses that were not dismissed lead to the conclusion. Conclusion and actions are drafts until the run ends, so they are
+ * Conclusion → Proposed actions. Only confirmed hypotheses lead to the conclusion. Conclusion and actions are drafts until the run ends, so they are
  * left out while it is still running.
  */
 export const buildHypothesisGraph = ({
@@ -173,10 +173,10 @@ export const buildHypothesisGraph = ({
     return { nodes, edges };
   }
 
-  // A dismissed hypothesis did not lead anywhere, so it does not feed the conclusion. When every
-  // hypothesis was dismissed, the chip does, so the conclusion stays connected.
+  // Only a confirmed hypothesis leads to the conclusion. Without one, the chip does, so the
+  // conclusion stays connected.
   const leadingIds = hypotheses.flatMap(({ status }, index) =>
-    status === 'dismissed' ? [] : [getHypothesisNodeId(index)]
+    status === 'confirmed' ? [getHypothesisNodeId(index)] : []
   );
   const feedingIds =
     showHypothesisRow && leadingIds.length > 0 ? leadingIds : [HYPOTHESIS_TREE_NODE_IDS.hypotheses];

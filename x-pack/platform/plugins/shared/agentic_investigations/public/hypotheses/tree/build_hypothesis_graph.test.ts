@@ -70,12 +70,21 @@ describe('buildHypothesisGraph', () => {
       'conclusion',
       'actions',
     ]);
-    // trigger→chip, chip→3 hypotheses, 2 hypotheses not dismissed→conclusion, conclusion→actions
+    // trigger→chip, chip→3 hypotheses, 2 confirmed hypotheses→conclusion, conclusion→actions
     expect(graph.edges).toHaveLength(7);
   });
 
-  it('leads no edge from a dismissed hypothesis to the conclusion', () => {
-    const { edges } = buildHypothesisGraph({ input: completed, isHypothesesExpanded: true });
+  it('leads only confirmed hypotheses to the conclusion', () => {
+    const { edges } = buildHypothesisGraph({
+      input: {
+        ...completed,
+        hypotheses: [
+          ...completed.hypotheses,
+          { candidate: 'Bot traffic', confidence: 0.2, status: 'investigating' },
+        ],
+      },
+      isHypothesesExpanded: true,
+    });
 
     expect(
       edges
@@ -84,7 +93,7 @@ describe('buildHypothesisGraph', () => {
     ).toEqual([getHypothesisNodeId(1), getHypothesisNodeId(2)]);
   });
 
-  it('feeds the conclusion from the chip when every hypothesis was dismissed', () => {
+  it('feeds the conclusion from the chip when no hypothesis is confirmed', () => {
     const { edges } = buildHypothesisGraph({
       input: {
         ...completed,
