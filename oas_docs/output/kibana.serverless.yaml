@@ -954,6 +954,7 @@ paths:
         - in: query
           name: include_hidden
           required: false
+          description: When true, hidden agents (such as built-in system agents) are included in the response.
           schema:
             default: false
             type: boolean

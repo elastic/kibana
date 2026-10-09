@@ -261,7 +261,13 @@ export function registerAgentRoutes({
         validate: {
           request: {
             query: schema.object({
-              include_hidden: schema.boolean({ defaultValue: false }),
+              include_hidden: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description:
+                    'When true, hidden agents (such as built-in system agents) are included in the response.',
+                },
+              }),
             }),
           },
         },
