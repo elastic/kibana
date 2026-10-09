@@ -26,8 +26,8 @@ export const SIGNIFICANT_EVENT_STATUS_OPTIONS = [
 
 export const significantEventStatusSchema = z.enum(SIGNIFICANT_EVENT_STATUS_OPTIONS)
   .describe(dedent`
-    "${ALERT_EPISODE_STATUS.ACTIVE}" = a current failure, material degradation, or sensitive-data exposure is confirmed or remains plausibly unverified;
-    "${ALERT_EPISODE_STATUS.RECOVERING}" = engine-written: no member rule is currently breaching. The event closes after consecutive clean runs, and returns to "${ALERT_EPISODE_STATUS.ACTIVE}" in the same episode if a breach comes back;
+    "${ALERT_EPISODE_STATUS.ACTIVE}" = a current failure, material degradation, or sensitive-data exposure is confirmed or remains plausibly unverified. A mechanism found at an unchanged background rate (rate-flat inconclusive) is verified as not newly elevated — it is not "plausibly unverified" and must not create a new event;
+    "${ALERT_EPISODE_STATUS.RECOVERING}" = derived, never set by a caller: every member rule is healthy. A breach in any member returns it to "${ALERT_EPISODE_STATUS.ACTIVE}" in the same episode;
     "${ALERT_EPISODE_STATUS.INACTIVE}" = the event is no longer active. Record the recovery, false-alarm, benign-change, or other assessment rationale in "assessment_note".
   `);
 
@@ -102,14 +102,6 @@ export const significantEventSchema = significantEventBaseSchema.extend({
       `
     ),
   investigations: z.array(significantEventInvestigationSchema).max(100).optional(),
-  status_evaluations: z
-    .number()
-    .int()
-    .min(0)
-    .optional()
-    .describe(
-      'Engine-owned: evaluations the series has spent in "recovering". Set only on a recovering version and cleared in every other state; never supplied by a caller.'
-    ),
 });
 
 export type SignificantEvent = z.infer<typeof significantEventSchema>;
