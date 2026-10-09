@@ -413,21 +413,26 @@ const stampEpisodeOwnershipTags = (doc: Record<string, unknown>, episodeId: stri
   doc.tags = [...next];
 };
 
-// DC2 entity join keys for the aws-iam AssumeRole pack. Stamped only onto ep1 clones so the
-// endpoint side carries the same host.name + cloud.account.id as the pinned CloudTrail events
-// (WIN-ANALYST01 / 123456789012). Host is re-pinned here because scaleEpisodes otherwise picks
-// from a seed-dependent pool and the join would be missing for some selections. The vendored
-// ep1data.ndjson.gz stays untouched; this runs in the scaling path.
+// DC2 entity join keys for the aws-iam AssumeRole pack. Applied on ep1 clones so the endpoint
+// side carries the same host.name + cloud.account.id as the pinned CloudTrail events
+// (WIN-ANALYST01 / 123456789012). Host is selected *before* setHostAndUserInPlace / graph
+// enrichment so related.hosts and host.target stay consistent with the pinned join host.
+// The vendored ep1data.ndjson.gz stays untouched; this runs in the scaling path.
 const DC2_JOIN_CLOUD_ACCOUNT_ID = '123456789012';
 const DC2_JOIN_EPISODE_ID = 'ep1';
 const DC2_JOIN_HOST = HOSTS['WIN-ANALYST01'];
+
+/** Prefer the DC2 pinned host for ep1; otherwise keep the clone's pool selection. */
+export const hostForEpisodeScaling = (
+  episodeId: string,
+  selectedHost: CatalogHost
+): CatalogHost => (episodeId === DC2_JOIN_EPISODE_ID ? DC2_JOIN_HOST : selectedHost);
 
 export const stampEpisodeCloudAccountIds = (
   doc: Record<string, unknown>,
   episodeId: string
 ): void => {
   if (episodeId !== DC2_JOIN_EPISODE_ID) return;
-  applyHostToDoc(doc, DC2_JOIN_HOST);
   const existingCloud = isRecord(doc.cloud) ? doc.cloud : {};
   doc.cloud = {
     ...existingCloud,
@@ -512,10 +517,11 @@ export async function* scaleEpisodes(
         if (producedDataDocs >= opts.targetEvents) break;
         if (producedThisClone >= perCloneTargetEvents) break;
 
+        const episodeHost = hostForEpisodeScaling(ep.episodeId, host);
         const cloned: Record<string, unknown> = structuredClone(doc);
         shiftTimeFieldsInPlace(cloned, deltaMs);
         rewriteEntityIdsInPlace(cloned, `${cloneKey}:${ep.episodeId}`);
-        setHostAndUserInPlace({ doc: cloned, host, user, agentId });
+        setHostAndUserInPlace({ doc: cloned, host: episodeHost, user, agentId });
         stampEpisodeOwnershipTags(cloned, ep.episodeId);
         stampEpisodeCloudAccountIds(cloned, ep.episodeId);
         producedDataDocs++;
@@ -524,10 +530,11 @@ export async function* scaleEpisodes(
       }
 
       for (const doc of ep.alertDocs) {
+        const episodeHost = hostForEpisodeScaling(ep.episodeId, host);
         const cloned: Record<string, unknown> = structuredClone(doc);
         shiftTimeFieldsInPlace(cloned, deltaMs);
         rewriteEntityIdsInPlace(cloned, `${cloneKey}:${ep.episodeId}`);
-        setHostAndUserInPlace({ doc: cloned, host, user, agentId });
+        setHostAndUserInPlace({ doc: cloned, host: episodeHost, user, agentId });
         stampEpisodeOwnershipTags(cloned, ep.episodeId);
         stampEpisodeCloudAccountIds(cloned, ep.episodeId);
         yield { doc: cloned, kind: 'endpoint_alert', episodeId: ep.episodeId };
