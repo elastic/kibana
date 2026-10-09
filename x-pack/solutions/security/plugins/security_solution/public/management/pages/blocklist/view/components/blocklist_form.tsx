@@ -89,7 +89,41 @@ const WILDCARD_ELIGIBLE_FIELDS: ReadonlySet<BlocklistConditionEntryField> = new 
   'file.path',
   'file.path.caseless',
   'file.name',
+  'file.name.caseless',
 ]);
+
+// The two wire values for the File Name field. `is one of` always uses the cased `file.name`;
+// `Match` (wildcard) uses whichever variant matches the target OS's filesystem case-sensitivity.
+const FILE_NAME_FIELDS: ReadonlySet<BlocklistConditionEntryField> = new Set([
+  'file.name',
+  'file.name.caseless',
+]);
+
+// Windows and macOS have case-insensitive filesystems; Linux does not.
+function resolveFileNameFieldForOs(os: OperatingSystem): BlocklistConditionEntryField {
+  return os === OperatingSystem.LINUX ? 'file.name' : 'file.name.caseless';
+}
+
+// Resolves the wire `field` value for the given operator/OS combination. Only the File Name
+// field has more than one wire value (see `resolveFileNameFieldForOs`); every other field is
+// left untouched here.
+function resolveFieldForOperator(
+  field: BlocklistConditionEntryField,
+  operator: ListOperatorTypeEnum,
+  os: OperatingSystem
+): BlocklistConditionEntryField {
+  if (!FILE_NAME_FIELDS.has(field)) {
+    return field;
+  }
+
+  return operator === ListOperatorTypeEnum.WILDCARD ? resolveFileNameFieldForOs(os) : 'file.name';
+}
+
+// The field dropdown only ever registers the canonical (cased) field value for a given
+// conceptual field, so the currently selected wire value must be normalized to match.
+function toDisplayField(field: BlocklistConditionEntryField): BlocklistConditionEntryField {
+  return field === 'file.name.caseless' ? 'file.name' : field;
+}
 
 // Endpoint artifact matching does not require escaping `\`, `*`, or `?`
 const UNNECESSARY_ESCAPING_REGEX = /\\[\\*?]/;
@@ -197,15 +231,14 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         'data-test-subj': getTestId('file.hash.*'),
       });
 
-      // Available for all operating systems
-      selectableFields.push({
-        value: 'file.name',
-        inputDisplay: CONDITION_FIELD_TITLE['file.name'],
-        dropdownDisplay: getDropdownDisplay('file.name'),
-        'data-test-subj': getTestId('file.name'),
-      });
-
       if (selectedOs === OperatingSystem.LINUX) {
+        selectableFields.push({
+          value: 'file.name',
+          inputDisplay: CONDITION_FIELD_TITLE['file.name'],
+          dropdownDisplay: getDropdownDisplay('file.name'),
+          'data-test-subj': getTestId('file.name'),
+        });
+
         selectableFields.push({
           value: 'file.path',
           inputDisplay: CONDITION_FIELD_TITLE['file.path'],
@@ -213,6 +246,13 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
           'data-test-subj': getTestId('file.path'),
         });
       } else {
+        selectableFields.push({
+          value: 'file.name',
+          inputDisplay: CONDITION_FIELD_TITLE['file.name.caseless'],
+          dropdownDisplay: getDropdownDisplay('file.name.caseless'),
+          'data-test-subj': getTestId('file.name.caseless'),
+        });
+
         selectableFields.push({
           value: 'file.path.caseless',
           inputDisplay: CONDITION_FIELD_TITLE['file.path.caseless'],
@@ -332,7 +372,11 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         const hasWildcardCharacter = values.some((v) => !!validateWildcardInput(v));
 
         // warn if a wildcard character is used without the Match operator, making the entry ineffective
-        if (type !== ListOperatorTypeEnum.WILDCARD && hasWildcardCharacter) {
+        if (
+          type !== ListOperatorTypeEnum.WILDCARD &&
+          hasWildcardCharacter &&
+          WILDCARD_ELIGIBLE_FIELDS.has(field)
+        ) {
           newValueWarnings.WILDCARD_WRONG_OPERATOR = createValidationMessage(
             ERRORS.WILDCARD_WRONG_OPERATOR
           );
@@ -418,16 +462,20 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
 
     const handleOnOsChange = useCallback(
       (os: OperatingSystem) => {
+        const nextField =
+          os !== OperatingSystem.WINDOWS && isWindowsSignatureEntry
+            ? 'file.hash.*'
+            : blocklistEntry.field;
+
         const nextItem = {
           ...item,
           os_types: [os],
           entries: [
             {
               ...blocklistEntry,
-              field:
-                os !== OperatingSystem.WINDOWS && isWindowsSignatureEntry
-                  ? 'file.hash.*'
-                  : blocklistEntry.field,
+              // OS changes always reset the operator to `is one of`, so the field must be
+              // re-resolved for the new OS too (relevant for the File Name field only).
+              field: resolveFieldForOperator(nextField, ListOperatorTypeEnum.MATCH_ANY, os),
               type: ListOperatorTypeEnum.MATCH_ANY,
               ...(typeof blocklistEntry.value === 'string'
                 ? { value: blocklistEntry.value.length ? blocklistEntry.value.split(',') : [] }
@@ -495,6 +543,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
           entries: [
             {
               ...blocklistEntry,
+              field: resolveFieldForOperator(blocklistEntry.field, newOperator, selectedOs),
               type: newOperator,
               ...generateBlocklistEntryValue(blocklistEntry.value, newOperator),
             },
@@ -509,7 +558,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
           item: nextItem as ArtifactFormComponentOnChangeCallbackProps['item'],
         });
       },
-      [item, blocklistEntry, generateBlocklistEntryValue, validateValues, onChange]
+      [item, blocklistEntry, selectedOs, generateBlocklistEntryValue, validateValues, onChange]
     );
 
     const handleOnValueTextChange = useCallback(
@@ -684,7 +733,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
                 <EuiSuperSelect
                   name="field"
                   options={fieldOptions}
-                  valueOfSelected={blocklistEntry.field}
+                  valueOfSelected={toDisplayField(blocklistEntry.field)}
                   onChange={handleOnFieldChange}
                   data-test-subj={getTestId('field-select')}
                   fullWidth

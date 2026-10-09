@@ -96,6 +96,12 @@ export const CONDITION_FIELD_TITLE: { [K in BlocklistConditionEntryField]: strin
   'file.name': i18n.translate('xpack.securitySolution.blocklist.entry.field.fileName', {
     defaultMessage: 'File Name',
   }),
+  'file.name.caseless': i18n.translate(
+    'xpack.securitySolution.blocklist.entry.field.fileName.caseless',
+    {
+      defaultMessage: 'File Name',
+    }
+  ),
 };
 
 export const CONDITION_FIELD_DESCRIPTION: { [K in BlocklistConditionEntryField]: string } = {
@@ -118,6 +124,12 @@ export const CONDITION_FIELD_DESCRIPTION: { [K in BlocklistConditionEntryField]:
   'file.name': i18n.translate('xpack.securitySolution.blocklist.entry.field.description.fileName', {
     defaultMessage: 'The name of the application',
   }),
+  'file.name.caseless': i18n.translate(
+    'xpack.securitySolution.blocklist.entry.field.description.fileName.caseless',
+    {
+      defaultMessage: 'The name of the application (case insensitive)',
+    }
+  ),
 };
 
 export const MATCHES_OPERATOR_LABEL = i18n.translate(

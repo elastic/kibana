@@ -59,8 +59,8 @@ const blocklistOperatorFieldTestCases = [
   {
     os: OperatingSystem.LINUX,
     field: 'file.name',
-    fieldText: 'File Name, ',
-    osText: 'Linux, ',
+    fieldText: 'File Name',
+    osText: 'Linux',
     isMulti: true,
   },
   {
@@ -87,8 +87,8 @@ const blocklistOperatorFieldTestCases = [
   {
     os: OperatingSystem.WINDOWS,
     field: 'file.name',
-    fieldText: 'File Name, ',
-    osText: 'Windows, ',
+    fieldText: 'File Name',
+    osText: 'Windows',
     isMulti: true,
   },
   {
@@ -108,8 +108,8 @@ const blocklistOperatorFieldTestCases = [
   {
     os: OperatingSystem.MAC,
     field: 'file.name',
-    fieldText: 'File Name, ',
-    osText: 'Mac, ',
+    fieldText: 'File Name',
+    osText: 'Mac',
     isMulti: true,
   },
 ];
@@ -475,6 +475,121 @@ describe('blocklist form', () => {
           value: 'C:\\foo\\notepad.exe',
         },
       ]);
+    });
+
+    describe('File Name field case-sensitivity', () => {
+      const selectMatchOperator = async () => {
+        await user.click(screen.getByTestId('blocklist-form-operator-select-multi'));
+        await waitForEuiPopoverOpen();
+        await user.click(screen.getByRole('option', { name: /^match$/i }));
+      };
+
+      const lastEntries = () => {
+        const lastCall = onChangeSpy.mock.calls.at(-1)?.[0] as
+          | ArtifactFormComponentOnChangeCallbackProps
+          | undefined;
+        return lastCall?.item.entries;
+      };
+
+      it.each([[OperatingSystem.WINDOWS], [OperatingSystem.MAC]])(
+        'should use the caseless field when Match is selected on %s',
+        async (os) => {
+          const item = createItem({
+            os_types: [os],
+            entries: [createEntry('file.name', ['notepad.exe'])],
+          });
+          render(createProps({ item }));
+
+          await selectMatchOperator();
+
+          expect(lastEntries()).toEqual([
+            {
+              field: 'file.name.caseless',
+              operator: ListOperatorEnum.INCLUDED,
+              type: ListOperatorTypeEnum.WILDCARD,
+              value: 'notepad.exe',
+            },
+          ]);
+        }
+      );
+
+      it('should keep the cased field when Match is selected on Linux', async () => {
+        const item = createItem({
+          os_types: [OperatingSystem.LINUX],
+          entries: [createEntry('file.name', ['notepad'])],
+        });
+        render(createProps({ item }));
+
+        await selectMatchOperator();
+
+        expect(lastEntries()).toEqual([
+          {
+            field: 'file.name',
+            operator: ListOperatorEnum.INCLUDED,
+            type: ListOperatorTypeEnum.WILDCARD,
+            value: 'notepad',
+          },
+        ]);
+      });
+
+      it('should still show "File Name" selected in the field dropdown when the field is caseless', () => {
+        const item = createItem({
+          os_types: [OperatingSystem.WINDOWS],
+          entries: [
+            {
+              field: 'file.name.caseless',
+              operator: ListOperatorEnum.INCLUDED,
+              type: ListOperatorTypeEnum.WILDCARD,
+              value: '*.exe',
+            },
+          ],
+        });
+        render(createProps({ item }));
+
+        expect(screen.getByTestId('blocklist-form-field-select').textContent).toEqual('File Name');
+      });
+
+      it('should reset to the cased field when switching back to "is one of"', async () => {
+        const item = createItem({
+          os_types: [OperatingSystem.WINDOWS],
+          entries: [
+            {
+              field: 'file.name.caseless',
+              operator: ListOperatorEnum.INCLUDED,
+              type: ListOperatorTypeEnum.WILDCARD,
+              value: 'notepad.exe',
+            },
+          ],
+        });
+        render(createProps({ item }));
+
+        await user.click(screen.getByTestId('blocklist-form-operator-select-multi'));
+        await waitForEuiPopoverOpen();
+        await user.click(screen.getByRole('option', { name: /is one of/i }));
+
+        expect(lastEntries()).toEqual([createEntry('file.name', ['notepad.exe'])]);
+      });
+
+      it('should reset to the cased field when the OS changes', async () => {
+        const item = createItem({
+          os_types: [OperatingSystem.WINDOWS],
+          entries: [
+            {
+              field: 'file.name.caseless',
+              operator: ListOperatorEnum.INCLUDED,
+              type: ListOperatorTypeEnum.WILDCARD,
+              value: 'notepad.exe',
+            },
+          ],
+        });
+        render(createProps({ item }));
+
+        await user.click(screen.getByTestId('blocklist-form-os-select'));
+        await waitForEuiPopoverOpen();
+        await user.click(screen.getByRole('option', { name: 'Linux' }));
+
+        expect(lastEntries()).toEqual([createEntry('file.name', ['notepad.exe'])]);
+      });
     });
 
     it('should warn when a wildcard character is used without the Match operator', async () => {

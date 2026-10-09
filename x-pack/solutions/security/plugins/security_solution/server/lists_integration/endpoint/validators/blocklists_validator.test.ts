@@ -193,7 +193,7 @@ describe('Blocklists API validations', () => {
     ];
 
     const wildcardEntry = (
-      field: 'file.path' | 'file.path.caseless' | 'file.name',
+      field: 'file.path' | 'file.path.caseless' | 'file.name' | 'file.name.caseless',
       value: string
     ): CreateExceptionListItemOptions['entries'] => [
       { field, type: 'wildcard', operator: 'included', value },
@@ -208,14 +208,16 @@ describe('Blocklists API validations', () => {
       }
     );
 
-    it.each([['file.path'], ['file.path.caseless'], ['file.name']] as const)(
-      'accepts a wildcard (Match) entry for field %s',
-      async (field) => {
-        await expect(
-          validator.validatePreCreateItem(buildItem(wildcardEntry(field, 'C:\\foo\\*.exe')))
-        ).resolves.toBeDefined();
-      }
-    );
+    it.each([
+      ['file.path'],
+      ['file.path.caseless'],
+      ['file.name'],
+      ['file.name.caseless'],
+    ] as const)('accepts a wildcard (Match) entry for field %s', async (field) => {
+      await expect(
+        validator.validatePreCreateItem(buildItem(wildcardEntry(field, 'C:\\foo\\*.exe')))
+      ).resolves.toBeDefined();
+    });
 
     it('rejects a wildcard entry over the 4096 character limit', async () => {
       await expect(

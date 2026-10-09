@@ -52,7 +52,8 @@ export type BlocklistConditionEntryField =
   | 'file.path'
   | 'file.Ext.code_signature'
   | 'file.path.caseless'
-  | 'file.name';
+  | 'file.name'
+  | 'file.name.caseless';
 export type AllConditionEntryFields =
   | TrustedAppConditionEntryField
   | BlocklistConditionEntryField
