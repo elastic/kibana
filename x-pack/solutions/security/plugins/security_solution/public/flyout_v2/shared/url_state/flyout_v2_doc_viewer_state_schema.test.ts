@@ -39,6 +39,7 @@ describe('flyoutV2DocViewerStateSchema', () => {
     ['an empty chain', { flyoutV2: [] }],
     ['an unbounded string', { flyoutV2: [{ kind: 'host', hostName: 'a'.repeat(1025) }] }],
     ['a non-string field', { flyoutV2: [{ kind: 'host', hostName: 42 }] }],
+    ['a missing required field', { flyoutV2: [{ kind: 'analyzer', documentId: 'alert-1' }] }],
   ])('rejects %s', (_, state) => {
     expect(flyoutV2DocViewerStateSchema.safeParse(state).success).toBe(false);
   });
