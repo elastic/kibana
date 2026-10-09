@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   OverviewTab,
   conversationToInvestigation,
@@ -15,9 +16,11 @@ import {
 } from '@kbn/agentic-investigations-common';
 import type { Investigation } from '../../../../../common';
 import { HypothesesList } from '../../../../hypotheses/attachments/hypotheses_view';
+import { HypothesisTreeCard } from '../../../../hypotheses/tree/hypothesis_tree_card';
 import { ImpactContent } from '../../../../impact/attachments/impact_view';
 import { SubjectList } from '../../../../subjects/attachments/subject_view';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
+import { getInvestigationDisplayTitle } from '../to_view_model';
 
 const readMetadataString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.trim().length > 0 ? value : undefined;
@@ -36,6 +39,7 @@ export const toOverviewSections = (
       impact.evidence !== undefined ||
       impact.entities.length > 0);
   const hypotheses = investigation?.hypotheses?.hypotheses ?? [];
+  const conclusion = readMetadataString(investigation?.metadata.verdict) ?? fallbackVerdict;
 
   return {
     subjects: subjects.length > 0 ? <SubjectList subjects={subjects} /> : undefined,
@@ -48,10 +52,26 @@ export const toOverviewSections = (
         onOpenEntity={onOpenEntity}
       />
     ) : undefined,
-    conclusion: readMetadataString(investigation?.metadata.verdict) ?? fallbackVerdict,
+    conclusion,
     trace:
-      hypotheses.length > 0 ? (
-        <HypothesesList hypotheses={hypotheses} variant="details" />
+      investigation && hypotheses.length > 0 ? (
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <HypothesisTreeCard
+              input={{
+                title: getInvestigationDisplayTitle(investigation),
+                subjects,
+                hypotheses,
+                conclusion,
+                proposals: investigation.proposals,
+                isRunning: investigation.in_progress,
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <HypothesesList hypotheses={hypotheses} variant="details" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : undefined,
   };
 };
