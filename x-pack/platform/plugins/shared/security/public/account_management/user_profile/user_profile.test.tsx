@@ -10,6 +10,7 @@ import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { getAvailableLocales, setAvailableLocales } from '@kbn/i18n';
 
 import { UserProfile, useUserProfileForm } from './user_profile';
 import { UserProfileAPIClient } from '..';
@@ -535,6 +536,39 @@ describe('useUserProfileForm', () => {
 
       expect(userRolesExpandButton).toBeInTheDocument();
       expect(userRolesExpandButton).toHaveTextContent(`+${extraRoles.length}`);
+    });
+  });
+
+  describe('browser translation compatibility', () => {
+    const previousLocales = getAvailableLocales();
+
+    afterEach(() => {
+      setAvailableLocales(previousLocales);
+    });
+
+    it('keeps the switch when language selection is disabled', () => {
+      setAvailableLocales([]);
+      const data: UserProfileData = {};
+      const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
+
+      render(
+        coreStart.rendering.addContext(
+          <Providers
+            services={coreStart}
+            history={history}
+            authc={authc}
+            securityApiClients={{
+              userProfiles: new UserProfileAPIClient(coreStart.http),
+              users: new UserAPIClient(coreStart.http),
+            }}
+          >
+            <UserProfile user={nonCloudUser} data={data} />
+          </Providers>
+        )
+      );
+
+      expect(screen.queryByTestId('localeSelect')).not.toBeInTheDocument();
+      expect(screen.getByTestId('installTranslationResilienceSwitch')).toBeInTheDocument();
     });
   });
 });

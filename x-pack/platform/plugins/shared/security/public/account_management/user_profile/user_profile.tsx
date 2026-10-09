@@ -290,10 +290,7 @@ export const UserLocaleEditor: FunctionComponent<UserLocaleEditorProps> = ({ for
   }
 
   const availableLocales = getAvailableLocales();
-  if (availableLocales.length === 0) {
-    return null;
-  }
-
+  const hasConfiguredLocales = availableLocales.length > 0;
   const localeOptions = availableLocales.map(({ id, label }) => ({ value: id, text: label }));
 
   return (
@@ -308,54 +305,64 @@ export const UserLocaleEditor: FunctionComponent<UserLocaleEditorProps> = ({ for
         </h2>
       }
       description={
-        <FormattedMessage
-          id="xpack.security.accountManagement.userProfile.localeGroupDescription"
-          defaultMessage="Select your preferred language for displaying dates, times, and other locale-specific data."
-        />
+        hasConfiguredLocales ? (
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.localeGroupDescription"
+            defaultMessage="Select your preferred language for displaying dates, times, and other locale-specific data."
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.localeGroupDescriptionNoLocales"
+            defaultMessage="Keep Kibana responsive when the browser translates the page."
+          />
+        )
       }
     >
-      <FormRow
-        name="data.userSettings.locale"
-        label={
-          <FormLabel for="data.userSettings.locale">
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={true}>
-                <FormattedMessage
-                  id="xpack.security.accountManagement.userProfile.localeLabel"
-                  defaultMessage="Display language"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <div css={betaBadgeStyle}>
-                  <EuiIconTip
-                    aria-label={i18n.translate(
-                      'xpack.security.accountManagement.userProfile.localeBetaBadge',
-                      { defaultMessage: 'beta' }
-                    )}
-                    content={i18n.translate(
-                      'xpack.security.accountManagement.userProfile.localeBetaBadge.tooltip',
-                      {
-                        defaultMessage: 'The display language setting is currently a beta feature.',
-                      }
-                    )}
-                    type="beta"
-                    position="bottom"
-                  />
-                </div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </FormLabel>
-        }
-        fullWidth
-      >
-        <FormField
-          as={EuiSelect}
+      {hasConfiguredLocales ? (
+        <FormRow
           name="data.userSettings.locale"
-          options={localeOptions}
-          data-test-subj="localeSelect"
+          label={
+            <FormLabel for="data.userSettings.locale">
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={true}>
+                  <FormattedMessage
+                    id="xpack.security.accountManagement.userProfile.localeLabel"
+                    defaultMessage="Display language"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <div css={betaBadgeStyle}>
+                    <EuiIconTip
+                      aria-label={i18n.translate(
+                        'xpack.security.accountManagement.userProfile.localeBetaBadge',
+                        { defaultMessage: 'beta' }
+                      )}
+                      content={i18n.translate(
+                        'xpack.security.accountManagement.userProfile.localeBetaBadge.tooltip',
+                        {
+                          defaultMessage:
+                            'The display language setting is currently a beta feature.',
+                        }
+                      )}
+                      type="beta"
+                      position="bottom"
+                    />
+                  </div>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </FormLabel>
+          }
           fullWidth
-        />
-      </FormRow>
+        >
+          <FormField
+            as={EuiSelect}
+            name="data.userSettings.locale"
+            options={localeOptions}
+            data-test-subj="localeSelect"
+            fullWidth
+          />
+        </FormRow>
+      ) : null}
       <FormRow
         name="data.userSettings.installTranslationResilience"
         label={

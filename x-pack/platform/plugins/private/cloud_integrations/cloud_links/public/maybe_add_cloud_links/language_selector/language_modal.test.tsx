@@ -10,6 +10,8 @@ import React, { type FC, type PropsWithChildren } from 'react';
 
 import { EuiProvider } from '@elastic/eui';
 
+import { getAvailableLocales } from '@kbn/i18n';
+
 import { LanguageModal } from './language_modal';
 import { useLanguage } from './use_language_hook';
 import { useTranslationResilience } from './use_translation_resilience_hook';
@@ -140,5 +142,14 @@ describe('LanguageModal', () => {
 
     expect(reportEventMock).not.toHaveBeenCalled();
     expect(closeModal).toHaveBeenCalled();
+  });
+
+  it('keeps the compatibility switch when no locales are configured', () => {
+    (getAvailableLocales as jest.Mock).mockReturnValueOnce([]);
+
+    const { getByTestId, queryByTestId } = renderModal();
+
+    expect(queryByTestId('languageSelect')).not.toBeInTheDocument();
+    expect(getByTestId('translationResilienceSwitch')).toBeInTheDocument();
   });
 });

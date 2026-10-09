@@ -62,6 +62,7 @@ export const LanguageModal: FC<Props> = ({ closeModal, analytics }) => {
   const isLoading = isLocaleLoading || isResilienceLoading;
 
   const localeOptions = getAvailableLocales().map(({ id, label }) => ({ value: id, text: label }));
+  const hasConfiguredLocales = localeOptions.length > 0;
 
   return (
     <EuiModal aria-labelledby={modalTitleId} onClose={closeModal}>
@@ -74,45 +75,48 @@ export const LanguageModal: FC<Props> = ({ closeModal, analytics }) => {
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiFormRow
-          label={
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                {i18n.translate('xpack.cloudLinks.userMenuLinks.languageModalSelectLabel', {
-                  defaultMessage: 'Display language',
-                })}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <div css={betaBadgeStyle}>
-                  <EuiIconTip
-                    aria-label={i18n.translate(
-                      'xpack.cloudLinks.userMenuLinks.languageModalBetaBadgeLabel',
-                      { defaultMessage: 'beta' }
-                    )}
-                    content={i18n.translate(
-                      'xpack.cloudLinks.userMenuLinks.languageModalBetaBadgeTooltip',
-                      {
-                        defaultMessage: 'The display language setting is currently a beta feature.',
-                      }
-                    )}
-                    type="beta"
-                    position="bottom"
-                  />
-                </div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-          fullWidth
-        >
-          <EuiSelect
-            id={selectId}
-            options={localeOptions}
-            value={locale}
-            onChange={(e) => onChange(e.target.value as LocaleValue, false)}
-            data-test-subj="languageSelect"
+        {hasConfiguredLocales ? (
+          <EuiFormRow
+            label={
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  {i18n.translate('xpack.cloudLinks.userMenuLinks.languageModalSelectLabel', {
+                    defaultMessage: 'Display language',
+                  })}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <div css={betaBadgeStyle}>
+                    <EuiIconTip
+                      aria-label={i18n.translate(
+                        'xpack.cloudLinks.userMenuLinks.languageModalBetaBadgeLabel',
+                        { defaultMessage: 'beta' }
+                      )}
+                      content={i18n.translate(
+                        'xpack.cloudLinks.userMenuLinks.languageModalBetaBadgeTooltip',
+                        {
+                          defaultMessage:
+                            'The display language setting is currently a beta feature.',
+                        }
+                      )}
+                      type="beta"
+                      position="bottom"
+                    />
+                  </div>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
             fullWidth
-          />
-        </EuiFormRow>
+          >
+            <EuiSelect
+              id={selectId}
+              options={localeOptions}
+              value={locale}
+              onChange={(e) => onChange(e.target.value as LocaleValue, false)}
+              data-test-subj="languageSelect"
+              fullWidth
+            />
+          </EuiFormRow>
+        ) : null}
         <EuiFormRow
           label={
             <EuiFlexGroup gutterSize="s" alignItems="center">
