@@ -9,14 +9,24 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
 import { useGetSimilarCases, initialData } from '../../../containers/use_get_similar_cases';
-import type { CaseUI } from '../../../../common/ui/types';
+import type { CaseUI, SortOrder } from '../../../../common/ui/types';
 import { SortFieldCase } from '../../../../common/ui/types';
 
-import { CASES_TABLE_PER_PAGE_VALUES, type EuiBasicTableOnChange } from '../../all_cases/types';
+import {
+  CASES_TABLE_PER_PAGE_VALUES,
+  type CasesColumnSelection,
+  type EuiBasicTableOnChange,
+} from '../../all_cases/types';
 import { ColumnsPopover } from '../../all_cases/components/columns_popover';
 import { SimilarCasesTable } from '../../similar_cases/table';
 import { useSimilarCasesColumnsSelection } from '../../similar_cases/use_similar_cases_columns_selection';
 import { SidebarToggleButton } from './sidebar/sidebar_toggle_button';
+
+const DEFAULT_SORT_FIELD = SortFieldCase.createdAt;
+const DEFAULT_SORT_ORDER: SortOrder = 'desc';
+
+const isSortFieldCase = (field: unknown): field is SortFieldCase =>
+  Object.values<unknown>(SortFieldCase).includes(field);
 
 interface CaseViewSimilarCasesProps {
   caseData: CaseUI;
@@ -26,8 +36,8 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
   const { euiTheme } = useEuiTheme();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(CASES_TABLE_PER_PAGE_VALUES[0]);
-  const [sortField, setSortField] = useState<SortFieldCase>(SortFieldCase.createdAt);
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [sortField, setSortField] = useState<SortFieldCase>(DEFAULT_SORT_FIELD);
+  const [sortOrder, setSortOrder] = useState<SortOrder>(DEFAULT_SORT_ORDER);
 
   const { pickerColumns, tableColumns, setPickerColumns } = useSimilarCasesColumnsSelection();
 
@@ -41,8 +51,8 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
   });
 
   const tableOnChangeCallback = useCallback(({ page, sort }: EuiBasicTableOnChange) => {
-    if (sort) {
-      setSortField(sort.field as SortFieldCase);
+    if (sort && isSortFieldCase(sort.field)) {
+      setSortField(sort.field);
       setSortOrder(sort.direction);
       setPageIndex(0);
     }
@@ -51,6 +61,23 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
       setPageSize(page.size);
     }
   }, []);
+
+  const onPickerColumnsChange = useCallback(
+    (columns: CasesColumnSelection[]) => {
+      setPickerColumns(columns);
+
+      const isSortedColumnHidden = columns.some(
+        ({ field, isChecked }) => field === sortField && !isChecked
+      );
+
+      if (isSortedColumnHidden) {
+        setSortField(DEFAULT_SORT_FIELD);
+        setSortOrder(DEFAULT_SORT_ORDER);
+        setPageIndex(0);
+      }
+    },
+    [setPickerColumns, sortField]
+  );
 
   const pagination = useMemo(
     () => ({
@@ -81,7 +108,7 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
         <EuiFlexItem grow={false}>
           <ColumnsPopover
             selectedColumns={pickerColumns}
-            onSelectedColumnsChange={setPickerColumns}
+            onSelectedColumnsChange={onPickerColumnsChange}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
