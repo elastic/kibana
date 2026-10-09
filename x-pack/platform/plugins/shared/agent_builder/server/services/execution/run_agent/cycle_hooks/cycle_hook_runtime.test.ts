@@ -26,9 +26,11 @@ import { applyStepUpdates } from '../step_state';
 import { CycleHookRuntime, type CycleDispatchFacts } from './cycle_hook_runtime';
 
 const execution = {
+  agent: { id: 'agent-1' },
   execution: { id: 'exec-1', resumed: false },
 } as unknown as CycleHookExecutionContext;
 const resumedExecution = {
+  agent: { id: 'agent-1' },
   execution: { id: 'exec-2', resumed: true },
 } as unknown as CycleHookExecutionContext;
 
@@ -129,6 +131,34 @@ describe('CycleHookRuntime', () => {
 
       expect(handler).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('setup failed'));
+    });
+
+    it('leaves a hook bound to other agents alone: no getHandler, no early call', async () => {
+      const getHandler = jest.fn(() => jest.fn());
+      const runtime = createRuntime([
+        { id: 'elsewhere', when: 'first', boundAgents: ['agent-2', 'agent-3'], getHandler },
+      ]);
+
+      await runtime.start();
+      const updates = await runtime.dispatch(facts(0));
+
+      expect(getHandler).not.toHaveBeenCalled();
+      expect(updates).toEqual([]);
+    });
+
+    it('runs a hook bound to this agent next to an unbound one', async () => {
+      const bound = jest.fn();
+      const unbound = jest.fn();
+      const runtime = createRuntime([
+        hook('bound', bound, { boundAgents: ['agent-2', 'agent-1'] }),
+        hook('unbound', unbound),
+      ]);
+
+      await runtime.start();
+      await runtime.dispatch(facts(0));
+
+      expect(bound).toHaveBeenCalledTimes(1);
+      expect(unbound).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -236,6 +266,32 @@ describe('CycleHookRuntime', () => {
       expect(texts(steps)).toEqual(['slow:from slow', 'fast:from fast']);
     });
 
+    it('keeps registration order across triggers: a first hook behind an every-cycle one waits for cycle 0', async () => {
+      const seen: Record<string, string[]> = {};
+      const observe =
+        (id: string): CycleHandler =>
+        async (cycle, api) => {
+          seen[id] = texts(cycle.steps);
+          await api.append({ text: id });
+        };
+      const runtime = createRuntime([
+        hook('b1', observe('b1'), { when: 'first' }),
+        hook('a', observe('a')),
+        hook('b2', observe('b2'), { when: 'first' }),
+      ]);
+
+      await runtime.start();
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(Object.keys(seen)).toEqual(['b1']); // b1 overlaps the setup; b2 must wait for a
+
+      const atZero = applyStepUpdates([], await runtime.dispatch(facts(0)));
+      expect(texts(atZero)).toEqual(['b1:b1', 'a:a', 'b2:b2']);
+      expect(seen).toEqual({ b1: [], a: ['b1:b1'], b2: ['b1:b1', 'a:a'] });
+
+      const atOne = applyStepUpdates(atZero, await runtime.dispatch(facts(1, { steps: atZero })));
+      expect(texts(atOne)).toEqual(['b1:b1', 'a:a', 'b2:b2', 'a:a']);
+    });
+
     it('hands the seed steps to the early call', async () => {
       const seed = [reasoning('seed')];
       let seen: ConversationRoundStep[] = [];
@@ -279,7 +335,7 @@ describe('CycleHookRuntime', () => {
     it('returns notes appended during the call as injected_context updates stamped with the hook id', async () => {
       const runtime = createRuntime([
         hook('memory', async (_cycle, api) => {
-          await api.append({ text: 'one', data: { k: 1 }, pin: 'round' });
+          await api.append({ text: 'one', data: { k: 1 } });
           await api.append({ text: 'two' });
         }),
       ]);
@@ -293,7 +349,6 @@ describe('CycleHookRuntime', () => {
           hook_id: 'memory',
           text: 'one',
           data: { k: 1 },
-          pin: 'round',
         },
         { type: ConversationRoundStepType.injectedContext, hook_id: 'memory', text: 'two' },
       ]);
@@ -423,6 +478,24 @@ describe('CycleHookRuntime', () => {
       await runtime.dispatch(facts(1, { steps }));
 
       expect(ids).toEqual(['c2', 'c3']);
+    });
+
+    it('hands the handler copies: what it does to them does not reach the run', async () => {
+      const existing: ConversationRoundStep[] = [reasoning('r'), toolCall('c1', 'g1')];
+      const summary = { summarized_round_count: 1 } as CycleDispatchFacts['summary'];
+      const runtime = createRuntime([
+        hook('a', (cycle) => {
+          (cycle.steps[0] as ReasoningStep).reasoning = 'tampered';
+          cycle.previousToolCalls[0].params.q = 'tampered';
+          cycle.summary!.summarized_round_count = 99;
+        }),
+      ]);
+      await runtime.start();
+
+      await runtime.dispatch(facts(0, { steps: existing, summary }));
+
+      expect(existing).toEqual([reasoning('r'), toolCall('c1', 'g1')]);
+      expect(summary).toEqual({ summarized_round_count: 1 });
     });
 
     it('reports time since start and since the hook last appended', async () => {

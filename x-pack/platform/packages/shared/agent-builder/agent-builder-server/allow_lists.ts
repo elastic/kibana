@@ -343,6 +343,18 @@ export const isAllowedBuiltinPlugin = (pluginId: string): pluginId is AgentBuild
 };
 
 /**
+ * This is a manually maintained list of all cycle hooks registered in Agent Builder.
+ * The intention is to force a code review from the Agent Builder team when any team adds a new cycle hook.
+ */
+export const AGENT_BUILDER_CYCLE_HOOKS = [] as const;
+
+export type AgentBuilderCycleHook = (typeof AGENT_BUILDER_CYCLE_HOOKS)[number];
+
+export const isAllowedCycleHook = (hookId: string): hookId is AgentBuilderCycleHook => {
+  return (AGENT_BUILDER_CYCLE_HOOKS as readonly string[]).includes(hookId);
+};
+
+/**
  * This is a manually maintained list of all built-in attachment types registered in Agent Builder.
  * The intention is to force a code review from the Agent Builder team when any team adds a new attachment type.
  */

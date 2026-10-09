@@ -16,9 +16,11 @@ import type {
   CompactionSummary,
   ConversationRoundStep,
   InjectedContextStepData,
+  SerializedExecutionError,
   ToolCallStep,
 } from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '../processed_input';
+import type { ProcessedTimelineEvent } from '../processed_timeline';
 import type { ModelProvider } from '../runner';
 import type { InternalSkillDefinition } from '../skills';
 
@@ -79,8 +81,14 @@ export interface CycleHookExecutionContext {
   readonly conversation: {
     /** Absent for one-shot runs. */
     readonly id?: string;
-    /** Previous rounds, oldest first. */
-    readonly rounds: readonly CycleHookRound[];
+    /**
+     * The context timeline before this execution, oldest first: user messages, each earlier
+     * execution's lifecycle events, attachment changes and custom events. A round paused on a
+     * prompt and being resumed is the current run, not history. Copied when first read.
+     */
+    readonly events: readonly ProcessedTimelineEvent[];
+    /** The executions on `events`, oldest first; derived from it. */
+    readonly executions: readonly ExecutionSummary[];
   };
 
   /** Platform services scoped to the user. Hook owners build their own from `request`. */
@@ -92,11 +100,22 @@ export interface CycleHookExecutionContext {
   };
 }
 
-export interface CycleHookRound {
+/** One execution on the conversation's timeline, as its events tell it. */
+export interface ExecutionSummary {
+  /** The `execution_id` its events carry. */
   readonly id: string;
-  readonly input: ProcessedRoundInput;
-  readonly response?: AssistantResponse;
+  /** The processed user message that triggered it; absent when something else did. */
+  readonly input?: ProcessedRoundInput;
+  /** Its steps, in sequence order. */
   readonly steps: readonly ConversationRoundStep[];
+  /** How it ended. */
+  readonly outcome: 'responded' | 'prompt_requested' | 'failed' | 'aborted';
+  /** The answer, when it responded. */
+  readonly response?: AssistantResponse;
+  /** The error, when it failed. */
+  readonly error?: SerializedExecutionError;
+  /** Its events in timeline order: the trigger, then its lifecycle events. */
+  readonly events: readonly ProcessedTimelineEvent[];
 }
 
 /**

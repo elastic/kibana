@@ -691,7 +691,7 @@ describe('runDefaultAgentMode', () => {
           agent: expect.objectContaining({ id: 'agent-1' }),
           execution: expect.objectContaining({ id: 'exec-1', resumed: false }),
           input: { message: 'hello', attachments: [] },
-          conversation: expect.objectContaining({ rounds: [] }),
+          conversation: expect.objectContaining({ events: [], executions: [] }),
         })
       );
       // created and started before the tools are selected, so a 'first' hook overlaps the setup
@@ -701,7 +701,7 @@ describe('runDefaultAgentMode', () => {
       expect(createAgentGraphMock.mock.calls[0][0].cycleHooks).toBeInstanceOf(CycleHookRuntime);
     });
 
-    it('closes the cycle hook runtime when the run completes and when it fails', async () => {
+    it('closes the cycle hook runtime once the round is extracted, before the post-round hooks', async () => {
       const close = jest.spyOn(CycleHookRuntime.prototype, 'close');
       const { context } = setup();
 
@@ -709,17 +709,35 @@ describe('runDefaultAgentMode', () => {
         { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any },
         context
       );
-      expect(close).toHaveBeenCalledTimes(1);
 
+      const runMock = context.hooks.run as jest.Mock;
+      const afterExecutionCall = runMock.mock.calls.findIndex(
+        ([lifecycle]) => lifecycle === HookLifecycle.afterExecution
+      );
+      expect(afterExecutionCall).toBeGreaterThanOrEqual(0);
+      expect(close.mock.invocationCallOrder[0]).toBeGreaterThan(
+        extractRoundMock.mock.invocationCallOrder[0]
+      );
+      expect(close.mock.invocationCallOrder[0]).toBeLessThan(
+        runMock.mock.invocationCallOrder[afterExecutionCall]
+      );
+
+      close.mockRestore();
+    });
+
+    it('closes the cycle hook runtime when the run fails', async () => {
+      const close = jest.spyOn(CycleHookRuntime.prototype, 'close');
+      const { context } = setup();
       extractRoundMock.mockRejectedValueOnce(new Error('stream failed'));
+
       await expect(
         runDefaultAgentMode(
           { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any },
           context
         )
       ).rejects.toThrow('stream failed');
-      expect(close).toHaveBeenCalledTimes(2);
 
+      expect(close).toHaveBeenCalledTimes(1);
       close.mockRestore();
     });
 

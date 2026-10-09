@@ -97,22 +97,17 @@ export const isPreExecutionWorkflowContextMessage = (message: BaseMessage): bool
   message.name === PRE_EXECUTION_WORKFLOW_CONTEXT_NAME;
 
 const INJECTED_CONTEXT_MESSAGE_NAME = 'injected_context';
-const PINNED_INJECTED_CONTEXT_MESSAGE_NAME = 'injected_context_pinned';
 
-/** The user-role notice an `injected_context` step renders as; a pinned step carries its own name. */
-export const createInjectedContextMessage = (step: InjectedContextStep): HumanMessage =>
+/** The user-role notice an `injected_context` step renders as. */
+const createInjectedContextMessage = (step: InjectedContextStep): HumanMessage =>
   new HumanMessage({
     content: generateXmlTree({
       tagName: 'injected_context',
       attributes: { source: step.hook_id },
       children: [step.text],
     }),
-    name:
-      step.pin === 'round' ? PINNED_INJECTED_CONTEXT_MESSAGE_NAME : INJECTED_CONTEXT_MESSAGE_NAME,
+    name: INJECTED_CONTEXT_MESSAGE_NAME,
   });
-
-export const isPinnedInjectedContextMessage = (message: BaseMessage): boolean =>
-  message.name === PINNED_INJECTED_CONTEXT_MESSAGE_NAME;
 
 /**
  * Groups consecutive tool call steps by `tool_call_group_id`.

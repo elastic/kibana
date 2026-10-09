@@ -51,12 +51,7 @@ import type { StateType, StateUpdate } from './state';
 import { StateAnnotation, toCurrentRun } from './state';
 import { processResearchResponse, processToolNodeResponse } from './response_processing';
 import { createAnswerAgentStructured } from './answer_agent_structured';
-import {
-  applyStepUpdates,
-  countNonTodosSteps,
-  stepUpdates,
-  type RunStepUpdate,
-} from './step_state';
+import { countNonTodosSteps, stepUpdates, type RunStepUpdate } from './step_state';
 import type { CycleHookRuntime } from './cycle_hooks/cycle_hook_runtime';
 import type { ToolExecutionBuffer } from './run_tracker';
 import type { SubagentTracker } from './subagent_tracker';
@@ -108,7 +103,7 @@ export const createAgentGraph = ({
     ContextManagementDeps,
     'conversation' | 'chatModel' | 'cacheControl' | 'events'
   >;
-  /** The execution's cycle hooks, dispatched before each research model call. */
+  /** The execution's cycle hooks, dispatched in their own node before each research model call. */
   cycleHooks?: CycleHookRuntime;
 }) => {
   const contextManagementNodes = createContextManagementNodes({
@@ -151,6 +146,23 @@ export const createAgentGraph = ({
     };
   };
 
+  /**
+   * Lands what the cycle hooks append in the state as its own super-step, before the model request:
+   * the notes are then part of every streamed state, so a fatal research error still keeps them.
+   */
+  const dispatchCycleHooks = async (state: StateType): Promise<StateUpdate> => {
+    if (!cycleHooks) {
+      return {};
+    }
+    const injected = await cycleHooks.dispatch({
+      cycle: state.currentCycle,
+      attempt: state.errorCount + state.contextRetryCount,
+      steps: state.steps,
+      summary: state.compactionSummary,
+    });
+    return injected.length > 0 ? { steps: injected } : {};
+  };
+
   const researchAgent = async (state: StateType): Promise<StateUpdate> => {
     const researcherModel = chatModel.bindTools(toolManager.list()).withConfig({
       tags: [tags.agent, tags.researchAgent],
@@ -162,29 +174,17 @@ export const createAgentGraph = ({
       events.emit(createReasoningEvent(getRandomThinkingMessage(), { transient: true }));
     }
 
-    // Returned on every path below: a retry must re-render the injected rows, not re-ask the hooks.
-    const injected = cycleHooks
-      ? await cycleHooks.dispatch({
-          cycle: state.currentCycle,
-          attempt: state.errorCount + state.contextRetryCount,
-          steps: state.steps,
-          summary: state.compactionSummary,
-        })
-      : [];
-    const runSteps = applyStepUpdates(state.steps, injected);
-
     const retryUpdate = (error: AgentBuilderAgentExecutionError): StateUpdate => ({
-      steps: injected,
       researchOutcome: { type: 'retry_error', error },
       errorCount: state.errorCount + 1,
       retryNotices: [
-        { phase: 'research', afterNonTodosStepCount: countNonTodosSteps(runSteps), error },
+        { phase: 'research', afterNonTodosStepCount: countNonTodosSteps(state.steps), error },
       ],
     });
 
     try {
       const response = await researcherModel.invoke(
-        await promptFactory.getMainPrompt({ run: toCurrentRun({ ...state, steps: runSteps }) })
+        await promptFactory.getMainPrompt({ run: toCurrentRun(state) })
       );
 
       const currentCycle = state.currentCycle + 1;
@@ -203,7 +203,7 @@ export const createAgentGraph = ({
       }
 
       return {
-        steps: [...injected, ...turn.stepUpdates],
+        steps: turn.stepUpdates,
         researchOutcome: turn.outcome,
         toolRenderState: turn.renderState,
         pendingToolCallIds: turn.pendingToolCallIds,
@@ -218,7 +218,6 @@ export const createAgentGraph = ({
           throw executionError;
         }
         return {
-          steps: injected,
           researchOutcome: { type: 'context_length_error', error: executionError },
           contextRetryCount: state.contextRetryCount + 1,
         };
@@ -239,7 +238,7 @@ export const createAgentGraph = ({
 
     if (outcome.type === 'retry_error') {
       if (state.errorCount <= MAX_ERROR_COUNT) {
-        return steps.researchAgent;
+        return steps.cycleHooks;
       } else {
         // max error count reached, stop execution by throwing
         throw outcome.error;
@@ -407,7 +406,7 @@ export const createAgentGraph = ({
   };
 
   const contextManagementEdge = async (state: StateType) =>
-    state.compactionRequest ? steps.compactContext : steps.researchAgent;
+    state.compactionRequest ? steps.compactContext : steps.cycleHooks;
 
   // note: the node names are used in the event convertion logic, they should *not* be changed
   const graphBuilder = new StateGraph(StateAnnotation)
@@ -415,6 +414,7 @@ export const createAgentGraph = ({
     .addNode(steps.checkBackgroundWork, checkBackgroundWork)
     .addNode(steps.contextManagement, contextManagementNodes.contextManagement)
     .addNode(steps.compactContext, contextManagementNodes.compactContext)
+    .addNode(steps.cycleHooks, dispatchCycleHooks)
     .addNode(steps.researchAgent, researchAgent)
     .addNode(steps.executeTool, executeTool)
     .addNode(steps.handleToolInterrupt, handleToolInterrupt)
@@ -424,9 +424,10 @@ export const createAgentGraph = ({
     .addEdge(steps.checkBackgroundWork, steps.contextManagement)
     .addConditionalEdges(steps.contextManagement, contextManagementEdge, {
       [steps.compactContext]: steps.compactContext,
-      [steps.researchAgent]: steps.researchAgent,
+      [steps.cycleHooks]: steps.cycleHooks,
     })
-    .addEdge(steps.compactContext, steps.researchAgent)
+    .addEdge(steps.compactContext, steps.cycleHooks)
+    .addEdge(steps.cycleHooks, steps.researchAgent)
     .addConditionalEdges(steps.executeTool, executeToolEdge, {
       [steps.checkBackgroundWork]: steps.checkBackgroundWork,
       [steps.handleToolInterrupt]: steps.handleToolInterrupt,
@@ -439,7 +440,7 @@ export const createAgentGraph = ({
       .addNode(steps.prepareToAnswer, prepareToAnswer)
       .addNode(steps.answerAgent, answerAgentStructured)
       .addConditionalEdges(steps.researchAgent, researchAgentEdge, {
-        [steps.researchAgent]: steps.researchAgent,
+        [steps.cycleHooks]: steps.cycleHooks,
         [steps.contextManagement]: steps.contextManagement,
         [steps.executeTool]: steps.executeTool,
         [steps.prepareToAnswer]: steps.prepareToAnswer,
@@ -451,7 +452,7 @@ export const createAgentGraph = ({
       });
   } else {
     graphBuilder.addConditionalEdges(steps.researchAgent, researchAgentEdge, {
-      [steps.researchAgent]: steps.researchAgent,
+      [steps.cycleHooks]: steps.cycleHooks,
       [steps.contextManagement]: steps.contextManagement,
       [steps.executeTool]: steps.executeTool,
       [steps.finalize]: steps.finalize,

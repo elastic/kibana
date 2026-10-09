@@ -627,11 +627,10 @@ describe('compactContext', () => {
 });
 
 describe('compactContext injected context', () => {
-  it('keeps pinned injected context out of summaries and sends unpinned notes', async () => {
+  it('sends injected context to the summarizer like any other step', async () => {
     const { invoke, deps } = setup();
     const steps = [
-      createInjectedContextStep({ hook_id: 'h', text: 'PINNED_NOTE', pin: 'round' }),
-      createInjectedContextStep({ hook_id: 'h', text: 'LOOSE_NOTE' }),
+      createInjectedContextStep({ hook_id: 'h', text: 'HOOK_NOTE' }),
       ...['x1', 'x2', 'x3'].map((id) => call(id, BIG)),
     ];
 
@@ -646,8 +645,6 @@ describe('compactContext injected context', () => {
     );
 
     expect(result?.summary.summarized_up_to).toEqual({ round_id: 'current', tool_call_id: 'x1' });
-    const request = requestText(invoke, 0);
-    expect(request).toContain('LOOSE_NOTE');
-    expect(request).not.toContain('PINNED_NOTE');
+    expect(requestText(invoke, 0)).toContain('HOOK_NOTE');
   });
 });

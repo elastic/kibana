@@ -564,6 +564,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     });
 
     const round = await extractRound(events$);
+    cycleHooks.close();
 
     // Persist filesystem state for this round (today: the workspace volume).
     try {

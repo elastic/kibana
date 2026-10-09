@@ -8,6 +8,7 @@
 import {
   isAllowedBuiltinAttachment,
   isAllowedBuiltinTool,
+  isAllowedCycleHook,
   isAllowedSkillRegistration,
 } from './allow_lists';
 import { ELASTIC_SKILLS_BASE_PATH } from './skills/type_definition';
@@ -73,5 +74,12 @@ describe('isAllowedSkillRegistration', () => {
     expect(
       isAllowedSkillRegistration({ id: 'elasticsearch-esql', basePath: 'skills/search' })
     ).toBe(false);
+  });
+});
+
+describe('isAllowedCycleHook', () => {
+  it('rejects unlisted hook ids', () => {
+    expect(isAllowedCycleHook('not-a-hook')).toBe(false);
+    expect(isAllowedCycleHook('')).toBe(false);
   });
 });

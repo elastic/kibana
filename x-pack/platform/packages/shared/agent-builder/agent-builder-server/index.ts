@@ -11,6 +11,11 @@ export type {
   ProcessedRoundInput,
 } from './processed_input';
 export type {
+  ProcessedCustomEvent,
+  ProcessedTimelineEvent,
+  ProcessedUserMessageEvent,
+} from './processed_timeline';
+export type {
   ToolProvider,
   ToolProviderHasOptions,
   ToolProviderGetOptions,
@@ -117,8 +122,8 @@ export type {
   CycleHookApi,
   CycleHookDefinition,
   CycleHookExecutionContext,
-  CycleHookRound,
   CycleTrigger,
+  ExecutionSummary,
   InjectedContextInput,
 } from './hooks/cycle';
 export { DEFAULT_CYCLE_HOOK_TIMEOUT_MS, MAX_CYCLE_HOOK_TIMEOUT_MS } from './hooks/cycle';

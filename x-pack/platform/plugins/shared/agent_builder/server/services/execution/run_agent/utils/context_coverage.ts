@@ -61,6 +61,7 @@ export const groupStepCycles = (steps: ConversationRoundStep[]): StepRange[] => 
 /** The history the agent context renders before the current run, and the input that follows it. */
 export interface HistoryView {
   entries: Array<TimelineEntry<ProcessedTimelineEvent>>;
+  events: ProcessedTimelineEvent[];
   input: ProcessedRoundInput;
   inputTimestamp?: string;
 }
@@ -76,13 +77,20 @@ export const historyView = (
   const entries = groupTimelineEntries(conversation.timeline);
   const lastRound = groupTimelineRounds(conversation.timeline).at(-1);
   if (lastRound && isAwaitingPrompt(lastRound)) {
+    const resumed = new Set(lastRound.events.map((event) => event.id));
     return {
       entries: entries.filter((entry) => !isTimelineRound(entry) || entry.id !== lastRound.id),
+      events: conversation.timeline.filter((event) => !resumed.has(event.id)),
       input: lastRound.userMessage.data,
       inputTimestamp: lastRound.userMessage.created_at,
     };
   }
-  return { entries, input: conversation.nextInput, inputTimestamp: conversationTimestamp };
+  return {
+    entries,
+    events: conversation.timeline,
+    input: conversation.nextInput,
+    inputTimestamp: conversationTimestamp,
+  };
 };
 
 /** What a compaction cursor leaves visible. */

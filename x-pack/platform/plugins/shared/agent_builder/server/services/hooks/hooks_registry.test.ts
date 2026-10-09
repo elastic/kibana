@@ -12,6 +12,14 @@ import {
   MAX_CYCLE_HOOK_TIMEOUT_MS,
 } from '@kbn/agent-builder-server';
 import type { CycleHookDefinition } from '@kbn/agent-builder-server';
+import { isAllowedCycleHook } from '@kbn/agent-builder-server/allow_lists';
+
+jest.mock('@kbn/agent-builder-server/allow_lists', () => ({
+  ...jest.requireActual('@kbn/agent-builder-server/allow_lists'),
+  isAllowedCycleHook: jest.fn().mockReturnValue(true),
+}));
+
+const isAllowedCycleHookMock = isAllowedCycleHook as jest.MockedFunction<typeof isAllowedCycleHook>;
 
 describe('buildHookRegistrationId', () => {
   it('returns bundleId-lifecycle', () => {
@@ -241,6 +249,20 @@ describe('registerCycleHook', () => {
     const registry = createHookRegistry();
 
     expect(() => registry.registerCycleHook(definition('bad', { timeout: 0 }))).toThrow();
+    expect(registry.getCycleHooks()).toEqual([]);
+  });
+});
+
+describe('registerCycleHook allow list', () => {
+  it('rejects a cycle hook whose id is not on the allow list, and registers nothing', () => {
+    const registry = createHookRegistry();
+    isAllowedCycleHookMock.mockReturnValueOnce(false);
+
+    expect(() => registry.registerCycleHook({ id: 'rogue', getHandler: () => undefined })).toThrow(
+      /not in the list of allowed cycle hooks/
+    );
+
+    expect(isAllowedCycleHookMock).toHaveBeenCalledWith('rogue');
     expect(registry.getCycleHooks()).toEqual([]);
   });
 });

@@ -130,13 +130,15 @@ describe('historyView', () => {
     const timeline = timelineFromRounds([{ id: 'a', input: input('first') }]);
     const view = historyView(conversationOf(timeline), '2026-01-01T00:00:00.000Z');
     expect(view.entries).toHaveLength(1);
+    expect(view.events).toEqual(timeline);
     expect(view.input).toEqual(input('next'));
     expect(view.inputTimestamp).toBe('2026-01-01T00:00:00.000Z');
   });
 
   it('leaves out the round paused on a prompt and uses its user message as the input', () => {
+    const history = timelineFromRounds([{ id: 'a', input: input('first') }]);
     const timeline = [
-      ...timelineFromRounds([{ id: 'a', input: input('first') }]),
+      ...history,
       ...(eventsForContext(eventsNativeConversation(pausedRoundTimeline('p', ['c1']))).map(
         (event) =>
           event.type === TimelineEventType.userMessage
@@ -148,6 +150,7 @@ describe('historyView', () => {
     expect(view.entries.map((entry) => (isTimelineRound(entry) ? entry.id : 'message'))).toEqual([
       'a',
     ]);
+    expect(view.events).toEqual(history);
     expect(view.input).toEqual(expect.objectContaining({ message: 'hello p' }));
   });
 });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import { withTimeout } from '@kbn/std';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
@@ -55,13 +56,15 @@ interface ActiveHook {
   lastRunCycle: number;
   /** When the hook last appended a note, for `timing.sinceLastAppendMs`. */
   lastAppendAt?: number;
-  /** The call a `'first'` hook started in `start()`, awaited at the top of the first dispatch. */
-  early?: Promise<void>;
+  /** Set for a hook called in `start()`: the call, and what it appended during it. */
+  early?: { done: Promise<void>; out: RunStepUpdate[] };
 }
 
 /**
  * Runs the cycle hooks of one agent execution: creates their handlers once, calls the due ones at
  * each cycle, and collects the `injected_context` steps they append as step updates for the graph.
+ *
+ * Hooks run in registration order, and each one sees what the hooks before it appended.
  */
 export class CycleHookRuntime {
   private readonly hooks: ActiveHook[] = [];
@@ -76,13 +79,21 @@ export class CycleHookRuntime {
   }
 
   /**
-   * Creates the handlers. A `'first'` hook is called right away so its work overlaps whatever runs
-   * before the first cycle; `dispatch` waits for it. Early calls run one after another, in
-   * registration order, so a later hook sees what an earlier one appended.
+   * Creates the handlers of the hooks that apply to this agent.
+   *
+   * A `'first'` hook is called right away, so its work overlaps whatever runs before the first
+   * cycle, unless a hook due at cycle 0 was registered before it: that one can only run at cycle 0,
+   * and the `'first'` hook then takes its turn there. Early calls run one after another; `dispatch`
+   * waits for them and lands their notes at the hooks' positions.
    */
   async start(seedSteps: ConversationRoundStep[] = []): Promise<void> {
-    let early: Promise<void> = Promise.resolve();
+    let chain: Promise<void> = Promise.resolve();
+    const earlyOuts: RunStepUpdate[][] = [];
+    let cycleZeroHookSeen = false;
     for (const def of this.deps.definitions) {
+      if (def.boundAgents && !def.boundAgents.includes(this.deps.execution.agent.id)) {
+        continue;
+      }
       // Once per round: the paused round being resumed already carries what the hook added.
       if (def.when === 'first' && this.deps.execution.execution.resumed) {
         continue;
@@ -101,33 +112,47 @@ export class CycleHookRuntime {
       }
       const hook: ActiveHook = { def, handler, lastRunCycle: -1 };
       this.hooks.push(hook);
-      if (def.when === 'first') {
-        hook.lastRunCycle = 0;
-        early = early.then(() =>
-          this.call(hook, { cycle: 0, attempt: 0, steps: seedSteps }, this.queue)
-        );
-        hook.early = early;
+      const when = def.when ?? 'every_cycle';
+      if (when !== 'first') {
+        if (when === 'every_cycle') {
+          cycleZeroHookSeen = true;
+        }
+        continue;
       }
+      if (cycleZeroHookSeen) {
+        continue;
+      }
+      hook.lastRunCycle = 0;
+      const before = [...earlyOuts];
+      const out: RunStepUpdate[] = [];
+      earlyOuts.push(out);
+      chain = chain.then(() =>
+        this.call(
+          hook,
+          { cycle: 0, attempt: 0, steps: applyStepUpdates(seedSteps, before.flat()) },
+          out
+        )
+      );
+      hook.early = { done: chain, out };
     }
   }
 
   /**
-   * Returns the step updates to fold into the state before this cycle's prompt is rendered: notes
-   * queued since the last cycle first, then what the due handlers append during their call.
+   * Returns the step updates to fold into the state before this cycle's prompt is rendered: the
+   * notes queued since the last cycle, then, hook by hook, what an early call appended or what the
+   * handler appends now. A retry only drains the queue.
    */
   async dispatch(facts: CycleDispatchFacts): Promise<RunStepUpdate[]> {
+    const out = this.queue.splice(0);
     for (const hook of this.hooks) {
       if (hook.early) {
-        await hook.early;
+        const { done, out: earlyOut } = hook.early;
         hook.early = undefined;
+        await done;
+        out.push(...earlyOut);
+        continue;
       }
-    }
-    const out = this.queue.splice(0);
-    if (facts.attempt > 0) {
-      return out;
-    }
-    for (const hook of this.hooks) {
-      if (!isDue(hook, facts.cycle)) {
+      if (facts.attempt > 0 || !isDue(hook, facts.cycle)) {
         continue;
       }
       await this.call(hook, facts, out);
@@ -154,6 +179,9 @@ export class CycleHookRuntime {
       },
     };
     const now = this.now();
+    // The handler gets copies, made when read: nothing it does to them reaches the run.
+    let steps: { appended: number; value: ConversationRoundStep[] } | undefined;
+    let previousToolCalls: ToolCallStep[] | undefined;
     const cycle: CycleContext = {
       index: facts.cycle,
       timing: {
@@ -161,10 +189,18 @@ export class CycleHookRuntime {
         sinceLastAppendMs: hook.lastAppendAt === undefined ? undefined : now - hook.lastAppendAt,
       },
       get steps() {
-        return applyStepUpdates(facts.steps, out);
+        if (steps?.appended !== out.length) {
+          steps = { appended: out.length, value: cloneDeep(applyStepUpdates(facts.steps, out)) };
+        }
+        return steps.value;
       },
-      previousToolCalls: lastToolCallGroup(facts.steps),
-      summary: facts.summary,
+      get previousToolCalls() {
+        if (!previousToolCalls) {
+          previousToolCalls = cloneDeep(lastToolCallGroup(facts.steps));
+        }
+        return previousToolCalls;
+      },
+      summary: cloneDeep(facts.summary),
     };
     try {
       await this.guarded(hook.def, 'handler', () => hook.handler(cycle, api), facts.cycle);

@@ -29,7 +29,6 @@ import {
   renderCurrentRun,
   renderHistorySteps,
   type CurrentRunRenderOptions,
-  isPinnedInjectedContextMessage,
 } from './render_steps_to_messages';
 import { toolCallKey } from './filestore_substitution';
 import type { ToolCallResultTransformer } from './tool_summarization';
@@ -572,17 +571,6 @@ describe('injected context', () => {
     expect(message.name).toBe('injected_context');
     expect(message.content).toContain('<injected_context source="memory">');
     expect(message.content).toContain('remember &lt;this&gt;');
-    expect(isPinnedInjectedContextMessage(message)).toBe(false);
-  });
-
-  it('names a pinned step apart, with the same content', async () => {
-    const [pinned] = await renderHistorySteps({
-      steps: [createInjectedContextStep({ ...note, pin: 'round' })],
-    });
-    const [plain] = await renderHistorySteps({ steps: [note] });
-
-    expect(isPinnedInjectedContextMessage(pinned)).toBe(true);
-    expect(pinned.content).toEqual(plain.content);
   });
 
   it('renders in both phases of the current run, identically to history', async () => {

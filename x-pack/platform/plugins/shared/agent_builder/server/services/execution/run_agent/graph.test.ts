@@ -722,4 +722,33 @@ describe('createAgentGraph cycle hooks', () => {
     expect(result.steps[0]).toEqual(note);
     expect(result.finalAnswer).toBe('the answer');
   });
+
+  it('commits the dispatched rows before the model call, so a fatal research error keeps them', async () => {
+    const graphName = 'cycle-hooks-fatal-graph';
+    const tracker = new RunTracker({ graphName });
+    const dispatch = jest
+      .fn()
+      .mockResolvedValueOnce([stepUpdates.append(note)])
+      .mockResolvedValue([]);
+    const cycleHooks = { dispatch } as unknown as CycleHookRuntime;
+    const { graph, researchInvoke } = createTestGraph({ cycleHooks, toolExecutionBuffer: tracker });
+    researchInvoke.mockRejectedValueOnce(new Error('fatal'));
+    tracker.seed({ steps: [] });
+
+    const stream = graph.streamEvents(
+      { cycleLimit: 5 },
+      { version: 'v2', streamMode: 'values', runName: graphName, recursionLimit: 50 }
+    );
+    await expect(
+      (async () => {
+        for await (const event of stream) {
+          tracker.observeGraphEvent(event);
+        }
+      })()
+    ).rejects.toThrow('fatal');
+
+    // the note landed in its own super-step, so the last streamed state and the projection have it
+    expect(tracker.latestState().steps).toEqual([note]);
+    expect(tracker.executionProjection()).toEqual([note]);
+  });
 });

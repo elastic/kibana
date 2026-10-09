@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isAllowedCycleHook } from '@kbn/agent-builder-server/allow_lists';
 import type {
   CycleHookDefinition,
   HookRegistration,
@@ -94,6 +95,12 @@ export function createHookRegistry(): HookRegistry {
 
     registerCycleHook(definition: CycleHookDefinition) {
       validateCycleHookDefinition(definition);
+      if (!isAllowedCycleHook(definition.id)) {
+        throw new Error(
+          `Cycle hook with id "${definition.id}" is not in the list of allowed cycle hooks.
+             Please add it to the list of allowed cycle hooks in the "@kbn/agent-builder-server/allow_lists.ts" file.`
+        );
+      }
       if (cycleHooks.some((hook) => hook.id === definition.id)) {
         throw new Error(`Cycle hook with id "${definition.id}" is already registered.`);
       }

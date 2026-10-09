@@ -315,22 +315,19 @@ describe('renderVisibleContext injected context', () => {
       deps()
     );
 
-  it('keeps a pinned note after the request once its cycle is covered, and drops an unpinned one', async () => {
+  it('renders a note in its cycle, and drops it once a summary covers that cycle', async () => {
     const steps = [
-      createInjectedContextStep({ hook_id: 'h', text: 'PINNED_NOTE', pin: 'round' }),
-      createInjectedContextStep({ hook_id: 'h', text: 'LOOSE_NOTE' }),
+      createInjectedContextStep({ hook_id: 'h', text: 'HOOK_NOTE' }),
       call('x1'),
       call('x2'),
     ];
 
     const uncovered = text(await render(steps));
-    expect(uncovered.split('PINNED_NOTE')).toHaveLength(2);
-    expect(uncovered.split('LOOSE_NOTE')).toHaveLength(2);
+    expect(uncovered.split('HOOK_NOTE')).toHaveLength(2);
+    expect(uncovered.indexOf('HOOK_NOTE')).toBeGreaterThan(uncovered.indexOf('NEXT_INPUT'));
+    expect(uncovered.indexOf('HOOK_NOTE')).toBeLessThan(uncovered.indexOf('RAW_x1'));
 
     const covered = text(await render(steps, { round_id: 'current', tool_call_id: 'x1' }));
-    expect(covered.split('PINNED_NOTE')).toHaveLength(2);
-    expect(covered.split('LOOSE_NOTE')).toHaveLength(1);
-    expect(covered.indexOf('PINNED_NOTE')).toBeGreaterThan(covered.indexOf('NEXT_INPUT'));
-    expect(covered.indexOf('PINNED_NOTE')).toBeLessThan(covered.indexOf('RAW_x2'));
+    expect(covered.split('HOOK_NOTE')).toHaveLength(1);
   });
 });
