@@ -212,33 +212,5 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(score.modifiers).to.have.length(1);
       expect(score.modifiers?.[0].type).to.be('asset_criticality');
     });
-
-    it('falls back to legacy preview path when entityStoreEnableV2 is disabled', async () => {
-      const targetUser = `target-${uuidv4().slice(0, 8)}`;
-      const aliasUser = `alias-${uuidv4().slice(0, 8)}`;
-      const { documentIds, testEntities } = await maintainerScenario.seedEntities([
-        riskScoreMaintainerEntityBuilders.idpUser({ userName: targetUser }),
-        riskScoreMaintainerEntityBuilders.idpUser({ userName: aliasUser }),
-      ]);
-      await entityStoreUtils.installEntityStoreV2({
-        entityTypes: ['user'],
-        dataViewPattern: testLogsIndex,
-      });
-      await maintainerScenario.setEntityResolutionTarget({
-        testEntity: testEntities[1],
-        resolvedToEntityId: testEntities[0].expectedEuid,
-      });
-      await maintainerScenario.createAlertsForDocumentIds({
-        documentIds,
-        alerts: 2,
-        riskScore: 60,
-      });
-
-      await setEntityStoreV2Setting(false);
-
-      const { scores } = await previewRiskScores({ body: { identifier_type: 'user' } });
-      // Legacy preview records do not include the v2-only score_type field.
-      expect(scores.user?.some((score) => score.score_type === undefined)).to.be(true);
-    });
   });
 };

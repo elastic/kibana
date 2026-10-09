@@ -25,16 +25,6 @@ describe(
   'Users stats and tables',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'disable:entityAnalyticsEntityStoreV2',
-          ])}`,
-          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
-        ],
-      },
-    },
   },
   () => {
     before(() => {
