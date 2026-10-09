@@ -52,6 +52,14 @@ const RuleMenu = ({ rule = mockRule('rule-id') }: { rule?: ReturnType<typeof moc
     isExistingRule: true,
     hasActionsPrivileges: true,
     refreshRule,
+    snoozeMenuItem: {
+      id: 'snoozeRule',
+      label: 'Set snooze',
+      iconType: 'bell',
+      overflow: true,
+      run: jest.fn(),
+      testId: 'rules-details-snooze-rule',
+    },
     showBulkDuplicateExceptionsConfirmation: async () => null,
     showManualRuleRunConfirmation: async () => null,
     confirmDeletion,
@@ -96,6 +104,7 @@ describe('rule details app menu', () => {
 
     expect(await screen.findByTestId('editRuleSettingsLink')).toBeEnabled();
     await openAppMenuOverflow();
+    expect(screen.getByTestId('rules-details-snooze-rule')).toBeInTheDocument();
     expect(screen.getByTestId('rules-details-duplicate-rule')).toBeEnabled();
     expect(screen.getByTestId('rules-details-export-rule')).toBeEnabled();
     expect(screen.getByTestId('rules-details-manual-rule-run')).toBeEnabled();

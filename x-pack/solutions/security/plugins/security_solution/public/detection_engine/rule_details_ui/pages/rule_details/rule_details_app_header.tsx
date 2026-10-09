@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { AppHeaderTab } from '@kbn/app-header';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { SecurityPageName } from '../../../../app/types';
@@ -18,6 +18,7 @@ import * as i18n from './translations';
 import { useRuleDetailsBadges } from './use_rule_details_badges';
 import { useRuleDetailsMenu } from './use_rule_details_menu';
 import { useRuleDetailsMetadata } from './use_rule_details_metadata';
+import { useRuleSnooze } from './use_rule_snooze';
 
 interface RuleDetailsAppHeaderProps {
   rule: RuleResponse | null;
@@ -56,7 +57,8 @@ export const RuleDetailsAppHeader = React.memo<RuleDetailsAppHeaderProps>(
   }) => {
     const { docLinks } = useKibana().services;
     const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
-    const badges = useRuleDetailsBadges({
+    const snooze = useRuleSnooze({ ruleId, isExistingRule });
+    const ruleBadges = useRuleDetailsBadges({
       rule,
       ruleLoading,
       isExistingRule,
@@ -64,6 +66,10 @@ export const RuleDetailsAppHeader = React.memo<RuleDetailsAppHeaderProps>(
       onRuleEnabledChange,
       startMlJobsIfNeeded,
     });
+    const badges = useMemo(
+      () => (snooze.badge ? [...ruleBadges, snooze.badge] : ruleBadges),
+      [ruleBadges, snooze.badge]
+    );
     const metadata = useRuleDetailsMetadata({ rule, createdBy, updatedBy });
     const menu = useRuleDetailsMenu({
       rule,
@@ -71,25 +77,29 @@ export const RuleDetailsAppHeader = React.memo<RuleDetailsAppHeaderProps>(
       isExistingRule,
       hasActionsPrivileges,
       refreshRule,
+      snoozeMenuItem: snooze.menuItem,
       showBulkDuplicateExceptionsConfirmation,
       showManualRuleRunConfirmation,
       confirmDeletion,
     });
 
     return (
-      <SecurityAppHeader
-        title={rule?.name ?? i18n.PAGE_TITLE}
-        back={{
-          label: RULES_PAGE_TITLE,
-          href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.rules }),
-        }}
-        badges={badges}
-        metadata={metadata}
-        tabs={tabs}
-        menu={menu}
-        docLink={docLinks.links.securitySolution.manageDetectionRules}
-        spacing="largeBleed"
-      />
+      <>
+        <SecurityAppHeader
+          title={rule?.name ?? i18n.PAGE_TITLE}
+          back={{
+            label: RULES_PAGE_TITLE,
+            href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.rules }),
+          }}
+          badges={badges}
+          metadata={metadata}
+          tabs={tabs}
+          menu={menu}
+          docLink={docLinks.links.securitySolution.manageDetectionRules}
+          spacing="largeBleed"
+        />
+        {snooze.modal}
+      </>
     );
   }
 );

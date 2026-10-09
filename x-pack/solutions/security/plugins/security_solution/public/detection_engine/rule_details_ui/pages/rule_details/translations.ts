@@ -147,3 +147,37 @@ export const DESTINATION_ADDRESS = i18n.translate(
     defaultMessage: 'Destination address',
   }
 );
+
+export const SET_SNOOZE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.setSnoozeLabel',
+  {
+    defaultMessage: 'Set snooze',
+  }
+);
+
+export const SNOOZED_BADGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.snoozedBadgeLabel',
+  {
+    defaultMessage: 'Snoozed',
+  }
+);
+
+export const SNOOZED_INDEFINITELY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.snoozedIndefinitelyTooltip',
+  {
+    defaultMessage: 'Rule notifications are snoozed indefinitely',
+  }
+);
+
+export const SNOOZED_UNTIL = (date: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.ruleDetails.snoozedUntilTooltip', {
+    defaultMessage: 'Rule notifications are snoozed until {date}',
+    values: { date },
+  });
+
+export const UNABLE_TO_LOAD_SNOOZE_SETTINGS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.unableToLoadSnoozeSettingsTitle',
+  {
+    defaultMessage: 'Unable to load rule snooze settings',
+  }
+);

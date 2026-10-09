@@ -54,12 +54,12 @@ import {
   RULE_FILL_ALL_GAPS_BUTTON,
 } from '../../../../screens/rule_details';
 import {
-  expectRuleSnoozed,
+  expectRuleSnoozedOnDetailsPage,
+  expectSnoozeDisabledOnDetailsPage,
   expectUnsnoozeSuccessToast,
-  snoozeRule,
-  unsnoozeRule,
+  snoozeRuleOnDetailsPage,
+  unsnoozeRuleOnDetailsPage,
 } from '../../../../tasks/rule_snoozing';
-import { UNSNOOZED_BADGE } from '../../../../screens/rule_snoozing';
 const usersToCreate = [rulesAllUser, rulesReadUser, rulesNoneUser, rulesReadManualRunAllUser];
 const rolesToCreate = [rulesAll, rulesRead, rulesNone, rulesReadManualRunAll];
 
@@ -132,9 +132,9 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
     });
 
     it('should be able to adjust snooze settings', () => {
-      snoozeRule('3 days');
-      expectRuleSnoozed('3 days');
-      unsnoozeRule();
+      snoozeRuleOnDetailsPage('3 days');
+      expectRuleSnoozedOnDetailsPage();
+      unsnoozeRuleOnDetailsPage();
       expectUnsnoozeSuccessToast();
     });
   });
@@ -176,7 +176,7 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
     });
 
     it('should not be able to adjust snooze settings', () => {
-      cy.get(UNSNOOZED_BADGE).should('be.disabled');
+      expectSnoozeDisabledOnDetailsPage();
     });
   });
 

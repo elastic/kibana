@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import type { AppHeaderMenu } from '@kbn/app-header';
+import type { AppMenuItemType } from '@kbn/app-menu';
 import { isCustomizedPrebuiltRule } from '../../../../../common/api/detection_engine';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
@@ -52,6 +53,7 @@ interface UseRuleDetailsMenuProps {
   isExistingRule: boolean;
   hasActionsPrivileges: boolean;
   refreshRule: () => void;
+  snoozeMenuItem: AppMenuItemType;
   showBulkDuplicateExceptionsConfirmation: () => Promise<string | null>;
   showManualRuleRunConfirmation: () => Promise<TimeRange | null>;
   confirmDeletion: () => Promise<boolean>;
@@ -63,6 +65,7 @@ export const useRuleDetailsMenu = ({
   isExistingRule,
   hasActionsPrivileges,
   refreshRule,
+  snoozeMenuItem,
   showBulkDuplicateExceptionsConfirmation,
   showManualRuleRunConfirmation,
   confirmDeletion,
@@ -145,6 +148,7 @@ export const useRuleDetailsMenu = ({
               },
             ]
           : []),
+        snoozeMenuItem,
         ...(addRuleToChatMenuItem ? [addRuleToChatMenuItem] : []),
         ...(rule
           ? [
@@ -260,6 +264,7 @@ export const useRuleDetailsMenu = ({
       hasMlPermissions,
       hasActionsPrivileges,
       refreshRule,
+      snoozeMenuItem,
       addRuleToChatMenuItem,
       getSecuritySolutionUrl,
       editDisabled,

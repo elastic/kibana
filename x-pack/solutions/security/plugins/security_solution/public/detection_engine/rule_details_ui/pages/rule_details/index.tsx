@@ -117,7 +117,6 @@ import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs
 import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
 import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
 import { useAsyncConfirmation } from '../../../rule_management_ui/components/rules_table/rules_table/use_async_confirmation';
-import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { RuleDefinitionSection } from '../../../rule_management/components/rule_details/rule_definition_section';
 import { RuleScheduleSection } from '../../../rule_management/components/rule_details/rule_schedule_section';
@@ -612,8 +611,6 @@ export const RuleDetailsPage = connector(
                 <MissingDetectionsPrivilegesCallOut />
                 {upgradeCallout}
                 {deprecationCallout}
-                <EuiSpacer size="m" />
-                <RuleSnoozeBadge ruleId={ruleId} showTooltipInline />
                 {ruleError}
                 <LegacyUrlConflictCallOut rule={rule} spacesApi={spacesApi} />
                 <EuiSpacer size="l" />
