@@ -232,6 +232,18 @@ Neither query has a time bound: an indefinite snooze or an ack stays in effect h
 
 When both an alert-level and a series-level record suppress an alert, `SuppressionIndex` reports the alert-level reason: an acked alert on a snoozed series reports `ack`.
 
+### Throttling lookup
+
+`ApplyThrottlingStep` reads the latest `notified` record of each candidate group (`getLastNotifiedTimestampsQueries`), but only as far back as its decision can use:
+
+| Policy                                                                         | Lookup                                                                                              |
+| ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| `every_time`, or an aggregated policy (`per_field`, `all`) without an interval | None: the group dispatches either way.                                                              |
+| Aggregated policy with an interval, or `per_status_interval`                   | Records with `@timestamp ≥ startedAt − interval`: an older record cannot change the decision.       |
+| `on_status_change`, or an interval that does not parse                         | Every record of the group.                                                                          |
+
+An aggregated group keeps the same id from tick to tick and gets one `notified` record per alert it dispatches, so an unbounded lookup would grow with everything the policy ever sent. A `per_alert` group belongs to one alert episode, so its full history stays small.
+
 ## Halt reasons
 
 | Reason                   | Meaning                                                                                                                                                          |
