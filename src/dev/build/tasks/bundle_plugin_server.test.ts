@@ -80,13 +80,13 @@ describe('bundlePluginServer', () => {
     expect(bundle).toContain('require.resolve("./lib/worker.js")');
 
     const loaded = requireFromTest(Path.join(server, 'plugin.js'));
-    expect(loaded.dir).toBe(Fs.realpathSync(server));
-    expect(loaded.service.dir).toBe(Fs.realpathSync(lib));
-    expect(loaded.service.file).toBe(Fs.realpathSync(Path.join(lib, 'service.js')));
-    expect(loaded.service.top).toEqual({
-      marker: 'top-marker',
-      dir: Fs.realpathSync(lib),
-    });
+    expect(Fs.realpathSync(loaded.dir)).toBe(Fs.realpathSync(server));
+    expect(Fs.realpathSync(loaded.service.dir)).toBe(Fs.realpathSync(lib));
+    expect(Fs.realpathSync(loaded.service.file)).toBe(
+      Fs.realpathSync(Path.join(lib, 'service.js'))
+    );
+    expect(loaded.service.top.marker).toBe('top-marker');
+    expect(Fs.realpathSync(loaded.service.top.dir)).toBe(Fs.realpathSync(lib));
     expect(loaded.service.lazy().marker).toBe('lazy-marker');
     expect(Fs.realpathSync(loaded.service.lazy().dir)).toBe(Fs.realpathSync(lib));
     expect(Fs.realpathSync(loaded.service.workerPath())).toBe(
@@ -201,6 +201,29 @@ describe('bundlePluginServer', () => {
     expect(loaded.loadLazy().hub).toBe(loaded.hub);
     expect(loaded.hub.helper).toBe(requireFromTest(Path.join(server, 'helper.js')));
     expect(loaded.config).toBe(requireFromTest(Path.join(server, 'index.js')).config);
+  });
+
+  it('resolves __dirname from the directory the bundle is loaded from', async () => {
+    const root = makePlugin();
+    const server = Path.join(root, 'server');
+    const lib = Path.join(server, 'lib');
+    Fs.mkdirSync(lib, { recursive: true });
+    Fs.writeFileSync(
+      Path.join(server, 'plugin.js'),
+      '"use strict";\nexports.dir = require("./lib/service").dir;\n'
+    );
+    Fs.writeFileSync(Path.join(lib, 'service.js'), '"use strict";\nexports.dir = __dirname;\n');
+
+    await bundlePluginServer(root);
+
+    const moved = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-plugin-bundle-moved-'));
+    directories.push(moved);
+    Fs.cpSync(root, moved, { recursive: true });
+
+    const bundle = Fs.readFileSync(Path.join(moved, 'server', 'plugin.js'), 'utf8');
+    expect(bundle).not.toContain(root);
+    const loaded = requireFromTest(Path.join(moved, 'server', 'plugin.js'));
+    expect(Fs.realpathSync(loaded.dir)).toBe(Fs.realpathSync(Path.join(moved, 'server', 'lib')));
   });
 
   it('leaves a plugin entry with no local files unchanged', async () => {

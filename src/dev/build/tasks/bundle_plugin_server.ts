@@ -87,6 +87,10 @@ export async function bundlePluginServer(pkgDistPath: string): Promise<void> {
       legalComments: 'inline',
       logLevel: 'silent',
       absWorkingDir: packageRoot,
+      // Captures the real directory of server/plugin.js. Per-file __dirname
+      // values are resolved from this at runtime so the bundle still works
+      // after the distributable is moved off the build machine.
+      banner: { js: 'var __kbnBundleDirname = __dirname;\n' },
       plugins: [pluginServerBundlePlugin(closure, serverDir)],
     });
     await Fsp.rename(outfile, entry);
@@ -124,7 +128,7 @@ function pluginServerBundlePlugin(closure: Set<string>, serverDir: string): Plug
         return {
           loader: 'js',
           resolveDir: Path.dirname(filename),
-          contents: injectModulePaths(source, filename),
+          contents: injectModulePaths(source, filename, serverDir),
         };
       });
     },
@@ -333,10 +337,16 @@ function relativeSpecifier(fromDir: string, target: string): string {
   return relative;
 }
 
-function injectModulePaths(source: string, filename: string): string {
-  const injected = `var __filename = ${JSON.stringify(filename)};\nvar __dirname = ${JSON.stringify(
-    Path.dirname(filename)
-  )};\n`;
+function injectModulePaths(source: string, filename: string, serverDir: string): string {
+  const relativeFile = Path.relative(serverDir, filename).split(Path.sep).join('/');
+  const relativeDir = Path.posix.dirname(relativeFile);
+  // Join against the bundle's own __dirname. A path baked in at build time
+  // points at the build workspace, which is gone when CI runs the distributable.
+  const injected = `var __filename = require("path").join(__kbnBundleDirname, ${JSON.stringify(
+    relativeFile
+  )});\nvar __dirname = require("path").join(__kbnBundleDirname, ${JSON.stringify(
+    relativeDir
+  )});\n`;
   const directive = source.match(/^(?:\s|\/\*[\s\S]*?\*\/|\/\/.*\n)*["']use strict["'];?\n?/);
   if (!directive) {
     return injected + source;
