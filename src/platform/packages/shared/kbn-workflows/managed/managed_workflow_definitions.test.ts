@@ -90,7 +90,7 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: {
     settingsVersion: 2,
     autonomyLevel: 'manual',
-    extras: { autoCloseConfidenceScoreMinThreshold: 0.85 },
+    extras: { autoCloseConfidenceScoreMinThreshold: 0.85, budgetPerHour: 300, lookbackHours: 24 },
   },
   [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: {
     settingsVersion: 1,
@@ -215,7 +215,7 @@ it.each([
   [
     ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
     renderInputs(FLOOR_ALERT_TRIAGE_YAML, ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS),
-    '13:ee8cf0d1',
+    '14:76d86679',
   ],
   [ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_REVIEW_YAML, '3:b59aafc3'],
   [
