@@ -7,18 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RuleTester } from 'eslint';
-import { PreferToastActionProps } from './prefer_toast_action_props';
-
-const tester = new RuleTester({
-  parser: require.resolve('@typescript-eslint/parser'),
-  parserOptions: {
-    sourceType: 'module',
-    ecmaVersion: 2018,
-    ecmaFeatures: { jsx: true },
-  },
-});
-
 // Both mount functions are handled identically by the rule (see MOUNT_FUNCTIONS in the
 // implementation), so only the dedicated mount function detection cases below exercise
 // both, everything else uses `mount()` since the choice of wrapper doesn't matter to it.
@@ -40,7 +28,8 @@ const ACTION_ELEMENTS = [
   { elementName: 'EuiLink', jsx: '<EuiLink href="/details">View details</EuiLink>' },
 ];
 
-tester.run('prefer_toast_action_props', PreferToastActionProps, {
+/** Rule test cases, replayed through Oxlint's RuleTester by `__fixtures__/run_rule_tests.mjs`. */
+export const preferToastActionPropsCases = {
   valid: [
     {
       name: 'actionProps usage is allowed',
@@ -186,19 +175,21 @@ tester.run('prefer_toast_action_props', PreferToastActionProps, {
         },
       ],
     })),
-    // every action element
-    ...ACTION_ELEMENTS.map(({ elementName, jsx }) => ({
-      name: `${elementName} is flagged`,
-      code: `toasts.addSuccess({ title: 'Title', text: ${mount(jsx)} });`,
-      errors: [
-        {
-          messageId: 'actionElementInMountContent',
-          data: { elementName, method: 'addSuccess', mountFn: 'mountReactNode' },
-        },
-      ],
-    })),
-    // every toast method
-    ...METHODS.map((method) => ({
+    // every other action element (`EuiButton` is the mount function case above)
+    ...ACTION_ELEMENTS.filter(({ elementName }) => elementName !== 'EuiButton').map(
+      ({ elementName, jsx }) => ({
+        name: `${elementName} is flagged`,
+        code: `toasts.addSuccess({ title: 'Title', text: ${mount(jsx)} });`,
+        errors: [
+          {
+            messageId: 'actionElementInMountContent',
+            data: { elementName, method: 'addSuccess', mountFn: 'mountReactNode' },
+          },
+        ],
+      })
+    ),
+    // every other toast method (`addSuccess` is the mount function case above)
+    ...METHODS.filter((method) => method !== 'addSuccess').map((method) => ({
       name: `toasts.${method}() is flagged`,
       code: `toasts.${method}({ title: 'Title', text: ${mount(
         '<EuiButton>Reload</EuiButton>'
@@ -500,4 +491,4 @@ tester.run('prefer_toast_action_props', PreferToastActionProps, {
       ],
     },
   ],
-});
+};
