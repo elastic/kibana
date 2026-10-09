@@ -150,6 +150,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Platform – Agentic Investigations
   `${internalNamespaces.agenticInvestigations}.set_impact`,
   `${internalNamespaces.agenticInvestigations}.set_hypotheses`,
+  `${internalNamespaces.agenticInvestigations}.get`,
 
   // Platform – Proposals
   `${internalNamespaces.proposals}.create`,

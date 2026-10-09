@@ -18,9 +18,7 @@ import {
   NightshiftModelNotFoundError,
 } from '@kbn/significant-events-schema';
 import {
-  InvestigationConflictError,
   InvestigationNotFoundError,
-  InvestigationMetadataMissingError,
   InvestigationQuotaDeniedError,
   InvestigationUnavailableError,
   InvalidInvestigationContextError,
@@ -54,12 +52,6 @@ export function rethrowInvestigationClientError(error: unknown): never {
   }
   if (error instanceof InvestigationNotFoundError) {
     throw notFound(error.message);
-  }
-  if (error instanceof InvestigationMetadataMissingError) {
-    throw badRequest(error.message);
-  }
-  if (error instanceof InvestigationConflictError) {
-    throw conflict(error.message);
   }
   if (error instanceof InvestigationQuotaDeniedError) {
     throw tooManyRequests(error.message);

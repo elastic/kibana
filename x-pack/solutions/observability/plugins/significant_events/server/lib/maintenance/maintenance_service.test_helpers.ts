@@ -13,6 +13,7 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { DeleteAllInvestigationsResult } from '@kbn/nightshift-investigations-plugin/server';
 import type { GetScopedClients } from '../../routes/types';
 import type { SignificantEventsServer } from '../../types';
 import type { KnowledgeIndicatorType } from '../knowledge_indicators';
@@ -209,10 +210,7 @@ export function makeService(params?: {
   ownedRuleIdsByStream?: Record<string, string[]>;
   dataStreams?: Record<string, number>;
   /** `null` models the investigations plugin being unavailable. */
-  investigations?: {
-    deleted: number;
-    failures: Array<{ id: string; spaceId: string; error: string }>;
-  } | null;
+  investigations?: DeleteAllInvestigationsResult | null;
 }) {
   const soClient = makeSoClient();
   // `null` models the alerting v2 plugin being unavailable.
@@ -287,7 +285,16 @@ export function makeService(params?: {
   const investigations =
     params?.investigations === null
       ? undefined
-      : params?.investigations ?? { deleted: 0, failures: [] };
+      : params?.investigations ?? {
+          investigationData: {
+            investigations: 0,
+            subjects: 0,
+            subjectClaims: 0,
+            impact: 0,
+            hypotheses: 0,
+            complete: true,
+          },
+        };
   const deleteAllInvestigations = investigations ? jest.fn(async () => investigations) : undefined;
 
   const globalUiSettingsClient = makeUiSettingsClient(

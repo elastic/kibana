@@ -8,25 +8,25 @@
 import { deleteAllInvestigations } from './delete_all_investigations';
 
 describe('deleteAllInvestigations', () => {
-  const sweepRepository = {
-    deleteAllAcrossSpaces: jest.fn().mockResolvedValue({ deleted: 2, failures: [] }),
-  };
-
-  it('deletes the saved objects and the shared investigation data in every space', async () => {
-    const investigationData = { subjects: 3, subjectClaims: 3, impact: 1, hypotheses: 1 };
+  it('deletes the shared investigation data in every space', async () => {
+    const investigationData = {
+      investigations: 2,
+      subjects: 3,
+      subjectClaims: 3,
+      impact: 1,
+      hypotheses: 1,
+      complete: true,
+    };
     const agenticInvestigations = {
       deleteSubjectInvestigationDataAcrossSpaces: jest.fn().mockResolvedValue(investigationData),
     };
 
-    await expect(
-      deleteAllInvestigations({ sweepRepository, agenticInvestigations })
-    ).resolves.toEqual({ deleted: 2, failures: [], investigationData });
+    await expect(deleteAllInvestigations({ agenticInvestigations })).resolves.toEqual({
+      investigationData,
+    });
   });
 
-  it('only deletes the saved objects without agentic investigations', async () => {
-    await expect(deleteAllInvestigations({ sweepRepository })).resolves.toEqual({
-      deleted: 2,
-      failures: [],
-    });
+  it('deletes nothing without agentic investigations', async () => {
+    await expect(deleteAllInvestigations({})).resolves.toEqual({});
   });
 });

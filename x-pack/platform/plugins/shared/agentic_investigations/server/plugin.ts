@@ -47,6 +47,7 @@ import { deleteInvestigationDataAcrossSpaces } from './investigations/services/d
 import { InProgressResolver } from './investigations/services/in_progress';
 import { InvestigationsQueryService } from './investigations/services/investigations_query_service';
 import { createInvestigationsClient } from './investigations/services/investigations_client';
+import { createGetInvestigationTool } from './investigations/tools/get_investigation_tool';
 import { createConversationReadCheck } from './investigation_attachments';
 import { createUserResolver } from './services/resolve_user';
 import type { ResolveUser } from './services/resolve_user';
@@ -137,6 +138,14 @@ export class AgenticInvestigationsPlugin
       createSetHypothesesTool({
         getHypothesesService: () => this.requireHypothesesService(),
         resolveUser: (request) => this.requireUserResolver()(request),
+        privileges: investigationsPrivileges,
+        logger: this.logger,
+      })
+    );
+
+    agentBuilder.tools.register(
+      createGetInvestigationTool({
+        getQueryService: () => this.requireInvestigationsQueryService(),
         privileges: investigationsPrivileges,
         logger: this.logger,
       })

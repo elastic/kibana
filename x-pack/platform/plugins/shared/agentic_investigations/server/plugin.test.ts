@@ -29,6 +29,7 @@ import {
   INVESTIGATIONS_API_PRIVILEGE_MANAGE,
   INVESTIGATIONS_API_PRIVILEGE_READ,
 } from './investigations/constants';
+import { GET_INVESTIGATION_TOOL_ID } from '../common/investigations/constants';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
 import { registerInvestigationRoutes } from './investigations/routes/register_routes';
 import { AgenticInvestigationsPlugin } from './plugin';
@@ -224,10 +225,13 @@ describe('AgenticInvestigationsPlugin', () => {
       ]);
     });
 
-    it('registers the set_impact and set_hypotheses agent tools during setup', () => {
+    it('registers the set_impact, set_hypotheses, and get agent tools during setup', () => {
       const { agentBuilder } = setupPlugin();
 
-      expect(agentBuilder.tools.register).toHaveBeenCalledTimes(2);
+      expect(agentBuilder.tools.register).toHaveBeenCalledTimes(3);
+      expect(agentBuilder.tools.register).toHaveBeenCalledWith(
+        expect.objectContaining({ id: GET_INVESTIGATION_TOOL_ID })
+      );
       expect(agentBuilder.tools.register).toHaveBeenCalledWith(
         expect.objectContaining({ id: SET_IMPACT_TOOL_ID })
       );

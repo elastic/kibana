@@ -543,14 +543,24 @@ export const createSignificantEventsMaintenanceService = ({
       return 0;
     }
     try {
-      const result = await server.nightshiftInvestigations.deleteAllInvestigations();
-      failures.push(
-        ...result.failures.map(({ id, spaceId, error }) => ({
-          target: `investigation:${id}@${spaceId}`,
-          error,
-        }))
-      );
-      return result.deleted;
+      // Investigations are Agent Builder conversations; this removes their shared investigation
+      // data (subjects, impact, hypotheses) in every space, which is what lists and finds them.
+      const { investigationData } = await server.nightshiftInvestigations.deleteAllInvestigations();
+      if (!investigationData) {
+        failures.push({
+          target: 'investigations',
+          error: 'Agentic investigations plugin is not available',
+        });
+        return 0;
+      }
+      if (!investigationData.complete) {
+        failures.push({
+          target: 'investigations',
+          error:
+            'Investigation data was only partly deleted because more was being written; run the reset again',
+        });
+      }
+      return investigationData.investigations;
     } catch (error) {
       failures.push({ target: 'investigations', error: toMessage(error) });
       return 0;

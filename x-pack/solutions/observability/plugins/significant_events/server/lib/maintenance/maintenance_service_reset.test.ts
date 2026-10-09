@@ -61,7 +61,16 @@ describe('SignificantEventsMaintenanceService', () => {
           [KNOWLEDGE_INDICATORS_DATA_STREAM]: 4,
           [DISCOVERIES_DATA_STREAM]: 4,
         },
-        investigations: { deleted: 2, failures: [] },
+        investigations: {
+          investigationData: {
+            investigations: 2,
+            subjects: 3,
+            subjectClaims: 3,
+            impact: 2,
+            hypotheses: 2,
+            complete: true,
+          },
+        },
       });
 
       const summary = await service.reset({ request: REQUEST, updatedBy: 'marco' });
@@ -264,6 +273,45 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(summary.partialFailures).toContainEqual({
         target: 'investigations',
         error: 'Investigations plugin is not available',
+      });
+    });
+
+    it('records a partial failure when agentic investigations is unavailable', async () => {
+      const { api } = makeManagementApi();
+      const { service } = makeService({ management: api, investigations: {} });
+
+      const summary = await service.reset({ request: REQUEST });
+
+      expect(summary.deleted?.investigations).toBe(0);
+      expect(summary.partialFailures).toContainEqual({
+        target: 'investigations',
+        error: 'Agentic investigations plugin is not available',
+      });
+    });
+
+    it('records a partial failure when the investigation data was only partly deleted', async () => {
+      const { api } = makeManagementApi();
+      const { service } = makeService({
+        management: api,
+        investigations: {
+          investigationData: {
+            investigations: 100,
+            subjects: 100,
+            subjectClaims: 100,
+            impact: 0,
+            hypotheses: 0,
+            complete: false,
+          },
+        },
+      });
+
+      const summary = await service.reset({ request: REQUEST });
+
+      expect(summary.deleted?.investigations).toBe(100);
+      expect(summary.partialFailures).toContainEqual({
+        target: 'investigations',
+        error:
+          'Investigation data was only partly deleted because more was being written; run the reset again',
       });
     });
 

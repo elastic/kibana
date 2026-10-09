@@ -25,7 +25,7 @@ inputs:
 waitForCompletion: true
 ```
 
-**Always set `waitForCompletion: true`.** The call waits synchronously for up to ~120s (a fixed wait window in the `execute_workflow` tool — not configurable from here) and then returns the execution. The investigation is recorded as its own conversation whose id is the returned `executionId`; its findings are in the investigation agent's final reply (see **Presenting results**). Since investigations may take a few minutes, longer runs return a still-running execution, so treat **Checking investigation status** as the expected next step rather than a rare fallback. Present the results in the same turn once they're available.
+**Always set `waitForCompletion: true`.** The call waits synchronously for up to ~120s (a fixed wait window in the `execute_workflow` tool — not configurable from here) and then returns the execution. The investigation is recorded as its own conversation whose id is the returned `executionId`; its findings are read with `agentic_investigations.get` (see **Presenting results**). Since investigations may take a few minutes, longer runs return a still-running execution, so treat **Checking investigation status** as the expected next step rather than a rare fallback. Present the results in the same turn once they're available.
 
 - Before triggering, briefly tell the user you're starting the investigation and that it may take a few minutes — the agent gathers and correlates logs, traces, and metrics before reaching a conclusion.
 - Stay on the tool call until it returns; do not ask the user to come back later, and do not start polling in a loop — call `get_workflow_execution_status` once if needed.
@@ -123,9 +123,9 @@ Use this when `execute_workflow` returned before the investigation reached a ter
 
 Use `platform.core.get_workflow_execution_status` with the `executionId` from the returned execution.
 
-- Status `running` — investigation is still in progress; let the user know it's still running and share the `executionId` so they can ask for an update later.
-- Status `completed` — present the findings (see **Presenting results**).
-- Status `failed` — the output contains error details.
+- Status `running` — investigation is still in progress; let the user know it's still running and share the `executionId` so they can ask for an update later. `agentic_investigations.get` with the `executionId` as `id` already shows what it has recorded so far.
+- Status `completed` — read the findings with `agentic_investigations.get` (see **Presenting results**).
+- Status `failed` — the output contains error details; `agentic_investigations.get` still shows whatever was recorded before the failure.
 
 ### Recording the investigation on a Significant Event
 
@@ -149,4 +149,18 @@ Only call this tool when a Significant Event was the context for the investigati
 
 ### Presenting results
 
-When the investigation completes, the `investigate` step's output `message` is the investigation agent's final reply: the root cause and its mechanism, the confirmed and dismissed hypotheses, the impact, and any proposed actions. Present it in plain language. Highlight the conclusion and the confirmed hypothesis first, then the impact and the proposed actions, then surface the dismissed hypotheses (with their reasons) if they add useful context.
+Read the investigation with `agentic_investigations.get`, passing the `executionId` as `id`. It returns what the investigation agent recorded:
+
+| Field | Description |
+|---|---|
+| `title` | The investigation's headline, generated from its first message; `title_pending` is `true` until then |
+| `metadata.summary` | What happened |
+| `metadata.verdict` | The conclusion: the root cause and its mechanism |
+| `metadata.severity` | `low`, `medium`, `high`, or `critical` |
+| `in_progress` | Whether the investigation is still being worked on |
+| `subjects` | What was investigated (alerts, significant events, questions) |
+| `impact` | Who and what was affected, with evidence |
+| `hypotheses` | Every candidate cause investigated, each with a `confidence` score 0–1, a `status` (`confirmed`, `dismissed`, or `investigating`), a `reason`, and evidence |
+| `proposals` | Proposed actions for a human to decide, each with a `title`, a `comment`, and a `status` |
+
+Present the findings in plain language. Highlight the `verdict` and the `confirmed` hypothesis first, then the impact and the proposed actions, then surface the `dismissed` hypotheses (with their reasons) if they add useful context.
