@@ -1365,6 +1365,8 @@
       "@kbn/evals-suite-alerting-v2/*": ["./x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2/*"],
       "@kbn/evals-suite-alerts-rag": ["./x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag"],
       "@kbn/evals-suite-alerts-rag/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag/*"],
+      "@kbn/evals-suite-alertzero-endpoint-analysis": ["./x-pack/solutions/security/packages/kbn-evals-suite-alertzero-endpoint-analysis"],
+      "@kbn/evals-suite-alertzero-endpoint-analysis/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-alertzero-endpoint-analysis/*"],
       "@kbn/evals-suite-attack-discovery": ["./x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery"],
       "@kbn/evals-suite-attack-discovery/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery/*"],
       "@kbn/evals-suite-attack-discovery-agent-builder": ["./x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder"],

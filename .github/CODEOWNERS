@@ -1435,6 +1435,7 @@ x-pack/solutions/security/packages/kbn-discoveries @elastic/security-threat-hunt
 x-pack/solutions/security/packages/kbn-discoveries-schemas @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow @elastic/security-investigations
 x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag @elastic/security-generative-ai
+x-pack/solutions/security/packages/kbn-evals-suite-alertzero-endpoint-analysis @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp @elastic/security-generative-ai
@@ -3526,6 +3527,7 @@ x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/to
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_entity_analytics @elastic/security-entity-analytics
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_security_persona_matrix @elastic/security-generative-ai
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_attack_discovery_agent_builder @elastic/security-generative-ai
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_alertzero_endpoint_analysis @elastic/security-generative-ai
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_nightshift_investigations @elastic/nightshift
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/discover_telemetry @elastic/observability-ui
 # /security_solution/common/endpoint/ and /security_solution/server/endpoint/ children overrides

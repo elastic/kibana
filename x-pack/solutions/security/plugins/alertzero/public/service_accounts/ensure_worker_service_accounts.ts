@@ -7,13 +7,13 @@
 
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import { SECURITY_SERVICE_ACCOUNT_URL } from '@kbn/alertzero-common';
 import {
+  SECURITY_SERVICE_ACCOUNT_URL,
   SECURITY_ROLE_API_VERSION,
   WORKER_ROLE_DEFINITIONS,
   buildSecurityRoleUrl,
   type WorkerRoleDefinition,
-} from '../../common/worker_roles';
+} from '@kbn/alertzero-common';
 import * as i18n from './translations';
 
 export type CoreServiceAccounts = CoreStart['security']['serviceAccounts'];

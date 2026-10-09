@@ -1,0 +1,21 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/agent-builder-common",
+    "@kbn/alertzero-common",
+    "@kbn/core",
+    "@kbn/evals",
+    "@kbn/proposals-common",
+    "@kbn/security-evals-workflow-traces",
+    "@kbn/workflows",
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}

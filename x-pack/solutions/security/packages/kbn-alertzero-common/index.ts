@@ -212,3 +212,10 @@ export type {
   SystemSecurityWorkerCatalogEntry,
   WorkerScheduleUnit,
 } from './constants';
+export {
+  SECURITY_ROLE_API_VERSION,
+  buildSecurityRoleUrl,
+  WORKER_ROLE_DEFINITIONS,
+  type WorkerRolePayload,
+  type WorkerRoleDefinition,
+} from './worker_roles';
