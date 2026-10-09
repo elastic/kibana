@@ -5,25 +5,7 @@
  * 2.0.
  */
 
-import { EntityType } from '../../../../common/entity_analytics/types';
-import type { EntityRiskScoresState } from '../../api/hooks/use_entity_risk_scores';
-import {
-  shouldPromoteResolutionSection,
-  shouldShowOnlyResolutionRisk,
-} from './show_only_resolution_risk';
-
-const scores = (
-  overrides: Partial<EntityRiskScoresState<EntityType.user>['resolution']> = {}
-): EntityRiskScoresState<EntityType.user> => ({
-  base: { loading: false } as EntityRiskScoresState<EntityType.user>['base'],
-  resolution: {
-    state: { loading: false, data: undefined } as EntityRiskScoresState<EntityType.user>['resolution']['state'],
-    hasResolutionGroup: false,
-    resolutionTargetEntityId: undefined,
-    ...overrides,
-  },
-  refetch: () => {},
-});
+import { shouldShowOnlyResolutionRisk } from './show_only_resolution_risk';
 
 describe('shouldShowOnlyResolutionRisk', () => {
   it('stays off when the facelift flag is off', () => {
@@ -78,38 +60,6 @@ describe('shouldShowOnlyResolutionRisk', () => {
         hasResolutionScore: false,
         resolutionLoading: false,
       })
-    ).toBe(false);
-  });
-});
-
-describe('shouldPromoteResolutionSection', () => {
-  it('promotes when the flag is on and a resolution score is present', () => {
-    expect(
-      shouldPromoteResolutionSection(
-        true,
-        scores({
-          hasResolutionGroup: true,
-          state: {
-            loading: false,
-            data: [{}],
-          } as EntityRiskScoresState<EntityType.user>['resolution']['state'],
-        })
-      )
-    ).toBe(true);
-  });
-
-  it('does not promote when the flag is off', () => {
-    expect(
-      shouldPromoteResolutionSection(
-        false,
-        scores({
-          hasResolutionGroup: true,
-          state: {
-            loading: false,
-            data: [{}],
-          } as EntityRiskScoresState<EntityType.user>['resolution']['state'],
-        })
-      )
     ).toBe(false);
   });
 });
