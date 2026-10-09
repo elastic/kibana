@@ -90,9 +90,9 @@ describe('toolDefinitionToInference preserves $defs', () => {
     expectAllRefsResolve(defs.extract.schema);
   });
 
-  it('keeps definitions for a zod v3 schema', () => {
-    // exercises the zod-to-json-schema branch of resolveToolSchema; a
-    // sub-schema reused twice makes it emit a $ref
+  it('keeps path refs resolvable for a zod v3 schema', () => {
+    // default zodToJsonSchema options never emit `definitions`; a sub-schema
+    // reused twice becomes a `#/properties/...` ref that must still resolve
     const timeRange = z3.object({ from: z3.string(), to: z3.string() });
     const v3Tool = tool(async () => 'ok', {
       name: 'extract_v3',
@@ -105,6 +105,7 @@ describe('toolDefinitionToInference preserves $defs', () => {
 
     const defs = toolDefinitionToInference([v3Tool as never]);
     const schema = defs.extract_v3.schema as unknown as Record<string, unknown>;
+    expect(collectRefs(schema)).toEqual(['#/properties/start']);
     expectAllRefsResolve(schema);
   });
 

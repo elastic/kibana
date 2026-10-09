@@ -87,7 +87,6 @@ function resolveToolSchema(schema: unknown): ToolSchema {
       'type',
       'properties',
       'required',
-      'definitions',
     ]) as ToolSchema;
   }
   // Plain JSON Schema object
