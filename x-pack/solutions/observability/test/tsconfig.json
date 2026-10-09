@@ -38,6 +38,7 @@
     "@kbn/apm-plugin",
     "@kbn/apm-sources-access-plugin",
     "@kbn/server-route-repository",
+    "@kbn/std",
     "@kbn/synthtrace",
     "@kbn/test-suites-xpack-platform",
     "@kbn/tooling-log",

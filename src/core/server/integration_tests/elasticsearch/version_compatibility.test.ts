@@ -16,6 +16,7 @@ import { firstValueFrom, Subject } from 'rxjs';
 import type { CliArgs } from '@kbn/config';
 import { unsafeConsole } from '@kbn/security-hardening';
 import { getFips } from 'crypto';
+import { withTimeout } from '@kbn/std';
 
 describe('Version Compatibility', () => {
   let esServer: TestElasticsearchUtils | undefined;
@@ -87,21 +88,28 @@ describe('Version Compatibility', () => {
         found$.next();
       }
     });
-    await Promise.race([
-      firstValueFrom(found$),
-      // Use the 'nextMinor' token so the version is always computed from the actual running ES
-      // version at startup time. A pre-computed version (e.g. from esTestConfig.getVersion())
-      // would break when the ES snapshot is promoted ahead of the Kibana package version,
-      // because it would accidentally equal the real ES version and produce no mismatch.
-      startServers({ customKibanaVersion: 'nextMinor' }).then(() => {
-        throw new Error(
-          'Kibana completed the bootstrap without finding the incompatibility message'
-        );
-      }),
-      new Promise((resolve, reject) =>
-        setTimeout(() => reject(new Error('Test timedout')), 5 * 60 * 1000)
-      ),
-    ]).finally(() => found$.complete());
+    try {
+      const outcome = await withTimeout({
+        promise: Promise.race([
+          firstValueFrom(found$),
+          // Use the 'nextMinor' token so the version is always computed from the actual running ES
+          // version at startup time. A pre-computed version (e.g. from esTestConfig.getVersion())
+          // would break when the ES snapshot is promoted ahead of the Kibana package version,
+          // because it would accidentally equal the real ES version and produce no mismatch.
+          startServers({ customKibanaVersion: 'nextMinor' }).then(() => {
+            throw new Error(
+              'Kibana completed the bootstrap without finding the incompatibility message'
+            );
+          }),
+        ]),
+        timeoutMs: 5 * 60 * 1000,
+      });
+      if (outcome.timedout) {
+        throw new Error('Test timedout');
+      }
+    } finally {
+      found$.complete();
+    }
   });
 
   it('should ignore the version mismatch when option is set', async () => {

@@ -105,6 +105,7 @@
     "@kbn/test-eui-helpers",
     "@kbn/shared-ux-utility",
     "@kbn/esql-utils",
+    "@kbn/std",
     "@kbn/app-header",
     "@kbn/core-chrome-app-menu",
     "@kbn/core-chrome-app-menu-components",

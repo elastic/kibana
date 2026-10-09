@@ -14,6 +14,7 @@ import {
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import type { LensSerializedState } from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { withTimeout } from '@kbn/std';
 import { isESQLModeEnabled } from './initializers/utils';
 import type { LensEmbeddableStartServices } from './types';
 
@@ -38,21 +39,22 @@ export async function loadESQLAttributes(
     return;
   }
 
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-  const timeoutFallback = new Promise<LensSerializedState['attributes'] | undefined>((resolve) => {
-    timeoutId = setTimeout(
-      () =>
-        buildESQLAttributes(FALLBACK_ESQL_QUERY, services).then(resolve, () => resolve(undefined)),
-      LOAD_ESQL_ATTRIBUTES_TIMEOUT_MS
-    );
+  const main = buildMainESQLAttributes(services);
+  const outcome = await withTimeout({
+    promise: main,
+    timeoutMs: LOAD_ESQL_ATTRIBUTES_TIMEOUT_MS,
   });
-
-  try {
-    return await Promise.race([buildMainESQLAttributes(services), timeoutFallback]);
-  } finally {
-    clearTimeout(timeoutId);
+  if (!outcome.timedout) {
+    return outcome.value;
   }
+
+  // The main load keeps running after we give up on it. Swallow a late rejection so it
+  // cannot surface once the fallback is already in flight.
+  void main.catch(() => undefined);
+  return buildESQLAttributes(FALLBACK_ESQL_QUERY, services).then(
+    (attributes) => attributes,
+    () => undefined
+  );
 }
 
 async function buildMainESQLAttributes({
