@@ -68,6 +68,14 @@ describe('runPairedTest', () => {
       expect(outcome.statistic).toBe(0);
       expect(outcome.pValue).toBe(1);
     });
+
+    it('omits the method when the test could not run', () => {
+      expect(runPairedTest('wilcoxon_signed_rank', [], [])).toEqual({
+        id: 'wilcoxon_signed_rank',
+        statistic: null,
+        pValue: null,
+      });
+    });
   });
 
   describe('mcnemar', () => {

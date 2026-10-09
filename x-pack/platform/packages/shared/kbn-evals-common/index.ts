@@ -40,7 +40,13 @@ export type {
 export { getDatasetId } from './impl/dataset_ids';
 export { getEvaluatorDefinitionId } from './impl/evaluator_ids';
 export { ALL_SPACES_ID, DEFAULT_SPACE_ID, resolveDatasetHomeSpace } from './impl/spaces';
-export { pairScores, compareScores, resolveDirection, isImproved } from './impl/statistics';
+export {
+  pairScores,
+  compareScores,
+  resolveDirection,
+  isImproved,
+  PARAMETRIC_UPGRADE_MIN_PAIRS,
+} from './impl/statistics';
 export type { PairedScore } from './impl/statistics';
 export {
   DEFAULT_JUDGE_SCORE_DIRECTION,

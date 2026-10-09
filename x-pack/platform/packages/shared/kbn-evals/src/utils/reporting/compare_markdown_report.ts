@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isImproved } from '@kbn/evals-common';
+import { isImproved, PARAMETRIC_UPGRADE_MIN_PAIRS } from '@kbn/evals-common';
 import type { Direction, ComparisonResult } from '@kbn/evals-common';
 import { formatDiscordantPairs, getTestLabel } from './test_label';
 
@@ -125,7 +125,7 @@ export function formatMarkdownCompareReport({
 
   lines.push(`Significance threshold: p < ${significanceThreshold}`);
   lines.push(
-    'Test per row is chosen from the scores: McNemar for pass/fail, otherwise Wilcoxon signed-rank (paired t-test for continuous scores when n ≥ 30 and differences look normal).'
+    `Test per row is chosen from the scores: McNemar for pass/fail, otherwise Wilcoxon signed-rank (paired t-test for continuous scores when n ≥ ${PARAMETRIC_UPGRADE_MIN_PAIRS} and differences look normal).`
   );
   lines.push('');
 

@@ -6,6 +6,7 @@
  */
 
 import type { ComparisonResult } from '@kbn/evals-common';
+import { PARAMETRIC_UPGRADE_MIN_PAIRS } from '@kbn/evals-common';
 import { formatMarkdownCompareReport } from './compare_markdown_report';
 
 const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult => ({
@@ -62,7 +63,9 @@ describe('formatMarkdownCompareReport', () => {
     });
 
     expect(output).toContain('| Diff | Test | p-value |');
-    expect(output).toContain('Test per row is chosen from the scores');
+    expect(output).toContain(
+      `otherwise Wilcoxon signed-rank (paired t-test for continuous scores when n ≥ ${PARAMETRIC_UPGRADE_MIN_PAIRS}`
+    );
     const lines = output.split('\n');
     expect(lines.find((line) => line.includes('| Criteria |'))).toContain('| Wilcoxon |');
     expect(lines.find((line) => line.includes('| Pass |'))).toContain(

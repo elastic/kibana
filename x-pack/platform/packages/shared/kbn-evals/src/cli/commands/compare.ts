@@ -58,8 +58,8 @@ export const compareCmd: Command<void> = {
     ],
     help: `
       --baseline-branch  Branch to find the latest baseline experiment on
-    --suite            Suite ID filter for baseline lookup and score filtering
-    --format           Output format: "terminal" (default) or "markdown"
+      --suite            Suite ID filter for baseline lookup and score filtering
+      --format           Output format: "terminal" (default) or "markdown"
       --kibana-url       Kibana URL for generating compare page links in markdown
       --output           Append markdown output to a file instead of stdout
       --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
@@ -81,6 +81,7 @@ export const compareCmd: Command<void> = {
     if (format !== 'terminal' && format !== 'markdown') {
       throw createFlagError('--format must be "terminal" or "markdown".');
     }
+
     const evaluationsKbnUrl = process.env.EVAL_KBN_URL;
     if (!evaluationsKbnUrl) {
       log.warning(`EVAL_KBN_URL not set; defaulting to ${DEFAULT_EVAL_KBN_URL}.`);

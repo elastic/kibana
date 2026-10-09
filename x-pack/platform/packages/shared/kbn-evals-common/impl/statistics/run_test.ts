@@ -40,11 +40,12 @@ export function runPairedTest(
     case 'wilcoxon_signed_rank': {
       // Package defaults: two-sided, zero differences discarded (`wilcox`), method `auto`.
       // `auto` does not report which method it resolved to; a z-statistic is only set when
-      // the normal approximation was used.
+      // the normal approximation was used. Both remaining paths (the exact distribution and
+      // the exhaustive sign-flip permutation used for small samples with ties) are exact.
       const { statistic, pValue, zStatistic } = wilcoxonSignedRank(target, baseline);
       return {
         id: test,
-        method: zStatistic !== null ? 'asymptotic' : 'exact',
+        ...(pValue !== null && { method: zStatistic !== null ? 'asymptotic' : 'exact' }),
         statistic,
         pValue,
       };
