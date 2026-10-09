@@ -129,6 +129,22 @@ describe('flyoutV2 URL param', () => {
       expect(decodeFlyoutV2UrlParam(raw)).toBeNull();
     });
 
+    it('returns null when a required field is missing', () => {
+      const raw = encode([{ kind: 'document', documentId: 'abc' }]);
+      expect(decodeFlyoutV2UrlParam(raw)).toBeNull();
+    });
+
+    it('returns null when the chain has more than two descriptors', () => {
+      const descriptor = { kind: 'rule', ruleId: 'r1' };
+      const raw = encode([descriptor, descriptor, descriptor]);
+      expect(decodeFlyoutV2UrlParam(raw)).toBeNull();
+    });
+
+    it('returns null when a string field exceeds the length bound', () => {
+      const raw = encode([{ kind: 'rule', ruleId: 'a'.repeat(1025) }]);
+      expect(decodeFlyoutV2UrlParam(raw)).toBeNull();
+    });
+
     it('never throws on any input', () => {
       const inputs = [null, undefined, '', 'garbage', '!@#$', '()', '!()'];
       for (const input of inputs) {
