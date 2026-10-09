@@ -50,6 +50,40 @@ describe('formatAttachmentEvent', () => {
       )
     ).toContain('type="attachment_restored"');
   });
+
+  it.each([
+    [
+      'updated',
+      '<attachment attachment_id="att-1" attachment_type="text" version="3" previous_version="2" description="Web traffic" actor="agent" source="execution" />',
+    ],
+    [
+      'deleted',
+      '<attachment attachment_id="att-1" attachment_type="text" hard_delete="false" actor="agent" source="execution" />',
+    ],
+    [
+      'restored',
+      '<attachment attachment_id="att-1" attachment_type="text" version="3" description="Web traffic" actor="agent" source="execution" />',
+    ],
+  ] as const)('renders the attributes of the %s event type', (kind, attachment) => {
+    expect(
+      formatAttachmentEvent(
+        attachmentEventFixture({ id: 'e', kind, version: 3, description: 'Web traffic' })
+      )
+    ).toBe(
+      [
+        `<conversation_event type="attachment_${kind}" timestamp="2026-01-01T00:00:00Z">`,
+        `  ${attachment}`,
+        '</conversation_event>',
+      ].join('\n')
+    );
+  });
+
+  it('flags an event of a hidden attachment, which the user does not see', () => {
+    expect(formatAttachmentEvent(attachmentEventFixture({ id: 'e', hidden: true }))).toContain(
+      'source="execution" hidden="true" />'
+    );
+    expect(formatAttachmentEvent(attachmentEventFixture({ id: 'e' }))).not.toContain('hidden=');
+  });
 });
 
 describe('createAttachmentNoticeRenderer', () => {

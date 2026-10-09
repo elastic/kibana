@@ -6,9 +6,29 @@
  */
 
 import type { AttachmentTimelineEvent } from '@kbn/agent-builder-common';
-import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils';
+import { TimelineEventType } from '@kbn/agent-builder-common';
+import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
 import { formatDate } from '../prompts/utils/helpers';
 import { attachmentTypeInstructions } from '../prompts/utils/attachments';
+
+type XmlAttributes = NonNullable<XmlNode['attributes']>;
+
+/** The attributes only some event types carry, in rendering order. */
+const typeAttributes = (event: AttachmentTimelineEvent): XmlAttributes => {
+  switch (event.type) {
+    case TimelineEventType.attachmentAdded:
+    case TimelineEventType.attachmentRestored:
+      return { version: event.data.current_version, description: event.data.description };
+    case TimelineEventType.attachmentUpdated:
+      return {
+        version: event.data.current_version,
+        previous_version: event.data.previous_version,
+        description: event.data.description,
+      };
+    case TimelineEventType.attachmentDeleted:
+      return { hard_delete: event.data.hard_delete };
+  }
+};
 
 /**
  * The agent-facing block of one attachment event. Reads only the event, so the block never changes
@@ -25,12 +45,10 @@ export const formatAttachmentEvent = (event: AttachmentTimelineEvent): string =>
         attributes: {
           attachment_id: data.attachment_id,
           attachment_type: data.attachment_type,
-          version: 'current_version' in data ? data.current_version : undefined,
-          previous_version: 'previous_version' in data ? data.previous_version : undefined,
-          description: 'description' in data ? data.description : undefined,
-          hard_delete: 'hard_delete' in data ? data.hard_delete : undefined,
+          ...typeAttributes(event),
           actor: event.actor.type,
           source: data.source,
+          hidden: data.hidden ? true : undefined,
         },
       },
     ],
