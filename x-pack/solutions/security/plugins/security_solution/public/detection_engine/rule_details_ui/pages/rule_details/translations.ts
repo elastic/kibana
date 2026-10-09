@@ -181,3 +181,15 @@ export const UNABLE_TO_LOAD_SNOOZE_SETTINGS = i18n.translate(
     defaultMessage: 'Unable to load rule snooze settings',
   }
 );
+
+export const ELASTIC_VERSION_BADGE = (version: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.ruleDetails.elasticVersionBadgeLabel', {
+    defaultMessage: 'Elastic version: {version}',
+    values: { version },
+  });
+
+export const REVISION_BADGE = (revision: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.ruleDetails.revisionBadgeLabel', {
+    defaultMessage: 'Revision: {revision}',
+    values: { revision },
+  });

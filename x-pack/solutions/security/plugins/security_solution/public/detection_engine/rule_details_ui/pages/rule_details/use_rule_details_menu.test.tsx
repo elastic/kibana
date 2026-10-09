@@ -45,10 +45,17 @@ const confirmDeletion = jest.fn(async () => false);
 const refreshRule = jest.fn();
 const executeBulkAction = jest.fn();
 
-const RuleMenu = ({ rule = mockRule('rule-id') }: { rule?: ReturnType<typeof mockRule> }) => {
+const RuleMenu = ({
+  rule = mockRule('rule-id'),
+  ruleLoading = false,
+}: {
+  rule?: ReturnType<typeof mockRule>;
+  ruleLoading?: boolean;
+}) => {
   const menu = useRuleDetailsMenu({
     rule,
     ruleId: 'rule-id',
+    ruleLoading,
     isExistingRule: true,
     hasActionsPrivileges: true,
     refreshRule,
@@ -67,12 +74,12 @@ const RuleMenu = ({ rule = mockRule('rule-id') }: { rule?: ReturnType<typeof moc
   return <SecurityAppHeader title="Rule" menu={menu} />;
 };
 
-const renderHeader = (rule?: ReturnType<typeof mockRule>) =>
+const renderHeader = (rule?: ReturnType<typeof mockRule>, ruleLoading?: boolean) =>
   render(
     <TestProviders>
       <MemoryRouter>
         <MockAppHeaderProvider>
-          <RuleMenu rule={rule} />
+          <RuleMenu rule={rule} ruleLoading={ruleLoading} />
         </MockAppHeaderProvider>
       </MemoryRouter>
     </TestProviders>
@@ -149,5 +156,12 @@ describe('rule details app menu', () => {
 
     expect(confirmDeletion).toHaveBeenCalled();
     expect(executeBulkAction).not.toHaveBeenCalled();
+  });
+
+  it('shows a loading "Refresh status" action while the rule refreshes', async () => {
+    renderHeader(undefined, true);
+    await openAppMenuOverflow();
+
+    expect(screen.getByTestId('ruleLastExecutionStatusRefreshButton')).toBeDisabled();
   });
 });

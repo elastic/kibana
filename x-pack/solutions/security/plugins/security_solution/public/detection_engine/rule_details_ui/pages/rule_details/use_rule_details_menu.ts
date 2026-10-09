@@ -50,6 +50,7 @@ import { useAddRuleToChatMenuItem } from './use_add_rule_to_chat_menu_item';
 interface UseRuleDetailsMenuProps {
   rule: Rule | null;
   ruleId: string;
+  ruleLoading: boolean;
   isExistingRule: boolean;
   hasActionsPrivileges: boolean;
   refreshRule: () => void;
@@ -62,6 +63,7 @@ interface UseRuleDetailsMenuProps {
 export const useRuleDetailsMenu = ({
   rule,
   ruleId,
+  ruleLoading,
   isExistingRule,
   hasActionsPrivileges,
   refreshRule,
@@ -130,7 +132,8 @@ export const useRuleDetailsMenu = ({
           id: 'refreshRuleStatus',
           label: i18n.REFRESH_STATUS,
           iconType: 'refresh',
-          disableButton: !isExistingRule,
+          isLoading: ruleLoading,
+          disableButton: !isExistingRule || ruleLoading,
           testId: 'ruleLastExecutionStatusRefreshButton',
           run: refreshRule,
         },
@@ -263,6 +266,7 @@ export const useRuleDetailsMenu = ({
       ruleId,
       hasMlPermissions,
       hasActionsPrivileges,
+      ruleLoading,
       refreshRule,
       snoozeMenuItem,
       addRuleToChatMenuItem,

@@ -12,8 +12,11 @@ import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/r
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
+import { ENABLE_RULE_CHANGES_HISTORY_SETTING } from '../../../../../common/constants';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useUiSetting$ } from '../../../../common/lib/kibana';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import {
@@ -22,6 +25,7 @@ import {
 } from '../../../../common/utils/privileges';
 import { useRuleCustomizationsContext } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import * as ruleDetailsI18n from '../../../rule_management/components/rule_details/translations';
+import * as ruleInfoI18n from '../../../../detections/components/rules/rule_info/translations';
 import type { Rule } from '../../../rule_management/logic';
 import { useExecuteBulkAction } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 import * as i18n from './translations';
@@ -33,9 +37,13 @@ interface UseRuleDetailsBadgesProps {
   hasActionsPrivileges: boolean;
   onRuleEnabledChange: (enabled: boolean) => void;
   startMlJobsIfNeeded: () => Promise<void>;
+  snoozeBadge?: AppHeaderBadge;
 }
 
-/** Builds the rule details header badges: enabled state (with enable/disable menu), modified, and deleted. */
+/**
+ * Builds the rule details header badges: enabled state (with enable/disable menu), deleted, modified,
+ * snoozed, and, when rule changes history is enabled, the Elastic version and revision.
+ */
 export const useRuleDetailsBadges = ({
   rule,
   ruleLoading,
@@ -43,6 +51,7 @@ export const useRuleDetailsBadges = ({
   hasActionsPrivileges,
   onRuleEnabledChange,
   startMlJobsIfNeeded,
+  snoozeBadge,
 }: UseRuleDetailsBadgesProps): AppHeaderBadge[] => {
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction({ suppressSuccessToast: true });
@@ -54,6 +63,12 @@ export const useRuleDetailsBadges = ({
   const mlCapabilities = useMlCapabilities();
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
   const [isEnabledChangeLoading, setIsEnabledChangeLoading] = useState(false);
+  const ruleChangesHistoryFFEnabled = useIsExperimentalFeatureEnabled('ruleChangesHistoryEnabled');
+  const [ruleChangesHistoryAdvancedSetting] = useUiSetting$<boolean>(
+    ENABLE_RULE_CHANGES_HISTORY_SETTING
+  );
+  const isRuleChangesHistoryEnabled =
+    ruleChangesHistoryFFEnabled && ruleChangesHistoryAdvancedSetting;
 
   const isEnabled = isExistingRule && (rule?.enabled ?? false);
   const enabledChangeDisabled =
@@ -87,10 +102,34 @@ export const useRuleDetailsBadges = ({
   );
 
   return useMemo<AppHeaderBadge[]>(() => {
-    if (ruleLoading) return [];
+    // Keep the badges of an already loaded rule while it refreshes to avoid flicker.
+    if (ruleLoading && rule == null) return [];
+
+    const versionBadges: AppHeaderBadge[] =
+      rule && isRuleChangesHistoryEnabled
+        ? [
+            ...(rule.rule_source.type === 'external'
+              ? [
+                  {
+                    label: i18n.ELASTIC_VERSION_BADGE(rule.version),
+                    tooltip: ruleInfoI18n.RULE_VERSION_TOOLTIP_CONTENT,
+                    'data-test-subj': 'ruleDetailsElasticVersionBadge',
+                  },
+                ]
+              : []),
+            {
+              label: i18n.REVISION_BADGE(rule.revision),
+              tooltip: ruleInfoI18n.RULE_REVISION_TOOLTIP_CONTENT,
+              'data-test-subj': 'ruleDetailsRevisionBadge',
+            },
+          ]
+        : [];
 
     if (!isExistingRule) {
-      return [{ label: i18n.DELETED_RULE, 'data-test-subj': 'ruleDetailsDeletedRuleBadge' }];
+      return [
+        { label: i18n.DELETED_RULE, 'data-test-subj': 'ruleDetailsDeletedRuleBadge' },
+        ...versionBadges,
+      ];
     }
 
     const badges: AppHeaderBadge[] = [
@@ -133,7 +172,9 @@ export const useRuleDetailsBadges = ({
       );
     }
 
-    return badges;
+    if (snoozeBadge) badges.push(snoozeBadge);
+
+    return [...badges, ...versionBadges];
   }, [
     ruleLoading,
     isExistingRule,
@@ -146,5 +187,7 @@ export const useRuleDetailsBadges = ({
     canEnableDisableRules,
     doesBaseVersionExist,
     openCustomizationsPreviewFlyout,
+    isRuleChangesHistoryEnabled,
+    snoozeBadge,
   ]);
 };

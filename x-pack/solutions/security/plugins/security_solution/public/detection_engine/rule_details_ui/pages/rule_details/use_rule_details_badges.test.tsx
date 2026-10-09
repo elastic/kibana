@@ -19,6 +19,8 @@ import { useRuleCustomizationsContext } from '../../../rule_management/component
 import { useExecuteBulkAction } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 import { mockRule } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useUiSetting$ } from '../../../../common/lib/kibana';
 import { useRuleDetailsBadges } from './use_rule_details_badges';
 
 jest.mock('../../../../common/components/user_privileges');
@@ -26,6 +28,11 @@ jest.mock(
   '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context'
 );
 jest.mock('../../../rule_management/logic/bulk_actions/use_execute_bulk_action');
+jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../common/lib/kibana', () => ({
+  ...jest.requireActual('../../../../common/lib/kibana'),
+  useUiSetting$: jest.fn(),
+}));
 jest.mock('../../../../common/components/app_header/use_ml_job_settings_menu_item', () => ({
   useMlJobSettingsMenuItem: () => ({ item: undefined, flyout: null }),
 }));
@@ -38,14 +45,15 @@ const startMlJobsIfNeeded = jest.fn(async () => {});
 const executeBulkAction = jest.fn();
 
 interface RuleBadgesProps {
-  rule: ReturnType<typeof mockRule>;
+  rule: ReturnType<typeof mockRule> | null;
   isExistingRule?: boolean;
+  ruleLoading?: boolean;
 }
 
-const RuleBadges = ({ rule, isExistingRule = true }: RuleBadgesProps) => {
+const RuleBadges = ({ rule, isExistingRule = true, ruleLoading = false }: RuleBadgesProps) => {
   const badges = useRuleDetailsBadges({
     rule,
-    ruleLoading: false,
+    ruleLoading,
     isExistingRule,
     hasActionsPrivileges: true,
     onRuleEnabledChange,
@@ -74,6 +82,11 @@ const mockEnableDisablePrivilege = (canEnableDisable: boolean) =>
     },
   });
 
+const mockRuleChangesHistory = (enabled: boolean) => {
+  (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(enabled);
+  (useUiSetting$ as jest.Mock).mockReturnValue([enabled]);
+};
+
 describe('useRuleDetailsBadges', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -83,6 +96,7 @@ describe('useRuleDetailsBadges', () => {
       state: { doesBaseVersionExist: true },
     });
     (useExecuteBulkAction as jest.Mock).mockReturnValue({ executeBulkAction });
+    mockRuleChangesHistory(true);
   });
 
   it('disables an enabled rule from the "Enabled" badge menu', async () => {
@@ -136,5 +150,62 @@ describe('useRuleDetailsBadges', () => {
 
     expect(screen.getByTestId('ruleDetailsDeletedRuleBadge')).toBeInTheDocument();
     expect(screen.queryByText('Enabled')).not.toBeInTheDocument();
+  });
+
+  it('shows the Elastic version and revision of a prebuilt rule', () => {
+    renderHeader({
+      rule: {
+        ...mockRule('rule-id'),
+        rule_source: {
+          type: 'external',
+          is_customized: false,
+          has_base_version: true,
+          customized_fields: [],
+        },
+        version: 12,
+        revision: 3,
+      },
+    });
+
+    expect(screen.getByText('Elastic version: 12')).toBeInTheDocument();
+    expect(screen.getByText('Revision: 3')).toBeInTheDocument();
+  });
+
+  it('shows only the revision of a custom rule', () => {
+    renderHeader({ rule: { ...mockRule('rule-id'), revision: 3 } });
+
+    expect(screen.queryByText(/Elastic version/)).not.toBeInTheDocument();
+    expect(screen.getByText('Revision: 3')).toBeInTheDocument();
+  });
+
+  it('hides the version and revision when rule changes history is disabled', () => {
+    mockRuleChangesHistory(false);
+    renderHeader({
+      rule: {
+        ...mockRule('rule-id'),
+        rule_source: {
+          type: 'external',
+          is_customized: false,
+          has_base_version: true,
+          customized_fields: [],
+        },
+        revision: 3,
+      },
+    });
+
+    expect(screen.queryByText(/Elastic version/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Revision/)).not.toBeInTheDocument();
+  });
+
+  it('keeps the badges while a loaded rule refreshes', () => {
+    renderHeader({ rule: mockRule('rule-id'), ruleLoading: true });
+
+    expect(screen.getByText('Enabled')).toBeInTheDocument();
+  });
+
+  it('shows no badges while the rule loads for the first time', () => {
+    renderHeader({ rule: null, ruleLoading: true });
+
+    expect(screen.queryByTestId('ruleDetailsEnabledBadge')).not.toBeInTheDocument();
   });
 });

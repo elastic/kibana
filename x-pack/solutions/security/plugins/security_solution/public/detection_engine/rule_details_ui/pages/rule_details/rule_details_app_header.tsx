@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { AppHeaderTab } from '@kbn/app-header';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { SecurityPageName } from '../../../../app/types';
@@ -58,22 +58,20 @@ export const RuleDetailsAppHeader = React.memo<RuleDetailsAppHeaderProps>(
     const { docLinks } = useKibana().services;
     const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
     const snooze = useRuleSnooze({ ruleId, isExistingRule });
-    const ruleBadges = useRuleDetailsBadges({
+    const badges = useRuleDetailsBadges({
       rule,
       ruleLoading,
       isExistingRule,
       hasActionsPrivileges,
       onRuleEnabledChange,
       startMlJobsIfNeeded,
+      snoozeBadge: snooze.badge,
     });
-    const badges = useMemo(
-      () => (snooze.badge ? [...ruleBadges, snooze.badge] : ruleBadges),
-      [ruleBadges, snooze.badge]
-    );
     const metadata = useRuleDetailsMetadata({ rule, createdBy, updatedBy });
     const menu = useRuleDetailsMenu({
       rule,
       ruleId,
+      ruleLoading,
       isExistingRule,
       hasActionsPrivileges,
       refreshRule,
