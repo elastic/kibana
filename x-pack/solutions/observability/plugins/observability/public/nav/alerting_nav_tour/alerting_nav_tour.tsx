@@ -9,20 +9,22 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { CoreStart } from '@kbn/core/public';
-import {
-  ALERTING_NAV_START_TOUR_EVENT,
-  ALERTING_NAV_TOUR_STORAGE_KEY,
-  ALERTING_PANEL_FOOTER_SELECTOR,
-  DEFAULT_ALERTING_NAV_TOUR_STATE,
-  type AlertingNavTourPersistedState,
-} from './constants';
 import { AlertingNavGuidedTour } from './guided_tour';
 import { getAlertingNavTourSteps } from './tour_steps';
 import { UnifiedAlertingPromoCard } from './unified_alerting_promo_card';
 
-interface AlertingNavTourProps {
-  coreStart: CoreStart;
+const ALERTING_NAV_TOUR_STORAGE_KEY = 'observability.alertingNavTour.v3';
+const ALERTING_PANEL_FOOTER_SELECTOR =
+  '[data-test-subj~="kbnChromeNav-sidePanel_alerting"] [data-test-subj="kbnChromeNav-panelFooter"]';
+
+/** Window event to start this tour from other surfaces (e.g. onboarding). */
+export const ALERTING_NAV_START_TOUR_EVENT = 'kbn:alertingOnboarding:startTour';
+
+interface AlertingNavTourPersistedState {
+  isDismissed: boolean;
 }
+
+const DEFAULT_STATE: AlertingNavTourPersistedState = { isDismissed: false };
 
 const useAlertingPanelFooter = (): Element | null => {
   const [footer, setFooter] = useState<Element | null>(() =>
@@ -40,19 +42,14 @@ const useAlertingPanelFooter = (): Element | null => {
   return footer;
 };
 
-/**
- * Renders the Unified Alerting promo card in the Alerting side-nav panel footer
- * and drives the guided tour across Alerts, Rules, Action policies, Execution
- * history, and Maintenance windows.
- */
-export const AlertingNavTour: React.FC<AlertingNavTourProps> = ({ coreStart }) => {
+/** Promo card in the Alerting side-nav footer + guided tour across Alerting pages. */
+export const AlertingNavTour: React.FC<{ coreStart: CoreStart }> = ({ coreStart }) => {
   const isTourEnabled = coreStart.notifications.tours.isEnabled();
   const footerEl = useAlertingPanelFooter();
-  const [persisted = DEFAULT_ALERTING_NAV_TOUR_STATE, setPersisted] =
-    useLocalStorage<AlertingNavTourPersistedState>(
-      ALERTING_NAV_TOUR_STORAGE_KEY,
-      DEFAULT_ALERTING_NAV_TOUR_STATE
-    );
+  const [persisted = DEFAULT_STATE, setPersisted] = useLocalStorage<AlertingNavTourPersistedState>(
+    ALERTING_NAV_TOUR_STORAGE_KEY,
+    DEFAULT_STATE
+  );
   const [isTourActive, setIsTourActive] = useState(false);
 
   const dismiss = useCallback(() => {
@@ -60,31 +57,21 @@ export const AlertingNavTour: React.FC<AlertingNavTourProps> = ({ coreStart }) =
     setIsTourActive(false);
   }, [setPersisted]);
 
-  const finishTour = useCallback(() => {
-    setIsTourActive(false);
-  }, []);
-
   const startTour = useCallback(() => {
-    if (!isTourEnabled) {
-      return;
+    if (isTourEnabled) {
+      setIsTourActive(true);
     }
-    setIsTourActive(true);
   }, [isTourEnabled]);
 
   useEffect(() => {
-    const onStartTourEvent = () => startTour();
-    window.addEventListener(ALERTING_NAV_START_TOUR_EVENT, onStartTourEvent);
-    return () => {
-      window.removeEventListener(ALERTING_NAV_START_TOUR_EVENT, onStartTourEvent);
-    };
+    const onStart = () => startTour();
+    window.addEventListener(ALERTING_NAV_START_TOUR_EVENT, onStart);
+    return () => window.removeEventListener(ALERTING_NAV_START_TOUR_EVENT, onStart);
   }, [startTour]);
-
-  const tourSteps = getAlertingNavTourSteps();
-  const showPromoCard = !persisted.isDismissed;
 
   return (
     <>
-      {showPromoCard && footerEl
+      {!persisted.isDismissed && footerEl
         ? createPortal(
             <UnifiedAlertingPromoCard onTakeTour={startTour} onDismiss={dismiss} />,
             footerEl
@@ -92,9 +79,9 @@ export const AlertingNavTour: React.FC<AlertingNavTourProps> = ({ coreStart }) =
         : null}
       {isTourEnabled ? (
         <AlertingNavGuidedTour
-          steps={tourSteps}
+          steps={getAlertingNavTourSteps()}
           isActive={isTourActive}
-          onFinish={finishTour}
+          onFinish={() => setIsTourActive(false)}
           application={coreStart.application}
         />
       ) : null}
