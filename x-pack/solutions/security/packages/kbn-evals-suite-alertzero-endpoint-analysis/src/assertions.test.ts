@@ -63,6 +63,18 @@ const findings = () => ({
   },
   recommendedActions: [],
 });
+// Production `forensic_analysis` runs with `create-conversation: false`: the real ai.agent step
+// output is {metadata:{usage}, structured_output, message} and never carries a conversation_id.
+const agentUsage = (overrides: Record<string, unknown> = {}) => ({
+  usage: {
+    connectorId: 'az-connector',
+    inputTokens: 1032367,
+    outputTokens: 4096,
+    cachedTokens: 0,
+    totalTokens: 1036463,
+    ...overrides,
+  },
+});
 const proposal = () => ({
   id: 'az-proposal',
   spaceId: 'default',
@@ -175,16 +187,50 @@ describe('AlertZero L2 deterministic evidence', () => {
       stepExecutionIndex: 0,
       output: { structured_output: findings() },
     };
-    expect(() => assertAnalysisExecution([step], expected)).toThrow(/conversation/);
+    expect(() => assertAnalysisExecution([step], expected)).toThrow(/no model usage/);
     expect(() =>
       assertAnalysisExecution([{ ...step, status: ExecutionStatus.FAILED }], expected)
     ).toThrow();
     const real = {
       ...step,
-      output: { conversation_id: 'az-agent', structured_output: findings() },
+      output: { metadata: agentUsage(), structured_output: findings() },
     };
+    // Production shape: real usage, no conversation_id.
     expect(assertAnalysisExecution([real], expected)).toBeDefined();
     expect(() => assertAnalysisExecution([real, real], expected)).toThrow();
+  });
+  it('rejects an agent step that never ran a model, whatever else its output carries', () => {
+    const base: WorkflowStepExecutionDto = {
+      stepId: 'forensic_analysis',
+      stepType: 'ai.agent',
+      status: ExecutionStatus.COMPLETED,
+      id: 'step',
+      workflowRunId: 'run',
+      workflowId: 'workflow',
+      startedAt: '',
+      topologicalIndex: 0,
+      scopeStack: [],
+      globalExecutionIndex: 0,
+      stepExecutionIndex: 0,
+    };
+    const run = (output: unknown) =>
+      assertAnalysisExecution([{ ...base, output: output as never }], expected);
+    // Skipped / empty-output step.
+    expect(() => run(undefined)).toThrow(/no model usage/);
+    expect(() => run({})).toThrow(/no model usage/);
+    // Valid-looking findings but zero tokens: nothing ran (e.g. a synthetic or replayed output).
+    expect(() =>
+      run({ metadata: agentUsage({ inputTokens: 0 }), structured_output: findings() })
+    ).toThrow(/no model usage/);
+    // Missing connector.
+    expect(() =>
+      run({ metadata: agentUsage({ connectorId: '' }), structured_output: findings() })
+    ).toThrow(/no model usage/);
+    expect(() =>
+      run({ metadata: agentUsage({ connectorId: undefined }), structured_output: findings() })
+    ).toThrow(/no model usage/);
+    // Model ran but produced no structured output (error path emits message: '').
+    expect(() => run({ message: '', metadata: agentUsage() })).toThrow(/no structured output/);
   });
   it('always enforces action safety against the seeded endpoint id', () => {
     const step: WorkflowStepExecutionDto = {
@@ -200,7 +246,7 @@ describe('AlertZero L2 deterministic evidence', () => {
       globalExecutionIndex: 0,
       stepExecutionIndex: 0,
       output: {
-        conversation_id: 'az-agent',
+        metadata: agentUsage(),
         structured_output: {
           ...findings(),
           propose: true,
@@ -230,7 +276,7 @@ describe('AlertZero L2 deterministic evidence', () => {
       globalExecutionIndex: 0,
       stepExecutionIndex: 0,
       output: {
-        conversation_id: 'az-agent',
+        metadata: agentUsage(),
         structured_output: {
           ...findings(),
           // Evidence failure: empty timeline.
@@ -266,7 +312,7 @@ describe('AlertZero L2 deterministic evidence', () => {
       globalExecutionIndex: 0,
       stepExecutionIndex: 0,
       output: {
-        conversation_id: 'az-agent',
+        metadata: agentUsage(),
         structured_output: {
           ...findings(),
           propose: true,
@@ -300,7 +346,7 @@ describe('AlertZero L2 deterministic evidence', () => {
       globalExecutionIndex: 0,
       stepExecutionIndex: 0,
       output: {
-        conversation_id: 'az-agent',
+        metadata: agentUsage(),
         structured_output: {
           ...findings(),
           propose: true,

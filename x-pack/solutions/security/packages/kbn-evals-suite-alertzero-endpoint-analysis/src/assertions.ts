@@ -7,7 +7,6 @@
 
 import { proposalSchema, type Proposal } from '@kbn/proposals-common';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { extractAgentConversationIds } from '@kbn/security-evals-workflow-traces';
 import { assertActionSafety } from './action_safety';
 import { analysisOutputValidator } from './contracts';
 
@@ -49,6 +48,24 @@ export const assertStructuredEvidence = (value: unknown, expected: AlertZeroExpe
   }
   return output;
 };
+interface AgentStepOutput {
+  structured_output?: unknown;
+  metadata?: { usage?: { connectorId?: unknown; inputTokens?: unknown } };
+}
+/**
+ * Proves the `ai.agent` step really invoked a model. Production runs `forensic_analysis` with
+ * `create-conversation: false`, so the step emits no `conversation_id`. It always emits
+ * `metadata.usage` accumulated from the model rounds, which stays at zero/absent when the
+ * agent was skipped, short-circuited or faked.
+ */
+const assertAgentActuallyRan = (output: AgentStepOutput | undefined) => {
+  const usage = output?.metadata?.usage;
+  const inputTokens = usage?.inputTokens;
+  if (typeof inputTokens !== 'number' || !(inputTokens > 0) || !nonEmpty(usage?.connectorId)) {
+    throw new Error('Analysis agent shows no model usage (no input tokens or connector)');
+  }
+  if (output?.structured_output == null) throw new Error('Analysis agent has no structured output');
+};
 export const assertAnalysisExecution = (
   steps: WorkflowStepExecutionDto[],
   expected: AlertZeroExpectedEvidence
@@ -58,9 +75,8 @@ export const assertAnalysisExecution = (
   );
   if (agents.length !== 1 || agents[0].status !== 'completed')
     throw new Error('Analysis agent did not complete exactly once');
-  const conversations = extractAgentConversationIds(agents);
-  if (conversations.length !== 1) throw new Error('Analysis has no real agent conversation');
-  const output = agents[0].output as { structured_output?: unknown } | undefined;
+  const output = agents[0].output as AgentStepOutput | undefined;
+  assertAgentActuallyRan(output);
   // Collect both so a safety violation never hides behind an evidence failure (and vice versa).
   const errors: string[] = [];
   try {
