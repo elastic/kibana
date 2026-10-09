@@ -137,7 +137,7 @@ These actions are written by `DispatchStep` to record what the dispatcher decide
 The dispatcher records both per-episode and per-group outcomes:
 
 - `fire` means an individual episode reached the dispatch stage
-- `notified` means a notification group was actually sent and is the durable record later throttling queries look at; because it is written per alert of the group as soon as the workflows are scheduled, it also tells a later tick which alerts a group already delivered when the earlier tick aborted before its series were recorded
+- `notified` means a notification group was actually sent and is the durable record later throttling queries look at
 
 That distinction is why `.alert-actions` stores both episode-scoped and notification-group-scoped fields.
 

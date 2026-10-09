@@ -28,12 +28,12 @@ export class DispatchPlan {
   public static of({
     toDispatch,
     throttled,
-    alreadyNotified = [],
+    alreadyNotified,
     dispatchable,
   }: {
     toDispatch: readonly ActionGroup[];
     throttled: readonly ActionGroup[];
-    alreadyNotified?: readonly ActionGroup[];
+    alreadyNotified: readonly ActionGroup[];
     /** Dispatchable alerts the plan was built from; those in no group become `unmatched`. */
     dispatchable: readonly Alert[];
   }): DispatchPlan {
@@ -47,14 +47,6 @@ export class DispatchPlan {
 
   public static empty(): DispatchPlan {
     return DispatchPlan.EMPTY;
-  }
-
-  public isEmpty(): boolean {
-    return (
-      this.toDispatch.length === 0 &&
-      this.throttled.length === 0 &&
-      this.alreadyNotified.length === 0
-    );
   }
 }
 

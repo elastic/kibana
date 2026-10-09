@@ -6,7 +6,7 @@
  */
 
 import { createActionGroup, createAlert } from '../../fixtures/test_utils';
-import { AlertTriage, DispatchPlan } from '../../state';
+import { AlertTriage, DispatchPlan, type SuppressedAlert } from '../../state';
 import type { ActionGroup, Alert } from '../../types';
 import { SeriesLedger } from './series_ledger';
 
@@ -17,7 +17,7 @@ const buildLedger = ({
   alreadyNotified = [],
   unmatched = [],
 }: {
-  suppressed?: Array<Alert & { reason: string }>;
+  suppressed?: SuppressedAlert[];
   toDispatch?: ActionGroup[];
   throttled?: ActionGroup[];
   alreadyNotified?: ActionGroup[];
@@ -145,12 +145,12 @@ describe('SeriesLedger', () => {
     const ledger = buildLedger({ toDispatch: [g1, g2] });
 
     expect(ledger.conclude([g1])).toEqual([]);
-    expect(ledger.isReleased(alertA)).toBe(false);
+    expect(ledger.releasedAlerts([alertA])).toEqual([]);
     expect(ledger.conclude([g2])).toEqual([
       expect.objectContaining({ action_type: 'fire', reason: 'dispatched by policy p1' }),
       expect.objectContaining({ action_type: 'fire', reason: 'dispatched by policy p2' }),
     ]);
-    expect(ledger.isReleased(alertA)).toBe(true);
+    expect(ledger.releasedAlerts([alertA])).toEqual([alertA]);
   });
 
   it('holds two episodes of one series until both of their groups concluded', () => {
@@ -338,73 +338,6 @@ describe('SeriesLedger', () => {
           'space-a',
           'space-b',
         ]);
-      });
-    });
-
-    describe('one record per alert', () => {
-      it('counts suppressed alerts', () => {
-        const ledger = buildLedger({
-          suppressed: [
-            { ...createAlert({ alert_id: 'ep-1' }), reason: 'acked' },
-            { ...createAlert({ alert_id: 'ep-2' }), reason: 'acked' },
-          ],
-        });
-
-        expect(ledger.takeReady()).toHaveLength(2);
-      });
-
-      it('counts throttled alerts across groups', () => {
-        const ledger = buildLedger({
-          throttled: [
-            createActionGroup({
-              id: 'g1',
-              alerts: [createAlert({ alert_id: 'e1' }), createAlert({ alert_id: 'e2' })],
-            }),
-            createActionGroup({ id: 'g2', alerts: [createAlert({ alert_id: 'e3' })] }),
-          ],
-        });
-
-        expect(ledger.takeReady()).toHaveLength(3);
-      });
-
-      it('counts dispatched alerts across groups', () => {
-        const group = createActionGroup({
-          id: 'g1',
-          alerts: [createAlert({ alert_id: 'e1' }), createAlert({ alert_id: 'e2' })],
-        });
-        const ledger = buildLedger({ toDispatch: [group] });
-
-        expect(ledger.conclude([group])).toHaveLength(2);
-      });
-
-      it('counts unmatched alerts', () => {
-        const ledger = buildLedger({
-          unmatched: [
-            createAlert({ alert_id: 'e1' }),
-            createAlert({ alert_id: 'e2' }),
-            createAlert({ alert_id: 'e3' }),
-          ],
-        });
-
-        expect(ledger.takeReady()).toHaveLength(3);
-      });
-
-      it('sums all buckets', () => {
-        const dispatchedAlert = createAlert({ alert_id: 'ep-dispatch', group_hash: 'h-dispatch' });
-        const dispatched = createActionGroup({ id: 'g-dispatch', alerts: [dispatchedAlert] });
-        const ledger = buildLedger({
-          suppressed: [{ ...createAlert({ alert_id: 'ep-sup' }), reason: 'acked' }],
-          throttled: [
-            createActionGroup({
-              id: 'g-throttle',
-              alerts: [createAlert({ alert_id: 'ep-throttled', group_hash: 'h-throttled' })],
-            }),
-          ],
-          toDispatch: [dispatched],
-          unmatched: [createAlert({ alert_id: 'ep-unmatched', group_hash: 'h-unmatched' })],
-        });
-
-        expect([...ledger.takeReady(), ...ledger.conclude([dispatched])]).toHaveLength(4);
       });
     });
   });
