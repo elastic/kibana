@@ -220,6 +220,14 @@ export const MODELS_LABEL = i18n.translate('xpack.alertzero.watches.settings.mod
   defaultMessage: 'Models',
 });
 
+export const NO_MODEL_REASON_PLAIN = i18n.translate(
+  'xpack.alertzero.watches.settings.worker.blockingReason.noModelPlain',
+  {
+    defaultMessage:
+      'Some AI-powered steps in this Worker may not be configured. Check Feature settings below.',
+  }
+);
+
 /* -------------------------------------------------------------------------- */
 /* Section headings                                                           */
 /* -------------------------------------------------------------------------- */

@@ -7,8 +7,10 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import {
+  ESCALATION_ATTACHMENTS_SYNCED_EVENT_TYPE,
   ESCALATION_CREATED_FROM_INVESTIGATION_EVENT_TYPE,
   ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE,
+  escalationAttachmentsSyncedEventSchema,
   escalationInvestigationEventSchema,
 } from '../../../common/escalations/conversation_events';
 
@@ -28,4 +30,9 @@ export const registerEscalationConversationEvents = (
       payloadSchema: escalationInvestigationEventSchema,
     });
   }
+
+  agentBuilder.conversationEvents.register({
+    type: ESCALATION_ATTACHMENTS_SYNCED_EVENT_TYPE,
+    payloadSchema: escalationAttachmentsSyncedEventSchema,
+  });
 };

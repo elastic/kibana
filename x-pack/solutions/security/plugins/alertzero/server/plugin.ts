@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERTZERO_REASONING_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
 import {
   DEFAULT_APP_CATEGORIES,
   type CoreSetup,
@@ -51,6 +52,7 @@ import { initializeManagedWorkflows } from './managed_workflows/initialize_manag
 import { installRegisteredWorkerForRequest } from './managed_workflows/worker_registry';
 import { WatchesService } from './services/watches/watches_service';
 import { WorkersService } from './services/workers/workers_service';
+import { createGetWorkerBlockingReasons } from './services/workers/worker_blocking_reasons';
 import { ConversationProposalsService } from './services/conversation_proposals/conversation_proposals_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
 import { ScanFailuresService } from './services/scan_failures/scan_failures_service';
@@ -96,6 +98,10 @@ export class AlertZeroPlugin
   private agentBuilderConversations?: NonNullable<
     AlertZeroStartDependencies['agentBuilder']
   >['conversations'];
+  private agentBuilderExecution?: NonNullable<
+    AlertZeroStartDependencies['agentBuilder']
+  >['execution'];
+  private searchInferenceEndpoints?: AlertZeroStartDependencies['searchInferenceEndpoints'];
   private huntServices?: HuntServices;
   private fleetAgentService?: AgentService;
   private coreStart?: CoreStart;
@@ -190,6 +196,8 @@ export class AlertZeroPlugin
       workflowsExtensions,
       getActionsService: () => this.requireActionsService(),
       getConversations: () => this.requireAgentBuilderConversations(),
+      getExecution: (params) => this.requireAgentBuilderExecution().executeAgent(params),
+      resolveConnectorId: (request) => this.resolveSummaryConnectorId(request),
       getHuntServices: () => this.requireHuntServices(),
       getResolveHostEnrollment: makeScopedResolveHostEnrollment(
         () => this.fleetAgentService,
@@ -272,6 +280,8 @@ export class AlertZeroPlugin
     this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
+    this.agentBuilderExecution = plugins.agentBuilder?.execution;
+    this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
 
     if (!this.config.enabled) {
       return this.alertZeroStartContract();
@@ -365,6 +375,7 @@ export class AlertZeroPlugin
         const client = await plugins.workflowsExtensions.getClient(request);
         await installRegisteredWorkerForRequest(client.managedWorkflows, registration, options);
       },
+      createGetWorkerBlockingReasons(plugins.searchInferenceEndpoints, this.logger.get('workers')),
       this.threatIntelSupplyService
     );
 
@@ -410,6 +421,33 @@ export class AlertZeroPlugin
     AlertZeroStartDependencies['agentBuilder']
   >['conversations'] {
     return this.requireStarted(this.agentBuilderConversations, 'agentBuilder.conversations');
+  }
+
+  private requireAgentBuilderExecution(): NonNullable<
+    AlertZeroStartDependencies['agentBuilder']
+  >['execution'] {
+    return this.requireStarted(this.agentBuilderExecution, 'agentBuilder.execution');
+  }
+
+  private async resolveSummaryConnectorId(request: KibanaRequest): Promise<string | undefined> {
+    const searchInferenceEndpoints = this.searchInferenceEndpoints;
+    if (!searchInferenceEndpoints) {
+      return undefined;
+    }
+    try {
+      const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
+        ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+        request
+      );
+      return endpoints[0]?.connectorId;
+    } catch (error) {
+      this.logger.warn(
+        `AlertZero investigation summary connector could not be resolved. ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return undefined;
+    }
   }
 
   private requireHuntServices(): HuntServices {

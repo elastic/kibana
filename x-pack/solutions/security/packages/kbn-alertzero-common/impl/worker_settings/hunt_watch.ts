@@ -16,6 +16,11 @@ import type { WorkerSettingsDeclaration } from './types';
  */
 export const CONTINUOUS_THREAT_HUNT_SETTINGS: WorkerSettingsDeclaration = {
   workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+  // Fixed Manual autonomy and a locked 4h schedule. Kept as literal values rather than read from
+  // CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS: that shared constant drives only
+  // `upgradeStoredWorkerSettings` for the yamlTemplate's render-time upgrade of already-stored
+  // settings documents, and has no `readOnly` concept. The two are kept in sync by hand; this
+  // declaration is what the settings page and the write API actually enforce.
   allowedAutonomyLevels: ['manual'],
   scheduleInterval: { defaultValue: '4h', readOnly: true },
 };

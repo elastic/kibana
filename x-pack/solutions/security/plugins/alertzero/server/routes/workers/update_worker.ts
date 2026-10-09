@@ -14,6 +14,7 @@ import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   ALERTZERO_WORKER_URL_TEMPLATE,
+  SYSTEM_SECURITY_WORKER_CATALOG,
   UpdateWorkerRequestBody,
 } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_WRITE } from '../../../common/constants';
@@ -22,7 +23,10 @@ import type { WorkerEnableBlockedReason } from '../../services/workers/workers_s
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import { hasManageSecurity } from './has_manage_security';
 
-const WORKER_ENABLE_BLOCKED_MESSAGES: Record<WorkerEnableBlockedReason, () => string> = {
+const WORKER_ENABLE_BLOCKED_MESSAGES: Record<
+  WorkerEnableBlockedReason,
+  (workerName: string) => string
+> = {
   alertAnalysisWorkflowDisabled: () =>
     i18n.translate('xpack.alertzero.alertTriageAlertAnalysisWorkflowDisabledErrorMessage', {
       defaultMessage:
@@ -48,7 +52,16 @@ const WORKER_ENABLE_BLOCKED_MESSAGES: Record<WorkerEnableBlockedReason, () => st
       defaultMessage:
         'Threat intel supply workflows are not installed in this deployment yet. Wait until setup finishes (Machine Learning embeddings available), then try turning on Hunt Watch again. If this persists after a restart, contact an administrator.',
     }),
+  noModel: (workerName) =>
+    i18n.translate('xpack.alertzero.workerEnableNoModelErrorMessage', {
+      defaultMessage:
+        '{workerName} cannot be turned on because no AI model is available to you in this space. Configure one in Feature settings, or ask an administrator for access to connectors.',
+      values: { workerName },
+    }),
 };
+
+const workerDisplayName = (workerId: string): string =>
+  SYSTEM_SECURITY_WORKER_CATALOG.find(({ id }) => id === workerId)?.name ?? workerId;
 
 const UpdateWorkerRequestParams = lazySchema(() =>
   z.object({
@@ -144,7 +157,11 @@ export const registerUpdateWorkerRoute = ({
               });
             case 'blocked':
               return response.badRequest({
-                body: { message: WORKER_ENABLE_BLOCKED_MESSAGES[result.reason]() },
+                body: {
+                  message: WORKER_ENABLE_BLOCKED_MESSAGES[result.reason](
+                    workerDisplayName(workerId)
+                  ),
+                },
               });
             case 'invalid':
               return response.badRequest({

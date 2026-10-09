@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID } from '@kbn/workflows';
 import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
 import {
@@ -21,6 +22,7 @@ import {
   type Worker,
 } from '@kbn/alertzero-common';
 import { WorkerSettingsPanel } from './worker_settings_panel';
+import { getBlockingWarningReasons } from './blocking_warning_reasons';
 
 jest.mock('../../../hooks/use_hunt_threat_intel_supply', () => ({
   useHuntThreatIntelSupplyStatus: jest.fn(() => ({
@@ -75,6 +77,7 @@ const createWorker = (workflowId: string | null): Worker => ({
   state: 'ok',
   settingsRevision: 1,
   workflowId,
+  blockingReasons: [],
   settings: {
     workerId: WORKER_ID,
     autonomy: 'manual',
@@ -89,15 +92,16 @@ const renderPanel = (
   workflowId: string | null,
   isAccordion: boolean,
   {
+    blockingReasons = [],
     enabled = true,
     showManagedWorkflows = true,
     canChangeAdvancedSettings = true,
-  }: {
-    enabled?: boolean;
+  }: Pick<Partial<Worker>, 'blockingReasons' | 'enabled'> & {
     showManagedWorkflows?: boolean;
     canChangeAdvancedSettings?: boolean;
   } = {}
 ) => {
+  const worker: Worker = { ...createWorker(workflowId), enabled, blockingReasons };
   const core = coreMock.createStart();
   core.http.get.mockResolvedValue(undefined);
   core.application.getUrlForApp.mockImplementation(
@@ -118,13 +122,13 @@ const renderPanel = (
     <I18nProvider>
       <KibanaContextProvider services={core}>
         <WorkerSettingsPanel
-          worker={createWorker(workflowId)}
+          worker={worker}
           isAccordion={isAccordion}
           isExpanded
           onToggle={jest.fn()}
           enabled={enabled}
-          settings={createWorker(workflowId).settings}
-          warningReasons={[]}
+          settings={worker.settings}
+          warningReasons={getBlockingWarningReasons(worker, { withLink: false })}
           settingsLocked={false}
           isSaving={false}
           canWrite
@@ -206,7 +210,7 @@ describe('WorkerSettingsPanel view executions link', () => {
   });
 });
 
-describe('WorkerSettingsPanel models', () => {
+describe('WorkerSettingsPanel models and no-model block', () => {
   it.each([
     ['accordion', true],
     ['single-Worker', false],
@@ -222,6 +226,43 @@ describe('WorkerSettingsPanel models', () => {
     expect(core.application.getUrlForApp).toHaveBeenCalledWith('management', {
       deepLinkId: 'model_settings',
     });
+  });
+
+  it('leaves the switch usable and shows no warning when nothing blocks the Worker', () => {
+    renderPanel(WORKFLOW_ID, false, { enabled: false });
+
+    expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`)).toBeEnabled();
+    expect(screen.queryByTestId(`alertZeroWorkerWarningIcon-${WORKER_ID}`)).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['accordion', true],
+    ['single-Worker', false],
+  ])(
+    'locks the switch of a blocked Worker that is off and explains why (%s)',
+    async (_layout, isAccordion) => {
+      renderPanel(WORKFLOW_ID, isAccordion, { blockingReasons: ['no_model'], enabled: false });
+
+      const enabledSwitch = screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`);
+      expect(enabledSwitch).toBeDisabled();
+      expect(enabledSwitch).toHaveAttribute('aria-checked', 'false');
+
+      fireEvent.mouseOver(screen.getByTestId(`alertZeroWorkerWarningIcon-${WORKER_ID}`));
+      const tooltip = await screen.findByRole('tooltip');
+      expect(tooltip).toHaveTextContent(
+        'Some AI-powered steps in this Worker may not be configured. Check Feature settings below.'
+      );
+      // A tooltip closes before the pointer reaches it, so it must not offer a link.
+      expect(within(tooltip).queryByRole('link')).not.toBeInTheDocument();
+    }
+  );
+
+  it('lets a blocked Worker that is on be switched off', () => {
+    renderPanel(WORKFLOW_ID, false, { blockingReasons: ['no_model'], enabled: true });
+
+    const enabledSwitch = screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`);
+    expect(enabledSwitch).toBeEnabled();
+    expect(enabledSwitch).toHaveAttribute('aria-checked', 'true');
   });
 });
 
@@ -305,6 +346,7 @@ describe('WorkerSettingsPanel Hunt threat intel supply', () => {
       state: 'ok',
       settingsRevision: 1,
       workflowId: null,
+      blockingReasons: [],
       settings: {
         workerId: HUNT_WORKER_ID,
         autonomy: 'manual',
@@ -313,23 +355,27 @@ describe('WorkerSettingsPanel Hunt threat intel supply', () => {
       },
     };
 
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
     render(
       <I18nProvider>
         <KibanaContextProvider services={core}>
-          <WorkerSettingsPanel
-            worker={huntWorker}
-            isAccordion={false}
-            isExpanded
-            onToggle={jest.fn()}
-            enabled={false}
-            settings={huntWorker.settings}
-            warningReasons={[]}
-            settingsLocked={false}
-            isSaving={false}
-            canWrite
-            onEnabledChange={jest.fn()}
-            onSettingsChange={jest.fn()}
-          />
+          <QueryClientProvider client={queryClient}>
+            <WorkerSettingsPanel
+              worker={huntWorker}
+              isAccordion={false}
+              isExpanded
+              onToggle={jest.fn()}
+              enabled={false}
+              settings={huntWorker.settings}
+              warningReasons={[]}
+              settingsLocked={false}
+              isSaving={false}
+              canWrite
+              onEnabledChange={jest.fn()}
+              onSettingsChange={jest.fn()}
+            />
+          </QueryClientProvider>
         </KibanaContextProvider>
       </I18nProvider>
     );

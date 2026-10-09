@@ -10,12 +10,14 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { UpdateWorkerResponse } from '@kbn/alertzero-common';
 import {
   ListWorkersResponse,
+  isWorkerEnableBlocked,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   touchesWorkerSettings,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   type UpdateWorkerRequestBody,
   type Worker,
+  type WorkerBlockingReason,
 } from '@kbn/alertzero-common';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowYaml } from '@kbn/workflows';
@@ -48,6 +50,7 @@ import {
   ThreatIntelSupplyNotInstalledError,
   type ThreatIntelSupplyService,
 } from '../threat_intel_supply';
+import type { GetWorkerBlockingReasons } from './worker_blocking_reasons';
 
 interface AlertTriageOpts {
   getAttachmentService?: AlertTriageAttachmentServiceProvider;
@@ -90,6 +93,9 @@ const templateValuesEqual = (
   left != null &&
   Object.keys(right).every((key) => Object.hasOwn(left, key) && isEqual(left[key], right[key]));
 
+/** Why enabling any Worker in the space was refused before anything was written. */
+export type SpaceEnableBlockedReason = 'noModel';
+
 /** Why an Alert Triage Worker enable was refused before anything was written. */
 export type AlertTriageEnableBlockedReason =
   | 'alertAnalysisWorkflowDisabled'
@@ -101,7 +107,9 @@ export type HuntSupplyEnableBlockedReason =
   | 'huntSupplyPrerequisitesUnmet'
   | 'huntSupplyNotInstalled';
 
+/** Why a Worker enable was refused before anything was written. */
 export type WorkerEnableBlockedReason =
+  | SpaceEnableBlockedReason
   | AlertTriageEnableBlockedReason
   | HuntSupplyEnableBlockedReason;
 
@@ -151,6 +159,7 @@ export class WorkersService {
     } = {},
     private readonly alertTriageOpts: AlertTriageOpts = {},
     private readonly installWorkerForRequest: InstallWorkerForRequest,
+    private readonly getBlockingReasons: GetWorkerBlockingReasons,
     private readonly threatIntelSupply?: ThreatIntelSupplyService
   ) {
     this.agentTypeMap = new Map((agentOpts.agentTypes ?? []).map((t) => [t.id, t]));
@@ -227,13 +236,18 @@ export class WorkersService {
   async list(request: KibanaRequest, spaceId: string): Promise<ListWorkersResponse> {
     await this.ensureAgent(spaceId);
 
-    const agentLookup = await this.buildAgentLookup(request);
-    const hiddenWorkerIds = await this.hiddenWorkerIds(request);
+    const [agentLookup, hiddenWorkerIds, blockingReasons] = await Promise.all([
+      this.buildAgentLookup(request),
+      this.hiddenWorkerIds(request),
+      this.getBlockingReasons(request),
+    ]);
     const workers = await Promise.all(
       workerRegistry
         .list()
         .filter((registration) => !hiddenWorkerIds.has(registration.id))
-        .map((registration) => this.projectWorker(registration, spaceId, request, agentLookup))
+        .map((registration) =>
+          this.projectWorker(registration, spaceId, request, blockingReasons, agentLookup)
+        )
     );
     return ListWorkersResponse.parse({ workers });
   }
@@ -252,8 +266,11 @@ export class WorkersService {
       return undefined;
     }
 
-    const agentLookup = await this.buildAgentLookup(request);
-    return this.projectWorker(registration, spaceId, request, agentLookup);
+    const [agentLookup, blockingReasons] = await Promise.all([
+      this.buildAgentLookup(request),
+      this.getBlockingReasons(request),
+    ]);
+    return this.projectWorker(registration, spaceId, request, blockingReasons, agentLookup);
   }
 
   async update(
@@ -268,6 +285,10 @@ export class WorkersService {
     }
     if ((await this.hiddenWorkerIds(request)).has(registration.id)) {
       return { outcome: 'not-found' };
+    }
+    const blockingReasons = await this.getBlockingReasons(request);
+    if (patch.enabled === true && isWorkerEnableBlocked(blockingReasons)) {
+      return { outcome: 'blocked', reason: 'noModel' };
     }
 
     const touchesSettings = touchesWorkerSettings(patch);
@@ -546,7 +567,13 @@ export class WorkersService {
     }
 
     const agentLookup = await this.buildAgentLookup(request);
-    const worker = await this.projectWorker(registration, spaceId, request, agentLookup);
+    const worker = await this.projectWorker(
+      registration,
+      spaceId,
+      request,
+      blockingReasons,
+      agentLookup
+    );
     return {
       outcome: 'updated',
       response: { worker, ...(skippedRuleCount > 0 ? { skippedRuleCount } : {}) },
@@ -632,6 +659,7 @@ export class WorkersService {
     registration: WorkerRegistration,
     spaceId: string,
     request: KibanaRequest,
+    blockingReasons: WorkerBlockingReason[],
     agentLookupCallback?: AgentLookup
   ): Promise<Worker> {
     const managedWorkflows = await this.requireManagedWorkflows();
@@ -705,6 +733,7 @@ export class WorkersService {
       settingsRevision,
       // `installed` is any document at this id, including a user workflow that is not ours.
       workflowId: status.installed && status.status !== 'not_managed' ? status.workflowId : null,
+      blockingReasons,
       skills: projectSkillsFromDefinition(definition, agentLookupCallback),
     };
   }
