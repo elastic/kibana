@@ -2083,7 +2083,7 @@
       "matchDepNames": ["react-hook-form"],
       "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
+      "addLabels": ["ci:all-cypress-suites"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2092,7 +2092,7 @@
       "matchDepNames": ["react-window-infinite-loader", "@types/react-window-infinite-loader"],
       "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
+      "addLabels": ["ci:all-cypress-suites", "Team:obs-signals-logs"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2101,7 +2101,7 @@
       "matchDepNames": ["form-data"],
       "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
+      "addLabels": ["ci:all-cypress-suites"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2110,7 +2110,7 @@
       "matchDepNames": ["@faker-js/faker"],
       "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
+      "addLabels": ["ci:all-cypress-suites", "Team:obs-signals-logs"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2127,7 +2127,7 @@
       "matchDepNames": ["redux-saga"],
       "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
+      "addLabels": ["ci:all-cypress-suites", "Team:obs-signals-logs"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },

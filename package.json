@@ -1288,6 +1288,7 @@
     "@kbn/task-manager-fixture-plugin": "workspace:*",
     "@kbn/task-manager-performance-plugin": "workspace:*",
     "@kbn/task-manager-plugin": "workspace:*",
+    "@kbn/task-manager-service-accounts-test-plugin": "workspace:*",
     "@kbn/telemetry": "workspace:*",
     "@kbn/telemetry-collection-manager-plugin": "workspace:*",
     "@kbn/telemetry-collection-xpack-plugin": "workspace:*",

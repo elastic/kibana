@@ -29,14 +29,15 @@ const LINKED_INVESTIGATIONS_LOADING_LABEL = i18n.translate(
   { defaultMessage: 'Loading linked investigations…' }
 );
 
-/** The `escalation` template: status and the linked investigations. */
+/** The `escalation` template: status, summary, attachments and the linked investigations. */
 export const escalationTemplate: TemplateDefinition = {
   templateId: ESCALATION_TEMPLATE_ID,
   register: ({
     core,
-    templateId,
     startDeps,
+    templateId,
     makeLazyWithProviders,
+    groupedAttachments,
     renderAssignees,
     renderStatus,
   }) => {
@@ -89,6 +90,7 @@ export const escalationTemplate: TemplateDefinition = {
     registerEscalationTemplateUI({
       conversationTemplates: agentBuilder.conversationTemplates,
       templateId,
+      groupedAttachments,
       name: ESCALATION_TEMPLATE_NAME,
       icon: 'warning',
       renderAssignees,
