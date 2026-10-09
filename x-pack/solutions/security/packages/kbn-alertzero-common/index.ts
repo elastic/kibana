@@ -120,6 +120,7 @@ export {
   AutoCloseConfidenceScoreMinThreshold,
   AlertTriageWorkerExtras,
   Worker,
+  WorkerBlockingReason,
   WorkerRunState,
   WorkerScheduleInterval,
   WorkerSettings,
@@ -159,6 +160,8 @@ export {
   WriteHuntEvidenceResponse,
 } from './impl/schemas';
 
+export { isWorkerEnableBlocked } from './impl/workers/blocking_reasons';
+
 export {
   compareWatchesForDisplay,
   coverageFromSchedule,
@@ -192,7 +195,6 @@ export {
   RULE_COVERAGE_DEFAULT_EXTRAS,
   RULE_TUNING_DEFAULT_EXTRAS,
   WORKER_SETTINGS_DECLARATIONS,
-  applyMissingWorkerSettingDefaults,
   applyWorkerSettingsWrite,
   createDefaultWorkerSettings,
   diffWorkerSettings,
@@ -200,8 +202,9 @@ export {
   getAllowedAutonomyLevels,
   getCompleteWorkerSettingsSchema,
   getWorkerSettingsDeclaration,
-  projectStoredAutonomyLevel,
+  nearestLowerAutonomyLevel,
   touchesWorkerSettings,
+  upgradeStoredWorkerSettings,
 } from './impl/worker_settings';
 export type { WorkerSettingsDeclaration } from './impl/worker_settings';
 export type {

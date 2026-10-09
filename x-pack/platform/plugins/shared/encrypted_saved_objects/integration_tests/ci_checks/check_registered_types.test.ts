@@ -155,6 +155,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "anonymization-salt|1",
         "api_key_pending_invalidation|2",
         "api_key_pending_invalidation|1",
+        "api_key_to_invalidate|3",
         "api_key_to_invalidate|2",
         "api_key_to_invalidate|1",
         "cloud-connect-api-key|1",
