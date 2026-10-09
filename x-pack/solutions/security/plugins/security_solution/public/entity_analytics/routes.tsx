@@ -138,9 +138,10 @@ EntityAnalyticsPrivilegedUserMonitoringContainer.displayName =
 // ---- Entity analytics home page routes ----
 const EntityAnalyticsHomePageContainer: React.FC = React.memo(() => {
   const { featureFlags } = useKibana().services;
+  // PoC branch only: default on so the CI cloud deployment shows the new page (do not merge).
   const isNewHomePageEnabled = featureFlags.useBooleanValue(
     USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG,
-    false
+    true
   );
 
   const PageComponent = isNewHomePageEnabled ? EntityAnalyticsNewHomePage : EntityAnalyticsHomePage;
