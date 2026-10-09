@@ -68,14 +68,14 @@ const INNER_PADDING = 16;
 const BODY_LINE_HEIGHT = 20;
 const DIMMED_OPACITY = 0.45;
 
+// Opacity only: React Flow measures the handles when a node mounts, so a transform here would
+// shift where the edges end and leave their arrowheads under the node.
 const nodeReveal = keyframes`
   from {
     opacity: 0;
-    transform: translateY(8px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 `;
 
