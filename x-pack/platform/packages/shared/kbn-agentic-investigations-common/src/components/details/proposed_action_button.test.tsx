@@ -192,6 +192,13 @@ describe('ProposedActionButton', () => {
       expect(screen.queryByText('Applied')).not.toBeInTheDocument();
     });
 
+    it('keeps the badge label as the caption for an expired proposal that has an actor', () => {
+      renderButton({ proposal: { ...decidedProposal, status: 'expired' } });
+
+      expect(screen.getAllByText('Expired').length).toBeGreaterThanOrEqual(2);
+      expect(screen.queryByText(/Approved by/)).not.toBeInTheDocument();
+    });
+
     it('names the decider without a time when the record carries no decidedAt', () => {
       renderButton({ proposal: { ...decidedProposal, decidedAt: undefined } });
 

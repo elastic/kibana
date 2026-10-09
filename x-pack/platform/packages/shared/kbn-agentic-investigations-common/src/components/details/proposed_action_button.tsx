@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elas
 import {
   ApprovalActorTime,
   ApprovalModal,
+  type ApprovalActorTimeProps,
   getApprovalOutcomeBadge,
   getProposalCaption,
   getProposalDecision,
@@ -44,6 +45,13 @@ export interface ProposedActionButtonProps {
   currentActorName?: string;
   'data-test-subj'?: string;
 }
+
+const ACTOR_OUTCOME_BY_STATUS: Partial<Record<ApprovalPhase, ApprovalActorTimeProps['outcome']>> = {
+  applied: 'approved',
+  applying: 'approved',
+  declined: 'declined',
+  failed: 'executed',
+};
 
 const PENDING_BADGE = {
   color: 'primary' as const,
@@ -90,26 +98,23 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
 
     // A decision with no `actorName` is a terminal state nobody actually decided (expired,
     // chiefly) — the badge label alone ("Expired") already says what happened, so this only adds
-    // "by {name}" when there is a real actor to name.
-    const caption = decision?.actorName ? (
-      <ApprovalActorTime
-        actorName={decision.actorName}
-        at={decision.decidedAt}
-        outcome={
-          decision.status === 'failed'
-            ? 'executed'
-            : decision.status === 'declined'
-            ? 'declined'
-            : 'approved'
-        }
-      />
-    ) : decision ? (
-      badge.label
-    ) : pendingCaption ? (
-      pendingCaption
-    ) : (
-      getEmptyValue()
-    );
+    // "by {name}" when there is a real actor to name. Only the outcomes below read naturally with
+    // one; any other status (an expired proposal that has an actor, say) keeps the badge label.
+    const actorOutcome = decision ? ACTOR_OUTCOME_BY_STATUS[decision.status] : undefined;
+    const caption =
+      decision?.actorName && actorOutcome ? (
+        <ApprovalActorTime
+          actorName={decision.actorName}
+          at={decision.decidedAt}
+          outcome={actorOutcome}
+        />
+      ) : decision ? (
+        badge.label
+      ) : pendingCaption ? (
+        pendingCaption
+      ) : (
+        getEmptyValue()
+      );
 
     const { euiTheme } = useEuiTheme();
     const borderStyle = `1px solid ${euiTheme.colors.backgroundLightText}`;
