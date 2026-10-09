@@ -24,10 +24,17 @@ import type { initializeLayoutManager } from './layout_manager';
 import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { initializeSettingsManager } from './settings_manager';
 import { reportDashboardSaved } from './telemetry/report_dashboard_saved';
-import type { PublishesOnSave } from './types';
+import type { DashboardSaveEvent } from './types';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
 
 const DEBOUNCE_TIME = 100;
+
+/** For each change source, the version of its latest change in a dashboard state. */
+export type ChangeSourceVersions = Readonly<Record<string, number>>;
+
+export type DashboardSaveWithChangeSources = DashboardSaveEvent & {
+  changeSourceVersions: ChangeSourceVersions;
+};
 
 export function initializeUnsavedChangesManager({
   layoutManager,
@@ -53,7 +60,7 @@ export function initializeUnsavedChangesManager({
   projectRoutingManager?: ReturnType<typeof initializeProjectRoutingManager>;
   approximationManager: ReturnType<typeof initializeApproximationManager>;
   setState: (state: DashboardState) => Promise<void>;
-  onSave$: PublishesOnSave['onSave$'];
+  onSave$: Observable<DashboardSaveWithChangeSources>;
   initialChangeSources?: readonly string[];
 }): {
   api: {
@@ -65,19 +72,39 @@ export function initializeUnsavedChangesManager({
     getLastSavedState: () => DashboardState;
     unsavedChanges$: Observable<Partial<DashboardState>>;
     addChangeSources: (sources: readonly string[]) => void;
-    takeChangeSourcesForSave: () => void;
+    getChangeSourceVersions: () => ChangeSourceVersions;
+    setChangeSourceVersions: (versions: ChangeSourceVersions) => void;
   };
 } {
   const hasUnsavedChanges$ = new BehaviorSubject(false);
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
-  const changeSources = new Set<string>(initialChangeSources);
-  const changeSourcesInSave = new Set<string>();
 
-  const onSaveSubscription = onSave$.subscribe((saveEvent) => {
-    const savedChangeSources = [...changeSourcesInSave];
-    changeSourcesInSave.clear();
+  // Each labeled change gets the next version number, and each source keeps the version of its
+  // latest change. Undo history stores these versions, so an undone change is not reported.
+  let latestVersion = 0;
+  let versions: ChangeSourceVersions = {};
+  let savedVersions: ChangeSourceVersions = {};
+
+  const addChangeSources = (sources: readonly string[]) => {
+    if (sources.length === 0) return;
+    latestVersion++;
+    versions = {
+      ...versions,
+      ...Object.fromEntries(sources.map((source) => [source, latestVersion])),
+    };
+  };
+  addChangeSources(initialChangeSources);
+
+  const getSourcesChangedSinceSave = (draftVersions: ChangeSourceVersions) =>
+    Object.keys(draftVersions)
+      .filter((source) => draftVersions[source] > (savedVersions[source] ?? 0))
+      .sort();
+
+  const onSaveSubscription = onSave$.subscribe(({ changeSourceVersions, ...saveEvent }) => {
+    const changeSourcesInSave = getSourcesChangedSinceSave(changeSourceVersions);
+    savedVersions = changeSourceVersions;
     lastSavedState$.next(saveEvent.dashboardState);
-    reportDashboardSaved({ ...saveEvent, changeSources: savedChangeSources });
+    reportDashboardSaved({ ...saveEvent, changeSources: changeSourcesInSave });
   });
 
   const dashboardStateChanges$ = combineLatest([
@@ -104,13 +131,13 @@ export function initializeUnsavedChangesManager({
       if (storeUnsavedChanges) {
         const { time_restore, ...restOfDashboardChanges } = dashboardChanges;
         const hasEditsToBackUp = Object.keys(restOfDashboardChanges).length > 0;
-        const changeSourcesToBackUp = new Set([...changeSourcesInSave, ...changeSources]);
+        const changeSourcesToBackUp = getSourcesChangedSinceSave(versions);
         const dashboardBackupState: DashboardBackupState = {
           // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
           viewMode,
           ...restOfDashboardChanges,
           ...(hasEditsToBackUp &&
-            changeSourcesToBackUp.size > 0 && { changeSources: [...changeSourcesToBackUp] }),
+            changeSourcesToBackUp.length > 0 && { changeSources: changeSourcesToBackUp }),
         };
         getDashboardBackupService().setState(savedObjectId$.value, dashboardBackupState);
       }
@@ -122,8 +149,7 @@ export function initializeUnsavedChangesManager({
   return {
     api: {
       asyncResetToLastSavedState: async () => {
-        changeSources.clear();
-        changeSourcesInSave.clear();
+        versions = savedVersions;
         await setState(lastSavedState$.value);
       },
       hasUnsavedChanges$,
@@ -138,10 +164,10 @@ export function initializeUnsavedChangesManager({
     internalApi: {
       getLastSavedState: () => lastSavedState$.value,
       unsavedChanges$: dashboardStateChanges$,
-      addChangeSources: (sources) => sources.forEach((source) => changeSources.add(source)),
-      takeChangeSourcesForSave: () => {
-        changeSources.forEach((source) => changeSourcesInSave.add(source));
-        changeSources.clear();
+      addChangeSources,
+      getChangeSourceVersions: () => versions,
+      setChangeSourceVersions: (nextVersions) => {
+        versions = nextVersions;
       },
     },
   };

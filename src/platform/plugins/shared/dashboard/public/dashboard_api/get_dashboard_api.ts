@@ -24,7 +24,7 @@ import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
 import { initializeESQLVariablesManager } from './esql_variables_manager';
 import { initializeFiltersManager } from './filters_manager';
-import { initializeHistoryManager } from './history_manager';
+import { initializeHistoryManager, type DashboardHistoryState } from './history_manager';
 import { initializeLayoutManager } from './layout_manager';
 import type { DashboardChildren } from './layout_manager/types';
 import { initializePauseFetchManager } from './pause_fetch_manager';
@@ -42,14 +42,17 @@ import type {
   DashboardApi,
   DashboardCreationOptions,
   DashboardInternalApi,
-  DashboardSaveEvent,
   DashboardSetStateOptions,
   DashboardUser,
   UserActivity,
 } from './types';
 import { DASHBOARD_API_TYPE } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
-import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
+import {
+  initializeUnsavedChangesManager,
+  type ChangeSourceVersions,
+  type DashboardSaveWithChangeSources,
+} from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 
 export function getDashboardApi({
@@ -76,7 +79,7 @@ export function getDashboardApi({
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = readResult?.meta.managed ?? false;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
-  const onSave$ = new Subject<DashboardSaveEvent>();
+  const onSave$ = new Subject<DashboardSaveWithChangeSources>();
   const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(null);
   const userActivity$ = new Subject<UserActivity>();
 
@@ -208,12 +211,19 @@ export function getDashboardApi({
     initialChangeSources: changeSources,
   });
 
-  const initialState$ = new Subject<DashboardState>();
+  const getHistoryState = (): DashboardHistoryState => ({
+    ...getState(),
+    changeSourceVersions: unsavedChangesManager.internalApi.getChangeSourceVersions(),
+  });
+  const initialState$ = new Subject<DashboardHistoryState>();
   const historyManager = initializeHistoryManager({
     anyStateChange$,
     hasOverlays$: trackOverlayApi.hasOverlays$,
-    setState,
-    getState,
+    setState: async ({ changeSourceVersions, ...state }) => {
+      unsavedChangesManager.internalApi.setChangeSourceVersions(changeSourceVersions);
+      await setState(state);
+    },
+    getState: getHistoryState,
     dataLoading$: combineLatest([
       layoutManager.internalApi.childrenStateLoading$,
       layoutManager.internalApi.childrenLoading$,
@@ -228,7 +238,7 @@ export function getDashboardApi({
 
   if (incomingEmbeddables?.length) {
     // allow incoming embeddables to be undone
-    initialState$.next(getState());
+    initialState$.next(getHistoryState());
     layoutManager.api.addIncomingEmbeddables(incomingEmbeddables);
   }
 
@@ -272,7 +282,7 @@ export function getDashboardApi({
       description: settingsManager.api.title$.value,
     },
     fullScreenMode$,
-    onSave$: onSave$.asObservable(),
+    onSave$: onSave$.pipe(map(({ changeSourceVersions, ...saveEvent }) => saveEvent)),
     getAppContext: () => {
       const embeddableAppContext = creationOptions?.getEmbeddableAppContext?.(savedObjectId$.value);
       return {
@@ -301,12 +311,13 @@ export function getDashboardApi({
       let resolve: ((results: { id: string } | undefined) => void) | undefined;
       const promise = new Promise<{ id: string } | undefined>((_resolve) => (resolve = _resolve));
 
+      let changeSourceVersions: ChangeSourceVersions = {};
       openSaveModal({
         description,
         isManaged,
         lastSavedId: savedObjectId$.value,
         serializeState: () => {
-          unsavedChangesManager.internalApi.takeChangeSourcesForSave();
+          changeSourceVersions = unsavedChangesManager.internalApi.getChangeSourceVersions();
           return getState();
         },
         setTimeRestore: (newTimeRestore: boolean) =>
@@ -335,6 +346,7 @@ export function getDashboardApi({
             previousDashboardId,
             dashboardId: id,
             dashboardState: getState(),
+            changeSourceVersions,
           });
           if (redirectTo && redirectRequired) {
             redirectTo({
@@ -353,7 +365,7 @@ export function getDashboardApi({
     },
     runQuickSave: async () => {
       if (isManaged) return;
-      unsavedChangesManager.internalApi.takeChangeSourcesForSave();
+      const changeSourceVersions = unsavedChangesManager.internalApi.getChangeSourceVersions();
       const dashboardState = getState();
       const previousDashboardId = savedObjectId$.value;
       const saveResult = await saveDashboard({
@@ -368,6 +380,7 @@ export function getDashboardApi({
         previousDashboardId,
         dashboardId: saveResult?.id ?? previousDashboardId,
         dashboardState,
+        changeSourceVersions,
       });
 
       return;

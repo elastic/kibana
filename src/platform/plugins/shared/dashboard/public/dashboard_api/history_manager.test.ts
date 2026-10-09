@@ -8,29 +8,31 @@
  */
 
 import { BehaviorSubject, combineLatest, firstValueFrom, map, Subject } from 'rxjs';
-import { initializeHistoryManager } from './history_manager';
+import { initializeHistoryManager, type DashboardHistoryState } from './history_manager';
 import { getSampleDashboardState } from '../mocks';
-import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { waitFor } from '@testing-library/react';
 
 const makeSetup = async () => {
-  const initialState = getSampleDashboardState();
+  const initialState: DashboardHistoryState = {
+    ...getSampleDashboardState(),
+    changeSourceVersions: {},
+  };
   // Mutable ref so getState's implementation is never replaced (mockReturnValue would drop the
   // getStateCalled$.next() side-effect; updating stateRef keeps the implementation intact).
-  const stateRef = { current: { ...initialState } as DashboardState };
+  const stateRef = { current: { ...initialState } };
 
-  const getState = jest.fn((): DashboardState => {
+  const getState = jest.fn((): DashboardHistoryState => {
     return { ...stateRef.current };
   });
 
-  const setState = jest.fn(async (state: DashboardState) => {
+  const setState = jest.fn(async (state: DashboardHistoryState) => {
     stateRef.current = state;
   });
 
   const anyStateChange$ = new Subject<void>();
   const hasOverlays$ = new BehaviorSubject<boolean>(false);
   const dataLoading$ = new BehaviorSubject<boolean>(false);
-  const initialState$ = new Subject<DashboardState>();
+  const initialState$ = new Subject<DashboardHistoryState>();
 
   const { internalApi, cleanup } = initializeHistoryManager({
     anyStateChange$,

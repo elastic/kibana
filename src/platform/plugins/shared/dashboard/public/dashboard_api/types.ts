@@ -82,8 +82,8 @@ export interface PublishesOnSave {
 export interface DashboardSetStateOptions {
   /**
    * Labels for the integrations making this change, e.g. `agent`. They are reported with the
-   * next save and kept until then, unless the dashboard is reset to its last saved state or its
-   * unsaved draft is discarded.
+   * next save that includes this change, so a change that is undone, reset to the last saved
+   * state, or discarded before a save is not reported.
    */
   changeSources?: string[];
 }

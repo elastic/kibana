@@ -124,6 +124,48 @@ describe('dashboard_saved telemetry', () => {
     ]);
   });
 
+  test('reports sources of a failed overlapping quick save on the next quick save', async () => {
+    let finishFirstSave = () => {};
+    let failSecondSave = () => {};
+    jest
+      .mocked(saveDashboard)
+      .mockReturnValueOnce(
+        new Promise((resolve) => (finishFirstSave = () => resolve({ id: 'existing-id' })))
+      )
+      .mockReturnValueOnce(
+        new Promise((resolve) => (failSecondSave = () => resolve({ error: 'conflict' })))
+      )
+      .mockResolvedValue({ id: 'existing-id' });
+    const { api } = getDashboardApi({
+      incomingEmbeddables: [],
+      initialState: DEFAULT_DASHBOARD_STATE,
+      savedObjectId: 'existing-id',
+    });
+
+    const firstSave = api.runQuickSave();
+    api.setState(DEFAULT_DASHBOARD_STATE, { changeSources: ['agent'] });
+    const secondSave = api.runQuickSave();
+    finishFirstSave();
+    await firstSave;
+    failSecondSave();
+    await secondSave;
+    await api.runQuickSave();
+
+    expect(getDashboardSavedEvents()).toEqual([
+      ['dashboard_saved', { is_new: false, is_copy: false, panel_count: 0, panel_types: [] }],
+      [
+        'dashboard_saved',
+        {
+          is_new: false,
+          is_copy: false,
+          change_sources: ['agent'],
+          panel_count: 0,
+          panel_types: [],
+        },
+      ],
+    ]);
+  });
+
   test('reports sources set after the save modal serializes state on the next save', async () => {
     jest.mocked(saveDashboard).mockResolvedValue({ id: 'copy-id' });
     jest.mocked(openSaveModal).mockImplementation(({ onSave, serializeState }) => {
@@ -153,6 +195,149 @@ describe('dashboard_saved telemetry', () => {
         },
       ],
     ]);
+  });
+
+  describe('with undo and redo', () => {
+    const agentSave = [
+      'dashboard_saved',
+      { is_new: false, is_copy: false, change_sources: ['agent'], panel_count: 0, panel_types: [] },
+    ];
+    const handSave = [
+      'dashboard_saved',
+      { is_new: false, is_copy: false, panel_count: 0, panel_types: [] },
+    ];
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.mocked(saveDashboard).mockResolvedValue({ id: 'existing-id' });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    type Dashboard = ReturnType<typeof getDashboardApi>;
+    const settle = () => jest.advanceTimersByTimeAsync(1000);
+    const setup = async (changeSources?: string[]) => {
+      const dashboard = getDashboardApi({
+        incomingEmbeddables: [],
+        initialState: DEFAULT_DASHBOARD_STATE,
+        savedObjectId: 'existing-id',
+        changeSources,
+      });
+      await settle();
+      return dashboard;
+    };
+    const editByHand = async ({ api }: Dashboard, title: string) => {
+      api.setState({ ...api.getSerializedState().attributes, title });
+      await settle();
+    };
+    const editByAgent = async ({ api }: Dashboard, title: string) => {
+      api.setState({ ...api.getSerializedState().attributes, title }, { changeSources: ['agent'] });
+      await settle();
+    };
+    const undo = async ({ internalApi }: Dashboard) => {
+      await internalApi.undo();
+      await settle();
+    };
+    const redo = async ({ internalApi }: Dashboard) => {
+      await internalApi.redo();
+      await settle();
+    };
+    const quickSave = async ({ api }: Dashboard) => {
+      await api.runQuickSave();
+      await settle();
+    };
+
+    test('does not report an agent change undone back to the saved state', async () => {
+      const dashboard = await setup();
+      await editByAgent(dashboard, 'Agent title');
+      await undo(dashboard);
+      await quickSave(dashboard);
+
+      expect(dashboard.api.getSettings().title).toBe('');
+      expect(getDashboardSavedEvents()).toEqual([handSave]);
+    });
+
+    test('reports an undone agent change once it is redone', async () => {
+      const dashboard = await setup();
+      await editByAgent(dashboard, 'Agent title');
+      await undo(dashboard);
+      await redo(dashboard);
+      await quickSave(dashboard);
+
+      expect(dashboard.api.getSettings().title).toBe('Agent title');
+      expect(getDashboardSavedEvents()).toEqual([agentSave]);
+    });
+
+    test('does not report an agent change undone back to a hand edit', async () => {
+      const dashboard = await setup();
+      await editByHand(dashboard, 'Hand title');
+      await editByAgent(dashboard, 'Agent title');
+      await undo(dashboard);
+      await quickSave(dashboard);
+
+      expect(dashboard.api.getSettings().title).toBe('Hand title');
+      expect(getDashboardSavedEvents()).toEqual([handSave]);
+    });
+
+    test('keeps the sources of the starting state when undoing back to it', async () => {
+      const dashboard = await setup(['agent']);
+      await editByHand(dashboard, 'Hand title');
+      await undo(dashboard);
+      await editByHand(dashboard, 'Second hand title');
+      await quickSave(dashboard);
+
+      expect(getDashboardSavedEvents()).toEqual([agentSave]);
+    });
+
+    test('does not report an agent change already saved when undoing a later hand edit', async () => {
+      const dashboard = await setup();
+      await editByAgent(dashboard, 'Agent title');
+      await quickSave(dashboard);
+      await editByHand(dashboard, 'Hand title A');
+      await undo(dashboard);
+      await editByHand(dashboard, 'Hand title B');
+      await quickSave(dashboard);
+
+      expect(dashboard.api.getSettings().title).toBe('Hand title B');
+      expect(getDashboardSavedEvents()).toEqual([agentSave, handSave]);
+    });
+
+    test('reports agent changes on each save that includes a new one', async () => {
+      const dashboard = await setup();
+      await editByAgent(dashboard, 'First agent title');
+      await quickSave(dashboard);
+      await editByAgent(dashboard, 'Second agent title');
+      await quickSave(dashboard);
+
+      expect(getDashboardSavedEvents()).toEqual([agentSave, agentSave]);
+    });
+
+    test('reports an agent change redone after a save that excluded it', async () => {
+      const dashboard = await setup();
+      await editByAgent(dashboard, 'Agent title');
+      await undo(dashboard);
+      await quickSave(dashboard);
+      await redo(dashboard);
+      await quickSave(dashboard);
+
+      expect(dashboard.api.getSettings().title).toBe('Agent title');
+      expect(getDashboardSavedEvents()).toEqual([handSave, agentSave]);
+    });
+
+    test('does not add an undo step for an agent change that changes nothing', async () => {
+      const dashboard = await setup();
+      await editByHand(dashboard, 'Hand title');
+      dashboard.api.setState(dashboard.api.getSerializedState().attributes, {
+        changeSources: ['agent'],
+      });
+      await settle();
+      await undo(dashboard);
+
+      expect(dashboard.api.getSettings().title).toBe('');
+      expect(dashboard.internalApi.canUndo$.value).toBe(false);
+    });
   });
 
   test('reports an interactive save of an existing dashboard as a new copy with setState sources', async () => {
