@@ -7,7 +7,7 @@
 
 import { partition } from 'lodash';
 import type { AutoApprovedApi } from '@kbn/agent-builder-common';
-import { isApiWildcardSelector } from '@kbn/agent-builder-common/apis/known_apis';
+import { isApiWildcardSelector } from '@kbn/agent-builder-common';
 import { loadApi } from './load_api';
 
 export interface DestructiveApiPartition {

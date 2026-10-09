@@ -7,8 +7,8 @@
 
 import type { Subscription } from 'rxjs';
 import type { QueryClient, QueryKey } from '@kbn/react-query';
-import type { ApiReference } from '@kbn/agent-builder-common/apis/known_apis';
-import { matchesAnyApiSelector } from '@kbn/agent-builder-common/apis/known_apis';
+import type { ApiReference } from '@kbn/agent-builder-common';
+import { matchesAnyApiSelector } from '@kbn/agent-builder-common';
 import type { EventsService } from '../../services/events';
 import { queryKeys } from '../query_keys';
 

@@ -6,8 +6,11 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { ApiStateChangedEventData, Conversation } from '@kbn/agent-builder-common';
-import type { ApiReference } from '@kbn/agent-builder-common/apis/known_apis';
+import type {
+  ApiReference,
+  ApiStateChangedEventData,
+  Conversation,
+} from '@kbn/agent-builder-common';
 import type { BrowserChatEvent } from './events';
 
 export interface ActiveConversation {
