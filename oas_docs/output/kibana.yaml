@@ -162926,7 +162926,7 @@ components:
         config:
           anyOf:
             - allOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_lensApiConfig'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiConfig'
                 - additionalProperties: false
                   type: object
                   properties:
@@ -182609,6 +182609,7 @@ components:
           anyOf:
             - type: string
             - type: number
+          nullable: true
         ranges:
           items:
             additionalProperties: false
@@ -182618,12 +182619,14 @@ components:
                 anyOf:
                   - type: string
                   - type: number
+                nullable: true
               label:
                 type: string
               to:
                 anyOf:
                   - type: string
                   - type: number
+                nullable: true
             required:
               - from
               - to
@@ -182634,6 +182637,7 @@ components:
           anyOf:
             - type: string
             - type: number
+          nullable: true
         type:
           enum:
             - range_key
