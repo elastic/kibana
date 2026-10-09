@@ -87,4 +87,9 @@ describe('buildKiMetadataListItems', () => {
     expect(screen.queryByTestId('contextViewKiTagsList')).not.toBeInTheDocument();
     expect(screen.queryByTestId('title-Expires at')).not.toBeInTheDocument();
   });
+
+  it('ignores tags when they are not an array', () => {
+    renderItems('ki-1', { tags: 'not-an-array' as unknown as string[] });
+    expect(screen.queryByTestId('contextViewKiTagsList')).not.toBeInTheDocument();
+  });
 });

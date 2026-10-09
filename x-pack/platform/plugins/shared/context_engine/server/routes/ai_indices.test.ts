@@ -1026,7 +1026,7 @@ describe('ai indices routes', () => {
         { name: 'type' },
         { name: 'title' },
         { name: 'updated_at' },
-        { name: 'governance.lifecycle.status' },
+        { name: 'lifecycle_status' },
       ],
       values,
     });
@@ -1103,7 +1103,7 @@ describe('ai indices routes', () => {
       });
 
       expect(esEsqlQuery.mock.calls[1][0].query).toContain(
-        'WHERE governance.lifecycle.status == "deleted"'
+        'WHERE lifecycle_status IN ("deleted")'
       );
     });
 

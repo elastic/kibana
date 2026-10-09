@@ -14,6 +14,8 @@ import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import type { KiListItem, ListKisResponse } from '../../common/http_api/knowledge_indicators';
 
 const KI_LIFECYCLE_STATUS_FIELD = 'governance.lifecycle.status';
+/** Normalized lifecycle column: unset or non-deleted stored values become `active`. */
+const KI_LIFECYCLE_STATUS_ALIAS = 'lifecycle_status';
 
 /** Columns the list reads. Each is guarded by a schema probe since AI indices vary in shape. */
 const KI_LIST_FIELDS = [
@@ -49,7 +51,7 @@ const toKiListItem = (row: Record<string, unknown>): KiListItem => {
   const { _index: index, id, type, title, updated_at: updatedAt, expires_at: expiresAt } = row;
   const updatedAtValue = toOptionalString(updatedAt);
   const expiresAtValue = toOptionalString(expiresAt);
-  const lifecycleStatus = toOptionalKiLifecycleStatus(row[KI_LIFECYCLE_STATUS_FIELD]);
+  const lifecycleStatus = toOptionalKiLifecycleStatus(row[KI_LIFECYCLE_STATUS_ALIAS]) ?? 'active';
   return {
     id: String(id),
     index: String(index),
@@ -57,32 +59,24 @@ const toKiListItem = (row: Record<string, unknown>): KiListItem => {
     ...(typeof title === 'string' ? { title } : {}),
     ...(updatedAtValue !== undefined ? { updated_at: updatedAtValue } : {}),
     ...(expiresAtValue !== undefined ? { expires_at: expiresAtValue } : {}),
-    ...(lifecycleStatus !== undefined ? { lifecycle_status: lifecycleStatus } : {}),
+    lifecycle_status: lifecycleStatus,
   };
 };
 
-const lifecycleStatusClauses: Record<KiLifecycleStatus, readonly string[]> = {
-  active: [`${KI_LIFECYCLE_STATUS_FIELD} IS NULL`, `${KI_LIFECYCLE_STATUS_FIELD} == "active"`],
-  deleted: [`${KI_LIFECYCLE_STATUS_FIELD} == "deleted"`],
-};
+const lifecycleStatusEvalClause = (has: (field: KiListField) => boolean): string =>
+  has(KI_LIFECYCLE_STATUS_FIELD)
+    ? `EVAL ${KI_LIFECYCLE_STATUS_ALIAS} = COALESCE(${KI_LIFECYCLE_STATUS_FIELD}, "active")`
+    : `EVAL ${KI_LIFECYCLE_STATUS_ALIAS} = "active"`;
 
-const lifecycleFilterClause = (
-  has: (field: KiListField) => boolean,
-  lifecycleStatuses?: KiLifecycleStatus[]
-): string[] => {
-  if (!has(KI_LIFECYCLE_STATUS_FIELD)) {
-    return [];
-  }
+const lifecycleFilterClause = (lifecycleStatuses?: KiLifecycleStatus[]): string[] => {
   if (lifecycleStatuses === undefined) {
-    return [
-      `WHERE ${KI_LIFECYCLE_STATUS_FIELD} IS NULL OR ${KI_LIFECYCLE_STATUS_FIELD} != "deleted"`,
-    ];
+    return [`WHERE ${KI_LIFECYCLE_STATUS_ALIAS} != "deleted"`];
   }
-  const parts = lifecycleStatuses.flatMap((status) => lifecycleStatusClauses[status]);
-  if (parts.length === 0) {
+  if (lifecycleStatuses.length === 0) {
     return ['WHERE FALSE'];
   }
-  return [`WHERE ${parts.join(' OR ')}`];
+  const values = lifecycleStatuses.map((status) => `"${status}"`).join(', ');
+  return [`WHERE ${KI_LIFECYCLE_STATUS_ALIAS} IN (${values})`];
 };
 
 /** A dest value may be a comma-separated list of index expressions. */
@@ -138,7 +132,8 @@ const currentKisQuery = (
           'WHERE _id == latest_doc',
         ]
       : []),
-    ...lifecycleFilterClause(has, lifecycleStatuses),
+    lifecycleStatusEvalClause(has),
+    ...lifecycleFilterClause(lifecycleStatuses),
     ...(has('type') ? [] : ['EVAL type = TO_STRING(NULL)']),
     ...(has('title') ? [] : ['EVAL title = TO_STRING(NULL)']),
     ...(has('updated_at') ? [] : ['EVAL updated_at = TO_STRING(NULL)']),
@@ -179,7 +174,7 @@ export const getKis = async (
     'title',
     'updated_at',
     'expires_at',
-    ...(has(KI_LIFECYCLE_STATUS_FIELD) ? [KI_LIFECYCLE_STATUS_FIELD] : []),
+    KI_LIFECYCLE_STATUS_ALIAS,
   ].join(', ');
 
   const rowsQuery = [

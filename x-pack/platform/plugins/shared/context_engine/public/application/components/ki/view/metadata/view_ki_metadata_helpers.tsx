@@ -29,7 +29,7 @@ export const buildKiMetadataListItems = (
   document: KiDocument,
   governance: KiGovernanceView
 ): KiMetadataListItem[] => {
-  const tags = document.tags ?? [];
+  const tags = Array.isArray(document.tags) ? document.tags : [];
   const { description, updated_at: updatedAt, expires_at: expiresAt } = document;
   const createdAt = document['@timestamp'];
 

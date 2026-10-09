@@ -42,7 +42,7 @@ const rowsResponse = (
     { name: 'type' },
     { name: 'title' },
     { name: 'updated_at' },
-    { name: 'governance.lifecycle.status' },
+    { name: 'lifecycle_status' },
   ],
   values: rows,
 });
@@ -58,7 +58,7 @@ const rowsResponseWithExpiresAt = (
     { name: 'title' },
     { name: 'updated_at' },
     { name: 'expires_at' },
-    { name: 'governance.lifecycle.status' },
+    { name: 'lifecycle_status' },
   ],
   values: rows,
 });
@@ -127,7 +127,13 @@ describe('ki_list', () => {
           updated_at: '2026-01-02T00:00:00.000Z',
           lifecycle_status: 'active',
         },
-        { id: 'ki-2', index: BACKING_INDEX, type: 'policy', title: 'Refund policy' },
+        {
+          id: 'ki-2',
+          index: BACKING_INDEX,
+          type: 'policy',
+          title: 'Refund policy',
+          lifecycle_status: 'active',
+        },
       ],
     });
 
@@ -140,10 +146,11 @@ describe('ki_list', () => {
         'WHERE revision_time == latest',
         'INLINE STATS latest_doc = MAX(_id) BY _index, id',
         'WHERE _id == latest_doc',
-        'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted"',
+        'EVAL lifecycle_status = COALESCE(governance.lifecycle.status, "active")',
+        'WHERE lifecycle_status != "deleted"',
         'EVAL expires_at = TO_STRING(NULL)',
         'SORT revision_time DESC, id ASC',
-        'KEEP _index, id, type, title, updated_at, expires_at, governance.lifecycle.status',
+        'KEEP _index, id, type, title, updated_at, expires_at, lifecycle_status',
         'LIMIT 25',
       ].join('\n| ')
     );
@@ -237,8 +244,7 @@ describe('ki_list', () => {
       ],
     });
 
-    expect(queryText(0)).toContain('WHERE governance.lifecycle.status == "deleted"');
-    expect(queryText(0)).not.toContain('governance.lifecycle.status == "active"');
+    expect(queryText(0)).toContain('WHERE lifecycle_status IN ("deleted")');
   });
 
   it('includes deleted KIs when lifecycleStatuses lists active and deleted', async () => {
@@ -271,9 +277,27 @@ describe('ki_list', () => {
       ],
     });
 
-    expect(queryText(0)).toContain(
-      'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active" OR governance.lifecycle.status == "deleted"'
-    );
+    expect(queryText(0)).toContain('WHERE lifecycle_status IN ("active", "deleted")');
+  });
+
+  it('returns no KIs when deleted is requested but the index has no lifecycle field', async () => {
+    query.mockReset();
+    query.mockResolvedValueOnce(probeResponse(['id', '@timestamp', 'type', 'title']));
+    query
+      .mockResolvedValueOnce(rowsResponse([]))
+      .mockResolvedValueOnce(totalsResponse(0))
+      .mockResolvedValueOnce(bucketsResponse([]));
+
+    await expect(
+      getKis(esClient, { dest: INDEX_DEST, size: 25, lifecycleStatuses: ['deleted'] })
+    ).resolves.toEqual({
+      total: 0,
+      summary: { total: 0, counts_by_type: [] },
+      kis: [],
+    });
+
+    expect(queryText(0)).toContain('EVAL lifecycle_status = "active"');
+    expect(queryText(0)).toContain('WHERE lifecycle_status IN ("deleted")');
   });
 
   it('collapses revisions by id alone on a data stream', async () => {
@@ -413,8 +437,18 @@ describe('ki_list', () => {
           updated_at: '2026-01-01T00:00:00.000Z',
           lifecycle_status: 'active',
         },
-        { id: 'ki-missing-type', index: BACKING_INDEX, title: 'Missing type' },
-        { id: 'ki-missing-title', index: BACKING_INDEX, type: 'policy' },
+        {
+          id: 'ki-missing-type',
+          index: BACKING_INDEX,
+          title: 'Missing type',
+          lifecycle_status: 'active',
+        },
+        {
+          id: 'ki-missing-title',
+          index: BACKING_INDEX,
+          type: 'policy',
+          lifecycle_status: 'active',
+        },
       ],
     });
   });
@@ -434,26 +468,40 @@ describe('ki_list', () => {
     expect(queryText(0)).toContain('| STATS total = COUNT(*)');
   });
 
-  it('omits the revision collapse and lifecycle filter for indices without those fields', async () => {
+  it('normalizes lifecycle to active and excludes deleted when fields are missing on the index', async () => {
     query.mockReset();
     query.mockResolvedValueOnce(probeResponse(['type', 'title']));
     query
       .mockResolvedValueOnce(
-        rowsResponse([[BACKING_INDEX, 'ki-1', 'dashboard', 'Sales', null, null]])
+        rowsResponse([[BACKING_INDEX, 'ki-1', 'dashboard', 'Sales', null, 'active']])
       )
       .mockResolvedValueOnce(totalsResponse(1))
       .mockResolvedValueOnce(bucketsResponse([[1, 'dashboard']]));
 
-    await getKis(esClient, { dest: INDEX_DEST, size: 25 });
+    await expect(getKis(esClient, { dest: INDEX_DEST, size: 25 })).resolves.toEqual(
+      expect.objectContaining({
+        kis: [
+          {
+            id: 'ki-1',
+            index: BACKING_INDEX,
+            type: 'dashboard',
+            title: 'Sales',
+            lifecycle_status: 'active',
+          },
+        ],
+      })
+    );
 
     expect(queryText(0)).toBe(
       [
         `FROM "${BACKING_INDEX}" METADATA _id, _index`,
         'EVAL id = _id',
+        'EVAL lifecycle_status = "active"',
+        'WHERE lifecycle_status != "deleted"',
         'EVAL updated_at = TO_STRING(NULL)',
         'EVAL expires_at = TO_STRING(NULL)',
         'SORT id ASC',
-        'KEEP _index, id, type, title, updated_at, expires_at',
+        'KEEP _index, id, type, title, updated_at, expires_at, lifecycle_status',
         'LIMIT 25',
       ].join('\n| ')
     );
