@@ -241,7 +241,21 @@ const bulkEpisodeIdSchema = z
   .max(ID_MAX_LENGTH)
   .describe('Identifier of the alert to apply the action to.');
 
-const makeBulkActionBodySchema = <TItem extends z.ZodType>(itemSchema: TItem, verb: string) =>
+type BulkItemIdKey = 'alert_id' | 'group_hash';
+
+/**
+ * Builds a bulk body whose items each target a different alert or series:
+ * a request repeating an `idKey` is rejected, since two actions of the same
+ * type for the same target would either repeat or contradict each other.
+ */
+const makeBulkActionBodySchema = <
+  TIdKey extends BulkItemIdKey,
+  TItem extends z.ZodType<Record<TIdKey, string>>
+>(
+  itemSchema: TItem,
+  verb: string,
+  idKey: TIdKey
+) =>
   z
     .object({
       items: z
@@ -251,7 +265,23 @@ const makeBulkActionBodySchema = <TItem extends z.ZodType>(itemSchema: TItem, ve
           MAX_BULK_ITEMS,
           `Cannot process more than ${MAX_BULK_ITEMS} actions in a single request`
         )
-        .describe(`List of 1 to ${MAX_BULK_ITEMS} ${verb} actions to create.`),
+        .superRefine((items, ctx) => {
+          const seenIds = new Set<string>();
+          items.forEach((item, index) => {
+            const id = item[idKey];
+            if (seenIds.has(id)) {
+              ctx.addIssue({
+                code: 'custom',
+                message: `Each ${idKey} can appear at most once per request; [${id}] is repeated`,
+                path: [index, idKey],
+              });
+            }
+            seenIds.add(id);
+          });
+        })
+        .describe(
+          `List of 1 to ${MAX_BULK_ITEMS} ${verb} actions to create, each for a different \`${idKey}\`.`
+        ),
     })
     .strict();
 
@@ -264,7 +294,8 @@ export type BulkSnoozeSeriesActionItem = z.infer<typeof bulkSnoozeSeriesActionIt
 
 export const bulkSnoozeSeriesActionBodySchema = makeBulkActionBodySchema(
   bulkSnoozeSeriesActionItemSchema,
-  'snooze'
+  'snooze',
+  'group_hash'
 ).meta({ id: 'alerting_bulk_snooze_series_request' });
 export type BulkSnoozeSeriesActionBody = z.infer<typeof bulkSnoozeSeriesActionBodySchema>;
 
@@ -277,7 +308,8 @@ export type BulkUnsnoozeSeriesActionItem = z.infer<typeof bulkUnsnoozeSeriesActi
 
 export const bulkUnsnoozeSeriesActionBodySchema = makeBulkActionBodySchema(
   bulkUnsnoozeSeriesActionItemSchema,
-  'unsnooze'
+  'unsnooze',
+  'group_hash'
 ).meta({ id: 'alerting_bulk_unsnooze_series_request' });
 export type BulkUnsnoozeSeriesActionBody = z.infer<typeof bulkUnsnoozeSeriesActionBodySchema>;
 
@@ -290,7 +322,8 @@ export type BulkTagEpisodeActionItem = z.infer<typeof bulkTagEpisodeActionItemSc
 
 export const bulkTagEpisodeActionBodySchema = makeBulkActionBodySchema(
   bulkTagEpisodeActionItemSchema,
-  'tag'
+  'tag',
+  'alert_id'
 ).meta({ id: 'alerting_bulk_tag_alerts_request' });
 export type BulkTagEpisodeActionBody = z.infer<typeof bulkTagEpisodeActionBodySchema>;
 
@@ -303,7 +336,8 @@ export type BulkAckEpisodeActionItem = z.infer<typeof bulkAckEpisodeActionItemSc
 
 export const bulkAckEpisodeActionBodySchema = makeBulkActionBodySchema(
   bulkAckEpisodeActionItemSchema,
-  'ack'
+  'ack',
+  'alert_id'
 ).meta({ id: 'alerting_bulk_ack_alerts_request' });
 export type BulkAckEpisodeActionBody = z.infer<typeof bulkAckEpisodeActionBodySchema>;
 
@@ -316,7 +350,8 @@ export type BulkUnackEpisodeActionItem = z.infer<typeof bulkUnackEpisodeActionIt
 
 export const bulkUnackEpisodeActionBodySchema = makeBulkActionBodySchema(
   bulkUnackEpisodeActionItemSchema,
-  'unack'
+  'unack',
+  'alert_id'
 ).meta({ id: 'alerting_bulk_unack_alerts_request' });
 export type BulkUnackEpisodeActionBody = z.infer<typeof bulkUnackEpisodeActionBodySchema>;
 
@@ -329,7 +364,8 @@ export type BulkAssignEpisodeActionItem = z.infer<typeof bulkAssignEpisodeAction
 
 export const bulkAssignEpisodeActionBodySchema = makeBulkActionBodySchema(
   bulkAssignEpisodeActionItemSchema,
-  'assign'
+  'assign',
+  'alert_id'
 ).meta({ id: 'alerting_bulk_assign_alerts_request' });
 export type BulkAssignEpisodeActionBody = z.infer<typeof bulkAssignEpisodeActionBodySchema>;
 
@@ -342,7 +378,8 @@ export type BulkActivateEpisodeActionItem = z.infer<typeof bulkActivateEpisodeAc
 
 export const bulkActivateEpisodeActionBodySchema = makeBulkActionBodySchema(
   bulkActivateEpisodeActionItemSchema,
-  'activate'
+  'activate',
+  'alert_id'
 ).meta({ id: 'alerting_bulk_activate_alerts_request' });
 export type BulkActivateEpisodeActionBody = z.infer<typeof bulkActivateEpisodeActionBodySchema>;
 
@@ -355,7 +392,8 @@ export type BulkDeactivateEpisodeActionItem = z.infer<typeof bulkDeactivateEpiso
 
 export const bulkDeactivateEpisodeActionBodySchema = makeBulkActionBodySchema(
   bulkDeactivateEpisodeActionItemSchema,
-  'deactivate'
+  'deactivate',
+  'alert_id'
 ).meta({ id: 'alerting_bulk_deactivate_alerts_request' });
 export type BulkDeactivateEpisodeActionBody = z.infer<typeof bulkDeactivateEpisodeActionBodySchema>;
 

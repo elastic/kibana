@@ -10,7 +10,7 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import { SCOUT_TEST_LANE_LOADS_PATH, SCOUT_TEST_TRACKS_ROOT } from './paths.ts';
-import { scoutTestTrack, type ScoutTestTrack } from './test_tracks.ts';
+import { scoutTestTrack, type ScoutTestLane, type ScoutTestTrack } from './test_tracks.ts';
 import { pickScoutTestGroupRunOrder } from './pick_scout_test_group_run_order.ts';
 import { BuildkiteClient, type BuildkiteCommandStep } from '../buildkite/index.ts';
 import { getKibanaDir } from '../utils.ts';
@@ -50,6 +50,29 @@ async function distributeScoutTestsByModule() {
   }
 }
 
+interface LoadGroup {
+  configSet: string;
+  loadIDs: string[];
+}
+
+// Lanes of combined tracks list their own load groups, other lanes run their track's server config set
+function getLaneLoadGroups(
+  lane: ScoutTestLane,
+  server: ScoutTestTrack['metadata']['server']
+): LoadGroup[] {
+  if (lane.metadata.loadGroups) {
+    return lane.metadata.loadGroups.map(({ configSet, loads }) => ({ configSet, loadIDs: loads }));
+  }
+
+  if (server === undefined) {
+    throw new Error(
+      `Scout test lane #${lane.number} has neither load groups nor a server config set`
+    );
+  }
+
+  return [{ configSet: server.configSet, loadIDs: lane.loads }];
+}
+
 async function distributeScoutTestsOnLanes() {
   const testTracksDefinitionPaths = scoutTestTrack.definitions.all();
 
@@ -58,7 +81,7 @@ async function distributeScoutTestsOnLanes() {
   }
 
   const steps: BuildkiteCommandStep[] = [];
-  const loadInfoByStepKey: Record<string, { label: string; loadIDs: string[] }> = {};
+  const loadInfoByStepKey: Record<string, { label: string; loadGroups: LoadGroup[] }> = {};
   const testLaneLoadsFilePath = path.relative(getKibanaDir(), SCOUT_TEST_LANE_LOADS_PATH);
 
   testTracksDefinitionPaths
@@ -71,6 +94,7 @@ async function distributeScoutTestsOnLanes() {
     .forEach(({ testTarget, server, lane }) => {
       // Define the effective lane number. `lane.number` is only accurate in reference to the originating test track
       const effectiveLaneNumber = steps.length + 1;
+      const loadGroups = getLaneLoadGroups(lane, server);
 
       const laneEnv = {
         SCOUT_TEST_LANE_LOADS_PATH: testLaneLoadsFilePath,
@@ -78,7 +102,6 @@ async function distributeScoutTestsOnLanes() {
         SCOUT_TEST_TARGET_LOCATION: testTarget.location,
         SCOUT_TEST_TARGET_ARCH: testTarget.arch,
         SCOUT_TEST_TARGET_DOMAIN: testTarget.domain,
-        SCOUT_TEST_SERVER_CONFIG_SET: server.configSet,
         SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS:
           process.env.SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS || '300',
         ...envVarsIfSet([
@@ -90,7 +113,8 @@ async function distributeScoutTestsOnLanes() {
       };
 
       const stepKey = `scout_test_lane_${effectiveLaneNumber}`;
-      const stepLabel = `Scout Lane #${effectiveLaneNumber} - ${testTarget.arch}-${testTarget.domain} / ${server.configSet}`;
+      const configSets = loadGroups.map(({ configSet }) => configSet).join(', ');
+      const stepLabel = `Scout Lane #${effectiveLaneNumber} - ${testTarget.arch}-${testTarget.domain} / ${configSets}`;
 
       // Agent that will do the actual work of running the test loads
       steps.push({
@@ -109,7 +133,7 @@ async function distributeScoutTestsOnLanes() {
       });
 
       // Lane load information to be referenced by the agent (IDs in particular)
-      loadInfoByStepKey[stepKey] = { label: stepLabel, loadIDs: lane.loads };
+      loadInfoByStepKey[stepKey] = { label: stepLabel, loadGroups };
     });
 
   if (steps.length === 0) {

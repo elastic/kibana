@@ -15,6 +15,7 @@ export {
   ESCALATION_LINKED_INVESTIGATIONS_URL,
   ESCALATION_STATUS_FIELD,
   ESCALATION_STATUS_URL,
+  ESCALATION_SYNC_URL,
   ESCALATION_TEMPLATE_ID,
   ESCALATIONS_INTERNAL_URL,
   ESCALATIONS_UI_CAPABILITY_MANAGE,
@@ -45,11 +46,17 @@ export type {
   ListEscalationsQuery,
   ListEscalationsResponse,
   ListLinkedInvestigationsResponse,
+  SyncEscalationResponse,
 } from './escalation';
 
 export {
+  ESCALATION_ATTACHMENTS_SYNCED_EVENT_TYPE,
   ESCALATION_CREATED_FROM_INVESTIGATION_EVENT_TYPE,
   ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE,
+  escalationAttachmentsSyncedEventSchema,
   escalationInvestigationEventSchema,
 } from './conversation_events';
-export type { EscalationInvestigationEventData } from './conversation_events';
+export type {
+  EscalationAttachmentsSyncedEventData,
+  EscalationInvestigationEventData,
+} from './conversation_events';

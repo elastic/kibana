@@ -147,6 +147,17 @@ describe('ConversationQueue', () => {
       expect(showMore()).toHaveTextContent('Show more (30)');
     });
 
+    it('follows the last row as its sibling, so the row keeps its divider', () => {
+      renderQueue({ remaining: 30, onShowMore: jest.fn() });
+
+      let footer: HTMLElement = showMore();
+      while (footer.parentElement && !footer.previousElementSibling) {
+        footer = footer.parentElement;
+      }
+
+      expect(footer.previousElementSibling).toHaveTextContent(investigation.title);
+    });
+
     it('is absent with nothing left to load', () => {
       renderQueue({ count: 1, remaining: 0, onShowMore: jest.fn() });
 

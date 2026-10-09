@@ -7,10 +7,8 @@
 
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
-  EuiButton,
   EuiCallOut,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiLink,
   EuiResizableContainer,
   EuiSpacer,
@@ -81,6 +79,7 @@ import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachm
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useAgentBuilderRuleCreation } from '../rule_creation/hooks/use_agent_builder_rule_creation';
 import { RuleCreationEventTypes } from '../../../../common/lib/telemetry/types';
+import { EditRuleFormButtons } from './edit_rule_form_buttons';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
@@ -702,24 +701,12 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                         justifyContent="flexEnd"
                         responsive={false}
                       >
-                        <EuiFlexItem grow={false}>
-                          <EuiButton iconType="cross" onClick={goToDetailsRule}>
-                            {i18n.CANCEL}
-                          </EuiButton>
-                        </EuiFlexItem>
-
-                        <EuiFlexItem grow={false}>
-                          <EuiButton
-                            data-test-subj="ruleEditSubmitButton"
-                            fill
-                            onClick={onSubmit}
-                            iconType="save"
-                            isLoading={isLoading}
-                            isDisabled={loading}
-                          >
-                            {i18n.SAVE_CHANGES}
-                          </EuiButton>
-                        </EuiFlexItem>
+                        <EditRuleFormButtons
+                          onCancel={goToDetailsRule}
+                          onSubmit={onSubmit}
+                          isLoading={isLoading}
+                          isDisabled={loading}
+                        />
                       </EuiFlexGroup>
                     </MaxWidthEuiFlexItem>
                   </EuiFlexGroup>

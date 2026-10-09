@@ -79,7 +79,6 @@ enabled:
   - src/platform/test/functional/apps/dashboard/esql_controls/config.ts
   - src/platform/test/functional/apps/discover/ccs_compatibility/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
-  - src/platform/test/functional/apps/management/group3/config.ts
   - src/platform/test/functional/apps/visualize/group1/config.ts
   - src/platform/test/functional/apps/visualize/group2/config.ts
   - src/platform/test/functional/apps/visualize/group3/config.ts
@@ -228,7 +227,6 @@ enabled:
   - x-pack/platform/test/functional/apps/monitoring/config.group1.ts
   - x-pack/platform/test/functional/apps/monitoring/config.group2.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
-  - x-pack/platform/test/functional/apps/security/config.ts
   - x-pack/platform/test/functional/apps/status_page/config.ts
   - x-pack/platform/test/functional/apps/transform/creation/index_pattern/config.ts
   - x-pack/platform/test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts
@@ -299,6 +297,7 @@ enabled:
   - x-pack/performance/journeys_e2e/many_fields_discover_esql.ts
   - x-pack/performance/journeys_e2e/many_fields_lens_editor.ts
   - x-pack/performance/journeys_e2e/many_fields_transform.ts
+  - x-pack/performance/journeys_e2e/many_points_chart_dashboard.ts
   - x-pack/performance/journeys_e2e/many_series_chart_dashboard.ts
   - x-pack/performance/journeys_e2e/metrics_experience_grid.ts
   - x-pack/performance/journeys_e2e/tsdb_logs_data_visualizer.ts

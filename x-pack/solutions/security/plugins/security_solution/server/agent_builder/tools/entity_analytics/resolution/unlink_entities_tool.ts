@@ -19,10 +19,10 @@ import { requireResolvedEntity } from '../entity_resolution';
 import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 import { checkResolutionAccess } from './check_resolution_access';
 import {
-  resolveEntityIdsForResolution,
+  resolveEntityIds,
   type ResolvedEntityResult,
   type UnresolvedEntityResult,
-} from './resolve_entity_ids';
+} from '../shared/resolve_entity_ids';
 import { getResolutionToolAvailability } from './resolution_availability';
 
 const MAX_ENTITIES_PER_CALL = 100;
@@ -199,7 +199,7 @@ Entity references that don't resolve to a canonical id are excluded from the bat
         }
 
         // 3. Resolve the entities to be unlinked to their EUIDs
-        const { resolved, unresolved } = await resolveEntityIdsForResolution({
+        const { resolved, unresolved } = await resolveEntityIds({
           esClient: client,
           spaceId,
           entityIds: params.entityIds,
