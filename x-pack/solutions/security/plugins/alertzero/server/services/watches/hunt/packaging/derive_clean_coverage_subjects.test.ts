@@ -82,7 +82,9 @@ describe('deriveCleanCoverageSubjects', () => {
   });
 
   it('gives the report-scoped subject the highest-confidence query', () => {
-    expect(deriveCleanCoverageSubjects(defaultArgs)[0].validatedEsql).toBe(SPRAY_ESQL);
+    expect(deriveCleanCoverageSubjects(defaultArgs)[0].validatedEsql).toBe(
+      SPRAY_ESQL.replace('// Generated from hunt.hunt_behavior\n', '')
+    );
   });
 
   it('flags every query as executed_no_rows', () => {

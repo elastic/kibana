@@ -321,6 +321,30 @@ describe('runPackageReport', () => {
       expect(getEsReportContextClient).toHaveBeenCalledTimes(1);
     });
 
+    it('keeps the SSE severity on a hit even when the report is loaded and has its own', async () => {
+      await runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus: 'success',
+        hasConfirmedHit: true,
+        attachments: [
+          sseAttachment({
+            hit: true,
+            hostName: 'h1',
+            hypothesis: 'Hunt Watch evaluated report rpt against the environment.',
+          }),
+        ],
+        expectedSseCount: 1,
+        deps: deps({ writeCoverageKis, getEsReportContextClient }),
+      });
+
+      expect(getEsReportContextClient).toHaveBeenCalledTimes(1);
+      const [subjects] = writeCoverageKis.mock.calls[0];
+      expect(subjects.map((subject) => subject.severity)).toEqual(subjects.map(() => 'high'));
+    });
+
     it('keeps the full investigation summary on the written subjects', async () => {
       await cleanRun();
 

@@ -118,10 +118,6 @@ export const getPackageReportStepDefinition = ({
           isContextEngineEnabled: () => isContextEngineEnabled(request),
         });
 
-        const getEsReportContextClient = getInternalEsClient
-          ? () => getInternalEsClient()
-          : undefined;
-
         const rehydrateProcessSelectors = getRehydrateProcessSelectors(
           context.contextManager.getScopedEsClient(),
           logger
@@ -160,7 +156,8 @@ export const getPackageReportStepDefinition = ({
             resolveHostEnrollment: getResolveHostEnrollment(spaceId),
             rehydrateProcessSelectors,
             countExistingProposals,
-            getEsReportContextClient,
+            getEsReportContextClient: getInternalEsClient,
+            logger,
             hasOpenProposal,
           },
         });

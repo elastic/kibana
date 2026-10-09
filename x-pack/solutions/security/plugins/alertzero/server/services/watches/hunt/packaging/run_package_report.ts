@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import type {
@@ -80,6 +81,8 @@ export interface RunPackageReportDeps {
    * erroring (see `loadReportHuntContext`'s doc comment).
    */
   getEsReportContextClient?: () => EsReportContextClient;
+  /** Logs a threat report load failure; absent, the failure is silent. */
+  logger?: Logger;
   hasOpenProposal: HasOpenProposal;
 }
 
@@ -223,6 +226,7 @@ export const runPackageReport = async ({
             esClient: deps.getEsReportContextClient(),
             spaceId,
             reportId,
+            logger: deps.logger,
           })
         : undefined;
       const subjects = deriveCleanCoverageSubjects({
@@ -290,7 +294,7 @@ export const runPackageReport = async ({
 
   // Hit path: the threat story is the finding's own hypothesis. The report is loaded only as a
   // fallback, when a finding carries no hypothesis (the mapper's generic sentence counts as
-  // none), and then its severity wins over the SSE's confidence-derived one.
+  // none). Severity always comes from the SSE, so it does not depend on whether that load ran.
   const needsReport = state.findings.some((finding) => finding.hypothesis === undefined);
   const reportContext =
     needsReport && deps.getEsReportContextClient
@@ -298,13 +302,14 @@ export const runPackageReport = async ({
           esClient: deps.getEsReportContextClient(),
           spaceId,
           reportId,
+          logger: deps.logger,
         })
       : undefined;
   const subjects = deriveCoverageSubjects({
     spaceId,
     state: {
       ...state,
-      severity: reportContext?.severity ?? state.severity,
+      severity: state.severity ?? reportContext?.severity,
       investigationSummary: buildInvestigationSummary({ state, decided }),
       coordinator,
       reportContext,

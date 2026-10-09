@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { loadReportHuntContext } from './load_report_hunt_context';
 import type { EsReportContextClient } from './load_report_hunt_context';
 
@@ -114,6 +115,18 @@ describe('loadReportHuntContext', () => {
     const result = await loadReportHuntContext({ esClient, spaceId: 'default', reportId: 'rpt-1' });
 
     expect(result).toBeUndefined();
+  });
+
+  it('warns with the report id when the client fails', async () => {
+    const esClient: EsReportContextClient = {
+      search: jest.fn().mockRejectedValue(new Error('socket hang up')),
+    };
+    const logger = { warn: jest.fn() } as unknown as Logger;
+
+    await loadReportHuntContext({ esClient, spaceId: 'default', reportId: 'rpt-1', logger });
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('rpt-1'));
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('socket hang up'));
   });
 
   it('filters by the current space plus the global sentinel', async () => {

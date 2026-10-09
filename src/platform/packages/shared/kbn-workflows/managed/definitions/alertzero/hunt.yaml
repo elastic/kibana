@@ -322,7 +322,9 @@ steps:
       # `compact` turns a nil (coordinator skipped, or Tier 2 never ran) into `[]` and leaves a
       # real array as is, so the declared array outputs never see a null.
       result_report_intent_targets: "${{ steps.run_hunt_coordinator.output.report_intent_targets | compact }}"
-      result_behaviors: "${{ steps.run_hunt_coordinator.output.tier2.behaviors | compact }}"
+      # Behaviors are cut to the 20 packaging accepts: Tier 2 can validate more than it generates a
+      # query for, and an over-long array would fail the packaging step's input validation.
+      result_behaviors: "${{ steps.run_hunt_coordinator.output.tier2.behaviors | compact | slice: 0, 20 }}"
 
   - name: emit_result
     type: workflow.output

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+
 /**
  * Reads a slice of the threat report (title, severity, extracted techniques / IOCs /
  * vendor / product, body text) for the coverage KI's prose and no-hit
@@ -88,10 +90,12 @@ export const loadReportHuntContext = async ({
   esClient,
   spaceId,
   reportId,
+  logger,
 }: {
   esClient: EsReportContextClient;
   spaceId: string;
   reportId: string;
+  logger?: Logger;
 }): Promise<ReportHuntContext | undefined> => {
   try {
     const response = await esClient.search({
@@ -143,7 +147,12 @@ export const loadReportHuntContext = async ({
       ...(product ? { product } : {}),
       ...(bodyText ? { bodyText } : {}),
     };
-  } catch {
+  } catch (error) {
+    logger?.warn(
+      `Hunt packaging could not load threat report ${reportId} for the coverage KI: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
     return undefined;
   }
 };

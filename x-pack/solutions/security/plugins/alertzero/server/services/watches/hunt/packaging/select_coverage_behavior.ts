@@ -67,11 +67,14 @@ export const selectCoverageBehavior = ({
       : b.rowCount - a.rowCount || b.confidence - a.confidence
   );
   if (!best) return { omittedReason: 'none_executed' };
-  if (best.validatedEsql.length > MAX_VALIDATED_ESQL_CHARS) {
+  // Tier 2's `//` header (generator note, report id fragment) is provenance, not part of the
+  // query a rule author reuses.
+  const validatedEsql = stripEsqlComments(best.validatedEsql).trim();
+  if (validatedEsql.length > MAX_VALIDATED_ESQL_CHARS) {
     return { omittedReason: 'too_long', behavior: best };
   }
   return {
-    validatedEsql: best.validatedEsql,
+    validatedEsql,
     esqlStatus: best.hit ? 'executed_hit' : 'executed_no_rows',
     behavior: best,
   };
