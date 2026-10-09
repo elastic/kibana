@@ -1197,6 +1197,64 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       });
     });
 
+    describe('policies with version conditions, inactive agents on #sentinel', () => {
+      const inactiveAgents = generateAgents(1, 'policy-1#sentinel', '9.4.1');
+
+      beforeEach(() => {
+        mockAgentPolicyService.fetchAllAgentPolicies = getPolicyPages(
+          [{ id: 'policy-1' } as AgentPolicy],
+          []
+        );
+        mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+        mockedGetAgentsByKuery.mockImplementation(async (_es, _so, options: any) =>
+          options.kuery.includes('status:inactive')
+            ? { total: 1, agents: inactiveAgents, page: 1, perPage: 0 }
+            : { total: 0, agents: [], page: 1, perPage: 0 }
+        );
+        mockedFetchAllAgentsByKuery.mockImplementation(async (_es, _so, options: any) =>
+          getMockFetchAllAgentsByKuery(
+            options.kuery.includes('status:inactive') ? inactiveAgents : []
+          )
+        );
+      });
+
+      it('moves them to the version specific policy when the sentinel version is disabled', async () => {
+        mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(false);
+
+        await runTask();
+
+        expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({
+            kuery: 'policy_id:"policy-1#sentinel" AND active:true AND status:inactive',
+            showInactive: true,
+          })
+        );
+        expect(mockedReassignAgents).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ agentIds: ['agent-0'], showInactive: true }),
+          'policy-1#9.4'
+        );
+      });
+
+      it('leaves them alone while the sentinel version is enabled', async () => {
+        mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(true);
+
+        await runTask();
+
+        expect(mockedGetAgentsByKuery).not.toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({
+            kuery: expect.stringContaining('status:inactive'),
+          })
+        );
+        expect(mockedReassignAgents).not.toHaveBeenCalled();
+      });
+    });
+
     describe('orphaned version-specific policy sweep', () => {
       beforeEach(() => {
         mockAgentPolicyService.fetchAllAgentPolicies = getPolicyPages([], []);
