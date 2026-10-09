@@ -96,27 +96,38 @@ describe('SearchModalInternal', () => {
     expect(blurSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the error state when the search fails', async () => {
+  it('renders the generic error state when the search fails', async () => {
+    (searchService.find as jest.Mock).mockReturnValue(throwError(() => new Error('generic error')));
+
+    renderModal();
+
+    await runDebouncedSearch();
+
+    expect(screen.getAllByTestId('nav-search-error-generic').length).toBeGreaterThan(0);
+    expect(screen.queryByTestId('nav-search-error-license')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nav-search-no-results')).not.toBeInTheDocument();
+  });
+
+  it('renders the license error state when the search fails with an invalid license error', async () => {
     (searchService.find as jest.Mock).mockReturnValue(
-      throwError(() => new Error('invalid license'))
+      throwError(() => Object.assign(new Error('expired'), { type: 'invalid-license' as const }))
     );
 
     renderModal();
 
     await runDebouncedSearch();
 
-    expect(screen.getAllByTestId('nav-search-error').length).toBeGreaterThan(0);
+    expect(screen.getAllByTestId('nav-search-error-license').length).toBeGreaterThan(0);
+    expect(screen.queryByTestId('nav-search-error-generic')).not.toBeInTheDocument();
     expect(screen.queryByTestId('nav-search-no-results')).not.toBeInTheDocument();
   });
 
-  it('replaces the error state with the character limit message when the input exceeds the limit', async () => {
-    (searchService.find as jest.Mock).mockReturnValue(
-      throwError(() => new Error('invalid license'))
-    );
-
+  it('marks the input as invalid and shows the character limit message when the input exceeds the limit', async () => {
     renderModal(SMALL_SEARCH_CHAR_LIMIT);
 
     await runDebouncedSearch();
+
+    expect(screen.getByTestId('nav-search-input')).not.toHaveAttribute('aria-invalid', 'true');
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await user.click(screen.getByTestId('nav-search-input'));
@@ -126,9 +137,9 @@ describe('SearchModalInternal', () => {
       jest.advanceTimersByTime(350);
     });
 
+    expect(screen.getByTestId('nav-search-input')).toHaveAttribute('aria-invalid', 'true');
     expect(screen.getAllByTestId('searchCharLimitExceededMessageHeading').length).toBeGreaterThan(
       0
     );
-    expect(screen.queryByTestId('nav-search-error')).not.toBeInTheDocument();
   });
 });

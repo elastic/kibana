@@ -271,7 +271,7 @@ describe('useSearchState', () => {
   it('sets searchError, clears stale options and reports the error when a search fails', async () => {
     const { globalSearch, navigateToUrl, reportEvent } = makeDeps();
 
-    const error = new Error('invalid license');
+    const error = new Error('generic error');
 
     // first call = initial empty load
     globalSearch.find.mockReturnValueOnce(of(createBatch('Discover')));
@@ -289,7 +289,7 @@ describe('useSearchState', () => {
 
     await triggerInitialLoadAndRunDebounce(result);
 
-    expect(result.current.searchError).toBe(false);
+    expect(result.current.searchError).toBeNull();
     expect(result.current.options).toHaveLength(1);
 
     act(() => {
@@ -299,9 +299,38 @@ describe('useSearchState', () => {
       jest.advanceTimersByTime(350);
     });
 
-    expect(result.current.searchError).toBe(true);
+    expect(result.current.searchError).toBe('generic');
     expect(result.current.options).toEqual([]);
     expect(result.current.isLoading).toBe(false);
+    expect(apm.captureError).toHaveBeenCalledWith(error, { labels: { SearchValue: 'd' } });
+  });
+
+  it('sets searchError to "license" when the search fails with an invalid license error', async () => {
+    const { globalSearch, navigateToUrl, reportEvent } = makeDeps();
+
+    const error = Object.assign(new Error('expired'), { type: 'invalid-license' as const });
+
+    // first call = initial empty load
+    globalSearch.find.mockReturnValueOnce(of(createBatch('Discover')));
+
+    // second call = user typed search, which fails because of the license
+    globalSearch.find.mockReturnValueOnce(throwError(() => error));
+
+    const { result } = renderHook(() =>
+      useSearchState({ globalSearch, navigateToUrl, reportEvent })
+    );
+
+    await triggerInitialLoadAndRunDebounce(result);
+
+    act(() => {
+      result.current.setSearchValue('d');
+    });
+    act(() => {
+      jest.advanceTimersByTime(350);
+    });
+
+    expect(result.current.searchError).toBe('license');
+    expect(result.current.options).toEqual([]);
     expect(apm.captureError).toHaveBeenCalledWith(error, { labels: { SearchValue: 'd' } });
   });
 
@@ -309,7 +338,7 @@ describe('useSearchState', () => {
     const { globalSearch, navigateToUrl, reportEvent } = makeDeps();
 
     // first call = initial empty load, which fails
-    globalSearch.find.mockReturnValueOnce(throwError(() => new Error('invalid license')));
+    globalSearch.find.mockReturnValueOnce(throwError(() => new Error('generic error')));
 
     // second call = user typed search, which succeeds
     globalSearch.find.mockReturnValueOnce(of(createBatch({ id: 'Map', score: 20 })));
@@ -324,7 +353,7 @@ describe('useSearchState', () => {
 
     await triggerInitialLoadAndRunDebounce(result);
 
-    expect(result.current.searchError).toBe(true);
+    expect(result.current.searchError).toBe('generic');
 
     act(() => {
       result.current.setSearchValue('m');
@@ -333,7 +362,7 @@ describe('useSearchState', () => {
       jest.advanceTimersByTime(350);
     });
 
-    expect(result.current.searchError).toBe(false);
+    expect(result.current.searchError).toBeNull();
     expect(result.current.options.map((o: any) => o.label)).toEqual(['Map']);
   });
 });

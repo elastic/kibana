@@ -16,12 +16,17 @@ import { apm } from '@elastic/apm-rum';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { SearchSuggestion } from '../suggestions';
 import { getSuggestions } from '../suggestions';
-import type { SearchProps } from '../components/types';
+import type { SearchErrorType, SearchProps } from '../components/types';
 import { resultToOption, suggestionToOption } from '../lib';
 import { parseSearchParams } from '../search_syntax';
 import { sort } from '../components';
 
 const UNKNOWN_TAG_ID = '__unknown__';
+
+const INVALID_LICENSE_ERROR_TYPE = 'invalid-license';
+
+const isInvalidLicenseError = (error?: { type?: string } | null): boolean =>
+  error?.type === INVALID_LICENSE_ERROR_TYPE;
 
 interface UseSearchStateOptions extends SearchProps {
   /** Called after a result is selected and navigation is triggered. */
@@ -34,7 +39,7 @@ export interface SearchStateResult {
   options: EuiSelectableTemplateSitewideOption[];
   isLoading: boolean;
   searchCharLimitExceeded: boolean;
-  searchError: boolean;
+  searchError: SearchErrorType | null;
   searchRef: RefObject<HTMLInputElement | null>;
   setSearchRef: (ref: HTMLInputElement | null) => void;
   triggerInitialLoad: () => void;
@@ -58,11 +63,12 @@ export const useSearchState = ({
   const [options, setOptions] = useState<EuiSelectableTemplateSitewideOption[]>([]);
   const [searchableTypes, setSearchableTypes] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [searchCharLimitExceeded, setSearchCharLimitExceeded] = useState(false);
-  const [searchError, setSearchError] = useState(false);
+  const [searchError, setSearchError] = useState<SearchErrorType | null>(null);
 
   const searchSubscription = useRef<Subscription | null>(null);
   const searchRef = useRef<HTMLInputElement | null>(null);
+
+  const searchCharLimitExceeded = searchValue.length > globalSearch.searchCharLimit;
 
   const setSearchRef = useCallback((ref: HTMLInputElement | null) => {
     searchRef.current = ref;
@@ -136,14 +142,12 @@ export const useSearchState = ({
         }
 
         // a new search attempt clears the previous error
-        setSearchError(false);
+        setSearchError(null);
 
-        if (searchValue.length > globalSearch.searchCharLimit) {
-          // setting this will display an error message to the user
-          setSearchCharLimitExceeded(true);
+        if (searchCharLimitExceeded) {
+          setIsLoading(false);
+          setOptions([]);
           return;
-        } else {
-          setSearchCharLimitExceeded(false);
         }
 
         const suggestions = loadSuggestions(searchValue.toLowerCase());
@@ -190,7 +194,7 @@ export const useSearchState = ({
             setIsLoading(false);
             // clear the previous results and set the error state
             setOptions([]);
-            setSearchError(true);
+            setSearchError(isInvalidLicenseError(err) ? 'license' : 'generic');
 
             apm.captureError(err, {
               labels: {
