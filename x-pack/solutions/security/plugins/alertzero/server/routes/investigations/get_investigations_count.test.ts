@@ -13,6 +13,7 @@ import { registerGetInvestigationsCountRoute } from './get_investigations_count'
 
 /** Context stub that satisfies `withAlertZeroEnabled` — setting returns `true` so the route proceeds. */
 const makeContext = () => ({
+  alertzero: Promise.resolve({ subscription: 'available', hasRequiredDependencies: true }),
   core: Promise.resolve({
     uiSettings: { client: { get: jest.fn().mockResolvedValue(true) } },
   }),
@@ -67,6 +68,20 @@ describe('registerGetInvestigationsCountRoute', () => {
       filter: `template_id: "${TEMPLATE_ID_INVESTIGATION}"`,
       perPage: 1,
     });
+  });
+
+  it('counts closed investigations by not filtering on status', async () => {
+    const list = jest.fn().mockResolvedValue({ results: [], total: 2 });
+    const { handler } = makeDeps(list);
+
+    await handler(
+      makeContext(),
+      httpServerMock.createKibanaRequest(),
+      httpServerMock.createResponseFactory()
+    );
+
+    const [{ filter }] = list.mock.calls[0];
+    expect(filter).not.toMatch(/status|closed/i);
   });
 
   it('returns { total } from the list response', async () => {

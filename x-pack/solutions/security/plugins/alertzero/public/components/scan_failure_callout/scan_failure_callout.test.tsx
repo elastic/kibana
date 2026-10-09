@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type ComponentProps } from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -27,12 +27,12 @@ const queryResult = (
   value: Pick<UseQueryResult<ScanFailuresResponse>, 'data' | 'error' | 'isLoading'>
 ): UseQueryResult<ScanFailuresResponse> => value as unknown as UseQueryResult<ScanFailuresResponse>;
 
-const renderCallout = () => {
+const renderCallout = (props: ComponentProps<typeof ScanFailureCallout> = {}) => {
   render(
     <I18nProvider>
       <EuiProvider>
         <Router history={createMemoryHistory()}>
-          <ScanFailureCallout />
+          <ScanFailureCallout {...props} />
         </Router>
       </EuiProvider>
     </I18nProvider>
@@ -135,5 +135,53 @@ describe('ScanFailureCallout', () => {
     renderCallout();
 
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
+  describe('wrapper', () => {
+    const wrapper = (callout: JSX.Element) => <div data-test-subj="calloutWrapper">{callout}</div>;
+
+    it('wraps the callout when something failed', () => {
+      useScanFailuresMock.mockReturnValue(
+        queryResult({
+          data: { workers: [], unknown: true },
+          isLoading: false,
+          error: null,
+        })
+      );
+
+      renderCallout({ wrapper });
+
+      expect(screen.getByTestId('calloutWrapper')).toContainElement(
+        screen.getByTestId('alertZeroScanFailureCallout')
+      );
+    });
+
+    it('does not render the wrapper when nothing failed', () => {
+      useScanFailuresMock.mockReturnValue(
+        queryResult({
+          data: { workers: [], unknown: false },
+          isLoading: false,
+          error: null,
+        })
+      );
+
+      renderCallout({ wrapper });
+
+      expect(screen.queryByTestId('calloutWrapper')).not.toBeInTheDocument();
+    });
+
+    it('does not render the wrapper while loading', () => {
+      useScanFailuresMock.mockReturnValue(
+        queryResult({
+          data: undefined,
+          isLoading: true,
+          error: null,
+        })
+      );
+
+      renderCallout({ wrapper });
+
+      expect(screen.queryByTestId('calloutWrapper')).not.toBeInTheDocument();
+    });
   });
 });

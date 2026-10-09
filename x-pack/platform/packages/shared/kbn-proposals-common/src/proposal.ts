@@ -82,12 +82,13 @@ export const proposalCategorySchema = actionCategorySchema;
 export type ProposalCategory = z.infer<typeof proposalCategorySchema>;
 
 export const dismissReasonSchema = z.enum([
-  'wrong',
+  /** The default: an analyst can decline without picking a specific reason at all. */
+  'no_reason',
   'duplicate',
-  'insufficient_evidence',
-  'low_value',
-  'out_of_scope',
-  'already_handled',
+  'false_positive',
+  /** Covers what were previously two separate reasons: `out_of_scope` and `already_handled`. */
+  'handled_elsewhere',
+  'risk_accepted',
   'other',
 ]);
 export type DismissReason = z.infer<typeof dismissReasonSchema>;
@@ -111,7 +112,7 @@ export const MAX_TITLE_LENGTH = 256;
 export const DEFAULT_PROPOSAL_TITLE = 'Proposed action';
 /** Markdown shown to a human, so it needs room without being unbounded. */
 export const MAX_COMMENT_LENGTH = 8192;
-const MAX_RATIONALE_LENGTH = 4096;
+export const MAX_RATIONALE_LENGTH = 4096;
 const MAX_ERROR_LENGTH = 4096;
 /** ISO 8601 timestamps; generous enough for any offset notation. */
 const MAX_TIMESTAMP_LENGTH = 64;
@@ -223,10 +224,9 @@ export const proposalSchema = z.object({
 });
 export type Proposal = z.infer<typeof proposalSchema>;
 
-/** Catalog metadata resolved on read, plus the expiry evaluated at request time. */
+/** Catalog metadata resolved on read. */
 export interface ProposalWithMetadata extends Proposal {
   action?: ActionMetadata;
-  expired: boolean;
 }
 
 export const createProposalRequestSchema = z.object({
@@ -262,6 +262,22 @@ export const createProposalRequestSchema = z.object({
   origin: proposalOriginSchema,
   expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
   workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+  /**
+   * The id to create the proposal under, instead of a random one. For a caller
+   * that derives the id from what it is proposing, so that two calls for the same
+   * thing meet at the same id and Elasticsearch's `op_type: 'create'` — not a
+   * check-then-create in application code — decides which one creates it.
+   *
+   * An id that already exists is refused with `ProposalAlreadyExistsError`; the
+   * service reads and returns nothing. What a duplicate means, and whether a
+   * settled proposal should be followed by a new one under another id, is the
+   * caller's to decide.
+   *
+   * The index is shared across spaces and the service does not scope the id, so
+   * the caller must put the space (and its own producer) into whatever the id is
+   * derived from. Omitting `id` mints a random one, exactly as before.
+   */
+  id: z.uuid().optional(),
 });
 export type CreateProposalRequest = z.infer<typeof createProposalRequestSchema>;
 
@@ -408,10 +424,8 @@ export const isProposalSettling = (proposal: Pick<Proposal, 'decision' | 'status
   proposal.decision === 'approved' &&
   (proposal.status === 'pending' || proposal.status === 'executing');
 
-export const isExpired = (proposal: Pick<Proposal, 'expiresAt'>, now = Date.now()): boolean => {
-  if (!proposal.expiresAt) {
-    return false;
-  }
-  const deadline = Date.parse(proposal.expiresAt);
-  return Number.isFinite(deadline) && deadline <= now;
-};
+/** Settled by a deadline rather than a person.
+ * `pending` reads as live even past `expiresAt` until the gate workflow sweeps it,
+ * so this is not a substitute for comparing `expiresAt` to `now`. */
+export const isExpired = (proposal: Pick<Proposal, 'status'>): boolean =>
+  proposal.status === 'expired';

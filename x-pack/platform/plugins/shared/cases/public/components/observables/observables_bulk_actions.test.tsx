@@ -13,7 +13,10 @@ import { renderWithTestingProviders } from '../../common/mock';
 import { ObservablesBulkActions } from './observables_bulk_actions';
 import { mockCase, mockObservables } from '../../containers/mock';
 import { OBSERVABLES_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 
+jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../workflows/use_cases_workflow_executor', () => ({
   useCasesWorkflowExecutor: jest.fn().mockReturnValue(jest.fn()),
 }));
@@ -58,6 +61,7 @@ describe('ObservablesBulkActions', () => {
       '../workflows/use_cases_workflow_executor'
     );
     (useCasesWorkflowExecutor as jest.Mock).mockReturnValue(jest.fn());
+    (useGetCaseConfiguration as jest.Mock).mockReturnValue(useCaseConfigureResponse);
   });
 
   it('renders nothing when no observables are selected', () => {

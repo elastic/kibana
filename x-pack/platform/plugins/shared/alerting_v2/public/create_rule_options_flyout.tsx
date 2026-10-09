@@ -22,12 +22,16 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import type { ComposeDiscoverFlyoutProps } from '@kbn/alerting-v2-rule-form';
-import { Context } from '@kbn/core-di-browser';
+import { Context, useService } from '@kbn/core-di-browser';
+import { PluginStart } from '@kbn/core-di';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from './kibana_services';
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
 import { RulesApi } from './services/rules_api';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
-import { useIsActionPoliciesLicenseValid } from './hooks/use_is_action_policies_license_valid';
+import { useCreateActionPolicyDisabledReason } from './hooks/use_create_action_policy_disabled_reason';
+import { getAlertingV2Locators } from './application/bind_locators_to_host';
+import { OBSERVABILITY_ALERTING_HOST } from './observability_alerting_host';
 
 export interface CreateRuleOptionsFlyoutLegacyItem {
   id: string;
@@ -65,7 +69,7 @@ interface LoadedModules {
   ComposeDiscoverFlyout: React.ComponentType<ComposeDiscoverFlyoutProps>;
 }
 
-const LicenseAwareComposeDiscoverFlyout = ({
+const ActionPolicyAwareComposeDiscoverFlyout = ({
   services,
   ComposeDiscoverFlyout,
   ...props
@@ -73,13 +77,24 @@ const LicenseAwareComposeDiscoverFlyout = ({
   services: AlertingV2KibanaServices;
   ComposeDiscoverFlyout: React.ComponentType<ComposeDiscoverFlyoutProps>;
 }) => {
-  const canCreateActionPolicy = useIsActionPoliciesLicenseValid();
-  const licenseAwareServices = useMemo(
-    () => ({ ...services, canCreateActionPolicy }),
-    [services, canCreateActionPolicy]
+  const createActionPolicyDisabledReason = useCreateActionPolicyDisabledReason();
+  const share = useService(PluginStart('share')) as SharePluginStart;
+
+  const getActionPolicyEditHref = useCallback(
+    (actionPolicyId: string) =>
+      getAlertingV2Locators(share).actionPolicyLocators.getRedirectUrl({
+        page: 'edit',
+        actionPolicyId,
+        host: OBSERVABILITY_ALERTING_HOST.actionPolicies,
+      }),
+    [share]
+  );
+  const actionPolicyAwareServices = useMemo(
+    () => ({ ...services, createActionPolicyDisabledReason, getActionPolicyEditHref }),
+    [services, createActionPolicyDisabledReason, getActionPolicyEditHref]
   );
 
-  return <ComposeDiscoverFlyout {...props} services={licenseAwareServices} />;
+  return <ComposeDiscoverFlyout {...props} services={actionPolicyAwareServices} />;
 };
 
 const noopSubscribe = () => () => {};
@@ -265,7 +280,7 @@ const CreateRuleOptionsFlyoutInner = ({
   if (step.type === 'esql') {
     return (
       <Context.Provider value={services.container}>
-        <LicenseAwareComposeDiscoverFlyout
+        <ActionPolicyAwareComposeDiscoverFlyout
           ComposeDiscoverFlyout={ComposeDiscoverFlyout}
           historyKey={historyKey}
           mode="create"
@@ -283,7 +298,7 @@ const CreateRuleOptionsFlyoutInner = ({
   if (step.type === 'threshold') {
     return (
       <Context.Provider value={services.container}>
-        <LicenseAwareComposeDiscoverFlyout
+        <ActionPolicyAwareComposeDiscoverFlyout
           ComposeDiscoverFlyout={ComposeDiscoverFlyout}
           historyKey={historyKey}
           mode="create"

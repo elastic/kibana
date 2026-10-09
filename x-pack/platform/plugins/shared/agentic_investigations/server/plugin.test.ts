@@ -13,14 +13,24 @@ import {
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   ESCALATIONS_UI_CAPABILITY_SHOW,
 } from '../common/escalations/constants';
+import { IMPACT_ATTACHMENT_TYPE } from '../common/impact/attachment';
+import { SET_IMPACT_TOOL_ID } from '../common/impact/constants';
+import { SUBJECT_ATTACHMENT_TYPE } from '../common/subjects/constants';
+import { HYPOTHESES_ATTACHMENT_TYPE, SET_HYPOTHESES_TOOL_ID } from '../common/hypotheses/constants';
 import { AttachImpactStepId, GetImpactStepId } from '../common/impact/step_types';
+import { ReopenInvestigationStepId } from '../common/investigations/step_types';
+import { AppendWorkflowExecutionIdStepId } from '../common/workflow_execution/step_types';
 import { registerImpactRoutes } from './impact/routes/register_routes';
 import {
   ESCALATIONS_API_PRIVILEGE_MANAGE,
   ESCALATIONS_API_PRIVILEGE_READ,
 } from './escalations/constants';
-import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from './investigations/constants';
+import {
+  INVESTIGATIONS_API_PRIVILEGE_MANAGE,
+  INVESTIGATIONS_API_PRIVILEGE_READ,
+} from './investigations/constants';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
+import { registerInvestigationRoutes } from './investigations/routes/register_routes';
 import { AgenticInvestigationsPlugin } from './plugin';
 
 jest.mock('./impact/routes/register_routes', () => ({
@@ -31,18 +41,29 @@ jest.mock('./escalations/routes/register_routes', () => ({
   registerEscalationRoutes: jest.fn(),
 }));
 
-const createContext = () =>
+jest.mock('./investigations/routes/register_routes', () => ({
+  registerInvestigationRoutes: jest.fn(),
+}));
+
+const createContext = ({ escalationsEnabled = true }: { escalationsEnabled?: boolean } = {}) =>
   ({
     logger: { get: () => loggerMock.create() },
+    config: {
+      get: () => ({ enabled: true, escalations: { enabled: escalationsEnabled } }),
+    },
   } as unknown as ConstructorParameters<typeof AgenticInvestigationsPlugin>[0]);
 
-const setupPlugin = () => {
-  const plugin = new AgenticInvestigationsPlugin(createContext());
+const setupPlugin = ({ escalationsEnabled }: { escalationsEnabled?: boolean } = {}) => {
+  const plugin = new AgenticInvestigationsPlugin(createContext({ escalationsEnabled }));
   const coreSetup = coreMock.createSetup();
   const features = { registerKibanaFeature: jest.fn() };
 
   const workflowsExtensions = { registerStepDefinition: jest.fn() };
-  const agentBuilder = { attachments: { registerType: jest.fn() } };
+  const agentBuilder = {
+    attachments: { registerType: jest.fn() },
+    conversationEvents: { register: jest.fn() },
+    tools: { register: jest.fn() },
+  };
 
   plugin.setup(
     coreSetup as never,
@@ -68,6 +89,8 @@ const startPlugin = (plugin: AgenticInvestigationsPlugin) => {
         list: jest.fn(),
         search: jest.fn(),
         create: jest.fn(),
+        addAccessControlEntries: jest.fn(),
+        removeAccessControlEntries: jest.fn(),
         patchMetadata: jest.fn(),
         update: jest.fn(),
       }),
@@ -90,9 +113,8 @@ const startPlugin = (plugin: AgenticInvestigationsPlugin) => {
   return { coreStart, contract, agentBuilder };
 };
 
-/** The single registered feature config, for assertions on its shape. */
-const registeredFeature = (features: { registerKibanaFeature: jest.Mock }) =>
-  features.registerKibanaFeature.mock.calls[0][0];
+const registeredFeature = (features: { registerKibanaFeature: jest.Mock }, id: string) =>
+  features.registerKibanaFeature.mock.calls.find(([f]: [{ id: string }]) => f.id === id)[0];
 
 describe('AgenticInvestigationsPlugin', () => {
   beforeEach(() => {
@@ -112,41 +134,21 @@ describe('AgenticInvestigationsPlugin', () => {
       );
     });
 
-    it('leaves impact off the base privileges until it needs its own', () => {
+    it('grants the investigations read API privilege with both base privileges', () => {
       const { features } = setupPlugin();
-      const { privileges } = registeredFeature(features);
+      const { privileges } = registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID);
 
-      expect(privileges.all.api).toEqual([]);
+      expect(INVESTIGATIONS_API_PRIVILEGE_READ).toBe('read_investigations');
+      expect(privileges.all.api).toEqual([INVESTIGATIONS_API_PRIVILEGE_READ]);
       expect(privileges.all.ui).toEqual([]);
-      expect(privileges.read.api).toEqual([]);
+      expect(privileges.read.api).toEqual([INVESTIGATIONS_API_PRIVILEGE_READ]);
       expect(privileges.read.ui).toEqual([]);
-    });
-
-    it('keeps escalation manage off the base privileges and joins view to Read', () => {
-      const { features } = setupPlugin();
-      const { subFeatures } = registeredFeature(features);
-      const [escalationsAll, escalationsRead] = subFeatures[0].privilegeGroups[0].privileges;
-
-      expect(escalationsAll).toEqual(
-        expect.objectContaining({
-          includeIn: 'none',
-          api: [ESCALATIONS_API_PRIVILEGE_READ, ESCALATIONS_API_PRIVILEGE_MANAGE],
-          ui: [ESCALATIONS_UI_CAPABILITY_SHOW, ESCALATIONS_UI_CAPABILITY_MANAGE],
-        })
-      );
-      expect(escalationsRead).toEqual(
-        expect.objectContaining({
-          includeIn: 'read',
-          api: [ESCALATIONS_API_PRIVILEGE_READ],
-          ui: [ESCALATIONS_UI_CAPABILITY_SHOW],
-        })
-      );
     });
 
     it('keeps investigations in a sub-feature with a manage privilege', () => {
       const { features } = setupPlugin();
-      const { subFeatures } = registeredFeature(features);
-      const [investigationsAll] = subFeatures[1].privilegeGroups[0].privileges;
+      const { subFeatures } = registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID);
+      const [investigationsAll] = subFeatures[0].privilegeGroups[0].privileges;
 
       expect(investigationsAll).toEqual(
         expect.objectContaining({
@@ -157,15 +159,81 @@ describe('AgenticInvestigationsPlugin', () => {
       );
     });
 
-    it('registers the impact attachment type and workflow steps during setup', () => {
+    it('registers escalations as a sub-feature alongside investigations with all/read privileges', () => {
+      const { features } = setupPlugin();
+      const { subFeatures } = registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID);
+      const [escalationsAll, escalationsRead] = subFeatures[1].privilegeGroups[0].privileges;
+
+      expect(escalationsAll).toEqual(
+        expect.objectContaining({
+          id: 'escalations_all',
+          includeIn: 'none',
+          api: [ESCALATIONS_API_PRIVILEGE_READ, ESCALATIONS_API_PRIVILEGE_MANAGE],
+          ui: [ESCALATIONS_UI_CAPABILITY_SHOW, ESCALATIONS_UI_CAPABILITY_MANAGE],
+        })
+      );
+      expect(escalationsRead).toEqual(
+        expect.objectContaining({
+          id: 'escalations_read',
+          includeIn: 'read',
+          api: [ESCALATIONS_API_PRIVILEGE_READ],
+          ui: [ESCALATIONS_UI_CAPABILITY_SHOW],
+        })
+      );
+    });
+
+    it('registers no escalations sub-feature when escalations are disabled', () => {
+      const { features } = setupPlugin({ escalationsEnabled: false });
+      const feature = registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID);
+
+      expect(feature.subFeatures).toHaveLength(1);
+      expect(feature.subFeatures[0].privilegeGroups[0].privileges[0].id).toBe('investigations_all');
+      expect(JSON.stringify(feature)).not.toMatch(/escalations/i);
+    });
+
+    it('tells the escalation routes whether escalations are enabled', () => {
+      setupPlugin({ escalationsEnabled: false });
+
+      expect(registerEscalationRoutes).toHaveBeenCalledWith(
+        expect.objectContaining({ escalationsEnabled: false })
+      );
+    });
+
+    it('registers the readonly investigation attachment types and workflow steps during setup', () => {
       const { workflowsExtensions, agentBuilder } = setupPlugin();
 
-      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(3);
+      for (const id of [
+        IMPACT_ATTACHMENT_TYPE,
+        SUBJECT_ATTACHMENT_TYPE,
+        HYPOTHESES_ATTACHMENT_TYPE,
+      ]) {
+        expect(agentBuilder.attachments.registerType).toHaveBeenCalledWith(
+          expect.objectContaining({ id, isReadonly: true })
+        );
+      }
 
       const registeredIds = workflowsExtensions.registerStepDefinition.mock.calls.map(
         ([definition]) => definition.id
       );
-      expect(registeredIds).toEqual([AttachImpactStepId, GetImpactStepId]);
+      expect(registeredIds).toEqual([
+        AttachImpactStepId,
+        GetImpactStepId,
+        ReopenInvestigationStepId,
+        AppendWorkflowExecutionIdStepId,
+      ]);
+    });
+
+    it('registers the set_impact and set_hypotheses agent tools during setup', () => {
+      const { agentBuilder } = setupPlugin();
+
+      expect(agentBuilder.tools.register).toHaveBeenCalledTimes(2);
+      expect(agentBuilder.tools.register).toHaveBeenCalledWith(
+        expect.objectContaining({ id: SET_IMPACT_TOOL_ID })
+      );
+      expect(agentBuilder.tools.register).toHaveBeenCalledWith(
+        expect.objectContaining({ id: SET_HYPOTHESES_TOOL_ID })
+      );
     });
 
     it('does not resolve the authorization service until a step actually runs', () => {
@@ -178,7 +246,27 @@ describe('AgenticInvestigationsPlugin', () => {
     it('grants no proposals privilege, which the proposals feature owns instead', () => {
       const { features } = setupPlugin();
 
-      expect(JSON.stringify(registeredFeature(features))).not.toMatch(/proposals/i);
+      expect(
+        JSON.stringify(registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID))
+      ).not.toMatch(/proposals/i);
+    });
+
+    it('registers the escalation timeline event types', () => {
+      const { agentBuilder } = setupPlugin();
+
+      expect(
+        agentBuilder.conversationEvents.register.mock.calls.map(([definition]) => definition.type)
+      ).toEqual([
+        'escalation_created_from_investigation',
+        'escalation_investigation_linked',
+        'escalation_attachments_synced',
+      ]);
+    });
+
+    it('registers no escalation timeline event types when escalations are disabled', () => {
+      const { agentBuilder } = setupPlugin({ escalationsEnabled: false });
+
+      expect(agentBuilder.conversationEvents.register).not.toHaveBeenCalled();
     });
 
     it('registers the HTTP routes for every entity', () => {
@@ -186,6 +274,7 @@ describe('AgenticInvestigationsPlugin', () => {
 
       expect(registerImpactRoutes).toHaveBeenCalledTimes(1);
       expect(registerEscalationRoutes).toHaveBeenCalledTimes(1);
+      expect(registerInvestigationRoutes).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -196,7 +285,17 @@ describe('AgenticInvestigationsPlugin', () => {
       const { contract } = startPlugin(plugin);
 
       expect(contract.getImpactClient).toEqual(expect.any(Function));
+      expect(contract.getSubjectsClient).toEqual(expect.any(Function));
+      expect(contract.getInvestigationsClient).toEqual(expect.any(Function));
       expect(contract.getEscalationsService()).toBeDefined();
+    });
+
+    it('refuses the escalations service when escalations are disabled', () => {
+      const { plugin } = setupPlugin({ escalationsEnabled: false });
+
+      const { contract } = startPlugin(plugin);
+
+      expect(() => contract.getEscalationsService()).toThrow(/escalations are disabled/i);
     });
 
     it('exposes no proposals getter, which the proposals plugin owns instead', () => {

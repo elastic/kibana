@@ -6,7 +6,10 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import {
+  NIGHTSHIFT_API_PRIVILEGES,
+  NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
+} from '@kbn/nightshift-shared';
 import type { SignificantEventsServer } from '../../types';
 import { assertCanManageRunQuotas, canManageRunQuotas } from './privileges';
 
@@ -36,7 +39,7 @@ describe('run quota global management privilege', () => {
     expect(get).toHaveBeenCalledWith(NIGHTSHIFT_API_PRIVILEGES.manage);
     expect(get).toHaveBeenCalledWith(NIGHTSHIFT_API_PRIVILEGES.configure);
     expect(globally).toHaveBeenCalledWith({
-      kibana: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+      kibana: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     });
   });
 

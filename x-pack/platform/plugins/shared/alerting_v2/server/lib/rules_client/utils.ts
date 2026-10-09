@@ -14,7 +14,9 @@ import {
   isLifecycleConfigAllowedForKind,
   isLifecycleConfigPresentForKind,
   isRecoveryConditionUsableWithBreach,
+  isRoutingTagsAllowedForKind,
   REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE,
+  ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
   isRecoveryTransitionConsistentWithStrategy,
   recoveryStrategy,
   validateComposedEsqlQuery,
@@ -216,15 +218,14 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     version: number;
   }
 ): RuleSavedObjectAttributes {
-  const { version, ...restServerFields } = serverFields;
   return {
     kind: data.kind,
     metadata: {
       name: data.metadata.name,
       description: data.metadata.description,
       tags: data.metadata.tags,
-      builder_type: data.metadata.builder_type,
-      version,
+      routing_tags: data.metadata.routing_tags,
+      builder_type: data.metadata.builder?.type,
     },
     time_field: data.time_field,
     schedule: {
@@ -236,22 +237,22 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     state_transition: data.state_transition ?? undefined,
     grouping: data.grouping,
     artifacts: data.artifacts,
-    ...restServerFields,
+    ...serverFields,
   };
 }
 
 /**
- * Resolves `metadata.builder_type` for an update.
+ * Resolves `metadata.builder` for an update.
  *
- * Builder rules require an explicit `metadata.builder_type: null` in the request
+ * Builder rules require an explicit `metadata.builder: null` in the request
  * to clear the field when the query changes.
  */
 function resolveBuilderType(
   updateData: UpdateRuleData,
   existingAttrs: RuleSavedObjectAttributes
 ): string | undefined {
-  if (updateData.metadata?.builder_type !== undefined) {
-    return updateData.metadata.builder_type ?? undefined;
+  if (updateData.metadata?.builder !== undefined) {
+    return updateData.metadata.builder?.type;
   }
 
   const queryChanged =
@@ -260,7 +261,7 @@ function resolveBuilderType(
   if (queryChanged && existingAttrs.metadata.builder_type) {
     throw Boom.badRequest(
       'Cannot update the query on a builder rule without explicitly clearing ' +
-        'metadata.builder_type. Send metadata.builder_type: null to confirm the transition to ES|QL mode.',
+        'metadata.builder. Send metadata.builder: null to confirm the transition to ES|QL mode.',
       { code: ALERTING_ERROR_CODES.BUILDER_TYPE_NOT_CLEARED }
     );
   }
@@ -292,17 +293,23 @@ export function buildUpdateRuleAttributes(
     version: number;
   }
 ): RuleSavedObjectAttributes {
-  const { version, ...restServerFields } = serverFields;
+  const { builder: _builder, ...metadata } = updateData.metadata ?? {};
+
   return {
     ...existingAttrs,
     metadata: {
       ...existingAttrs.metadata,
-      ...updateData.metadata,
+      ...metadata,
       builder_type: resolveBuilderType(updateData, existingAttrs),
-      // `null` clears all tags. The SO schema is `maybe(...)` without
-      // `nullable()`, so the cleared value must be stored as `undefined`.
+      /*
+       * `null` clears all tags or routing tags. The SO schema is `maybe(...)`
+       * without `nullable()`, so the cleared value must be stored as `undefined`.
+       */
       tags: nullToUndefined(updateData.metadata?.tags, existingAttrs.metadata.tags),
-      version,
+      routing_tags: nullToUndefined(
+        updateData.metadata?.routing_tags,
+        existingAttrs.metadata.routing_tags
+      ),
     },
     time_field: updateData.time_field ?? existingAttrs.time_field,
     schedule: { ...existingAttrs.schedule, ...updateData.schedule },
@@ -323,7 +330,7 @@ export function buildUpdateRuleAttributes(
     // Server-managed fields — preserved as-is except timestamps and user.
     createdBy: existingAttrs.createdBy,
     createdAt: existingAttrs.createdAt,
-    ...restServerFields,
+    ...serverFields,
     // Immutable fields are forced from storage last, so no preceding override
     // can leak through if someone adds a new immutable field to the registry.
     ...pickImmutable(existingAttrs),
@@ -351,6 +358,12 @@ export function validateMergedRuleAttributes(
     {
       valid: isLifecycleConfigAllowedForKind(attrs),
       message: 'Signal rules cannot set recovery or no_data.',
+      code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
+      details: { rule_id: ruleId, rule_kind: attrs.kind },
+    },
+    {
+      valid: isRoutingTagsAllowedForKind(attrs),
+      message: ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
       code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
       details: { rule_id: ruleId, rule_kind: attrs.kind },
     },
@@ -407,24 +420,21 @@ function isMergedRecoverySegmentComposable(attrs: RuleSavedObjectAttributes): bo
   return validateComposedEsqlQuery(attrs.query.base, attrs.recovery.segment) == null;
 }
 
-/**
- * Converts saved object attributes into the public API response shape.
- */
+/** Converts saved object attributes into the public API rule shape. */
 export function transformRuleSoAttributesToRuleApiResponse(
   id: string,
-  attrs: RuleSavedObjectAttributes,
-  version?: string
+  attrs: RuleSavedObjectAttributes
 ): RuleResponse {
   return {
     id,
-    version,
+    version: attrs.version ?? RULE_VERSION_FALLBACK,
     kind: attrs.kind,
     metadata: {
       name: attrs.metadata.name,
       description: attrs.metadata.description,
       tags: attrs.metadata.tags,
-      builder_type: attrs.metadata.builder_type,
-      version: attrs.metadata.version ?? RULE_VERSION_FALLBACK,
+      routing_tags: attrs.metadata.routing_tags,
+      builder: attrs.metadata.builder_type ? { type: attrs.metadata.builder_type } : undefined,
     },
     time_field: attrs.time_field,
     schedule: {

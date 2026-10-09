@@ -8,7 +8,7 @@
 import type { RouteValidationFunction } from '@kbn/core-http-server';
 import { isZod, z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
-import { flattenZodIssues, formatZodIssue } from '../../common/runtime_types/zod/format_errors';
+import { flattenZodIssues, formatZodIssue } from '../../common/runtime_types/schemas/format_errors';
 
 export const MAX_ROUTE_ID_LENGTH = 1024;
 export const MAX_ROUTE_STRING_LENGTH = 4096;

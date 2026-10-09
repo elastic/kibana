@@ -13,7 +13,7 @@ import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type { DataSource } from '@kbn/data-source';
 import type { DocViewerProps, DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { UnifiedDocViewerFlyoutProps } from '@kbn/unified-doc-viewer-plugin/public';
@@ -43,7 +43,7 @@ export interface DiscoverGridFlyoutProps
   filters?: Filter[];
   query?: Query | AggregateQuery;
   columns: string[];
-  columnsMeta?: DataTableColumnsMeta;
+  dataSource?: DataSource;
   hit?: DataTableRecord;
   hits?: DataTableRecord[];
   dataView: DataView;
@@ -71,7 +71,7 @@ export function DiscoverGridFlyout({
   hits,
   dataView,
   columns,
-  columnsMeta,
+  dataSource,
   savedSearchId,
   filters,
   query,
@@ -149,7 +149,7 @@ export function DiscoverGridFlyout({
       hits={hits}
       dataView={dataView}
       columns={columns}
-      columnsMeta={columnsMeta}
+      dataSource={dataSource}
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
       onClose={onClose}

@@ -101,9 +101,6 @@ service.unregisterEsqlSource(esqlSource.id); // call on teardown
 
 // Polymorphic lookup — works for both DSL and ES|QL ids
 const source = await service.get(someId);
-
-// Synchronous shortcut when you already have a DataView in hand
-const source = service.fromDataView(dataView);
 ```
 
 Unregistered `esql-*` ids return `undefined` (no fallback to `dataViews.get`).
@@ -112,9 +109,10 @@ Unregistered `esql-*` ids return `undefined` (no fallback to `dataViews.get`).
 
 A transitional shim that registers an `EsqlSource` as a DataView in the `dataViewsService` cache, so consumers that haven't yet migrated to `DataSourceService` keep working (`dataViews.get(esql-*)`).
 
+- one DataView per dataset (FROM target, time field, project routing), shared by every query on it
+- fields come from `getFilterableFields()` (the LIMIT 0 schema of the source command), so filters and KQL see the FROM target's fields rather than the query's result columns
 - `skipFetchFields: true` — never calls `_field_caps`
-- copies LIMIT 0 / `getColumns()` onto the spec
-- injects the time field if it is missing from the result columns, so `DataView.isTimeBased()` stays true
+- injects the time field if it is missing from the schema, so `DataView.isTimeBased()` stays true
 
 Delete once all such consumers migrate to `DataSourceService.get()`.
 

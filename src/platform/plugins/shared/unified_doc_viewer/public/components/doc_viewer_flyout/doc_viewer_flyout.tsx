@@ -29,7 +29,8 @@ import {
   useEuiTheme,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataSource } from '@kbn/data-source';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import useObservable from 'react-use/lib/useObservable';
@@ -62,7 +63,7 @@ export interface UnifiedDocViewerFlyoutProps
   docViewsRegistry?: DocViewRenderProps['docViewsRegistry'];
   isEsqlQuery: boolean;
   columns: string[];
-  columnsMeta?: DataTableColumnsMeta;
+  dataSource?: DataSource;
   /** The expanded document, or undefined while a shared link resolves. */
   hit?: DataTableRecord;
   /** Request state rendered when the document is unavailable. */
@@ -113,7 +114,7 @@ export function UnifiedDocViewerFlyout({
   docViewsRegistry,
   isEsqlQuery,
   columns,
-  columnsMeta,
+  dataSource,
   hit,
   requestState,
   requestStateMeta,
@@ -217,7 +218,7 @@ export function UnifiedDocViewerFlyout({
         hit: actualHit,
         dataView,
         columns,
-        columnsMeta,
+        dataSource,
         textBasedHits: isEsqlQuery ? hits : undefined,
         filter: onFilter,
         onAddColumn,
@@ -232,7 +233,7 @@ export function UnifiedDocViewerFlyout({
       actualHit,
       dataView,
       columns,
-      columnsMeta,
+      dataSource,
       isEsqlQuery,
       hits,
       onFilter,

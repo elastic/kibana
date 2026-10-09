@@ -24,6 +24,7 @@ export {
 } from './access_control';
 export {
   DEFAULT_CONVERSATION_TITLE,
+  CHAT_MESSAGE_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
   CONVERSATION_ID_MAX_LENGTH,
   CONVERSATION_METADATA_KEY_MAX_LENGTH,
@@ -83,6 +84,8 @@ export {
   ZERO_MODEL_USAGE,
   isZeroModelUsage,
   type CompactionSummary,
+  type CompactionCursor,
+  type ToolCallRef,
   type CompactionStructuredData,
   type CompactionToolCallSummary,
   type CompactionEntity,
@@ -108,6 +111,10 @@ export {
   type SubagentRosterUpdatedStepData,
   createSubagentRosterUpdatedStep,
   isSubagentRosterUpdatedStep,
+  type SubstitutionStep,
+  type SubstitutionStepData,
+  createSubstitutionStep,
+  isSubstitutionStep,
 } from './conversation';
 export {
   ChatEventType,
@@ -183,6 +190,10 @@ export {
   type SubagentRosterUpdatedEventData,
   createSubagentRosterUpdatedEvent,
   isSubagentRosterUpdatedEvent,
+  type SubstitutionAppliedEvent,
+  type SubstitutionAppliedEventData,
+  createSubstitutionAppliedEvent,
+  isSubstitutionAppliedEvent,
   isTodosUpdatedEvent,
   TODOS_UPDATED_UI_EVENT,
   type TodosUpdatedUiEventData,

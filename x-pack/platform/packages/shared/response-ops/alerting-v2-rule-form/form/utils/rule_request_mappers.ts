@@ -43,6 +43,7 @@ const mapMetadata = (metadata: FormValues['metadata']) => ({
   name: metadata.name,
   description: metadata.description,
   ...(metadata.tags?.length ? { tags: metadata.tags } : {}),
+  ...(metadata.routingTags?.length ? { routing_tags: metadata.routingTags } : {}),
 });
 
 const mapSchedule = (schedule: FormValues['schedule']) => ({
@@ -58,7 +59,7 @@ const mapGrouping = (grouping: FormValues['grouping']) =>
  * Contains all fields except `kind` (only required for create).
  */
 export interface RuleRequestCommon {
-  metadata: { name: string; description?: string; tags?: string[] };
+  metadata: { name: string; description?: string; tags?: string[]; routing_tags?: string[] };
   time_field: string;
   schedule: { every: string; lookback?: string };
   query: Query;
@@ -118,6 +119,7 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
       description: rule.metadata.description,
       enabled: rule.enabled,
       tags: rule.metadata.tags,
+      routingTags: rule.metadata.routing_tags,
     },
     timeField: rule.time_field,
     schedule: {

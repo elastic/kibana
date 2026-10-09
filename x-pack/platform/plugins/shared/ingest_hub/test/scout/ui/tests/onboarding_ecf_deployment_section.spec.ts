@@ -143,8 +143,22 @@ test.describe('Onboarding ECF Deployment Section', { tag: tags.stateful.classic 
     browserAuth,
     page,
   }) => {
+    // Seed a completed Step 2 (bucket ARN set). Without a source ECF can route, Step 3 holds Next
+    // back on purpose, which would mask what this test checks: that the optional, invalid stack
+    // name does not block step completion.
     await navigateToOnboardingStep(browserAuth, page, 'authenticate-and-deploy', {
       selectedServiceIds: [ECF_SERVICE_ID],
+      serviceVars: {
+        [ECF_SERVICE_ID]: {
+          enabledDataStreams: [ECF_SERVICE_ID],
+          varsByDataStream: {
+            [ECF_SERVICE_ID]: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::my-bucket' } },
+            },
+          },
+        },
+      },
       ecfLaunchStep: {
         launchedFamilies: ['unified'],
         stackVersions: { unified: MOCK_ECF_VERSION },
