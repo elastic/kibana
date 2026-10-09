@@ -7,15 +7,15 @@
 
 import type { Severity, SignificantEventStatus } from '@kbn/significant-events-schema';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
-import type { RuleEventsClient } from './rule_events_client';
-import type { TriggerEmitter } from '../../../workflows/triggers/emit';
-import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
+import type { RuleEventsClient } from '../rule_events_client';
+import type { TriggerEmitter } from '../../../../workflows/triggers/emit';
+import { emitSignificantEventWriteTriggers } from '../../../../workflows/triggers/emit_significant_event_triggers';
 import {
   decideLifecycle,
   type LifecycleInput,
   type LifecycleSkipReason,
 } from './lifecycle_state_machine';
-import { toRuleEvent } from './to_rule_event';
+import { toRuleEvent } from '../to_rule_event';
 
 export type LifecycleControllerSkipReason = LifecycleSkipReason | 'not_found' | 'superseded';
 
@@ -38,8 +38,7 @@ const requestedStatus = (input: LifecycleInput): SignificantEventStatus =>
  * Applies one lifecycle input to one event: reads its latest version, asks the state machine for
  * the decision, and appends the resulting version through the event store. This is the only
  * function that decides and writes a status change; every driver (the status workflow, the
- * operator route and chat tools, the cleanup workflow) calls it with a typed input. A discovery
- * write consults the same state machine through its write guard.
+ * operator route and chat tools, the cleanup workflow) calls it with a typed input.
  */
 export const applyLifecycleInput = async ({
   eventSearchClient,
@@ -97,22 +96,18 @@ export const applyLifecycleInput = async ({
 
   const annotation = annotate?.(decision.status);
   const now = new Date().toISOString();
-  // A blank note counts as omitted, so it cannot overwrite the existing one.
+
   const note = (annotation?.assessmentNote ?? assessmentNote)?.trim();
   const resolvedSeverity = annotation?.severity ?? severity;
   const updatedEvent = {
     ...latest,
     '@timestamp': now,
     status: decision.status,
-    // Set while recovering, cleared in every other state, so an unrelated writer that carries the
-    // latest version forward cannot change the count.
     status_evaluations: decision.evaluations,
     ...(resolvedSeverity !== undefined ? { severity: resolvedSeverity } : {}),
     ...(note ? { assessment_note: note } : {}),
   };
 
-  // `createAlertEvent` waits for a refresh, so an immediate re-fetch (e.g. the UI invalidating its
-  // query right after this route responds) sees the new version.
   await alertEventsClient.createAlertEvent(toRuleEvent(updatedEvent));
 
   // Notify subscribed workflows of the status change (fire-and-forget).

@@ -10,9 +10,9 @@ import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { IRulesManagementClient } from '../../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
 import type { RuleEventsClient } from './rule_events_client';
 import { cleanupStaleEvents, STALE_EVENT_ASSESSMENT_NOTE } from './cleanup_stale_events';
-import { applyLifecycleInput } from './lifecycle_controller';
+import { applyLifecycleInput } from './lifecycle/lifecycle_controller';
 
-jest.mock('./lifecycle_controller', () => ({
+jest.mock('./lifecycle/lifecycle_controller', () => ({
   applyLifecycleInput: jest.fn(),
 }));
 

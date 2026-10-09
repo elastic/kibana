@@ -6,7 +6,7 @@
  */
 
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
-import { EVENT_STATUS_CHANGED_TRIGGER_ID } from '../../../../common/workflows/triggers';
+import { EVENT_STATUS_CHANGED_TRIGGER_ID } from '../../../../../common/workflows/triggers';
 import type { LifecycleInput } from './lifecycle_state_machine';
 import { applyLifecycleInput } from './lifecycle_controller';
 import type { SignificantEvent } from '@kbn/significant-events-schema';

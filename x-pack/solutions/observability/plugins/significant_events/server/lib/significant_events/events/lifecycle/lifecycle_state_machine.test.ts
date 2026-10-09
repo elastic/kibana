@@ -89,24 +89,84 @@ describe('decideLifecycle', () => {
     );
   });
 
-  describe('breach_asserted (a discovery write)', () => {
-    it.each<SignificantEventStatus | undefined>([undefined, 'inactive', 'active'])(
-      'opens or continues as active from %s',
-      (status) => {
-        expect(decide(status, { kind: 'breach_asserted' })).toEqual({
+  describe('assessment (what discovery stored about the members)', () => {
+    it.each<
+      [
+        string,
+        SignificantEventStatus | undefined,
+        'breaching' | 'clean' | 'no_data',
+        LifecycleDecision
+      ]
+    >([
+      ['opens a new series on a breach', undefined, 'breaching', { write: true, status: 'active' }],
+      [
+        'reopens a closed series on a breach',
+        'inactive',
+        'breaching',
+        { write: true, status: 'active' },
+      ],
+      [
+        'keeps an active series active on a breach',
+        'active',
+        'breaching',
+        { write: true, status: 'active' },
+      ],
+      [
+        'returns a recovering series to active on a breach',
+        'recovering',
+        'breaching',
+        { write: true, status: 'active' },
+      ],
+      [
+        'starts recovery when every member is healthy',
+        'active',
+        'clean',
+        { write: true, status: 'recovering', evaluations: 1 },
+      ],
+      [
+        'keeps an active series active when a member cannot be judged',
+        'active',
+        'no_data',
+        { write: true, status: 'active' },
+      ],
+      [
+        'does not open a new series on healthy members',
+        undefined,
+        'clean',
+        { write: false, reason: 'not_a_breach' },
+      ],
+      [
+        'does not open a new series on unjudged members',
+        undefined,
+        'no_data',
+        { write: false, reason: 'not_a_breach' },
+      ],
+      [
+        'does not reopen a closed series on healthy members',
+        'inactive',
+        'clean',
+        { write: false, reason: 'not_a_breach' },
+      ],
+      [
+        'does not reopen a closed series on unjudged members',
+        'inactive',
+        'no_data',
+        { write: false, reason: 'not_a_breach' },
+      ],
+    ])('%s', (_label, status, outcome, expected) => {
+      expect(decide(status, { kind: 'assessment', outcome })).toEqual(expected);
+    });
+
+    it.each<'clean' | 'no_data'>(['clean', 'no_data'])(
+      'carries evidence onto a recovering series without moving its status or count (%s)',
+      (outcome) => {
+        expect(decide('recovering', { kind: 'assessment', outcome }, 2)).toEqual({
           write: true,
-          status: 'active',
+          status: 'recovering',
+          evaluations: 2,
         });
       }
     );
-
-    it('carries evidence onto a recovering series without moving it or its count', () => {
-      expect(decide('recovering', { kind: 'breach_asserted' }, 2)).toEqual({
-        write: true,
-        status: 'recovering',
-        evaluations: 2,
-      });
-    });
   });
 
   describe('operator intent', () => {
@@ -169,7 +229,9 @@ describe('decideLifecycle', () => {
       { kind: 'evaluation', outcome: 'breaching' },
       { kind: 'evaluation', outcome: 'clean' },
       { kind: 'evaluation', outcome: 'no_data' },
-      { kind: 'breach_asserted' },
+      { kind: 'assessment', outcome: 'breaching' },
+      { kind: 'assessment', outcome: 'clean' },
+      { kind: 'assessment', outcome: 'no_data' },
       { kind: 'operator', intent: 'activate' },
       { kind: 'operator', intent: 'deactivate' },
       { kind: 'rule_deleted' },
@@ -210,21 +272,39 @@ describe('decideLifecycle', () => {
       });
     });
 
-    it('leaves recovering only through an evaluation, an operator or a deleted rule', () => {
+    it('leaves recovering only through an evaluation, an assessment, an operator or a deleted rule', () => {
       everyCase.forEach(({ status, input, decision }) => {
         if (status === 'recovering' && decision.write && decision.status !== 'recovering') {
-          expect(['evaluation', 'operator', 'rule_deleted']).toContain(input.kind);
+          expect(['evaluation', 'assessment', 'operator', 'rule_deleted']).toContain(input.kind);
         }
       });
     });
 
-    it('never gives an agent assertion the power to close or to start recovery', () => {
+    it('never lets an assessment close a series, and lets it leave recovering only back to active', () => {
       everyCase.forEach(({ status, input, decision }) => {
-        if (input.kind === 'breach_asserted' && decision.write) {
+        if (input.kind === 'assessment' && decision.write) {
           expect(decision.status).not.toBe('inactive');
-          if (status !== 'recovering') {
-            expect(decision.status).toBe('active');
+          if (status === 'recovering') {
+            expect(['recovering', 'active']).toContain(decision.status);
           }
+        }
+      });
+    });
+
+    it('never lets an assessment open or reopen a series unless it is breaching', () => {
+      everyCase.forEach(({ status, input, decision }) => {
+        const notLive = status === undefined || status === 'inactive';
+        if (input.kind === 'assessment' && input.outcome !== 'breaching' && notLive) {
+          expect(decision.write).toBe(false);
+        }
+      });
+    });
+
+    it('enters recovering only from an evaluation or an assessment on an active series', () => {
+      everyCase.forEach(({ status, input, decision }) => {
+        if (decision.write && decision.status === 'recovering' && status !== 'recovering') {
+          expect(['evaluation', 'assessment']).toContain(input.kind);
+          expect(status).toBe('active');
         }
       });
     });
