@@ -245,6 +245,46 @@ describe('handleAgentExecution', () => {
     generateTitleMock.mockReturnValue(of('Generated title'));
   });
 
+  it('forwards structured output settings on a standalone run', async () => {
+    const conversationClient = createConversationClientMock();
+    stubResolveServices(conversationClient);
+    executeAgentMock.mockReturnValue(
+      of({
+        type: ChatEventType.messageComplete,
+        data: { message_id: 'm-1', message_content: '' },
+      } as ChatAgentEvent)
+    );
+    const outputSchema = {
+      type: 'object',
+      properties: { summary: { type: 'string' } },
+    };
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.standalone,
+        agentId: 'test-agent',
+        agentParams: {
+          nextInput: { message: 'summarize' },
+          structuredOutput: true,
+          outputSchema,
+        },
+      } as never,
+      deps: createDeps({ conversationClient }),
+      request: { headers: {} } as never,
+      abortSignal: new AbortController().signal,
+    });
+    await lastValueFrom(events$.pipe(toArray()));
+
+    expect(executeAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        structuredOutput: true,
+        outputSchema,
+        executionMode: AgentExecutionMode.standalone,
+      })
+    );
+  });
+
   it('loads tracing privacy settings from the request-scoped saved objects client', async () => {
     const conversation = createEmptyConversation({
       id: 'conversation-1',
