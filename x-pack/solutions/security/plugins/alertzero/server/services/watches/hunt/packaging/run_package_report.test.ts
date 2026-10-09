@@ -248,8 +248,7 @@ describe('runPackageReport', () => {
         attachments: [],
         expectedSseCount: 0,
         coordinator: {
-          tier2Targets: ['logs-aws.cloudtrail-*', 'logs-endpoint.events.00e5ea78.2026.10.08*'],
-          actionableIndices: ['logs-endpoint.events.00e5ea78.2026.10.08*'],
+          reportIntentTargets: ['logs-aws.cloudtrail-*'],
           behaviors: [
             {
               technique_id: 'T1110.003',

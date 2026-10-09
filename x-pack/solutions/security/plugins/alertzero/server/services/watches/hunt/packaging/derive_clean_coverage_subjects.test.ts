@@ -14,13 +14,6 @@ const SPRAY_ESQL =
 const SPRAY_SUBTECHNIQUE_ESQL =
   'FROM logs-aws.cloudtrail-*\n| WHERE event.outcome == "failure"\n| LIMIT 25';
 
-const ENDPOINT_PADDING = [
-  'logs-endpoint.alerts.00e5ea78.2026.10.08*',
-  'logs-endpoint.alerts.07d8f63a.2026.10.08*',
-  'logs-endpoint.events.00e5ea78.2026.10.08*',
-  'logs-endpoint.events.e8c68216.2026.10.08*',
-];
-
 /** The shape of run `ti-report-aws-iam-clean-historic-10`: two executed queries, zero rows. */
 const inputs: CoordinatorInputs = {
   reportIntentTargets: ['logs-aws.cloudtrail-*'],
