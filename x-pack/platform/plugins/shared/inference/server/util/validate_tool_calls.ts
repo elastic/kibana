@@ -15,6 +15,53 @@ import {
   createToolValidationError,
 } from '../../common/chat_complete/errors';
 
+type JsonObject = Record<string, unknown>;
+
+const isJsonObject = (value: unknown): value is JsonObject =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const expectsStructuredValue = (schema: JsonObject): boolean => {
+  const { type } = schema;
+  const types = Array.isArray(type) ? type : [type];
+  return types.includes('object') || types.includes('array');
+};
+
+/**
+ * Models sometimes send an object or array argument as a JSON string. Following the schema, parses
+ * such strings back into the structure the schema asks for and leaves every other value as it is.
+ */
+const parseJsonEncodedValues = (value: unknown, schema: unknown): unknown => {
+  if (!isJsonObject(schema)) return value;
+
+  if (typeof value === 'string' && expectsStructuredValue(schema)) {
+    try {
+      const parsed: unknown = JSON.parse(value);
+      if (typeof parsed === 'object' && parsed !== null) {
+        return parseJsonEncodedValues(parsed, schema);
+      }
+    } catch (error) {
+      return value;
+    }
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => parseJsonEncodedValues(item, schema.items));
+  }
+
+  if (isJsonObject(value) && isJsonObject(schema.properties)) {
+    const properties = schema.properties;
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [
+        key,
+        parseJsonEncodedValues(item, properties[key]),
+      ])
+    );
+  }
+
+  return value;
+};
+
 export function validateToolCalls<TToolOptions extends ToolOptions>({
   toolCalls,
   toolChoice,
@@ -64,7 +111,16 @@ export function validateToolCalls({
       // the recursive type compatibility, so we assert it as Record<string, unknown>
       const zodSchema = fromJSONSchema(toolSchema as unknown as Record<string, unknown>);
       if (zodSchema) {
-        zodSchema.parse(serializedArguments);
+        const firstAttempt = zodSchema.safeParse(serializedArguments);
+        if (!firstAttempt.success) {
+          // Only values that failed validation are repaired, so valid arguments are never changed.
+          const repaired = parseJsonEncodedValues(serializedArguments, toolSchema);
+          const secondAttempt = zodSchema.safeParse(repaired);
+          if (!secondAttempt.success) {
+            throw firstAttempt.error;
+          }
+          serializedArguments = repaired as Record<string, unknown>;
+        }
       }
     } catch (error) {
       const errorMessage =
