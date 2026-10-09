@@ -96,7 +96,7 @@ describe('InvestigationTimelineFlyoutOpener', () => {
       expect.anything(),
       expect.objectContaining({
         paddingSize: 'l',
-        title: 'Investigation timeline',
+        title: 'Forensic timeline',
         session: 'start',
         resizable: true,
         type: 'push',

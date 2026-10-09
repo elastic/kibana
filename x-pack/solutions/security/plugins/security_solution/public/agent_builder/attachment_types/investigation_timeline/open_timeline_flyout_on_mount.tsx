@@ -11,11 +11,9 @@ import { useDefaultDocumentFlyoutProperties } from '../../../flyout_v2/shared/ho
 import { useOpenFlyout } from '../../../flyout_v2/shared/hooks/use_open_flyout';
 import { useFlyoutSessionContext } from '../../../flyout_v2/session_context';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
+import { TIMELINE_TITLE } from '../grouped_attachments';
 import { ConversationFlyoutHost } from '../grouped_attachments/conversation_flyout_host';
-import {
-  INVESTIGATION_TIMELINE_FLYOUT_TITLE,
-  InvestigationTimelineFlyout,
-} from './timeline_flyout';
+import { InvestigationTimelineFlyout } from './timeline_flyout';
 import type { InvestigationTimelineEvent } from './types';
 
 const OpenTimelineOnMount = ({ events }: { events: InvestigationTimelineEvent[] }) => {
@@ -40,7 +38,7 @@ const OpenTimelineOnMount = ({ events }: { events: InvestigationTimelineEvent[] 
         type: 'push',
         resizable: true,
         paddingSize: 'l',
-        title: INVESTIGATION_TIMELINE_FLYOUT_TITLE,
+        title: TIMELINE_TITLE,
       },
       {
         surface: FLYOUT_SURFACE.FLYOUT,

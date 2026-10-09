@@ -11,8 +11,9 @@ import { useDefaultDocumentFlyoutProperties } from '../../../flyout_v2/shared/ho
 import { useOpenFlyout } from '../../../flyout_v2/shared/hooks/use_open_flyout';
 import { useFlyoutSessionContext } from '../../../flyout_v2/session_context';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
+import { IOCS_TITLE } from '../grouped_attachments';
 import { ConversationFlyoutHost } from '../grouped_attachments/conversation_flyout_host';
-import { INVESTIGATION_IOCS_FLYOUT_TITLE, InvestigationIocsFlyout } from './iocs_flyout';
+import { InvestigationIocsFlyout } from './iocs_flyout';
 import type { IocCategoryRow } from './parse_iocs';
 
 const OpenIocsOnMount = ({ categories }: { categories: IocCategoryRow[] }) => {
@@ -37,7 +38,7 @@ const OpenIocsOnMount = ({ categories }: { categories: IocCategoryRow[] }) => {
         type: 'push',
         resizable: true,
         paddingSize: 'l',
-        title: INVESTIGATION_IOCS_FLYOUT_TITLE,
+        title: IOCS_TITLE,
       },
       {
         surface: FLYOUT_SURFACE.FLYOUT,

@@ -68,7 +68,6 @@ const categories = [
   {
     id: 'shas' as const,
     typeLabel: 'SHA256',
-    shortLabel: 'SHAs',
     items: [{ value: 'abc123' }],
   },
 ];
