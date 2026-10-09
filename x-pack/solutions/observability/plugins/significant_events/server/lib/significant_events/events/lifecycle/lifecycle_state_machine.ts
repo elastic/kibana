@@ -12,7 +12,7 @@ import type {
 import { nextStatus, RECOVERING_COUNT, type StatusOutcome } from './status_transition';
 
 /**
- * The one place that decides a significant event's status (target architecture §4). Every caller
+ * The one place that decides a significant event's status. Every caller
  * submits a typed input; none of them picks a status. Pure: no I/O, no caller identity. Who may
  * submit which input is the write authority's concern, not this function's.
  *
@@ -20,15 +20,18 @@ import { nextStatus, RECOVERING_COUNT, type StatusOutcome } from './status_trans
  * (`CountTimeframeStrategy`) instead of calling it: the director only runs inside a rule's
  * execution and needs a rule (`RuleResponse`) to read its `state_transition`, our events have no
  * backing rule and are written through `create_alert`, which never runs it, and it is internal to
- * `alerting_v2` (no export, and no asks to that team). `lifecycle_director_conformance.test.ts`
- * feeds both the same evaluations and fails on any difference. Revisit when current-state
- * documents exist: a rule over them would run the director for free.
+ * `alerting_v2`.
  */
 export type LifecycleInput =
   /** One scheduled evaluation of the series' member rules. */
   | { kind: 'evaluation'; outcome: StatusOutcome }
-  /** A confirmed breach asserted by a discovery write: opens or continues the event. */
-  | { kind: 'breach_asserted' }
+  /**
+   * What discovery's stored verdicts say about the event's members after a write is merged:
+   * `breaching` when any member asserts a breach, `clean` when every member is healthy, `no_data`
+   * when none asserts a breach but some cannot be judged. Observed once per discovery write, so
+   * it carries no count.
+   */
+  | { kind: 'assessment'; outcome: StatusOutcome }
   /** An operator's intent, through the update route or a chat tool. */
   | { kind: 'operator'; intent: 'activate' | 'deactivate' }
   /** The rule backing the event no longer exists. */
@@ -59,6 +62,8 @@ export type LifecycleSkipReason =
   | 'no_data'
   /** The series is already in the state the input asks for. */
   | 'already_in_state'
+  /** Only a breach opens an event: a healthy or unjudged assessment of a closed or new series. */
+  | 'not_a_breach'
   /** The input needs a live series and there is none. */
   | 'not_live';
 
@@ -102,6 +107,36 @@ const decideEvaluation = ({
     : { write: true, status: transition.status };
 };
 
+const decideAssessment = ({
+  state,
+  outcome,
+}: {
+  state: LifecycleState;
+  outcome: StatusOutcome;
+}): LifecycleDecision => {
+  const { status, evaluations } = state;
+
+  if (status !== 'active' && status !== 'recovering') {
+    // Only a breach opens or reopens (a new episode on an inactive series).
+    return outcome === 'breaching'
+      ? { write: true, status: 'active' }
+      : { write: false, reason: 'not_a_breach' };
+  }
+
+  if (outcome === 'breaching') {
+    return { write: true, status: 'active' };
+  }
+  if (status === 'active' && outcome === 'clean') {
+    return { write: true, status: 'recovering', evaluations: 1 };
+  }
+  // A healthy or unjudged assessment of a recovering series, or an unjudged one of an active
+  // series: the evidence is kept and the status stands. Discovery never closes a series, and it
+  // does not advance the count: assessments are not periodic.
+  return status === 'recovering'
+    ? { write: true, status: 'recovering', evaluations }
+    : { write: true, status: 'active' };
+};
+
 export const decideLifecycle = ({
   state,
   input,
@@ -117,12 +152,8 @@ export const decideLifecycle = ({
     case 'evaluation':
       return decideEvaluation({ state, outcome: input.outcome, recoveringCount });
 
-    case 'breach_asserted':
-      // Only an evaluation moves a `recovering` series. A write that carries new evidence onto it
-      // keeps the status and the count, so it can neither flip the event nor advance the count.
-      return status === 'recovering'
-        ? { write: true, status: 'recovering', evaluations: state.evaluations }
-        : { write: true, status: 'active' };
+    case 'assessment':
+      return decideAssessment({ state, outcome: input.outcome });
 
     case 'operator':
       if (input.intent === 'deactivate') {

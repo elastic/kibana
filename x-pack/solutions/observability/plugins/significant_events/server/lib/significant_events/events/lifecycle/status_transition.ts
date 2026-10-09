@@ -42,10 +42,9 @@ export const aggregateStatusOutcomes = (outcomes: readonly StatusOutcome[]): Sta
 
 /**
  * Deterministic `active -> recovering -> inactive` transition, mirroring the Alerting v2 director's
- * basic state machine plus its count semantics (target architecture §4). A copy, not a call: see
+ * basic state machine plus its count semantics. A copy, not a call: see
  * `lifecycle_state_machine.ts` for why the director itself cannot be used here. `no_data` holds the
  * current status without advancing or resetting `statusCount`, like the director's `keep_last`.
- *
  * `statusCount` is the number of consecutive `recovering` versions already written for the series.
  */
 export const nextStatus = ({
