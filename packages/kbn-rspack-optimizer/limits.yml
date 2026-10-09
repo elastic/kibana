@@ -7,7 +7,7 @@ pageLoadAssetSize:
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
   agentBuilderWorkflows: 1152
-  agenticInvestigations: 38001
+  agenticInvestigations: 48669
   aiAssistantManagementSelection: 355
   aiops: 586
   alerting: 8789
@@ -67,7 +67,7 @@ pageLoadAssetSize:
   entityStore: 2252
   esql: 382
   esqlDataGrid: 215
-  esqlViews: 1332
+  esqlViews: 1652
   esUiShared: 2284
   evals: 4875
   eventAnnotation: 17278
@@ -133,7 +133,7 @@ pageLoadAssetSize:
   monitoring: 22416
   navigation: 332
   newsfeed: 10708
-  nightshift: 2362
+  nightshift: 2762
   nightshiftInvestigations: 9405
   nightshiftSources: 3928
   noDataPage: 630

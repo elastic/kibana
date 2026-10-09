@@ -48,6 +48,15 @@ import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/alertzero/floor_attack_di
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_endpoint_analysis.yaml';
 import FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_run_endpoint_analysis.yaml';
 import HUNT_CONTINUOUS_THREAT_HUNT_YAML from './definitions/alertzero/hunt_continuous_threat_hunt.yaml';
+import {
+  ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS,
+  ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS,
+  CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS,
+  ENDPOINT_ANALYSIS_WORKER_SETTINGS_DEFAULTS,
+  RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS,
+  RULE_TUNING_WORKER_SETTINGS_DEFAULTS,
+  type WorkerSettingsDefaults,
+} from './definitions/alertzero/worker_settings_defaults';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -193,46 +202,65 @@ function createContentFingerprint(content: string): string {
   return fingerprint.toString(16).padStart(8, '0');
 }
 
+/**
+ * What the platform's `yamlTemplate` hash cannot see but the render depends on: the imported YAML
+ * and, for AlertZero Workers, the settings defaults their renderer fills stored values from.
+ */
+const renderInputs = (importedYaml: string, defaults?: WorkerSettingsDefaults): string =>
+  defaults === undefined ? importedYaml : `${importedYaml}\n${JSON.stringify(defaults)}`;
+
 it.each([
-  [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '11:7fd8ee14'],
-  [ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_REVIEW_YAML, '2:687fa6cf'],
-  [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID, FLOOR_ATTACK_DISCOVERY_YAML, '5:0c7063df'],
+  [
+    ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
+    renderInputs(FLOOR_ALERT_TRIAGE_YAML, ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS),
+    '13:ee8cf0d1',
+  ],
+  [ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_REVIEW_YAML, '3:b59aafc3'],
+  [
+    ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
+    renderInputs(FLOOR_ATTACK_DISCOVERY_YAML, ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS),
+    '7:81e93c9b',
+  ],
   [
     ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
-    FORENSICS_ENDPOINT_ANALYSIS_YAML,
-    '3:a21077e9',
+    renderInputs(FORENSICS_ENDPOINT_ANALYSIS_YAML, ENDPOINT_ANALYSIS_WORKER_SETTINGS_DEFAULTS),
+    '5:ca69d574',
   ],
   [
     ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
     FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML,
-    '5:8c1109cb',
+    '6:73c35d66',
   ],
   [
     ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
-    HUNT_CONTINUOUS_THREAT_HUNT_YAML,
-    '1:ca43fa49',
+    renderInputs(HUNT_CONTINUOUS_THREAT_HUNT_YAML, CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS),
+    '4:432a8ccd',
   ],
-  [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '8:6890b0d2'],
+  [
+    ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
+    renderInputs(DETECTION_RULE_TUNING_YAML, RULE_TUNING_WORKER_SETTINGS_DEFAULTS),
+    '10:f49f1522',
+  ],
   [
     ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
-    DETECTION_RULE_COVERAGE_YAML,
-    '2:a3ed0daa',
+    renderInputs(DETECTION_RULE_COVERAGE_YAML, RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS),
+    '4:d2801f59',
   ],
   [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '3:20440aaf'],
   [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '3:39ab48da'],
   [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '3:5bff8110'],
 ] as const)(
-  'requires bumping %s definition.version together with the imported YAML fingerprint',
-  (workflowId, importedYaml, expectedFingerprint) => {
+  'requires bumping %s definition.version together with the fingerprint of its render inputs',
+  (workflowId, inputs, expectedFingerprint) => {
     const definition = managedWorkflowDefinitions.find(({ id }) => id === workflowId);
     if (!definition) throw new Error(`Managed worker "${workflowId}" is not registered`);
-    const actualFingerprint = `${definition.version}:${createContentFingerprint(importedYaml)}`;
+    const actualFingerprint = `${definition.version}:${createContentFingerprint(inputs)}`;
     if (actualFingerprint === expectedFingerprint) {
       return;
     }
     throw new Error(
-      `Imported YAML for '${workflowId}' changed (${actualFingerprint}, expected ${expectedFingerprint}). ` +
-        `yamlTemplate hashing covers only the function source, not this imported string, so already-installed spaces will not receive the edit until definition.version is bumped. ` +
+      `Render inputs for '${workflowId}' changed (${actualFingerprint}, expected ${expectedFingerprint}). ` +
+        `yamlTemplate hashing covers only the function source, not the imported YAML or the settings defaults in worker_settings_defaults.ts, so already-installed spaces will not receive the edit until definition.version is bumped. ` +
         `Bump version in the worker module and update this expected fingerprint in the same change.`
     );
   }

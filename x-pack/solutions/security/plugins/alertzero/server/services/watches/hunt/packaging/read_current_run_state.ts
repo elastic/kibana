@@ -12,13 +12,89 @@ import type { ResolveHostEnrollment } from '../../../fleet/resolve_host_enrollme
 import { buildMatchesRequired } from '../common/matches_required';
 import type { RehydrateProcessSelectors } from './rehydrate_process_selectors';
 import type {
+  CurrentRunFinding,
   CurrentRunHost,
   CurrentRunState,
   HuntEvidenceSummary,
   HuntEvidenceTechnique,
 } from './types';
 
+/** Rank order for picking the single most severe current-run SSE severity. Higher wins. */
+const SEVERITY_RANK: Record<string, number> = { low: 0, medium: 1, high: 2, critical: 3 };
+
+/** Highest-ranked severity across current-run SSEs; every SSE carries one, so this is never empty. */
+const pickHighestSeverity = (severities: string[]): string | undefined =>
+  severities.reduce<string | undefined>((highest, candidate) => {
+    if (highest === undefined) {
+      return candidate;
+    }
+    return (SEVERITY_RANK[candidate] ?? 0) > (SEVERITY_RANK[highest] ?? 0) ? candidate : highest;
+  }, undefined);
+
 const SSE_ATTACHMENT_TYPE = 'security.significant_security_event';
+
+type ParsedSse = ReturnType<typeof significantSecurityEventAttachmentReadSchema.parse>;
+
+/** The sentence the SSE mapper falls back to when no behavior supplied a hypothesis. */
+const GENERIC_HYPOTHESIS_PREFIX = 'Hunt Watch evaluated report';
+
+/** `T1078.004 (Cloud Accounts)`, the SKI value for a technique. */
+const TECHNIQUE_LABEL = /^(T\d{4}(?:\.\d{3})?) \((.+)\)$/;
+
+const toFinding = (sse: ParsedSse): CurrentRunFinding => ({
+  title: sse.title,
+  ...(sse.hypothesis_tested.startsWith(GENERIC_HYPOTHESIS_PREFIX)
+    ? {}
+    : { hypothesis: sse.hypothesis_tested }),
+  severity: sse.severity,
+  ...(sse.corroborated_technique_id
+    ? { corroboratedTechniqueId: sse.corroborated_technique_id }
+    : {}),
+  eventRefs: (sse.events ?? []).map((event) => ({
+    index: event.source_index,
+    ...(event.matched?.technique_id ? { techniqueId: event.matched.technique_id } : {}),
+  })),
+  tier1Indices: (sse.hunt_result?.tier1.per_index ?? []).map((entry) => entry.index),
+  behaviors: (sse.hunt_result?.tier2?.behaviors ?? []).flatMap((behavior) =>
+    behavior.execution?.executed === true && behavior.validated_esql
+      ? [
+          {
+            techniqueId: behavior.technique_id,
+            ...(behavior.technique_name ? { techniqueName: behavior.technique_name } : {}),
+            title: behavior.title,
+            confidence: behavior.confidence,
+            validatedEsql: behavior.validated_esql,
+            rowCount: behavior.execution.row_count,
+            hit: behavior.execution.hit,
+            ...(behavior.execution.inconclusive_reason
+              ? { inconclusiveReason: behavior.execution.inconclusive_reason }
+              : {}),
+          },
+        ]
+      : []
+  ),
+  ...(sse.hunt_result?.time_range ? { window: sse.hunt_result.time_range } : {}),
+  evidenceLines: [...sse.evidence_for, ...sse.evidence_against],
+  hosts: sse.entities
+    .filter((e) => e.field === 'host.name' || e.field === 'host.hostname')
+    .map((e) => e.value),
+  users: sse.entities.filter((e) => e.field === 'user.name').map((e) => e.value),
+});
+
+const collectTechniqueNames = (currentRun: ParsedSse[]): Record<string, string> => {
+  const names: Record<string, string> = {};
+  for (const sse of currentRun) {
+    for (const ski of sse.security_knowledge_indicators) {
+      if (ski.type !== 'technique') continue;
+      const match = TECHNIQUE_LABEL.exec(ski.value);
+      if (match) names[match[1]] = match[2];
+    }
+    for (const behavior of sse.hunt_result?.tier2?.behaviors ?? []) {
+      if (behavior.technique_name) names[behavior.technique_id] = behavior.technique_name;
+    }
+  }
+  return names;
+};
 
 const currentVersionData = (attachment: VersionedAttachment): unknown => {
   const version = attachment.versions.find((v) => v.version === attachment.current_version);
@@ -120,6 +196,13 @@ export const readCurrentRunState = async ({
     ),
   ];
 
+  const findings = currentRun.map(toFinding);
+  const techniqueNames = collectTechniqueNames(currentRun);
+  const users = [...new Set(findings.flatMap((finding) => finding.users))];
+  const window = findings.find((finding) => finding.window)?.window;
+
+  const severity = pickHighestSeverity(currentRun.map((sse) => sse.severity));
+
   const corroboratedTechniques = [
     ...new Set(
       currentRun
@@ -187,6 +270,11 @@ export const readCurrentRunState = async ({
     titles,
     evidenceLines,
     techniques,
+    findings,
+    techniqueNames,
+    users,
+    ...(window ? { window } : {}),
+    severity,
     corroboratedTechniques,
     hasNonHostEntity,
     hasIocIndicator,
