@@ -247,15 +247,17 @@ describe('rule-tuning coverage characterization', () => {
     // Unique: a duplicated id double-counts one dispute.
     expect(new Set(contested).size).toBe(contested.length);
 
-    // The dispute is exactly the volume + low-value + new_terms families the
-    // label proposal documents (13 fixtures). If a fixture joins or leaves the
-    // dispute, update g6-label-proposal.md in the same commit.
+    // The dispute is exactly the volume + low-value + new_terms families plus
+    // the two single-entity manual suppressions (logship, incapable-rule-type)
+    // the label proposal documents (17 fixtures). If a fixture joins or leaves
+    // the dispute, update g6-label-proposal.md in the same commit.
     expect(contested).toEqual([
       'fp-volume-suppression',
       'fp-suppression-healthcheck',
       'fp-suppression-vulnscan',
       'fp-suppression-inventory',
       'fp-suppression-patchagent',
+      'fp-suppression-logship',
       'fp-low-value-risk',
       'fp-low-value-scripting',
       'fp-low-value-admin-tools',
@@ -266,6 +268,7 @@ describe('rule-tuning coverage characterization', () => {
       'fp-manual-newterms-proxy',
       'fp-manual-newterms-vpn',
       'fp-manual-newterms-ntp',
+      'fp-suppression-incapable-rule-type',
     ]);
 
     // The uncontested subset must still exercise every branch the full set
@@ -278,6 +281,52 @@ describe('rule-tuning coverage characterization', () => {
     expect(uncontestedLabels).toContain('schedule');
     // ...and stays the majority of the dataset, or the uncontested number
     // stops being the headline metric.
-    expect(uncontestedLabels.length).toBe(24);
+    expect(uncontestedLabels.length).toBe(22);
+  });
+
+  it('pins the seed fix: schedule alerts land inside the lookback and entity spreads defeat exception-first', () => {
+    const seeder = readSeeder();
+
+    // (a) The schedule rule's lookback is now-24h (every other fixture stays at
+    // the burst-implied now-10m default).
+    expect(seeder).toMatch(
+      /from: fixture\.id\.startsWith\('fp-schedule-'\) \? 'now-24h' : 'now-10m'/
+    );
+
+    // (b) Every schedule alert offset is strictly inside that window: the
+    // seeder must spread timestamps as (20 - i * 4)h — oldest now-20h, all
+    // five offsets (20/16/12/8/4) < 24. The pre-fix (25 - i * 5)h put the
+    // oldest alert at now-25h, OUTSIDE the lookback and invisible to the
+    // diagnosis the fixture exists to exercise.
+    expect(seeder).toMatch(/\(20 - i \* 4\) \* 60 \* 60 \* 1000/);
+
+    // (c) The offhours-batch schedule fixture seeds five DISTINCT user.name
+    // values: a shared user would make user:<svc> the tightest single
+    // condition and the prompt's exception-first preference would outrank the
+    // schedule fix the fixture tests.
+    const offhours = seeder.slice(
+      seeder.indexOf("'fp-schedule-offhours-batch': ["),
+      seeder.indexOf('],', seeder.indexOf("'fp-schedule-offhours-batch': ["))
+    );
+    const offhoursUsers = [...offhours.matchAll(/user: '(svc_[a-z]+)'/g)].map((m) => m[1]);
+    expect(offhoursUsers.length).toBe(5);
+    expect(new Set(offhoursUsers).size).toBe(5);
+
+    // (d) The threshold fixtures spread their alerts across 3 distinct hosts,
+    // each firing exactly 4 times against a threshold of 3: no host, user, ip
+    // or process repeats ACROSS hosts, so exception/query have no common
+    // entity to key on and the raised threshold is the only correct label.
+    for (const id of ['fp-threshold-bruteforce-burst', 'fp-threshold-auditflood']) {
+      const block = seeder.slice(
+        seeder.indexOf(`'${id}': [`),
+        seeder.indexOf('],', seeder.indexOf(`'${id}': [`))
+      );
+      const hosts = [...block.matchAll(/host: '([a-z0-9-]+)'/g)].map((m) => m[1]);
+      expect(hosts.length).toBe(12);
+      const counts = new Map<string, number>();
+      hosts.forEach((h) => counts.set(h, (counts.get(h) ?? 0) + 1));
+      expect([...counts.keys()].length).toBe(3);
+      expect([...counts.values()].every((n) => n === 4)).toBe(true);
+    }
   });
 });

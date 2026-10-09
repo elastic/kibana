@@ -11,17 +11,20 @@ golden tuning path.
 | Evaluator | Kind | Gate or smoke |
 |-----------|------|---------------|
 | `ChangeTypeAccuracy` | CODE (binary) | **gate** — predicted tuning path == golden label, all fixtures |
-| `ChangeTypeAccuracyUncontested` | CODE (binary) | **gate** — same question on the fixtures whose labels are agreed (24/39); contested fixtures score N/A, so the run's N/A count states the coverage gap |
+| `ChangeTypeAccuracyUncontested` | CODE (binary) | **gate** — same question on the fixtures whose labels are agreed (22/39); contested fixtures score N/A, so the run's N/A count states the coverage gap |
 | `TuningQuality` | LLM judge | **gate** — summary grounded in the seeded FP evidence |
 | `Tool Routing` | CODE (trace) | **gate** — the agent actually retrieved the alerts (`investigate-rule.get_alerts_by_ids`); N/A when no span is reachable |
 | `ValidProposal` | CODE (structural) | **smoke** — schema/apply-gate conformance; expected to saturate |
 
 ### Contested labels
 
-15 fixtures carry golden labels that are contested against the product contract at
+17 fixtures carry golden labels that are contested against the product contract at
 upstream main and await sign-off (see `CONTESTED_FIXTURE_IDS` in `src/constants.ts` and
 `g6-label-proposal.md` on the tracking card): the whole volume-suppression and low-value
-families (labeled `manual`/`risk_score`) and the whole new_terms family (labeled `manual`).
+families (labeled `manual`/`risk_score`), the whole new_terms family (labeled `manual`),
+and two single-entity manual suppressions (`fp-suppression-logship`,
+`fp-suppression-incapable-rule-type`) — the same one-known-good-entity shape as the
+contested suppression fixtures.
 The contract's diagnose prompt ranks `exception` first and the runtime applies exceptions on
 every rule type including new_terms (verified at upstream main
 `e25202cf957`: `rule_tuning_review.yaml:341-395,595-605`, `create_new_terms_alert_type.ts:117,141`).
@@ -141,9 +144,13 @@ Each dataset run (i.e. each repetition) ends with one line per evaluator:
 
 ```
 📊 security: rule-tuning-workflow-decision | ChangeTypeAccuracy: mean 0.667 ±0.365 (n=39)
+📊 security: rule-tuning-workflow-decision | ChangeTypeAccuracyUncontested: mean 0.706 ±0.353 (n=22) [N/A×17]
 📊 security: rule-tuning-workflow-decision | ValidProposal: mean 1.000 ±0.000 (n=39) [SATURATED(no signal)]
 📊 security: rule-tuning-workflow-decision | Tool Routing: mean 1.000 ±0.000 (n=38) [N/A×1]
 ```
+
+(Numbers are illustrative of the line format, not a recorded run — read the
+`SATURATED`, `N/A` and `n=` annotations, not the means.)
 
 `n` counts one repetition's examples; the framework's score table aggregates the repetitions for the
 final per-model numbers.

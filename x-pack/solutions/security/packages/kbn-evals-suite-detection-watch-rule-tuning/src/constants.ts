@@ -98,6 +98,7 @@ export const CONTESTED_FIXTURE_IDS = [
   'fp-suppression-vulnscan',
   'fp-suppression-inventory',
   'fp-suppression-patchagent',
+  'fp-suppression-logship',
   'fp-low-value-risk',
   'fp-low-value-scripting',
   'fp-low-value-admin-tools',
@@ -110,6 +111,7 @@ export const CONTESTED_FIXTURE_IDS = [
   'fp-manual-newterms-proxy',
   'fp-manual-newterms-vpn',
   'fp-manual-newterms-ntp',
+  'fp-suppression-incapable-rule-type',
 ] as const;
 
 /** Tag prefix the workflow writes to harvested alerts. Isolated to the eval namespace. */
