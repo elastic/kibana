@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { ALERT_RULE_TYPE_ID, ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/rule-data-utils';
@@ -27,9 +28,12 @@ const getDocViewerResult = (
   record: DataTableRecord,
   toolkitActions: {
     refreshData?: () => void;
-  } = {}
+  } = {},
+  getFeatureById: jest.Mock = jest.fn()
 ) => {
-  const providerServices = {} as ProfileProviderServices;
+  const providerServices = {
+    discoverShared: { features: { registry: { getById: getFeatureById } } },
+  } as unknown as ProfileProviderServices;
   const [enhancedProvider] = createSecurityDocumentProfileProviders(providerServices);
   const prevRenderHeader = jest.fn();
   const prevRenderFooter = jest.fn();
@@ -142,6 +146,23 @@ describe('createSecurityDocumentProfileProviders', () => {
 
       expect(registry.add).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'doc_view_alerts_overview' })
+      );
+    });
+
+    it("registers the Security overview tab's shareable state schema", () => {
+      const shareableStateSchema = z.object({});
+      const getFeatureById = jest.fn().mockReturnValue({ shareableStateSchema });
+      const { result } = getDocViewerResult(
+        createRecord({ 'event.kind': 'signal' }),
+        {},
+        getFeatureById
+      );
+      const registry = { add: jest.fn() };
+      result.docViewsRegistry(registry as never);
+
+      expect(getFeatureById).toHaveBeenCalledWith('security-solution-alert-flyout-overview-tab');
+      expect(registry.add).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'doc_view_alerts_overview', shareableStateSchema })
       );
     });
 

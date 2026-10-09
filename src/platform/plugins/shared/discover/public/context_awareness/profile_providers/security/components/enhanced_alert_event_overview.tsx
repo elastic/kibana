@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type {
+  DocViewRenderProps,
+  DocViewRestorableStateProps,
+} from '@kbn/unified-doc-viewer/types';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 
 const noop = () => {};
@@ -18,7 +21,9 @@ const noop = () => {};
  * The intention keep implementing its content as we're extracting flyout code from the Security Solution plugin to a set of package.
  * The feature flag will remain disabled until we're ready to ship some of the content. The target is to release an MVP by 9.4 then have it fully functional by 9.5.
  */
-export interface EnhancedAlertEventOverviewProps extends DocViewRenderProps {
+export interface EnhancedAlertEventOverviewProps
+  extends DocViewRenderProps,
+    DocViewRestorableStateProps {
   providerServices: ProfileProviderServices;
   refreshData?: () => void;
 }

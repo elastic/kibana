@@ -9,8 +9,10 @@ import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
-import { useFlyoutV2UrlWriter } from './flyout_v2_url_writer';
+import { hasOpenFlyoutV2, useFlyoutV2UrlWriter } from './flyout_v2_url_writer';
+import type { FlyoutV2UrlParamValue } from './flyout_v2_url_param';
 import { FLYOUT_V2_URL_PARAM } from './flyout_v2_url_param';
+import { registerFlyoutV2StateSink } from './flyout_v2_state_sink';
 import { documentFlyoutHistoryKey } from '../constants/flyout_history';
 
 // ---------------------------------------------------------------------------
@@ -29,8 +31,10 @@ const renderWriter = (
   return { result, history };
 };
 
-const getParam = (history: ReturnType<typeof createMemoryHistory>, key = FLYOUT_V2_URL_PARAM) =>
-  new URLSearchParams(history.location.search).get(key);
+const getParam = (
+  history: ReturnType<typeof createMemoryHistory>,
+  key: string = FLYOUT_V2_URL_PARAM
+) => new URLSearchParams(history.location.search).get(key);
 
 const docDescriptor = (id: string) =>
   ({ kind: 'document' as const, documentId: id, indexName: 'idx' } as const);
@@ -322,6 +326,97 @@ describe('useFlyoutV2UrlWriter', () => {
           wrapper,
         });
       }).not.toThrow();
+    });
+  });
+
+  describe('with a state sink registered for the history key', () => {
+    // Distinct param key so the module-scoped generation tracking does not leak across tests.
+    const sinkParamKey = 'flyoutV2SinkTest';
+    let stack: FlyoutV2UrlParamValue;
+    let unregister: () => void;
+    const write = jest.fn((nextStack: FlyoutV2UrlParamValue | null) => {
+      stack = nextStack ?? [];
+    });
+
+    beforeEach(() => {
+      stack = [];
+      write.mockClear();
+      unregister = registerFlyoutV2StateSink(documentFlyoutHistoryKey, {
+        read: () => stack,
+        write,
+      });
+    });
+
+    afterEach(() => {
+      unregister();
+    });
+
+    it('writes to the sink instead of the URL', () => {
+      const { result, history } = renderWriter(createMemoryHistory(), sinkParamKey);
+
+      act(() => {
+        result.current.writeOnOpen(docDescriptor('doc-1'));
+      });
+
+      expect(write).toHaveBeenCalledWith([docDescriptor('doc-1')]);
+      expect(getParam(history, sinkParamKey)).toBeNull();
+    });
+
+    it('reads the current root from the sink for inherit opens', () => {
+      stack = [analyzerDescriptor('doc-1')];
+      const { result } = renderWriter(createMemoryHistory(), sinkParamKey);
+
+      act(() => {
+        result.current.writeOnOpen(docDescriptor('doc-2'), 'inherit');
+      });
+
+      expect(write).toHaveBeenLastCalledWith([analyzerDescriptor('doc-1'), docDescriptor('doc-2')]);
+    });
+
+    it('writes the close fallback to the sink and tracks open flyouts', () => {
+      const { result } = renderWriter(createMemoryHistory(), sinkParamKey);
+
+      let onClose!: () => void;
+      act(() => {
+        result.current.writeOnOpen(docDescriptor('doc-1'));
+        onClose = result.current.buildOnClose(null);
+      });
+
+      expect(hasOpenFlyoutV2(sinkParamKey)).toBe(true);
+
+      act(() => {
+        onClose();
+      });
+
+      expect(write).toHaveBeenLastCalledWith(null);
+      expect(hasOpenFlyoutV2(sinkParamKey)).toBe(false);
+    });
+
+    it('writes to the sink even when history is not usable', () => {
+      const wrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
+        children as React.ReactElement;
+      const { result } = renderHook(
+        () => useFlyoutV2UrlWriter(sinkParamKey, documentFlyoutHistoryKey),
+        { wrapper }
+      );
+
+      act(() => {
+        result.current.writeOnOpen(docDescriptor('doc-1'));
+      });
+
+      expect(write).toHaveBeenCalledWith([docDescriptor('doc-1')]);
+    });
+
+    it('falls back to the URL once the sink is unregistered', () => {
+      unregister();
+      const { result, history } = renderWriter(createMemoryHistory(), sinkParamKey);
+
+      act(() => {
+        result.current.writeOnOpen(docDescriptor('doc-1'));
+      });
+
+      expect(write).not.toHaveBeenCalled();
+      expect(getParam(history, sinkParamKey)).not.toBeNull();
     });
   });
 });

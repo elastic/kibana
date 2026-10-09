@@ -8,7 +8,11 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type {
+  DocView,
+  DocViewRenderProps,
+  DocViewRestorableStateProps,
+} from '@kbn/unified-doc-viewer/types';
 import type { FunctionComponent } from 'react';
 import type React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
@@ -148,9 +152,14 @@ interface SecuritySolutionAlertFlyoutRenderProps extends DocViewRenderProps {
   onAlertUpdated: () => void;
 }
 
+type SecuritySolutionAlertFlyoutOverviewTabRenderProps = SecuritySolutionAlertFlyoutRenderProps &
+  DocViewRestorableStateProps;
+
 export interface SecuritySolutionAlertFlyoutOverviewTabFeature {
   id: 'security-solution-alert-flyout-overview-tab';
-  render: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
+  render: (props: SecuritySolutionAlertFlyoutOverviewTabRenderProps) => JSX.Element;
+  /** Deep-linkable subset of the overview tab state, registered on the Discover doc view. */
+  shareableStateSchema?: DocView['shareableStateSchema'];
 }
 
 export interface SecuritySolutionAlertFlyoutHeaderTitleFeature {
