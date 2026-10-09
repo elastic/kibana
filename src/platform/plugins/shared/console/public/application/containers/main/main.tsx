@@ -101,7 +101,7 @@ const useStyles = (isEmbeddable: boolean) => {
     `,
 
     consoleTabs: css`
-      padding: 0 ${euiTheme.size.s};
+      padding: ${euiTheme.size.s} ${euiTheme.size.m} 0;
     `,
 
     // Scrollable panel with body background
