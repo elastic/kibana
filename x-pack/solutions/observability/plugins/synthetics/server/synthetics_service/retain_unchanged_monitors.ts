@@ -7,6 +7,7 @@
 
 import pMap from 'p-map';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type {
@@ -160,7 +161,11 @@ export const retainUnchangedMonitors = async ({
   return Array.from(notRetained.values());
 };
 
-/** Reads the given monitors with their secrets, skipping any that can no longer be read. */
+/**
+ * Reads the given monitors with their secrets. A monitor deleted since it was listed is skipped,
+ * as there is nothing left to send. Any other failure, such as one to decrypt it, is counted in
+ * `unreadable` so the caller does not treat the monitor as synced.
+ */
 export const readDecryptedMonitors = async ({
   encryptedClient,
   monitors,
@@ -170,6 +175,8 @@ export const readDecryptedMonitors = async ({
   monitors: RetainableMonitor[];
   logger: Logger;
 }) => {
+  let unreadable = 0;
+
   const decrypted = await pMap(
     monitors,
     async ({ savedObjectType, savedObjectId, namespace }) => {
@@ -180,12 +187,19 @@ export const readDecryptedMonitors = async ({
           { namespace }
         );
       } catch (error) {
-        // most likely deleted since it was listed, so there is nothing left to send
-        logger.debug(`Could not read monitor ${savedObjectId} to sync it: ${error.message}`);
+        if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+          logger.debug(`Monitor ${savedObjectId} was deleted before it could be synced`);
+        } else {
+          unreadable++;
+          logger.warn(`Could not read monitor ${savedObjectId} to sync it: ${error.message}`);
+        }
       }
     },
     { concurrency: FETCH_MONITOR_CONCURRENCY }
   );
 
-  return decrypted.filter((monitor): monitor is NonNullable<typeof monitor> => !!monitor);
+  return {
+    monitors: decrypted.filter((monitor): monitor is NonNullable<typeof monitor> => !!monitor),
+    unreadable,
+  };
 };

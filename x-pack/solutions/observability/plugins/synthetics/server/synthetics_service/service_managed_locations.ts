@@ -448,6 +448,8 @@ export class ServiceManagedLocations {
 
     const startedAt = new Date();
     let hasPushFailure = false;
+    // Kept apart from `syncErrors`, which add and edit requests also write to while this runs.
+    const pushErrors: ServiceLocationErrors = [];
 
     const maintenanceWindows = await getMaintenanceWindows(this.server, spaceId);
 
@@ -513,9 +515,10 @@ export class ServiceManagedLocations {
         return;
       }
 
-      // Reading the monitors one by one is only worth it for the few a service lets go of, so
-      // when no service can retain any, scanning them all is cheaper.
-      const canRetain = this.locations.some(({ id }) => this.httpClient.supportsRetain(id));
+      // Reading the monitors one by one is only worth it for the few a service lets go of. A
+      // location that cannot retain lets go of all of its monitors on every run, so as long as
+      // there is one, scanning them all in pages is cheaper.
+      const canRetain = this.locations.every(({ id }) => this.httpClient.supportsRetain(id));
       const fingerprint = getFingerprint(output);
       if (
         canRetain &&
@@ -563,6 +566,7 @@ export class ServiceManagedLocations {
           if (!syncErrors) {
             hasPushFailure = true;
           }
+          pushErrors.push(...(syncErrors ?? []));
           this.syncErrors = [...(this.syncErrors ?? []), ...(syncErrors ?? [])];
         },
         {
@@ -639,17 +643,31 @@ export class ServiceManagedLocations {
           return;
         }
 
-        await pushMonitors(result.saved_objects.filter(({ error }) => !error));
+        const readable = result.saved_objects.filter(({ error }) => !error);
+        if (readable.length < result.saved_objects.length) {
+          // Not sending a monitor that failed to decrypt must not count as syncing it, or it would
+          // not be tried again until the next full sync once it can be read.
+          hasPushFailure = true;
+          this.logger.warn(
+            `${
+              result.saved_objects.length - readable.length
+            } monitors could not be read and were not synced`
+          );
+        }
+        await pushMonitors(readable);
       }
     }
     finder.close().catch(() => {});
 
     for (const candidates of chunk(notRetained, FULL_SYNC_PAGE_SIZE)) {
-      const monitors = await readDecryptedMonitors({
+      const { monitors, unreadable } = await readDecryptedMonitors({
         encryptedClient: this.server.encryptedSavedObjects.getClient(),
         monitors: candidates,
         logger: this.logger,
       });
+      if (unreadable > 0) {
+        hasPushFailure = true;
+      }
       if (monitors.length > 0) {
         await pushMonitors(monitors);
       }
@@ -659,7 +677,10 @@ export class ServiceManagedLocations {
     await syncAllLocations();
 
     const { current: output } = resolvedOutput;
-    if (syncState && output && !hasPushFailure && !service.syncErrors?.length) {
+    // With no locations nothing was sent, so there is nothing to record: the locations could not
+    // be fetched, and changes made meanwhile must still count as changed once they are back.
+    const hasLocations = this.locations.length > 0;
+    if (syncState && output && hasLocations && !hasPushFailure && pushErrors.length === 0) {
       const syncedAt = startedAt.toISOString();
       syncState.lastSyncedAt = syncedAt;
       syncState.syncFingerprint = getFingerprint(output);
