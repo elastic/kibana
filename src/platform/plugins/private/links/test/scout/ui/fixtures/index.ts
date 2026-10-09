@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
-import type {
-  PageObjects,
-  ScoutPage,
-  ScoutParallelWorkerFixtures,
-  ScoutTestFixtures,
-} from '@kbn/scout';
+import { test as baseTest, createLazyPageObject } from '@kbn/scout';
+import type { PageObjects, ScoutPage, ScoutWorkerFixtures, ScoutTestFixtures } from '@kbn/scout';
 import { LinksPanel } from './page_objects';
 
 export interface LinksPageObjects extends PageObjects {
@@ -24,7 +19,7 @@ export interface LinksTestFixtures extends ScoutTestFixtures {
   pageObjects: LinksPageObjects;
 }
 
-export const spaceTest = spaceBaseTest.extend<LinksTestFixtures, ScoutParallelWorkerFixtures>({
+export const test = baseTest.extend<LinksTestFixtures, ScoutWorkerFixtures>({
   pageObjects: async (
     { pageObjects, page }: { pageObjects: LinksPageObjects; page: ScoutPage },
     use: (pageObjects: LinksPageObjects) => Promise<void>

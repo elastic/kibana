@@ -22,7 +22,7 @@
 ### Proposed file splits
 
 - `links_navigation.ts` (7 `it`, 3 flows) into:
-  - `links_panel_add.spec.ts` (1 test)
+  - `add_from_library.spec.ts` (1 test)
   - `links_dashboard_navigation.spec.ts` (4 tests)
   - `links_external_navigation.spec.ts` (3 tests, needs custom server config)
 - `links_create_edit.ts` into:
@@ -41,7 +41,7 @@ None. `links_create_edit` is skipped upstream; migrate and, if still flaky, keep
 
 | FTR file | FTR `it()` title | Behavior and assertions | Scout destination | Disposition | Rationale |
 |----------|------------------|-------------------------|-------------------|-------------|-----------|
-| `links_navigation.ts` | adds links panel to top of dashboard | Add saved links panel from library; first panel title is "a few horizontal links" | `links_panel_add.spec.ts` | Scout `test` | Single flow |
+| `links_navigation.ts` | adds links panel to top of dashboard | Add saved links panel from library; first panel title is "a few horizontal links" | `add_from_library.spec.ts` | Scout `test` | Single flow |
 | `links_navigation.ts` | should disable link if dashboard does not exist | `links 001` shows `Error fetching dashboard` link, disabled | `links_dashboard_navigation.spec.ts` | Scout `test` | Independent |
 | `links_navigation.ts` | useFilters should pass filter pills and query | links 002 → links 001: 2 filters passed, time range not overridden | same | Scout `test` | Independent; was `skipFIPS` (Scout has no FIPS lane, noted) |
 | `links_navigation.ts` | useTimeRange should pass date range | links 001 → links 002: time passed, 1 filter | same | Scout `test` | Independent |
@@ -67,7 +67,7 @@ None. `links_create_edit` is skipped upstream; migrate and, if still flaky, keep
 
 | FTR file | Proposed spec path | Key flows covered |
 |----------|--------------------|-------------------|
-| `links_navigation.ts` | `test/scout/ui/tests/links_panel_add.spec.ts`, `links_dashboard_navigation.spec.ts`, `links_external_navigation.spec.ts` | Add panel, dashboard link options, external link policy/tab behavior |
+| `links_navigation.ts` | `test/scout/ui/tests/add_from_library.spec.ts`, `links_dashboard_navigation.spec.ts`, `links_external_navigation.spec.ts` | Add panel, dashboard link options, external link policy/tab behavior |
 | `links_create_edit.ts` | `test/scout/ui/tests/links_create.spec.ts`, `links_edit.spec.ts` | Create by-ref/by-value, edit/reorder/delete |
 
 ### API tests
@@ -86,7 +86,7 @@ None. Possible follow-up: external-policy validation in the link editor is alrea
 
 | Proposed spec | Why parallel-safe |
 |--------------|------------------|
-| `links_panel_add`, `links_dashboard_navigation`, `links_create`, `links_edit` | State is space-scoped (kbn archive loaded per space via `scoutSpace.savedObjects.load`, uiSettings per space). Dashboards' saved IDs in archive are fixed; space-scoped load makes this safe. |
+| `add_from_library`, `links_dashboard_navigation`, `links_create`, `links_edit` | State is space-scoped (kbn archive loaded per space via `scoutSpace.savedObjects.load`, uiSettings per space). Dashboards' saved IDs in archive are fixed; space-scoped load makes this safe. |
 
 ### Must be sequential
 
@@ -203,7 +203,7 @@ NEEDS VERIFICATION: whether a default-config alternative exists (e.g. assert dis
 
 | Proposed spec | Where it should run | Reasoning |
 |--------------|--------------------|-----------|
-| `links_panel_add`, `links_dashboard_navigation`, `links_create`(non-policy), `links_edit` | stateful + serverless (`tags.deploymentAgnostic`) | Links panel exists everywhere; FTR was stateful-only (`ftr_platform_stateful_configs.yml:71`), so this expands coverage. NEEDS VERIFICATION in serverless run. |
+| `add_from_library`, `links_dashboard_navigation`, `links_create`(non-policy), `links_edit` | stateful + serverless (`tags.deploymentAgnostic`) | Links panel exists everywhere; FTR was stateful-only (`ftr_platform_stateful_configs.yml:71`), so this expands coverage. NEEDS VERIFICATION in serverless run. |
 | `links_external_navigation` + policy test | stateful only | Custom server config set is local-only (no Cloud) |
 
 ### Stateful/serverless mirror FTR files
@@ -243,7 +243,7 @@ None found after searching by basename (`links_navigation`, `links_create_edit`)
 
 | # | Proposed spec | From | Complexity | Notes |
 |---|--------------|------|------------|-------|
-| 1 | `links_panel_add.spec.ts` | `links_navigation.ts` | simple | Default config |
+| 1 | `add_from_library.spec.ts` | `links_navigation.ts` | simple | Default config |
 | 2 | `links_dashboard_navigation.spec.ts` | `links_navigation.ts` | medium | New page object helpers (dashboard-id from URL), new-page handling |
 
 - **Human involvement**: `autopilot`
@@ -304,7 +304,9 @@ Post-migration cleanup: delete `links/` FTR dir, remove line 71 from `.buildkite
 
 ## Execution notes (2026-10-09)
 
-- Specs landed in `test/scout/ui/parallel_tests/` (`links_panel_add`, `links_dashboard_navigation`, `links_create`, `links_edit`) and `test/scout_links_external_url_policy/ui/parallel_tests/links_external_url_policy.spec.ts`. The policy-violation test from `links_create_edit.ts` moved into the policy spec because it needs the custom server config.
+- Specs landed in `test/scout/ui/tests/` (`add_from_library`, `links_dashboard_navigation`, `links_create`, `links_edit`) and `test/scout_links_external_url_policy/ui/tests/links_external_url_policy.spec.ts`. The policy-violation test from `links_create_edit.ts` moved into the policy spec because it needs the custom server config.
 - New config set: `kbn-scout/.../config_sets/links_external_url_policy`. Plugin-local page object: `LinksPanel`. `global.setup.ts` loads the dashboard ES archive (the time picker is disabled without a time-based index); the flights archives were not needed and were dropped.
 - Verified locally (stateful classic): 12/12 default-config specs, 4/4 policy specs. Serverless run **not verified** (Docker unavailable).
 - FTR `links/` directory and its `ftr_platform_stateful_configs.yml` entry removed; `dashboard_page_links.ts` kept for the accessibility FTR test.
+
+- Converted to sequential (`test` + `kbnClient.importExport.load`, fixed archive ids, default space) instead of parallel `spaceTest`; `global.setup.ts` removed and the ES archive is loaded in the navigation spec. Re-verified: 11/11 default-config, 4/4 policy.

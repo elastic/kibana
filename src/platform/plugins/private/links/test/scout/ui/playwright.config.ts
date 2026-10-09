@@ -9,11 +9,6 @@
 
 import { createPlaywrightConfig } from '@kbn/scout';
 
-/**
- * These tests require a custom server configuration that sets `externalUrl.policy`,
- * which is only read when Kibana boots.
- */
 export default createPlaywrightConfig({
-  testDir: './parallel_tests',
-  workers: 2,
+  testDir: './tests',
 });
