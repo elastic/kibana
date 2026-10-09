@@ -84,7 +84,6 @@ interface MessageEditorProps {
   ariaLabel?: string;
   'data-test-subj'?: string;
   onPasteFile?: (file: File) => string | undefined;
-  /** Lets a pasted PDF reach `onPasteFile`. Off by default, so a PDF paste is a plain paste. */
   acceptPdf?: boolean;
   onAfterInput?: () => void;
   onHoveredPlaceholderChange?: (name: string | null) => void;

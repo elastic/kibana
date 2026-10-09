@@ -23,14 +23,11 @@ const DEFAULT_PDF_NAME = 'document.pdf';
 export interface UsePdfUploadParams {
   addErrorToast: (input: ToastInput) => void;
   messageEditorController: MessageEditorController;
-  /** Makes the conversation a PDF is read into when the user pastes it in a new chat. */
   createConversation: (agentId: string) => Promise<{ id: string }>;
 }
 
 export interface UsePdfUploadResult {
-  /** Names of the PDFs that are uploading or being read. */
   loadingPdfNames: Set<string>;
-  /** The conversation made for a PDF pasted in a new chat. Send reuses it. */
   pendingConversationId: string | undefined;
   handlePastePdf?: (file: File) => string | undefined;
   handleAfterInput: () => void;

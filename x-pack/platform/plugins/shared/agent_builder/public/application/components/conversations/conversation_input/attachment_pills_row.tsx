@@ -27,7 +27,6 @@ export interface AttachmentPillsRowProps {
   justifyContent?: EuiFlexGroupProps['justifyContent'];
   onRemoveAttachment?: (attachment: ConversationAttachment) => void;
   uploadingNames?: Set<string>;
-  /** PDFs that are uploading or being read, drawn as named pills with a spinner. */
   loadingPdfNames?: Set<string>;
   onRemoveLoadingPdf?: (name: string) => void;
   hoveredImageName?: string | null;

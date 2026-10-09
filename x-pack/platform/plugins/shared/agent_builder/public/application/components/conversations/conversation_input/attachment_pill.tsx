@@ -37,7 +37,6 @@ export interface AttachmentPillProps {
   attachment: Attachment;
   onRemoveAttachment?: () => void;
   isHighlighted?: boolean;
-  /** A PDF that is still uploading or being read: the icon is a spinner and Send waits for it. */
   isLoading?: boolean;
 }
 

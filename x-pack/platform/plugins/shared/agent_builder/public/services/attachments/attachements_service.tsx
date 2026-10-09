@@ -151,7 +151,6 @@ export class AttachmentsService {
     return attachment;
   }
 
-  /** Whether the server can read PDFs right now. */
   async isPdfAvailable(): Promise<boolean> {
     const { available } = await this.http.get<{ available: boolean }>(pdfAvailabilityPath);
     return available === true;

@@ -65,7 +65,6 @@ const createTextAndBadgeFragment = (sanitizedHtml: DocumentFragment): DocumentFr
 
 export interface HandleEditorPasteOpts {
   onPasteFile?: (file: File) => string | undefined;
-  /** Also take a pasted PDF file. Otherwise a PDF paste falls through to the text paste. */
   acceptPdf?: boolean;
   editorRef: RefObject<HTMLDivElement>;
   onChange: () => void;

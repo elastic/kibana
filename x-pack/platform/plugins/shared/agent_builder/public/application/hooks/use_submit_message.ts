@@ -20,7 +20,6 @@ import { useToasts } from './use_toasts';
 import { appPaths } from '../utils/app_paths';
 
 interface SubmitMessageOptions {
-  /** A conversation made before Send. Only used when there is no conversation yet. */
   conversationId?: string;
 }
 

@@ -37,9 +37,7 @@ export interface AgentBuilderStorybookProviderProps {
   agentId?: string;
   initialAttachments?: ConversationAttachment[];
   services?: Partial<AgentBuilderInternalService>;
-  /** Replaces the shared query client, for stories whose queries must not carry over. */
   queryClient?: QueryClient;
-  /** Replaces the Kibana services, for stories that need to see toasts or analytics. */
   kibanaServices?: StartServices;
 }
 
