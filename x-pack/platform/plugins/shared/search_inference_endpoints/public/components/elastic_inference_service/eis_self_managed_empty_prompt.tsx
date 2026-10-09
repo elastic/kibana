@@ -14,7 +14,6 @@ import {
   EuiIcon,
   EuiIllustration,
   EuiLink,
-  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -81,16 +80,6 @@ export const EisSelfManagedEmptyPrompt = ({ onConnectCluster }: EisSelfManagedEm
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <p>
-          {i18n.translate(
-            'xpack.searchInferenceEndpoints.eisModelsPage.selfManagedEmpty.connectDescription',
-            {
-              defaultMessage:
-                'Connect your cluster to Elastic Cloud to access Elastic Inference Service.',
-            }
-          )}
-        </p>
       </EuiText>
     }
     actions={
