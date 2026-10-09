@@ -443,6 +443,7 @@ export class WorkflowExecutionTelemetryClient {
     eventChainContext?: EventChainContext;
     eventId: string;
     subscriberResolutionMs: number;
+    subscriptionCacheOutcome: 'hit' | 'miss';
     resolutionStats: TriggerResolutionStats;
     scheduleStats: TriggerEventScheduleStats;
   }): void {
@@ -456,6 +457,7 @@ export class WorkflowExecutionTelemetryClient {
       auditOnly: !params.config.enabled && params.config.logEvents,
       eventChainDepth: params.eventChainContext?.depth ?? 0,
       subscriberResolutionMs: params.subscriberResolutionMs,
+      subscriptionCacheOutcome: params.subscriptionCacheOutcome,
       ...(params.eventChainContext?.sourceExecutionId && {
         sourceExecutionId: params.eventChainContext.sourceExecutionId,
       }),

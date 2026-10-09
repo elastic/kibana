@@ -326,6 +326,7 @@ describe('TriggerEventHandler', () => {
         triggerId: 'cases.updated',
         eventId: expect.any(String),
         subscriberResolutionMs: expect.any(Number),
+        subscriptionCacheOutcome: 'miss',
         resolutionStats: expect.objectContaining({ matchedCount: 1 }),
         scheduleStats: expect.objectContaining({
           scheduledSuccessCount: 1,
@@ -759,6 +760,15 @@ describe('TriggerEventHandler', () => {
     expect(workflowRepository.getWorkflowsByIds).toHaveBeenCalledTimes(1);
     expect(workflowRepository.getWorkflowsByIds).toHaveBeenCalledWith(['wf-1'], 'default');
     expect(scheduleWorkflow).toHaveBeenCalledTimes(2);
+    const reportMock = getTelemetryMock();
+    expect(reportMock).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ subscriptionCacheOutcome: 'miss' })
+    );
+    expect(reportMock).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ subscriptionCacheOutcome: 'hit' })
+    );
   });
 
   it('loads subscribers again for the same trigger in another space', async () => {
@@ -794,5 +804,48 @@ describe('TriggerEventHandler', () => {
       'cases.updated',
       'space-b'
     );
+  });
+
+  it('reports an expired subscriber cache entry as a miss', async () => {
+    jest.useFakeTimers();
+    try {
+      const workflowRepository = createWorkflowRepositoryMock([createMockWorkflow()]);
+      const handler = new TriggerEventHandler(
+        createDeps({
+          workflowRepository,
+          config: {
+            enabled: true,
+            logEvents: true,
+            maxChainDepth: 10,
+            subscriptionCacheTtl: moment.duration(1, 's'),
+          },
+        })
+      );
+
+      await handler.handleEvent({
+        triggerId: 'cases.updated',
+        payload: {},
+        request: mockRequest,
+      });
+      await jest.advanceTimersByTimeAsync(1000);
+      await handler.handleEvent({
+        triggerId: 'cases.updated',
+        payload: {},
+        request: mockRequest,
+      });
+
+      expect(workflowRepository.getWorkflowsSubscribedToTrigger).toHaveBeenCalledTimes(2);
+      const reportMock = getTelemetryMock();
+      expect(reportMock).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ subscriptionCacheOutcome: 'miss' })
+      );
+      expect(reportMock).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ subscriptionCacheOutcome: 'miss' })
+      );
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });

@@ -234,7 +234,11 @@ export class TriggerEventHandler {
     this.validateTrigger(triggerId, spaceId, payload);
 
     const resolutionStartMs = Date.now();
-    const { workflows, stats: resolutionStats } = await this.resolveMatchingWorkflowSubscriptions(
+    const {
+      workflows,
+      stats: resolutionStats,
+      subscriptionCacheOutcome,
+    } = await this.resolveMatchingWorkflowSubscriptions(
       triggerId,
       spaceId,
       eventContextForResolution
@@ -296,6 +300,7 @@ export class TriggerEventHandler {
       config: this.config,
       eventChainContext,
       subscriberResolutionMs,
+      subscriptionCacheOutcome,
       resolutionStats,
       scheduleStats,
     });
@@ -418,7 +423,7 @@ export class TriggerEventHandler {
       triggerId,
     });
     const workflows = await this.loadMatchedWorkflows(matchedIds, spaceId, loadedWorkflows);
-    return { workflows, stats };
+    return { workflows, stats, subscriptionCacheOutcome: resolution.outcome };
   }
 
   private async loadMatchedWorkflows(

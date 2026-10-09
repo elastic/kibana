@@ -590,6 +590,7 @@ export interface TriggerEventDispatchedParams {
   sourceExecutionId?: string;
   auditOnly: boolean;
   subscriberResolutionMs?: number;
+  subscriptionCacheOutcome: 'hit' | 'miss';
   subscribedCount: number;
   disabledCount: number;
   connectorIdMismatchCount: number;
