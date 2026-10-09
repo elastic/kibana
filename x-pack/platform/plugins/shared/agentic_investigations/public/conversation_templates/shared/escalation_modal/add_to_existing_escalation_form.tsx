@@ -10,7 +10,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { EscalationIncidentSummary } from '@kbn/agentic-investigations-common';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { ESCALATION_MODAL_TRANSLATIONS } from './escalation_modal_translations';
 
 const T = ESCALATION_MODAL_TRANSLATIONS.addToExistingForm;
@@ -100,18 +100,18 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : isError ? (
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
               title={T.loadErrorTitle}
-              color="danger"
-              iconType="error"
               data-test-subj="escalationModalLoadError"
-            >
-              {error instanceof Error && error.message ? <p>{error.message}</p> : null}
-              <EuiButton size="s" color="danger" onClick={onRetry}>
-                {T.retryButton}
-              </EuiButton>
-            </EuiCallOut>
+              text={error instanceof Error && error.message ? <p>{error.message}</p> : null}
+              actionProps={{
+                primary: {
+                  children: T.retryButton,
+                  onClick: onRetry,
+                },
+              }}
+            />
           ) : incidents.length === 0 ? (
             <EuiText size="s" color="subdued" textAlign="center">
               <p>{T.emptyText}</p>
@@ -137,7 +137,7 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
                   onClick={() => !isRowDisabled(incident) && setSelectedId(incident.id)}
                   data-test-subj={`escalationModalIncident-${incident.id}`}
                 >
-                  <EuiFlexGroup alignItems="center" gutterSize="xs">
+                  <EuiFlexGroup alignItems="center" gutterSize="s">
                     <EuiFlexItem grow={false}>
                       <EuiRadio
                         id={`incident-${incident.id}`}
