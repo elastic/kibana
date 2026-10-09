@@ -13,6 +13,7 @@ import {
   validateChannelName,
   PostMessageSubActionParamsSchema,
   SlackApiConfigSchema,
+  SlackApiParamsSchema,
   MAX_ALLOWED_CHANNELS,
 } from './v1';
 
@@ -198,6 +199,73 @@ describe('Slack Api Schema validation', () => {
       expect(() =>
         PostMessageSubActionParamsSchema.parse({ text: 'hello', channelNames: ['#general'] })
       ).not.toThrow();
+    });
+  });
+
+  describe('SlackApiParamsSchema', () => {
+    const blockkitText = JSON.stringify({
+      blocks: [
+        {
+          type: 'section',
+          text: { type: 'mrkdwn', text: 'Hello' },
+        },
+      ],
+    });
+
+    test('keeps an explicit postBlockkit subAction', () => {
+      expect(
+        SlackApiParamsSchema.parse({
+          subAction: 'postBlockkit',
+          subActionParams: { text: blockkitText },
+        })
+      ).toEqual({
+        subAction: 'postBlockkit',
+        subActionParams: { text: blockkitText },
+      });
+    });
+
+    test('keeps an explicit validChannelId subAction', () => {
+      expect(
+        SlackApiParamsSchema.parse({
+          subAction: 'validChannelId',
+          subActionParams: { channelId: 'C123' },
+        })
+      ).toEqual({
+        subAction: 'validChannelId',
+        subActionParams: { channelId: 'C123' },
+      });
+    });
+
+    test('defaults a missing subAction to postMessage', () => {
+      expect(SlackApiParamsSchema.parse({ subActionParams: { text: 'hello' } })).toEqual({
+        subAction: 'postMessage',
+        subActionParams: { text: 'hello' },
+      });
+    });
+
+    test('throws when subAction is unknown', () => {
+      expect(() =>
+        SlackApiParamsSchema.parse({
+          subAction: 'random subAction',
+          subActionParams: { text: 'hello' },
+        })
+      ).toThrow();
+    });
+
+    test('throws when subAction is omitted and text is missing', () => {
+      expect(() => SlackApiParamsSchema.parse({ subActionParams: {} })).toThrow();
+    });
+
+    test('defaults a missing subAction to postMessage when subAction is explicitly undefined', () => {
+      expect(
+        SlackApiParamsSchema.parse({
+          subAction: undefined,
+          subActionParams: { text: 'hello' },
+        })
+      ).toEqual({
+        subAction: 'postMessage',
+        subActionParams: { text: 'hello' },
+      });
     });
   });
 });
