@@ -30,73 +30,87 @@ Parameters:
     Description: Kibana may only manage CloudFormation stacks whose names start with this prefix.
 
 Resources:
+  # IAM caps a user's inline policies at 2,048 characters combined, so the day-to-day permissions
+  # live in a managed policy. The inline policy below holds only the self-cleanup rights: inline
+  # permissions last until the user itself is deleted (the final step of a stack deletion),
+  # whereas the managed policy is detached before that.
+  KibanaOnboardingPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub "KibanaManagedOnboarding-\${AWS::StackName}"
+      Users:
+        - !Ref KibanaOnboardingUser
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: ManagePrefixedStacks
+            Effect: Allow
+            Action:
+              - cloudformation:CreateStack
+              - cloudformation:UpdateStack
+              - cloudformation:DeleteStack
+              - cloudformation:DescribeStacks
+              - cloudformation:DescribeStackEvents
+              - cloudformation:GetTemplate
+            Resource: !Sub "arn:\${AWS::Partition}:cloudformation:*:\${AWS::AccountId}:stack/\${StackNamePrefix}-*/*"
+          - Sid: InspectTemplates
+            Effect: Allow
+            Action:
+              - cloudformation:GetTemplateSummary
+              - cloudformation:ValidateTemplate
+              - cloudformation:ListStacks
+            Resource: "*"
+          - Sid: ManageIdentityRoles
+            Effect: Allow
+            Action:
+              - iam:CreateRole
+              - iam:DeleteRole
+              - iam:GetRole
+              - iam:UpdateRole
+              - iam:UpdateAssumeRolePolicy
+              - iam:PutRolePolicy
+              - iam:DeleteRolePolicy
+              - iam:GetRolePolicy
+              - iam:AttachRolePolicy
+              - iam:DetachRolePolicy
+              - iam:TagRole
+              - iam:UntagRole
+            Resource:
+              - !Sub "arn:\${AWS::Partition}:iam::\${AWS::AccountId}:role/ElasticWorkloadIdentity*"
+              - !Sub "arn:\${AWS::Partition}:iam::\${AWS::AccountId}:role/\${StackNamePrefix}-*"
+          - Sid: PassLambdaRoleToLambda
+            Effect: Allow
+            Action: iam:PassRole
+            Resource: !Sub "arn:\${AWS::Partition}:iam::\${AWS::AccountId}:role/\${StackNamePrefix}-*"
+            Condition:
+              StringEquals:
+                iam:PassedToService: lambda.amazonaws.com
+          - Sid: ManageOidcProviderFunction
+            Effect: Allow
+            Action:
+              - lambda:CreateFunction
+              - lambda:DeleteFunction
+              - lambda:GetFunction
+              - lambda:GetFunctionConfiguration
+              - lambda:UpdateFunctionCode
+              - lambda:UpdateFunctionConfiguration
+              - lambda:InvokeFunction
+              - lambda:TagResource
+              - lambda:ListTags
+            Resource: !Sub "arn:\${AWS::Partition}:lambda:*:\${AWS::AccountId}:function:\${StackNamePrefix}-*"
+
   KibanaOnboardingUser:
     Type: AWS::IAM::User
     Properties:
       UserName: !Sub "kibana-managed-onboarding-\${AWS::StackName}"
       Policies:
-        - PolicyName: KibanaManagedOnboarding
+        # Self-cleanup when the credentials are removed from Kibana. CloudFormation deletes the
+        # secret, the access key and the managed policy, then the user; the session it opened with
+        # the key stays valid for those remaining calls.
+        - PolicyName: KibanaManagedOnboardingCleanup
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              - Sid: ManagePrefixedStacks
-                Effect: Allow
-                Action:
-                  - cloudformation:CreateStack
-                  - cloudformation:UpdateStack
-                  - cloudformation:DeleteStack
-                  - cloudformation:DescribeStacks
-                  - cloudformation:DescribeStackEvents
-                  - cloudformation:GetTemplate
-                Resource: !Sub "arn:\${AWS::Partition}:cloudformation:*:\${AWS::AccountId}:stack/\${StackNamePrefix}-*/*"
-              - Sid: InspectTemplates
-                Effect: Allow
-                Action:
-                  - cloudformation:GetTemplateSummary
-                  - cloudformation:ValidateTemplate
-                  - cloudformation:ListStacks
-                Resource: "*"
-              - Sid: ManageIdentityRoles
-                Effect: Allow
-                Action:
-                  - iam:CreateRole
-                  - iam:DeleteRole
-                  - iam:GetRole
-                  - iam:UpdateRole
-                  - iam:UpdateAssumeRolePolicy
-                  - iam:PutRolePolicy
-                  - iam:DeleteRolePolicy
-                  - iam:GetRolePolicy
-                  - iam:AttachRolePolicy
-                  - iam:DetachRolePolicy
-                  - iam:TagRole
-                  - iam:UntagRole
-                Resource:
-                  - !Sub "arn:\${AWS::Partition}:iam::\${AWS::AccountId}:role/ElasticWorkloadIdentity*"
-                  - !Sub "arn:\${AWS::Partition}:iam::\${AWS::AccountId}:role/\${StackNamePrefix}-*"
-              - Sid: PassLambdaRoleToLambda
-                Effect: Allow
-                Action: iam:PassRole
-                Resource: !Sub "arn:\${AWS::Partition}:iam::\${AWS::AccountId}:role/\${StackNamePrefix}-*"
-                Condition:
-                  StringEquals:
-                    iam:PassedToService: lambda.amazonaws.com
-              - Sid: ManageOidcProviderFunction
-                Effect: Allow
-                Action:
-                  - lambda:CreateFunction
-                  - lambda:DeleteFunction
-                  - lambda:GetFunction
-                  - lambda:GetFunctionConfiguration
-                  - lambda:UpdateFunctionCode
-                  - lambda:UpdateFunctionConfiguration
-                  - lambda:InvokeFunction
-                  - lambda:TagResource
-                  - lambda:ListTags
-                Resource: !Sub "arn:\${AWS::Partition}:lambda:*:\${AWS::AccountId}:function:\${StackNamePrefix}-*"
-              # Self-cleanup when the credentials are removed from Kibana. CloudFormation deletes the
-              # secret, then the access key, then the user; the session it opened with the key stays
-              # valid for those remaining calls.
               - Sid: DeleteThisBootstrapStack
                 Effect: Allow
                 Action:
@@ -109,6 +123,7 @@ Resources:
                 Action:
                   - iam:DeleteUser
                   - iam:DeleteUserPolicy
+                  - iam:DetachUserPolicy
                   - iam:DeleteAccessKey
                   - iam:ListAccessKeys
                   - iam:GetUser
@@ -116,6 +131,15 @@ Resources:
                   - iam:ListAttachedUserPolicies
                   - iam:ListGroupsForUser
                 Resource: !Sub "arn:\${AWS::Partition}:iam::\${AWS::AccountId}:user/kibana-managed-onboarding-\${AWS::StackName}"
+              - Sid: DeleteOwnManagedPolicy
+                Effect: Allow
+                Action:
+                  - iam:DeletePolicy
+                  - iam:GetPolicy
+                  - iam:ListPolicyVersions
+                  - iam:DeletePolicyVersion
+                  - iam:ListEntitiesForPolicy
+                Resource: !Sub "arn:\${AWS::Partition}:iam::\${AWS::AccountId}:policy/KibanaManagedOnboarding-\${AWS::StackName}"
               - Sid: DeleteOwnSecret
                 Effect: Allow
                 Action:
