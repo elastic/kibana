@@ -35,7 +35,7 @@ const workers: Array<[string, (serviceAccountId?: string) => string]> = [
         ...shared,
         extras: {
           autoCloseConfidenceScoreMinThreshold: 0.85,
-          budgetPerHour: 300,
+          budgetPerHour: 1300,
           lookbackHours: 24,
         },
         serviceAccountId,

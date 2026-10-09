@@ -72,8 +72,12 @@ describe('Worker settings declarations', () => {
     expect(createDefaultWorkerSettings(TRIAGE)).toEqual({
       workerId: TRIAGE,
       autonomy: 'manual',
-      scheduleInterval: '10m',
-      extras: { autoCloseConfidenceScoreMinThreshold: 0.85, budgetPerHour: 300, lookbackHours: 24 },
+      scheduleInterval: '15m',
+      extras: {
+        autoCloseConfidenceScoreMinThreshold: 0.85,
+        budgetPerHour: 1300,
+        lookbackHours: 24,
+      },
     });
     expect(createDefaultWorkerSettings(ATTACK_DISCOVERY)).not.toHaveProperty('extras');
   });
