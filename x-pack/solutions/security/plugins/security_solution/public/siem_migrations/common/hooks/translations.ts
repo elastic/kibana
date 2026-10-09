@@ -13,3 +13,10 @@ export const SIEM_MIGRATIONS_ADD_ANOTHER_MIGRATION_TITLE = i18n.translate(
     defaultMessage: 'Add another migration',
   }
 );
+
+export const SIEM_MIGRATIONS_ADD_INTEGRATIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.common.addIntegrations.title',
+  {
+    defaultMessage: 'Add integrations',
+  }
+);

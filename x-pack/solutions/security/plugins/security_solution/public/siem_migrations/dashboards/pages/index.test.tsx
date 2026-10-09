@@ -160,6 +160,16 @@ describe('MigrationDashboardsPage', () => {
       renderComponent();
       expect(screen.queryByTestId('siemMigrationsSelectMigrationButton')).not.toBeInTheDocument();
     });
+
+    it('renders integrations and documentation without add another migration', async () => {
+      renderComponent();
+
+      await openAppMenuOverflow();
+
+      expect(await screen.findByTestId('addIntegrationsButton')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
+      expect(screen.queryByTestId('addAnotherMigrationButton')).not.toBeInTheDocument();
+    });
   });
 
   describe('when there are migrations', () => {
@@ -212,6 +222,8 @@ describe('MigrationDashboardsPage', () => {
       await openAppMenuOverflow();
 
       expect(await screen.findByTestId('addAnotherMigrationButton')).toBeInTheDocument();
+      expect(screen.getByTestId('addIntegrationsButton')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
     });
 
     describe('when migration status is RUNNING', () => {

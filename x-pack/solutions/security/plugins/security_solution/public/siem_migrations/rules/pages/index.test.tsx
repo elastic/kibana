@@ -285,6 +285,18 @@ describe('Migrations: Translated Rules Page', () => {
       await openAppMenuOverflow();
 
       expect(await screen.findByTestId('addAnotherMigrationButton')).toBeInTheDocument();
+      expect(screen.getByTestId('addIntegrationsButton')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
+    });
+
+    test('should render integrations and documentation when no migrations exist', async () => {
+      renderTestComponent();
+
+      await openAppMenuOverflow();
+
+      expect(await screen.findByTestId('addIntegrationsButton')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
+      expect(screen.queryByTestId('addAnotherMigrationButton')).not.toBeInTheDocument();
     });
   });
 

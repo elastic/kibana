@@ -62,7 +62,7 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
       [navigateTo]
     );
 
-    const { menu } = useMigrationAppHeaderProps({
+    const { menu, docLink } = useMigrationAppHeaderProps({
       migrationType: 'dashboard',
       migrationsStats: dashboardMigrationsStats,
     });
@@ -96,7 +96,10 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
         <DashboardMigrationDataInputWrapper onFlyoutClosed={refetchData}>
           <>
             {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (
-              <MigrationProgressPanel migrationStats={migrationStats} migrationType="dashboard" />
+              <>
+                <EuiSpacer size="m" />
+                <MigrationProgressPanel migrationStats={migrationStats} migrationType="dashboard" />
+              </>
             )}
             {migrationStats.status === SiemMigrationTaskStatus.FINISHED && (
               <>
@@ -116,7 +119,10 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
               SiemMigrationTaskStatus.INTERRUPTED,
               SiemMigrationTaskStatus.STOPPED,
             ].includes(migrationStats.status) && (
-              <MigrationReadyPanel migrationStats={migrationStats} />
+              <>
+                <EuiSpacer size="m" />
+                <MigrationReadyPanel migrationStats={migrationStats} />
+              </>
             )}
           </>
         </DashboardMigrationDataInputWrapper>
@@ -125,7 +131,7 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
 
     return (
       <SecuritySolutionPageWrapper>
-        <AppHeader title={i18n.PAGE_TITLE} menu={menu} spacing="largeBleed" />
+        <AppHeader title={i18n.PAGE_TITLE} menu={menu} docLink={docLink} spacing="bleed" />
         <MigrationSelectorRow
           migrationsStats={dashboardMigrationsStats}
           selectedMigrationId={migrationId}

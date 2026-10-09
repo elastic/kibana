@@ -76,7 +76,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       [navigateTo]
     );
 
-    const { menu } = useMigrationAppHeaderProps({
+    const { menu, docLink } = useMigrationAppHeaderProps({
       migrationType: 'rule',
       migrationsStats: ruleMigrationsStats,
     });
@@ -133,10 +133,16 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
               SiemMigrationTaskStatus.INTERRUPTED,
               SiemMigrationTaskStatus.STOPPED,
             ].includes(migrationStats.status) && (
-              <MigrationReadyPanel migrationStats={migrationStats} />
+              <>
+                <EuiSpacer size="m" />
+                <MigrationReadyPanel migrationStats={migrationStats} />
+              </>
             )}
             {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (
-              <MigrationProgressPanel migrationStats={migrationStats} migrationType="rule" />
+              <>
+                <EuiSpacer size="m" />
+                <MigrationProgressPanel migrationStats={migrationStats} migrationType="rule" />
+              </>
             )}
           </>
         </RuleMigrationDataInputWrapper>
@@ -152,7 +158,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
 
     return (
       <SecuritySolutionPageWrapper>
-        <AppHeader title={i18n.PAGE_TITLE} menu={menu} spacing="largeBleed" />
+        <AppHeader title={i18n.PAGE_TITLE} menu={menu} docLink={docLink} spacing="bleed" />
         <MigrationSelectorRow
           migrationsStats={ruleMigrationsStats}
           selectedMigrationId={migrationId}
