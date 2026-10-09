@@ -12091,7 +12091,7 @@ paths:
                       alert_id: episode-1
                       group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
                     error: Conflict
-                    message: Cannot acknowledge alert [episode-1]. It is already acknowledged
+                    message: '[episode-1] is already acknowledged.'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert is already acknowledged.
@@ -12386,7 +12386,7 @@ paths:
                       alert_id: episode-1
                       group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
                     error: Conflict
-                    message: Cannot assign alert [episode-1]. It is already assigned to [u_abc123]
+                    message: '[episode-1] is already assigned to [u_abc123].'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert already carries the requested assignee.
@@ -12683,7 +12683,7 @@ paths:
                       alert_id: episode-1
                       group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
                     error: Conflict
-                    message: Cannot tag alert [episode-1]. It already carries the requested tags
+                    message: '[episode-1] already has these tags.'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert already carries exactly the requested tags.
@@ -12830,7 +12830,7 @@ paths:
                       alert_id: episode-1
                       group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
                     error: Conflict
-                    message: Cannot remove the acknowledgement from alert [episode-1]. It is not acknowledged
+                    message: '[episode-1] must be acknowledged first before it can be unacknowledged.'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert is not acknowledged.
