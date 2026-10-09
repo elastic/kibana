@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { flattenObject } from '@kbn/object-utils';
 import { inject, injectable } from 'inversify';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { alertEventSeveritySchema } from '@kbn/alerting-v2-schemas';
 import { alertEpisodeStatus } from '../../../resources/datastreams/alert_events';
 import { EsServiceScopedToken } from '../es_service/tokens';
 import { buildAlertEventsFiltersFromMatcher } from './build_alert_events_filters_from_matcher';
@@ -19,6 +20,11 @@ const DATA_FIELD_SAMPLE_SIZE = 1000;
 const ALERT_EVENTS_LOOKBACK = 'now-24h';
 
 const EPISODE_STATUS_VALUES = Object.values(alertEpisodeStatus);
+const EPISODE_INDEX_FIELD_STATIC_VALUES: Readonly<Record<string, readonly string[]>> = {
+  'episode.status': EPISODE_STATUS_VALUES,
+  'alert.status': EPISODE_STATUS_VALUES,
+  severity: Object.values(alertEventSeveritySchema.enum),
+};
 
 enum MatcherField {
   AlertStatus = 'alert_status',
@@ -26,9 +32,10 @@ enum MatcherField {
   GroupHash = 'group_hash',
 }
 
-const MATCHER_FIELD_TO_ES_FIELD: Partial<Record<MatcherField, string>> = {
+const MATCHER_FIELD_TO_ES_FIELD: Readonly<Record<string, string>> = {
   [MatcherField.AlertId]: 'alert.id',
   [MatcherField.GroupHash]: 'group_hash',
+  'alert.id': 'alert.id',
 };
 
 const getEscapedQuery = (q: string = '') =>
@@ -50,7 +57,12 @@ export class MatcherSuggestionsService {
   ) {}
 
   async getSuggestions(field: string, query: string): Promise<string[]> {
-    const esField = MATCHER_FIELD_TO_ES_FIELD[field as MatcherField];
+    const episodeIndexStaticValues = EPISODE_INDEX_FIELD_STATIC_VALUES[field];
+    if (episodeIndexStaticValues) {
+      return this.getStaticSuggestions([...episodeIndexStaticValues], query);
+    }
+
+    const esField = MATCHER_FIELD_TO_ES_FIELD[field];
     if (esField) {
       return this.getAlertEventFieldSuggestions(esField, query);
     }

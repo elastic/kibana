@@ -47,10 +47,7 @@ export class MatcherValueSuggestionsRoute extends BaseAlertingRoute {
   static path = ALERTING_V2_INTERNAL_SUGGESTIONS_MATCHER_VALUES_API_PATH;
   static security: RouteSecurity = {
     authz: {
-      requiredPrivileges: [
-        ALERTING_V2_API_PRIVILEGES.rules.read,
-        ALERTING_V2_API_PRIVILEGES.alerts.read,
-      ],
+      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.read],
     },
   };
   static routeOptions = {
