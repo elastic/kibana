@@ -187,7 +187,7 @@ const addScrollTarget = (id: string): HTMLElement => {
 };
 
 describe('AtAGlance verdict actions', () => {
-  it.each<[AttentionLevel, string, string | undefined, string | undefined]>([
+  it.each<[AttentionLevel, string | undefined, string | undefined, string | undefined]>([
     ['urgent', 'Triage Threat 1 and decide on ownership', 'Triage with AI Agent', 'View threat'],
     ['action', 'Assign the 9 unowned high/critical alerts', 'Triage with AI Agent', 'View threat'],
     ['watch', 'Close the visibility gaps', 'Review with AI Agent', 'View'],
