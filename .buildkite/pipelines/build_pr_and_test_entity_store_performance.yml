@@ -16,7 +16,7 @@ steps:
         label: Comment missing labels
         agents:
           provider: gcp
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-minimal-ubuntu-2604
           imageProject: elastic-images-prod
           machineType: n2-standard-2
         timeout_in_minutes: 5
@@ -30,7 +30,7 @@ steps:
         timeout_in_minutes: 10
         agents:
           provider: gcp
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-minimal-ubuntu-2604
           imageProject: elastic-images-prod
           machineType: n2-standard-2
         retry:
@@ -46,7 +46,7 @@ steps:
         label: Comment with job URL
         agents:
           provider: gcp
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-minimal-ubuntu-2604
           imageProject: elastic-images-prod
           machineType: n2-standard-2
         timeout_in_minutes: 5
@@ -122,6 +122,6 @@ steps:
         label: Post-Build
         agents:
           provider: gcp
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-minimal-ubuntu-2604
           imageProject: elastic-images-prod
           machineType: n2-standard-2
