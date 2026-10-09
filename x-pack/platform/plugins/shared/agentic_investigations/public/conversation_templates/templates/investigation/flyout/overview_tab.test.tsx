@@ -70,7 +70,7 @@ const renderOverview = () =>
   );
 
 describe('InvestigationOverview', () => {
-  it('renders the subjects, what happened, impact, conclusion, and trace from the query API', () => {
+  it('renders the subjects, what happened, impact, conclusion, and hypothesis tree from the query API', () => {
     mockUseInvestigation.mockReturnValue({ data: investigation });
 
     renderOverview();
@@ -101,7 +101,6 @@ describe('InvestigationOverview', () => {
 
     expect(screen.getByText('From the conversation')).toBeInTheDocument();
     expect(screen.queryByText('Impact')).not.toBeInTheDocument();
-    expect(screen.queryByText('Investigation trace')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationHypothesisTreeButton')).not.toBeInTheDocument();
   });
 });
