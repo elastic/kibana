@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-alertzero-worker-chain
 dependsOn:
   - '@kbn/alertzero-common'
+  - '@kbn/alertzero-plugin'
   - '@kbn/core'
   - '@kbn/evals'
   - '@kbn/evals-suite-attack-discovery-fp-tp'

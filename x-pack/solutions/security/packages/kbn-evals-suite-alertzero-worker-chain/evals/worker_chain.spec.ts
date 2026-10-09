@@ -41,15 +41,13 @@ import {
   ensureFpTpSeedPrerequisites,
   seedFixture,
 } from '@kbn/evals-suite-attack-discovery-fp-tp/src/world';
-import { ALERTZERO_REASONING_FEATURE_ID, WORKER_IDS } from '../src/constants';
+import { ALERTZERO_REASONING_FEATURE_ID } from '../src/constants';
 import {
-  captureWorker,
-  preflightWorkerServiceAccounts,
-  restoreWorker,
-  writeWorkerAutonomy,
-  type KbnRequestContext,
-  type WorkerAutonomySnapshot,
-} from '../src/worker_settings';
+  createHarnessState,
+  setupWorkerChainHarness,
+  teardownWorkerChainHarness,
+} from '../src/harness_setup';
+import type { KbnRequestContext } from '../src/worker_settings';
 import { runChain, type ChainScenario } from '../src/chain_runner';
 import { chainTerminal, executionIdArray, unsafeAction } from '../src/safety_evaluators';
 
@@ -67,14 +65,8 @@ const asString = (value: unknown): string | undefined =>
 
 evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, () => {
   const ctxOf = (fetch: HttpHandler): KbnRequestContext => ({ fetch, spaceId: SPACE_ID });
-  /** B4: state captured before the first write, put back in afterAll even when a run fails. */
-  const snapshots: WorkerAutonomySnapshot[] = [];
-  /**
-   * R1/R4: service account each Worker runs as, resolved once in beforeAll.
-   * Auto-approvals are attributed to these principals; /internal/security/me
-   * (the eval user) is never consulted.
-   */
-  let workerServiceAccounts: Record<string, string> = {};
+  /** Everything setup changed (B4 snapshots, the AlertZero setting), put back in afterAll even when a run fails. */
+  const harness = createHarnessState();
   let restoreInferenceSettings: (() => Promise<void>) | undefined;
   let restoreEntityExtraction: (() => Promise<void>) | undefined;
   const pendingCleanups = new Set<() => Promise<void>>();
@@ -96,35 +88,15 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
       });
       restoreEntityExtraction = await ensureFpTpSeedPrerequisites(kbnRequestFromFetch(fetch));
       await waitForConversationsReady(fetch);
-      // Applied, not declared: capture first, then write. A failed write after the
-      // capture still gets restored because the snapshot is pushed before writing.
-      const ctx = ctxOf(fetch);
-      // R4 first: enabling a Worker without settings.serviceAccountId is a 400,
-      // so preflight before any write and reuse the value for R1 and G20.
-      workerServiceAccounts = await preflightWorkerServiceAccounts(
-        ctx,
-        Object.values(WORKER_IDS),
-        process.env.ALERTZERO_EVAL_SERVICE_ACCOUNT_ID
-      );
-      log.info(
-        `Worker service accounts (R1): ${Object.entries(workerServiceAccounts)
-          .map(([id, sa]) => `${id} -> ${sa}`)
-          .join(', ')}`
-      );
-      snapshots.push(await captureWorker(ctx, WORKER_IDS.alertTriage));
-      await writeWorkerAutonomy(
-        ctx,
-        WORKER_IDS.alertTriage,
-        'supervised',
-        workerServiceAccounts[WORKER_IDS.alertTriage]
-      );
-      snapshots.push(await captureWorker(ctx, WORKER_IDS.attackDiscovery));
-      await writeWorkerAutonomy(
-        ctx,
-        WORKER_IDS.attackDiscovery,
-        'manual',
-        workerServiceAccounts[WORKER_IDS.attackDiscovery]
-      );
+      // Applied, not declared: enable the AlertZero setting, provision the Worker service
+      // accounts, then capture -> write -> verify each Worker (see harness_setup.ts).
+      await setupWorkerChainHarness({
+        fetch,
+        ctx: ctxOf(fetch),
+        state: harness,
+        log,
+        pinnedServiceAccountId: asString(process.env.ALERTZERO_EVAL_SERVICE_ACCOUNT_ID),
+      });
       log.info('AlertZero worker-chain harness ready');
     }
   );
@@ -133,11 +105,7 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
     if (pendingCleanups.size > 0) {
       await Promise.allSettled([...pendingCleanups].map((cleanup) => cleanup()));
     }
-    for (const snapshot of snapshots) {
-      await restoreWorker(ctxOf(fetch), snapshot).catch((error: Error) =>
-        log.warning(`Could not restore worker ${snapshot.workerId}: ${error.message}`)
-      );
-    }
+    await teardownWorkerChainHarness({ ctx: ctxOf(fetch), state: harness, log });
     await restoreEntityExtraction?.().catch((error: Error) =>
       log.warning(`Could not restart Entity Store extraction: ${error.message}`)
     );
@@ -203,7 +171,7 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
                 triageTrigger: 'manual-event',
                 forensicsSweepMode: 'blocked',
                 runAsIdentities: {
-                  usernames: Object.values(workerServiceAccounts),
+                  usernames: Object.values(harness.workerServiceAccounts),
                 },
               });
               return { record };

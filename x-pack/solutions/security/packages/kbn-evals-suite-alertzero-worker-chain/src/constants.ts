@@ -61,6 +61,12 @@ export const ALERTZERO_API_VERSION = '1';
 export const PROPOSALS_API_VERSION = '1';
 
 export const ALERTZERO_WORKERS_URL = '/internal/alertzero/workers';
+
+/** ALERTZERO_ENABLED_SETTING_ID (@kbn/alertzero-common): per-space gate on every alertzero route. */
+export const ALERTZERO_ENABLED_SETTING_ID = 'securitySolution:enableAlertZero';
+
+/** SECURITY_SERVICE_ACCOUNT_URL (@kbn/alertzero-common). */
+export const SECURITY_SERVICE_ACCOUNT_URL = '/internal/security/service_account';
 export const PROPOSALS_URL = '/internal/proposals';
 
 export const INFERENCE_SETTINGS_ROUTE = '/internal/search_inference_endpoints/settings';

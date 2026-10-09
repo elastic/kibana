@@ -135,7 +135,8 @@ export const restoreWorker = async (
 export const preflightWorkerServiceAccounts = async (
   ctx: KbnRequestContext,
   workerIds: readonly string[],
-  serviceAccountId?: string
+  /** One account for every Worker, or one per Worker id (as provisioned by the harness). */
+  serviceAccountIds?: string | Readonly<Record<string, string>>
 ): Promise<Record<string, string>> => {
   const workers = await listWorkers(ctx);
   const effective: Record<string, string> = {};
@@ -145,7 +146,9 @@ export const preflightWorkerServiceAccounts = async (
     if (worker === undefined) {
       throw new Error(`Worker "${workerId}" is not registered; is the alertzero plugin enabled?`);
     }
-    const resolved = serviceAccountId ?? worker.settings.serviceAccountId;
+    const override =
+      typeof serviceAccountIds === 'string' ? serviceAccountIds : serviceAccountIds?.[workerId];
+    const resolved = override ?? worker.settings.serviceAccountId;
     if (resolved !== undefined) effective[workerId] = resolved;
     else missing.push(workerId);
   }
@@ -215,4 +218,27 @@ export const readWorkerServiceAccountIds = async (
       return [workerId, worker.settings.serviceAccountId];
     })
   );
+};
+
+/**
+ * Fails loudly when a Worker the harness just enabled has no installed per-space
+ * workflow (`workflowId` null) or is not enabled. The Workers list reports
+ * `workflowId: null` for a Worker that was never installed in the space, and a
+ * run against it would otherwise fail much later with an opaque workflow 404.
+ */
+export const assertWorkerInstalled = async (
+  ctx: KbnRequestContext,
+  workerId: string
+): Promise<string> => {
+  const worker = await findWorker(ctx, workerId);
+  if (!worker.workflowId || !worker.enabled) {
+    throw new Error(
+      `Worker "${workerId}" is not ready in space "${ctx.spaceId}" after the harness enabled it ` +
+        `(workflowId=${worker.workflowId ?? 'null'}, enabled=${worker.enabled}): its per-space ` +
+        'managed workflow is not installed. Check that xpack.security.serviceAccounts.enabled ' +
+        'is true, that the Worker service account is enabled and assumable, and the Kibana ' +
+        'server log for the install failure.'
+    );
+  }
+  return worker.workflowId;
 };
