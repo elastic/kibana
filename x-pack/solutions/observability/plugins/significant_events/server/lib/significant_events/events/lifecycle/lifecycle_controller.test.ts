@@ -38,8 +38,8 @@ const createSearchClient = (latest?: SignificantEvent) => ({
 
 const DEACTIVATE: LifecycleInput = { kind: 'operator', intent: 'deactivate' };
 
-const evaluation = (outcome: 'breaching' | 'clean' | 'no_data'): LifecycleInput => ({
-  kind: 'evaluation',
+const assessment = (outcome: 'breaching' | 'clean' | 'no_data'): LifecycleInput => ({
+  kind: 'assessment',
   outcome,
 });
 
@@ -131,144 +131,84 @@ describe('applyLifecycleInput', () => {
     expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
   });
 
-  describe('status evaluations', () => {
+  describe('assessment', () => {
     it.each<
-      [string, Partial<SignificantEvent>, LifecycleInput, string, number | undefined, boolean]
+      [string, SignificantEvent['status'], 'breaching' | 'clean' | 'no_data', string, boolean]
     >([
-      ['enters recovering with one evaluation', {}, evaluation('clean'), 'recovering', 1, false],
       [
-        'advances the stored count, without a trigger',
-        { status: 'recovering', status_evaluations: 1 },
-        evaluation('clean'),
-        'recovering',
-        2,
-        false,
-      ],
-      [
-        'closes once the count is spent, clears it and emits a trigger',
-        { status: 'recovering', status_evaluations: 3 },
-        evaluation('clean'),
-        'inactive',
-        undefined,
-        true,
-      ],
-      [
-        'ignores a stale count on an active version, as a framework action leaves behind',
-        { status: 'active', status_evaluations: 2 },
-        evaluation('clean'),
-        'recovering',
-        1,
-        false,
-      ],
-      [
-        'clears the count when a breach returns',
-        { status: 'recovering', status_evaluations: 2 },
-        evaluation('breaching'),
+        'starts recovery silently when every member is healthy',
         'active',
-        undefined,
+        'clean',
+        'recovering',
         false,
       ],
       [
-        'clears the count when an operator deactivates',
-        { status: 'recovering', status_evaluations: 2 },
-        DEACTIVATE,
-        'inactive',
-        undefined,
-        true,
+        'returns a recovering event to active silently on a breach',
+        'recovering',
+        'breaching',
+        'active',
+        false,
       ],
-    ])('%s', async (_label, state, input, status, count, triggers) => {
-      const existing = createSignificantEvent(state);
+      ['reopens a closed event on a breach and notifies', 'inactive', 'breaching', 'active', true],
+    ])('%s', async (_label, current, outcome, status, triggers) => {
+      const existing = createSignificantEvent({ status: current });
       const alertEventsClient = makeAlertEventsClient();
       const emitTrigger = jest.fn();
 
       const result = await applyLifecycleInput({
         eventSearchClient: createSearchClient(existing) as never,
         eventId: existing.event_id,
-        input,
+        input: assessment(outcome),
         alertEventsClient,
         emitTrigger,
       });
 
       expect(result).toEqual({ updated: 1, ignored: 0, status });
-      const { alert_status: written, data } = lastWritten(alertEventsClient);
-      expect(written).toBe(status);
-      if (count === undefined) {
-        expect(data).not.toHaveProperty('status_evaluations');
-      } else {
-        expect(data).toMatchObject({ status_evaluations: count });
-      }
+      expect(lastWritten(alertEventsClient).alert_status).toBe(status);
       expect(emitTrigger).toHaveBeenCalledTimes(triggers ? 1 : 0);
     });
 
-    it.each<[string, 'breaching' | 'no_data', string]>([
-      ['still breaching', 'breaching', 'unchanged'],
-      ['no data', 'no_data', 'no_data'],
-    ])('writes nothing for an active series: %s', async (_label, outcome, reason) => {
-      const existing = createSignificantEvent({ status: 'active' });
+    it.each<[string, SignificantEvent['status'], 'clean' | 'no_data']>([
+      ['healthy members of a closed event', 'inactive', 'clean'],
+      ['unjudged members of a closed event', 'inactive', 'no_data'],
+    ])('writes nothing for %s', async (_label, current, outcome) => {
+      const existing = createSignificantEvent({ status: current });
       const alertEventsClient = makeAlertEventsClient();
 
       const result = await applyLifecycleInput({
         eventSearchClient: createSearchClient(existing) as never,
         eventId: existing.event_id,
-        input: evaluation(outcome),
+        input: assessment(outcome),
         alertEventsClient,
       });
 
-      expect(result).toEqual({ updated: 0, ignored: 1, status: 'active', reason });
+      expect(result).toEqual({ updated: 0, ignored: 1, status: current, reason: 'not_a_breach' });
       expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
-    });
-
-    it('writes only when the latest version is the one the caller read', async () => {
-      const existing = createSignificantEvent({ status: 'active' });
-      const stale = makeAlertEventsClient();
-
-      const superseded = await applyLifecycleInput({
-        eventSearchClient: createSearchClient(existing) as never,
-        eventId: existing.event_id,
-        input: evaluation('clean'),
-        expectedTimestamp: '2000-01-01T00:00:00.000Z',
-        alertEventsClient: stale,
-      });
-      expect(superseded).toEqual({
-        updated: 0,
-        ignored: 1,
-        status: 'active',
-        reason: 'superseded',
-      });
-      expect(stale.createAlertEvent).not.toHaveBeenCalled();
-
-      const current = await applyLifecycleInput({
-        eventSearchClient: createSearchClient(existing) as never,
-        eventId: existing.event_id,
-        input: evaluation('clean'),
-        expectedTimestamp: existing['@timestamp'],
-        alertEventsClient: makeAlertEventsClient(),
-      });
-      expect(current.updated).toBe(1);
     });
   });
 
-  it('writes the given severity on the new version and keeps the stored one when omitted', async () => {
-    const existing = createSignificantEvent({ status: 'recovering', severity: 'high' });
+  it('writes only when the latest version is the one the caller read', async () => {
+    const existing = createSignificantEvent({ status: 'active' });
+    const stale = makeAlertEventsClient();
 
-    const withSeverity = makeAlertEventsClient();
-    await applyLifecycleInput({
+    const superseded = await applyLifecycleInput({
       eventSearchClient: createSearchClient(existing) as never,
       eventId: existing.event_id,
       input: DEACTIVATE,
-      severity: 'low',
-      alertEventsClient: withSeverity,
+      expectedTimestamp: '2000-01-01T00:00:00.000Z',
+      alertEventsClient: stale,
     });
-    expect(lastWritten(withSeverity)).toMatchObject({ severity: 'low' });
+    expect(superseded).toEqual({ updated: 0, ignored: 1, status: 'active', reason: 'superseded' });
+    expect(stale.createAlertEvent).not.toHaveBeenCalled();
 
-    const withoutSeverity = makeAlertEventsClient();
-    await applyLifecycleInput({
+    const current = await applyLifecycleInput({
       eventSearchClient: createSearchClient(existing) as never,
       eventId: existing.event_id,
       input: DEACTIVATE,
-      alertEventsClient: withoutSeverity,
+      expectedTimestamp: existing['@timestamp'],
+      alertEventsClient: makeAlertEventsClient(),
     });
-    expect(lastWritten(withoutSeverity)).toMatchObject({ severity: 'high' });
+    expect(current.updated).toBe(1);
   });
 
   it('emits a status-changed trigger after a successful write', async () => {

@@ -116,18 +116,6 @@ describe('RuleEventsClient', () => {
       ]);
     });
 
-    it('reads the engine-owned evaluation count back from the stored version', async () => {
-      const row: MockRow = {
-        source: ruleEventSource(),
-        dataJson: JSON.stringify({ ...dataDoc, status_evaluations: 2 }),
-      };
-      const { client } = createClient(async () => sourceResponse([row]));
-
-      const { hits } = await client.findLatest({});
-
-      expect(hits[0].status_evaluations).toBe(2);
-    });
-
     it('normalizes a scalar stream_names string to a 1-element array', async () => {
       const scalarDataDoc = { ...dataDoc, stream_names: 'logs.bridge.only' };
       const row: MockRow = {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Severity, SignificantEventStatus } from '@kbn/significant-events-schema';
+import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { RuleEventsClient } from '../rule_events_client';
 import type { TriggerEmitter } from '../../../../workflows/triggers/emit';
@@ -36,17 +36,15 @@ const requestedStatus = (input: LifecycleInput): SignificantEventStatus =>
 
 /**
  * Applies one lifecycle input to one event: reads its latest version, asks the state machine for
- * the decision, and appends the resulting version through the event store. This is the only
- * function that decides and writes a status change; every driver (the status workflow, the
- * operator route and chat tools, the cleanup workflow) calls it with a typed input.
+ * the decision, and appends the resulting version through the event store. The operator route,
+ * chat tools, and cleanup workflow call it. Discovery writes (`event_write/handler.ts`) and
+ * `attach_investigation.ts` still write directly and are not governed by this function.
  */
 export const applyLifecycleInput = async ({
   eventSearchClient,
   eventId,
   input,
-  severity,
   assessmentNote,
-  annotate,
   expectedTimestamp,
   alertEventsClient,
   emitTrigger,
@@ -54,17 +52,7 @@ export const applyLifecycleInput = async ({
   eventSearchClient: RuleEventsClient;
   eventId: string;
   input: LifecycleInput;
-  /** Overrides the stored severity on the new version; omitted keeps it. */
-  severity?: Severity;
   assessmentNote?: string;
-  /**
-   * Severity and note chosen from the status the state machine resolved, for a driver (the status
-   * workflow) that cannot know it before the decision. Takes precedence over the plain fields.
-   */
-  annotate?: (status: SignificantEventStatus) => {
-    severity?: Severity;
-    assessmentNote?: string;
-  };
   /**
    * Writes only while the latest version still carries this `@timestamp`. A newer version means
    * something else (e.g. a discovery write) changed the event since the caller read it.
@@ -83,28 +71,23 @@ export const applyLifecycleInput = async ({
     return { updated: 0, ignored: 1, status: latest.status, reason: 'superseded' };
   }
 
-  const decision = decideLifecycle({
-    state: { status: latest.status, evaluations: latest.status_evaluations ?? 0 },
-    input,
-  });
+  const decision = decideLifecycle({ state: { status: latest.status }, input });
   if (!decision.write) {
     return { updated: 0, ignored: 1, status: latest.status, reason: decision.reason };
   }
 
-  const annotation = annotate?.(decision.status);
   const now = new Date().toISOString();
-
-  const note = (annotation?.assessmentNote ?? assessmentNote)?.trim();
-  const resolvedSeverity = annotation?.severity ?? severity;
+  // A blank note counts as omitted, so it cannot overwrite the existing one.
+  const note = assessmentNote?.trim();
   const updatedEvent = {
     ...latest,
     '@timestamp': now,
     status: decision.status,
-    status_evaluations: decision.evaluations,
-    ...(resolvedSeverity !== undefined ? { severity: resolvedSeverity } : {}),
     ...(note ? { assessment_note: note } : {}),
   };
 
+  // `createAlertEvent` waits for a refresh, so an immediate re-fetch (e.g. the UI invalidating its
+  // query right after this route responds) sees the new version.
   await alertEventsClient.createAlertEvent(toRuleEvent(updatedEvent));
 
   // Notify subscribed workflows of the status change (fire-and-forget).
