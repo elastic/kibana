@@ -16,7 +16,7 @@ export type NginxSignal = 'logs' | 'metrics';
 export type NginxStreamId = 'access' | 'error' | 'metrics';
 export type NginxStep = 'schema' | 'logs' | 'metrics' | 'summary';
 
-export const NGINX_ROOT_NAME = 'nginx_group';
+export const NGINX_GROUP_NAME = 'nginx_group';
 
 export const SCHEMA_INFO: Record<NginxSchema, { title: string; description: string }> = {
   otel: { title: 'OpenTelemetry', description: 'OpenTelemetry semantic conventions.' },

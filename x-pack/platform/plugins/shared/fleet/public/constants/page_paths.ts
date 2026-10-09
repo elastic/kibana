@@ -58,7 +58,7 @@ export type DynamicPage =
   | 'settings_edit_fleet_server_hosts'
   | 'settings_edit_fleet_proxy'
   | 'integration_collection'
-  | 'integration_root';
+  | 'integration_group';
 
 export type Page = StaticPage | DynamicPage;
 
@@ -126,8 +126,8 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integration_policy_upgrade: '/edit-integration/:packagePolicyId',
   add_integration_to_policy: '/detail/:pkgkey/add-integration/:integration?',
   integration_collection: '/collection/:groupId',
-  // PROTOTYPE: root package schema picker
-  integration_root: '/root/:rootName',
+  // PROTOTYPE: integration group schema picker
+  integration_group: '/group/:groupName',
 };
 
 export const pagePathGetters: {
@@ -260,12 +260,12 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
-  add_integration_to_policy: ({ pkgkey, integration, agentPolicyId, prerelease, root }) => {
+  add_integration_to_policy: ({ pkgkey, integration, agentPolicyId, prerelease, group }) => {
     const qs = queryString.stringify({
       ...(agentPolicyId ? { policyId: agentPolicyId } : {}),
       ...(prerelease ? { prerelease } : {}),
-      // PROTOTYPE: root package context, used for the page header
-      ...(root ? { root } : {}),
+      // PROTOTYPE: integration group context, used for the page header
+      ...(group ? { group } : {}),
     });
     return [
       INTEGRATIONS_BASE_PATH,
@@ -346,5 +346,5 @@ export const pagePathGetters: {
   ],
   debug: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.debug],
   integration_collection: ({ groupId }) => [INTEGRATIONS_BASE_PATH, `/collection/${groupId}`],
-  integration_root: ({ rootName }) => [INTEGRATIONS_BASE_PATH, `/root/${rootName}`],
+  integration_group: ({ groupName }) => [INTEGRATIONS_BASE_PATH, `/group/${groupName}`],
 };

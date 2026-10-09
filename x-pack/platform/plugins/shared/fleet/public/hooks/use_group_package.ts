@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-// PROTOTYPE: resolve a root package (one with `schemas`) and its schema children from the
-// package list. Works the same for the fixture and for real registry roots.
+// PROTOTYPE: resolve an integration group (a package with `schemas`) and its child integrations
+// from the package list. Works the same for the fixture and for real registry groups.
 
 import { useMemo } from 'react';
 
 import { installationStatuses } from '../../common/constants';
-import { getRootDefaultSchema, getRootSchemaChildren } from '../../common/services';
+import { getGroupDefaultSchema, getGroupSchemaChildren } from '../../common/services';
 import type { PackageListItem } from '../types';
 
 import { useGetPackagesQuery } from './use_request';
 
-export interface RootSchemaOption {
+export interface GroupSchemaOption {
   schema: string;
   packageName: string;
   versionConstraint: string;
@@ -25,20 +25,20 @@ export interface RootSchemaOption {
   isInstalled: boolean;
 }
 
-export const useRootPackage = (rootName?: string) => {
+export const useGroupPackage = (groupName?: string) => {
   // Children (e.g. OTel packages) are often prereleases, so always include them here.
   const { data, isLoading, error } = useGetPackagesQuery(
     { prerelease: true },
-    { enabled: !!rootName }
+    { enabled: !!groupName }
   );
 
   return useMemo(() => {
     const items = data?.items ?? [];
-    const root = rootName
-      ? items.find((item) => item.name === rootName && item.schemas)
+    const group = groupName
+      ? items.find((item) => item.name === groupName && item.schemas)
       : undefined;
-    const options: RootSchemaOption[] = root
-      ? getRootSchemaChildren(root).map((c) => {
+    const options: GroupSchemaOption[] = group
+      ? getGroupSchemaChildren(group).map((c) => {
           const child = items.find((item) => item.name === c.package);
           return {
             schema: c.schema,
@@ -52,9 +52,9 @@ export const useRootPackage = (rootName?: string) => {
     return {
       isLoading,
       error,
-      root,
+      group,
       options,
-      defaultSchema: root ? getRootDefaultSchema(root) : undefined,
+      defaultSchema: group ? getGroupDefaultSchema(group) : undefined,
     };
-  }, [data?.items, error, isLoading, rootName]);
+  }, [data?.items, error, isLoading, groupName]);
 };

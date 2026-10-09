@@ -40,7 +40,7 @@ import {
 } from '../../../../../../../hooks';
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
 import { incrementPolicyName } from '../../../../../../../services';
-import type { RootSchemaOption } from '../../../../../../../hooks/use_root_package';
+import type { GroupSchemaOption } from '../../../../../../../hooks/use_group_package';
 import { PackageIcon } from '../../../../../../../components';
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../constants';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
@@ -49,7 +49,7 @@ import { PackageDocumentationModal } from '../../../../../../fleet/sections/agen
 import { SelectedPolicyTab } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/components';
 import { useAllNonManagedAgentPolicies } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/components/steps/components/use_policies';
 import type { SavedPolicyResult } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/types';
-import { getRootChildVersion } from '../schema_toggle';
+import { getGroupChildVersion } from '../schema_toggle';
 
 import type { NginxOverrides, NginxSchema, NginxStep, NginxStreamId } from './model';
 import { applyToInputs, getSteps, resolveValues } from './model';
@@ -58,12 +58,12 @@ import type { AgentPolicyMode } from './steps';
 import { LogsStep, MetricsStep, SchemaSignalsStep, StepRecap, SummaryStep } from './steps';
 
 interface WizardProps {
-  root: PackageListItem;
-  options: RootSchemaOption[];
+  group: PackageListItem;
+  options: GroupSchemaOption[];
   defaultSchema: NginxSchema;
 }
 
-export const NginxOnboardingWizard: React.FC<WizardProps> = ({ root, options, defaultSchema }) => {
+export const NginxOnboardingWizard: React.FC<WizardProps> = ({ group, options, defaultSchema }) => {
   const spaceSettings = useSpaceSettingsContext();
   const existingPolicies = useAllNonManagedAgentPolicies();
 
@@ -122,12 +122,12 @@ export const NginxOnboardingWizard: React.FC<WizardProps> = ({ root, options, de
   );
 
   const option = options.find((o) => o.schema === schema);
-  const childVersion = option ? getRootChildVersion(option) : undefined;
+  const childVersion = option ? getGroupChildVersion(option) : undefined;
 
   return (
     <NginxWizardBody
       key={schema}
-      root={root}
+      group={group}
       schema={schema}
       defaultSchema={defaultSchema}
       onSchemaChange={setSchema}
@@ -159,7 +159,7 @@ export const NginxOnboardingWizard: React.FC<WizardProps> = ({ root, options, de
 };
 
 interface BodyProps {
-  root: PackageListItem;
+  group: PackageListItem;
   schema: NginxSchema;
   defaultSchema: NginxSchema;
   onSchemaChange: (schema: NginxSchema) => void;
@@ -452,16 +452,16 @@ const NginxWizardBody: React.FC<BodyProps> = (props) => {
               })}
             >
               <PackageIcon
-                packageName={props.root.name}
-                version={props.root.version}
-                icons={props.root.icons}
+                packageName={props.group.name}
+                version={props.group.version}
+                icons={props.group.icons}
                 size="m"
               />
             </div>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
-              <h1>{props.root.title}</h1>
+              <h1>{props.group.title}</h1>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -485,7 +485,7 @@ const NginxWizardBody: React.FC<BodyProps> = (props) => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiText size="s" color="subdued" css={css({ marginTop: euiTheme.size.s })}>
-          {/* PROTOTYPE: design copy, the root manifest description is shorter */}
+          {/* PROTOTYPE: design copy, the group manifest description is shorter */}
           Collect access and error logs plus connection metrics from Nginx web servers.
         </EuiText>
         <EuiHorizontalRule margin="m" />

@@ -439,7 +439,7 @@ export type RegistrySearchResult = Pick<
   | 'deprecated'
   | 'group'
   | 'schemas'
-  | 'requires' // PROTOTYPE: needed to hide a root child's input/content deps
+  | 'requires' // PROTOTYPE: integration group child versions, and hiding a child's input/content deps
 >;
 
 // from /categories

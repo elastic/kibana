@@ -50,7 +50,7 @@ import { mergeCategoriesAndCount } from '../util';
 import { useBuildIntegrationsUrl } from './use_build_integrations_url';
 import { useOnboardingOverride } from './use_onboarding_override';
 import { applyGrouping } from './apply_grouping';
-import { applyRootPackages } from './apply_root_packages';
+import { applyGroupPackages } from './apply_group_packages';
 
 export interface IntegrationsURLParameters {
   searchString?: string;
@@ -229,8 +229,8 @@ export const useAvailablePackages = ({
   // All cards before any filter (no agentless filter, no category filter).
   // Used by useBrowseIntegrationHook which applies both filters from the live URL.
   const allCards: IntegrationCardItem[] = useMemo(() => {
-    // PROTOTYPE: root packages (with `schemas`) get one tile each; their children are hidden.
-    const { rootCards, remainingItems: eprAndCustomPackages } = applyRootPackages({
+    // PROTOTYPE: integration groups (with `schemas`) get one tile each; their children are hidden.
+    const { groupCards, remainingItems: eprAndCustomPackages } = applyGroupPackages({
       items: [...mergedEprPackages, ...(appendCustomIntegrations || [])],
       getHref,
       getAbsolutePath,
@@ -238,7 +238,7 @@ export const useAvailablePackages = ({
     });
 
     let itemsToMap: Array<PackageListItem | CustomIntegration>;
-    let extraCards: IntegrationCardItem[] = [...rootCards];
+    let extraCards: IntegrationCardItem[] = [...groupCards];
 
     if (enableIntegrationCollectionTiles && enableCollectionGrouping) {
       const { collectionCards, ungroupedItems } = applyGrouping({
