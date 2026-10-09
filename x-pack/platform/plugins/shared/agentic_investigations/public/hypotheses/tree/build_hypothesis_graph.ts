@@ -127,13 +127,13 @@ const createEdge = (source: string, target: string, isHappyPath: boolean): Hypot
 
 /**
  * Builds the hypothesis tree: Trigger → Hypotheses chip → one flat row of hypotheses →
- * Conclusion → Proposed actions. Conclusion and actions are drafts until the run ends, so they are
+ * Conclusion → Proposed actions. Only hypotheses that were not dismissed lead to the conclusion. Conclusion and actions are drafts until the run ends, so they are
  * left out while it is still running.
  */
 export const buildHypothesisGraph = ({
   input: { title, subjects, hypotheses, conclusion, proposals, isRunning },
   isHypothesesExpanded,
-  isActionsExpanded = false,
+  isActionsExpanded = true,
 }: {
   input: HypothesisTreeInput;
   isHypothesesExpanded: boolean;
@@ -173,12 +173,17 @@ export const buildHypothesisGraph = ({
     return { nodes, edges };
   }
 
-  const feedingIds = showHypothesisRow
-    ? hypotheses.map((_, index) => getHypothesisNodeId(index))
-    : [HYPOTHESIS_TREE_NODE_IDS.hypotheses];
-  const happyFeedingId = showHypothesisRow
-    ? getHypothesisNodeId(winnerIndex)
-    : HYPOTHESIS_TREE_NODE_IDS.hypotheses;
+  // A dismissed hypothesis did not lead anywhere, so it does not feed the conclusion. When every
+  // hypothesis was dismissed, the chip does, so the conclusion stays connected.
+  const leadingIds = hypotheses.flatMap(({ status }, index) =>
+    status === 'dismissed' ? [] : [getHypothesisNodeId(index)]
+  );
+  const feedingIds =
+    showHypothesisRow && leadingIds.length > 0 ? leadingIds : [HYPOTHESIS_TREE_NODE_IDS.hypotheses];
+  const happyFeedingId =
+    feedingIds[0] === HYPOTHESIS_TREE_NODE_IDS.hypotheses
+      ? HYPOTHESIS_TREE_NODE_IDS.hypotheses
+      : getHypothesisNodeId(winnerIndex);
   const isFeedingHappy = (id: string): boolean => hasWinner && id === happyFeedingId;
 
   const conclusionText = conclusion?.trim();
