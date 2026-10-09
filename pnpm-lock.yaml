@@ -5719,7 +5719,7 @@ importers:
         version: link:packages/kbn-yarn-lock-validator
       '@mswjs/http-middleware':
         specifier: 0.10.3
-        version: 0.10.3(msw@2.13.6(@types/node@24.10.13)(typescript@6.0.3))(supports-color@10.2.2)
+        version: 0.10.3(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(supports-color@10.2.2)
       '@octokit/rest':
         specifier: 22.0.1
         version: 22.0.1
@@ -6447,8 +6447,8 @@ importers:
         specifier: 0.5.1
         version: 0.5.1(supports-color@10.2.2)
       msw:
-        specifier: 2.13.6
-        version: 2.13.6(@types/node@24.10.13)(typescript@6.0.3)
+        specifier: 2.15.0
+        version: 2.15.0(@types/node@24.10.13)(typescript@6.0.3)
       nock:
         specifier: 12.0.3
         version: 12.0.3(supports-color@10.2.2)
@@ -21601,8 +21601,8 @@ packages:
   msgpackr@1.12.1:
     resolution: {integrity: sha512-4EUH9tQHnMmEgzW/MdAP0KIfa1T9AF+htl0ffe2n5vb2EKn9y2co8ccpgWko6S52Jy1PQZKwRnx5/KkYjtd9MQ==}
 
-  msw@2.13.6:
-    resolution: {integrity: sha512-GAJbQy8Ra/Ydjt0Hb2MGT2qhzd83J3+QZMHdH85uW7r/XkKc846+Ma2PLif5hGvTm5Yqa+wkcstpim0WeLZU9g==}
+  msw@2.15.0:
+    resolution: {integrity: sha512-2wQAmKkQKxRuXvYJxVhPGG0wZNBQyD06oJvxqw90XqLvptdqxdlHrFUfEteKkpaNORX3Xzc+HtEl/q0nfmN2wQ==}
     engines: {node: '>=18'}
     hasBin: true
     peerDependencies:
@@ -29773,10 +29773,10 @@ snapshots:
   '@msgpackr-extract/msgpackr-extract-win32-x64@3.0.4':
     optional: true
 
-  '@mswjs/http-middleware@0.10.3(msw@2.13.6(@types/node@24.10.13)(typescript@6.0.3))(supports-color@10.2.2)':
+  '@mswjs/http-middleware@0.10.3(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(supports-color@10.2.2)':
     dependencies:
       express: 4.22.0(supports-color@10.2.2)
-      msw: 2.13.6(@types/node@24.10.13)(typescript@6.0.3)
+      msw: 2.15.0(@types/node@24.10.13)(typescript@6.0.3)
       strict-event-emitter: 0.5.1
     transitivePeerDependencies:
       - supports-color
@@ -40918,7 +40918,7 @@ snapshots:
     optionalDependencies:
       msgpackr-extract: 3.0.4
 
-  msw@2.13.6(@types/node@24.10.13)(typescript@6.0.3):
+  msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3):
     dependencies:
       '@inquirer/confirm': 6.3.1(@types/node@24.10.13)
       '@mswjs/interceptors': 0.41.6
