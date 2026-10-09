@@ -23,7 +23,7 @@ The ${dashboardTools.generateDashboard} tool builds the resulting dashboard from
 
 ## Improving an Existing Dashboard (Enhance)
 
-When asked to enhance, improve, or clean up an existing dashboard, read \`${ENHANCE_GUIDANCE_PATH}\` with \`read_file\` before inspecting the dashboard or calling any other tool. Follow that file. It takes precedence over the create-dashboard guidance in this skill. Do not enhance without reading it.
+\`read_file\` \`${ENHANCE_GUIDANCE_PATH}\` before any other tool. Follow that file; it overrides this skill. Do not enhance without reading it.
 
 ## Using Dashboard Operations
 

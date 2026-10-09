@@ -46,7 +46,7 @@ describe('registerSkills', () => {
 
   it('loads the enhance workflow from referenced content', () => {
     expect(skill.content).toContain(ENHANCE_GUIDANCE_PATH);
-    expect(skill.content).toContain('read_file');
+    expect(skill.content).toContain(`\`read_file\` \`${ENHANCE_GUIDANCE_PATH}\` before any other tool`);
     expect(skill.content).toContain('Do not enhance without reading it');
     expect(skill.content).not.toContain('How would you like to enhance this dashboard?');
     expect(skill.referencedContent).toEqual([
