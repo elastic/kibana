@@ -302,8 +302,9 @@ const renderToolCallGroup = async (
       const stepReasoning = joinReasoning(
         reasoningSteps.filter((s) => s.tool_call_id === call.tool_call_id)
       );
-      const name =
-        current?.run.renderState[call.tool_call_id]?.toolName ?? sanitizeToolId(call.tool_id);
+      const name = sanitizeToolId(
+        current?.run.renderState[call.tool_call_id]?.toolName ?? call.tool_id
+      );
       return {
         id: call.tool_call_id,
         name,

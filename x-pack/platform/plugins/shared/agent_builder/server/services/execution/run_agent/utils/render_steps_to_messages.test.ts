@@ -285,6 +285,11 @@ describe('renderCurrentRun', () => {
     expect(tool.content).toBe(wrapToolResultContent('browser said hi'));
   });
 
+  it('sanitizes the render state tool name', async () => {
+    const messages = await current([call('h1')], rendered('h1', { toolName: 'not.a.tool' }));
+    expect((messages[0] as AIMessage).tool_calls?.[0].name).toBe('not_a_tool');
+  });
+
   it('falls back to the sanitized tool id and serialized results without render state', async () => {
     const messages = await current([call('old', { tool_id: 'some.tool' })], {});
     const [ai, tool] = messages as [AIMessage, ToolMessage];

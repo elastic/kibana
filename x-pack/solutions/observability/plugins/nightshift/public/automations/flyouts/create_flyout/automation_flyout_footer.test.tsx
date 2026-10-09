@@ -11,39 +11,32 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { AutomationFlyoutFooter } from './automation_flyout_footer';
 
 const renderFooter = (props: Partial<React.ComponentProps<typeof AutomationFlyoutFooter>> = {}) => {
-  const handlers = { onEnabledChange: jest.fn(), onSave: jest.fn() };
+  const onSave = jest.fn();
   render(
     <I18nProvider>
-      <AutomationFlyoutFooter isEnabled={false} canSave isSaving={false} {...handlers} {...props} />
+      <AutomationFlyoutFooter canSave isSaving={false} onSave={onSave} {...props} />
     </I18nProvider>
   );
-  return handlers;
+  return { onSave };
 };
 
 describe('AutomationFlyoutFooter', () => {
-  it('shows the disabled state and toggles it', () => {
-    const { onEnabledChange } = renderFooter();
-
-    expect(screen.getByText('Saves as disabled')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('automationEnabledSwitch'));
-    expect(onEnabledChange).toHaveBeenCalledWith(true);
-  });
-
-  it('shows the enabled state', () => {
-    renderFooter({ isEnabled: true });
-
-    expect(screen.getByText('Enables when saved')).toBeInTheDocument();
-  });
-
-  it('saves only when allowed', () => {
+  it('saves as disabled', () => {
     const { onSave } = renderFooter();
     fireEvent.click(screen.getByTestId('submitAutomation'));
-    expect(onSave).toHaveBeenCalled();
+    expect(onSave).toHaveBeenCalledWith(false);
   });
 
-  it('disables save when blocked', () => {
+  it('saves and enables', () => {
+    const { onSave } = renderFooter();
+    fireEvent.click(screen.getByTestId('submitAndEnableAutomation'));
+    expect(onSave).toHaveBeenCalledWith(true);
+  });
+
+  it('disables both saves when blocked', () => {
     renderFooter({ canSave: false, saveBlocker: 'Fix the cron expression to save' });
 
     expect(screen.getByTestId('submitAutomation')).toBeDisabled();
+    expect(screen.getByTestId('submitAndEnableAutomation')).toBeDisabled();
   });
 });

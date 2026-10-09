@@ -24,6 +24,7 @@ export {
 } from './access_control';
 export {
   DEFAULT_CONVERSATION_TITLE,
+  CHAT_MESSAGE_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
   CONVERSATION_ID_MAX_LENGTH,
   CONVERSATION_METADATA_KEY_MAX_LENGTH,
@@ -209,6 +210,7 @@ export {
   createUserQuestionAskedEvent,
   createUserQuestionAnsweredEvent,
 } from './events';
+export type { SlackPayload, SurfacePayload } from './surface_payload';
 export type { RoundState } from './round_state';
 export type { ConversationListOptions } from './conversation_list';
 export {

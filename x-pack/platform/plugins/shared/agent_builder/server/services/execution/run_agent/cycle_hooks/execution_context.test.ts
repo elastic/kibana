@@ -30,10 +30,11 @@ const processed = (events: TimelineEvent[]): ProcessedTimelineEvent[] =>
       : event
   ) as ProcessedTimelineEvent[];
 
-const build = (timeline: ProcessedTimelineEvent[]) => {
+const build = (timeline: ProcessedTimelineEvent[], resumedRoundId?: string) => {
   const processedConversation = {
     timeline,
     nextInput: { message: 'next', attachments: [] },
+    resumedRoundId,
   } as unknown as ProcessedConversation;
   const agentConfiguration = { tools: [] } as unknown as AgentConfiguration;
   const execution = buildCycleHookExecutionContext({
@@ -81,16 +82,27 @@ describe('buildCycleHookExecutionContext', () => {
     }
   });
 
-  it('leaves out the round paused on a prompt: it is the run being resumed, not history', () => {
+  it('leaves out the paused round this run resumes: it is the current run, not history', () => {
     const history = processed(completedRoundTimeline('r1', T0));
     const paused = processed(pausedRoundTimeline('p', ['c1'], T1));
 
-    const { execution } = build([...history, ...paused]);
+    const { execution } = build([...history, ...paused], 'p');
 
     expect(execution.conversation.events).toEqual(history);
     expect(execution.conversation.executions.map((summary) => summary.outcome)).toEqual([
       'responded',
     ]);
+  });
+
+  it('keeps a paused round the run does not resume in the history', () => {
+    const timeline = processed([
+      ...completedRoundTimeline('r1', T0),
+      ...pausedRoundTimeline('p', ['c1'], T1),
+    ]);
+
+    const { execution } = build(timeline);
+
+    expect(execution.conversation.events).toEqual(timeline);
   });
 
   it('hands out copies, made once: what a hook does to them never reaches the run', () => {

@@ -89,7 +89,7 @@ interface ConversationHistory {
   executions: ExecutionSummary[];
 }
 
-/** The timeline before this execution; a paused round being resumed is the current run, not history. */
+/** The timeline before this execution; the paused round this run resumes is the current run, not history. */
 const conversationHistory = (conversation: ProcessedConversation): ConversationHistory => {
   const events = cloneDeep(historyView(conversation).events);
   const executions: ExecutionSummary[] = [];

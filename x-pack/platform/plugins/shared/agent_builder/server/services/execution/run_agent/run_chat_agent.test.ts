@@ -41,6 +41,7 @@ import {
 } from './utils';
 import { createAgentGraph } from './graph';
 import { createPromptFactory } from './prompts';
+import { registerInternalTools } from './tools/register_internal_tools';
 import { createImageResolver } from './utils/image_resolver';
 import { RunTracker } from './run_tracker';
 import { CycleHookRuntime } from './cycle_hooks/cycle_hook_runtime';
@@ -96,6 +97,9 @@ const addRoundCompleteEventMock = addRoundCompleteEvent as jest.MockedFn<
   typeof addRoundCompleteEvent
 >;
 const createPromptFactoryMock = createPromptFactory as jest.MockedFn<typeof createPromptFactory>;
+const registerInternalToolsMock = registerInternalTools as jest.MockedFn<
+  typeof registerInternalTools
+>;
 const createImageResolverMock = createImageResolver as jest.MockedFn<typeof createImageResolver>;
 
 describe('runDefaultAgentMode', () => {
@@ -769,6 +773,115 @@ describe('runDefaultAgentMode', () => {
       model_context: '<system_update>initial context</system_update>',
     } as const;
 
+    const pausedConversation = () =>
+      createEmptyConversation({
+        rounds: [
+          createRound({
+            id: 'round-1',
+            status: ConversationRoundStatus.awaitingPrompt,
+            steps: [pausedCall],
+            pending_prompts: [
+              { id: 'p1', type: AgentPromptType.confirmation, title: 't', message: 'm' },
+            ],
+          }),
+        ],
+      });
+
+    it('runs a fresh round on top of a paused conversation when it does not store it', async () => {
+      const { context, streamEvents } = setup();
+      context.conversationAccess = 'readOnly';
+      getPendingTurnMock.mockImplementation(realGetPendingTurn);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'Summarize' },
+          agentConfiguration: { tools: [] } as any,
+          conversation: pausedConversation(),
+        },
+        context
+      );
+
+      expect(getPendingTurnMock).not.toHaveBeenCalled();
+      const command = initialCommand(streamEvents);
+      expect(command.goto).toEqual([nodeNames.init]);
+      expect(command.update).not.toHaveProperty('pendingToolCallIds');
+      const roundStarted = (context.events.emit as jest.Mock).mock.calls
+        .map(([event]) => event)
+        .find((event) => event.type === ChatEventType.roundStarted);
+      expect(roundStarted.data).not.toHaveProperty('resumed');
+      const { processedConversation } = createPromptFactoryMock.mock.calls[0][0];
+      expect(processedConversation.resumedRoundId).toBeUndefined();
+    });
+
+    it('still requires prompt responses on a paused conversation it stores', async () => {
+      const { context } = setup();
+      getPendingTurnMock.mockImplementation(realGetPendingTurn);
+
+      await expect(
+        runDefaultAgentMode(
+          {
+            nextInput: { message: 'Summarize' },
+            agentConfiguration: { tools: [] } as any,
+            conversation: pausedConversation(),
+          },
+          context
+        )
+      ).rejects.toThrow(/awaiting prompt responses/);
+    });
+
+    it('starts without the stored sub-agent state and offers no metadata writes when not storing', async () => {
+      const { context } = setup();
+      context.conversationAccess = 'readOnly';
+      const conversation = createEmptyConversation({
+        id: 'conversation-1',
+        template_id: 'investigation',
+        metadata: { severity: 'high' },
+        state: {
+          subagents: { researcher: { conversation_id: 'child-1', agent_id: 'agent-2' } },
+          background_executions: {
+            'bg-1': { execution_id: 'bg-1', status: 'running' },
+          },
+        } as never,
+      });
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'Summarize' },
+          agentConfiguration: { tools: [] } as any,
+          conversation,
+        },
+        context
+      );
+
+      // template metadata still feeds the prompt
+      expect(prepareConversationMock).toHaveBeenCalledWith(
+        expect.objectContaining({ metadata: { severity: 'high' }, templateId: 'investigation' })
+      );
+      const [params] = registerInternalToolsMock.mock.calls[0];
+      expect(params.updateConversationMetadata).toBeUndefined();
+      expect(createPromptFactoryMock.mock.calls[0][0].conversationMetadataWritable).toBe(false);
+      expect(params.subagentTracker.snapshot()).toEqual({});
+      expect(params.backgroundExecutionService.getPendingState()).toEqual({});
+      expect(context.conversationClient.patchMetadata).not.toHaveBeenCalled();
+    });
+
+    it('passes the storage flags to both agent hooks', async () => {
+      const { context } = setup();
+      context.conversationAccess = 'readOnly';
+
+      await runDefaultAgentMode(
+        { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any },
+        context
+      );
+
+      for (const lifecycle of [HookLifecycle.beforeAgent, HookLifecycle.afterExecution]) {
+        expect(context.hooks.run).toHaveBeenCalledWith(
+          lifecycle,
+          expect.objectContaining({ conversationAccess: 'readOnly' })
+        );
+      }
+    });
+
     it('runs beforeAgent on resume without replacing the initial workflow step', async () => {
       const { context, streamEvents } = setup();
       (context.hooks.run as jest.Mock).mockImplementation(async (_lifecycle, hookContext) => ({
@@ -837,6 +950,7 @@ describe('runDefaultAgentMode', () => {
         expect.objectContaining({
           processedConversation: expect.objectContaining({
             nextInput: expect.objectContaining({ message: 'hook rewrite' }),
+            resumedRoundId: 'round-1',
           }),
         })
       );

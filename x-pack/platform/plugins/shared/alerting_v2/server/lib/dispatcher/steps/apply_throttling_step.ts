@@ -153,15 +153,14 @@ function shouldDispatch(
 ): boolean {
   if (!lastRecord) return true;
 
-  const { groupingMode } = policy;
+  const { mode } = policy.grouping;
   const strategy =
-    policy.throttle?.strategy ??
-    (groupingMode === 'per_alert' ? 'on_status_change' : 'time_interval');
+    policy.throttle?.strategy ?? (mode === 'per_alert' ? 'on_status_change' : 'time_interval');
 
   if (strategy === 'every_time') return true;
 
   // Aggregate modes (per_field, all): throttle by interval only
-  if (groupingMode !== 'per_alert') {
+  if (mode !== 'per_alert') {
     return (
       !policy.throttle?.interval ||
       !isWithinInterval(
