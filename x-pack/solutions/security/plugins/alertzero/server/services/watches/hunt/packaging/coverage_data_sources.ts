@@ -17,10 +17,6 @@ const uniqueSorted = (values: Array<string | undefined>): string[] =>
     .sort()
     .slice(0, MAX_DATA_SOURCES);
 
-/** `logs-endpoint` for `logs-endpoint.alerts.00e5ea78.2026.10.08*` or `logs-endpoint.*`. */
-const vendorKey = (pattern: string): string | undefined =>
-  /^([a-z]+)-([^.\-*]+)/.exec(pattern)?.slice(1, 3).join('-');
-
 /** Drops `//` comment lines; Tier 2's header says "Generated from hunt.…", which is not a FROM. */
 export const stripEsqlComments = (esql: string): string =>
   esql
@@ -51,32 +47,19 @@ export const fromDataSources = (esql: string): string[] => {
 };
 
 /**
- * Report-intent dataset patterns for a run with no source events: the Tier 2 allowlist minus
- * the process-bearing streams that were added for response actions. The allowlist is
- * `report match + Tier 1 hits + actionable_indices`, so taking the set difference leaves what
- * the report is about. When the allowlist was already bounded to vendor wildcards
- * (`logs-endpoint.*`) a plain difference cannot remove the padding, so a target is also
- * dropped when its `<type>-<vendor>` prefix is one an actionable index carries.
+ * Dataset patterns for a subject with no hit events: the coordinator's `report_intent_targets`
+ * (the datasets the report itself points at, already free of Tier 1 hit indices and the
+ * process-bearing response-action streams), collapsed to dataset patterns. When the
+ * coordinator named none, the executed queries' `FROM` is the next best evidence.
  */
 export const reportIntentDataSources = ({
-  tier2Targets,
-  actionableIndices,
+  reportIntentTargets,
   behaviors,
 }: {
-  tier2Targets: string[];
-  actionableIndices: string[];
+  reportIntentTargets: string[];
   behaviors: CoverageBehavior[];
 }): string[] => {
-  const actionable = new Set(actionableIndices);
-  const actionableVendors = new Set(
-    actionableIndices.map(vendorKey).filter((key): key is string => key !== undefined)
-  );
-  const remaining = tier2Targets.filter((target) => {
-    if (actionable.has(target)) return false;
-    const key = vendorKey(target);
-    return key === undefined || !actionableVendors.has(key);
-  });
-  const fromTargets = uniqueSorted(remaining.map(collapseToDataSourcePattern));
+  const fromTargets = uniqueSorted(reportIntentTargets.map(collapseToDataSourcePattern));
   if (fromTargets.length > 0) return fromTargets;
   return uniqueSorted(behaviors.flatMap((behavior) => fromDataSources(behavior.validatedEsql)));
 };

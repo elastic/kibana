@@ -115,11 +115,7 @@ export const deriveCoverageSubjects = ({
   const behaviors: CoverageBehavior[] = state.coordinator?.behaviors
     ? toCoverageBehaviors(state.coordinator.behaviors)
     : findings.flatMap((finding) => finding.behaviors);
-  const tier2Targets =
-    state.coordinator?.tier2Targets ?? findings.flatMap((finding) => finding.tier2Targets);
-  const actionableIndices =
-    state.coordinator?.actionableIndices ??
-    findings.flatMap((finding) => finding.actionableIndices);
+  const reportIntentTargets = state.coordinator?.reportIntentTargets ?? [];
   const techniqueIds = state.techniques.length > 0 ? [...new Set(state.techniques)] : [undefined];
 
   return techniqueIds.map((techniqueId) => {
@@ -146,7 +142,7 @@ export const deriveCoverageSubjects = ({
       hitRefIndices.length > 0
         ? eventDataSources(hitRefIndices)
         : firstNonEmpty(
-            reportIntentDataSources({ tier2Targets, actionableIndices, behaviors }),
+            reportIntentDataSources({ reportIntentTargets, behaviors }),
             vendorFallbackDataSources({
               vendor: state.reportContext?.vendor,
               product: state.reportContext?.product,

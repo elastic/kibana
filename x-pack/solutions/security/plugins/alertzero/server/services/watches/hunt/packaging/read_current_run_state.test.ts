@@ -485,22 +485,6 @@ describe('readCurrentRunState', () => {
       expect(state?.findings[0].behaviors).toEqual([]);
     });
 
-    it('returns the Tier 2 targets and actionable indices', async () => {
-      const state = await readFindings([
-        sseAttachment({
-          tier2Targets: ['logs-aws.cloudtrail-*', 'logs-endpoint.events.process-*'],
-          actionableIndices: ['logs-endpoint.events.process-*'],
-        }),
-      ]);
-
-      expect(state?.findings[0]).toEqual(
-        expect.objectContaining({
-          tier2Targets: ['logs-aws.cloudtrail-*', 'logs-endpoint.events.process-*'],
-          actionableIndices: ['logs-endpoint.events.process-*'],
-        })
-      );
-    });
-
     it('returns the hunt window', async () => {
       const state = await readFindings([sseAttachment({})]);
 

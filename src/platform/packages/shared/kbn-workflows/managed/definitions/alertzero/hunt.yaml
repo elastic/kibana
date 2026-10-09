@@ -65,13 +65,9 @@ outputs:
       type: number
     # The coordinator result a clean run cannot leave on an attachment (it attaches an SSE
     # only for a confirmed hit). Packaging reads these to give the coverage KI a dataset hint
-    # and the executed Tier 2 query. Empty arrays, never absent, when the coordinator did not
+    # (the datasets the report points at) and the executed Tier 2 query. Empty arrays, never absent, when the coordinator did not
     # run or Tier 2 did not either.
-    tier2_targets:
-      type: array
-      items:
-        type: string
-    actionable_indices:
+    report_intent_targets:
       type: array
       items:
         type: string
@@ -325,8 +321,7 @@ steps:
       result_sse_count: "${{ steps.run_hunt_coordinator.output.sse | size }}"
       # `compact` turns a nil (coordinator skipped, or Tier 2 never ran) into `[]` and leaves a
       # real array as is, so the declared array outputs never see a null.
-      result_tier2_targets: "${{ steps.run_hunt_coordinator.output.tier2_targets | compact }}"
-      result_actionable_indices: "${{ steps.run_hunt_coordinator.output.actionable_indices | compact }}"
+      result_report_intent_targets: "${{ steps.run_hunt_coordinator.output.report_intent_targets | compact }}"
       result_behaviors: "${{ steps.run_hunt_coordinator.output.tier2.behaviors | compact }}"
 
   - name: emit_result
@@ -339,6 +334,5 @@ steps:
       headline: "{{ variables.result_headline }}"
       hit: "${{ variables.result_hit }}"
       sse_count: "${{ variables.result_sse_count }}"
-      tier2_targets: "${{ variables.result_tier2_targets }}"
-      actionable_indices: "${{ variables.result_actionable_indices }}"
+      report_intent_targets: "${{ variables.result_report_intent_targets }}"
       behaviors: "${{ variables.result_behaviors }}"

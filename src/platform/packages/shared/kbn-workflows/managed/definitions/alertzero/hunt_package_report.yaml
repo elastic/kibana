@@ -86,16 +86,11 @@ triggers:
         # for a confirmed hit). Not required, for the same reason as `expectedSseCount`: an
         # already-installed Worker does not send them until its own `version` bumps, and the
         # step treats absent values as "no dataset hint / no query", never as an error.
-        tier2Targets:
+        reportIntentTargets:
           type: array
           items:
             type: string
-          description: The coordinator's `tier2_targets` (the hunt child's `tier2_targets` output).
-        actionableIndices:
-          type: array
-          items:
-            type: string
-          description: The coordinator's `actionable_indices` (the hunt child's `actionable_indices` output).
+          description: The coordinator's `report_intent_targets` (the hunt child's `report_intent_targets` output).
         behaviors:
           type: array
           items:
@@ -139,8 +134,7 @@ steps:
       # renders it as the string "false", which fails input validation.
       hasConfirmedHit: "${{ inputs.hasConfirmedHit }}"
       expectedSseCount: "${{ inputs.expectedSseCount }}"
-      tier2Targets: "${{ inputs.tier2Targets }}"
-      actionableIndices: "${{ inputs.actionableIndices }}"
+      reportIntentTargets: "${{ inputs.reportIntentTargets }}"
       behaviors: "${{ inputs.behaviors }}"
     on-failure:
       fallback:

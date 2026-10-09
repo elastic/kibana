@@ -47,10 +47,9 @@ interface YamlStep {
   name: string;
   type?: string;
   with?: {
-    result_tier2_targets?: string;
-    result_actionable_indices?: string;
+    result_report_intent_targets?: string;
     result_behaviors?: string;
-    tier2_targets?: string;
+    report_intent_targets?: string;
     'workflow-id'?: string;
     inputs?: Record<string, unknown>;
     path?: string;
@@ -292,13 +291,13 @@ describe('Hunt Watch worker chain', () => {
   // reach packaging only as inputs threaded hunt -> Worker -> packaging child -> step.
   describe('the coordinator result handed to packaging', () => {
     const resultVariables = () =>
-      huntSteps.find((step) => step.with?.result_tier2_targets !== undefined)?.with ?? {};
+      huntSteps.find((step) => step.with?.result_report_intent_targets !== undefined)?.with ?? {};
     const workerInputs = () => stepIn(workerSteps, 'package_report')?.with?.inputs ?? {};
     const decideInputs = () => stepIn(packageReportSteps, 'decide_and_package')?.with ?? {};
 
-    it('declares the three results as hunt outputs', () => {
+    it('declares the coordinator results as hunt outputs', () => {
       expect(Object.keys(hunt.outputs?.properties ?? {})).toEqual(
-        expect.arrayContaining(['tier2_targets', 'actionable_indices', 'behaviors'])
+        expect.arrayContaining(['report_intent_targets', 'behaviors'])
       );
     });
 
@@ -307,25 +306,22 @@ describe('Hunt Watch worker chain', () => {
     });
 
     it.each([
-      ['tier2_targets', ['logs-aws.cloudtrail-*'], ['logs-aws.cloudtrail-*']],
-      ['tier2_targets', undefined, []],
-    ])(
-      'reads %s as an array (%p) even when the coordinator did not run',
-      (_name, value, expected) => {
-        expect(
-          evaluateExpression(resultVariables().result_tier2_targets as string, {
-            steps: {
-              run_hunt_coordinator: { output: value ? { tier2_targets: value } : undefined },
-            },
-          })
-        ).toEqual(expected);
-      }
-    );
+      ['a report match', ['logs-aws.cloudtrail-*'], ['logs-aws.cloudtrail-*']],
+      ['no coordinator output', undefined, []],
+    ])('reads report_intent_targets as an array for %s (%p)', (_name, value, expected) => {
+      expect(
+        evaluateExpression(resultVariables().result_report_intent_targets as string, {
+          steps: {
+            run_hunt_coordinator: { output: value ? { report_intent_targets: value } : undefined },
+          },
+        })
+      ).toEqual(expected);
+    });
 
     it('reads behaviors as an empty array when Tier 2 never ran', () => {
       expect(
         evaluateExpression(resultVariables().result_behaviors as string, {
-          steps: { run_hunt_coordinator: { output: { tier2_targets: [] } } },
+          steps: { run_hunt_coordinator: { output: { report_intent_targets: [] } } },
         })
       ).toEqual([]);
     });
@@ -340,34 +336,36 @@ describe('Hunt Watch worker chain', () => {
       ).toEqual([{ technique_id: 'T1110' }]);
     });
 
-    it('forwards the three results from the hunt output into the packaging call', () => {
-      expect(
-        ['tier2Targets', 'actionableIndices', 'behaviors'].map((key) => key in workerInputs())
-      ).toEqual([true, true, true]);
+    it('forwards the report-intent targets and behaviors from the hunt output into the packaging call', () => {
+      expect(['reportIntentTargets', 'behaviors'].map((key) => key in workerInputs())).toEqual([
+        true,
+        true,
+      ]);
     });
 
     it('reads the packaging call inputs as empty arrays when the hunt output is missing', () => {
       expect(
-        evaluateExpression(workerInputs().tier2Targets as string, {
+        evaluateExpression(workerInputs().reportIntentTargets as string, {
           steps: { hunt: { output: undefined } },
         })
       ).toEqual([]);
     });
 
-    it('declares the three inputs on the packaging child without requiring them', () => {
+    it('declares the two inputs on the packaging child without requiring them', () => {
       const inputs = packageReport.triggers?.[0]?.inputs;
 
       expect(
-        ['tier2Targets', 'actionableIndices', 'behaviors'].map(
+        ['reportIntentTargets', 'behaviors'].map(
           (key) => key in (inputs?.properties ?? {}) && !(inputs?.required ?? []).includes(key)
         )
-      ).toEqual([true, true, true]);
+      ).toEqual([true, true]);
     });
 
-    it('forwards the three inputs from the packaging child into the step', () => {
-      expect(
-        ['tier2Targets', 'actionableIndices', 'behaviors'].map((key) => key in decideInputs())
-      ).toEqual([true, true, true]);
+    it('forwards the two inputs from the packaging child into the step', () => {
+      expect(['reportIntentTargets', 'behaviors'].map((key) => key in decideInputs())).toEqual([
+        true,
+        true,
+      ]);
     });
   });
 

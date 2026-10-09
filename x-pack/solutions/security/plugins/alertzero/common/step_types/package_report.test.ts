@@ -26,16 +26,15 @@ const behavior = {
 };
 
 describe('packageReportInputSchema coordinator results', () => {
-  it('accepts an input that omits all three', () => {
+  it('accepts an input that omits both', () => {
     expect(packageReportInputSchema.safeParse(defaultInput).success).toBe(true);
   });
 
-  it('accepts the three results', () => {
+  it('accepts the report-intent targets and behaviors', () => {
     expect(
       packageReportInputSchema.safeParse({
         ...defaultInput,
-        tier2Targets: ['logs-aws.cloudtrail-*'],
-        actionableIndices: ['logs-endpoint.events.process-*'],
+        reportIntentTargets: ['logs-aws.cloudtrail-*'],
         behaviors: [behavior],
       }).success
     ).toBe(true);
@@ -59,11 +58,11 @@ describe('packageReportInputSchema coordinator results', () => {
     ).not.toHaveProperty('hits');
   });
 
-  it('rejects more than 200 Tier 2 targets', () => {
+  it('rejects more than 200 report-intent targets', () => {
     expect(
       packageReportInputSchema.safeParse({
         ...defaultInput,
-        tier2Targets: Array.from({ length: 201 }, (_, i) => `logs-a${i}-*`),
+        reportIntentTargets: Array.from({ length: 201 }, (_, i) => `logs-a${i}-*`),
       }).success
     ).toBe(false);
   });
@@ -72,7 +71,7 @@ describe('packageReportInputSchema coordinator results', () => {
     expect(
       packageReportInputSchema.safeParse({
         ...defaultInput,
-        tier2Targets: ['x'.repeat(513)],
+        reportIntentTargets: ['x'.repeat(513)],
       }).success
     ).toBe(false);
   });

@@ -34,8 +34,6 @@ const finding = (overrides: Partial<CurrentRunFinding> = {}): CurrentRunFinding 
       hit: true,
     },
   ],
-  tier2Targets: ['logs-aws.cloudtrail-*', 'logs-endpoint.events.process-*'],
-  actionableIndices: ['logs-endpoint.events.process-*'],
   window: WINDOW,
   evidenceLines: ['Tier 2 executed T1078.004 with 2 required-index row(s).'],
   hosts: ['WIN-ANALYST01'],
@@ -161,10 +159,7 @@ describe('deriveCoverageSubjects', () => {
         techniques: ['T1078.004', 'T1021.001'],
         corroboratedTechniques: ['T1078.004'],
         findings: [finding({ corroboratedTechniqueId: undefined })],
-        coordinator: {
-          tier2Targets: ['logs-aws.cloudtrail-*', 'logs-endpoint.events.process-*'],
-          actionableIndices: ['logs-endpoint.events.process-*'],
-        },
+        coordinator: { reportIntentTargets: ['logs-aws.cloudtrail-*'] },
       });
 
     it('does not claim a confirmed hit', () => {
@@ -293,10 +288,7 @@ describe('deriveCoverageSubjects', () => {
       const [subject] = derive(
         hitState({
           findings: [finding({ eventRefs: [{ index: PACK_INDEX, techniqueId: 'T1078.004' }] })],
-          coordinator: {
-            tier2Targets: ['logs-aws.cloudtrail-*'],
-            actionableIndices: [],
-          },
+          coordinator: { reportIntentTargets: ['logs-aws.cloudtrail-*'] },
         })
       );
 

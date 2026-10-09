@@ -23,8 +23,7 @@ const ENDPOINT_PADDING = [
 
 /** The shape of run `ti-report-aws-iam-clean-historic-10`: two executed queries, zero rows. */
 const inputs: CoordinatorInputs = {
-  tier2Targets: ['logs-aws.cloudtrail-*', ...ENDPOINT_PADDING],
-  actionableIndices: ENDPOINT_PADDING,
+  reportIntentTargets: ['logs-aws.cloudtrail-*'],
   behaviors: [
     {
       technique_id: 'T1110.003',

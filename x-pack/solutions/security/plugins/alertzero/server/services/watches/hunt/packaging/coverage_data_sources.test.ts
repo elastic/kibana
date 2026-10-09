@@ -14,13 +14,6 @@ import {
 } from './coverage_data_sources';
 import type { CoverageBehavior } from './types';
 
-const ENDPOINT_PADDING = [
-  'logs-endpoint.alerts.00e5ea78.2026.10.08*',
-  'logs-endpoint.alerts.07d8f63a.2026.10.08*',
-  'logs-endpoint.events.00e5ea78.2026.10.08*',
-  'logs-endpoint.events.e8c68216.2026.10.08*',
-];
-
 const behavior = (validatedEsql: string): CoverageBehavior => ({
   techniqueId: 'T1110.003',
   confidence: 0.92,
@@ -79,38 +72,43 @@ describe('fromDataSources', () => {
 
 describe('reportIntentDataSources', () => {
   const defaultArgs = {
-    tier2Targets: ['logs-aws.cloudtrail-*', ...ENDPOINT_PADDING],
-    actionableIndices: ENDPOINT_PADDING,
+    reportIntentTargets: ['logs-aws.cloudtrail-*'],
     behaviors: [] as CoverageBehavior[],
   };
 
-  it('returns the report stream without the process padding', () => {
+  it('returns the report stream as a dataset pattern', () => {
     expect(reportIntentDataSources(defaultArgs)).toEqual(['logs-aws.cloudtrail-*']);
   });
 
-  it('drops a vendor wildcard the allowlist was bounded to when an actionable index shares its vendor', () => {
+  it('collapses a concrete stream to its dataset pattern', () => {
     expect(
       reportIntentDataSources({
         ...defaultArgs,
-        tier2Targets: ['logs-aws.*', 'logs-endpoint.*'],
+        reportIntentTargets: ['logs-aws.cloudtrail-default*'],
+      })
+    ).toEqual(['logs-aws.cloudtrail-*']);
+  });
+
+  it('drops a target that names no dataset', () => {
+    expect(
+      reportIntentDataSources({
+        ...defaultArgs,
+        reportIntentTargets: ['logs-endpoint.events.00e5ea78.2026.10.08*'],
       })
     ).toEqual([]);
   });
 
-  it('falls back to the executed behavior FROM when no target survives', () => {
+  it('falls back to the executed behavior FROM when the coordinator named no target', () => {
     expect(
       reportIntentDataSources({
-        ...defaultArgs,
-        tier2Targets: ENDPOINT_PADDING,
+        reportIntentTargets: [],
         behaviors: [behavior('FROM logs-aws.cloudtrail-* | LIMIT 5')],
       })
     ).toEqual(['logs-aws.cloudtrail-*']);
   });
 
   it('returns nothing when there are no targets and no behaviors', () => {
-    expect(
-      reportIntentDataSources({ tier2Targets: [], actionableIndices: [], behaviors: [] })
-    ).toEqual([]);
+    expect(reportIntentDataSources({ reportIntentTargets: [], behaviors: [] })).toEqual([]);
   });
 });
 

@@ -87,19 +87,12 @@ export const packageReportInputSchema = z.object({
    * Optional for the same staleness reason as `expectedSseCount`: omitting them degrades the
    * coverage KI's `data_sources` / `validated_esql`, never fails packaging.
    */
-  tier2Targets: z
+  reportIntentTargets: z
     .array(z.string().max(512))
     .max(200)
     .optional()
     .describe(
-      "The coordinator's `tier2_targets`: what Tier 2 was allowed to read. Clean-run coverage KIs derive `data_sources` from it minus `actionableIndices`."
-    ),
-  actionableIndices: z
-    .array(z.string().max(512))
-    .max(200)
-    .optional()
-    .describe(
-      "The coordinator's `actionable_indices`: streams whose mapping carries a process identity. Subtracted from `tier2Targets` so process padding does not read as the report's data source."
+      "The coordinator's `report_intent_targets`: the datasets the report itself points at, without Tier 1 hit indices or the process-bearing streams. Coverage KIs without hit events name these as `data_sources`."
     ),
   behaviors: z
     .array(

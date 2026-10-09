@@ -70,8 +70,6 @@ const toFinding = (sse: ParsedSse): CurrentRunFinding => ({
         ]
       : []
   ),
-  tier2Targets: sse.hunt_result?.tier2_targets ?? [],
-  actionableIndices: sse.hunt_result?.actionable_indices ?? [],
   ...(sse.hunt_result?.time_range ? { window: sse.hunt_result.time_range } : {}),
   evidenceLines: [...sse.evidence_for, ...sse.evidence_against],
   hosts: sse.entities

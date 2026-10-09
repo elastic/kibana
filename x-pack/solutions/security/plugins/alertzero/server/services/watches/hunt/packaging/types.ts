@@ -81,8 +81,8 @@ export interface CoverageBehavior {
 
 /** The coordinator result packaging is handed because a clean run leaves no SSE to read it from. */
 export interface CoordinatorInputs {
-  tier2Targets?: string[];
-  actionableIndices?: string[];
+  /** The coordinator's report-intent datasets: where a rule for this report would query. */
+  reportIntentTargets?: string[];
   behaviors?: PackageReportBehavior[];
 }
 
@@ -98,8 +98,6 @@ export interface CurrentRunFinding {
   /** Tier 1 `per_index` hit indices, the complete list `eventRefs` samples from. */
   tier1Indices: string[];
   behaviors: CoverageBehavior[];
-  tier2Targets: string[];
-  actionableIndices: string[];
   window?: { from: string; to: string };
   evidenceLines: string[];
   hosts: string[];
