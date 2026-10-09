@@ -7,14 +7,17 @@
 
 import { FP_TP_EXAMPLES } from '@kbn/evals-suite-attack-discovery-fp-tp/src/scenarios';
 import {
+  WORKER_CHAIN_CI_STEP_BUDGET_MS,
   WORKER_CHAIN_EXAMPLES_ENV,
   WORKER_CHAIN_EXAMPLE_COUNT,
   WORKER_CHAIN_MAX_CHAIN_MS,
   WORKER_CHAIN_SUBSETS,
 } from './constants';
 import {
+  assertWorkerChainFitsCiBudget,
   deriveWorkerChainTimeoutMs,
   eligibleExampleIds,
+  selectWorkerChainExamples,
   selectWorkerChainExampleIds,
 } from './example_selection';
 
@@ -114,5 +117,45 @@ describe('deriveWorkerChainTimeoutMs', () => {
     expect(() => deriveWorkerChainTimeoutMs({ [WORKER_CHAIN_EXAMPLES_ENV]: 'nope' })).toThrow(
       /unknown example/
     );
+  });
+});
+
+describe('selectWorkerChainExamples (the spec subset filter)', () => {
+  it('returns exactly the smoke6 worlds, in scenario order, when WORKER_CHAIN_EXAMPLES=smoke6', () => {
+    const picked = selectWorkerChainExamples({ [WORKER_CHAIN_EXAMPLES_ENV]: 'smoke6' });
+    expect(picked.map(({ id }) => id).sort()).toEqual([...WORKER_CHAIN_SUBSETS.smoke6].sort());
+    expect(picked.map(({ id }) => id)).toEqual(
+      FP_TP_EXAMPLES.map(({ id }) => id).filter((id) => WORKER_CHAIN_SUBSETS.smoke6.includes(id))
+    );
+  });
+
+  it('returns only the listed ids for an explicit selection', () => {
+    expect(
+      selectWorkerChainExamples({ [WORKER_CHAIN_EXAMPLES_ENV]: 'encoded-powershell.fp' }).map(
+        ({ id }) => id
+      )
+    ).toEqual(['encoded-powershell.fp']);
+  });
+
+  it('returns every eligible world, and never a `failed` one, when unset', () => {
+    const picked = selectWorkerChainExamples({});
+    expect(picked).toHaveLength(WORKER_CHAIN_EXAMPLE_COUNT);
+    expect(picked.some(({ expectedOutcome }) => expectedOutcome === 'failed')).toBe(false);
+  });
+});
+
+describe('assertWorkerChainFitsCiBudget', () => {
+  it('refuses a Buildkite run whose derived timeout exceeds the step budget', () => {
+    expect(deriveWorkerChainTimeoutMs({})).toBeGreaterThan(WORKER_CHAIN_CI_STEP_BUDGET_MS);
+    expect(() => assertWorkerChainFitsCiBudget({ BUILDKITE: 'true' })).toThrow(
+      /exceeds the Buildkite step budget of 120 min/
+    );
+  });
+
+  it('does not constrain a controller run (not Buildkite)', () => {
+    expect(() => assertWorkerChainFitsCiBudget({})).not.toThrow();
+    expect(() =>
+      assertWorkerChainFitsCiBudget({ [WORKER_CHAIN_EXAMPLES_ENV]: 'smoke6' })
+    ).not.toThrow();
   });
 });

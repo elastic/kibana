@@ -14,8 +14,9 @@ export default createPlaywrightEvalsConfig({
   // so the single test covers every selected example (WORKER_CHAIN_EXAMPLES) times
   // EVAL_REPETITIONS back to back: selected x repetitions x the per-chain bound
   // (constants.ts). A ceiling, not a target. CI is deliberately not resized: the
-  // Buildkite step is capped at 120 min (run_suite.sh:240) and this suite sets no
-  // stepTimeoutInMinutes in evals.suites.json, so it is run on a controller with
-  // WORKER_CHAIN_EXAMPLES=smoke6, not as a full-set CI gate.
+  // Buildkite step is capped at 120 min (run_suite.sh:240) and does not forward
+  // WORKER_CHAIN_EXAMPLES, so a Buildkite run refuses to start
+  // (assertWorkerChainFitsCiBudget) rather than hit the step kill. Run it on a
+  // controller with WORKER_CHAIN_EXAMPLES=smoke6.
   timeout: deriveWorkerChainTimeoutMs(),
 });

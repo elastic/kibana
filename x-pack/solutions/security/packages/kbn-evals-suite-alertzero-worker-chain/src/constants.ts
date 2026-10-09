@@ -113,6 +113,14 @@ export const WORKER_CHAIN_EXPERIMENT_CONCURRENCY = 1;
 /** Examples the spec runs when no subset is selected (non-`failed` FP/TP worlds). */
 export const WORKER_CHAIN_EXAMPLE_COUNT = 21;
 
+/**
+ * The Buildkite eval step is killed at 120 min (run_suite.sh sets
+ * `timeout_in_minutes` to 120 unless the suite declares `stepTimeoutInMinutes`,
+ * which this suite does not). The step env does not forward
+ * `WORKER_CHAIN_EXAMPLES`, so a CI run always selects every example.
+ */
+export const WORKER_CHAIN_CI_STEP_BUDGET_MS = 120 * 60 * 1000;
+
 /** Env var selecting a subset of examples: comma-separated example ids and/or named subsets. */
 export const WORKER_CHAIN_EXAMPLES_ENV = 'WORKER_CHAIN_EXAMPLES';
 

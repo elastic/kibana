@@ -33,10 +33,7 @@ import {
 import { overrideInferenceFeature } from '@kbn/evals-suite-attack-discovery-fp-tp/src/inference_override';
 import { waitForConversationsReady } from '@kbn/evals-suite-attack-discovery-fp-tp/src/investigation';
 import { kbnRequestFromFetch } from '@kbn/evals-suite-attack-discovery-fp-tp/src/kbn_request';
-import {
-  buildFpTpExampleWorld,
-  FP_TP_EXAMPLES,
-} from '@kbn/evals-suite-attack-discovery-fp-tp/src/scenarios';
+import { buildFpTpExampleWorld } from '@kbn/evals-suite-attack-discovery-fp-tp/src/scenarios';
 import {
   ensureFpTpSeedPrerequisites,
   seedFixture,
@@ -45,7 +42,7 @@ import {
   ALERTZERO_REASONING_FEATURE_ID,
   WORKER_CHAIN_EXPERIMENT_CONCURRENCY,
 } from '../src/constants';
-import { selectWorkerChainExampleIds } from '../src/example_selection';
+import { assertWorkerChainFitsCiBudget, selectWorkerChainExamples } from '../src/example_selection';
 import {
   createHarnessState,
   setupWorkerChainHarness,
@@ -85,6 +82,7 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
       connector: EvalConnector;
       log: ToolingLog;
     }) => {
+      assertWorkerChainFitsCiBudget();
       restoreInferenceSettings = await overrideInferenceFeature({
         fetch,
         featureId: ALERTZERO_REASONING_FEATURE_ID,
@@ -123,15 +121,14 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
     async ({ executorClient, esClient, fetch, log }) => {
       // WORKER_CHAIN_EXAMPLES (ids and/or `smoke6`) narrows the run; an unknown id
       // throws here rather than silently running a different set.
-      const selectedIds = new Set(selectWorkerChainExampleIds());
-      const examples: ChainDatasetExample[] = FP_TP_EXAMPLES.filter(({ id }) =>
-        selectedIds.has(id)
-      ).map(({ id, expectedOutcome }) => ({
-        id,
-        input: { exampleId: id },
-        output: { goldVerdict: expectedOutcome as ChainScenario['goldVerdict'] },
-        metadata: { exampleId: id, goldVerdict: expectedOutcome as ChainScenario['goldVerdict'] },
-      }));
+      const examples: ChainDatasetExample[] = selectWorkerChainExamples().map(
+        ({ id, expectedOutcome }) => ({
+          id,
+          input: { exampleId: id },
+          output: { goldVerdict: expectedOutcome as ChainScenario['goldVerdict'] },
+          metadata: { exampleId: id, goldVerdict: expectedOutcome as ChainScenario['goldVerdict'] },
+        })
+      );
 
       await executorClient.runExperiment(
         {
