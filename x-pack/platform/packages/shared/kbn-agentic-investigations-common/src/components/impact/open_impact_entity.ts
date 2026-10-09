@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-/**
- * Security registers this at start. The shared Impact section cannot import the entity flyout.
- */
+/** An impacted entity the entity flyout can open. The flyout itself lives in the solution. */
 export interface ImpactEntityTarget {
   id: string;
   name?: string;
@@ -23,29 +21,4 @@ export const entityStoreIdType = (id: string): 'user' | 'host' | 'service' | und
     return undefined;
   }
   return match[1] as 'user' | 'host' | 'service';
-};
-
-type ImpactEntityOpener = (entity: ImpactEntityTarget) => void;
-
-let opener: ImpactEntityOpener | undefined;
-
-/** Replaces the opener. Called once from the solution that owns the entity flyout. */
-export const registerImpactEntityOpener = (next: ImpactEntityOpener): void => {
-  opener = next;
-};
-
-export const hasImpactEntityOpener = (): boolean => opener !== undefined;
-
-/** Drops the opener. Tests use this so a registration does not leak into later cases. */
-export const clearImpactEntityOpener = (): void => {
-  opener = undefined;
-};
-
-/** Opens the entity flyout when a solution registered an opener. */
-export const openImpactEntity = (entity: ImpactEntityTarget): boolean => {
-  if (!opener) {
-    return false;
-  }
-  opener(entity);
-  return true;
 };

@@ -28,6 +28,8 @@ const GROUPED_ATTACHMENTS_ORDER: readonly FlyoutGroupedAttachments[] = [
   FlyoutGroupedAttachments.ALERTS,
   FlyoutGroupedAttachments.ATTACKS,
   FlyoutGroupedAttachments.RULES,
+  FlyoutGroupedAttachments.TIMELINE,
+  FlyoutGroupedAttachments.IOCS,
 ];
 
 export interface OverviewTabProps {

@@ -23,6 +23,7 @@ import type {
   RenderOverview,
   RenderLiveState,
   RenderTitle,
+  RenderSyncIndicator,
 } from './types';
 
 /**
@@ -266,6 +267,11 @@ export interface RegisterEscalationTemplateUIOptions {
    * Supplied by the caller so the list can use Kibana HTTP hooks unavailable in this package.
    */
   renderLinkedInvestigations?: RenderLinkedInvestigations;
+  /**
+   * When provided, the header renders it beside the title, e.g. a spinner while the escalation's
+   * attachments sync. Supplied by the caller so it can use Kibana HTTP hooks and toasts.
+   */
+  renderSyncIndicator?: RenderSyncIndicator;
 }
 
 /** Returns the tab ids registered by the escalation template. */
@@ -291,6 +297,7 @@ export const registerEscalationTemplateUI = ({
   renderAssignees,
   renderStatus,
   renderLinkedInvestigations,
+  renderSyncIndicator,
 }: RegisterEscalationTemplateUIOptions): void => {
   const [overviewTabId] = getEscalationTabIds(templateId);
 
@@ -323,6 +330,7 @@ export const registerEscalationTemplateUI = ({
               conversation={conversation}
               renderAssignees={renderAssignees}
               renderStatus={renderStatus}
+              renderSyncIndicator={renderSyncIndicator}
               refetchConversation={refetchConversation}
             />
           </Suspense>

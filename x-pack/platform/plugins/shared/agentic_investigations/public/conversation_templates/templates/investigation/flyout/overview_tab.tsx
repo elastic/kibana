@@ -10,6 +10,7 @@ import {
   OverviewTab,
   conversationToInvestigation,
   type OverviewSections,
+  type ImpactEntityTarget,
   type OverviewSlotRenderProps,
 } from '@kbn/agentic-investigations-common';
 import type { Investigation } from '../../../../../common';
@@ -24,7 +25,8 @@ const readMetadataString = (value: unknown): string | undefined =>
 /** Sections for the data an investigation has; missing data leaves its section out. */
 export const toOverviewSections = (
   investigation: Investigation | undefined,
-  fallbackVerdict: string | undefined
+  fallbackVerdict: string | undefined,
+  onOpenEntity?: (entity: ImpactEntityTarget) => void
 ): OverviewSections => {
   const subjects = investigation?.subjects ?? [];
   const impact = investigation?.impact;
@@ -43,6 +45,7 @@ export const toOverviewSections = (
         evidence={impact.evidence}
         entities={impact.entities}
         variant="details"
+        onOpenEntity={onOpenEntity}
       />
     ) : undefined,
     conclusion: readMetadataString(investigation?.metadata.verdict) ?? fallbackVerdict,
@@ -58,11 +61,17 @@ export const toOverviewSections = (
  * knows about it (subjects, impact, hypotheses), read again while an agent works on it. When the
  * read fails (for example without the read privilege) the tab still shows the conversation.
  */
-export const InvestigationOverview: React.FC<OverviewSlotRenderProps> = ({
+export const InvestigationOverview: React.FC<
+  OverviewSlotRenderProps & {
+    /** Present when a solution registered an entity flyout. Entity-store ids open it. */
+    onOpenEntity?: (entity: ImpactEntityTarget) => void;
+  }
+> = ({
   conversation,
   groupedAttachments,
   proposedActionsContent,
   proposedActionsCount,
+  onOpenEntity,
 }) => {
   const { data } = useInvestigation(conversation.id);
   const investigation = useMemo(() => {
@@ -72,8 +81,9 @@ export const InvestigationOverview: React.FC<OverviewSlotRenderProps> = ({
   }, [conversation, data?.metadata.summary]);
 
   const sections = useMemo(
-    () => toOverviewSections(data, readMetadataString(conversation.metadata?.verdict)),
-    [data, conversation.metadata?.verdict]
+    () =>
+      toOverviewSections(data, readMetadataString(conversation.metadata?.verdict), onOpenEntity),
+    [data, conversation.metadata?.verdict, onOpenEntity]
   );
 
   return (

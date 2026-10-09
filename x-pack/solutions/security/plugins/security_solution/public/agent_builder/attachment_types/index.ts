@@ -18,7 +18,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart, ISessionService } from '@kbn/data-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { Subscription } from 'rxjs';
-import { registerImpactEntityOpener } from '@kbn/agentic-investigations-common';
+import type { AgenticInvestigationsPublicPluginStart } from '@kbn/agentic-investigations-plugin/public';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 import {
@@ -163,6 +163,7 @@ export const registerEntityAttachment = ({
   resolveSecurityCanvasContext,
   searchSession,
   uiSettings,
+  registerImpactEntityOpener,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
@@ -173,8 +174,9 @@ export const registerEntityAttachment = ({
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
   searchSession?: ISessionService;
   uiSettings: IUiSettingsClient;
+  registerImpactEntityOpener?: AgenticInvestigationsPublicPluginStart['registerImpactEntityOpener'];
 }): void => {
-  registerImpactEntityOpener((entity) => {
+  registerImpactEntityOpener?.((entity) => {
     void import(
       /* webpackChunkName: "security_impact_entity_flyout" */
       './open_impact_entity_flyout'

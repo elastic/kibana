@@ -27,6 +27,7 @@ import { createToolHandlerContextMock } from '../../test_utils/runner';
 const baseContext: BeforeAgentHookContext = {
   nextInput: { message: 'hello', attachments: [] },
   request: {} as BeforeAgentHookContext['request'],
+  conversationAccess: 'readWrite',
 };
 
 const baseToolCallContext: BeforeToolCallHookContext = {
