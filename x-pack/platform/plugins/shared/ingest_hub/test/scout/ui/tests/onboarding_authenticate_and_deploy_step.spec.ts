@@ -460,6 +460,45 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     await expect.poll(() => readSelectedServiceIds(page)).toStrictEqual(['ec2_otel']);
   });
 
+  test('ecf-only services: switching back to managed does not bring back their ECF deployment', async ({
+    browserAuth,
+    page,
+  }) => {
+    await mockEcfOnlyServicePackages(page);
+    await mockEcfTemplateVersion(page);
+    // Step 2 stores one instance per selected service. Saving agent-based removes the ECF-only
+    // service from the selection, but its stored instance stays until Step 2 runs again.
+    await navigateToOnboardingStep(browserAuth, page, 'authenticate-and-deploy', {
+      dataFormat: 'otel',
+      selectedServiceIds: ['cloudtrail_otel', 'ec2_otel'],
+      instances: [
+        {
+          instanceId: 'cloudtrail_otel',
+          serviceId: 'cloudtrail_otel',
+          name: 'AWS CloudTrail',
+          isDuplicate: false,
+        },
+        { instanceId: 'ec2_otel', serviceId: 'ec2_otel', name: 'Amazon EC2', isDuplicate: false },
+      ],
+    });
+    await expect(page.testSubj.locator('ecfDeploymentSection')).toBeVisible();
+
+    await page.testSubj.locator('deploymentMethodCard-editButton').click();
+    await page.testSubj.locator('editDeploymentMethodModal-select').selectOption('agent_based');
+    await page.testSubj.locator('editDeploymentMethodModal-saveButton').click();
+    await expect(page.testSubj.locator('ecfDeploymentSection')).toBeHidden();
+
+    await page.testSubj.locator('deploymentMethodCard-editButton').click();
+    await page.testSubj
+      .locator('editDeploymentMethodModal-select')
+      .selectOption('managed_integration');
+    await page.testSubj.locator('editDeploymentMethodModal-saveButton').click();
+
+    // Back on managed, only EC2 is selected, so there is nothing to deploy through ECF.
+    await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
+    await expect(page.testSubj.locator('ecfDeploymentSection')).toBeHidden();
+  });
+
   test('ecf-only services: the deployment method cannot be changed when only they are selected', async ({
     browserAuth,
     page,

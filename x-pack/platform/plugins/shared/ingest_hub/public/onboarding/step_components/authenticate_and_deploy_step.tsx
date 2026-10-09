@@ -25,6 +25,7 @@ import { useOnboardingFlow } from '../onboarding_flow_context';
 import { isAgentBasedOnly } from '../aws_service_matrix';
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../aws_service_matrix';
 import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
+import { reconcileInstances } from './authenticate_and_deploy_step/deploy_group_helpers';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
 import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';
 import { getIncompleteInstances } from './service_settings_step/use_service_settings';
@@ -189,18 +190,19 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const otlpEndpoint = services.cloud?.managedOtlp?.url;
 
   // ECF instances: prefer session-storage instances because they carry duplicate-instance ARNs
-  // (multi-bucket / multi-log-group configs from Step 2). Fall back to one base instance per
-  // selected service when session storage hasn't been written yet — e.g. the user jumped to
-  // Step 3 directly via the horizontal step indicator without clicking Next in Step 2.
-  const ecfInstances = useMemo(() => {
-    const stored = serviceSettings?.instances;
-    if (stored && stored.length > 0) return stored;
-    return selectedServiceIds.flatMap((id) => {
-      const service = awsServicesMap?.get(id);
-      if (!service?.showInUI) return [];
-      return [{ instanceId: id, serviceId: id, name: service.name, isDuplicate: false }];
-    });
-  }, [serviceSettings?.instances, selectedServiceIds, awsServicesMap]);
+  // (multi-bucket / multi-log-group configs from Step 2). Reconciling with the selection drops the
+  // instances of deselected services, and adds one base instance per selected service that has
+  // none — e.g. the user jumped to Step 3 directly via the horizontal step indicator without
+  // clicking Next in Step 2.
+  const ecfInstances = useMemo(
+    () =>
+      reconcileInstances(
+        serviceSettings?.instances ?? [],
+        selectedServiceIds,
+        awsServicesMap ?? new Map()
+      ),
+    [serviceSettings?.instances, selectedServiceIds, awsServicesMap]
+  );
 
   // ── Settings collected for ECF vs. the selected method ───────────────────────
   // Step 2 collects only the trigger ARN for services ECF can deploy. Under agent-based those
