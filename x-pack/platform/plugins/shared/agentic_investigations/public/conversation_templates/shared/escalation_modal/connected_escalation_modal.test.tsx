@@ -87,8 +87,7 @@ const investigation: Investigation = {
   title: 'Suspicious login',
   createdAt: '2026-01-01T00:00:00Z',
   updatedAt: '2026-01-01T00:00:00Z',
-  watch_id: 'watch-1',
-  watch_execution_id: 'exec-1',
+  worker_execution_ids: ['exec-1'],
   pendingProposalCount: 0,
   assignees: [],
   events: [],
@@ -336,7 +335,7 @@ describe('ConnectedEscalationModal', () => {
 
     expect(screen.queryByTestId('escalationModalCreateEscalation')).not.toBeInTheDocument();
     expect(
-      screen.getByText('Your user profile is unavailable. Private escalations cannot be created.')
+      screen.getByText('Your user profile is unavailable. Escalations cannot be created.')
     ).toBeInTheDocument();
   });
 

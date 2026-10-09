@@ -145,7 +145,7 @@ steps:
       metadata:
         status: open
         description: "{{ steps.gap.output.description }}"
-        workflow_execution_id: "{{ execution.id }}"
+        workflow_execution_ids: ["{{ execution.id }}"]
 
   # Manual mode only: ask the analyst before any work on this gap starts. Assisted mode
   # skips this step and goes directly to the check.
@@ -161,6 +161,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-create-alertzero-proposal
+          run-as-mode: inherit
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
             title: Review detection gap
@@ -177,7 +178,7 @@ steps:
               {{ steps.gap.output.evidence }}
               {% endif %}
               **On approval**
-              The agent checks whether a rule already covers this gap and proposes one fix: enable a disabled rule, install a prebuilt rule, confirm an enabled rule, or draft a new rule. The fix returns as a second proposal for your approval before anything changes. Dismissing removes the gap from future coverage checks.
+              If you approve, the agent checks whether a rule already covers this gap. It then makes one proposal: enable a disabled rule, install a prebuilt rule, confirm an enabled rule, or draft a new rule. You must approve this second proposal before anything changes. If you dismiss, the gap is removed from future coverage checks.
             impact: low
             # A proposal without an action has no category. The queue hides proposals
             # without a category, so set it here.
@@ -243,6 +244,7 @@ steps:
   # reported gap is often covered by a rule that is disabled or not installed.
   - name: coverage_check
     type: ai.agent
+    agent-id: alertzero-thin-agent
     # Keep in sync with ALERTZERO_FAST_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
     connector-id-by-feature: alertzero_fast
     # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
@@ -257,6 +259,17 @@ steps:
       continue: true
     create-conversation: true
     with:
+      # The thin agent has no skills or tools of its own. List every skill the
+      # step needs, including the skills those skills load.
+      configuration_overrides:
+        enable_elastic_capabilities: false
+        tools: []
+        # detection-coverage loads find-security-rules and recommend-prebuilt-rules
+        # with load_skill, which fails for a skill that is not in this list.
+        skill_ids:
+          - detection-coverage
+          - find-security-rules
+          - recommend-prebuilt-rules
       message: |-
         Use the [/detection-coverage](skill://detection-coverage) skill to decide
         whether this detection gap is already covered. The supplied context is
@@ -267,6 +280,8 @@ steps:
         Evidence: {{ steps.gap.output.evidence }}
 
         Report one verdict. Take every rule name and id from a tool result.
+
+        Write the rationale in ASD-STE100 Simplified Technical English.
       schema:
         type: object
         properties:
@@ -398,7 +413,7 @@ steps:
         {{ steps.compose_evidence.output.check_line }}
 
         **On approval**
-        Nothing is applied automatically; approving acknowledges the follow-up. Approving or dismissing removes the gap from future coverage checks.
+        The agent applies nothing. If you approve, you acknowledge the follow-up. If you approve or dismiss, the gap is removed from future coverage checks.
 
   # Step 6 of 10: propose the fix, one case per verdict. A missing or unknown verdict
   # matches no case and goes to the default, never to rule creation. Inside a case the
@@ -424,6 +439,7 @@ steps:
               continue: true
             with:
               workflow-id: system-security-rule-creation
+              run-as-mode: inherit
               inputs:
                 technique: "{{ steps.gap.output.technique }}"
                 gap_description: "{{ steps.gap.output.description }}"
@@ -440,6 +456,7 @@ steps:
             if: "${{ steps.resolve_rule.output.id != null }}"
             with:
               workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: |-
@@ -457,7 +474,7 @@ steps:
                   {{ steps.compose_evidence.output.check_line }}
 
                   **On approval**
-                  The rule is enabled and starts producing alerts on its next scheduled run. Dismissing leaves it off.
+                  If you approve, the agent enables the rule. The rule makes alerts at its next scheduled run. If you dismiss, the rule stays off.
                 actionWorkflowId: system-alertzero-action-enable-rule
                 actionInput:
                   id: "{{ steps.resolve_rule.output.id }}"
@@ -473,12 +490,13 @@ steps:
             if: "${{ steps.resolve_rule.output.id == null }}"
             with:
               workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: |-
                   **Coverage check needs a manual follow-up**
 
-                  The check matched a disabled rule, but it could not be found by its rule id, so it was not proposed for enabling.
+                  The check found a disabled rule but could not find it by its rule ID. The agent did not propose to enable it.
 
                   {{ steps.compose_report.output.body }}
                 category: configure
@@ -501,6 +519,7 @@ steps:
             if: "${{ steps.install_target.output.ready == true }}"
             with:
               workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: |-
@@ -518,7 +537,7 @@ steps:
                   {{ steps.compose_evidence.output.check_line }}
 
                   **On approval**
-                  The Elastic prebuilt rule is installed from the package and enabled immediately. Dismissing leaves it uninstalled.
+                  If you approve, the agent installs the Elastic prebuilt rule from the package and enables it at once. If you dismiss, the rule stays uninstalled.
                 actionWorkflowId: system-alertzero-action-install-prebuilt-rule
                 actionInput:
                   rule_id: "{{ steps.coverage_check.output.structured_output.rule_id }}"
@@ -532,12 +551,13 @@ steps:
             if: "${{ steps.install_target.output.ready != true }}"
             with:
               workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: |-
                   **Coverage check needs a manual follow-up**
 
-                  The check matched a prebuilt rule, but did not report a rule id and version to install.
+                  The check found a prebuilt rule but did not give a rule ID and version to install.
 
                   {{ steps.compose_report.output.body }}
                 category: configure
@@ -554,13 +574,14 @@ steps:
             if: "${{ steps.resolve_rule.output.enabled == true }}"
             with:
               workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: |-
                   **Confirm an enabled rule already covers this gap**
 
                   {{ steps.compose_evidence.output.rule_line }}
-                  **Recommended action:** None; confirm coverage
+                  **Recommended action:** None. Confirm the coverage.
                   {{ steps.compose_evidence.output.investigation_line }}
 
                   {{ steps.compose_evidence.output.gap_block }}
@@ -568,12 +589,12 @@ steps:
                   **Why it covers**
                   {{ steps.coverage_check.output.structured_output.rationale }}
 
-                  This check does not account for rule exceptions, which may limit coverage.
+                  This check does not look at rule exceptions. Exceptions may reduce coverage.
 
                   {{ steps.compose_evidence.output.check_line }}
 
                   **On approval**
-                  Nothing changes; approving records that the gap is covered. Dismiss if the rule does not fully address the reported behavior.
+                  Nothing changes. If you approve, the review records that the rule covers the gap. Dismiss if the rule does not fully cover the reported behavior.
                 category: configure
                 impact: low
                 confidence: medium
@@ -584,12 +605,13 @@ steps:
             if: "${{ steps.resolve_rule.output.enabled != true }}"
             with:
               workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: |-
                   **Coverage check needs a manual follow-up**
 
-                  The check matched an enabled rule, but the rule was not found or is disabled, so coverage was not confirmed.
+                  The check found an enabled rule, but the rule is missing or disabled. Coverage is not confirmed.
 
                   {{ steps.compose_report.output.body }}
                 category: configure
@@ -606,12 +628,13 @@ steps:
             and steps.coverage_check.output.structured_output.verdict != '' }}
         with:
           workflow-id: system-create-alertzero-proposal
+          run-as-mode: inherit
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
             comment: |-
               **Coverage check needs a manual follow-up**
 
-              The coverage check returned an unexpected verdict and no automated action was taken.
+              The coverage check gave an unexpected verdict. The agent took no automated action.
 
               {{ steps.compose_report.output.body }}
             category: configure
