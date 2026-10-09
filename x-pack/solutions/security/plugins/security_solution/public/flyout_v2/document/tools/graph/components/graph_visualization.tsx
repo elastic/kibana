@@ -180,10 +180,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
           }));
         onShowGrouped({ docMode, entityItems, documentIds: [], dataViewId: undefined });
       } else if (docMode === 'grouped-events' && documentsData.length > 0) {
-        const documentIds = documentsData
-          .slice(0, MAX_DOCUMENTS_TO_LOAD)
-          .map((doc) => doc.event?.id)
-          .filter((id): id is string => id !== undefined);
+        const documentIds = documentsData.slice(0, MAX_DOCUMENTS_TO_LOAD).map((doc) => doc.id);
         onShowGrouped({
           docMode,
           documentIds,

@@ -11,7 +11,8 @@ import React from 'react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import {
@@ -51,11 +52,9 @@ const cellId = 'leaf-1';
 const nodePath = ['extension'];
 const nodePathMap = { extension: 'png' };
 const cascadePath = { nodePath, nodePathMap };
-const cascadedColumnsMeta: DataTableColumnsMeta = {
-  category: {
-    type: 'string',
-  },
-};
+const cascadedLeafDataSource = createMockEsqlSource([
+  { name: 'category', type: 'string', source: 'index' },
+]);
 
 const createVirtualizerController = () =>
   createChildVirtualizerController({ getRootVirtualizer: () => undefined });
@@ -64,9 +63,7 @@ const createCascadedDocumentsFetcher = (services: DiscoverServices) => {
   const stateManager: CascadedDocumentsStateManager = {
     getIsActiveInstance: jest.fn(() => true),
     getCascadedDocuments: jest.fn(() => undefined),
-    getColumnsMeta: jest.fn(() => ({})),
     setCascadedDocuments: jest.fn(),
-    setColumnsMeta: jest.fn(),
   };
   const scopedProfilesManager = services.profilesManager.createScopedProfilesManager({
     scopedEbtManager: services.ebtManager.createScopedEBTManager(),
@@ -77,6 +74,7 @@ const createCascadedDocumentsFetcher = (services: DiscoverServices) => {
     services,
     scopedProfilesManager,
     stateManager,
+    new BehaviorSubject<DataSource | undefined>(undefined),
     new BehaviorSubject<DataSource | undefined>(undefined)
   );
 };
@@ -148,7 +146,7 @@ const createContextValue = ({
     availableCascadeGroups: ['category'],
     selectedCascadeGroups: ['category'],
     cascadedDocumentsFetcher: createCascadedDocumentsFetcher(services),
-    cascadedColumnsMeta,
+    cascadedLeafDataSource,
     esqlQuery,
     esqlVariables: undefined,
     timeRange: undefined,
@@ -198,7 +196,7 @@ describe('ESQLDataCascadeLeafCell', () => {
     expect(getExpandedDocSetter).toHaveBeenCalledWith(cellId, cascadePath);
     expect(getRenderDocumentViewMetaSetter).toHaveBeenCalledWith(cellId);
     expect(unifiedDataTableProps.rows).toEqual(cellData);
-    expect(unifiedDataTableProps.columnsMeta).toEqual(cascadedColumnsMeta);
+    expect(unifiedDataTableProps.dataSource).toBe(cascadedLeafDataSource);
     expect(unifiedDataTableProps.renderDocumentView).toBe('external');
     expect(unifiedDataTableProps.expandedDoc).toEqual(expandedDoc);
     expect(unifiedDataTableProps.setExpandedDoc).toBe(ownerBoundSetExpandedDoc);
@@ -223,7 +221,7 @@ describe('ESQLDataCascadeLeafCell', () => {
     );
 
     let unifiedDataTableProps = unifiedDataTableMock.mock.lastCall?.[0]!;
-    expect(unifiedDataTableProps.columnsMeta).toEqual(cascadedColumnsMeta);
+    expect(unifiedDataTableProps.dataSource).toBe(cascadedLeafDataSource);
     expect(unifiedDataTableProps.expandedDoc).toBeUndefined();
     expect(unifiedDataTableProps.setExpandedDoc).toBe(ownerBoundSetExpandedDoc);
     expect(unifiedDataTableProps.setRenderDocumentViewMeta).toBeUndefined();

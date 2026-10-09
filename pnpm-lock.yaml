@@ -237,7 +237,6 @@ overrides:
   baseline-browser-mapping: 2.9.14
   cheerio: 1.0.0-rc.12
   chokidar: 3.5.3
-  d3-scale>d3-color: npm:@elastic/kibana-d3-color@2.0.1
   dompurify: 3.4.14
   esbuild: 0.28.1
   fast-xml-parser: 5.5.7
@@ -266,6 +265,8 @@ overrides:
   '@elastic/pretty-printer': 4.29.0
   '@emnapi/core': 1.11.1
   '@emnapi/runtime': 1.11.1
+  '@paulirish/trace_engine>legacy-javascript': 0.0.3
+  '@paulirish/trace_engine>third-party-web': 0.30.0
   '@redux-saga/core': 1.3.0
   '@redux-saga/types': 1.2.1
   '@types/babel__traverse': 7.20.6
@@ -283,6 +284,7 @@ overrides:
   colorette: 2.0.20
   concaveman: 1.2.0
   d3-format@3: 3.1.0
+  d3-interpolate@2.0.1>d3-color: npm:@elastic/kibana-d3-color@2.0.1
   dom-accessibility-api@^0.5.9: 0.5.13
   eslint-module-utils: 2.8.0
   focus-lock: 0.11.6
@@ -380,6 +382,9 @@ importers:
       '@elastic/datemath':
         specifier: 5.0.3
         version: 5.0.3(moment@2.31.0)
+      '@elastic/distillate':
+        specifier: 0.2.0
+        version: 0.2.0
       '@elastic/ebt':
         specifier: 1.4.1
         version: 1.4.1
@@ -407,6 +412,12 @@ importers:
       '@elastic/filesaver':
         specifier: 1.1.2
         version: 1.1.2
+      '@elastic/isomer-runtime':
+        specifier: 0.2.0
+        version: 0.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)
+      '@elastic/isomer-sdk':
+        specifier: 0.2.0
+        version: 0.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)
       '@elastic/kibana-d3-color':
         specifier: 2.0.1
         version: 2.0.1
@@ -596,6 +607,12 @@ importers:
       '@kbn/agentic-investigations-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/agentic_investigations
+      '@kbn/ai-anonymization-common':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/ai-infra/ai-anonymization-common
+      '@kbn/ai-anonymization-server':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/ai-infra/ai-anonymization-server
       '@kbn/ai-assistant':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-ai-assistant
@@ -2297,6 +2314,9 @@ importers:
       '@kbn/gen-ai-streaming-response-example-plugin':
         specifier: workspace:*
         version: link:x-pack/examples/gen_ai_streaming_response_example
+      '@kbn/genai-common':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-genai-common
       '@kbn/generate-csv':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-generate-csv
@@ -2477,6 +2497,9 @@ importers:
       '@kbn/ipynb':
         specifier: workspace:*
         version: link:x-pack/solutions/search/packages/kbn-ipynb
+      '@kbn/isomer':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/isomer/isomer
       '@kbn/item-buffer':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-item-buffer
@@ -8116,6 +8139,8 @@ importers:
 
   src/platform/packages/shared/kbn-ftr-llm-proxy: {}
 
+  src/platform/packages/shared/kbn-genai-common: {}
+
   src/platform/packages/shared/kbn-grok-ui: {}
 
   src/platform/packages/shared/kbn-grouping: {}
@@ -8978,6 +9003,10 @@ importers:
 
   x-pack/platform/packages/shared/ai-assistant/icon: {}
 
+  x-pack/platform/packages/shared/ai-infra/ai-anonymization-common: {}
+
+  x-pack/platform/packages/shared/ai-infra/ai-anonymization-server: {}
+
   x-pack/platform/packages/shared/ai-infra/anonymization-common: {}
 
   x-pack/platform/packages/shared/ai-infra/anonymization-ui: {}
@@ -9009,6 +9038,8 @@ importers:
   x-pack/platform/packages/shared/index-management/index_management_shared_types: {}
 
   x-pack/platform/packages/shared/ingest-pipelines: {}
+
+  x-pack/platform/packages/shared/isomer/isomer: {}
 
   x-pack/platform/packages/shared/kbn-agentic-investigations-common: {}
 
@@ -11017,6 +11048,10 @@ packages:
     peerDependencies:
       moment: ^2.24.0
 
+  '@elastic/distillate@0.2.0':
+    resolution: {integrity: sha512-MT6/KONPeYj/y+v16KjzjY8t7DozXFrEVykJrd7YOFPnJOxZCPtVMe+jtQxl0niWfHnoMn9Rbgy1t+bwh5HrnQ==}
+    engines: {node: '>=20'}
+
   '@elastic/ebt@1.4.1':
     resolution: {integrity: sha512-8kvqG4cU/+V0CvJcXH9Bh0jyHmqvmVwhsOiGW0ZS1ylHMMgVP95186W3quL8luivoAg7PNIUj69OsV2OjLDmwg==}
 
@@ -11119,6 +11154,25 @@ packages:
 
   '@elastic/filesaver@1.1.2':
     resolution: {integrity: sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==}
+
+  '@elastic/isomer-runtime@0.2.0':
+    resolution: {integrity: sha512-7zq59s2I+4TNdMXZanIvbSjtmqed0kK4jCC2NK2y/hgotLtRVaq02UG4IJqXdZtthmwVyV/UX7x/ymDRfTTl8A==}
+    engines: {node: '>=22.13.0'}
+    peerDependencies:
+      react: '>=18 <20'
+      react-dom: '>=18 <20'
+      zod: 4.4.3
+
+  '@elastic/isomer-sdk@0.2.0':
+    resolution: {integrity: sha512-xXtu094TQq9tU5MhTxajpT3SvWD5+bqeNF4WC2nac+HaW2ndcHLqZMpVXcPlFWYn7ntlbyVyuJ6M9vjAGHxuFA==}
+    engines: {node: '>=22.13.0'}
+    peerDependencies:
+      react: '>=18 <20'
+      react-dom: '>=18 <20'
+      zod: 4.4.3
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
 
   '@elastic/kibana-d3-color@2.0.1':
     resolution: {integrity: sha512-YZ8hV2bWNyYi833Yj3UWczmTxdHzmo/Xc2IVkNXr/ZqtkrTDlTLysCyJm7SfAt9iBy6EVRGWTn8cPz8QOY6Ixw==}
@@ -17768,9 +17822,6 @@ packages:
   d3-collection@1.0.7:
     resolution: {integrity: sha512-ii0/r5f4sjKNTfh84Di+DpztYwqKhEyUlKoPrzUFfeSkWxjW49xU2QzO9qrPrNkpdI0XJkfzvmTu8V2Zylln6A==}
 
-  d3-color@2.0.0:
-    resolution: {integrity: sha512-SPXi0TSKPD4g9tw0NMZFnR95XVgUZiBH+uUTqQuDu1OsE2zomHU7ho0FISciaPvosimixwHFl3WHLGabv6dDgQ==}
-
   d3-color@3.1.0:
     resolution: {integrity: sha512-zg/chbXyeBtMQ1LbD/WSoW2DpC3I0mpmPdW+ynRTj/x2DAWYrIY7qeZIHidozwV24m4iavr15lNwIwLxRmOxhA==}
     engines: {node: '>=12'}
@@ -20933,8 +20984,8 @@ packages:
     resolution: {integrity: sha512-DpMa59o5uGUWWjruMp71e6knmwKU3jRBBn1kjuLWN9EeIOxNeSAwvHf03WIl8g/ZMR2oSQC9ej3yeLBwdDc/pg==}
     engines: {node: '>=10.13.0'}
 
-  legacy-javascript@0.0.1:
-    resolution: {integrity: sha512-lPyntS4/aS7jpuvOlitZDFifBCb4W8L/3QU0PLbUTUj+zYah8rfVjYic88yG7ZKTxhS5h9iz7duT8oUXKszLhg==}
+  legacy-javascript@0.0.3:
+    resolution: {integrity: sha512-1r6MT4dVaJyXt4G07Cm2cQ0AUaLJdefiEp4SmIAylA++gnEQ82YvmzE58RkM5EP0fk5hROLCslUPGnwIYdZQVA==}
 
   leven@2.1.0:
     resolution: {integrity: sha512-nvVPLpIHUxCUoRLrFqTgSxXJ614d8AgQoWl7zPe/2VadE8+1dpU3LBhowRuBAcuwruWtOdD8oYC9jDNJjXDPyA==}
@@ -25185,8 +25236,8 @@ packages:
     resolution: {integrity: sha512-hdF5ZgjTqgAntKkklYw0R03MG2x/bSzTtkxmIRw/sTNV8YXsCJ1tfLAX23lhxhHJlEf3CRCOCGGWw3vI3GaSPw==}
     engines: {node: '>=18'}
 
-  traverse@0.6.11:
-    resolution: {integrity: sha512-vxXDZg8/+p3gblxB6BhhG5yWVn1kGRlaL8O78UDXc3wRnPizB5g83dcvWV1jpDMIPnjZjOFuxlMmE82XJ4407w==}
+  traverse@0.6.14:
+    resolution: {integrity: sha512-CYRAVGfnSSe+4Wlof62oUH6y9fGwo0NNS84hMq76MTZtwXQU7Oqna9SgWfrCGj5JPUtHQudnIEt1BP7PInPkPQ==}
     engines: {node: '>= 0.4'}
 
   tree-dump@1.1.0:
@@ -25367,8 +25418,8 @@ packages:
   typed-query-selector@2.12.3:
     resolution: {integrity: sha512-/dtuMZyutHLlrxWhhC1uib00ELUr2dZ8C9B8YzZYsJmeE3V56OxRblrSM2UaF142pcMtak7ehZ6+poWGeehNIg==}
 
-  typedarray.prototype.slice@1.0.5:
-    resolution: {integrity: sha512-q7QNVDGTdl702bVFiI5eY4l/HkgCM6at9KhcFbgUAzezHFbOVy4+0O/lCjsABEQwbZPravVfBIiBVGo89yzHFg==}
+  typedarray.prototype.slice@1.0.6:
+    resolution: {integrity: sha512-r+7YvGfM5TkTiDQ5EqWi/Z4L4KP3jUI+YCmTtWg1tmTHUw6xladLJqzR2heMaHBIM0TTFLZmn/EkIaEHYs/bIA==}
     engines: {node: '>= 0.4'}
 
   typedarray@0.0.7:
@@ -28012,6 +28063,10 @@ snapshots:
       moment: 2.31.0
       tslib: 1.14.1
 
+  '@elastic/distillate@0.2.0':
+    dependencies:
+      stylis: 4.4.0
+
   '@elastic/ebt@1.4.1':
     dependencies:
       '@babel/runtime': 7.29.7
@@ -28202,6 +28257,29 @@ snapshots:
       vfile: 4.2.1
 
   '@elastic/filesaver@1.1.2': {}
+
+  '@elastic/isomer-runtime@0.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)':
+    dependencies:
+      '@elastic/isomer-sdk': 0.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      zod: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
+
+  '@elastic/isomer-sdk@0.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)':
+    dependencies:
+      acorn: 8.18.0
+      mdast-util-from-markdown: 2.0.3(supports-color@10.2.2)
+      mdast-util-gfm: 3.1.0(supports-color@10.2.2)
+      mdast-util-to-markdown: 2.1.3
+      micromark-extension-gfm: 3.0.0
+      react: 18.2.0
+      zod: 4.4.3
+    optionalDependencies:
+      react-dom: 18.2.0(react@18.2.0)
+    transitivePeerDependencies:
+      - supports-color
 
   '@elastic/kibana-d3-color@2.0.1': {}
 
@@ -30025,7 +30103,7 @@ snapshots:
       '@mapbox/extent': 0.4.0
       '@mapbox/geojson-coords': 0.0.2
       rw: 0.1.4
-      traverse: 0.6.11
+      traverse: 0.6.14
 
   '@mapbox/geojson-normalize@0.0.1': {}
 
@@ -31345,7 +31423,7 @@ snapshots:
 
   '@paulirish/trace_engine@0.0.65':
     dependencies:
-      legacy-javascript: 0.0.1
+      legacy-javascript: 0.0.3
       third-party-web: 0.30.0
 
   '@pdf-lib/standard-fonts@1.0.0':
@@ -35680,8 +35758,6 @@ snapshots:
 
   d3-collection@1.0.7: {}
 
-  d3-color@2.0.0: {}
-
   d3-color@3.1.0: {}
 
   d3-delaunay@6.0.4:
@@ -35729,7 +35805,7 @@ snapshots:
 
   d3-interpolate@2.0.1:
     dependencies:
-      d3-color: 2.0.0
+      d3-color: '@elastic/kibana-d3-color@2.0.1'
 
   d3-interpolate@3.0.1:
     dependencies:
@@ -39658,7 +39734,7 @@ snapshots:
 
   lead@4.0.0: {}
 
-  legacy-javascript@0.0.1: {}
+  legacy-javascript@0.0.3: {}
 
   leven@2.1.0: {}
 
@@ -44784,10 +44860,12 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
-  traverse@0.6.11:
+  traverse@0.6.14:
     dependencies:
+      define-data-property: 1.1.4
+      es-to-primitive: 1.3.4
       gopd: 1.2.0
-      typedarray.prototype.slice: 1.0.5
+      typedarray.prototype.slice: 1.0.6
       which-typed-array: 1.1.24
 
   tree-dump@1.1.0(tslib@2.8.1):
@@ -44958,7 +45036,7 @@ snapshots:
 
   typed-query-selector@2.12.3: {}
 
-  typedarray.prototype.slice@1.0.5:
+  typedarray.prototype.slice@1.0.6:
     dependencies:
       call-bind: 1.0.9
       define-properties: 1.2.1
