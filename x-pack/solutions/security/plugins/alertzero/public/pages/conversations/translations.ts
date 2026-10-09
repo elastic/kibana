@@ -27,3 +27,26 @@ export const COPY_LINK_TOASTS = Object.freeze({
     defaultMessage: 'Could not copy the link',
   }),
 });
+
+export const IDLE_HEADER = {
+  greeting: i18n.translate('xpack.alertzero.queue.idleHeader.greeting', {
+    defaultMessage: 'Your Watches are running.',
+  }),
+  title: i18n.translate('xpack.alertzero.queue.idleHeader.title', {
+    defaultMessage: 'No actions need you',
+  }),
+  subtitle: ({
+    watchCount,
+    enabledWorkerCount,
+    workerCount,
+  }: {
+    watchCount: number;
+    enabledWorkerCount: number;
+    workerCount: number;
+  }) =>
+    i18n.translate('xpack.alertzero.queue.idleHeader.subtitle', {
+      defaultMessage:
+        '{watchCount, plural, one {# Watch is} other {# Watches are}} running right now · {enabledWorkerCount} of {workerCount} {workerCount, plural, one {Worker is} other {Workers are}} enabled',
+      values: { watchCount, enabledWorkerCount, workerCount },
+    }),
+};
