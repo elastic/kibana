@@ -42,6 +42,7 @@ export function createPromptRestApi({ fetch, signal }: PublicInferenceClientCrea
       functionCalling,
       prevMessages,
       toolChoice,
+      reasoning,
     } = options;
 
     const body: PromptRequestBody = {
@@ -56,6 +57,7 @@ export function createPromptRestApi({ fetch, signal }: PublicInferenceClientCrea
       prevMessages,
       metadata,
       toolChoice,
+      reasoning,
     };
 
     const validationResult = inputSchema.safeParse(input);

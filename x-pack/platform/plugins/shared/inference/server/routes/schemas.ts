@@ -55,6 +55,26 @@ export const messageOptionsSchema = schema.object({
   toolChoice: toolChoiceSchema,
 });
 
+export const reasoningSchema = schema.maybe(
+  schema.object({
+    effort: schema.maybe(
+      schema.oneOf([
+        schema.literal('none'),
+        schema.literal('minimal'),
+        schema.literal('low'),
+        schema.literal('medium'),
+        schema.literal('high'),
+        schema.literal('xhigh'),
+      ])
+    ),
+    enabled: schema.maybe(schema.boolean()),
+    summary: schema.maybe(
+      schema.oneOf([schema.literal('auto'), schema.literal('concise'), schema.literal('detailed')])
+    ),
+    exclude: schema.maybe(schema.boolean()),
+  })
+);
+
 export const chatCompleteBaseSchema = schema.object({
   connectorId: schema.string({ minLength: 1 }),
   maxRetries: schema.maybe(schema.number()),
@@ -95,6 +115,7 @@ export const chatCompleteBaseSchema = schema.object({
   functionCalling: schema.maybe(
     schema.oneOf([schema.literal('auto'), schema.literal('native'), schema.literal('simulated')])
   ),
+  reasoning: reasoningSchema,
 });
 
 const messageSchema = schema.oneOf([

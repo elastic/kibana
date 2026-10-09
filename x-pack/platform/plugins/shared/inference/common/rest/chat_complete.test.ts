@@ -71,4 +71,19 @@ describe('createChatCompleteRestApi', () => {
 
     expect(JSON.parse((callBody as any[])[1].body as string)).toEqual(omit(params, 'stream'));
   });
+
+  it('forwards the reasoning configuration in the request body', async () => {
+    const params = {
+      connectorId: 'my-connector',
+      messages: [{ role: MessageRole.User, content: 'question' }],
+      reasoning: { effort: 'high', exclude: true },
+    } satisfies ChatCompleteOptions;
+
+    http.fetch.mockResolvedValue({});
+
+    await chatComplete(params);
+
+    const callBody = http.fetch.mock.lastCall!;
+    expect(JSON.parse((callBody as any[])[1].body as string)).toEqual(params);
+  });
 });
