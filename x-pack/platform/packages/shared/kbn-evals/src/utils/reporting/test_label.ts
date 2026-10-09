@@ -22,5 +22,5 @@ export function formatDiscordantPairs(hypothesisTest: ComparisonResult['hypothes
   if (!discordantPairs) {
     return '';
   }
-  return ` (${discordantPairs.targetOnly} up, ${discordantPairs.baselineOnly} down)`;
+  return ` (${discordantPairs.targetOnly} target only, ${discordantPairs.baselineOnly} baseline only)`;
 }

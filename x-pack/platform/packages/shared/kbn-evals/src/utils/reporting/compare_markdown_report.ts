@@ -125,7 +125,7 @@ export function formatMarkdownCompareReport({
 
   lines.push(`Significance threshold: p < ${significanceThreshold}`);
   lines.push(
-    'Test per row is chosen from the scores: McNemar for pass/fail, otherwise Wilcoxon signed-rank (paired t-test when n ≥ 30 and differences look normal).'
+    'Test per row is chosen from the scores: McNemar for pass/fail, otherwise Wilcoxon signed-rank (paired t-test for continuous scores when n ≥ 30 and differences look normal).'
   );
   lines.push('');
 

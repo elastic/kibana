@@ -107,7 +107,7 @@ describe('CompareExperimentsPage', () => {
 
     fireEvent.mouseOver(within(passRow).getByText('+0.250'));
     expect(
-      screen.getByText(/4 examples pass only in target, 1 example pass only in baseline/)
+      screen.getByText(/4 examples score 1 only in target, 1 example score 1 only in baseline/)
     ).toBeInTheDocument();
   });
 });

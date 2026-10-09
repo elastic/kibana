@@ -216,7 +216,7 @@ describe('formatCompareReport', () => {
       results,
     });
 
-    expect(tableOutput).toContain('(4 up, 1 down)');
+    expect(tableOutput).toContain('(4 target only, 1 baseline only)');
     expect(tableOutput).toContain('McNemar');
   });
 });

@@ -111,7 +111,7 @@ export const getTestTooltip = (testLabel: string, metricTypeLabel: string, metho
 export const getDiscordantPairsHint = (targetOnly: number, baselineOnly: number) =>
   i18n.translate('xpack.evals.compareExperiments.discordantPairsHint', {
     defaultMessage:
-      '{targetOnly, plural, one {# example} other {# examples}} pass only in target, {baselineOnly, plural, one {# example} other {# examples}} pass only in baseline',
+      '{targetOnly, plural, one {# example} other {# examples}} score 1 only in target, {baselineOnly, plural, one {# example} other {# examples}} score 1 only in baseline',
     values: { targetOnly, baselineOnly },
   });
 

@@ -66,7 +66,7 @@ describe('formatMarkdownCompareReport', () => {
     const lines = output.split('\n');
     expect(lines.find((line) => line.includes('| Criteria |'))).toContain('| Wilcoxon |');
     expect(lines.find((line) => line.includes('| Pass |'))).toContain(
-      '| +0.10 (3 up, 0 down) | McNemar |'
+      '| +0.10 (3 target only, 0 baseline only) | McNemar |'
     );
   });
 
