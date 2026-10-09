@@ -1,30 +1,118 @@
 {
   "10.2.0": [
     {
-      "TODO": "Please create one or more sample objects with properties that reflect real '[object Object]' objects",
-      "NOTE": "That each modelVersion has a corresponding fixture file, which defines the previous and current versions.",
-      "NOTE2": "These fixtures define the before and after state, and are used for both upgrade and rollback testing.",
-      "HINT": "You can use the template below and create sample objects for 10.2.0 and 10.3.0 versions.",
-      "HINT2": "Alternatively, you can copy the contents from older fixture files (if they exist) and adapt them accordingly.",
-      "IMPORTANT": "The current version fixtures (below) are defining how objects from the previous version fixtures (this array) would look like AFTER upgrading.",
-      "IMPORTANT2": "They are NOT defining random sample objects with properties that are valid for the current model version."
+      "name": "Checkout latency triage",
+      "description": "Investigate checkout latency alerts.",
+      "automationType": "custom",
+      "isEnabled": true,
+      "workflowId": "workflow-checkout-latency",
+      "trigger": {
+        "rows": [
+          {
+            "kind": "alert",
+            "ruleNamePattern": "checkout",
+            "ruleNameMatchMode": "substring",
+            "alertStatus": "active",
+            "tags": [
+              "checkout"
+            ]
+          }
+        ]
+      },
+      "execution": {
+        "promptTemplate": "Find the root cause of {{alert.rule.name}}.",
+        "reasoningMode": "investigate"
+      },
+      "completion": {
+        "action": "create_investigation"
+      },
+      "runtime": {
+        "dailyDispatchLimit": 10,
+        "overlapPolicy": "drop"
+      },
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-01T10:00:00.000Z"
+    },
+    {
+      "name": "Nightly health report",
+      "automationType": "managed",
+      "isEnabled": false,
+      "trigger": {
+        "rows": [
+          {
+            "kind": "schedule",
+            "schedulePreset": "daily",
+            "timezone": "UTC"
+          }
+        ]
+      },
+      "execution": {},
+      "completion": {
+        "action": "silent"
+      },
+      "runtime": {},
+      "createdAt": "2026-09-02T08:00:00.000Z",
+      "updatedAt": "2026-09-03T08:00:00.000Z"
     }
   ],
   "10.3.0": [
     {
-      "name": "string",
-      "description": "string?",
-      "automationType": "string",
-      "isEnabled": "boolean",
-      "workflowId": "string?",
-      "trigger": "object?",
-      "execution": "object?",
-      "runtime": "object?",
-      "createdAt": "string",
-      "updatedAt": "string",
-      "tags": "array?",
-      "author": "string?",
-      "completions": "array"
+      "name": "Checkout latency triage",
+      "description": "Investigate checkout latency alerts.",
+      "automationType": "custom",
+      "isEnabled": true,
+      "workflowId": "workflow-checkout-latency",
+      "trigger": {
+        "rows": [
+          {
+            "kind": "alert",
+            "ruleNamePattern": "checkout",
+            "ruleNameMatchMode": "substring",
+            "alertStatus": "active",
+            "tags": [
+              "checkout"
+            ]
+          }
+        ]
+      },
+      "execution": {
+        "promptTemplate": "Find the root cause of {{alert.rule.name}}.",
+        "reasoningMode": "investigate"
+      },
+      "completions": [
+        {
+          "action": "create_investigation"
+        }
+      ],
+      "runtime": {
+        "dailyDispatchLimit": 10,
+        "overlapPolicy": "drop"
+      },
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-01T10:00:00.000Z"
+    },
+    {
+      "name": "Nightly health report",
+      "automationType": "managed",
+      "isEnabled": false,
+      "trigger": {
+        "rows": [
+          {
+            "kind": "schedule",
+            "schedulePreset": "daily",
+            "timezone": "UTC"
+          }
+        ]
+      },
+      "execution": {},
+      "completions": [
+        {
+          "action": "silent"
+        }
+      ],
+      "runtime": {},
+      "createdAt": "2026-09-02T08:00:00.000Z",
+      "updatedAt": "2026-09-03T08:00:00.000Z"
     }
   ]
 }
