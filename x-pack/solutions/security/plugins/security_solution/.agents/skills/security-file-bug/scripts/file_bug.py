@@ -961,9 +961,9 @@ def check_draft(
             gaps.append("bug_label")
         if "triage_needed" not in names:
             gaps.append("triage_label")
-    if FILED_VIA not in _visible_text(body):
-        gaps.append("stamp")
-    gaps.extend(_body_section_gaps(body))
+        if FILED_VIA not in _visible_text(body):
+            gaps.append("stamp")
+        gaps.extend(_body_section_gaps(body))
     if is_tester_finding(finding, config) and title is not None:
         if TESTER_SOURCE_LABEL not in [str(label) for label in (labels or [])]:
             gaps.append("tester_label")

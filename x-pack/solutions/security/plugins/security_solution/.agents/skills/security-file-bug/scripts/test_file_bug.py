@@ -662,6 +662,29 @@ class CheckDraftTest(unittest.TestCase):
         )
         self.assertEqual(gaps, [])
 
+    def test_comment_body_does_not_require_template_or_stamp(self):
+        finding = {
+            "current_behavior": 'Toast: "TypeError: cannot read map"',
+            "expected_behavior": "Table lists entities",
+            "steps_followed": ["Open Entity Analytics"],
+            "feature_flags": "Unknown",
+            "deployment": "Unknown",
+            "role": "Unknown",
+            "spaces": "Unknown",
+        }
+        gaps = check_draft(
+            body=(
+                "Same defect as this issue. Missing repro: after Last 1 year "
+                'the toast is `TypeError: cannot read map`.\n'
+            ),
+            title=None,
+            finding=finding,
+            config={"kibana_version": "9.3.0"},
+        )
+        self.assertEqual(gaps, [])
+        self.assertNotIn("stamp", gaps)
+        self.assertNotIn("body_describe", gaps)
+
     def test_missing_stamp_and_bad_title(self):
         gaps = check_draft(
             body="**Steps to reproduce:**\n1. click\n",
@@ -1634,6 +1657,7 @@ class SkillProtocolTest(unittest.TestCase):
         self.assertIn("Hard stop", self.text)
         self.assertIn("Fileable checklist", self.text)
         self.assertIn("check-draft", self.text)
+        self.assertIn("omit `--title`", self.skill)
         self.assertIn("scan-sensitive", self.text)
         self.assertIn("scan-wip", self.text)
         self.assertIn("file anyway", self.text.lower())
