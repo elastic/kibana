@@ -1102,9 +1102,7 @@ describe('ai indices routes', () => {
         query: { size: 25, lifecycle_status: ['deleted'] },
       });
 
-      expect(esEsqlQuery.mock.calls[1][0].query).toContain(
-        'WHERE lifecycle_status IN ("deleted")'
-      );
+      expect(esEsqlQuery.mock.calls[1][0].query).toContain('WHERE lifecycle_status IN ("deleted")');
     });
 
     it('passes type filter to Elasticsearch', async () => {
