@@ -30,16 +30,26 @@ const renderCallout = () =>
 describe('DetectionPausedCallout', () => {
   it('shows the page-level paused status with attribution', () => {
     mockMaintenanceStatus = {
-      data: { state: 'paused', updatedBy: 'elastic' },
+      data: {
+        state: 'paused',
+        updatedBy: 'kate.sosedova@elastic.co',
+        lastSummary: {
+          state: 'paused',
+          executionsCancelled: 0,
+          workflowsDisabled: 14,
+          rulesDisabled: 168,
+          partialFailures: [],
+        },
+      },
     };
 
     renderCallout();
 
     const callout = screen.getByTestId('streams-settings-maintenance-paused-status');
-    expect(callout).toHaveTextContent('Detection is paused by elastic.');
-    expect(callout).toHaveTextContent('Nightshift activity is stopped across the deployment');
-    expect(callout).toHaveTextContent('continuous onboarding');
-    expect(callout).toHaveTextContent('investigations');
+    expect(callout).toHaveTextContent(
+      'Detection process is paused by kate.sosedova@elastic.co · 168 rules and 14 automations disabled.'
+    );
+    expect(callout).not.toHaveTextContent('Nightshift activity is stopped across the deployment');
   });
 
   it('uses the feature-flag title and explains that re-enabling does not resume', () => {
