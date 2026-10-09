@@ -22,7 +22,7 @@ export interface PlanBatchesParams {
   /** Free in-flight slots according to headroom. */
   headroomSlots: number;
   budget: number;
-  /** Alerts created before this (epoch ms) are stale rather than planned. */
+  /** Alerts created before this (epoch ms) are outside the look-back and are not planned. */
   lookbackCutoff: number;
 }
 
@@ -30,8 +30,6 @@ export interface BatchPlan {
   skipReason: SweepSkipReason;
   batches: RuleAllocation[];
   reclaimAlertIds: string[];
-  /** Reclaimed alerts that fell outside the look-back while they were claimed. */
-  staleAlertIds: string[];
   liveBatches: number;
   plannedCost: number;
 }
@@ -55,7 +53,6 @@ export const planBatches = ({
       skipReason: 'live_batches_unreadable',
       batches: [],
       reclaimAlertIds: [],
-      staleAlertIds: [],
       liveBatches: 0,
       plannedCost: 0,
     };
@@ -69,9 +66,6 @@ export const planBatches = ({
 
   const base = {
     reclaimAlertIds: reclaimed.map(({ id }) => id),
-    staleAlertIds: reclaimed
-      .filter(({ timestamp }) => timestamp < lookbackCutoff)
-      .map(({ id }) => id),
     liveBatches: liveExecutionIds.size,
     batches: [],
     plannedCost: 0,

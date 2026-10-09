@@ -22,6 +22,8 @@ export interface TagAlertsParams {
 export interface SweepPorts {
   readHeadroom: () => Promise<HeadroomResult>;
   fetchAlerts: () => Promise<TriageAlert[]>;
+  /** Count of open alerts older than the look-back that no triage or analysis touched. */
+  countAgedOutAlerts: () => Promise<number>;
   /** Undefined when the live batches could not be read. */
   listLiveExecutionIds: () => Promise<ReadonlySet<string> | undefined>;
   tagAlerts: (params: TagAlertsParams) => Promise<void>;
@@ -37,7 +39,6 @@ export interface SweepConfig {
 
 const EMPTY_NUMBERS: SweepNumbers = {
   pendingAlerts: 0,
-  staleAlerts: 0,
   claimedAlerts: 0,
   reclaimedAlerts: 0,
   liveBatches: 0,
@@ -94,17 +95,20 @@ const releaseClaims = async (
  */
 export const planSweep = async (ports: SweepPorts, config: SweepConfig): Promise<SweepPlan> => {
   const sweepBudget = getSweepBudget(config.budgetPerHour, config.intervalMinutes);
-  const skipped = (skipReason: SweepPlan['skipReason']): SweepPlan => ({
+  const skipped = (skipReason: SweepPlan['skipReason'], agedOutAlerts?: number): SweepPlan => ({
     skipReason,
     batches: [],
-    staleAlertIds: [],
     reclaimAlertIds: [],
-    numbers: { ...EMPTY_NUMBERS, sweepBudget },
+    numbers: { ...EMPTY_NUMBERS, agedOutAlerts, sweepBudget },
   });
 
-  const headroom = await ports.readHeadroom();
-  if (headroom.status === 'behind') return skipped('tm_behind');
-  if (headroom.status === 'unknown') return skipped('tm_unknown');
+  // A failed count only costs the number: it must never fail or block the sweep.
+  const [headroom, agedOutAlerts] = await Promise.all([
+    ports.readHeadroom(),
+    ports.countAgedOutAlerts().catch(() => undefined),
+  ]);
+  if (headroom.status === 'behind') return skipped('tm_behind', agedOutAlerts);
+  if (headroom.status === 'unknown') return skipped('tm_unknown', agedOutAlerts);
 
   const [alerts, liveExecutionIds] = await Promise.all([
     ports.fetchAlerts(),
@@ -136,15 +140,13 @@ export const planSweep = async (ports: SweepPorts, config: SweepConfig): Promise
     remove: [],
   });
 
-  const staleAlertIds = [...selected.stale.map(({ id }) => id), ...plan.staleAlertIds];
   return {
     skipReason: plan.skipReason,
     batches: plan.batches,
-    staleAlertIds,
     reclaimAlertIds: plan.reclaimAlertIds,
     numbers: {
       pendingAlerts: selected.pending.length,
-      staleAlerts: staleAlertIds.length,
+      agedOutAlerts,
       claimedAlerts: selected.claimed.length,
       reclaimedAlerts: plan.reclaimAlertIds.length,
       liveBatches: plan.liveBatches,

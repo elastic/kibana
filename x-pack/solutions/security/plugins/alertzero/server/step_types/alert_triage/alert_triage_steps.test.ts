@@ -11,7 +11,6 @@ import { TM_DELAY_LIMIT_MS } from '../../alert_triage/constants';
 import {
   getTriageHeadroomStepDefinition,
   getTriagePlanSweepStepDefinition,
-  getTriageTagStaleStepDefinition,
 } from './alert_triage_steps';
 
 const createContext = (input: Record<string, unknown>, callKibanaApi: jest.Mock) =>
@@ -100,7 +99,9 @@ describe('triage plan sweep step', () => {
     );
 
     expect(output).toEqual(expect.objectContaining({ skip_reason: 'tm_behind', batches: [] }));
-    expect(callKibanaApi).not.toHaveBeenCalled();
+    // Only the aged-out count runs: it is a read, so a blocked sweep writes and plans nothing.
+    expect(callKibanaApi).toHaveBeenCalledTimes(1);
+    expect(callKibanaApi.mock.calls[0][0].path).toBe('/api/detection_engine/signals/search');
   });
 
   it('treats ok without its slots as unknown rather than assuming room', async () => {
@@ -116,6 +117,9 @@ describe('triage plan sweep step', () => {
       async ({ path, body }: { path: string; body?: { query?: unknown } }) => {
         if (path.includes('/executions'))
           return { status: 200, headers: {}, body: { results: [] } };
+        if (path.endsWith('/signals/search') && JSON.stringify(body).includes('"size":0')) {
+          return { status: 200, headers: {}, body: { hits: { total: { value: 13 } } } };
+        }
         if (path.endsWith('/signals/search')) {
           const isClaimedQuery = !JSON.stringify(body?.query).includes('must_not');
           return {
@@ -156,9 +160,20 @@ describe('triage plan sweep step', () => {
     expect(output).toEqual(
       expect.objectContaining({
         skip_reason: 'none',
+        numbers: expect.objectContaining({ aged_out_alerts: 13 }),
         batches: [{ rule_id: 'rule-a', rule_name: 'Rule A name', alert_ids: ['alert-1'] }],
       })
     );
+    const searchQueries: string[] = callKibanaApi.mock.calls
+      .map(([call]) => call as { path: string; body?: { query?: unknown } })
+      .filter(({ path }) => path.endsWith('/signals/search'))
+      .map(({ body }) => JSON.stringify(body?.query));
+    const agedOutQuery = searchQueries.find((query) => query.includes('"lt":')) ?? '';
+    expect(agedOutQuery).toContain('"range":{"@timestamp":{"lt":');
+    const unclaimedQuery = searchQueries.find((query) => query.includes('"gte":')) ?? '';
+    // The look-back is the search window, so older alerts are never read.
+    expect(unclaimedQuery).toContain('"range":{"@timestamp":{"gte":');
+    expect(unclaimedQuery).not.toContain('az:triage_stale');
     expect(callKibanaApi).toHaveBeenCalledWith(
       expect.objectContaining({
         path: '/api/detection_engine/signals/tags',
@@ -168,34 +183,5 @@ describe('triage plan sweep step', () => {
         },
       })
     );
-  });
-});
-
-describe('triage tag stale step', () => {
-  it('tags the alerts az:triage_stale in chunks', async () => {
-    const callKibanaApi = jest.fn().mockResolvedValue({ status: 200, headers: {}, body: {} });
-    const alertIds = Array.from({ length: 1200 }, (_, i) => `a-${i}`);
-
-    const { output } = await getTriageTagStaleStepDefinition().handler(
-      createContext({ alert_ids: alertIds }, callKibanaApi)
-    );
-
-    expect(output).toEqual({ tagged: 1200 });
-    expect(callKibanaApi).toHaveBeenCalledTimes(3);
-    expect(callKibanaApi.mock.calls[0][0].body.tags).toEqual({
-      tags_to_add: ['az:triage_stale'],
-      tags_to_remove: [],
-    });
-  });
-
-  it('tags nothing and makes no call for an empty list', async () => {
-    const callKibanaApi = jest.fn();
-
-    const { output } = await getTriageTagStaleStepDefinition().handler(
-      createContext({ alert_ids: [] }, callKibanaApi)
-    );
-
-    expect(output).toEqual({ tagged: 0 });
-    expect(callKibanaApi).not.toHaveBeenCalled();
   });
 });

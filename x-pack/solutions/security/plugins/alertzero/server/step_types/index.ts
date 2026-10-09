@@ -14,7 +14,6 @@ import type { HuntServices } from '../services/watches/hunt/types';
 import {
   getTriageHeadroomStepDefinition,
   getTriagePlanSweepStepDefinition,
-  getTriageTagStaleStepDefinition,
 } from './alert_triage/alert_triage_steps';
 import { getPackageReportStepDefinition } from './package_report';
 import {
@@ -68,7 +67,6 @@ export const registerStepDefinitions = ({
   );
   workflowsExtensions.registerStepDefinition(getTriageHeadroomStepDefinition({ getTaskManager }));
   workflowsExtensions.registerStepDefinition(getTriagePlanSweepStepDefinition());
-  workflowsExtensions.registerStepDefinition(getTriageTagStaleStepDefinition());
 };
 
 export { getPackageReportStepDefinition } from './package_report';

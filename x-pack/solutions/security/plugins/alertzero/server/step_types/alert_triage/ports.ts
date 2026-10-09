@@ -12,7 +12,6 @@ import {
   OPEN_ALERT_STATUSES,
   TRIAGE_FAILED_TAG,
   TRIAGE_PENDING_TAG,
-  TRIAGE_STALE_TAG,
   VERDICT_TAGS,
 } from '../../alert_triage/constants';
 import type { SweepPorts } from '../../alert_triage/plan_sweep';
@@ -135,32 +134,31 @@ const searchAlerts = async (
   return (body.hits?.hits ?? []).map(toTriageAlert);
 };
 
+/** Alerts no triage or analysis has touched: no verdict, failure, claim or analysis tag. */
+const UNTRIAGED_MUST_NOT = (analysisTagPrefix: string) => [
+  { terms: { [ALERT_FIELDS.tags]: [...VERDICT_TAGS, TRIAGE_FAILED_TAG, TRIAGE_PENDING_TAG] } },
+  { prefix: { [ALERT_FIELDS.tags]: analysisTagPrefix } },
+];
+
 /**
- * Open alerts still needing triage, plus the claimed ones in a separate query so a claim on a
- * low-risk alert is still seen when the backlog exceeds one search window.
+ * Open alerts created since `windowStart` that still need triage, so the look-back is the search
+ * window and older alerts are never read or tagged. Claimed alerts come from a separate query with
+ * no time bound, so a claim on a low-risk or aged-out alert is still seen and can be reclaimed.
  */
 export const fetchTriageAlerts = async (
   api: KibanaApi,
-  analysisTagPrefix: string
+  analysisTagPrefix: string,
+  windowStart: number
 ): Promise<TriageAlert[]> => {
   const openStatus = { terms: { [ALERT_FIELDS.status]: [...OPEN_ALERT_STATUSES] } };
   const [unclaimed, claimed] = await Promise.all([
     searchAlerts(api, {
       bool: {
-        filter: [openStatus],
-        must_not: [
-          {
-            terms: {
-              [ALERT_FIELDS.tags]: [
-                ...VERDICT_TAGS,
-                TRIAGE_FAILED_TAG,
-                TRIAGE_STALE_TAG,
-                TRIAGE_PENDING_TAG,
-              ],
-            },
-          },
-          { prefix: { [ALERT_FIELDS.tags]: analysisTagPrefix } },
+        filter: [
+          openStatus,
+          { range: { [ALERT_FIELDS.timestamp]: { gte: new Date(windowStart).toISOString() } } },
         ],
+        must_not: UNTRIAGED_MUST_NOT(analysisTagPrefix),
       },
     }),
     searchAlerts(api, {
@@ -179,3 +177,32 @@ export const tagAlerts =
       body: { ids: alertIds, tags: { tags_to_add: add, tags_to_remove: remove } },
     });
   };
+
+/** One count query, no writes: open alerts older than the look-back that were never triaged. */
+export const countAgedOutAlerts = async (
+  { callKibanaApi }: KibanaApi,
+  analysisTagPrefix: string,
+  windowStart: number
+): Promise<number> => {
+  const { body } = await callKibanaApi<{ hits?: { total?: { value?: number } | number } }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: 0,
+      track_total_hits: true,
+      query: {
+        bool: {
+          filter: [
+            { terms: { [ALERT_FIELDS.status]: [...OPEN_ALERT_STATUSES] } },
+            { range: { [ALERT_FIELDS.timestamp]: { lt: new Date(windowStart).toISOString() } } },
+          ],
+          must_not: UNTRIAGED_MUST_NOT(analysisTagPrefix),
+        },
+      },
+    },
+  });
+  const total = body.hits?.total;
+  if (typeof total === 'number') return total;
+  if (typeof total?.value === 'number') return total.value;
+  throw new Error('Aged-out alert count missing from the search response');
+};

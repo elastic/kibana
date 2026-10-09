@@ -37,7 +37,8 @@ export type HeadroomResult =
 
 export interface SweepNumbers {
   pendingAlerts: number;
-  staleAlerts: number;
+  /** Open alerts older than the look-back and never triaged. Absent when the count failed. */
+  agedOutAlerts?: number;
   claimedAlerts: number;
   reclaimedAlerts: number;
   liveBatches: number;
@@ -50,8 +51,6 @@ export interface SweepNumbers {
 export interface SweepPlan {
   skipReason: SweepSkipReason;
   batches: readonly RuleAllocation[];
-  /** Alerts to tag `az:triage_stale`. */
-  staleAlertIds: readonly string[];
   /** Alerts whose claim and execution tags are removed because their batch is no longer live. */
   reclaimAlertIds: readonly string[];
   numbers: SweepNumbers;
