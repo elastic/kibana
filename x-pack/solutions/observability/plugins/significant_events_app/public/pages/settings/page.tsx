@@ -1,0 +1,91 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
+import { i18n } from '@kbn/i18n';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
+import React, { useEffect } from 'react';
+import {
+  SignificantEventsAppHeader,
+  SignificantEventsAppLoading,
+  SignificantEventsAppPageTemplate,
+} from '../../components/page_template';
+import { SignificantEventsNotEnabledPrompt } from '../../components/not_enabled_prompt';
+import { useKibana } from '../../hooks/use_kibana';
+import { useSignificantEventsAvailability } from '../../hooks/use_significant_events_availability';
+import { SettingsWorkspace } from './settings_workspace';
+
+const settingsTitle = i18n.translate('xpack.significantEventsApp.settingsPage.title', {
+  defaultMessage: 'Settings',
+});
+
+const nightshiftLabel = i18n.translate(
+  'xpack.significantEventsApp.settingsPage.backToNightshiftLabel',
+  {
+    defaultMessage: 'Nightshift',
+  }
+);
+
+export function SettingsPage() {
+  const {
+    core: {
+      application: {
+        capabilities: { nightshift },
+        getUrlForApp,
+        navigateToApp,
+      },
+      chrome,
+    },
+  } = useKibana();
+  const { canManageAndConfigure } = getNightshiftCapabilities(nightshift);
+  const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
+  const nightshiftHref = getUrlForApp(NIGHTSHIFT_APP_ID);
+
+  useEffect(() => {
+    if (!canManageAndConfigure) {
+      void navigateToApp(NIGHTSHIFT_APP_ID);
+    }
+  }, [canManageAndConfigure, navigateToApp]);
+
+  useEffect(() => {
+    if (canManageAndConfigure) {
+      chrome.setBreadcrumbs([
+        { text: nightshiftLabel, href: nightshiftHref },
+        { text: settingsTitle },
+      ]);
+    }
+  }, [canManageAndConfigure, chrome, nightshiftHref]);
+
+  if (!canManageAndConfigure) {
+    return null;
+  }
+
+  if (isAvailabilityLoading) {
+    return <SignificantEventsAppLoading />;
+  }
+
+  if (!availability || !availability.available) {
+    const reason = availability?.reason ?? 'unknown';
+    return (
+      <SignificantEventsAppPageTemplate.Body grow>
+        <SignificantEventsNotEnabledPrompt reason={reason} />
+      </SignificantEventsAppPageTemplate.Body>
+    );
+  }
+
+  return (
+    <>
+      <SignificantEventsAppHeader
+        title={settingsTitle}
+        back={{ href: nightshiftHref, label: nightshiftLabel }}
+      />
+      <SignificantEventsAppPageTemplate.Body grow>
+        <SettingsWorkspace />
+      </SignificantEventsAppPageTemplate.Body>
+    </>
+  );
+}

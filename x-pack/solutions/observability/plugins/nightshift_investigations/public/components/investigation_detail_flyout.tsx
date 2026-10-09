@@ -10,6 +10,7 @@ import React from 'react';
 import type { ComponentProps } from 'react';
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -109,6 +110,7 @@ export interface InvestigationDetailFlyoutProps {
   isLoading: boolean;
   error: Error | null;
   onClose: () => void;
+  eventHref?: string;
   /** Pass-through to EuiFlyout; use to add share URL, EBT tracking, etc. */
   flyoutMenuProps?: ComponentProps<typeof EuiFlyout>['flyoutMenuProps'];
   onClickCapture?: React.MouseEventHandler<HTMLElement>;
@@ -133,6 +135,7 @@ export function InvestigationDetailFlyout({
   isLoading,
   error,
   onClose,
+  eventHref,
   flyoutMenuProps,
   onClickCapture,
   progress,
@@ -178,6 +181,21 @@ export function InvestigationDetailFlyout({
 
     return (
       <>
+        {eventHref && (
+          <>
+            <EuiButtonEmpty
+              data-test-subj="nightshiftInvestigationsRenderBodyOpenSourceEventAndEvidenceButton"
+              href={eventHref}
+              iconType="bell"
+              size="s"
+            >
+              {i18n.translate('xpack.nightshiftInvestigations.flyout.sourceEvent', {
+                defaultMessage: 'Open source event and evidence',
+              })}
+            </EuiButtonEmpty>
+            <EuiSpacer size="m" />
+          </>
+        )}
         {invState.summary && (
           <>
             <SectionTitle>

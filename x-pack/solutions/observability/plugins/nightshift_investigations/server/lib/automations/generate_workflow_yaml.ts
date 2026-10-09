@@ -37,6 +37,62 @@ export function generateWorkflowYaml(
   automationId: string,
   automation: NightshiftAutomationAttributes
 ): string {
+  const eventRows = automation.trigger.rows.filter(
+    (row): row is Extract<NightshiftTriggerRow, { kind: 'significant_event' }> =>
+      row.kind === 'significant_event'
+  );
+  if (eventRows.length) {
+    const conditions = eventRows.map((row) => {
+      const parts = ['event.status: "active"'];
+      if (row.titlePattern) parts.push(`event.title: "*${escapeKql(row.titlePattern)}*"`);
+      if (row.severities?.length)
+        parts.push(
+          `(${row.severities.map((severity) => `event.severity: "${severity}"`).join(' OR ')})`
+        );
+      if (row.streamNames?.length)
+        parts.push(
+          `(${row.streamNames
+            .map((name) => `event.stream_names: "${escapeKql(name)}"`)
+            .join(' OR ')})`
+        );
+      return `(${parts.join(' AND ')})`;
+    });
+    return stringify(
+      {
+        name: automation.name,
+        enabled: automation.isEnabled,
+        tags: ['nightshift', 'automation'],
+        settings: {
+          concurrency: { key: `${automationId}:{{ event.event_id }}`, strategy: 'drop', max: 1 },
+        },
+        triggers: [
+          { type: 'significant-events.eventCreated', on: { condition: conditions.join(' OR ') } },
+          {
+            type: 'significant-events.eventStatusChanged',
+            on: { condition: conditions.join(' OR ') },
+          },
+        ],
+        steps: [
+          {
+            name: 'trigger_investigation',
+            type: 'nightshift.triggerInvestigation',
+            with: {
+              subject_type: 'significant_event',
+              subject_id: '{{ event.event_id }}',
+              title: '{{ event.title }}',
+              summary: '{{ event.summary }}',
+              trigger_type: 'automatic',
+              concurrency_key: '{{ event.event_id }}',
+              ...(automation.execution.promptTemplate
+                ? { message: automation.execution.promptTemplate }
+                : {}),
+            },
+          },
+        ],
+      },
+      { lineWidth: 0 }
+    );
+  }
   const alertRows = automation.trigger.rows.filter(
     (r): r is Extract<NightshiftTriggerRow, { kind: 'alert' }> => r.kind === 'alert'
   );

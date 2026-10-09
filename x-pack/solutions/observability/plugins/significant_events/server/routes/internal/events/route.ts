@@ -379,7 +379,7 @@ const eventsUpdateRoute = createServerRoute({
       assessment_note: z.string().max(MAX_ASSESSMENT_NOTE_LENGTH).optional(),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server, logger }) => {
+  handler: async ({ params, request, getScopedClients, server }) => {
     const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } =
       await getScopedClients({ request });
 

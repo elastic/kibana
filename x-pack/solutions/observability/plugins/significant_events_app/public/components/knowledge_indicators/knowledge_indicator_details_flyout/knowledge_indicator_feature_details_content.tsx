@@ -7,6 +7,8 @@
 
 import {
   EuiBadge,
+  EuiAccordion,
+  useGeneratedHtmlId,
   EuiButtonEmpty,
   EuiCodeBlock,
   EuiDescriptionList,
@@ -15,11 +17,16 @@ import {
   EuiHealth,
   EuiHorizontalRule,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Feature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
 import React, { useMemo } from 'react';
+import { useEvidence } from '../../evidence_chain/evidence_context';
+import { useFetchDiscoveryQueries } from '../../../hooks/use_fetch_discovery_queries';
+import { FeatureCorrection } from '../../../pages/detection/feature_correction';
+import { journey } from '../../../pages/detection/journey_translations';
 import { useDeveloperMode } from '../../../hooks/use_developer_mode';
 import { DeveloperModeBadge } from '../../developer_mode_badge/developer_mode_badge';
 import { InfoPanel } from '../../info_panel';
@@ -28,14 +35,35 @@ import { getConfidenceColor } from '../utils/get_confidence_color';
 interface Props {
   feature: Feature;
   onOpenInDiscover?: () => void;
+  onUpdated?: () => void;
 }
 
-export function KnowledgeIndicatorFeatureDetailsContent({ feature, onOpenInDiscover }: Props) {
+export function KnowledgeIndicatorFeatureDetailsContent({
+  feature,
+  onOpenInDiscover,
+  onUpdated,
+}: Props) {
+  const propertiesId = useGeneratedHtmlId({ prefix: 'knowledgeProperties' });
   const { isDeveloperMode } = useDeveloperMode();
+  const { href, onNavigate } = useEvidence();
+  const rules = useFetchDiscoveryQueries({ name: feature.stream_name, page: 1, perPage: 1000 });
+  const relatedRules =
+    rules.data?.queries.filter((item) =>
+      item.query.features?.some((reference) => reference.id === feature.id)
+    ) ?? [];
   const listItems = useMemo(() => {
     const tags = feature.tags?.length ? feature.tags : [];
 
     return [
+      { title: journey.source, description: <EuiText size="s">{feature.stream_name}</EuiText> },
+      {
+        title: journey.expires,
+        description: (
+          <EuiText size="s">
+            {feature.expires_at ? new Date(feature.expires_at).toLocaleString() : journey.noExpiry}
+          </EuiText>
+        ),
+      },
       {
         title: DETAILS_ID_LABEL,
         description: (
@@ -100,40 +128,79 @@ export function KnowledgeIndicatorFeatureDetailsContent({ feature, onOpenInDisco
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
-        <InfoPanel
-          title={GENERAL_INFORMATION_LABEL}
-          headerRightContent={
-            onOpenInDiscover ? (
-              <EuiButtonEmpty
-                data-test-subj="significantEventsAppFeatureDetailsFlyoutOpenInDiscover"
-                size="xs"
-                iconType="discoverApp"
-                iconSide="left"
-                onClick={onOpenInDiscover}
-              >
-                {OPEN_IN_DISCOVER_LABEL}
-              </EuiButtonEmpty>
-            ) : undefined
-          }
-        >
-          {listItems.map((item, index) => (
-            <React.Fragment key={item.title}>
-              <EuiDescriptionList
-                type="column"
-                columnWidths={[1, 2]}
-                compressed
-                listItems={[item]}
-              />
-              {index < listItems.length - 1 && <EuiHorizontalRule margin="m" />}
-            </React.Fragment>
-          ))}
-        </InfoPanel>
-      </EuiFlexItem>
-      <EuiFlexItem>
         <InfoPanel title={DESCRIPTION_LABEL}>
           <EuiText>{feature.description || NO_DESCRIPTION_AVAILABLE}</EuiText>
         </InfoPanel>
       </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <InfoPanel title={journey.relatedRules}>
+          {relatedRules.length ? (
+            relatedRules.map((item) => (
+              <div key={item.query.id}>
+                <EuiButtonEmpty
+                  data-test-subj="significantEventsAppKnowledgeIndicatorFeatureDetailsContentButton"
+                  size="xs"
+                  iconType="visLine"
+                  href={href({ kind: 'rule', id: item.query.id, stream: feature.stream_name })}
+                  onClick={
+                    onNavigate
+                      ? (event) => {
+                          event.preventDefault();
+                          onNavigate({
+                            kind: 'rule',
+                            id: item.query.id,
+                            stream: feature.stream_name,
+                          });
+                        }
+                      : undefined
+                  }
+                >
+                  {item.query.title}
+                </EuiButtonEmpty>
+              </div>
+            ))
+          ) : (
+            <EuiText size="xs" color="subdued">
+              <p>{rules.isLoading ? journey.waiting : journey.noRelatedRules}</p>
+            </EuiText>
+          )}
+        </InfoPanel>
+        <EuiSpacer size="m" />
+        <FeatureCorrection feature={feature} onSaved={onUpdated} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiAccordion id={propertiesId} buttonContent={GENERAL_INFORMATION_LABEL} paddingSize="m">
+          <InfoPanel
+            title={GENERAL_INFORMATION_LABEL}
+            headerRightContent={
+              onOpenInDiscover ? (
+                <EuiButtonEmpty
+                  data-test-subj="significantEventsAppFeatureDetailsFlyoutOpenInDiscover"
+                  size="xs"
+                  iconType="discoverApp"
+                  iconSide="left"
+                  onClick={onOpenInDiscover}
+                >
+                  {OPEN_IN_DISCOVER_LABEL}
+                </EuiButtonEmpty>
+              ) : undefined
+            }
+          >
+            {listItems.map((item, index) => (
+              <React.Fragment key={item.title}>
+                <EuiDescriptionList
+                  type="column"
+                  columnWidths={[1, 2]}
+                  compressed
+                  listItems={[item]}
+                />
+                {index < listItems.length - 1 && <EuiHorizontalRule margin="m" />}
+              </React.Fragment>
+            ))}
+          </InfoPanel>
+        </EuiAccordion>
+      </EuiFlexItem>
+
       <EuiFlexItem>
         <InfoPanel title={EVIDENCE_LABEL}>
           {evidence.length > 0 ? (

@@ -29,6 +29,10 @@ const settingsLabel = i18n.translate('xpack.nightshift.settingsLinkLabel', {
   defaultMessage: 'Settings',
 });
 
+const detectionLabel = i18n.translate('xpack.nightshift.detectionLinkLabel', {
+  defaultMessage: 'Detection',
+});
+
 const managementLabel = i18n.translate('xpack.nightshift.managementLinkLabel', {
   defaultMessage: 'Management',
 });
@@ -70,6 +74,9 @@ export interface NightshiftAppHeaderProps {
   page?: 'landing' | 'automations' | 'settings';
   onManagementClick: () => void | Promise<void>;
   managementHref: string;
+  onDetectionClick?: () => void | Promise<void>;
+  detectionHref?: string;
+  knowledgeHref?: string;
   onSettingsClick?: () => void | Promise<void>;
   settingsHref?: string;
   /** Shows the sandbox secrets menu item when set. */
@@ -84,6 +91,9 @@ export interface NightshiftAppHeaderProps {
 
 export function NightshiftAppHeader({
   page = 'landing',
+  onDetectionClick,
+  detectionHref,
+  knowledgeHref,
   onManagementClick,
   managementHref,
   onSettingsClick,
@@ -100,6 +110,20 @@ export function NightshiftAppHeader({
   const menu = useMemo<AppMenuConfig>(
     () => ({
       items: [
+        ...(knowledgeHref
+          ? [
+              {
+                id: 'nightshiftKnowledge',
+                label: i18n.translate('xpack.nightshift.knowledgeLinkLabel', {
+                  defaultMessage: 'Knowledge',
+                }),
+                iconType: 'documents' as const,
+                href: knowledgeHref,
+                overflow: true,
+                testId: 'nightshiftKnowledgeLink',
+              },
+            ]
+          : []),
         ...(onAutomationsClick && automationsHref && !isAutomationsPage
           ? [
               {
@@ -121,6 +145,20 @@ export function NightshiftAppHeader({
                 run: () => onSandboxSecretsClick(),
                 testId: 'nightshiftSandboxSecretsLink',
                 overflow: true,
+              },
+            ]
+          : []),
+        ...(onDetectionClick && detectionHref
+          ? [
+              {
+                id: 'nightshiftDetection',
+                label: detectionLabel,
+                iconType: 'graphApp' as const,
+                href: detectionHref,
+                run: () => {
+                  void onDetectionClick();
+                },
+                testId: 'nightshiftDetectionLink',
               },
             ]
           : []),
@@ -174,6 +212,9 @@ export function NightshiftAppHeader({
       onAutomationsClick,
       onManagementClick,
       onSandboxSecretsClick,
+      onDetectionClick,
+      detectionHref,
+      knowledgeHref,
       onCustomContextClick,
       onSettingsClick,
       settingsHref,

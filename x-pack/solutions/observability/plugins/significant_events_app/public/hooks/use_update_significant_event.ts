@@ -87,6 +87,7 @@ export const useUpdateSignificantEvent = ({
     },
     onSettled: async () => {
       await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['detectionWorkspace'] }),
         queryClient.invalidateQueries({ queryKey: ['significantEvents'], exact: false }),
         queryClient.invalidateQueries({ queryKey: ['significantEventLifecycle'], exact: false }),
       ]);

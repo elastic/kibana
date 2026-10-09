@@ -26,6 +26,7 @@ export const useFetchSignificantEventLifecycle = (eventId: string | undefined) =
       );
     },
     enabled: !!eventId,
+    refetchInterval: 5000,
     onError: showFetchErrorToast,
   });
 };

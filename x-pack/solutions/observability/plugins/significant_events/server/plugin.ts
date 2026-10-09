@@ -33,6 +33,7 @@ import {
 import type { Subscription } from 'rxjs';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import { enginePreferencesSavedObjectType } from './lib/engine_preferences';
 import {
   getRelayAppConnectionSavedObjectType,
   RELAY_APP_CONNECTION_SO_TYPE,
@@ -162,6 +163,7 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(getSignificantEventsMaintenanceStateSavedObjectType());
     core.savedObjects.registerType(runQuotaSettingsSavedObjectType);
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
+    core.savedObjects.registerType(enginePreferencesSavedObjectType);
 
     plugins.nightshiftInvestigations?.registerInvestigationQuota(async () => {
       if (!this.server?.core) {

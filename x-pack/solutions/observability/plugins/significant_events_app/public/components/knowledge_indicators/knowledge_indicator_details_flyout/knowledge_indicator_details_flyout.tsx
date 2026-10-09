@@ -7,9 +7,12 @@
 
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiConfirmModal,
+  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -33,6 +36,7 @@ import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/significant-events-sch
 import type { Feature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { buildFeatureDiscoverParams } from '../../../util/discover_helpers';
@@ -57,6 +61,9 @@ import { useBlocksNewActivity } from '../../../hooks/use_significant_events_main
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../../pages/significant_events/components/queries_table/translations';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { getKnowledgeIndicatorStreamName } from '../utils/get_knowledge_indicator_stream_name';
+import { useEvidence } from '../../evidence_chain/evidence_context';
+import { EvidenceChain } from '../../evidence_chain/evidence_chain';
+import { journey } from '../../../pages/detection/journey_translations';
 import { KnowledgeIndicatorFeatureDetailsContent } from './knowledge_indicator_feature_details_content';
 import { KnowledgeIndicatorQueryDetailsContent } from './knowledge_indicator_query_details_content';
 
@@ -88,27 +95,44 @@ export function KnowledgeIndicatorDetailsFlyout({
       },
     },
     dependencies: {
-      start: { share },
+      start: {
+        share,
+        streams: { streamsRepositoryClient },
+      },
     },
   } = useKibana();
+  const { href, onNavigate } = useEvidence();
   const canManage = getNightshiftCapabilities(nightshift).canManage;
   const { timeState } = useTimefilter();
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'knowledgeIndicatorDetailsFlyoutTitle' });
+  const [confirmExclusion, setConfirmExclusion] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const streamName = getKnowledgeIndicatorStreamName(knowledgeIndicator);
+  const definition = useQuery({
+    queryKey: ['detectionStreamDefinition', streamName],
+    enabled: !stream,
+    queryFn: ({ signal }) =>
+      streamsRepositoryClient.fetch('GET /api/streams/{name} 2023-10-31', {
+        signal: signal ?? null,
+        params: { path: { name: streamName } },
+      }),
+  });
+  const resolvedStream = stream ?? definition.data?.stream;
 
   const featureFilter =
     knowledgeIndicator.kind === 'feature' ? knowledgeIndicator.feature.filter : undefined;
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   const openFeatureInDiscover = useMemo(() => {
-    if (!featureFilter || !discoverLocator || !stream) {
+    if (!featureFilter || !discoverLocator || !resolvedStream) {
       return undefined;
     }
     return () =>
-      discoverLocator.navigate(buildFeatureDiscoverParams(stream, featureFilter, timeState));
-  }, [discoverLocator, featureFilter, stream, timeState]);
+      discoverLocator.navigate(
+        buildFeatureDiscoverParams(resolvedStream, featureFilter, timeState)
+      );
+  }, [discoverLocator, featureFilter, resolvedStream, timeState]);
 
   const streamFeatures = useMemo(
     () => features.filter((f) => f.stream_name === streamName),
@@ -193,7 +217,7 @@ export function KnowledgeIndicatorDetailsFlyout({
             disabled={isMutating}
             onClick={() => {
               setIsActionsMenuOpen(false);
-              excludeFeature(knowledgeIndicator.feature.uuid);
+              setConfirmExclusion(true);
             }}
           >
             {EXCLUDE_LABEL}
@@ -229,7 +253,7 @@ export function KnowledgeIndicatorDetailsFlyout({
     );
 
     return items;
-  }, [canManage, excludeFeature, isMutating, knowledgeIndicator, restoreFeature, setDurability]);
+  }, [canManage, isMutating, knowledgeIndicator, restoreFeature, setDurability]);
 
   const queryActionItems = useMemo(() => {
     if (!canManage || knowledgeIndicator.kind !== 'query') {
@@ -362,6 +386,18 @@ export function KnowledgeIndicatorDetailsFlyout({
         </FlyoutToolbarHeader>
 
         <EuiFlyoutHeader hasBorder>
+          <EuiText size="xs" color="subdued">
+            <p>
+              {isRule
+                ? i18n.translate('xpack.significantEventsApp.detail.ruleEyebrow', {
+                    defaultMessage: 'Detection rule',
+                  })
+                : i18n.translate('xpack.significantEventsApp.detail.knowledgeEyebrow', {
+                    defaultMessage: 'Learned knowledge',
+                  })}
+            </p>
+          </EuiText>
+          <EuiSpacer size="s" />
           <EuiTitle size="s">
             <h2 id={flyoutTitleId}>{title}</h2>
           </EuiTitle>
@@ -393,41 +429,85 @@ export function KnowledgeIndicatorDetailsFlyout({
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <FlyoutMetadataCard title={TYPE_LABEL}>
-                    <EuiBadge color="hollow">{QUERY_TYPE_LABEL}</EuiBadge>
+                    <EuiBadge color="hollow">
+                      {knowledgeIndicator.kind === 'query'
+                        ? knowledgeIndicator.query.type
+                        : QUERY_TYPE_LABEL}
+                    </EuiBadge>
                   </FlyoutMetadataCard>
                 </EuiFlexItem>
               </>
             )}
-            <EuiFlexItem>
-              <FlyoutMetadataCard title={STREAM_LABEL}>
-                <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
-                  {streamName}
-                </EuiBadge>
-              </FlyoutMetadataCard>
-            </EuiFlexItem>
             <EuiFlexItem>
               <FlyoutMetadataCard title={DURABILITY_LABEL}>
                 <DurabilityBadge expiresAt={getKnowledgeIndicatorExpiresAt(knowledgeIndicator)} />
               </FlyoutMetadataCard>
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiButtonEmpty
+            size="xs"
+            flush="left"
+            iconType="database"
+            href={href({ kind: 'source', id: streamName, stream: streamName })}
+            onClick={
+              onNavigate
+                ? (event) => {
+                    event.preventDefault();
+                    onNavigate({ kind: 'source', id: streamName, stream: streamName });
+                  }
+                : undefined
+            }
+            data-test-subj="knowledgeIndicatorSourceLink"
+          >
+            {streamName}
+          </EuiButtonEmpty>
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
           {knowledgeIndicator.kind === 'feature' ? (
-            <KnowledgeIndicatorFeatureDetailsContent
-              feature={knowledgeIndicator.feature}
-              onOpenInDiscover={openFeatureInDiscover}
-            />
+            <>
+              <KnowledgeIndicatorFeatureDetailsContent
+                onUpdated={onClose}
+                feature={knowledgeIndicator.feature}
+                onOpenInDiscover={openFeatureInDiscover}
+              />
+              <EuiSpacer size="l" />
+              <EvidenceChain focus={{ kind: 'feature', feature: knowledgeIndicator.feature }} />
+            </>
           ) : (
             <KnowledgeIndicatorQueryDetailsContent
               query={knowledgeIndicator.query}
               occurrences={occurrencesByQueryId[knowledgeIndicator.query.id]}
               streamFeatures={streamFeatures}
+              streamName={streamName}
+              onUpdated={onClose}
             />
           )}
         </EuiFlyoutBody>
       </EuiFlyout>
+      {confirmExclusion && knowledgeIndicator.kind === 'feature' && (
+        <EuiConfirmModal
+          title={EXCLUDE_LABEL}
+          aria-label={EXCLUDE_LABEL}
+          onCancel={() => setConfirmExclusion(false)}
+          onConfirm={() => {
+            excludeFeature(knowledgeIndicator.feature.uuid);
+            setConfirmExclusion(false);
+          }}
+          cancelButtonText={journey.cancel}
+          confirmButtonText={EXCLUDE_LABEL}
+        >
+          <EuiText size="s">
+            <p>
+              {i18n.translate('xpack.significantEventsApp.knowledge.excludeImpact', {
+                defaultMessage:
+                  'This indicator will be excluded from learned context and the topology. Rules that depend on it are reconciled by the engine. Existing detections and events remain available. You can restore it from Knowledge.',
+              })}
+            </p>
+          </EuiText>
+        </EuiConfirmModal>
+      )}
       {showDeleteModal ? (
         <DeleteTableItemsModal
           title={isRule ? DELETE_RULE_MODAL_TITLE : DELETE_KI_MODAL_TITLE}
@@ -471,13 +551,6 @@ const TYPE_LABEL = i18n.translate(
   'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.typeLabel',
   {
     defaultMessage: 'Type',
-  }
-);
-
-const STREAM_LABEL = i18n.translate(
-  'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.streamLabel',
-  {
-    defaultMessage: 'Stream',
   }
 );
 

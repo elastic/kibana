@@ -44,6 +44,13 @@ export function NightshiftPage(): React.ReactElement | null {
   const settingsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/settings',
   });
+  const detectionHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
+    path: '/detection',
+  });
+  const navigateToDetection = useCallback(
+    () => application.navigateToUrl(detectionHref),
+    [application, detectionHref]
+  );
   const managementHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
     path: '/streams',
   });
@@ -153,6 +160,11 @@ export function NightshiftPage(): React.ReactElement | null {
               headerProps={{
                 onManagementClick: navigateToManagement,
                 managementHref,
+                onDetectionClick: navigateToDetection,
+                detectionHref,
+                knowledgeHref: application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
+                  path: '/knowledge',
+                }),
                 onSandboxSecretsClick: canManageSandboxSecrets
                   ? openSandboxSecretsFlyout
                   : undefined,
@@ -169,6 +181,11 @@ export function NightshiftPage(): React.ReactElement | null {
             page={canUseAutomationsPage ? 'automations' : 'landing'}
             onManagementClick={navigateToManagement}
             managementHref={managementHref}
+            onDetectionClick={navigateToDetection}
+            detectionHref={detectionHref}
+            knowledgeHref={application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
+              path: '/knowledge',
+            })}
             onSettingsClick={canManageAndConfigure ? navigateToSettings : undefined}
             settingsHref={canManageAndConfigure ? settingsHref : undefined}
             onSandboxSecretsClick={canManageSandboxSecrets ? openSandboxSecretsFlyout : undefined}

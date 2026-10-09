@@ -6,8 +6,15 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { severitySchema } from '@kbn/significant-events-schema';
 
 export const triggerRowSchema = z.discriminatedUnion('kind', [
+  z.object({
+    kind: z.literal('significant_event'),
+    titlePattern: z.string().max(1000).optional(),
+    severities: z.array(severitySchema).max(4).optional(),
+    streamNames: z.array(z.string().max(1000)).max(100).optional(),
+  }),
   z.object({
     kind: z.literal('alert'),
     ruleNamePattern: z.string().max(1000).optional(),
