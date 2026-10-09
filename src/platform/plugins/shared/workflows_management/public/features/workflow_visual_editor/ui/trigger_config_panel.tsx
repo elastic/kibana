@@ -31,22 +31,16 @@ import { isMap, parseDocument, stringify as stringifyYaml } from 'yaml';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { YAML_LANG_ID } from '@kbn/monaco';
-import {
-  ensureWorkflowGraphEuiIcons,
-  resolveNodeChipStyle,
-} from '@kbn/workflows-ui';
-import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
+import { ensureWorkflowGraphEuiIcons, resolveNodeChipStyle } from '@kbn/workflows-ui';
+import { FlyoutMonacoFrame, getFlyoutMonacoEditorOptions } from './flyout_monaco_frame';
 import {
   findStepsReferencingInput,
   parseInputsToSchemaProperties,
-  SchemaPropertyList,
   schemaPropertiesToJsonSchema,
   type SchemaPropertyField,
+  SchemaPropertyList,
 } from '../../../shared/ui/schema_property_builder';
-import {
-  FlyoutMonacoFrame,
-  getFlyoutMonacoEditorOptions,
-} from './flyout_monaco_frame';
+import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 
 ensureWorkflowGraphEuiIcons();
 
@@ -336,9 +330,7 @@ export function TriggerConfigPanel({
               <span
                 css={[
                   { color: chip.iconColor, display: 'inline-flex', lineHeight: 0 },
-                  chip.iconColor
-                    ? { '& svg, & svg *': { fill: chip.iconColor } }
-                    : undefined,
+                  chip.iconColor ? { '& svg, & svg *': { fill: chip.iconColor } } : undefined,
                 ]}
               >
                 <StepIcon
@@ -458,7 +450,11 @@ export function TriggerConfigPanel({
                 }}
               >
                 {!parsed.valid ? (
-                  <EuiText size="s" color="danger" data-test-subj="workflowTriggerConfigPanelInvalid">
+                  <EuiText
+                    size="s"
+                    color="danger"
+                    data-test-subj="workflowTriggerConfigPanelInvalid"
+                  >
                     {i18n.translate('workflows.triggerConfigPanel.invalidYaml', {
                       defaultMessage: 'Fix the YAML to edit this trigger as a form. {error}',
                       values: { error: parsed.error ?? '' },
@@ -564,28 +560,25 @@ export function TriggerConfigPanel({
           paddingInline: euiTheme.size.base,
         }}
       >
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={onCancel}
-                data-test-subj="workflowTriggerConfigPanelCancel"
-              >
-                {i18n.translate('workflows.triggerConfigPanel.cancel', { defaultMessage: 'Cancel' })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={handleSave}
-                isDisabled={!parsed.valid}
-                data-test-subj="workflowTriggerConfigPanelSave"
-              >
-                {i18n.translate('workflows.triggerConfigPanel.save', {
-                  defaultMessage: 'Save trigger',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={onCancel} data-test-subj="workflowTriggerConfigPanelCancel">
+              {i18n.translate('workflows.triggerConfigPanel.cancel', { defaultMessage: 'Cancel' })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={handleSave}
+              isDisabled={!parsed.valid}
+              data-test-subj="workflowTriggerConfigPanelSave"
+            >
+              {i18n.translate('workflows.triggerConfigPanel.save', {
+                defaultMessage: 'Save trigger',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </div>
     </div>
   );

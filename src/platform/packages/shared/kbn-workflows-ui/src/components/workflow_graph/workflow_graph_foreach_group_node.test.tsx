@@ -116,7 +116,6 @@ describe('WorkflowGraphForeachGroupNode', () => {
     expect(fallbackCall?.[0].style.right).toBeUndefined();
   });
 
-
   describe('execution outcome colours', () => {
     // EuiIcon renders its `color` prop as a DOM attribute — use that to assert
     // that different execution states produce distinct colours. Each render is
@@ -174,25 +173,19 @@ describe('WorkflowGraphForeachGroupNode', () => {
 
     it('renders the + button when hasBodySteps is false and edit is available', () => {
       renderWithEdit({ hasBodySteps: false } as any);
-      expect(
-        screen.getByTestId('workflowGraphForeachGroupAddFirstStep')
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('workflowGraphForeachGroupAddFirstStep')).toBeInTheDocument();
     });
 
     it('does not render the + button when hasBodySteps is true', () => {
       renderWithEdit({ hasBodySteps: true } as any);
-      expect(
-        screen.queryByTestId('workflowGraphForeachGroupAddFirstStep')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowGraphForeachGroupAddFirstStep')).not.toBeInTheDocument();
     });
 
     it('does not render the + button in read-only mode (no edit context)', () => {
       // The dashed body area is always shown for empty containers, but the
       // interactive + button requires edit context.
       renderGroup({ hasBodySteps: false } as any);
-      expect(
-        screen.queryByTestId('workflowGraphForeachGroupAddFirstStep')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowGraphForeachGroupAddFirstStep')).not.toBeInTheDocument();
     });
 
     it('stops propagation on the + click so it cannot bubble into ReactFlow onNodeClick', () => {
@@ -242,9 +235,7 @@ describe('WorkflowGraphForeachGroupNode', () => {
 
     it('does not render the 3-dots button in read-only mode', () => {
       renderGroup();
-      expect(
-        screen.queryByTestId('workflowGraphForeachGroupMenuButton')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowGraphForeachGroupMenuButton')).not.toBeInTheDocument();
     });
 
     it('calls onEditStep when Edit step is clicked', () => {

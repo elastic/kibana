@@ -152,10 +152,8 @@ export function errorPortCenter(
 export const isHorizontalDirection = (direction: LayoutDirection): boolean => direction === 'LR';
 
 /** Cross-axis position style for a React Flow Handle on the flow source edge. */
-export const handleAlongStyle = (
-  along: string,
-  isHorizontal: boolean
-): CSSProperties => (isHorizontal ? { top: along } : { left: along });
+export const handleAlongStyle = (along: string, isHorizontal: boolean): CSSProperties =>
+  isHorizontal ? { top: along } : { left: along };
 
 /**
  * Absolute-position style for the error port: bottom edge at ERROR_PORT_FRACTION,
@@ -163,9 +161,7 @@ export const handleAlongStyle = (
  * 15px flow-port outset). Same in both orientations — do not put the error
  * port on the right edge in LR.
  */
-export const errorPortEdgeStyle = (
-  straddleOutset: number = PORT_HIT_SIZE / 2
-): CSSProperties => ({
+export const errorPortEdgeStyle = (straddleOutset: number = PORT_HIT_SIZE / 2): CSSProperties => ({
   left: ERROR_PORT_ALONG,
   right: 'auto',
   bottom: -straddleOutset,
@@ -213,13 +209,7 @@ export function expandedPortsClear(
   hasErrorPort: boolean,
   direction: LayoutDirection
 ): boolean {
-  const centers = expandedPortCenters(
-    nodeWidth,
-    nodeHeight,
-    flowCount,
-    hasErrorPort,
-    direction
-  );
+  const centers = expandedPortCenters(nodeWidth, nodeHeight, flowCount, hasErrorPort, direction);
   const minDist = PORT_EXPANDED_SIZE; // diameter = 2 * radius clearance
   for (let i = 0; i < centers.length; i++) {
     for (let j = i + 1; j < centers.length; j++) {

@@ -59,7 +59,11 @@ describe('buildWorkflowSettingsNodes', () => {
 
     const rowWidth = 3 * PENDING_NODE_WIDTH + 2 * SETTINGS_GROUP_PAD;
     const expectedGroupY =
-      200 - SETTINGS_TO_FLOW_GAP - PENDING_NODE_HEIGHT - SETTINGS_GROUP_PAD - (topInset - SETTINGS_GROUP_PAD);
+      200 -
+      SETTINGS_TO_FLOW_GAP -
+      PENDING_NODE_HEIGHT -
+      SETTINGS_GROUP_PAD -
+      (topInset - SETTINGS_GROUP_PAD);
     const bandMidX = PENDING_NODE_WIDTH / 2;
     const expectedGroupX = bandMidX - rowWidth / 2 - SETTINGS_GROUP_PAD;
     expect(nodes[0].position.x).toBeCloseTo(expectedGroupX);

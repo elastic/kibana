@@ -83,8 +83,9 @@ export function getInputCaretCoordinates(
 
   for (const prop of MIRROR_STYLE_PROPS) {
     // Style declaration keys match the camelCase list above.
-    (mirror.style as unknown as Record<string, string>)[prop] =
-      computed[prop as keyof CSSStyleDeclaration] as string;
+    (mirror.style as unknown as Record<string, string>)[prop] = computed[
+      prop as keyof CSSStyleDeclaration
+    ] as string;
   }
 
   mirror.textContent = element.value.substring(0, position);

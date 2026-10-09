@@ -48,9 +48,7 @@ export const validateSchemaPropertyName = (
   const trimmed = name.trim();
   if (!trimmed) return 'empty';
   if (!IDENTIFIER_RE.test(trimmed)) return 'invalid';
-  const duplicate = siblings.some(
-    (s) => s.id !== selfId && s.name.trim() === trimmed
-  );
+  const duplicate = siblings.some((s) => s.id !== selfId && s.name.trim() === trimmed);
   if (duplicate) return 'duplicate';
   return null;
 };
@@ -148,8 +146,8 @@ const parseProperty = (
   const mode: SchemaPropertyMode = isRequired
     ? 'required'
     : parsedDefault.trim()
-      ? 'default'
-      : 'none';
+    ? 'default'
+    : 'none';
 
   return {
     id: createId(),
@@ -371,7 +369,5 @@ export const findStepsReferencingPath = (
  * Find step names that reference `inputs.<name>` (or nested paths under it)
  * in the workflow YAML document.
  */
-export const findStepsReferencingInput = (
-  workflowYaml: string,
-  inputName: string
-): string[] => findStepsReferencingPath(workflowYaml, 'inputs', inputName);
+export const findStepsReferencingInput = (workflowYaml: string, inputName: string): string[] =>
+  findStepsReferencingPath(workflowYaml, 'inputs', inputName);

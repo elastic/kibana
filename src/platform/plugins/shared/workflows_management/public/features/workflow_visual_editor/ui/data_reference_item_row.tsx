@@ -85,11 +85,7 @@ function DelayedLabelTooltip({
   );
 }
 
-export function DataReferenceEntityIcon({
-  stepType,
-}: {
-  readonly stepType: string;
-}) {
+export function DataReferenceEntityIcon({ stepType }: { readonly stepType: string }) {
   const { euiTheme } = useEuiTheme();
   const chip = resolveNodeChipStyle(euiTheme, stepType, stepType.startsWith('trigger_'), {
     isSuccess: false,
@@ -117,9 +113,7 @@ export function DataReferenceEntityIcon({
       <span
         css={[
           { color: chip.iconColor, display: 'inline-flex', lineHeight: 0 },
-          chip.iconColor
-            ? { '& svg, & svg *': { fill: chip.iconColor } }
-            : undefined,
+          chip.iconColor ? { '& svg, & svg *': { fill: chip.iconColor } } : undefined,
         ]}
       >
         <StepIcon

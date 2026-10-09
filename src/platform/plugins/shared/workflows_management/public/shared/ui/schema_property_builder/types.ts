@@ -8,13 +8,7 @@
  */
 
 /** Types the visual schema builder can author. */
-export type SchemaPropertyType =
-  | 'string'
-  | 'number'
-  | 'boolean'
-  | 'date'
-  | 'object'
-  | 'array';
+export type SchemaPropertyType = 'string' | 'number' | 'boolean' | 'date' | 'object' | 'array';
 
 /**
  * How the property behaves when the caller omits a value.

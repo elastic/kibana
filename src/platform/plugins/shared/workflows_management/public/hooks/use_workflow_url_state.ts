@@ -153,9 +153,7 @@ export function useWorkflowUrlState() {
     return {
       tab: (firstString(params.tab) as WorkflowUrlStateTabType) || 'workflow',
       // Visual builder is the default; only `view=yaml` forces the YAML editor.
-      view:
-        getStoredEditorView() ??
-        (params.view === 'yaml' ? 'yaml' : 'graph'),
+      view: getStoredEditorView() ?? (params.view === 'yaml' ? 'yaml' : 'graph'),
       direction:
         getStoredGraphDirection() ??
         (params.direction === 'LR' || params.direction === 'TB'

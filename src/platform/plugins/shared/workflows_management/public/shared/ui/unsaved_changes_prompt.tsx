@@ -93,7 +93,10 @@ export const UnsavedChangesPrompt = React.memo<Props>(
           });
 
           if (confirmed) {
-            const url = http.basePath.prepend(nextLocation.pathname) + nextLocation.search + nextLocation.hash;
+            const url =
+              http.basePath.prepend(nextLocation.pathname) +
+              nextLocation.search +
+              nextLocation.hash;
             unblock();
             navigateToUrl(url, { state: nextLocation.state });
           }

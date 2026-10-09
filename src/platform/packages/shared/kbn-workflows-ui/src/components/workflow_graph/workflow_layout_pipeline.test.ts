@@ -794,7 +794,6 @@ describe('spec 02 regression — named fixtures', () => {
     expect(centerX(fallbackNode!)).toBeGreaterThan(centerX(ownerNode!) + 100);
   });
 
-
   it('owner with fallback and a plain following step share the spine column', () => {
     // Speculative anchoring (pass 3) translates the owner onto its spine
     // successor's column. Owner and next-step should share the same x-centre.

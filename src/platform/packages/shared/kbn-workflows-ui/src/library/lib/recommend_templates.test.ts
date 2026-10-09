@@ -72,7 +72,11 @@ describe('recommendTemplates', () => {
         solutions: ['security'],
         stepTypes: ['slack.postMessage'],
       }),
-      buildTemplate({ slug: 'sec-only', solutions: ['security'], stepTypes: ['elasticsearch.search'] }),
+      buildTemplate({
+        slug: 'sec-only',
+        solutions: ['security'],
+        stepTypes: ['elasticsearch.search'],
+      }),
     ];
 
     const result = recommendTemplates({

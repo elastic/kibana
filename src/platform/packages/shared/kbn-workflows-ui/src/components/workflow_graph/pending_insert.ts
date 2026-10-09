@@ -96,10 +96,12 @@ export const computePendingErrorBranchPlacement = (
   _stepId: string,
   _nodes: readonly Node[],
   _direction: LayoutDirection
-): {
-  origin: { x: number; y: number };
-  shifts: ReadonlyMap<string, { dx: number; dy: number }>;
-} | undefined => undefined;
+):
+  | {
+      origin: { x: number; y: number };
+      shifts: ReadonlyMap<string, { dx: number; dy: number }>;
+    }
+  | undefined => undefined;
 
 /**
  * Flow-space top-left for the pending insert card, sized to a normal step node.

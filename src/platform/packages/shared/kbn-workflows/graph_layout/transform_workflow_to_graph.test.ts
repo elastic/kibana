@@ -195,9 +195,7 @@ describe('transformWorkflowToGraph', () => {
     );
     // With join node: branch exits (t2, e2) feed the virtual gate-join node,
     // which then feeds 'after' as the single source.
-    const sourcesIntoAfter = r.edges
-      .filter((e) => e.target === 'after')
-      .map((e) => e.source);
+    const sourcesIntoAfter = r.edges.filter((e) => e.target === 'after').map((e) => e.source);
     expect(sourcesIntoAfter).toEqual(['gate-join']);
     // forkNodeToJoinId maps gate → gate-join.
     expect(r.forkNodeToJoinId.get('gate')).toBe('gate-join');
@@ -377,9 +375,7 @@ describe('transformWorkflowToGraph', () => {
     );
     // Each empty branch gets a bypass lane node so the labeled edge renders.
     // The virtual par-join node consolidates all branch exits; only par-join feeds 'after'.
-    const branchBypassIds = r.bypassLaneNodes
-      .filter((n) => n.id !== 'par-join')
-      .map((n) => n.id);
+    const branchBypassIds = r.bypassLaneNodes.filter((n) => n.id !== 'par-join').map((n) => n.id);
     expect(branchBypassIds).toHaveLength(2);
     expect(branchBypassIds.every((s) => s.startsWith('par-branch-'))).toBe(true);
     const sourcesIntoAfter = r.edges.filter((e) => e.target === 'after').map((e) => e.source);
@@ -903,7 +899,9 @@ describe('transformWorkflowToGraph — nodeRefs', () => {
       expect(r.bypassLaneNodes).toHaveLength(2);
       const bypassId = r.bypassLaneNodes.find((n) => n.id !== 'gate-join')!.id;
       // Branch exits (bye, bypassId) feed gate-join; gate-join is the single source into 'next'.
-      expect(r.edges).toContainEqual(expect.objectContaining({ source: 'bye', target: 'gate-join' }));
+      expect(r.edges).toContainEqual(
+        expect.objectContaining({ source: 'bye', target: 'gate-join' })
+      );
       expect(r.edges).toContainEqual(
         expect.objectContaining({ source: bypassId, target: 'gate-join' })
       );
@@ -934,7 +932,9 @@ describe('transformWorkflowToGraph — nodeRefs', () => {
       expect(r.edges).toContainEqual(
         expect.objectContaining({ source: bypassId, target: 'gate-join' })
       );
-      expect(r.edges).toContainEqual(expect.objectContaining({ source: 'bye', target: 'gate-join' }));
+      expect(r.edges).toContainEqual(
+        expect.objectContaining({ source: 'bye', target: 'gate-join' })
+      );
       const fanInEdges = r.edges.filter((e) => e.target === 'next');
       expect(fanInEdges).toHaveLength(1);
       expect(fanInEdges[0].source).toBe('gate-join');

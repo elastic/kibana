@@ -10,8 +10,8 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import { ReferenceCapableField } from './reference_capable_field';
+import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 
 jest.mock('./data_reference_picker', () => ({
   DataReferencePicker: ({

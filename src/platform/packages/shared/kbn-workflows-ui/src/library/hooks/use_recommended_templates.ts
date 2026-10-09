@@ -8,9 +8,9 @@
  */
 
 import { useMemo } from 'react';
-import { recommendTemplates, type RecommendedTemplate } from '../lib/recommend_templates';
 import { useActiveSolution } from './use_active_solution';
 import { useCatalog } from './use_catalog';
+import { type RecommendedTemplate, recommendTemplates } from '../lib/recommend_templates';
 
 export interface UseRecommendedTemplatesResult {
   readonly recommendations: RecommendedTemplate[];

@@ -118,7 +118,10 @@ export const coerceConstantValue = (
     try {
       const parsed = JSON.parse(trimmed);
       if (type === 'array' && !Array.isArray(parsed)) return { ok: false, error: 'json' };
-      if (type === 'object' && (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed))) {
+      if (
+        type === 'object' &&
+        (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed))
+      ) {
         return { ok: false, error: 'json' };
       }
       return { ok: true, value: parsed };
@@ -148,8 +151,7 @@ export const parseOutputsToFields = (outputs: unknown): OutputField[] => {
   if (Array.isArray(outputs)) {
     return outputs.map((raw) => {
       const item = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
-      const type =
-        typeof item.type === 'string' ? (item.type as OutputField['type']) : 'string';
+      const type = typeof item.type === 'string' ? (item.type as OutputField['type']) : 'string';
       return createEmptyOutput({
         name: typeof item.name === 'string' ? item.name : '',
         type: ['string', 'number', 'boolean', 'date', 'object', 'array'].includes(type)
@@ -161,8 +163,8 @@ export const parseOutputsToFields = (outputs: unknown): OutputField[] => {
           item.default === undefined || item.default === null
             ? ''
             : typeof item.default === 'string'
-              ? item.default
-              : JSON.stringify(item.default),
+            ? item.default
+            : JSON.stringify(item.default),
       });
     });
   }

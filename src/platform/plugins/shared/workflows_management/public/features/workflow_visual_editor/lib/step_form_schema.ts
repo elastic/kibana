@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   getBuiltInStepDefinition,
   getStepDeprecationInfo,
@@ -14,7 +15,6 @@ import {
 } from '@kbn/workflows';
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { unwrapSchema } from '@kbn/workflows/common/utils/zod';
-import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import { prettifyCatalogKey } from '../../../shared/utils/catalog_display_name';
 
@@ -243,7 +243,12 @@ const resolveKind = (
   // Schema-level `.meta({ language })` annotation takes priority over name-based overrides,
   // so step types can declare their language without a hardcoded entry in this file.
   const metaLanguage = readFieldMeta(schema)?.language as StepFieldLanguage | undefined;
-  if (metaLanguage === 'json' || metaLanguage === 'kuery' || metaLanguage === 'plaintext' || metaLanguage === 'esql') {
+  if (
+    metaLanguage === 'json' ||
+    metaLanguage === 'kuery' ||
+    metaLanguage === 'plaintext' ||
+    metaLanguage === 'esql'
+  ) {
     return { kind: 'code', language: metaLanguage };
   }
 
@@ -416,10 +421,7 @@ export const findUnclosedTemplateExpression = (value: string): boolean => {
  * Advisory field validation for the config panel. Returns a specific message, or
  * undefined when the value is acceptable. Empty optionals are always OK.
  */
-export const validateStepField = (
-  field: StepFormField,
-  value: unknown
-): string | undefined => {
+export const validateStepField = (field: StepFormField, value: unknown): string | undefined => {
   if (isEmptyFieldValue(value)) {
     if (!field.required) return undefined;
     return i18n.translate('workflows.stepConfigPanel.validation.required', {

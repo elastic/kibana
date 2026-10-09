@@ -10,12 +10,12 @@
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { DataReferencePicker } from './data_reference_picker';
 import {
   clearActiveDataReferenceInsertTarget,
   setActiveDataReferenceInsertTarget,
 } from '../../../shared/lib/active_data_reference_insert_target';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
-import { DataReferencePicker } from './data_reference_picker';
 
 export interface ReferenceSelectionBridge {
   readonly focus: () => void;
@@ -105,7 +105,8 @@ export function ReferenceCapableField({
   const openPicker = useCallback(
     (replaceRange: { start: number; end: number } | null) => {
       const bridge = selectionBridgeRef.current;
-      caretOnOpenRef.current = bridge?.getCaret() ?? inputRef.current?.selectionStart ?? value.length;
+      caretOnOpenRef.current =
+        bridge?.getCaret() ?? inputRef.current?.selectionStart ?? value.length;
       replaceRangeRef.current = replaceRange;
       setIsOpen(true);
     },
@@ -176,8 +177,7 @@ export function ReferenceCapableField({
       return;
     }
     const bridge = selectionBridgeRef.current;
-    const caret =
-      bridge?.getCaret() ?? inputRef.current?.selectionStart ?? value.length;
+    const caret = bridge?.getCaret() ?? inputRef.current?.selectionStart ?? value.length;
     openPicker({ start: caret, end: caret });
   }, [closePicker, isOpen, openPicker, value.length]);
 
@@ -275,7 +275,9 @@ export function ReferenceCapableField({
             }
           : {}),
         borderRadius: euiTheme.border.radius.small,
-        boxShadow: isDragOver ? `inset 0 0 0 2px ${euiTheme.colors.borderStrongPrimary}` : undefined,
+        boxShadow: isDragOver
+          ? `inset 0 0 0 2px ${euiTheme.colors.borderStrongPrimary}`
+          : undefined,
         transition: `box-shadow ${euiTheme.animation.fast}`,
       }}
     >

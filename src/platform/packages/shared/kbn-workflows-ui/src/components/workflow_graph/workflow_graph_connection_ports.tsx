@@ -16,15 +16,15 @@ import type { NodePortTargets } from './compute_insertion_points';
 import {
   ERROR_PORT_ALONG,
   ERROR_PORT_FRACTION,
+  errorPortEdgeStyle,
   IF_PORT_FALSE,
   IF_PORT_TRUE,
+  isHorizontalDirection,
   PORT_DOT_SIZE,
   PORT_EXPANDED_SIZE,
   PORT_HIT_SIZE,
   PORT_STRADDLE_OUTSET,
   STEP_PORT,
-  errorPortEdgeStyle,
-  isHorizontalDirection,
 } from './port_geometry';
 import type {
   WorkflowGraphAnchorRect,
@@ -45,7 +45,12 @@ export {
   STEP_PORT,
 };
 /** @deprecated Prefer ERROR_PORT_FRACTION. */
-export { ERROR_PORT_INSET, ERROR_PORT_OFFSET, IF_PORT_ERROR, STEP_ERROR_PORT } from './port_geometry';
+export {
+  ERROR_PORT_INSET,
+  ERROR_PORT_OFFSET,
+  IF_PORT_ERROR,
+  STEP_ERROR_PORT,
+} from './port_geometry';
 /** @deprecated Prefer IF_PORT_FALSE / IF_PORT_TRUE. */
 export const BRANCH_FALSE_LEFT = IF_PORT_FALSE;
 export const BRANCH_TRUE_LEFT = IF_PORT_TRUE;
@@ -89,8 +94,7 @@ export function WorkflowGraphConnectionPorts({
   const fallbackStepName = ports.fallbackTarget?.stepName;
   const fallbackNodeId = ports.fallbackTarget?.nodeId;
   const creatingError =
-    pendingInsert?.context.mode === 'error' &&
-    pendingInsert.context.stepId === fallbackNodeId;
+    pendingInsert?.context.mode === 'error' && pendingInsert.context.stepId === fallbackNodeId;
 
   const insertError = useCallback(
     (stepName: string, anchor: WorkflowGraphAnchorRect) => {

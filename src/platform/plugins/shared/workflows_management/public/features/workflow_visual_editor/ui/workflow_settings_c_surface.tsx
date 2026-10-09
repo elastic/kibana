@@ -35,8 +35,8 @@ import {
 import { CANVAS_CONFIG_PANEL_MARGIN } from './canvas_config_panel_shell';
 import { useWorkflowSettingsDraft } from './use_workflow_settings_draft';
 import {
-  WorkflowConstantsEditor,
   type SettingsEditorAddControls,
+  WorkflowConstantsEditor,
 } from '../../../pages/workflow_detail/ui/workflow_constants_editor';
 import { WorkflowOutputsEditor } from '../../../pages/workflow_detail/ui/workflow_outputs_editor';
 

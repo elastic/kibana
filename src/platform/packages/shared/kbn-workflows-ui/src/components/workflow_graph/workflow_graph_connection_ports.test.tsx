@@ -86,12 +86,7 @@ describe('WorkflowGraphConnectionPorts', () => {
 
     rerender(
       <div style={{ position: 'relative', width: 300, height: 64 }}>
-        <WorkflowGraphConnectionPorts
-          ports={ports}
-          edit={edit}
-          nodeHovered
-          direction="TB"
-        />
+        <WorkflowGraphConnectionPorts ports={ports} edit={edit} nodeHovered direction="TB" />
       </div>
     );
     expect(getComputedStyle(errorAnchor).opacity).toBe('1');
@@ -151,12 +146,7 @@ describe('WorkflowGraphConnectionPorts', () => {
     };
     render(
       <div style={{ position: 'relative', width: 300, height: 64 }}>
-        <WorkflowGraphConnectionPorts
-          ports={ports}
-          edit={edit}
-          nodeHovered
-          direction="TB"
-        />
+        <WorkflowGraphConnectionPorts ports={ports} edit={edit} nodeHovered direction="TB" />
       </div>
     );
     const anchor = portAnchor('workflowGraphPort-error');

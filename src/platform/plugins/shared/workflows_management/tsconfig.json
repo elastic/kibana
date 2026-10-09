@@ -21,7 +21,6 @@
     "@kbn/entity-access-control",
     "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",
-    "@kbn/esql-editor",
     "@kbn/esql-language",
     "@kbn/esql-types",
     "@kbn/esql-utils",

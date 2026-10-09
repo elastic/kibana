@@ -48,9 +48,7 @@ jest.mock('../../../shared/ui/step_icons/step_icon', () => ({
   ),
 }));
 
-const renderPanel = (
-  overrides: Partial<React.ComponentProps<typeof TriggerConfigPanel>> = {}
-) => {
+const renderPanel = (overrides: Partial<React.ComponentProps<typeof TriggerConfigPanel>> = {}) => {
   const onSave = jest.fn();
   const onCancel = jest.fn();
   render(

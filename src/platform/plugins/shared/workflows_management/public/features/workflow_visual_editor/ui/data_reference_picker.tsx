@@ -23,6 +23,8 @@ import {
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DataReferenceItemRowContent } from './data_reference_item_row';
+import { getInputCaretCoordinates } from './get_input_caret_coordinates';
 import type {
   DataReferenceCatalog,
   DataReferenceGroup,
@@ -34,8 +36,6 @@ import {
   formatDataReferenceToken,
   isDataReferenceInsertable,
 } from '../lib/build_data_reference_catalog';
-import { DataReferenceItemRowContent } from './data_reference_item_row';
-import { getInputCaretCoordinates } from './get_input_caret_coordinates';
 
 const PICKER_MAX_HEIGHT = 400;
 /** Fixed floating-layer width — must not match the panel field width. */
@@ -198,7 +198,11 @@ export function DataReferencePicker({
         groups: [] as DataReferenceGroup[],
       };
     }
-    return { mode: 'browse' as const, items: [] as DataReferenceItem[], groups: catalog.groups.filter((g) => g.items.length > 0) };
+    return {
+      mode: 'browse' as const,
+      items: [] as DataReferenceItem[],
+      groups: catalog.groups.filter((g) => g.items.length > 0),
+    };
   }, [catalog, drilledItem, search]);
 
   const flatNavigable = useMemo((): readonly NavigableEntry[] => {

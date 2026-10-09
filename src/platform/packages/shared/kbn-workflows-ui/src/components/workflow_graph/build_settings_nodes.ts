@@ -135,8 +135,7 @@ export function buildWorkflowSettingsNodes(
   const height = isCompact ? SETTINGS_COMPACT_HEIGHT : PENDING_NODE_HEIGHT;
   const gap = SETTINGS_GROUP_PAD;
   const pad = SETTINGS_GROUP_PAD;
-  const span =
-    specs.length * (arrangeInRow ? width : height) + (specs.length - 1) * gap;
+  const span = specs.length * (arrangeInRow ? width : height) + (specs.length - 1) * gap;
   // Top pad + title + gap before cards (same as pad).
   const topInset = pad + SETTINGS_GROUP_HEADER_HEIGHT + pad;
   const cardAreaW = arrangeInRow ? span : width;
@@ -176,9 +175,7 @@ export function buildWorkflowSettingsNodes(
 
   const cardNodes = specs.map((spec, index) => {
     const localX = arrangeInRow ? pad + index * (width + gap) : pad;
-    const localY = arrangeInRow
-      ? topInset
-      : topInset + index * (height + gap);
+    const localY = arrangeInRow ? topInset : topInset + index * (height + gap);
 
     return {
       id: `settings:${spec.kind}`,

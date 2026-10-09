@@ -8,12 +8,14 @@
  */
 
 import {
+  type DropResult,
   EuiAccordion,
   EuiBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiConfirmModal,
   EuiDragDropContext,
+  euiDragDropReorder,
   EuiDraggable,
   EuiDroppable,
   EuiEmptyPrompt,
@@ -24,25 +26,23 @@ import {
   EuiIcon,
   EuiPanel,
   EuiRadioGroup,
+  type EuiRadioGroupOption,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  euiDragDropReorder,
   useEuiTheme,
   useGeneratedHtmlId,
-  type DropResult,
-  type EuiRadioGroupOption,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { SchemaListDragClone } from './schema_list_drag_clone';
 import {
   applyModeChange,
   applyTypeChange,
   createEmptySchemaProperty,
   validateSchemaPropertyName,
 } from './schema_property_model';
-import { SchemaListDragClone } from './schema_list_drag_clone';
 import {
   SCALAR_SCHEMA_PROPERTY_TYPES,
   SCHEMA_PROPERTY_MAX_DEPTH,
@@ -69,7 +69,9 @@ export interface SchemaPropertyListProps {
   readonly findReferencingSteps?: (name: string) => string[];
 }
 
-const nameErrorMessage = (error: ReturnType<typeof validateSchemaPropertyName>): string | undefined => {
+const nameErrorMessage = (
+  error: ReturnType<typeof validateSchemaPropertyName>
+): string | undefined => {
   if (error === 'empty') {
     return i18n.translate('workflows.schemaPropertyBuilder.nameEmpty', {
       defaultMessage: 'Name is required.',
@@ -128,7 +130,7 @@ const PropertyEditor = ({
             marginInlineEnd: 6,
           }}
         >
-          <EuiIcon type="drag" color="subdued" size="s" />
+          <EuiIcon type="drag" color="subdued" size="s" aria-hidden={true} />
         </span>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -301,9 +303,7 @@ const PropertyEditor = ({
                       defaultMessage: 'Allow other values',
                     })}
                     checked={field.allowOtherValues}
-                    onChange={(e) =>
-                      onUpdate({ ...field, allowOtherValues: e.target.checked })
-                    }
+                    onChange={(e) => onUpdate({ ...field, allowOtherValues: e.target.checked })}
                     data-test-subj={`${dataTestSubjPrefix}-allowOther-${field.id}`}
                   />
                 </EuiFormRow>
@@ -339,12 +339,9 @@ const PropertyEditor = ({
                       })}
                       <EuiText size="xs" color="subdued">
                         <span>
-                          {i18n.translate(
-                            'workflows.schemaPropertyBuilder.modeRequiredSecondary',
-                            {
-                              defaultMessage: 'the caller must provide a value',
-                            }
-                          )}
+                          {i18n.translate('workflows.schemaPropertyBuilder.modeRequiredSecondary', {
+                            defaultMessage: 'the caller must provide a value',
+                          })}
                         </span>
                       </EuiText>
                     </span>
@@ -372,9 +369,7 @@ const PropertyEditor = ({
                           value={field.defaultValue}
                           disabled={field.mode !== 'default'}
                           onClick={(e) => e.stopPropagation()}
-                          onChange={(e) =>
-                            onUpdate({ ...field, defaultValue: e.target.value })
-                          }
+                          onChange={(e) => onUpdate({ ...field, defaultValue: e.target.value })}
                           data-test-subj={`${dataTestSubjPrefix}-default-${field.id}`}
                         />
                       </EuiFlexItem>
@@ -435,8 +430,7 @@ const PropertyEditor = ({
                 {atNestingLimit ? (
                   <EuiText size="xs" color="subdued">
                     {i18n.translate('workflows.schemaPropertyBuilder.nestingLimit', {
-                      defaultMessage:
-                        'Deeper nested shapes can still be edited in the YAML tab.',
+                      defaultMessage: 'Deeper nested shapes can still be edited in the YAML tab.',
                     })}
                   </EuiText>
                 ) : (
@@ -450,12 +444,9 @@ const PropertyEditor = ({
                         'workflows.schemaPropertyBuilder.noItemPropsTitle',
                         { defaultMessage: 'No item properties yet' }
                       )}
-                      emptyBody={i18n.translate(
-                        'workflows.schemaPropertyBuilder.noItemPropsBody',
-                        {
-                          defaultMessage: 'Define the shape of each array item.',
-                        }
-                      )}
+                      emptyBody={i18n.translate('workflows.schemaPropertyBuilder.noItemPropsBody', {
+                        defaultMessage: 'Define the shape of each array item.',
+                      })}
                       addButtonLabel={i18n.translate(
                         'workflows.schemaPropertyBuilder.addItemProperty',
                         { defaultMessage: 'Add property' }
@@ -484,10 +475,9 @@ const PropertyEditor = ({
                   onChange={(properties) => onUpdate({ ...field, properties })}
                   depth={depth + 1}
                   dataTestSubjPrefix={`${dataTestSubjPrefix}-props`}
-                  emptyTitle={i18n.translate(
-                    'workflows.schemaPropertyBuilder.noNestedPropsTitle',
-                    { defaultMessage: 'No properties yet' }
-                  )}
+                  emptyTitle={i18n.translate('workflows.schemaPropertyBuilder.noNestedPropsTitle', {
+                    defaultMessage: 'No properties yet',
+                  })}
                   emptyBody={i18n.translate('workflows.schemaPropertyBuilder.noNestedPropsBody', {
                     defaultMessage: 'Add fields that belong on this object.',
                   })}
@@ -576,9 +566,7 @@ export function SchemaPropertyList({
 
   const requestDelete = useCallback(
     (field: SchemaPropertyField) => {
-      const steps = field.name.trim()
-        ? findReferencingSteps?.(field.name.trim()) ?? []
-        : [];
+      const steps = field.name.trim() ? findReferencingSteps?.(field.name.trim()) ?? [] : [];
       if (steps.length > 0) {
         setPendingDelete({ field, steps });
         return;
@@ -602,11 +590,7 @@ export function SchemaPropertyList({
         if (steps.length > 0) {
           setPendingRename({ field: next, nextName: next.name, steps });
           // Keep previous name until confirmed — still apply other field edits.
-          onChange(
-            properties.map((p) =>
-              p.id === next.id ? { ...next, name: prev.name } : p
-            )
-          );
+          onChange(properties.map((p) => (p.id === next.id ? { ...next, name: prev.name } : p)));
           return;
         }
       }

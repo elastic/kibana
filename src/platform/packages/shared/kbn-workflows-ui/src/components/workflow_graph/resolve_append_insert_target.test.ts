@@ -60,7 +60,10 @@ describe('resolveAppendInsertTarget', () => {
           'if1',
           {
             branches: new Map([
-              ['steps', { slot: { kind: 'steps' as const }, ownerStepName: 'if1', isTerminal: false }],
+              [
+                'steps',
+                { slot: { kind: 'steps' as const }, ownerStepName: 'if1', isTerminal: false },
+              ],
             ]),
           },
         ],

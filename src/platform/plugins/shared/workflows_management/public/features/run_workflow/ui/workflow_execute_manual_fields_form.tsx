@@ -9,6 +9,7 @@
 
 import {
   EuiComboBox,
+  type EuiComboBoxOptionOption,
   EuiDatePicker,
   EuiFieldNumber,
   EuiFieldText,
@@ -17,7 +18,6 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiTextArea,
-  type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
@@ -75,9 +75,7 @@ export function WorkflowExecuteManualFieldsForm({
           ? schema.enum.map((v) => String(v))
           : undefined;
         const examplesRaw = (schema as { examples?: unknown }).examples;
-        const examples = Array.isArray(examplesRaw)
-          ? examplesRaw.map((v) => String(v))
-          : undefined;
+        const examples = Array.isArray(examplesRaw) ? examplesRaw.map((v) => String(v)) : undefined;
         const fieldValue = value[name];
         const label = isRequired ? `${name} *` : name;
 
@@ -136,9 +134,7 @@ export function WorkflowExecuteManualFieldsForm({
               singleSelection={{ asPlainText: true }}
               options={options}
               selectedOptions={selected}
-              onChange={(selectedOptions) =>
-                setField(name, selectedOptions[0]?.label ?? undefined)
-              }
+              onChange={(selectedOptions) => setField(name, selectedOptions[0]?.label ?? undefined)}
               onCreateOption={(created) => setField(name, created)}
               data-test-subj={`workflowExecuteManualField-${name}`}
             />
@@ -154,8 +150,8 @@ export function WorkflowExecuteManualFieldsForm({
                 fieldValue === undefined
                   ? ''
                   : typeof fieldValue === 'string'
-                    ? fieldValue
-                    : JSON.stringify(fieldValue, null, 2)
+                  ? fieldValue
+                  : JSON.stringify(fieldValue, null, 2)
               }
               onChange={(e) => {
                 const raw = e.target.value;

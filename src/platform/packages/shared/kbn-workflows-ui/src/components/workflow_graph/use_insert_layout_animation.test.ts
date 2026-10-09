@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Edge, Node } from '@xyflow/react';
 import { act, renderHook } from '@testing-library/react';
-import {
-  INSERT_LAYOUT_MS,
-  useInsertLayoutAnimation,
-} from './use_insert_layout_animation';
+import type { Edge, Node } from '@xyflow/react';
+import { INSERT_LAYOUT_MS, useInsertLayoutAnimation } from './use_insert_layout_animation';
 
 function node(id: string, x: number, y: number): Node {
   return { id, position: { x, y }, data: { label: id }, type: 'workflowNode' };
@@ -199,7 +196,12 @@ describe('useInsertLayoutAnimation', () => {
     const initial = [node('a', 0, 0), node('b', 0, 100)];
     const edgeWithPoints = {
       ...edge('into', 'a', 'new'),
-      data: { points: [{ x: 0, y: 50 }, { x: 0, y: 80 }] },
+      data: {
+        points: [
+          { x: 0, y: 50 },
+          { x: 0, y: 80 },
+        ],
+      },
     };
     const { result, rerender } = renderHook(
       ({ nodes, flashNodeId }: { nodes: Node[]; flashNodeId?: string }) =>
@@ -226,7 +228,9 @@ describe('useInsertLayoutAnimation', () => {
     });
     expect(result.current.isSliding).toBe(false);
     const restored = result.current.edges.find((e) => e.id === 'into');
-    expect((restored?.data as { points?: unknown; drawIn?: boolean } | undefined)?.drawIn).toBeUndefined();
+    expect(
+      (restored?.data as { points?: unknown; drawIn?: boolean } | undefined)?.drawIn
+    ).toBeUndefined();
     expect((restored?.data as { points?: unknown } | undefined)?.points).toEqual([
       { x: 0, y: 50 },
       { x: 0, y: 80 },

@@ -8,9 +8,9 @@
  */
 
 import type { WorkflowDetailDto } from '@kbn/workflows';
-import { createMockStore } from '../__mocks__/store.mock';
 import { selectHasChanges } from './selectors';
 import { seedCreateYaml, setWorkflow, setYamlString } from './slice';
+import { createMockStore } from '../__mocks__/store.mock';
 
 const mockWorkflow = {
   id: 'wf-1',

@@ -28,9 +28,7 @@ export interface WorkflowGraphSettingsNodeData extends Record<string, unknown> {
 const CHIP_SIZE = 32;
 const COMPACT_CHIP_SIZE = 24;
 
-function WorkflowGraphSettingsNodeInner(
-  node: NodeProps<Node<WorkflowGraphSettingsNodeData>>
-) {
+function WorkflowGraphSettingsNodeInner(node: NodeProps<Node<WorkflowGraphSettingsNodeData>>) {
   const { kind, label, subtitle, iconType, compact = false } = node.data;
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;

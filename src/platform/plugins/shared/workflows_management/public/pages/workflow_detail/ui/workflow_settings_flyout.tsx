@@ -33,8 +33,19 @@ import { useDispatch, useSelector } from 'react-redux-v7';
 import { parseDocument } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getAllConnectorsWithDynamic } from '../../../../common/schema';
+import { WorkflowConstantsEditor } from './workflow_constants_editor';
+import { WorkflowOutputsEditor } from './workflow_outputs_editor';
+import {
+  type ConstantField,
+  constantsToYamlRecord,
+  type OutputField,
+  outputsToJsonSchema,
+  parseConstsToFields,
+  parseOutputsToFields,
+  writeRootYamlMapping,
+} from './workflow_settings_fields_model';
 import { updateWorkflowYamlFields } from '../../../../common/lib/yaml/update_workflow_yaml_fields';
+import { getAllConnectorsWithDynamic } from '../../../../common/schema';
 import { useWorkflowFiltersOptions } from '../../../entities/workflows/model/use_workflow_stats';
 import {
   selectConnectors,
@@ -43,17 +54,6 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { setYamlString } from '../../../entities/workflows/store/workflow_detail/slice';
 import { findStepsReferencingPath } from '../../../shared/ui/schema_property_builder';
-import { WorkflowConstantsEditor } from './workflow_constants_editor';
-import { WorkflowOutputsEditor } from './workflow_outputs_editor';
-import {
-  constantsToYamlRecord,
-  outputsToJsonSchema,
-  parseConstsToFields,
-  parseOutputsToFields,
-  writeRootYamlMapping,
-  type ConstantField,
-  type OutputField,
-} from './workflow_settings_fields_model';
 
 export interface WorkflowSettingsFlyoutProps {
   readonly isOpen: boolean;
@@ -188,12 +188,9 @@ export const WorkflowSettingsFlyout = ({
     }
   }, [name, definition?.name, applyYamlPatch]);
 
-  const handleDescriptionChange = useCallback(
-    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setDescription(event.target.value);
-    },
-    []
-  );
+  const handleDescriptionChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setDescription(event.target.value);
+  }, []);
 
   const handleDescriptionBlur = useCallback(() => {
     const next = description.trim();

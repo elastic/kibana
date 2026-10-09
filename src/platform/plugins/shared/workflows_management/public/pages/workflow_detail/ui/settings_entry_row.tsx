@@ -25,11 +25,6 @@ import {
 } from '@elastic/eui';
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { DataReferenceCatalog } from '../../../features/workflow_visual_editor/lib/build_data_reference_catalog';
-import {
-  validateSchemaPropertyName,
-  type SchemaPropertyField,
-} from '../../../shared/ui/schema_property_builder';
 import { settingsEntryNameErrorMessage } from './settings_entry_row_shared';
 import {
   coerceConstantValue,
@@ -37,6 +32,11 @@ import {
   type ConstantType,
   type OutputField,
 } from './workflow_settings_fields_model';
+import type { DataReferenceCatalog } from '../../../features/workflow_visual_editor/lib/build_data_reference_catalog';
+import {
+  type SchemaPropertyField,
+  validateSchemaPropertyName,
+} from '../../../shared/ui/schema_property_builder';
 
 const SettingsEntryOutputFieldsLazy = React.lazy(async () => {
   const module = await import('./settings_entry_output_fields');
@@ -54,9 +54,9 @@ const CONSTANT_TYPE_OPTIONS: Array<{ value: ConstantType; text: string }> = [
   { value: 'array', text: 'array' },
 ];
 
-type SettingsEntryRowSharedProps = {
+interface SettingsEntryRowSharedProps {
   readonly readOnly?: boolean;
-};
+}
 
 export type ConstantSettingsEntryRowProps = SettingsEntryRowSharedProps & {
   readonly kind: 'constant';
@@ -165,6 +165,7 @@ const ConstantFields = ({
             compressed
           >
             <EuiFieldText
+              isInvalid={nameError != null && field.name.length > 0}
               compressed
               fullWidth
               value={field.name}
@@ -260,30 +261,16 @@ const DraftActions = ({
   }
 
   return (
-    <EuiFlexGroup
-      gutterSize="s"
-      alignItems="center"
-      justifyContent="flexEnd"
-      responsive={false}
-    >
+    <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiButton
-          size="xs"
-          onClick={onDiscard}
-          data-test-subj={`${prefix}Discard-${fieldId}`}
-        >
+        <EuiButton size="xs" onClick={onDiscard} data-test-subj={`${prefix}Discard-${fieldId}`}>
           {i18n.translate('workflows.workflowSettingsFlyout.settingsEntryCancel', {
             defaultMessage: 'Cancel',
           })}
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton
-          size="xs"
-          fill
-          onClick={onCommit}
-          data-test-subj={`${prefix}Done-${fieldId}`}
-        >
+        <EuiButton size="xs" fill onClick={onCommit} data-test-subj={`${prefix}Done-${fieldId}`}>
           {i18n.translate('workflows.workflowSettingsFlyout.settingsEntryDone', {
             defaultMessage: 'Done',
           })}

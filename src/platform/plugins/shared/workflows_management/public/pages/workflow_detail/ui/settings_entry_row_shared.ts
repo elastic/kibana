@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { validateSchemaPropertyName } from '../../../shared/ui/schema_property_builder';
+import type { validateSchemaPropertyName } from '../../../shared/ui/schema_property_builder';
 
 export const settingsEntryNameErrorMessage = (
   error: ReturnType<typeof validateSchemaPropertyName>

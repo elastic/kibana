@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { parseDocument } from 'yaml';
 import type { EsWorkflow } from '@kbn/workflows';
 import { updateYamlField } from '@kbn/workflows-yaml';
-import { parseDocument } from 'yaml';
 
 /**
  * Checks if a workflow update affects YAML metadata fields

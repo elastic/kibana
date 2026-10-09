@@ -15,10 +15,6 @@ import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import { useWorkflowsCapabilities, type WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowDetailHeader, type WorkflowDetailHeaderProps } from './workflow_detail_header';
-import {
-  resetWorkflowSettingsSurfaceVariantForTests,
-  setWorkflowSettingsSurfaceVariant,
-} from '../../../features/workflow_visual_editor/ui/workflow_settings_surface_variant';
 import { PLUGIN_ID } from '../../../../common';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import {
@@ -29,6 +25,10 @@ import {
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail/thunks/save_yaml_thunk';
+import {
+  resetWorkflowSettingsSurfaceVariantForTests,
+  setWorkflowSettingsSurfaceVariant,
+} from '../../../features/workflow_visual_editor/ui/workflow_settings_surface_variant';
 import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
@@ -347,7 +347,6 @@ describe('WorkflowDetailHeader', () => {
     renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
     expect(screen.queryByTestId('runWorkflowHeaderButton')).not.toBeInTheDocument();
   });
-
 
   it('disables enabled toggle when yaml has validation errors', () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {

@@ -38,10 +38,10 @@ import {
   useRecommendedTemplates,
   useWorkflowsApi,
 } from '@kbn/workflows-ui';
+import { setShowCreationEmptyState } from './workflow_creation_empty_state_prototype';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
-import { setShowCreationEmptyState } from './workflow_creation_empty_state_prototype';
 
 /** Prototype-only LLM hero states for empty-canvas demos. */
 export type LlmPrototypeState = 'enabled' | 'missing' | 'onPrem';
@@ -761,19 +761,17 @@ export function WorkflowCreationPanel({
                 data-test-subj="workflowCreationPanelTemplatesLoading"
               >
                 {[0, 1, 2].map((index) => (
-                  <EuiSkeletonRectangle
-                    key={index}
-                    height={120}
-                    width="100%"
-                    borderRadius="m"
-                  />
+                  <EuiSkeletonRectangle key={index} height={120} width="100%" borderRadius="m" />
                 ))}
               </div>
             ) : !isRecommendationsError && recommendations.length > 0 ? (
               <div
                 css={{
                   display: 'grid',
-                  gridTemplateColumns: `repeat(${Math.min(recommendations.length, 3)}, minmax(0, 1fr))`,
+                  gridTemplateColumns: `repeat(${Math.min(
+                    recommendations.length,
+                    3
+                  )}, minmax(0, 1fr))`,
                   gap: euiTheme.size.s,
                   marginTop: euiTheme.size.s,
                 }}
