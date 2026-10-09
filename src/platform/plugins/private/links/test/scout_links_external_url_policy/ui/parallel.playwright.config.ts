@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('image embeddable', function () {
-    loadTestFile(require.resolve('./image_embeddable'));
-  });
-}
+/**
+ * These tests require a custom server configuration that sets `externalUrl.policy`,
+ * which is only read when Kibana boots.
+ */
+export default createPlaywrightConfig({
+  testDir: './parallel_tests',
+  workers: 2,
+});

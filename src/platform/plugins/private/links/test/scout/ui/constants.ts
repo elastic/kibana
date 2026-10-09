@@ -7,16 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
+export const DASHBOARD_ES_ARCHIVE =
+  'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
-
-  return {
-    ...functionalConfig.getAll(),
-    testFiles: [require.resolve('.')],
-    junit: {
-      reportName: 'Dashboard Elements - Image Embeddable tests',
-    },
-  };
-}
+export const DASHBOARD_KBN_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
