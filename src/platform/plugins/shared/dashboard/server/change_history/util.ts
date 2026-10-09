@@ -61,14 +61,18 @@ export const addToHistory = async ({
     snapshot, // post-change state
   };
 
-  await client.log(change, {
-    action: 'dashboard_update',
-    username: user.username,
-    userProfileId: user.profile_uid,
-    spaceId,
-    ...(typeof restoredFrom === 'number' && { data: { metadata: { restoredFrom } } }),
-    refresh: 'wait_for', // wait for ES to update so that we fetch the updated list
-  });
+  try {
+    await client.log(change, {
+      action: 'dashboard_update',
+      username: user.username,
+      userProfileId: user.profile_uid,
+      spaceId,
+      ...(typeof restoredFrom === 'number' && { data: { metadata: { restoredFrom } } }),
+      refresh: restoredFrom ? 'wait_for' : undefined, // wait for ES to update so that we fetch the updated list
+    });
+  } catch (e) {
+    // console.log('!!!!!', { e });
+  }
 
   // return res.ok();
 };

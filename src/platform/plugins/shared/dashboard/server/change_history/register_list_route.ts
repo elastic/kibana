@@ -94,9 +94,10 @@ export const registerHistoryListRoute = (
       }
       const spaceId = spacesService?.getSpaceId(req) ?? 'default';
 
+      const { page = 1, per_page: perPage } = req.query;
       const { total, items } = await client.getHistory(spaceId, 'dashboard', req.params.id, {
-        size: req.query.per_page,
-        from: req.query.page,
+        size: perPage,
+        from: perPage ? (page - 1) * perPage : undefined, // `page` is 1-indexed; `from` is an offset
       });
 
       const [coreStart] = await coreSetup.getStartServices();
