@@ -18,7 +18,10 @@ const errorReason = 'this should appear as error reason';
 
 jest.mock('@kbn/es-query', () => {
   return {
-    fromKueryExpression: jest.requireActual('@kbn/es-query').fromKueryExpression,
+    // Resolved on call, not while the mock is created: requiring the real module here runs in the
+    // middle of a circular import chain and gets a partially loaded module.
+    fromKueryExpression: (query: string) =>
+      jest.requireActual('@kbn/es-query').fromKueryExpression(query),
     buildEsQuery: jest.fn(() => {
       // eslint-disable-next-line no-throw-literal
       throw { shortMessage: errorReason };
