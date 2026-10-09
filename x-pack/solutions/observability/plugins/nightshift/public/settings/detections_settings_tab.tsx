@@ -47,7 +47,10 @@ export const DetectionsSettingsTab = () => {
 
   const saveRemainingSettings = async () => {
     if (form.hasActivitySettingsChanges) {
-      await form.handleSave();
+      const result = await form.handleSave();
+      if (result === 'failed') {
+        return;
+      }
     }
     if (tokenTracking.isDirty) {
       await tokenTracking.save();

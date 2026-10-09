@@ -262,6 +262,22 @@ describe('DetectionsSettingsTab', () => {
     );
   });
 
+  it('stops the save sequence when activity settings fail', async () => {
+    mockRunLimitsIsDirty = true;
+    mockContinuousHasChanged = true;
+    mockTokenTrackingIsDirty = true;
+    mockContinuousSave.mockRejectedValue(new Error('activity save failed'));
+    setup({ isDeveloperMode: true });
+
+    fireEvent.click(screen.getByTestId('streams-settings-save-button'));
+
+    await waitFor(() => {
+      expect(mockRunLimitsRequestSave).toHaveBeenCalledTimes(1);
+      expect(mockContinuousSave).toHaveBeenCalledTimes(1);
+    });
+    expect(mockTokenTrackingSave).not.toHaveBeenCalled();
+  });
+
   it('waits for run-limit confirmation before saving the remaining settings', async () => {
     mockRunLimitsIsDirty = true;
     mockContinuousHasChanged = true;

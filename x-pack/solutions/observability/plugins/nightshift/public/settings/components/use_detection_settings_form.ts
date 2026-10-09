@@ -22,6 +22,8 @@ import { configToAnnotatedYaml } from './significant_events_tuning_config_editor
 import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
 import { useScheduledDiscoverySettings } from './use_scheduled_discovery_settings';
 
+type DetectionActivitySaveResult = 'saved' | 'failed' | 'noop';
+
 const useSettingsPermissions = () => {
   const { application } = useKibana().services;
   const { canManage, canManageAndConfigure } = getNightshiftCapabilities(
@@ -125,7 +127,11 @@ export const useDetectionSettingsForm = () => {
     scheduledDiscovery.reset();
   }, [continuousExtraction, scheduledDiscovery]);
 
-  const handleSave = useCallback(async () => {
+  const handleSave = useCallback(async (): Promise<DetectionActivitySaveResult> => {
+    if (!hasActivitySettingsChanges) {
+      return 'noop';
+    }
+
     setIsSaving(true);
     try {
       if (canEditSettings && continuousExtraction.hasChanged) {
@@ -135,6 +141,7 @@ export const useDetectionSettingsForm = () => {
       if (canEditSettings && scheduledDiscovery.hasChanged) {
         await scheduledDiscovery.save();
       }
+      return 'saved';
     } catch (err) {
       core.notifications.toasts.addDanger({
         title: i18n.translate('xpack.nightshift.settings.saveErrorTitle', {
@@ -142,10 +149,17 @@ export const useDetectionSettingsForm = () => {
         }),
         text: getFormattedError(err).message,
       });
+      return 'failed';
     } finally {
       setIsSaving(false);
     }
-  }, [core.notifications.toasts, continuousExtraction, scheduledDiscovery, canEditSettings]);
+  }, [
+    canEditSettings,
+    continuousExtraction,
+    core.notifications.toasts,
+    hasActivitySettingsChanges,
+    scheduledDiscovery,
+  ]);
 
   const [isSavingTuningConfig, setIsSavingTuningConfig] = useState(false);
 
