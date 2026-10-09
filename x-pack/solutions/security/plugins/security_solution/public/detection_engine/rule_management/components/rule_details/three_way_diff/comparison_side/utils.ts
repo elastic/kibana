@@ -11,6 +11,7 @@ import { Version } from './versions_picker/constants';
 import {
   ThreeWayDiffOutcome,
   type RequiredField,
+  type RequiredFieldInput,
   type ThreeWayDiff,
   ThreeWayDiffConflict,
 } from '../../../../../../../common/api/detection_engine';
@@ -99,7 +100,7 @@ export const stringifyWithExpandedEmpties = (value: unknown): string => {
  * Normalizes required fields for display: deduplicates and sorts by `name` and `type`
  * so order and duplicates don't show up as changes.
  */
-export const normalizeRequiredFieldsForDisplay = <T extends Pick<RequiredField, 'name' | 'type'>>(
+export const normalizeRequiredFieldsForDisplay = <T extends RequiredFieldInput>(
   requiredFields: T[]
 ): T[] =>
   sortBy(
