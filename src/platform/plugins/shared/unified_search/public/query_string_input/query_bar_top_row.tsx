@@ -378,14 +378,6 @@ export const QueryBarTopRow = React.memo(
 
     const focusEsqlEditor = useCallback(() => esqlEditorRef.current?.focus(), []);
 
-    const focusEsqlEditor = useCallback(() => {
-      setTimeout(() => {
-        document
-          .querySelector<HTMLTextAreaElement>('[data-test-subj="ESQLEditor"] textarea.inputarea')
-          ?.focus();
-      }, 0);
-    }, []);
-
     // Temporary, the empty page will change and we wont need to control it
     useEffect(() => {
       esqlEditorRef.current?.refreshInitialState();
