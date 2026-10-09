@@ -23,7 +23,10 @@ import {
 } from './register';
 import type { RenderAssignees, RenderLinkedInvestigations } from './types';
 import { ACTIONS_TRANSLATIONS } from '../components/actions/translations';
-import { createFlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
+import {
+  FlyoutGroupedAttachments,
+  createFlyoutGroupedAttachmentsRegistry,
+} from '../components/grouped_attachments';
 
 const conversation: Conversation = {
   id: 'conversation-1',
@@ -342,6 +345,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
     });
 
@@ -358,6 +362,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
       renderAssignees,
     });
@@ -392,6 +397,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
     });
 
@@ -412,6 +418,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
     });
 
@@ -427,6 +434,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
       renderLinkedInvestigations,
     });
@@ -453,6 +461,47 @@ describe('registerEscalationTemplateUI', () => {
     );
   });
 
+  it('renders the summary and grouped attachments in the overview tab', async () => {
+    const { contract } = createFakeService();
+    const groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
+    groupedAttachments.register(FlyoutGroupedAttachments.ALERTS, ['security.alert'], () => (
+      <li>Session cookie replayed</li>
+    ));
+
+    registerEscalationTemplateUI({
+      conversationTemplates: contract,
+      templateId: 'escalation',
+      groupedAttachments,
+      name: 'Escalation',
+    });
+
+    const TabContent = contract.getTab('escalation.overview')?.content;
+    if (!TabContent) throw new Error('Expected escalation.overview tab');
+
+    renderWithKibanaRenderContext(
+      <TabContent
+        conversation={{
+          ...escalationConversation,
+          metadata: { status: 'open', summary: 'Escalated narrative' },
+          attachments: [
+            {
+              id: 'attachment-1',
+              type: 'security.alert',
+              current_version: 1,
+              versions: [
+                { version: 1, data: {}, created_at: '2024-01-01T00:00:00Z', content_hash: 'a' },
+              ],
+            },
+          ],
+        }}
+        isOpenedFromChat={false}
+      />
+    );
+
+    expect(await screen.findByText('Escalated narrative')).toBeInTheDocument();
+    expect(screen.getByText('Session cookie replayed')).toBeInTheDocument();
+  });
+
   it('navigates via openFullscreenConversation with openDetails:true when onOpenInvestigation is called', async () => {
     const { contract, openFullscreenConversation } = createFakeService();
     let capturedOnOpen: ((args: { conversationId: string; agentId: string }) => void) | undefined;
@@ -464,6 +513,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
       renderLinkedInvestigations,
     });
