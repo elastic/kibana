@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/solutions/security/plugins/alertzero
 dependsOn:
   - '@kbn/security-plugin-types-server'
+  - '@kbn/security-solution-features'
   - '@kbn/security-plugin'
   - '@kbn/agentic-investigations-common'
   - '@kbn/core'

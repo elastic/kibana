@@ -18,6 +18,7 @@ import { registerListWatchesRoute } from './watches/list_watches';
 import { registerGetWatchRoute } from './watches/get_watch';
 import { registerListWorkersRoute } from './workers/list_workers';
 import { registerUpdateWorkerRoute } from './workers/update_worker';
+import { registerAttachAlertTriageRulesRoute } from './workers/attach_alert_triage_rules';
 import { registerGetProposalsByCategoryRoute } from './proposals/get_proposals_by_category';
 import { registerGetClosedProposalsRoute } from './proposals/get_closed_proposals';
 import { registerListActionsRoute } from './actions/list_actions';
@@ -43,6 +44,7 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerGetWatchRoute(deps);
   registerListWorkersRoute(deps);
   registerUpdateWorkerRoute(deps);
+  registerAttachAlertTriageRulesRoute(deps);
   registerGetProposalsByCategoryRoute(deps);
   registerGetClosedProposalsRoute(deps);
   registerListActionsRoute(deps);

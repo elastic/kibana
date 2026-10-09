@@ -46,6 +46,16 @@ export const ALERTZERO_WORKER_URL_TEMPLATE = `${ALERTZERO_WORKERS_URL}/{workerId
 export const buildWorkerUrl = (workerId: string) =>
   `${ALERTZERO_WORKERS_URL}/${encodeURIComponent(workerId)}`;
 
+/**
+ * Attaches a Worker's rule action to rules, only while the Worker is enabled in the request's
+ * space. Called by the managed workflow that attaches rules created after the Worker was enabled.
+ */
+export const ALERTZERO_WORKER_ATTACH_RULES_URL_TEMPLATE =
+  `${ALERTZERO_WORKER_URL_TEMPLATE}/rules/_attach` as const;
+
+export const buildWorkerAttachRulesUrl = (workerId: string) =>
+  `${buildWorkerUrl(workerId)}/rules/_attach`;
+
 /** Pending proposals for a single action category. */
 export const ALERTZERO_PROPOSALS_CATEGORY_URL =
   `${ALERTZERO_INTERNAL_URL}/proposals/category/{category}` as const;
@@ -220,6 +230,11 @@ export const SYSTEM_SECURITY_WORKER_IDS = [
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+] as const;
+
+/** Workers that run through a per-rule `.workflows` action, so rules can be attached to them. */
+export const SYSTEM_SECURITY_WORKER_IDS_WITH_RULE_ATTACHMENT = [
+  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
 ] as const;
 
 /**

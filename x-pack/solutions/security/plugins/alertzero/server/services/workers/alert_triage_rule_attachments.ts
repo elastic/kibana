@@ -79,10 +79,15 @@ export const detachAlertTriageWorkerFromAllRules = (
  */
 export const detachRuleIdChunks = async (
   service: AlertTriageAttachmentService,
-  ruleIdChunks: string[][]
+  ruleIdChunks: string[][],
+  options: { ignoreMissingRules?: boolean } = {}
 ): Promise<void> => {
   for (const chunk of ruleIdChunks) {
     if (chunk.length === 0) continue;
-    await service.updateRuleAttachments({ attachRuleIds: [], detachRuleIds: chunk });
+    await service.updateRuleAttachments({
+      attachRuleIds: [],
+      detachRuleIds: chunk,
+      ...options,
+    });
   }
 };

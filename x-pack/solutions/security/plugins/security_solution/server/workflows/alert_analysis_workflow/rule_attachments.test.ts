@@ -714,6 +714,80 @@ describe('alert analysis workflow rule attachments', () => {
     ).rejects.toThrow('Failed to resolve 1 selected rule(s)');
   });
 
+  // The attach workflow acts on ids from an event that fired earlier, so a rule deleted in between
+  // must not stop the others being attached.
+  describe('ignoreMissingRules', () => {
+    const createBulkEditFn = () =>
+      jest.fn().mockImplementation(async ({ rules: editedRules }) => ({
+        rules: editedRules,
+        skipped: [],
+        errors: [],
+        total: editedRules.length,
+      })) as unknown as jest.MockedFunction<typeof bulkEditRules>;
+
+    it('updates the ids that still resolve and ignores the ones that do not', async () => {
+      const bulkEditRulesFn = createBulkEditFn();
+      const service = createAlertAnalysisWorkflowRuleAttachmentService({
+        rulesClient: createRulesClient([
+          createRule({ id: 'rule-1' }),
+          createRule({ id: 'rule-2' }),
+        ]),
+        workflowId: WORKFLOW_ID,
+        bulkEditDependencies: createBulkEditDependencies(),
+        bulkEditRulesFn,
+      });
+
+      await expect(
+        service.updateRuleAttachments({
+          attachRuleIds: ['rule-1', 'deleted-rule', 'rule-2'],
+          detachRuleIds: [],
+          ignoreMissingRules: true,
+        })
+      ).resolves.toEqual({ matched: 2, updated: 2 });
+
+      expect(bulkEditRulesFn).toHaveBeenCalledTimes(1);
+      expect(
+        (bulkEditRulesFn.mock.calls[0][0].rules as Array<{ id: string }>).map(({ id }) => id)
+      ).toEqual(['rule-1', 'rule-2']);
+    });
+
+    it('does nothing when none of the ids resolve', async () => {
+      const bulkEditRulesFn = createBulkEditFn();
+      const service = createAlertAnalysisWorkflowRuleAttachmentService({
+        rulesClient: createRulesClient([]),
+        workflowId: WORKFLOW_ID,
+        bulkEditDependencies: createBulkEditDependencies(),
+        bulkEditRulesFn,
+      });
+
+      await expect(
+        service.updateRuleAttachments({
+          attachRuleIds: ['deleted-1', 'deleted-2'],
+          detachRuleIds: [],
+          ignoreMissingRules: true,
+        })
+      ).resolves.toEqual({ matched: 0, updated: 0 });
+      expect(bulkEditRulesFn).not.toHaveBeenCalled();
+    });
+
+    it('still fails on missing ids unless asked to ignore them', async () => {
+      const service = createAlertAnalysisWorkflowRuleAttachmentService({
+        rulesClient: createRulesClient([createRule({ id: 'rule-1' })]),
+        workflowId: WORKFLOW_ID,
+        bulkEditDependencies: createBulkEditDependencies(),
+        bulkEditRulesFn: createBulkEditFn(),
+      });
+
+      await expect(
+        service.updateRuleAttachments({
+          attachRuleIds: ['rule-1', 'deleted-rule'],
+          detachRuleIds: [],
+          ignoreMissingRules: false,
+        })
+      ).rejects.toThrow('Failed to resolve 1 selected rule(s)');
+    });
+  });
+
   it('throws when bulk edit dependencies are missing but changes are required', async () => {
     // rule-1 lacks the workflow action, so attaching it is a real change that needs bulk-edit
     // dependencies; omitting them must fail loudly rather than silently no-op.

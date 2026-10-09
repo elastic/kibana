@@ -47,7 +47,9 @@ export interface AlertTriageAttachmentService {
   updateRuleAttachments(params: {
     attachRuleIds: string[];
     detachRuleIds: string[];
-  }): Promise<unknown>;
+    /** Skip ids that no longer match a rule instead of failing the whole call. */
+    ignoreMissingRules?: boolean;
+  }): Promise<{ matched: number; updated: number }>;
 }
 
 /**

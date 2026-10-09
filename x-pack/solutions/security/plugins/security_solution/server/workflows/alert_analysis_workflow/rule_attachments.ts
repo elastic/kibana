@@ -286,9 +286,11 @@ const getRulesWithWorkflowAction = (
 const getRulesByIds = async ({
   rulesClient,
   ruleIds,
+  ignoreMissingRules = false,
 }: {
   rulesClient: RulesClient;
   ruleIds: string[];
+  ignoreMissingRules?: boolean;
 }): Promise<RuleAlertType[]> => {
   if (ruleIds.length > MAX_RULES_TO_ATTACH) {
     throw new BadRequestError(
@@ -307,7 +309,7 @@ const getRulesByIds = async ({
     ruleIds,
   });
 
-  if (total !== ruleIds.length) {
+  if (total !== ruleIds.length && !ignoreMissingRules) {
     throw new Error(`Failed to resolve ${ruleIds.length - total} selected rule(s)`);
   }
 
@@ -418,7 +420,12 @@ export const createAlertAnalysisWorkflowRuleAttachmentService = (
       };
     },
 
-    async updateRuleAttachments({ attachRuleIds, detachRuleIds, dryRun = false }) {
+    async updateRuleAttachments({
+      attachRuleIds,
+      detachRuleIds,
+      dryRun = false,
+      ignoreMissingRules = false,
+    }) {
       const uniqueAttachRuleIds = [...new Set(attachRuleIds)];
       const uniqueDetachRuleIds = [...new Set(detachRuleIds)];
       const duplicatedRuleIds = uniqueAttachRuleIds.filter((id) =>
@@ -430,7 +437,11 @@ export const createAlertAnalysisWorkflowRuleAttachmentService = (
       }
 
       const uniqueRuleIds = [...uniqueAttachRuleIds, ...uniqueDetachRuleIds];
-      const rules = await getRulesByIds({ rulesClient, ruleIds: uniqueRuleIds });
+      const rules = await getRulesByIds({
+        rulesClient,
+        ruleIds: uniqueRuleIds,
+        ignoreMissingRules,
+      });
       const attachRuleIdSet = new Set(uniqueAttachRuleIds);
       const detachRuleIdSet = new Set(uniqueDetachRuleIds);
       const rulesToAttach = getRulesMissingWorkflowAction(
@@ -445,7 +456,7 @@ export const createAlertAnalysisWorkflowRuleAttachmentService = (
 
       if (dryRun || updatedRulesCount === 0) {
         return {
-          matched: uniqueRuleIds.length,
+          matched: rules.length,
           updated: updatedRulesCount,
         };
       }
@@ -515,7 +526,7 @@ export const createAlertAnalysisWorkflowRuleAttachmentService = (
       }
 
       return {
-        matched: uniqueRuleIds.length,
+        matched: rules.length,
         updated: outcomes.reduce((count, outcome) => count + outcome.updated, 0),
       };
     },

@@ -53,6 +53,11 @@ export { ListWatchesResponse } from './watches/list_watches_route.gen';
 export { GetWatchResponse } from './watches/get_watch_route.gen';
 export { ListWorkersResponse } from './workers/list_workers_route.gen';
 export {
+  AttachAlertTriageRulesRequestBody,
+  AttachAlertTriageRulesRequestParams,
+  AttachAlertTriageRulesResponse,
+} from './workers/attach_alert_triage_rules_route.gen';
+export {
   UpdateWorkerRequestBody,
   UpdateWorkerRequestParams,
   UpdateWorkerResponse,

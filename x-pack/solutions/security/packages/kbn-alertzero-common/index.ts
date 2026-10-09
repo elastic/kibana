@@ -37,6 +37,7 @@ export {
   ALERTZERO_WATCH_URL_TEMPLATE,
   ALERTZERO_WORKERS_URL,
   ALERTZERO_WORKER_URL_TEMPLATE,
+  ALERTZERO_WORKER_ATTACH_RULES_URL_TEMPLATE,
   HUNT_INTERNAL_ROUTE_BASE,
   HUNT_INDEX_SCOPE_URL,
   CANDIDATES_URL,
@@ -61,6 +62,7 @@ export {
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_IDS,
+  SYSTEM_SECURITY_WORKER_IDS_WITH_RULE_ATTACHMENT,
   TEMPLATE_ID_ESCALATION,
   TEMPLATE_ID_INVESTIGATION,
   WATCH_AUTONOMY_LEVELS,
@@ -76,6 +78,7 @@ export {
   buildServiceAccountUrl,
   buildWatchUrl,
   buildWorkerUrl,
+  buildWorkerAttachRulesUrl,
 } from './constants';
 
 export type { ScanFailureWorker, ScanFailuresResponse } from './constants';
@@ -90,6 +93,9 @@ export type {
 } from './action_catalog_types';
 
 export {
+  AttachAlertTriageRulesRequestBody,
+  AttachAlertTriageRulesRequestParams,
+  AttachAlertTriageRulesResponse,
   GetWatchResponse,
   Lifecycle,
   ListWatchesResponse,

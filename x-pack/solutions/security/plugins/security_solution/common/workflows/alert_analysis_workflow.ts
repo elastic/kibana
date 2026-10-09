@@ -302,6 +302,11 @@ export interface UpdateRuleAttachmentsParams {
   attachRuleIds: string[];
   detachRuleIds: string[];
   dryRun?: boolean;
+  /**
+   * Skip ids that no longer match a rule instead of failing the whole call. For callers that act on
+   * ids reported earlier, where a rule deleted in between must not stop the others being updated.
+   */
+  ignoreMissingRules?: boolean;
 }
 
 export interface UpdateRuleAttachmentsResult {
