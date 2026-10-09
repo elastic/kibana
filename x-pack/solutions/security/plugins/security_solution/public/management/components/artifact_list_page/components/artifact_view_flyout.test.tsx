@@ -18,6 +18,7 @@ import {
   useArtifactActionsDisabled as _useArtifactActionsDisabled,
   useGetArtifact as _useGetArtifact,
 } from '../../../hooks/artifacts';
+import { getEmptyValue } from '../../../../common/components/empty_value';
 import { artifactListPageLabels } from '../translations';
 import { useWithArtifactEnableDisable as _useWithArtifactEnableDisable } from '../hooks/use_with_artifact_enable_disable';
 import { useArtifactAssignedPolicies as _useArtifactAssignedPolicies } from '../hooks/use_artifact_assigned_policies';
@@ -395,13 +396,13 @@ describe('ArtifactViewFlyout', () => {
     expect(renderResult.getByTestId('viewFlyout-takeActionButton')).toBeDisabled();
   });
 
-  it('shows a dash when the artifact has no description', () => {
+  it('shows an empty value when the artifact has no description', () => {
     item.description = '   ';
     useGetArtifactMock.mockReturnValue({ data: item, error: null });
 
     render();
 
-    expect(renderResult.getByTestId('viewFlyout-description')).toHaveTextContent('-');
+    expect(renderResult.getByTestId('viewFlyout-description')).toHaveTextContent(getEmptyValue());
   });
 
   it('shows a loader while the artifact is being retrieved', () => {

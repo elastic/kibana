@@ -33,6 +33,7 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useArtifactActionsDisabled, useGetArtifact } from '../../../hooks/artifacts';
 import { FormattedDate } from '../../../../common/components/formatted_date';
+import { getEmptyValue } from '../../../../common/components/empty_value';
 import { useToasts } from '../../../../common/lib/kibana';
 import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import type { XOR } from '../../../../../common/utility_types';
@@ -83,10 +84,6 @@ export const ARTIFACT_VIEW_FLYOUT_LABELS = Object.freeze({
   viewFlyoutTakeActionButtonLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.viewFlyoutTakeActionButtonLabel',
     { defaultMessage: 'Take action' }
-  ),
-  viewFlyoutEmptyDescription: i18n.translate(
-    'xpack.securitySolution.artifactListPage.viewFlyoutEmptyDescription',
-    { defaultMessage: '-' }
   ),
   viewFlyoutItemLoadFailure: (errorMessage: string): string =>
     i18n.translate('xpack.securitySolution.artifactListPage.viewFlyoutItemLoadFailure', {
@@ -162,7 +159,6 @@ export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
     const { euiTheme } = useEuiTheme();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const toasts = useToasts();
-    const { urlParams } = useUrlParams<ArtifactListPageUrlParams>();
     const titleId = useGeneratedHtmlId({ prefix: 'artifactViewFlyoutTitle' });
     const labels: ArtifactViewFlyoutLabels = useMemo(
       () => ({
@@ -319,9 +315,7 @@ const ArtifactViewFlyoutBody = memo<{
   }) => {
     const { euiTheme } = useEuiTheme();
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const description = item.description.trim()
-      ? item.description
-      : labels.viewFlyoutEmptyDescription;
+    const description = item.description.trim() ? item.description : getEmptyValue();
 
     const infoBlockCss = css`
       display: grid;
