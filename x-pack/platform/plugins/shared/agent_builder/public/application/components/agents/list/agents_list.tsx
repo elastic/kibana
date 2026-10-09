@@ -418,7 +418,7 @@ export const AgentsList: React.FC = () => {
               : actionLabels.setSpaceDefaultDescription,
           'data-test-subj': (agent) => `agentBuilderAgentsListSpaceDefault-${agent.id}`,
           showOnHover: true,
-          available: () => manageAgents,
+          available: (agent) => manageAgents && !agent.hidden,
           onClick: (agent) => {
             const isCurrent = spaceDefaultAgentId === agent.id;
             setSpaceDefaultAgent.mutate(isCurrent ? null : agent.id);
