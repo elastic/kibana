@@ -18,7 +18,8 @@
     "test/scout/**/*",
     "test/scout_automatic_import/**/*",
     "test/scout_fi_agentless/**/*",
-    "test/scout_iac_provisioner/**/*"
+    "test/scout_iac_provisioner/**/*",
+    "test/scout_fleet_real_agent/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -134,6 +135,7 @@
     "@kbn/fs",
     "@kbn/kql",
     "@kbn/scout",
+    "@kbn/es",
     "@kbn/reporting-common",
     "@kbn/reporting-plugin",
     "@kbn/user-profile-components",
