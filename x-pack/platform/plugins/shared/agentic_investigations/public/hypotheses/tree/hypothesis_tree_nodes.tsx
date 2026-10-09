@@ -25,6 +25,7 @@ import type { HypothesisStatus } from '../../../common/hypotheses/hypotheses';
 import type { InvestigationProposalSummary } from '../../../common/investigations/investigation';
 import type { InvestigationSubjectType } from '../../../common/subjects/subject';
 import { getSubjectTitle } from '../../subjects/attachments/subject_title';
+import { getSubjectHref } from '../../subjects/attachments/subject_view';
 import { SUBJECT_TYPE_LABELS } from '../../subjects/attachments/translations';
 import type { HypothesisTreeNodeData, HypothesisTreeNodeKind } from './build_hypothesis_graph';
 import { HYPOTHESIS_TREE_NODE_WIDTH } from './layout_hypothesis_graph';
@@ -33,7 +34,9 @@ import {
   EXPAND_LABEL,
   HYPOTHESIS_STATUS_LABELS,
   NODE_LABELS,
+  OPEN_SLACK_THREAD_LABEL,
   PROPOSAL_CONFIDENCE_LABELS,
+  VIEW_ALERT_LABEL,
   actionsCountLabel,
   hypothesesCountLabel,
   hypothesisConfidenceLabel,
@@ -493,6 +496,8 @@ const HypothesisTreeNodeComponent = ({
   switch (data.kind) {
     case 'trigger': {
       const [first, ...rest] = data.subjects;
+      const href = first ? getSubjectHref(first) : undefined;
+      const isSlack = first?.type === 'slack_thread';
       return (
         <NodeShell kind="trigger" label={NODE_LABELS.trigger} {...shellProps}>
           <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false}>
@@ -511,6 +516,20 @@ const HypothesisTreeNodeComponent = ({
                 <EuiText size="xs" color="subdued">
                   {SUBJECT_TYPE_LABELS[first.type]}
                   {rest.length > 0 && ` · ${moreSubjectsLabel(rest.length)}`}
+                </EuiText>
+              )}
+              {href && (
+                <EuiText size="xs">
+                  <EuiLink
+                    href={href}
+                    external={isSlack}
+                    target={isSlack ? '_blank' : undefined}
+                    data-test-subj="investigationHypothesisTreeTriggerLink"
+                    // Following the link should not also select the node.
+                    onClick={(event: React.MouseEvent) => event.stopPropagation()}
+                  >
+                    {isSlack ? OPEN_SLACK_THREAD_LABEL : VIEW_ALERT_LABEL}
+                  </EuiLink>
                 </EuiText>
               )}
             </EuiFlexItem>

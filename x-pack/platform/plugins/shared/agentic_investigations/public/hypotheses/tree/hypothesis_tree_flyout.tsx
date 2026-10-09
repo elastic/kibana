@@ -49,6 +49,7 @@ import '@xyflow/react/dist/style.css';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import { EvidenceView } from '../../evidence/evidence_view';
 import { SubjectList } from '../../subjects/attachments/subject_view';
+import { ProposalDecision } from './proposal_decision';
 import {
   buildHypothesisGraph,
   getPathToNode,
@@ -80,7 +81,6 @@ import {
   NO_REASON_LABEL,
   PREVIOUS_ACTION_LABEL,
   PROPOSAL_CONFIDENCE_LABELS,
-  PROPOSAL_REVIEW_HINT,
   PROPOSAL_STATUS_LABELS,
   actionPositionLabel,
   hypothesesAnalyzedLabel,
@@ -171,10 +171,12 @@ const ActionPager = ({
 );
 
 const NodeDetail = ({
+  investigationId,
   data,
   selectedActionIndex,
   onChangeAction,
 }: {
+  investigationId: string;
   data: HypothesisTreeNodeData;
   selectedActionIndex: number | null;
   onChangeAction: (index: number) => void;
@@ -220,15 +222,9 @@ const NodeDetail = ({
     case 'actions': {
       const total = data.proposals.length;
       const index = Math.min(selectedActionIndex ?? 0, total - 1);
-      const { title, confidence, status, comment } = data.proposals[index];
-      return (
+      const { id, title, confidence, status, comment } = data.proposals[index];
+      const summary = (
         <>
-          {total > 1 && (
-            <>
-              <ActionPager index={index} total={total} onChange={onChangeAction} />
-              <EuiSpacer size="s" />
-            </>
-          )}
           <EuiText size="s">
             <strong>{title}</strong>
           </EuiText>
@@ -247,14 +243,22 @@ const NodeDetail = ({
           <EuiMarkdownFormat textSize="s">
             {comment.trim() ? comment : NO_COMMENT_LABEL}
           </EuiMarkdownFormat>
-          {status === 'pending' && (
+        </>
+      );
+      return (
+        <>
+          {total > 1 && (
             <>
-              <EuiSpacer size="m" />
-              <EuiText size="xs" color="subdued">
-                {PROPOSAL_REVIEW_HINT}
-              </EuiText>
+              <ActionPager index={index} total={total} onChange={onChangeAction} />
+              <EuiSpacer size="s" />
             </>
           )}
+          <ProposalDecision
+            key={id}
+            investigationId={investigationId}
+            proposalId={id}
+            fallback={summary}
+          />
         </>
       );
     }
@@ -410,6 +414,16 @@ const HypothesisTreeCanvas = ({
     [canvasWidth, getZoom, measuredHeights, positioned, setCenter]
   );
 
+  // Selecting a node centres it beside the detail panel; closing the panel shows the whole tree again.
+  const clearSelection = useCallback(() => {
+    if (selectedNodeId === null) {
+      return;
+    }
+    setSelectedNodeId(null);
+    setSelectedActionIndex(null);
+    void fitView(FIT_VIEW_OPTIONS);
+  }, [fitView, selectedNodeId]);
+
   const handleNodeClick: NodeMouseHandler<HypothesisTreeFlowNode> = useCallback(
     (_, { id, data }) => {
       if (data.kind === 'hypotheses') {
@@ -417,20 +431,15 @@ const HypothesisTreeCanvas = ({
         return;
       }
       if (selectedNodeId === id) {
-        setSelectedNodeId(null);
+        clearSelection();
         return;
       }
       setSelectedNodeId(id);
       setSelectedActionIndex(data.kind === 'actions' ? 0 : null);
       centreOnNode(id);
     },
-    [centreOnNode, selectedNodeId]
+    [centreOnNode, clearSelection, selectedNodeId]
   );
-
-  const clearSelection = useCallback(() => {
-    setSelectedNodeId(null);
-    setSelectedActionIndex(null);
-  }, []);
 
   const changeAction = useCallback((index: number) => {
     setSelectedActionIndex(index);
@@ -553,6 +562,7 @@ const HypothesisTreeCanvas = ({
               </EuiFlexGroup>
               <EuiSpacer size="s" />
               <NodeDetail
+                investigationId={input.id}
                 data={selectedNode.data}
                 selectedActionIndex={selectedActionIndex}
                 onChangeAction={changeAction}

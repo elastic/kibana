@@ -14,6 +14,8 @@ import type {
 
 /** What the tree is drawn from: the investigation as the query API returns it. */
 export interface HypothesisTreeInput {
+  /** The investigation (conversation) id. */
+  id: string;
   /** The investigation's title, named by the trigger when it has no subjects. */
   title: string;
   subjects: readonly InvestigationSubjectResponse[];

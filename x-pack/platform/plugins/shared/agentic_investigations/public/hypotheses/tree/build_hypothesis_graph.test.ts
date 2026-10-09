@@ -35,6 +35,7 @@ const proposal = (
 });
 
 const completed: HypothesisTreeInput = {
+  id: 'conv-1',
   title: 'Checkout latency spike',
   subjects: [
     {
