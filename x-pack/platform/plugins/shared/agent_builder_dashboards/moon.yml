@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/agent-builder-server'
   - '@kbn/as-code-dashboard-schema'
   - '@kbn/dashboard-plugin'
+  - '@kbn/embeddable-plugin'
   - '@kbn/agent-builder-dashboards-common'
   - '@kbn/dashboard-agent-authoring'
   - '@kbn/zod'

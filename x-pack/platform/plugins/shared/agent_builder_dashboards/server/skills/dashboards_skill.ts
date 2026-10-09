@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { DASHBOARDS_SKILL_ID } from '../../common';
-import { generateDashboardTool } from '../tools';
+import { generateDashboardTool, type GenerateDashboardToolDeps } from '../tools';
 import { dashboardGeneration } from './generation_guidance';
 import { kibanaRendering } from './rendering_guidance';
 
-export const dashboardsSkill = defineSkillType({
-  id: DASHBOARDS_SKILL_ID,
-  name: DASHBOARDS_SKILL_ID,
-  basePath: 'skills/platform/dashboard',
-  description:
-    'Compose and update Kibana dashboards, involving panel creation, layout, and inline visualization editing.',
-  content: `## When to Use This Skill
+export const createDashboardsSkill = (deps: GenerateDashboardToolDeps): SkillDefinition =>
+  defineSkillType({
+    id: DASHBOARDS_SKILL_ID,
+    name: DASHBOARDS_SKILL_ID,
+    basePath: 'skills/platform/dashboard',
+    description:
+      'Compose and update Kibana dashboards, involving panel creation, layout, and inline visualization editing.',
+    content: `## When to Use This Skill
 
 Use this skill when:
 - A user asks to find, list, inspect, or modify existing Kibana dashboards.
@@ -33,9 +35,9 @@ ${dashboardGeneration.guidance}
 
 ${kibanaRendering.guidance}
 `,
-  referencedContent: [
-    ...(dashboardGeneration.referencedContent ?? []),
-    ...(kibanaRendering.referencedContent ?? []),
-  ],
-  getInlineTools: () => [generateDashboardTool()],
-});
+    referencedContent: [
+      ...(dashboardGeneration.referencedContent ?? []),
+      ...(kibanaRendering.referencedContent ?? []),
+    ],
+    getInlineTools: () => [generateDashboardTool(deps)],
+  });

@@ -7,9 +7,11 @@
 
 import { internalTools, platformCoreTools } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import { dashboardsSkill as skill } from './dashboards_skill';
+import { createDashboardsSkill } from './dashboards_skill';
 import { ENHANCE_GUIDANCE_PATH } from './generation_guidance/enhance_guidance';
 import { registerSkills } from './register_skills';
+
+const skill = createDashboardsSkill({ getValidateDashboard: jest.fn() });
 
 const enhanceGuidance = (): string => {
   const reference = skill.referencedContent?.find((item) => item.name === 'enhance');
@@ -26,7 +28,7 @@ describe('registerSkills', () => {
       skills: { register },
     } as unknown as AgentBuilderPluginSetup;
 
-    registerSkills(agentBuilder);
+    registerSkills(agentBuilder, { getValidateDashboard: jest.fn() });
 
     expect(register).toHaveBeenCalledTimes(1);
     expect(register).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboards' }));
