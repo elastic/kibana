@@ -1048,6 +1048,20 @@ describe('WatchDetailPage', () => {
       expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeEnabled();
     });
 
+    it('shows no no-model warning to a user who cannot change Workers', () => {
+      renderWatch(
+        SYSTEM_SECURITY_WATCH_DETECTION_ID,
+        [blocked(ruleTuning, true), blocked(ruleCoverage, false)],
+        false
+      );
+
+      for (const worker of [ruleTuning, ruleCoverage]) {
+        expect(
+          screen.queryByTestId(`alertZeroWorkerWarningIcon-${worker.id}`)
+        ).not.toBeInTheDocument();
+      }
+    });
+
     it('gives Hunt the Models row and the block like every other Worker', () => {
       renderWatch(SYSTEM_SECURITY_WATCH_HUNT_ID, [blocked(huntWorker, false)]);
 

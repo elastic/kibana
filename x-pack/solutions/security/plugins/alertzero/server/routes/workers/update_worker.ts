@@ -18,6 +18,7 @@ import {
   UpdateWorkerRequestBody,
 } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_WRITE } from '../../../common/constants';
+import { workerName } from '../../../common/worker_names';
 import type { RouteDependencies } from '../register_routes';
 import type { WorkerEnableBlockedReason } from '../../services/workers/workers_service';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
@@ -25,7 +26,7 @@ import { hasManageSecurity } from './has_manage_security';
 
 const WORKER_ENABLE_BLOCKED_MESSAGES: Record<
   WorkerEnableBlockedReason,
-  (workerName: string) => string
+  (displayName: string) => string
 > = {
   alertAnalysisWorkflowDisabled: () =>
     i18n.translate('xpack.alertzero.alertTriageAlertAnalysisWorkflowDisabledErrorMessage', {
@@ -52,16 +53,16 @@ const WORKER_ENABLE_BLOCKED_MESSAGES: Record<
       defaultMessage:
         'Threat intel supply workflows are not installed in this deployment yet. Wait until setup finishes (Machine Learning embeddings available), then try turning on Hunt Watch again. If this persists after a restart, contact an administrator.',
     }),
-  noModel: (workerName) =>
+  noModel: (displayName) =>
     i18n.translate('xpack.alertzero.workerEnableNoModelErrorMessage', {
       defaultMessage:
         '{workerName} cannot be turned on because no AI model is available to you in this space. Configure one in Feature settings, or ask an administrator for access to connectors.',
-      values: { workerName },
+      values: { workerName: displayName },
     }),
 };
 
 const workerDisplayName = (workerId: string): string =>
-  SYSTEM_SECURITY_WORKER_CATALOG.find(({ id }) => id === workerId)?.name ?? workerId;
+  workerName(workerId, SYSTEM_SECURITY_WORKER_CATALOG.find(({ id }) => id === workerId)?.name);
 
 const UpdateWorkerRequestParams = lazySchema(() =>
   z.object({
