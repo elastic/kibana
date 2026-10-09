@@ -45,11 +45,11 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/secur
   --jsonl "$SESSION_DIR/findings.jsonl" --title "$FINDING_TITLE"
 ```
 
-Then `check-pack`, `infer-deployment`, `scan-sensitive`, `render-body` with `$SESSION_DIR/config.json`. Keep `source: exploratory-tester` on that JSON. Path B create always includes `sec-eng-prod:exploratory-tester` (`write --finding`).
+Then `check-pack`, `infer-deployment`, `scan-sensitive`, `render-body` with `$SESSION_DIR/config.json`. Keep `source: exploratory-tester` on that JSON. Path B create always includes `sec-eng-prod:exploratory-tester` (`write --finding`). `--index` and `--title` skip `Observation` blocks.
 
 ## Fileable checklist
 
-Do not ask for a write-yes until `check-draft` exits 0, or you have walked every remaining gap (`Unknown` is allowed). `check-draft` is the bar. Always **show the full draft** (title, type, labels, body, files) and **end the turn** before any write. Path B create also needs `sec-eng-prod:exploratory-tester`. Title: `[<team name>] [Bug]` + symptom (`format-title`; no clipped title). Create labels always include `bug` and `triage_needed`. `write` sets GitHub Type to Bug. Stamp: `Filed via security-file-bug`. A `wip` / `wip_or_limitation` hit is not fileable until they say **file anyway**.
+Do not ask for a write-yes until `check-draft` exits 0, or you have walked every remaining gap (`Unknown` is allowed). `check-draft` is the bar: pack gaps, title/labels, a **visible** stamp (not only an HTML comment), and required body sections (Describe, Version, Steps, Current, Expected). Always **show the full draft** (title, type, labels, body, files) and **end the turn** before any write. Path B create also needs `sec-eng-prod:exploratory-tester`. Title: `[<team name>] [Bug]` + symptom (`format-title`; no clipped title). Create labels always include `bug` and `triage_needed`. `write` sets GitHub Type to Bug. Stamp: `Filed via security-file-bug` as visible body text. A `wip` / `wip_or_limitation` hit is not fileable until they say **file anyway**.
 
 ## Scripts
 
@@ -81,7 +81,7 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/secur
 
 ### 2. Search
 
-You own the query. Search **open and closed issues** and **open PRs** (include drafts). Empty issue results are **not** proof the bug is new — run a **second** issue query before proposing create. `gh issue view` / `gh pr view` candidate bodies and match the *work*, not title keywords. A matching **draft or WIP PR**, or a known/intentional limitation, is a pre-file stop — do not treat a note in Additional information as clearance.
+You own the query. Search **open and closed issues** and **open PRs** (include drafts). Empty issue results are **not** proof the bug is new — run a **second** issue query before proposing create. `decide` exits 0 with `create` only when there are **no** matches. **One or more** matches exit 2 (`ask`) — show the candidates, match the *work* (not title keywords), and let the human pick create / comment / reopen. `gh issue view` / `gh pr view` candidate bodies. A matching **draft or WIP PR**, or a known/intentional limitation, is a pre-file stop — do not treat a note in Additional information as clearance.
 
 ```bash
 GH_PAGER=cat gh search issues --repo elastic/kibana --limit 10 --json number,state,title,body \

@@ -107,13 +107,6 @@ def _issue_matches(payload: object) -> list:
     ]
 
 
-def _catalog_names(payload: object) -> set:
-    names: set = set()
-    for entry in payload if isinstance(payload, list) else []:
-        name = entry.get("name") if isinstance(entry, dict) else entry
-        if name:
-            names.add(str(name))
-    return names
 
 
 def _cmd_decide(args: argparse.Namespace) -> int:
@@ -131,7 +124,7 @@ def _cmd_decide(args: argparse.Namespace) -> int:
 def _cmd_validate_labels(args: argparse.Namespace) -> int:
     requested = [name.strip() for name in args.labels.split(",") if name.strip()]
     if args.catalog:
-        catalog = _catalog_names(_read_json(args.catalog))
+        catalog = catalog_from_search_results([_read_json(args.catalog)])
     elif args.repo:
         payloads = []
         for label in requested:
@@ -361,9 +354,7 @@ def _cmd_upload(args: argparse.Namespace) -> int:
     if auth.get("returncode") or not token:
         detail = str(auth.get("stderr") or "").strip() or "no token on stdout"
         return _fail(f"`gh auth token` failed: {detail}")
-    result = upload_evidence(
-        issue_number=args.issue, repo=args.repo, files=args.file, token=token
-    )
+    result = upload_evidence(repo=args.repo, files=args.file, token=token)
     return _emit(
         {
             "uploaded": [{"path": path, "url": url} for path, url in result.uploaded],
@@ -530,7 +521,6 @@ def _build_parser() -> argparse.ArgumentParser:
     write.set_defaults(handler=_cmd_write)
 
     upload = subparsers.add_parser("upload", help="Upload evidence to user-attachments")
-    upload.add_argument("--issue", type=int, default=None)
     upload.add_argument("--repo", required=True)
     upload.add_argument("--file", action="append", required=True)
     upload.set_defaults(handler=_cmd_upload)

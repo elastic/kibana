@@ -9,6 +9,7 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Literal
+from urllib.parse import quote
 
 WriteAction = Literal["create", "comment", "reopen_comment", "ask"]
 UNKNOWN_ANSWER = "Unknown"
@@ -145,28 +146,29 @@ def parse_search_results(payload: object) -> list[IssueMatch]:
     return matches
 
 
+def _fileable_findings(records: list) -> list:
+    return [
+        record
+        for record in records
+        if isinstance(record, dict)
+        and record.get("kind") == "finding"
+        and record.get("block_type") != "Observation"
+    ]
+
+
 def finding_from_jsonl(
     records: list,
     *,
     index: int | None = None,
     title: str | None = None,
 ) -> dict:
-    findings = [
-        record
-        for record in records
-        if isinstance(record, dict) and record.get("kind") == "finding"
-    ]
+    numbered = _fileable_findings(records)
     if title is not None:
         wanted = title.strip().lower()
-        for finding in findings:
+        for finding in numbered:
             if str(finding.get("title", "")).strip().lower() == wanted:
                 return _with_tester_source(finding)
         raise ValueError(f"no finding titled {title!r}")
-    numbered = [
-        finding
-        for finding in findings
-        if finding.get("block_type") != "Observation"
-    ]
     if index is None:
         if len(numbered) == 1:
             return _with_tester_source(numbered[0])
@@ -215,12 +217,6 @@ def with_create_labels(labels: list) -> list[str]:
 def decide_write_path(matches: list[IssueMatch]) -> WritePath:
     if len(matches) == 0:
         return WritePath("create", None, ())
-    if len(matches) == 1:
-        match = matches[0]
-        action: WriteAction = (
-            "reopen_comment" if match.state == "closed" else "comment"
-        )
-        return WritePath(action, match.number, (match,))
     return WritePath("ask", None, tuple(matches))
 
 
@@ -571,6 +567,15 @@ def _stack_version(config: dict, environment: dict) -> str:
     )
 
 
+def _version_text(finding: dict, config: dict) -> str:
+    environment = _environment(config)
+    return _first_text(
+        finding.get("version"),
+        finding.get("kibana_version"),
+        _stack_version(config, environment),
+    )
+
+
 def _with_flag_setup(flags: str | None, finding: dict, config: dict, environment: dict) -> str | None:
     if flags is None:
         return None
@@ -685,12 +690,7 @@ class ReleaseInference:
 
 def infer_release_label(finding: dict, config: dict) -> ReleaseInference:
     """Map a stack version to a `vX.Y.Z` label, or ask when it is not a release."""
-    environment = _environment(config)
-    raw = _first_text(
-        finding.get("version"),
-        finding.get("kibana_version"),
-        _stack_version(config, environment),
-    )
+    raw = _version_text(finding, config)
     if not raw or raw.lower() == UNKNOWN_ANSWER.lower():
         return ReleaseInference(
             "ask", None, "Version is missing or Unknown — confirm the stack release"
@@ -754,10 +754,12 @@ def _spaces(finding: dict, config: dict, environment: dict) -> str | None:
 
 def _additional_information(finding: dict, evidence: list[str]) -> str | None:
     lines: list[str] = []
-    for label, key in (("Flow", "flow"), ("Level", "level")):
-        value = _optional_text(finding.get(key))
-        if value is not None:
-            lines.append(f"{label}: {value}")
+    flow = _optional_text(finding.get("flow_name"), finding.get("flow"))
+    if flow is not None:
+        lines.append(f"Flow: {flow}")
+    level = _optional_text(finding.get("level"))
+    if level is not None:
+        lines.append(f"Level: {level}")
     lines.extend(_remaining_evidence(evidence))
     return "\n".join(lines) if lines else None
 
@@ -807,7 +809,7 @@ def pack_gaps(finding: dict, config: dict) -> list[str]:
     evidence = _evidence_lines(finding)
     session_dir = _session_dir(config, environment)
     gaps: list[str] = []
-    if not _stack_version(config, environment):
+    if not _version_text(finding, config):
         gaps.append("version")
     elif infer_release_label(finding, config).status == "ask":
         gaps.append("release")
@@ -869,9 +871,52 @@ def _needs_quoted_error(finding: dict, evidence: list[str]) -> bool:
     return bool(re.search(r"\berror\b|\bfail", hay, re.I))
 
 
+_HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.S)
+_EMPTY_STEP_RE = re.compile(r"^\d+\.\s*$")
+_REQUIRED_BODY_SECTIONS = (
+    ("body_describe", _HEADING_DESCRIBE),
+    ("body_version", _HEADING_VERSION),
+    ("body_steps", _HEADING_STEPS),
+    ("body_current", _HEADING_CURRENT),
+    ("body_expected", _HEADING_EXPECTED),
+)
+
+
+def _visible_text(text: str) -> str:
+    return _HTML_COMMENT_RE.sub("", text)
+
+
+def _section_content(body: str, heading: str) -> str:
+    visible = _visible_text(body)
+    if heading not in visible:
+        return ""
+    after = visible.split(heading, 1)[1]
+    nxt = re.search(r"\n\*\*[^\n]+:\*\*", after)
+    chunk = after[: nxt.start()] if nxt else after
+    return chunk.strip()
+
+
+def _body_section_filled(heading: str, content: str) -> bool:
+    if not content:
+        return False
+    if heading == _HEADING_STEPS:
+        lines = [line.strip() for line in content.splitlines() if line.strip()]
+        if lines and all(_EMPTY_STEP_RE.match(line) for line in lines):
+            return False
+    return True
+
+
+def _body_section_gaps(body: str) -> list[str]:
+    return [
+        gap
+        for gap, heading in _REQUIRED_BODY_SECTIONS
+        if not _body_section_filled(heading, _section_content(body, heading))
+    ]
+
+
 def with_filed_stamp(body: str) -> str:
     text = body.rstrip()
-    if FILED_VIA in text:
+    if FILED_VIA in _visible_text(text):
         return f"{text}\n"
     return f"{text}\n\n{FILED_VIA}\n"
 
@@ -916,8 +961,9 @@ def check_draft(
             gaps.append("bug_label")
         if "triage_needed" not in names:
             gaps.append("triage_label")
-    if FILED_VIA not in body:
+    if FILED_VIA not in _visible_text(body):
         gaps.append("stamp")
+    gaps.extend(_body_section_gaps(body))
     if is_tester_finding(finding, config) and title is not None:
         if TESTER_SOURCE_LABEL not in [str(label) for label in (labels or [])]:
             gaps.append("tester_label")
@@ -965,7 +1011,7 @@ def render_bug_body(finding: dict, config: dict) -> str:
     }
     sections: list[tuple[str, str]] = [
         (_HEADING_DESCRIBE, _describe_the_bug(finding)),
-        (_HEADING_VERSION, _stack_version(config, environment)),
+        (_HEADING_VERSION, _version_text(finding, config)),
         *[(heading, optional_present[heading]) for heading in (
             _HEADING_FEATURE_FLAGS,
             _HEADING_DEPLOYMENT,
@@ -1250,14 +1296,12 @@ def upload_evidence(
     repo: str,
     files: list,
     token: str,
-    issue_number: int | None = None,
     repository_id: int | None = None,
     http_post: HttpPost = _default_http_post,
     compress_video_fn: CompressVideo = compress_video,
     run_gh: GhRunner | None = None,
 ) -> UploadResult:
     """Upload evidence to user-attachments, compressing a rejected video once."""
-    del issue_number
     repo_id = repository_id
     if repo_id is None:
         repo_id = _repository_id(repo, run_gh or _default_run_gh)
@@ -1267,7 +1311,9 @@ def upload_evidence(
         path = Path(file_path)
         mime = _mime_for(path)
         url = _ASSET_URL.format(
-            name=path.name, content_type=mime, repository_id=repo_id
+            name=quote(path.name, safe=""),
+            content_type=quote(mime, safe=""),
+            repository_id=repo_id,
         )
         headers = {
             "Authorization": f"Bearer {token}",
@@ -1402,6 +1448,30 @@ def _gh_comment(
     return _first_url(stdout)
 
 
+def _label_in_repo(repo: str, name: str, run_gh: GhRunner) -> bool:
+    argv = [
+        "gh",
+        "label",
+        "list",
+        "--repo",
+        repo,
+        "--search",
+        name,
+        "--limit",
+        "20",
+        "--json",
+        "name",
+    ]
+    returncode, stdout, _stderr = _gh_result(run_gh(argv))
+    if returncode != 0:
+        return False
+    try:
+        payload = json.loads(stdout or "[]")
+    except json.JSONDecodeError:
+        return False
+    return name in catalog_from_search_results([payload])
+
+
 def write_github(
     *,
     action: WriteAction,
@@ -1427,7 +1497,11 @@ def write_github(
     if action == "create":
         labels = with_create_labels(labels)
         release = infer_release_label(finding or {}, config or {})
-        if release.status == "confident" and release.label:
+        if (
+            release.status == "confident"
+            and release.label
+            and _label_in_repo(repo, release.label, run_gh)
+        ):
             labels = _unique_labels(labels, [release.label])
     workdir = Path(tempfile.mkdtemp(prefix="file_bug_body_"))
     try:

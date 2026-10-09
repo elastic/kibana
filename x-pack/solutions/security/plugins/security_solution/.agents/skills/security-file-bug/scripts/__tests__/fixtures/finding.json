@@ -1,7 +1,7 @@
 {
   "title": "Risk scores table stays empty after 1 year range",
   "level": 1,
-  "flow": "Happy path",
+  "flow_name": "Happy path",
   "role": "t2_analyst",
   "steps_followed": ["Open Entity Analytics", "Set time range to Last 1 year"],
   "current_behavior": "Table shows 0 entities",

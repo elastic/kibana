@@ -1,7 +1,8 @@
 <!--
 Full field rules, including the four always-ask fields: ../references/drafting.md
 Omit empty optional headings. Never write _unknown_. Quote the exact error.
-Stamp: Filed via security-file-bug. Preconditions only when needed before step 1.
+Put the visible stamp after the last heading, not in this comment.
+Preconditions only when needed before step 1.
 -->
 
 **Describe the bug:**

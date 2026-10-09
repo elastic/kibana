@@ -1,6 +1,6 @@
 # Drafting a Security bug (load while collecting)
 
-Field rules live here once. `check-pack`, `check-draft`, `infer-deployment`, `format-title`, and `scan-sensitive` are the source of truth — if prose and a script disagree, trust the script.
+Field rules live here once. `check-pack`, `check-draft`, `infer-deployment`, `format-title`, and `scan-sensitive` are the source of truth — if prose and a script disagree, trust the script. `check-draft` also requires a visible stamp and filled Describe / Version / Steps / Current / Expected sections in the body, not only a complete finding JSON.
 
 Repo: `elastic/kibana`. Body: this skill's `templates/bug-report.md` (not `.github/ISSUE_TEMPLATE/Bug_report.md`). Follow `.agents/skills/kbn-github` (explicit confirm, then `gh`).
 

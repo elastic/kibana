@@ -34,6 +34,7 @@ from file_bug import (  # noqa: E402
     scan_wip,
     upload_evidence,
     validate_labels,
+    with_filed_stamp,
     write_github,
 )
 
@@ -46,17 +47,19 @@ class DecideWritePathTest(unittest.TestCase):
         self.assertEqual(path.action, "create")
         self.assertIsNone(path.number)
 
-    def test_one_open_comments(self):
+    def test_one_open_asks(self):
         m = IssueMatch(123, "open", "Risk table empty")
         path = decide_write_path([m])
-        self.assertEqual(path.action, "comment")
-        self.assertEqual(path.number, 123)
+        self.assertEqual(path.action, "ask")
+        self.assertIsNone(path.number)
+        self.assertEqual(path.candidates, (m,))
 
-    def test_one_closed_reopens_and_comments(self):
+    def test_one_closed_asks(self):
         m = IssueMatch(456, "closed", "Risk table empty")
         path = decide_write_path([m])
-        self.assertEqual(path.action, "reopen_comment")
-        self.assertEqual(path.number, 456)
+        self.assertEqual(path.action, "ask")
+        self.assertIsNone(path.number)
+        self.assertEqual(path.candidates, (m,))
 
     def test_two_matches_asks(self):
         path = decide_write_path(
@@ -157,6 +160,7 @@ class InferTeamLabelTest(unittest.TestCase):
 
 
 FIXTURES = Path(__file__).resolve().parent / "__tests__" / "fixtures"
+SKILL_ROOT = Path(__file__).resolve().parents[1]
 
 
 class RenderBugBodyTest(unittest.TestCase):
@@ -170,6 +174,7 @@ class RenderBugBodyTest(unittest.TestCase):
         self.assertIn("**Logs and/or server output (if relevant):**", body)
         self.assertIn("**Any additional information:**", body)
         self.assertIn("Open Entity Analytics", body)
+        self.assertIn("Flow: Happy path", body)
         self.assertIn("Table shows 0 entities", body)
         self.assertIn("Table lists entities in range", body)
         self.assertIn("TypeError: cannot read map of undefined", body)
@@ -444,6 +449,37 @@ class FindingFromJsonlTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             finding_from_jsonl(self.records, title="Nope")
 
+    def test_title_skips_observations(self):
+        records = [
+            {
+                "kind": "finding",
+                "block_type": "Observation",
+                "title": "Looks fine",
+                "current_behavior": "ok",
+            },
+            {
+                "kind": "finding",
+                "block_type": "Finding",
+                "title": "Looks fine",
+                "current_behavior": "bug",
+            },
+        ]
+        finding = finding_from_jsonl(records, title="Looks fine")
+        self.assertEqual(finding["current_behavior"], "bug")
+        self.assertEqual(finding["block_type"], "Finding")
+
+    def test_title_of_observation_only_raises(self):
+        records = [
+            {
+                "kind": "finding",
+                "block_type": "Observation",
+                "title": "Happy path renders",
+                "current_behavior": "ok",
+            }
+        ]
+        with self.assertRaises(ValueError):
+            finding_from_jsonl(records, title="Happy path renders")
+
 
 class InferDeploymentTest(unittest.TestCase):
     def test_explicit_both(self):
@@ -558,6 +594,23 @@ class PackGapsTest(unittest.TestCase):
         self.assertIn("expected_vague", gaps)
         self.assertIn("error_unquoted", gaps)
 
+    def test_finding_version_clears_version_gap(self):
+        gaps = pack_gaps(
+            {
+                "version": "9.6.0",
+                "current_behavior": "Table shows 0 entities",
+                "expected_behavior": "Table lists entities",
+                "steps_followed": ["click"],
+                "feature_flags": "Unknown",
+                "deployment": "Unknown",
+                "role": "Unknown",
+                "spaces": "Unknown",
+            },
+            {},
+        )
+        self.assertNotIn("version", gaps)
+        self.assertNotIn("release", gaps)
+
 
 class ScanSensitiveTest(unittest.TestCase):
     def test_flags_email_and_case(self):
@@ -590,6 +643,7 @@ class ScanWipTest(unittest.TestCase):
 class CheckDraftTest(unittest.TestCase):
     def test_complete_draft_is_fileable(self):
         finding = {
+            "title": "Risk table empty",
             "current_behavior": 'Toast: "TypeError: cannot read map"',
             "expected_behavior": "Table lists entities",
             "steps_followed": ["Open Entity Analytics"],
@@ -685,6 +739,125 @@ class CheckDraftTest(unittest.TestCase):
         )
         self.assertNotIn("wip_or_limitation", gaps)
 
+    def test_complete_json_empty_body_is_not_fileable(self):
+        finding = {
+            "current_behavior": 'Toast: "TypeError: cannot read map"',
+            "expected_behavior": "Table lists entities",
+            "steps_followed": ["Open Entity Analytics"],
+            "feature_flags": "No feature flag (default/GA)",
+            "deployment": "ECH",
+            "role": "none",
+            "spaces": "default",
+        }
+        gaps = check_draft(
+            body=FILED_VIA,
+            title="[Entity Analytics] [Bug] Risk table empty",
+            finding=finding,
+            config={"kibana_version": "9.3.0"},
+            labels=["bug", "triage_needed"],
+        )
+        self.assertIn("body_describe", gaps)
+        self.assertIn("body_version", gaps)
+        self.assertIn("body_steps", gaps)
+        self.assertIn("body_current", gaps)
+        self.assertIn("body_expected", gaps)
+
+    def test_stamp_in_html_comment_is_not_visible(self):
+        finding = {
+            "current_behavior": 'Toast: "TypeError: cannot read map"',
+            "expected_behavior": "Table lists entities",
+            "steps_followed": ["Open Entity Analytics"],
+            "feature_flags": "Unknown",
+            "deployment": "Unknown",
+            "role": "Unknown",
+            "spaces": "Unknown",
+        }
+        body = (
+            f"<!-- Stamp: {FILED_VIA} -->\n"
+            "**Describe the bug:**\nRisk table empty\n\n"
+            "**Version:**\n9.3.0\n\n"
+            "**Steps to reproduce:**\n1. Open Entity Analytics\n\n"
+            "**Current behaviour (with screenshots and recordings):**\n"
+            'Toast: "TypeError: cannot read map"\n\n'
+            "**Expected behavior:**\nTable lists entities\n"
+        )
+        gaps = check_draft(
+            body=body,
+            title="[Entity Analytics] [Bug] Risk table empty",
+            finding=finding,
+            config={"kibana_version": "9.3.0"},
+            labels=["bug", "triage_needed"],
+        )
+        self.assertIn("stamp", gaps)
+
+    def test_with_filed_stamp_appends_when_only_in_comment(self):
+        body = f"<!-- {FILED_VIA} -->\n**Describe the bug:**\nRisk table empty\n"
+        updated = with_filed_stamp(body)
+        self.assertTrue(updated.rstrip().endswith(FILED_VIA))
+        visible = updated.split("-->", 1)[-1]
+        self.assertIn(FILED_VIA, visible)
+
+
+class PathADraftTest(unittest.TestCase):
+    def test_unfilled_template_is_not_fileable(self):
+        template = (SKILL_ROOT / "templates" / "bug-report.md").read_text(
+            encoding="utf-8"
+        )
+        finding = {
+            "current_behavior": 'Toast: "TypeError: cannot read map"',
+            "expected_behavior": "Table lists entities",
+            "steps_followed": ["Open Entity Analytics"],
+            "feature_flags": "Unknown",
+            "deployment": "Unknown",
+            "role": "Unknown",
+            "spaces": "Unknown",
+        }
+        gaps = check_draft(
+            body=template,
+            title="[Entity Analytics] [Bug] Risk table empty",
+            finding=finding,
+            config={"kibana_version": "9.3.0"},
+            labels=["bug", "triage_needed"],
+        )
+        self.assertIn("stamp", gaps)
+        self.assertIn("body_describe", gaps)
+        self.assertIn("body_version", gaps)
+        self.assertIn("body_steps", gaps)
+        self.assertIn("body_current", gaps)
+        self.assertIn("body_expected", gaps)
+
+    def test_filled_path_a_markdown_is_fileable(self):
+        finding = {
+            "current_behavior": 'Toast: "TypeError: cannot read map"',
+            "expected_behavior": "Table lists entities",
+            "steps_followed": ["Open Entity Analytics"],
+            "feature_flags": "Unknown",
+            "deployment": "Unknown",
+            "role": "Unknown",
+            "spaces": "Unknown",
+        }
+        body = (
+            "**Describe the bug:**\nRisk table empty\n\n"
+            "**Version:**\n9.3.0\n\n"
+            "**Feature flags:**\nUnknown\n\n"
+            "**Deployment:**\nUnknown\n\n"
+            "**Role required to reproduce:**\nUnknown\n\n"
+            "**Spaces:**\nUnknown\n\n"
+            "**Steps to reproduce:**\n1. Open Entity Analytics\n\n"
+            "**Current behaviour (with screenshots and recordings):**\n"
+            'Toast: "TypeError: cannot read map"\n\n'
+            "**Expected behavior:**\nTable lists entities\n\n"
+            f"{FILED_VIA}\n"
+        )
+        gaps = check_draft(
+            body=body,
+            title="[Entity Analytics] [Bug] Risk table empty",
+            finding=finding,
+            config={"kibana_version": "9.3.0"},
+            labels=["bug", "triage_needed"],
+        )
+        self.assertEqual(gaps, [])
+
 
 class EmbedUploadsTest(unittest.TestCase):
     def test_wraps_image_paths_as_markdown(self):
@@ -747,7 +920,6 @@ class UploadEvidenceTest(unittest.TestCase):
             png = Path(tmp) / "shot.png"
             png.write_bytes(b"png")
             result = upload_evidence(
-                issue_number=99,
                 repo="elastic/kibana",
                 files=[png],
                 token="t",
@@ -759,6 +931,27 @@ class UploadEvidenceTest(unittest.TestCase):
         self.assertEqual(result.leftovers, ())
         self.assertIn("user-attachments/assets", posts[0])
         self.assertIn("repository_id=7833168", posts[0])
+
+    def test_encodes_spaces_in_filename(self):
+        posts = []
+
+        def http_post(url, headers, file_path):
+            posts.append(url)
+            return {"ok": True, "status": 201, "url": "https://img/a.png"}
+
+        with TemporaryDirectory() as tmp:
+            png = Path(tmp) / "risk score table.png"
+            png.write_bytes(b"png")
+            upload_evidence(
+                repo="elastic/kibana",
+                files=[png],
+                token="t",
+                repository_id=7833168,
+                http_post=http_post,
+                compress_video_fn=lambda *a, **k: None,
+            )
+        self.assertIn("name=risk%20score%20table.png", posts[0])
+        self.assertNotIn("name=risk score table.png", posts[0])
 
     def test_video_rejected_then_compress_retry_succeeds(self):
         calls = {"n": 0}
@@ -779,7 +972,6 @@ class UploadEvidenceTest(unittest.TestCase):
             video = Path(tmp) / "flow.mp4"
             video.write_bytes(b"huge")
             result = upload_evidence(
-                issue_number=99,
                 repo="elastic/kibana",
                 files=[video],
                 token="t",
@@ -799,7 +991,6 @@ class UploadEvidenceTest(unittest.TestCase):
             video = Path(tmp) / "flow.mp4"
             video.write_bytes(b"huge")
             result = upload_evidence(
-                issue_number=99,
                 repo="elastic/kibana",
                 files=[video],
                 token="t",
@@ -886,6 +1077,12 @@ class WriteGithubTest(unittest.TestCase):
 
         def run_gh(argv):
             calls.append(argv)
+            if argv[1:3] == ["label", "list"]:
+                return {
+                    "returncode": 0,
+                    "stdout": json.dumps([{"name": "v9.6.0"}]),
+                    "stderr": "",
+                }
             return {
                 "returncode": 0,
                 "stdout": "https://github.com/elastic/kibana/issues/1",
@@ -906,7 +1103,39 @@ class WriteGithubTest(unittest.TestCase):
             result["labels"],
             ["bug", "triage_needed", "Team:Entity Analytics", "v9.6.0"],
         )
-        self.assertIn("v9.6.0", calls[0])
+        create = next(argv for argv in calls if argv[1:3] == ["issue", "create"])
+        self.assertIn("v9.6.0", create)
+
+    def test_create_skips_release_label_missing_from_catalog(self):
+        calls = []
+
+        def run_gh(argv):
+            calls.append(argv)
+            if argv[1:3] == ["label", "list"]:
+                return {
+                    "returncode": 0,
+                    "stdout": json.dumps([{"name": "v9.6.0"}]),
+                    "stderr": "",
+                }
+            return {
+                "returncode": 0,
+                "stdout": "https://github.com/elastic/kibana/issues/1",
+                "stderr": "",
+            }
+
+        result = write_github(
+            action="create",
+            repo="elastic/kibana",
+            title="[Entity Analytics] [Bug] Risk table empty",
+            body="body",
+            labels=["Team:Entity Analytics"],
+            number=None,
+            config={"kibana_version": "9.7.0"},
+            run_gh=run_gh,
+        )
+        self.assertNotIn("v9.7.0", result["labels"])
+        create = next(argv for argv in calls if argv[1:3] == ["issue", "create"])
+        self.assertNotIn("v9.7.0", create)
 
     def test_comment_adds_tester_label_to_existing_issue(self):
         calls = []
@@ -1304,9 +1533,11 @@ class TesterPackIntegrationTest(unittest.TestCase):
         self.assertNotIn("`$SESSION_DIR", body)
         self.assertIn(f"**Describe the bug:**\n{finding['title']}", body)
         self.assertNotIn(f"**Describe the bug:**\n{finding['current_behavior']}", body)
+        self.assertIn("flow_name", finding)
+        self.assertNotIn("flow", finding)
+        self.assertIn(f"Flow: {finding['flow_name']}", body)
 
 
-SKILL_ROOT = Path(__file__).resolve().parents[1]
 SKILL = SKILL_ROOT / "SKILL.md"
 
 
@@ -1410,6 +1641,7 @@ class SkillProtocolTest(unittest.TestCase):
         self.assertIn("Never write in the same turn", self.skill)
         self.assertIn("Filed via security-file-bug", self.text)
         self.assertIn("open and closed", self.text)
+        self.assertIn("One or more", self.skill)
         self.assertIn("second", self.text.lower())
         self.assertIn("elastic/security-team", self.text)
         self.assertIn("vague", self.text.lower())
