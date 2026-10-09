@@ -34,6 +34,10 @@ import {
 } from './filter_workflows_by_trigger_condition';
 import { resolveWorkflowEventsModeFromOn } from './lib/resolve_workflow_events_mode_from_on';
 import {
+  type InvalidateSubscriptionCacheParams,
+  SubscriptionResolutionCache,
+} from './subscription_resolution_cache';
+import {
   createEmptyTriggerResolutionStats,
   createEmptyTriggerScheduleStats,
   type TriggerEventScheduleStats,
@@ -173,6 +177,7 @@ export class TriggerEventHandler {
   private readonly config: EventTriggersConfig;
   private readonly logger: Logger;
   private readonly triggerEventsClientPromise: Promise<TriggerEventsDataStreamClient | undefined>;
+  private readonly subscriptionCache: SubscriptionResolutionCache;
 
   constructor(deps: TriggerEventHandlerDeps) {
     this.scheduleWorkflow = deps.scheduleWorkflow;
@@ -188,6 +193,14 @@ export class TriggerEventHandler {
     this.workflowExecutionRepository = deps.workflowExecutionRepository;
     this.triggerEventsClientPromise =
       deps.triggerEventsClientPromise ?? initializeTriggerEventsClient(coreStart.dataStreams);
+    this.subscriptionCache = new SubscriptionResolutionCache({
+      ttlMs: this.config.subscriptionCacheTtl.asMilliseconds(),
+    });
+  }
+
+  /** Drops this node's cached subscribers for the given space and triggers. */
+  invalidateSubscriptionCache(params: InvalidateSubscriptionCacheParams): void {
+    this.subscriptionCache.invalidate(params);
   }
 
   async handleEvent(params: EmitEventParams): Promise<void> {

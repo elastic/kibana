@@ -702,6 +702,9 @@ workflowsExecutionEngine:
     # Maximum depth for event-triggered chains (each emit that schedules workflows increments depth).
     # When exceeded, matching workflows are not scheduled (warning logged). Default 10, minimum 1.
     maxChainDepth: 10
+    # How long this node keeps a cached subscriber set for one space and trigger.
+    # A hit does not extend it. Default 3m, minimum 1s.
+    subscriptionCacheTtl: 3m
 
   # Maximum depth of nested workflow execution (workflow calling another via workflow.execute).
   # When exceeded, nested execution is not started. Default 10, minimum 1 (see server/config.ts).
@@ -718,6 +721,8 @@ workflowsExecutionEngine:
 ### Event-driven and depth settings
 
 - **`eventDriven.maxChainDepth`** — Maximum depth for **event-triggered** chains (each `emitEvent` that schedules workflows advances depth). Default **`10`**; minimum **`1`**. When a run would exceed this value, matching workflows are **not** scheduled and the server logs a warning.
+
+- **`eventDriven.subscriptionCacheTtl`** — How long this node keeps a cached subscriber set for one space and trigger. Default **`3m`**; minimum **`1s`**. A cache hit does not extend the TTL. Other Kibana nodes keep the previous set until their own TTL.
 
 - **`maxWorkflowDepth`** — Maximum depth of **nested** workflow execution when one workflow invokes another via the **`workflow.execute`** step. Default **`10`**; minimum **`1`**. When exceeded, the nested run is not started.
 

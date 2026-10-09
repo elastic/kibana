@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import moment from 'moment';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { EsWorkflowExecution, WorkflowDetailDto } from '@kbn/workflows';
@@ -112,6 +113,7 @@ function createDeps(overrides: Partial<TriggerEventHandlerDeps> = {}): TriggerEv
       enabled: true,
       logEvents: true,
       maxChainDepth: 10,
+      subscriptionCacheTtl: moment.duration(60, 's'),
     },
     scheduleWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' }),
     logger: mockLogger,
@@ -253,7 +255,12 @@ describe('TriggerEventHandler', () => {
     const scheduleWorkflow = jest.fn();
     const deps = createDeps({
       scheduleWorkflow,
-      config: { enabled: false, logEvents: false, maxChainDepth: 10 },
+      config: {
+        enabled: false,
+        logEvents: false,
+        maxChainDepth: 10,
+        subscriptionCacheTtl: moment.duration(60, 's'),
+      },
     });
     const handler = new TriggerEventHandler(deps);
 
@@ -404,7 +411,12 @@ describe('TriggerEventHandler', () => {
     const scheduleWorkflow = jest.fn();
     const deps = createDeps({
       scheduleWorkflow,
-      config: { enabled: true, logEvents: true, maxChainDepth: 5 },
+      config: {
+        enabled: true,
+        logEvents: true,
+        maxChainDepth: 5,
+        subscriptionCacheTtl: moment.duration(60, 's'),
+      },
       workflowRepository: createWorkflowRepositoryMock([createMockWorkflow()]),
     });
     const handler = new TriggerEventHandler(deps);

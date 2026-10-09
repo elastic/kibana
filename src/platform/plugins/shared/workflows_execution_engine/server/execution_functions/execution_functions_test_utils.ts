@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -21,7 +22,12 @@ import type { ContextDependencies } from '../workflow_context_manager/types';
 
 export const createMockWorkflowExecutionEngineConfig = (): WorkflowsExecutionEngineConfig => ({
   enabled: true,
-  eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+  eventDriven: {
+    enabled: true,
+    logEvents: true,
+    maxChainDepth: 10,
+    subscriptionCacheTtl: moment.duration(60, 's'),
+  },
   maxWorkflowDepth: 10,
   logging: { console: true },
   http: { allowedHosts: ['*'] },

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { isGraphBuildError, WorkflowGraph } from '@kbn/workflows/graph';
@@ -52,7 +53,12 @@ describe('setupDependencies', () => {
 
   const mockConfig: WorkflowsExecutionEngineConfig = {
     enabled: true,
-    eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+    eventDriven: {
+      enabled: true,
+      logEvents: true,
+      maxChainDepth: 10,
+      subscriptionCacheTtl: moment.duration(60, 's'),
+    },
     maxWorkflowDepth: 10,
     logging: {
       console: true,
