@@ -100,7 +100,9 @@ describe('dynamic settings routes', () => {
     });
 
     it('rejects an out-of-range sync interval instead of passing it through', () => {
-      expect(() => DynamicSettingsSchema.validate({ privateLocationsSyncInterval: 5000 })).toThrow();
+      expect(() =>
+        DynamicSettingsSchema.validate({ privateLocationsSyncInterval: 5000 })
+      ).toThrow();
     });
 
     it('rejects non-integer thresholds', () => {
