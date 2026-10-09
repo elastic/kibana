@@ -32,7 +32,10 @@ export class WorkflowsAppPage {
   constructor(private readonly page: ScoutPage) {
     this.yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
     this.saveButton = this.page.testSubj.locator('saveWorkflowHeaderButton');
-    this.runButton = this.page.testSubj.locator('workflowBottomBarRunButton');
+    // The bottom bar swaps the full-width run button for an icon-only one below 800px, and only ever mounts one of them.
+    this.runButton = this.page.testSubj
+      .locator('workflowBottomBarRunButton')
+      .or(this.page.testSubj.locator('workflowBottomBarRunButtonCompact'));
     this.executionPanel = this.page.testSubj.locator('workflowExecutionPanel');
   }
 
