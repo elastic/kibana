@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type {
-  SignalEffect,
-  SignalEntry,
-  Severity,
-  SignificantEvent,
-} from '@kbn/significant-events-schema';
+import type { SignalImpact, Severity, SignificantEvent } from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import type { CompactBulkError } from '../bulk_write';
 import {
@@ -22,8 +17,7 @@ import {
   preserveStableNarrative,
 } from './episode_context';
 import { lockSeverityForCompletedInvestigation, type EventsWriteSource } from './severity_lock';
-import { computeSeverity, deriveEventEffect } from './compute_severity';
-import { computeTopologyBreadth, computeTopologyFanOut, hasCascadePath } from './topology_breadth';
+import { computeSeverity, deriveEventImpact } from './compute_severity';
 import type { BulkResults, EventsWriteInput, EventsWriteResult, WriteCandidate } from './types';
 
 interface EventFacts
@@ -33,49 +27,38 @@ interface EventFacts
   latestEvent: SignificantEvent | undefined;
   episodeContext: ReturnType<typeof mergeEpisodeContext>;
   frozenNarrative: ReturnType<typeof preserveStableNarrative>;
-  effect: SignalEffect;
+  impact: SignalImpact;
 }
 
 /**
  * Returns true when the latest stored version for this event_id has the same computed severity
- * and status as the candidate and the candidate introduces no new detection rules — indicating
- * this snapshot would produce a pure-churn duplicate.
+ * and status as the candidate, the same worst impact (the fact the tier derives from), and the
+ * candidate introduces no new detection rules — indicating this snapshot would produce a
+ * pure-churn duplicate.
  */
-const sameOutagePaths = (first: string[], second: string[]): boolean => {
-  const sortedFirst = [...first].sort();
-  const sortedSecond = [...second].sort();
-  return (
-    sortedFirst.length === sortedSecond.length &&
-    sortedFirst.every((path, index) => path === sortedSecond[index])
-  );
-};
-
 export const shouldSkipAsNoOp = ({
   latestEvent,
   candidate,
   priorDocs,
   computedSeverity,
-  mergedSignals,
+  mergedImpact,
 }: {
   latestEvent: SignificantEvent | undefined;
   candidate: WriteCandidate;
   priorDocs: SignificantEvent[];
   computedSeverity: Severity;
-  mergedSignals: SignalEntry[] | undefined;
+  mergedImpact: SignalImpact;
 }): boolean => {
   if (latestEvent === undefined) return false;
 
   const knownRuleUuids = extractRuleUuidsFromEvents([...priorDocs, latestEvent]);
   const addsRule = addsNewDetectionRules(extractRuleUuids(candidate.input.signals), knownRuleUuids);
-  const merged = deriveEventEffect(mergedSignals);
-  const stored = deriveEventEffect(latestEvent.signals);
-  const sameFacts =
-    merged.effect === stored.effect && sameOutagePaths(merged.outagePaths, stored.outagePaths);
+  const stored = deriveEventImpact(latestEvent.signals);
 
   return (
     latestEvent.status === candidate.input.status &&
     latestEvent.severity === computedSeverity &&
-    sameFacts &&
+    mergedImpact === stored.impact &&
     !addsRule
   );
 };
@@ -148,21 +131,14 @@ export const computeEventFacts = ({
   // Discovery assigns the final status directly; persist caller-supplied status for all write modes.
   const status = candidate.input.status;
 
-  const { effect, outagePaths, severityScore } = deriveEventEffect(signals);
-  const breadth = computeTopologyBreadth(episodeContext.causalFeatures, episodeContext.blastRadius);
-  const topologyFanOut = computeTopologyFanOut(episodeContext.blastRadius);
-  const cascadePath = hasCascadePath(episodeContext.blastRadius);
+  const { impact, severityScore } = deriveEventImpact(signals);
 
-  // Floor to 'low' on inactive (the resolved tier, by the same convention the prompt previously wrote directly)
+  // Floor to 'low' on inactive.
   const severityFromSignals =
     status === 'inactive'
       ? 'low'
       : computeSeverity({
-          effect,
-          outagePaths,
-          breadth,
-          topologyFanOut,
-          hasCascadePath: cascadePath,
+          impact,
           severityScore,
         });
   // A signal-less write (chat create) keeps its explicit severity; signal-bearing writes always compute.
@@ -193,7 +169,7 @@ export const computeEventFacts = ({
     episodeContext,
     status,
     severity,
-    effect,
+    impact,
     frozenNarrative,
     confidence: episodeContext.confidence,
   };
@@ -215,7 +191,7 @@ export const buildPendingWrite = ({
     episodeContext,
     status,
     severity,
-    effect,
+    impact,
     frozenNarrative,
     confidence,
   } = facts;
@@ -225,7 +201,7 @@ export const buildPendingWrite = ({
     status,
     narrativePreserved: frozenNarrative?.narrativePreserved,
     severity,
-    effect,
+    impact,
     document: {
       ...rest,
       ...(frozenNarrative
@@ -261,7 +237,7 @@ export const applyWriteOutcomes = ({
   results: BulkResults;
 }): void => {
   pendingWrites.forEach(
-    ({ candidate, status, narrativePreserved, severity, effect }, responseIndex) => {
+    ({ candidate, status, narrativePreserved, severity, impact }, responseIndex) => {
       const error = errors[responseIndex];
       if (error) {
         results[candidate.index] = {
@@ -280,7 +256,7 @@ export const applyWriteOutcomes = ({
         status,
         written: true,
         severity,
-        effect,
+        impact,
       };
       if (narrativePreserved) {
         result.narrative_preserved = true;

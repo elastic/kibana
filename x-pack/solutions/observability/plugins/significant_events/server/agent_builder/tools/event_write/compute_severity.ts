@@ -8,118 +8,89 @@
 import {
   CRITICAL_SEVERITY_THRESHOLD,
   type Severity,
-  type SignalEffect,
+  type SignalImpact,
   type SignalEntry,
 } from '@kbn/significant-events-schema';
 
-/**
- * "degradation" escalates to high when the event's breadth — distinct affected entities —
- * exceeds this
- */
-export const BREADTH_THRESHOLD = 1;
-
-/**
- * A single outage path escalates to critical when at least this many confirmed dependency edges
- * fan out from it. Fan-out means the failure is spreading to several dependents at once.
- */
-export const TOPOLOGY_FAN_OUT_THRESHOLD = 2;
-
-export interface EventEffect {
-  effect: SignalEffect;
-  /** Deduplicated distinct outage paths from every signal at the worst effect. */
-  outagePaths: string[];
-  /** Max severity_score among the signals that produced `effect`; undefined when none carried one. */
+export interface EventImpact {
+  impact: SignalImpact;
+  /** Max severity_score among the signals that produced `impact`; undefined when none carried one. */
   severityScore?: number;
 }
 
 export interface ComputeSeverityInput {
-  effect: SignalEffect;
-  outagePaths: string[];
-  /** Distinct KI-resolved entities in the member-union topology. */
-  breadth: number;
-  /** Distinct KI-resolved dependency edges in the member-union blast_radius. */
-  topologyFanOut: number;
-  /** True when the merged blast_radius carries at least one dependency-type edge (a cascade). */
-  hasCascadePath: boolean;
-  /** Max severity_score among the signals that produced `effect` (deriveEventEffect's output). */
+  impact: SignalImpact;
+  /** Max severity_score among the signals that produced `impact` (deriveEventImpact's output). */
   severityScore?: number;
 }
 
-const EFFECT_PRIORITY: Record<SignalEffect, number> = {
+const IMPACT_PRIORITY: Record<SignalImpact, number> = {
   none: 0,
-  degradation: 1,
-  outage: 2,
-  exposure: 3,
+  degraded: 1,
+  blocked: 2,
+  exposed: 3,
 };
 
 /**
- * Reduces an event's merged signal set (already unioned across versions by
- * mergeSignalsLatestPerRule, so a member that joined in an earlier cycle still counts) to the
- * event-level typed facts the severity policy consumes:
- *  - the worst effect among contributing signals (exposure > outage > degradation > none);
- *  - the deduplicated union of outage_paths from every signal at that worst effect — this is
- *    what lets a second confirmed path re-tier the event to critical when a member joins, in
- *    code, with no new model call;
- *  - the max KI severity_score among the contributing signals, since severity_score "supports,
- *    never replaces, grounding" only for the signals that produced the effect.
- *
+ * Reduces an event's merged signal set to the event-level typed facts the severity policy
+ * consumes:
+ *  - the worst impact among contributing signals (exposed > blocked > degraded > none);
+ *  - the max KI severity_score among the contributing non-off_topic signals, since
+ *    severity_score "supports, never replaces, grounding" and an off_topic row refutes its rule.
  */
-export const deriveEventEffect = (signals: SignalEntry[] | undefined): EventEffect => {
-  const withEffect = (signals ?? []).filter((signal) => signal.effect !== undefined);
+export const deriveEventImpact = (signals: SignalEntry[] | undefined): EventImpact => {
+  const withImpact = (signals ?? []).filter((signal) => signal.impact !== undefined);
 
-  const worst = withEffect.reduce<SignalEffect>(
+  const worst = withImpact.reduce<SignalImpact>(
     (acc, signal) =>
-      signal.effect !== undefined && EFFECT_PRIORITY[signal.effect] > EFFECT_PRIORITY[acc]
-        ? signal.effect
+      signal.impact !== undefined && IMPACT_PRIORITY[signal.impact] > IMPACT_PRIORITY[acc]
+        ? signal.impact
         : acc,
     'none'
   );
 
-  const contributing = withEffect.filter((signal) => signal.effect === worst);
+  const contributing = withImpact.filter((signal) => signal.impact === worst);
 
-  const outagePaths =
-    worst === 'outage'
-      ? [...new Set(contributing.flatMap((signal) => signal.outage_paths ?? []))]
-      : [];
-
+  // off_topic rows refute the rule, so its configured score cannot escalate the event.
   const severityScores = contributing
-    .map((signal) => (signal.type === 'detection' ? signal.metadata.severity_score : undefined))
+    .map((signal) =>
+      signal.type === 'detection' && signal.verdict !== 'off_topic'
+        ? signal.metadata.severity_score
+        : undefined
+    )
     .filter((score): score is number => score !== undefined);
 
   return {
-    effect: worst,
-    outagePaths,
+    impact: worst,
     severityScore: severityScores.length > 0 ? Math.max(...severityScores) : undefined,
   };
 };
 
 /**
- * Deterministic mapping from an event's typed facts to its stored severity tier
- **/
-export const computeSeverity = ({
-  effect,
-  outagePaths,
-  breadth,
-  topologyFanOut,
-  hasCascadePath,
-  severityScore,
-}: ComputeSeverityInput): Severity => {
-  switch (effect) {
-    case 'exposure':
+ * Deterministic mapping from an event's typed facts to its stored severity tier.
+ *
+ * `blocked` escalates to `critical` only via the KI `severity_score` threshold — the one input that
+ * is not model-written per detection. No entity count or topology size is an input: rule-backed
+ * KIs all score >= 60, so the score cannot separate medium from high, and listed topology is not
+ * a measured breadth.
+ *
+ * `degraded` is always `medium`: a log sample cannot show how widespread impairment is.
+ */
+export const computeSeverity = ({ impact, severityScore }: ComputeSeverityInput): Severity => {
+  switch (impact) {
+    case 'exposed':
       return 'critical';
-    case 'outage': {
-      if (outagePaths.length >= 2) return 'critical';
+    case 'blocked': {
       const criticalScore =
         severityScore !== undefined && severityScore >= CRITICAL_SEVERITY_THRESHOLD;
-      const criticalFanOut = topologyFanOut >= TOPOLOGY_FAN_OUT_THRESHOLD;
-      return criticalScore || criticalFanOut ? 'critical' : 'high';
+      return criticalScore ? 'critical' : 'high';
     }
-    case 'degradation':
-      return breadth > BREADTH_THRESHOLD || hasCascadePath ? 'high' : 'medium';
+    case 'degraded':
+      return 'medium';
     case 'none':
       return 'low';
     default: {
-      throw new Error(`computeSeverity: unhandled effect "${effect}"`);
+      throw new Error(`computeSeverity: unhandled impact "${impact}"`);
     }
   }
 };

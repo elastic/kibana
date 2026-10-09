@@ -138,16 +138,9 @@ Stored form (written to evidence.esql_query — no executed ordering/limit tail)
 
 **One `signals` entry per rule — never two.** `evidence.esql_query`/`evidence.result` reflect the single confirmation query (or the shared deduplicated execution). `evidence.esql_query` stores the reader-facing query rather than copying `data.esql` from the tool result. Each signal entry combines detection metadata and query result. See `<output_format>` for the exact format.
 
-1. **Write the Signal Description** (keep under 350 chars). For `confirms` only, use the **Found / Impact** format: **Found** names the concrete row signature and failing target from the query result without reproducing raw sensitive values; refer to sensitive field names and exposure type only. Never say only that rows were returned. **Impact** names who or what is blocked, degraded, or unaffected — outcome language only; never omit Impact on `confirms`. For every other verdict, use a plain outcome phrase with no `Found:`/`Impact:` prefix. The structured `verdict` carries the conclusion. Do not put dependency chains, upstream causes, or topology in the description — record those in Step 5 `causal_features` and `blast_radius`. Budget order when over limit: shorten Found first. Concretely:
-   - **Confirms**: `"Found: dial tcp inventory-db:5432 connection refused. Impact: db-dependent requests blocked."`
-   - **Off-topic (signature mismatch)**: `"Upstream API error observed, not a metrics export failure; unrelated to metrics export."`
-   - **Off-topic match**: `"Different service/failure matched by substring only."`
-   - **Inconclusive (no match)**: `"No matching row found."`
-   - **Refutes (healthy rows)**: `"Healthy transaction log, no error signature; no impact."`
+Decide the two typed facts first, then write the description from them — never the other way round.
 
-   `result: found` means a row was returned — it does **not** mean the hypothesis is confirmed. Healthy rows use `refutes`; a genuinely returned row that does not address the authored hypothesis uses `off_topic`. Empty or errored evidence uses `inconclusive`; never assign `off_topic` without a returned row. A query may match a row via keyword substring without the row being on-topic; always verify the row content corroborates the KI's hypothesized service, error type, and mechanism before writing `confirms`. When the KI names alternatives (for example, service A **or** service B, or error signature A **or** signature B), a row matching any one documented alternative is on-topic; set `confirms` when it directly supports that alternative's failure or degradation. Use `off_topic` only when it matches none of them.
-
-2. **Set `verdict` from the row content and result**:
+1. **Set `verdict` from the row content and result**:
    - `confirms` only for a found row that directly supports the rule's failure, degradation, exposure, or evidenced cascade. The error signature in the found row is itself the mechanism — do not require a separate independent confirmation of the dependency path on top of a clearly on-topic error row.
    - `refutes` for successful healthy, positive, or no-failure found rows.
    - `off_topic` for a found row that does not address the authored rule hypothesis.
@@ -155,10 +148,33 @@ Stored form (written to evidence.esql_query — no executed ordering/limit tail)
    - `not_checked` only when no backed query KI exists.
    - When an off-topic found row contains a concrete non-benign error, preserve only a redacted signature in the signal description. The calling discovery agent must assess that observed error as a separate incident candidate; an off-topic verdict rejects the rule hypothesis, not the observed error.
 
-3. **Classify `effect` per the `effect` field contract on `platform_sig_events_events_write`** — judge the operation's success vs failure from the row itself, never from `p_value`, `change_point_type`, alert volume, or this signal's own description wording. Only when the row itself genuinely doesn't show success or failure (not merely silent on cause) may the matched query KI's own description break the tie — cite the specific clause it supports in this signal's description; do not inherit the KI description's wording as if it were observed. If neither the row nor the cited clause decides it, set `effect: "degradation"` for a `confirms` signal.
-   - Every verdict other than `confirms` → `effect: "none"`, except `off_topic` with a concrete non-benign error, which classifies `effect` (and `outage_paths` if `outage`) from that observed error.
-   - Confirmed active exposure of PII, PCI DSS, SSN, credentials, secrets, or tokens → `effect: "exposure"`, only when `verdict` is `confirms` (or `off_topic` with a concrete observed error); every other verdict uses `effect: "none"`.
-   - When `effect` is `"outage"`, add one `outage_paths` entry per distinct verified path the row shows failing to complete, named by what traverses it: the caller operation when the evidence names one (`checkout`), otherwise the failing hop (`orders-api -> postgres`). One entry per path — do not split one path by endpoint variant or status code; a URL alone is not a path. Omit `outage_paths` for every other `effect`.
+   `result: found` means a row was returned — it does **not** mean the hypothesis is confirmed. Healthy rows use `refutes`; a genuinely returned row that does not address the authored hypothesis uses `off_topic`. Empty or errored evidence uses `inconclusive`; never assign `off_topic` without a returned row. A query may match a row via keyword substring without the row being on-topic; always verify the row content corroborates the KI's hypothesized service, error type, and mechanism before writing `confirms`. When the KI names alternatives (for example, service A **or** service B, or error signature A **or** signature B), a row matching any one documented alternative is on-topic; set `confirms` when it directly supports that alternative's failure or degradation. Use `off_topic` only when it matches none of them.
+
+2. **Classify `impact`** — judge the outcome the row itself shows; never infer from `p_value`, `change_point_type`, or alert volume. The description is written after this step, from this value.
+
+   Evaluate in this order:
+   - **`"exposed"`**: confirmed active exposure of PII, PCI DSS, SSN, credentials, secrets, or tokens — only when `verdict` is `confirms` (or `off_topic` with a concrete observed error).
+   - **`"blocked"`**: the operation **failed to complete** — an error status (including 4xx/5xx), an exception, a timeout, or a refused/reset connection. A response that reports failure is still a failure regardless of whose fault it is. Exception: when the system is demonstrably tolerating the dependency error via a fallback, backup path, or degraded mode, judge the outer operation's outcome — if that outer operation completed (even impaired), classify `"degraded"` instead.
+   - **`"degraded"`**: the operation **succeeded but impaired** — elevated latency, a retry that eventually succeeded, a fallback response, or a partial result. Default to `"degraded"` for a `confirms` signal when neither the row nor a cited KI clause resolves the outcome.
+   - **`"none"`**: every verdict other than `confirms`, except `off_topic` with a concrete non-benign error (which classifies from that observed error).
+
+   When the row genuinely doesn't show success or failure (not merely silent on cause), the matched query KI's own description may break the tie — cite the specific clause in this signal's `description`; do not inherit KI wording as if it were observed.
+
+   **Tie-break:** when both `"blocked"` and `"degraded"` fit the same row — an error is logged, but the row does not establish whether the requested operation still completed — choose `"degraded"`. `"blocked"` requires the row to show non-completion; an error along the path is evidence to weigh, not proof the operation failed.
+
+3. **Write the Signal Description** (keep under 350 chars). For `confirms` only, use the **Found / Impact** format:
+   - **Found** names the concrete row signature and failing target from the query result without reproducing raw sensitive values; refer to sensitive field names and exposure type only. Never say only that rows were returned.
+   - **Impact** names the operation or who is affected, ending with the `impact` value you set in 4.2 itself — **blocked**, **degraded**, or **exposed** — or exactly `Impact: none.` Nothing else goes in the clause: no cause, no count, no topology. Never omit Impact on `confirms`, and never use a word that contradicts the field.
+
+   For every other verdict, use a plain outcome phrase with no `Found:`/`Impact:` prefix. The structured `verdict` carries the conclusion. Do not put dependency chains, upstream causes, or topology in the description — record those in Step 5 `causal_features` and `blast_radius`. Budget order when over limit: shorten Found first. Concretely:
+   - **Confirms, `impact: blocked`**: `"Found: dial tcp inventory-db:5432 connection refused. Impact: db-dependent requests blocked."`
+   - **Confirms, `impact: degraded`**: `"Found: checkout p99 4.2s, retries succeeding after 2 attempts. Impact: checkout latency degraded."`
+   - **Confirms, `impact: exposed`**: `"Found: card_number logged in plaintext by payment-worker. Impact: customer PCI data exposed."`
+   - **Off-topic (signature mismatch)**: `"Upstream API error observed, not a metrics export failure; unrelated to metrics export."`
+   - **Off-topic match**: `"Different service/failure matched by substring only."`
+   - **Inconclusive (no match)**: `"No matching row found."`
+   - **Refutes (healthy rows)**: `"Healthy transaction log, no error signature; no impact."`
+
 ### Step 5: Consolidate Causal Features and Blast Radius
 
 Build one topology graph for the batch. `query.features[]` seeds the graph; it never limits it. Evaluate every fetched `dependency`, `entity`, and `infrastructure` KI once. Do not issue another KI search.
@@ -178,6 +194,8 @@ Build one topology graph for the batch. `query.features[]` seeds the graph; it n
    - entity: `{ type: "entity", subtype, feature_id, name, stream_name? }`
    - infrastructure: `{ type: "infrastructure", subtype, feature_id, title?, workloads, stream_name? }`
 
+   A dependency's `source` and `target` are the `feature_id` of the entity KIs at its two ends, copied from the dependency KI's own `source` and `target`; the writer stores the resolved ids.
+
    Copy classification verbatim from each fetched KI: `subtype` on every entry and `type` on cause entries. Blast-radius `type` remains the row-shape label shown above.
 4. **Close the ledger.** Deduplicate all entries and assign each fetched candidate exactly one disposition: causal, blast radius, or excluded. `off_topic`, `refutes`, `inconclusive`, and `not_checked` may inform narrative assessment but cannot establish active topology.
 
@@ -192,8 +210,7 @@ Each entry:
 - `stream_name`: the detection rule's stream
 - `description`: Signal Verdict narrative; never include raw sensitive values from the query row
 - `verdict`: `confirms` | `refutes` | `off_topic` | `inconclusive` | `not_checked`
-- `effect`: `none` | `degradation` | `outage` | `exposure` — classified from the same row, per Step 4.3
-- `outage_paths`: `string[]`, one distinct failing path per entry (caller operation, or `source -> target` hop), required when `effect` is `"outage"`, omitted otherwise
+- `impact`: `none` | `degraded` | `blocked` | `exposed` — classified from the same row, per Step 4.2; the description's Impact clause ends with this value
 - `collected_at`: ISO-8601 query timestamp; omit for quiet-rule entries
 - `evidence`: `{ esql_query, result, time_range }` for the executed evidence query; omit for quiet rules. `esql_query` retains `?_tstart` / `?_tend` and any original KI projection, but omits executed ordering and limit tails. `time_range` is the absolute `{ from, to }` window bound at execution — always record it; without it a placeholder query cannot be interpreted. `result`: `"found"` | `"empty"` | `"error"`
 - `metadata`: detection input

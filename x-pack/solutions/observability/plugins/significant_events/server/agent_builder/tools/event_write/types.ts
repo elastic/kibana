@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignalEffect, Severity, SignificantEvent } from '@kbn/significant-events-schema';
+import type { SignalImpact, Severity, SignificantEvent } from '@kbn/significant-events-schema';
 import { createBulkWriteOutcomeUnknownError, type CompactBulkError } from '../bulk_write';
 
 export type EventsWriteInput = Pick<
@@ -36,7 +36,7 @@ export interface EventsWriteResult {
    *  introduced no new rule UUIDs — preventing identity hijack by an unrelated condition. */
   narrative_preserved?: true;
   severity: Severity;
-  effect: SignalEffect;
+  impact: SignalImpact;
 }
 
 export interface EventsWriteDuplicateResult {

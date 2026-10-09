@@ -452,7 +452,7 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'active-cascade',
-          text: 'Sets status=active with severity=critical for the cascade event because active database-connectivity failures broadly break core customer balance, transaction-history, payment, and deposit journeys. Bases critical severity on demonstrated customer impact and scope, without requiring PII exposure or a fixed downstream-service count.',
+          text: 'Sets status=active for the cascade event; active database-connectivity failures broadly break core customer balance, transaction-history, payment, and deposit journeys. The computed severity is critical because the cascade signals are blocked and the seeded JDBC KI has severity_score 80 (the critical threshold); the agent does not set severity.',
           score: 3,
         },
         {

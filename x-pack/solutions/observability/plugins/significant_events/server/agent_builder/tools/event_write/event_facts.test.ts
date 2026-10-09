@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import type { SignalEntry, SignificantEvent } from '@kbn/significant-events-schema';
-import { shouldSkipAsNoOp } from './event_facts';
+import type { CausalFeature, SignalEntry, SignificantEvent } from '@kbn/significant-events-schema';
+import { computeEventFacts, shouldSkipAsNoOp } from './event_facts';
 import type { EventsWriteInput, SnapshotCandidate } from './types';
 
 const TS_EARLIER = '2026-07-20T07:00:00.000Z';
 
 const makeSignal = (
-  effect: 'degradation' | 'outage',
-  outagePaths: string[] = []
+  impact: 'degraded' | 'blocked',
+  ruleUuid = 'rule-abc'
 ): Extract<SignalEntry, { type: 'detection' }> => ({
   type: 'detection',
   stream_name: 'logs.checkout',
   description: 'High latency',
   verdict: 'confirms',
-  effect,
-  ...(outagePaths.length > 0 ? { outage_paths: outagePaths } : {}),
+  impact,
   metadata: {
-    detection_id: 'det-rule-abc',
-    rule_uuid: 'rule-abc',
+    detection_id: `det-${ruleUuid}`,
+    rule_uuid: ruleUuid,
     change_point_type: 'spike',
     p_value: 0.01,
   },
@@ -37,6 +36,8 @@ const makeStored = (signals: SignalEntry[]): SignificantEvent =>
     severity: 'high',
     stream_names: ['logs.checkout'],
     signals,
+    causal_features: [],
+    blast_radius: [],
     title: 'Checkout latency',
     symptom_hypothesis: 'Checkout requests are delayed.',
     summary: 'P99 latency breached SLO',
@@ -62,44 +63,76 @@ const makeCandidate = (signals: SignalEntry[]): SnapshotCandidate => ({
 });
 
 describe('shouldSkipAsNoOp', () => {
-  it('skips a same-tier snapshot whose effect and outage paths match the stored event', () => {
-    const signal = makeSignal('degradation');
-    expect(
-      shouldSkipAsNoOp({
-        latestEvent: makeStored([signal]),
-        candidate: makeCandidate([signal]),
-        priorDocs: [],
-        computedSeverity: 'high',
-        mergedSignals: [signal],
-      })
-    ).toBe(true);
+  const skip = ({
+    stored,
+    submitted,
+    mergedImpact,
+  }: {
+    stored: SignalEntry[];
+    submitted: SignalEntry[];
+    mergedImpact: 'degraded' | 'blocked';
+  }) =>
+    shouldSkipAsNoOp({
+      latestEvent: makeStored(stored),
+      candidate: makeCandidate(submitted),
+      priorDocs: [],
+      computedSeverity: 'high',
+      mergedImpact,
+    });
+
+  it('skips a same-tier snapshot whose impact matches the stored event', () => {
+    const signal = makeSignal('degraded');
+
+    expect(skip({ stored: [signal], submitted: [signal], mergedImpact: 'degraded' })).toBe(true);
   });
 
-  it('does not skip when the merged effect differs from the stored effect', () => {
-    const stored = makeSignal('degradation');
-    const changed = makeSignal('outage', ['orders-api -> postgres']);
+  it('does not skip when the merged impact differs from the stored impact', () => {
     expect(
-      shouldSkipAsNoOp({
-        latestEvent: makeStored([stored]),
-        candidate: makeCandidate([changed]),
-        priorDocs: [],
-        computedSeverity: 'high',
-        mergedSignals: [changed],
+      skip({
+        stored: [makeSignal('degraded')],
+        submitted: [makeSignal('blocked')],
+        mergedImpact: 'blocked',
       })
     ).toBe(false);
   });
+});
 
-  it('does not skip when the outage paths differ from the stored paths', () => {
-    const stored = makeSignal('outage', ['orders-api -> postgres']);
-    const changed = makeSignal('outage', ['checkout']);
-    expect(
-      shouldSkipAsNoOp({
-        latestEvent: makeStored([stored]),
-        candidate: makeCandidate([changed]),
-        priorDocs: [],
-        computedSeverity: 'high',
-        mergedSignals: [changed],
-      })
-    ).toBe(false);
+describe('computeEventFacts — degraded', () => {
+  const entity = (id: string): CausalFeature => ({
+    feature_id: id,
+    type: 'service',
+    subtype: 'service',
+    name: id,
+    stream_name: 'logs.checkout',
+  });
+
+  it('stays medium however many topology entities the event lists', () => {
+    const candidate = makeCandidate([makeSignal('degraded')]);
+
+    const facts = computeEventFacts({
+      candidate: {
+        ...candidate,
+        input: {
+          ...candidate.input,
+          causal_features: [entity('checkout'), entity('payments')],
+          blast_radius: [
+            { type: 'entity', feature_id: 'orders', name: 'orders', stream_name: 'logs.checkout' },
+            {
+              type: 'dependency',
+              feature_id: 'orders-db',
+              source: 'orders',
+              target: 'checkout',
+              stream_name: 'logs.checkout',
+            },
+          ],
+        },
+      },
+      timestamp: '2026-07-20T08:00:00.000Z',
+      latestByEventId: new Map(),
+      priorDocsByEventId: new Map(),
+      source: 'discovery',
+    });
+
+    expect(facts.severity).toBe('medium');
   });
 });

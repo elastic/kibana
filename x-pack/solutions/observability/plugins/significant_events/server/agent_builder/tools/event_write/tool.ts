@@ -185,7 +185,12 @@ const enrichCausalFeatures = async (
   try {
     // `featureIds` matches slug-style references and `id` matches uuid-style references.
     const references = [...causalFeatures, ...blastRadiusEntries];
-    const featureIds = [...new Set(references.map(({ feature_id: featureId }) => featureId))];
+    const dependencyEnds = blastRadiusEntries.flatMap((entry) =>
+      entry.type === 'dependency' ? [entry.source, entry.target] : []
+    );
+    const featureIds = [
+      ...new Set([...references.map(({ feature_id: featureId }) => featureId), ...dependencyEnds]),
+    ];
     const streamNames = [
       ...new Set([
         ...items.flatMap(({ stream_names: names }) => names),
@@ -236,6 +241,7 @@ const enrichCausalFeatures = async (
     // is the deterministic "this KI exists" gate. Dropped ids are logged for the eval trail.
     return items.map((item) => {
       const dropped: string[] = [];
+      const unresolvedEnds = new Set<string>();
       const resolvedCausalFeatures = item.causal_features?.flatMap((causalFeature) => {
         const feature = resolveFeature(
           causalFeature.feature_id,
@@ -255,6 +261,18 @@ const enrichCausalFeatures = async (
           },
         ];
       });
+      // The end of a dependency is an entity, so it resolves without the edge's own stream (an
+      // edge can cross streams) and never to another dependency. An end that resolves to no entity
+      // is kept verbatim and logged: it matches no entity Knowledge Indicator, so it cannot be
+      // traced back to one.
+      const resolveEnd = (end: string): string => {
+        const resolved = resolveFeature(end, undefined, item.stream_names);
+        if (resolved === undefined || resolved.type === 'dependency') {
+          unresolvedEnds.add(end);
+          return end;
+        }
+        return resolved.id;
+      };
       // Blast radius rows carry their own row-shape discriminator in `type`; only the
       // indicator's subtype is enriched.
       const blastRadius = item.blast_radius?.flatMap((entry) => {
@@ -263,8 +281,21 @@ const enrichCausalFeatures = async (
           dropped.push(entry.feature_id);
           return [];
         }
-        return [{ ...entry, feature_id: feature.id, subtype: feature.subtype }];
+        const ends =
+          entry.type === 'dependency'
+            ? { source: resolveEnd(entry.source), target: resolveEnd(entry.target) }
+            : {};
+        return [{ ...entry, ...ends, feature_id: feature.id, subtype: feature.subtype }];
       });
+      if (unresolvedEnds.size > 0) {
+        logger.warn(
+          `events_write: kept ${
+            unresolvedEnds.size
+          } dependency ends that resolve to no stored entity Knowledge Indicator, so they join no entity: ${[
+            ...unresolvedEnds,
+          ].join(', ')}`
+        );
+      }
       if (dropped.length > 0) {
         logger.warn(
           `events_write: dropped ${
@@ -272,15 +303,89 @@ const enrichCausalFeatures = async (
           } topology entries with no stored Knowledge Indicator: ${dropped.join(', ')}`
         );
       }
-      return { ...item, causal_features: resolvedCausalFeatures, blast_radius: blastRadius };
+      return {
+        ...item,
+        causal_features: resolvedCausalFeatures,
+        blast_radius: blastRadius,
+      };
     });
   } catch (error) {
-    // Fail loudly: writing topology unchecked would let every entry count toward severity.
+    // Fail loudly: writing topology unchecked would store unverified KI references.
     const message = error instanceof Error ? error.message : 'Unknown error';
     throw new Error(
       `events_write: could not resolve topology against Knowledge Indicators: ${message}`
     );
   }
+};
+
+/**
+ * Stamps each detection signal's `metadata.severity_score` from the query Knowledge Indicator
+ * backing its rule. The score is a severity-policy input, so it is read from the KI store rather
+ * than trusted from the caller: a value the agent supplied is replaced, and a rule with no backing
+ * KI carries none.
+ */
+const resolveSignalSeverityScores = async (
+  items: EventsWriteParams['items'],
+  getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient>,
+  logger: Logger
+): Promise<EventsWriteParams['items']> => {
+  const detectionSignals = items.flatMap(({ signals = [] }) =>
+    signals.flatMap((signal) => (signal.type === 'detection' ? [signal] : []))
+  );
+  if (detectionSignals.length === 0) {
+    return items;
+  }
+
+  const ruleIds = [...new Set(detectionSignals.map(({ metadata }) => metadata.rule_uuid))];
+  const streamNames = [
+    ...new Set([
+      ...items.flatMap(({ stream_names: names }) => names),
+      ...detectionSignals.map(({ stream_name: streamName }) => streamName),
+    ]),
+  ];
+
+  let scoreByRuleId: Map<string, number>;
+  try {
+    const kiClient = await getKnowledgeIndicatorClient();
+    const links = await kiClient.getQueryLinks(streamNames, { ruleIds, includeExpired: true });
+    scoreByRuleId = new Map(
+      links.flatMap(({ rule_id: ruleId, query }) =>
+        query.severity_score !== undefined ? [[ruleId, query.severity_score] as const] : []
+      )
+    );
+  } catch (error) {
+    // Fail loudly: a silently missing score would quietly cap every outage at `high`.
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(
+      `events_write: could not resolve severity_score against Knowledge Indicators: ${message}`
+    );
+  }
+
+  const unbacked = ruleIds.filter((ruleId) => !scoreByRuleId.has(ruleId));
+  if (unbacked.length > 0) {
+    logger.warn(
+      `events_write: ${
+        unbacked.length
+      } detection rules have no scored query Knowledge Indicator; their signals carry no severity_score: ${unbacked.join(
+        ', '
+      )}`
+    );
+  }
+
+  return items.map((item) => ({
+    ...item,
+    signals: item.signals?.map((signal) =>
+      signal.type === 'detection'
+        ? {
+            ...signal,
+            metadata: {
+              ...signal.metadata,
+              severity_score: scoreByRuleId.get(signal.metadata.rule_uuid),
+            },
+          }
+        : signal
+    ),
+  }));
 };
 
 export function createEventsWriteTool({
@@ -350,8 +455,8 @@ export function createEventsWriteTool({
         });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
-        const items = await enrichCausalFeatures(
-          toolParams.items,
+        const items = await resolveSignalSeverityScores(
+          await enrichCausalFeatures(toolParams.items, getKnowledgeIndicatorClient, logger),
           getKnowledgeIndicatorClient,
           logger
         );
@@ -384,7 +489,7 @@ export function createEventsWriteTool({
                 written: result.written,
                 stream_names: input.stream_names,
                 error_message: isBulkError ? result.error.reason : undefined,
-                ...(result.written ? { severity: result.severity, effect: result.effect } : {}),
+                ...(result.written ? { severity: result.severity, impact: result.impact } : {}),
               }),
           });
         });

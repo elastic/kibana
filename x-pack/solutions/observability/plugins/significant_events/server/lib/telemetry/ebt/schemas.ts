@@ -657,10 +657,10 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
       optional: true,
     },
   },
-  effect: {
+  impact: {
     type: 'keyword',
     _meta: {
-      description: "The event's worst signal effect. Present only when written is true.",
+      description: "The event's worst signal impact. Present only when written is true.",
       optional: true,
     },
   },

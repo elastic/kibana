@@ -44,12 +44,14 @@ const blastRadiusDependencySchema = lazySchema(() =>
       .string()
       .max(MAX_TITLE_LENGTH)
       .describe(
-        'Name of the service or component initiating the call in this dependency relationship.'
+        "feature_id of the entity or infrastructure Knowledge Indicator initiating the call in this dependency relationship, copied from the dependency indicator's own source. The writer stores the resolved indicator id."
       ),
     target: z
       .string()
       .max(MAX_TITLE_LENGTH)
-      .describe('Name of the service or component being called or depended upon.'),
+      .describe(
+        "feature_id of the entity or infrastructure Knowledge Indicator being called or depended upon, copied from the dependency indicator's own target. The writer stores the resolved indicator id."
+      ),
     protocol: z
       .string()
       .max(MAX_ID_LENGTH)
@@ -210,35 +212,35 @@ export const SIGNAL_VERDICTS = [
 ] as const;
 export type SignalVerdict = (typeof SIGNAL_VERDICTS)[number];
 
-export const SIGNAL_EFFECTS = ['none', 'degradation', 'outage', 'exposure'] as const;
-export type SignalEffect = (typeof SIGNAL_EFFECTS)[number];
+export const SIGNAL_IMPACTS = ['none', 'degraded', 'blocked', 'exposed'] as const;
+export type SignalImpact = (typeof SIGNAL_IMPACTS)[number];
 
 /**
- * Effect field contract — single source of truth for schema `.describe()` and eval judges.
+ * Impact field contract — single source of truth for schema `.describe()` and eval judges.
  * This contract only governs what the agent classifies from grounding evidence, not what tier that
- * classification implies. There is no "scope" on a blocked operation: escalates a
- * single blocked operation to critical on KI `severity_score` or topology fan-out, not on a
- * judgment about how narrowly the block is confined.
+ * classification implies; the tier is computed server-side from this value and the KI
+ * `severity_score`.
  */
-export const EFFECT_CONTRACT_RULE = dedent`
+export const IMPACT_CONTRACT_RULE = dedent`
     What this signal's \`evidence\` shows about whether the operation succeeded — never from
     \`p_value\`, \`change_point_type\`, fire count, or this signal's own \`description\` wording.
 
     - "none": the operation completed normally, or no confirmed impact is shown.
-    - "degradation": the operation succeeded but impaired — elevated latency, a retry that then
+    - "degraded": the operation succeeded but impaired — elevated latency, a retry that then
       succeeded, a fallback response, or a partial result.
-    - "outage": the operation failed to complete — an error status (including a rejected or
+    - "blocked": the operation failed to complete — an error status (including a rejected or
       bad-request reply), an exception, a timeout, or a refused connection. A reply reporting
       failure is still a failure — whose fault does not change that; attribution belongs in
-      \`symptom_hypothesis\`, not here. Name each distinct failing path in \`outage_paths\` — this
-      describes only the requests this evidence covers, not every caller or region.
-    - "exposure": confirmed active exposure of PII, PCI DSS, SSN, credentials, secrets, or tokens.
+      \`symptom_hypothesis\`, not here.
+    - "exposed": confirmed active exposure of PII, PCI DSS, SSN, credentials, secrets, or tokens.
 
     An internal dependency's error is not itself the operation failing when the system is known to
     tolerate it via a fallback, backup path, or degraded mode — judge the operation's own outcome,
     not the dependency's. When a row genuinely doesn't show that outcome either way, the matched
     query KI's description may break the tie if this signal's own description cites the specific
-    clause the row supports; otherwise default to "degradation".
+    clause the row supports; otherwise default to "degraded". When both "blocked" and
+    "degraded" fit — an error is logged but the row does not establish whether the operation
+    completed — choose "degraded"; "blocked" requires the row to show non-completion.
 
     Only \`confirms\`, or \`off_topic\` with a concrete non-benign error, may be anything but
     "none".
@@ -257,7 +259,7 @@ const signalBaseSchema = lazySchema(() =>
         dedent`
       Compact observation account for detection signals — use Found / Impact only. Max ${MAX_SIGNAL_DESCRIPTION_LENGTH} chars; shorten Found before omitting Impact on confirms.
 
-      Found names the concrete row signature and failing target; never say only that rows were returned. Impact names what is blocked, degraded, or unaffected using outcome language only. The structured verdict carries whether this confirms, refutes, is off-topic, is inconclusive, or was not checked; do not repeat a Verdict label here.
+      Found names the concrete row signature and failing target; never say only that rows were returned. Impact names the operation or who is affected, ending with this signal's impact value itself (blocked / degraded / exposed), or exactly "Impact: none." No cause, count, or topology in the clause, and never a word that contradicts the field. The structured verdict carries whether this confirms, refutes, is off-topic, is inconclusive, or was not checked; do not repeat a Verdict label here.
 
       Do not name dependency chains, upstream causes, or topology here — use causal_features and blast_radius for that.
       ${NO_RAW_SENSITIVE_VALUES_RULE}
@@ -278,14 +280,7 @@ const signalBaseSchema = lazySchema(() =>
       .describe(
         'ES|QL query verification for this signal. Present when a query was executed to confirm or refute the signal; null when no verification was run.'
       ),
-    effect: z.enum(SIGNAL_EFFECTS).optional().describe(EFFECT_CONTRACT_RULE),
-    outage_paths: z
-      .array(z.string().max(MAX_TITLE_LENGTH))
-      .max(MAX_ARRAY_LENGTH)
-      .optional()
-      .describe(
-        'Required when effect is "outage": each distinct verified path the row shows failing to complete, named by what traverses it — the caller operation when the evidence names one ("checkout"), otherwise the failing hop ("orders-api -> postgres"). One entry per distinct path; a URL alone is not a path. Omit when effect is not "outage".'
-      ),
+    impact: z.enum(SIGNAL_IMPACTS).optional().describe(IMPACT_CONTRACT_RULE),
   })
 );
 
@@ -354,35 +349,21 @@ const detectionSignalSchema = lazySchema(() =>
       // Deterministic guard: only a verdict that means "this row shows something real" may claim
       // impact. An off-topic signal here means a concrete non-benign observed error (guarded above:
       // off_topic requires found evidence) — not merely an unrelated finding.
-      if (signal.verdict === 'confirms' && signal.effect === undefined) {
+      if (signal.verdict === 'confirms' && signal.impact === undefined) {
         context.addIssue({
           code: 'custom',
-          path: ['effect'],
+          path: ['impact'],
           message:
-            'A confirms signal requires an explicit effect. An omitted effect is computed as "none" and would tier the event as low.',
+            'A confirms signal requires an explicit impact. An omitted impact is computed as "none" and would tier the event as low.',
         });
       }
       const canClaimImpact = signal.verdict === 'confirms' || signal.verdict === 'off_topic';
-      if (!canClaimImpact && signal.effect !== undefined && signal.effect !== 'none') {
+      if (!canClaimImpact && signal.impact !== undefined && signal.impact !== 'none') {
         context.addIssue({
           code: 'custom',
-          path: ['effect'],
+          path: ['impact'],
           message:
-            'effect can only be "degradation", "outage", or "exposure" on a confirms signal, or an off_topic signal with a concrete observed error. Every other verdict must use effect "none" or omit it.',
-        });
-      }
-      if (signal.effect === 'outage' && (signal.outage_paths ?? []).length === 0) {
-        context.addIssue({
-          code: 'custom',
-          path: ['outage_paths'],
-          message: 'effect "outage" requires at least one entry in outage_paths.',
-        });
-      }
-      if (signal.effect !== 'outage' && (signal.outage_paths ?? []).length > 0) {
-        context.addIssue({
-          code: 'custom',
-          path: ['outage_paths'],
-          message: 'outage_paths is only valid when effect is "outage".',
+            'impact can only be "degraded", "blocked", or "exposed" on a confirms signal, or an off_topic signal with a concrete observed error. Every other verdict must use impact "none" or omit it.',
         });
       }
     })
@@ -403,7 +384,7 @@ export const SEVERITY_OPTIONS = [
 ] as const satisfies readonly AlertEventSeverity[];
 
 export const SEVERITY_CONTRACT_RULE =
-  "Computed severity tier, derived from each signal's effect and outage_paths, the KI severity_score, and the event's stored topology. Never written or inferred by agents.";
+  "Computed severity tier, derived from each signal's impact and the KI severity_score. Never written or inferred by agents.";
 /** Canonical severity used by storage, APIs, and tools. */
 export const severitySchema = lazySchema(() =>
   alertEventSeveritySchema.exclude(['info']).describe(SEVERITY_CONTRACT_RULE)
