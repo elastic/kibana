@@ -70,9 +70,13 @@ const toAttachmentNode = (tag: string): AttachmentNode | undefined => {
  * ```
  */
 const toMessageNodes = (message: string): MessageNode[] =>
-  splitCustomElements(message, tagName).flatMap((segment): MessageNode[] => {
+  splitCustomElements(message, tagName).flatMap((segment, index): MessageNode[] => {
     if (segment.type === 'text') {
-      return [{ type: 'markdown', text: segment.text.trim() }];
+      // Text after a tag on the same line drops the space that separates it from the tag. The
+      // first line otherwise keeps its indentation, which an indented code block needs.
+      const text = index > 0 ? segment.text.replace(/^[ \t]+/, '') : segment.text;
+
+      return [{ type: 'markdown', text: text.replace(/^\s*\n/, '').trimEnd() }];
     }
 
     const node = toAttachmentNode(segment.tag);

@@ -116,6 +116,20 @@ describe('buildComposition', () => {
     expect(build('<render_attachment field-id="x" id="a1" />')).toEqual(['[a1 v2]']);
   });
 
+  it('keeps the indentation of an indented code block after a tag', () => {
+    expect(build('<render_attachment id="a1" />\n\n    const a = 1;\n    const b = 2;')).toEqual([
+      '[a1 v2]',
+      '    const a = 1;\n    const b = 2;',
+    ]);
+  });
+
+  it('keeps the indentation of an indented code block that starts the message', () => {
+    expect(build('    const a = 1;\n\n<render_attachment id="a1" />')).toEqual([
+      '    const a = 1;',
+      '[a1 v2]',
+    ]);
+  });
+
   it('drops tags without an id', () => {
     expect(build('Hello <render_attachment version="1" />')).toEqual(['Hello']);
   });
