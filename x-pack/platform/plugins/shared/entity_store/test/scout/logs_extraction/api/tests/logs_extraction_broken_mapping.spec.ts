@@ -459,7 +459,7 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
         {
           headers: internalHeaders,
           responseType: 'json',
-          body: { fromDateISO: t0.toISOString(), toDateISO: sec(15) }, // covers doc1 only (sec(30) is outside)
+          body: { fromDateISO: t0.toISOString(), toDateISO: sec(15), process: 'single' }, // covers doc1 only (sec(30) is outside)
         }
       );
       expect(firstExtraction.statusCode).toBe(200);
@@ -499,7 +499,7 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
         {
           headers: internalHeaders,
           responseType: 'json',
-          body: { fromDateISO: t0.toISOString(), toDateISO: sec(59) }, // covers both docs
+          body: { fromDateISO: t0.toISOString(), toDateISO: sec(59), process: 'single' }, // covers both docs
         }
       );
       expect(secondExtraction.statusCode).toBe(200);
@@ -532,6 +532,7 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
           body: {
             fromDateISO: FROM_DATE,
             toDateISO: TO_DATE,
+            process: 'single',
           },
         }
       );
