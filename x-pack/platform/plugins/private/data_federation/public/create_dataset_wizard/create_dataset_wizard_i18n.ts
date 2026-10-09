@@ -302,7 +302,7 @@ export const createDatasetWizardStrings = {
     'xpack.dataFederation.createDatasetForm.dataSourceAuthenticationCalloutDescription',
     {
       defaultMessage:
-        'Before adding this dataset, make sure the data source can read the data. Access is managed in your cloud provider.',
+        'Make sure the selected data source has permission to read the data you want to query. You can update its permissions in your cloud provider.',
     }
   ),
 
