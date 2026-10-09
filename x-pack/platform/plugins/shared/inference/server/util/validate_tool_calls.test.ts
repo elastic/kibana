@@ -233,10 +233,15 @@ describe('validateToolCalls', () => {
       ).toEqual({ response: { verdicts: [{ id: 'a' }] } });
     });
 
-    it('keeps a string that the schema expects as a string', () => {
-      expect(
-        validate({ response: { verdicts: [], note: '{"a":1}' } })[0].function.arguments
-      ).toEqual({ response: { verdicts: [], note: '{"a":1}' } });
+    it('keeps a string that the schema expects as a string, even when it holds valid JSON', () => {
+      // The outer `response` is a string, so validation fails and the repair runs. `note` is a
+      // string the schema wants as a string, so it must come out of the repair unparsed: parsing
+      // every string would turn it into an object and the second validation would fail.
+      const response = { verdicts: [{ id: 'a' }], note: '{"a":1}' };
+
+      expect(validate({ response: JSON.stringify(response) })[0].function.arguments).toEqual({
+        response,
+      });
     });
 
     it('still throws when the parsed value does not match the schema', () => {
