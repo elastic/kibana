@@ -293,7 +293,10 @@ describe('AutomationsPage', () => {
       fireEvent.click(await screen.findByTestId('deleteAutomation'));
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
-      expect(deleteMutate).toHaveBeenCalledWith('report', expect.anything());
+      expect(deleteMutate).toHaveBeenCalledWith(
+        { id: 'report', name: 'Daily report' },
+        expect.anything()
+      );
     });
 
     it('returns to the list when the automation id in the URL does not exist', () => {

@@ -217,11 +217,12 @@ export const AutomationsPage = (): React.ReactElement => {
         <EuiConfirmModal
           title={getDeleteConfirmTitle(automationToDelete.name)}
           onCancel={() => setAutomationToDelete(undefined)}
-          onConfirm={() =>
-            deleteAutomation.mutate(automationToDelete.id, {
-              onSuccess: () => setAutomationToDelete(undefined),
-            })
-          }
+          onConfirm={() => {
+            deleteAutomation.mutate(
+              { id: automationToDelete.id, name: automationToDelete.name },
+              { onSuccess: () => setAutomationToDelete(undefined) }
+            );
+          }}
           cancelButtonText={listLabels.cancel}
           confirmButtonText={listLabels.delete}
           buttonColor="danger"

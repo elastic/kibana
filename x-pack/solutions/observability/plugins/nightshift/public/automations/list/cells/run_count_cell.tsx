@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { getEbtProps } from '@kbn/ebt-click';
 import React from 'react';
 import { EuiLink, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 
 export const RunCountCell = ({
   count,
@@ -38,10 +40,11 @@ export const RunCountCell = ({
           textDecoration: 'none',
           '&:hover': { textDecoration: 'underline' },
         }}
-        onClick={(event: React.MouseEvent) => {
-          event.stopPropagation();
-          onOpen();
-        }}
+        onClick={onOpen}
+        {...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.VIEW_AUTOMATION_RUNS,
+          element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_LIST,
+        })}
       >
         {count}
       </EuiLink>

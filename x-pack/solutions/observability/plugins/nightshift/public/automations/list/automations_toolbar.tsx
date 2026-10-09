@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getEbtProps } from '@kbn/ebt-click';
 import React, { useState } from 'react';
 import {
   EuiAvatar,
@@ -24,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import type { TimeRange } from '../hooks/use_automation_usage';
 import {
   statusLabels,
@@ -183,6 +185,10 @@ export const AutomationsToolbar = ({
                     aria-label={listLabels.create}
                     onClick={onCreate}
                     data-test-subj="nightshiftAutomationsPageButton"
+                    {...getEbtProps({
+                      action: NIGHTSHIFT_EBT_ACTIONS.CREATE_AUTOMATION,
+                      element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_LIST,
+                    })}
                   />
                 </EuiToolTip>
               ) : (
@@ -192,6 +198,10 @@ export const AutomationsToolbar = ({
                   size="s"
                   iconType="plus"
                   onClick={onCreate}
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.CREATE_AUTOMATION,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_LIST,
+                  })}
                 >
                   {listLabels.create}
                 </EuiButton>
@@ -215,6 +225,10 @@ export const AutomationsToolbar = ({
                   data-test-subj="nightshiftAutomationsPageButton"
                   size="xs"
                   onClick={onClearFilters}
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.CLEAR_AUTOMATION_FILTERS,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_LIST,
+                  })}
                 >
                   {listLabels.clearFilters}
                 </EuiButtonEmpty>
