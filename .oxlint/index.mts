@@ -28,6 +28,8 @@ import { licenseHeaderOverrides } from './license_headers.mts';
 import { scoutOverrides } from './scout.mts';
 import { i18nOverrides } from './i18n.mts';
 import { telemetryOverrides } from './telemetry.mts';
+import { kbnUiOverrides, kbnUiRules } from './kbn_ui.mts';
+import { alertingV2Overrides } from './alerting_v2.mts';
 import { securityImportsOverrides } from './security_imports.mts';
 
 export default defineConfig<OxlintConfig>({
@@ -49,6 +51,14 @@ export default defineConfig<OxlintConfig>({
       name: '@kbn/disable',
       specifier: './packages/kbn-eslint-plugin-disable/oxlint_plugin.js',
     },
+    {
+      name: '@kbn/kbn-ui',
+      specifier: './packages/kbn-eslint-plugin-kbn-ui/oxlint_plugin.js',
+    },
+    {
+      name: '@kbn/alerting-v2',
+      specifier: './packages/kbn-eslint-plugin-alerting-v2/oxlint_plugin.js',
+    },
   ],
   categories: {
     correctness: 'off',
@@ -59,6 +69,7 @@ export default defineConfig<OxlintConfig>({
     ...jestRules,
     ...reactRules,
     ...kibanaRules,
+    ...kbnUiRules,
   },
   overrides: [
     ...licenseHeaderOverrides,
@@ -67,6 +78,8 @@ export default defineConfig<OxlintConfig>({
     ...i18nOverrides,
     ...telemetryOverrides,
     ...securityImportsOverrides,
+    ...kbnUiOverrides,
+    ...alertingV2Overrides,
   ],
   // oxlint's parser rejects TypeScript grammar errors (TS1016: required parameter after an
   // optional one) that ESLint's parser and tsc's `skipLibCheck` let through in this declaration.

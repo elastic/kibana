@@ -2072,6 +2072,27 @@ describe('AttachmentService', () => {
           data: { content: '' },
         });
       });
+
+      it('skips a row that fails to decode and logs a warning', async () => {
+        const userAttachment = createUserAttachment();
+        const junkAttachment = {
+          ...userAttachment,
+          id: 'junk-1',
+          attributes: { ...userAttachment.attributes, type: 'junk' },
+        };
+
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          createSOFindResponse([
+            { ...junkAttachment, score: 0 },
+            { ...userAttachment, score: 0 },
+          ])
+        );
+
+        const res = await service.find({});
+
+        expect(res.saved_objects.map(({ id }) => id)).toEqual([userAttachment.id]);
+        expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('junk-1'));
+      });
     });
   });
 
