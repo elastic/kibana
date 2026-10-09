@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiHealth, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import type {
   ExecutiveBrief,
   ExecutiveBriefDecision,
@@ -24,6 +24,13 @@ const URGENCY_ORDER: ReadonlyArray<ExecutiveBriefDecision['urgency']> = [
   'this_week',
   'next_review',
 ];
+
+// Same colours the urgency pills used, matching the traffic lights (Now ≈ Urgent, This week ≈ Action).
+const URGENCY_COLOR: Record<ExecutiveBriefDecision['urgency'], 'danger' | 'warning' | 'subdued'> = {
+  now: 'danger',
+  this_week: 'warning',
+  next_review: 'subdued',
+};
 
 const CUT = { [BRIEF_CUT_ATTRIBUTE]: '' };
 
@@ -58,9 +65,15 @@ export const Decisions: React.FC<{ decisions: ExecutiveBrief['decisions'] }> = (
                 ${groupIndex > 0 ? `border-top: ${euiTheme.border.thin};` : ''}
               `}
             >
-              <EuiText size="xs" color="subdued">
-                <strong>{URGENCY_LABEL[urgency]}</strong>
-              </EuiText>
+              <EuiHealth
+                color={URGENCY_COLOR[urgency]}
+                textSize="xs"
+                data-test-subj={`executiveBriefDecisionGroupTitle-${urgency}`}
+              >
+                <EuiText size="xs">
+                  <strong>{URGENCY_LABEL[urgency]}</strong>
+                </EuiText>
+              </EuiHealth>
             </div>
             {items.map(({ decision, index }, itemIndex) => (
               <div key={`${decision.action}-${index}`} {...(itemIndex > 0 ? CUT : {})}>
