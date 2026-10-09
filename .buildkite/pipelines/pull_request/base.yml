@@ -113,6 +113,8 @@ steps:
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
       FTR_CONFIGS_DEPS: 'build'
       FTR_TEST_CHANNELS: ci-on-commit
+      # off | dry-run | enabled — narrows FTR to the solution domains a PR affects
+      FTR_DOMAIN_SELECTION: 'dry-run'
     plugins:
       - sparse-checkout#v1.6.0:
           no_cone: true

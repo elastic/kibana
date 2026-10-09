@@ -10,11 +10,13 @@ disabled:
   - x-pack/platform/test/serverless/functional/config.base.ts
 
 enabled:
-  # Serverless deployment-agnostic configs to run platform api-integration tests
-  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts
-  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/search.serverless.config.ts
-  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/security.serverless.config.ts
-  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.logs_essentials.serverless.config.ts
-  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts
-  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams_definitions.feature_flag.serverless.config.ts
-  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.evals.feature_flag.serverless.config.ts
+  # Serverless deployment-agnostic configs to run platform api-integration tests.
+  # `project` is the solution domain of the config's `serverlessProject`. PR selective
+  # testing runs a base config when platform code changes or when that solution is affected.
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts: { project: observability }
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/search.serverless.config.ts: { project: search }
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/security.serverless.config.ts: { project: security }
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.logs_essentials.serverless.config.ts: { project: observability }
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts: { project: observability }
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams_definitions.feature_flag.serverless.config.ts: { project: observability }
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.evals.feature_flag.serverless.config.ts: { project: observability }

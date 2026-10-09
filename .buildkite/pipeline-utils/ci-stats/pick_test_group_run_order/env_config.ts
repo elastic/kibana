@@ -17,6 +17,9 @@ import {
 const VALID_SOLUTIONS = ['observability', 'search', 'security', 'workplaceai', 'vectordb'];
 const VALID_LIMIT_CONFIG_TYPES = ['unit', 'integration', 'functional'];
 
+const FTR_DOMAIN_SELECTION_MODES = ['off', 'dry-run', 'enabled'] as const;
+type FtrDomainSelectionMode = (typeof FTR_DOMAIN_SELECTION_MODES)[number];
+
 // Defaults mirror `.buildkite/scripts/common/env.sh` so this script can also run
 // outside the standard Buildkite bootstrap (locally, ad-hoc pipelines, etc.).
 const DEFAULT_TEST_GROUP_TYPE_UNIT = 'Jest Unit Tests';
@@ -36,6 +39,9 @@ const DEFAULT_TEST_GROUP_TYPE_FUNCTIONAL = 'Functional Tests';
 export function loadRunOrderConfig() {
   const pipelineSlug = getRequiredEnv('BUILDKITE_PIPELINE_SLUG');
   const isMergeQueue = pipelineSlug === PIPELINES.MERGE_QUEUE;
+  const useSelectiveTesting =
+    (Boolean(process.env.GITHUB_PR_NUMBER) || isMergeQueue) &&
+    !(parseCsvEnv('GITHUB_PR_LABELS') ?? []).includes(PREVENT_SELECTIVE_TESTS_LABEL);
 
   return {
     ownBranch: getRequiredEnv('BUILDKITE_BRANCH'),
@@ -85,9 +91,9 @@ export function loadRunOrderConfig() {
     envFromLabels: collectEnvFromLabels(),
 
     isMergeQueue,
-    useSelectiveTesting:
-      (Boolean(process.env.GITHUB_PR_NUMBER) || isMergeQueue) &&
-      !(parseCsvEnv('GITHUB_PR_LABELS') ?? []).includes(PREVENT_SELECTIVE_TESTS_LABEL),
+    useSelectiveTesting,
+    /** FTR domain narrowing; PR builds only (on-merge and the merge queue keep every domain). */
+    ftrDomainSelection: useSelectiveTesting && !isMergeQueue ? parseFtrDomainSelection() : 'off',
     // PRs compare from their common ancestor with the target branch. A merge group
     // compares from the commit it is built on (HEAD~1 for single-PR squash groups),
     // so earlier queued PRs are excluded.
@@ -179,4 +185,18 @@ function parseLimitSolutions(): string[] | undefined {
     throw new Error('Unsupported LIMIT_SOLUTIONS value');
   }
   return limitSolutions;
+}
+
+function parseFtrDomainSelection(): FtrDomainSelectionMode {
+  const value = process.env.FTR_DOMAIN_SELECTION;
+  if (!value) return 'off';
+  const mode = FTR_DOMAIN_SELECTION_MODES.find((m) => m === value);
+  if (!mode) {
+    throw new Error(
+      `invalid FTR_DOMAIN_SELECTION: ${value}. Valid values: ${FTR_DOMAIN_SELECTION_MODES.join(
+        ', '
+      )}`
+    );
+  }
+  return mode;
 }

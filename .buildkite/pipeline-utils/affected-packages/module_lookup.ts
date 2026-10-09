@@ -23,6 +23,10 @@ export interface ModuleLookup {
    * `"@kbn/core-http-server-internal"` → `"src/core/packages/http/server-internal"`
    */
   byId: Map<string, string>;
+  /**
+   * `"@kbn/apm-plugin"` → `"observability"`; modules without a `group` in kibana.jsonc are absent
+   */
+  groupById: Map<string, string>;
 }
 
 let cachedModuleLookup: ModuleLookup | null = null;
@@ -41,6 +45,7 @@ export function getModuleLookup(): ModuleLookup {
 
   const byDir = new Map<string, string>();
   const byId = new Map<string, string>();
+  const groupById = new Map<string, string>();
 
   for (const file of files) {
     if (file.includes('__fixtures__')) {
@@ -52,10 +57,13 @@ export function getModuleLookup(): ModuleLookup {
     if (config.id && typeof config.id === 'string') {
       byDir.set(dir, config.id);
       byId.set(config.id, dir);
+      if (typeof config.group === 'string') {
+        groupById.set(config.id, config.group);
+      }
     }
   }
 
-  cachedModuleLookup = { byDir, byId };
+  cachedModuleLookup = { byDir, byId, groupById };
   return cachedModuleLookup;
 }
 
