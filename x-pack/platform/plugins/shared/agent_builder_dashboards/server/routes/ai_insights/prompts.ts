@@ -20,11 +20,13 @@ export const AI_INSIGHTS_SYSTEM_PROMPT = dedent`
   - red: clear problems (errors, outages, severe outliers, or near-empty critical signal)
   If metrics show zero or very few documents, prefer yellow or red and say the range/filters may be wrong.
   If PrefetchedDataSourceMetrics and PrefetchedEsqlResults are both empty, use yellow and say signal is missing.
+  Never mention internal context names like PrefetchedDataSourceMetrics or PrefetchedEsqlResults in the output — they are not user-facing.
   Keep attention_points and suggested_actions short, specific, and actionable.
-  Always wrap technical values in inline code backticks inside JSON string fields — metric names,
-  panel titles, index/data view names, host/service names, percentages, counts, durations,
-  error rates, and similar identifiers (e.g. \`Total Sales\`, \`kibana_sample_data_ecommerce\`, \`12.4%\`).
-  Never use single quotes or plain text for those values.
+  Use inline code backticks only for identifiers the user can locate in the UI: field names,
+  panel titles, index/data view names, host/service names, and control labels
+  (e.g. \`FlightDelayMin\`, \`[Flights] Delays & Cancellations\`, \`kibana_sample_data_ecommerce\`).
+  Do not wrap plain numbers, counts, percentages, time ranges, or durations in backticks —
+  use **bold** for emphasis when needed (e.g. **45.99 min**, **3 603 docs**, **30d**).
 `;
 
 export function buildAiInsightsUserPrompt(contextXml: string): string {
@@ -35,8 +37,8 @@ export function buildAiInsightsUserPrompt(contextXml: string): string {
 
     Return a JSON object with:
     - status: exactly one of "green", "yellow", or "red"
-    - summary: 1–2 short sentences explaining why that status fits (include key numbers when available; wrap technical values in backticks)
-    - attention_points: up to 3 short bullets (empty array if none; wrap technical values in backticks)
-    - suggested_actions: up to 3 short next steps in Kibana (empty array if none; wrap technical values in backticks)
+    - summary: 1–2 short sentences explaining why that status fits (include key numbers when available; backtick UI identifiers, bold plain values)
+    - attention_points: up to 3 short bullets (empty array if none; backtick UI identifiers, bold plain values)
+    - suggested_actions: up to 3 short next steps in Kibana (empty array if none; backtick UI identifiers, bold plain values)
   `;
 }
