@@ -24,6 +24,7 @@ export const Template: FunctionComponent<Props> = ({
   metadata: {
     uiPublicUrl,
     locale,
+    installTranslationResilience,
     darkMode,
     stylesheetPaths,
     preloadFonts,
@@ -93,6 +94,9 @@ export const Template: FunctionComponent<Props> = ({
         })}
         {createElement('kbn-prototype-hardening', {
           data: JSON.stringify({ hardenPrototypes }),
+        })}
+        {createElement('kbn-translation-resilience', {
+          data: JSON.stringify({ installTranslationResilience }),
         })}
         {createElement('kbn-injected-metadata', { data: JSON.stringify(injectedMetadata) })}
         <div

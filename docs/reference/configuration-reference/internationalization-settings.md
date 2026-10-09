@@ -105,3 +105,9 @@ i18n.allowLocaleCookie: false
 #    Users see i18n.defaultLocale until they choose a language themselves:
 i18n.detectBrowserLocale: false
 ```
+
+## Browser's translation features
+
+There is a known bug with React and Browsers translation features that may result in stale panels or even broken sections in the page.
+
+Set the experimental setting `i18n.installTranslationResilience` to `true` in case the browser's translation features are used and they cause any issues.

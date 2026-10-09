@@ -226,6 +226,7 @@ export const defaultConfig: StorybookConfig = {
     // set the kbn public path values, we create a pointer on the topmost window path since this assignment will happen within an iframe
     window.top.__kbnPublicPath__ = window.__kbnPublicPath__ = { 'kbn-ui-shared-deps-npm': publicPath, 'kbn-ui-shared-deps-src': publicPath, 'kbn-monaco': publicPath };
     window.__kbnHardenPrototypes__ = false;
+    window.__kbnInstallTranslationResilience__ = false;
   </script>
   <script src="kbn-ui-shared-deps-npm.dll.js"></script>
   <script src="kbn-ui-shared-deps-src.js"></script>

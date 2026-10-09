@@ -18,11 +18,24 @@ if (window.__kbnHardenPrototypes__) {
   require('@kbn/security-hardening/prototype');
 }
 
-// Patch to ensure readoption of tracked DOM elements when Chrome and Edge translations kick in and replace the `<font>` tags.
-// For more details, refer to https://github.com/alexspeller/translation-resilience.
-require('translation-resilience').installTranslationResilience({
-  eager: false, // Only load the translation resilience script when it's needed (the browser translates the page)
-});
+if (typeof window.__kbnInstallTranslationResilience__ !== 'boolean') {
+  throw new Error(
+    'Invariant bootstrap failure: __kbnInstallTranslationResilience__ must be set to true or false'
+  );
+}
+if (window.__kbnInstallTranslationResilience__) {
+  // Patch to ensure readoption of tracked DOM elements when Chrome and Edge translations kick in and replace the `<font>` tags.
+  // For more details, refer to https://github.com/alexspeller/translation-resilience.
+  // Opt in with `i18n.installTranslationResilience: true` in `kibana.yml`.
+  require('translation-resilience').installTranslationResilience({
+    eager: false, // Only load the translation resilience script when it's needed (the browser translates the page)
+    onEvent: (message) => {
+      if (typeof window.__kbnTranslationsTelemetryEmitter__ === 'function') {
+        window.__kbnTranslationsTelemetryEmitter__(message);
+      }
+    },
+  });
+}
 
 // stateful deps
 export const KbnUiTheme = require('@kbn/ui-theme');

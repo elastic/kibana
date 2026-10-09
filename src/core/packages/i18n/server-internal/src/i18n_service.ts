@@ -54,6 +54,12 @@ export interface InternalI18nServiceSetup extends I18nServiceSetup {
    * Controlled by `i18n.detectBrowserLocale` in `kibana.yml`. Defaults to `true`.
    */
   detectBrowserLocale: boolean;
+  /**
+   * When `true`, Kibana installs the translation resilience script.
+   * Controlled by `i18n.installTranslationResilience` in `kibana.yml`.
+   * Defaults to `false`.
+   */
+  installTranslationResilience: boolean;
 }
 
 export interface InternalI18nServicePreboot {
@@ -62,6 +68,7 @@ export interface InternalI18nServicePreboot {
   getAvailableLocales(): ReadonlyArray<AvailableLocale>;
   allowLocaleCookie: boolean;
   detectBrowserLocale: boolean;
+  installTranslationResilience: boolean;
 }
 
 export class I18nService {
@@ -82,6 +89,7 @@ export class I18nService {
       localeFileMap,
       allowLocaleCookie,
       detectBrowserLocale,
+      installTranslationResilience,
     } = await this.initTranslations(pluginPaths);
     const { dist: isDist } = this.coreContext.env.packageInfo;
     http.registerRoutes('', (router) =>
@@ -100,6 +108,7 @@ export class I18nService {
       getAvailableLocales: () => availableLocales,
       allowLocaleCookie,
       detectBrowserLocale,
+      installTranslationResilience,
     };
   }
 
@@ -114,6 +123,7 @@ export class I18nService {
       localeFileMap,
       allowLocaleCookie,
       detectBrowserLocale,
+      installTranslationResilience,
     } = await this.initTranslations(pluginPaths);
 
     const router = http.createRouter('');
@@ -135,6 +145,7 @@ export class I18nService {
       getTranslationHashes: () => translationHashes,
       allowLocaleCookie,
       detectBrowserLocale,
+      installTranslationResilience,
     };
   }
 
@@ -182,6 +193,7 @@ export class I18nService {
       localeFileMap,
       allowLocaleCookie: i18nConfig.allowLocaleCookie,
       detectBrowserLocale: i18nConfig.detectBrowserLocale,
+      installTranslationResilience: i18nConfig.installTranslationResilience,
     };
   }
 }

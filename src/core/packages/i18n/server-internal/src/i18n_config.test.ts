@@ -44,6 +44,7 @@ describe('i18n config', () => {
         defaultLocale: 'en',
         allowLocaleCookie: true,
         detectBrowserLocale: true,
+        installTranslationResilience: false,
       });
     });
 
@@ -116,6 +117,16 @@ describe('i18n config', () => {
     it('accepts detectBrowserLocale: false', () => {
       const validated = config.schema.validate({ detectBrowserLocale: false });
       expect(validated.detectBrowserLocale).toBe(false);
+    });
+
+    it('defaults installTranslationResilience to false', () => {
+      const validated = config.schema.validate({});
+      expect(validated.installTranslationResilience).toBe(false);
+    });
+
+    it('accepts installTranslationResilience: true', () => {
+      const validated = config.schema.validate({ installTranslationResilience: true });
+      expect(validated.installTranslationResilience).toBe(true);
     });
   });
 

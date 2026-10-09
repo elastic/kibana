@@ -10,10 +10,20 @@
 import React from 'react';
 import { EuiContext } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import { getEuiContextMapping } from './i18n_eui_mapping';
 
+declare global {
+  interface Window {
+    __kbnInstallTranslationResilience__: boolean;
+    __kbnTranslationsTelemetryEmitter__?: (message: string) => void;
+  }
+}
+
+export interface SetupDeps {
+  analytics: AnalyticsServiceSetup;
+}
 /**
  * Service that is responsible for i18n capabilities.
  * @internal
@@ -42,6 +52,26 @@ export class I18nService {
         );
       },
     };
+  }
+
+  public setup({ analytics }: SetupDeps): void {
+    if (window.__kbnInstallTranslationResilience__) {
+      analytics.registerEventType({
+        eventType: 'translation-resilience',
+        schema: {
+          message: {
+            type: 'text',
+            _meta: {
+              description:
+                'Message from the translation resilience script. It will let us know when the translation resilience script is loaded and used.',
+            },
+          },
+        },
+      });
+      window.__kbnTranslationsTelemetryEmitter__ = (message: string) => {
+        analytics.reportEvent('translation-resilience', { message });
+      };
+    }
   }
 
   public start(): I18nStart {

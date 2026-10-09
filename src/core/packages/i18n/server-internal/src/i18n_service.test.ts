@@ -25,7 +25,11 @@ import { httpServiceMock } from '@kbn/core-http-server-mocks';
 const getConfigService = (
   defaultLocale = 'en',
   locales: string[] = ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE', 'pt-BR'],
-  { allowLocaleCookie = true, detectBrowserLocale = true } = {}
+  {
+    allowLocaleCookie = true,
+    detectBrowserLocale = true,
+    installTranslationResilience = false,
+  } = {}
 ) => {
   const configService = configServiceMock.create();
   configService.atPath.mockImplementation((path) => {
@@ -35,6 +39,7 @@ const getConfigService = (
         locales,
         allowLocaleCookie,
         detectBrowserLocale,
+        installTranslationResilience,
       });
     }
     return new BehaviorSubject({});
@@ -195,6 +200,21 @@ describe('I18nService', () => {
 
         expect(preboot.detectBrowserLocale).toBe(detectBrowserLocale);
         expect(setup.detectBrowserLocale).toBe(detectBrowserLocale);
+      }
+    );
+
+    it.each([true, false])(
+      'exposes i18n.installTranslationResilience: %s on the preboot and setup contracts',
+      async (installTranslationResilience) => {
+        configService = getConfigService(undefined, undefined, { installTranslationResilience });
+        coreContext = mockCoreContext.create({ configService });
+        service = new I18nService(coreContext);
+
+        const preboot = await service.preboot({ pluginPaths: [], http: httpPreboot });
+        const setup = await service.setup({ pluginPaths: [], http: httpSetup });
+
+        expect(preboot.installTranslationResilience).toBe(installTranslationResilience);
+        expect(setup.installTranslationResilience).toBe(installTranslationResilience);
       }
     );
 

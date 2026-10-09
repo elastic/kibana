@@ -85,7 +85,9 @@ function kbnBundlesLoader() {
 
 var kbnCsp = JSON.parse(document.querySelector('kbn-csp').getAttribute('data'));
 var kbnHardenPrototypes = JSON.parse(document.querySelector('kbn-prototype-hardening').getAttribute('data'));
+var kbnInstallTranslationResilience = JSON.parse(document.querySelector('kbn-translation-resilience').getAttribute('data'));
 window.__kbnHardenPrototypes__ = kbnHardenPrototypes.hardenPrototypes;
+window.__kbnInstallTranslationResilience__ = kbnInstallTranslationResilience.installTranslationResilience;
 window.__kbnStrictCsp__ = kbnCsp.strictCsp;
 ${kbnThemeTagTemplate}
 window.__kbnPublicPath__ = ${publicPathMap};

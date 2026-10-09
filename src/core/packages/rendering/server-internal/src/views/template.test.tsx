@@ -20,6 +20,7 @@ const baseMetadata = {
   uiPublicUrl: '/ui',
   bootstrapScriptUrl: '/bootstrap.js',
   locale: 'en',
+  installTranslationResilience: false,
   themeVersion: 'v9',
   darkMode: false,
   stylesheetPaths: [],
@@ -68,6 +69,12 @@ describe('Template (boot splash)', () => {
     expect(defaultSvg.attr('viewBox')).toBe('0 0 32 32');
     expect(customImg.attr('width')).toBe('40');
     expect(customImg.attr('height')).toBe('40');
+  });
+
+  it('embeds installTranslationResilience for the bootstrap script', () => {
+    const $ = render({ ...baseMetadata, installTranslationResilience: true });
+    const data = JSON.parse($('kbn-translation-resilience').attr('data') ?? '{}');
+    expect(data).toEqual({ installTranslationResilience: true });
   });
 
   it('wraps the loader with role="progressbar" so it matches <EuiLoadingElastic />', () => {

@@ -343,6 +343,7 @@ export class RenderingService {
       uiPublicUrl,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
       locale: effectiveLocale,
+      installTranslationResilience: i18n.installTranslationResilience,
       themeVersion,
       darkMode,
       stylesheetPaths: commonStylesheetPaths,
