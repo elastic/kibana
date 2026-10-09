@@ -105,7 +105,7 @@ test.describe('Action Policies - create and edit', { tag: ['@local-stateful-clas
         expect(items[0]).toMatchObject({
           name: CREATED_POLICY_NAME,
           matcher: { tags: [ROUTING_TAG], expression: MATCHER },
-          grouping_mode: 'per_alert',
+          grouping: { mode: 'per_alert' },
           throttle: { strategy: 'on_status_change' },
           destinations: [{ type: 'workflow', id: workflowId }],
         });

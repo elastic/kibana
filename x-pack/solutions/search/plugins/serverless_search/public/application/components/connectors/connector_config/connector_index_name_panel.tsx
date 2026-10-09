@@ -29,9 +29,12 @@ export const ConnectorIndexnamePanel: React.FC<ConnectorIndexNamePanelProps> = (
     mutationFn: async (inputName: string) => {
       if (inputName && inputName !== connector.index_name) {
         const body = { index_name: inputName };
-        await http.post(`/internal/serverless_search/connectors/${connector.id}/index_name`, {
-          body: JSON.stringify(body),
-        });
+        await http.post(
+          `/internal/serverless_search/connectors/${encodeURIComponent(connector.id)}/index_name`,
+          {
+            body: JSON.stringify(body),
+          }
+        );
       }
       return inputName;
     },
