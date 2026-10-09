@@ -95,10 +95,13 @@ describe('MaintenanceSection', () => {
     );
 
     const resumeButton = screen.getByTestId('streams-settings-maintenance-toggle-button');
-    const summary = screen.getByTestId('streams-settings-maintenance-activity-counts');
     expect(resumeButton).toHaveTextContent('Resume detection engine');
-    expect(summary).toHaveTextContent('12 automations disabled');
-    expect(summary).toHaveTextContent('28 rules disabled');
+    expect(
+      screen.getByTestId('streams-settings-maintenance-automations-disabled')
+    ).toHaveTextContent('12 automations disabled');
+    expect(screen.getByTestId('streams-settings-maintenance-rules-disabled')).toHaveTextContent(
+      '28 rules disabled'
+    );
   });
 
   it('does not show activity counts while enabled', () => {

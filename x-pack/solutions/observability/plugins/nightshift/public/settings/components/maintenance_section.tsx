@@ -60,11 +60,21 @@ const ActivityCounts = ({
       <EuiFlexItem>
         <EuiText size="xs" color="subdued">
           <p>
-            {i18n.translate('xpack.nightshift.settings.maintenance.disabledActivitySummary', {
-              defaultMessage:
-                '{automationsDisabled, plural, one {# automation disabled} other {# automations disabled}} · {rulesDisabled, plural, one {# rule disabled} other {# rules disabled}}',
-              values: { automationsDisabled, rulesDisabled },
-            })}
+            <span data-test-subj="streams-settings-maintenance-automations-disabled">
+              {i18n.translate('xpack.nightshift.settings.maintenance.automationsDisabledSummary', {
+                defaultMessage:
+                  '{automationsDisabled, plural, one {# automation disabled} other {# automations disabled}}',
+                values: { automationsDisabled },
+              })}
+            </span>
+            <br />
+            <span data-test-subj="streams-settings-maintenance-rules-disabled">
+              {i18n.translate('xpack.nightshift.settings.maintenance.rulesDisabledSummary', {
+                defaultMessage:
+                  '{rulesDisabled, plural, one {# rule disabled} other {# rules disabled}}',
+                values: { rulesDisabled },
+              })}
+            </span>
           </p>
         </EuiText>
       </EuiFlexItem>
