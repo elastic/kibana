@@ -319,15 +319,13 @@ overrides:
   vega-util: 2.1.0
   vscode-languageserver-types: 3.17.5
 
-pnpmfileChecksum: sha256-JL9Z/8IecLxwanP1rhrhbsvFTvupuyak+iLixXT5Rmk=
-
 importers:
 
   .:
     dependencies:
       '@a2a-js/sdk':
-        specifier: 0.3.4
-        version: 0.3.4(express@5.2.1(supports-color@10.2.2))
+        specifier: 1.2.1
+        version: 1.2.1(@bufbuild/protobuf@2.5.2)(@grpc/grpc-js@1.14.5)(express@5.2.1(supports-color@10.2.2))
       '@apidevtools/json-schema-ref-parser':
         specifier: 15.3.6
         version: 15.3.6(@types/json-schema@7.0.15)
@@ -4604,8 +4602,8 @@ importers:
         specifier: 3.10.1
         version: 3.10.1
       just-bash:
-        specifier: 3.0.1
-        version: 3.0.1(supports-color@10.2.2)
+        specifier: 3.4.2
+        version: 3.4.2(supports-color@10.2.2)
       kea:
         specifier: 2.6.0
         version: 2.6.0(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0)
@@ -4836,13 +4834,13 @@ importers:
         version: 2.6.5
       redux-devtools-extension:
         specifier: 2.13.8
-        version: 2.13.8
+        version: 2.13.8(redux@5.0.1)
       redux-saga:
         specifier: 1.3.0
         version: 1.3.0
       redux-thunk-v2:
         specifier: npm:redux-thunk@2.4.2
-        version: redux-thunk@2.4.2
+        version: redux-thunk@2.4.2(redux@5.0.1)
       redux-toolkit-v1:
         specifier: npm:@reduxjs/toolkit@1.9.7
         version: '@reduxjs/toolkit@1.9.7(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)'
@@ -9898,12 +9896,18 @@ importers:
 
 packages:
 
-  '@a2a-js/sdk@0.3.4':
-    resolution: {integrity: sha512-WXMk/UspvQFxesvb8hXyfPE8d3ibpiRie24Yw/5ruMqNJcdwxjfZ1G0gj6vYE/I9RAZD145CNzedpZA2cLV2JQ==}
-    engines: {node: '>=18'}
+  '@a2a-js/sdk@1.2.1':
+    resolution: {integrity: sha512-czCgk8Hw5TKgL0y9peDcxhHV3gGlVE8cHwPMhDOKoGM1QMsDCP1G8Fma6Snnpnr7Ci/U/1f0bFHnCyd7YnmioA==}
+    engines: {node: '>=20'}
     peerDependencies:
+      '@bufbuild/protobuf': 2.5.2
+      '@grpc/grpc-js': ^1.11.0
       express: ^4.21.2 || ^5.1.0
     peerDependenciesMeta:
+      '@bufbuild/protobuf':
+        optional: true
+      '@grpc/grpc-js':
+        optional: true
       express:
         optional: true
 
@@ -20886,8 +20890,9 @@ packages:
   jszip@3.10.1:
     resolution: {integrity: sha512-xXDvecyTpGLrqFrvkrUSoxxfJI5AH7U8zxxtVclpsUtMCq4JQ290LY8AW5c7Ggnr/Y/oK+bQMbqK2qmtk3pN4g==}
 
-  just-bash@3.0.1:
-    resolution: {integrity: sha512-YVyzCN08fKarUnwqy7rKOAcX+2MLYLnYInuowmUXn3mqhrtd4ieZNBuzdQG+qYV9DqnIWuv9Whiph0WRIWsBtw==}
+  just-bash@3.4.2:
+    resolution: {integrity: sha512-T0Vpy7YRgCjxJdqG3tkxn0ZnIDLJvVwb8hH4L+6NVdp+Te27jQxjxnszW9ODjEKbWxWujj83rP5S0GQxCSufgg==}
+    engines: {node: '>=20.18.1'}
     hasBin: true
 
   just-curry-it@3.2.1:
@@ -22486,6 +22491,9 @@ packages:
   papaparse@5.5.3:
     resolution: {integrity: sha512-5QvjGxYVjxO59MGU2lHVYpRWBBtKHnlIAcSe1uNFCkkptUh63NFRj0FJQm7nR67puEruUci/ZkjmEFrjCAyP4A==}
 
+  papaparse@5.7.0:
+    resolution: {integrity: sha512-qBGxg/7Q3Kl9Wfhrz2Z74UnvnHTXLNG6jmKJFeBvP2+y4lV7So+7SR62+Zd47JvdrCkX+nDcnr0ObPzek/+6RA==}
+
   param-case@3.0.4:
     resolution: {integrity: sha512-RXlj7zCYokReqWpOPH9oYivUzLYZ5vAPIfEmCTNViosC78F8F0H9y7T7gG2M39ymgutxF5gcFEsyZQSph9Bp3A==}
 
@@ -23698,12 +23706,16 @@ packages:
   redux-devtools-extension@2.13.8:
     resolution: {integrity: sha512-8qlpooP2QqPtZHQZRhx3x3OP5skEV1py/zUdMY28WNAocbafxdG2tRD1MWE7sp8obGMNYuLWanhhQ7EQvT1FBg==}
     deprecated: Package moved to @redux-devtools/extension.
+    peerDependencies:
+      redux: ^3.1.0 || ^4.0.0
 
   redux-saga@1.3.0:
     resolution: {integrity: sha512-J9RvCeAZXSTAibFY0kGw6Iy4EdyDNW7k6Q+liwX+bsck7QVsU78zz8vpBRweEfANxnnlG/xGGeOvf6r8UXzNJQ==}
 
   redux-thunk@2.4.2:
     resolution: {integrity: sha512-+P3TjtnP0k/FEjcBL5FZpoovtvrTNT/UXd4/sluaSyrURlSlhLSzEdfsTBW7WsKB6yPvgd7q/iZPICFjW4o57Q==}
+    peerDependencies:
+      redux: ^4
 
   redux-thunk@3.1.0:
     resolution: {integrity: sha512-NW2r5T6ksUKXCabzhL9z+h206HQw/NJkcLm1GPImRQ8IzfXwRGqjVhKJGauHirT0DAuyy6hjdnMZaRoAcy0Klw==}
@@ -26470,10 +26482,12 @@ packages:
 
 snapshots:
 
-  '@a2a-js/sdk@0.3.4(express@5.2.1(supports-color@10.2.2))':
+  '@a2a-js/sdk@1.2.1(@bufbuild/protobuf@2.5.2)(@grpc/grpc-js@1.14.5)(express@5.2.1(supports-color@10.2.2))':
     dependencies:
-      uuid: 11.1.1
+      jose: 6.2.12
     optionalDependencies:
+      '@bufbuild/protobuf': 2.5.2
+      '@grpc/grpc-js': 1.14.5
       express: 5.2.1(supports-color@10.2.2)
 
   '@actions/core@2.0.3':
@@ -31648,7 +31662,7 @@ snapshots:
     dependencies:
       immer: 9.0.21
       redux: 4.2.1
-      redux-thunk: 2.4.2
+      redux-thunk: 2.4.2(redux@4.2.1)
       reselect: 4.1.8
     optionalDependencies:
       react: 18.2.0
@@ -39619,7 +39633,7 @@ snapshots:
       readable-stream: 2.3.8
       setimmediate: 1.0.5
 
-  just-bash@3.0.1(supports-color@10.2.2):
+  just-bash@3.4.2(supports-color@10.2.2):
     dependencies:
       diff: 8.0.4
       fast-xml-parser: 5.5.7
@@ -39627,7 +39641,7 @@ snapshots:
       ini: 6.0.0
       minimatch: 10.2.6
       modern-tar: 0.7.7
-      papaparse: 5.5.3
+      papaparse: 5.7.0
       quickjs-emscripten: 0.32.0
       re2js: 1.4.0
       seek-bzip: 2.0.0
@@ -39635,7 +39649,8 @@ snapshots:
       sprintf-js: 1.1.3
       sql.js: 1.14.2
       turndown: 7.2.4
-      yaml: 2.8.3
+      undici: 7.29.1
+      yaml: 2.9.1
     optionalDependencies:
       '@mongodb-js/zstd': 7.0.0
       node-liblzma: 2.2.0
@@ -41640,6 +41655,8 @@ snapshots:
 
   papaparse@5.5.3: {}
 
+  papaparse@5.7.0: {}
+
   param-case@3.0.4:
     dependencies:
       dot-case: 3.0.4
@@ -43017,17 +43034,21 @@ snapshots:
       reduce-reducers: 0.4.3
       to-camel-case: 1.0.0
 
-  redux-devtools-extension@2.13.8:
+  redux-devtools-extension@2.13.8(redux@5.0.1):
     dependencies:
-      redux: 4.2.1
+      redux: 5.0.1
 
   redux-saga@1.3.0:
     dependencies:
       '@redux-saga/core': 1.3.0
 
-  redux-thunk@2.4.2:
+  redux-thunk@2.4.2(redux@4.2.1):
     dependencies:
       redux: 4.2.1
+
+  redux-thunk@2.4.2(redux@5.0.1):
+    dependencies:
+      redux: 5.0.1
 
   redux-thunk@3.1.0(redux@5.0.1):
     dependencies:
