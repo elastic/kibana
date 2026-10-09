@@ -5,60 +5,59 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiBadge, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
+import React from 'react';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
-import type { DatasetBooleanFormValue } from '../../../create_dataset_form_state';
+import {
+  DEFAULT_HEADER_ROW,
+  type DatasetBooleanFormValue,
+} from '../../../create_dataset_form_state';
+import type { ComboBoxChange } from '../../../components/combo_box_selection_validity';
+import {
+  EuiComboBoxNoCustomOption,
+  type EuiComboBoxNoCustomOptionOption,
+} from '../../../components/eui_combo_box_no_custom_option';
 
-type HeaderRowOption = EuiComboBoxOptionOption<string> & { value: DatasetBooleanFormValue };
-
-const OPTIONS: HeaderRowOption[] = [
+const OPTIONS: Array<EuiComboBoxNoCustomOptionOption<Exclude<DatasetBooleanFormValue, ''>>> = [
   {
     value: 'true',
-    label: createDatasetWizardStrings.settingsHeaderRowTrue,
-    append: <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>,
+    label: createDatasetWizardStrings.trueLabel,
+    description: createDatasetWizardStrings.settingsHeaderRowTrueDescription,
+    'data-test-subj': 'createDatasetSettingsHeaderRowOption-true',
   },
-  { value: 'false', label: createDatasetWizardStrings.settingsHeaderRowFalse },
+  {
+    value: 'false',
+    label: createDatasetWizardStrings.falseLabel,
+    description: createDatasetWizardStrings.settingsHeaderRowFalseDescription,
+    'data-test-subj': 'createDatasetSettingsHeaderRowOption-false',
+  },
 ];
+
+export const getHeaderRowDisplayLabel = (value: boolean): string =>
+  OPTIONS.find((option) => option.value === String(value))?.label ?? String(value);
 
 export function HeaderRow({
   value,
   onChange,
   onBlur,
+  isInvalid,
 }: {
   value: DatasetBooleanFormValue;
-  onChange: (next: DatasetBooleanFormValue) => void;
+  onChange: (next: ComboBoxChange<DatasetBooleanFormValue>) => void;
   onBlur: () => void;
+  isInvalid: boolean;
 }) {
-  const selectedOptions = useMemo(() => {
-    if (!value) return [];
-    const option = OPTIONS.find((o) => o.value === value);
-    return option
-      ? ([
-          {
-            value: option.value,
-            label: option.label,
-          },
-        ] as HeaderRowOption[])
-      : ([{ value, label: value } as HeaderRowOption] as HeaderRowOption[]);
-  }, [value]);
-
   return (
-    <EuiComboBox
-      placeholder={createDatasetWizardStrings.settingsHeaderRowPlaceholder}
-      options={OPTIONS}
-      data-test-subj="createDatasetSettingsHeaderRow"
-      fullWidth
-      aria-label={createDatasetWizardStrings.settingsHeaderRowLabel}
-      singleSelection={{ asPlainText: true }}
-      isClearable
-      selectedOptions={selectedOptions}
-      onChange={(nextSelectedOptions) => {
-        const next = nextSelectedOptions?.[0] as HeaderRowOption | undefined;
-        onChange(next?.value ?? '');
-      }}
+    <EuiComboBoxNoCustomOption
+      value={value}
+      onChange={onChange}
       onBlur={onBlur}
+      options={OPTIONS}
+      defaultValue={DEFAULT_HEADER_ROW}
+      isInvalid={isInvalid}
+      placeholder={createDatasetWizardStrings.settingsHeaderRowPlaceholder}
+      aria-label={createDatasetWizardStrings.settingsHeaderRowLabel}
+      data-test-subj="createDatasetSettingsHeaderRow"
     />
   );
 }

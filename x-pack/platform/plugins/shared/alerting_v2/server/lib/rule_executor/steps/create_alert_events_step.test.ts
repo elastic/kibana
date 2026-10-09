@@ -330,7 +330,6 @@ describe('CreateAlertEventsStep', () => {
       buildGroupHash({
         rowDoc: { 'host.name': host },
         groupKeyFields: ['host.name'],
-        fallbackSeed: 'unused',
       });
 
     it('never drops an active group and preserves the active set on state for reuse', async () => {

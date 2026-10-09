@@ -10,16 +10,20 @@ jest.mock('../../significant_events/latest_source_query', () => {
   return {
     ...actual,
     executeAndDecodeSource: jest.fn(),
+    executeCountQuery: jest.fn(),
   };
 });
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { executeAndDecodeSource } from '../../significant_events/latest_source_query';
+import {
+  executeAndDecodeSource,
+  executeCountQuery,
+} from '../../significant_events/latest_source_query';
 import { RevisionReader } from './revision_reader';
 import { IndicatorReader } from './indicator_reader';
 import type { StoredQueryKnowledgeIndicator } from '../data_stream';
-import { KI_TYPE_QUERY } from '../fields';
+import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
 
 const IS_NOT_EXPIRED_FRAGMENT = 'expires_at IS NULL OR expires_at >= NOW()';
 const STREAM = 'logs-app';
@@ -64,6 +68,29 @@ function capturedQueryString(runEsql: jest.Mock): string {
 
 beforeEach(() => {
   (executeAndDecodeSource as jest.Mock).mockReset();
+  (executeCountQuery as jest.Mock).mockReset();
+});
+
+describe('IndicatorReader.countKnowledgeIndicators', () => {
+  it('counts latest non-deleted revisions without the revision fetch limit', async () => {
+    const { reader } = makeReader();
+    (executeCountQuery as jest.Mock).mockResolvedValueOnce(25_001);
+
+    await expect(reader.countKnowledgeIndicators(KI_TYPE_FEATURE)).resolves.toBe(25_001);
+
+    const query = (executeCountQuery as jest.Mock).mock.calls[0][0].query.print('basic');
+    const latestRevisionGroupingIndex = query.lastIndexOf('INLINE STATS');
+    const deletionFilterIndex = query.indexOf('deleted IS NULL OR deleted == FALSE');
+    const countIndex = query.indexOf('STATS total = COUNT(*)');
+
+    expect(query).toContain('STATS total = COUNT(*)');
+    expect(query).toContain('deleted IS NULL OR deleted == FALSE');
+    expect(query).toContain('"feature"');
+    expect(query).toContain('LIMIT 1');
+    expect(query).not.toContain('LIMIT 10000');
+    expect(deletionFilterIndex).toBeGreaterThan(latestRevisionGroupingIndex);
+    expect(countIndex).toBeGreaterThan(deletionFilterIndex);
+  });
 });
 
 describe('IndicatorReader.getQueryLinks', () => {

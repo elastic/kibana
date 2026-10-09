@@ -92,8 +92,8 @@ jest.mock('../../../hooks/use_fetch_rules', () => ({
   useFetchRules: () => ({ data: { items: [], total: 0 }, isLoading: false }),
 }));
 
-jest.mock('../../../hooks/use_fetch_rule_tags', () => ({
-  useFetchRuleTags: () => ({ data: [], isLoading: false }),
+jest.mock('../../../hooks/use_fetch_rule_routing_tags', () => ({
+  useFetchRuleRoutingTags: () => ({ data: [], isLoading: false }),
 }));
 
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
@@ -164,7 +164,7 @@ describe('ActionPolicyForm', () => {
       screen.getByTestId(TEST_SUBJ.nameInput)
     );
     expect(screen.getByTestId('actionPolicyFormSection-policyScope')).toContainElement(
-      screen.getByTestId('ruleTagsSelector')
+      screen.getByTestId('routingTagsSelector')
     );
 
     const notificationControlsButton = within(
@@ -195,17 +195,17 @@ describe('ActionPolicyForm', () => {
     expect(await screen.findByText('Name is required.')).toBeInTheDocument();
   });
 
-  it('renders grouping mode toggle with Per Episode selected by default', () => {
+  it('renders grouping mode toggle with Per Alert selected by default', () => {
     renderForm();
 
     const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
     expect(toggle).toBeInTheDocument();
-    const perEpisodeButton = toggle.querySelector('button[aria-pressed="true"]');
-    expect(perEpisodeButton).toBeInTheDocument();
+    const perAlertButton = toggle.querySelector('button[aria-pressed="true"]');
+    expect(perAlertButton).toBeInTheDocument();
     expect(screen.getByTestId(TEST_SUBJ.strategySelect)).toHaveValue('on_status_change');
   });
 
-  it('shows strategy select for per_episode mode', () => {
+  it('shows strategy select for per_alert mode', () => {
     renderForm();
 
     const strategySelect = screen.getByTestId(TEST_SUBJ.strategySelect);
@@ -293,7 +293,7 @@ describe('ActionPolicyForm', () => {
     const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
     const buttons = toggle.querySelectorAll('button');
 
-    // Switch to Per Episode
+    // Switch to Per Alert
     await user.click(buttons[0]);
     expect(screen.queryByTestId(TEST_SUBJ.groupByInput)).not.toBeInTheDocument();
 

@@ -55,6 +55,7 @@ const DEFAULT_WATERFALL_RESULT = {
     { id: 'span-1', traceId: 'trace-1', parentId: 'tx-1' },
   ],
   errors: [],
+  totalErrors: 0,
   agentMarks: {},
   entryTransaction: {
     transaction: { id: 'tx-1', duration: { us: 1000 } },

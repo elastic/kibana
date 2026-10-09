@@ -25,11 +25,13 @@ const INCREMENTABLE_UNITS: ReadonlyArray<ReturnType<typeof selectUnit>['unit']> 
  */
 export const ConversationMetaInfo = memo<{
   createdAt: Investigation['createdAt'];
-}>(({ createdAt }) => {
+  /** Rendered beside the age; the host supplies it only while a decision is in flight. */
+  inFlightStatus?: React.ReactNode;
+}>(({ createdAt, inFlightStatus }) => {
   const { unit } = selectUnit(new Date(createdAt));
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive direction="row">
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} direction="row">
       <EuiFlexItem grow={false}>
         <EuiToolTip content={<FormattedDate value={createdAt} dateStyle="full" timeStyle="long" />}>
           {/* Focusable so the exact time is reachable without a pointer. */}
@@ -43,6 +45,7 @@ export const ConversationMetaInfo = memo<{
           </EuiText>
         </EuiToolTip>
       </EuiFlexItem>
+      {inFlightStatus ? <EuiFlexItem grow={false}>{inFlightStatus}</EuiFlexItem> : null}
     </EuiFlexGroup>
   );
 });

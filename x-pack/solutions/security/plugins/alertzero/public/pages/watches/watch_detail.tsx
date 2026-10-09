@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -19,6 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
+import type { Worker } from '@kbn/alertzero-common';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useCanWriteAlertZero } from '../../hooks/use_can_write_alertzero';
@@ -28,13 +29,26 @@ import { useWorkers } from '../../hooks/use_workers_api';
 import { SettingsSection } from './components/settings_section';
 import { WatchesSectionLayout } from './components/watches_section_layout';
 import { WorkerSettingsPanel } from './components/worker_settings_panel';
+import {
+  getBlockedAfterSaveNotices,
+  getDisableConfirmation,
+  getWorkerWarningReasons,
+  type WorkerBlockedNotice,
+  type WorkerDisableConfirmation,
+  type WorkerEnabledById,
+} from './worker_dependencies/worker_dependencies';
+import { WorkerBlockedAfterSaveModal } from './worker_dependencies/worker_blocked_after_save_modal';
+import { WorkerDisableConfirmModal } from './worker_dependencies/worker_disable_confirm_modal';
+import { workerName } from './workers/translations';
 import * as i18n from './translations';
 import * as settingsI18n from './settings_translations';
 
 export const WatchDetailPage: React.FC = () => {
   const history = useHistory();
   const { watchId } = useParams<{ watchId: string }>();
-  const canWrite = useCanWriteAlertZero();
+  const currentWatchId = useRef(watchId);
+  currentWatchId.current = watchId;
+  const canWriteAlertZero = useCanWriteAlertZero();
   const { euiTheme } = useEuiTheme();
   const { data, isLoading, error, refetch } = useWatch(watchId);
   const {
@@ -46,6 +60,10 @@ export const WatchDetailPage: React.FC = () => {
 
   const watch = data?.watch;
   useAlertZeroDocTitle(watch?.name ?? i18n.PAGE_TITLE);
+  // Absent until the workers response arrives. A loaded response without the flag stays editable
+  // only when the field is missing; an explicit false locks the controls.
+  const canModifyWorkers = workersData?.canModifyWorkers !== false;
+  const canWrite = canWriteAlertZero && canModifyWorkers;
 
   const members = useMemo(
     () => (workersData?.workers ?? []).filter((worker) => worker.watchIds.includes(watchId)),
@@ -53,6 +71,17 @@ export const WatchDetailPage: React.FC = () => {
   );
   const { discard, isDirty, isSaving, resolve, save, updateEnabled, updateSettings } =
     useWatchSettingsDraft(members);
+  // Dependencies cross Watches, so this spans every Worker.
+  const enabledById: WorkerEnabledById = useMemo(
+    () =>
+      new Map((workersData?.workers ?? []).map((worker) => [worker.id, resolve(worker).enabled])),
+    [workersData?.workers, resolve]
+  );
+  const [pendingDisable, setPendingDisable] = useState<{
+    worker: Worker;
+    confirmation: WorkerDisableConfirmation;
+  } | null>(null);
+  const [blockedNoticeQueue, setBlockedNoticeQueue] = useState<WorkerBlockedNotice[]>([]);
   const [saveBlockedByInvalidDraft, setSaveBlockedByInvalidDraft] = useState(false);
   // Workers whose trigger control holds an uncommittable amount. That draft never reaches settings
   // state, so the page must hear about it directly or Save would persist the last valid cadence.
@@ -84,8 +113,14 @@ export const WatchDetailPage: React.FC = () => {
       setSaveBlockedByInvalidDraft(true);
       return;
     }
+    const savedFromWatchId = watchId;
+    const enabledSavedFrom = enabledById;
+    const storedEnabledById = new Map(
+      (workersData?.workers ?? []).map((worker) => [worker.id, worker.enabled])
+    );
+    let savedWorkers: Worker[];
     try {
-      await save();
+      savedWorkers = await save();
       setSaveBlockedByInvalidDraft(false);
     } catch (saveError) {
       if (saveError instanceof Error && saveError.message === 'invalid') {
@@ -94,7 +129,40 @@ export const WatchDetailPage: React.FC = () => {
       }
       throw saveError;
     }
-  }, [save, hasInvalidDraft]);
+    // The page stays mounted across Watches; a notice from the Watch the user left would mislead.
+    if (currentWatchId.current !== savedFromWatchId) {
+      return;
+    }
+    const savedEnabledById = new Map(savedWorkers.map((worker) => [worker.id, worker.enabled]));
+    const enabledAfterSave: WorkerEnabledById = new Map(
+      [...enabledSavedFrom].map(([workerId, enabled]) => [
+        workerId,
+        savedEnabledById.get(workerId) ?? storedEnabledById.get(workerId) ?? enabled,
+      ])
+    );
+    setBlockedNoticeQueue(
+      getBlockedAfterSaveNotices(storedEnabledById, enabledAfterSave, savedWorkers)
+    );
+  }, [save, hasInvalidDraft, watchId, enabledById, workersData?.workers]);
+
+  const handleEnabledChange = useCallback(
+    (worker: Worker, enabled: boolean) => {
+      const confirmation = enabled ? undefined : getDisableConfirmation(worker.id, enabledById);
+      if (confirmation) {
+        setPendingDisable({ worker, confirmation });
+        return;
+      }
+      updateEnabled(worker, enabled);
+    },
+    [enabledById, updateEnabled]
+  );
+
+  const confirmPendingDisable = useCallback(() => {
+    if (pendingDisable) {
+      updateEnabled(pendingDisable.worker, false);
+    }
+    setPendingDisable(null);
+  }, [pendingDisable, updateEnabled]);
 
   const onDiscard = useCallback(() => {
     discard();
@@ -104,6 +172,7 @@ export const WatchDetailPage: React.FC = () => {
   }, [discard]);
 
   const isMultiWorker = members.length > 1;
+  const blockedNotice = blockedNoticeQueue[0];
 
   const headerPrimaryActionItem = useMemo(
     () => ({
@@ -147,6 +216,8 @@ export const WatchDetailPage: React.FC = () => {
     setInvalidTriggerWorkerIds(new Set());
     setSaveBlockedByInvalidDraft(false);
     setDraftResetKey((key) => key + 1);
+    setPendingDisable(null);
+    setBlockedNoticeQueue([]);
   }, [watchId, discard]);
 
   const handleToggleWorker = useCallback((workerId: string, isOpen: boolean) => {
@@ -263,10 +334,11 @@ export const WatchDetailPage: React.FC = () => {
                 enabled={draft.enabled}
                 settings={draft.settings}
                 error={draft.error}
+                warningReasons={getWorkerWarningReasons(worker, enabledById)}
                 settingsLocked={worker.state === 'unavailable'}
                 isSaving={isSaving}
                 canWrite={canWrite}
-                onEnabledChange={(enabled) => updateEnabled(worker, enabled)}
+                onEnabledChange={(enabled) => handleEnabledChange(worker, enabled)}
                 onSettingsChange={(patch) => updateSettings(worker, patch)}
                 onTriggerValidityChange={(isValid) =>
                   handleTriggerValidityChange(worker.id, isValid)
@@ -320,6 +392,20 @@ export const WatchDetailPage: React.FC = () => {
           </SettingsSection>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {pendingDisable ? (
+        <WorkerDisableConfirmModal
+          confirmation={pendingDisable.confirmation}
+          onConfirm={confirmPendingDisable}
+          onCancel={() => setPendingDisable(null)}
+        />
+      ) : null}
+      {blockedNotice ? (
+        <WorkerBlockedAfterSaveModal
+          workerName={workerName(blockedNotice.workerId)}
+          reasons={blockedNotice.reasons}
+          onAcknowledge={() => setBlockedNoticeQueue((queue) => queue.slice(1))}
+        />
+      ) : null}
     </WatchesSectionLayout>
   );
 };

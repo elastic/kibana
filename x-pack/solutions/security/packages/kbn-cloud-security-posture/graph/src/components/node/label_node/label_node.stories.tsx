@@ -15,6 +15,12 @@ import { GlobalGraphStyles } from '../../graph/styles';
 
 import '@xyflow/react/dist/style.css';
 
+/** Static toolbar items for Storybook previews of the floating label-node toolbar. */
+const storybookToolbarItems = () => [
+  { iconType: 'filter', label: 'Show events with this action', onClick: () => {} },
+  { iconType: 'inspect', label: 'Show event details', onClick: () => {} },
+];
+
 const meta: Meta<LabelNodeViewModel> = {
   title: 'Components/Graph Components/Label Node',
   args: {
@@ -34,6 +40,7 @@ const meta: Meta<LabelNodeViewModel> = {
       '10.200.0.202',
     ],
     countryCodes: ['us', 'ru', 'es', 'us', 'us'],
+    toolbarItemsFn: storybookToolbarItems,
   },
   argTypes: {
     color: {
@@ -45,6 +52,7 @@ const meta: Meta<LabelNodeViewModel> = {
         type: 'boolean',
       },
     },
+    toolbarItemsFn: { control: false },
   },
   decorators: [GlobalStylesStorybookDecorator],
 };

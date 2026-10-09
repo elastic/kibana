@@ -30,6 +30,8 @@ export interface EvaluatorScore {
   explanation?: string | null;
   metadata?: Record<string, unknown>;
   traceId?: string | null;
+  /** Overrides the evaluator's `direction` for this score alone. */
+  direction?: Direction;
 }
 
 /**

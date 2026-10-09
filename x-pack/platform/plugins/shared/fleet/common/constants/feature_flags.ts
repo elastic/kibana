@@ -7,3 +7,9 @@
 
 /** LaunchDarkly flag that gates Fleet calls to the IaC Provisioner. Fallback is false. */
 export const ENABLE_IAC_PROVISIONER_FLAG = 'fleet.enableIacProvisioner';
+
+/** LaunchDarkly flag that gates the Restart Agent action in the Fleet UI. Fallback is false. */
+export const ENABLE_RESTART_AGENT_ACTION_FLAG = 'fleet.enableRestartAgentAction';
+
+/** LaunchDarkly flag that gates creation and management of OTLP outputs. Fallback is false. */
+export const ENABLE_OTLP_OUTPUT_FLAG = 'fleet.enableOtlpOutput';
