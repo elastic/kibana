@@ -15,9 +15,14 @@ import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_typ
 
 import { createCaseError } from '../../common/error';
 import type { CasesClient, CasesClientArgs } from '..';
-import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
+import { flattenCaseSavedObject } from '../../common/utils';
+import {
+  convertSortField,
+  buildFilter,
+  buildObservablesFieldsFilter,
+  combineFilters,
+} from '../utils';
 import { Operations } from '../../authorization';
-import { buildFilter, buildObservablesFieldsFilter, combineFilters } from '../utils';
 import { combineFilterWithAuthorizationFilter } from '../../authorization/utils';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { getAvailableObservableTypesMap } from '../observable_types';
@@ -128,7 +133,8 @@ export const similar = async (
 
     const cases = await caseService.findCases({
       filter: finalCasesFilter,
-      sortField: defaultSortField,
+      sortField: convertSortField(paramArgs.sortField),
+      sortOrder: paramArgs.sortOrder ?? 'desc',
       search: `-"cases:${caseId}"`,
       rootSearchFields: ['_id'],
       page: paramArgs.page,
