@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class FilingGateTest(unittest.TestCase):
     def test_skill_banner_points_at_file_bug(self):
         text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
-        self.assertIn("security-file-bug", text)
+        self.assertIn("file-bug", text)
         self.assertIn("Do not file anything they did not name", text)
         self.assertIn("you may ask whether they want any findings filed", text)
         self.assertIn("Do not write to GitHub from this skill", text)
@@ -21,7 +21,7 @@ class FilingGateTest(unittest.TestCase):
 
     def test_phase3_may_offer_then_handoff(self):
         text = (ROOT / "phases" / "3-report.md").read_text(encoding="utf-8")
-        self.assertIn("security-file-bug", text)
+        self.assertIn("file-bug", text)
         self.assertIn("Do you want any of these findings filed as Kibana issues?", text)
         self.assertIn("Yes\" without names is not enough", text)
         self.assertIn("Do not run `gh issue create`", text)

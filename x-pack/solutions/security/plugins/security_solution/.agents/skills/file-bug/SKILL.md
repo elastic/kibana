@@ -1,5 +1,5 @@
 ---
-name: security-file-bug
+name: file-bug
 description: >
   Use when the user says "create a bug", "file a ticket", "post this bug",
   "comment this on #N", or "file this finding" for a Kibana Security
@@ -7,7 +7,7 @@ description: >
 disable-model-invocation: true
 ---
 
-# Security file-bug
+# File bug
 
 Write a Kibana Security Solution bug to `elastic/kibana` only after an **explicit yes**. `disable-model-invocation: true`. Do not offer to file anything on your own initiative.
 
@@ -41,7 +41,7 @@ Same later steps. Fork only how you collect. Drafting rules: `references/draftin
 ```bash
 python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/parse-findings.py \
   --session-dir "$SESSION_DIR"
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py from-findings \
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/file-bug/scripts/file-bug.py from-findings \
   --jsonl "$SESSION_DIR/findings.jsonl" --title "$FINDING_TITLE"
 ```
 
@@ -49,7 +49,7 @@ Then `check-pack`, `infer-deployment`, `scan-sensitive`, `render-body` with `$SE
 
 ## Fileable checklist
 
-Do not ask for a write-yes until `check-draft` exits 0, or you have walked every remaining gap (`Unknown` is allowed). On **create**, pass `--title`: `check-draft` then also requires title/labels, a **visible** stamp (not only an HTML comment), and required body sections (Describe, Version, Steps, Current, Expected). On **comment / reopen**, omit `--title` — do not pad the comment with the create template; `write` still appends the stamp. Always **show the full draft** (title, type, labels, body, files) and **end the turn** before any write. Path B create also needs `sec-eng-prod:exploratory-tester`. Title: `[<team name>] [Bug]` + symptom (`format-title`; no clipped title). Create labels always include `bug` and `triage_needed`. `write` sets GitHub Type to Bug. Stamp: `Filed via security-file-bug` as visible body text on create. A `wip` / `wip_or_limitation` hit is not fileable until they say **file anyway**.
+Do not ask for a write-yes until `check-draft` exits 0, or you have walked every remaining gap (`Unknown` is allowed). On **create**, pass `--title`: `check-draft` then also requires title/labels, a **visible** stamp (not only an HTML comment), and required body sections (Describe, Version, Steps, Current, Expected). On **comment / reopen**, omit `--title` — do not pad the comment with the create template; `write` still appends the stamp. Always **show the full draft** (title, type, labels, body, files) and **end the turn** before any write. Path B create also needs `sec-eng-prod:exploratory-tester`. Title: `[<team name>] [Bug]` + symptom (`format-title`; no clipped title). Create labels always include `bug` and `triage_needed`. `write` sets GitHub Type to Bug. Stamp: `Filed via file-bug` as visible body text on create. A `wip` / `wip_or_limitation` hit is not fileable until they say **file anyway**.
 
 ## Scripts
 
@@ -60,20 +60,20 @@ Every GitHub label read and write goes through `python3 …/scripts/file-bug.py 
 ### 1. Collect
 
 ```bash
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py check-pack \
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/file-bug/scripts/file-bug.py check-pack \
   --finding "$FINDING_JSON" --config "$CONFIG_JSON"
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py infer-deployment \
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/file-bug/scripts/file-bug.py infer-deployment \
   --finding "$FINDING_JSON" --config "$CONFIG_JSON"
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py infer-release \
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/file-bug/scripts/file-bug.py infer-release \
   --finding "$FINDING_JSON" --config "$CONFIG_JSON"
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py scan-sensitive \
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/file-bug/scripts/file-bug.py scan-sensitive \
   --finding "$FINDING_JSON"
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py render-body \
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/file-bug/scripts/file-bug.py render-body \
   --finding "$FINDING_JSON" --config "$CONFIG_JSON"
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py infer-team \
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/file-bug/scripts/file-bug.py infer-team \
   --area "$AREA" --slug "$AREA_SLUG" --route "$ROUTE" \
   --knowledge x-pack/solutions/security/plugins/security_solution/.agents/references/security-domain-knowledge.md
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py format-title \
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/file-bug/scripts/file-bug.py format-title \
   --label "$TEAM_LABEL" --symptom "$SYMPTOM"
 ```
 
@@ -86,8 +86,8 @@ You own the query. Search **open and closed issues** and **open PRs** (include d
 ```bash
 GH_PAGER=cat gh search issues --repo elastic/kibana --limit 10 --json number,state,title,body \
   "<title and distinctive error strings>" \
-  | python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py parse-search --input -
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py decide \
+  | python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/file-bug/scripts/file-bug.py parse-search --input -
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/file-bug/scripts/file-bug.py decide \
   --matches matches.json
 ```
 
@@ -96,9 +96,9 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/secur
 **Always present the complete draft before opening a ticket.** Show title (create), GitHub Type, labels, full body or comment, and files to upload. Then **end the turn**. Never write in the same turn you first show the draft.
 
 ```bash
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py validate-labels \
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/file-bug/scripts/file-bug.py validate-labels \
   --labels "bug,Team:…" --repo elastic/kibana
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py scan-wip \
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/file-bug/scripts/file-bug.py scan-wip \
   --finding "$FINDING_JSON" --body body.md
 ```
 
@@ -113,11 +113,11 @@ Write-yes is a **later** message that clearly approves **this** shown draft (for
 Upload first, embed into a **new** body file, write **that** file (not the pre-embed `body.md`). `embed-uploads` wraps images as `![filename](url)` and videos as `<video src="url" controls></video>` on their own paragraph so GitHub shows a player. Never write a bare image or video URL (a URL in a sentence is a link).
 
 ```bash
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py upload \
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/file-bug/scripts/file-bug.py upload \
   --repo elastic/kibana --file shot.png --file flow.mp4 > uploaded.json
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py embed-uploads \
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/file-bug/scripts/file-bug.py embed-uploads \
   --body body.md --map uploaded.json --out embedded.md
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/scripts/file-bug.py write \
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/file-bug/scripts/file-bug.py write \
   --action create|comment|reopen_comment \
   --repo elastic/kibana --title "…" --body-file embedded.md \
   --label bug --label triage_needed --label "Team:…" --label sec-eng-prod:exploratory-tester \

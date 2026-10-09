@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Single entry point the security-file-bug skill calls instead of hand-rolled `gh` flags."""
+"""Single entry point the file-bug skill calls instead of hand-rolled `gh` flags."""
 from __future__ import annotations
 
 import argparse
@@ -499,7 +499,7 @@ def _build_parser() -> argparse.ArgumentParser:
     sensitive.set_defaults(handler=_cmd_scan_sensitive)
 
     render = subparsers.add_parser(
-        "render-body", help="Render the security-file-bug template"
+        "render-body", help="Render the file-bug template"
     )
     render.add_argument("--finding", required=True, help="Finding JSON path, or - for stdin")
     render.add_argument("--config", default=None, help="Session config JSON path")

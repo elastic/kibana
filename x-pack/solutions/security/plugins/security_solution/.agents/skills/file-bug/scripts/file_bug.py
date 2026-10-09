@@ -13,7 +13,7 @@ from urllib.parse import quote
 
 WriteAction = Literal["create", "comment", "reopen_comment", "ask"]
 UNKNOWN_ANSWER = "Unknown"
-FILED_VIA = "Filed via security-file-bug"
+FILED_VIA = "Filed via file-bug"
 MAX_TITLE_LEN = 140
 SOURCE_EXPLORATORY_TESTER = "exploratory-tester"
 TESTER_SOURCE_LABEL = "sec-eng-prod:exploratory-tester"

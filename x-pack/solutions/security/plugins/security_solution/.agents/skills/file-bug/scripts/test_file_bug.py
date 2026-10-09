@@ -1576,7 +1576,7 @@ class SkillProtocolTest(unittest.TestCase):
         )
 
     def test_frontmatter(self):
-        self.assertIn("name: security-file-bug", self.skill)
+        self.assertIn("name: file-bug", self.skill)
         self.assertIn("disable-model-invocation: true", self.skill)
         self.assertIn("Use when the user says", self.skill)
         self.assertIn("references/drafting.md", self.skill)
@@ -1663,7 +1663,7 @@ class SkillProtocolTest(unittest.TestCase):
         self.assertIn("file anyway", self.text.lower())
         self.assertIn("end the turn", self.text.lower())
         self.assertIn("Never write in the same turn", self.skill)
-        self.assertIn("Filed via security-file-bug", self.text)
+        self.assertIn("Filed via file-bug", self.text)
         self.assertIn("open and closed", self.text)
         self.assertIn("One or more", self.skill)
         self.assertIn("second", self.text.lower())

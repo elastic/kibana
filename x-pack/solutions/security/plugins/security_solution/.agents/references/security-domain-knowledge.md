@@ -1,6 +1,6 @@
 <!--
   Shared Security domain knowledge. Read-only for agents.
-  Consumers: security-file-bug, bug-validator.
+  Consumers: file-bug, bug-validator.
   Updates go through a reviewed PR (CODEOWNERS: @elastic/security-engineering-productivity).
   Team-assignment content also needs the owning @elastic/security-* team.
 -->
