@@ -350,33 +350,18 @@ export class APIKeys implements NativeAPIKeysType {
     let result: GrantAPIKeyResult;
     try {
       this.logger.debug(`Granting an API key with grant type [${params.grant_type}]`);
-      // The client typings don't know the service account grant type yet.
-      result =
-        params.grant_type === '_user_managed_service_account'
-          ? await this.clusterClient.asInternalUser.transport.request<GrantAPIKeyResult>({
-              method: 'POST',
-              path: '/_security/api_key/grant',
-              body: {
-                grant_type: params.grant_type,
-                service_account_token: params.service_account_token,
-                api_key: params.api_key,
-              },
-              ...(params.refresh !== undefined
-                ? { querystring: { refresh: String(params.refresh) } }
-                : {}),
-            })
-          : await this.clusterClient.asInternalUser.security.grantApiKey(params);
+      // @ts-expect-error Elasticsearch client types do not yet include the `_user_managed_service_account` grant
+      result = await this.clusterClient.asInternalUser.security.grantApiKey(params);
       this.logger.debug('API key was granted successfully');
     } catch (e) {
       const serviceAccountError = toServiceAccountGrantError(e, this.getCurrentUser(request), {
         reason: this.getServiceAccountGrantRefusalReason(authorizationHeader),
       });
+      // A refused service account is the caller's to fix, not a Kibana failure.
+      this.logger[serviceAccountError ? 'warn' : 'error'](`Failed to grant API key: ${e.message}`);
       if (serviceAccountError) {
-        // The caller's credential was refused, which is not a Kibana failure.
-        this.logger.warn(`Failed to grant API key: ${e.message}`);
         throw serviceAccountError;
       }
-      this.logger.error(`Failed to grant API key: ${e.message}`);
       // The original error's request metadata carries the service account token, so it must not
       // leave this method.
       if (params.grant_type === '_user_managed_service_account') {

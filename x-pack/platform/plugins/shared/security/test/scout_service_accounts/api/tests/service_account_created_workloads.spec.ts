@@ -40,11 +40,12 @@ apiTest.describe(
     const workloadIds: string[] = [];
     const builtInTokenNames: string[] = [];
     const roleName = uniqueName();
-    const indexName = uniqueName();
+    // An index the account's role can read.
+    const grantedIndexName = uniqueName();
     // An index the account's role does not cover, to show its keys are limited to that role.
     const deniedIndexName = uniqueName();
 
-    const ruleBody = (name: string, index = indexName) => ({
+    const ruleBody = (name: string, index: string) => ({
       name,
       rule_type_id: '.es-query',
       consumer: 'stackAlerts',
@@ -114,7 +115,7 @@ apiTest.describe(
     };
 
     apiTest.beforeAll(async ({ esClient, kbnClient }) => {
-      for (const index of [indexName, deniedIndexName]) {
+      for (const index of [grantedIndexName, deniedIndexName]) {
         await esClient.index({
           index,
           document: { '@timestamp': new Date().toISOString() },
@@ -125,7 +126,7 @@ apiTest.describe(
         method: 'PUT',
         path: `/api/security/role/${roleName}`,
         body: {
-          elasticsearch: { indices: [{ names: [indexName], privileges: ['read'] }] },
+          elasticsearch: { indices: [{ names: [grantedIndexName], privileges: ['read'] }] },
           kibana: [{ base: [], feature: { stackAlerts: ['all'] }, spaces: ['*'] }],
         },
       });
@@ -152,7 +153,10 @@ apiTest.describe(
         path: `/api/security/role/${roleName}`,
         ignoreErrors: [404],
       });
-      await esClient.indices.delete({ index: [indexName, deniedIndexName] }, { ignore: [404] });
+      await esClient.indices.delete(
+        { index: [grantedIndexName, deniedIndexName] },
+        { ignore: [404] }
+      );
     });
 
     apiTest(
@@ -162,7 +166,7 @@ apiTest.describe(
 
         const created = await apiClient.post('api/alerting/rule', {
           headers: { ...HEADERS, authorization: `Bearer ${token}` },
-          body: ruleBody(name),
+          body: ruleBody(name, grantedIndexName),
           responseType: 'json',
         });
         expect(created).toHaveStatusCode(200);
@@ -176,7 +180,7 @@ apiTest.describe(
           }
         );
 
-        // B8: the rule keeps its own key after the account that created it is gone.
+        // The rule keeps its own key after the account that created it is gone.
         await deleteServiceAccounts(esClient, config, [{ namespace: 'kibana', name }], {
           tokenNames: [DIRECT_TOKEN_NAME],
         });
@@ -241,7 +245,11 @@ apiTest.describe(
 
         const executed = await apiClient.post(workloadPath(name), {
           headers: { ...HEADERS, ...cookieHeader },
-          body: { operation: 'execute', action: 'create_rule', rule: ruleBody(name) },
+          body: {
+            operation: 'execute',
+            action: 'create_rule',
+            rule: ruleBody(name, grantedIndexName),
+          },
           responseType: 'json',
         });
         expect(executed).toHaveStatusCode(200);

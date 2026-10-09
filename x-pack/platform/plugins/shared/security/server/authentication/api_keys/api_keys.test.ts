@@ -527,7 +527,7 @@ describe('API Keys', () => {
     });
 
     it('grants with the service account grant type and no client authentication', async () => {
-      mockClusterClient.asInternalUser.transport.request.mockResolvedValueOnce(grantResult);
+      mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce(grantResult);
 
       const result = await apiKeys.grantAsInternalUser(
         createServiceAccountRequest({ 'es-client-authentication': 'SharedSecret secret' }),
@@ -535,20 +535,15 @@ describe('API Keys', () => {
       );
 
       expect(result).toEqual(grantResult);
-      expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
-      expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
-        method: 'POST',
-        path: '/_security/api_key/grant',
-        body: {
-          grant_type: '_user_managed_service_account',
-          service_account_token: serviceAccountToken,
-          api_key: { name: 'test_api_key', role_descriptors: roleDescriptors, expiration: '1d' },
-        },
+      expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
+        grant_type: '_user_managed_service_account',
+        service_account_token: serviceAccountToken,
+        api_key: { name: 'test_api_key', role_descriptors: roleDescriptors, expiration: '1d' },
       });
     });
 
     it('forwards `refresh`', async () => {
-      mockClusterClient.asInternalUser.transport.request.mockResolvedValueOnce(grantResult);
+      mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce(grantResult);
 
       await apiKeys.grantAsInternalUser(
         createServiceAccountRequest(),
@@ -556,8 +551,11 @@ describe('API Keys', () => {
         { refresh: 'wait_for' }
       );
 
-      expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenCalledWith(
-        expect.objectContaining({ querystring: { refresh: 'wait_for' } })
+      expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith(
+        expect.objectContaining({
+          grant_type: '_user_managed_service_account',
+          refresh: 'wait_for',
+        })
       );
     });
 
@@ -577,7 +575,6 @@ describe('API Keys', () => {
         role_descriptors: {},
       });
 
-      expect(mockClusterClient.asInternalUser.transport.request).not.toHaveBeenCalled();
       expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith(
         expect.objectContaining({ grant_type: 'access_token', access_token: serviceAccountToken })
       );
@@ -593,7 +590,6 @@ describe('API Keys', () => {
         { name: 'test_api_key', role_descriptors: {} }
       );
 
-      expect(mockClusterClient.asInternalUser.transport.request).not.toHaveBeenCalled();
       expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith(
         expect.objectContaining({
           grant_type: 'access_token',
@@ -606,7 +602,7 @@ describe('API Keys', () => {
       [400, '[service_account_token] must belong to a user-managed service account'],
       [403, 'Failed to authenticate api key grant'],
     ])('maps a %s refusal to an error that names the account', async (statusCode, reason) => {
-      mockClusterClient.asInternalUser.transport.request.mockRejectedValueOnce(
+      mockClusterClient.asInternalUser.security.grantApiKey.mockRejectedValueOnce(
         createResponseError(statusCode, reason)
       );
 
@@ -625,7 +621,7 @@ describe('API Keys', () => {
     });
 
     it('maps a 401 to a 403, since Kibana already authenticated the caller', async () => {
-      mockClusterClient.asInternalUser.transport.request.mockRejectedValueOnce(
+      mockClusterClient.asInternalUser.security.grantApiKey.mockRejectedValueOnce(
         createResponseError(401, 'unable to authenticate')
       );
 
@@ -640,7 +636,7 @@ describe('API Keys', () => {
     });
 
     it('logs a refusal as a warning and a server error as an error', async () => {
-      mockClusterClient.asInternalUser.transport.request
+      mockClusterClient.asInternalUser.security.grantApiKey
         .mockRejectedValueOnce(createResponseError(400, 'refused'))
         .mockRejectedValueOnce(createResponseError(503, 'unavailable'));
       const grant = () =>
@@ -689,7 +685,7 @@ describe('API Keys', () => {
 
     it('keeps the status of a server error without exposing the original error', async () => {
       const sourceError = createResponseError(503, 'unavailable');
-      mockClusterClient.asInternalUser.transport.request.mockRejectedValueOnce(sourceError);
+      mockClusterClient.asInternalUser.security.grantApiKey.mockRejectedValueOnce(sourceError);
 
       const failure = await apiKeys
         .grantAsInternalUser(createServiceAccountRequest(), {
@@ -719,7 +715,7 @@ describe('API Keys', () => {
     it.each([400, 403, 503, 'connection'] as const)(
       'never logs or throws the token (%s)',
       async (failureKind) => {
-        mockClusterClient.asInternalUser.transport.request.mockRejectedValueOnce(
+        mockClusterClient.asInternalUser.security.grantApiKey.mockRejectedValueOnce(
           failureKind === 'connection'
             ? new errors.ConnectionError(
                 'Disconnected',

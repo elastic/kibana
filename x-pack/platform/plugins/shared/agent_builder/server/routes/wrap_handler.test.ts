@@ -155,6 +155,19 @@ describe('getHandlerWrapper', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
+  it('forwards the headers of a 4xx Boom error', async () => {
+    const boom = Boom.tooManyRequests('slow down');
+    boom.output.headers['Retry-After'] = '10';
+    const handler = wrapHandler(async () => {
+      throw boom;
+    });
+
+    const result: any = await handler(createCtx(), req, kibanaResponseFactory);
+
+    expect(result.status).toBe(429);
+    expect(result.options.headers).toEqual({ 'Retry-After': '10' });
+  });
+
   it('falls back to 500 for a 5xx Boom error', async () => {
     const handler = wrapHandler(async () => {
       throw Boom.serverUnavailable('unavailable');

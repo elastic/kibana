@@ -91,6 +91,7 @@ export const getHandlerWrapper =
           return res.customError({
             body: { message: e.message },
             statusCode: e.output.statusCode,
+            headers: e.output.headers as { [key: string]: string },
           });
         }
         logger.error(`Unexpected error in handler: ${e.stack ?? e.message}`);

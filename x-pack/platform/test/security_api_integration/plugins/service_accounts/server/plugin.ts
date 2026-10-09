@@ -19,11 +19,11 @@ import type {
 
 interface SetupDependencies {
   security: SecurityPluginSetup;
-  taskManager?: TaskManagerSetupContract;
+  taskManager: TaskManagerSetupContract;
 }
 
 interface StartDependencies {
-  taskManager?: TaskManagerStartContract;
+  taskManager: TaskManagerStartContract;
 }
 
 const NOOP_TASK_TYPE = 'serviceAccountsTest:noop';
@@ -34,7 +34,7 @@ export class ServiceAccountsTestPlugin
   setup(core: CoreSetup<StartDependencies>, { security, taskManager }: SetupDependencies): void {
     core.security.serviceAccounts.registerWorkloadType({ type: 'job', name: 'Test job' });
     const router = core.http.createRouter();
-    taskManager?.registerTaskDefinitions({
+    taskManager.registerTaskDefinitions({
       [NOOP_TASK_TYPE]: {
         title: 'Service accounts test no-op',
         createTaskRunner: () => ({ run: async () => undefined }),
@@ -53,7 +53,6 @@ export class ServiceAccountsTestPlugin
       },
       async (_context, request, response) => {
         const [, { taskManager: taskManagerStart }] = await core.getStartServices();
-        if (!taskManagerStart) return response.notFound();
         try {
           const task = await taskManagerStart.schedule(
             {
@@ -86,7 +85,7 @@ export class ServiceAccountsTestPlugin
       },
       async (_context, request, response) => {
         const [, { taskManager: taskManagerStart }] = await core.getStartServices();
-        await taskManagerStart?.removeIfExists(request.params.taskId);
+        await taskManagerStart.removeIfExists(request.params.taskId);
         return response.noContent();
       }
     );
