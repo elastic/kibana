@@ -15,6 +15,7 @@ import {
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+  type WorkerBlockingReason,
 } from '@kbn/alertzero-common';
 import {
   getBlockedAfterSaveNotices,
@@ -31,6 +32,25 @@ const enabledById = (entries: Record<string, boolean>) => new Map(Object.entries
 
 const messages = (reasons: Array<{ message: React.ReactNode }>) =>
   reasons.map((reason) => reason.message);
+
+const ids = (reasons: Array<{ id: string }>) => reasons.map((reason) => reason.id);
+
+const subject = (id: string, blockingReasons: WorkerBlockingReason[] = []) => ({
+  id,
+  blockingReasons,
+});
+
+/** Saved Workers as the server returns them, on or off as `enabledAfterSave` says. */
+const saved = (
+  enabledAfterSave: Map<string, boolean>,
+  workerIds: string[],
+  blockingReasons: WorkerBlockingReason[] = []
+) =>
+  workerIds.map((id) => ({
+    id,
+    enabled: enabledAfterSave.get(id) === true,
+    blockingReasons,
+  }));
 
 describe('getDisableConfirmation', () => {
   it.each([
@@ -101,10 +121,13 @@ describe('getDisableConfirmation', () => {
 });
 
 describe('getWorkerWarningReasons', () => {
+  const warnings = (worker: ReturnType<typeof subject>, state: Map<string, boolean>) =>
+    getWorkerWarningReasons(worker, state, { includeBlocking: true });
+
   it('warns the dependent while its provider is off, whether or not the dependent is on', () => {
     for (const dependentEnabled of [true, false]) {
       const state = enabledById({ [HUNT]: false, [RULE_COVERAGE]: dependentEnabled });
-      expect(messages(getWorkerWarningReasons(RULE_COVERAGE, state))).toEqual([
+      expect(messages(warnings(subject(RULE_COVERAGE), state))).toEqual([
         'Continuous Threat Hunt is disabled — no gap signals to act on.',
       ]);
     }
@@ -112,35 +135,65 @@ describe('getWorkerWarningReasons', () => {
 
   it('warns the provider while it is off and its dependent is enabled', () => {
     expect(
-      messages(getWorkerWarningReasons(HUNT, enabledById({ [HUNT]: false, [RULE_COVERAGE]: true })))
+      messages(warnings(subject(HUNT), enabledById({ [HUNT]: false, [RULE_COVERAGE]: true })))
     ).toEqual(['Rule Coverage is enabled but has no gap signals while this Worker is off.']);
   });
 
   it('does not warn the provider when its dependent is off too', () => {
-    expect(
-      getWorkerWarningReasons(HUNT, enabledById({ [HUNT]: false, [RULE_COVERAGE]: false }))
-    ).toEqual([]);
+    expect(warnings(subject(HUNT), enabledById({ [HUNT]: false, [RULE_COVERAGE]: false }))).toEqual(
+      []
+    );
   });
 
   it('warns nobody while the provider is on', () => {
     const state = enabledById({ [HUNT]: true, [RULE_COVERAGE]: true });
-    expect(getWorkerWarningReasons(HUNT, state)).toEqual([]);
-    expect(getWorkerWarningReasons(RULE_COVERAGE, state)).toEqual([]);
+    expect(warnings(subject(HUNT), state)).toEqual([]);
+    expect(warnings(subject(RULE_COVERAGE), state)).toEqual([]);
   });
 
   it('does not warn the dependent when the provider is not registered', () => {
-    expect(getWorkerWarningReasons(RULE_COVERAGE, enabledById({ [RULE_COVERAGE]: true }))).toEqual(
-      []
+    expect(warnings(subject(RULE_COVERAGE), enabledById({ [RULE_COVERAGE]: true }))).toEqual([]);
+  });
+
+  it('leaves the no-model reason out for users who cannot change Workers', () => {
+    const state = enabledById({ [HUNT]: false, [RULE_COVERAGE]: true });
+
+    expect(
+      ids(
+        getWorkerWarningReasons(subject(RULE_COVERAGE, ['no_model']), state, {
+          includeBlocking: false,
+        })
+      )
+    ).toEqual([`blockedBy:${HUNT}`]);
+  });
+
+  it('puts the no-model reason ahead of a dependency reason', () => {
+    const state = enabledById({ [HUNT]: false, [RULE_COVERAGE]: true });
+
+    expect(ids(warnings(subject(RULE_COVERAGE, ['no_model']), state))).toEqual([
+      'no_model',
+      `blockedBy:${HUNT}`,
+    ]);
+  });
+
+  it('gives the header a plain-text no-model reason, since its tooltip cannot hold a link', () => {
+    const [noModel] = warnings(
+      subject(RULE_COVERAGE, ['no_model']),
+      enabledById({ [RULE_COVERAGE]: false })
+    );
+
+    expect(noModel.message).toBe(
+      'Some AI-powered steps in this Worker may not be configured. Check Feature settings below.'
     );
   });
 
   it('uses the Attack Discovery → Endpoint Analysis copy', () => {
     const state = enabledById({ [ATTACK_DISCOVERY]: false, [ENDPOINT_ANALYSIS]: true });
 
-    expect(messages(getWorkerWarningReasons(ENDPOINT_ANALYSIS, state))).toEqual([
+    expect(messages(warnings(subject(ENDPOINT_ANALYSIS), state))).toEqual([
       'Attack Discovery is disabled — no attacks are handed off for analysis.',
     ]);
-    expect(messages(getWorkerWarningReasons(ATTACK_DISCOVERY, state))).toEqual([
+    expect(messages(warnings(subject(ATTACK_DISCOVERY), state))).toEqual([
       'Endpoint Analysis is enabled but has nothing to analyze while this Worker is off.',
     ]);
   });
@@ -162,7 +215,11 @@ describe('getBlockedAfterSaveNotices', () => {
   const huntOffRuleCreationOn = enabledById({ [HUNT]: false, [RULE_COVERAGE]: true });
 
   it('notifies for a Worker the save turned on that is still blocked', () => {
-    const notices = getBlockedAfterSaveNotices(bothOff, huntOffRuleCreationOn, [RULE_COVERAGE]);
+    const notices = getBlockedAfterSaveNotices(
+      bothOff,
+      huntOffRuleCreationOn,
+      saved(huntOffRuleCreationOn, [RULE_COVERAGE])
+    );
 
     expect(notices.map(({ workerId }) => workerId)).toEqual([RULE_COVERAGE]);
     expect(messages(notices[0].reasons)).toEqual([
@@ -185,7 +242,11 @@ describe('getBlockedAfterSaveNotices', () => {
 
   it('skips a Worker that was already enabled, so a settings-only save stays quiet', () => {
     expect(
-      getBlockedAfterSaveNotices(huntOffRuleCreationOn, huntOffRuleCreationOn, [RULE_COVERAGE])
+      getBlockedAfterSaveNotices(
+        huntOffRuleCreationOn,
+        huntOffRuleCreationOn,
+        saved(huntOffRuleCreationOn, [RULE_COVERAGE])
+      )
     ).toEqual([]);
   });
 
@@ -194,8 +255,30 @@ describe('getBlockedAfterSaveNotices', () => {
       getBlockedAfterSaveNotices(
         enabledById({ [HUNT]: true, [RULE_COVERAGE]: true }),
         huntOffRuleCreationOn,
-        [HUNT]
+        saved(huntOffRuleCreationOn, [HUNT])
       )
+    ).toEqual([]);
+  });
+
+  it('reports no model after any save of a Worker that is on, including a settings-only save', () => {
+    const state = enabledById({ [HUNT]: true, [RULE_COVERAGE]: true });
+
+    const notices = getBlockedAfterSaveNotices(
+      state,
+      state,
+      saved(state, [RULE_COVERAGE], ['no_model'])
+    );
+
+    expect(notices).toEqual([
+      { workerId: RULE_COVERAGE, reasons: [expect.objectContaining({ id: 'no_model' })] },
+    ]);
+  });
+
+  it('does not report no model for a Worker that is off after the save', () => {
+    const state = enabledById({ [HUNT]: true, [RULE_COVERAGE]: false });
+
+    expect(
+      getBlockedAfterSaveNotices(state, state, saved(state, [RULE_COVERAGE], ['no_model']))
     ).toEqual([]);
   });
 
@@ -208,7 +291,7 @@ describe('getBlockedAfterSaveNotices', () => {
       getBlockedAfterSaveNotices(
         enabledById({ [HUNT]: true, [RULE_COVERAGE]: false }),
         enabledById({ [HUNT]: true, [RULE_COVERAGE]: true }),
-        [RULE_COVERAGE]
+        saved(enabledById({ [HUNT]: true, [RULE_COVERAGE]: true }), [RULE_COVERAGE])
       )
     ).toEqual([]);
   });

@@ -23,12 +23,12 @@ describe('WorkerBlockedAfterSaveModal', () => {
     );
     const modal = screen.getByTestId('alertZeroWorkerBlockedAfterSaveModal');
 
-    expect(modal).toHaveTextContent("Saved — but Rule Coverage depends on a Worker that's off");
+    expect(modal).toHaveTextContent("Saved — but Rule Coverage won't run properly yet");
     expect(modal).toHaveTextContent(
       'Continuous Threat Hunt is disabled — no gap signals to act on.'
     );
     expect(screen.getByRole('dialog')).toHaveAccessibleName(
-      "Saved — but Rule Coverage depends on a Worker that's off"
+      "Saved — but Rule Coverage won't run properly yet"
     );
 
     fireEvent.click(screen.getByTestId('alertZeroWorkerBlockedAfterSaveAcknowledge'));

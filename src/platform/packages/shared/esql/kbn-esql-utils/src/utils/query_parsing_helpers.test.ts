@@ -158,6 +158,23 @@ describe('esql query helpers', () => {
       ).toBe('event.timefield');
     });
 
+    it('should return @timestamp for a query that uses TBUCKET', () => {
+      expect(parseTimeFieldFromESQLQuery('ts a | stats sum(bytes) by tbucket(100)')).toBe(
+        '@timestamp'
+      );
+      expect(parseTimeFieldFromESQLQuery('TS a | STATS SUM(bytes) BY TBUCKET(1 hour)')).toBe(
+        '@timestamp'
+      );
+    });
+
+    it('should prefer the field used with the time params over the TBUCKET default', () => {
+      expect(
+        parseTimeFieldFromESQLQuery(
+          'from a | where event.created >= ?_tstart | stats sum(bytes) by tbucket(100)'
+        )
+      ).toBe('event.created');
+    });
+
     it('should return the time field if the column is casted', () => {
       expect(
         parseTimeFieldFromESQLQuery(

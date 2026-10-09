@@ -30,13 +30,6 @@ jest.mock('./saved_objects/saved_objects', () => ({
   registerSyntheticsSavedObjects: jest.fn(),
 }));
 
-jest.mock('./telemetry/sender', () => ({
-  TelemetryEventsSender: jest.fn().mockImplementation(() => ({
-    setup: jest.fn(),
-    start: jest.fn().mockResolvedValue(undefined),
-  })),
-}));
-
 jest.mock('./tasks/rebalance_private_location_shards_task', () => ({
   RebalancePrivateLocationShardsTask: jest.fn().mockImplementation(() => ({
     registerTaskDefinition: jest.fn(),
@@ -76,7 +69,6 @@ describe('Synthetics server plugin', () => {
         registerKibanaFeature: jest.fn(),
       },
       taskManager: taskManagerSetup,
-      telemetry: {},
       cloud: {},
       share: {},
       alerting: {},
@@ -99,7 +91,6 @@ describe('Synthetics server plugin', () => {
       security: {},
       fleet: {},
       encryptedSavedObjects: {},
-      telemetry: {},
       alerting: {},
     } as any);
 
@@ -127,7 +118,6 @@ describe('Synthetics server plugin', () => {
         registerKibanaFeature: jest.fn(),
       },
       taskManager: taskManagerSetup,
-      telemetry: {},
       cloud: {},
       share: {},
       alerting: {},
@@ -149,7 +139,6 @@ describe('Synthetics server plugin', () => {
       security: {},
       fleet: {},
       encryptedSavedObjects: {},
-      telemetry: {},
       alerting: {},
     } as any);
 

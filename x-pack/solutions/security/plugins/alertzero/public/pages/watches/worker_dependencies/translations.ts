@@ -25,7 +25,7 @@ export const DISABLE_DIALOG_CONFIRM = i18n.translate(
 
 export const blockedAfterSaveTitle = (workerName: string): string =>
   i18n.translate('xpack.alertzero.watches.workerDependencies.blockedAfterSave.title', {
-    defaultMessage: "Saved — but {workerName} depends on a Worker that's off",
+    defaultMessage: "Saved — but {workerName} won't run properly yet",
     values: { workerName },
   });
 
