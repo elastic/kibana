@@ -35,7 +35,6 @@ const validItem = {
   rules: [{ id: 'rule-1', name: 'Rule 1' }],
   rule_count: 1,
   workflows: [{ id: 'workflow-1', name: 'Workflow 1' }],
-  error: null,
 };
 
 describe('policy_execution_history_schema', () => {
@@ -450,14 +449,9 @@ describe('policy_execution_history_schema', () => {
       expect(policyExecutionHistoryItemSchema.parse(validItem)).toEqual(validItem);
     });
 
-    it('accepts a null policy name', () => {
-      const item = { ...validItem, policy: { id: 'policy-1', name: null } };
-      expect(policyExecutionHistoryItemSchema.parse(item).policy.name).toBeNull();
-    });
-
-    it('accepts a missing policy name (optional)', () => {
+    it('accepts a missing policy name', () => {
       const item = { ...validItem, policy: { id: 'policy-1' } };
-      expect(policyExecutionHistoryItemSchema.safeParse(item).success).toBe(true);
+      expect(policyExecutionHistoryItemSchema.parse(item).policy).not.toHaveProperty('name');
     });
 
     it('rejects an outcome outside the API vocabulary', () => {
@@ -465,12 +459,12 @@ describe('policy_execution_history_schema', () => {
       expect(policyExecutionHistoryItemSchema.safeParse(item).success).toBe(false);
     });
 
-    it('accepts a populated error object with a nullable stack trace', () => {
+    it('accepts a populated error object with a stack trace', () => {
       const item = {
         ...validItem,
         outcome: 'failure' as const,
         failure_reason: 'schedule_error' as const,
-        error: { message: 'boom', stack_trace: null },
+        error: { message: 'boom', stack_trace: 'at foo (bar.ts:1:1)' },
       };
       expect(policyExecutionHistoryItemSchema.parse(item)).toEqual(item);
     });
@@ -487,14 +481,9 @@ describe('policy_execution_history_schema', () => {
       }
     );
 
-    it('requires error.stack_trace when error is present', () => {
+    it('accepts an error whose stack trace the source did not record', () => {
       const item = { ...validItem, error: { message: 'boom' } };
-      expect(policyExecutionHistoryItemSchema.safeParse(item).success).toBe(false);
-    });
-
-    it('rejects a missing error key (absence is encoded as null)', () => {
-      const { error: _omit, ...rest } = validItem;
-      expect(policyExecutionHistoryItemSchema.safeParse(rest).success).toBe(false);
+      expect(policyExecutionHistoryItemSchema.parse(item).error).toEqual({ message: 'boom' });
     });
 
     it(`accepts a rules array at the embedded cap (${MAX_EMBEDDED_RULES_PER_ITEM})`, () => {
@@ -563,16 +552,15 @@ describe('policy_execution_history_schema', () => {
   });
 
   describe('listPolicyExecutionHistoryResponseSchema', () => {
-    it('accepts a valid empty page with search_matches=null', () => {
+    it('accepts a valid empty page with no search_matches', () => {
       const parsed = listPolicyExecutionHistoryResponseSchema.parse({
         items: [],
         page: 1,
         per_page: EXECUTION_HISTORY_DEFAULT_PER_PAGE,
         total: 0,
-        search_matches: null,
       });
       expect(parsed.items).toEqual([]);
-      expect(parsed.search_matches).toBeNull();
+      expect(parsed).not.toHaveProperty('search_matches');
     });
 
     it('accepts a page of items with populated search_matches', () => {
@@ -593,7 +581,6 @@ describe('policy_execution_history_schema', () => {
           page: 1,
           per_page: 0,
           total: 42,
-          search_matches: null,
         }).success
       ).toBe(false);
     });
@@ -605,7 +592,6 @@ describe('policy_execution_history_schema', () => {
           page: 0,
           per_page: 20,
           total: 0,
-          search_matches: null,
         }).success
       ).toBe(false);
     });
@@ -617,7 +603,6 @@ describe('policy_execution_history_schema', () => {
           page: 1,
           per_page: -1,
           total: 0,
-          search_matches: null,
         }).success
       ).toBe(false);
     });
@@ -629,7 +614,6 @@ describe('policy_execution_history_schema', () => {
           page: 1,
           per_page: 20,
           total: -1,
-          search_matches: null,
         }).success
       ).toBe(false);
     });
@@ -642,7 +626,6 @@ describe('policy_execution_history_schema', () => {
           page: 1,
           per_page: 20,
           total: 1,
-          search_matches: null,
         }).success
       ).toBe(false);
     });
