@@ -35,6 +35,7 @@ jest.mock('../components/executive_brief', () => ({
   ExecutiveBriefFlyout: ({ timeRange }: { timeRange: string }) => (
     <div data-test-subj="executiveBriefFlyoutStub">{timeRange}</div>
   ),
+  useExportBriefPdf: () => jest.fn(),
 }));
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
