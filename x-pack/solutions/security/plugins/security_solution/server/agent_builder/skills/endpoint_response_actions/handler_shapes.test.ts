@@ -279,9 +279,6 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       const mockMetadataService = {
         getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
       };
-      const originalGetEndpointMetadataService =
-        mockEndpointAppContextService.getEndpointMetadataService;
-
       jest
         .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
         .mockImplementation(
@@ -291,21 +288,17 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
             >
         );
 
-      try {
-        const result = await (listTool as unknown as { handler: Function }).handler(
-          {},
-          { logger: { error: jest.fn() } }
-        );
-        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
-        // list_endpoints has no single-host lookup to fail — confirm it returns the
-        // empty-list shape (not the 'endpoint_not_found' reason used by the other tools).
-        expect(data.reason).not.toBe('endpoint_not_found');
-        expect(Array.isArray(data.endpoints)).toBe(true);
-        expect(data.endpoints).toHaveLength(0);
-      } finally {
-        mockEndpointAppContextService.getEndpointMetadataService =
-          originalGetEndpointMetadataService;
-      }
+      // The service is rebuilt in beforeEach, so the spy needs no manual restore.
+      const result = await (listTool as unknown as { handler: Function }).handler(
+        {},
+        { logger: { error: jest.fn() } }
+      );
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      // list_endpoints has no single-host lookup to fail — confirm it returns the
+      // empty-list shape (not the 'endpoint_not_found' reason used by the other tools).
+      expect(data.reason).not.toBe('endpoint_not_found');
+      expect(Array.isArray(data.endpoints)).toBe(true);
+      expect(data.endpoints).toHaveLength(0);
     });
   });
 });
