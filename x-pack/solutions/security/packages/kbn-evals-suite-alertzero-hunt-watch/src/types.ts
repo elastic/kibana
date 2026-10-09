@@ -11,7 +11,8 @@ export type ReportClass = 'R-ioc' | 'R-beh-A' | 'R-beh-B' | 'R-decoy(a)' | 'R-de
 export type HuntTier1Status =
   | 'environment_hits_found'
   | 'no_environment_hits'
-  | 'no_searchable_terms';
+  | 'no_searchable_terms'
+  | 'scope_blocked';
 
 export type HuntIncompleteReason =
   | 'search_partial'
@@ -24,7 +25,12 @@ export type HuntIncompleteReason =
   | 'tier2_failed'
   | 'no_inference'
   | 'no_report_text'
-  | 'nothing_searched';
+  | 'nothing_searched'
+  | 'generation_budget'
+  | 'unknown_technique_id'
+  | 'rows_unclassifiable'
+  | 'refs_unavailable'
+  | 'input_truncated';
 
 export type HuntCompleteness = 'complete' | 'incomplete_retryable' | 'incomplete_final';
 
@@ -48,7 +54,7 @@ export interface CoordinatorRun {
   tier1_incomplete?: HuntIncompleteReason[];
   tier1_hits?: Tier1HitRef[];
   tier1_matched_iocs?: Array<{ value: string; hits?: Tier1HitRef[] }>;
-  tier2_skipped_reason?: HuntIncompleteReason;
+  tier2_skipped_reason?: string;
   behaviours: BehaviourRun[];
   completeness?: HuntCompleteness;
   tier2_when?: string;

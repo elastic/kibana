@@ -15,7 +15,7 @@ import type { CorpusSample, ManifestChain } from '../fixtures/load_corpus';
  * - twin-removed link -> (chain, step, technique ids, twin doc ids that must NOT match)
  */
 
-export type SeededDocId = string; // `${sampleFile}#${docIndex}#${side}`
+export type SeededDocId = string; // see seededDocId
 
 export interface PlantedIoc {
   value: string;
@@ -46,6 +46,20 @@ export interface CorpusLabels {
 }
 
 export const sampleBase = (fileName: string): string => fileName.slice(0, 8);
+
+/**
+ * The ONE id function for seeded docs. The seeder indexes every doc with
+ * `_id = seededDocId(...)` and the labels are built with the same function,
+ * so a live hit's `id` is directly a label key (design v2: labels know every
+ * id up front). Readable on purpose: the `${base}#` prefix is what the M2
+ * evaluator uses to scope a sample's planted ids. Phases reset the seeded
+ * indices, so the id needs no repetition component.
+ */
+export const seededDocId = (
+  base: string,
+  docIndex: number,
+  side: 'positive' | 'negative'
+): SeededDocId => `${base}#${docIndex}#${side}`;
 
 const collectSeededStreams = (
   samples: Record<string, CorpusSample>
@@ -132,8 +146,7 @@ export const buildLabels = ({
 
   const chainOf: Record<string, string> = {};
   const techOf: Record<string, string[]> = {};
-  const docId = (base: string, i: number, side: 'positive' | 'negative'): SeededDocId =>
-    `${base}#${i}#${side}`;
+  const docId = seededDocId;
   const plantedBehaviours: PlantedBehaviour[] = [];
   const plantedIocValues = new Map<string, PlantedIoc>();
 

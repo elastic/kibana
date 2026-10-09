@@ -9,95 +9,100 @@ import { evaluate } from '../../src/evaluate';
 import { buildLabels } from '../../src/datasets/labels';
 import { loadManifest, loadSamples } from '../../src/fixtures/load_corpus';
 import { buildReportSpecs } from '../../src/fixtures/report_documents';
-import { HUNT_REPORTS_PER_PHASE, phaseOrder } from '../../src/harness/phases';
+import {
+  HUNT_REPORTS_PER_PHASE,
+  corpusGateAlertsMustBeZero,
+  phaseOrder,
+} from '../../src/harness/phases';
+import { PhaseSeeder, type PhaseBuckets } from '../../src/harness/seeder';
+import {
+  buildExamples,
+  c3aFailure,
+  c3bHolds,
+  cellKey,
+  leakAuditFailures,
+  toInvalidRecord,
+  toRunRecord,
+  type ControlFailure,
+} from '../../src/harness/examples';
 import { createCleanValidityEvaluator } from '../../src/evaluators/clean_validity';
 import {
   createSeededHitRecallTier1Evaluator,
   createSeededHitRecallTier2Evaluator,
   createFalseHitRateEvaluator,
-  type HuntRunRecord,
 } from '../../src/evaluators/recall_false_hits';
-import type { CoordinatorRun } from '../../src/types';
+import type { HuntRunRecord } from '../../src/evaluators/run_record';
+import type { Phase } from '../../src/types';
 
 const GREP_TITLE =
   'hunt watch seeded-recall sweep runs E0, E+ and E- through the production Worker';
 
+const ALERTS_INDEX = '.alerts-security.alerts-default';
+
 /**
- * The live Hunt Watch sweep. One stack per (model, rep): reports are ingested
- * through the production route with fresh ES-minted ids per phase, the Worker
- * is triggered manually with reportIds (batches of 10, serialized — its
- * concurrency is drop/max 1), and each hunt's coordinator output is read from
- * the run_hunt_coordinator step output of the child execution. M1 (T1 and T2
- * separately), M2 FalseHitRate and M3 CleanValidity are CODE evaluators; no
- * LLM judge is in the gate. Controls C1/C2/C3a/C3b gate the cell: a control
- * failure is an INVALID cell, never a shrunk denominator.
+ * The live Hunt Watch sweep. One stack per (model, rep). Per phase the seeded
+ * indices are reset and that phase's environment is bulk-indexed with the
+ * label-space `_id`s (E0 = base environment, E+ = E0 + positive docs, E- =
+ * E0 + negative twins); reports are then ingested through the production route
+ * with fresh ES-minted ids, the Worker is triggered manually with reportIds
+ * (batches of 10, serialized — its concurrency is drop/max 1), and each
+ * hunt's coordinator output is read from the `run_hunt_coordinator` step
+ * output of the child execution. M1 (T1 and T2 separately), M2 FalseHitRate
+ * and M3 CleanValidity are CODE evaluators; no LLM judge is in the gate.
  *
- * The model under test drives the hunt because the Worker passes
- * tier2_when='always' (HUNT_WORKER_DEFAULTS) and Tier 2 binds to the pinned
- * model under test via the alertzero inference feature settings, so 2 model
- * families x 3 reps measures model-dependent Tier 2 extraction and query
- * generation. Tier 1 is deterministic IoC search and is reported once, never
- * in a model comparison.
+ * The model under test drives the hunt: the `modelSettingsForHuntWatch` auto
+ * fixture pins the alertzero fast/reasoning inference features to the
+ * connector under test, and Tier 2 resolves its model from the reasoning
+ * feature first. The Worker passes tier2_when='always' (HUNT_WORKER_DEFAULTS).
+ *
+ * INVALID cells: the experiment always has METRICS_EXAMPLE_COUNT examples. A
+ * report with no coordinator output, a per-batch candidates violation, or a
+ * failed C1/C2/C3a control makes the affected cells INVALID — every evaluator
+ * returns score null for them — and never shrinks the denominator.
  */
-
-const toRunRecord = (
-  spec: ReturnType<typeof buildReportSpecs>[number],
-  phase: 'E0' | 'E+' | 'E-',
-  run: CoordinatorRun
-): HuntRunRecord => ({
-  runKey: spec.runKey,
-  phase,
-  reportClass: spec.reportClass,
-  sampleBase: spec.sampleBase,
-  run,
-  tier1HitIds: (run.tier1_hits ?? []).map((h) => h._id),
-  tier2HitIds: (run.behaviours ?? []).flatMap((b) => (b.hits ?? []).map((x) => x._id)),
-  tier1MatchedIocs: (run.tier1_matched_iocs ?? []).map((m) => ({
-    value: m.value,
-    hitIds: (m.hits ?? []).map((x) => x._id),
-  })),
-});
-
-evaluate(GREP_TITLE, async ({ executorClient, huntWatchClient, log }) => {
+evaluate(GREP_TITLE, async ({ executorClient, huntWatchClient, esClient, log }) => {
   const manifest = loadManifest();
   const samples = loadSamples();
   const labels = buildLabels({ manifest, samples });
   const specs = buildReportSpecs(manifest, samples, 'A');
   const phaseList = phaseOrder();
+  const seeder = new PhaseSeeder(esClient, samples);
 
   if (specs.length !== HUNT_REPORTS_PER_PHASE) {
     throw new Error(`report plan has ${specs.length} reports, expected ${HUNT_REPORTS_PER_PHASE}`);
   }
 
-  const runRecords: HuntRunRecord[] = [];
-  const controlFailures: Array<{ control: string; detail: string }> = [];
+  const records: HuntRunRecord[] = [];
+  const failures: ControlFailure[] = [];
+  const buckets = {} as Record<Phase, PhaseBuckets>;
 
   // Phases run in a fixed order (design v3 §4): E0, then E+, then E-.
   for (const phase of phaseList) {
-    log.info(`[hunt-watch] phase ${phase}: ingesting ${specs.length} reports`);
-    const phaseRuns: HuntRunRecord[] = [];
+    log.info(`[hunt-watch] phase ${phase}: seeding environment`);
+    const plan = await seeder.seed(phase);
+    buckets[phase] = plan.buckets;
+    log.info(`[hunt-watch] phase ${phase}: seeded ${plan.docs.length} docs`);
 
+    if (phase === 'E0') {
+      // C1 (corpus gate): the clean environment must not already alert.
+      const counted = await esClient.count({ index: ALERTS_INDEX, ignore_unavailable: true });
+      const c1 = corpusGateAlertsMustBeZero(counted.count);
+      if (c1) {
+        failures.push({
+          control: c1.control,
+          detail: c1.detail,
+          cells: specs.map((s) => cellKey('E0', s.runKey)),
+        });
+      }
+    }
+
+    log.info(`[hunt-watch] phase ${phase}: ingesting ${specs.length} reports`);
+    const reportIds: string[] = [];
     for (const spec of specs) {
       const { reportId } = await huntWatchClient.ingestThreatReport(spec.document);
       log.info(`[hunt-watch] ${phase} ${spec.runKey} -> report ${reportId}`);
-      phaseRuns.push({
-        runKey: spec.runKey,
-        phase,
-        reportClass: spec.reportClass,
-        sampleBase: spec.sampleBase,
-        run: {} as CoordinatorRun, // filled from the Worker sweep below
-        tier1HitIds: [],
-        tier2HitIds: [],
-        tier1MatchedIocs: [],
-      });
-      // keep the minted id on the record
-      (phaseRuns[phaseRuns.length - 1] as HuntRunRecord & { reportId?: string }).reportId =
-        reportId;
+      reportIds.push(reportId);
     }
-
-    const reportIds = phaseRuns.map(
-      (r) => (r as HuntRunRecord & { reportId?: string }).reportId as string
-    );
 
     const { runs, invalidBatches } = await huntWatchClient.runHunts(reportIds, {
       onCandidates: (batch, response) => {
@@ -111,50 +116,51 @@ evaluate(GREP_TITLE, async ({ executorClient, huntWatchClient, log }) => {
       },
     });
 
-    // Per-batch route assertion (design v6 §4a): any violation is an INVALID cell.
+    // Per-batch route assertion (design v6 §4a): a violation invalidates the batch's cells.
+    const batchOf = new Map<string, (typeof invalidBatches)[number]>();
     for (const violation of invalidBatches) {
-      controlFailures.push({
+      for (const id of violation.batch) batchOf.set(id, violation);
+      failures.push({
         control: 'per-batch-candidates',
         detail: `phase ${phase}: ids ${violation.response.ids.length}/${
           violation.batch.length
         }, skipped ${JSON.stringify(violation.response.skipped)}`,
+        cells: violation.batch.map((id) => cellKey(phase, specs[reportIds.indexOf(id)].runKey)),
       });
     }
 
-    for (let i = 0; i < phaseRuns.length; i++) {
+    specs.forEach((spec, i) => {
       const reportId = reportIds[i];
       const run = runs.get(reportId);
-      const spec = specs[i];
       if (run) {
-        runRecords.push(toRunRecord(spec, phase, run));
+        records.push(toRunRecord(spec, phase, reportId, run));
+      } else if (batchOf.has(reportId)) {
+        records.push(toInvalidRecord(spec, phase, reportId, 'per-batch candidates violation'));
       } else {
-        // No coordinator output for this report: INVALID cell, never a skip.
-        controlFailures.push({
-          control: 'missing-coordinator-output',
-          detail: `phase ${phase} ${spec.runKey}: no run_hunt_coordinator step output for report ${reportId}`,
-        });
+        records.push(
+          toInvalidRecord(
+            spec,
+            phase,
+            reportId,
+            `missing-coordinator-output: no run_hunt_coordinator step output for report ${reportId}`
+          )
+        );
       }
-    }
-  }
-
-  // C3a (infra, E+): >=1 behaviour with executed == true on the T1218.005
-  // canary chain's R-beh report. A failure is an INVALID cell.
-  const ePlusBeh = runRecords.filter((r) => r.phase === 'E+' && r.reportClass === 'R-beh-A');
-  if (
-    ePlusBeh.length > 0 &&
-    !ePlusBeh.some((r) => (r.run.behaviours ?? []).some((b) => b.executed))
-  ) {
-    controlFailures.push({
-      control: 'C3a',
-      detail: 'E+ produced no executed Tier 2 behaviour on any R-beh report',
     });
   }
-  // C3b (detection, E+): reported separately from the metrics (design v3 §4).
-  const c3bHolds = ePlusBeh.some((r) =>
-    (r.run.behaviours ?? []).some(
-      (b) => b.executed && b.hit && (b.technique_id ?? '') !== '' && (b.hits ?? []).length > 0
-    )
+
+  // C2 (leak audit): R-beh report text must carry no token that appears in the E+ positives.
+  const positiveDocs = Object.values(samples).flatMap((s) =>
+    (s.positive?.docs ?? []).map((d) => d.doc)
   );
+  failures.push(...leakAuditFailures(specs, positiveDocs, phaseList));
+
+  // C3a (infra, E+) invalidates its cells; C3b (detection) is reported separately.
+  const c3a = c3aFailure(records);
+  if (c3a) failures.push(c3a);
+  const c3b = c3bHolds(records);
+
+  const examples = buildExamples({ records, labels, buckets, failures, c3b });
 
   await executorClient.runExperiment(
     {
@@ -163,40 +169,24 @@ evaluate(GREP_TITLE, async ({ executorClient, huntWatchClient, log }) => {
         {
           name: 'hunt_watch: seeded-recall',
           description:
-            'ad2-v1 seeded-recall corpus. CODE-scored: M1 seeded-hit recall (T1/T2 separate), M2 false-hit rate, M3 clean validity.',
-          examples: runRecords.map((record, i) => ({
-            id: `${record.phase}-${record.runKey}-${i}`,
-            output: record,
-            metadata: {
-              labels,
-              noise: [],
-              twinChanged: [],
-              twinRetained: [],
-              foreign: [],
-              fixture: labels.fixtureStreams,
-              phase: record.phase,
-              report_class: record.reportClass,
-              controls: { c3b: c3bHolds, failures: controlFailures },
-            },
-          })),
+            'ad2-v1 seeded-recall corpus. CODE-scored: M1 seeded-hit recall (T1/T2 separate), M2 false-hit rate, M3 clean validity (E0 only). Always 42 examples; INVALID cells score null.',
+          examples,
         },
       ],
       metadata: {
+        grep_title: GREP_TITLE,
         phases: phaseList,
-        control_failures: controlFailures,
-        c3b: c3bHolds,
+        control_failures: failures.map(({ control, detail }) => ({ control, detail })),
+        c3b,
         corpus_version: 'ad2-v1',
       },
-      task: async ({ output }) => output as unknown as CoordinatorRun,
+      task: async ({ output }) => output as HuntRunRecord,
     },
     [
       createSeededHitRecallTier1Evaluator(),
       createSeededHitRecallTier2Evaluator(),
       createFalseHitRateEvaluator(),
       createCleanValidityEvaluator(),
-      // The four evaluators share the HuntRunRecord example shape; the
-      // experiment-level generic cannot express a heterogeneous evaluator
-      // list, so the checked types meet here.
-    ] as never
+    ]
   );
 });

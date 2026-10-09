@@ -9,6 +9,7 @@ import type { Evaluator } from '@kbn/evals';
 import type { CoordinatorRun, ReportClass } from '../types';
 import { InvalidCell } from '../types';
 import { techniqueRelated } from '../datasets/labels';
+import { invalidCellVerdict, type HuntExample, type HuntRunRecord } from './run_record';
 
 /**
  * Applicability of each tier per report class — a property of the report FIXTURE
@@ -116,17 +117,21 @@ export const m3Verdict = (
  * M3 as a @kbn/evals CODE evaluator over the E0 phase: score 1 = clean,
  * 0 = incomplete/false-hit, null = INVALID cell (excluded, never defaulted).
  */
-export const createCleanValidityEvaluator = (): Evaluator<
-  { output: CoordinatorRun; metadata: { report_class: ReportClass } },
-  CoordinatorRun
-> => ({
+export const createCleanValidityEvaluator = (): Evaluator<HuntExample, HuntRunRecord> => ({
   name: 'HuntWatchCleanValidity',
   kind: 'CODE',
   direction: 'neutral',
   evaluate: async ({ output, metadata }) => {
+    const invalid = invalidCellVerdict(output, metadata);
+    if (invalid) return invalid;
+    // M3 is defined over E0 only (design v6 §2): in E+ a hit is the expected
+    // outcome, so scoring it here would contaminate the mean with "false-hit".
+    if (output.phase !== 'E0') {
+      return { score: null, label: 'n/a: not E0', explanation: null };
+    }
     let result: M3Result;
     try {
-      result = m3Verdict(metadata.report_class, output);
+      result = m3Verdict(metadata.report_class, output.run);
     } catch (e) {
       if (e instanceof InvalidCell) {
         return { score: null, label: 'INVALID', explanation: e.cause };
@@ -269,6 +274,12 @@ export const classifyHitIds = ({
   return out;
 };
 
-/** M2 totality: every classified id is accounted for. */
-export const classificationIsTotal = (classified: Record<string, IdBucketValue>): boolean =>
-  Object.values(classified).every((v) => v !== undefined);
+/**
+ * M2 totality: every requested hit id is classified into exactly one bucket.
+ * Compared against the REQUESTED ids, not the map's own values: a check over
+ * the map the classifier just filled cannot fail.
+ */
+export const classificationIsTotal = (
+  hitIds: readonly string[],
+  classified: Record<string, IdBucketValue>
+): boolean => hitIds.every((id) => classified[id] !== undefined);
