@@ -207,6 +207,7 @@ export interface RegisterEscalationTemplateUIOptions {
   conversationTemplates: ConversationTemplateServiceStartContract;
   /** Escalation template id (typically `'escalation'`). Agent Builder throws on duplicate. */
   templateId: string;
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   /** Localized template display name. */
   name: string;
   icon?: IconType;
@@ -240,9 +241,9 @@ export const getEscalationTabIds = (templateId: string): readonly string[] => [
 /**
  * Registers the escalation conversation details flyout UI.
  *
- * The flyout shows a header (title, status, assignees) and — when `renderLinkedInvestigations`
- * is supplied — an overview tab listing the linked investigations. With a single tab Agent Builder
- * hides the tab bar, so the list reads as the flyout body.
+ * The flyout shows a header (title, status, assignees) and an overview tab with the summary, the
+ * grouped attachments and — when `renderLinkedInvestigations` is supplied — the linked
+ * investigations. With a single tab Agent Builder hides the tab bar, so it reads as the body.
  *
  * Call once from the plugin's `start`, **after** `registerAgenticInvestigationTemplateUI`.
  * Agent Builder throws if the template id is already registered.
@@ -250,6 +251,7 @@ export const getEscalationTabIds = (templateId: string): readonly string[] => [
 export const registerEscalationTemplateUI = ({
   conversationTemplates,
   templateId,
+  groupedAttachments,
   name,
   icon,
   renderAssignees,
@@ -266,6 +268,7 @@ export const registerEscalationTemplateUI = ({
         <Suspense fallback={<EuiSkeletonText lines={3} />}>
           <LazyEscalationOverviewSlot
             conversation={conversation}
+            groupedAttachments={groupedAttachments}
             renderLinkedInvestigations={renderLinkedInvestigations}
             onOpenInvestigation={({ conversationId, agentId }) =>
               openFullscreenConversation({ conversationId, agentId, openDetails: true })

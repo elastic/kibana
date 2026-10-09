@@ -127,8 +127,8 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           description: 'policy-1 description',
           destinations: [{ type: 'workflow', id: 'workflow-1' }],
           matcher: { expression: "env == 'production'" },
-          group_by: ['service.name', 'environment'],
-          throttle: { interval: '5m' },
+          grouping: { mode: 'per_field', fields: ['service.name', 'environment'] },
+          throttle: { strategy: 'time_interval', interval: '5m' },
         })
       ),
       apiServices.alertingV2.actionPolicies.create(
@@ -136,7 +136,7 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           name: 'policy-2',
           description: 'policy-2 description',
           destinations: [{ type: 'workflow', id: 'workflow-2' }],
-          throttle: { interval: '1h' },
+          throttle: { strategy: 'per_status_interval', interval: '1h' },
         })
       ),
     ]);
