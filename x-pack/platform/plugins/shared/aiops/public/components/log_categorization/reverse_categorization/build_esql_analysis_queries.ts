@@ -16,8 +16,11 @@ import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { QueryMode } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 import { QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 
-/** Commands that truncate or aggregate the document set and must not scope categorization. */
-const COMMANDS_TO_DROP_FOR_ANALYSIS = new Set(['limit', 'sort', 'stats', 'sample']);
+/** Commands that truncate the document set, or project columns away (the analysis needs the time and analysed fields). */
+const COMMANDS_TO_DROP_FOR_ANALYSIS = new Set(['limit', 'sort', 'sample', 'keep', 'drop']);
+
+/** Commands after which rows are no longer documents, so nothing from here on can scope them. */
+const COMMANDS_THAT_END_DOCUMENT_SCOPE = new Set(['stats']);
 
 /**
  * Returns the document-producing prefix of an ES|QL query for reverse categorization analysis.
@@ -29,7 +32,10 @@ export function getEsqlDocumentScopeQuery(esql: string): string {
     return converted.trim();
   }
 
-  const scopedCommands = root.commands.filter(
+  const endIndex = root.commands.findIndex((command) =>
+    COMMANDS_THAT_END_DOCUMENT_SCOPE.has(command.name)
+  );
+  const scopedCommands = (endIndex < 0 ? root.commands : root.commands.slice(0, endIndex)).filter(
     (command) => !COMMANDS_TO_DROP_FOR_ANALYSIS.has(command.name)
   );
 
@@ -128,12 +134,8 @@ export function buildEsqlCategoryDocsQuery({
   const field = sanitazeESQLInput(fieldName);
   const timeField = sanitazeESQLInput(timeFieldName);
 
-  const { root } = Parser.parse(scopeQuery);
-  const lastCommand = root.commands[root.commands.length - 1];
-  const withMatch =
-    lastCommand?.name === 'where'
-      ? appendToESQLQuery(scopeQuery, `AND ${matchExpression}`)
-      : appendToESQLQuery(scopeQuery, `| WHERE ${matchExpression}`);
+  // A separate WHERE is ANDed with the existing ones, so OR / NOT in the scope keep their precedence.
+  const withMatch = appendToESQLQuery(scopeQuery, `| WHERE ${matchExpression}`);
 
   return appendToESQLQuery(
     withMatch,

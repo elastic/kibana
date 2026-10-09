@@ -25,6 +25,21 @@ describe('build_esql_analysis_queries', () => {
       ).toBe('FROM logs-* | WHERE service.name == "checkout"');
     });
 
+    it('drops commands after STATS because they may reference its aliases', () => {
+      expect(
+        getEsqlDocumentScopeQuery(
+          'FROM logs-* | STATS n = COUNT(*) BY message | WHERE n > 1 | SORT n DESC | LIMIT 10'
+        )
+      ).toBe('FROM logs-*');
+    });
+
+    it('strips KEEP and DROP so the time and analysed fields stay available', () => {
+      expect(getEsqlDocumentScopeQuery('FROM logs-* | KEEP message')).toBe('FROM logs-*');
+      expect(getEsqlDocumentScopeQuery('FROM logs-* | DROP @timestamp | WHERE status == 500')).toBe(
+        'FROM logs-* | WHERE status == 500'
+      );
+    });
+
     it('strips STATS so document filters before an aggregate are preserved', () => {
       expect(
         getEsqlDocumentScopeQuery(
@@ -89,7 +104,7 @@ describe('build_esql_analysis_queries', () => {
   });
 
   describe('buildEsqlCategoryDocsQuery', () => {
-    it('ANDs MATCH onto an existing WHERE clause', () => {
+    it('adds MATCH as a separate WHERE after an existing WHERE clause', () => {
       const query = buildEsqlCategoryDocsQuery({
         esql: 'FROM logs-* | WHERE service.name == "checkout" | LIMIT 100',
         fieldName: 'message',
@@ -99,9 +114,22 @@ describe('build_esql_analysis_queries', () => {
       });
 
       expect(query).toContain('WHERE service.name == "checkout"');
-      expect(query).toContain('AND MATCH(`message`, "error timeout"');
+      expect(query).toContain('| WHERE MATCH(`message`, "error timeout"');
       expect(query).toContain('KEEP `message`, `@timestamp`');
       expect(query).toContain('LIMIT 50');
+    });
+
+    it('does not change the precedence of an existing OR condition', () => {
+      const query = buildEsqlCategoryDocsQuery({
+        esql: 'FROM logs-* | WHERE a == 1 OR b == 2',
+        fieldName: 'message',
+        timeFieldName: '@timestamp',
+        categoryKey: 'error',
+      });
+
+      expect(query).toContain('WHERE a == 1 OR b == 2');
+      expect(query).not.toContain('AND MATCH');
+      expect(query).toContain('| WHERE MATCH(`message`, "error"');
     });
 
     it('appends a WHERE MATCH clause when the scope has no WHERE', () => {
