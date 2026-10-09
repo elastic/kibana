@@ -46,10 +46,10 @@ export interface BuilderResolutionOptions {
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-const withGenerated = <T extends { query?: Query; time_field?: string; grouping?: unknown }>(
+const withGenerated = <T extends { query?: unknown; time_field?: string; grouping?: unknown }>(
   data: T,
   generated: GeneratedQuery
-): T & { query: Query } => ({
+): Omit<T, 'query'> & { query: Query } => ({
   ...data,
   query: generated.query,
   ...(generated.time_field === undefined ? {} : { time_field: generated.time_field }),

@@ -796,6 +796,8 @@ describe('utils', () => {
       );
 
       expect(result.artifacts).toBeUndefined();
+    });
+
     it('clears the stored query when the resolved update data carries query: null (execution-time type)', () => {
       // An execution-time builder type may switch from a write-time type that
       // compiled and stored a query. The null sentinel tells buildUpdateRuleAttributes

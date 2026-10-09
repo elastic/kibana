@@ -945,7 +945,7 @@ type CreateRuleRefinementFields = Pick<
   // Nullable `builder` because the PUT body accepts `null` to clear a stored
   // builder relationship.
   metadata: Omit<z.infer<typeof metadataSchema>, 'builder'> & {
-    builder?: z.infer<typeof builderSchema> | null;
+    builder?: z.infer<typeof metadataBuilderSchema> | null;
   };
   // Optional because a builder-authored body carries its parameters instead of
   // a query; the builder refinements below keep exactly one of the two present.
@@ -1096,7 +1096,7 @@ export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
 export const replaceRuleMetadataSchema = metadataSchema
   .extend({
     // Override: accept null on PUT to clear a stored builder relationship.
-    builder: builderSchema
+    builder: metadataBuilderSchema
       .optional()
       .nullable()
       .describe(

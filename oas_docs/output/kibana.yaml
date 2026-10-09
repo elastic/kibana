@@ -153032,10 +153032,11 @@ components:
       type: object
       properties:
         artifacts:
-          description: Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.
+          description: 'Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear.'
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
+          minItems: 1
           type: array
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
@@ -153061,9 +153062,7 @@ components:
         schedule:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
         state_transition:
-          allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
-          nullable: true
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
         time_field:
           default: '@timestamp'
           description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.
@@ -153096,8 +153095,9 @@ components:
           description: Structured parameters for the rule builder identified by `builder.type`. The server generates the rule query from these fields.
           type: object
         description:
-          description: Human-readable description of the rule.
+          description: Human-readable description of the rule. Omit to leave it unset; send `null` on PATCH to clear it. An empty string is rejected.
           maxLength: 1024
+          minLength: 1
           type: string
         name:
           description: Rule name (must be unique within the space).
@@ -153523,6 +153523,11 @@ components:
               type: string
           required:
             - type
+        builder_fields:
+          additionalProperties: {}
+          description: Structured parameters for the rule builder identified by `builder.type`. The server generates the rule query from these fields.
+          nullable: true
+          type: object
         description:
           description: Human-readable description of the rule. Omit to leave it unset; send `null` on PATCH to clear it. An empty string is rejected.
           maxLength: 1024
@@ -153544,6 +153549,72 @@ components:
           minItems: 1
           nullable: true
           type: array
+        signature_id:
+          description: Stable logical-rule identifier. Optional at creation — generated when absent. Immutable after creation.
+          maxLength: 256
+          minLength: 1
+          type: string
+        source:
+          discriminator:
+            propertyName: type
+          oneOf:
+            - additionalProperties: false
+              type: object
+              properties:
+                type:
+                  enum:
+                    - internal
+                  type: string
+                version:
+                  description: Content version. Starts at 1.
+                  maximum: 9007199254740991
+                  minimum: 1
+                  type: integer
+              required:
+                - type
+                - version
+            - additionalProperties: false
+              type: object
+              properties:
+                id:
+                  description: The id of the template the rule was created from.
+                  maxLength: 150
+                  minLength: 1
+                  type: string
+                type:
+                  enum:
+                    - template
+                  type: string
+                version:
+                  description: Content version. Starts at 1.
+                  maximum: 9007199254740991
+                  minimum: 1
+                  type: integer
+              required:
+                - type
+                - version
+                - id
+            - additionalProperties: false
+              type: object
+              properties:
+                id:
+                  description: The stable id of the external asset.
+                  maxLength: 150
+                  minLength: 1
+                  type: string
+                type:
+                  enum:
+                    - external
+                  type: string
+                version:
+                  description: Asset version the rule is synced to.
+                  maximum: 9007199254740991
+                  minimum: 1
+                  type: integer
+              required:
+                - type
+                - version
+                - id
         tags:
           description: Tags for categorization, e.g. ["production", "infra"].
           items:
@@ -153816,7 +153887,7 @@ components:
       properties:
         builder:
           additionalProperties: false
-          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
+          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL; send `null` on PATCH to clear it.
           type: object
           properties:
             type:
@@ -153831,8 +153902,9 @@ components:
           description: Structured parameters for the rule builder identified by `builder.type`. The server generates the rule query from these fields.
           type: object
         description:
-          description: Human-readable description of the rule.
+          description: Human-readable description of the rule. Omit to leave it unset; send `null` on PATCH to clear it. An empty string is rejected.
           maxLength: 1024
+          minLength: 1
           type: string
         name:
           description: Rule name (must be unique within the space).
