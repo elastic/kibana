@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { EQL_RULE } from '@kbn/scout-security';
+import { EQL_RULE, spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
-import { spaceTest, tags } from '../fixtures';
 
 const MISSING_FIELD_QUERY = 'any where hello.world';
 
 // Each space gets its own source index so the missing-field case does not depend on other data.
 // `endgame-*` is readable by the platform engineer role, which runs the EQL validation request.
+// Indices are shared by all spaces, so this index also matches the default `endgame-*` pattern for
+// other specs in this config. Do not assert that `endgame-*` matches no index.
 const sourceIndexName = (spaceId: string): string =>
   `endgame-scout-eql-rule-edit-${spaceId.replace(/[^a-z0-9]/gi, '').toLowerCase()}`;
 
