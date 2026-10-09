@@ -55,7 +55,7 @@ export const messageOptionsSchema = schema.object({
   toolChoice: toolChoiceSchema,
 });
 
-export const reasoningSchema = schema.maybe(
+const reasoningSchema = schema.maybe(
   schema.object({
     effort: schema.maybe(
       schema.oneOf([

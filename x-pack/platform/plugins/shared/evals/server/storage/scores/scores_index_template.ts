@@ -71,6 +71,7 @@ const evaluationsDataStreamMappings = {
             id: { type: 'keyword' },
             family: { type: 'keyword' },
             provider: { type: 'keyword' },
+            reasoning_effort: { type: 'keyword' },
           },
         },
       },
@@ -93,6 +94,7 @@ const evaluationsDataStreamMappings = {
             id: { type: 'keyword' },
             family: { type: 'keyword' },
             provider: { type: 'keyword' },
+            reasoning_effort: { type: 'keyword' },
           },
         },
       },
@@ -102,7 +104,7 @@ const evaluationsDataStreamMappings = {
 
 export const evaluationsDataStreamDefinition: DataStreamDefinition<MappingsDefinition> = {
   name: EvaluationIndices.SCORES,
-  version: 5,
+  version: 6,
   hidden: true,
   template: {
     lifecycle: {

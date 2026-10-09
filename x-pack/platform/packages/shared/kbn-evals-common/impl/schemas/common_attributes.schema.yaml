@@ -117,8 +117,21 @@ components:
         provider:
           type: string
           maxLength: 256
+        reasoning_effort:
+          $ref: '#/components/schemas/ReasoningEffort'
       required:
         - id
+
+    ReasoningEffort:
+      type: string
+      description: Reasoning effort the model was asked to use. Absent when the run did not set one.
+      enum:
+        - none
+        - minimal
+        - low
+        - medium
+        - high
+        - xhigh
 
     EvaluationScoreDocument:
       type: object
