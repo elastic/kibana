@@ -2,6 +2,15 @@
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
  * Public License v 1.0"; you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  *
@@ -196,20 +205,23 @@ describe('llm_evals.yml suite steps', () => {
         .filter((id) => !knownSuiteIds.has(id));
 
     expect(
-      unknownIdsIn([
-        'steps:',
-        '  - command: run_suite.sh',
-        '    env:',
-        '      EVAL_SUITE_ID: security-attack-discovery-fp-tpp',
-        '  - group: weekly',
-        '    steps:',
-        '      - command: run_suite.sh',
-        '        env:',
-        '          EVAL_SUITE_ID: attack-discovery',
-        '  - command: run_suite.sh',
-        '    env:',
-        '      EVAL_SUITE_ID: security-attack-discovery-fp-tp',
-        ''].join('\n'))
+      unknownIdsIn(
+        [
+          'steps:',
+          '  - command: run_suite.sh',
+          '    env:',
+          '      EVAL_SUITE_ID: security-attack-discovery-fp-tpp',
+          '  - group: weekly',
+          '    steps:',
+          '      - command: run_suite.sh',
+          '        env:',
+          '          EVAL_SUITE_ID: attack-discovery',
+          '  - command: run_suite.sh',
+          '    env:',
+          '      EVAL_SUITE_ID: security-attack-discovery-fp-tp',
+          '',
+        ].join('\n')
+      )
     ).toEqual(['security-attack-discovery-fp-tpp']);
   });
 
@@ -245,7 +257,9 @@ describe('llm_evals.yml suite steps', () => {
 
     const configSetProblemsIn = (text: string) =>
       stepsFromYamlText(text)
-        .filter(({ env = {} }) => env.EVAL_SUITE_ID !== undefined && !allowlist.has(env.EVAL_SUITE_ID))
+        .filter(
+          ({ env = {} }) => env.EVAL_SUITE_ID !== undefined && !allowlist.has(env.EVAL_SUITE_ID)
+        )
         .map(({ env = {} }) => {
           const expected = serverConfigSetBySuite.get(env.EVAL_SUITE_ID!);
           if (expected === undefined || env.EVAL_SERVER_CONFIG_SET === expected) return null;
@@ -257,17 +271,20 @@ describe('llm_evals.yml suite steps', () => {
         .filter(Boolean);
 
     expect(
-      configSetProblemsIn([
-        'steps:',
-        '  - command: run_suite.sh',
-        '    env:',
-        '      EVAL_SUITE_ID: nightshift-investigations',
-        '  - group: weekly',
-        '    steps:',
-        '      - command: run_suite.sh',
-        '        env:',
-        '          EVAL_SUITE_ID: attack-discovery',
-        ''].join('\n'))
+      configSetProblemsIn(
+        [
+          'steps:',
+          '  - command: run_suite.sh',
+          '    env:',
+          '      EVAL_SUITE_ID: nightshift-investigations',
+          '  - group: weekly',
+          '    steps:',
+          '      - command: run_suite.sh',
+          '        env:',
+          '          EVAL_SUITE_ID: attack-discovery',
+          '',
+        ].join('\n')
+      )
     ).toEqual([
       'nightshift-investigations: suite declares serverConfigSet "evals_nightshift_investigations" ' +
         'but the step env has "no EVAL_SERVER_CONFIG_SET"',
