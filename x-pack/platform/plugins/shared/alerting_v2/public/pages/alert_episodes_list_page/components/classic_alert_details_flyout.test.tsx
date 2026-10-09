@@ -14,6 +14,22 @@ import { ClassicAlertDetailsFlyout } from './classic_alert_details_flyout';
 
 jest.mock('@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id');
 
+const mockEuiFlyout = jest.fn();
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const react = jest.requireActual('react');
+  return {
+    ...actual,
+    EuiFlyout: (props: Record<string, unknown>) => {
+      mockEuiFlyout(props);
+      return react.createElement(actual.EuiFlyout, props);
+    },
+  };
+});
+
+const forwardedFlyoutProps = () => mockEuiFlyout.mock.calls[mockEuiFlyout.mock.calls.length - 1][0];
+
 const mockFetchClassicAlertById = jest.mocked(fetchClassicAlertById);
 
 const services = {
@@ -45,6 +61,18 @@ const renderFlyout = (props?: Partial<React.ComponentProps<typeof ClassicAlertDe
 describe('ClassicAlertDetailsFlyout', () => {
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('opens as a resizable overlay without stealing page focus', () => {
+    mockFetchClassicAlertById.mockReturnValue(new Promise(() => {}));
+
+    renderFlyout();
+
+    expect(forwardedFlyoutProps()).toMatchObject({
+      type: 'overlay',
+      ownFocus: false,
+      resizable: true,
+    });
   });
 
   it('shows a loading spinner while the classic alert is being fetched', () => {

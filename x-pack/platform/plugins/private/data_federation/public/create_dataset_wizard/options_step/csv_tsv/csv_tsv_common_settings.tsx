@@ -13,6 +13,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 import {
+  DEFAULT_ENCODING,
+  DEFAULT_HEADER_ROW,
+  encodeEscapeCharacterToFormValue,
+  getCsvTsvFormatDefaults,
   validateDelimiter,
   validateDistinctCsvCharacter,
   type CreateDatasetFormValues,
@@ -30,6 +34,7 @@ import { SkipRowsField } from './fields/skip_rows_field';
 
 export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
   const format: DatasetFormatFormValue = useWatch({ control, name: 'settings.format' });
+  const { delimiter: defaultDelimiter, mode: defaultMode } = getCsvTsvFormatDefaults(format);
   const { field: delimiterField, fieldState: delimiterState } = useController({
     name: 'settings.delimiter',
     control,
@@ -67,7 +72,9 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
           <FormattedMessage
             id="xpack.dataFederation.createDatasetForm.settingsDelimiterHelp"
             defaultMessage="{defaultValue} by default"
-            values={{ defaultValue: <EuiCode>{format === 'tsv' ? '\\t' : ','}</EuiCode> }}
+            values={{
+              defaultValue: <EuiCode>{encodeEscapeCharacterToFormValue(defaultDelimiter)}</EuiCode>,
+            }}
           />
         }
         fullWidth
@@ -78,7 +85,7 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
           value={delimiterField.value}
           onChange={(next) => delimiterField.onChange(next)}
           onBlur={delimiterField.onBlur}
-          defaultValue={format === 'tsv' ? '\t' : ','}
+          defaultValue={defaultDelimiter}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -92,7 +99,7 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
           <FormattedMessage
             id="xpack.dataFederation.createDatasetForm.settingsModeHelp"
             defaultMessage="{defaultValue} by default"
-            values={{ defaultValue: <EuiCode>{format === 'tsv' ? 'plain' : 'quoted'}</EuiCode> }}
+            values={{ defaultValue: <EuiCode>{defaultMode}</EuiCode> }}
           />
         }
         fullWidth
@@ -104,7 +111,7 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
           onChange={onModeChange}
           onBlur={modeField.onBlur}
           isInvalid={Boolean(modeState.error)}
-          defaultValue={format === 'tsv' ? 'plain' : 'quoted'}
+          defaultValue={defaultMode}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -118,7 +125,7 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
           <FormattedMessage
             id="xpack.dataFederation.createDatasetForm.settingsHeaderRowHelp"
             defaultMessage="{trueValue} by default"
-            values={{ trueValue: <EuiCode>true</EuiCode> }}
+            values={{ trueValue: <EuiCode>{DEFAULT_HEADER_ROW}</EuiCode> }}
           />
         }
         fullWidth
@@ -182,7 +189,7 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
           <FormattedMessage
             id="xpack.dataFederation.createDatasetForm.settingsEncodingHelp"
             defaultMessage="{defaultValue} by default"
-            values={{ defaultValue: <EuiCode>UTF-8</EuiCode> }}
+            values={{ defaultValue: <EuiCode>{DEFAULT_ENCODING}</EuiCode> }}
           />
         }
         fullWidth
