@@ -104,19 +104,23 @@ const Ruler = ({ sees }: { sees: Sees }) => {
   const styles = {
     root: css`
       position: relative;
+      margin-top: ${euiTheme.size.m};
       padding: ${euiTheme.size.l} 0;
     `,
     bar: css`
       display: flex;
-      height: ${euiTheme.size.xl};
+      min-height: ${euiTheme.size.xl};
       border-radius: ${euiTheme.border.radius.medium};
       overflow: hidden;
     `,
     segment: css`
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
+      align-content: center;
       gap: ${euiTheme.size.xs};
       padding-inline: ${euiTheme.size.s};
+      padding-block: ${euiTheme.size.xs};
       border-inline-end: ${euiTheme.border.thin};
       background: ${euiTheme.colors.backgroundBaseSubdued};
       white-space: nowrap;

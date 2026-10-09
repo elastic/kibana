@@ -38,7 +38,7 @@ export interface KibanaEuiProviderProps extends Pick<EuiProviderProps<{}>, 'modi
   globalStyles?: boolean;
   /**
    * Element this React root is mounted in. EUI breakpoint hooks measure its nearest breakpoint container.
-   * Defaults to the app area, where apps mount.
+   * Without it, they follow the window.
    */
   mountElement?: HTMLElement;
 }
@@ -168,9 +168,9 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
           BREAKPOINT_CONTAINER_POC === 'css'
             ? true
             : BREAKPOINT_CONTAINER_POC === 'js'
-            ? {
-                mountElement: mountElement ?? document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID),
-              }
+            ? mountElement
+              ? { mountElement }
+              : true
             : undefined,
       }}
     >

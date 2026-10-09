@@ -28,7 +28,7 @@ export const MODE_OPTIONS: Array<{ id: Mode; label: string }> = [
 export const MODE_DESCRIPTIONS: Record<Mode, string> = {
   window: "Today's behavior. CSS and JS breakpoints follow the window.",
   css: 'CSS track. EUI styles follow the app area, JS breakpoints still follow the window.',
-  js: 'CSS and JS tracks. Both follow the nearest breakpoint container.',
+  js: 'CSS and JS tracks. JS follows the nearest breakpoint container in roots that opt in, the window elsewhere.',
 };
 
 export const setMode = (id: string) => {

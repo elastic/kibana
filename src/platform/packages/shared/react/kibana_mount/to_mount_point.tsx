@@ -43,15 +43,13 @@ export const toMountPoint = (node: React.ReactNode, params: ToMountPointParams):
 
   if (isParamsUsingPreferred(params)) {
     mount = (element: HTMLElement) => {
-      ReactDOM.render(params.addContext(node, { mountElement: element }), element);
+      ReactDOM.render(params.addContext(node), element);
       return () => ReactDOM.unmountComponentAtNode(element);
     };
   } else {
     mount = (element: HTMLElement) => {
       ReactDOM.render(
-        <KibanaRenderContextProvider {...params} mountElement={element}>
-          {node}
-        </KibanaRenderContextProvider>,
+        <KibanaRenderContextProvider {...params}>{node}</KibanaRenderContextProvider>,
         element
       );
       return () => ReactDOM.unmountComponentAtNode(element);
