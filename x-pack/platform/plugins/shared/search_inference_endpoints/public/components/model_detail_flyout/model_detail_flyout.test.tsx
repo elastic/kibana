@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { EisInferenceEndpoint } from '../../../common/types';
 import { ModelDetailFlyout } from './model_detail_flyout';
 import { useKibana } from '../../hooks/use_kibana';
@@ -72,15 +72,19 @@ describe('ModelDetailFlyout', () => {
     expect(screen.getByText('Unknown')).toBeInTheDocument();
   });
 
-  it('renders task type badges in header', () => {
+  it('does not render header badges', () => {
     const endpoints = [
       createEndpoint({ inference_id: 'ep-1', task_type: 'text_embedding' }),
-      createEndpoint({ inference_id: 'ep-2', task_type: 'completion' }),
-    ];
+      createEndpoint({
+        inference_id: 'ep-2',
+        task_type: 'completion',
+        metadata: { heuristics: { status: 'preview' } },
+      }),
+    ] as unknown as EisInferenceEndpoint[];
     renderFlyout(MODEL_ID, endpoints);
 
-    expect(screen.getAllByText('text_embedding').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('completion').length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByTestId('flyoutTaskBadges')).not.toBeInTheDocument();
+    expect(screen.queryByTestId(`modelPreviewBadge-${MODEL_ID}`)).not.toBeInTheDocument();
   });
 
   it('filters endpoints by modelId', () => {
@@ -114,56 +118,17 @@ describe('ModelDetailFlyout', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('renders documentation link', () => {
+  it('renders EIS documentation links', () => {
     renderFlyout();
-    expect(screen.getByText('View documentation')).toBeInTheDocument();
-  });
 
-  describe('model status badge', () => {
-    it('renders the EOL badge when metadata has an end_of_life_date in the past', () => {
-      const endpoint = {
-        ...createEndpoint(),
-        metadata: {
-          heuristics: { status: 'deprecated', end_of_life_date: '2020-01-01' },
-        },
-      } as unknown as EisInferenceEndpoint;
-      renderFlyout(MODEL_ID, [endpoint]);
-
-      const badges = screen.getByTestId('flyoutTaskBadges');
-      expect(within(badges).getByTestId(`modelEolBadge-${MODEL_ID}`)).toBeInTheDocument();
-    });
-
-    it('renders the deprecated badge when metadata has status', () => {
-      const endpoint = {
-        ...createEndpoint(),
-        metadata: {
-          heuristics: { status: 'deprecated' },
-        },
-      } as unknown as EisInferenceEndpoint;
-      renderFlyout(MODEL_ID, [endpoint]);
-
-      const badges = screen.getByTestId('flyoutTaskBadges');
-      expect(within(badges).getByTestId(`modelDeprecatedBadge-${MODEL_ID}`)).toBeInTheDocument();
-    });
-
-    it('renders the preview badge when metadata status is preview', () => {
-      const endpoint = {
-        ...createEndpoint(),
-        metadata: { heuristics: { status: 'preview' } },
-      } as unknown as EisInferenceEndpoint;
-      renderFlyout(MODEL_ID, [endpoint]);
-
-      const badges = screen.getByTestId('flyoutTaskBadges');
-      expect(within(badges).getByTestId(`modelPreviewBadge-${MODEL_ID}`)).toBeInTheDocument();
-    });
-
-    it('renders no status badge when endpoint has no metadata', () => {
-      renderFlyout();
-
-      expect(screen.queryByTestId(`modelPreviewBadge-${MODEL_ID}`)).not.toBeInTheDocument();
-      expect(screen.queryByTestId(`modelDeprecatedBadge-${MODEL_ID}`)).not.toBeInTheDocument();
-      expect(screen.queryByTestId(`modelEolBadge-${MODEL_ID}`)).not.toBeInTheDocument();
-    });
+    expect(screen.getByTestId('modelDetailFlyoutDocumentationLinks')).toBeInTheDocument();
+    expect(screen.getByTestId('modelDetailFlyoutCompareModelsLink')).toHaveTextContent(
+      'Compare models'
+    );
+    expect(screen.getByTestId('modelDetailFlyoutViewEisDocumentationLink')).toHaveTextContent(
+      'View EIS documentation'
+    );
+    expect(screen.queryByText('View documentation')).not.toBeInTheDocument();
   });
 
   describe('region options', () => {
