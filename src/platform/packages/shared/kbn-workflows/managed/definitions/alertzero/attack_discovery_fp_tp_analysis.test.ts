@@ -375,16 +375,10 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(loadAttack?.type).toBe('elasticsearch.search');
     });
 
-    it('reads it from both space-scoped discovery indices (scheduled first)', () => {
+    it('reads it from the space-scoped ad-hoc discovery index', () => {
       expect(loadAttack?.with?.index).toBe(
-        '.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}'
+        '.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}'
       );
-    });
-
-    // The scheduled alias need not exist yet in a fresh space; a missing alias
-    // must not fail the load (the ad-hoc read still has to succeed).
-    it('tolerates an unavailable scheduled index', () => {
-      expect(loadAttack?.with?.ignore_unavailable).toBe(true);
     });
 
     // The persisted document is indexed UNDER `kibana.alert.uuid`, so `_id` is the

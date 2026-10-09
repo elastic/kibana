@@ -134,16 +134,10 @@ steps:
   #
   # A required source, so no `on-failure`: a failed search fails the run, which the
   # review records as `failed`.
-  # Scheduled AD persists under `.alerts-security.attack.discovery.alerts-<space>`;
-  # ad-hoc under `.adhoc.…`. The id is unique across both, so read the pair and
-  # keep the run total at 1 (an id naming no document still fails the guard
-  # below). Same shape as `forensics_run_endpoint_analysis.fetch_attack_discovery_alert`.
   - name: load_attack_discovery
     type: elasticsearch.search
     with:
-      index: >-
-        .alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}
-      ignore_unavailable: true
+      index: .adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}
       size: 1
       query:
         ids:

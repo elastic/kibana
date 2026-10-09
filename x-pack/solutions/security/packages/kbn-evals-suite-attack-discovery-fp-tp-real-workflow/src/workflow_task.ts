@@ -16,8 +16,19 @@
  *   1. Seeds a real persisted AD document via the dev-only data generator route
  *      `POST /internal/elastic_assistant/data_generator/attack_discoveries/_create`,
  *      which writes through the alerting framework into the space-scoped
- *      SCHEDULED index `.alerts-security.attack.discovery.alerts-<space>` (the
- *      same index the workflow searches by id, alongside the ad-hoc one).
+ *      SCHEDULED index `.alerts-security.attack.discovery.alerts-<space>`. The
+ *      workflow's `load_attack_discovery` searches only the space-scoped AD-HOC
+ *      index `.adhoc.alerts-security.attack.discovery.alerts-<space>` (the
+ *      runner-launched analyses' index), so the seeder then copies the persisted
+ *      document verbatim into the ad-hoc index via a direct ES bulk with
+ *      refresh, keeping `_id` = `kibana.alert.uuid` — the workflow's read
+ *      contract (see copyAttackDiscoveryToAdhocIndex + the guard test).
+ *
+ *      It also seeds every alert the discovery cites into
+ *      `.alerts-security.alerts-<space>` (see seedCitedAlerts): in production
+ *      an Attack Discovery always cites real alerts, so a fixture citing
+ *      missing alerts would fail the product's `require_cited_alerts` guard
+ *      and no verdict would ever be produced.
  *
  *      Corpus→AD-field mapping (payload is GUIDE incident-level evidence):
  *        title                → `GUIDE <IncidentId>: <first DetectorName/category summary>` (plain text)
@@ -60,19 +71,34 @@ import {
 import { FP_TP_ANALYSIS_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
 
 /**
- * The seeder→reader contract this module must honor: the data generator route
- * persists through the scheduled AD rule, so every seeded document lands in the
- * space-scoped SCHEDULED index. The workflow's `load_attack_discovery` step
- * searches by id across BOTH the scheduled and the ad-hoc aliases, so a document
- * here is always found. If the workflow YAML ever narrows its read back to one
- * alias, `workflow_task.test.ts` fails this constant's guard test before any
- * smoke run burns a budget on 0/156 executions (the 63363fcbffe failure mode).
+ * The seeder→reader contract this module must honor: the workflow's
+ * `load_attack_discovery` step searches ONLY the space-scoped AD-HOC index
+ * (the index runner-launched analyses persist into), while the data generator
+ * route persists through the scheduled AD rule into the SCHEDULED index. The
+ * seeder therefore copies the persisted document into the ad-hoc index itself
+ * (direct ES bulk, `_id` = `kibana.alert.uuid`). If the workflow YAML ever
+ * changes which index it reads, `workflow_task.test.ts` fails this constant's
+ * guard test before any smoke run burns a budget on executions that never
+ * reach the agent (the 63363fcbffe failure mode).
  *
  * Kept as a literal (mirroring ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX in
  * @kbn/elastic-assistant-common, which is not a dependency of this package) so
  * the guard fails on drift in EITHER direction.
  */
-export const SEED_ATTACK_DISCOVERY_INDEX_PREFIX = '.alerts-security.attack.discovery.alerts-';
+export const SEED_ATTACK_DISCOVERY_INDEX_PREFIX = '.adhoc.alerts-security.attack.discovery.alerts-';
+
+/**
+ * The SCHEDULED index the data generator route writes into (via the alerting
+ * framework). The seeder reads the persisted document back from here before
+ * copying it into the ad-hoc index above. Same literal treatment.
+ */
+export const SCHEDULED_ATTACK_DISCOVERY_INDEX_PREFIX = '.alerts-security.attack.discovery.alerts-';
+
+/** The security alerts index the workflow's `load_alerts` step reads (and the
+ * seeder's cited-alert documents are written to). Same literal treatment as
+ * SEED_ATTACK_DISCOVERY_INDEX_PREFIX: `ALERTS_INDEX` from
+ * @kbn/rule-data-utils is not a runtime dependency of this package. */
+export const SEED_CITED_ALERTS_INDEX_PREFIX = '.alerts-security.alerts-';
 
 /** The `ai.agent` step whose structured output we grade. */
 const AGENT_STEP_TYPE = 'ai.agent';
@@ -132,6 +158,11 @@ export interface AttackDiscoveryTaskOutput {
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Never-called fetch for ES-only seeding helpers (see SeedingClients.esClient). */
+const noopFetch = (() => {
+  throw new Error('unexpected fetch call in an ES-only seeding helper');
+}) as HttpHandler;
 
 const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatuses.includes(status);
 
@@ -674,21 +705,151 @@ export const buildAttackDiscoveryFromPayload = (
 export interface SeedingClients {
   fetch: HttpHandler;
   log: ToolingLog;
+  /**
+   * Direct ES client used to (a) copy the persisted AD document from the
+   * scheduled index (where the data generator route writes) into the ad-hoc
+   * index the workflow reads, and (b) seed the cited alerts. Optional for
+   * unit-test callers that mock the fetch path; without it the seeder falls
+   * back to trusting the route's write index (the pre-contract behavior).
+   */
+  esClient?: EsClientLike;
 }
 
 /**
- * Seeds one persisted AD document through the dev-only data generator route and
- * returns the persisted document (its `id` is what the workflow searches by).
+ * Minimal structural type for the ES client the eval fixtures provide
+ * (`@kbn/scout`'s EsClient). Declared locally so this package keeps no runtime
+ * dependency on the client package; the fixture client is structurally
+ * compatible (get/bulk/deleteByQuery).
+ */
+export interface EsClientLike {
+  get(params: { index: string; id: string }): Promise<{ found: boolean; _source?: unknown }>;
+  bulk(params: { body: unknown[]; refresh?: boolean | 'wait_for' }): Promise<{ errors: boolean }>;
+  deleteByQuery(params: {
+    index: string;
+    query: Record<string, unknown>;
+    refresh?: boolean;
+    conflicts?: 'proceed' | 'abort';
+  }): Promise<unknown>;
+}
+
+/** Space the seeder writes into: the run's first `--space-ids` entry, or the
+ * default space (mirrors getSpaceIdsFromEnv in @kbn/evals, which is not
+ * exported for package use). */
+const seedSpaceId = (): string => {
+  const first = (process.env.EVAL_SPACE_IDS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .find((s) => s.length > 0);
+  return first ?? 'default';
+};
+
+/**
+ * Copies the persisted AD document from the scheduled index (where the data
+ * generator route writes) into the ad-hoc index the workflow reads, verbatim
+ * and under the same `_id` (= `kibana.alert.uuid`), via a direct ES bulk with
+ * refresh. This is the seeder→reader contract for `.adhoc`: no product route
+ * persists ad-hoc attack discoveries, so the suite writes it itself.
+ */
+export const copyAttackDiscoveryToAdhocIndex = async (
+  { esClient, log }: SeedingClients,
+  attackDiscoveryId: string
+): Promise<void> => {
+  if (!esClient) {
+    log.warning(
+      `No esClient provided; skipping the .adhoc copy of AD ${attackDiscoveryId} ` +
+        '(the workflow will not find it unless the write index already matches its read)'
+    );
+    return;
+  }
+  const scheduledIndex = `${SCHEDULED_ATTACK_DISCOVERY_INDEX_PREFIX}${seedSpaceId()}`;
+  const adhocIndex = `${SEED_ATTACK_DISCOVERY_INDEX_PREFIX}${seedSpaceId()}`;
+  const doc = await esClient.get({ index: scheduledIndex, id: attackDiscoveryId });
+  if (!doc.found) {
+    throw new Error(
+      `Persisted attack discovery ${attackDiscoveryId} not found in ${scheduledIndex}`
+    );
+  }
+  await esClient.bulk({
+    body: [{ index: { _index: adhocIndex, _id: attackDiscoveryId } }, doc._source],
+    refresh: true,
+  });
+  log.info(`Copied AD ${attackDiscoveryId} from ${scheduledIndex} to ${adhocIndex}`);
+};
+
+/**
+ * Seeds every alert the discovery cites into the space-scoped security alerts
+ * index the workflow's `load_alerts` step reads. In production an Attack
+ * Discovery cites real alerts; a fixture citing missing alerts fails the
+ * product's `require_cited_alerts` guard and no verdict is ever produced.
  *
- * The route runs a real alerting rule (`runSoon`) that persists via the alerting
- * framework, polls for the documents, and backdates timestamps — so the response
- * `data` entries carry the final persisted document ids in the space-scoped
- * SCHEDULED index `.alerts-security.attack.discovery.alerts-<space>` (NOT the
- * ad-hoc one: the data generator goes through the scheduled AD rule). The
- * workflow reads both aliases, so this is the seeder→reader contract.
+ * Alert documents are minimal but schema-valid for the fields the workflow
+ * reads (`load_alerts`/`count_alerts`/`load_entities`): host.id, user.name,
+ * rule name/severity, and @timestamp inside the discovery's window. Entity ids
+ * derive from the seeded AD's entities when the renderer recorded them,
+ * otherwise from the discovery title (corpus cases carry alert-level data only
+ * at the incident level, so the entities are synthetic).
+ */
+export const seedCitedAlerts = async (
+  { esClient, log }: SeedingClients,
+  doc: ReturnType<typeof buildAttackDiscoveryFromPayload>,
+  attackDiscoveryId: string
+): Promise<void> => {
+  if (!esClient) {
+    log.warning(
+      `No esClient provided; skipping cited-alert seeding for AD ${attackDiscoveryId} ` +
+        '(require_cited_alerts may fail the run)'
+    );
+    return;
+  }
+  const index = `${SEED_CITED_ALERTS_INDEX_PREFIX}${seedSpaceId()}`;
+  const timestamp = doc.timestamp ?? new Date().toISOString();
+  const hostId = `host-${attackDiscoveryId}`;
+  const userName = `user-${attackDiscoveryId.slice(0, 8)}`;
+  const ruleName = doc.title.slice(0, 200);
+  const severity = 'medium';
+  const body: unknown[] = [];
+  for (const alertId of doc.alertIds) {
+    body.push({ index: { _index: index, _id: alertId } });
+    body.push({
+      '@timestamp': timestamp,
+      'kibana.alert.uuid': alertId,
+      'kibana.alert.rule.name': ruleName,
+      'kibana.alert.rule.uuid': `rule-${attackDiscoveryId}`,
+      'kibana.alert.severity': severity,
+      host: { id: hostId, name: hostId },
+      user: { name: userName },
+    });
+  }
+  if (body.length === 0) {
+    log.warning(`Seeded AD ${attackDiscoveryId} cites no alerts; nothing seeded into ${index}`);
+    return;
+  }
+  const result = await esClient.bulk({ body, refresh: true });
+  if (result.errors) {
+    throw new Error(`Bulk seeding cited alerts into ${index} reported errors`);
+  }
+  log.info(
+    `Seeded ${doc.alertIds.length} cited alert(s) into ${index} for AD ${attackDiscoveryId}`
+  );
+};
+
+/**
+ * Seeds one persisted AD document through the dev-only data generator route,
+ * copies it into the ad-hoc index the workflow reads, and seeds the alerts it
+ * cites; returns the persisted document (its `id` is what the workflow
+ * searches by).
+ *
+ * The route runs a real alerting rule (`runSoon`) that persists via the
+ * alerting framework, polls for the documents, and backdates timestamps — so
+ * the response `data` entries carry the final persisted document ids in the
+ * space-scoped SCHEDULED index `.alerts-security.attack.discovery.alerts-<space>`
+ * (NOT the ad-hoc one: the data generator goes through the scheduled AD rule).
+ * `copyAttackDiscoveryToAdhocIndex` then re-indexes the document into the
+ * ad-hoc index so the workflow's `.adhoc`-only `load_attack_discovery` finds
+ * it: this is the seeder→reader contract.
  */
 export const seedAttackDiscovery = async (
-  { fetch, log }: SeedingClients,
+  { fetch, log, esClient }: SeedingClients,
   doc: ReturnType<typeof buildAttackDiscoveryFromPayload>,
   caseId: string
 ): Promise<PersistedAttackDiscovery> => {
@@ -737,6 +898,10 @@ export const seedAttackDiscovery = async (
     );
   }
   log.info(`Seeded attack discovery document ${persisted.id} (title: ${doc.title})`);
+  // The route persisted into the SCHEDULED index; the workflow reads the
+  // ad-hoc one. Copy the doc across (same _id) and seed the alerts it cites.
+  await copyAttackDiscoveryToAdhocIndex({ fetch: noopFetch, log, esClient }, persisted.id);
+  await seedCitedAlerts({ fetch: noopFetch, log, esClient }, doc, persisted.id);
   return persisted;
 };
 
@@ -786,6 +951,7 @@ export const seedInvestigation = async (
 export const runAttackDiscoveryWorkflow = async ({
   fetch,
   log,
+  esClient,
   payload,
   caseId,
   maxWaitMs = 12 * 60_000,
@@ -793,6 +959,8 @@ export const runAttackDiscoveryWorkflow = async ({
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
+  /** Direct ES client for the ad-hoc copy + cited-alert seeding (see SeedingClients). */
+  esClient?: EsClientLike;
   /** The corpus case payload — rendered into the seeded AD document. */
   payload: Record<string, unknown>;
   /** Corpus case id, used for synthetic alert ids and logging. */
@@ -804,7 +972,7 @@ export const runAttackDiscoveryWorkflow = async ({
   let investigationId: string;
   try {
     seeded = await seedAttackDiscovery(
-      { fetch, log },
+      { fetch, log, esClient },
       buildAttackDiscoveryFromPayload(caseId, payload),
       caseId
     );

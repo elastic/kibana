@@ -13,25 +13,30 @@ import { parse } from 'yaml';
 import { FP_TP_ANALYSIS_WORKFLOW_ID } from './constants';
 import {
   buildAttackDiscoveryFromPayload,
+  copyAttackDiscoveryToAdhocIndex,
   deriveInvestigationId,
   normalizeVerdictLabel,
   readAgentConnectorId,
   readAgentVerdict,
   readWorkflowOutput,
   runAttackDiscoveryWorkflow,
+  SCHEDULED_ATTACK_DISCOVERY_INDEX_PREFIX,
   SEED_ATTACK_DISCOVERY_INDEX_PREFIX,
+  SEED_CITED_ALERTS_INDEX_PREFIX,
   seedAttackDiscovery,
+  seedCitedAlerts,
   seedInvestigation,
 } from './workflow_task';
 
 describe('seeder→reader index contract', () => {
-  // The data generator route persists through the SCHEDULED AD rule, so the
-  // seeder's write index is the scheduled alias, never the ad-hoc one. Ties
-  // SEED_ATTACK_DISCOVERY_INDEX_PREFIX (product code) to the workflow's
-  // `load_attack_discovery` read: a regression that narrows the read back to a
-  // single alias (63363fcbffe) fails here instead of burning a smoke budget on
-  // executions that never reach the agent.
-  it('the workflow reads every index the seeder can write', () => {
+  // The data generator route persists through the SCHEDULED AD rule, but the
+  // workflow's `load_attack_discovery` searches only the space-scoped AD-HOC
+  // index — the seeder therefore writes its copy into `.adhoc` itself (see
+  // copyAttackDiscoveryToAdhocIndex). Ties SEED_ATTACK_DISCOVERY_INDEX_PREFIX
+  // (the seeder's write index) to the workflow's read: a regression that
+  // changes either side (e.g. 63363fcbffe's alias swap) fails here instead of
+  // burning a smoke budget on executions that never reach the agent.
+  it('the workflow reads the index the seeder writes (.adhoc)', () => {
     const definition = getManagedWorkflowDefinition(FP_TP_ANALYSIS_WORKFLOW_ID ?? '');
 
     expect(definition).toBeDefined();
@@ -47,6 +52,127 @@ describe('seeder→reader index contract', () => {
     // runtime; the seeder's prefix (already trailing-dash) must appear verbatim
     // among the reads.
     expect(readIndexes).toContain(`${SEED_ATTACK_DISCOVERY_INDEX_PREFIX}{{ workflow.spaceId }}`);
+  });
+
+  it('the workflow reads cited alerts from the index the seeder writes them to', () => {
+    const definition = getManagedWorkflowDefinition(FP_TP_ANALYSIS_WORKFLOW_ID ?? '');
+
+    const workflow = parse(definition!.yaml!) as {
+      steps: Array<{ name?: string; with?: { index?: string } }>;
+    };
+    const loadAlertsStep = workflow.steps.find((s) => s.name === 'load_alerts');
+    expect(loadAlertsStep?.with?.index).toBe(
+      `${SEED_CITED_ALERTS_INDEX_PREFIX}{{ workflow.spaceId }}`
+    );
+  });
+});
+
+describe('copyAttackDiscoveryToAdhocIndex', () => {
+  const makeEsClient = () => {
+    const calls: { get: unknown[]; bulk: unknown[] } = { get: [], bulk: [] };
+    return {
+      calls,
+      client: {
+        get: async (params: unknown) => {
+          calls.get.push(params);
+          return { found: true, _source: { 'kibana.alert.uuid': AD_DOC_ID, title: 't' } };
+        },
+        bulk: async (params: unknown) => {
+          calls.bulk.push(params);
+          return { errors: false };
+        },
+        deleteByQuery: async () => ({}),
+      },
+    };
+  };
+
+  it('re-indexes the persisted doc into the ad-hoc alias under the same _id', async () => {
+    const { calls, client } = makeEsClient();
+    await copyAttackDiscoveryToAdhocIndex(
+      { fetch: jest.fn(), log: mockLog(), esClient: client },
+      AD_DOC_ID
+    );
+    expect(calls.get[0]).toEqual({
+      index: `${SCHEDULED_ATTACK_DISCOVERY_INDEX_PREFIX}default`,
+      id: AD_DOC_ID,
+    });
+    expect(calls.bulk[0]).toEqual({
+      body: [
+        { index: { _index: `${SEED_ATTACK_DISCOVERY_INDEX_PREFIX}default`, _id: AD_DOC_ID } },
+        { 'kibana.alert.uuid': AD_DOC_ID, title: 't' },
+      ],
+      refresh: true,
+    });
+  });
+
+  it('throws when the scheduled index does not have the document', async () => {
+    const client = {
+      get: async () => ({ found: false }),
+      bulk: async () => ({ errors: false }),
+      deleteByQuery: async () => ({}),
+    };
+    await expect(
+      copyAttackDiscoveryToAdhocIndex(
+        { fetch: jest.fn(), log: mockLog(), esClient: client },
+        AD_DOC_ID
+      )
+    ).rejects.toThrow(/not found/);
+  });
+});
+
+describe('seedCitedAlerts', () => {
+  const seededAlertIds = (bulkParams: { body: Array<{ index?: { _id?: string } }> }): string[] =>
+    bulkParams.body
+      .filter((op) => op && typeof op === 'object' && 'index' in op)
+      .map((op) => op.index!._id!);
+
+  const makeEsClient = () => {
+    const bulks: Array<{ body: unknown[]; refresh?: boolean }> = [];
+    return {
+      bulks,
+      client: {
+        get: async () => ({ found: false }),
+        bulk: async (params: { body: unknown[]; refresh?: boolean }) => {
+          bulks.push(params);
+          return { errors: false };
+        },
+        deleteByQuery: async () => ({}),
+      },
+    };
+  };
+
+  it('seeds every cited alert id into the security alerts index the workflow reads', async () => {
+    const { bulks, client } = makeEsClient();
+    const doc = buildAttackDiscoveryFromPayload('40', GUIDE_PAYLOAD);
+    expect(doc.alertIds.length).toBeGreaterThan(0);
+
+    await seedCitedAlerts({ fetch: jest.fn(), log: mockLog(), esClient: client }, doc, AD_DOC_ID);
+
+    expect(bulks).toHaveLength(1);
+    expect(bulks[0].refresh).toBe(true);
+    // Every id the discovery cites must be seeded — exactly, no more, no less.
+    expect(seededAlertIds(bulks[0] as never)).toEqual(doc.alertIds);
+    // ...into the index `load_alerts` reads, with the fields it reads.
+    expect(bulks[0].body[0]).toEqual({
+      index: { _index: `${SEED_CITED_ALERTS_INDEX_PREFIX}default`, _id: doc.alertIds[0] },
+    });
+    const alertDoc = bulks[0].body[1] as Record<string, unknown>;
+    expect(alertDoc['@timestamp']).toBe(doc.timestamp);
+    expect(alertDoc['kibana.alert.uuid']).toBe(doc.alertIds[0]);
+    expect(alertDoc).toHaveProperty('host.id');
+    expect(alertDoc).toHaveProperty('user.name');
+    expect(alertDoc['kibana.alert.rule.name']).toBe(doc.title);
+  });
+
+  it('seeds nothing when the discovery cites no alerts (only warns)', async () => {
+    const { bulks, client } = makeEsClient();
+    const doc = buildAttackDiscoveryFromPayload('40', GUIDE_PAYLOAD);
+    await seedCitedAlerts(
+      { fetch: jest.fn(), log: mockLog(), esClient: client },
+      { ...doc, alertIds: [] },
+      AD_DOC_ID
+    );
+    expect(bulks).toHaveLength(0);
   });
 });
 

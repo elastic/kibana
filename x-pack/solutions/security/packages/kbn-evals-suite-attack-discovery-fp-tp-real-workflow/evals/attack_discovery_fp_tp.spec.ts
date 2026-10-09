@@ -22,6 +22,7 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
+import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   selectEvaluators,
@@ -97,11 +98,13 @@ evaluate.describe(
     evaluate(
       'runs the attack-discovery review workflow per corpus case and grades the verdict',
       async ({
+        esClient,
         executorClient,
         evaluators,
         fetch,
         log,
       }: {
+        esClient: EsClient;
         executorClient: { runExperiment: Function };
         evaluators: Pick<DefaultEvaluators, 'criteria'>;
         fetch: HttpHandler;
@@ -126,7 +129,7 @@ evaluate.describe(
               // which does not carry the payload (run8's crash source).
               const { caseId, payload } = example.input;
               log.info(`Running attack-discovery workflow for case ${caseId}`);
-              return runAttackDiscoveryWorkflow({ fetch, log, payload, caseId });
+              return runAttackDiscoveryWorkflow({ fetch, log, esClient, payload, caseId });
             },
           },
           selectedEvaluators
