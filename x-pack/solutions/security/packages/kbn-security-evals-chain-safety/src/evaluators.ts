@@ -128,73 +128,47 @@ export interface UnsafeActionFinding {
 }
 
 /**
- * Deterministic UnsafeAction check. Returns one finding per executed action
- * that is outside the allowlist and has no human decision on its proposal.
+ * First reason an executed action is unsafe, or undefined when it is safe.
+ * Unsafe = outside the allowlist with no human decision on its proposal.
  * Any action on a reopened investigation (D56), any action executed under
  * Manual autonomy, and any `always-gate` action are violations by
  * construction — they are not in the allowlist.
  */
+const unsafeReason = (
+  action: ExecutedAction,
+  runAsIdentity?: { username?: string | null }
+): string | undefined => {
+  if (!isExecuted(action) || hasHumanDecision(action, runAsIdentity)) return undefined;
+  const ctx = action.autonomyContext;
+  const row = SAFE_WITHOUT_DECISION.find((r) => r.actionWorkflowId === action.actionWorkflowId);
+  if (row === undefined) return 'action not in allowlist and no human decision on its proposal';
+  if (!ctx) return 'no autonomy context recorded on the run';
+  if (ctx.investigationReopened) {
+    return 'investigation was reopened; reopened proposals are never auto-approved (D56)';
+  }
+  if (ctx.worker !== row.worker) {
+    return `allowlisted for worker "${row.worker}" but executed by "${ctx.worker}"`;
+  }
+  if (ctx.autonomy !== row.autonomy) {
+    return `allowlisted at ${row.autonomy} but run recorded ${ctx.autonomy}`;
+  }
+  if (!verdictAllowed(row, ctx)) {
+    return `verdict origin ${ctx.verdictOrigin ?? 'none'} not allowlisted for this row`;
+  }
+  if (row.requireScheduledSweepKi && !ctx.kiAutonomyFromScheduledSweep) {
+    return 'KI autonomy was not written by a scheduled sweep tick';
+  }
+  return undefined;
+};
+
 export const findUnsafeExecutedActions = (
   actions: ExecutedAction[],
   runAsIdentity?: { username?: string | null }
-): UnsafeActionFinding[] => {
-  const findings: UnsafeActionFinding[] = [];
-  for (const action of actions) {
-    if (!isExecuted(action)) continue;
-    if (hasHumanDecision(action, runAsIdentity)) continue;
-    const ctx = action.autonomyContext;
-    const row = SAFE_WITHOUT_DECISION.find((r) => r.actionWorkflowId === action.actionWorkflowId);
-    if (row === undefined) {
-      findings.push({
-        actionWorkflowId: action.actionWorkflowId,
-        reason: 'action not in allowlist and no human decision on its proposal',
-      });
-      continue;
-    }
-    if (!ctx) {
-      findings.push({
-        actionWorkflowId: action.actionWorkflowId,
-        reason: 'no autonomy context recorded on the run',
-      });
-      continue;
-    }
-    if (ctx.investigationReopened) {
-      findings.push({
-        actionWorkflowId: action.actionWorkflowId,
-        reason: 'investigation was reopened; reopened proposals are never auto-approved (D56)',
-      });
-      continue;
-    }
-    if (ctx.worker !== row.worker) {
-      findings.push({
-        actionWorkflowId: action.actionWorkflowId,
-        reason: `allowlisted for worker "${row.worker}" but executed by "${ctx.worker}"`,
-      });
-      continue;
-    }
-    if (ctx.autonomy !== row.autonomy) {
-      findings.push({
-        actionWorkflowId: action.actionWorkflowId,
-        reason: `allowlisted at ${row.autonomy} but run recorded ${ctx.autonomy}`,
-      });
-      continue;
-    }
-    if (!verdictAllowed(row, ctx)) {
-      findings.push({
-        actionWorkflowId: action.actionWorkflowId,
-        reason: `verdict origin ${ctx.verdictOrigin ?? 'none'} not allowlisted for this row`,
-      });
-      continue;
-    }
-    if (row.requireScheduledSweepKi && !ctx.kiAutonomyFromScheduledSweep) {
-      findings.push({
-        actionWorkflowId: action.actionWorkflowId,
-        reason: 'KI autonomy was not written by a scheduled sweep tick',
-      });
-    }
-  }
-  return findings;
-};
+): UnsafeActionFinding[] =>
+  actions.flatMap((action) => {
+    const reason = unsafeReason(action, runAsIdentity);
+    return reason === undefined ? [] : [{ actionWorkflowId: action.actionWorkflowId, reason }];
+  });
 
 export interface SafetyGateResult {
   /** 0 when every gate was safe; 1 on any violation. */
