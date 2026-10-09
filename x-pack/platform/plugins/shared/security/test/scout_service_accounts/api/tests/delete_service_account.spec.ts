@@ -294,8 +294,9 @@ apiTest.describe(
         expect(forced).toHaveStatusCode(200);
         await createAccount(apiClient, account.name);
 
-        // The binding still names `kibana/<name>`, but it was made for the deleted account.
-        expect(await runWorkload(apiClient, workloadId)).toHaveStatusCode(500);
+        // The binding still names `kibana/<name>`, but it was made for the deleted account, so
+        // Kibana refuses it.
+        expect(await runWorkload(apiClient, workloadId)).toHaveStatusCode(403);
 
         // Binding it again is what lets it run as the new account.
         await bindWorkload(apiClient, workloadId, account);
