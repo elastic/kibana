@@ -11,6 +11,7 @@ import { LENS_ITEM_VERSION_V2 } from './v2/constants';
 
 export { LENS_ITEM_VERSION_V1 } from './v1/constants';
 export { LENS_ITEM_VERSION_V2 } from './v2/constants';
+export { LENS_ITEM_VERSION_V3 } from './v3/constants';
 
 /**
  * Latest Lens CM Item Version
