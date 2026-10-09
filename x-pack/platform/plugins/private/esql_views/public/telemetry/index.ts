@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { pairScores, computePairedTTestResults } from '@kbn/evals-common';
-export type { PairedTTestResult } from '@kbn/evals-common';
+export { TelemetryService } from './telemetry_service';
+export type { EsqlViewsTelemetryClient } from './types';
