@@ -38,9 +38,15 @@ jest.mock('../alert_flyout_overview_tab_component/data_view_manager_bootstrap', 
   DataViewManagerBootstrap: () => null,
 }));
 
+const mockFlyoutV2DocViewerStateSync = jest.fn((_: unknown) => null);
+jest.mock('../flyout_v2_doc_viewer_state_sync', () => ({
+  FlyoutV2DocViewerStateSync: (props: unknown) => mockFlyoutV2DocViewerStateSync(props),
+}));
+
 describe('AttackFlyoutOverviewTab', () => {
   beforeEach(() => {
     mockFlyoutProviders.mockClear();
+    mockFlyoutV2DocViewerStateSync.mockClear();
   });
 
   const servicesMock = {
@@ -116,6 +122,32 @@ describe('AttackFlyoutOverviewTab', () => {
 
     expect(screen.getByTestId('mock-visualizations-section')).toBeInTheDocument();
     expect(screen.getByTestId('mock-insights-section')).toBeInTheDocument();
+  });
+
+  it('syncs the flyouts it opens with the doc view state', async () => {
+    const store = createStore(() => ({}));
+    const hit = buildHit();
+    const onInitialStateChange = jest.fn();
+    const initialState = { flyoutV2: [{ kind: 'host' as const, hostName: 'web-01' }] };
+
+    render(
+      <AttackFlyoutOverviewTab
+        hit={hit}
+        servicesPromise={Promise.resolve(servicesMock)}
+        storePromise={Promise.resolve(store as never)}
+        onAttackUpdated={jest.fn()}
+        initialState={initialState}
+        onInitialStateChange={onInitialStateChange}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockFlyoutV2DocViewerStateSync).toHaveBeenCalledWith({
+        hit,
+        initialState,
+        onInitialStateChange,
+      });
+    });
   });
 
   it('does not render when resolving dependencies fails', async () => {

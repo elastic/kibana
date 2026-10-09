@@ -13,7 +13,6 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EnhancedAlertEventOverview } from './enhanced_alert_event_overview';
-import type { ProfileProviderServices } from '../../profile_provider_services';
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -30,26 +29,14 @@ const hit = createMockHit({
 describe('EnhancedAlertEventOverview', () => {
   it('renders the security solution overview tab feature', async () => {
     const renderFeature = jest.fn().mockReturnValue(<div>OverviewTab</div>);
-    const providerServices = {
-      discoverShared: {
-        features: {
-          registry: {
-            getById: jest.fn().mockReturnValue({
-              id: 'security-solution-alert-flyout-overview-tab',
-              render: renderFeature,
-            }),
-          },
-        },
-      },
-    } as unknown as ProfileProviderServices;
+    const overviewTab = {
+      id: 'security-solution-alert-flyout-overview-tab' as const,
+      render: renderFeature,
+    };
 
     render(
       <IntlProvider locale="en">
-        <EnhancedAlertEventOverview
-          hit={hit}
-          dataView={dataViewMock}
-          providerServices={providerServices}
-        />
+        <EnhancedAlertEventOverview hit={hit} dataView={dataViewMock} overviewTab={overviewTab} />
       </IntlProvider>
     );
 
@@ -64,5 +51,37 @@ describe('EnhancedAlertEventOverview', () => {
     );
 
     expect(screen.getByText('OverviewTab')).toBeInTheDocument();
+  });
+
+  it('forwards the restorable doc view state to the overview tab feature', () => {
+    const renderFeature = jest.fn().mockReturnValue(<div>OverviewTab</div>);
+    const initialState = { flyoutV2: [{ kind: 'host', hostName: 'web-01' }] };
+    const onInitialStateChange = jest.fn();
+
+    render(
+      <IntlProvider locale="en">
+        <EnhancedAlertEventOverview
+          hit={hit}
+          dataView={dataViewMock}
+          overviewTab={{ id: 'security-solution-alert-flyout-overview-tab', render: renderFeature }}
+          initialState={initialState}
+          onInitialStateChange={onInitialStateChange}
+        />
+      </IntlProvider>
+    );
+
+    expect(renderFeature).toHaveBeenCalledWith(
+      expect.objectContaining({ initialState, onInitialStateChange })
+    );
+  });
+
+  it('renders nothing when the overview tab feature is not registered', () => {
+    const { container } = render(
+      <IntlProvider locale="en">
+        <EnhancedAlertEventOverview hit={hit} dataView={dataViewMock} />
+      </IntlProvider>
+    );
+
+    expect(container).toBeEmptyDOMElement();
   });
 });

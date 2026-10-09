@@ -149,22 +149,48 @@ describe('createSecurityDocumentProfileProviders', () => {
       );
     });
 
-    it("registers the Security overview tab's shareable state schema", () => {
-      const shareableStateSchema = z.object({});
-      const getFeatureById = jest.fn().mockReturnValue({ shareableStateSchema });
-      const { result } = getDocViewerResult(
-        createRecord({ 'event.kind': 'signal' }),
-        {},
-        getFeatureById
-      );
-      const registry = { add: jest.fn() };
-      result.docViewsRegistry(registry as never);
+    it.each([
+      [
+        'alert',
+        { 'event.kind': 'signal' },
+        'security-solution-alert-flyout-overview-tab',
+        'doc_view_alerts_overview',
+      ],
+      [
+        'attack discovery',
+        { 'event.kind': 'signal', [ALERT_RULE_TYPE_ID]: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID },
+        'security-solution-attack-flyout-overview-tab',
+        'doc_view_attack_overview',
+      ],
+      [
+        'IOC',
+        { 'event.type': 'indicator' },
+        'security-solution-ioc-flyout-overview-tab',
+        'doc_view_ioc_overview',
+      ],
+    ])(
+      "registers the %s overview tab's shareable state schema and hands it the feature",
+      (_, fields, featureId, docViewId) => {
+        const shareableStateSchema = z.object({});
+        const overviewTab = { id: featureId, shareableStateSchema };
+        const getFeatureById = jest.fn().mockReturnValue(overviewTab);
+        const hit = createRecord(fields as DataTableRecord['flattened']);
+        const { result } = getDocViewerResult(hit, {}, getFeatureById);
+        const registry = { add: jest.fn() };
+        result.docViewsRegistry(registry as never);
 
-      expect(getFeatureById).toHaveBeenCalledWith('security-solution-alert-flyout-overview-tab');
-      expect(registry.add).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'doc_view_alerts_overview', shareableStateSchema })
-      );
-    });
+        expect(getFeatureById).toHaveBeenCalledTimes(1);
+        expect(getFeatureById).toHaveBeenCalledWith(featureId);
+        expect(registry.add).toHaveBeenCalledWith(
+          expect.objectContaining({ id: docViewId, shareableStateSchema })
+        );
+
+        const rendered = registry.add.mock.calls[0][0].render({ hit, dataView: dataViewMock });
+        expect((rendered as { props: { overviewTab: unknown } }).props.overviewTab).toBe(
+          overviewTab
+        );
+      }
+    );
 
     it('adds the overview tab to the registry for non-alert events', () => {
       const { result } = getDocViewerResult(createRecord({ 'event.kind': 'event' }));

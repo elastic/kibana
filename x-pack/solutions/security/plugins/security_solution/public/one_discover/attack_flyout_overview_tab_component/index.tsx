@@ -17,8 +17,10 @@ import { OverviewTab } from '../../flyout_v2/attack/main/tabs/overview_tab';
 import { DataViewManagerBootstrap } from '../alert_flyout_overview_tab_component/data_view_manager_bootstrap';
 import { DiscoverCellActions } from '../cell_actions';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import type { FlyoutV2DocViewerStateProps } from '../../flyout_v2/shared/url_state/flyout_v2_doc_viewer_state_schema';
+import { FlyoutV2DocViewerStateSync } from '../flyout_v2_doc_viewer_state_sync';
 
-export interface AttackFlyoutOverviewTabProps {
+export interface AttackFlyoutOverviewTabProps extends FlyoutV2DocViewerStateProps {
   hit: DataTableRecord;
   servicesPromise: Promise<StartServices>;
   storePromise: Promise<SecurityAppStore>;
@@ -43,6 +45,8 @@ export const AttackFlyoutOverviewTab = ({
   filter,
   onAddColumn,
   onRemoveColumn,
+  initialState,
+  onInitialStateChange,
 }: AttackFlyoutOverviewTabProps) => {
   const renderCellActions = useCallback<CellActionRenderer>(
     (props) => (
@@ -96,12 +100,14 @@ export const AttackFlyoutOverviewTab = ({
         hit={hit}
         renderCellActions={renderCellActions}
         onAttackUpdated={onAttackUpdated}
+        initialState={initialState}
+        onInitialStateChange={onInitialStateChange}
       />
     ),
   });
 };
 
-interface AttackFlyoutOverviewTabContentProps {
+interface AttackFlyoutOverviewTabContentProps extends FlyoutV2DocViewerStateProps {
   hit: DataTableRecord;
   /** Callback passed to the flyout content to render cell actions. */
   renderCellActions: CellActionRenderer;
@@ -116,12 +122,19 @@ const AttackFlyoutOverviewTabContent = ({
   hit,
   renderCellActions,
   onAttackUpdated,
+  initialState,
+  onInitialStateChange,
 }: AttackFlyoutOverviewTabContentProps) => {
   const isInSecurityApp = useIsInSecurityApp();
 
   return (
     <>
       {!isInSecurityApp && <DataViewManagerBootstrap />}
+      <FlyoutV2DocViewerStateSync
+        hit={hit}
+        initialState={initialState}
+        onInitialStateChange={onInitialStateChange}
+      />
       <EuiSpacer size="m" />
       <OverviewTab
         hit={hit}
