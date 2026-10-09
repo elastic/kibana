@@ -16,16 +16,22 @@ const CRITERIA = ['criterion one', 'criterion two'];
 const makeEvaluators = (score: number) => {
   const innerEvaluate = jest.fn().mockResolvedValue({ score });
   const evaluators = {
-    criteria: jest.fn().mockReturnValue({ evaluate: innerEvaluate }),
+    criteria: jest.fn().mockReturnValue({ evaluate: innerEvaluate, name: 'criteria' }),
   } as unknown as DefaultEvaluators;
   return { evaluators, innerEvaluate };
 };
 
-const makeArgs = (rationale: string | undefined | null) =>
+const makeArgs = ({
+  rationale,
+  classification = 'true_positive',
+}: {
+  rationale?: string | null;
+  classification?: string | null;
+}) =>
   ({
     input: { alertId: 'a1' },
     output: {
-      classification: 'true_positive',
+      classification,
       confidenceScore: 0.9,
       rationale,
       executionId: 'exec-1',
@@ -37,13 +43,13 @@ const makeArgs = (rationale: string | undefined | null) =>
   } as any);
 
 describe('createRationaleQualityEvaluator', () => {
-  it('scores N/A — not 0 — when the verdict has no rationale', async () => {
-    // "No rationale" is a measurement gap: the judge never sees it, so absence
-    // cannot be graded as a grounding failure against the criteria.
+  it('scores N/A — not 0 — only when the verdict has neither classification nor rationale', async () => {
+    // The evidenced 18-doc empty-artifact shape: the judge never sees it, so
+    // absence cannot be graded as a grounding failure against the criteria.
+    const { evaluators, innerEvaluate } = makeEvaluators(0);
     for (const rationale of [undefined, null, '']) {
-      const { evaluators, innerEvaluate } = makeEvaluators(0);
       const result = await createRationaleQualityEvaluator(evaluators, CRITERIA).evaluate(
-        makeArgs(rationale)
+        makeArgs({ rationale, classification: null })
       );
       expect(result.score).toBeNull();
       expect(result.label).toBe('N/A');
@@ -51,22 +57,35 @@ describe('createRationaleQualityEvaluator', () => {
     }
   });
 
+  it('scores 0 — not N/A — when classification is present but the rationale is missing', async () => {
+    // The rationale field is schema-required (alert_analysis_workflow.yaml), so
+    // a classification without one is a schema violation, not a measurement
+    // gap. N/A here would hide the violation from the report.
+    const { evaluators, innerEvaluate } = makeEvaluators(1);
+    for (const rationale of [undefined, null, '', '   ']) {
+      const result = await createRationaleQualityEvaluator(evaluators, CRITERIA).evaluate(
+        makeArgs({ rationale })
+      );
+      expect(result.score).not.toBeNull();
+      expect(result.score).toBe(0);
+      expect(innerEvaluate).not.toHaveBeenCalled();
+    }
+  });
+
+  it('keeps the inner criteria evaluator name for baseline continuity', () => {
+    // Pre-PR .evaluation-scores baselines and compare runs key on the
+    // evaluator name; renaming 'criteria' would break comparability.
+    const { evaluators } = makeEvaluators(0.75);
+    const evaluator = createRationaleQualityEvaluator(evaluators, CRITERIA);
+    expect(evaluator.name).toBe('criteria');
+  });
+
   it('delegates to the criteria judge when a rationale exists', async () => {
     const { evaluators, innerEvaluate } = makeEvaluators(0.75);
     const result = await createRationaleQualityEvaluator(evaluators, CRITERIA).evaluate(
-      makeArgs('process name and command line indicate…')
+      makeArgs({ rationale: 'process name and command line indicate…' })
     );
     expect(result.score).toBe(0.75);
     expect(innerEvaluate).toHaveBeenCalledTimes(1);
-  });
-
-  it('treats a whitespace-only rationale as missing', async () => {
-    const { evaluators, innerEvaluate } = makeEvaluators(0);
-    const result = await createRationaleQualityEvaluator(evaluators, CRITERIA).evaluate(
-      makeArgs('   ')
-    );
-    expect(result.score).toBeNull();
-    expect(result.label).toBe('N/A');
-    expect(innerEvaluate).not.toHaveBeenCalled();
   });
 });

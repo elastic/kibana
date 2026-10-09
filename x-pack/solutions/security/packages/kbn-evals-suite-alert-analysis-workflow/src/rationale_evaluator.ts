@@ -11,9 +11,9 @@ import type { AlertAnalysisVerdict } from './workflow_task';
 const asVerdict = (output: unknown): AlertAnalysisVerdict => output as AlertAnalysisVerdict;
 
 /**
- * Wraps the criteria judge for the rationale: a verdict with no rationale is a
- * measurement gap, not a quality zero. The judge never sees the empty artifact,
- * so it cannot grade "absence" as a grounding failure.
+ * Wraps the criteria judge for the rationale. The evaluator keeps the inner
+ * `criteria` name (no override) so pre-PR .evaluation-scores baselines and
+ * compare runs stay keyed on the same evaluator name.
  */
 export const createRationaleQualityEvaluator = (
   evaluators: DefaultEvaluators,
@@ -23,14 +23,32 @@ export const createRationaleQualityEvaluator = (
 
   return {
     ...inner,
-    name: 'RationaleQuality',
     evaluate: async (args) => {
-      const rationale = asVerdict(args.output)?.rationale;
-      if (rationale == null || rationale.trim().length === 0) {
+      const verdict = asVerdict(args.output);
+      const rationale = verdict?.rationale;
+      const hasRationale = rationale != null && rationale.trim().length > 0;
+      const hasClassification = verdict?.classification != null;
+      // N/A only for the evidenced empty-artifact shape: a verdict with
+      // neither classification nor rationale (the judge never sees it, so
+      // absence cannot be graded as a grounding failure).
+      if (!hasClassification && !hasRationale) {
         return {
           score: null,
           label: 'N/A',
-          explanation: 'No rationale in verdict — skipping rationale quality evaluation.',
+          explanation: 'No verdict — workflow produced neither classification nor rationale.',
+          metadata: { missingVerdict: true },
+        };
+      }
+      // A classification without a rationale is a schema violation (rationale
+      // is required by alert_analysis_workflow.yaml), not a measurement gap:
+      // score 0 so it surfaces in ValidVerdict and the means instead of
+      // silently vanishing as N/A.
+      if (!hasRationale) {
+        return {
+          score: 0,
+          label: 'missing-rationale',
+          explanation:
+            'Verdict has a classification but no rationale — schema-required field missing.',
           metadata: { missingRationale: true },
         };
       }

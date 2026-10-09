@@ -29,8 +29,10 @@ export const classificationAccuracy: Evaluator = {
   direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const verdict = asVerdict(output);
-    // An empty artifact (no verdict at all) is a missing measurement, not a
-    // wrong classification — score N/A instead of dragging the mean toward 0.
+    // Defensive only: runAlertAnalysisWorkflow always returns a verdict object
+    // (executionId/executionStatus) or throws, so this branch is not reachable
+    // via the spec. Kept so a future refactor of the workflow task cannot
+    // reintroduce quality zeros for empty artifacts.
     if (verdict == null || typeof verdict !== 'object' || Object.keys(verdict).length === 0) {
       return {
         score: null,
@@ -68,8 +70,9 @@ export const validVerdict: Evaluator = {
   direction: 'maximize',
   evaluate: async ({ output }) => {
     const verdict = asVerdict(output);
-    // Same rule as ClassificationAccuracy: an empty artifact is N/A, not a
-    // schema-drift failure. score_stats already excludes null scores.
+    // Defensive only: see ClassificationAccuracy — the workflow always returns
+    // a verdict object or throws, so this branch is unreachable via the spec.
+    // score_stats already excludes null scores.
     if (verdict == null || typeof verdict !== 'object' || Object.keys(verdict).length === 0) {
       return {
         score: null,
@@ -85,7 +88,8 @@ export const validVerdict: Evaluator = {
       typeof verdict.confidenceScore === 'number' &&
       verdict.confidenceScore >= 0 &&
       verdict.confidenceScore <= 1;
-    const valid = classificationValid && confidenceValid;
+    const rationaleValid = verdict.rationale != null && verdict.rationale.trim().length > 0;
+    const valid = classificationValid && confidenceValid && rationaleValid;
 
     return {
       score: valid ? 1 : 0,
@@ -93,6 +97,7 @@ export const validVerdict: Evaluator = {
       metadata: {
         classificationValid,
         confidenceValid,
+        rationaleValid,
         executionStatus: verdict.executionStatus,
       },
     };

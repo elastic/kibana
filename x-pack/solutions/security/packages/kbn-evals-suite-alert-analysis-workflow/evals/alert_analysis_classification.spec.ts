@@ -59,6 +59,7 @@ import {
   validVerdict,
 } from '../src/evaluators';
 import { createRationaleQualityEvaluator } from '../src/rationale_evaluator';
+import { logRunSummary, withScoreCollection, type ScoreSink } from '../src/run_summary';
 import { ALERT_ANALYSIS_EVAL_ALERTS } from '../src/synthetic_alerts';
 import { ALERTS_INDEX } from '../src/constants';
 
@@ -144,6 +145,10 @@ evaluate.describe(
           createRationaleQualityEvaluator(evaluators, RATIONALE_CRITERIA),
         ]);
 
+        // Observe every score so the run states its own N/A count — null
+        // scores are excluded from score_stats, so without this the gaps
+        // would vanish from the report.
+        const sink: ScoreSink = new Map();
         await executorClient.runExperiment(
           {
             datasets: [
@@ -212,8 +217,14 @@ evaluate.describe(
               }
             },
           },
-          selectedEvaluators
+          withScoreCollection(selectedEvaluators, sink)
         );
+
+        logRunSummary({
+          sink,
+          datasetName: 'security: alert-analysis-workflow-classification',
+          log,
+        });
       }
     );
   }

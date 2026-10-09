@@ -61,11 +61,31 @@ describe('classificationAccuracy', () => {
 describe('validVerdict', () => {
   it('scores 1 for a well-formed verdict', async () => {
     const result = await validVerdict.evaluate({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      output: { classification: 'true_positive', confidenceScore: 0.5 } as any,
+      output: {
+        classification: 'true_positive',
+        confidenceScore: 0.5,
+        rationale: 'process name and signer match the expected pattern',
+      },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
     expect(result.score).toBe(1);
+  });
+
+  it('scores 0 when the schema-required rationale is missing or blank', async () => {
+    // alert_analysis_workflow.yaml requires a rationale; a verdict without one
+    // is schema drift, not a measurement gap, and must not pass the guardrail.
+    for (const rationale of [undefined, null, '', '   ']) {
+      const result = await validVerdict.evaluate({
+        output: {
+          classification: 'true_positive',
+          confidenceScore: 0.5,
+          rationale,
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+      expect(result.score).toBe(0);
+      expect(result.metadata?.rationaleValid).toBe(false);
+    }
   });
 
   it('scores 0 for schema drift (classification outside the enum)', async () => {
