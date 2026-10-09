@@ -44,6 +44,7 @@ export const buildUnitConnectionEdges = (
       type: ANIMATED_EDGE_TYPE,
       reconnectable: true,
       selectable: true,
+      deletable: false,
       className: 'streamsUnitConnection nopan',
       data: { unitConnection: true, forwarding },
     })
