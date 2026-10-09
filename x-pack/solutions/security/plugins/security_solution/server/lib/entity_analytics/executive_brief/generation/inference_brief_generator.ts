@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ChatCompletionTokenCount, Message, ToolSchema } from '@kbn/inference-common';
+import type {
+  ChatCompletionTokenCount,
+  Message,
+  ToolCallArguments,
+  ToolSchema,
+} from '@kbn/inference-common';
 import { MessageRole, isToolValidationError } from '@kbn/inference-common';
 import type { ExecutiveBriefJob } from '../../../../../common/entity_analytics/executive_brief/types';
 import { BRIEF_OUTPUT_SCHEMA, BRIEF_SYSTEM_PROMPT } from './brief_prompt';
@@ -68,10 +73,13 @@ export const sumTokens = (
   };
 };
 
-const safeParseArguments = (raw: string): object => {
+const isArguments = (value: unknown): value is ToolCallArguments =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const safeParseArguments = (raw: string): ToolCallArguments => {
   try {
     const parsed: unknown = JSON.parse(raw);
-    return typeof parsed === 'object' && parsed !== null ? parsed : {};
+    return isArguments(parsed) ? parsed : {};
   } catch {
     return {};
   }
