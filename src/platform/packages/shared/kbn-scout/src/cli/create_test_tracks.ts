@@ -28,7 +28,7 @@ import { type ScoutTestConfig, ScoutTestConfigStats, testConfigs } from '@kbn/sc
 import { parse } from 'yaml';
 import CliTable3 from 'cli-table3';
 import dedent from 'dedent';
-import type { TestTrackLoad } from '../execution/test_track';
+import type { TestTrackLane, TestTrackLoad } from '../execution/test_track';
 import { TestTrack } from '../execution/test_track';
 import type { SerializedScoutTestingScope } from '../tests_discovery/testing_scope';
 import { readScoutTestingScope } from '../tests_discovery/testing_scope';
@@ -241,6 +241,96 @@ export function buildTrack(
   return track;
 }
 
+export interface CombinedLaneLoadGroup {
+  configSet: string;
+  loads: string[];
+}
+
+interface ShortLaneGroup {
+  testTarget: ScoutTestTarget;
+  agentQueue: string;
+  lanes: Array<{ configSet: string; lane: TestTrackLane }>;
+}
+
+/**
+ * Moves lanes shorter than the given threshold into combined tracks (one per test target and agent queue),
+ * packing them into as few lanes as the runtime target allows. Each combined lane lists its loads
+ * per server config set in `metadata.loadGroups`, as the server needs to be restarted for each group.
+ */
+export function combineShortLanes(
+  tracks: TestTrack[],
+  shortLaneThreshold: number,
+  log: ToolingLog
+): TestTrack[] {
+  const shortLanesByGroup = new Map<string, ShortLaneGroup>();
+
+  tracks.forEach((track) => {
+    track.lanes
+      .filter((lane) => lane.runtimeEstimate < shortLaneThreshold)
+      .forEach((lane) => {
+        const testTarget: ScoutTestTarget = track.metadata.testTarget;
+        const { agentQueue } = lane.metadata.buildkite;
+        const groupKey = `${testTarget.tag}/${agentQueue}`;
+        const group: ShortLaneGroup = shortLanesByGroup.get(groupKey) ?? {
+          testTarget,
+          agentQueue,
+          lanes: [],
+        };
+        group.lanes.push({ configSet: track.metadata.server.configSet, lane });
+        shortLanesByGroup.set(groupKey, group);
+      });
+  });
+
+  const movedLanes = new Set<TestTrackLane>();
+
+  const combinedTracks = shortLanesByGroup
+    .values()
+    // A single short lane has nothing to be combined with
+    .filter((group) => group.lanes.length > 1)
+    .map(({ testTarget, agentQueue, lanes }) => {
+      const combinedTrack = new TestTrack({ runtimeTarget: lanes[0].lane.runtimeTarget });
+      combinedTrack.metadata.testTarget = testTarget;
+
+      lanes
+        // Same as with loads: placing the longest lanes first gives the highest lane saturation
+        .sort((a, b) => b.lane.runtimeEstimate - a.lane.runtimeEstimate)
+        .forEach(({ configSet, lane: shortLane }) => {
+          const lane =
+            combinedTrack.lanes.find(
+              (candidate) =>
+                candidate.runtimeEstimate + shortLane.runtimeEstimate <= candidate.runtimeTarget
+            ) ?? combinedTrack.addLane();
+
+          // Every group needs its own server, so the setup duration adds up
+          lane.estimatedSetupDuration += shortLane.estimatedSetupDuration;
+          lane.loads.push(...shortLane.loads);
+          lane.metadata.buildkite = { agentQueue };
+          lane.metadata.loadGroups = [
+            ...(lane.metadata.loadGroups ?? []),
+            { configSet, loads: shortLane.loads.map((load) => load.id) },
+          ] satisfies CombinedLaneLoadGroup[];
+
+          movedLanes.add(shortLane);
+        });
+
+      log.info(
+        `Combined ${lanes.length} short lanes for test target '${testTarget.tag}' (${agentQueue})` +
+          ` into ${combinedTrack.laneCount} lane(s)`
+      );
+      return combinedTrack;
+    })
+    .toArray();
+
+  tracks.forEach((track) => {
+    track.lanes = track.lanes.filter((lane) => !movedLanes.has(lane));
+    track.lanes.forEach((lane, index) => {
+      lane.number = index + 1;
+    });
+  });
+
+  return [...tracks.filter((track) => track.laneCount > 0), ...combinedTracks];
+}
+
 export function msToHuman(ms: number): string {
   if (ms === 0) {
     return '0s';
@@ -430,7 +520,11 @@ function displayMultiTrackSummary(
         track.metadata.testTarget.location,
         track.metadata.testTarget.arch,
         track.metadata.testTarget.domain,
-        track.metadata.server.configSet,
+        lane.metadata.loadGroups
+          ? lane.metadata.loadGroups
+              .map((group: CombinedLaneLoadGroup) => group.configSet)
+              .join('\n')
+          : track.metadata.server.configSet,
         msToHuman(lane.runtimeEstimate),
         lane.loads.length,
         msToHuman(lane.availableCapacity),
@@ -456,9 +550,10 @@ export const createTestTracks: Command<void> = {
       'targetRuntimeMinutes',
       'minRuntimeMinutes',
       'estimatedLaneSetupMinutes',
+      'shortLaneThresholdMinutes',
       'testing-scope',
     ],
-    boolean: ['showIndividualTrackSummaries', 'showMultiTrackSummary'],
+    boolean: ['combineShortLanes', 'showIndividualTrackSummaries', 'showMultiTrackSummary'],
     default: {
       outputPath: `${SCOUT_OUTPUT_ROOT}/test_tracks/${Date.now()}.json`,
     },
@@ -470,6 +565,8 @@ export const createTestTracks: Command<void> = {
     --targetRuntimeMinutes          (optional)  How long the test track should run [default: longest estimated load runtime]
     --minRuntimeMinutes             (optional)  Target runtime minutes shouldn't be lower than this
     --estimatedLaneSetupMinutes     (optional)  How long a lane setup is expected to take
+    --combineShortLanes             (optional)  Combine short lanes of different server config sets into shared lanes
+    --shortLaneThresholdMinutes     (optional)  Lanes shorter than this are combined [default: half of the runtime target]
     --showIndividualTrackSummaries  (optional)  Display individual test track summaries
     --showMultiTrackSummary         (optional)  Display multi-track summary
     --testing-scope                 (optional)  Path to a 'testing_scope.json' produced by 'scout resolve-testing-scope'.
@@ -592,7 +689,7 @@ export const createTestTracks: Command<void> = {
 
     log.info(`All tracks will use a runtime target of ${msToHuman(runtimeTarget)}`);
 
-    const tracks = testLoadsByTarget
+    let tracks = testLoadsByTarget
       .entries()
       .flatMap(([target, loads]) => {
         if (target.location === 'cloud') {
@@ -636,6 +733,14 @@ export const createTestTracks: Command<void> = {
         });
       })
       .toArray();
+
+    if (flagsReader.boolean('combineShortLanes')) {
+      // Half of the runtime target guarantees that at least two short lanes fit into a combined lane
+      const shortLaneThreshold =
+        (flagsReader.number('shortLaneThresholdMinutes') || 0) * 60 * 1000 || runtimeTarget / 2;
+      log.info(`Combining lanes shorter than ${msToHuman(shortLaneThreshold)}`);
+      tracks = combineShortLanes(tracks, shortLaneThreshold, log);
+    }
 
     // Write track specifications
     const outputPath = flagsReader.requiredString('outputPath');

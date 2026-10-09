@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { firstValueFrom } from 'rxjs';
+
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import {
   KAFKA_OAUTH2_MINIMUM_FLEET_SERVER_VERSION,
+  ENABLE_OTLP_OUTPUT_FLAG,
   OTLP_MINIMUM_FLEET_SERVER_VERSION,
   SO_SEARCH_LIMIT,
 } from '../../../common/constants';
@@ -32,6 +35,14 @@ export async function isOtlpOutputSupported(
   });
 }
 
+const isOtlpOutputFlagEnabled = async (): Promise<boolean> => {
+  const featureFlags = appContextService.getFeatureFlags();
+  if (!featureFlags) {
+    return false;
+  }
+  return await firstValueFrom(featureFlags.getBooleanValue$(ENABLE_OTLP_OUTPUT_FLAG, false));
+};
+
 /**
  * Checks whether OTLP output is permitted in this deployment.
  * Returns { result: true } when allowed, or { result: false, error } with a human-readable
@@ -41,7 +52,7 @@ export async function checkOtlpOutputAllowed(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract
 ): Promise<{ result: boolean; error?: string }> {
-  if (!appContextService.getExperimentalFeatures().enableOtlpOutput) {
+  if (!(await isOtlpOutputFlagEnabled())) {
     return { result: false, error: 'OTLP output type is not enabled' };
   }
 

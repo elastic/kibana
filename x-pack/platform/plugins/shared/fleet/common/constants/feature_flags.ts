@@ -13,3 +13,6 @@ export const ENABLE_RESTART_AGENT_ACTION_FLAG = 'fleet.enableRestartAgentAction'
 
 /** Feature flag that gates the OAuth2 authentication method of the Kafka output. Fallback is false. */
 export const ENABLE_KAFKA_OAUTH2_AUTH_FLAG = 'fleet.enableKafkaOAuth2Auth';
+
+/** LaunchDarkly flag that gates creation and management of OTLP outputs. Fallback is false. */
+export const ENABLE_OTLP_OUTPUT_FLAG = 'fleet.enableOtlpOutput';

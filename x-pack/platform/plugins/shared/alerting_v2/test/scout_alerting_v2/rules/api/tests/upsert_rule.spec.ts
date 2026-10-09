@@ -116,6 +116,33 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
+    'upsert: replace does not merge nested query or metadata leaves',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'replace-me', description: 'original', tags: ['cpu'] },
+          query: {
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: 'WHERE count >= 10' },
+          },
+        })
+      );
+
+      const response = await apiClient.put(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: buildCreateRuleData({
+          metadata: { name: 'replaced' },
+          query: { base: 'FROM logs-* | LIMIT 10' },
+        }),
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.metadata).toStrictEqual({ name: 'replaced' });
+      expect(response.body.query).toStrictEqual({ base: 'FROM logs-* | LIMIT 10' });
+    }
+  );
+
+  apiTest(
     'upsert: should return 409 when attempting to change an immutable field (kind)',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(

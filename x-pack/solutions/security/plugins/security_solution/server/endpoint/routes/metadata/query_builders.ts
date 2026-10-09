@@ -51,6 +51,9 @@ export const MetadataSortMethod: estypes.SortCombinations[] = [
   },
 ];
 
+/** Unique per united document; appended to every united-index sort as the tiebreaker. */
+export const UNITED_METADATA_SORT_TIEBREAKER_FIELD = 'united.agent.agent.id';
+
 const getUnitedMetadataSortMethod = (
   sortField: EndpointSortableField,
   sortDirection: 'asc' | 'desc'
@@ -64,11 +67,14 @@ const getUnitedMetadataSortMethod = (
       ? 'united.agent.enrolled_at'
       : sortField.replace('metadata.', 'united.endpoint.');
 
-  if (DATE_FIELDS.includes(sortField)) {
-    return [{ [mappedUnitedMetadataSortField]: { order: sortDirection, unmapped_type: 'date' } }];
-  } else {
-    return [{ [mappedUnitedMetadataSortField]: sortDirection }];
-  }
+  const primarySort: estypes.SortCombinations = DATE_FIELDS.includes(sortField)
+    ? { [mappedUnitedMetadataSortField]: { order: sortDirection, unmapped_type: 'date' } }
+    : { [mappedUnitedMetadataSortField]: sortDirection };
+
+  // Offset pagination needs a total order: sort keys such as `enrolled_at` tie across agents, and
+  // ES may order tied hits differently between page requests, skipping or repeating hosts.
+  // The Fleet agent id is unique per united document, so it breaks every tie.
+  return [primarySort, { [UNITED_METADATA_SORT_TIEBREAKER_FIELD]: 'asc' }];
 };
 
 export function getESQueryHostMetadataByID(
