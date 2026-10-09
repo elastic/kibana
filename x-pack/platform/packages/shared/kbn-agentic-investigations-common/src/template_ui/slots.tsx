@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Conversation } from '@kbn/agent-builder-common';
 import {
   ConversationDetailsFlyoutHeader,
@@ -14,12 +15,18 @@ import {
   type ConversationDetailsFlyoutFooterProps,
   OverviewTab,
 } from '../components/details';
+import { ImpactSection } from '../components/details/impact_section';
 import type { FlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
 import {
   conversationToInvestigation,
   conversationToEscalationHeader,
 } from './conversation_to_investigation';
-import type { RenderAssignees, RenderStatus, RenderLinkedInvestigations } from './types';
+import type {
+  RenderAssignees,
+  RenderStatus,
+  RenderLinkedInvestigations,
+  RenderSyncIndicator,
+} from './types';
 
 /**
  * The investigation flyout's slot contents, kept in one module so `register` can pull them in a
@@ -132,12 +139,14 @@ export interface EscalationHeaderSlotProps {
   refetchConversation?: () => Promise<void>;
   renderAssignees?: RenderAssignees;
   renderStatus?: RenderStatus;
+  renderSyncIndicator?: RenderSyncIndicator;
 }
 
 export const EscalationHeaderSlot = ({
   conversation,
   renderAssignees,
   renderStatus,
+  renderSyncIndicator,
   refetchConversation,
 }: EscalationHeaderSlotProps) => {
   const { status, assigneeUids } = conversationToEscalationHeader(conversation);
@@ -169,6 +178,7 @@ export const EscalationHeaderSlot = ({
       assigneeUids={assigneeUids}
       assigneesNode={assigneesNode}
       statusNode={statusNode}
+      syncNode={renderSyncIndicator?.({ escalationId: conversation.id })}
     />
   );
 };
@@ -185,25 +195,28 @@ export interface EscalationOverviewSlotProps {
 
 /**
  * The body tab for the escalation details flyout. Renders the linked investigations list via
- * `renderLinkedInvestigations` (supplied by the consuming plugin so it can use HTTP hooks).
- * Returns `null` when no render prop is provided.
+ * `renderLinkedInvestigations` (supplied by the consuming plugin so it can use HTTP hooks), then
+ * the Impact copied over from the linked investigations.
  */
 export const EscalationOverviewSlot = ({
   conversation,
   renderLinkedInvestigations,
   onOpenInvestigation,
 }: EscalationOverviewSlotProps) => {
-  if (!renderLinkedInvestigations) return null;
-
   const { linkedInvestigationIds } = conversationToEscalationHeader(conversation);
 
   return (
-    <>
-      {renderLinkedInvestigations({
-        escalationId: conversation.id,
-        linkedInvestigationIds,
-        onOpenInvestigation,
-      })}
-    </>
+    <EuiFlexGroup direction="column" gutterSize="m">
+      {renderLinkedInvestigations && (
+        <EuiFlexItem>
+          {renderLinkedInvestigations({
+            escalationId: conversation.id,
+            linkedInvestigationIds,
+            onOpenInvestigation,
+          })}
+        </EuiFlexItem>
+      )}
+      <ImpactSection attachments={conversation.attachments} />
+    </EuiFlexGroup>
   );
 };

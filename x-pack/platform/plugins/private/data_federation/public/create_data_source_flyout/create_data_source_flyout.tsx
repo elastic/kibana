@@ -82,7 +82,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
 
   const dataFederationLinks = docLinks.links.dataFederation;
 
-  const enableFederatedIdentityAuth = featureFlags?.enableFederatedIdentityAuth;
+  const enableFederatedIdentity = Boolean(cloudInfo?.jwtIssuer);
   const enableGoogleCloudStorageDataSourceType =
     featureFlags?.enableGoogleCloudStorageDataSourceType;
   const enableAzureDataSourceType = featureFlags?.enableAzureDataSourceType;
@@ -187,7 +187,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
       initialDataSource
         ? authenticationModeFromDataSource(initialDataSource)
         : getDefaultAuthenticationMode(dataSourceType, {
-            enableFederatedIdentity: enableFederatedIdentityAuth,
+            enableFederatedIdentity,
           })
   );
 
@@ -206,11 +206,11 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     if (!isEditMode) {
       setAuthenticationMode(
         getDefaultAuthenticationMode(dataSourceType, {
-          enableFederatedIdentity: enableFederatedIdentityAuth,
+          enableFederatedIdentity,
         })
       );
     }
-  }, [dataSourceType, isEditMode, enableFederatedIdentityAuth]);
+  }, [dataSourceType, isEditMode, enableFederatedIdentity]);
 
   const handleSave = (data: CreateDataSourceFlyoutFormValues) =>
     onSave(
@@ -337,7 +337,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           <CreateDataSourceFlyoutAuthenticationSelect
             authenticationMode={authenticationMode}
             dataSourceType={dataSourceType}
-            enableFederatedIdentity={enableFederatedIdentityAuth}
+            enableFederatedIdentity={enableFederatedIdentity}
             onAuthenticationModeChange={setAuthenticationMode}
           />
           <CreateDataSourceFlyoutAuthenticationFields

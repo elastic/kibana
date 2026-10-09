@@ -49,9 +49,19 @@ export const buildAlertDocument = (
   stepNumber: number,
   step: Ad2ScenarioStep,
   timestamp: Date,
-  runMarker: string
+  runMarker: string,
+  /**
+   * Coordinates the RULE identity (`kibana.alert.rule.uuid`/`rule_id`,
+   * `rule.id`), distinct from the alert identity. Defaults to the step number,
+   * which is right for signal chains (each step is its own detection rule).
+   * Noise cohorts pass a constant per rule type so N alerts from one noisy
+   * rule share one rule identity — the repeated-rule cluster rule-based
+   * correlation is supposed to see — while every alert id stays unique.
+   */
+  ruleSeed: string | number = stepNumber
 ): Ad2IndexedAlert => {
   const alertId = ad2ScenarioAlertId(runMarker, scenarioKey, stepNumber);
+  const ruleId = ad2SeedId(runMarker, 'rule', scenarioKey, ruleSeed);
   const dataset = scenario.dataset ?? 'endpoint.alerts';
   const category = scenario.category ?? 'Endpoint Behavior Detection';
   const ancestorId = ad2SeedId(runMarker, 'process', scenarioKey, stepNumber);
@@ -92,7 +102,7 @@ export const buildAlertDocument = (
     message: step.message,
     rule: {
       name: step.ruleName,
-      id: ad2SeedId(runMarker, 'rule', scenarioKey, stepNumber),
+      id: ruleId,
       description: step.message,
     },
     'kibana.alert.rule.category': category,
@@ -100,8 +110,8 @@ export const buildAlertDocument = (
     'kibana.alert.rule.producer': 'siem',
     'kibana.alert.rule.name': step.ruleName,
     'kibana.alert.rule.rule_type_id': 'siem.eqlRule',
-    'kibana.alert.rule.rule_id': ad2SeedId(runMarker, 'rule', scenarioKey, stepNumber),
-    'kibana.alert.rule.uuid': ad2SeedId(runMarker, 'rule', scenarioKey, stepNumber),
+    'kibana.alert.rule.rule_id': ruleId,
+    'kibana.alert.rule.uuid': ruleId,
     'kibana.alert.rule.version': 1,
     'kibana.alert.rule.revision': 1,
     'kibana.alert.rule.description': step.message,
