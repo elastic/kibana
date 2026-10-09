@@ -232,12 +232,18 @@ apiTest.describe(
             expect((await client.getMaintenance()).state).toBe('enabled');
             // Installation is asynchronous, so wait until the shared workflow is installed and running.
             await expect
-              .poll(() => client.isWorkflowEnabled(SHARED_WORKFLOW_ENDPOINT), POLL_OPTIONS)
+              .poll(() => client.isWorkflowEnabled(SHARED_WORKFLOW_ENDPOINT), {
+                ...POLL_OPTIONS,
+                message: 'the shared discovery workflow is installed and enabled',
+              })
               .toBe(true);
             // The per-space workflow only exists once something asks for it.
             await client.bootstrapSpaceWorkflow();
             await expect
-              .poll(() => client.isWorkflowEnabled(SPACE_WORKFLOW_ENDPOINT), POLL_OPTIONS)
+              .poll(() => client.isWorkflowEnabled(SPACE_WORKFLOW_ENDPOINT), {
+                ...POLL_OPTIONS,
+                message: 'the bootstrapped space cleanup workflow is installed and enabled',
+              })
               .toBe(true);
             const source = await client.createSource(`flag-off-${uuidv4()}`);
             sourceId = source.id;
@@ -256,12 +262,25 @@ apiTest.describe(
             await delay(NIGHTSHIFT_FLAG_SETTLE_MS + 1_000);
             await nightshift.disableSignificantEvents();
             // The status route stays reachable while the flag is off.
-            await expect.poll(client.getMaintenance, POLL_OPTIONS).toStrictEqual(PAUSED_BY_FLAG);
+            await expect
+              .poll(client.getMaintenance, {
+                ...POLL_OPTIONS,
+                message: 'the flag-off pause is recorded as paused by the feature flag',
+              })
+              .toStrictEqual(PAUSED_BY_FLAG);
             // The state reads `paused` as soon as the pause is claimed, before the sweep ends.
             await expect
-              .poll(() => client.isWorkflowEnabled(SPACE_WORKFLOW_ENDPOINT), POLL_OPTIONS)
+              .poll(() => client.isWorkflowEnabled(SPACE_WORKFLOW_ENDPOINT), {
+                ...POLL_OPTIONS,
+                message: 'the pause disables the space cleanup workflow',
+              })
               .toBe(false);
-            await expect.poll(() => client.isRuleEnabled(ruleId), POLL_OPTIONS).toBe(false);
+            await expect
+              .poll(() => client.isRuleEnabled(ruleId), {
+                ...POLL_OPTIONS,
+                message: 'the pause disables the query rule',
+              })
+              .toBe(false);
             // The shared workflows belong to every space, so the pause does not turn them off.
             expect(await client.isWorkflowEnabled(SHARED_WORKFLOW_ENDPOINT)).toBe(true);
           }
@@ -269,7 +288,12 @@ apiTest.describe(
 
         await apiTest.step('turning the flag back on keeps it paused', async () => {
           await nightshift.enableSignificantEvents();
-          await expect.poll(client.isAvailable, POLL_OPTIONS).toBe(true);
+          await expect
+            .poll(client.isAvailable, {
+              ...POLL_OPTIONS,
+              message: 'Significant Events reports available once the flag is back on',
+            })
+            .toBe(true);
           expect(await client.getMaintenance()).toStrictEqual(PAUSED_BY_FLAG);
           expect(await client.isRuleEnabled(ruleId)).toBe(false);
         });
