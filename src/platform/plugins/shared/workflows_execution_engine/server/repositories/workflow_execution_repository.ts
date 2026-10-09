@@ -57,6 +57,28 @@ export class WorkflowExecutionRepository {
     return doc;
   }
 
+  /**
+   * Reads only the cancellation fields of a workflow execution (real-time GET with a source filter).
+   * Returns null when the document is missing or belongs to another space.
+   */
+  public async getWorkflowExecutionCancelState(
+    workflowExecutionId: string,
+    spaceId: string
+  ): Promise<Pick<
+    EsWorkflowExecution,
+    'cancelRequested' | 'cancelledAt' | 'cancelledBy'
+  > | null> {
+    const { items } = await this.workflowExecutionsDataClient.getByIds([workflowExecutionId], {
+      sourceIncludes: ['spaceId', 'cancelRequested', 'cancelledAt', 'cancelledBy'],
+    });
+    const doc = items[0]?.document;
+    if (!doc || doc.spaceId !== spaceId) {
+      return null;
+    }
+    const { cancelRequested, cancelledAt, cancelledBy } = doc;
+    return { cancelRequested, cancelledAt, cancelledBy };
+  }
+
   public async getWorkflowExecutionWithVersion(
     workflowExecutionId: string,
     spaceId: string
