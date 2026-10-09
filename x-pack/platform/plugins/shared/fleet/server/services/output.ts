@@ -111,7 +111,9 @@ import {
 } from './outputs/helpers';
 import {
   clearKafkaAuthFieldsForType,
+  getRemovedKafkaOAuth2Secrets,
   omitKafkaSecretsOfOtherAuthTypes,
+  omitRemovedKafkaOAuth2Secrets,
   usesKafkaOAuth2,
 } from './outputs/kafka_auth';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
@@ -162,7 +164,12 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
   const logger = appContextService.getLogger();
 
   if (isBeatsSOOutput(so.attributes)) {
-    const { output_id: outputId, ssl, proxy_id: proxyId, ...attributes } = so.attributes;
+    const {
+      output_id: outputId,
+      ssl,
+      proxy_id: proxyId,
+      ...attributes
+    } = omitRemovedKafkaOAuth2Secrets(so.attributes);
     let parsedSsl;
     try {
       parsedSsl = typeof ssl === 'string' ? JSON.parse(ssl) : undefined;
@@ -1620,6 +1627,20 @@ class OutputService {
           updateData.service_token = typedFullUpdateData.secrets.service_token as string;
         }
       }
+    }
+
+    // The secrets that are no longer part of the output are deleted above. Their references have to
+    // be removed too, or the output would keep pointing at deleted secrets.
+    const removedOAuth2Secrets = getRemovedKafkaOAuth2Secrets(
+      originalOutput,
+      mergedType === outputType.Kafka ? (data as { secrets?: unknown }).secrets : undefined
+    );
+    if (removedOAuth2Secrets) {
+      const newSecrets = updateData.secrets as { oauth2?: Record<string, unknown> } | undefined;
+      updateData.secrets = {
+        ...newSecrets,
+        oauth2: { ...newSecrets?.oauth2, ...removedOAuth2Secrets },
+      } as typeof updateData.secrets;
     }
 
     patchUpdateDataWithRequireEncryptedAADFields(updateData, originalOutput);

@@ -88,6 +88,49 @@ export function omitKafkaSecretsOfOtherAuthTypes<T extends object>(
   return kept as T;
 }
 
+/**
+ * The saved object update merges objects: a secret that is no longer sent is deleted, but its
+ * reference stays in the output unless it is explicitly set to `null`. Returns those `null`s for
+ * the OAuth2 secrets that the output has and the update does not keep (`undefined` if none).
+ */
+export function getRemovedKafkaOAuth2Secrets(
+  original: { type?: string; secrets?: unknown },
+  updatedSecrets: unknown
+): Record<string, null> | undefined {
+  const savedOAuth2 = (original.secrets as { oauth2?: Record<string, unknown> } | undefined)
+    ?.oauth2;
+  if (original.type !== 'kafka' || !savedOAuth2) {
+    return undefined;
+  }
+
+  const keptOAuth2 = (updatedSecrets as { oauth2?: Record<string, unknown> } | undefined)?.oauth2;
+  const removed = Object.keys(savedOAuth2).filter((key) => savedOAuth2[key] && !keptOAuth2?.[key]);
+
+  return removed.length ? Object.fromEntries(removed.map((key) => [key, null])) : undefined;
+}
+
+/**
+ * Removes the OAuth2 secrets set to `null` by an update (see `getRemovedKafkaOAuth2Secrets`) from
+ * the attributes of a saved output, so they are not part of the output.
+ */
+export function omitRemovedKafkaOAuth2Secrets<T extends object>(attributes: T): T {
+  const secrets = (attributes as { secrets?: { oauth2?: Record<string, unknown> | null } }).secrets;
+  if (!secrets || !('oauth2' in secrets)) {
+    return attributes;
+  }
+
+  const { oauth2, ...otherSecrets } = secrets;
+  const keptOAuth2 = Object.fromEntries(
+    Object.entries(oauth2 ?? {}).filter(([, secret]) => secret !== null && secret !== undefined)
+  );
+  const newSecrets = isEmpty(keptOAuth2) ? otherSecrets : { ...otherSecrets, oauth2: keptOAuth2 };
+
+  const { secrets: _secrets, ...otherAttributes } = attributes as T & { secrets?: unknown };
+
+  // no secrets left: the output is as if it never had any
+  return (isEmpty(newSecrets) ? otherAttributes : { ...otherAttributes, secrets: newSecrets }) as T;
+}
+
 /** Whether an output payload sets anything of the OAuth2 authentication method. */
 export function usesKafkaOAuth2(output: {
   type?: string;

@@ -11,7 +11,9 @@ import {
   buildKafkaAuthData,
   buildKafkaSecrets,
   clearKafkaAuthFieldsForType,
+  getRemovedKafkaOAuth2Secrets,
   omitKafkaSecretsOfOtherAuthTypes,
+  omitRemovedKafkaOAuth2Secrets,
   usesKafkaOAuth2,
 } from './kafka_auth';
 
@@ -392,5 +394,88 @@ describe('buildKafkaSecrets', () => {
 
     expect(buildKafkaSecrets({ auth_type: kafkaAuthType.Userpass, secrets })).toBe(secrets);
     expect(buildKafkaSecrets({ auth_type: kafkaAuthType.Ssl, secrets: undefined })).toBe(undefined);
+  });
+});
+
+describe('getRemovedKafkaOAuth2Secrets', () => {
+  const saved = {
+    type: 'kafka',
+    secrets: { oauth2: { client_secret: { id: 'secret-id' }, client_certificate_key: null } },
+  };
+
+  it('returns a null for each saved secret that the update does not keep', () => {
+    expect(getRemovedKafkaOAuth2Secrets(saved, undefined)).toEqual({ client_secret: null });
+    expect(getRemovedKafkaOAuth2Secrets(saved, { password: 'pass' })).toEqual({
+      client_secret: null,
+    });
+    expect(
+      getRemovedKafkaOAuth2Secrets(
+        { type: 'kafka', secrets: { oauth2: { client_secret: { id: 'a' } } } },
+        { oauth2: { client_certificate_key: 'KEY' } }
+      )
+    ).toEqual({ client_secret: null });
+  });
+
+  it('returns nothing when the update keeps every saved secret', () => {
+    expect(
+      getRemovedKafkaOAuth2Secrets(saved, { oauth2: { client_secret: { id: 'secret-id' } } })
+    ).toBeUndefined();
+    expect(
+      getRemovedKafkaOAuth2Secrets(saved, { oauth2: { client_secret: 'a new secret' } })
+    ).toBeUndefined();
+  });
+
+  it('returns nothing when the output has no saved OAuth2 secret, or is not a Kafka output', () => {
+    expect(getRemovedKafkaOAuth2Secrets({ type: 'kafka' }, undefined)).toBeUndefined();
+    expect(
+      getRemovedKafkaOAuth2Secrets({ type: 'kafka', secrets: { password: { id: 'a' } } }, {})
+    ).toBeUndefined();
+    expect(getRemovedKafkaOAuth2Secrets({ type: 'kafka', secrets: { oauth2: {} } }, {})).toBe(
+      undefined
+    );
+    expect(getRemovedKafkaOAuth2Secrets({ ...saved, type: 'logstash' }, undefined)).toBeUndefined();
+  });
+});
+
+describe('omitRemovedKafkaOAuth2Secrets', () => {
+  it('removes the OAuth2 secrets that an update set to null', () => {
+    expect(
+      omitRemovedKafkaOAuth2Secrets({
+        name: 'output',
+        secrets: {
+          password: { id: 'password-id' },
+          oauth2: { client_secret: null, client_certificate_key: { id: 'key-id' } },
+        },
+      })
+    ).toEqual({
+      name: 'output',
+      secrets: {
+        password: { id: 'password-id' },
+        oauth2: { client_certificate_key: { id: 'key-id' } },
+      },
+    });
+  });
+
+  it('removes the oauth2 secrets when none is left', () => {
+    expect(
+      omitRemovedKafkaOAuth2Secrets({
+        secrets: { password: { id: 'password-id' }, oauth2: { client_secret: null } },
+      })
+    ).toEqual({ secrets: { password: { id: 'password-id' } } });
+    // no secrets left: the output is as if it never had any
+    expect(
+      omitRemovedKafkaOAuth2Secrets({
+        name: 'output',
+        secrets: { oauth2: { client_secret: null } },
+      })
+    ).toEqual({ name: 'output' });
+  });
+
+  it('does not change the attributes without OAuth2 secrets', () => {
+    const withoutOAuth2 = { name: 'output', secrets: { password: { id: 'password-id' } } };
+    const withoutSecrets = { name: 'output' };
+
+    expect(omitRemovedKafkaOAuth2Secrets(withoutOAuth2)).toBe(withoutOAuth2);
+    expect(omitRemovedKafkaOAuth2Secrets(withoutSecrets)).toBe(withoutSecrets);
   });
 });
