@@ -45,6 +45,7 @@ export {
   EmbeddableRenderer,
   EmbeddableRendererContext,
   PlacementStrategy,
+  prefetchEmbeddableRenderer,
   type DefaultEmbeddableApi,
   type EmbeddablePublicDefinition,
   type LayoutConstraints,
