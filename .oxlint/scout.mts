@@ -112,4 +112,20 @@ export const scoutOverrides: OxlintOverride[] = [
       '@kbn/eslint/scout_no_raw_eui_selectors': 'error',
     },
   },
+  {
+    // Observability Scout tests (excludes plugins that are single-architecture by design:
+    // profiling/uptime are stateful-only, serverless_observability is serverless-only,
+    // ux/exploratory_view (RUM) ship stateful-only)
+    files: ['x-pack/solutions/observability/{packages,plugins}/*/test/{scout,scout_*}/**/*.ts'],
+    excludeFiles: [
+      'x-pack/solutions/observability/plugins/profiling/test/**',
+      'x-pack/solutions/observability/plugins/serverless_observability/test/**',
+      'x-pack/solutions/observability/plugins/uptime/test/**',
+      'x-pack/solutions/observability/plugins/ux/test/**',
+      'x-pack/solutions/observability/plugins/exploratory_view/test/**',
+    ],
+    rules: {
+      '@kbn/eslint/scout_prefer_both_arch_tags': 'warn',
+    },
+  },
 ];

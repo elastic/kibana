@@ -2406,14 +2406,6 @@ module.exports = {
       },
     },
     {
-      // Observability Scout tests (excludes profiling, which is stateful-only by design)
-      files: ['x-pack/solutions/observability/{packages,plugins}/*/test/{scout,scout_*}/**/*.ts'],
-      excludedFiles: ['x-pack/solutions/observability/plugins/profiling/test/**'],
-      rules: {
-        '@kbn/eslint/scout_prefer_both_arch_tags': 'warn',
-      },
-    },
-    {
       files: ['x-pack/solutions/observability/**/test/{scout,scout_*}/**/*.ts'],
       rules: {
         'no-restricted-imports': [
