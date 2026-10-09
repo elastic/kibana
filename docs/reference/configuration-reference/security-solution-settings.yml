@@ -115,6 +115,71 @@ groups:
           self: ga
           serverless: unavailable
 
+      - setting: xpack.securitySolution.packagerTaskInterval
+        description: |
+          How often the background task that builds Elastic Defend artifacts and their manifest runs. Specify a number followed by `s` for seconds or `m` for minutes.
+        datatype: string
+        default: 60s
+        applies_to:
+          stack: ga
+          ech: unavailable
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: xpack.securitySolution.packagerTaskTimeout
+        description: |
+          How long a run of the Elastic Defend artifacts task can take before it times out. Specify a number followed by `s` for seconds, `m` for minutes, `h` for hours, or `d` for days.
+        datatype: string
+        default: 20m
+        applies_to:
+          stack: ga
+          ech: unavailable
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: xpack.securitySolution.packagerTaskPackagePolicyUpdateBatchSize
+        description: |
+          The number of Elastic Defend integration policies that the artifacts task updates at a time when a new artifact manifest is available. Must be between `1` and `50`.
+        datatype: int
+        default: 25
+        applies_to:
+          stack: ga
+          ech: unavailable
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: xpack.securitySolution.completeExternalResponseActionsTaskInterval
+        description: |
+          How often the background task that checks and completes response actions sent to third-party endpoint agents runs. Specify a number followed by `s` for seconds or `m` for minutes.
+        datatype: string
+        default: 60s
+        applies_to:
+          stack: ga
+          ech: unavailable
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: xpack.securitySolution.completeExternalResponseActionsTaskTimeout
+        description: |
+          How long a run of the third-party response actions task can take before it times out. Specify a number followed by `s` for seconds or `m` for minutes.
+        datatype: string
+        default: 5m
+        applies_to:
+          stack: ga
+          ech: unavailable
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
   - group: Entity analytics settings
     id: entity-analytics-settings
     settings:
@@ -146,6 +211,23 @@ groups:
           serverless: unavailable
         deprecation_details: |
           Deprecated since 9.4. Privileged user monitoring is replaced by [watchlists](docs-content://solutions/security/advanced-entity-analytics/watchlists.md).
+
+  - group: Osquery settings
+    id: osquery-settings
+    settings:
+
+      - setting: xpack.osquery.enabled
+        description: |
+          Set to `false` to disable [Osquery](docs-content://solutions/security/investigate/osquery.md) in Kibana, including the **Osquery** app and Osquery response actions. Set to `true` to keep it enabled.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: unavailable
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
 
   - group: Experimental features
     id: experimental-features
