@@ -282,12 +282,14 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       const originalGetEndpointMetadataService =
         mockEndpointAppContextService.getEndpointMetadataService;
 
-      jest.spyOn(mockEndpointAppContextService, 'getEndpointMetadataService').mockImplementation(
-        () =>
-          mockMetadataService as unknown as ReturnType<
-            EndpointAppContextService['getEndpointMetadataService']
-          >
-      );
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation(
+          () =>
+            mockMetadataService as unknown as ReturnType<
+              EndpointAppContextService['getEndpointMetadataService']
+            >
+        );
 
       try {
         const result = await (listTool as unknown as { handler: Function }).handler(

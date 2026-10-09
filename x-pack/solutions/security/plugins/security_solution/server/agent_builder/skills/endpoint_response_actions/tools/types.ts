@@ -13,8 +13,7 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../../../common/endpoint/service/response_actions/constants';
-import type { HostInfo } from '../../../../../common/endpoint/types';
-import type { ActionDetails } from '../../../../../common/endpoint/types';
+import type { HostInfo, ActionDetails } from '../../../../../common/endpoint/types';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { getActionDetailsById } from '../../../../endpoint/services/actions';
 
