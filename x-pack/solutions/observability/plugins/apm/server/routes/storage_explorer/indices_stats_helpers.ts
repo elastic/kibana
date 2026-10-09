@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { errors } from '@elastic/elasticsearch';
 import { uniq, values, sumBy } from 'lodash';
 import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
+import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
 import type { ApmPluginRequestHandlerContext } from '../typings';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
@@ -160,17 +162,11 @@ export function getApmIndicesCombined(apmEventClient: APMEventClient) {
 }
 
 export function isIndexNotFoundError(error: unknown): boolean {
-  if (!error || typeof error !== 'object') {
-    return false;
-  }
+  const elasticsearchError =
+    error instanceof WrappedElasticsearchClientError ? error.originalError : error;
 
-  const esError = error as {
-    message?: string;
-    meta?: { body?: { error?: { type?: string } } };
-  };
   return (
-    esError.meta?.body?.error?.type === 'index_not_found_exception' ||
-    (typeof esError.message === 'string' &&
-      esError.message.startsWith('index_not_found_exception:'))
+    elasticsearchError instanceof errors.ResponseError &&
+    elasticsearchError.body?.error?.type === 'index_not_found_exception'
   );
 }
