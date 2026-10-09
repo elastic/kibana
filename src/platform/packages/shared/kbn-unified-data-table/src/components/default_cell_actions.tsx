@@ -138,9 +138,8 @@ export const ReverseCategorizeBtn = ({
   uiActions?: UiActionsStart;
 }) => {
   const context = useContext(UnifiedDataTableContext);
-  const buttonTitle = i18n.translate('unifiedDataTable.grid.reverseCategorizeAria', {
-    defaultMessage: 'Run reverse categorization on {value}',
-    values: { value: columnId },
+  const buttonTitle = i18n.translate('unifiedDataTable.grid.reverseCategorize', {
+    defaultMessage: 'Find similar values',
   });
 
   const isTextfield = field.esTypes?.includes('text') === true;
@@ -172,9 +171,7 @@ export const ReverseCategorizeBtn = ({
       title={buttonTitle}
       data-test-subj="reverseCategorizeButton"
     >
-      {i18n.translate('unifiedDataTable.grid.reverseCategorize', {
-        defaultMessage: 'Find similar values',
-      })}
+      {buttonTitle}
     </Component>
   );
 };
