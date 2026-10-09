@@ -42,6 +42,27 @@ jest.mock('../../hooks/use_can_write_alertzero', () => ({
 }));
 jest.mock('../../hooks/use_watches_api');
 jest.mock('../../hooks/use_workers_api');
+jest.mock('../../hooks/use_hunt_threat_intel_supply', () => ({
+  useHuntThreatIntelSupplyStatus: jest.fn(() => ({
+    data: {
+      huntEnabled: false,
+      drift: false,
+      hardGate: { ok: true, reasonCodes: [] },
+      workflows: [],
+    },
+    isLoading: false,
+    isError: false,
+  })),
+  useRestoreHuntThreatIntelSupply: jest.fn(() => ({
+    mutate: jest.fn(),
+    isLoading: false,
+  })),
+}));
+jest.mock('../../components/worker_dependencies/worker_dependencies_callout', () => ({
+  WorkerDependenciesCallout: ({ worker, surface }: { worker: { id: string }; surface: string }) => (
+    <div data-test-subj={`alertZeroWorkerDependencies-${surface}-${worker.id}`} />
+  ),
+}));
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useKibana: () => ({
@@ -292,6 +313,9 @@ describe('WatchDetailPage', () => {
 
     for (const worker of floorWorkers) {
       const section = screen.getByTestId(`alertZeroWatchWorkerSection-${worker.id}`);
+      expect(
+        within(section).getByTestId(`alertZeroWorkerDependencies-settings-${worker.id}`)
+      ).toBeInTheDocument();
       expect(
         within(section).getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`)
       ).toBeInTheDocument();
@@ -1022,6 +1046,20 @@ describe('WatchDetailPage', () => {
 
       expect(enabledSwitch(ruleTuning)).toHaveAttribute('aria-checked', 'false');
       expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeEnabled();
+    });
+
+    it('shows no no-model warning to a user who cannot change Workers', () => {
+      renderWatch(
+        SYSTEM_SECURITY_WATCH_DETECTION_ID,
+        [blocked(ruleTuning, true), blocked(ruleCoverage, false)],
+        false
+      );
+
+      for (const worker of [ruleTuning, ruleCoverage]) {
+        expect(
+          screen.queryByTestId(`alertZeroWorkerWarningIcon-${worker.id}`)
+        ).not.toBeInTheDocument();
+      }
     });
 
     it('gives Hunt the Models row and the block like every other Worker', () => {

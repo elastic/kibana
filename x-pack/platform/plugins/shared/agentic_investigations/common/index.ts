@@ -148,6 +148,7 @@ export type {
   ReadManagePrivileges,
 } from './investigations/privileges';
 
+export { isInvestigationSeverity } from './investigations/severity';
 export { isInvestigationTitlePending } from './investigations/title';
 
 // Query API shapes. Types only, like subjects and hypotheses: the schemas stay in the entity
