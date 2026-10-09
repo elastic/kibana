@@ -31,6 +31,12 @@ jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
   ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
 }));
 
+jest.mock('../../components/worker_dependencies/worker_dependencies_callout', () => ({
+  WorkerDependenciesCallout: ({ worker, surface }: { worker: { id: string }; surface: string }) => (
+    <div data-test-subj={`alertZeroWorkerDependencies-${surface}-${worker.id}`} />
+  ),
+}));
+
 const mockEnsureWorkerServiceAccounts = jest.fn();
 jest.mock('../../service_accounts/ensure_worker_service_accounts', () => ({
   ensureWorkerServiceAccounts: (...args: unknown[]) => mockEnsureWorkerServiceAccounts(...args),
@@ -74,7 +80,7 @@ const enabledWorkerBody = JSON.stringify({
 });
 
 const renderPage = ({
-  canWrite = false,
+  canWrite = true,
   httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } }),
   httpGet,
   serverWorkers = ALL_WORKERS_RESPONSE,
@@ -147,12 +153,28 @@ describe('OnboardingPage', () => {
       expect(screen.queryByRole('switch')).not.toBeInTheDocument();
     });
 
-    it('is shown to read-only users and does not send PATCHes', () => {
+    it('disables Continue with an explanation for users without write access', () => {
       const httpPatch = jest.fn();
       renderPage({ canWrite: false, skipIntro: false, httpPatch });
 
-      expect(screen.getByTestId('alertZeroOnboardingContinueButton')).toBeInTheDocument();
+      expect(screen.getByTestId('alertZeroOnboardingContinueButton')).toBeDisabled();
+      expect(screen.getByTestId('alertZeroOnboardingContinueDisabledReason')).toHaveTextContent(
+        'You need the AlertZero All privilege'
+      );
+
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
+      expect(screen.getByTestId('alertZeroOnboardingIntroPromo')).toBeInTheDocument();
+      expect(screen.queryByRole('switch')).not.toBeInTheDocument();
       expect(httpPatch).not.toHaveBeenCalled();
+    });
+
+    it('enables Continue without an explanation for users with write access', () => {
+      renderPage({ canWrite: true, skipIntro: false });
+
+      expect(screen.getByTestId('alertZeroOnboardingContinueButton')).toBeEnabled();
+      expect(
+        screen.queryByTestId('alertZeroOnboardingContinueDisabledReason')
+      ).not.toBeInTheDocument();
     });
 
     it('shows a disabled video placeholder', () => {
@@ -384,11 +406,13 @@ describe('OnboardingPage', () => {
       expect(httpPatch).not.toHaveBeenCalled();
     });
 
-    it('shows the Attack Discovery workflows note', () => {
+    it('shows the Attack Discovery dependency callout', () => {
       renderPage({ canWrite: true });
-      expect(screen.getByTestId('alertZeroOnboardingAttackDiscoveryNote')).toHaveTextContent(
-        'Turning this on also enables the Attack Discovery workflows in Settings.'
-      );
+      expect(
+        screen.getByTestId(
+          `alertZeroWorkerDependencies-onboarding-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+        )
+      ).toBeInTheDocument();
     });
 
     it('does not render the Before you enable panel', () => {
@@ -501,13 +525,14 @@ describe('OnboardingPage', () => {
       expect(screen.getByTestId('alertZeroOnboardingBackButton')).toBeInTheDocument();
     });
 
-    it('navigates to Security and does not send PATCHes when Back is clicked', () => {
+    it('returns to the intro step and does not send PATCHes when Back is clicked', () => {
       const httpPatch = jest.fn();
       const { application } = renderPage({ canWrite: true, httpPatch });
 
       fireEvent.click(screen.getByTestId('alertZeroOnboardingBackButton'));
 
-      expect(application.navigateToApp).toHaveBeenCalledWith(SECURITY_APP_ID);
+      expect(screen.getByTestId('alertZeroOnboardingIntroPromo')).toBeInTheDocument();
+      expect(application.navigateToApp).not.toHaveBeenCalled();
       expect(httpPatch).not.toHaveBeenCalled();
     });
 
@@ -710,14 +735,10 @@ describe('OnboardingPage', () => {
   });
 
   describe('without write capability (read-only user)', () => {
-    it('renders the read-only body copy', () => {
-      renderPage({ canWrite: false });
-      expect(screen.getByText(/Ask an administrator to enable a Watch worker/)).toBeInTheDocument();
-    });
-
-    it('does not render the worker toggle list', () => {
+    it('cannot reach the worker selection step', () => {
       renderPage({ canWrite: false });
       expect(screen.queryByTestId(/alertZeroOnboardingWorkerToggle/)).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Enable and run' })).not.toBeInTheDocument();
     });
   });
 });

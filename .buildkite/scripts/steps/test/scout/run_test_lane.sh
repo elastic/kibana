@@ -4,13 +4,15 @@ set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
 
-SCOUT_SERVER_LOG=".scout/server.log"
+SCOUT_SERVER_LOG=""
 PLAYWRIGHT_BIN="./node_modules/.bin/playwright"
 
 LOAD_IDS=()
+LOAD_CONFIG_SETS=()
 PASSED_INDICES=""
 PASSED=()
 FAILED=()
+FAILED_COUNT_AT_SERVER_START=0
 SKIPPED=()
 RETRY_SPEC_FILES=()
 TOTAL_FLAKY=0
@@ -138,9 +140,12 @@ mark_index_passed() {
   buildkite-agent meta-data set "$PASSED_LOAD_INDICES_META_KEY" "$PASSED_INDICES"
 }
 
-# Extract the load IDs (Scout test config paths) assigned to this lane from the loads file
+# Extract the load IDs (Scout test config paths) assigned to this lane and the server config set of each load
 read_load_ids() {
-  mapfile -t LOAD_IDS < <(jq -r --arg key "$BUILDKITE_STEP_KEY" '.[$key].loadIDs[]' "$SCOUT_TEST_LANE_LOADS_PATH")
+  mapfile -t LOAD_IDS < <(jq -r --arg key "$BUILDKITE_STEP_KEY" \
+    '.[$key].loadGroups[]?.loadIDs[]?' "$SCOUT_TEST_LANE_LOADS_PATH")
+  mapfile -t LOAD_CONFIG_SETS < <(jq -r --arg key "$BUILDKITE_STEP_KEY" \
+    '.[$key].loadGroups[]? | .configSet as $configSet | .loadIDs[]? | $configSet' "$SCOUT_TEST_LANE_LOADS_PATH")
 
   if [[ ${#LOAD_IDS[@]} -eq 0 ]]; then
     echo "No test lane load IDs found for step key '$BUILDKITE_STEP_KEY'"
@@ -164,6 +169,7 @@ upload_test_server_log() {
 # Start the Scout test server in the background and wait for it to become ready
 start_server() {
   local timeout_seconds="$1"
+  FAILED_COUNT_AT_SERVER_START=${#FAILED[@]}
   mkdir -p "$(dirname "$SCOUT_SERVER_LOG")"
 
   echo "--- Starting test server (timeout: ${timeout_seconds}s)"
@@ -200,15 +206,20 @@ start_server() {
   exit 1
 }
 
-# Stop the test server if it's still running
+# Stop the test server if it's still running and upload its log if any config failed against it
 stop_server() {
-  if [[ -n "${SCOUT_SERVER_PID:-}" ]] && kill -0 "$SCOUT_SERVER_PID" 2>/dev/null; then
+  if [[ -z "${SCOUT_SERVER_PID:-}" ]]; then
+    return
+  fi
+
+  if kill -0 "$SCOUT_SERVER_PID" 2>/dev/null; then
     echo "--- Stopping test server (PID: $SCOUT_SERVER_PID)"
     kill "$SCOUT_SERVER_PID" 2>/dev/null || true
     wait "$SCOUT_SERVER_PID" 2>/dev/null || true
   fi
+  SCOUT_SERVER_PID=""
 
-  if [[ ${#FAILED[@]} -gt 0 ]]; then
+  if [[ ${#FAILED[@]} -gt $FAILED_COUNT_AT_SERVER_START ]]; then
     upload_test_server_log
   fi
 }
@@ -351,7 +362,7 @@ print_summary() {
   echo "Test server configuration:"
   echo "  Arch: $SCOUT_TEST_TARGET_ARCH"
   echo "  Domain: $SCOUT_TEST_TARGET_DOMAIN"
-  echo "  Server config set: $SCOUT_TEST_SERVER_CONFIG_SET"
+  echo "  Server config set(s): $(jq -r --arg key "$BUILDKITE_STEP_KEY" '[.[$key].loadGroups[]?.configSet] | join(", ")' "$SCOUT_TEST_LANE_LOADS_PATH")"
   echo ""
   echo "Test count by status:"
   if [[ ${#PASSED[@]} -gt 0 ]]; then
@@ -377,7 +388,6 @@ check_required_env_vars \
   SCOUT_TEST_TARGET_LOCATION \
   SCOUT_TEST_TARGET_ARCH \
   SCOUT_TEST_TARGET_DOMAIN \
-  SCOUT_TEST_SERVER_CONFIG_SET \
   SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS \
   KIBANA_BUILD_LOCATION
 
@@ -390,15 +400,23 @@ read_load_ids
 load_passed_indices
 
 trap stop_server EXIT
-start_server "$SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS"
 
 for i in "${!LOAD_IDS[@]}"; do
   config_path="${LOAD_IDS[$i]}"
+  config_set="${LOAD_CONFIG_SETS[$i]}"
 
   if has_load_index_passed "$i"; then
     SKIPPED+=("$config_path")
     echo "~~~ Skipping (already passed): $config_path"
     continue
+  fi
+
+  # Loads are grouped by server config set; (re)start the server only when the next load needs a different one
+  if [[ -z "${SCOUT_SERVER_PID:-}" || "$config_set" != "${SCOUT_TEST_SERVER_CONFIG_SET:-}" ]]; then
+    stop_server
+    SCOUT_TEST_SERVER_CONFIG_SET="$config_set"
+    SCOUT_SERVER_LOG=".scout/server_${i}_${config_set}.log"
+    start_server "$SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS"
   fi
 
   run_scout_tests "$i" "$config_path"
