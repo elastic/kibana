@@ -341,9 +341,8 @@ describe('ExecutiveBriefFlyout', () => {
     });
     render(<ExecutiveBriefFlyout timeRange="7d" onClose={jest.fn()} />);
 
-    expect(screen.getByTestId(TEST_IDS.progress)).toHaveTextContent(
-      'Writing the brief with Claude Sonnet 5'
-    );
+    expect(screen.getByTestId(TEST_IDS.progress)).toHaveTextContent('Writing the brief…');
+    expect(screen.getByTestId(TEST_IDS.progress)).not.toHaveTextContent('Claude Sonnet 5');
   });
 
   it('does not render an owner chip for decisions without an owner', () => {

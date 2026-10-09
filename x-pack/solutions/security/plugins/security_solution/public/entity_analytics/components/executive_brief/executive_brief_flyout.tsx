@@ -109,7 +109,7 @@ interface ProgressProps {
 
 const stageLabel = (stage: BriefJobStage, modelName: string | undefined): string =>
   stage === 'generate' && modelName
-    ? `Writing the brief with ${modelName}… this usually takes about 30 seconds`
+    ? 'Writing the brief… this usually takes about 30 seconds'
     : STAGE_LABEL[stage];
 
 const Progress: React.FC<ProgressProps & { modelName?: string }> = ({ job, modelName }) => (
@@ -352,7 +352,7 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
                     timeRange
                   ].toLowerCase()}. `}
                   {selection.generator === 'inference'
-                    ? `Written by ${selectedName ?? 'the selected model'}; takes about 30 seconds.`
+                    ? 'Takes about 30 seconds.'
                     : 'Uses the template generator (no AI); takes a few seconds.'}
                 </p>
               }
