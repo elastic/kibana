@@ -203,6 +203,14 @@ describe('ArtifactSimpleTable', () => {
     expect(renderResult.getByTestId('testTable-noResults')).toHaveTextContent('No items found');
   });
 
+  it('names the row actions menu button after the artifact of that row', () => {
+    render();
+
+    expect(renderResult.getByTestId('testTable-rowActions-button')).toHaveAccessibleName(
+      `Open actions for ${item.name}`
+    );
+  });
+
   it('opens the row actions menu with edit and delete', async () => {
     render();
 
