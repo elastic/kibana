@@ -17,6 +17,7 @@ project:
   owner: '@elastic/security-generative-ai'
   sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-alertzero-endpoint-analysis
 dependsOn:
+  - '@kbn/agent-builder-plugin'
   - '@kbn/agent-builder-common'
   - '@kbn/alertzero-common'
   - '@kbn/core'
