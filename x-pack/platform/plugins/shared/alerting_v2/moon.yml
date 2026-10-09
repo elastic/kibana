@@ -157,8 +157,12 @@ dependsOn:
   - '@kbn/core-ui-settings-server'
   - '@kbn/licensing-plugin'
   - '@kbn/licensing-types'
+  - '@kbn/workflows-yaml'
   - '@kbn/tooling-log'
   - '@kbn/test'
+  - '@kbn/cloud-plugin'
+  - '@kbn/core-overlays-browser-mocks'
+  - '@kbn/core-rendering-browser-mocks'
 tags:
   - plugin
   - prod

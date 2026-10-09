@@ -8,15 +8,11 @@
 import React, { useState } from 'react';
 import {
   EuiConfirmModal,
-  EuiFieldText,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiFlyoutResizable,
-  EuiFormRow,
-  EuiSpacer,
-  EuiText,
-  EuiTextArea,
   EuiTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -25,10 +21,7 @@ import {
   createAutomationFormValues,
   type AutomationFormValues,
 } from '../form/automation_form_values';
-import { AutomationActionsSection } from '../form/actions/automation_actions_section';
-import { AutomationInstructions } from '../form/instructions/automation_instructions';
-import { AutomationTriggerSection } from '../form/triggers/trigger_section';
-import { AutomationTagsField, tagLabels } from '../form/tags_field';
+import { AutomationFormBody } from '../form/automation_form_body';
 import { AutomationFlyoutFooter } from './automation_flyout_footer';
 import { toAutomationRequestBody } from '../form/to_automation_request';
 import { canSaveAutomation, getSaveBlocker, isTriggerValid } from '../form/validation';
@@ -74,9 +67,11 @@ const getDiscardBody = (name: string) =>
 
 export const CreateAutomationFlyout = ({
   onClose,
+  onCreated,
   tagSuggestions = [],
 }: {
   onClose: () => void;
+  onCreated: (id: string) => void;
   tagSuggestions?: string[];
 }): React.ReactElement => {
   const [initialValues] = useState(createAutomationFormValues);
@@ -84,24 +79,25 @@ export const CreateAutomationFlyout = ({
   const [isNameInvalid, setIsNameInvalid] = useState(false);
   const [isDiscardOpen, setIsDiscardOpen] = useState(false);
   const titleId = useGeneratedHtmlId();
+  const { euiTheme } = useEuiTheme();
   const createAutomation = useCreateAutomation();
   const update = (changes: Partial<AutomationFormValues>) =>
     setValues((current) => ({ ...current, ...changes }));
   const isDirty = JSON.stringify(values) !== JSON.stringify(initialValues);
   const saveBlocker = getSaveBlocker(values);
-  const canSave = canSaveAutomation(values);
+  const canSave = isDirty && canSaveAutomation(values);
 
   const requestClose = () => (isDirty ? setIsDiscardOpen(true) : onClose());
 
-  const save = () => {
+  const save = (isEnabled: boolean) => {
     const { trigger } = values;
     if (!isTriggerValid(trigger)) return;
     if (!values.name.trim()) {
       setIsNameInvalid(true);
       return;
     }
-    createAutomation.mutate(toAutomationRequestBody({ ...values, trigger }), {
-      onSuccess: onClose,
+    createAutomation.mutate(toAutomationRequestBody({ ...values, isEnabled, trigger }), {
+      onSuccess: ({ id }) => onCreated(id),
     });
   };
 
@@ -111,91 +107,29 @@ export const CreateAutomationFlyout = ({
       size={780}
       minWidth={420}
       maxWidth={960}
+      paddingSize="m"
       aria-labelledby={titleId}
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
+        <EuiTitle size="s" css={{ paddingBlock: euiTheme.size.s }}>
           <h2 id={titleId}>{labels.createTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiFormRow fullWidth label={labels.name} isInvalid={isNameInvalid}>
-          <EuiFieldText
-            fullWidth
-            compressed
-            placeholder={labels.namePlaceholder}
-            value={values.name}
-            isInvalid={isNameInvalid}
-            onChange={(event) => {
-              update({ name: event.target.value });
-              setIsNameInvalid(false);
-            }}
-            data-test-subj="automationName"
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          fullWidth
-          label={tagLabels.tags}
-          labelAppend={
-            <EuiText size="xs" color="subdued">
-              {labels.optional}
-            </EuiText>
-          }
-        >
-          <AutomationTagsField
-            tags={values.tags}
-            suggestions={tagSuggestions}
-            onChange={(tags) => update({ tags })}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          fullWidth
-          label={labels.description}
-          labelAppend={
-            <EuiText size="xs" color="subdued">
-              {labels.optional}
-            </EuiText>
-          }
-        >
-          <EuiTextArea
-            fullWidth
-            compressed
-            rows={1}
-            resize="none"
-            css={{ fieldSizing: 'content', minBlockSize: 0, maxBlockSize: 160 }}
-            maxLength={200}
-            placeholder={labels.descriptionPlaceholder}
-            value={values.description}
-            onChange={(event) => update({ description: event.target.value })}
-            data-test-subj="automationDescription"
-          />
-        </EuiFormRow>
-        <EuiSpacer size="l" />
-        <AutomationTriggerSection
-          trigger={values.trigger}
-          dailyDispatchLimit={values.dailyDispatchLimit}
-          onTriggerChange={(trigger) => update({ trigger })}
-          onDailyDispatchLimitChange={(dailyDispatchLimit) => update({ dailyDispatchLimit })}
-        />
-        <EuiSpacer size="l" />
-        <AutomationInstructions
-          instructions={values.instructions}
-          mode={values.mode}
-          onInstructionsChange={(instructions) => update({ instructions })}
-          onModeChange={(mode) => update({ mode })}
-        />
-        <EuiSpacer size="l" />
-        <AutomationActionsSection
-          slackAction={values.slackAction}
-          onSlackActionChange={(slackAction) => update({ slackAction })}
+        <AutomationFormBody
+          values={values}
+          tagSuggestions={tagSuggestions}
+          isNameInvalid={isNameInvalid}
+          onChange={(changes) => {
+            update(changes);
+            if ('name' in changes) setIsNameInvalid(false);
+          }}
         />
       </EuiFlyoutBody>
       <AutomationFlyoutFooter
-        isEnabled={values.isEnabled}
         canSave={canSave}
         isSaving={createAutomation.isLoading}
         saveBlocker={saveBlocker}
-        onEnabledChange={(isEnabled) => update({ isEnabled })}
         onSave={save}
       />
       {isDiscardOpen && (
