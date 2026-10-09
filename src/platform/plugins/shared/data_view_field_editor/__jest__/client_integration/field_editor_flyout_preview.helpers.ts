@@ -144,6 +144,14 @@ const getActions = (testBed: TestBed) => {
     testBed.component.update();
   };
 
+  const saveField = async () => {
+    await act(async () => {
+      testBed.find('fieldSaveButton').simulate('click');
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+    });
+    testBed.component.update();
+  };
+
   const loadCustomDocument = (docId: string) => {};
 
   return {
@@ -156,6 +164,7 @@ const getActions = (testBed: TestBed) => {
     goToNextDocument,
     goToPreviousDocument,
     loadCustomDocument,
+    saveField,
   };
 };
 
