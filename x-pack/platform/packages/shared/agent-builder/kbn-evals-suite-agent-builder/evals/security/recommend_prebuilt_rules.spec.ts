@@ -434,7 +434,9 @@ evaluate.describe(
                 },
                 metadata: {
                   query_intent: 'Rule Editing',
-                  expectedSkill: 'detection-rule-edit',
+                  // detection-rule-edit excludes enable/disable actions (see its index.ts
+                  // exclusion line), so rule toggles route to find-security-rules instead.
+                  expectedSkill: 'find-security-rules',
                 },
               },
               {
@@ -463,20 +465,9 @@ evaluate.describe(
                   expectedSkill: 'alert-analysis',
                 },
               },
-              {
-                input: {
-                  question:
-                    'Create an Alerting V2 rule that uses an ES|QL query to alert me when host CPU stays above 90%.',
-                },
-                output: {
-                  expected:
-                    'I will help author an Alerting V2 rule whose condition is an ES|QL query that fires when host CPU stays above 90%. This is about creating a custom alerting rule, not installing prebuilt Elastic detection rules.',
-                },
-                metadata: {
-                  query_intent: 'Alerting V2 Rule Authoring',
-                  expectedSkill: 'rule-management',
-                },
-              },
+              // Removed the Alerting V2 rule-management row: that skill is gated off by
+              // alerting:v2:experimentalFeatures on evals_agent_builder; coverage lives in
+              // kbn-evals-suite-alerting-v2/evals/rule_management/rule_management.spec.ts.
             ],
           },
         });

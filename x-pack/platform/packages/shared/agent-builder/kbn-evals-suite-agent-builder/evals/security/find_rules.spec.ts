@@ -318,6 +318,8 @@ evaluate.describe(
                   query_intent: 'MITRE Technique ID Query',
                   expectedSkill: 'find-security-rules',
                   expectedOnlyToolId: 'security.find_rules',
+                  // The find-rules skill mandates calling security.discover_rule_tags first.
+                  allowedPrecedingToolIds: ['security.discover_rule_tags'],
                 },
               },
               {
@@ -336,6 +338,8 @@ evaluate.describe(
                   query_intent: 'MITRE Tactic Name Query',
                   expectedSkill: 'find-security-rules',
                   expectedOnlyToolId: 'security.find_rules',
+                  // The find-rules skill mandates calling security.discover_rule_tags first.
+                  allowedPrecedingToolIds: ['security.discover_rule_tags'],
                 },
               },
               {
@@ -353,6 +357,8 @@ evaluate.describe(
                   query_intent: 'MITRE Tactic Name Query',
                   expectedSkill: 'find-security-rules',
                   expectedOnlyToolId: 'security.find_rules',
+                  // The find-rules skill mandates calling security.discover_rule_tags first.
+                  allowedPrecedingToolIds: ['security.discover_rule_tags'],
                 },
               },
               {
@@ -371,6 +377,8 @@ evaluate.describe(
                   query_intent: 'MITRE Tactic Name Query',
                   expectedSkill: 'find-security-rules',
                   expectedOnlyToolId: 'security.find_rules',
+                  // The find-rules skill mandates calling security.discover_rule_tags first.
+                  allowedPrecedingToolIds: ['security.discover_rule_tags'],
                 },
               },
               {
@@ -388,6 +396,8 @@ evaluate.describe(
                   query_intent: 'MITRE Tactic ID Query',
                   expectedSkill: 'find-security-rules',
                   expectedOnlyToolId: 'security.find_rules',
+                  // The find-rules skill mandates calling security.discover_rule_tags first.
+                  allowedPrecedingToolIds: ['security.discover_rule_tags'],
                 },
               },
             ],
@@ -454,10 +464,14 @@ evaluate.describe(
               },
               {
                 input: {
-                  question: 'Which ML jobs have anomalies in the last 24 hours?',
+                  // Security-entity ML phrasing: generic "ML anomalies" prompts route to
+                  // anomaly-detection instead of the security ML jobs skill.
+                  question:
+                    'Are any users logging in at unusual hours according to our security ML jobs?',
                 },
                 output: {
-                  expected: 'I will check the ML jobs for anomalies detected in the last 24 hours.',
+                  expected:
+                    'I will check the security ML jobs for unusual login hours for our users.',
                 },
                 metadata: {
                   query_intent: 'ML Anomalies',
@@ -473,23 +487,14 @@ evaluate.describe(
                 },
                 metadata: {
                   query_intent: 'Rule Editing',
-                  expectedSkill: 'detection-rule-edit',
+                  // detection-rule-edit excludes enable/disable actions (see its index.ts
+                  // exclusion line), so rule toggles route to find-security-rules instead.
+                  expectedSkill: 'find-security-rules',
                 },
               },
-              {
-                input: {
-                  question:
-                    'Show me my alerting V2 rules with ES|QL queries that monitor system CPU.',
-                },
-                output: {
-                  expected:
-                    'I will look up alerting V2 rules (not Security detection rules) that use ES|QL queries to monitor system CPU.',
-                },
-                metadata: {
-                  query_intent: 'V2 Rule Discovery',
-                  expectedSkill: 'rule-management',
-                },
-              },
+              // Removed the Alerting V2 rule-management row: that skill is gated off by
+              // alerting:v2:experimentalFeatures on evals_agent_builder; coverage lives in
+              // kbn-evals-suite-alerting-v2/evals/rule_management/rule_management.spec.ts.
             ],
           },
         });
