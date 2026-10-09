@@ -171,6 +171,7 @@ describe('useConversationProposals', () => {
       query: {
         conversationId: 'conv-42',
         excludeUndecidedSuperseded: true,
+        order: 'newest',
         size: MAX_PROPOSALS_PAGE_SIZE,
         from: 0,
       },
@@ -222,6 +223,7 @@ describe('useConversationProposals', () => {
       query: {
         conversationId: 'conv-42',
         excludeUndecidedSuperseded: true,
+        order: 'newest',
         size: MAX_PROPOSALS_PAGE_SIZE,
         from: 1,
       },

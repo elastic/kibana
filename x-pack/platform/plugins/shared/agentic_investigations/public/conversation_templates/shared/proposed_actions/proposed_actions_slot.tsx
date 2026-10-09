@@ -35,17 +35,6 @@ import {
   PROPOSED_ACTIONS_SHOW_MORE_LABEL,
 } from './translations';
 
-/**
- * A retry is cloned with its original's `createdAt`, so that cannot order a chain. What does is
- * when each attempt ended: the undecided retry has not ended yet, so it is the newest, and the
- * failed attempts follow by their `decidedAt`, latest first. `createdAt` breaks any remaining tie.
- */
-const NOT_ENDED = '9999-12-31T23:59:59.999Z';
-
-const byNewestFirst = (a: ProposalWithMetadata, b: ProposalWithMetadata): number =>
-  (b.decidedAt ?? NOT_ENDED).localeCompare(a.decidedAt ?? NOT_ENDED) ||
-  b.createdAt.localeCompare(a.createdAt);
-
 export interface ProposedActionsSlotProps {
   conversationId: string;
 }
@@ -148,13 +137,13 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
   }
 
   // Deduplicated because the pages are offset windows over a list a decision can move rows
-  // within: a proposal decided between two fetches shifts everything after it up. Newest first,
-  // so a retry sits above the failed attempt it replaced; the API orders by priority instead.
+  // within: a proposal decided between two fetches shifts everything after it up. The API
+  // returns them newest first, so a retry sits above the failed attempt it replaced.
   const proposals = [
     ...new Map(
       (data?.pages ?? []).flatMap((page) => page.proposals).map((p) => [p.id, p])
     ).values(),
-  ].sort(byNewestFirst);
+  ];
 
   if (proposals.length === 0) {
     return (

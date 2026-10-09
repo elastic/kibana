@@ -350,6 +350,12 @@ export const listProposalsQuerySchema = proposalFiltersSchema.extend({
   category: proposalCategorySchema.optional(),
   /** Bounds the closed queue to a recency window rather than all decided history. */
   decidedWithinHours: z.coerce.number().int().min(1).max(168).optional(),
+  /**
+   * `priority` (the default) ranks by impact, confidence and deadline, for a queue of open
+   * proposals. `newest` orders a conversation's history by when each proposal was decided, with
+   * an undecided one first, so paging stays consistent with the order shown.
+   */
+  order: z.enum(['priority', 'newest']).optional(),
   size: z.coerce.number().int().min(1).max(MAX_PROPOSALS_PAGE_SIZE).default(50),
   from: z.coerce.number().int().min(0).max(MAX_PROPOSALS_PAGE_OFFSET).default(0),
 });

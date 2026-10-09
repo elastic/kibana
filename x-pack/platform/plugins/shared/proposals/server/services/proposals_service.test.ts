@@ -14,6 +14,7 @@ import {
   type ListProposalsQuery,
 } from '@kbn/proposals-common';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
+import { IMPACT_RANK_FIELD } from '../storage/sort_ranks';
 import {
   ProposalAlreadyExistsError,
   ProposalConflictError,
@@ -2283,6 +2284,31 @@ describe('ProposalsService', () => {
       expect(searchArgs.query.bool.filter).toEqual(
         expect.arrayContaining([{ bool: { must_not: { exists: { field: 'supersededBy' } } } }])
       );
+    });
+
+    it('should order a conversation history newest first when asked, undecided leading', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery({ order: 'newest' }), SPACE_ID, request);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.sort).toEqual([
+        { decidedAt: { order: 'desc', missing: '_first' } },
+        { createdAt: { order: 'desc' } },
+        { rootProposalId: { order: 'asc' } },
+        { revision: { order: 'asc' } },
+      ]);
+    });
+
+    it('should keep ranking by priority unless a newest-first order is asked for', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery(), SPACE_ID, request);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.sort[0]).toEqual({ [IMPACT_RANK_FIELD]: { order: 'asc' } });
     });
 
     it('should keep a decided superseded proposal but drop an undecided one', async () => {

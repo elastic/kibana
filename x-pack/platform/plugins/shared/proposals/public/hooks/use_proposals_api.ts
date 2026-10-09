@@ -135,6 +135,7 @@ export const useConversationProposals = (
         query: {
           conversationId,
           excludeUndecidedSuperseded: true,
+          order: 'newest',
           size: MAX_PROPOSALS_PAGE_SIZE,
           from: pageParam ?? 0,
         },
