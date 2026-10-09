@@ -306,6 +306,7 @@ describe('Update profile routes', () => {
         userSettings: {
           darkMode: 'dark',
           contrastMode: 'high',
+          installTranslationResilience: true,
           rememberSelectedSpace: true,
         },
       };

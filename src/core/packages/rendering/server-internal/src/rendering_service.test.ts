@@ -960,13 +960,15 @@ describe('RenderingService', () => {
       });
 
       afterEach(() => {
-        mockRenderingSetupDeps.i18n.installTranslationResilience = false;
+        mockRenderingSetupDeps.userSettings.getUserSettings.mockReset();
       });
 
       it.each([true, false])(
         'embeds installTranslationResilience: %s in the bootstrap tag',
         async (installTranslationResilience) => {
-          mockRenderingSetupDeps.i18n.installTranslationResilience = installTranslationResilience;
+          mockRenderingSetupDeps.userSettings.getUserSettings.mockResolvedValue({
+            installTranslationResilience,
+          } as UserSettings);
           await service.preboot(mockRenderingPrebootDeps);
           const { render } = await service.setup(mockRenderingSetupDeps);
 

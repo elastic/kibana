@@ -77,6 +77,7 @@ describe('useUserProfileForm', () => {
           "userSettings": Object {
             "contrastMode": "system",
             "darkMode": "system",
+            "installTranslationResilience": false,
             "locale": "en",
             "rememberSelectedSpace": true,
           },

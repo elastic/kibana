@@ -26,7 +26,7 @@ if (typeof window.__kbnInstallTranslationResilience__ !== 'boolean') {
 if (window.__kbnInstallTranslationResilience__) {
   // Patch to ensure readoption of tracked DOM elements when Chrome and Edge translations kick in and replace the `<font>` tags.
   // For more details, refer to https://github.com/alexspeller/translation-resilience.
-  // Opt in with `i18n.installTranslationResilience: true` in `kibana.yml`.
+  // Opt in from the user profile Language section, or the user-menu Language modal on Cloud.
   require('translation-resilience').installTranslationResilience({
     eager: false, // Only load the translation resilience script when it's needed (the browser translates the page)
     onEvent: (message) => {

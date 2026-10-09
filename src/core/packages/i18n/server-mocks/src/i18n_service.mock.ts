@@ -40,7 +40,6 @@ const createInternalSetupContractMock = () => {
     ...createSetupContractMock(),
     allowLocaleCookie: true,
     detectBrowserLocale: true,
-    installTranslationResilience: false,
   } as jest.Mocked<InternalI18nServiceSetup>;
 };
 
@@ -55,7 +54,6 @@ const createInternalPrebootMock = () => {
     ...base,
     allowLocaleCookie: true,
     detectBrowserLocale: true,
-    installTranslationResilience: false,
   } as jest.Mocked<InternalI18nServicePreboot>;
 
   mock.getTranslationHash.mockReturnValue('MOCK_HASH');

@@ -32,7 +32,7 @@ export interface UseUserProfileSettingResult<T> {
  * Generic hook for managing a single user profile setting.
  * Handles optimistic updates, persistence, and initial value tracking.
  */
-export function useUserProfileSetting<T extends string>({
+export function useUserProfileSetting<T extends string | boolean>({
   settingKey,
   defaultValue,
   notification,
@@ -78,7 +78,8 @@ export function useUserProfileSetting<T extends string>({
     setValue(profileValue);
     if (userProfileLoaded) {
       const stored = userProfileData?.userSettings?.[settingKey] as T | undefined;
-      if (stored) {
+      // Boolean `false` is a stored choice. Empty string is still "no locale choice".
+      if (typeof stored === 'boolean' || stored) {
         setInitialValue(stored);
       }
     }

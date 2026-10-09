@@ -66,19 +66,6 @@ groups:
           ech: beta
           self: beta
 
-      - setting: i18n.installTranslationResilience
-        description: |
-          When `true`, {{kib}} installs a browser patch that keeps the UI
-          responsive when Microsoft Edge or Chrome translates the page.
-          The patch stays inactive until the browser actually translates
-          the page. Defaults to `false`.
-        datatype: boolean
-        default: "false"
-        applies_to:
-          stack: beta 9.6+
-          ech: beta
-          self: beta
-
       - setting: i18n.locale
         description: |
           Set the {{kib}} interface language.

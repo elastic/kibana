@@ -212,7 +212,11 @@ export class RenderingService {
       defaultSettings,
       settingsUserValues = {},
       globalSettingsUserValues = {},
-      { darkMode: userSettingDarkMode, locale: userSettingLocale } = {},
+      {
+        darkMode: userSettingDarkMode,
+        locale: userSettingLocale,
+        installTranslationResilience: userSettingInstallTranslationResilience,
+      } = {},
       userStorageResult = { available: false, values: {} },
     ] = await Promise.all(
       isAnonymousPage
@@ -343,7 +347,7 @@ export class RenderingService {
       uiPublicUrl,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
       locale: effectiveLocale,
-      installTranslationResilience: i18n.installTranslationResilience,
+      installTranslationResilience: userSettingInstallTranslationResilience === true,
       themeVersion,
       darkMode,
       stylesheetPaths: commonStylesheetPaths,

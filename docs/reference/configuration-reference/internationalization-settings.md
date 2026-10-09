@@ -106,8 +106,11 @@ i18n.allowLocaleCookie: false
 i18n.detectBrowserLocale: false
 ```
 
-## Browser's translation features
+## Browser translation
 
-There is a known bug with React and Browsers translation features that may result in stale panels or even broken sections in the page.
+Chrome and Microsoft Edge can move text nodes when they translate a page, which makes parts of Kibana unresponsive. Each user can opt in to an experimental compatibility patch:
 
-Set the experimental setting `i18n.installTranslationResilience` to `true` in case the browser's translation features are used and they cause any issues.
+- On a self-managed deployment, open **Profile** and turn on **Browser translation compatibility** in the Language section.
+- On Elastic Cloud, open the user menu, choose **Language**, and turn on the same switch.
+
+The patch stays inactive until the browser translates the page. Reload Kibana after saving. The switch defaults to off.

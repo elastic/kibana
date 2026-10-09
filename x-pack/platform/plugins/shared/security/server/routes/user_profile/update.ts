@@ -27,6 +27,7 @@ const ALLOWED_KEYS_UPDATE_CLOUD = [
   'userSettings.agentBuilderAnnouncementModalSeen',
   'userSettings.agentBuilderAnnouncementModalSeenBySpaceJson',
   'userSettings.locale',
+  'userSettings.installTranslationResilience',
   'userSettings.rememberSelectedSpace',
   'userSettings.lastSelectedSpaceId',
 ] as const satisfies readonly UserProfileUpdatePaths[];
@@ -64,6 +65,7 @@ const userProfileUpdateSchema = schema.object({
         schema.string({ maxLength: MAX_AGENT_BUILDER_ANNOUNCEMENT_SPACE_JSON_CHARS })
       ),
       locale: schema.maybe(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
+      installTranslationResilience: schema.maybe(schema.boolean()),
       rememberSelectedSpace: schema.maybe(schema.boolean()),
       lastSelectedSpaceId: schema.maybe(
         schema.nullable(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH }))

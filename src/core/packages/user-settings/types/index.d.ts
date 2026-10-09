@@ -46,6 +46,11 @@ export interface UserSettingsData {
   darkMode?: DarkModeValue;
   contrastMode?: ContrastModeValue;
   locale?: LocaleValue;
+  /**
+   * When `true`, Kibana installs a browser patch that keeps the UI responsive
+   * if Chrome or Microsoft Edge translates the page. Experimental. Defaults to off.
+   */
+  installTranslationResilience?: boolean;
   solutionNavOptOut?: boolean;
   /**
    * Whether the user wants to be redirected to the last accessed space on login.

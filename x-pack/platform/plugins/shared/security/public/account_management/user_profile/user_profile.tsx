@@ -129,6 +129,7 @@ export interface UserProfileFormValues {
       darkMode: DarkModeValue;
       contrastMode: ContrastModeValue;
       locale: LocaleValue;
+      installTranslationResilience: boolean;
       rememberSelectedSpace: boolean;
     };
   };
@@ -353,6 +354,54 @@ export const UserLocaleEditor: FunctionComponent<UserLocaleEditorProps> = ({ for
           options={localeOptions}
           data-test-subj="localeSelect"
           fullWidth
+        />
+      </FormRow>
+      <FormRow
+        name="data.userSettings.installTranslationResilience"
+        label={
+          <FormLabel for="data.userSettings.installTranslationResilience">
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <FormattedMessage
+                  id="xpack.security.accountManagement.userProfile.installTranslationResilienceLabel"
+                  defaultMessage="Browser translation compatibility"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">
+                  <FormattedMessage
+                    id="xpack.security.accountManagement.userProfile.installTranslationResilienceExperimentalBadge"
+                    defaultMessage="Experimental"
+                  />
+                </EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </FormLabel>
+        }
+        fullWidth
+      >
+        <FormField
+          label={
+            <EuiText size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.security.accountManagement.userProfile.installTranslationResilienceSwitchDescription"
+                  defaultMessage="Keeps Kibana responsive when Chrome or Microsoft Edge translates the page. Reload the page after saving."
+                />
+              </p>
+            </EuiText>
+          }
+          as={EuiSwitch}
+          name="data.userSettings.installTranslationResilience"
+          checked={formik.values.data.userSettings.installTranslationResilience ?? false}
+          data-test-subj="installTranslationResilienceSwitch"
+          onChange={async (e) => {
+            await formik.setFieldTouched('data.userSettings.installTranslationResilience', true);
+            await formik.setFieldValue(
+              'data.userSettings.installTranslationResilience',
+              e.target.checked
+            );
+          }}
         />
       </FormRow>
     </EuiDescribedFormGroup>
@@ -969,6 +1018,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
             locale:
               data.userSettings?.locale ||
               toCanonicalLocaleId(i18n.getLocale(), getAvailableLocales()),
+            installTranslationResilience: data.userSettings?.installTranslationResilience ?? false,
             rememberSelectedSpace: data.userSettings?.rememberSelectedSpace ?? true,
           },
         }
@@ -1025,7 +1075,9 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
       if (
         initialValues.data?.userSettings.darkMode !== values.data?.userSettings.darkMode ||
         initialValues.data?.userSettings.contrastMode !== values.data?.userSettings.contrastMode ||
-        initialValues.data?.userSettings.locale !== values.data?.userSettings.locale
+        initialValues.data?.userSettings.locale !== values.data?.userSettings.locale ||
+        initialValues.data?.userSettings.installTranslationResilience !==
+          values.data?.userSettings.installTranslationResilience
       ) {
         isRefreshRequired = true;
       }

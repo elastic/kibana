@@ -138,12 +138,26 @@ describe('#setup', () => {
       darkMode: true,
       locale: 'fr-FR',
       rememberSelectedSpace: false,
+      installTranslationResilience: false,
     });
     expect(startDeps.userProfile.getCurrent).toHaveBeenCalledTimes(1);
     expect(startDeps.userProfile.getCurrent).toHaveBeenCalledWith({
       request: kibanaRequest,
       dataPath: 'userSettings',
     });
+  });
+
+  it('returns installTranslationResilience only when the user opted in', async () => {
+    startDeps.userProfile.getCurrent.mockResolvedValue(
+      createUserProfile({ installTranslationResilience: true })
+    );
+
+    const { getUserSettings } = service.setup();
+    service.start(startDeps);
+
+    const userSettings = await getUserSettings(httpServerMock.createKibanaRequest());
+
+    expect(userSettings.installTranslationResilience).toBe(true);
   });
 
   it('does not fetch userSettings when client is not set, returns `undefined`, and logs a debug statement', async () => {

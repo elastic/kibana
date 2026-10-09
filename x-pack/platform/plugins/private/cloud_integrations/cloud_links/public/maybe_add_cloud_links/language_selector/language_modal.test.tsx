@@ -12,12 +12,14 @@ import { EuiProvider } from '@elastic/eui';
 
 import { LanguageModal } from './language_modal';
 import { useLanguage } from './use_language_hook';
+import { useTranslationResilience } from './use_translation_resilience_hook';
 
 const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <EuiProvider>{children}</EuiProvider>
 );
 
 jest.mock('./use_language_hook');
+jest.mock('./use_translation_resilience_hook');
 
 jest.mock('@kbn/i18n', () => {
   const original = jest.requireActual('@kbn/i18n');
@@ -47,6 +49,13 @@ describe('LanguageModal', () => {
       isLoading: false,
       isVisible: true,
       onChange: onChangeMock,
+    });
+    (useTranslationResilience as jest.Mock).mockReturnValue({
+      value: false,
+      initialValue: false,
+      isLoading: false,
+      isVisible: true,
+      onChange: jest.fn(),
     });
   });
 
