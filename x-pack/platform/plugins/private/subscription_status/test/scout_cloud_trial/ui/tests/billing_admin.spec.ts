@@ -47,7 +47,7 @@ test.describe(
         await badge.click();
         await expect(popover).toContainText('Elasticsearch Serverless');
         await expect(popover).toContainText('AWS (us-east-1)');
-        await expect(popover).toContainText("You're on an Elastic trial.");
+        await expect(popover).toContainText("You're on an Elastic Cloud trial");
       });
 
       await test.step('links point to Cloud billing and pricing', async () => {

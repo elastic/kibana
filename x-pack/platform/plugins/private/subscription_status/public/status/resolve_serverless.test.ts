@@ -79,7 +79,7 @@ describe('resolveServerlessStatus', () => {
       label: 'Trial',
       title: 'Elasticsearch Serverless',
       subtitle: 'AWS (us-east-1)',
-      description: "You're on an Elastic trial.",
+      description: "You're on an Elastic Cloud trial",
       primaryAction: { id: 'subscribe', label: 'Subscribe', href: BILLING_URL },
       secondaryAction: {
         id: 'view_pricing',

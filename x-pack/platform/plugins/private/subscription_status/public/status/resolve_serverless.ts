@@ -141,7 +141,7 @@ export const resolveServerlessStatus = async ({
     title: getTitle(projectType),
     subtitle: getRegionLabel(csp, region),
     description: i18n.translate('xpack.subscriptionStatus.serverless.trialDescription', {
-      defaultMessage: "You're on an Elastic trial.",
+      defaultMessage: "You're on an Elastic Cloud trial",
     }),
     primaryAction: {
       id: 'subscribe',
