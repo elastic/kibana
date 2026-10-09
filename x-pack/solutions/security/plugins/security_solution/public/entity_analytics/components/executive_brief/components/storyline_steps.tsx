@@ -20,6 +20,7 @@ import type { EuiTimelineItemProps } from '@elastic/eui';
 import { MAX_STORYLINE_EVENTS } from '../../../../../common/entity_analytics/executive_brief/constants';
 import type {
   BriefSnapshot,
+  StoryEvent,
   StoryEventType,
   Storyline,
 } from '../../../../../common/entity_analytics/executive_brief/types';
@@ -28,8 +29,12 @@ import { getTacticName } from '../utils/resolve_evidence';
 import { useIsPrintMode } from './brief_context';
 import { EvidenceChip } from './evidence_chip';
 
-/** Events shown before "Show more"; print and PDF always show every event. */
-export const PREVIEW_EVENT_COUNT = 4;
+/**
+ * Collapsed timelines keep how it started and where it stands now; the middle is summarised by the
+ * attack stages in the card header. Print and PDF always show every event.
+ */
+export const PREVIEW_HEAD_COUNT = 2;
+export const PREVIEW_TAIL_COUNT = 2;
 
 export const EVENT_ICON: Record<StoryEventType, { iconType: string; color: EventColor }> = {
   alert_first: { iconType: 'warning', color: 'warning' },
@@ -49,7 +54,7 @@ const formatTime = (iso: string): string => {
   return `${date.toISOString().slice(0, 10)} ${date.toISOString().slice(11, 16)}Z`;
 };
 
-/** EuiTimeline of the storyline's events: a short preview that expands, capped server-side with a "+N more" note. */
+/** EuiTimeline of the storyline's events: first and latest events with an expandable gap; capped server-side with a "+N more" note. */
 export const StorylineSteps: React.FC<{ storyline: Storyline; snapshot: BriefSnapshot }> = ({
   storyline,
   snapshot,
@@ -58,9 +63,11 @@ export const StorylineSteps: React.FC<{ storyline: Storyline; snapshot: BriefSna
   const isPrintMode = useIsPrintMode();
   const [showAll, setShowAll] = useState(false);
   const allEvents = storyline.events.slice(0, MAX_STORYLINE_EVENTS);
-  const hiddenCount = isPrintMode || showAll ? 0 : allEvents.length - PREVIEW_EVENT_COUNT;
-  const events = hiddenCount > 0 ? allEvents.slice(0, PREVIEW_EVENT_COUNT) : allEvents;
-  const canCollapse = !isPrintMode && showAll && allEvents.length > PREVIEW_EVENT_COUNT;
+  // Hiding a single event saves nothing, so only truncate when at least two would be hidden.
+  const isLong = allEvents.length > PREVIEW_HEAD_COUNT + PREVIEW_TAIL_COUNT + 1;
+  const isTruncated = isLong && !isPrintMode && !showAll;
+  const hiddenCount = isTruncated ? allEvents.length - PREVIEW_HEAD_COUNT - PREVIEW_TAIL_COUNT : 0;
+  const canCollapse = isLong && !isPrintMode && showAll;
   const isSevere = storyline.severity === 'critical' || storyline.severity === 'high';
   const colorOf = (type: StoryEventType, color: EventColor): string => {
     if (type === 'alert_first' && isSevere) return euiTheme.colors.danger;
@@ -74,7 +81,7 @@ export const StorylineSteps: React.FC<{ storyline: Storyline; snapshot: BriefSna
     }[color];
   };
 
-  const items: EuiTimelineItemProps[] = events.map((event, eventIndex) => ({
+  const toItem = (event: StoryEvent, eventIndex: number): EuiTimelineItemProps => ({
     icon: (
       <EuiAvatar
         name={event.type.replace(/_/g, ' ')}
@@ -113,22 +120,37 @@ export const StorylineSteps: React.FC<{ storyline: Storyline; snapshot: BriefSna
         </EuiPanel>
       </div>
     ),
-  }));
+  });
+
+  const gapItem: EuiTimelineItemProps = {
+    icon: <EuiAvatar name="More events" iconType="boxesVertical" color="subdued" size="m" />,
+    iconAriaLabel: 'More events',
+    verticalAlign: 'center',
+    children: (
+      <EuiButtonEmpty
+        size="xs"
+        flush="left"
+        onClick={() => setShowAll(true)}
+        data-test-subj="executiveBriefStepsShowAll"
+      >
+        {`Show ${hiddenCount} more ${hiddenCount === 1 ? 'event' : 'events'}`}
+      </EuiButtonEmpty>
+    ),
+  };
+
+  const items: EuiTimelineItemProps[] = isTruncated
+    ? [
+        ...allEvents.slice(0, PREVIEW_HEAD_COUNT).map(toItem),
+        gapItem,
+        ...allEvents
+          .slice(-PREVIEW_TAIL_COUNT)
+          .map((event, index) => toItem(event, PREVIEW_HEAD_COUNT + index)),
+      ]
+    : allEvents.map(toItem);
 
   return (
     <div data-test-subj="executiveBriefSteps">
       <EuiTimeline items={items} />
-      {hiddenCount > 0 && (
-        <EuiButtonEmpty
-          size="xs"
-          flush="left"
-          iconType="chevronSingleDown"
-          onClick={() => setShowAll(true)}
-          data-test-subj="executiveBriefStepsShowAll"
-        >
-          {`Show ${hiddenCount} more ${hiddenCount === 1 ? 'event' : 'events'}`}
-        </EuiButtonEmpty>
-      )}
       {canCollapse && (
         <EuiButtonEmpty
           size="xs"
@@ -140,7 +162,7 @@ export const StorylineSteps: React.FC<{ storyline: Storyline; snapshot: BriefSna
           {'Show fewer events'}
         </EuiButtonEmpty>
       )}
-      {hiddenCount <= 0 && storyline.eventsTruncated > 0 && (
+      {!isTruncated && storyline.eventsTruncated > 0 && (
         <EuiText size="xs" color="subdued" data-test-subj="executiveBriefStepsMore">
           {`+${storyline.eventsTruncated} more`}
         </EuiText>

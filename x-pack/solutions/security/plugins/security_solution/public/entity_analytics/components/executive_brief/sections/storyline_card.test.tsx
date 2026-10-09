@@ -194,22 +194,44 @@ describe('StorylineCard', () => {
     }
   });
 
-  it('previews the first timeline events and expands to show the rest', () => {
-    const events = manyEvents(7);
+  it('previews the first and latest timeline events and expands the gap', () => {
     render(
       <StorylineCard
         snapshot={snapshot}
-        storyline={{ ...story1, events, eventsTruncated: 0 }}
+        storyline={{ ...story1, events: manyEvents(7), eventsTruncated: 0 }}
         narrative={narrativeFor(story1.evidenceId)}
         decisions={[]}
       />
     );
-    const steps = () => within(screen.getByTestId('executiveBriefSteps'));
-    expect(steps().getAllByTestId(/^executiveBriefEvent-/)).toHaveLength(4);
+    const shownIds = () =>
+      within(screen.getByTestId('executiveBriefSteps'))
+        .getAllByTestId(/^executiveBriefEvent-/)
+        .map((element) => element.getAttribute('data-test-subj'));
+    expect(shownIds()).toEqual([
+      'executiveBriefEvent-EVT-1',
+      'executiveBriefEvent-EVT-2',
+      'executiveBriefEvent-EVT-6',
+      'executiveBriefEvent-EVT-7',
+    ]);
     fireEvent.click(screen.getByTestId('executiveBriefStepsShowAll'));
-    expect(steps().getAllByTestId(/^executiveBriefEvent-/)).toHaveLength(7);
+    expect(shownIds()).toHaveLength(7);
     fireEvent.click(screen.getByTestId('executiveBriefStepsShowFewer'));
-    expect(steps().getAllByTestId(/^executiveBriefEvent-/)).toHaveLength(4);
+    expect(shownIds()).toHaveLength(4);
+  });
+
+  it('does not truncate when only one event would be hidden', () => {
+    render(
+      <StorylineCard
+        snapshot={snapshot}
+        storyline={{ ...story1, events: manyEvents(5), eventsTruncated: 0 }}
+        narrative={narrativeFor(story1.evidenceId)}
+        decisions={[]}
+      />
+    );
+    expect(
+      within(screen.getByTestId('executiveBriefSteps')).getAllByTestId(/^executiveBriefEvent-/)
+    ).toHaveLength(5);
+    expect(screen.queryByTestId('executiveBriefStepsShowAll')).not.toBeInTheDocument();
   });
 
   it('shows every timeline event in print mode', () => {
