@@ -83,7 +83,6 @@ describe('ArtifactViewFlyout', () => {
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
-    mockedContext.history.push('somepage?show=view&itemId=item-1');
     onClose = jest.fn();
     onEnabledChangeRefresh = jest.fn().mockResolvedValue(undefined);
     refetchArtifact = jest.fn().mockResolvedValue(undefined);
@@ -120,6 +119,7 @@ describe('ArtifactViewFlyout', () => {
     render = (props = {}) => {
       const sharedProps = {
         apiClient: new TrustedAppsApiClient(mockedContext.coreStart.http),
+        itemId: 'item-1',
         onClose,
         ViewModeComponent,
         'data-test-subj': 'viewFlyout',

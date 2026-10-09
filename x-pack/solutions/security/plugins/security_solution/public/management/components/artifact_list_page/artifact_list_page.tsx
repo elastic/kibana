@@ -170,10 +170,10 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
     const setUrlParams = useSetUrlParams();
     const {
-      urlParams: { filter, includedPolicies, sortField, sortOrder, show: showUrlParam },
+      urlParams: { filter, includedPolicies, sortField, sortOrder, show: showUrlParam, itemId },
     } = useUrlParams<ArtifactListPageUrlParams>();
 
-    const isViewFlyoutOpened = showAsSimpleTable && showUrlParam === 'view';
+    const isViewFlyoutOpened = showAsSimpleTable && showUrlParam === 'view' && Boolean(itemId);
 
     const { exportExceptionList } = useApi(http);
 
@@ -472,9 +472,11 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
         {isViewFlyoutOpened &&
           ViewModeComponent &&
+          itemId &&
           (showEnabledColumn ? (
             <ArtifactViewFlyout
               apiClient={apiClient}
+              itemId={itemId}
               labels={labels}
               showEnabledSwitch={showEnabledColumn}
               allowCardEditAction={allowCardEditAction}
@@ -488,6 +490,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           ) : (
             <ArtifactViewFlyout
               apiClient={apiClient}
+              itemId={itemId}
               labels={labels}
               allowCardEditAction={allowCardEditAction}
               allowCardDeleteAction={allowCardDeleteAction}

@@ -30,7 +30,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import { useUrlParams } from '../../../hooks/use_url_params';
 import { useArtifactActionsDisabled, useGetArtifact } from '../../../hooks/artifacts';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useToasts } from '../../../../common/lib/kibana';
@@ -38,7 +37,7 @@ import type { ExceptionsListApiClient } from '../../../services/exceptions_list/
 import type { XOR } from '../../../../../common/utility_types';
 import { ManagementPageLoader } from '../../management_page_loader';
 import { ARTIFACT_ENABLE_DISABLE_ACTION_LABELS } from '../hooks/use_with_artifact_enable_disable';
-import type { ArtifactListPageUrlParams, ArtifactViewModeComponentProps } from '../types';
+import type { ArtifactViewModeComponentProps } from '../types';
 import {
   ARTIFACT_ENABLED_SWITCH_LABELS,
   ArtifactEnabledSwitch,
@@ -109,6 +108,8 @@ export type ArtifactViewFlyoutTakeAction = (action: {
 
 interface ArtifactViewFlyoutBaseProps {
   apiClient: ExceptionsListApiClient;
+  /** Id of the artifact to load. The list page only opens this flyout when the URL has one. */
+  itemId: string;
   /** Any label overrides */
   labels?: Partial<ArtifactViewFlyoutLabels>;
   /** Renders the artifact-specific definition. Receives the full artifact item. */
@@ -143,6 +144,7 @@ export type ArtifactViewFlyoutProps = ArtifactViewFlyoutBaseProps &
 export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
   ({
     apiClient,
+    itemId,
     labels: _labels,
     ViewModeComponent,
     showEnabledSwitch = false,
@@ -176,8 +178,8 @@ export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
       data: item,
       error,
       refetch: refetchArtifact,
-    } = useGetArtifact(apiClient, urlParams.itemId, undefined, {
-      enabled: Boolean(urlParams.itemId),
+    } = useGetArtifact(apiClient, itemId, undefined, {
+      enabled: Boolean(itemId),
       retry: false,
     });
 

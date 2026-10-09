@@ -255,6 +255,17 @@ describe('When using the ArtifactListPage component', () => {
         expect(queryByTestId('formMock')).not.toBeInTheDocument();
       });
 
+      it('should not open the view flyout when show=view has no itemId', async () => {
+        history.push('somepage?show=view');
+
+        const { queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        expect(queryByTestId('testPage-viewFlyout')).not.toBeInTheDocument();
+        expect(queryByTestId('testPage-viewFlyout-loader')).not.toBeInTheDocument();
+      });
+
       it('should disable the artifact from the view flyout and refresh the list', async () => {
         const { getAllByTestId, getByTestId } = await renderWithListData({
           showAsSimpleTable: true,
