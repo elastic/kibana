@@ -22,7 +22,7 @@ export const DEVELOPER_MODE_BADGE_TOOLTIP = i18n.translate(
 export function DeveloperModeBadge() {
   return (
     <EuiToolTip content={DEVELOPER_MODE_BADGE_TOOLTIP}>
-      <EuiBadge color="hollow" tabIndex={0} data-test-subj="nightshiftDeveloperModeBadge">
+      <EuiBadge color="accent" tabIndex={0} data-test-subj="nightshiftDeveloperModeBadge">
         {DEVELOPER_MODE_BADGE_LABEL}
       </EuiBadge>
     </EuiToolTip>

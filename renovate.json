@@ -276,6 +276,15 @@
       "minimumReleaseAge": "14 days"
     },
     {
+      "groupName": "Isomer dependencies",
+      "matchDepNames": ["@elastic/distillate", "@elastic/isomer-runtime", "@elastic/isomer-sdk"],
+      "reviewers": ["team:appex-sharedux"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:SharedUX"],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
+    },
+    {
       "matchDepNames": ["rison-node"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
@@ -2074,7 +2083,7 @@
       "matchDepNames": ["react-hook-form"],
       "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
+      "addLabels": ["ci:all-cypress-suites"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2083,7 +2092,7 @@
       "matchDepNames": ["react-window-infinite-loader", "@types/react-window-infinite-loader"],
       "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
+      "addLabels": ["ci:all-cypress-suites", "Team:obs-signals-logs"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2092,7 +2101,7 @@
       "matchDepNames": ["form-data"],
       "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
+      "addLabels": ["ci:all-cypress-suites"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2101,7 +2110,7 @@
       "matchDepNames": ["@faker-js/faker"],
       "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
+      "addLabels": ["ci:all-cypress-suites", "Team:obs-signals-logs"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2118,7 +2127,7 @@
       "matchDepNames": ["redux-saga"],
       "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
+      "addLabels": ["ci:all-cypress-suites", "Team:obs-signals-logs"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2624,6 +2633,15 @@
     {
       "groupName": "mysql2",
       "matchDepNames": ["mysql2"],
+      "reviewers": ["team:response-ops"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:ResponseOps"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "mssql",
+      "matchDepNames": ["mssql", "@types/mssql"],
       "reviewers": ["team:response-ops"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:ResponseOps"],

@@ -457,6 +457,8 @@ export class AuthenticationService {
       kibanaFeatures,
       buildFlavor,
       uiam,
+      serviceAccountsEnabled: config.serviceAccounts.enabled,
+      getCurrentUser,
     });
 
     const uiamAPIKeys = uiam

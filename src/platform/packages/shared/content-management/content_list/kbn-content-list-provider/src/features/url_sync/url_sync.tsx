@@ -17,13 +17,13 @@ import {
   decodeNewShape,
   encodeUrlState,
   getInitialQueryText,
+  getSortDirectionsByFieldFromKey,
   getSortingConfigKey,
-  getSortingUrlConfigFromKey,
   hasNewShapeParams,
   mergeAndStringify,
   parseSearch,
 } from './url_codec';
-import type { SortDirectionsByField } from './url_codec';
+import type { SortDirectionsByField, SortState } from '../sorting';
 import type { HydratedUrlState, UrlStateSlices } from './types';
 import { decodeLegacyParams } from './legacy_decoder';
 import { useInRouterContext } from './router_context';
@@ -31,6 +31,11 @@ import { claimUrlSyncSlot, type UrlSyncSlotClaim } from './coordinator';
 
 type ClientStateSlices = Pick<ContentListState, 'queryText' | 'sort'>;
 type Dispatch = React.Dispatch<ContentListAction>;
+
+interface ContentListUrlSyncProps {
+  /** The sort the list opened with (persisted, configured, or default). Must stay stable after mount. */
+  initialSort: SortState;
+}
 
 const warnUnknownUrlValue = (key: string, value: unknown): void => {
   if (process.env.NODE_ENV !== 'production') {
@@ -111,15 +116,16 @@ const dispatchAllSlices = (
  *
  * @returns The content list URL sync component.
  */
-export const ContentListUrlSync = (): JSX.Element | null => {
+export const ContentListUrlSync = ({
+  initialSort,
+}: ContentListUrlSyncProps): JSX.Element | null => {
   const { features } = useContentListConfig();
   const inRouterContext = useInRouterContext();
 
   if (features.urlSync === false || !inRouterContext) {
     return null;
   }
-
-  return <ContentListUrlSyncSlot />;
+  return <ContentListUrlSyncSlot initialSort={initialSort} />;
 };
 
 /**
@@ -130,7 +136,7 @@ export const ContentListUrlSync = (): JSX.Element | null => {
  * `q`/`sort` keys. See [`coordinator.ts`](./coordinator.ts) for the long-term
  * direction (per-instance URL key namespacing).
  */
-const ContentListUrlSyncSlot = (): JSX.Element | null => {
+const ContentListUrlSyncSlot = ({ initialSort }: ContentListUrlSyncProps): JSX.Element | null => {
   const history = useHistory();
   const { id, queryKeyScope } = useContentListConfig();
   const [claim, setClaim] = useState<UrlSyncSlotClaim | null>(null);
@@ -166,7 +172,7 @@ const ContentListUrlSyncSlot = (): JSX.Element | null => {
     return null;
   }
 
-  return <ContentListUrlSyncInner />;
+  return <ContentListUrlSyncInner initialSort={initialSort} />;
 };
 
 /**
@@ -174,14 +180,14 @@ const ContentListUrlSyncSlot = (): JSX.Element | null => {
  *
  * @returns The inner content list URL sync component.
  */
-const ContentListUrlSyncInner = (): null => {
+const ContentListUrlSyncInner = ({ initialSort }: ContentListUrlSyncProps): null => {
   const history = useHistory();
   const { features } = useContentListConfig();
   const { state, dispatch } = useContentListState();
   const sortingConfigKey = getSortingConfigKey(features.sorting);
   const initialQueryText = getInitialQueryText(features.search);
-  const { initialSort, sortDirectionsByField } = useMemo(
-    () => getSortingUrlConfigFromKey(sortingConfigKey),
+  const sortDirectionsByField = useMemo(
+    () => getSortDirectionsByFieldFromKey(sortingConfigKey),
     [sortingConfigKey]
   );
   const [hydrated, setHydrated] = useState(false);
