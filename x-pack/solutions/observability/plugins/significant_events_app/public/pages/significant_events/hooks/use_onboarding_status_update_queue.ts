@@ -55,7 +55,10 @@ export function useOnboardingStatusUpdateQueue(
       if (awaiting) {
         const key = getStatusKey(statusResult);
         awaiting.baselineKey ??= key;
-        if (key === awaiting.baselineKey && Date.now() < awaiting.deadline) {
+        const isRunActive = KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(statusResult.status);
+        // An active run ends the wait: the status route ignores runs that started before the
+        // current query, so it is the run being waited for. Reporting it now shows its Stop action.
+        if (!isRunActive && key === awaiting.baselineKey && Date.now() < awaiting.deadline) {
           // No new run yet. Report nothing: the caller shows the source as generating until the
           // run appears, and a stale terminal status would clear that and fire its callbacks.
           continue;
