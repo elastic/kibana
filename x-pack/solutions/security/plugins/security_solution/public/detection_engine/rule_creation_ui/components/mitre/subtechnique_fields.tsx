@@ -39,6 +39,7 @@ interface AddSubtechniqueProps {
   isDisabled: boolean;
   onFieldChange: (threats: Threats) => void;
   subtechniques: MitreSubtechniqueSummary[];
+  labelPrefix: string;
 }
 
 export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
@@ -49,6 +50,7 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
   techniqueIndex,
   onFieldChange,
   subtechniques,
+  labelPrefix,
 }): JSX.Element => {
   const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
     'mitreAttackUpdatesUIEnabled'
@@ -195,7 +197,7 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
                 disabled,
               })),
             ]}
-            prepend={`${field.label} ${i18n.SUBTECHNIQUE}`}
+            prepend={`${labelPrefix} ${i18n.SUBTECHNIQUE}`}
             aria-label=""
             onChange={updateSubtechnique.bind(null, index)}
             fullWidth={true}
@@ -211,7 +213,7 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
     [
       subtechniques,
       isUnsupportedSubtechnique,
-      field.label,
+      labelPrefix,
       updateSubtechnique,
       technique,
       techniqueIndex,
@@ -237,12 +239,12 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
                 isInvalid={subtechniqueUnsupported}
                 error={
                   subtechniqueUnsupported
-                    ? i18n.UNSUPPORTED_MITRE_ID_ERROR(subtechnique.id)
+                    ? i18n.UNSUPPORTED_MITRE_ID_ERROR(subtechnique.id, labelPrefix)
                     : undefined
                 }
                 helpText={
                   subtechniqueRenamedFrom
-                    ? i18n.RENAMED_FROM_HINT(subtechniqueRenamedFrom)
+                    ? i18n.RENAMED_FROM_HINT(subtechniqueRenamedFrom, labelPrefix)
                     : undefined
                 }
               >

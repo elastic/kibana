@@ -11,7 +11,7 @@
 // version bumps.
 // Seeding at version 99.0 keeps the suite independent of the shared server's real artifact data: the managed route resolves the highest version, and server-side consumers read the data client on every call, so nothing is cached across suites.
 
-import { spaceTest, tags } from '@kbn/scout-security';
+import { spaceTest, tags, CUSTOM_QUERY_RULE } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import {
   SEEDED_TACTIC_ALPHA,
@@ -19,10 +19,16 @@ import {
   SEEDED_TECHNIQUE_ONE,
   SEEDED_TECHNIQUE_TWO,
   SEEDED_SUBTECHNIQUE_ONE,
+  SEEDED_ATLAS_TACTIC,
+  SEEDED_ATLAS_TECHNIQUE,
+  SEEDED_ATLAS_SUBTECHNIQUE,
 } from '../fixtures/mitre_fixtures';
 
 const RULE_NAME = 'Managed MITRE picker test rule';
 const MULTI_TACTIC_RULE_NAME = 'Managed MITRE multi-tactic picker test rule';
+const ATLAS_RULE_NAME = 'Managed MITRE ATLAS picker test rule';
+const ATLAS_EDIT_RULE_NAME = 'Managed MITRE ATLAS edit test rule';
+const ATLAS_EDIT_RENAMED_RULE_NAME = 'Managed MITRE ATLAS edit test rule renamed';
 const RULE_DESCRIPTION = 'Verifies the managed MITRE API populates the tactic/technique picker.';
 const DEFINE_QUERY = 'host.name: *';
 
@@ -178,6 +184,132 @@ spaceTest.describe(
             );
           }
         );
+      }
+    );
+
+    spaceTest(
+      'adds the MITRE ATLAS framework and persists an ATLAS tactic/technique/subtechnique after rule save',
+      async ({ page, apiServices, pageObjects: { ruleCreateWizard } }) => {
+        await ruleCreateWizard.completeUntilActionsStep({
+          name: ATLAS_RULE_NAME,
+          description: RULE_DESCRIPTION,
+          query: DEFINE_QUERY,
+          onAboutStep: async () => {
+            await spaceTest.step(
+              'Advanced settings: expand to reach the MITRE picker',
+              async () => {
+                await ruleCreateWizard.expandAdvancedSettings();
+                await ruleCreateWizard.waitForMitreLoaded();
+              }
+            );
+
+            await spaceTest.step('Add the ATLAS framework', async () => {
+              await ruleCreateWizard.addMitreFramework('atlas');
+              await expect(ruleCreateWizard.mitreFrameworkSection('atlas')).toBeVisible();
+              await expect(ruleCreateWizard.mitreFrameworkSection('enterprise')).toBeVisible();
+            });
+
+            await spaceTest.step('a11y check: ATLAS section', async () => {
+              const { violations } = await page.checkA11y({
+                include: ['[data-test-subj="mitreFrameworkSection-atlas"]'],
+              });
+              expect(violations).toHaveLength(0);
+            });
+
+            await spaceTest.step('Select the seeded ATLAS tactic', async () => {
+              await ruleCreateWizard.selectMitreTacticByIdInSection(
+                'atlas',
+                SEEDED_ATLAS_TACTIC.id
+              );
+            });
+
+            await spaceTest.step('Add and select the seeded ATLAS technique', async () => {
+              await ruleCreateWizard.addAndSelectMitreTechniqueByIdInSection(
+                'atlas',
+                SEEDED_ATLAS_TECHNIQUE.id
+              );
+            });
+
+            await spaceTest.step('Add and select the seeded ATLAS subtechnique', async () => {
+              await ruleCreateWizard.addAndSelectMitreSubtechniqueByIdInSection(
+                'atlas',
+                SEEDED_ATLAS_SUBTECHNIQUE.id
+              );
+            });
+          },
+        });
+
+        await spaceTest.step('Create rule without enabling', async () => {
+          await ruleCreateWizard.createWithoutEnablingRule();
+        });
+
+        await spaceTest.step('Assert the saved rule contains both frameworks', async () => {
+          await expect(ruleCreateWizard.ruleDetailsTitle).toContainText(ATLAS_RULE_NAME);
+          const atlasGroup = ruleCreateWizard.savedThreatFrameworkGroup('atlas');
+          await expect(atlasGroup).toBeVisible();
+          await expect(atlasGroup.locator('[data-test-subj="threatTacticLink"]')).toContainText(
+            SEEDED_ATLAS_TACTIC.name
+          );
+          await expect(atlasGroup.locator('[data-test-subj="threatTechniqueLink"]')).toContainText(
+            SEEDED_ATLAS_TECHNIQUE.name
+          );
+          await expect(
+            atlasGroup.locator('[data-test-subj="threatSubtechniqueLink"]')
+          ).toContainText(SEEDED_ATLAS_SUBTECHNIQUE.name);
+
+          // The details URL is `/rules/id/<ruleId>/<tab>`. The untouched enterprise
+          // row is empty and filtered out on save, so only ATLAS persists.
+          const ruleId = new URL(page.url()).pathname.match(/\/rules\/id\/([^/]+)/)?.[1] ?? '';
+          const rule = await apiServices.detectionRule.getById(ruleId);
+          const [atlasThreat] = (rule.threat ?? []).filter(
+            ({ framework }) => framework === 'MITRE ATLAS'
+          );
+          expect(rule.threat).toHaveLength(1);
+          expect(atlasThreat.tactic.id).toBe(SEEDED_ATLAS_TACTIC.id);
+          expect(atlasThreat.technique?.[0].id).toBe(SEEDED_ATLAS_TECHNIQUE.id);
+          expect(atlasThreat.technique?.[0].subtechnique?.[0].id).toBe(
+            SEEDED_ATLAS_SUBTECHNIQUE.id
+          );
+        });
+      }
+    );
+
+    spaceTest(
+      'preserves the MITRE ATLAS framework when a rule is edited without touching its threat mappings',
+      async ({ apiServices, pageObjects: { ruleCreateWizard } }) => {
+        const { id: ruleId } = await apiServices.detectionRule.createCustomQueryRule({
+          ...CUSTOM_QUERY_RULE,
+          rule_id: 'managed-mitre-atlas-edit-rule',
+          name: ATLAS_EDIT_RULE_NAME,
+          description: RULE_DESCRIPTION,
+          enabled: false,
+          threat: [
+            {
+              framework: 'MITRE ATLAS',
+              tactic: {
+                id: SEEDED_ATLAS_TACTIC.id,
+                name: SEEDED_ATLAS_TACTIC.name,
+                reference: SEEDED_ATLAS_TACTIC.reference,
+              },
+              technique: [],
+            },
+          ],
+        });
+
+        await spaceTest.step('Edit the rule name and save', async () => {
+          await ruleCreateWizard.gotoEditAbout(ruleId);
+          await ruleCreateWizard.renameAndSaveEditedRule(ATLAS_EDIT_RENAMED_RULE_NAME);
+        });
+
+        await spaceTest.step('Assert the ATLAS framework is preserved', async () => {
+          await expect(ruleCreateWizard.ruleDetailsTitle).toContainText(
+            ATLAS_EDIT_RENAMED_RULE_NAME
+          );
+          await expect(ruleCreateWizard.savedThreatFrameworkGroup('atlas')).toBeVisible();
+          const rule = await apiServices.detectionRule.getById(ruleId);
+          expect(rule.threat?.[0].framework).toBe('MITRE ATLAS');
+          expect(rule.threat?.[0].tactic.id).toBe(SEEDED_ATLAS_TACTIC.id);
+        });
       }
     );
   }

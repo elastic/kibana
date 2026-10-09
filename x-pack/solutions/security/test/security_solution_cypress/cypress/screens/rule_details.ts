@@ -66,7 +66,7 @@ export const INVESTIGATION_NOTES_MARKDOWN = 'test markdown';
 
 export const INVESTIGATION_NOTES_TOGGLE = '[data-test-subj="stepAboutDetailsToggle-notes"]';
 
-export const MITRE_ATTACK_DETAILS = 'MITRE ATT&CK';
+export const MITRE_ATTACK_DETAILS = 'Threat mappings';
 
 export const FIELDS_BROWSER_BTN =
   '[data-test-subj="alertsTableIsLoaded"] [data-test-subj="show-field-browser"]';

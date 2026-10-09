@@ -49,6 +49,7 @@ interface AddTechniqueProps {
   tactics: MitreTacticSummary[];
   techniques: MitreTechniqueSummary[];
   subtechniques: MitreSubtechniqueSummary[];
+  labelPrefix: string;
 }
 
 export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
@@ -60,6 +61,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
   tactics,
   techniques,
   subtechniques,
+  labelPrefix,
 }): JSX.Element => {
   const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
     'mitreAttackUpdatesUIEnabled'
@@ -219,7 +221,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
                 disabled,
               })),
             ]}
-            prepend={`${field.label} ${i18n.TECHNIQUE}`}
+            prepend={`${labelPrefix} ${i18n.TECHNIQUE}`}
             aria-label=""
             onChange={updateTechnique.bind(null, index)}
             fullWidth={true}
@@ -233,7 +235,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
       );
     },
     [
-      field.label,
+      labelPrefix,
       findCurrentTechniqueOption,
       isTechniqueReassignedFromTactic,
       isUnsupportedTechnique,
@@ -255,9 +257,9 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
         );
         const techniqueRenamedFrom = getTechniqueRenamedFromName(technique);
         const techniqueErrorMessage = techniqueUnsupported
-          ? i18n.UNSUPPORTED_MITRE_ID_ERROR(technique.id)
+          ? i18n.UNSUPPORTED_MITRE_ID_ERROR(technique.id, labelPrefix)
           : techniqueReassigned
-          ? i18n.TECHNIQUE_REASSIGNED_FROM_TACTIC_ERROR(technique.id)
+          ? i18n.TECHNIQUE_REASSIGNED_FROM_TACTIC_ERROR(technique.id, labelPrefix)
           : undefined;
         return (
           <div key={index}>
@@ -268,7 +270,9 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
               isInvalid={techniqueUnsupported || techniqueReassigned}
               error={techniqueErrorMessage}
               helpText={
-                techniqueRenamedFrom ? i18n.RENAMED_FROM_HINT(techniqueRenamedFrom) : undefined
+                techniqueRenamedFrom
+                  ? i18n.RENAMED_FROM_HINT(techniqueRenamedFrom, labelPrefix)
+                  : undefined
               }
             >
               <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -301,6 +305,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
               techniqueIndex={index}
               onFieldChange={onFieldChange}
               subtechniques={subtechniques}
+              labelPrefix={labelPrefix}
             />
           </div>
         );

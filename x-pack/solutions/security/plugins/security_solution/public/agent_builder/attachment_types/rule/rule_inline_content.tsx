@@ -21,6 +21,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { type AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
+import { THREAT_FIELD_LABEL } from '../../../detection_engine/rule_management/components/rule_details/translations';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import { toSimpleRuleSchedule } from '../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
@@ -37,7 +38,6 @@ import {
   SEVERITY_LABEL,
   RISK_SCORE_LABEL,
   TAGS_HEADING,
-  MITRE_HEADING,
   INTERVAL_LABEL,
   LOOKBACK_LABEL,
   LIMITATIONS_TITLE,
@@ -243,7 +243,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
       {rule.threat && rule.threat.length > 0 && (
         <>
           <EuiSpacer size="s" />
-          <SectionHeading>{MITRE_HEADING}</SectionHeading>
+          <SectionHeading>{THREAT_FIELD_LABEL}</SectionHeading>
           <EuiSpacer size="xs" />
           <EuiFlexGrid columns={2} gutterSize="m" responsive={false}>
             {rule.threat.map((entry, threatIndex) => (
