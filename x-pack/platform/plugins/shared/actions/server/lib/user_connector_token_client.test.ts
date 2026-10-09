@@ -588,6 +588,46 @@ describe('UserConnectorTokenClient', () => {
       );
     });
 
+    test('logs every attempted revoke id on a failure line, including the failed one', async () => {
+      const createdAt = new Date().toISOString();
+      mockOAuthTokensFinder([
+        {
+          id: 'token-id-1',
+          type: 'user_connector_token',
+          references: [],
+          attributes: {
+            profileUid: 'user-1',
+            connectorId: '123',
+            credentialType: 'oauth',
+            credentials: { accessToken: 'access-token-user-1' },
+            createdAt,
+            updatedAt: createdAt,
+          },
+        },
+      ]);
+      mockEmptyDeletion();
+      const failure = new EarsRequestError({
+        message: 'Failed to revoke token via auth redirect service',
+        status: 502,
+        earsRequestId: 'req-502',
+      });
+      mockRevokeEarsCredentials.mockResolvedValueOnce({
+        earsRequestIds: ['req-a', 'req-502'],
+        errors: [failure],
+      });
+
+      await userClient.deleteAllConnectorTokens({
+        connectorId: '123',
+        authType: 'ears',
+        provider: 'test-provider',
+      });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        'EARS revoke failure: connectorId=123 provider=test-provider profileUid=user-1 earsRequestId=req-a,req-502 status=502',
+        { tags: ['ears', 'revoke', 'failure'] }
+      );
+    });
+
     test('logs when the finder throws but still completes deletion', async () => {
       (
         encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock

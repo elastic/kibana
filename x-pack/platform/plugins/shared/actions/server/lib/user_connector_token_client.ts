@@ -560,8 +560,8 @@ export class UserConnectorTokenClient {
             ...logFields,
             outcome: 'failure',
             ...errorFields,
-            // ids of the revokes that did succeed, when the failed one has none of its own
-            earsRequestId: errorFields.earsRequestId ?? (earsRequestIds.join(',') || undefined),
+            // every attempted revoke's id, not just the first failure's
+            earsRequestId: earsRequestIds.join(',') || errorFields.earsRequestId,
           });
         }
       } catch (err) {

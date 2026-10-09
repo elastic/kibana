@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { requestEarsRevoke } from './request_ears_revoke';
+import { EarsRequestError } from './ears_request_error';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 import type { OAuthPersonalCredentials } from '../../types';
 
@@ -18,8 +19,9 @@ const stripTokenTypePrefix = (accessToken: string): string => {
 
 /**
  * Revokes both the access token and refresh token for a set of stored OAuth credentials
- * via EARS. Both revokes are always attempted; request ids of the ones that succeeded are returned
- * alongside any errors so a partial failure doesn't lose them. Callers handle failures best-effort.
+ * via EARS. Both revokes are always attempted; the request ids of every attempt, successful or
+ * failed, are returned alongside any errors so a partial failure doesn't lose them. Callers handle
+ * failures best-effort.
  */
 export const revokeEarsCredentials = async ({
   provider,
@@ -46,10 +48,17 @@ export const revokeEarsCredentials = async ({
   const earsRequestIds: string[] = [];
   const errors: unknown[] = [];
   for (const result of results) {
+    const earsRequestId =
+      result.status === 'fulfilled'
+        ? result.value.earsRequestId
+        : result.reason instanceof EarsRequestError
+        ? result.reason.earsRequestId
+        : undefined;
+    if (earsRequestId) {
+      earsRequestIds.push(earsRequestId);
+    }
     if (result.status === 'rejected') {
       errors.push(result.reason);
-    } else if (result.value.earsRequestId) {
-      earsRequestIds.push(result.value.earsRequestId);
     }
   }
   return { earsRequestIds, errors };
