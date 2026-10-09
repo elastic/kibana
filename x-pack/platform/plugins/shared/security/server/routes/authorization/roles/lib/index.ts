@@ -5,3 +5,4 @@
  * 2.0.
  */
 export { roleGrantsSubFeaturePrivileges } from './role_privileges';
+export { queryAllRoles, queryRoleByName } from './query_roles';
