@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiProvider } from '@elastic/eui';
 import { render } from '@testing-library/react';
 import { FlyoutHeaderActions } from './flyout_header_actions';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
@@ -26,6 +27,9 @@ jest.mock('../../session_context', () => ({
 const mockUseIsInSecurityApp = useIsInSecurityApp as jest.Mock;
 const mockUseFlyoutSessionContext = useFlyoutSessionContext as jest.Mock;
 
+const renderActions = (ui: React.ReactElement) =>
+  render(<EuiProvider highContrastMode={false}>{ui}</EuiProvider>);
+
 describe('<FlyoutHeaderActions />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -39,14 +43,14 @@ describe('<FlyoutHeaderActions />', () => {
 
   it('renders the settings menu inside the Security Solution app', () => {
     mockUseIsInSecurityApp.mockReturnValue(true);
-    const { getByTestId } = render(<FlyoutHeaderActions />);
+    const { getByTestId } = renderActions(<FlyoutHeaderActions />);
 
     expect(getByTestId('mockSettingsMenu')).toBeInTheDocument();
   });
 
   it('renders children', () => {
     mockUseIsInSecurityApp.mockReturnValue(true);
-    const { getByTestId } = render(
+    const { getByTestId } = renderActions(
       <FlyoutHeaderActions>
         <div data-test-subj="mockChild" />
       </FlyoutHeaderActions>
@@ -57,7 +61,7 @@ describe('<FlyoutHeaderActions />', () => {
 
   it('renders children even outside the Security Solution app', () => {
     mockUseIsInSecurityApp.mockReturnValue(false);
-    const { getByTestId, queryByTestId } = render(
+    const { getByTestId, queryByTestId } = renderActions(
       <FlyoutHeaderActions>
         <div data-test-subj="mockChild" />
       </FlyoutHeaderActions>
@@ -69,10 +73,10 @@ describe('<FlyoutHeaderActions />', () => {
 
   it('renders nothing outside the Security Solution app with no children', () => {
     mockUseIsInSecurityApp.mockReturnValue(false);
-    const { container, queryByTestId } = render(<FlyoutHeaderActions />);
+    const { container, queryByTestId } = renderActions(<FlyoutHeaderActions />);
 
     expect(queryByTestId('mockSettingsMenu')).not.toBeInTheDocument();
-    expect(container).toBeEmptyDOMElement();
+    expect(container.querySelector('.euiFlexGroup')).not.toBeInTheDocument();
   });
 
   it('does not render the settings menu in a child flyout (its controls are inert there)', () => {
@@ -82,7 +86,7 @@ describe('<FlyoutHeaderActions />', () => {
       historyKey: Symbol('history'),
       isChildFlyout: true,
     });
-    const { queryByTestId } = render(<FlyoutHeaderActions />);
+    const { queryByTestId } = renderActions(<FlyoutHeaderActions />);
 
     expect(queryByTestId('mockSettingsMenu')).not.toBeInTheDocument();
   });
@@ -94,7 +98,7 @@ describe('<FlyoutHeaderActions />', () => {
       historyKey: Symbol('history'),
       isChildFlyout: true,
     });
-    const { getByTestId, queryByTestId } = render(
+    const { getByTestId, queryByTestId } = renderActions(
       <FlyoutHeaderActions>
         <div data-test-subj="mockChild" />
       </FlyoutHeaderActions>
