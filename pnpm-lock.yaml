@@ -401,14 +401,14 @@ importers:
         specifier: 4.29.0
         version: 4.29.0
       '@elastic/eui':
-        specifier: 123.1.0
-        version: 123.1.0(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
+        specifier: 123.1.0-snapshot.1791551657245
+        version: 123.1.0-snapshot.1791551657245(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.1.0-snapshot.1791551657245(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
       '@elastic/eui-illustrations':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: 1.1.0-snapshot.1791551657245
+        version: 1.1.0-snapshot.1791551657245
       '@elastic/eui-theme-borealis':
-        specifier: 8.1.0
-        version: 8.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: 8.1.0-snapshot.1791551657245
+        version: 8.1.0-snapshot.1791551657245(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@elastic/filesaver':
         specifier: 1.1.2
         version: 1.1.2
@@ -5079,11 +5079,11 @@ importers:
         specifier: 6.0.2
         version: 6.0.2(@babel/core@7.29.7(supports-color@10.2.2))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(babel-loader@9.2.1(@babel/core@7.29.7(supports-color@10.2.2))(webpack@5.96.1))(supports-color@10.2.2)(webpack@5.96.1)
       '@elastic/eslint-plugin-eui':
-        specifier: 3.2.0
-        version: 3.2.0(eslint@8.57.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
+        specifier: 3.2.0-snapshot.1791551657245
+        version: 3.2.0-snapshot.1791551657245(eslint@8.57.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
       '@elastic/eui-test-helpers':
-        specifier: 2.0.0
-        version: 2.0.0(@playwright/test@1.63.0)
+        specifier: 2.0.0-snapshot.1791551657245
+        version: 2.0.0-snapshot.1791551657245(@playwright/test@1.63.0)
       '@elastic/makelogs':
         specifier: 6.1.1
         version: 6.1.1
@@ -11091,8 +11091,8 @@ packages:
     resolution: {integrity: sha512-MEypIG6DFC7qqmrC8hCuGxYEpsC7nY9qCF1U5L/xvMf3eP/Ea52NKgxzvcAOfR6GrlaZJt6swouLPifhJ+f0LQ==}
     engines: {node: '>=22'}
 
-  '@elastic/eslint-plugin-eui@3.2.0':
-    resolution: {integrity: sha512-EBj9vs7XsxzGhHPe+w6nMsPT8PIToRp7myZ3DOlSkZudYmdbPqKqd69QyS6X5yHu126yf90/0uHyco7ObPVogA==}
+  '@elastic/eslint-plugin-eui@3.2.0-snapshot.1791551657245':
+    resolution: {integrity: sha512-x2xlh9NoeZxjTug13D+G/3jTegtR+unJzSOqkSF8A5QE5AeZEicDCgeFzTIr9KEPeJbupgz1eGWkWXSyoJbmNQ==}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
       typescript: 6.0.3
@@ -11121,33 +11121,33 @@ packages:
   '@elastic/esql@4.29.0':
     resolution: {integrity: sha512-2/35ra1Hc6u24/sqzcq2RaJPoK574LMrvKrspIxNVkvm4mVo/t02SYQE67F8eRJE5WCxUEsG8bssVEIA7ITBqA==}
 
-  '@elastic/eui-illustrations@1.1.0':
-    resolution: {integrity: sha512-xqOf5dcFmB0WylGy7w2aTJfHMIOjGxW1xops2WkxsfWEpqSFz4r0y4QCpGW+zEhRBVemWcB/lr3S+GoFqm+AFQ==}
+  '@elastic/eui-illustrations@1.1.0-snapshot.1791551657245':
+    resolution: {integrity: sha512-MuTolQ+aAXkxIVme7nW8HLxWXo9L5YSaTOGFck8oReO/5G9xfGNB4jl0Tx3uOPTGu0R0bvaB6iAMok/pIYnSBg==}
 
-  '@elastic/eui-test-helpers@2.0.0':
-    resolution: {integrity: sha512-qF2td/xFXOmG3eRe48wR8ddhq7WEhgSjAGtyKxEJVkG5XCgVK8XJ8TRcuAHZbnyJ40qEp5IN2dQIhnopzjqQ+g==}
+  '@elastic/eui-test-helpers@2.0.0-snapshot.1791551657245':
+    resolution: {integrity: sha512-Q4aYTn7hRS/3PUjLOUKMBAWCeNzqzTcrcVt4KmHb+5nUbj6llP7Nbzu1jMUj2+CPKBDxPNLb99fcwT4G1nGGJA==}
     peerDependencies:
       '@playwright/test': ^1.50.0
     peerDependenciesMeta:
       '@playwright/test':
         optional: true
 
-  '@elastic/eui-theme-borealis@8.1.0':
-    resolution: {integrity: sha512-S0WDpEJo4KeZVgTBTIbFKorkZcukmiFRL+5B8Ys6+wcUDXyuPzqUvJYCGpAqbawNMhVA0eWjGoh06YXOnSfjkQ==}
+  '@elastic/eui-theme-borealis@8.1.0-snapshot.1791551657245':
+    resolution: {integrity: sha512-nplxVniOf52NxgHROnkVfgh5tgoZgmmJqTfU2bjBJhPRvCElGZalOP0GpILenv1OGOqNeSPfT3xFcL2oi7xMxw==}
 
-  '@elastic/eui-theme-common@10.1.0':
-    resolution: {integrity: sha512-OVIK5bDZWUEu7DWx+aEgykYHeUTx3o1NYbxn6YA38Uu0DgsZ+RDfvmT3Jt7h/TTE/QzfBCOvB0M6EhJWhmhmEg==}
+  '@elastic/eui-theme-common@10.1.0-snapshot.1791551657245':
+    resolution: {integrity: sha512-hM2+6mpTEnoZH2aQj0QKbG4GSSbtr6NLyoVuN0a7FuskjobQvp0fYmu/gCa2B1usrukKIT8UE+umaMDa25VjeA==}
     peerDependencies:
       '@emotion/react': 11.x
       react: ^17.0 || ^18.0
       react-dom: ^17.0 || ^18.0
 
-  '@elastic/eui@123.1.0':
-    resolution: {integrity: sha512-DndrCzhyrCxcfTqK13/2y7g8bFiBGLQIb/DIrg8AEKbjwrQo6c4WO0DU6AcZu+/1xyBpj4asmNR4MBSI/GDAlA==}
+  '@elastic/eui@123.1.0-snapshot.1791551657245':
+    resolution: {integrity: sha512-KHnaEWgxVzubEwHl0Hu07Yf9QbXVIMY5aYFkehD45MfbTrHWbANWnckpgapPewvBiiviEJIyJ/JjQto9uJKhFA==}
     engines: {node: 16.x || 18.x || >=20.x}
     peerDependencies:
       '@elastic/datemath': ^5.0.2
-      '@elastic/eui-theme-borealis': 8.1.0
+      '@elastic/eui-theme-borealis': 8.1.0-snapshot.1791551657245
       '@emotion/css': 11.x
       '@emotion/react': 11.x
       '@types/react': 18.2.79
@@ -28124,7 +28124,7 @@ snapshots:
       semver: 7.7.4
       topojson-client: 3.1.0
 
-  '@elastic/eslint-plugin-eui@3.2.0(eslint@8.57.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)':
+  '@elastic/eslint-plugin-eui@3.2.0-snapshot.1791551657245(eslint@8.57.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)':
     dependencies:
       '@typescript-eslint/typescript-estree': 8.71.0(supports-color@10.2.2)(typescript@6.0.3)
       '@typescript-eslint/utils': 8.60.0(eslint@8.57.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
@@ -28188,22 +28188,22 @@ snapshots:
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
-  '@elastic/eui-illustrations@1.1.0': {}
+  '@elastic/eui-illustrations@1.1.0-snapshot.1791551657245': {}
 
-  '@elastic/eui-test-helpers@2.0.0(@playwright/test@1.63.0)':
+  '@elastic/eui-test-helpers@2.0.0-snapshot.1791551657245(@playwright/test@1.63.0)':
     optionalDependencies:
       '@playwright/test': 1.63.0
 
-  '@elastic/eui-theme-borealis@8.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@elastic/eui-theme-borealis@8.1.0-snapshot.1791551657245(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@elastic/eui-theme-common': 10.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@elastic/eui-theme-common': 10.1.0-snapshot.1791551657245(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       chroma-js: 2.4.2
     transitivePeerDependencies:
       - '@emotion/react'
       - react
       - react-dom
 
-  '@elastic/eui-theme-common@10.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@elastic/eui-theme-common@10.1.0-snapshot.1791551657245(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@emotion/react': 11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2)
       '@types/lodash': 4.17.20
@@ -28212,11 +28212,11 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  '@elastic/eui@123.1.0(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)':
+  '@elastic/eui@123.1.0-snapshot.1791551657245(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.1.0-snapshot.1791551657245(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)':
     dependencies:
       '@elastic/datemath': 5.0.3(moment@2.31.0)
-      '@elastic/eui-theme-borealis': 8.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@elastic/eui-theme-common': 10.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@elastic/eui-theme-borealis': 8.1.0-snapshot.1791551657245(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@elastic/eui-theme-common': 10.1.0-snapshot.1791551657245(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@elastic/prismjs-esql': 4.28.0
       '@emotion/css': 11.13.5(supports-color@10.2.2)
       '@emotion/react': 11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2)
