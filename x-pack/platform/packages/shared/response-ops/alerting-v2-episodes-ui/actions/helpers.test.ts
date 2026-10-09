@@ -71,6 +71,6 @@ describe('successOrPartialToast', () => {
       affected_count: 2,
       errors: [{ id: 'ep1', error: { code: 'ALERT_ACTION_NO_OP', message: 'same assignee' } }],
     });
-    expect(t).toEqual({ title: '2 episodes updated successfully.', color: 'success' });
+    expect(t).toEqual({ title: '2 alerts updated successfully.', color: 'success' });
   });
 });
