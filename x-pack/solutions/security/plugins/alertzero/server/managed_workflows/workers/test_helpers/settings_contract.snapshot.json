@@ -377,9 +377,7 @@
             "kind": "leaf",
             "type": "string",
             "enum": [
-              "manual",
-              "assisted",
-              "supervised"
+              "manual"
             ]
           },
           "scheduleInterval": {

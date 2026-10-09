@@ -42,6 +42,22 @@ jest.mock('../../hooks/use_can_write_alertzero', () => ({
 }));
 jest.mock('../../hooks/use_watches_api');
 jest.mock('../../hooks/use_workers_api');
+jest.mock('../../hooks/use_hunt_threat_intel_supply', () => ({
+  useHuntThreatIntelSupplyStatus: jest.fn(() => ({
+    data: {
+      huntEnabled: false,
+      drift: false,
+      hardGate: { ok: true, reasonCodes: [] },
+      workflows: [],
+    },
+    isLoading: false,
+    isError: false,
+  })),
+  useRestoreHuntThreatIntelSupply: jest.fn(() => ({
+    mutate: jest.fn(),
+    isLoading: false,
+  })),
+}));
 jest.mock('../../components/worker_dependencies/worker_dependencies_callout', () => ({
   WorkerDependenciesCallout: ({ worker, surface }: { worker: { id: string }; surface: string }) => (
     <div data-test-subj={`alertZeroWorkerDependencies-${surface}-${worker.id}`} />

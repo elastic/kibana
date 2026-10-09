@@ -9,6 +9,7 @@
 
 import type { Dispatch } from 'react';
 import type { ContentListItem } from '../item';
+import type { SortState } from '../features/sorting';
 
 /**
  * Action type constants for state reducer.
@@ -45,12 +46,7 @@ export interface ContentListClientState {
    */
   queryText: string;
   /** Sort state. */
-  sort: {
-    /** Field name to sort by. */
-    field: string;
-    /** Sort direction. */
-    direction: 'asc' | 'desc';
-  };
+  sort: SortState;
   /** Pagination state. */
   page: {
     /** Current page index (0-based). */
@@ -148,7 +144,7 @@ interface ResetQueryAction {
 /** Set sort field and direction. */
 interface SetSortAction {
   type: typeof CONTENT_LIST_ACTIONS.SET_SORT;
-  payload: { field: string; direction: 'asc' | 'desc' };
+  payload: SortState;
 }
 
 /**

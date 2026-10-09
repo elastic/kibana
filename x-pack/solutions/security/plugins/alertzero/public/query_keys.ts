@@ -35,6 +35,11 @@ export const queryKeys = {
     all: ['alertzero', 'workers'] as const,
     list: () => [...queryKeys.workers.all, 'list'] as const,
   },
+  /** Hunt Watch threat-intel supply status for the current space. */
+  huntThreatIntelSupply: {
+    all: ['alertzero', 'hunt-threat-intel-supply'] as const,
+    status: () => [...queryKeys.huntThreatIntelSupply.all, 'status'] as const,
+  },
   workerDependencies: {
     alertAnalysisSetting: (spaceBasePath: string, cachedValue: boolean) =>
       [

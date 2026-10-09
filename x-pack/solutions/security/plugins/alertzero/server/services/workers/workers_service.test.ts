@@ -15,6 +15,7 @@ import {
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_IDS,
 } from '@kbn/alertzero-common';
 import {
@@ -22,6 +23,11 @@ import {
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
+import type { ThreatIntelSupplyService } from '../threat_intel_supply';
+import {
+  ThreatIntelSupplyHardGateError,
+  ThreatIntelSupplyNotInstalledError,
+} from '../threat_intel_supply';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import { WorkersService } from './workers_service';
 import type { GetWorkerBlockingReasons } from './worker_blocking_reasons';
@@ -30,6 +36,7 @@ const TRIAGE = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
 const ATTACK_DISCOVERY = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const RULE_TUNING = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
 const FORENSICS = SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID;
+const HUNT = SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
 const SPACE = 'default';
 const request = {} as KibanaRequest;
 const WORKERS_WITHOUT_FORENSIC_SKILL = SYSTEM_SECURITY_WORKER_IDS.filter((id) => id !== FORENSICS);
@@ -1765,6 +1772,218 @@ describe('WorkersService', () => {
         outcome: 'not-found',
       });
       expect(harness.documents.has(`${FORENSICS}-${SPACE}`)).toBe(false);
+    });
+  });
+
+  describe('Hunt Watch threat intel supply', () => {
+    const makeThreatIntelSupply = () =>
+      ({
+        assertHardGate: jest.fn(async () => undefined),
+        ensureSupplyForSpace: jest.fn(async () => undefined),
+        teardownSupplyForSpace: jest.fn(async () => undefined),
+      } as unknown as ThreatIntelSupplyService & {
+        assertHardGate: jest.Mock;
+        ensureSupplyForSpace: jest.Mock;
+        teardownSupplyForSpace: jest.Mock;
+      });
+
+    const makeHuntService = (
+      harness: ReturnType<typeof createPersistentHarness>,
+      threatIntelSupply: ThreatIntelSupplyService
+    ) =>
+      new WorkersService(
+        harness.management,
+        Promise.resolve(harness.managedWorkflows),
+        loggingSystemMock.createLogger() as Logger,
+        {},
+        {},
+        async (_request, registration, options) => {
+          await harness.install(registration.id, options);
+        },
+        async () => [],
+        threatIntelSupply
+      );
+
+    it('returns huntSupplyPrerequisitesUnmet when the hard-gate fails', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      threatIntelSupply.assertHardGate.mockRejectedValue(
+        new ThreatIntelSupplyHardGateError(['embedding_endpoint_unavailable'])
+      );
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      expect(
+        await service.update(
+          HUNT,
+          {
+            enabled: true,
+            settings: { serviceAccountId: 'sa-1' },
+            settingsRevision: null,
+          },
+          SPACE,
+          request
+        )
+      ).toEqual({ outcome: 'blocked', reason: 'huntSupplyPrerequisitesUnmet' });
+    });
+
+    it('does not ensure supply when the hard-gate fails', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      threatIntelSupply.assertHardGate.mockRejectedValue(
+        new ThreatIntelSupplyHardGateError(['embedding_endpoint_unavailable'])
+      );
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      await service.update(
+        HUNT,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
+
+      expect(threatIntelSupply.ensureSupplyForSpace).not.toHaveBeenCalled();
+    });
+
+    it('returns huntSupplyNotInstalled when TI docs are missing', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      threatIntelSupply.ensureSupplyForSpace.mockRejectedValue(
+        new ThreatIntelSupplyNotInstalledError('system-security-threat-intel-ingest-feeds')
+      );
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      expect(
+        await service.update(
+          HUNT,
+          {
+            enabled: true,
+            settings: { serviceAccountId: 'sa-1' },
+            settingsRevision: null,
+          },
+          SPACE,
+          request
+        )
+      ).toEqual({ outcome: 'blocked', reason: 'huntSupplyNotInstalled' });
+    });
+
+    it('ensures TI supply before enabling Hunt', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      await service.update(
+        HUNT,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
+
+      expect(threatIntelSupply.ensureSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
+    });
+
+    it('re-ensures TI supply after Hunt enable so a concurrent teardown can be repaired', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      await service.update(
+        HUNT,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
+
+      expect(threatIntelSupply.ensureSupplyForSpace).toHaveBeenCalledTimes(2);
+      expect(threatIntelSupply.ensureSupplyForSpace).toHaveBeenNthCalledWith(1, SPACE, request);
+      expect(threatIntelSupply.ensureSupplyForSpace).toHaveBeenNthCalledWith(2, SPACE, request);
+    });
+
+    it('tears down TI supply when Hunt enable fails after ensure', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      const service = makeHuntService(harness, threatIntelSupply);
+      harness.updateWorkflow.mockRejectedValueOnce(new Error('enable write failed'));
+
+      await expect(
+        service.update(
+          HUNT,
+          {
+            enabled: true,
+            settings: { serviceAccountId: 'sa-1' },
+            settingsRevision: null,
+          },
+          SPACE,
+          request
+        )
+      ).rejects.toThrow('enable write failed');
+
+      expect(threatIntelSupply.ensureSupplyForSpace).toHaveBeenCalled();
+      expect(threatIntelSupply.teardownSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
+    });
+
+    it('does not ensure TI supply when enable is rejected for a missing service account', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      expect(await service.update(HUNT, { enabled: true }, SPACE, request)).toEqual({
+        outcome: 'rejected',
+        what: 'a worker that is enabled without a service account',
+      });
+      expect(threatIntelSupply.ensureSupplyForSpace).not.toHaveBeenCalled();
+    });
+
+    it('tears down TI supply when disabling Hunt', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      await service.update(
+        HUNT,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
+      threatIntelSupply.teardownSupplyForSpace.mockClear();
+
+      await service.update(HUNT, { enabled: false }, SPACE, request);
+
+      expect(threatIntelSupply.teardownSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
+    });
+
+    it('does not call TI supply when enabling a non-Hunt worker', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      await service.update(
+        ATTACK_DISCOVERY,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
+
+      expect(threatIntelSupply.assertHardGate).not.toHaveBeenCalled();
     });
   });
 });
