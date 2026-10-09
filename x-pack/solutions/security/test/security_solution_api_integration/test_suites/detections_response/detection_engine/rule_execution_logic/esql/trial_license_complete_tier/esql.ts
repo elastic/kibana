@@ -2636,42 +2636,6 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload(packetBeatPath);
       });
 
-      it('should handle shard failures and include warning in logs for query that is not aggregating', async () => {
-        const doc1 = { agent: { name: 'test-1' } };
-        await indexEnhancedDocuments({
-          documents: [doc1],
-          interval: ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'],
-          id: uuidv4(),
-        });
-
-        const rule: EsqlRuleCreateProps = {
-          ...getCreateEsqlRulesSchemaMock('rule-1', true),
-          query: `from packetbeat-*, ecs_compliant METADATA _id | limit 101`,
-          from: 'now-100000h',
-        };
-
-        const { logs, previewId } = await previewRule({
-          supertest,
-          rule,
-        });
-
-        const previewAlerts = await getPreviewAlerts({ es, previewId });
-
-        expect(logs).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              warnings: expect.arrayContaining([
-                expect.stringContaining(
-                  'The ES|QL event query was only executed on the available shards. The query failed to run successfully on the following shards'
-                ),
-              ]),
-            }),
-          ])
-        );
-
-        expect(previewAlerts).not.toHaveLength(0);
-      });
-
       it('should handle shard failures and include errors in logs for query that is aggregating', async () => {
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock(),

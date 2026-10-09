@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import moment from 'moment';
 
@@ -210,6 +211,49 @@ describe('esqlExecutor', () => {
       const result = await esqlExecutor(mockedArguments);
 
       expect(result.state).toHaveProperty('lastQuery', params.query);
+    });
+  });
+
+  describe('shard failures', () => {
+    it('should add a warning message and still create alerts when ES|QL returns partial results', async () => {
+      const shardFailure = {
+        shard: 0,
+        index: 'packetbeat-000001',
+        reason: { type: 'script_exception', reason: 'runtime error' },
+      };
+
+      (
+        ruleServices.scopedClusterClient.asCurrentUser.esql.asyncQuery as unknown as jest.Mock
+      ).mockResolvedValue({
+        id: 'QUERY-ID',
+        is_running: false,
+        columns: [{ name: '_id', type: 'keyword' }],
+        values: [['doc-1']],
+        _clusters: { details: { '(local)': { failures: [shardFailure] } } },
+      });
+      ruleServices.scopedClusterClient.asCurrentUser.search.mockResponse({
+        hits: { hits: [] },
+      } as unknown as estypes.SearchResponse);
+      ruleServices.alertWithPersistence.mockResolvedValue({
+        createdAlerts: [
+          { _id: 'alert-1', _index: '.internal.alerts-security.alerts-default-000001' },
+        ],
+        errors: {},
+        alertsWereTruncated: false,
+      });
+
+      const result = await esqlExecutor(mockedArguments);
+      const asyncQueryMock = ruleServices.scopedClusterClient.asCurrentUser.esql
+        .asyncQuery as unknown as jest.Mock;
+
+      expect(asyncQueryMock.mock.calls[0][0]).toHaveProperty('allow_partial_results', true);
+      expect(result.warningMessages).toContain(
+        `The ES|QL event query was only executed on the available shards. The query failed to run successfully on the following shards: ${JSON.stringify(
+          [shardFailure]
+        )}`
+      );
+      expect(result.errors).toEqual([]);
+      expect(result.createdSignalsCount).toBe(1);
     });
   });
 
