@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { forbidden } from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
@@ -136,6 +137,50 @@ describe('ki_search tool', () => {
     const { getKnowledgeIndicatorClient } = await searchAs('read');
 
     expect(getKnowledgeIndicatorClient).toHaveBeenCalled();
+  });
+
+  const searchWithUnreadableSource = async (input: { slugs?: string[] }) => {
+    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    const getQueryLinks = jest.fn().mockResolvedValue([]);
+    const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
+    const sourcesClient = mockSourcesClient(['logs.open', 'logs.closed']);
+    sourcesClient.assertReadable.mockImplementation(async (id: string) => {
+      if (id === 'logs.closed') {
+        throw forbidden('Cannot read source');
+      }
+    });
+    const getScopedClients = jest.fn(async () => {
+      return {
+        licensing: {},
+        sourcesClient,
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getQueryLinks, getFeatures }),
+      } as unknown as RouteHandlerScopedClients;
+    }) as unknown as jest.MockedFunction<GetScopedClients>;
+    const tool = createSearchKnowledgeIndicatorsTool({
+      getScopedClients,
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
+      logger,
+    });
+
+    const result = await invokeHandler(tool as never, input, createMockToolContext());
+    return { result, getQueryLinks, getFeatures };
+  };
+
+  it('searches only the sources the caller can read when no slugs are given', async () => {
+    const { getFeatures, getQueryLinks } = await searchWithUnreadableSource({});
+
+    expect(getFeatures.mock.calls.map(([sourceId]) => sourceId)).toEqual(['logs.open']);
+    expect(getQueryLinks).toHaveBeenCalledWith(['logs.open'], expect.anything());
+  });
+
+  it('fails the search when a named source cannot be read', async () => {
+    const { result, getFeatures, getQueryLinks } = await searchWithUnreadableSource({
+      slugs: ['logs.closed'],
+    });
+
+    expect(getFeatures).not.toHaveBeenCalled();
+    expect(getQueryLinks).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 
   it('does not search KIs without the Nightshift read privilege', async () => {

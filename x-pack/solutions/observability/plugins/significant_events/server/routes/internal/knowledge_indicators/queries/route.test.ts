@@ -10,6 +10,7 @@ import {
   NightshiftModelBlockedError,
   type QueryLink,
 } from '@kbn/significant-events-schema';
+import { forbidden } from '@hapi/boom';
 import { DeepStrict } from '@kbn/zod-helpers';
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
 import { KI_QUERY_GENERATION_AGENT_ID } from '../../../../agent_builder/agents/ki_query_generation';
@@ -424,9 +425,11 @@ describe('getDiscoveryQueriesRoute source resolution', () => {
     per_page: 100,
   });
   const kiClient = {};
+  const assertReadable = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    assertReadable.mockResolvedValue(undefined);
     list.mockResolvedValue({
       sources: [{ id: 'logs.a' }, { id: 'logs.b' }],
       total: 2,
@@ -446,7 +449,7 @@ describe('getDiscoveryQueriesRoute source resolution', () => {
       params: { query },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        sourcesClient: { list },
+        sourcesClient: { list, assertReadable },
         licensing: {},
         scopedClusterClient: { asCurrentUser: {} },
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
@@ -503,6 +506,40 @@ describe('getDiscoveryQueriesRoute source resolution', () => {
       kiClient
     );
   });
+
+  it('searches only the sources the caller can read', async () => {
+    assertReadable.mockImplementation(async (id: string) => {
+      if (id === 'logs.b') {
+        throw forbidden('no access');
+      }
+    });
+
+    await discoveryQueriesRoute.handler(
+      makeDiscoveryHandlerParams({ ...discoveryBaseQuery, query: 'checkout' })
+    );
+
+    expect(mockFetchQueryLinks).toHaveBeenCalledWith(
+      expect.objectContaining({ sourceIds: ['logs.a'] }),
+      expect.anything()
+    );
+  });
+
+  it('drops an unreadable source from a caller-provided id list', async () => {
+    assertReadable.mockImplementation(async (id: string) => {
+      if (id === 'logs.b') {
+        throw forbidden('no access');
+      }
+    });
+
+    await discoveryQueriesRoute.handler(
+      makeDiscoveryHandlerParams({ ...discoveryBaseQuery, sourceIds: ['logs.a', 'logs.b'] })
+    );
+
+    expect(mockFetchQueryLinks).toHaveBeenCalledWith(
+      expect.objectContaining({ sourceIds: ['logs.a'] }),
+      expect.anything()
+    );
+  });
 });
 
 describe('getDiscoveryQueriesOccurrencesRoute source resolution', () => {
@@ -513,9 +550,11 @@ describe('getDiscoveryQueriesOccurrencesRoute source resolution', () => {
     per_page: 100,
   });
   const kiClient = {};
+  const assertReadable = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    assertReadable.mockResolvedValue(undefined);
     list.mockResolvedValue({
       sources: [{ id: 'logs.a' }, { id: 'logs.b' }],
       total: 2,
@@ -535,7 +574,7 @@ describe('getDiscoveryQueriesOccurrencesRoute source resolution', () => {
       params: { query: { ...discoveryBaseQuery, query: 'checkout' } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
-        sourcesClient: { list },
+        sourcesClient: { list, assertReadable },
         licensing: {},
         scopedClusterClient: { asCurrentUser: {} },
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
@@ -554,6 +593,35 @@ describe('getDiscoveryQueriesOccurrencesRoute source resolution', () => {
         sourceIds: ['logs.a', 'logs.b'],
         query: 'checkout',
       }),
+      expect.objectContaining({ kiClient })
+    );
+  });
+
+  it('computes occurrences only for the sources the caller can read', async () => {
+    assertReadable.mockImplementation(async (id: string) => {
+      if (id === 'logs.b') {
+        throw forbidden('no access');
+      }
+    });
+    const handlerParams = {
+      params: { query: { ...discoveryBaseQuery, query: 'checkout' } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: { list, assertReadable },
+        licensing: {},
+        scopedClusterClient: { asCurrentUser: {} },
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
+        getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ alertsReader: {} }),
+      }),
+      getSpaceId: jest.fn().mockResolvedValue('default'),
+      server: makeServer(),
+      logger: { warn: jest.fn() },
+    } as unknown as Parameters<typeof discoveryOccurrencesRoute.handler>[0];
+
+    await discoveryOccurrencesRoute.handler(handlerParams);
+
+    expect(mockGetQueryOccurrences).toHaveBeenCalledWith(
+      expect.objectContaining({ sourceIds: ['logs.a'] }),
       expect.objectContaining({ kiClient })
     );
   });

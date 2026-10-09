@@ -48,6 +48,7 @@ import { assertValidDateRange, makeIsoDateFromString } from '../../../utils/iso_
 import { assertSourceEnabled } from '../../../utils/assert_source_enabled';
 import {
   MAX_SOURCE_IDS_PER_REQUEST,
+  filterReadableSourceIds,
   requestedOrAllSourceIds,
   sourceIdsArraySchema,
   sourceIdsQuerySchema,
@@ -488,8 +489,9 @@ const getDiscoveryQueriesRoute = createServerRoute({
     } = params.query;
     assertValidDateRange(from, to);
 
-    const sourceIds = await requestedOrAllSourceIds(
-      requestedSourceIds,
+    // The readers below run as the internal user, so keep only the sources the caller can read.
+    const sourceIds = await filterReadableSourceIds(
+      await requestedOrAllSourceIds(requestedSourceIds, scopedClients.sourcesClient),
       scopedClients.sourcesClient
     );
 
@@ -567,8 +569,9 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
     const { from, to, bucketSize, query, sourceIds: requestedSourceIds } = params.query;
     assertValidDateRange(from, to);
 
-    const sourceIds = await requestedOrAllSourceIds(
-      requestedSourceIds,
+    // The readers below run as the internal user, so keep only the sources the caller can read.
+    const sourceIds = await filterReadableSourceIds(
+      await requestedOrAllSourceIds(requestedSourceIds, scopedClients.sourcesClient),
       scopedClients.sourcesClient
     );
 

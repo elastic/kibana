@@ -74,6 +74,8 @@ export const createFeatureSimilaritySearchTool = ({
         await assertCanReadSignificantEvents({ request: context.request, server });
         const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
         const [source] = resolveSourcesBySlug(catalog, [slug]);
+        // Stored features are read as the internal user, so check the caller's own data access first.
+        await scopedClients.sourcesClient.assertReadable(source.id);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
         const groups = await searchFeaturesForCandidates({

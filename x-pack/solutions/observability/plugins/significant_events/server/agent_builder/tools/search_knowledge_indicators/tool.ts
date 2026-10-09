@@ -34,7 +34,11 @@ import {
   MAX_COMPACT_META_KEYS,
   searchKnowledgeIndicatorsToolHandler,
 } from './handler';
-import { loadSourceCatalog, resolveSourcesBySlug } from '../../utils/resolve_source_slugs';
+import {
+  loadSourceCatalog,
+  resolveSourcesBySlug,
+  restrictCatalogToReadable,
+} from '../../utils/resolve_source_slugs';
 
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID =
   platformSignificantEventsTools.searchKnowledgeIndicators;
@@ -200,8 +204,18 @@ export function createSearchKnowledgeIndicatorsTool({
         const { view, slugs, ...restParams } = toolParams;
         const maxPerPage =
           view === 'full' ? KI_SEARCH_MAX_PER_PAGE_FULL : MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE;
-        const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
-        const sources = slugs ? resolveSourcesBySlug(catalog, slugs) : undefined;
+        const fullCatalog = await loadSourceCatalog(scopedClients.sourcesClient);
+        const sources = slugs ? resolveSourcesBySlug(fullCatalog, slugs) : undefined;
+        // Stored KIs are read as the internal user, so check the caller's own data access first.
+        // Named sources must all be readable; an unscoped search covers only the readable ones.
+        if (sources) {
+          await Promise.all(
+            sources.map(({ id }) => scopedClients.sourcesClient.assertReadable(id))
+          );
+        }
+        const catalog = sources
+          ? fullCatalog
+          : await restrictCatalogToReadable(fullCatalog, scopedClients.sourcesClient);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
         const params = {
           ...restParams,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { forbidden } from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
@@ -34,12 +35,13 @@ describe('ki_feature_similarity_search tool', () => {
 
   const createTool = (
     findFeatures = jest.fn().mockResolvedValue({ hits: [] }),
-    toolServer = server
+    toolServer = server,
+    sourcesClient = mockSourcesClient(['logs.test'])
   ) => {
     const getScopedClients = jest.fn(async () => {
       return {
         licensing: {},
-        sourcesClient: mockSourcesClient(['logs.test']),
+        sourcesClient,
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ findFeatures }),
       } as unknown as RouteHandlerScopedClients;
     }) as unknown as jest.MockedFunction<GetScopedClients>;
@@ -96,6 +98,26 @@ describe('ki_feature_similarity_search tool', () => {
         ],
       }).success
     ).toBe(false);
+  });
+
+  it('does not search a source the caller cannot read', async () => {
+    const sourcesClient = mockSourcesClient(['logs.test']);
+    sourcesClient.assertReadable.mockRejectedValue(forbidden('Cannot read source'));
+    const { tool, findFeatures } = createTool(undefined, server, sourcesClient);
+
+    const result = await invokeHandler(
+      tool,
+      {
+        slug: 'logs.test',
+        candidates: [
+          { candidate_id: 'tech-x', title: 'Tech X', description: 'tech', type: 'technology' },
+        ],
+      },
+      createMockToolContext()
+    );
+
+    expect(findFeatures).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 
   it('searches every candidate and groups hits by candidate_id', async () => {

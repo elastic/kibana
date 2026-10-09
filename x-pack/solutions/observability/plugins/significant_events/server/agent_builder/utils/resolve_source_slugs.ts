@@ -9,6 +9,7 @@ import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { StatusError } from '../../lib/errors/status_error';
 import { listAllSources } from '../../routes/utils/list_all_sources';
+import { filterReadableSourceIds } from '../../routes/utils/resolve_source_ids';
 import { SourceDisabledError } from './source_disabled_error';
 
 export { SourceDisabledError };
@@ -36,6 +37,24 @@ export async function loadSourceCatalog(sourcesClient: SourcesClient): Promise<S
   return {
     bySlug: new Map(sources.map((source) => [source.slug, source])),
     byId: new Map(sources.map((source) => [source.id, source])),
+  };
+}
+
+/**
+ * The catalog narrowed to the sources whose data the caller can read. Stored knowledge is read as
+ * the internal user, so an unscoped read has to start from this rather than the full catalog.
+ */
+export async function restrictCatalogToReadable(
+  catalog: SourceCatalog,
+  sourcesClient: SourcesClient
+): Promise<SourceCatalog> {
+  const readableIds = new Set(
+    await filterReadableSourceIds([...catalog.byId.keys()], sourcesClient)
+  );
+  const readable = [...catalog.byId.values()].filter((source) => readableIds.has(source.id));
+  return {
+    bySlug: new Map(readable.map((source) => [source.slug, source])),
+    byId: new Map(readable.map((source) => [source.id, source])),
   };
 }
 
