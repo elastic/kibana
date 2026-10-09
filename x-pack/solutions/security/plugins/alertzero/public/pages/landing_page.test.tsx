@@ -72,7 +72,7 @@ type QueryOverrides = Partial<{
 }>;
 
 const workersResult = (workers: Array<{ enabled: boolean }>, overrides: QueryOverrides = {}) => ({
-  data: { workers: workers.map((w, i) => ({ id: `w-${i}`, ...w })) },
+  data: { workers: workers.map((w, i) => ({ id: `w-${i}`, blockingReasons: [], ...w })) },
   isLoading: false,
   isFetching: false,
   error: undefined,
@@ -89,6 +89,7 @@ const investigationsResult = (total: number, overrides: QueryOverrides = {}) => 
 
 const wrap = (ui: React.ReactElement) => {
   const core = coreMock.createStart();
+  (core.application.capabilities as Record<string, unknown>).alertzero = { write: true };
   const history = createMemoryHistory();
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -263,7 +264,13 @@ describe('LandingPage', () => {
     // the Enable button is active. (workersResult uses sequential w-N IDs; supply
     // the real catalog IDs so the worker intersection in OnboardingPage matches.)
     mockUseWorkers.mockReturnValue({
-      data: { workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id, enabled: false })) },
+      data: {
+        workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({
+          id,
+          enabled: false,
+          blockingReasons: [],
+        })),
+      },
       isLoading: false,
       isFetching: false,
       error: undefined,
@@ -298,7 +305,7 @@ describe('LandingPage', () => {
     });
     // Seed the workers cache so useEnableWorkers can filter IDs on the first click.
     queryClient.setQueryData(queryKeys.workers.list(), {
-      workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id, enabled: false })),
+      workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id, enabled: false, blockingReasons: [] })),
     });
 
     // Build the element as a factory so each call produces a distinct React element.
@@ -337,7 +344,7 @@ describe('LandingPage', () => {
     // Construct a fresh element tree for rerender so React reconciles from the new root
     // and LandingPage reads the updated mock return value.
     mockUseWorkers.mockReturnValue({
-      data: { workers: [{ id: ALL_ONBOARDING_WORKER_IDS[0], enabled: true }] },
+      data: { workers: [{ id: ALL_ONBOARDING_WORKER_IDS[0], enabled: true, blockingReasons: [] }] },
       isLoading: false,
       isFetching: false,
       error: undefined,
@@ -369,7 +376,13 @@ describe('LandingPage', () => {
 
   it('releases the save lock on total failure so a subsequent worker enable can transition normally', async () => {
     mockUseWorkers.mockReturnValue({
-      data: { workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id, enabled: false })) },
+      data: {
+        workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({
+          id,
+          enabled: false,
+          blockingReasons: [],
+        })),
+      },
       isLoading: false,
       isFetching: false,
       error: undefined,
@@ -398,7 +411,7 @@ describe('LandingPage', () => {
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
     });
     queryClient.setQueryData(queryKeys.workers.list(), {
-      workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id, enabled: false })),
+      workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id, enabled: false, blockingReasons: [] })),
     });
 
     const makeUI = () => (
@@ -437,7 +450,7 @@ describe('LandingPage', () => {
     // Simulate a background refetch returning an enabled worker: the queue should
     // now be reachable (savingInProgress is false).
     mockUseWorkers.mockReturnValue({
-      data: { workers: [{ id: ALL_ONBOARDING_WORKER_IDS[0], enabled: true }] },
+      data: { workers: [{ id: ALL_ONBOARDING_WORKER_IDS[0], enabled: true, blockingReasons: [] }] },
       isLoading: false,
       isFetching: false,
       error: undefined,
