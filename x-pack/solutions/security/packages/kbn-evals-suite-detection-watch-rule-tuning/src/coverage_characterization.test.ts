@@ -329,4 +329,27 @@ describe('rule-tuning coverage characterization', () => {
       expect([...counts.values()].every((n) => n === 4)).toBe(true);
     }
   });
+
+  it('seeds kibana.alert.rule.revision on every alert doc, sourced from the rule-create response', () => {
+    // The worker harvest dedupes with
+    // `INLINE STATS latest_revision = MAX(kibana.alert.rule.revision) BY rule.uuid
+    //  | WHERE kibana.alert.rule.revision == latest_revision`.
+    // ES|QL drops rows where the field is null (null == null is not true), so a
+    // seeder that omits it makes the worker harvest zero rows and the eval fails
+    // with "settled but opened no review children". #290665.
+    const seeder = readSeeder();
+    expect(seeder).toMatch(/'kibana\.alert\.rule\.revision': ruleRevision/);
+    // The value must come from the rule-create response, never a hardcoded
+    // literal — a later rule update bumps the real revision and orphans the
+    // seeded cluster.
+    expect(seeder).toMatch(/revision\?: number/);
+    expect(seeder).toMatch(/ruleRevision = rule\?\.revision \?\? 0/);
+    expect(seeder).not.toMatch(/'kibana\.alert\.rule\.revision': 0/);
+
+    // And the harvest still groups by the field, so this pin tracks the worker
+    // contract rather than a stale seeder detail.
+    const worker = readWorker();
+    expect(worker).toMatch(/MAX\(`kibana\.alert\.rule\.revision`\)/);
+    expect(worker).toMatch(/WHERE `kibana\.alert\.rule\.revision` == latest_revision/);
+  });
 });

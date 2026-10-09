@@ -440,11 +440,25 @@ const typeSpecificCreateFields = (ruleType: string): Record<string, unknown> => 
   }
 };
 
-const baseAlert = (ruleUuid: string, ruleName: string, ruleId: string, seq: number, at?: Date) => ({
+// The worker harvest (rule_tuning_worker.yaml) dedupes to the latest revision per rule:
+// `INLINE STATS latest_revision = MAX(kibana.alert.rule.revision) BY rule.uuid
+//  | WHERE kibana.alert.rule.revision == latest_revision`. ES|QL's `null == null`
+// comparison drops every doc where this field is missing, so a seeded alert
+// without it is invisible to the worker — the whole cluster gets harvested away
+// and the eval scores a seeding bug as "opened no review children".
+const baseAlert = (
+  ruleUuid: string,
+  ruleName: string,
+  ruleId: string,
+  ruleRevision: number,
+  seq: number,
+  at?: Date
+) => ({
   '@timestamp': (at ?? new Date()).toISOString(),
   'kibana.alert.rule.uuid': ruleUuid,
   'kibana.alert.rule.name': ruleName,
   'kibana.alert.rule.rule_id': ruleId,
+  'kibana.alert.rule.revision': ruleRevision,
   'kibana.alert.workflow_status': 'closed',
   'kibana.alert.workflow_reason': 'false_positive',
   'kibana.alert.workflow_tags': [],
@@ -479,42 +493,51 @@ export const seedRuleAndFpAlerts = async (
   }).catch(() => {});
 
   // 1. Create the detection rule via the detection engine API.
-  const rule = await fetch<{ id?: string }>('/api/detection_engine/rules?spaceId=default', {
-    method: 'POST',
-    headers: { 'kbn-xsrf': 'true', 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      rule_id: ruleId,
-      name: ruleName,
-      type: fixture.ruleType,
-      query: FIXTURE_QUERIES[fixture.id],
-      language: 'kuery',
-      index: ['logs-endpoint.events.process-default'],
-      severity: 'medium',
-      risk_score: 40,
-      interval: '5m',
-      // Schedule fixtures need a window wide enough that their spread-out alert
-      // timestamps (seeded across now-24h) all land inside it: the over-wide
-      // lookback must be visible to the model as the rule's defect. Every other
-      // fixture gets the default now-10m window its burst-shaped cluster implies.
-      from: fixture.id.startsWith('fp-schedule-') ? 'now-24h' : 'now-10m',
-      to: 'now',
-      // The worker only diagnoses enabled rules (rule_tuning.yaml gates diagnose_rule on
-      // `fetch_rule.output.enabled == true`) — a disabled rule produces no FPs, so tuning it
-      // is meaningless. Seeding it disabled skipped diagnosis and yielded empty proposals.
-      // Enabling is safe here: `index` has no source documents, so the rule executes and
-      // matches nothing; the FP cluster is bulk-indexed directly against its uuid below.
-      enabled: true,
-      // Neither the fixture id nor its expected label may appear here: the agent can
-      // fetch this rule and read the description. Opaque token only.
-      description: `kbn-evals rule-tuning seeded rule ${opaqueToken}`,
-      tags: ['eval-rule-tuning'],
-      ...typeSpecificCreateFields(fixture.ruleType),
-    }),
-  });
+  const rule = await fetch<{ id?: string; revision?: number }>(
+    '/api/detection_engine/rules?spaceId=default',
+    {
+      headers: { 'kbn-xsrf': 'true', 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        rule_id: ruleId,
+        name: ruleName,
+        type: fixture.ruleType,
+        query: FIXTURE_QUERIES[fixture.id],
+        language: 'kuery',
+        index: ['logs-endpoint.events.process-default'],
+        severity: 'medium',
+        risk_score: 40,
+        interval: '5m',
+        // Schedule fixtures need a window wide enough that their spread-out alert
+        // timestamps (seeded across now-24h) all land inside it: the over-wide
+        // lookback must be visible to the model as the rule's defect. Every other
+        // fixture gets the default now-10m window its burst-shaped cluster implies.
+        from: fixture.id.startsWith('fp-schedule-') ? 'now-24h' : 'now-10m',
+        to: 'now',
+        // The worker only diagnoses enabled rules (rule_tuning.yaml gates diagnose_rule on
+        // `fetch_rule.output.enabled == true`) — a disabled rule produces no FPs, so tuning it
+        // is meaningless. Seeding it disabled skipped diagnosis and yielded empty proposals.
+        // Enabling is safe here: `index` has no source documents, so the rule executes and
+        // matches nothing; the FP cluster is bulk-indexed directly against its uuid below.
+        enabled: true,
+        // Neither the fixture id nor its expected label may appear here: the agent can
+        // fetch this rule and read the description. Opaque token only.
+        description: `kbn-evals rule-tuning seeded rule ${opaqueToken}`,
+        tags: ['eval-rule-tuning'],
+        ...typeSpecificCreateFields(fixture.ruleType),
+      }),
+    }
+  );
   log.info(
     `created rule ${rule?.id ?? ruleId} (uuid key ${uniqueRuleId}) for fixture ${fixture.id}`
   );
   const seededUuid: string = rule?.id ?? uniqueRuleId;
+  // The harvest dedupes alerts BY `kibana.alert.rule.revision`; the field on every
+  // seeded doc must match the rule's real revision from this create response (0 on
+  // a fresh create). Fallback to 0 keeps the seeder usable if the API ever omits
+  // the field — a constant 0 still groups correctly for a rule that is never
+  // updated mid-run. NEVER hardcode this per-alert: a later rule update bumps the
+  // real revision and silently orphans the whole cluster again.
+  const ruleRevision = rule?.revision ?? 0;
 
   // 2. Index the closed-FP alert cluster against the rule's real uuid.
   const entities = ENTITY_PROFILES[fixture.id] ?? [];
@@ -534,7 +557,7 @@ export const seedRuleAndFpAlerts = async (
   const alertTime = (i: number): Date | undefined =>
     isSchedule ? new Date(Date.now() - (20 - i * 4) * 60 * 60 * 1000) : undefined;
   const docs = entities.map((e, i) => ({
-    ...baseAlert(seededUuid, ruleName, ruleId, i, alertTime(i)),
+    ...baseAlert(seededUuid, ruleName, ruleId, ruleRevision, i, alertTime(i)),
     host: { name: e.host },
     user: { name: e.user },
     source: { ip: e.ip },
