@@ -144,11 +144,18 @@ const HOST_QUALIFIED_SUFFIXES = [
   'tv',
 ];
 
-// The qualified alternative comes first: both engines take the first alternative that matches,
-// so this makes `api.example.com.internal` match whole instead of stopping at `.com`.
+const QUALIFIED_SUFFIX = anyCaseAlternation(HOST_QUALIFIED_SUFFIXES);
+
+// Both engines take the first alternative that matches, so the order decides what is masked as one
+// name. The common-suffix alternative comes first and its greedy label run reaches the last common
+// suffix, so `web.prod.internal.example.com` is one match rather than `web.prod.internal` plus
+// `example.com`. It may then absorb up to three qualified suffixes (`api.example.com.internal`).
+// A name with no common suffix (`web-01.corp.local`) falls through to the second alternative,
+// which needs two labels before a qualified suffix.
 const HOST_PATTERN =
-  `\\b(?:${HOST_LABEL}\\.){2,10}${anyCaseAlternation(HOST_QUALIFIED_SUFFIXES)}\\b` +
-  `|\\b(?:${HOST_LABEL}\\.){1,10}${anyCaseAlternation(HOST_COMMON_SUFFIXES)}\\b`;
+  `\\b(?:${HOST_LABEL}\\.){1,10}${anyCaseAlternation(HOST_COMMON_SUFFIXES)}` +
+  `(?:\\.${QUALIFIED_SUFFIX}){0,3}\\b` +
+  `|\\b(?:${HOST_LABEL}\\.){2,10}${QUALIFIED_SUFFIX}\\b`;
 
 // `DOMAIN\account` with an upper-case NetBIOS-style domain of at least two characters, so drive
 // letters (`C:\`), lower-case path segments and escape sequences (`\n`, `\d`) are not matched.

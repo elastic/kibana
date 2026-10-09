@@ -148,6 +148,9 @@ describe.each(ENGINES)('built-in regex rules on %s', (engine) => {
       `k8s-${'x'.repeat(50)}.corp.local`,
       // A trailing suffix after `.com` is part of the same name.
       'api.example.com.internal',
+      // A qualified suffix in the middle must not end the name early.
+      'web.prod.internal.example.com',
+      'a.corp.local.example.org',
     ])('masks %s whole', (host) => {
       expectSpans(id, host, [host]);
     });
