@@ -1255,6 +1255,8 @@ packages:
   - 'x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta'
   - 'x-pack/platform/packages/shared/ai-assistant/common'
   - 'x-pack/platform/packages/shared/ai-assistant/icon'
+  - 'x-pack/platform/packages/shared/ai-infra/ai-anonymization-common'
+  - 'x-pack/platform/packages/shared/ai-infra/ai-anonymization-server'
   - 'x-pack/platform/packages/shared/ai-infra/anonymization-common'
   - 'x-pack/platform/packages/shared/ai-infra/anonymization-ui'
   - 'x-pack/platform/packages/shared/ai-infra/inference-common'
