@@ -13,7 +13,6 @@ import type { Output } from '../../types';
 import * as agentPolicy from '../agent_policy';
 import { outputService } from '../output';
 import { checkKafkaOAuth2Allowed, checkOtlpOutputAllowed } from '../outputs/helpers';
-import { isOutputSecretStorageEnabled } from '../secrets/outputs';
 
 import {
   SERVERLESS_DEFAULT_OUTPUT_ID,
@@ -35,18 +34,12 @@ jest.mock('../epm/packages/bundled_packages');
 jest.mock('../epm/archive');
 jest.mock('../settings');
 jest.mock('../outputs/helpers');
-jest.mock('../secrets/outputs', () => ({
-  ...jest.requireActual('../secrets/outputs'),
-  isOutputSecretStorageEnabled: jest.fn(),
-}));
 
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
 const mockedCheckKafkaOAuth2Allowed = checkKafkaOAuth2Allowed as jest.MockedFunction<
   typeof checkKafkaOAuth2Allowed
 >;
-const mockedIsOutputSecretStorageEnabled = isOutputSecretStorageEnabled as jest.MockedFunction<
-  typeof isOutputSecretStorageEnabled
->;
+
 const mockedCheckOtlpOutputAllowed = checkOtlpOutputAllowed as jest.MockedFunction<
   typeof checkOtlpOutputAllowed
 >;
@@ -105,7 +98,6 @@ describe('Outputs preconfiguration', () => {
     mockedOutputService.getDefaultDataOutputId.mockReset();
     mockedCheckOtlpOutputAllowed.mockResolvedValue({ result: true });
     mockedCheckKafkaOAuth2Allowed.mockResolvedValue({ result: true });
-    mockedIsOutputSecretStorageEnabled.mockResolvedValue(true);
     mockedOutputService.getDefaultESHosts.mockReturnValue(['http://default-es:9200']);
     const keyHash = (await hashSecret('secretKey')) as string;
     const passwordHash = (await hashSecret('secretPassword')) as string;
@@ -1669,19 +1661,8 @@ describe('Outputs preconfiguration', () => {
         );
       });
 
-      it('should skip the output when the secrets storage is not enabled', async () => {
-        const soClient = savedObjectsClientMock.create();
-        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-        mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
-
-        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [oauth2Output()]);
-
-        expect(mockedOutputService.create).not.toHaveBeenCalled();
-      });
-
       it('should not check OAuth2 when no output uses it', async () => {
         mockedCheckKafkaOAuth2Allowed.mockClear();
-        mockedIsOutputSecretStorageEnabled.mockClear();
         const soClient = savedObjectsClientMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
         await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
@@ -1695,7 +1676,6 @@ describe('Outputs preconfiguration', () => {
         ]);
 
         expect(mockedCheckKafkaOAuth2Allowed).not.toHaveBeenCalled();
-        expect(mockedIsOutputSecretStorageEnabled).not.toHaveBeenCalled();
       });
     });
 

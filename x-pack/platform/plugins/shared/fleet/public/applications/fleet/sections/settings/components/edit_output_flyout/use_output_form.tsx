@@ -20,7 +20,6 @@ import {
 } from '../../../../../../../common/services/output_helpers';
 
 import type {
-  KafkaOAuth2Config,
   KafkaOutput,
   NewElasticsearchOutput,
   NewLogstashOutput,
@@ -34,7 +33,6 @@ import {
   kafkaAuthType,
   kafkaCompressionType,
   kafkaConnectionType,
-  kafkaOAuth2GrantType,
   kafkaPartitionType,
   kafkaSaslMechanism,
   kafkaTopicsType,
@@ -59,7 +57,6 @@ import {
   useComboBoxWithCustomInput,
 } from '../../../../hooks';
 import type { Output } from '../../../../types';
-import type { SOSecret } from '../../../../../../../common/types';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
 import { ExperimentalFeaturesService } from '../../../../services';
 
@@ -77,10 +74,6 @@ import {
   validateKafkaUsername,
   validateKafkaPassword,
   validateKafkaPasswordSecret,
-  validateKafkaOAuth2ClientId,
-  validateKafkaOAuth2ClientSecretSecret,
-  validateKafkaOAuth2TokenUrl,
-  validateKafkaOAuth2EndpointParams,
   validateKafkaHeaders,
   validateKafkaStaticTopic,
   validateKafkaClientId,
@@ -93,10 +86,17 @@ import {
   validateSslPathsCombo,
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
+import type { KafkaOAuth2Inputs } from './use_kafka_oauth2_inputs';
+import {
+  buildKafkaOAuth2Config,
+  extractKafkaOAuth2Secrets,
+  useKafkaOAuth2Inputs,
+  validateKafkaOAuth2Inputs,
+} from './use_kafka_oauth2_inputs';
 
 const DEFAULT_QUEUE_MAX_SIZE = 4096;
 
-export interface OutputFormInputsType {
+export interface OutputFormInputsType extends KafkaOAuth2Inputs {
   nameInput: ReturnType<typeof useInput>;
   typeInput: ReturnType<typeof useInput>;
   elasticsearchUrlInput: ReturnType<typeof useComboInput>;
@@ -139,12 +139,6 @@ export interface OutputFormInputsType {
   kafkaAuthUsernameInput: ReturnType<typeof useInput>;
   kafkaAuthPasswordInput: ReturnType<typeof useInput>;
   kafkaAuthPasswordSecretInput: ReturnType<typeof useSecretInput>;
-  kafkaOAuth2ClientIdInput: ReturnType<typeof useInput>;
-  kafkaOAuth2ClientSecretInput: ReturnType<typeof useSecretInput>;
-  kafkaOAuth2TokenUrlInput: ReturnType<typeof useInput>;
-  kafkaOAuth2ScopesInput: ReturnType<typeof useComboInput>;
-  kafkaOAuth2EndpointParamsInput: ReturnType<typeof useKeyValueInput>;
-  kafkaOAuth2TlsCaFileInput: ReturnType<typeof useInput>;
   kafkaPartitionTypeInput: ReturnType<typeof useRadioInput>;
   kafkaPartitionTypeRandomInput: ReturnType<typeof useInput>;
   kafkaPartitionTypeHashInput: ReturnType<typeof useInput>;
@@ -176,23 +170,13 @@ function extractKafkaOutputSecrets(
     | 'kafkaSslKeySecretInput'
     | 'kafkaAuthPasswordInput'
     | 'kafkaAuthPasswordSecretInput'
-    | 'kafkaOAuth2ClientSecretInput'
   >,
-  oauth2?: { isSelected: boolean; originalClientCertificateKey?: SOSecret }
+  oauth2Secrets?: NonNullable<KafkaOutput['secrets']>['oauth2']
 ): KafkaOutput['secrets'] | null {
   const secrets: KafkaOutput['secrets'] = {};
 
-  if (oauth2?.isSelected) {
-    const clientSecret = inputs.kafkaOAuth2ClientSecretInput.value;
-    if (clientSecret || oauth2.originalClientCertificateKey) {
-      secrets.oauth2 = {
-        ...(clientSecret ? { client_secret: clientSecret } : {}),
-        // not editable in this form: keep it, or it would be deleted when the output is saved
-        ...(oauth2.originalClientCertificateKey
-          ? { client_certificate_key: oauth2.originalClientCertificateKey }
-          : {}),
-      };
-    }
+  if (oauth2Secrets) {
+    secrets.oauth2 = oauth2Secrets;
   }
 
   if (!inputs.kafkaSslKeyInput.value && inputs.kafkaSslKeySecretInput.value) {
@@ -206,65 +190,6 @@ function extractKafkaOutputSecrets(
   }
 
   return Object.keys(secrets).length ? secrets : null;
-}
-
-const endpointParamsToRows = (
-  params: KafkaOAuth2Config['endpoint_params']
-): Array<{ key: string; value: string }> => {
-  const rows = Object.entries(params ?? {}).flatMap(([key, values]) =>
-    values.map((value) => ({ key, value }))
-  );
-
-  return rows.length ? rows : [{ key: '', value: '' }];
-};
-
-/**
- * Builds the OAuth2 settings of the payload. The settings this form does not edit (the jwt-bearer
- * grant, the `*_file` settings, ...) are kept as they are, or they would be lost when the output
- * is saved.
- */
-function buildKafkaOAuth2Config(
-  original: KafkaOAuth2Config | null | undefined,
-  inputs: Pick<
-    OutputFormInputsType,
-    | 'kafkaOAuth2ClientIdInput'
-    | 'kafkaOAuth2TokenUrlInput'
-    | 'kafkaOAuth2ScopesInput'
-    | 'kafkaOAuth2EndpointParamsInput'
-    | 'kafkaOAuth2TlsCaFileInput'
-  >
-): KafkaOAuth2Config {
-  const {
-    client_id: _clientId,
-    token_url: _tokenUrl,
-    scopes: _scopes,
-    endpoint_params: _endpointParams,
-    tls: originalTls,
-    ...preserved
-  } = original ?? ({} as Partial<KafkaOAuth2Config>);
-  const { ca_file: _caFile, ...preservedTls } = originalTls ?? {};
-
-  const scopes = inputs.kafkaOAuth2ScopesInput.value.map((scope) => scope.trim()).filter(Boolean);
-
-  const endpointParams: Record<string, string[]> = {};
-  inputs.kafkaOAuth2EndpointParamsInput.value.forEach(({ key, value }) => {
-    if (key && value) {
-      endpointParams[key] = [...(endpointParams[key] ?? []), value];
-    }
-  });
-
-  const caFile = inputs.kafkaOAuth2TlsCaFileInput.value?.trim();
-  const tls = { ...preservedTls, ...(caFile ? { ca_file: caFile } : {}) };
-  const clientId = inputs.kafkaOAuth2ClientIdInput.value?.trim();
-
-  return {
-    ...preserved,
-    ...(clientId ? { client_id: clientId } : {}),
-    token_url: inputs.kafkaOAuth2TokenUrlInput.value.trim(),
-    ...(scopes.length ? { scopes } : {}),
-    ...(Object.keys(endpointParams).length ? { endpoint_params: endpointParams } : {}),
-    ...(Object.keys(tls).length ? { tls } : {}),
-  };
 }
 
 export function extractDefaultStaticKafkaTopic(o: KafkaOutput): string {
@@ -636,47 +561,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     isDisabled('password')
   );
 
-  // The settings this form does not edit can make the client id or secret optional
   const isKafkaOAuth2Selected = kafkaAuthMethodInput.value === kafkaAuthType.OAuth2;
-  const kafkaOAuth2Config = kafkaOutput?.oauth2 ?? undefined;
-  const isKafkaOAuth2ClientSecretRequired =
-    (kafkaOAuth2Config?.grant_type ?? kafkaOAuth2GrantType.ClientCredentials) ===
-      kafkaOAuth2GrantType.ClientCredentials && !kafkaOAuth2Config?.client_secret_file;
-
-  const kafkaOAuth2ClientIdInput = useInput(
-    kafkaOAuth2Config?.client_id,
-    isKafkaOAuth2Selected && !kafkaOAuth2Config?.client_id_file
-      ? validateKafkaOAuth2ClientId
-      : undefined,
-    isDisabled('oauth2')
-  );
-  const kafkaOAuth2ClientSecretInput = useSecretInput(
-    kafkaOutput?.secrets?.oauth2?.client_secret,
-    isKafkaOAuth2Selected && isKafkaOAuth2ClientSecretRequired
-      ? validateKafkaOAuth2ClientSecretSecret
-      : undefined,
-    isDisabled('oauth2')
-  );
-  const kafkaOAuth2TokenUrlInput = useInput(
-    kafkaOAuth2Config?.token_url,
-    isKafkaOAuth2Selected ? validateKafkaOAuth2TokenUrl : undefined,
-    isDisabled('oauth2')
-  );
-  const kafkaOAuth2ScopesInput = useComboInput(
-    'kafkaOAuth2ScopesComboBox',
-    kafkaOAuth2Config?.scopes ?? [],
-    undefined,
-    isDisabled('oauth2')
-  );
-  const kafkaOAuth2EndpointParamsInput = useKeyValueInput(
-    'kafkaOAuth2EndpointParamsComboBox',
-    endpointParamsToRows(kafkaOAuth2Config?.endpoint_params),
-    isKafkaOAuth2Selected ? validateKafkaOAuth2EndpointParams : undefined,
-    isDisabled('oauth2')
-  );
-  const kafkaOAuth2TlsCaFileInput = useInput(
-    kafkaOAuth2Config?.tls?.ca_file,
-    undefined,
+  const kafkaOAuth2Inputs = useKafkaOAuth2Inputs(
+    kafkaOutput,
+    isKafkaOAuth2Selected,
     isDisabled('oauth2')
   );
 
@@ -862,12 +750,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaAuthUsernameInput,
     kafkaAuthPasswordInput,
     kafkaAuthPasswordSecretInput,
-    kafkaOAuth2ClientIdInput,
-    kafkaOAuth2ClientSecretInput,
-    kafkaOAuth2TokenUrlInput,
-    kafkaOAuth2ScopesInput,
-    kafkaOAuth2EndpointParamsInput,
-    kafkaOAuth2TlsCaFileInput,
+    ...kafkaOAuth2Inputs,
     kafkaSaslMechanismInput,
     kafkaPartitionTypeInput,
     kafkaPartitionTypeRandomInput,
@@ -902,12 +785,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     const kafkaUsernameValid = kafkaAuthUsernameInput.validate();
     const kafkaPasswordPlainValid = kafkaAuthPasswordInput.validate();
     const kafkaPasswordSecretValid = kafkaAuthPasswordSecretInput.validate();
-    const kafkaOAuth2Valid = [
-      kafkaOAuth2ClientIdInput.validate(),
-      kafkaOAuth2ClientSecretInput.validate(),
-      kafkaOAuth2TokenUrlInput.validate(),
-      kafkaOAuth2EndpointParamsInput.validate(),
-    ].every(Boolean);
+    const kafkaOAuth2Valid = validateKafkaOAuth2Inputs(kafkaOAuth2Inputs);
     const kafkaClientIDValid = kafkaClientIdInput.validate();
     const kafkaSslCertificateAuthoritiesValid = kafkaSslCertificateAuthoritiesInput.validate();
     const kafkaSslCertificateValid = kafkaSslCertificateInput.validate();
@@ -1007,10 +885,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     elasticsearchUrlInput,
     remoteElasticsearchUrlInput,
     kafkaHostsInput,
-    kafkaOAuth2ClientIdInput,
-    kafkaOAuth2ClientSecretInput,
-    kafkaOAuth2TokenUrlInput,
-    kafkaOAuth2EndpointParamsInput,
+    kafkaOAuth2Inputs,
     kafkaAuthUsernameInput,
     kafkaAuthPasswordInput,
     kafkaAuthPasswordSecretInput,
@@ -1116,12 +991,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
                 kafkaSslKeySecretInput,
                 kafkaAuthPasswordInput,
                 kafkaAuthPasswordSecretInput,
-                kafkaOAuth2ClientSecretInput,
               },
-              {
-                isSelected: isKafkaOAuth2Selected,
-                originalClientCertificateKey: kafkaOutput?.secrets?.oauth2?.client_certificate_key,
-              }
+              isKafkaOAuth2Selected ? extractKafkaOAuth2Secrets(kafkaOAuth2Inputs) : undefined
             );
 
             return {
@@ -1184,13 +1055,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
                 : {}),
               ...(isKafkaOAuth2Selected
                 ? {
-                    oauth2: buildKafkaOAuth2Config(kafkaOutput?.oauth2, {
-                      kafkaOAuth2ClientIdInput,
-                      kafkaOAuth2TokenUrlInput,
-                      kafkaOAuth2ScopesInput,
-                      kafkaOAuth2EndpointParamsInput,
-                      kafkaOAuth2TlsCaFileInput,
-                    }),
+                    oauth2: buildKafkaOAuth2Config(kafkaOutput?.oauth2, kafkaOAuth2Inputs),
                   }
                 : {}),
 
@@ -1401,12 +1266,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaSslKeySecretInput,
     kafkaAuthPasswordInput,
     kafkaAuthPasswordSecretInput,
-    kafkaOAuth2ClientIdInput,
-    kafkaOAuth2ClientSecretInput,
-    kafkaOAuth2TokenUrlInput,
-    kafkaOAuth2ScopesInput,
-    kafkaOAuth2EndpointParamsInput,
-    kafkaOAuth2TlsCaFileInput,
+    kafkaOAuth2Inputs,
     isKafkaOAuth2Selected,
     kafkaOutput,
     nameInput.value,

@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 
 import {
+  EuiAccordion,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFieldPassword,
@@ -16,19 +17,27 @@ import {
   EuiFlexItem,
   EuiFormErrorText,
   EuiFormRow,
+  EuiRadioGroup,
+  EuiSelect,
   EuiSpacer,
+  EuiSwitch,
+  EuiTextArea,
+  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
-import { KAFKA_OAUTH2_MINIMUM_FLEET_SERVER_VERSION } from '../../../../../../../common/constants';
-import { useFleetStatus } from '../../../../hooks';
-
+import {
+  KAFKA_OAUTH2_MINIMUM_FLEET_SERVER_VERSION,
+  kafkaOAuth2GrantType,
+  kafkaOAuth2SignatureAlgorithm,
+} from '../../../../../../../common/constants';
 import { MultiRowInput } from '../multi_row_input';
 
 import type { OutputFormInputsType } from './use_output_form';
+import { isKafkaOAuth2JwtBearer } from './use_kafka_oauth2_inputs';
 import { SecretFormRow } from './output_form_secret_form_row';
 
 type EndpointParamsErrors = Array<{
@@ -153,11 +162,72 @@ const EndpointParams: React.FunctionComponent<{ inputs: OutputFormInputsType }> 
   );
 };
 
+const grantTypeOptions = [
+  {
+    id: kafkaOAuth2GrantType.ClientCredentials,
+    label: i18n.translate('xpack.fleet.settings.editOutputFlyout.kafkaOAuth2ClientCredentials', {
+      defaultMessage: 'Client credentials',
+    }),
+    'data-test-subj': 'kafkaOAuth2GrantTypeClientCredentialsRadioButton',
+  },
+  {
+    id: kafkaOAuth2GrantType.JwtBearer,
+    label: i18n.translate('xpack.fleet.settings.editOutputFlyout.kafkaOAuth2JwtBearer', {
+      defaultMessage: 'JWT bearer',
+    }),
+    'data-test-subj': 'kafkaOAuth2GrantTypeJwtBearerRadioButton',
+  },
+];
+
+const signatureAlgorithmOptions = Object.values(kafkaOAuth2SignatureAlgorithm).map((algorithm) => ({
+  text: algorithm,
+  value: algorithm,
+}));
+
+/** A setting that is a path on the host of the agent, or a plain text one. */
+const TextSetting: React.FunctionComponent<{
+  label: string;
+  helpText?: string;
+  input: { props: React.ComponentProps<typeof EuiFieldText>; formRowProps: object };
+  testSubj: string;
+}> = ({ label, helpText, input, testSubj }) => (
+  <EuiFormRow fullWidth label={label} helpText={helpText} {...input.formRowProps}>
+    <EuiFieldText
+      fullWidth
+      compressed
+      data-test-subj={`settingsOutputsFlyout.${testSubj}`}
+      {...input.props}
+    />
+  </EuiFormRow>
+);
+
+const filePathHelpText = i18n.translate(
+  'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2FilePathHelpText',
+  { defaultMessage: 'Path on the host of the agent.' }
+);
+
 /** Settings of the OAuth2 authentication method of the Kafka output. */
 export const OutputFormKafkaOAuth2: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({
   inputs,
 }) => {
-  const fleetStatus = useFleetStatus();
+  const isJwtBearer = isKafkaOAuth2JwtBearer(inputs);
+  // the advanced settings are open when one of them is set, so that it is not missed
+  const hasAdvancedSettings =
+    [
+      inputs.kafkaOAuth2ClientIdFileInput,
+      inputs.kafkaOAuth2ClientSecretFileInput,
+      inputs.kafkaOAuth2ClientCertificateKeyFileInput,
+      inputs.kafkaOAuth2ClientCertificateKeyIdInput,
+      inputs.kafkaOAuth2IssInput,
+      inputs.kafkaOAuth2AudienceInput,
+      inputs.kafkaOAuth2ClaimsInput,
+      inputs.kafkaOAuth2TlsCaFileInput,
+      inputs.kafkaOAuth2TlsCertFileInput,
+      inputs.kafkaOAuth2TlsKeyFileInput,
+      inputs.kafkaOAuth2TlsServerNameOverrideInput,
+      inputs.kafkaOAuth2TlsMinVersionInput,
+      inputs.kafkaOAuth2TlsMaxVersionInput,
+    ].some((input) => !!input.value) || inputs.kafkaOAuth2TlsInsecureSkipVerifyInput.value;
 
   return (
     <>
@@ -179,28 +249,25 @@ export const OutputFormKafkaOAuth2: React.FunctionComponent<{ inputs: OutputForm
         }
         data-test-subj="settingsOutputsFlyout.kafkaOAuth2VersionCallout"
       />
-      {fleetStatus?.isSecretsStorageEnabled === false && (
-        <>
-          <EuiSpacer size="s" />
-          <KbnWarningCallout
-            size="s"
-            title={
-              <FormattedMessage
-                id="xpack.fleet.settings.editOutputFlyout.kafkaOAuth2SecretsStorageCalloutTitle"
-                defaultMessage="Secrets storage is not available"
-              />
-            }
-            text={
-              <FormattedMessage
-                id="xpack.fleet.settings.editOutputFlyout.kafkaOAuth2SecretsStorageCalloutText"
-                defaultMessage="The client secret is always stored as a secret, so this output cannot be saved until all Fleet Servers support secrets storage."
-              />
-            }
-            data-test-subj="settingsOutputsFlyout.kafkaOAuth2SecretsStorageCallout"
-          />
-        </>
-      )}
       <EuiSpacer size="m" />
+      <EuiFormRow
+        fullWidth
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.kafkaOAuth2GrantTypeLabel"
+            defaultMessage="Grant type"
+          />
+        }
+      >
+        <EuiRadioGroup
+          name="kafkaOAuth2GrantType"
+          style={{ display: 'flex', gap: 30 }}
+          data-test-subj="settingsOutputsFlyout.kafkaOAuth2GrantTypeInput"
+          options={grantTypeOptions}
+          compressed
+          {...inputs.kafkaOAuth2GrantTypeInput.props}
+        />
+      </EuiFormRow>
       <EuiFormRow
         fullWidth
         label={
@@ -217,25 +284,46 @@ export const OutputFormKafkaOAuth2: React.FunctionComponent<{ inputs: OutputForm
           {...inputs.kafkaOAuth2ClientIdInput.props}
         />
       </EuiFormRow>
-      <SecretFormRow
-        fullWidth
-        title={i18n.translate(
-          'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2ClientSecretTitle',
-          {
-            defaultMessage: 'Client secret',
-          }
-        )}
-        {...inputs.kafkaOAuth2ClientSecretInput.formRowProps}
-        useSecretsStorage={true}
-        cancelEdit={inputs.kafkaOAuth2ClientSecretInput.cancelEdit}
-      >
-        <EuiFieldPassword
-          type={'dual'}
+      {isJwtBearer ? (
+        // a key per grant: each row has its own state, e.g. whether a saved value is hidden
+        <SecretFormRow
+          key="kafkaOAuth2ClientCertificateKey"
           fullWidth
-          data-test-subj="settingsOutputsFlyout.kafkaOAuth2ClientSecretInput"
-          {...inputs.kafkaOAuth2ClientSecretInput.props}
-        />
-      </SecretFormRow>
+          title={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2ClientCertificateKeyTitle',
+            { defaultMessage: 'Private key' }
+          )}
+          {...inputs.kafkaOAuth2ClientCertificateKeyInput.formRowProps}
+          useSecretsStorage={true}
+          cancelEdit={inputs.kafkaOAuth2ClientCertificateKeyInput.cancelEdit}
+        >
+          <EuiTextArea
+            fullWidth
+            rows={5}
+            data-test-subj="settingsOutputsFlyout.kafkaOAuth2ClientCertificateKeyInput"
+            {...inputs.kafkaOAuth2ClientCertificateKeyInput.props}
+          />
+        </SecretFormRow>
+      ) : (
+        <SecretFormRow
+          key="kafkaOAuth2ClientSecret"
+          fullWidth
+          title={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2ClientSecretTitle',
+            { defaultMessage: 'Client secret' }
+          )}
+          {...inputs.kafkaOAuth2ClientSecretInput.formRowProps}
+          useSecretsStorage={true}
+          cancelEdit={inputs.kafkaOAuth2ClientSecretInput.cancelEdit}
+        >
+          <EuiFieldPassword
+            type={'dual'}
+            fullWidth
+            data-test-subj="settingsOutputsFlyout.kafkaOAuth2ClientSecretInput"
+            {...inputs.kafkaOAuth2ClientSecretInput.props}
+          />
+        </SecretFormRow>
+      )}
       <EuiFormRow
         fullWidth
         label={
@@ -267,28 +355,226 @@ export const OutputFormKafkaOAuth2: React.FunctionComponent<{ inputs: OutputForm
       />
       <EuiSpacer size="m" />
       <EndpointParams inputs={inputs} />
-      <EuiFormRow
-        fullWidth
-        label={
+      <EuiSpacer size="s" />
+      <EuiAccordion
+        id="kafkaOAuth2AdvancedSettings"
+        data-test-subj="settingsOutputsFlyout.kafkaOAuth2AdvancedSettings"
+        initialIsOpen={hasAdvancedSettings}
+        paddingSize="m"
+        buttonContent={
           <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.kafkaOAuth2TlsCaFileLabel"
-            defaultMessage="Token endpoint certificate authority (optional)"
+            id="xpack.fleet.settings.editOutputFlyout.kafkaOAuth2AdvancedSettingsLabel"
+            defaultMessage="Advanced settings"
           />
         }
-        helpText={
-          <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.kafkaOAuth2TlsCaFileHelpText"
-            defaultMessage="Path, on the host of the agent, of the certificate authority that signed the certificate of the token endpoint."
-          />
-        }
-        {...inputs.kafkaOAuth2TlsCaFileInput.formRowProps}
       >
-        <EuiFieldText
-          fullWidth
-          data-test-subj="settingsOutputsFlyout.kafkaOAuth2TlsCaFileInput"
-          {...inputs.kafkaOAuth2TlsCaFileInput.props}
+        <TextSetting
+          label={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2ClientIdFileLabel',
+            { defaultMessage: 'Client ID file (optional)' }
+          )}
+          helpText={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2ClientIdFileHelpText',
+            {
+              defaultMessage:
+                'Path, on the host of the agent, of a file with the client ID. It replaces the client ID.',
+            }
+          )}
+          input={inputs.kafkaOAuth2ClientIdFileInput}
+          testSubj="kafkaOAuth2ClientIdFileInput"
         />
-      </EuiFormRow>
+        {isJwtBearer ? (
+          <>
+            <TextSetting
+              label={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2ClientCertificateKeyFileLabel',
+                { defaultMessage: 'Private key file (optional)' }
+              )}
+              helpText={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2ClientCertificateKeyFileHelpText',
+                {
+                  defaultMessage:
+                    'Path, on the host of the agent, of a file with the private key. It replaces the private key.',
+                }
+              )}
+              input={inputs.kafkaOAuth2ClientCertificateKeyFileInput}
+              testSubj="kafkaOAuth2ClientCertificateKeyFileInput"
+            />
+            <TextSetting
+              label={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2ClientCertificateKeyIdLabel',
+                { defaultMessage: 'Key ID (optional)' }
+              )}
+              input={inputs.kafkaOAuth2ClientCertificateKeyIdInput}
+              testSubj="kafkaOAuth2ClientCertificateKeyIdInput"
+            />
+            <EuiFormRow
+              fullWidth
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.kafkaOAuth2SignatureAlgorithmLabel"
+                  defaultMessage="Signature algorithm"
+                />
+              }
+            >
+              <EuiSelect
+                fullWidth
+                compressed
+                options={signatureAlgorithmOptions}
+                data-test-subj="settingsOutputsFlyout.kafkaOAuth2SignatureAlgorithmInput"
+                {...inputs.kafkaOAuth2SignatureAlgorithmInput.props}
+              />
+            </EuiFormRow>
+            <TextSetting
+              label={i18n.translate('xpack.fleet.settings.editOutputFlyout.kafkaOAuth2IssLabel', {
+                defaultMessage: 'Issuer (optional)',
+              })}
+              helpText={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2IssHelpText',
+                { defaultMessage: 'Defaults to the client ID.' }
+              )}
+              input={inputs.kafkaOAuth2IssInput}
+              testSubj="kafkaOAuth2IssInput"
+            />
+            <TextSetting
+              label={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2AudienceLabel',
+                { defaultMessage: 'Audience (optional)' }
+              )}
+              helpText={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2AudienceHelpText',
+                { defaultMessage: 'Defaults to the token URL.' }
+              )}
+              input={inputs.kafkaOAuth2AudienceInput}
+              testSubj="kafkaOAuth2AudienceInput"
+            />
+            <EuiFormRow
+              fullWidth
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.kafkaOAuth2ClaimsLabel"
+                  defaultMessage="Additional claims (optional)"
+                />
+              }
+              helpText={
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.kafkaOAuth2ClaimsHelpText"
+                  defaultMessage="A JSON object with claims added to the token."
+                />
+              }
+              {...inputs.kafkaOAuth2ClaimsInput.formRowProps}
+            >
+              <EuiTextArea
+                fullWidth
+                compressed
+                rows={3}
+                data-test-subj="settingsOutputsFlyout.kafkaOAuth2ClaimsInput"
+                {...inputs.kafkaOAuth2ClaimsInput.props}
+              />
+            </EuiFormRow>
+          </>
+        ) : (
+          <TextSetting
+            label={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2ClientSecretFileLabel',
+              { defaultMessage: 'Client secret file (optional)' }
+            )}
+            helpText={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2ClientSecretFileHelpText',
+              {
+                defaultMessage:
+                  'Path, on the host of the agent, of a file with the client secret. It replaces the client secret.',
+              }
+            )}
+            input={inputs.kafkaOAuth2ClientSecretFileInput}
+            testSubj="kafkaOAuth2ClientSecretFileInput"
+          />
+        )}
+        <EuiSpacer size="m" />
+        <EuiTitle size="xxs">
+          <h4>
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.kafkaOAuth2TlsTitle"
+              defaultMessage="Token endpoint TLS"
+            />
+          </h4>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <TextSetting
+          label={i18n.translate('xpack.fleet.settings.editOutputFlyout.kafkaOAuth2TlsCaFileLabel', {
+            defaultMessage: 'Certificate authority file (optional)',
+          })}
+          helpText={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2TlsCaFileHelpText',
+            {
+              defaultMessage:
+                'Path, on the host of the agent, of the certificate authority that signed the certificate of the token endpoint.',
+            }
+          )}
+          input={inputs.kafkaOAuth2TlsCaFileInput}
+          testSubj="kafkaOAuth2TlsCaFileInput"
+        />
+        <TextSetting
+          label={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2TlsCertFileLabel',
+            { defaultMessage: 'Client certificate file (optional)' }
+          )}
+          helpText={filePathHelpText}
+          input={inputs.kafkaOAuth2TlsCertFileInput}
+          testSubj="kafkaOAuth2TlsCertFileInput"
+        />
+        <TextSetting
+          label={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2TlsKeyFileLabel',
+            {
+              defaultMessage: 'Client certificate key file (optional)',
+            }
+          )}
+          helpText={filePathHelpText}
+          input={inputs.kafkaOAuth2TlsKeyFileInput}
+          testSubj="kafkaOAuth2TlsKeyFileInput"
+        />
+        <TextSetting
+          label={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2TlsServerNameOverrideLabel',
+            { defaultMessage: 'Server name override (optional)' }
+          )}
+          input={inputs.kafkaOAuth2TlsServerNameOverrideInput}
+          testSubj="kafkaOAuth2TlsServerNameOverrideInput"
+        />
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem>
+            <TextSetting
+              label={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2TlsMinVersionLabel',
+                { defaultMessage: 'Minimum TLS version (optional)' }
+              )}
+              input={inputs.kafkaOAuth2TlsMinVersionInput}
+              testSubj="kafkaOAuth2TlsMinVersionInput"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <TextSetting
+              label={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2TlsMaxVersionLabel',
+                { defaultMessage: 'Maximum TLS version (optional)' }
+              )}
+              input={inputs.kafkaOAuth2TlsMaxVersionInput}
+              testSubj="kafkaOAuth2TlsMaxVersionInput"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiSwitch
+          compressed
+          label={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2TlsInsecureSkipVerifyLabel',
+            { defaultMessage: 'Skip the verification of the server certificate' }
+          )}
+          data-test-subj="settingsOutputsFlyout.kafkaOAuth2TlsInsecureSkipVerifyInput"
+          {...inputs.kafkaOAuth2TlsInsecureSkipVerifyInput.props}
+        />
+      </EuiAccordion>
     </>
   );
 };

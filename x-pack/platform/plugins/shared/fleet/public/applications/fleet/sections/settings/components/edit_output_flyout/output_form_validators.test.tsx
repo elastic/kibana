@@ -14,6 +14,8 @@ import {
   validateCATrustedFingerPrint,
   validateKafkaHeaders,
   validateKafkaHosts,
+  validateKafkaOAuth2Claims,
+  validateKafkaOAuth2ClientCertificateKeySecret,
   validateKafkaOAuth2ClientId,
   validateKafkaOAuth2ClientSecretSecret,
   validateKafkaOAuth2EndpointParams,
@@ -504,6 +506,40 @@ describe('Output form validation', () => {
         expect(validateKafkaOAuth2ClientSecretSecret('my-secret')).toBeUndefined();
         expect(validateKafkaOAuth2ClientSecretSecret({ id: 'secret-id' })).toBeUndefined();
       });
+    });
+
+    describe('validateKafkaOAuth2ClientCertificateKeySecret', () => {
+      it('should require a private key', () => {
+        expect(validateKafkaOAuth2ClientCertificateKeySecret('')).toEqual([
+          'Private key is required',
+        ]);
+        expect(validateKafkaOAuth2ClientCertificateKeySecret(undefined)).toEqual([
+          'Private key is required',
+        ]);
+      });
+
+      it('should accept a new private key and a saved one', () => {
+        expect(validateKafkaOAuth2ClientCertificateKeySecret('-----BEGIN-----')).toBeUndefined();
+        expect(validateKafkaOAuth2ClientCertificateKeySecret({ id: 'key-id' })).toBeUndefined();
+      });
+    });
+
+    describe('validateKafkaOAuth2Claims', () => {
+      it('should accept no claims or a JSON object', () => {
+        expect(validateKafkaOAuth2Claims('')).toBeUndefined();
+        expect(validateKafkaOAuth2Claims('  ')).toBeUndefined();
+        expect(validateKafkaOAuth2Claims('{"sub": "my-client", "n": {"a": 1}}')).toBeUndefined();
+        expect(validateKafkaOAuth2Claims('{}')).toBeUndefined();
+      });
+
+      it.each(['not json', '["a"]', '"text"', '42', 'null'])(
+        'should reject %s, it is not a JSON object',
+        (value) => {
+          expect(validateKafkaOAuth2Claims(value)).toEqual([
+            'The claims must be a JSON object, for example {"sub": "my-client"}',
+          ]);
+        }
+      );
     });
 
     describe('validateKafkaOAuth2TokenUrl', () => {

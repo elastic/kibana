@@ -322,6 +322,40 @@ export const validateKafkaOAuth2ClientSecretSecret = toSecretValidator(
   validateKafkaOAuth2ClientSecret
 );
 
+export function validateKafkaOAuth2ClientCertificateKey(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2ClientCertificateKeyIsRequired', {
+        defaultMessage: 'Private key is required',
+      }),
+    ];
+  }
+}
+
+export const validateKafkaOAuth2ClientCertificateKeySecret = toSecretValidator(
+  validateKafkaOAuth2ClientCertificateKey
+);
+
+export function validateKafkaOAuth2Claims(value: string) {
+  if (!value || value.trim() === '') {
+    return;
+  }
+
+  try {
+    const claims = JSON.parse(value);
+    if (claims === null || typeof claims !== 'object' || Array.isArray(claims)) {
+      throw new Error('not an object');
+    }
+  } catch (error) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2ClaimsInvalid', {
+        defaultMessage: 'The claims must be a JSON object, for example {example}',
+        values: { example: '{"sub": "my-client"}' },
+      }),
+    ];
+  }
+}
+
 export function validateKafkaOAuth2TokenUrl(value: string) {
   if (!value || value.trim() === '') {
     return [
