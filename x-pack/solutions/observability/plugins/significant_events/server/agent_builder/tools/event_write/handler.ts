@@ -142,6 +142,7 @@ export async function eventsWriteBulkHandler({
         candidate,
         priorDocs: priorDocsByEventId.get(candidate.eventId) ?? [],
         computedSeverity: facts.severity,
+        mergedSignals: facts.signals,
       })
     ) {
       results[candidate.index] = {

@@ -84,6 +84,7 @@ describe('signalEntrySchema verdict/evidence consistency', () => {
     expect(
       parseSignal({
         verdict: 'confirms',
+        effect: 'degradation',
         evidence: {
           ...evidence('found'),
           time_range: { from: '2026-07-20T07:00:00.000Z', to: '2026-07-20T08:00:00.000Z' },
@@ -139,11 +140,14 @@ describe('topology classification compatibility', () => {
 });
 
 describe('signalEntrySchema effect/outage_paths guard', () => {
-  it('omitting effect is valid on every verdict', () => {
+  it('omitting effect is valid on non-confirming verdicts', () => {
     expect(parseSignal({ verdict: 'refutes', evidence: evidence('empty') }).success).toBe(true);
+  });
+
+  it('rejects a confirms signal without an explicit effect', () => {
     expect(
       parseSignal({ verdict: 'confirms', evidence: evidence('found'), effect: undefined }).success
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it('accepts effect "none" on every verdict', () => {

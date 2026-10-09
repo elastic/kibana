@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { SignalEffect, Severity, SignificantEvent } from '@kbn/significant-events-schema';
+import type {
+  SignalEffect,
+  SignalEntry,
+  Severity,
+  SignificantEvent,
+} from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import type { CompactBulkError } from '../bulk_write';
 import {
@@ -36,25 +41,41 @@ interface EventFacts
  * and status as the candidate and the candidate introduces no new detection rules — indicating
  * this snapshot would produce a pure-churn duplicate.
  */
+const sameOutagePaths = (first: string[], second: string[]): boolean => {
+  const sortedFirst = [...first].sort();
+  const sortedSecond = [...second].sort();
+  return (
+    sortedFirst.length === sortedSecond.length &&
+    sortedFirst.every((path, index) => path === sortedSecond[index])
+  );
+};
+
 export const shouldSkipAsNoOp = ({
   latestEvent,
   candidate,
   priorDocs,
   computedSeverity,
+  mergedSignals,
 }: {
   latestEvent: SignificantEvent | undefined;
   candidate: WriteCandidate;
   priorDocs: SignificantEvent[];
   computedSeverity: Severity;
+  mergedSignals: SignalEntry[] | undefined;
 }): boolean => {
   if (latestEvent === undefined) return false;
 
   const knownRuleUuids = extractRuleUuidsFromEvents([...priorDocs, latestEvent]);
   const addsRule = addsNewDetectionRules(extractRuleUuids(candidate.input.signals), knownRuleUuids);
+  const merged = deriveEventEffect(mergedSignals);
+  const stored = deriveEventEffect(latestEvent.signals);
+  const sameFacts =
+    merged.effect === stored.effect && sameOutagePaths(merged.outagePaths, stored.outagePaths);
 
   return (
     latestEvent.status === candidate.input.status &&
     latestEvent.severity === computedSeverity &&
+    sameFacts &&
     !addsRule
   );
 };
