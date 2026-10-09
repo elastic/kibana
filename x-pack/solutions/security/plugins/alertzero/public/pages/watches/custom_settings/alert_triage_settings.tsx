@@ -9,10 +9,15 @@ import React from 'react';
 import {
   ALERT_TRIAGE_DEFAULT_EXTRAS,
   AlertTriageWorkerExtras,
+  BUDGET_PER_HOUR_MAX,
+  BUDGET_PER_HOUR_MIN,
+  LOOKBACK_HOURS_MAX,
+  LOOKBACK_HOURS_MIN,
   type WorkerSettings,
 } from '@kbn/alertzero-common';
 import { MinimumConfidenceScoreField } from '../components/minimum_confidence_score_field';
 import { SettingRow } from '../components/setting_row';
+import { BoundedNumberField } from './bounded_number_field';
 import * as i18n from '../settings_translations';
 import type { WorkerCustomSettingsComponent } from './types';
 
@@ -34,18 +39,50 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
   const extras = readAlertTriageExtras(settings);
 
   return (
-    <SettingRow
-      label={i18n.MINIMUM_CONFIDENCE_SCORE_LABEL}
-      labelHelp={i18n.MINIMUM_CONFIDENCE_SCORE_HELP_TEXT}
-      data-test-subj="alertZeroMinimumConfidenceScoreRow"
-    >
-      <MinimumConfidenceScoreField
-        current={extras.autoCloseConfidenceScoreMinThreshold}
-        isDisabled={isDisabled}
-        onChange={(autoCloseConfidenceScoreMinThreshold) =>
-          onExtrasChange({ ...extras, autoCloseConfidenceScoreMinThreshold })
-        }
-      />
-    </SettingRow>
+    <>
+      <SettingRow
+        label={i18n.MINIMUM_CONFIDENCE_SCORE_LABEL}
+        labelHelp={i18n.MINIMUM_CONFIDENCE_SCORE_HELP_TEXT}
+        data-test-subj="alertZeroMinimumConfidenceScoreRow"
+      >
+        <MinimumConfidenceScoreField
+          current={extras.autoCloseConfidenceScoreMinThreshold}
+          isDisabled={isDisabled}
+          onChange={(autoCloseConfidenceScoreMinThreshold) =>
+            onExtrasChange({ ...extras, autoCloseConfidenceScoreMinThreshold })
+          }
+        />
+      </SettingRow>
+      <SettingRow
+        label={i18n.BUDGET_PER_HOUR_LABEL}
+        labelHelp={i18n.BUDGET_PER_HOUR_HELP_TEXT}
+        data-test-subj="alertZeroBudgetPerHourRow"
+      >
+        <BoundedNumberField
+          value={extras.budgetPerHour}
+          min={BUDGET_PER_HOUR_MIN}
+          max={BUDGET_PER_HOUR_MAX}
+          ariaLabel={i18n.BUDGET_PER_HOUR_ARIA_LABEL}
+          testSubj="alertZeroBudgetPerHour"
+          isDisabled={isDisabled}
+          onChange={(budgetPerHour) => onExtrasChange({ ...extras, budgetPerHour })}
+        />
+      </SettingRow>
+      <SettingRow
+        label={i18n.LOOKBACK_HOURS_LABEL}
+        labelHelp={i18n.LOOKBACK_HOURS_HELP_TEXT}
+        data-test-subj="alertZeroLookbackHoursRow"
+      >
+        <BoundedNumberField
+          value={extras.lookbackHours}
+          min={LOOKBACK_HOURS_MIN}
+          max={LOOKBACK_HOURS_MAX}
+          ariaLabel={i18n.LOOKBACK_HOURS_ARIA_LABEL}
+          testSubj="alertZeroLookbackHours"
+          isDisabled={isDisabled}
+          onChange={(lookbackHours) => onExtrasChange({ ...extras, lookbackHours })}
+        />
+      </SettingRow>
+    </>
   );
 };
