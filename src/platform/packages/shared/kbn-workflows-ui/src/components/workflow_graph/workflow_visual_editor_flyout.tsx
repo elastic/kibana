@@ -331,6 +331,7 @@ export function WorkflowVisualEditorFlyout({
         {yamlSlice ? (
           <CodeEditor
             languageId="yaml"
+            themeOverride={WORKFLOWS_MONACO_EDITOR_THEME}
             value={yamlSlice}
             height="100%"
             width="100%"
@@ -342,7 +343,6 @@ export function WorkflowVisualEditorFlyout({
               folding: false,
               fontSize: 12,
               renderLineHighlight: 'none',
-              theme: WORKFLOWS_MONACO_EDITOR_THEME,
               padding: { top: 12, bottom: 12 },
             }}
           />

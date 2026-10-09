@@ -65,7 +65,14 @@ export interface CodeEditorProps
    * Documentation of options can be found here:
    * https://microsoft.github.io/monaco-editor/docs.html#interfaces/editor.IStandaloneEditorConstructionOptions.html
    */
-  options?: Omit<monaco.editor.IStandaloneEditorConstructionOptions, 'editContext'>;
+  options?: Omit<monaco.editor.IStandaloneEditorConstructionOptions, 'editContext' | 'theme'>;
+
+  /**
+   * Specifies an override for the theme used by the editor, it's the responsibility of the caller to ensure the theme is valid.
+   * By default themes are applied taking into account the current eui theme and specification of language tokens defined by the language itself,
+   * in such a way that scopes are applied to the language tokens.
+   */
+  themeOverride?: monaco.editor.IStandaloneEditorConstructionOptions['theme'];
 
   /**
    * Suggestion provider for autocompletion
@@ -257,6 +264,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   onFocus,
   onBlur,
   overflowWidgetsContainerZIndexOverride,
+  themeOverride,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { registerContextMenuActions, unregisterContextMenuActions } = useContextMenuUtils();
@@ -620,8 +628,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const { CopyButton } = useCopy({ isCopyable, value });
 
-  const theme =
-    options?.theme ??
+  const resolvedTheme =
+    themeOverride ??
     (transparentBackground ? CODE_EDITOR_TRANSPARENT_THEME_ID : CODE_EDITOR_DEFAULT_THEME_ID);
 
   return (
@@ -655,7 +663,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         <ReBroadcastMouseDownEvents>
           {accessibilityOverlayEnabled && isFullScreen && renderPrompt()}
           <MonacoEditor
-            theme={theme}
+            theme={resolvedTheme}
             language={languageId}
             value={value}
             onChange={onChange}
