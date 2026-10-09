@@ -60,5 +60,11 @@ export type DashboardLocatorParams = Partial<
      * (Background search)
      */
     searchSessionId?: string;
+
+    /**
+     * Labels for the integrations that supplied this state, e.g. `agent`. They are reported with
+     * the next save of the opened dashboard.
+     */
+    changeSources?: string[];
   }
 >;
