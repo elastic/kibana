@@ -12,6 +12,7 @@ import type {
   ArtifactEntryCardDecoratorProps,
   ArtifactEntryCardProps,
 } from './artifact_entry_card';
+import type { CriteriaConditionsProps } from './components/criteria_conditions';
 import { ArtifactEntryCard } from './artifact_entry_card';
 import { act, fireEvent, getByTestId, waitFor } from '@testing-library/react';
 import type { AnyArtifact } from './types';
@@ -304,6 +305,16 @@ describe.each([
 
       expect(renderResult.getByText('mock decorator')).toBeInTheDocument();
       expect(passedItem).toBe(item);
+    });
+
+    it('should replace criteria conditions when CriteriaComponent is provided', () => {
+      const MockCriteria = memo<CriteriaConditionsProps>(() => <p>{'custom criteria'}</p>);
+      MockCriteria.displayName = 'MockCriteria';
+
+      render({ CriteriaComponent: MockCriteria });
+
+      expect(renderResult.getByText('custom criteria')).toBeInTheDocument();
+      expect(renderResult.queryByTestId('testCard-criteriaConditions-condition')).toBeNull();
     });
   });
 

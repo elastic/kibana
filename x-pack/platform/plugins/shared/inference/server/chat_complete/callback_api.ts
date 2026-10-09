@@ -6,7 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatCompleteOptions, AnonymizationRule, Model } from '@kbn/inference-common';
+import type { ChatCompleteOptions, Model } from '@kbn/inference-common';
+import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
 import {
   createInferenceInternalError,
   createInferenceRequestError,
@@ -24,6 +25,11 @@ import { defer, forkJoin, from, identity, share, switchMap, catchError, throwErr
 import { withChatCompleteSpan } from '@kbn/inference-tracing';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { omit } from 'lodash';
+import { addAnonymizationInstruction, deanonymizeMessage } from '@kbn/ai-anonymization-server';
+import type {
+  InferenceAnonymizationOptions,
+  RegexWorkerService,
+} from '@kbn/ai-anonymization-server';
 import type { ActionsClientProvider } from '../types';
 import type {
   InferenceAdapterChatCompleteOptions,
@@ -43,10 +49,6 @@ import {
 } from './utils';
 import type { InferenceCallbackManager } from '../inference_client/callback_manager';
 import { getRetryFilter } from '../../common/utils/error_retry_filter';
-import { deanonymizeMessage } from './anonymization/deanonymize_message';
-import { addAnonymizationInstruction } from './anonymization/add_anonymization_instruction';
-import type { RegexWorkerService } from './anonymization/regex_worker_service';
-import type { InferenceAnonymizationOptions } from '../inference_client/anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 import { prepareAnonymization } from './prepare_anonymization';
 import type { TokenUsageLogger } from '../token_usage';
@@ -243,20 +245,19 @@ function createChatCompletePipeline({
           usePersistentReplacements: anonymization?.replacements?.usePersistentReplacements,
           requireReplacementsEncryptionKey: anonymization?.replacements?.requireEncryptionKey,
           saltPromise: anonymization?.saltPromise,
-          resolveEffectivePolicy: anonymization?.resolveEffectivePolicy,
           metadata,
           system,
           messages,
         })
       ).pipe(
-        switchMap(({ anonymization: preparedAnonymization, replacementsId, effectivePolicy }) => {
+        switchMap(({ anonymization: preparedAnonymization, replacementsId }) => {
           // Gate on whether anything was actually masked this turn, not on whether a system
           // prompt happens to exist — a request with no system prompt can still anonymize
           // entities in its messages, and the model still needs to be told what the
           // placeholder tokens mean.
           const baseSystem = preparedAnonymization.system ?? system;
           const systemWithAnonymizationInstructions = preparedAnonymization.anonymizations.length
-            ? addAnonymizationInstruction(baseSystem ?? '', anonymizationRules, effectivePolicy)
+            ? addAnonymizationInstruction(baseSystem ?? '', anonymizationRules)
             : baseSystem;
 
           const spanModel = getSpanModel(modelName);

@@ -12,15 +12,83 @@ import { setTimeout } from 'timers/promises';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Plugin } from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 
 interface SetupDependencies {
   security: SecurityPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
-export class ServiceAccountsTestPlugin implements Plugin<void, void, SetupDependencies> {
-  setup(core: CoreSetup, { security }: SetupDependencies): void {
+interface StartDependencies {
+  taskManager: TaskManagerStartContract;
+}
+
+const NOOP_TASK_TYPE = 'serviceAccountsTest:noop';
+
+export class ServiceAccountsTestPlugin
+  implements Plugin<void, void, SetupDependencies, StartDependencies>
+{
+  setup(core: CoreSetup<StartDependencies>, { security, taskManager }: SetupDependencies): void {
     core.security.serviceAccounts.registerWorkloadType({ type: 'job', name: 'Test job' });
     const router = core.http.createRouter();
+    taskManager.registerTaskDefinitions({
+      [NOOP_TASK_TYPE]: {
+        title: 'Service accounts test no-op',
+        createTaskRunner: () => ({ run: async () => undefined }),
+      },
+    });
+    // Schedules a task with the caller's request, so Task Manager grants an API key from the
+    // caller's credential. The task is due far in the future and never runs.
+    router.post(
+      {
+        path: '/internal/service_accounts_test/_tasks',
+        options: { access: 'internal' },
+        security: {
+          authz: { enabled: false, reason: 'Test endpoint scheduling a no-op task as the caller' },
+        },
+        validate: false,
+      },
+      async (_context, request, response) => {
+        const [, { taskManager: taskManagerStart }] = await core.getStartServices();
+        try {
+          const task = await taskManagerStart.schedule(
+            {
+              taskType: NOOP_TASK_TYPE,
+              runAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+              params: {},
+              state: {},
+            },
+            { request }
+          );
+          return response.ok({ body: { id: task.id, apiKeyId: task.userScope?.apiKeyId } });
+        } catch (error) {
+          return response.customError({
+            statusCode: Boom.isBoom(error) ? error.output.statusCode : 500,
+            body: { message: error.message },
+          });
+        }
+      }
+    );
+    router.delete(
+      {
+        path: '/internal/service_accounts_test/_tasks/{taskId}',
+        options: { access: 'internal' },
+        security: {
+          authz: { enabled: false, reason: 'Test endpoint removing a task it scheduled' },
+        },
+        validate: {
+          params: schema.object({ taskId: schema.string({ minLength: 1, maxLength: 128 }) }),
+        },
+      },
+      async (_context, request, response) => {
+        const [, { taskManager: taskManagerStart }] = await core.getStartServices();
+        await taskManagerStart.removeIfExists(request.params.taskId);
+        return response.noContent();
+      }
+    );
     // Reports how Core classified the request's principal. Authorization is intentionally off:
     // the point is to observe classification for credentials without Kibana privileges.
     router.get(
@@ -66,11 +134,13 @@ export class ServiceAccountsTestPlugin implements Plugin<void, void, SetupDepend
                 schema.literal('authenticate'),
                 schema.literal('read_role'),
                 schema.literal('get_saved_object'),
+                schema.literal('create_rule'),
               ],
               { defaultValue: 'authenticate' }
             ),
             // The dashboard `get_saved_object` reads as the service account.
             savedObjectId: schema.maybe(schema.string({ minLength: 1, maxLength: 128 })),
+            rule: schema.maybe(schema.object({}, { unknowns: 'allow' })),
             revoke: schema.oneOf(
               [
                 schema.literal('none'),
@@ -93,7 +163,8 @@ export class ServiceAccountsTestPlugin implements Plugin<void, void, SetupDepend
         const [start] = await core.getStartServices();
         const api = start.security.serviceAccounts;
         const workload = { workloadType: 'job', workloadId: request.params.workloadId };
-        const { operation, serviceAccountId, waitMs, action, revoke, savedObjectId } = request.body;
+        const { operation, serviceAccountId, waitMs, action, revoke, savedObjectId, rule } =
+          request.body;
         try {
           if (operation === 'bind') {
             if (!serviceAccountId) return response.badRequest();
@@ -118,6 +189,25 @@ export class ServiceAccountsTestPlugin implements Plugin<void, void, SetupDepend
                   return {
                     savedObjectStatus: Boom.isBoom(error) ? error.output.statusCode : 500,
                   };
+                }
+              }
+              // A nested caller: the workload calls a Kibana API as the account through the self
+              // client, and that API mints the workload's own credential.
+              if (action === 'create_rule') {
+                try {
+                  const { response: ruleResponse, body } = await start.http.selfClient
+                    .asScoped(fakeRequest)
+                    .fetch('/api/alerting/rule', { method: 'POST', body: rule, asResponse: true });
+                  return { status: ruleResponse.status, body };
+                } catch (error) {
+                  if (error instanceof Error && 'response' in error && 'body' in error) {
+                    const { response: ruleResponse, body } = error as Error & {
+                      response?: Response;
+                      body?: unknown;
+                    };
+                    if (ruleResponse) return { status: ruleResponse.status, body };
+                  }
+                  throw error;
                 }
               }
               const client = start.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
