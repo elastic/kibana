@@ -27,6 +27,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import { MAX_RULE_NAMES } from '@kbn/nightshift-investigations-plugin/common';
 import { useRuleCatalog } from '../../../../../hooks/use_rule_catalog';
 import type { TriggerFormValues } from '../../automation_form_values';
 import { rulePickerLabels } from '../translations';
@@ -56,7 +57,7 @@ export const RulePicker = ({
   onChange: (trigger: TriggerFormValues) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { data: catalog = [] } = useRuleCatalog();
+  const { data: catalog = [], isError } = useRuleCatalog();
   const { ruleNames, ruleTags } = trigger;
   const [view, setView] = useState<PickerView>('rules');
   const [query, setQuery] = useState('');
@@ -81,7 +82,12 @@ export const RulePicker = ({
   const selectedCount = resolved.length;
 
   const commit = (next: { ruleNames: string[]; ruleTags: string[] }) =>
-    onChange({ ...trigger, ruleNames: unique(next.ruleNames), ruleTags: unique(next.ruleTags) });
+    onChange({
+      ...trigger,
+      ruleNamePattern: '',
+      ruleNames: unique(next.ruleNames),
+      ruleTags: unique(next.ruleTags),
+    });
 
   const toggleRule = (name: string, checked: boolean) =>
     commit({
@@ -106,7 +112,8 @@ export const RulePicker = ({
       tags: ruleTagsOfRule,
       viaTags,
       checked: viaTags.length > 0 || ruleNames.includes(name) ? 'on' : undefined,
-      disabled: viaTags.length > 0,
+      disabled:
+        viaTags.length > 0 || (!ruleNames.includes(name) && ruleNames.length >= MAX_RULE_NAMES),
       toolTipContent:
         viaTags.length > 0 ? rulePickerLabels.includedByTag(viaTags.join(', ')) : undefined,
     };
@@ -178,7 +185,10 @@ export const RulePicker = ({
     shownRuleNames.length > 0 && shownRuleNames.every((name) => ruleNames.includes(name));
   const filterTagSelected = Boolean(tagFilter) && ruleTags.includes(tagFilter);
   const showTagBulkAction = view === 'rules' && Boolean(tagFilter) && !q;
-  const showShownBulkAction = view === 'rules' && Boolean(q) && shownRuleNames.length > 0;
+  const newShownRuleNames = shownRuleNames.filter((name) => !ruleNames.includes(name));
+  const fitsLimit = ruleNames.length + newShownRuleNames.length <= MAX_RULE_NAMES;
+  const showShownBulkAction =
+    view === 'rules' && Boolean(q) && shownRuleNames.length > 0 && (allShownSelected || fitsLimit);
   const hasSelection = selectedCount > 0;
   const showFooter = hasSelection || showTagBulkAction || showShownBulkAction;
 
@@ -210,7 +220,9 @@ export const RulePicker = ({
       : rulePickerLabels.searchRules(totalRules);
 
   const emptyMessage =
-    view === 'selected' && !q
+    isError && view !== 'selected'
+      ? rulePickerLabels.loadError
+      : view === 'selected' && !q
       ? rulePickerLabels.nothingSelected
       : view === 'rules' && tagFilter && !q
       ? rulePickerLabels.noRulesWithTag(tagFilter)
@@ -220,9 +232,9 @@ export const RulePicker = ({
           view === 'rules' ? tagFilter : ''
         );
 
-  const tabs: Array<{ id: PickerView; label: string; count: number }> = [
-    { id: 'rules', label: rulePickerLabels.rulesTab, count: totalRules },
-    { id: 'tags', label: rulePickerLabels.tagsTab, count: tagCounts.length },
+  const tabs: Array<{ id: PickerView; label: string; count?: number }> = [
+    { id: 'rules', label: rulePickerLabels.rulesTab, count: isError ? undefined : totalRules },
+    { id: 'tags', label: rulePickerLabels.tagsTab, count: isError ? undefined : tagCounts.length },
     { id: 'selected', label: rulePickerLabels.selectedTab, count: selectedCount },
   ];
 
@@ -357,11 +369,13 @@ export const RulePicker = ({
               isSelected={view === tab.id}
               onClick={() => switchView(tab.id)}
               append={
-                <EuiNotificationBadge
-                  color={tab.id === 'selected' && tab.count > 0 ? 'accent' : 'subdued'}
-                >
-                  {tab.count}
-                </EuiNotificationBadge>
+                tab.count === undefined ? undefined : (
+                  <EuiNotificationBadge
+                    color={tab.id === 'selected' && tab.count > 0 ? 'accent' : 'subdued'}
+                  >
+                    {tab.count}
+                  </EuiNotificationBadge>
+                )
               }
               data-test-subj={`automationRulePickerTab-${tab.id}`}
             >

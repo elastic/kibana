@@ -12,15 +12,26 @@ import { AutomationTriggerSection } from './trigger_section';
 import type { TriggerFormValues } from '../automation_form_values';
 import { toEveryCron } from '../to_automation_request';
 
+const defaultCatalog = {
+  data: [
+    { name: 'CPU usage high', tags: ['infra', 'prod'] },
+    { name: 'Disk full', tags: ['storage', 'prod'] },
+    { name: 'Memory pressure', tags: ['infra'] },
+  ],
+  isError: false,
+};
+const mockUseRuleCatalog = jest.fn();
 jest.mock('../../../../hooks/use_rule_catalog', () => ({
-  useRuleCatalog: () => ({
-    data: [
-      { name: 'CPU usage high', tags: ['infra', 'prod'] },
-      { name: 'Disk full', tags: ['storage', 'prod'] },
-      { name: 'Memory pressure', tags: ['infra'] },
-    ],
-  }),
+  useRuleCatalog: () => mockUseRuleCatalog(),
 }));
+
+const legacyPatternTrigger: TriggerFormValues = {
+  kind: 'alert',
+  ruleNamePattern: 'cpu',
+  ruleNames: [],
+  ruleTags: [],
+  alertStatus: 'any',
+};
 
 const onTriggerChange = jest.fn();
 
@@ -50,6 +61,10 @@ const selectTrigger = async (testSubject: string, label: string) => {
 const lastTrigger = () => onTriggerChange.mock.calls[onTriggerChange.mock.calls.length - 1][0];
 
 describe('AutomationTriggerSection', () => {
+  beforeEach(() => {
+    mockUseRuleCatalog.mockReturnValue(defaultCatalog);
+  });
+
   beforeEach(() => onTriggerChange.mockClear());
 
   it('shows the empty state and the trigger groups', async () => {
@@ -135,6 +150,31 @@ describe('AutomationTriggerSection', () => {
 
     fireEvent.click(screen.getByTestId('automationRuleClear'));
     expect(lastTrigger()).toMatchObject({ ruleNames: [], ruleTags: [] });
+  });
+
+  it('replaces the legacy name pattern when rules are picked', async () => {
+    render(<TriggerSection initialTrigger={legacyPatternTrigger} />);
+    fireEvent.click(screen.getByTestId('automationRulePicker'));
+    fireEvent.click(await screen.findByText('Disk full'));
+    expect(lastTrigger()).toMatchObject({ ruleNamePattern: '', ruleNames: ['Disk full'] });
+  });
+
+  it('shows an error instead of an empty rule list when rules fail to load', async () => {
+    mockUseRuleCatalog.mockReturnValue({ data: undefined, isError: true });
+    render(<TriggerSection initialTrigger={{ ...legacyPatternTrigger, ruleNamePattern: '' }} />);
+    fireEvent.click(screen.getByTestId('automationRulePicker'));
+    expect(await screen.findByText('Unable to load rules.')).toBeInTheDocument();
+  });
+
+  it('does not offer bulk selection beyond the rule name limit', async () => {
+    const rules = Array.from({ length: 101 }, (_, index) => ({ name: `Rule ${index}`, tags: [] }));
+    mockUseRuleCatalog.mockReturnValue({ data: rules, isError: false });
+    render(<TriggerSection initialTrigger={{ ...legacyPatternTrigger, ruleNamePattern: '' }} />);
+    fireEvent.click(screen.getByTestId('automationRulePicker'));
+    fireEvent.change(await screen.findByTestId('automationRulePickerSearch'), {
+      target: { value: 'Rule' },
+    });
+    expect(screen.queryByTestId('automationRuleSelectShown')).not.toBeInTheDocument();
   });
 
   it('keeps the hourly window on whole hours', async () => {

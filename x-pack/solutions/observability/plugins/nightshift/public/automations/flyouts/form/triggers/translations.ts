@@ -275,6 +275,9 @@ export const rulePickerLabels = {
       defaultMessage: '{count, plural, one {# rule} other {# rules}} now',
       values: { count },
     }),
+  loadError: i18n.translate('xpack.nightshift.automations.rulePicker.loadError', {
+    defaultMessage: 'Unable to load rules.',
+  }),
   clear: i18n.translate('xpack.nightshift.automations.rulePicker.clear', {
     defaultMessage: 'Clear',
   }),

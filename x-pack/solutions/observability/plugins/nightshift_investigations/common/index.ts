@@ -15,6 +15,8 @@ import type { InvestigationSubjectType, InvestigationTriggerType } from './workf
 
 export type { Severity } from '@kbn/significant-events-schema';
 
+export { MAX_RULE_NAMES } from './automation_limits';
+
 export {
   INVESTIGATION_SUBJECT_TYPES,
   type InvestigationSubjectType,
