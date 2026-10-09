@@ -221,11 +221,14 @@ export const actionPolicyModelVersions: SavedObjectsModelVersionMap = {
      *
      * The mode is kept as it was stored, so an explicit `per_alert` still reads back as one; only
      * the dead configuration goes. `groupBy` on a mode that groups on no field is dropped, and
-     * `per_field` with nothing to group by names a mode it cannot satisfy, so it loses the mode
-     * too and falls back to `per_alert`. A throttle whose strategy takes no interval loses the
-     * stray interval. One with no strategy at all is given the strategy the dispatcher has been
-     * inferring for it all along, so the throttling it performs today survives being written down;
-     * only a throttle with no interval either names nothing to keep, and becomes `null`.
+     * `per_field` with nothing to group by becomes `all`, which is what it already dispatches as:
+     * the group key is built from the fields, so with none it is `{}` — one group per policy, the
+     * same action group `all` hashes to.
+     *
+     * A throttle whose strategy takes no interval loses the stray interval. One with no strategy at
+     * all is given the strategy the dispatcher has been inferring for it all along, so the
+     * throttling it performs today survives being written down; only a throttle with no interval
+     * either names nothing to keep, and becomes `null`.
      *
      * Dropping a key off `throttle` needs `unsafe_transform`: a `data_backfill` result is merged
      * into the document with a deep merge, which cannot remove anything. It runs after the
@@ -248,7 +251,7 @@ export const actionPolicyModelVersions: SavedObjectsModelVersionMap = {
           if (groupingMode === 'per_field') {
             return groupBy?.length
               ? { attributes: { grouping: { mode: 'per_field' as const, fields: groupBy } } }
-              : { attributes: {} };
+              : { attributes: { grouping: { mode: 'all' as const } } };
           }
 
           return groupingMode === 'all' || groupingMode === 'per_alert'

@@ -144,11 +144,6 @@ function validateThrottleGroupingCompat(
 type ThrottleDraft = NonNullable<ActionPolicyAttachmentData['throttle']>;
 
 /**
- * Builds the throttle variant the strategy names. An interval carries over only to a strategy that
- * uses one, so switching to an intervalless strategy needs no extra operation; one the agent spells
- * out for such a strategy is an error rather than a value the server would have to discard.
- */
-/**
  * Builds the grouping variant the mode names. Fields carry over only to the mode that groups on
  * them, so switching away from `per_field` needs no extra operation; fields the agent spells out
  * for another mode are an error rather than a value the server would have to discard.
@@ -178,6 +173,11 @@ function buildGroupingDraft(
   return { mode, fields };
 }
 
+/**
+ * Builds the throttle variant the strategy names. An interval carries over only to a strategy that
+ * uses one, so switching to an intervalless strategy needs no extra operation; one the agent spells
+ * out for such a strategy is an error rather than a value the server would have to discard.
+ */
 function buildThrottleDraft(
   strategy: ThrottleStrategy,
   explicitInterval: string | undefined,

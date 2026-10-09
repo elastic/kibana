@@ -405,14 +405,17 @@ describe('actionPolicyModelVersions', () => {
       expect(migrate(document).grouping).toBeUndefined();
     });
 
-    // `per_field` groups on its fields, so without any it named no behaviour to carry over.
+    /**
+     * The group key is built from the fields, so `per_field` with none of them already keys on
+     * `{}` — one group per policy, the same action group `all` hashes to.
+     */
     it.each([
       ['null', null],
       ['an empty array', []],
       ['absent', undefined],
-    ])('drops a per_field mode whose fields are %s', (_label, groupBy) => {
+    ])('turns a per_field mode whose fields are %s into all', (_label, groupBy) => {
       const document = createV5PolicyDocument({ groupingMode: 'per_field', groupBy });
-      expect(migrate(document).grouping).toBeUndefined();
+      expect(migrate(document).grouping).toEqual({ mode: 'all' });
     });
 
     // Fields on a mode that reads none were dead configuration, so they are not carried over.
@@ -471,6 +474,32 @@ describe('actionPolicyModelVersions', () => {
         });
 
         expect(migrate(document).throttle).toEqual(expected);
+      }
+    );
+
+    /**
+     * Only an aggregate mode may carry `time_interval`, so a fieldless `per_field` has to land on
+     * `all` for its throttle to still name a legal pair.
+     */
+    it.each([
+      [
+        'keeps',
+        { strategy: 'time_interval', interval: '5m' },
+        { strategy: 'time_interval', interval: '5m' },
+      ],
+      ['infers', { interval: '5m' }, { strategy: 'time_interval', interval: '5m' }],
+    ])(
+      '%s an aggregate throttle on a per_field policy with no fields',
+      (_label, throttle, expected) => {
+        const document = createV5PolicyDocument({
+          groupingMode: 'per_field',
+          groupBy: null,
+          throttle,
+        });
+
+        const { grouping, throttle: migrated } = migrate(document);
+        expect(grouping).toEqual({ mode: 'all' });
+        expect(migrated).toEqual(expected);
       }
     );
 
