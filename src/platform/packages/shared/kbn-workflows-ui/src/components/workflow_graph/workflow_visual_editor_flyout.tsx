@@ -22,18 +22,18 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { StepInfo } from '@kbn/workflows-yaml';
-import { deslugifyStepName } from './deslugify_step_name';
 import { AiIcon } from '@kbn/shared-ux-ai-components';
+import type { StepInfo } from '@kbn/workflows-yaml';
 import { aiIconTileCss } from './ai_icon_tile';
+import { deslugifyStepName } from './deslugify_step_name';
 import { resolveNodeChipStyle } from './resolve_node_chip_style';
-import { getStepIconType } from '../step_icons/get_step_icon_type';
 import type { RenderStepIcon } from './workflow_graph_actions_context';
 import {
   useWorkflowsMonacoTheme,
   WORKFLOWS_MONACO_EDITOR_THEME,
 } from '../../hooks/use_workflows_monaco_theme';
 import { TypeIcon } from '../step_icons';
+import { getStepIconType } from '../step_icons/get_step_icon_type';
 
 export type WorkflowVisualEditorFlyoutTarget =
   | {
