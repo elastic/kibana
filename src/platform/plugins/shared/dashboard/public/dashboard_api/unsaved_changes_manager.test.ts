@@ -309,12 +309,20 @@ describe('unsavedChangesManager', () => {
       jest.advanceTimersByTime(100);
     };
 
-    const save = (panels: DashboardState['panels'] = [agentPanel]) =>
+    const finishSave = (panels: DashboardState['panels'] = [agentPanel]) =>
       onSave$.next({
         previousDashboardId: 'dashboard1234',
         dashboardId: 'dashboard1234',
         dashboardState: { ...DEFAULT_DASHBOARD_STATE, panels },
       });
+
+    const save = (
+      { internalApi }: ReturnType<typeof createManager>,
+      panels: DashboardState['panels'] = [agentPanel]
+    ) => {
+      internalApi.takeChangeSourcesForSave();
+      finishSave(panels);
+    };
 
     const savedEvent = (changeSources?: string[]) => [
       'dashboard_saved',
@@ -339,50 +347,90 @@ describe('unsavedChangesManager', () => {
     });
 
     it('reports added and restored sources on the next save, then clears them', () => {
-      const { internalApi } = createManager({ initialChangeSources: ['restored'] });
-      internalApi.addChangeSources(['agent']);
+      const manager = createManager({ initialChangeSources: ['restored'] });
+      manager.internalApi.addChangeSources(['agent']);
       emitLayoutChanges({ panels: [agentPanel] });
 
-      save();
-      save();
+      save(manager);
+      save(manager);
 
       expect(reportEventMock.mock.calls).toEqual([savedEvent(['restored', 'agent']), savedEvent()]);
     });
 
+    it('reports sources added during a save on the following save', () => {
+      const manager = createManager({ initialChangeSources: ['restored'] });
+
+      manager.internalApi.takeChangeSourcesForSave();
+      manager.internalApi.addChangeSources(['agent']);
+      finishSave();
+      save(manager);
+
+      expect(reportEventMock.mock.calls).toEqual([savedEvent(['restored']), savedEvent(['agent'])]);
+    });
+
+    it('reports sources taken by a failed save on the next successful save', () => {
+      const manager = createManager({ initialChangeSources: ['restored'] });
+
+      manager.internalApi.takeChangeSourcesForSave();
+      manager.internalApi.addChangeSources(['agent']);
+      save(manager);
+
+      expect(reportEventMock.mock.calls).toEqual([savedEvent(['restored', 'agent'])]);
+    });
+
     it('keeps sources when edits return to the last saved state', () => {
-      const { internalApi } = createManager();
-      internalApi.addChangeSources(['agent']);
+      const manager = createManager();
+      manager.internalApi.addChangeSources(['agent']);
       emitLayoutChanges({ panels: [agentPanel] });
       emitLayoutChanges({});
 
-      save();
+      save(manager);
 
       expect(reportEventMock.mock.calls).toEqual([savedEvent(['agent'])]);
     });
 
-    it('clears sources on reset to the last saved state', async () => {
-      const { api } = createManager({ initialChangeSources: ['agent'] });
+    it('clears pending and in-flight sources on reset to the last saved state', async () => {
+      const manager = createManager({ initialChangeSources: ['restored'] });
+      manager.internalApi.takeChangeSourcesForSave();
+      manager.internalApi.addChangeSources(['agent']);
 
-      await api.asyncResetToLastSavedState();
-      save();
+      await manager.api.asyncResetToLastSavedState();
+      save(manager);
 
       expect(reportEventMock.mock.calls).toEqual([savedEvent()]);
     });
 
     it('keeps sources added while a reset is being applied', async () => {
       let finishReset = () => {};
-      const { api, internalApi } = createManager({
+      const manager = createManager({
         initialChangeSources: ['restored'],
         setState: () => new Promise((resolve) => (finishReset = resolve)),
       });
 
-      const reset = api.asyncResetToLastSavedState();
-      internalApi.addChangeSources(['agent']);
+      const reset = manager.api.asyncResetToLastSavedState();
+      manager.internalApi.addChangeSources(['agent']);
       finishReset();
       await reset;
-      save();
+      save(manager);
 
       expect(reportEventMock.mock.calls).toEqual([savedEvent(['agent'])]);
+    });
+
+    it('backs up pending and in-flight sources while a save is in flight', () => {
+      const manager = createManager({
+        storeUnsavedChanges: true,
+        initialChangeSources: ['restored'],
+      });
+
+      manager.internalApi.takeChangeSourcesForSave();
+      manager.internalApi.addChangeSources(['agent']);
+      emitLayoutChanges({ panels: [agentPanel] });
+
+      expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', {
+        viewMode: 'edit',
+        panels: [agentPanel],
+        changeSources: ['restored', 'agent'],
+      });
     });
 
     it('backs up sources only alongside dashboard edits', () => {
@@ -406,14 +454,14 @@ describe('unsavedChangesManager', () => {
       });
       const onUnhandledError = jest.fn();
       rxjsConfig.onUnhandledError = onUnhandledError;
-      const { internalApi } = createManager({ initialChangeSources: ['agent'] });
+      const manager = createManager({ initialChangeSources: ['agent'] });
       const otherSubscriber = jest.fn();
       onSave$.subscribe(otherSubscriber);
 
-      save([userPanel]);
+      save(manager, [userPanel]);
       jest.runAllTimers();
 
-      expect(internalApi.getLastSavedState()).toEqual({
+      expect(manager.internalApi.getLastSavedState()).toEqual({
         ...DEFAULT_DASHBOARD_STATE,
         panels: [userPanel],
       });

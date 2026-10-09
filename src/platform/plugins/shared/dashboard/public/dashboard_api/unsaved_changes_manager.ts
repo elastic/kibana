@@ -65,15 +65,17 @@ export function initializeUnsavedChangesManager({
     getLastSavedState: () => DashboardState;
     unsavedChanges$: Observable<Partial<DashboardState>>;
     addChangeSources: (sources: readonly string[]) => void;
+    takeChangeSourcesForSave: () => void;
   };
 } {
   const hasUnsavedChanges$ = new BehaviorSubject(false);
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
   const changeSources = new Set<string>(initialChangeSources);
+  const changeSourcesInSave = new Set<string>();
 
   const onSaveSubscription = onSave$.subscribe((saveEvent) => {
-    const savedChangeSources = [...changeSources];
-    changeSources.clear();
+    const savedChangeSources = [...changeSourcesInSave];
+    changeSourcesInSave.clear();
     lastSavedState$.next(saveEvent.dashboardState);
     reportDashboardSaved({ ...saveEvent, changeSources: savedChangeSources });
   });
@@ -102,11 +104,13 @@ export function initializeUnsavedChangesManager({
       if (storeUnsavedChanges) {
         const { time_restore, ...restOfDashboardChanges } = dashboardChanges;
         const hasEditsToBackUp = Object.keys(restOfDashboardChanges).length > 0;
+        const changeSourcesToBackUp = new Set([...changeSourcesInSave, ...changeSources]);
         const dashboardBackupState: DashboardBackupState = {
           // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
           viewMode,
           ...restOfDashboardChanges,
-          ...(hasEditsToBackUp && changeSources.size > 0 && { changeSources: [...changeSources] }),
+          ...(hasEditsToBackUp &&
+            changeSourcesToBackUp.size > 0 && { changeSources: [...changeSourcesToBackUp] }),
         };
         getDashboardBackupService().setState(savedObjectId$.value, dashboardBackupState);
       }
@@ -119,6 +123,7 @@ export function initializeUnsavedChangesManager({
     api: {
       asyncResetToLastSavedState: async () => {
         changeSources.clear();
+        changeSourcesInSave.clear();
         await setState(lastSavedState$.value);
       },
       hasUnsavedChanges$,
@@ -134,6 +139,10 @@ export function initializeUnsavedChangesManager({
       getLastSavedState: () => lastSavedState$.value,
       unsavedChanges$: dashboardStateChanges$,
       addChangeSources: (sources) => sources.forEach((source) => changeSources.add(source)),
+      takeChangeSourcesForSave: () => {
+        changeSources.forEach((source) => changeSourcesInSave.add(source));
+        changeSources.clear();
+      },
     },
   };
 }

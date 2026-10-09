@@ -89,6 +89,72 @@ describe('dashboard_saved telemetry', () => {
     ]);
   });
 
+  test('reports sources set during a quick save on the next quick save', async () => {
+    let finishSave = () => {};
+    jest
+      .mocked(saveDashboard)
+      .mockReturnValueOnce(
+        new Promise((resolve) => (finishSave = () => resolve({ id: 'existing-id' })))
+      )
+      .mockResolvedValue({ id: 'existing-id' });
+    const { api } = getDashboardApi({
+      incomingEmbeddables: [],
+      initialState: DEFAULT_DASHBOARD_STATE,
+      savedObjectId: 'existing-id',
+    });
+
+    const firstSave = api.runQuickSave();
+    api.setState(DEFAULT_DASHBOARD_STATE, { changeSources: ['agent'] });
+    finishSave();
+    await firstSave;
+    await api.runQuickSave();
+
+    expect(getDashboardSavedEvents()).toEqual([
+      ['dashboard_saved', { is_new: false, is_copy: false, panel_count: 0, panel_types: [] }],
+      [
+        'dashboard_saved',
+        {
+          is_new: false,
+          is_copy: false,
+          change_sources: ['agent'],
+          panel_count: 0,
+          panel_types: [],
+        },
+      ],
+    ]);
+  });
+
+  test('reports sources set after the save modal serializes state on the next save', async () => {
+    jest.mocked(saveDashboard).mockResolvedValue({ id: 'copy-id' });
+    jest.mocked(openSaveModal).mockImplementation(({ onSave, serializeState }) => {
+      const savedState = serializeState();
+      api.setState(DEFAULT_DASHBOARD_STATE, { changeSources: ['agent'] });
+      onSave({ id: 'copy-id', savedState });
+    });
+    const { api } = getDashboardApi({
+      incomingEmbeddables: [],
+      initialState: DEFAULT_DASHBOARD_STATE,
+      savedObjectId: 'existing-id',
+    });
+
+    await api.runInteractiveSave();
+    await api.runQuickSave();
+
+    expect(getDashboardSavedEvents()).toEqual([
+      ['dashboard_saved', { is_new: true, is_copy: true, panel_count: 0, panel_types: [] }],
+      [
+        'dashboard_saved',
+        {
+          is_new: false,
+          is_copy: false,
+          change_sources: ['agent'],
+          panel_count: 0,
+          panel_types: [],
+        },
+      ],
+    ]);
+  });
+
   test('reports an interactive save of an existing dashboard as a new copy with setState sources', async () => {
     jest.mocked(openSaveModal).mockImplementation(({ onSave, serializeState }) => {
       onSave({ id: 'copy-id', savedState: serializeState() });

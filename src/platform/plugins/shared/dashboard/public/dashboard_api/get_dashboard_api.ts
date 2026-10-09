@@ -305,7 +305,10 @@ export function getDashboardApi({
         description,
         isManaged,
         lastSavedId: savedObjectId$.value,
-        serializeState: getState,
+        serializeState: () => {
+          unsavedChangesManager.internalApi.takeChangeSourcesForSave();
+          return getState();
+        },
         setTimeRestore: (newTimeRestore: boolean) =>
           settingsManager.api.setSettings({ time_restore: newTimeRestore }),
         setProjectRoutingRestore: (newProjectRoutingRestore: boolean) =>
@@ -350,6 +353,7 @@ export function getDashboardApi({
     },
     runQuickSave: async () => {
       if (isManaged) return;
+      unsavedChangesManager.internalApi.takeChangeSourcesForSave();
       const dashboardState = getState();
       const previousDashboardId = savedObjectId$.value;
       const saveResult = await saveDashboard({
