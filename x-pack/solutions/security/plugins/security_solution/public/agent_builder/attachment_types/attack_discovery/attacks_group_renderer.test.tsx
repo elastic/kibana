@@ -15,7 +15,9 @@ jest.mock('../grouped_attachments/flyout_opener', () => ({
   GroupedAttachmentFlyoutOpener: () => null,
 }));
 
+const getUrlForApp = jest.fn(() => '/app/security/attacks');
 const Renderer = createAttacksGroupRenderer({
+  application: { getUrlForApp } as never,
   getSpaceId: jest.fn().mockResolvedValue('default'),
   resolveSecurityCanvasContext: jest.fn(),
 });
@@ -28,6 +30,8 @@ const attack = (overrides: Partial<UnknownAttachment> = {}): UnknownAttachment =
 });
 
 describe('createAttacksGroupRenderer', () => {
+  beforeEach(() => jest.clearAllMocks());
+
   it('renders a flyout row titled with the attack', async () => {
     render(
       <ul>
@@ -59,5 +63,29 @@ describe('createAttacksGroupRenderer', () => {
 
     await screen.findByRole('list');
     expect(screen.queryByText('No id')).not.toBeInTheDocument();
+  });
+
+  it('collapses several attacks into one row linking to the Attacks page filtered to them', async () => {
+    render(
+      <ul>
+        <Renderer
+          attachments={[
+            attack({ id: 'a', data: { id: 'attack-1', timestamp: '2026-09-02T00:00:00.000Z' } }),
+            attack({ id: 'b', data: { id: 'attack-2', timestamp: '2026-09-01T00:00:00.000Z' } }),
+          ]}
+        />
+      </ul>
+    );
+
+    expect(await screen.findByText('2 attacks')).toBeInTheDocument();
+    expect(screen.getAllByRole('listitem')).toHaveLength(1);
+    expect(screen.getByRole('link')).toHaveAttribute('href', '/app/security/attacks');
+    expect(getUrlForApp).toHaveBeenCalledWith(
+      'securitySolutionUI',
+      expect.objectContaining({
+        deepLinkId: 'attacks',
+        path: expect.stringContaining('attack-1'),
+      })
+    );
   });
 });
