@@ -2,9 +2,16 @@
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * Public License v 1.0"; you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.elastic.co/licensing/elastic-license
+ *
+ * or in writing, software distributed under the Apache License, Version 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * This product includes software developed at third-party
+ * specifications (https://github.com/elastic/spec).
  */
 
 import Fs from 'fs';
@@ -125,26 +132,25 @@ interface WeeklyStep {
   steps?: WeeklyStep[];
 }
 
-// `[suiteId, requested model groups]` for every suite step in llm_evals.yml, including those
-// nested in groups.
-const weeklySuiteModelGroups = (steps: WeeklyStep[]): Array<[string, Set<string>]> =>
+// Every suite step in llm_evals.yml, including those nested in groups.
+const weeklySuiteSteps = (steps: WeeklyStep[]): WeeklyStep[] =>
   steps.flatMap(({ env = {}, steps: nested = [] }) => [
-    ...(env.EVAL_SUITE_ID
-      ? [
-          [
-            env.EVAL_SUITE_ID,
-            new Set((env.EVAL_MODEL_GROUPS ?? '').split(',').filter(Boolean)),
-          ] as [string, Set<string>],
-        ]
-      : []),
-    ...weeklySuiteModelGroups(nested),
+    ...(env.EVAL_SUITE_ID ? [{ env }] : []),
+    ...weeklySuiteSteps(nested),
   ]);
 
+const stepsFromYamlText = (text: string) =>
+  weeklySuiteSteps((parseYaml(text) as WeeklyStep).steps ?? []);
+
+const suiteSteps = stepsFromYamlText(
+  Fs.readFileSync(Path.join(__dirname, 'llm_evals.yml'), 'utf-8')
+);
+
 const weeklyModelGroupsBySuite = new Map(
-  weeklySuiteModelGroups(
-    (parseYaml(Fs.readFileSync(Path.join(__dirname, 'llm_evals.yml'), 'utf-8')) as WeeklyStep)
-      .steps ?? []
-  )
+  suiteSteps.map(({ env }) => [
+    env.EVAL_SUITE_ID!,
+    new Set((env.EVAL_MODEL_GROUPS ?? '').split(',').filter(Boolean)),
+  ])
 );
 
 describe('evals.suites.json weeklyEisModelGroups', () => {
@@ -164,5 +170,46 @@ describe('evals.suites.json weeklyEisModelGroups', () => {
       });
 
     expect(problems).toEqual([]);
+  });
+});
+
+describe('llm_evals.yml suite steps', () => {
+  const knownSuiteIds = new Set(suites.map(({ id }) => id));
+
+  it('names a suite that exists in evals.suites.json', () => {
+    // The weeklyEisModelGroups coverage check above only cross-checks suites that define
+    // weeklyEisModelGroups, so a mistyped EVAL_SUITE_ID on any other step would otherwise stay
+    // green. Fail listing the unknown ids.
+    const unknownIds = suiteSteps
+      .map(({ env }) => env.EVAL_SUITE_ID!)
+      .filter((id) => !knownSuiteIds.has(id));
+
+    expect(unknownIds).toEqual([]);
+  });
+
+  it('flags an unknown suite id, including one nested in a group', () => {
+    // Exercises the same path as the check above on a hand-written pipeline: both a top-level
+    // mistyped id and one nested inside a group step must surface in the unknown list.
+    const unknownIdsIn = (text: string) =>
+      stepsFromYamlText(text)
+        .map(({ env }) => env.EVAL_SUITE_ID!)
+        .filter((id) => !knownSuiteIds.has(id));
+
+    expect(
+      unknownIdsIn([
+        'steps:',
+        '  - command: run_suite.sh',
+        '    env:',
+        '      EVAL_SUITE_ID: security-attack-discovery-fp-tpp',
+        '  - group: weekly',
+        '    steps:',
+        '      - command: run_suite.sh',
+        '        env:',
+        '          EVAL_SUITE_ID: attack-discovery',
+        '  - command: run_suite.sh',
+        '    env:',
+        '      EVAL_SUITE_ID: security-attack-discovery-fp-tp',
+        ''].join('\n'))
+    ).toEqual(['security-attack-discovery-fp-tpp']);
   });
 });
