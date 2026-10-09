@@ -16,11 +16,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CHAT_MESSAGE_MAX_LENGTH } from '@kbn/agent-builder-common';
-import {
-  AttachmentType,
-  SUPPORTED_PDF_MIME_TYPE,
-  type ConversationAttachment,
-} from '@kbn/agent-builder-common/attachments';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -53,9 +48,7 @@ import { useToasts } from '../../../hooks/use_toasts';
 import { InputActions } from './input_actions';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
-import { useImageUpload } from './use_image_upload';
-import { usePdfUpload } from './use_pdf_upload';
-import { useIsPdfUploadAvailable } from '../../../hooks/use_is_pdf_upload_available';
+import { useAttachmentUploads } from './use_attachment_uploads';
 
 const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.container.label', {
   defaultMessage: 'Message input form',
@@ -336,54 +329,17 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   const {
     uploadingNames,
-    handlePasteFile: handlePasteImage,
-    handleAfterInput: handleAfterImageInput,
-    handleRemoveAttachment: handleRemoveImageAttachment,
-  } = useImageUpload({
-    addErrorToast,
-    messageEditorController,
-  });
-
-  const isPdfUploadAvailable = useIsPdfUploadAvailable();
-  const {
     loadingPdfNames,
+    uploadingChipNames,
+    isUploading,
+    isPdfUploadAvailable,
     pendingConversationId,
-    handlePastePdf,
-    handleAfterInput: handleAfterPdfInput,
-    handleRemovePdf,
-    handleSubmitted: handlePdfSubmitted,
-  } = usePdfUpload({
-    addErrorToast,
-    messageEditorController,
-    createConversation,
-  });
-
-  const uploadingChipNames = useMemo(
-    () => new Set([...uploadingNames, ...loadingPdfNames]),
-    [uploadingNames, loadingPdfNames]
-  );
-
-  const handlePasteFile = useCallback(
-    (file: File): string | undefined =>
-      file.type === SUPPORTED_PDF_MIME_TYPE ? handlePastePdf?.(file) : handlePasteImage?.(file),
-    [handlePastePdf, handlePasteImage]
-  );
-
-  const handleAfterInput = useCallback(() => {
-    handleAfterImageInput();
-    handleAfterPdfInput();
-  }, [handleAfterImageInput, handleAfterPdfInput]);
-
-  const handleRemoveAttachment = useCallback(
-    (attachment: ConversationAttachment) => {
-      if (!('items' in attachment) && attachment.type === AttachmentType.pdf) {
-        if (attachment.description) handleRemovePdf(attachment.description);
-        return;
-      }
-      handleRemoveImageAttachment?.(attachment);
-    },
-    [handleRemovePdf, handleRemoveImageAttachment]
-  );
+    handlePasteFile,
+    handleAfterInput,
+    handleRemoveAttachment,
+    handleRemoveLoadingPdf,
+    handleSubmitted: handleUploadsSubmitted,
+  } = useAttachmentUploads({ addErrorToast, messageEditorController, createConversation });
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
@@ -402,8 +358,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     !isAgentIdValid ||
     isAgentModelLoading ||
     isAwaitingPrompt ||
-    uploadingNames.size > 0 ||
-    loadingPdfNames.size > 0;
+    isUploading;
 
   const placeholder = isAgentDeleted ? disabledPlaceholder(agentId) : enabledPlaceholder;
 
@@ -542,7 +497,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     } else {
       submitMessage(content, { conversationId: pendingConversationId });
     }
-    handlePdfSubmitted();
+    handleUploadsSubmitted();
     clearDraft();
     messageEditorController.clear();
     onSubmit?.();
@@ -558,13 +513,13 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       isCollapsed={shouldCollapseInput}
       triggerMode={triggerMode}
     >
-      {(visibleAttachments.length > 0 || uploadingNames.size > 0 || loadingPdfNames.size > 0) && (
+      {(visibleAttachments.length > 0 || isUploading) && (
         <EuiFlexItem grow={false}>
           <AttachmentPillsRow
             attachments={visibleAttachments}
             uploadingNames={uploadingNames}
             loadingPdfNames={loadingPdfNames}
-            onRemoveLoadingPdf={handleRemovePdf}
+            onRemoveLoadingPdf={handleRemoveLoadingPdf}
             removable
             onRemoveAttachment={handleRemoveAttachment}
             hoveredImageName={hoveredImageName}
