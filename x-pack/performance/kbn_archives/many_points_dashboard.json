@@ -1,8 +1,4 @@
 {
-  "accessControl": {
-    "accessMode": "write_restricted",
-    "owner": "u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0"
-  },
   "attributes": {
     "description": "",
     "kibanaSavedObjectMeta": {
