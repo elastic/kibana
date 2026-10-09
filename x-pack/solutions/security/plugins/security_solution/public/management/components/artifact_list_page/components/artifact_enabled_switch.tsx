@@ -14,31 +14,52 @@ import {
   EuiToolTip,
   type EuiSwitchEvent,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useArtifactActionsDisabled } from '../../../hooks/artifacts';
 import { isArtifactDisabled } from '../../../../../common/endpoint/service/artifacts';
 import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
-import {
-  type ARTIFACT_ENABLE_DISABLE_ACTION_LABELS,
-  useWithArtifactEnableDisable,
-} from '../hooks/use_with_artifact_enable_disable';
+import type { ARTIFACT_ENABLE_DISABLE_ACTION_LABELS } from '../hooks/use_with_artifact_enable_disable';
+import { useWithArtifactEnableDisable } from '../hooks/use_with_artifact_enable_disable';
+
+export const ARTIFACT_ENABLED_SWITCH_LABELS = Object.freeze({
+  tableColumnEnabledLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnEnabledLabel',
+    { defaultMessage: 'Enabled' }
+  ),
+  tableEnabledStatusLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.enabledStatusLabel',
+    { defaultMessage: 'Enabled' }
+  ),
+  tableDisabledStatusLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.disabledStatusLabel',
+    { defaultMessage: 'Disabled' }
+  ),
+});
 
 export interface ArtifactEnabledSwitchProps {
   item: ExceptionListItemSchema;
   apiClient: ExceptionsListApiClient;
-  labels: {
-    tableColumnEnabledLabel: string;
-    tableEnabledStatusLabel: string;
-    tableDisabledStatusLabel: string;
-  } & typeof ARTIFACT_ENABLE_DISABLE_ACTION_LABELS;
+  labels: typeof ARTIFACT_ENABLED_SWITCH_LABELS & typeof ARTIFACT_ENABLE_DISABLE_ACTION_LABELS;
   isReadOnly?: boolean;
-  onSuccess?: () => Promise<void>;
+  /** Reloads the artifact after a successful update or a 409 conflict. */
+  onRefresh?: () => Promise<void>;
   'data-test-subj'?: string;
 }
 
+const isConflictError = (error: unknown): boolean => {
+  if (typeof error !== 'object' || error === null) {
+    return false;
+  }
+
+  const httpError = error as IHttpFetchError<{ statusCode?: number }>;
+  return httpError.response?.status === 409 || httpError.body?.statusCode === 409;
+};
+
 export const ArtifactEnabledSwitch = memo<ArtifactEnabledSwitchProps>(
-  ({ item, apiClient, labels, isReadOnly = false, onSuccess, 'data-test-subj': dataTestSubj }) => {
+  ({ item, apiClient, labels, isReadOnly = false, onRefresh, 'data-test-subj': dataTestSubj }) => {
     const isMounted = useIsMounted();
     const { isDisabled: isActionDisabled } = useArtifactActionsDisabled(item);
     const { setArtifactEnabled, isLoading } = useWithArtifactEnableDisable(apiClient, item, labels);
@@ -63,7 +84,14 @@ export const ArtifactEnabledSwitch = memo<ArtifactEnabledSwitchProps>(
 
         // mutateAsync rethrows after onError; swallow so failed updates are not unhandled rejections.
         setArtifactEnabled(event.target.checked)
-          .then(() => onSuccess?.())
+          .then(() => onRefresh?.())
+          .catch((error: unknown) => {
+            if (!isConflictError(error)) {
+              return undefined;
+            }
+
+            return onRefresh?.();
+          })
           .catch(() => undefined)
           .finally(() => {
             if (isMounted()) {
@@ -71,7 +99,7 @@ export const ArtifactEnabledSwitch = memo<ArtifactEnabledSwitchProps>(
             }
           });
       },
-      [isBusy, isMounted, isSwitchDisabled, onSuccess, setArtifactEnabled]
+      [isBusy, isMounted, isSwitchDisabled, onRefresh, setArtifactEnabled]
     );
 
     return (

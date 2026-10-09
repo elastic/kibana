@@ -14,6 +14,7 @@ import {
   ruleSavedObjectAttributesSchemaV5,
   ruleSavedObjectAttributesSchemaV6,
   ruleSavedObjectAttributesSchemaV7,
+  ruleSavedObjectAttributesSchemaV8,
 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 import { migrateDashboardArtifactDataKey } from './migrate_dashboard_artifact_data_key';
@@ -215,6 +216,18 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: ruleSavedObjectAttributesSchemaV7.extends({}, { unknowns: 'ignore' }),
       create: ruleSavedObjectAttributesSchemaV7,
+    },
+  },
+  '10': {
+    /*
+     * Adds `metadata.template.id`, the id of the rule template a rule was
+     * created from. Optional, so existing rules need no backfill. Not indexed
+     * until something needs to search or filter on it.
+     */
+    changes: [],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV8.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV8,
     },
   },
 };

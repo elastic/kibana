@@ -13,12 +13,13 @@ import type {
   ToolAvailabilityResult,
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { getStreamTypeFromDefinition, type StreamType } from '@kbn/streams-schema';
 import { baseFeatureSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { createFeatureKnowledgeIndicatorToolHandler } from './handler';
@@ -26,15 +27,17 @@ import { createFeatureKnowledgeIndicatorToolHandler } from './handler';
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID =
   platformSignificantEventsTools.createFeatureKnowledgeIndicator;
 
-const createFeatureKISchema = baseFeatureSchema.extend({
-  expires_at: z.iso
-    .datetime()
-    .optional()
-    .describe(
-      'Optional expiry deadline (ISO 8601). Provide to create a managed KI that expires at this date. ' +
-        'Omit to create a durable KI with no expiry.'
-    ),
-});
+const createFeatureKISchema = lazySchema(() =>
+  baseFeatureSchema.extend({
+    expires_at: z.iso
+      .datetime()
+      .optional()
+      .describe(
+        'Optional expiry deadline (ISO 8601). Provide to create a managed KI that expires at this date. ' +
+          'Omit to create a durable KI with no expiry.'
+      ),
+  })
+);
 
 export function createFeatureKnowledgeIndicatorTool({
   getScopedClients,
@@ -123,6 +126,7 @@ export function createFeatureKnowledgeIndicatorTool({
           server,
           licensing: scopedClients.licensing,
         });
+        await assertCanManageSignificantEvents({ request, server });
         const definition = await scopedClients.streamsClient.getStream(streamName);
         streamType = getStreamTypeFromDefinition(definition);
 
