@@ -439,6 +439,11 @@ export interface BriefValidation {
   unbackedRelations: Array<{ statement: string; from: string; to: string }>;
   /** Numbers in prose that do not appear in snapshot metrics. */
   inventedNumbers: string[];
+  /**
+   * Claims kept but flagged (e.g. a weak relation with no computed edge). The UI shows a subtle
+   * warning next to the flagged claim. Strong unbacked relations are dropped, not flagged.
+   */
+  flags?: Array<{ claimPath: string; statement: string; reason: string }>;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -486,6 +491,8 @@ export interface ExecutiveBriefJob {
   /** Milliseconds per stage. */
   timings?: Partial<Record<BriefJobStage, number>>;
   tokens?: { prompt: number; completion: number };
+  /** Display name of the model/connector that wrote the brief (absent for the template generator). */
+  model?: string;
   error?: {
     code: 'interrupted' | 'timeout' | 'connector' | 'llm_output' | 'unknown';
     message: string;
