@@ -154,6 +154,8 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
         highContrastMode,
         theme: _theme,
         componentDefaults,
+        // EUI CSS breakpoints follow the nearest breakpoint container (the app area or `body`). JS breakpoints keep the window.
+        breakpointContainer: true,
       }}
     >
       {children}

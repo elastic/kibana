@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
+import { EUI_BREAKPOINT_CONTAINER_ATTRIBUTE } from '@elastic/eui';
 
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '../constants';
 
@@ -33,7 +34,9 @@ export const LayoutApplication = ({
   const { appearance } = useLayoutConfig();
 
   return (
-    <div css={styles.root(appearance)}>
+    // EUI breakpoints follow this element when `EuiProvider` `breakpointContainer` is set. It's the
+    // non-scrolling wrapper, so fixed descendants contained by it don't scroll away with the content.
+    <div css={styles.root(appearance)} {...{ [EUI_BREAKPOINT_CONTAINER_ATTRIBUTE]: true }}>
       <div
         css={styles.scrollContainer}
         id={APP_MAIN_SCROLL_CONTAINER_ID}
