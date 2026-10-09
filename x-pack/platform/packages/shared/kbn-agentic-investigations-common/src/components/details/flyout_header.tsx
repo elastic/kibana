@@ -19,15 +19,11 @@ import {
 import type { EuiBadgeProps } from '@elastic/eui';
 import type { Investigation } from '../../types';
 import { ConversationHeaderBlocks } from './header_blocks';
-import { SEVERITY_LABELS } from './overview_translations';
+import { SEVERITY_COLORS, SEVERITY_LABELS } from './severity';
 
-// Same colors as the investigation card's severity dot (agenticInvestigations).
-const SEVERITY_COLORS: Readonly<Record<string, EuiBadgeProps['color']>> = {
-  low: 'success',
-  medium: 'primary',
-  high: 'warning',
-  critical: 'danger',
-};
+// Unknown severity values render as-is in a hollow badge.
+const BADGE_COLORS: Readonly<Record<string, EuiBadgeProps['color']>> = SEVERITY_COLORS;
+const BADGE_LABELS: Readonly<Record<string, string>> = SEVERITY_LABELS;
 
 export interface ConversationDetailsFlyoutHeaderProps {
   investigation: Investigation;
@@ -77,10 +73,10 @@ export const ConversationDetailsFlyoutHeader = ({
             {severity && liveStateNode === undefined && (
               <EuiFlexItem grow={false}>
                 <EuiBadge
-                  color={SEVERITY_COLORS[severity] ?? 'hollow'}
+                  color={BADGE_COLORS[severity] ?? 'hollow'}
                   data-test-subj="investigationFlyoutSeverity"
                 >
-                  {SEVERITY_LABELS[severity] ?? severity}
+                  {BADGE_LABELS[severity] ?? severity}
                 </EuiBadge>
               </EuiFlexItem>
             )}

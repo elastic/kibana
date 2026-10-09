@@ -10,9 +10,8 @@ import { useQuery } from '@kbn/react-query';
 import type { ConversationTemplateBriefCardRenderProps } from '@kbn/agent-builder-browser';
 import type { ConversationWithoutRoundsWithPermissions } from '@kbn/agent-builder-common';
 import {
-  INVESTIGATION_SEVERITIES,
+  isInvestigationSeverity,
   isInvestigationTitlePending,
-  type InvestigationSeverity,
   type InvestigationSummary,
 } from '../../../../common';
 import { retryOnTransientError } from '../../../retry_on_transient_error';
@@ -23,9 +22,6 @@ import { InvestigationCard } from './card';
 
 const readString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.length > 0 ? value : undefined;
-
-const isSeverity = (value: unknown): value is InvestigationSeverity =>
-  INVESTIGATION_SEVERITIES.some((severity) => severity === value);
 
 /** What the card can show before (or without) the list read: the conversation's own fields. */
 export const conversationToInvestigationSummary = (
@@ -41,7 +37,7 @@ export const conversationToInvestigationSummary = (
     agent_id: conversation.agent_id,
     metadata: {
       status: metadata.status === 'closed' ? 'closed' : 'open',
-      ...(isSeverity(metadata.severity) && { severity: metadata.severity }),
+      ...(isInvestigationSeverity(metadata.severity) && { severity: metadata.severity }),
       ...(readString(metadata.summary) && { summary: readString(metadata.summary) }),
       ...(readString(metadata.verdict) && { verdict: readString(metadata.verdict) }),
     },

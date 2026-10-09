@@ -18,15 +18,3 @@ export const OVERVIEW_SECTION_LABELS = Object.freeze({
     defaultMessage: 'Investigation trace',
   }),
 });
-
-/** Labels of the investigation template's `severity` values. Unknown values render as-is. */
-export const SEVERITY_LABELS: Readonly<Record<string, string>> = Object.freeze({
-  low: i18n.translate('xpack.alertzero.detailsFlyout.severity.low', { defaultMessage: 'Low' }),
-  medium: i18n.translate('xpack.alertzero.detailsFlyout.severity.medium', {
-    defaultMessage: 'Medium',
-  }),
-  high: i18n.translate('xpack.alertzero.detailsFlyout.severity.high', { defaultMessage: 'High' }),
-  critical: i18n.translate('xpack.alertzero.detailsFlyout.severity.critical', {
-    defaultMessage: 'Critical',
-  }),
-});

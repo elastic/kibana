@@ -55,6 +55,11 @@ export {
   type EscalationFlyoutHeaderProps,
 } from './src/components/details/escalation_flyout_header';
 export { StatusToggle, type StatusToggleProps } from './src/components/details/status_toggle';
+export {
+  SEVERITY_COLORS,
+  SEVERITY_LABELS,
+  type InvestigationSeverityLevel,
+} from './src/components/details/severity';
 export { DetailsBlock } from './src/components/details/detail_block';
 export {
   ProposedActionButton,
