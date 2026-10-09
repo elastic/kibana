@@ -75,6 +75,15 @@
       "enabled": true
     },
     {
+      "groupName": "esbuild",
+      "matchDepNames": ["esbuild"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:Operations"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "devcontainer",
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
