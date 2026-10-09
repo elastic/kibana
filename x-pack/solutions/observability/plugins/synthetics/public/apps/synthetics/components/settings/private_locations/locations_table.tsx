@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
@@ -37,6 +37,8 @@ import { PolicyName } from './policy_name';
 import { LocationHealth } from './location_health';
 import { LOCATION_NAME_LABEL } from './location_form';
 import type { ClientPluginsStart } from '../../../../../plugin';
+import { useLicense } from '../../../hooks/use_license';
+import { AGENT_SHARDING_MIN_LICENSE } from '../../../../../../common/constants/license';
 import { UnhealthyCountBadge } from './unhealthy_count_badge';
 import { ResetMonitorModal } from '../../monitors_page/management/monitor_list_table/reset_monitor_modal';
 import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
@@ -61,11 +63,20 @@ export const PrivateLocationsTable = ({
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [monitorPendingReset, setMonitorPendingReset] = useState<{
+    locationId: string;
     resetIds: string[];
     skippedMonitors: Array<{ id: string; name: string }>;
   } | null>(null);
-  const { resetMonitors, getUnhealthyLocationStatuses, getUnhealthyMonitorsForLocation } =
-    useMonitorIntegrationHealth();
+  const privateLocationIds = useMemo(
+    () => privateLocations.map(({ id }) => id),
+    [privateLocations]
+  );
+  const {
+    resetPrivateLocation,
+    getUnhealthyLocationStatuses,
+    getUnhealthyMonitorsForLocation,
+    getUnhealthyConfigIdsForLocation,
+  } = useMonitorIntegrationHealth({ locationIds: privateLocationIds });
 
   const [locationPendingDelete, setLocationPendingDelete] = useState<string | null>(null);
 
@@ -91,6 +102,9 @@ export const PrivateLocationsTable = ({
     });
 
   const { canSave } = useSyntheticsSettingsContext();
+  const { hasAtLeast } = useLicense();
+  // Stats carry the server's answer (license + rebalance switch); license is the pre-load fallback.
+  const isShardingActive = hasAtLeast(AGENT_SHARDING_MIN_LICENSE) === true;
 
   const { services } = useKibana<ClientPluginsStart>();
 
@@ -142,7 +156,10 @@ export const PrivateLocationsTable = ({
             <EuiFlexItem grow={false}>
               <ViewLocationMonitors count={monitors} locationName={item.label} />
             </EuiFlexItem>
-            <UnhealthyCountBadge item={item} />
+            <UnhealthyCountBadge
+              item={item}
+              unhealthyConfigIds={getUnhealthyConfigIdsForLocation(item.id)}
+            />
           </EuiFlexGroup>
         );
       },
@@ -156,7 +173,7 @@ export const PrivateLocationsTable = ({
           locationStats={agentStatsByLocation.get(item.id)}
           // The expanded panel already shows the agent count, so drop the badge there.
           hideAgentCount={expandedIds.has(item.id)}
-          isAgentSharding={item.isAgentSharding}
+          isShardingActive={agentStatsByLocation.get(item.id)?.isShardingActive ?? isShardingActive}
         />
       ),
     },
@@ -246,7 +263,7 @@ export const PrivateLocationsTable = ({
             }
 
             if (resetIds.length > 0) {
-              setMonitorPendingReset({ resetIds, skippedMonitors });
+              setMonitorPendingReset({ locationId: item.id, resetIds, skippedMonitors });
             }
           },
         },
@@ -371,7 +388,7 @@ export const PrivateLocationsTable = ({
         <ResetMonitorModal
           configIds={monitorPendingReset.resetIds}
           onClose={() => setMonitorPendingReset(null)}
-          resetMonitors={resetMonitors}
+          resetMonitors={() => resetPrivateLocation(monitorPendingReset.locationId)}
           skippedMonitors={monitorPendingReset.skippedMonitors}
         />
       )}

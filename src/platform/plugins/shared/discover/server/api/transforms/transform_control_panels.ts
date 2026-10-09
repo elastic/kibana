@@ -10,18 +10,13 @@
 import { ZodError } from '@kbn/zod';
 import { transformType } from '@kbn/embeddable-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
-import {
-  discoverSessionControlPanelSchema,
-  discoverSessionControlPanelsSchema,
-} from '@kbn/as-code-discover-schema';
+import { discoverSessionApiControlPanelSchema } from '@kbn/as-code-discover-schema';
 import {
   getControlOrder,
   isRecord,
   convertControlGroupEntryToApi,
 } from '../../../common/session/control_panels';
-import type { DiscoverSessionControlPanels, DiscoverSessionWarning } from '../schema';
-
-export { serializeEsqlControls as transformControlPanelsIn } from '../../../common/session/control_panels';
+import type { DiscoverSessionApiControlPanels, DiscoverSessionWarning } from '../schema';
 
 const createDroppedControlPanelsWarning = (
   tabId: string,
@@ -59,10 +54,10 @@ const createDroppedPanelWarning = (
 const parseControlPanelEntry = (
   id: string,
   panel: unknown
-): DiscoverSessionControlPanels[number] => {
+): DiscoverSessionApiControlPanels[number] => {
   const control = convertControlGroupEntryToApi(id, panel);
 
-  return discoverSessionControlPanelSchema.parse({
+  return discoverSessionApiControlPanelSchema.parse({
     ...control,
     type: transformType(control.type),
   });
@@ -75,7 +70,7 @@ const parseControlPanelEntry = (
 export const transformControlPanelsOut = (
   controlGroupJson: string | undefined,
   tabId: string
-): { panels: DiscoverSessionControlPanels | undefined; warnings: DiscoverSessionWarning[] } => {
+): { panels: DiscoverSessionApiControlPanels | undefined; warnings: DiscoverSessionWarning[] } => {
   if (!controlGroupJson) {
     return { panels: undefined, warnings: [] };
   }
@@ -103,7 +98,7 @@ export const transformControlPanelsOut = (
     ([, panelA], [, panelB]) => getControlOrder(panelA) - getControlOrder(panelB)
   );
 
-  const panels: DiscoverSessionControlPanels = [];
+  const panels: DiscoverSessionApiControlPanels = [];
   const warnings: DiscoverSessionWarning[] = [];
 
   for (const [id, panel] of entries) {
@@ -115,7 +110,7 @@ export const transformControlPanelsOut = (
   }
 
   return {
-    panels: panels.length ? discoverSessionControlPanelsSchema.parse(panels) : undefined,
+    panels: panels.length ? panels : undefined,
     warnings,
   };
 };

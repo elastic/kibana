@@ -1593,6 +1593,7 @@ export interface ConnectorAddFlyoutProps {
   onClose: () => void;
   featureId?: string;
   onConnectorCreated?: (connector: ActionConnector) => void;
+  onConnectorUpdated?: (connector: ActionConnector) => void;
   onTestConnector?: (connector: ActionConnector) => void;
 }
 ```
@@ -1603,6 +1604,7 @@ export interface ConnectorAddFlyoutProps {
 | onClose            | Called when closing the flyout                                                                                                                                                                                                                                             |
 | featureId          | Optional property that filters which action types are loaded when the flyout is opened. Each action type configures the feature ids it is available in during [server side registration](https://github.com/elastic/kibana/tree/main/x-pack/platform/plugins/shared/actions#action-types). |
 | onConnectorCreated | Optional property. Function to be called after the creation of the connector.                                                                                                                                                                                              |
+| onConnectorUpdated | Optional property. Called for saves made in the edit phase after creation, so callers can refresh a connector cache. The initial create still uses `onConnectorCreated`.                                                                                                  |
 | onTestConnector    | Optional property. Function to be called when the user press the Save & Test button.                                                                                                                                                                                       |
 
 ## Embed the Edit Connector flyout within any Kibana plugin

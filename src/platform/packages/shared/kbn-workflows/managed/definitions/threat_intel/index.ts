@@ -44,7 +44,7 @@ export const THREAT_INTEL_ENRICH_REPORT_WORKFLOW = {
   id: THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: PLUGIN_ID,
-  version: 1,
+  version: 4,
   visibility: VISIBILITY,
   yaml: ENRICH_THREAT_REPORT_YAML,
 } as const satisfies ManagedWorkflowDefinition;

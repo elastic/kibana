@@ -19,6 +19,12 @@ import { FlyoutContainer } from './flyout_container';
 
 type Options = 'legend' | 'style' | 'filters';
 
+const toolbarFlyoutTestSubj: Record<Options, string> = {
+  style: 'lnsStyleSettingsFlyout',
+  legend: 'lnsLegendSettingsFlyout',
+  filters: 'lnsFiltersSettingsFlyout',
+};
+
 type ToolbarOption = EuiButtonGroupOptionProps & { id: Options; label: string };
 const baseToolbarOptions: ToolbarOption[] = [
   {
@@ -112,6 +118,7 @@ export function FlyoutToolbar<S>({
         label={flyoutTitle}
         isInlineEditing={isInlineEditing}
         isOpen={isFlyoutVisible}
+        dataTestSubj={idSelected ? toolbarFlyoutTestSubj[idSelected] : undefined}
         handleClose={() => {
           setIdSelected('');
           setFlyoutVisible(false);

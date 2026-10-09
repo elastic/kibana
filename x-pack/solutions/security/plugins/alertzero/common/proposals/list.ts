@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
+import type { ProposalWithMetadata } from '@kbn/proposals-common';
 
 export const CLOSED_GROUP_KEY = 'closed' as const;
 
@@ -18,12 +18,38 @@ export interface ProposalItem extends ProposalWithMetadata {
    * conversation redirect, which resolves the agent itself.
    */
   conversationAgentId?: string;
+  /**
+   * User ids assigned to the investigation, from conversation metadata. Always an array —
+   * empty when unset or the conversation is unreadable — so callers need no fallback.
+   */
+  conversationAssignees: string[];
+  /** Absent when the conversation has no Impact document. */
+  entityIds?: string[];
 }
 
-export type ProposalGroups = Record<string, ProposalItem[]>;
-
-export interface GetProposalsListResponse {
-  groups: ProposalGroups;
+export interface ProposalsPageResponse {
+  proposals: ProposalItem[];
   total: number;
-  truncated: boolean;
 }
+
+export interface ProposalsPageParams {
+  size: number;
+  from: number;
+}
+
+/** Rows per request. `from` walks the queue; this only bounds one page of it. */
+export const MAX_QUEUE_PAGE_SIZE = 100;
+
+/**
+ * Elasticsearch refuses `from + size` past `index.max_result_window`. Going further
+ * needs `search_after`, which the queue sorts are now ordered enough to support —
+ * `rootProposalId` plus `revision` breaks every tie among live proposals — but which
+ * nothing implements yet.
+ *
+ * @see {@link https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results#search-after}
+ */
+export const MAX_QUEUE_REACH = 10_000;
+
+/** The window a page has to fit inside, whatever offset it starts at. */
+export const fitsQueueReach = ({ size, from }: ProposalsPageParams) =>
+  from + size <= MAX_QUEUE_REACH;

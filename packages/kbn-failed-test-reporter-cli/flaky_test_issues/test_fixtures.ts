@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FlakyTestEntry, FlakyTestReport } from '@kbn/scout-reporting';
+import type {
+  FlakyTestEntry,
+  FlakyTestFileStats,
+  FlakyTestPipelineStats,
+  FlakyTestReport,
+} from '@kbn/scout-reporting';
 import type { GithubIssue } from '../failed_tests_reporter/github_api';
+import { updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 
 export const GENERATED_AT = new Date('2026-09-09T09:04:41.000Z');
 
@@ -22,7 +28,8 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
   filePath: SUITE_PATH,
   configPath:
     'x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts',
-  owners: ['elastic/obs-ux-management-team'],
+  configCategory: 'ui-test',
+  owners: ['elastic/obs-signals-logs-team'],
   areas: [],
   runs: 509,
   fails: 49,
@@ -32,6 +39,7 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
   failedBuilds: 49,
   buildFailRate: 49 / 509,
   failedBranches: 1,
+  flakiestBranch: { branch: 'main', builds: 509, failedBuilds: 49, buildFailRate: 49 / 509 },
   byBranch: [
     {
       branch: 'main',
@@ -39,11 +47,32 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
       failedBuilds: 49,
       buildFailRate: 49 / 509,
       lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
+      lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
+      lastFailedJobId: '0199-abcd',
       latestRun: {
         status: 'passed',
         timestamp: new Date('2026-09-09T06:04:41.000Z'),
         buildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12346',
       },
+    },
+  ],
+  byTarget: [
+    {
+      mode: 'stateful-classic',
+      type: 'local',
+      builds: 509,
+      failedBuilds: 49,
+      buildFailRate: 49 / 509,
+      lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
+      lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
+      lastFailedJobId: '0199-abcd',
+    },
+    {
+      mode: 'serverless-observability_complete',
+      type: 'local',
+      builds: 426,
+      failedBuilds: 0,
+      buildFailRate: 0,
     },
   ],
   firstFailedAt: new Date('2026-09-02T10:00:00.000Z'),
@@ -57,14 +86,54 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
   sampleFailures: [
     {
       message: 'Error: Timed out 30000ms waiting for expect(locator).toBeVisible()',
-      buildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd',
+      buildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
+      jobId: '0199-abcd',
+      stepLabel: 'Scout Lane #3 - stateful-classic / default',
       timestamp: new Date('2026-09-09T06:12:00.000Z'),
     },
   ],
+  errors: [
+    {
+      key: 'Error: Timed out Nms waiting for expect(locator).toBeVisible()',
+      message: 'Error: Timed out 30000ms waiting for expect(locator).toBeVisible()',
+      failuresCount: 61,
+      buildsCount: 49,
+      byPipeline: [
+        { pipeline: 'kibana-on-merge', failuresCount: 49 },
+        { pipeline: 'kibana-pull-request', failuresCount: 12 },
+      ],
+      branches: ['main', 'someone:fix-it'],
+      targets: ['stateful-classic'],
+      firstFailedAt: new Date('2026-09-02T10:00:00.000Z'),
+      lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
+      lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
+      lastFailedJobId: '0199-abcd',
+    },
+  ],
+  suiteTitle: 'Default status alert',
   ...overrides,
 });
 
-export const flakyReport = (flaky: FlakyTestEntry[]): FlakyTestReport => ({
+export const pipelineStats = (
+  overrides: Partial<FlakyTestPipelineStats> = {}
+): FlakyTestPipelineStats => ({
+  pipeline: 'kibana-on-merge',
+  builds: 509,
+  failedBuilds: 49,
+  buildFailRate: 49 / 509,
+  failedBranches: 1,
+  failedBranchNames: ['main'],
+  lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
+  lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
+  lastFailedJobId: '0199-abcd',
+  lastFailedStepLabel: 'Scout Lane #3 - stateful-classic / default',
+  ...overrides,
+});
+
+export const flakyReport = (
+  flaky: FlakyTestEntry[],
+  files: FlakyTestFileStats[] = []
+): FlakyTestReport => ({
   schemaVersion: 1,
   generatedAt: GENERATED_AT,
   window: {
@@ -78,12 +147,7 @@ export const flakyReport = (flaky: FlakyTestEntry[]): FlakyTestReport => ({
     frameworks: ['jest', 'ftr', 'cypress', 'playwright'],
     classifications: ['flaky'],
   },
-  thresholds: {
-    minBuilds: 10,
-    minFailedBuilds: 2,
-    minFailRate: 0,
-    maxTests: 200,
-  },
+  thresholds: { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0.03, maxTests: 200 },
   summary: {
     totalFlaky: flaky.length,
     totalConsistentlyFailing: 0,
@@ -92,7 +156,7 @@ export const flakyReport = (flaky: FlakyTestEntry[]): FlakyTestReport => ({
   },
   flaky,
   consistentlyFailing: [],
-  files: [],
+  files,
 });
 
 export const githubIssue = (overrides: Partial<GithubIssue> & { number: number }): GithubIssue => ({
@@ -104,3 +168,21 @@ export const githubIssue = (overrides: Partial<GithubIssue> & { number: number }
   state: 'open',
   ...overrides,
 });
+
+/** A suite issue about every suite of a file: `flaky-test-suite` metadata without a suite title. */
+export const fileWideIssue = (
+  number: number,
+  overrides: Partial<GithubIssue> & { filePath?: string; framework?: string } = {}
+): GithubIssue => {
+  const { filePath = SUITE_PATH, framework = 'playwright', ...issue } = overrides;
+  return githubIssue({
+    number,
+    title: `Flaky Scout suite: ${filePath}`,
+    body: updateIssueMetadata(
+      'Filed for the whole file',
+      { 'suite.filePath': filePath, 'suite.framework': framework },
+      'flaky-test-suite'
+    ),
+    ...issue,
+  });
+};

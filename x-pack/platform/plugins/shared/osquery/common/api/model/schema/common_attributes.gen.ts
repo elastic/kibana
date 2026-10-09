@@ -41,6 +41,15 @@ export const PlatformOrUndefined = lazySchema(() => Platform.nullable());
 export type PlatformOrUndefined = z.infer<typeof PlatformOrUndefined>;
 
 /**
+ * Pack-level platform restriction. To specify multiple platforms, use commas. For example, `linux,darwin`.
+ */
+export const PackPlatform = lazySchema(() => z.string().min(1).max(256));
+export type PackPlatform = z.infer<typeof PackPlatform>;
+
+export const PackPlatformOrUndefined = lazySchema(() => PackPlatform.nullable());
+export type PackPlatformOrUndefined = z.infer<typeof PackPlatformOrUndefined>;
+
+/**
  * The SQL query you want to run.
  */
 export const Query = lazySchema(() => z.string());
@@ -128,6 +137,15 @@ export const EnabledOrUndefined = lazySchema(() => Enabled.nullable());
 export type EnabledOrUndefined = z.infer<typeof EnabledOrUndefined>;
 
 /**
+ * Whether this query is enabled. When false, the query is omitted from the Fleet policy. Default is true.
+ */
+export const QueryEnabled = lazySchema(() => z.boolean());
+export type QueryEnabled = z.infer<typeof QueryEnabled>;
+
+export const QueryEnabledOrUndefined = lazySchema(() => QueryEnabled.nullable());
+export type QueryEnabledOrUndefined = z.infer<typeof QueryEnabledOrUndefined>;
+
+/**
  * A list of agents policy IDs.
  */
 export const PolicyIds = lazySchema(() => z.array(z.string()));
@@ -185,6 +203,20 @@ export type ECSMappingArray = z.infer<typeof ECSMappingArray>;
 export const ECSMappingArrayOrUndefined = lazySchema(() => ECSMappingArray.nullable());
 export type ECSMappingArrayOrUndefined = z.infer<typeof ECSMappingArrayOrUndefined>;
 
+/**
+  * Controls the result document type emitted by osquerybeat for this pack or query.
+- `snapshot`: Full table snapshot on every scheduled run (default).
+- `differential`: Rows added or removed since the previous run.
+- `differential_added_only`: Only rows added since the previous run (no removals).
+
+  */
+export const ResultType = lazySchema(() =>
+  z.enum(['snapshot', 'differential', 'differential_added_only'])
+);
+export type ResultType = z.infer<typeof ResultType>;
+export type ResultTypeEnum = typeof ResultType.enum;
+export const ResultTypeEnum = ResultType.enum;
+
 export const ArrayQueriesItem = lazySchema(() =>
   z.object({
     id: QueryId.optional(),
@@ -194,6 +226,8 @@ export const ArrayQueriesItem = lazySchema(() =>
     platform: PlatformOrUndefined.optional(),
     removed: RemovedOrUndefined.optional(),
     snapshot: SnapshotOrUndefined.optional(),
+    enabled: QueryEnabled.optional(),
+    result_type: ResultType.optional(),
   })
 );
 export type ArrayQueriesItem = z.infer<typeof ArrayQueriesItem>;
@@ -318,6 +352,8 @@ export const ObjectQueriesItem = lazySchema(() =>
       ),
     schedule_type: ScheduleTypeOrUndefined.optional(),
     rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
+    enabled: QueryEnabled.optional(),
+    result_type: ResultType.optional(),
   })
 );
 export type ObjectQueriesItem = z.infer<typeof ObjectQueriesItem>;
@@ -327,6 +363,56 @@ export type ObjectQueriesItem = z.infer<typeof ObjectQueriesItem>;
  */
 export const ObjectQueries = lazySchema(() => z.object({}).catchall(ObjectQueriesItem));
 export type ObjectQueries = z.infer<typeof ObjectQueries>;
+
+/**
+ * Uses the Osquery versions greater than or equal to the specified version string. Formatted as a numeric version string, e.g. `"5.10.0"`, or an empty string to inherit the pack's `min_osquery_version` (no constraint if the pack has none). Non-numeric values (e.g. `"latest"`) are rejected.
+ */
+export const PackQueryVersionInput = lazySchema(() =>
+  z
+    .string()
+    .max(64)
+    .regex(/^(\d+(\.\d+){0,2})?$/)
+);
+export type PackQueryVersionInput = z.infer<typeof PackQueryVersionInput>;
+
+export const PackQueryVersionInputOrUndefined = lazySchema(() => PackQueryVersionInput);
+export type PackQueryVersionInputOrUndefined = z.infer<typeof PackQueryVersionInputOrUndefined>;
+
+export const ObjectQueriesItemInput = lazySchema(() =>
+  z.object({
+    query: Query.optional(),
+    id: QueryId.optional(),
+    ecs_mapping: ECSMappingOrUndefined.optional(),
+    version: PackQueryVersionInputOrUndefined.optional(),
+    platform: PlatformOrUndefined.optional(),
+    saved_query_id: SavedQueryIdOrUndefined.optional(),
+    removed: RemovedOrUndefined.optional(),
+    snapshot: SnapshotOrUndefined.optional(),
+    /**
+      * Interval for this query, in seconds. Overrides the pack's `interval` when this query also has `schedule_type: interval`. If you send `interval` without `schedule_type: interval`, Kibana removes it when saving, and the query uses the pack's `interval` instead. Ignored when the pack's `schedule_type` is `rrule`.
+
+      */
+    interval: z
+      .number()
+      .int()
+      .nullable()
+      .optional()
+      .describe(
+        "Interval for this query, in seconds. Overrides the pack's `interval` when this query also has `schedule_type: interval`. If you send `interval` without `schedule_type: interval`, Kibana removes it when saving, and the query uses the pack's `interval` instead. Ignored when the pack's `schedule_type` is `rrule`.\n"
+      ),
+    schedule_type: ScheduleTypeOrUndefined.optional(),
+    rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
+    enabled: QueryEnabled.optional(),
+    result_type: ResultType.optional(),
+  })
+);
+export type ObjectQueriesItemInput = z.infer<typeof ObjectQueriesItemInput>;
+
+/**
+ * An object of queries.
+ */
+export const ObjectQueriesInput = lazySchema(() => z.object({}).catchall(ObjectQueriesItemInput));
+export type ObjectQueriesInput = z.infer<typeof ObjectQueriesInput>;
 
 export const Queries = lazySchema(() => z.union([ArrayQueries, ObjectQueries]));
 export type Queries = z.infer<typeof Queries>;
@@ -383,3 +469,29 @@ export type PackInterval = z.infer<typeof PackInterval>;
 
 export const PackIntervalOrUndefined = lazySchema(() => PackInterval.nullable());
 export type PackIntervalOrUndefined = z.infer<typeof PackIntervalOrUndefined>;
+
+export const ResultTypeOrUndefined = lazySchema(() => ResultType.nullable());
+export type ResultTypeOrUndefined = z.infer<typeof ResultTypeOrUndefined>;
+
+/**
+ * Minimum osquery version required to run this pack or query, e.g. `"5.10.0"`.
+ */
+export const MinOsqueryVersion = lazySchema(() => z.string().min(1).max(64));
+export type MinOsqueryVersion = z.infer<typeof MinOsqueryVersion>;
+
+/**
+ * Minimum osquery version required to run this pack or query. Formatted as a numeric version string, e.g. `"5.10.0"`. Non-numeric values (e.g. `"latest"`) are rejected.
+ */
+export const MinOsqueryVersionInput = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(64)
+    .regex(/^\d+(\.\d+){0,2}$/)
+);
+export type MinOsqueryVersionInput = z.infer<typeof MinOsqueryVersionInput>;
+
+export const MinOsqueryVersionInputOrUndefined = lazySchema(() =>
+  MinOsqueryVersionInput.nullable()
+);
+export type MinOsqueryVersionInputOrUndefined = z.infer<typeof MinOsqueryVersionInputOrUndefined>;

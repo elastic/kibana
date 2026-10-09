@@ -5,66 +5,137 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useQueryClient } from '@kbn/react-query';
 import { css } from '@emotion/react';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  useEuiTheme,
-} from '@elastic/eui';
+  PROPOSALS_UI_CAPABILITY_SHOW,
+  PROPOSALS_UI_CAPABILITY_DECIDE,
+} from '@kbn/proposals-common';
 import {
-  ConversationQueue,
-  CONVERSATION_QUEUE_CATEGORIES,
   type ConversationsActionsGroupProps,
   type BaseActionsProps,
   type CardActionType,
   type Investigation,
-  type RecommendedAction,
   InvestigationActionModals,
-  BlastRadius,
+  type EscalationModalRenderProps,
+  Impact,
+  useEntityFilter,
 } from '@kbn/agentic-investigations-common';
-import { useApproveProposal, useDismissProposal } from '@kbn/agentic-investigations-plugin/public';
-import { isHttpFetchError } from '@kbn/core-http-browser';
+import {
+  useApproveProposal,
+  useDismissProposal,
+  useIsApprovingProposal,
+  useIsDecliningProposal,
+  useProposal,
+  queryKeys as platformQueryKeys,
+} from '@kbn/proposals-plugin/public';
+import {
+  useAssignInvestigation,
+  useCurrentUserProfile,
+  useStatusSignal,
+  useOpenInChat,
+  decisionErrorMessage,
+  EscalationModalBoundary,
+  LazyConnectedCloseInvestigationModal,
+  LazyConnectedEscalationModal,
+} from '@kbn/agentic-investigations-plugin/public';
+import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import type { DeclineParams } from '@kbn/proposals-ui';
+import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
+import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
+import { CLOSED_GROUP_KEY, type ProposalItem } from '../../../common/proposals/list';
+import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
-import { useProposalsList } from '../../hooks/use_proposals_api';
-import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { useConversationsUrlParams } from './conversations_url_params';
 import { useInvestigationDetails } from './use_investigation_details';
-import { QUEUE_PAGE_INFO, DECISION_ERRORS } from './translations';
+import { useCopyInvestigationLink } from './use_copy_investigation_link';
+import { COPY_LINK_TOASTS, IDLE_HEADER, QUEUE_PAGE_INFO } from './translations';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
+import { WorkersRunningPanel } from '../../components/workers_running_panel';
+import { useRunningSummary } from '../../hooks/use_running_summary';
 import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
-import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
-import type { ProposalItem } from '../../../common/proposals/list';
-import { proposalToInvestigation } from './proposal_to_investigation';
+import { InFlightProposalBadge } from './in_flight_proposal_badge';
+import { useQueueSections } from './queue/use_queue_sections';
+import { useDropDecidedProposal } from './queue/use_drop_decided_proposal';
+import { QueueSection } from './queue/queue_section';
+import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 
-/**
- * The proposals route distinguishes why a decision was refused — 410 the deadline passed,
- * 409 someone decided first or the action input drifted, 400 an input the action rejects.
- * The shared mutations have no `onError`, so the caller has to surface it or the dialog
- * just closes as though the decision had landed.
- */
-const decisionErrorMessage = (error: unknown): string => {
-  const status = isHttpFetchError(error) ? error.response?.status : undefined;
-  return DECISION_ERRORS[status ?? 0] ?? DECISION_ERRORS.default;
-};
+const wrapScanFailureCallout = (callout: JSX.Element) => (
+  <EuiFlexItem grow={false}>{callout}</EuiFlexItem>
+);
 
 export const ConversationsPage: React.FC = () => {
+  const {
+    services: { application },
+  } = useKibana<CoreStart>();
+
+  if (application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_SHOW] !== true) {
+    return (
+      <EuiEmptyPrompt
+        data-test-subj="alertzeroProposalsPrivilegesGate"
+        iconType="lock"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.alertzero.queue.missingProposalsPrivilegesTitle"
+              defaultMessage="Contact your administrator for access"
+            />
+          </h2>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.alertzero.queue.missingProposalsPrivilegesDescription"
+              defaultMessage="To view the AlertZero queue in this space, you need the Proposed Actions Read privilege."
+            />
+          </p>
+        }
+      />
+    );
+  }
+
+  return <ConversationsPageContent />;
+};
+
+const ConversationsPageContent: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-  const { data, isLoading, error } = useProposalsList();
-  const approve = useApproveProposal();
-  const dismiss = useDismissProposal();
-  const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const { sections, proposalsById, investigations: conversations } = useQueueSections();
+
+  // When the flyout's status toggle changes status (isolated QueryClient), bump the signal
+  // so this page's QueryClient invalidates its proposal queries and the queue refreshes.
+  useStatusSignal(() => {
+    void queryClient.invalidateQueries({ queryKey: platformQueryKeys.proposals.all });
+  });
+
+  // FIXME: use hook methods to keep in-flight states
+  const { mutateAsync: approveDecision } = useApproveProposal();
+  const { mutateAsync: dismissDecision } = useDismissProposal();
+  const dropDecided = useDropDecidedProposal();
+  const { data: currentUserProfile } = useCurrentUserProfile();
+  const currentActorName = currentUserProfile
+    ? getUserDisplayName(currentUserProfile.user)
+    : undefined;
+  const { entityFilter: effectiveEntityFilter, setEntityFilter } = useEntityFilter(conversations);
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
 
   const [selectedIdForRecommendedAction, setSelectedIdForRecommendedAction] = useState<
     string | undefined
   >(undefined);
+  const isApprovingSelected = useIsApprovingProposal(selectedIdForRecommendedAction);
+  const isDecliningSelected = useIsDecliningProposal(selectedIdForRecommendedAction);
+  const isSubmittingSelected = isApprovingSelected
+    ? 'applying'
+    : isDecliningSelected
+    ? 'declining'
+    : undefined;
 
   const { selectedConversationId, selectConversation, clearSelectedConversation } =
     useConversationsUrlParams();
@@ -73,31 +144,31 @@ export const ConversationsPage: React.FC = () => {
     recordId: Investigation['recordId'] | null;
   }>({ type: null, recordId: null });
 
-  // Raw proposals indexed by id so that approve can submit the original
-  // actionInput without it needing a field on Investigation.
-  const proposalsById = useMemo((): Map<string, ProposalItem> => {
-    const all: ProposalItem[] = Object.values(data?.groups ?? {}).flat();
-    return new Map(all.map((p) => [p.id, p]));
-  }, [data?.groups]);
-
-  // Adapt all proposals (including closed) into Investigation shape. The
-  // adapter sets recommendedAction: 'closed' for decided ones, which routes
-  // them into the Closed accordion via groupedBriefingItems below.
-  const conversations = useMemo(
-    () => [...proposalsById.values()].map(proposalToInvestigation),
-    [proposalsById]
+  // From chartsSummary rather than the pages: no page-size cap, and every
+  // category. Shares the chart row's query key, so it costs no extra request.
+  const { data: chartsSummary, isLoading, error } = useProposalChartsSummary();
+  const openCount = chartsSummary?.currentOpen ?? 0;
+  const runningSummary = useRunningSummary();
+  // Idle: nothing open and nothing closed in the window, so the queue has no rows at all.
+  // Gated on settled queries so a loading or failed count never reads as "nothing to do".
+  const closedTotal = useMemo(
+    () => sections.find(({ id }) => id === CLOSED_GROUP_KEY)?.total,
+    [sections]
   );
-
-  // Header count: pending groups only — closed proposals are excluded.
-  // "3 actions need you" must not count decisions already made.
-  const openCount = useMemo(
-    () =>
-      Object.entries(data?.groups ?? {}).reduce(
-        (sum, [key, items]) => (key === CLOSED_GROUP_KEY ? sum : sum + items.length),
-        0
-      ),
-    [data?.groups]
+  // A failed section query hides nothing but its rows, so it must not read as an empty queue,
+  // and "running" is only true once an enabled Worker is confirmed.
+  const hasSectionError = sections.some(
+    ({ hasLoadError, hasCountError }) => hasLoadError || hasCountError
   );
+  const hasEnabledWorkers = runningSummary.enabledWorkerCount > 0;
+  const isIdle =
+    !isLoading &&
+    !error &&
+    !hasSectionError &&
+    hasEnabledWorkers &&
+    openCount === 0 &&
+    closedTotal === 0 &&
+    proposalsById.size === 0;
 
   const onClickAction: BaseActionsProps['onClickAction'] = useCallback((action, recordId) => {
     setModalState({ type: action, recordId });
@@ -140,8 +211,39 @@ export const ConversationsPage: React.FC = () => {
   );
 
   const {
-    services: { notifications },
+    services: { application, notifications },
   } = useKibana<CoreStart>();
+
+  const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
+  const { manageEscalations: canManageEscalations, manageInvestigations: canManageInvestigations } =
+    useAlertZeroInvestigationsCapabilities();
+
+  // ---------------------------------------------------------------------------
+  // Assignee picker — shared across all non-closed investigation cards
+  // ---------------------------------------------------------------------------
+
+  const assignInvestigation = useAssignInvestigation();
+
+  const renderInFlightStatus = useCallback(
+    ({ id }: Investigation) => <InFlightProposalBadge proposalId={id} />,
+    []
+  );
+
+  const renderAssignees = useQueueAssignees({
+    items: conversations,
+    getRowKey: (inv) => inv.id,
+    getTargetId: (inv) => inv.conversationId,
+    getAssigneeUids: (inv) => inv.assignees ?? [],
+    assign: (investigationId, assignees) =>
+      assignInvestigation.mutateAsync({ investigationId, assignees }),
+    queryKey: platformQueryKeys.proposals.all,
+    canManage: canManageInvestigations,
+    labels: {
+      assignSuccess: QUEUE_PAGE_INFO.assignSuccess,
+      assignError: QUEUE_PAGE_INFO.assignError,
+    },
+    buttonIconSize: 's',
+  });
 
   // Both decisions close on success only, and surface the refusal otherwise: an expired
   // deadline or a proposal someone else already decided must not look like it landed.
@@ -150,62 +252,107 @@ export const ConversationsPage: React.FC = () => {
     [notifications]
   );
 
+  // Stays open on success rather than closing: the approval modal itself shows the resulting
+  // "Applied" state, so the analyst sees the outcome before dismissing it themselves.
   const confirmApproval = useCallback(
-    (investigation: Investigation) => {
-      const proposal = proposalsById.get(investigation.id);
-      approve.mutate(
-        { id: investigation.id, body: { actionInput: proposal?.actionInput } },
-        { onSuccess: closeApproval, onError: onDecisionError }
-      );
+    async (proposal: ProposalItem) => {
+      try {
+        await approveDecision({ id: proposal.id, body: { actionInput: proposal.actionInput } });
+        void dropDecided(proposal.id);
+      } catch (err) {
+        onDecisionError(err);
+        throw err;
+      }
     },
-    [approve, closeApproval, onDecisionError, proposalsById]
+    [approveDecision, dropDecided, onDecisionError]
+  );
+
+  // The approval modal collects its own decline reason inline now, so this is a direct mutation
+  // call — distinct from the ⋮ "Close investigation" action below, which closes the whole
+  // investigation rather than dismissing a single proposal.
+  const dismissApproval = useCallback(
+    async (proposal: ProposalItem, { dismissReason, rationale }: DeclineParams) => {
+      try {
+        await dismissDecision({ id: proposal.id, body: { dismissReason, rationale } });
+        void dropDecided(proposal.id);
+      } catch (err) {
+        onDecisionError(err);
+        throw err;
+      }
+    },
+    [dismissDecision, dropDecided, onDecisionError]
+  );
+
+  const renderCloseModal = useCallback(
+    ({ investigation, onClose }: { investigation: Investigation; onClose: () => void }) => (
+      <EscalationModalBoundary>
+        <LazyConnectedCloseInvestigationModal
+          investigation={investigation}
+          onClose={onClose}
+          dropDecidedProposal={dropDecided}
+        />
+      </EscalationModalBoundary>
+    ),
+    [dropDecided]
   );
 
   const renderDismissModal = useCallback(
-    ({ recordId, onClose }: { recordId: string; onClose: () => void }) => (
-      <DismissProposalModal
-        proposalId={recordId}
-        onClose={onClose}
-        onConfirm={({ dismissReason, rationale }) =>
-          dismiss.mutate(
-            { id: recordId, body: { dismissReason, rationale } },
-            { onSuccess: onClose, onError: onDecisionError }
-          )
-        }
-      />
+    ({ recordId, onClose }: { recordId?: string | null; onClose: () => void }) => {
+      if (!recordId) return null;
+      return (
+        <DismissProposalModal
+          proposalId={recordId}
+          onClose={onClose}
+          onConfirm={async ({ dismissReason, rationale }) => {
+            try {
+              await dismissDecision({ id: recordId, body: { dismissReason, rationale } });
+              void dropDecided(recordId);
+              onClose();
+            } catch (err) {
+              onDecisionError(err);
+              throw err;
+            }
+          }}
+        />
+      );
+    },
+    [dismissDecision, dropDecided, onDecisionError]
+  );
+
+  const renderEscalationModal = useCallback(
+    (props: EscalationModalRenderProps) => (
+      <EscalationModalBoundary>
+        <LazyConnectedEscalationModal {...props} />
+      </EscalationModalBoundary>
     ),
-    [dismiss, onDecisionError]
+    []
   );
 
   const onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'] =
-    useCallback(
-      ({ id }) => {
-        setSelectedIdForRecommendedAction(id);
-      },
-      [setSelectedIdForRecommendedAction]
-    );
+    useCallback(({ id }) => {
+      setSelectedIdForRecommendedAction(id);
+    }, []);
 
   // Agent Builder owns the flyout: it loads the conversation and renders the slots this solution
   // registered for the `investigation` template. Closing it clears the URL, which is what closes
   // the flyout on the next pass — the URL stays the single source of truth.
+  const copyInvestigationLink = useCopyInvestigationLink();
+  // Cards are keyed by proposal id, but the link and the flyout are keyed by its conversation.
+  const copyLinkForProposal = useCallback(
+    (proposalId: Investigation['id']) => {
+      const conversationId = proposalsById.get(proposalId)?.conversationId;
+      // The card menu closes on click, so there is no tooltip to confirm in: use a toast.
+      if (conversationId && copyInvestigationLink(conversationId)) {
+        notifications?.toasts.addSuccess(COPY_LINK_TOASTS.copied);
+      }
+    },
+    [proposalsById, copyInvestigationLink, notifications]
+  );
   useInvestigationDetails({
     conversationId: selectedConversationId,
     onClose: clearSelectedConversation,
+    onCopyLink: copyInvestigationLink,
   });
-
-  // Which cards are current is navigation state, so it comes from the URL rather than from
-  // remembering the click: opening a chat unmounts this page, and a remembered id would be
-  // gone on Back while the flyout reopened from the URL. Deriving also means Close clears the
-  // highlight for free.
-  const selectedCardIds = useMemo(
-    () =>
-      selectedConversationId
-        ? [...proposalsById.values()]
-            .filter(({ conversationId }) => conversationId === selectedConversationId)
-            .map(({ id }) => id)
-        : [],
-    [selectedConversationId, proposalsById]
-  );
 
   const actionInvestigation = useMemo(
     () =>
@@ -215,139 +362,134 @@ export const ConversationsPage: React.FC = () => {
     [conversations, modalState.recordId]
   );
 
-  const selectedRecommendedActionConversation = useMemo(
+  // Cards are keyed by proposal id, so the click already names the row the modal decides on.
+  const liveSelectedProposal = selectedIdForRecommendedAction
+    ? proposalsById.get(selectedIdForRecommendedAction)
+    : undefined;
+
+  // `useDropDecidedProposal` removes a just-decided proposal from the open-bucket cache
+  // `proposalsById` is built from, before the analyst has necessarily seen the approval modal
+  // reflect it. Without this, `InvestigationActionModals` would unmount the modal the instant
+  // the row leaves the queue, right when `Applying`/`Applied` is shown.
+  // `useProposal` keeps refreshing the single record independently of that eviction (including
+  // through the settling window), so the sticky fallback below stays live rather than frozen
+  // pre-decision.
+  const [stickySelectedProposal, setStickySelectedProposal] = useState<ProposalItem | undefined>(
+    undefined
+  );
+  useEffect(() => {
+    if (liveSelectedProposal) {
+      setStickySelectedProposal(liveSelectedProposal);
+    }
+  }, [liveSelectedProposal]);
+  useEffect(() => {
+    if (!selectedIdForRecommendedAction) {
+      setStickySelectedProposal(undefined);
+    }
+  }, [selectedIdForRecommendedAction]);
+
+  const selectedProposalQuery = useProposal(selectedIdForRecommendedAction);
+  const { data: selectedProposalData } = selectedProposalQuery;
+  const selectedProposal: ProposalItem | undefined = useMemo(
     () =>
-      selectedIdForRecommendedAction
-        ? conversations.find((c) => c.id === selectedIdForRecommendedAction)
-        : undefined,
-    [conversations, selectedIdForRecommendedAction]
+      liveSelectedProposal ??
+      (stickySelectedProposal && selectedProposalData
+        ? { ...stickySelectedProposal, ...selectedProposalData }
+        : stickySelectedProposal),
+    [liveSelectedProposal, stickySelectedProposal, selectedProposalData]
   );
 
-  // `listByWindow` sorts createdAt-ascending, which buries the proposals that matter;
-  // the adapter's synthetic priorityScore is what restores an impact-first ordering.
-  const sortedConversations = useMemo(
-    () =>
-      conversations.toSorted((a, b) => {
-        const priorityDiff = (b.priorityScore ?? 0) - (a.priorityScore ?? 0);
-        if (priorityDiff !== 0) {
-          return priorityDiff;
-        }
-        return b.updatedAt.localeCompare(a.updatedAt);
-      }),
-    [conversations]
-  );
-
-  const filteredQueueItems = useMemo(
-    () =>
-      sortedConversations.filter((conversation) => {
-        if (surfaceFilter && conversation.affectedSurface !== surfaceFilter) return false;
-        return true;
-      }),
-    [sortedConversations, surfaceFilter]
-  );
-
-  // Every bucket is rendered, empty or not: the accordions are the page's structure, so
-  // one disappearing would move the others as the queue drains.
-  const groupedBriefingItems = useMemo(
-    (): Array<{ id: RecommendedAction; label: string; items: Investigation[] }> =>
-      CONVERSATION_QUEUE_CATEGORIES.map((bucket) => ({
-        ...bucket,
-        items: filteredQueueItems.filter(
-          (conversation) => conversation.recommendedAction === bucket.id
-        ),
-      })),
-    [filteredQueueItems]
+  const pageContentProps = useMemo(
+    () => ({
+      css: css`
+        padding-block: ${euiTheme.size.xxl};
+        align-self: center;
+        max-width: 1000px;
+      `,
+    }),
+    [euiTheme.size.xxl]
   );
 
   return (
-    <AlertZeroPageSection
-      contentProps={{
-        css: css`
-          padding-block: ${euiTheme.size.xxl};
-          align-self: center;
-          max-width: 1000px;
-        `,
-      }}
-    >
+    <AlertZeroPageSection contentProps={pageContentProps}>
       <InvestigationActionModals
         action={modalState.type}
         recordId={modalState.recordId}
         initialAssignee={actionInvestigation?.assignee}
-        approvalInvestigation={selectedRecommendedActionConversation}
+        investigation={actionInvestigation}
+        approvalProposal={selectedProposal}
+        readOnly={!canDecide}
         onCloseAction={closeModal}
         onCloseApproval={closeApproval}
         onConfirmApproval={confirmApproval}
+        isSubmitting={isSubmittingSelected}
+        currentActorName={currentActorName}
+        onDismissApproval={dismissApproval}
+        renderCloseModal={canManageInvestigations ? renderCloseModal : undefined}
         renderDismissModal={renderDismissModal}
+        renderEscalationModal={renderEscalationModal}
       />
 
-      <EuiFlexGroup gutterSize="l" direction="column" wrap>
+      {/* No `wrap`: a wrapping column sizes each line to its widest content, which let a
+          long row title push the queue past the viewport instead of truncating. */}
+      <EuiFlexGroup gutterSize="l" direction="column">
         <EuiFlexItem grow={false}>
           <AlertZeroPageHeader
+            // The header renders the charts-summary count, so it tracks that query
+            // rather than the section pages, which now load independently.
             isLoading={isLoading}
-            // Keep the count visible during a background refetch: only hide it
-            // when there is an error AND no previously-loaded data to show.
-            hasError={Boolean(error) && !data}
+            hasError={Boolean(error) && chartsSummary === undefined}
             // Closed proposals are rows but not work: a window holding only decisions
             // already made is an empty queue, and must not read as "0 actions need you"
             // beside a populated header.
             isQueueEmpty={openCount === 0}
             eventCount={openCount}
+            {...(isIdle && {
+              greeting: IDLE_HEADER.greeting,
+              title: IDLE_HEADER.title,
+              subtitle: IDLE_HEADER.subtitle(runningSummary),
+            })}
           />
         </EuiFlexItem>
+        <ScanFailureCallout wrapper={wrapScanFailureCallout} />
         <EuiFlexItem grow={false}>
           <ProposalsTrendChartRow />
         </EuiFlexItem>
+        {isIdle && (
+          <EuiFlexItem grow={false}>
+            <WorkersRunningPanel />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
-          <BlastRadius
-            investigations={sortedConversations}
-            surfaceFilter={surfaceFilter}
-            onSurfaceFilterChange={setSurfaceFilter}
+          <Impact
+            items={conversations}
+            entityFilter={effectiveEntityFilter}
+            onEntityFilterChange={setEntityFilter}
           />
         </EuiFlexItem>
 
-        {isLoading ? (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="center" style={{ minHeight: 200 }}>
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="xl" aria-label={QUEUE_PAGE_INFO.loading} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        ) : null}
-
-        {error && !data ? (
-          <EuiFlexItem grow={false}>
-            <EuiEmptyPrompt iconType="warning" title={<h2>{QUEUE_PAGE_INFO.loadError}</h2>} />
-          </EuiFlexItem>
-        ) : null}
-
-        {!isLoading && !(error && !data) && filteredQueueItems.length === 0 ? (
-          <EuiFlexItem grow={false}>
-            <EuiEmptyPrompt
-              iconType="chartTagCloud"
-              title={<h2>{QUEUE_PAGE_INFO.emptyQueue}</h2>}
-            />
-          </EuiFlexItem>
-        ) : null}
-
-        {!isLoading && !(error && !data)
-          ? groupedBriefingItems.map((group) => (
-              <EuiFlexItem key={group.id} grow={false}>
-                <ConversationQueue
-                  briefingId={group.id}
-                  briefingType={group.id}
-                  briefingList={group.items}
-                  isFiltered={filteredQueueItems.length !== sortedConversations.length}
-                  onClickRecommendedAction={onClickRecommendedAction}
-                  onClickAction={onClickAction}
-                  onClickCard={onClickCard}
-                  onOpenChat={openChatForProposal}
-                  getChatHref={getChatHrefForProposal}
-                  selectedIds={selectedCardIds}
-                />
-              </EuiFlexItem>
-            ))
-          : null}
+        {/* Every bucket is rendered, empty or not: the accordions are the page's structure,
+            so one disappearing would move the others as the queue drains. */}
+        {!isIdle &&
+          sections.map((section) => (
+            <EuiFlexItem key={section.id} grow={false}>
+              <QueueSection
+                section={section}
+                entityFilter={effectiveEntityFilter}
+                selectedConversationId={selectedConversationId}
+                onClickRecommendedAction={canDecide ? onClickRecommendedAction : undefined}
+                onClickAction={onClickAction}
+                onClickCard={onClickCard}
+                onOpenChat={openChatForProposal}
+                getChatHref={getChatHrefForProposal}
+                canManageEscalations={canManageEscalations}
+                canCloseInvestigation={canManageInvestigations}
+                onCopyLink={copyLinkForProposal}
+                renderAssignees={renderAssignees}
+                renderInFlightStatus={renderInFlightStatus}
+              />
+            </EuiFlexItem>
+          ))}
       </EuiFlexGroup>
     </AlertZeroPageSection>
   );

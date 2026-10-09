@@ -251,10 +251,16 @@ export function getBabelLoaderRule(dist: boolean): RuleSetRule {
  *
  * Note: We explicitly set type: 'javascript/auto' to tell RSPack to use
  * the loader chain instead of trying to use native CSS parsing.
+ *
+ * `?raw` imports must skip this rule. Webpack/Rspack apply every matching
+ * rule, so without the exclusion style-loader still runs and
+ * `getRawQueryLoaderRule` then stringifies that JS into the module. Core's
+ * `disable_animations.css?raw` injection depends on receiving actual CSS.
  */
 export function getCssLoaderRule(dist: boolean): RuleSetRule {
   return {
     test: /\.css$/,
+    resourceQuery: { not: /raw/ },
     type: 'javascript/auto', // Use loader chain, not native CSS parsing
     use: [
       { loader: require.resolve('style-loader') },
@@ -491,10 +497,9 @@ export function getSharedModuleRules(
  */
 export function getSharedIgnoreWarnings(): RegExp[] {
   return [
-    // Same as legacy webpack optimizer (STATS_WARNINGS_FILTER)
     /export .* was not found in/,
     /chunk .* \[mini-css-extract-plugin\].*Conflicting order between/,
-    // RSPack-specific: Node.js globals mocking (webpack silently mocks these)
+    // Node.js globals mocking (webpack silently mocks these)
     /__dirname.*is used and has been mocked/,
     /__filename.*is used and has been mocked/,
   ];

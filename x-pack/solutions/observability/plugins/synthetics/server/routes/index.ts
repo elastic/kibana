@@ -8,17 +8,20 @@
 import { syncParamsSettingsParamsRoute } from './settings/params/sync_global_params_settings';
 import { syncParamsSyntheticsParamsRoute } from './settings/params/sync_global_params';
 import { cleanupPrivateLocationRoute } from './settings/private_locations/cleanup_private_locations';
+import { resetPrivateLocationRoute } from './settings/private_locations/reset_private_location';
 import { getSyntheticsTriggerTaskRun } from './tasks/trigger_task_run';
 import { syntheticsInspectStatusRuleRoute } from './rules/inspect_status_rule';
 import { syntheticsInspectTLSRuleRoute } from './rules/inspect_tls_rule';
 import { syntheticsGetLatestTestRunRoute } from './pings/get_latest_test_run';
 import { deleteSyntheticsParamsBulkRoute } from './settings/params/delete_params_bulk';
 import { deleteSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/delete_monitor_bulk';
+import { createSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/create_monitor_bulk';
 import { updateSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/update_monitor_bulk';
 import {
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,
 } from './settings/dynamic_settings';
+import { getClusterSettingsPrivilegesRoute } from './settings/cluster_settings_privileges';
 import {
   createGetMultiSpaceSettingsRoute,
   createPutMultiSpaceSettingsRoute,
@@ -129,6 +132,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   createPostDynamicSettingsRoute,
   createGetMultiSpaceSettingsRoute,
   createPutMultiSpaceSettingsRoute,
+  getClusterSettingsPrivilegesRoute,
   syntheticsGetPingHeatmapRoute,
   createOverviewTrendsRoute,
   syntheticsInspectStatusRuleRoute,
@@ -137,6 +141,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   resetSyntheticsMonitorRoute,
   resetSyntheticsMonitorBulkRoute,
   cleanupPrivateLocationRoute,
+  resetPrivateLocationRoute,
   syncParamsSyntheticsParamsRoute,
   syncParamsSettingsParamsRoute,
   getMonitorsHealthRoute,
@@ -166,6 +171,7 @@ export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] =
   editSyntheticsMonitorRoute,
   deleteSyntheticsMonitorRoute,
   deleteSyntheticsMonitorBulkRoute,
+  createSyntheticsMonitorBulkRoute,
   updateSyntheticsMonitorBulkRoute,
   deleteSyntheticsParamsBulkRoute,
   syntheticsGetLatestTestRunRoute,

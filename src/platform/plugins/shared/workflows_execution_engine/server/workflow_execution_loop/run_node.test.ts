@@ -93,7 +93,6 @@ describe('runNode', () => {
       node: mockNode,
       scopeStack,
       abortController: new AbortController(),
-      flushEventLogs: jest.fn().mockResolvedValue(undefined),
       contextManager: {
         ensureContextReady: jest.fn().mockResolvedValue(undefined),
         releaseReadPins: jest.fn(),
@@ -176,13 +175,7 @@ describe('runNode', () => {
       expect(mockNodeImplementation.run).toHaveBeenCalled();
     });
 
-    it('should flush step event logs after step execution', async () => {
-      await runNode(mockParams);
-
-      expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalledTimes(1);
-    });
-
-    it('should pass the task abort signal when Task Manager aborts during step execution', async () => {
+    it('should still apply execution delay when Task Manager aborts during step execution', async () => {
       mockNodeImplementation.run.mockImplementation(async () => {
         taskAbortController.abort(new WorkflowTaskManagerAbortError());
       });
@@ -190,9 +183,6 @@ describe('runNode', () => {
       await runNode(mockParams);
 
       expect(mockHandleExecutionDelay).toHaveBeenCalled();
-      expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalledWith({
-        signal: mockParams.signal,
-      });
     });
   });
 
@@ -331,6 +321,16 @@ describe('runNode', () => {
 
       expect(mockNodeImplementation.run).not.toHaveBeenCalled();
     });
+
+    it('should stop the cursor when workflow status is WAITING so the loop cannot spin', async () => {
+      workflowExecution.status = ExecutionStatus.WAITING;
+
+      await runNode(mockParams);
+
+      expect(mockNodeImplementation.run).not.toHaveBeenCalled();
+      expect(mockParams.workflowExecutionCursor.stop).toHaveBeenCalled();
+      expect(mockParams.workflowExecutionCursor.isExecuting).toBe(false);
+    });
   });
 
   describe('when there is no current node', () => {
@@ -363,7 +363,6 @@ describe('runNode', () => {
       expect(mockParams.workflowExecutionCursor.error).toEqual(
         expect.objectContaining({ message: 'Step execution failed' })
       );
-      expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalledTimes(1);
     });
 
     it('should call catchError when error occurs', async () => {

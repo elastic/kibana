@@ -9,11 +9,25 @@
     "server/**/*"
   ],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/config-schema",
     "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/deeplinks-analytics",
+    "@kbn/esql",
+    "@kbn/esql-datagrid",
+    "@kbn/esql-editor",
+    "@kbn/esql-language",
+    "@kbn/esql-types",
+    "@kbn/esql-utils",
+    "@kbn/es-query",
+    "@kbn/es-types",
     "@kbn/features-plugin",
     "@kbn/i18n",
-    "@kbn/management-plugin"
+    "@kbn/management-plugin",
+    "@kbn/share-plugin",
+    "@kbn/utility-types"
   ],
   "exclude": [
     "target/**/*"

@@ -10,12 +10,17 @@
 import { parse } from 'yaml';
 import { z } from '@kbn/zod/v4';
 import {
+  ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW,
+  ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID,
+  ALERTZERO_ACTION_WORKFLOW_IDS,
   ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW,
+  ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+  ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW,
@@ -29,9 +34,12 @@ import {
 } from '../../../spec/schema';
 
 /**
- * Verdicts the FP/TP analysis workflow may return. Each one must have a dedicated
- * switch case in the review workflow, so a verdict never falls through to the
- * default arm.
+ * Verdicts the review workflow may apply. Each one must have a dedicated switch
+ * case, so a verdict never falls through to the default arm.
+ *
+ * The analysis workflow returns only the first three. `failed` is an execution
+ * state the review derives when the analysis produced no payload at all, which is
+ * why it is a case here and not an output there.
  */
 const VERDICTS = ['false_positive', 'true_positive', 'inconclusive', 'failed'] as const;
 
@@ -97,7 +105,15 @@ const flatten = (steps: YamlStep[]): YamlStep[] =>
 const worker = parse(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.yaml) as YamlWorkflow;
 const review = parse(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.yaml) as YamlWorkflow;
 
+// The action the review escalates to. Its declared input shape and approval policy
+// are half of a contract the review holds the other half of, so both are read from
+// the action itself rather than restated here.
+const forensicsAction = parse(ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW.yaml) as YamlWorkflow;
 const journalNote = parse(ALERTZERO_JOURNAL_NOTE_WORKFLOW.yaml) as YamlWorkflow;
+const forensicsMetadata = (forensicsAction.consts?.actionMetadata ?? {}) as {
+  approvalPolicy?: string;
+  reversible?: boolean;
+};
 
 // The Watch Floor worker is a template, so it has to be rendered before parsing.
 const floor = parse(
@@ -112,7 +128,9 @@ const workerSteps = flatten(worker.steps);
 const reviewSteps = flatten(review.steps);
 const floorSteps = flatten(floor.steps);
 const journalNoteSteps = flatten(journalNote.steps);
+const forensicsSteps = flatten(forensicsAction.steps);
 const reviewStepNames = reviewSteps.map((step) => step.name);
+const workerStepNames = workerSteps.map((step) => step.name);
 
 const stepIn = (steps: YamlStep[], name: string) => steps.find((step) => step.name === name);
 
@@ -125,12 +143,11 @@ const asWith = (step: YamlStep | undefined): Record<string, string> =>
 // Every reference to the Investigation resolves through the derived id rather than
 // through the create's output: on a re-review the create 409s and emits nothing.
 const derivedInvestigationId = '{{ steps.resolve_investigation_id.output.investigation_id }}';
-const journalWorkflowIdTemplate = '{{ consts.journal_note }}';
+const journalWorkflowId = ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID;
 
 const journalExecutes = (steps: YamlStep[]) =>
   steps.filter(
-    (step) =>
-      step.type === 'workflow.execute' && step.with?.['workflow-id'] === journalWorkflowIdTemplate
+    (step) => step.type === 'workflow.execute' && step.with?.['workflow-id'] === journalWorkflowId
   );
 
 // Two persisted Attack Discovery ids. `kibana.alert.uuid` is the SHA-256 hex the
@@ -171,6 +188,7 @@ describe('Attack Discovery worker chain', () => {
     ['worker', ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.yaml],
     ['review', ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.yaml],
     ['journal note', ALERTZERO_JOURNAL_NOTE_WORKFLOW.yaml],
+    ['forensics handoff', ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW.yaml],
     [
       'floor worker',
       ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW.yamlTemplate({
@@ -466,8 +484,18 @@ describe('Attack Discovery worker chain', () => {
       expect(parallel?.steps).toHaveLength(1);
     });
 
-    it('launches each review with workflow.execute', () => {
-      expect(branch?.type).toBe('workflow.execute');
+    // `executeAsync`, not `execute`: a review parks on its escalation gate for up to
+    // `176h`, and a synchronous launch would park this run with it. Two things then
+    // kill the analyst's decision window, because a run waiting on a child both burns
+    // its own wall clock and holds its concurrency slot: this run's workflow timeout,
+    // and the next scheduled run cancelling this one under `cancel-in-progress`.
+    // Either one cancels the review, which leaves the Investigation open and the
+    // proposal `pending` forever -- nothing settles a cancelled gate, and dispatch
+    // never hands that attack out again. Human time cannot share an execution with
+    // machine cadence. Re-dispatch stays safe without the join: the review's own
+    // `drop max 1`, keyed per attack, turns a second launch away.
+    it('launches each review detached from this run', () => {
+      expect(branch?.type).toBe('workflow.executeAsync');
     });
 
     it('launches the review workflow once per attack', () => {
@@ -603,12 +631,16 @@ describe('Attack Discovery worker chain', () => {
       });
     });
 
-    // `init_review_counts` seeds the variable and each batch adds to it, so the
-    // output has to read the accumulator rather than a copy of it.
-    it('reports the accumulated failed-review count', () => {
-      expect(stepIn(workerSteps, 'emit_result')?.with?.reviews_failed).toContain(
-        'variables.reviews_failed'
-      );
+    // There is no failed-review count to report: the reviews are dispatched detached,
+    // so this run terminalizes without learning any of their outcomes. Reporting a
+    // number here would mean joining them, which is exactly what must not happen.
+    // A failed review is visible in its own execution and in the journal it writes.
+    it('reports no review outcome it cannot observe', () => {
+      expect(stepIn(workerSteps, 'emit_result')?.with?.reviews_failed).toBeUndefined();
+    });
+
+    it('accumulates no per-batch review counts', () => {
+      expect(workerStepNames).not.toContain('accumulate_failed');
     });
   });
 
@@ -633,71 +665,169 @@ describe('Attack Discovery worker chain', () => {
       expect(verdictSwitch?.type).toBe('switch');
     });
 
-    it('switches on the stub verdict', () => {
-      expect(verdictSwitch?.expression).toContain('inputs.stub_verdict');
+    // The verdict arrives from another workflow, so `resolve_analysis` is the one
+    // place it is interpreted and every reader below goes through it.
+    it('switches on the resolved analysis verdict', () => {
+      expect(verdictSwitch?.expression).toBe('{{ steps.resolve_analysis.output.verdict }}');
     });
 
-    // #19276 AC1. A default run then exercises the escalation path, the same one
-    // true_positive takes.
-    it('defaults the stub verdict from consts.default_verdict', () => {
-      expect(verdictSwitch?.expression).toContain('default: consts.default_verdict');
+    it('does not switch on an input the caller could set', () => {
+      expect(verdictSwitch?.expression).not.toContain('inputs.');
     });
 
-    it('defaults consts.default_verdict to inconclusive', () => {
-      expect(review.consts?.default_verdict).toBe('inconclusive');
+    // Both escalating verdicts reach the same gate, which is why neither case
+    // carries an escalation of its own — it would have to be written twice.
+    it.each(['inconclusive', 'true_positive'] as const)(
+      'routes %s to the escalation gate',
+      (verdict) => {
+        expect(caseStep(verdict)?.with?.escalate).toBe(true);
+      }
+    );
+
+    // The verdict is the analysis's to decide, so there is no longer an input that
+    // can set it. An analyst can read the classification but not override it.
+    it('takes no verdict input', () => {
+      expect(review.triggers?.[0]?.inputs?.properties?.stub_verdict).toBeUndefined();
     });
 
-    it('names the inconclusive branch promote_inconclusive_per_autonomy', () => {
-      expect(caseStep('inconclusive')?.name).toBe('promote_inconclusive_per_autonomy');
-    });
-
-    it('stubs the inconclusive branch as a console step', () => {
-      expect(caseStep('inconclusive')?.type).toBe('console');
-    });
-
-    it('routes inconclusive onto the Promote-to-Incident path', () => {
-      expect(caseStep('inconclusive')?.with?.message).toContain('Promote-to-Incident');
-    });
-
-    it('does not tag inconclusive for a downstream worker', () => {
-      expect(caseStep('inconclusive')?.with?.message).not.toContain('tagging');
-    });
-
-    it('exposes every verdict as an input so all branches stay reachable', () => {
-      expect(review.triggers?.[0]?.inputs?.properties?.stub_verdict?.enum).toEqual([...VERDICTS]);
-    });
-
-    // #19214 replaces the four-arm console `apply_verdict`. Until then the skeleton
-    // switch stays, including the stale "Promote-to-Incident" copy. `run_fp_tp_analysis`
-    // stays a console until #19211.
-    it('leaves apply_verdict as console stubs pending #19214', () => {
+    // Every console stub is now gone: `run_fp_tp_analysis` calls the real analysis
+    // workflow, and `report_unknown_verdict` is a defensive default arm rather than
+    // a placeholder.
+    it('leaves exactly one console step', () => {
       expect(
         reviewSteps.filter((step) => step.type === 'console').map((step) => step.name)
-      ).toEqual([
-        'run_fp_tp_analysis',
-        'report_unknown_verdict',
-        'close_as_false_positive',
-        'promote_per_autonomy',
-        'promote_inconclusive_per_autonomy',
-        'record_analysis_failure',
-      ]);
+      ).toEqual(['report_unknown_verdict']);
     });
 
     it.each([
       ['resolve_investigation_id', 'data.set'],
+      ['resolve_display_text', 'kibana.request'],
       ['open_investigation', 'ai.conversation.create'],
       ['verify_investigation', 'ai.conversation.metadata.read'],
       ['attach_discovery', 'ai.attachment.add'],
       ['attach_alerts', 'foreach'],
       ['attach_alert_batch', 'ai.attachment.add'],
       ['verify_evidence', 'ai.attachment.read'],
+      ['collect_impact_entities', 'security.getAlertEntities'],
+      ['attach_impact', 'investigations.attachImpact'],
+      ['journal_impact_recorded', 'workflow.execute'],
+      ['run_fp_tp_analysis', 'workflow.execute'],
+      ['resolve_analysis', 'data.set'],
       ['attach_verdict', 'ai.attachment.add'],
+      ['refresh_verdict', 'ai.attachment.update'],
+      ['close_investigation_false_positive', 'ai.conversation.metadata.patch'],
+      ['close_attack_false_positive', 'security.setAttackStatus'],
+      ['record_analysis_failure', 'ai.conversation.metadata.patch'],
+      ['escalation_gate', 'workflow.execute'],
+      ['read_proposal_decision', 'kibana.request'],
+      ['close_investigation_declined', 'ai.conversation.metadata.patch'],
+      ['close_attack_declined', 'security.setAttackStatus'],
+      ['record_decision_lapsed', 'ai.conversation.metadata.patch'],
     ] as const)('implements %s as a real %s step', (name, type) => {
       expect(stepIn(reviewSteps, name)?.type).toBe(type);
     });
 
-    it('still stubs run_fp_tp_analysis pending #19211', () => {
-      expect(stepIn(reviewSteps, 'run_fp_tp_analysis')?.type).toBe('console');
+    describe('the FP/TP analysis handoff', () => {
+      const runAnalysis = stepIn(reviewSteps, 'run_fp_tp_analysis');
+      const analysisInputs = asInputs(runAnalysis);
+
+      it('calls the analysis workflow', () => {
+        expect(runAnalysis?.with?.['workflow-id']).toBe(
+          ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID
+        );
+      });
+
+      // Synchronous: the review needs the verdict inline, and every write the
+      // verdict produces is the review's.
+      it('waits for the verdict rather than dispatching detached', () => {
+        expect(runAnalysis?.type).toBe('workflow.execute');
+      });
+
+      // IDS ONLY. The analysis loads the authoritative documents itself, so a retry
+      // cannot reason over a copy of either that went stale between attempts.
+      it('hands the analysis nothing but the two ids', () => {
+        expect(Object.keys(analysisInputs).sort()).toEqual([
+          'attack_discovery_id',
+          'investigation_id',
+        ]);
+      });
+
+      it('names the attack under review', () => {
+        expect(analysisInputs.attack_discovery_id).toBe('{{ inputs.attack_discovery_id }}');
+      });
+
+      it('names the Investigation by its derived id', () => {
+        expect(analysisInputs.investigation_id).toBe(derivedInvestigationId);
+      });
+
+      // The failure contract: the analysis fails its run rather than classifying,
+      // and continuing is what lets `resolve_analysis` route that to the `failed`
+      // arm instead of abandoning the Investigation mid-review.
+      it('continues when the analysis fails so the failure can be recorded', () => {
+        expect(runAnalysis?.['on-failure']?.continue).toBe(true);
+      });
+
+      it('runs the analysis before applying a verdict', () => {
+        expect(reviewStepNames.indexOf('run_fp_tp_analysis')).toBeLessThan(
+          reviewStepNames.indexOf('apply_verdict')
+        );
+      });
+    });
+
+    describe('the resolved analysis result', () => {
+      const resolved = asWith(stepIn(reviewSteps, 'resolve_analysis'));
+
+      // Renders the mapping exactly as the engine will, so each assertion reads the
+      // value a real execution produces rather than the template source. `output` is
+      // what a failed child leaves behind: nothing.
+      const resolve = (template: string, output: Record<string, string> = {}) =>
+        createWorkflowLiquidEngine().parseAndRender(template, {
+          consts: review.consts,
+          execution: { id: 'review-run-1' },
+          steps: { run_fp_tp_analysis: { output } },
+        });
+
+      // A failed child hands its parent nothing, so an absent verdict IS the
+      // failure signal. This is the whole `failed` mapping.
+      it('falls back to the failed verdict when the analysis produced none', async () => {
+        await expect(resolve(resolved.verdict)).resolves.toBe('failed');
+      });
+
+      it('takes the analysis verdict when there is one', async () => {
+        await expect(resolve(resolved.verdict, { verdict: 'false_positive' })).resolves.toBe(
+          'false_positive'
+        );
+      });
+
+      it('names failed as an execution state rather than a classification', () => {
+        expect(review.consts?.failed_verdict).toBe('failed');
+      });
+
+      // The attachment requires a summary, so a failed analysis has to supply one
+      // rather than attach an empty verdict. The execution reference is what makes
+      // the failure investigable, since the error itself lives in workflow history.
+      it('explains the failure when the analysis produced no summary', async () => {
+        await expect(resolve(resolved.summary_markdown)).resolves.toContain(
+          'See review execution review-run-1'
+        );
+      });
+
+      // The `{% if %}` rather than `| default:` is load-bearing: appending the
+      // execution id after a `default:` would append it to the child's summary too.
+      it('passes the analysis summary through untouched when there is one', async () => {
+        await expect(
+          resolve(resolved.summary_markdown, { summary_markdown: 'A **summary**' })
+        ).resolves.toBe('A **summary**');
+      });
+
+      // `${{ }}`, not `{{ }}`: the rationale is optional, and the attachment's
+      // renderer null-checks it, so a stringified absence would render an empty
+      // `## Rationale` section.
+      it('keeps an absent rationale absent rather than empty', () => {
+        expect(resolved.rationale_markdown).toBe(
+          '${{ steps.run_fp_tp_analysis.output.rationale_markdown }}'
+        );
+      });
     });
 
     describe('the Investigation', () => {
@@ -728,17 +858,38 @@ describe('Attack Discovery worker chain', () => {
       // recording it here would group nothing and quietly break the telemetry that
       // reads this field.
       it('records the Worker run that produced it, not its own execution', () => {
-        const metadata = open?.with?.metadata as Record<string, string> | undefined;
+        const metadata = open?.with?.metadata as Record<string, string | string[]> | undefined;
 
-        expect(metadata?.workflow_execution_id).toBe('{{ inputs.parent_run_id }}');
+        expect(metadata?.workflow_execution_ids).toEqual(['{{ inputs.parent_run_id }}']);
+      });
+
+      it('appends the runner ID when reusing an investigation without changing its metadata at creation', () => {
+        const append = stepIn(reviewSteps, 'append_workflow_execution');
+        expect(append?.type).toBe('investigations.appendWorkflowExecutionId');
+        expect(append?.['on-failure']).toEqual({ continue: true });
+        expect(append?.if).toBe('${{ inputs.parent_run_id != blank }}');
+        expect(append?.with).toEqual({
+          conversationId: '{{ steps.resolve_investigation_id.output.investigation_id }}',
+          workflowExecutionId: '{{ inputs.parent_run_id }}',
+        });
+        const names = reviewSteps.map(({ name }) => name);
+        expect(names.indexOf('verify_investigation')).toBeLessThan(
+          names.indexOf('append_workflow_execution')
+        );
+        expect(names.indexOf('append_workflow_execution')).toBeLessThan(
+          names.indexOf('run_fp_tp_analysis')
+        );
       });
 
       // #19022 asks for the narrative on the Investigation itself, not only in an
       // attachment, so it is readable without resolving anything.
+      // Plain text, because the Investigation list and overview show it as-is.
       it('seeds the attack narrative into summary', () => {
-        const metadata = open?.with?.metadata as Record<string, string> | undefined;
+        const metadata = open?.with?.metadata as Record<string, string | string[]> | undefined;
 
-        expect(metadata?.summary).toBe('{{ inputs.summary_markdown }}');
+        expect(metadata?.summary).toBe(
+          "{{ steps.resolve_display_text.output.data[0].summary_markdown | remove: '`' | default: inputs.summary_markdown | truncate: 8000 }}"
+        );
       });
 
       // kibana-q0t5. The Investigation id is a pure function of the attack, so every
@@ -785,8 +936,10 @@ describe('Attack Discovery worker chain', () => {
         ).toEqual([]);
       });
 
-      it('does not re-fetch the Attack Discovery from the ad-hoc index', () => {
-        expect(reviewSteps.filter((step) => step.type === 'elasticsearch.search')).toEqual([]);
+      // Impact reads the correlated alerts through the Security step, and nothing reads the
+      // attack from Elasticsearch.
+      it('reads no Elasticsearch index itself', () => {
+        expect(reviewSteps.filter((step) => step.type.startsWith('elasticsearch.'))).toEqual([]);
       });
 
       it('does not run an agent against the Investigation', () => {
@@ -797,11 +950,167 @@ describe('Attack Discovery worker chain', () => {
       // review-side lookup. A regrouped alert set, and Kibana scheduled AD vs this
       // Worker (`ownerId` differs; `generation_source` is not passed yet), are
       // intentional producer splits.
-      it('derives the Investigation id first, with no lookup before it', () => {
-        expect(review.steps.map((step) => step.name).slice(0, 2)).toEqual([
+      // The only step between them reads the DISCOVERY's display text, not the
+      // Investigation, so there is still no Investigation lookup before the create.
+      it('derives the Investigation id first, with no Investigation lookup before it', () => {
+        expect(review.steps.map((step) => step.name).slice(0, 3)).toEqual([
           'resolve_investigation_id',
+          'resolve_display_text',
           'open_investigation',
         ]);
+      });
+    });
+
+    // The inputs are the persisted, anonymized text with `{{ field value }}` tokens,
+    // which plain text and plain markdown surfaces would show raw. Every surface an
+    // analyst reads takes the display text instead, and falls back to the inputs
+    // when the step failed.
+    describe('display text', () => {
+      const HOST_UUID = '2911864a-7591-4fdd-8c40-be92b7c5507f';
+      const anonymizedInputs = {
+        alert_ids: ['alert-1'],
+        summary_markdown: `OneNote file on {{ host.name ${HOST_UUID} }} ran curl`,
+        title: `Qbot on ${HOST_UUID}`,
+      };
+      // As the find API returns it: field values as inline code, original values restored.
+      const displayText = {
+        summary_markdown: 'OneNote file on `SRVWIN04` ran curl',
+        title: 'Qbot on SRVWIN04',
+      };
+      const render = (template: unknown, discovery?: Record<string, string>) =>
+        createWorkflowLiquidEngine().parseAndRender(String(template), {
+          consts: review.consts,
+          inputs: anonymizedInputs,
+          steps: {
+            resolve_analysis: { output: { verdict: 'inconclusive' } },
+            resolve_display_text: discovery != null ? { output: { data: [discovery] } } : {},
+          },
+        });
+      const open = () => asWith(stepIn(reviewSteps, 'open_investigation'));
+      const metadata = () => open().metadata as unknown as Record<string, string>;
+      const comment = () => asWith(stepIn(reviewSteps, 'resolve_escalation')).comment;
+
+      // The public find API, so the text is rendered and de-anonymized by the product
+      // itself, under the workflow identity's privileges.
+      it('reads the discovery under review from the find API, in its space', () => {
+        expect(stepIn(reviewSteps, 'resolve_display_text')?.with).toEqual({
+          headers: { 'elastic-api-version': '2023-10-31' },
+          method: 'GET',
+          path: '/s/{{ workflow.spaceId }}/api/attack_discovery/_find',
+          query: { ids: '{{ inputs.attack_discovery_id }}', include_all_authors: 'true' },
+        });
+      });
+
+      // One retry, since a transient failure leaves the fallback text in place for good, and
+      // then the review continues on the inputs.
+      it('retries once, then continues when the display text cannot be read', () => {
+        expect(stepIn(reviewSteps, 'resolve_display_text')?.['on-failure']).toEqual({
+          continue: true,
+          retry: { delay: '5s', 'max-attempts': 1 },
+        });
+      });
+
+      it('bounds each attempt well below the transport default', () => {
+        expect(stepIn(reviewSteps, 'resolve_display_text')?.timeout).toBe('30s');
+      });
+
+      it.each([
+        ['the Investigation title', () => open().title, displayText.title],
+        [
+          'the Investigation summary',
+          () => metadata().summary,
+          'OneNote file on SRVWIN04 ran curl',
+        ],
+      ])('uses the display text for %s', async (_, template, expected) => {
+        expect(await render(template(), displayText)).toBe(expected);
+      });
+
+      it.each([
+        ['the Investigation title', () => open().title, anonymizedInputs.title],
+        ['the Investigation summary', () => metadata().summary, anonymizedInputs.summary_markdown],
+      ])('falls back to the inputs for %s', async (_, template, expected) => {
+        expect(await render(template())).toBe(expected);
+      });
+
+      it('falls back to the inputs when the find API returns no discovery', async () => {
+        const rendered = await createWorkflowLiquidEngine().parseAndRender(String(open().title), {
+          inputs: anonymizedInputs,
+          steps: { resolve_display_text: { output: { data: [] } } },
+        });
+
+        expect(rendered).toBe(anonymizedInputs.title);
+      });
+
+      it('keeps the Investigation summary within the discovery bound', async () => {
+        const rendered = await render(metadata().summary, {
+          ...displayText,
+          summary_markdown: 'a'.repeat(9000),
+        });
+
+        expect(rendered.length).toBeLessThanOrEqual(8000);
+      });
+
+      it('names the discovery by its display title in the journal', async () => {
+        const journal = asInputs(stepIn(reviewSteps, 'journal_review_started')).message;
+
+        expect(await render(journal, displayText)).toContain(`"${displayText.title}"`);
+      });
+
+      // A re-review cannot repair the Investigation title or summary, because its create
+      // 409s, so the journal is the only record that the fallback was used.
+      describe('journal fallback note', () => {
+        const NOTE = 'shown anonymized';
+        const journal = () =>
+          String(asInputs(stepIn(reviewSteps, 'journal_review_started')).message);
+
+        it('says the text is anonymized when the display text could not be read', async () => {
+          expect(await render(journal())).toContain(NOTE);
+        });
+
+        it('says nothing about it when the display text was read', async () => {
+          const rendered = await render(journal(), displayText);
+
+          expect(rendered).not.toContain(NOTE);
+          expect(rendered).toContain(`"${displayText.title}". 1 correlated detection alert(s).`);
+        });
+
+        it('keeps the sentences separated when the note is shown', async () => {
+          expect(await render(journal())).toContain(
+            `"${anonymizedInputs.title}". Could not read the discovery's display text, so names and values below are shown anonymized. 1 correlated detection alert(s).`
+          );
+        });
+      });
+
+      // The AlertZero queue row shows the proposal's title as its summary.
+      it('titles the proposal with the display title', async () => {
+        const title = asInputs(stepIn(reviewSteps, 'escalation_gate')).title;
+
+        expect(await render(title, displayText)).toBe(displayText.title);
+      });
+
+      it('falls back to the input title for the proposal', async () => {
+        const title = asInputs(stepIn(reviewSteps, 'escalation_gate')).title;
+
+        expect(await render(title)).toBe(anonymizedInputs.title);
+      });
+
+      it('shows the display title and summary in the proposal comment, with no tokens', async () => {
+        const rendered = await render(comment(), displayText);
+
+        expect(rendered).toContain(`## ${displayText.title}`);
+        expect(rendered).toContain(displayText.summary_markdown);
+        expect(rendered).not.toContain('{{');
+      });
+
+      // The proposal record bounds its comment at 8192 characters.
+      it('keeps the proposal comment within the proposal bound at the largest title and summary', async () => {
+        const rendered = await render(comment(), {
+          ...displayText,
+          summary_markdown: 'a'.repeat(8000),
+          title: 't'.repeat(1024),
+        });
+
+        expect(rendered.length).toBeLessThanOrEqual(8192);
       });
     });
 
@@ -878,13 +1187,302 @@ describe('Attack Discovery worker chain', () => {
       });
     });
 
+    // The hosts and users the attack touched, recorded on the Investigation as the
+    // Impact the AlertZero landing page filters proposals by. Bookkeeping, not
+    // evidence, so none of it may fail the review.
+    describe('impact', () => {
+      const IMPACT_STEPS = [
+        'collect_impact_entities',
+        'attach_impact',
+        'journal_impact_recorded',
+      ] as const;
+
+      const collect = stepIn(reviewSteps, 'collect_impact_entities');
+      const attach = stepIn(reviewSteps, 'attach_impact');
+      const journal = stepIn(reviewSteps, 'journal_impact_recorded');
+
+      // Same engine options the execution engine's templating uses, so the authored
+      // expressions evaluate here exactly as they will in a run.
+      const liquid = createWorkflowLiquidEngine({ strictFilters: true, strictVariables: false });
+      const evaluate = (expression: string, context: Record<string, unknown>): unknown =>
+        liquid.evalValueSync(
+          expression
+            .replace(/^\$?\{\{/, '')
+            .replace(/\}\}$/, '')
+            .trim(),
+          context
+        );
+
+      const entities = [
+        { id: 'host:web-01-id', name: 'web-01', type: 'host' },
+        { id: 'user:alice@web-01-id@local', name: 'alice@web-01', type: 'user' },
+        { id: 'host:unnamed-id', type: 'host' },
+      ];
+
+      it('continues past every impact step that fails', () => {
+        expect(
+          IMPACT_STEPS.filter(
+            (name) => stepIn(reviewSteps, name)?.['on-failure']?.continue !== true
+          )
+        ).toEqual([]);
+      });
+
+      it('runs the impact steps in order', () => {
+        const positions = IMPACT_STEPS.map((name) => reviewStepNames.indexOf(name));
+
+        expect(positions).toEqual([...positions].sort((a, b) => a - b));
+      });
+
+      it.each(['verify_evidence', 'journal_evidence_attached'])(
+        'records impact after %s',
+        (name) => {
+          expect(reviewStepNames.indexOf(IMPACT_STEPS[0])).toBeGreaterThan(
+            reviewStepNames.indexOf(name)
+          );
+        }
+      );
+
+      // Before the analysis, so a parked escalation gate already has its Impact and the
+      // proposal shows up under the landing-page pills from the moment it is raised.
+      it.each(['journal_analysis_started', 'run_fp_tp_analysis', 'escalation_gate'])(
+        'records impact before %s',
+        (name) => {
+          expect(reviewStepNames.indexOf('journal_impact_recorded')).toBeLessThan(
+            reviewStepNames.indexOf(name)
+          );
+        }
+      );
+
+      // The search honors the step's abort signal, so a timeout ends it. The attach does
+      // not: it would keep writing after the timeout, and the journal would say it failed.
+      it('bounds the read of the alerts, and not the attach', () => {
+        expect(collect?.timeout).toBe('60s');
+        expect(attach?.timeout).toBeUndefined();
+      });
+
+      // The step accepts alert ids up to 256 characters (`MAX_ALERT_ID_LENGTH`), and one
+      // longer id would fail the whole read.
+      it('accepts no alert id longer than the step does', () => {
+        const alertIds = review.triggers?.[0]?.inputs?.properties?.alert_ids as
+          | { items?: { maxLength?: number } }
+          | undefined;
+
+        expect(alertIds?.items?.maxLength).toBe(256);
+      });
+
+      describe('the entities', () => {
+        // The entities come from a Security step that derives them with the Entity Store's
+        // own rules, so the YAML holds none of that logic.
+        it('come from the correlated alerts through the Security step', () => {
+          expect(collect?.type).toBe('security.getAlertEntities');
+          expect(collect?.with?.alert_ids).toBe('${{ inputs.alert_ids }}');
+        });
+
+        // The step derives the index from the space, and takes no other input that could
+        // name one.
+        it('name no index', () => {
+          expect(Object.keys(collect?.with ?? {}).sort()).toEqual(['alert_ids', 'max_entities']);
+        });
+
+        // Room for another writer: the attach rejects a merge past 100.
+        it('are capped below what one Investigation may hold', () => {
+          expect(collect?.with?.max_entities).toBe('${{ consts.impact_entity_cap }}');
+          expect(review.consts?.impact_entity_cap).toBe(50);
+        });
+      });
+
+      describe('the attach', () => {
+        it('attaches to the derived Investigation', () => {
+          expect(attach?.with?.conversationId).toBe(derivedInvestigationId);
+        });
+
+        // `${{ }}` keeps the entities an array of objects. `{{ }}` would hand the step a
+        // string it rejects.
+        it('passes the entities with a type-preserving template', () => {
+          expect(attach?.with?.entities).toBe(
+            '${{ steps.collect_impact_entities.output.entities }}'
+          );
+        });
+      });
+
+      // The attach rejects an empty `entities`, and a skipped or failed step leaves its
+      // output undefined. Each guard skips its step for both, so nothing downstream is
+      // handed nothing.
+      describe('the guards', () => {
+        const guard = (step: YamlStep | undefined, context: Record<string, unknown>) =>
+          evaluate(String(step?.if), context);
+
+        it.each([
+          ['missing', undefined, false],
+          ['empty', [], false],
+          ['present', ['alert-1'], true],
+        ])('collects only when alert_ids is %s', (_label, alertIds, expected) => {
+          expect(guard(collect, { inputs: { alert_ids: alertIds } })).toBe(expected);
+        });
+
+        it('attaches only when there are entities to attach', () => {
+          const withEntities = (value: unknown) => ({
+            steps: {
+              collect_impact_entities: value === undefined ? {} : { output: { entities: value } },
+            },
+          });
+
+          expect([
+            guard(attach, withEntities(undefined)),
+            guard(attach, withEntities([])),
+            guard(attach, withEntities(entities)),
+          ]).toEqual([false, false, true]);
+        });
+      });
+
+      // Rendered through the engine, because the message is a folded scalar whose
+      // phrases the YAML source splits across lines.
+      describe('the journal note', () => {
+        const ALERT_IDS = ['alert-1', 'alert-2', 'alert-3', 'alert-4', 'alert-5'];
+
+        const render = (
+          steps: Record<string, unknown>,
+          inputs: Record<string, unknown> = { alert_ids: ALERT_IDS }
+        ): Promise<string> =>
+          liquid.parseAndRender(
+            String((journal?.with?.inputs as Record<string, unknown> | undefined)?.message),
+            { execution: { id: 'execution-1' }, inputs, steps }
+          );
+
+        const collected = { output: { entities, total: 3, truncated: false } };
+
+        it('writes to the derived Investigation', () => {
+          expect(
+            (journal?.with?.inputs as Record<string, unknown> | undefined)?.conversation_id
+          ).toBe(derivedInvestigationId);
+        });
+
+        it('says how many entities were recorded', async () => {
+          expect(
+            await render({
+              attach_impact: { output: { entities } },
+              collect_impact_entities: collected,
+            })
+          ).toBe('Recorded impact: 3 host(s) and user(s).');
+        });
+
+        // The attach returns everything the Investigation's impact now holds, which can
+        // include what an earlier review or another writer recorded.
+        it('counts what this review found, not what the Investigation now holds', async () => {
+          expect(
+            await render({
+              attach_impact: { output: { entities: [...entities, ...entities, ...entities] } },
+              collect_impact_entities: collected,
+            })
+          ).toBe('Recorded impact: 3 host(s) and user(s).');
+        });
+
+        it('says when it recorded only the most alerted', async () => {
+          expect(
+            await render({
+              attach_impact: { output: { entities } },
+              collect_impact_entities: { output: { entities, total: 120, truncated: true } },
+            })
+          ).toBe('Recorded impact: 3 host(s) and user(s) (the most alerted of 120).');
+        });
+
+        // A fixed sentence per error type: the raw message of an internal failure would land
+        // in the Investigation, where every later agent round reads it as user input.
+        it.each([
+          [
+            'PermissionError',
+            "Could not record impact: the review's principal lacks the Manage investigations privilege.",
+          ],
+          [
+            'NotFoundError',
+            "Could not record impact: the review's principal does not own this Investigation.",
+          ],
+          [
+            'ValidationError',
+            "Could not record impact: it was rejected as invalid (an Investigation's impact holds at most 100 hosts and users).",
+          ],
+          [
+            'ConflictError',
+            'Could not record impact: another writer updated it at the same time. Re-running the review retries it.',
+          ],
+          ['ApiError', 'Could not record impact. See review execution execution-1.'],
+          ['TimeoutError', 'Could not record impact. See review execution execution-1.'],
+        ])('says why the attach failed with a %s', async (type, expected) => {
+          expect(
+            await render({
+              attach_impact: { error: { message: 'internal detail', type } },
+              collect_impact_entities: collected,
+            })
+          ).toBe(expected);
+        });
+
+        it('never journals the raw error message', async () => {
+          expect(
+            await render({
+              attach_impact: { error: { message: 'internal detail', type: 'ApiError' } },
+              collect_impact_entities: collected,
+            })
+          ).not.toContain('internal detail');
+        });
+
+        // Includes a principal that may not read the alerts index: the search fails rather
+        // than returning nothing.
+        it('says when the alerts could not be read', async () => {
+          expect(
+            await render({
+              collect_impact_entities: { error: { message: 'security_exception', type: 'Error' } },
+            })
+          ).toBe(
+            "Could not read the correlated alerts' hosts and users, so no impact was recorded. See review execution execution-1."
+          );
+        });
+
+        it.each([
+          ['missing', {}],
+          ['empty', { alert_ids: [] }],
+        ])(
+          'says when the review was given no alerts, with alert_ids %s',
+          async (_label, inputs) => {
+            expect(await render({}, inputs)).toBe(
+              'No impact recorded: the review was given no correlated alerts.'
+            );
+          }
+        );
+
+        it('says when there was nothing to record, and how many alerts it read', async () => {
+          expect(
+            await render({
+              collect_impact_entities: { output: { entities: [], total: 0, truncated: false } },
+            })
+          ).toBe('No impact recorded: the 5 correlated alert(s) name no host or user.');
+        });
+      });
+    });
+
     describe('attachments', () => {
       const attachments = reviewSteps.filter((step) => step.type === 'ai.attachment.add');
 
       // Evidence goes on as attachments, never as chat messages: a message would
       // wake the agent on a conversation the Worker is only writing to.
-      it('adds exactly three attachments', () => {
+      it('adds exactly three evidence attachments', () => {
         expect(attachments).toHaveLength(3);
+      });
+
+      // Impact is the one other attachment, and it is bookkeeping, not evidence. Reads and
+      // the verdict refresh write no new attachment, nor do investigation metadata updates.
+      it('writes no other attachment than the Impact', () => {
+        const evidenceSteps = ['ai.attachment.add', 'ai.attachment.read', 'ai.attachment.update'];
+
+        expect(
+          reviewSteps
+            .filter(
+              (step) =>
+                (step.type.startsWith('ai.attachment.') ||
+                  step.type.startsWith('investigations.attach')) &&
+                !evidenceSteps.includes(step.type)
+            )
+            .map((step) => step.type)
+        ).toEqual(['investigations.attachImpact']);
       });
 
       // Every one domain-typed. A generic `text` attachment would carry the verdict
@@ -899,10 +1497,13 @@ describe('Attack Discovery worker chain', () => {
 
       // The heading and the narrative are rendered by the type from these fields, so
       // the workflow passes the verdict as an enum rather than as assembled markdown.
+      // All three come from the analysis via `resolve_analysis`: the summary is the
+      // conclusion's, not the discovery's `inputs.summary_markdown`.
       it('passes the verdict as structured data rather than a markdown blob', () => {
         expect(stepIn(reviewSteps, 'attach_verdict')?.with?.data).toEqual({
-          summary_markdown: '{{ inputs.summary_markdown }}',
-          verdict: '{{ inputs.stub_verdict | default: consts.default_verdict }}',
+          summary_markdown: '{{ steps.resolve_analysis.output.summary_markdown }}',
+          verdict: '{{ steps.resolve_analysis.output.verdict }}',
+          rationale_markdown: '${{ steps.resolve_analysis.output.rationale_markdown }}',
         });
       });
 
@@ -982,6 +1583,450 @@ describe('Attack Discovery worker chain', () => {
       it('continues past a failed attachment', () => {
         expect(attachments.map((step) => step['on-failure']?.continue)).toEqual([true, true, true]);
       });
+
+      // A re-review lands on the SAME Investigation, so the add above 409s and its
+      // verdict is discarded — while the switch, the journal and the run output all
+      // act on the NEW one. The evidence attachments keep the first snapshot on
+      // purpose; the conclusion is the one that has to follow the analysis.
+      describe('refreshing the verdict on a re-review', () => {
+        const refresh = stepIn(reviewSteps, 'refresh_verdict');
+
+        // `update` versions rather than overwrites, so the superseded verdict stays
+        // in the attachment's history.
+        it('updates rather than adding a second verdict attachment', () => {
+          expect(refresh?.type).toBe('ai.attachment.update');
+        });
+
+        it('targets the attachment the add created', () => {
+          expect(refresh?.with?.attachment_id).toBe('analysis-verdict');
+        });
+
+        // Only on the 409 path: a first review's add already wrote this.
+        it('runs only when the add did not write the verdict', () => {
+          expect(refresh?.if).toBe('${{ steps.attach_verdict.error != null }}');
+        });
+
+        // The whole point: the refreshed payload is the one every other consumer of
+        // the verdict reads, so it cannot drift from them.
+        it('writes the same payload the rest of the review acts on', () => {
+          expect(refresh?.with?.data).toEqual(stepIn(reviewSteps, 'attach_verdict')?.with?.data);
+        });
+
+        it('refreshes before any lifecycle action is taken', () => {
+          expect(reviewStepNames.indexOf('refresh_verdict')).toBeLessThan(
+            reviewStepNames.indexOf('apply_verdict')
+          );
+        });
+
+        // Same reason the add continues: a verdict that could not be recorded is not
+        // a reason to abandon the review that produced it.
+        it('continues past a failed refresh', () => {
+          expect(refresh?.['on-failure']?.continue).toBe(true);
+        });
+      });
+    });
+
+    describe('closing the Attack Discovery', () => {
+      const closes = ['close_attack_false_positive', 'close_attack_declined'] as const;
+
+      it('closes the attack on exactly two paths', () => {
+        expect(
+          reviewSteps
+            .filter((step) => step.type === 'security.setAttackStatus')
+            .map((step) => step.name)
+        ).toEqual([...closes]);
+      });
+
+      // A reason is recorded only where the analysis actually produced a verdict
+      // about the attack. A decline says the escalation was not worth taking, which
+      // is not a statement about what the attack IS, so inferring a reason there
+      // would attribute a verdict to the analyst that they never gave.
+      it.each([
+        ['close_attack_false_positive', 'false_positive'],
+        ['close_attack_declined', undefined],
+      ] as const)('records %s with reason %j', (name, reason) => {
+        expect(stepIn(reviewSteps, name)?.with?.reason).toBe(reason);
+      });
+
+      // The whole point: an attack being closed says nothing about the detection
+      // alerts underneath it.
+      it.each(closes)('does not close the correlated detection alerts in %s', (name) => {
+        expect(stepIn(reviewSteps, name)?.with?.update_related_alerts).toBe(false);
+      });
+
+      it.each(closes)('closes by the persisted document id in %s', (name) => {
+        expect(stepIn(reviewSteps, name)?.with?.ids).toEqual(['{{ inputs.attack_discovery_id }}']);
+      });
+    });
+
+    describe('Investigation close reasons', () => {
+      const closeReasonOf = (name: string) =>
+        (stepIn(reviewSteps, name)?.with?.updates as { close_reason?: string })?.close_reason;
+
+      it.each([
+        ['close_investigation_false_positive', 'false_positive'],
+        ['close_investigation_declined', 'other'],
+      ] as const)('closes %s as %s', (name, reason) => {
+        expect(closeReasonOf(name)).toBe(reason);
+      });
+
+      // An analysis that failed produced no verdict about the attack, and an
+      // expired proposal means nobody looked. Neither is grounds for closing.
+      it.each(['record_analysis_failure', 'record_decision_lapsed', 'record_forensics_handoff'])(
+        'leaves the Investigation open in %s',
+        (name) => {
+          expect((stepIn(reviewSteps, name)?.with?.updates as { status?: string })?.status).toBe(
+            'open'
+          );
+        }
+      );
+    });
+
+    describe('the failed analysis arm', () => {
+      const verdict =
+        (stepIn(reviewSteps, 'record_analysis_failure')?.with?.updates as { verdict?: string })
+          ?.verdict ?? '';
+
+      it('states outright that no classification was produced', () => {
+        expect(verdict).toContain('NO CLASSIFICATION');
+      });
+
+      it('names the review execution that holds the error', () => {
+        expect(verdict).toContain('{{ execution.id }}');
+      });
+    });
+
+    // The decision already landed by the time these run, so a failed bookkeeping
+    // write must not fail the run and lose it. The two `security.setAttackStatus`
+    // closes are NOT in this list: they are the lifecycle rather than bookkeeping,
+    // and they fail the run instead. See 'the attack close is the lifecycle' below.
+    it('continues past every post-decision bookkeeping write', () => {
+      const postDecision = [
+        'close_investigation_false_positive',
+        'record_analysis_failure',
+        'record_forensics_handoff',
+        'close_investigation_declined',
+        'record_decision_lapsed',
+      ];
+
+      expect(
+        postDecision.filter((name) => stepIn(reviewSteps, name)?.['on-failure']?.continue !== true)
+      ).toEqual([]);
+    });
+
+    // Both closes run AFTER the matching Investigation close, so swallowing a failure
+    // here leaves the attack open and the two objects disagreeing on a run the parent
+    // counts as `completed`. RFC §9 wants a partial lifecycle transition observable and
+    // retryable, which means the run has to end red.
+    describe('the attack close is the lifecycle, not bookkeeping', () => {
+      const closes = ['close_attack_false_positive', 'close_attack_declined'] as const;
+      const fallbackOf = (name: (typeof closes)[number]) =>
+        stepIn(reviewSteps, name)?.['on-failure']?.fallback ?? [];
+
+      it.each(closes)('does not continue past a failed %s', (name) => {
+        expect(stepIn(reviewSteps, name)?.['on-failure']?.continue).not.toBe(true);
+      });
+
+      it.each(closes)('journals the partial transition then fails the run in %s', (name) => {
+        expect(fallbackOf(name).map((step) => step.type)).toEqual([
+          'workflow.execute',
+          'workflow.fail',
+        ]);
+      });
+
+      // A failed journal note must not mask the failure the fallback exists to report.
+      it.each(closes)("continues past a failed journal note inside %s's fallback", (name) => {
+        expect(fallbackOf(name)[0]?.['on-failure']?.continue).toBe(true);
+      });
+
+      it.each(closes)("names what was left open in %s's journal note", (name) => {
+        expect(JSON.stringify(fallbackOf(name)[0]?.with)).toContain('PARTIAL LIFECYCLE TRANSITION');
+      });
+
+      it.each(closes)("journals to the Investigation from %s's fallback", (name) => {
+        expect(
+          (fallbackOf(name)[0]?.with as { 'workflow-id'?: string } | undefined)?.['workflow-id']
+        ).toBe(ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID);
+      });
+    });
+
+    describe('the proposal decision read-back', () => {
+      const readback = stepIn(reviewSteps, 'read_proposal_decision');
+      const decision = stepIn(reviewSteps, 'record_decision');
+
+      // After a failed action the gate clones the proposal and re-parks, so the id it
+      // emits is the live record rather than the one it first created.
+      it('reads the proposal the gate created', () => {
+        expect(JSON.stringify(readback?.with)).toContain('steps.escalation_gate.output.proposalId');
+      });
+
+      it('calls the versioned internal proposals route', () => {
+        expect(JSON.stringify(readback?.with)).toContain('/internal/proposals/');
+      });
+
+      // The two axes are what separate a decline from a lapse, so the read-back is no
+      // longer load-bearing for the branch — only for the prose that goes with it.
+      it('branches on the gate output rather than on the read-back', () => {
+        expect(JSON.stringify(decision?.with)).not.toContain('read_proposal_decision');
+      });
+
+      it('distinguishes a decline by the decision axis', () => {
+        expect(String(decision?.with?.declined)).toContain(
+          "steps.escalation_gate.output.decision == 'dismissed'"
+        );
+      });
+
+      it('distinguishes an expiry by the status axis', () => {
+        expect(String(decision?.with?.expired)).toContain(
+          "steps.escalation_gate.output.status == 'expired'"
+        );
+      });
+
+      // An approval whose handoff failed reports `approved` + `failed`, which is not
+      // a handoff that happened. Reading both axes keeps it out of the approve arm.
+      it('requires the action to have run before it counts an approval', () => {
+        expect(String(decision?.with?.approved)).toContain(
+          "steps.escalation_gate.output.status == 'succeeded'"
+        );
+      });
+
+      // Losing the prose must not lose the decision that was already made.
+      it('continues past a failed read-back', () => {
+        expect(readback?.['on-failure']?.continue).toBe(true);
+      });
+
+      // The analyst's structured reason goes on as prose. It is NOT relayed to
+      // `security.setAttackStatus`: those values describe the proposal, not the
+      // attack.
+      it.each(['dismissReason', 'rationale'])(
+        'records the analyst %s on the Investigation',
+        (field) => {
+          const verdict = String(
+            (
+              stepIn(reviewSteps, 'close_investigation_declined')?.with?.updates as {
+                verdict?: string;
+              }
+            )?.verdict
+          );
+
+          expect(verdict).toContain(field);
+        }
+      );
+    });
+  });
+
+  describe('the forensics handoff escalation', () => {
+    const resolve = stepIn(reviewSteps, 'resolve_escalation');
+    const handoff = stepIn(reviewSteps, 'record_forensics_handoff');
+
+    it('creates exactly one proposal', () => {
+      expect(
+        reviewSteps.filter(
+          (step) => step.with?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
+        )
+      ).toHaveLength(1);
+    });
+
+    it('points the gate at the forensics handoff action', async () => {
+      const rendered = await createWorkflowLiquidEngine().parseAndRender(
+        asInputs(stepIn(reviewSteps, 'escalation_gate')).actionWorkflowId,
+        { consts: review.consts }
+      );
+
+      expect(rendered.trim()).toBe(ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID);
+    });
+
+    // This workflow's trigger allows 1024 characters, while the proposal step
+    // caps titles at 256: forwarding one unbounded fails the escalation for an
+    // otherwise valid discovery.
+    it('bounds the proposal title it forwards', async () => {
+      const rendered = await createWorkflowLiquidEngine().parseAndRender(
+        asInputs(stepIn(reviewSteps, 'escalation_gate')).title,
+        { inputs: { title: 'A'.repeat(1024) } }
+      );
+
+      expect(rendered.length).toBeLessThanOrEqual(256);
+    });
+
+    it('installs the action it points at', () => {
+      expect(ALERTZERO_ACTION_WORKFLOW_IDS).toContain(
+        ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID
+      );
+    });
+
+    // The action closes `actionInput` to additional properties, so a key the review
+    // sends that the action does not declare fails validation at approval time —
+    // after an analyst has already said yes. An exact match is the only safe shape.
+    it('sends exactly the keys the action declares', () => {
+      const actionInput = forensicsAction.triggers?.[0]?.inputs?.properties?.actionInput;
+
+      expect(Object.keys(resolve?.with?.action_input as Record<string, unknown>).sort()).toEqual(
+        Object.keys(actionInput?.properties ?? {}).sort()
+      );
+    });
+
+    it('closes the action input against keys the action would reject', () => {
+      expect(
+        forensicsAction.triggers?.[0]?.inputs?.properties?.actionInput?.additionalProperties
+      ).toBe(false);
+    });
+
+    // These five flow into a knowledge indicator's title, description and attributes,
+    // which are persisted and swept by a consumer. The review's own trigger schema
+    // bounds every string it takes; the action has to match, or the bound the review
+    // enforces is undone by the hop that follows it.
+    describe('action input bounds', () => {
+      const properties = (forensicsAction.triggers?.[0]?.inputs?.properties?.actionInput
+        ?.properties ?? {}) as Record<string, { maxLength?: number; type?: string }>;
+
+      it('bounds every string the handoff accepts', () => {
+        expect(
+          Object.entries(properties)
+            .filter(([, property]) => property.type === 'string' && property.maxLength == null)
+            .map(([name]) => name)
+        ).toEqual([]);
+      });
+
+      // The conversation id bound every `ai.*` step already enforces.
+      it('bounds the Investigation id to a conversation id', () => {
+        expect(properties.investigation_id?.maxLength).toBe(256);
+      });
+
+      it('bounds the attack id to the same length the review takes', () => {
+        expect(properties.attack_discovery_id?.maxLength).toBe(
+          (
+            review.triggers?.[0]?.inputs?.properties?.attack_discovery_id as
+              | { maxLength?: number }
+              | undefined
+          )?.maxLength
+        );
+      });
+
+      // An `enum` here would fail the handoff outright if #19211's real analysis adds
+      // an escalating verdict, and the vocabulary is the review's to own.
+      it('does not pin the verdict vocabulary', () => {
+        expect(properties.classification).not.toHaveProperty('enum');
+      });
+    });
+
+    // The knowledge indicator IS the handoff contract. Forensics Watch sweeps for it and
+    // reads it without ever calling back, so its type and its attribute names belong to
+    // that consumer rather than to this producer.
+    describe('the knowledge indicator', () => {
+      const ki = stepIn(flatten(forensicsAction.steps), 'write_analyze_endpoint_ki');
+      const fields = (ki?.with?.ki ?? {}) as {
+        type?: string;
+        attributes?: Record<string, string>;
+      };
+
+      it('writes it with the Context Engine step the sweep reads', () => {
+        expect(ki?.type).toBe('context-engine.createKi');
+      });
+
+      it('declares the type the Forensics sweep selects on', () => {
+        expect(fields.type).toBe('security.analyze_endpoint');
+      });
+
+      // Keyed on the ATTACK, which is the object the request is about and the id the
+      // consumer dereferences. Keying on the Investigation is now merely equivalent
+      // rather than wrong — kibana-q0t5 made that id a pure function of this one —
+      // but it would reach the same place through a second derivation, and only for
+      // as long as that stays true.
+      it('keys the knowledge indicator on the attack', () => {
+        expect(ki?.with?.ki_id).toBe(
+          'analyze-endpoint-{{ inputs.actionInput.attack_discovery_id }}'
+        );
+      });
+
+      it('carries the Attack Discovery alert id the consumer dereferences', () => {
+        expect(fields.attributes?.attack_discovery_alert_id).toBe(
+          '{{ inputs.actionInput.attack_discovery_id }}'
+        );
+      });
+
+      it('carries the Investigation the narrative and the report live on', () => {
+        expect(fields.attributes?.investigation_id).toBe(
+          '{{ inputs.actionInput.investigation_id }}'
+        );
+      });
+
+      // Every space's `security-investigations` knowledge indicators share one backing
+      // index, whose name derives from the AI index id alone, so a consumer cannot
+      // resolve either id above without being told which space they belong to.
+      it('carries the executing space', () => {
+        expect(fields.attributes?.space_id).toBe('{{ workflow.spaceId }}');
+      });
+
+      it('requests the handoff as pending', () => {
+        expect(fields.attributes?.status).toBe('pending');
+      });
+    });
+
+    describe('autoApprove', () => {
+      const evaluateAutoApprove = (output: Record<string, string>): unknown =>
+        createWorkflowLiquidEngine().evalValueSync(
+          String(resolve?.with?.auto_approve)
+            .replace(/^\$\{\{/, '')
+            .replace(/\}\}$/, '')
+            .trim(),
+          { steps: { resolve_context: { output } } }
+        );
+
+      // The two verdicts that reach the gate propose the SAME handoff, so autonomy has
+      // to answer both the same way. Gating one and not the other would make a single
+      // dial position mean two different things.
+      it.each(['true_positive', 'inconclusive'])(
+        'auto-approves a %s at supervised autonomy',
+        (verdict) => {
+          expect(evaluateAutoApprove({ autonomy: 'supervised', verdict })).toBe(true);
+        }
+      );
+
+      it.each(['true_positive', 'inconclusive'])('gates a %s at manual autonomy', (verdict) => {
+        expect(evaluateAutoApprove({ autonomy: 'manual', verdict })).toBe(false);
+      });
+
+      // The pair the Worker offers. `assisted` sits between them and would mean the same
+      // thing as `manual` here, so it is not exposed — a regression that reintroduced it
+      // would give an analyst a level that changes nothing.
+      it('offers exactly the two autonomy levels the gate can distinguish', () => {
+        expect(review.triggers?.[0]?.inputs?.properties?.autonomy?.enum).toEqual([
+          'manual',
+          'supervised',
+        ]);
+      });
+
+      it('declares the action irreversible, since no forensics run can be recalled', () => {
+        expect(forensicsMetadata.reversible).toBe(false);
+      });
+
+      // `always-gate` here would make `supervised` identical to `manual`, which is the
+      // whole distinction the two-level dial exists to draw.
+      it('defers the action to the caller autonomy level', () => {
+        expect(forensicsMetadata.approvalPolicy).toBe('autonomy-dependent');
+      });
+    });
+
+    describe('the approve branch', () => {
+      it('runs only on approval', () => {
+        expect(handoff?.if).toContain('steps.record_decision.output.approved == true');
+      });
+
+      // Forensics Watch writes its report into this Investigation, so closing it
+      // would delete the thing the handoff exists to produce, and closing the attack
+      // would contradict a run that is about to start.
+      it('leaves the Investigation open for the forensics report', () => {
+        expect((handoff?.with?.updates as { status?: string })?.status).toBe('open');
+      });
+
+      it('closes nothing', () => {
+        const closing = reviewSteps.filter(
+          (step) =>
+            step.type === 'security.setAttackStatus' && String(step.if).includes('approved == true')
+        );
+
+        expect(closing).toEqual([]);
+      });
     });
   });
 
@@ -995,7 +2040,7 @@ describe('Attack Discovery worker chain', () => {
       expect(steps.filter((step) => step.type === 'workflow.output')).toHaveLength(1);
     });
 
-    it.each(['alerts_analyzed', 'attacks_generated', 'reviews_failed', 'reviews_requested'])(
+    it.each(['alerts_analyzed', 'attacks_generated', 'reviews_requested'])(
       'reports %s so a caller can tell an empty run from a failed one',
       (name) => {
         expect((worker.outputs ?? []).map((output) => output.name)).toContain(name);
@@ -1004,7 +2049,7 @@ describe('Attack Discovery worker chain', () => {
 
     // The editor type-checks `workflow.output` `with:` source text, so a
     // `type: number` field cannot be filled with `"${{ ... }}"`.
-    it.each(['alerts_analyzed', 'attacks_generated', 'reviews_failed', 'reviews_requested'])(
+    it.each(['alerts_analyzed', 'attacks_generated', 'reviews_requested'])(
       'declares %s as a string so the templated emit passes editor type checks',
       (name) => {
         expect((worker.outputs ?? []).find((output) => output.name === name)?.type).toBe('string');
@@ -1014,7 +2059,7 @@ describe('Attack Discovery worker chain', () => {
     // `${{ }}` keeps the Liquid value's type. Runtime output validation then
     // rejects a number against `type: string`. `{{ }}` stringifies so the
     // emitted value matches the declared schema.
-    it.each(['alerts_analyzed', 'attacks_generated', 'reviews_failed', 'reviews_requested'])(
+    it.each(['alerts_analyzed', 'attacks_generated', 'reviews_requested'])(
       'stringifies %s in emit_result so runtime matches the string output schema',
       (name) => {
         expect(stepIn(workerSteps, 'emit_result')?.with?.[name]).toEqual(
@@ -1058,7 +2103,7 @@ describe('Attack Discovery worker chain', () => {
       );
     });
 
-    it.each(['attack_discovery_id', 'investigation_id'])(
+    it.each(['attack_discovery_id', 'investigation_id', 'proposal_status', 'proposal_decision'])(
       'returns %s from each review so the worker can trace what it did',
       (name) => {
         expect((review.outputs ?? []).map((output) => output.name)).toContain(name);
@@ -1102,9 +2147,7 @@ describe('Attack Discovery worker chain', () => {
 
   describe('the Investigation journal helper', () => {
     const append = stepIn(journalNoteSteps, 'append_note');
-    const request = append?.with?.request as
-      | { body?: { trigger_mode?: string }; path?: string }
-      | undefined;
+    const request = append?.with as { body?: { trigger_mode?: string }; path?: string } | undefined;
 
     it('POSTs the chat converse route, not the agent_builder converse route', () => {
       expect(request?.path).toContain('/api/chat/converse');
@@ -1122,28 +2165,55 @@ describe('Attack Discovery worker chain', () => {
       expect(append?.['on-failure']?.continue).toBe(true);
     });
 
-    it('is installed with the Attack Discovery workflows so Review can execute it', () => {
+    it('is installed with the Attack Discovery workflows so Review and handoff can execute it', () => {
       expect(ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS).toContain(ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID);
     });
   });
 
   describe('the Investigation journal', () => {
-    // host steps, so the last five land with #19214's verdict switch and gate.
     const reviewJournal = journalExecutes(reviewSteps);
 
     const INFLECTIONS = [
       'journal_review_started',
       'journal_evidence_attached',
+      'journal_impact_recorded',
       'journal_analysis_started',
       'journal_analysis_finished',
+      'journal_fp_closed',
+      'journal_attack_status_false_positive',
+      'journal_analysis_failed',
+      'journal_decision_recorded',
+      'journal_attack_status_declined',
     ] as const;
 
+    // Not inflections: these live in the two lifecycle closes' fallbacks and only run
+    // when the attack could not be closed after its Investigation already was.
+    const LIFECYCLE_FAILURE_NOTES: string[] = [
+      'journal_attack_status_false_positive_failed',
+      'journal_attack_status_declined_failed',
+    ];
+
+    const isFailureNote = (name: string) => LIFECYCLE_FAILURE_NOTES.includes(name);
+
     it('points journal executes at the helper id', () => {
-      expect(review.consts?.journal_note).toBe(ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID);
+      expect(reviewJournal.length).toBeGreaterThan(0);
+      expect(
+        reviewJournal.every(
+          (step) => step.with?.['workflow-id'] === ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID
+        )
+      ).toBe(true);
     });
 
     it('calls the journal helper at each agreed inflection', () => {
-      expect(reviewJournal.map((step) => step.name)).toEqual([...INFLECTIONS]);
+      expect(reviewJournal.map((step) => step.name).filter((name) => !isFailureNote(name))).toEqual(
+        [...INFLECTIONS]
+      );
+    });
+
+    it('journals both partial lifecycle transitions', () => {
+      expect(reviewJournal.map((step) => step.name).filter(isFailureNote)).toEqual(
+        LIFECYCLE_FAILURE_NOTES
+      );
     });
 
     it.each(INFLECTIONS)('continues past a failed %s note', (name) => {
@@ -1188,7 +2258,7 @@ describe('Attack Discovery worker chain', () => {
       );
     });
 
-    it('does not add a HITL gate', () => {
+    it('does not add a HITL gate beyond the escalate proposal', () => {
       expect(reviewSteps.filter((step) => step.type === 'waitForApproval')).toEqual([]);
     });
 
@@ -1205,19 +2275,94 @@ describe('Attack Discovery worker chain', () => {
     });
   });
 
-  // Overlapping runner runs are already cancelled by the floor / runner concurrency
-  // policy. Sequential re-generation of the same attack is a #19022 Investigation
-  // concern (and AD hash-dedup), not a per-attack concurrency key on this review.
-  it('gives the review workflow no per-attack concurrency policy', () => {
-    expect(review.settings?.concurrency).toBeUndefined();
+  describe('the forensics handoff journal', () => {
+    const ki = stepIn(forensicsSteps, 'write_analyze_endpoint_ki');
+    const fallback = ki?.['on-failure']?.fallback ?? [];
+
+    it('journals after a successful knowledge indicator write', () => {
+      const names = forensicsAction.steps.map((step) => step.name);
+
+      expect(names.indexOf('journal_handoff_succeeded')).toBeGreaterThan(
+        names.indexOf('write_analyze_endpoint_ki')
+      );
+    });
+
+    it('journals a KI failure then fails the proposal', () => {
+      expect(fallback.map((step) => step.name)).toEqual(['journal_handoff_failed', 'fail_handoff']);
+    });
+
+    it('points the handoff journal at the helper', () => {
+      expect(forensicsAction.consts?.journal_note).toBe(ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID);
+    });
+
+    it('fails the handoff after journaling the KI error', () => {
+      expect(stepIn(fallback, 'fail_handoff')?.type).toBe('workflow.fail');
+    });
   });
 
-  // The default workflow timeout (6h) must stay above the 35m generation step.
+  // The derived id makes a concurrent re-review harmless for the Investigation — one
+  // create wins and the other 409s onto it — but not for the gate: both runs would
+  // reach `escalation_gate` and raise a proposal against the same Investigation. The
+  // key is per attack, so this serializes one attack's reviews, never two attacks.
+  //
+  // A literal input value resolves here, unlike a TEMPLATED input value or a
+  // Liquid-rendered input default: the key is evaluated before inputs are rendered
+  // and persisted, and the runner passes this id already rendered. An unresolvable
+  // key evaluates to null, which disables the policy rather than collapsing every
+  // attack onto one group.
+  it('serializes reviews of the same attack', () => {
+    expect(review.settings?.concurrency?.key).toBe(
+      'attack-discovery-review-{{ inputs.attack_discovery_id }}'
+    );
+  });
+
+  // `drop`, not `cancel-in-progress`: the in-flight review may already be holding an
+  // analyst's decision window open, and the newer run has nothing to add — it is the
+  // same attack.
+  it('drops a second review of an attack already under review', () => {
+    expect(review.settings?.concurrency?.strategy).toBe('drop');
+  });
+
+  it('allows one review per attack at a time', () => {
+    expect(review.settings?.concurrency?.max).toBe(1);
+  });
+
+  // The workflow timeout is wall-clock from `startedAt`, so the time the escalation
+  // gate parks for counts against it. At the 6h default a gated review is killed
+  // under the analyst, leaving the Investigation open and the proposal dangling — and
+  // dispatch never hands that attack out again. This has to clear the gate's own
+  // `168h` ceiling, which covers a 72h decision window plus a second full 72h for a
+  // proposal re-parked on a denial or a failed action. Same 176h as the rule tuning
+  // review.
+  it('outlives the analyst decision window the escalation gate parks for', () => {
+    expect(review.settings?.timeout).toBe('176h');
+  });
+
+  // Neither the floor nor the runner sets `settings.timeout`, so both take the
+  // engine's 6h default — and that is correct only because neither one waits on a
+  // human. The runner's longest wait is the 4h generation step, and the floor's is the
+  // runner. Were either to park on the review's escalation gate instead, the same
+  // default would become a 6h guillotine: the timeout is wall-clock from `startedAt`,
+  // so a parked run burns it, and tripping it cancels the child it was waiting on.
   it.each([
     ['floor', floor],
     ['worker', worker],
   ])('leaves the %s workflow-level timeout at its generous default', (_name, workflow) => {
     expect(workflow.settings?.timeout).toBeUndefined();
+  });
+
+  // The invariant that default rests on, asserted directly rather than inferred from
+  // the fan-out's step type. A `workflow.execute` to the review is the one way to
+  // reintroduce the park, and it would regress silently: the YAML stays valid and
+  // every other assertion here still passes.
+  it('never waits synchronously on a review', () => {
+    expect(
+      workerSteps.filter(
+        (step) =>
+          step.type === 'workflow.execute' &&
+          step.with?.['workflow-id'] === ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID
+      )
+    ).toEqual([]);
   });
 
   // Systemic guard, not a point fix. Three separate references to the batched
