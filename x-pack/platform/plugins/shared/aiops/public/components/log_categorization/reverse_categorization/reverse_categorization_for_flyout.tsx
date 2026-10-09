@@ -438,9 +438,6 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
   }, []);
 
   const histogram = eventRate.map(({ key: catKey, docCount }) => {
-    if (data) {
-      // debugger;
-    }
     const term =
       (selectedCategory?.key && data ? data.sparkLines[selectedCategory?.key][catKey] : 0) ?? 0;
     const newTerm = term > docCount ? docCount : term;

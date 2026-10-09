@@ -222,7 +222,8 @@ function buildEuiGridColumn({
             onFilter,
             dataGridRef,
             hideFilteringOnComputedColumns,
-            uiActions
+            uiActions,
+            dataView
           )
         : EMPTY_CELL_ACTIONS;
 

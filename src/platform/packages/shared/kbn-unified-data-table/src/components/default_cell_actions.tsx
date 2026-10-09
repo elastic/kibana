@@ -11,7 +11,7 @@ import type { MutableRefObject } from 'react';
 import React, { useContext } from 'react';
 import type { EuiDataGridColumnCellActionProps, EuiDataGridRefProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -145,8 +145,8 @@ export const ReverseCategorizeBtn = ({
 
   const isTextfield = field.esTypes?.includes('text') === true;
 
-  if (!uiActions || !isTextfield) {
-    return <></>;
+  if (!uiActions || !isTextfield || !context.dataView.isTimeBased()) {
+    return null;
   }
 
   return (
@@ -220,7 +220,8 @@ export function buildCellActions(
   onFilter?: DocViewFilterFn,
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>,
   hideFilteringOnComputedColumns?: boolean,
-  uiActions?: UiActionsStart
+  uiActions?: UiActionsStart,
+  dataView?: DataView
 ) {
   const shouldShowFilters = shouldShowFieldFilterInOutActions({
     dataViewField: field,
@@ -230,7 +231,8 @@ export function buildCellActions(
 
   const showReverseCategorize =
     field.esTypes?.includes('text') === true &&
-    uiActions?.hasAction('ACTION_REVERSE_CATEGORIZE_FIELD') === true;
+    uiActions?.hasAction('ACTION_REVERSE_CATEGORIZE_FIELD') === true &&
+    dataView?.isTimeBased() === true;
 
   return [
     ...(shouldShowFilters
