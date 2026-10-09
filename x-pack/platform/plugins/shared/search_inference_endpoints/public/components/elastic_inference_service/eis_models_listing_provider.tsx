@@ -108,7 +108,6 @@ export const EisModelsListingProvider = ({
       ),
     [models]
   );
-
   const features = useMemo(
     () => ({
       sorting: {
@@ -139,6 +138,7 @@ export const EisModelsListingProvider = ({
         <RegionOptionsProvider value={regionOptions}>
           <EisModelsListing
             {...{ onViewModelDetails, displayOptions, hasBlockedModels, viewMode }}
+            catalogTotal={models.length}
             onApplyDisplayOptions={setDisplayOptions}
             onViewModeChange={setViewMode}
           />
