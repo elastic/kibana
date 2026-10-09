@@ -24,6 +24,7 @@
     "tslib": "*"
   },
   "devDependencies": {
+    "@buildkite/buildkite-sdk": "0.12.0",
     "@types/jest": "^30.0.0",
     "@types/jscodeshift": "^0.12.0",
     "@types/minimatch": "^6.0.0",
@@ -46,6 +47,7 @@
     "#pipeline-utils/ci-stats": "./pipeline-utils/ci-stats/index.ts",
     "#pipeline-utils/github": "./pipeline-utils/github/index.ts",
     "#pipeline-utils/scout": "./pipeline-utils/scout/index.ts",
+    "#pipeline-utils/step-library": "./pipeline-utils/step-library/index.ts",
     "#pipeline-utils/test-failures": "./pipeline-utils/test-failures/index.ts",
     "#pipeline-utils/*": "./pipeline-utils/*.ts"
   }
