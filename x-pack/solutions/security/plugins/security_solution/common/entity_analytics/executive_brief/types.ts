@@ -130,7 +130,35 @@ export interface RiskConcentrationCell {
   count: number;
 }
 
+/** How much attention the situation needs. Ordered: urgent > action > watch > clear. */
+export type AttentionLevel = 'urgent' | 'action' | 'watch' | 'clear';
+
+export type AttentionAreaId = 'threats' | 'response' | 'coverage' | 'visibility';
+
+export interface AttentionArea {
+  id: AttentionAreaId;
+  level: AttentionLevel;
+  /** Deterministic one-line fact, e.g. "1 critical threat unaddressed". */
+  summary: string;
+  /** Which rule fired (shown in "why this level"). */
+  rule: string;
+  evidence: EvidenceId[];
+}
+
+/**
+ * Deterministic attention assessment (no LLM). Overall level = most severe area level.
+ * Visibility never exceeds 'watch'.
+ */
+export interface AttentionAssessment {
+  level: AttentionLevel;
+  areas: AttentionArea[];
+  /** Direction of activity vs the previous period (display only; never escalates the level). */
+  trend?: 'more' | 'less' | 'same';
+}
+
 export interface BriefGlance {
+  /** Set by the job runner once threats and blind spots are known. */
+  assessment?: AttentionAssessment;
   stats: GlanceStat[];
   needsAttention: NeedsAttentionTileSnapshot[];
   /** Built from returned buckets only (some entity types may not be installed). */
