@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import type { ApmPluginRequestHandlerContext } from '../typings';
 import {
@@ -12,6 +14,16 @@ import {
   getIndicesLifecycleStatus,
   getTotalIndicesStats,
 } from './indices_stats_helpers';
+
+function createEsError(type: string, reason: string, statusCode = 500) {
+  return new errors.ResponseError({
+    statusCode,
+    headers: {},
+    warnings: [],
+    meta: {} as unknown as TransportResult['meta'],
+    body: { error: { type, reason } },
+  } as TransportResult);
+}
 
 describe('storage explorer with missing APM indices', () => {
   const apmEventClient = {
@@ -23,7 +35,11 @@ describe('storage explorer with missing APM indices', () => {
     },
   } as unknown as APMEventClient;
 
-  const missingIndex = new Error('index_not_found_exception: no such index [traces-apm-missing]');
+  const missingIndex = createEsError(
+    'index_not_found_exception',
+    'no such index [traces-apm-missing]',
+    404
+  );
 
   function contextFor(client: object) {
     return {
@@ -43,7 +59,11 @@ describe('storage explorer with missing APM indices', () => {
   });
 
   it('does not hide unrelated index statistics errors', async () => {
-    const securityError = new Error('security_exception: missing monitor privilege');
+    const securityError = createEsError(
+      'security_exception',
+      'missing monitor privilege',
+      403
+    );
     const stats = jest.fn(async ({ index }: { index: string }) => {
       if (index === 'traces-apm-missing') {
         throw securityError;
@@ -106,7 +126,11 @@ describe('storage explorer with missing APM indices', () => {
   });
 
   it('does not hide unrelated lifecycle errors', async () => {
-    const securityError = new Error('security_exception: missing view_index_metadata privilege');
+    const securityError = createEsError(
+      'security_exception',
+      'missing view_index_metadata privilege',
+      403
+    );
     const explainLifecycle = jest.fn(async ({ index }: { index: string }) => {
       if (index === 'traces-apm-missing') {
         throw securityError;
