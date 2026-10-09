@@ -151,6 +151,10 @@ describe.each(ENGINES)('built-in regex rules on %s', (engine) => {
       // A qualified suffix in the middle must not end the name early.
       'web.prod.internal.example.com',
       'a.corp.local.example.org',
+      // Everything up to the last qualified suffix belongs to the name, not just one suffix.
+      'a.example.com.internal.example.de',
+      'db.example.com.eu.west.corp.local',
+      'a.example.com.corp.local.lan.int.app',
     ])('masks %s whole', (host) => {
       expectSpans(id, host, [host]);
     });
