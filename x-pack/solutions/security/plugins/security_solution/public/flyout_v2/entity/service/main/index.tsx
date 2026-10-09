@@ -42,6 +42,9 @@ import { ServicePanelHeader } from '../../../../flyout/entity_details/service_ri
 import { ServicePanelFooter } from '../../../../flyout/entity_details/service_right/footer';
 import { useObservedService } from '../../../../flyout/entity_details/service_right/hooks/use_observed_service';
 import { useFlyoutApi } from '../../../use_flyout_api';
+import { FlyoutHeaderActions } from '../../../shared/components/flyout_header_actions';
+import { EntityAnalyticsFlyoutCopyLink } from '../../shared/components/entity_analytics_flyout_copy_link';
+import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
 
 export interface ServiceProps {
   /** Display name from the source row / document (typically `service.name`). */
@@ -73,6 +76,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
   contextID,
 }) {
   const { euiTheme } = useEuiTheme();
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
   const {
     openServiceFlyoutAsChild,
     openEntityDetailsAsChild,
@@ -285,6 +289,20 @@ export const Service: FC<ServiceProps> = memo(function Service({
             ? ((getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??
                 'Unknown') as RiskSeverity)
             : undefined
+        }
+        headerActions={
+          isNewEntityAnalyticsPage ? (
+            <FlyoutHeaderActions>
+              <EntityAnalyticsFlyoutCopyLink
+                target={{
+                  kind: 'service',
+                  serviceName,
+                  entityId: entityStoreEntityId ?? entityId,
+                  scopeId,
+                }}
+              />
+            </FlyoutHeaderActions>
+          ) : undefined
         }
       />
       <FlyoutBody panelProps={{ paddingSize: 'none' }}>

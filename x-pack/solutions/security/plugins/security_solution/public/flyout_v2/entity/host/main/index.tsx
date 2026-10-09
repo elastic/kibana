@@ -413,6 +413,8 @@ export const Host: FC<HostProps> = memo(function Host({
           identityFields={documentEntityIdentifiers}
           isEntityInStore={!!observedHost.entityRecord}
           riskLevel={riskLevel}
+          scopeId={scopeId}
+          showEntityAnalyticsCopyLink
         />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

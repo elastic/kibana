@@ -433,6 +433,8 @@ export const User: FC<UserProps> = memo(function User({
           identityFields={documentEntityIdentifiers}
           isEntityInStore={!!observedUser.entityRecord}
           riskLevel={riskLevel}
+          scopeId={scopeId}
+          showEntityAnalyticsCopyLink
         />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
