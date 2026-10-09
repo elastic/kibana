@@ -13,7 +13,10 @@ import { useContentListPhase } from '@kbn/content-list-provider';
 import { ALERTING_V2_ACTION_POLICIES_APP_ID } from '@kbn/alerting-v2-constants';
 import { i18n } from '@kbn/i18n';
 import { experimentalBadge } from '../../components/experimental_badge';
-import { EsqlRulesOnlyCallout, esqlRulesOnlyBadge } from '../../components/esql_rules_only_notice';
+import {
+  UniversalRulesOnlyCallout,
+  universalRulesOnlyBadge,
+} from '../../components/universal_rules_only_notice';
 import {
   useAreAgentBuilderSkillsAvailable,
   useAgentBuilderSkillsRequirements,
@@ -88,8 +91,8 @@ export interface ActionPoliciesListHeaderProps {
   onCreateWithAgent: () => void;
 }
 
-const ESQL_RULES_ONLY_CALLOUT_BODY = i18n.translate(
-  'xpack.alertingV2.actionPolicies.esqlRulesOnlyCalloutBody',
+const UNIVERSAL_RULES_ONLY_CALLOUT_BODY = i18n.translate(
+  'xpack.alertingV2.actionPolicies.universalRulesOnlyCalloutBody',
   {
     defaultMessage:
       'Action policies only apply to alerts from Universal rules and external alerts.',
@@ -143,14 +146,14 @@ export const ActionPoliciesListHeader = ({
       <AppHeader
         sticky={false}
         title={ACTION_POLICIES_LIST_PAGE_TITLE}
-        badges={[esqlRulesOnlyBadge, experimentalBadge]}
+        badges={[universalRulesOnlyBadge, experimentalBadge]}
         spacing="bleed"
         menu={headerMenu}
       />
       <EuiSpacer size="m" />
-      <EsqlRulesOnlyCallout
+      <UniversalRulesOnlyCallout
         appId={ALERTING_V2_ACTION_POLICIES_APP_ID}
-        description={ESQL_RULES_ONLY_CALLOUT_BODY}
+        description={UNIVERSAL_RULES_ONLY_CALLOUT_BODY}
       />
       {canWrite && <ActionPoliciesLicenseCallout />}
     </>

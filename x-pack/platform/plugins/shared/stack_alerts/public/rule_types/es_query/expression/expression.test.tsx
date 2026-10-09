@@ -268,7 +268,7 @@ describe('EsQueryRuleTypeExpression', () => {
   test('should render options by default', () => {
     setup({} as EsQueryRuleParams<SearchType.esQuery>);
     expect(screen.getByTestId('queryFormTypeChooserTitle')).toBeInTheDocument();
-    expect(screen.getByTestId('esQueryEsqlRulesBanner')).toBeInTheDocument();
+    expect(screen.getByTestId('esQueryUniversalRulesBanner')).toBeInTheDocument();
     expect(screen.getByTestId('queryFormType_searchSource')).toBeInTheDocument();
     expect(screen.getByTestId('queryFormType_esQuery')).toBeInTheDocument();
     expect(screen.getByTestId('queryFormType_esqlQuery')).toBeInTheDocument();
@@ -294,8 +294,8 @@ describe('EsQueryRuleTypeExpression', () => {
     });
     expect(screen.getByTestId('queryJsonEditor')).toBeInTheDocument();
     expect(screen.getByTestId('selectIndexExpression')).toBeInTheDocument();
-    expect(screen.getByTestId('esQueryEsqlRulesBanner')).toBeInTheDocument();
-    expect(screen.getAllByTestId('esQueryEsqlRulesBannerLink')[0]).toHaveAttribute(
+    expect(screen.getByTestId('esQueryUniversalRulesBanner')).toBeInTheDocument();
+    expect(screen.getAllByTestId('esQueryUniversalRulesBannerLink')[0]).toHaveAttribute(
       'href',
       '/app/management/alertingV2/rules'
     );
@@ -316,7 +316,7 @@ describe('EsQueryRuleTypeExpression', () => {
       expect(screen.queryByTestId('queryFormTypeChooserTitle')).not.toBeInTheDocument();
     });
     expect(screen.getByTestId('selectDataViewExpression')).toBeInTheDocument();
-    expect(screen.getByTestId('esQueryEsqlRulesBanner')).toBeInTheDocument();
+    expect(screen.getByTestId('esQueryUniversalRulesBanner')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('queryFormTypeChooserCancel'));
 
@@ -334,7 +334,7 @@ describe('EsQueryRuleTypeExpression', () => {
       expect(screen.queryByTestId('queryFormTypeChooserTitle')).not.toBeInTheDocument();
     });
     expect(screen.getByTestId('queryEsqlEditor')).toBeInTheDocument();
-    expect(screen.getByTestId('esQueryEsqlRulesBanner')).toBeInTheDocument();
+    expect(screen.getByTestId('esQueryUniversalRulesBanner')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('queryFormTypeChooserCancel'));
 
@@ -352,7 +352,7 @@ describe('EsQueryRuleTypeExpression', () => {
     });
     expect(screen.queryByTestId('queryFormTypeChooserCancel')).not.toBeInTheDocument();
     expect(screen.getByTestId('selectIndexExpression')).toBeInTheDocument();
-    expect(screen.getByTestId('esQueryEsqlRulesBanner')).toBeInTheDocument();
+    expect(screen.getByTestId('esQueryUniversalRulesBanner')).toBeInTheDocument();
   });
 
   test('should not render the Universal rules banner when editing a rule', async () => {
@@ -361,7 +361,7 @@ describe('EsQueryRuleTypeExpression', () => {
     await waitFor(() => {
       expect(screen.getByTestId('selectIndexExpression')).toBeInTheDocument();
     });
-    expect(screen.queryByTestId('esQueryEsqlRulesBanner')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('esQueryUniversalRulesBanner')).not.toBeInTheDocument();
   });
 
   test('should link the Universal rules banner to the host-provided Universal rules tab', async () => {
@@ -370,9 +370,9 @@ describe('EsQueryRuleTypeExpression', () => {
     ]);
 
     await waitFor(() => {
-      expect(screen.getByTestId('esQueryEsqlRulesBanner')).toBeInTheDocument();
+      expect(screen.getByTestId('esQueryUniversalRulesBanner')).toBeInTheDocument();
     });
-    expect(screen.getAllByTestId('esQueryEsqlRulesBannerLink')[0]).toHaveAttribute(
+    expect(screen.getAllByTestId('esQueryUniversalRulesBannerLink')[0]).toHaveAttribute(
       'href',
       '/obs/rules/v2'
     );
@@ -385,7 +385,7 @@ describe('EsQueryRuleTypeExpression', () => {
     await waitFor(() => {
       expect(screen.getByTestId('selectIndexExpression')).toBeInTheDocument();
     });
-    expect(screen.queryByTestId('esQueryEsqlRulesBanner')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('esQueryUniversalRulesBanner')).not.toBeInTheDocument();
   });
 
   test('should render KQL and Lucene view without the form type chooser', async () => {

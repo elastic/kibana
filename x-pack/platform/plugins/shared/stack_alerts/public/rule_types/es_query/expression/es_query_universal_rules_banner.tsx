@@ -13,16 +13,16 @@ import { ALERTING_V2_RULES_BASE_PATH, ALERTING_V2_RULES_TAB_ID } from '@kbn/aler
 import { canAccessAlertingV2Rules } from '@kbn/alerting-v2-utils';
 import { useTriggerUiActionServices } from '../util';
 
-const BANNER_TITLE = i18n.translate('xpack.stackAlerts.esQuery.ui.esqlRulesBanner.title', {
+const BANNER_TITLE = i18n.translate('xpack.stackAlerts.esQuery.ui.universalRulesBanner.title', {
   defaultMessage: 'Looking for Universal rules?',
 });
 
 const UNIVERSAL_RULES_LINK_LABEL = i18n.translate(
-  'xpack.stackAlerts.esQuery.ui.esqlRulesBanner.universalRulesLinkLabel',
+  'xpack.stackAlerts.esQuery.ui.universalRulesBanner.universalRulesLinkLabel',
   { defaultMessage: 'Universal rules' }
 );
 
-export const EsQueryEsqlRulesBanner = () => {
+export const EsQueryUniversalRulesBanner = () => {
   const services = useTriggerUiActionServices();
   const { application, http, tabs } = services;
 
@@ -40,11 +40,11 @@ export const EsQueryEsqlRulesBanner = () => {
         announceOnMount
         title={BANNER_TITLE}
         iconType="info"
-        data-test-subj="esQueryEsqlRulesBanner"
+        data-test-subj="esQueryUniversalRulesBanner"
       >
         <p>
           <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.esqlRulesBanner.body"
+            id="xpack.stackAlerts.esQuery.ui.universalRulesBanner.body"
             defaultMessage="ES Query rules are part of Classic rules. Try {universalRulesLink} for the newer ES|QL-based experience."
             values={{
               universalRulesLink: (
@@ -54,7 +54,7 @@ export const EsQueryEsqlRulesBanner = () => {
                     event.preventDefault();
                     application.navigateToUrl(href);
                   }}
-                  data-test-subj="esQueryEsqlRulesBannerLink"
+                  data-test-subj="esQueryUniversalRulesBannerLink"
                 >
                   {UNIVERSAL_RULES_LINK_LABEL}
                 </EuiLink>

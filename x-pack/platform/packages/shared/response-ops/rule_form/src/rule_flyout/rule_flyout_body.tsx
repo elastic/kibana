@@ -21,7 +21,7 @@ import type { RuleFormStepId } from '../constants';
 import { useRuleFormHorizontalSteps, useRuleFormState } from '../hooks';
 import {
   DISABLED_ACTIONS_WARNING_TITLE,
-  STANDARD_RULES_BADGE_LABEL,
+  CLASSIC_RULES_BADGE_LABEL,
   RULE_FLYOUT_HEADER_CREATE_TITLE,
   RULE_FLYOUT_HEADER_EDIT_TITLE,
   RULE_FLYOUT_STEPS_ARIA_LABEL,
@@ -153,8 +153,8 @@ export const RuleFlyoutBody = ({
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiBadge color="hollow" data-test-subj="standardRulesBadge">
-          {STANDARD_RULES_BADGE_LABEL}
+        <EuiBadge color="hollow" data-test-subj="classicRulesBadge">
+          {CLASSIC_RULES_BADGE_LABEL}
         </EuiBadge>
         {isEdit ? (
           <RuleFlyoutEditTabs steps={steps} />

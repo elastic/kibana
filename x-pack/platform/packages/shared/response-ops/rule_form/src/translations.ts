@@ -687,8 +687,8 @@ export const RULE_FORM_RETURN_TITLE = i18n.translate('responseOpsRuleForm.ruleFo
   defaultMessage: 'Return',
 });
 
-export const STANDARD_RULES_BADGE_LABEL = i18n.translate(
-  'responseOpsRuleForm.ruleForm.standardRulesBadgeLabel',
+export const CLASSIC_RULES_BADGE_LABEL = i18n.translate(
+  'responseOpsRuleForm.ruleForm.classicRulesBadgeLabel',
   { defaultMessage: 'Classic rules' }
 );
 

@@ -354,13 +354,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   const badges: AppHeaderBadge[] = [
     {
-      label: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.standardRulesBadge', {
-        defaultMessage: 'Classic rules',
-      }),
-      color: 'hollow',
-      'data-test-subj': 'standardRulesBadge',
-    },
-    {
       label:
         rule.executionStatus.status.charAt(0).toUpperCase() + rule.executionStatus.status.slice(1),
       color: statusColor === 'subdued' ? 'default' : statusColor,
@@ -370,6 +363,13 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
       label: rule.enabled ? ENABLED_LABEL : DISABLED_LABEL,
       color: rule.enabled ? 'success' : 'default',
       'data-test-subj': 'ruleEnabledBadge',
+    },
+    {
+      label: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.classicRulesBadge', {
+        defaultMessage: 'Classic rules',
+      }),
+      color: 'hollow',
+      'data-test-subj': 'classicRulesBadge',
     },
     ...rule.tags.map((tag): AppHeaderBadge => ({ label: tag, color: 'hollow' })),
   ];

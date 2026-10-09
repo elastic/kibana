@@ -22,7 +22,7 @@ import { useRuleFormScreenContext, useRuleFormState, useRuleFormSteps } from '..
 import {
   DISABLED_ACTIONS_WARNING_TITLE,
   RULE_FORM_RETURN_TITLE,
-  STANDARD_RULES_BADGE_LABEL,
+  CLASSIC_RULES_BADGE_LABEL,
 } from '../translations';
 import type { RuleFormData } from '../types';
 import { RulePageFooter } from './rule_page_footer';
@@ -120,8 +120,8 @@ export const RulePage = (props: RulePageProps) => {
             <EuiFlexItem grow={false} className="eui-fullWidth">
               <RulePageNameInput />
               <EuiSpacer size="s" />
-              <EuiBadge color="hollow" data-test-subj="standardRulesBadge">
-                {STANDARD_RULES_BADGE_LABEL}
+              <EuiBadge color="hollow" data-test-subj="classicRulesBadge">
+                {CLASSIC_RULES_BADGE_LABEL}
               </EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>

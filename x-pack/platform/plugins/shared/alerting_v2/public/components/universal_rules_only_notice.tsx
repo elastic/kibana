@@ -12,19 +12,19 @@ import { ALERTING_V2_SECTION_ID } from '@kbn/alerting-v2-constants';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-export const esqlRulesOnlyBadge: AppHeaderBadge = {
-  label: i18n.translate('xpack.alertingV2.esqlRulesOnly.badgeLabel', {
+export const universalRulesOnlyBadge: AppHeaderBadge = {
+  label: i18n.translate('xpack.alertingV2.universalRulesOnly.badgeLabel', {
     defaultMessage: 'Universal rules only',
   }),
   color: 'hollow',
-  'data-test-subj': 'esqlRulesOnlyBadge',
+  'data-test-subj': 'universalRulesOnlyBadge',
 };
 
-const CALLOUT_TITLE = i18n.translate('xpack.alertingV2.esqlRulesOnly.calloutTitle', {
+const CALLOUT_TITLE = i18n.translate('xpack.alertingV2.universalRulesOnly.calloutTitle', {
   defaultMessage: 'Universal rules only',
 });
 
-export const EsqlRulesOnlyCallout = ({
+export const UniversalRulesOnlyCallout = ({
   appId,
   description,
 }: {
@@ -32,7 +32,7 @@ export const EsqlRulesOnlyCallout = ({
   description: string;
 }) => {
   const [isDismissed, setIsDismissed] = useLocalStorage<boolean>(
-    `${ALERTING_V2_SECTION_ID}.${appId}.esqlRulesOnlyCalloutDismissed`,
+    `${ALERTING_V2_SECTION_ID}.${appId}.universalRulesOnlyCalloutDismissed`,
     false
   );
 
@@ -46,7 +46,7 @@ export const EsqlRulesOnlyCallout = ({
         announceOnMount
         title={CALLOUT_TITLE}
         iconType="info"
-        data-test-subj="esqlRulesOnlyCallout"
+        data-test-subj="universalRulesOnlyCallout"
         onDismiss={() => setIsDismissed(true)}
       >
         <p>{description}</p>
