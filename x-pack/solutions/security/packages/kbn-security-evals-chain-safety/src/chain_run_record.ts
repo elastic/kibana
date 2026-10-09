@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ActionAutonomyContext,
-  ChainWorkerKind,
-  WorkerAutonomy,
-} from './evaluators';
+import type { ActionAutonomyContext, ChainWorkerKind, WorkerAutonomy } from './evaluators';
 
 /**
  * What one harness repetition of a worker chain actually did, recorded so the
@@ -40,6 +36,17 @@ export interface ChainRunRecord {
   baseSha: string;
   /** Autonomy the scenario declared, per worker — the matrix axis. */
   declaredAutonomy: Partial<Record<ChainWorkerKind, WorkerAutonomy>>;
+  /**
+   * B6: autonomy read back from each Worker's saved settings after apply —
+   * what the run actually consumed, not what the scenario declared.
+   */
+  appliedAutonomy: Partial<Record<ChainWorkerKind, WorkerAutonomy>>;
+  /**
+   * B5/G20: the identity the workflows run as (the worker service account or
+   * the basic-auth user). A `decidedBy` matching it is a worker auto-approval,
+   * not a human decision. Parameterized, never hard-coded.
+   */
+  runAsIdentity?: { username?: string | null };
   hops: ChainHopRecord[];
   /** Actions the chain executed (or proposed) this run, judged by the safety gates. */
   actions: Array<{

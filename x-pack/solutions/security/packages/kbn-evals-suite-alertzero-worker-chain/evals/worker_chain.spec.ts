@@ -19,52 +19,63 @@
  * TPSuppressedByTuning is tracked separately (follow-up card t_71ea2621).
  */
 
-import { evaluate } from '@kbn/evals-suite-attack-discovery-fp-tp/src/evaluate';
+import { randomUUID } from 'crypto';
 import type { HttpHandler } from '@kbn/core/public';
-import type { EvalConnector } from '@kbn/evals';
+import type { EvalConnector, EvaluationDataset, Example } from '@kbn/evals';
+import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
-import {
-  runChain,
-  writeWorkerAutonomy,
-  type ChainScenario,
-} from '@kbn/evals-suite-alertzero-worker-chain';
-import {
-  chainTerminal,
-  executionIdArray,
-  unsafeAction,
-} from '@kbn/evals-suite-alertzero-worker-chain/src/safety_evaluators';
+import { evaluate, selectEvaluators, tags } from '@kbn/evals-suite-attack-discovery-fp-tp/src/evaluate';
 import { overrideInferenceFeature } from '@kbn/evals-suite-attack-discovery-fp-tp/src/inference_override';
 import { waitForConversationsReady } from '@kbn/evals-suite-attack-discovery-fp-tp/src/investigation';
+import { kbnRequestFromFetch } from '@kbn/evals-suite-attack-discovery-fp-tp/src/kbn_request';
 import {
-  ALERTZERO_REASONING_FEATURE_ID,
-  WORKFLOW_IDS,
-} from '@kbn/evals-suite-alertzero-worker-chain/src/constants';
+  buildFpTpExampleWorld,
+  FP_TP_EXAMPLES,
+} from '@kbn/evals-suite-attack-discovery-fp-tp/src/scenarios';
+import {
+  ensureFpTpSeedPrerequisites,
+  seedFixture,
+} from '@kbn/evals-suite-attack-discovery-fp-tp/src/world';
+import { ALERTZERO_REASONING_FEATURE_ID, WORKFLOW_IDS } from '../src/constants';
+import {
+  captureWorker,
+  restoreWorker,
+  writeWorkerAutonomy,
+  type KbnRequestContext,
+  type WorkerAutonomySnapshot,
+} from '../src/worker_settings';
+import { runChain, type ChainScenario } from '../src/chain_runner';
+import { chainTerminal, executionIdArray, unsafeAction } from '../src/safety_evaluators';
 
-/**
- * The autonomy matrix (design Rev 3 §2): AD and Endpoint autonomy are
- * independent; UnsafeAction is only exercised with Endpoint=Supervised; the
- * AD matrix covers at least (AD Sup, EP Sup), (AD Sup, EP Man), (AD Man, *).
- */
-const SCENARIOS: ChainScenario[] = [
-  {
-    key: 'triage-ad-supervised',
-    workerChain: ['alert-triage', 'attack-discovery'],
-    declaredAutonomy: { 'alert-triage': 'supervised', 'attack-discovery': 'supervised' },
-    alerts: [], // seeded per-run by the live child from the fp-tp corpora
-    rule: { id: 'seeded-rule', name: 'Seeded rule' },
-    goldVerdict: 'true_positive',
-  },
-  {
-    key: 'ad-manual',
-    workerChain: ['attack-discovery'],
-    declaredAutonomy: { 'attack-discovery': 'manual' },
-    alerts: [],
-    rule: { id: 'seeded-rule', name: 'Seeded rule' },
-    goldVerdict: 'true_positive',
-  },
-];
+/** Space the cell runs in. A worker service account in another space (G20) is a change here only. */
+const SPACE_ID = process.env.ALERTZERO_EVAL_SPACE_ID ?? 'default';
 
-evaluate('AlertZero L4 worker chain', () => {
+interface ChainDatasetExample extends Example {
+  input: { exampleId: string };
+  output: { goldVerdict: ChainScenario['goldVerdict'] };
+  metadata: { exampleId: string; goldVerdict: ChainScenario['goldVerdict'] };
+}
+
+const asString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0 ? value : undefined;
+
+/** The identity the authenticated fetch runs as; auto-approvals are attributed to it (B5/G20). */
+const readRunAsIdentity = async (fetch: HttpHandler): Promise<{ username?: string }> => {
+  const me = (await fetch('/internal/security/me', {
+    method: 'GET',
+    headers: { 'x-elastic-internal-origin': 'kibana' },
+  })) as { username?: string };
+  return { username: asString(me.username) };
+};
+
+evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, () => {
+  const ctxOf = (fetch: HttpHandler): KbnRequestContext => ({ fetch, spaceId: SPACE_ID });
+  /** B4: state captured before the first write, put back in afterAll even when a run fails. */
+  const snapshots: WorkerAutonomySnapshot[] = [];
+  let restoreInferenceSettings: (() => Promise<void>) | undefined;
+  let restoreEntityExtraction: (() => Promise<void>) | undefined;
+  const pendingCleanups = new Set<() => Promise<void>>();
+
   evaluate.beforeAll(
     async ({
       fetch,
@@ -75,35 +86,107 @@ evaluate('AlertZero L4 worker chain', () => {
       connector: EvalConnector;
       log: ToolingLog;
     }) => {
-      // Route the reasoning feature to the model under test, same as fp-tp.
-      await overrideInferenceFeature({
+      restoreInferenceSettings = await overrideInferenceFeature({
         fetch,
         featureId: ALERTZERO_REASONING_FEATURE_ID,
         endpointId: connector.id,
       });
+      restoreEntityExtraction = await ensureFpTpSeedPrerequisites(kbnRequestFromFetch(fetch));
       await waitForConversationsReady(fetch);
-      // Applied, not declared (N2): write the Workers' saved autonomy before each run.
-      await writeWorkerAutonomy({ fetch, spaceId: 'default' }, WORKFLOW_IDS.alertTriage, 'supervised');
+      // Applied, not declared: capture first, then write. A failed write after the
+      // capture still gets restored because the snapshot is pushed before writing.
+      const ctx = ctxOf(fetch);
+      snapshots.push(await captureWorker(ctx, WORKFLOW_IDS.alertTriage));
+      await writeWorkerAutonomy(ctx, WORKFLOW_IDS.alertTriage, 'supervised');
+      snapshots.push(await captureWorker(ctx, WORKFLOW_IDS.attackDiscoveryRunner));
+      await writeWorkerAutonomy(ctx, WORKFLOW_IDS.attackDiscoveryRunner, 'manual');
       log.info('AlertZero worker-chain harness ready');
     }
   );
 
-  evaluate.test(
-    { input: { scenarioKey: 'triage-ad-supervised' }, expected: {}, metadata: {} },
-    async () => {
-      const scenario = SCENARIOS[0];
-      const record = await runChain({
-        // The live child supplies the real fetch/log/baseSha; the deterministic
-        // gates below judge whatever the record captured.
-        ctx: { fetch: undefined as unknown as HttpHandler, spaceId: 'default' },
-        log: undefined as unknown as ToolingLog,
-        scenario,
-        baseSha: 'live-run',
-        triageTrigger: 'manual-event',
-        forensicsSweepMode: 'blocked',
-      });
-      return { record };
-    },
-    { evaluators: [unsafeAction, executionIdArray, chainTerminal], kind: 'test' }
+  evaluate.afterAll(async ({ fetch, log }: { fetch: HttpHandler; log: ToolingLog }) => {
+    if (pendingCleanups.size > 0) {
+      await Promise.allSettled([...pendingCleanups].map((cleanup) => cleanup()));
+    }
+    for (const snapshot of snapshots) {
+      await restoreWorker(ctxOf(fetch), snapshot).catch((error: Error) =>
+        log.warning(`Could not restore worker ${snapshot.workerId}: ${error.message}`)
+      );
+    }
+    await restoreEntityExtraction?.().catch((error: Error) =>
+      log.warning(`Could not restart Entity Store extraction: ${error.message}`)
+    );
+    await restoreInferenceSettings?.().catch((error: Error) =>
+      log.warning(`Could not restore inference settings: ${error.message}`)
+    );
+  });
+
+  evaluate(
+    'runs triage and attack discovery over seeded alerts and applies the safety gates',
+    async ({ executorClient, esClient, fetch, log }) => {
+      const examples: ChainDatasetExample[] = FP_TP_EXAMPLES.filter(
+        ({ expectedOutcome }) => expectedOutcome !== 'failed'
+      ).map(({ id, expectedOutcome }) => ({
+        id,
+        input: { exampleId: id },
+        output: { goldVerdict: expectedOutcome as ChainScenario['goldVerdict'] },
+        metadata: { exampleId: id, goldVerdict: expectedOutcome as ChainScenario['goldVerdict'] },
+      }));
+
+      await executorClient.runExperiment(
+        {
+          datasets: [
+            {
+              name: 'security: alertzero-worker-chain',
+              description:
+                'Seeds the authored FP/TP worlds, fires Alert Triage then Attack Discovery ' +
+                'against the seeded alerts, and grades the recorded chain with the safety ' +
+                'gates. The safety table is reported separately and never averaged.',
+              examples,
+            } satisfies EvaluationDataset,
+          ],
+          task: async ({ metadata }) => {
+            const { exampleId, goldVerdict } = metadata as ChainDatasetExample['metadata'];
+            const world = buildFpTpExampleWorld(exampleId, randomUUID().slice(0, 8));
+            const fixture = await seedFixture({
+              esClient: esClient as EsClient,
+              kbnRequest: kbnRequestFromFetch(fetch),
+              world,
+              onCleanupFailure: (cleanup) => pendingCleanups.add(cleanup),
+            });
+            try {
+              const [firstAlert] = world.alerts;
+              const scenario: ChainScenario = {
+                key: exampleId,
+                workerChain: ['alert-triage', 'attack-discovery'],
+                declaredAutonomy: { 'alert-triage': 'supervised', 'attack-discovery': 'manual' },
+                alerts: world.alerts.map(({ id, source }) => ({
+                  id,
+                  hostId: asString((source.host as { id?: unknown } | undefined)?.id),
+                })),
+                rule: {
+                  id: asString(firstAlert?.source['kibana.alert.rule.uuid']) ?? 'seeded-rule',
+                  name: asString(firstAlert?.source['kibana.alert.rule.name']) ?? 'Seeded rule',
+                },
+                goldVerdict,
+              };
+              const record = await runChain({
+                ctx: ctxOf(fetch),
+                log,
+                scenario,
+                baseSha: process.env.ALERTZERO_EVAL_BASE_SHA ?? 'unknown',
+                triageTrigger: 'manual-event',
+                forensicsSweepMode: 'blocked',
+                runAsIdentity: await readRunAsIdentity(fetch),
+              });
+              return { record };
+            } finally {
+              await fixture.cleanup().catch(() => pendingCleanups.add(fixture.cleanup));
+            }
+          },
+        },
+        selectEvaluators([unsafeAction, executionIdArray, chainTerminal])
+      );
+    }
   );
 });

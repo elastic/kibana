@@ -11,12 +11,12 @@
     "**/*.ts"
   ],
   "exclude": [
-    "target/**/*",
-    "evals/**/*"
+    "target/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/evals",
+    "@kbn/evals-suite-attack-discovery-fp-tp",
     "@kbn/security-evals-chain-safety",
     "@kbn/tooling-log",
     "@kbn/workflows"

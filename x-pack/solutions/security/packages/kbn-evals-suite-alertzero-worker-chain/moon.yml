@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/alertzero-common'
   - '@kbn/core'
   - '@kbn/evals'
+  - '@kbn/evals-suite-attack-discovery-fp-tp'
   - '@kbn/scout'
   - '@kbn/security-evals-chain-safety'
   - '@kbn/security-evals-workflow-traces'

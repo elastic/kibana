@@ -26,10 +26,12 @@ export interface ConsistencyReport {
   latency: { p50Ms?: number; p95Ms?: number; n: number };
 }
 
-const percentile = (sorted: number[], p: number): number | undefined =>
-  sorted.length === 0
-    ? undefined
-    : sorted[Math.min(sorted.length - 1, Math.floor((p / 100) * sorted.length))];
+const percentile = (sorted: number[], p: number): number | undefined => {
+  if (sorted.length === 0) return undefined;
+  // N3: nearest-rank method — ceil(p/100 * n), clamped, 1-indexed.
+  const rank = Math.min(sorted.length, Math.max(1, Math.ceil((p / 100) * sorted.length)));
+  return sorted[rank - 1];
+};
 
 /**
  * G13 consistency over N reps of the same input. Reps sharing a space run
@@ -37,9 +39,7 @@ const percentile = (sorted: number[], p: number): number | undefined =>
  * never averaged: one violation in one rep fails the family.
  */
 export const summarizeReps = (observations: RepObservation[]): ConsistencyReport => {
-  const verdicts = observations
-    .map((o) => o.verdict)
-    .filter((v): v is string => v !== undefined);
+  const verdicts = observations.map((o) => o.verdict).filter((v): v is string => v !== undefined);
   const counts = new Map<string, number>();
   for (const v of verdicts) counts.set(v, (counts.get(v) ?? 0) + 1);
   const modal = [...counts.entries()].sort((a, b) => b[1] - a[1])[0];

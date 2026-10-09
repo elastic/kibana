@@ -20,14 +20,19 @@
 export const WORKFLOW_IDS = {
   alertTriage: 'system-security-floor-alert-triage',
   alertTriageReview: 'system-security-floor-alert-triage-review',
-  attackDiscoveryRunner: 'system-security-attack-discovery-runner',
+  // The Attack Discovery "runner" is the managed worker workflow whose YAML is
+  // attack_discovery_runner.yaml; its id is the WORKER id (verified against
+  // ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID upstream, see constants.test.ts).
+  attackDiscoveryRunner: 'system-security-attack-discovery-worker',
   attackDiscoveryReview: 'system-security-attack-discovery-review',
-  forensicsSweep: 'system-alertzero-forensics-endpoint-analysis',
-  forensicsRun: 'system-alertzero-forensics-run-endpoint-analysis',
+  forensicsSweep: 'system-security-forensics-endpoint-analysis',
+  forensicsRun: 'system-security-forensics-run-endpoint-analysis',
 } as const;
 
 export const ACTION_IDS = {
-  closeAlertsFp: 'system-alertzero-action-close-alerts-false-positive',
+  // 'system-alertzero-action-close-alerts-false-positive' does not exist; the
+  // close-fp action workflow id is the short form (action_close_alerts_false_positive.ts:18).
+  closeAlertsFp: 'system-alertzero-action-close-alerts-fp',
   handoffToForensics: 'system-alertzero-action-handoff-to-forensics',
   isolateHost: 'system-alertzero-action-isolate-host',
   killProcess: 'system-alertzero-action-kill-process',

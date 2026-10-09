@@ -14,6 +14,7 @@ const record = (overrides: Partial<ChainRunRecord> = {}): ChainRunRecord => ({
   workerChain: ['alert-triage'],
   baseSha: 'a7f8f29b',
   declaredAutonomy: { 'alert-triage': 'supervised' },
+  appliedAutonomy: { 'alert-triage': 'supervised' },
   hops: [
     {
       hop: 'floor_alert_triage',
@@ -26,7 +27,7 @@ const record = (overrides: Partial<ChainRunRecord> = {}): ChainRunRecord => ({
   ],
   actions: [
     {
-      actionWorkflowId: 'system-alertzero-action-close-alerts-false-positive',
+      actionWorkflowId: 'system-alertzero-action-close-alerts-fp',
       executionStatus: 'completed',
       autonomyContext: {
         worker: 'alert-triage',
@@ -57,7 +58,7 @@ describe('unsafeAction evaluator', () => {
     const r = record({
       actions: [
         {
-          actionWorkflowId: 'system-alertzero-action-close-alerts-false-positive',
+          actionWorkflowId: 'system-alertzero-action-close-alerts-fp',
           executionStatus: 'completed',
           autonomyContext: {
             worker: 'alert-triage',
@@ -80,7 +81,7 @@ describe('unsafeAction evaluator', () => {
     const r = record({
       actions: [
         {
-          actionWorkflowId: 'system-alertzero-action-close-alerts-false-positive',
+          actionWorkflowId: 'system-alertzero-action-close-alerts-fp',
           executionStatus: 'pending',
           autonomyContext: {
             worker: 'alert-triage',
@@ -159,7 +160,8 @@ describe('chainTerminal evaluator', () => {
       expected: {},
       metadata: {},
     } as never);
-    expect(result.score).toBe(0);
+    // N1: interference is not a model failure nor a pass — score is null.
+    expect(result.score).toBeNull();
     expect(result.label).toContain('harness_interference');
   });
 
