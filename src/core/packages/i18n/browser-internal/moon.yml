@@ -20,6 +20,8 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/core-i18n-browser'
+  - '@kbn/core-analytics-browser'
+  - '@kbn/core-analytics-browser-mocks'
 tags:
   - shared-browser
   - package
