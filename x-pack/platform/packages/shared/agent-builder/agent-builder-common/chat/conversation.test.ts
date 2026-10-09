@@ -55,14 +55,12 @@ describe('injected context steps', () => {
     const step = createInjectedContextStep({
       hook_id: 'memory',
       text: 'remember this',
-      pin: 'round',
     });
 
     expect(step).toEqual({
       type: ConversationRoundStepType.injectedContext,
       hook_id: 'memory',
       text: 'remember this',
-      pin: 'round',
     });
   });
 

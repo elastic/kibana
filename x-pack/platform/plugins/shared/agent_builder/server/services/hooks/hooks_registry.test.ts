@@ -176,6 +176,33 @@ describe('registerCycleHook', () => {
     );
   });
 
+  it('stores the agents a hook is bound to', () => {
+    const registry = createHookRegistry();
+    registry.registerCycleHook(definition('bound', { boundAgents: ['nightshift.investigator'] }));
+    registry.registerCycleHook(definition('global'));
+
+    expect(registry.getCycleHooks().map((hook) => hook.boundAgents)).toEqual([
+      ['nightshift.investigator'],
+      undefined,
+    ]);
+  });
+
+  it('rejects an empty boundAgents list', () => {
+    const registry = createHookRegistry();
+
+    expect(() => registry.registerCycleHook(definition('bad', { boundAgents: [] }))).toThrow(
+      /boundAgents must list at least one agent id/
+    );
+  });
+
+  it.each([[''], ['ok', '']])('rejects boundAgents %j', (...boundAgents: string[]) => {
+    const registry = createHookRegistry();
+
+    expect(() => registry.registerCycleHook(definition('bad', { boundAgents }))).toThrow(
+      /boundAgents must contain non-empty agent ids/
+    );
+  });
+
   it('accepts the string triggers and a positive everyCycles', () => {
     const registry = createHookRegistry();
     registry.registerCycleHook(definition('a', { when: 'first' }));

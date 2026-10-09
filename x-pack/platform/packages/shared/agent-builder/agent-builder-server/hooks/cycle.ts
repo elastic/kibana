@@ -25,6 +25,9 @@ import type { InternalSkillDefinition } from '../skills';
 export const DEFAULT_CYCLE_HOOK_TIMEOUT_MS = 10_000;
 export const MAX_CYCLE_HOOK_TIMEOUT_MS = 60_000;
 
+/** The id a built-in agent is registered with. */
+export type AgentId = string;
+
 /**
  * When a cycle hook is called: once per round before the first model call, before every research
  * model call, or before every n-th cycle (5, 10, 15, ... for `{ everyCycles: 5 }`).
@@ -39,6 +42,8 @@ export interface CycleHookDefinition {
   id: string;
   /** When the handler is called. Defaults to every research cycle. */
   when?: CycleTrigger;
+  /** Only run for these agents. Defaults to every agent. */
+  boundAgents?: readonly AgentId[];
   /** Wall time per call, in ms. Defaults to DEFAULT_CYCLE_HOOK_TIMEOUT_MS; at most MAX_CYCLE_HOOK_TIMEOUT_MS. */
   timeout?: number;
   /** Called once per execution. Returns the handler for that execution, or `undefined` to sit it out. */

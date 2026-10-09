@@ -284,8 +284,6 @@ export interface InjectedContextStepData {
   text: string;
   /** For the UI and analytics; never rendered to the model. */
   data?: JsonObject;
-  /** Keeps the text verbatim for the rest of the round once a compaction covers its cycle. */
-  pin?: 'round';
 }
 
 export type InjectedContextStep = ConversationRoundStepMixin<

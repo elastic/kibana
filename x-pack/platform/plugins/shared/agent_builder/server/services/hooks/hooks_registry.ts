@@ -25,9 +25,22 @@ export interface HookRegistry {
   getCycleHooks(): CycleHookDefinition[];
 }
 
-const validateCycleHookDefinition = ({ id, when, timeout }: CycleHookDefinition): void => {
+const validateCycleHookDefinition = ({
+  id,
+  when,
+  boundAgents,
+  timeout,
+}: CycleHookDefinition): void => {
   if (!id) {
     throw new Error('Cycle hook id must not be empty.');
+  }
+  if (boundAgents !== undefined) {
+    if (boundAgents.length === 0) {
+      throw new Error(`Cycle hook "${id}": boundAgents must list at least one agent id.`);
+    }
+    if (boundAgents.some((agentId) => typeof agentId !== 'string' || agentId.length === 0)) {
+      throw new Error(`Cycle hook "${id}": boundAgents must contain non-empty agent ids.`);
+    }
   }
   if (typeof when === 'string') {
     if (when !== 'first' && when !== 'every_cycle') {
