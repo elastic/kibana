@@ -329,6 +329,12 @@ export const proposalFiltersSchema = z.object({
   /** Drops proposals that were replaced, so a chain shows only its live head. */
   excludeSuperseded: z.stringbool().default(false),
   /**
+   * Drops superseded proposals that were never decided — earlier revisions, whose successor
+   * carries the same ask — while keeping a decided one, such as a failed attempt that a retry
+   * replaced, so the history still shows what ran and how it ended.
+   */
+  excludeUndecidedSuperseded: z.stringbool().default(false),
+  /**
    * Drops proposals whose deadline has passed, by date rather than by status.
    * Distinct from `status: 'expired'`: between the deadline passing and the
    * gate workflow settling the record there is task lag during which it still

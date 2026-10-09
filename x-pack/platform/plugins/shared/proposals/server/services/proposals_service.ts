@@ -835,6 +835,7 @@ export class ProposalsService {
               {
                 status: 'pending',
                 excludeSuperseded: true,
+                excludeUndecidedSuperseded: false,
                 // Past its deadline a proposal awaits no decision, even before the gate settles it.
                 excludeExpired: true,
               },
@@ -1245,6 +1246,18 @@ const toFilterClauses = (
     // A superseded proposal is represented by its successor, so showing both
     // would put every retry of the same subject in the queue.
     filter.push({ bool: { must_not: { exists: { field: 'supersededBy' } } } });
+  }
+  if (filters.excludeUndecidedSuperseded) {
+    filter.push({
+      bool: {
+        must_not: {
+          bool: {
+            filter: [{ exists: { field: 'supersededBy' } }],
+            must_not: [{ exists: { field: 'decision' } }],
+          },
+        },
+      },
+    });
   }
   if (filters.excludeExpired) {
     // A proposal with no deadline never expires, so it has to survive the

@@ -168,6 +168,27 @@ describe('ProposedActionsSlot', () => {
     expect(screen.getByText('After-hours domain admin logins — fin-dc-01')).toBeInTheDocument();
   });
 
+  it('lists the retry above the failed attempts it replaced, though they share a createdAt', () => {
+    const failedFirst = {
+      ...decidedProposal,
+      id: 'failed-first',
+      status: 'failed' as const,
+      createdAt: '2024-01-01T10:00:00Z',
+      decidedAt: '2024-01-01T10:16:00Z',
+    };
+    const failedLast = { ...failedFirst, id: 'failed-last', decidedAt: '2024-01-01T10:50:00Z' };
+    const retry = { ...mockProposal, id: 'retry', createdAt: '2024-01-01T10:00:00Z' };
+    mockConversationProposalsPage([failedFirst, retry, failedLast]);
+    renderSlot();
+
+    const rows = screen.getAllByTestId(/^investigationFlyoutProposedAction-/);
+    expect(rows.map((row) => row.getAttribute('data-test-subj'))).toEqual([
+      'investigationFlyoutProposedAction-retry',
+      'investigationFlyoutProposedAction-failed-last',
+      'investigationFlyoutProposedAction-failed-first',
+    ]);
+  });
+
   it('renders proposals as direct siblings so the grouped first/last-child borders apply', () => {
     mockConversationProposalsPage([mockProposal, decidedProposal]);
 

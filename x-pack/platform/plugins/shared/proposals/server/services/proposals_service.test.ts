@@ -58,6 +58,7 @@ const baseDocument = (overrides: Partial<ProposalDocument> = {}): ProposalDocume
 /** The full query shape, so a test only states the filters it cares about. */
 const listQuery = (overrides: Partial<ListProposalsQuery> = {}): ListProposalsQuery => ({
   excludeSuperseded: false,
+  excludeUndecidedSuperseded: false,
   excludeExpired: false,
   size: 50,
   from: 0,
@@ -2281,6 +2282,29 @@ describe('ProposalsService', () => {
       const [[searchArgs]] = storage.search.mock.calls;
       expect(searchArgs.query.bool.filter).toEqual(
         expect.arrayContaining([{ bool: { must_not: { exists: { field: 'supersededBy' } } } }])
+      );
+    });
+
+    it('should keep a decided superseded proposal but drop an undecided one', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery({ excludeUndecidedSuperseded: true }), SPACE_ID, request);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          {
+            bool: {
+              must_not: {
+                bool: {
+                  filter: [{ exists: { field: 'supersededBy' } }],
+                  must_not: [{ exists: { field: 'decision' } }],
+                },
+              },
+            },
+          },
+        ])
       );
     });
 

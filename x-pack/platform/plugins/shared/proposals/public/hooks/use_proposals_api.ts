@@ -111,8 +111,9 @@ const nextConversationProposalsOffset = (
 /**
  * Every proposal on one conversation, decided or not — the investigation flyout's own proposal
  * history, as opposed to `usePendingProposals`'s cross-conversation "awaiting a human" queue.
- * Superseded rows are still dropped: a retried proposal's earlier attempts are not history worth
- * a card of their own, only the live head is.
+ * A failed attempt that a retry replaced stays, as a read-only row that shows how it ended;
+ * superseded rows that were never decided (earlier revisions) are dropped, since their
+ * successor carries the same ask.
  *
  * Paged rather than a single fixed-size read: the list API caps a page at
  * `MAX_PROPOSALS_PAGE_SIZE`, so an investigation with more proposals than that would otherwise
@@ -133,7 +134,7 @@ export const useConversationProposals = (
         version: PROPOSALS_API_VERSION,
         query: {
           conversationId,
-          excludeSuperseded: true,
+          excludeUndecidedSuperseded: true,
           size: MAX_PROPOSALS_PAGE_SIZE,
           from: pageParam ?? 0,
         },
