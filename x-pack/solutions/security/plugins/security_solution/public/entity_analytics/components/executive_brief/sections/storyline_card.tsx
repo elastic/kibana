@@ -30,7 +30,7 @@ import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyou
 import { FLYOUT_TYPE } from '../../../../common/lib/telemetry/events/flyout_v2/types';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { EntityBadge } from '../../entity_badge';
-import { EXECUTIVE_BRIEF_SCOPE_ID } from '../constants';
+import { BRIEF_CUT_ATTRIBUTE, EXECUTIVE_BRIEF_SCOPE_ID } from '../constants';
 import { TEST_IDS } from '../test_ids';
 import { useIsPrintMode } from '../components/brief_context';
 import { DecisionAccordion } from '../components/decision_accordion';
@@ -50,6 +50,8 @@ const CONFIDENCE_LABEL: Record<BriefConfidence, string> = {
   medium: 'Medium confidence',
   low: 'Low confidence',
 };
+
+const CUT = { [BRIEF_CUT_ATTRIBUTE]: '' };
 
 const ENTITY_ICON = {
   user: 'user',
@@ -219,35 +221,38 @@ export const StorylineCard: React.FC<StorylineCardProps> = ({
             </p>
           </EuiText>
           <EuiSpacer size="m" />
-          <StorylineGraph storyline={storyline} snapshot={snapshot} />
-          {isNewFlyoutEnabled && focal && (
-            <EuiButtonEmpty
-              size="xs"
-              iconType="external"
-              onClick={openGraphView}
-              data-test-subj="executiveBriefOpenGraph"
-            >
-              {'Open in graph view'}
-            </EuiButtonEmpty>
-          )}
+          <div {...CUT}>
+            <StorylineGraph storyline={storyline} snapshot={snapshot} />
+            {isNewFlyoutEnabled && focal && (
+              <EuiButtonEmpty
+                size="xs"
+                iconType="external"
+                onClick={openGraphView}
+                data-test-subj="executiveBriefOpenGraph"
+              >
+                {'Open in graph view'}
+              </EuiButtonEmpty>
+            )}
+          </div>
           <EuiSpacer size="m" />
-          <EuiTitle size="xxs">
-            <h5>{'Timeline'}</h5>
-          </EuiTitle>
-          <EuiSpacer size="s" />
+          <div {...CUT}>
+            <EuiTitle size="xxs">
+              <h5>{'Timeline'}</h5>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+          </div>
           <StorylineSteps storyline={storyline} snapshot={snapshot} />
           <EuiSpacer size="m" />
-          <ResponseRow response={storyline.response} />
+          <div {...CUT}>
+            <ResponseRow response={storyline.response} />
+          </div>
           {decisions.length > 0 && (
             <>
               <EuiSpacer size="m" />
               {decisions.map(({ decision, index }) => (
-                <DecisionAccordion
-                  key={`${decision.action}-${index}`}
-                  decision={decision}
-                  index={index}
-                  inline
-                />
+                <div key={`${decision.action}-${index}`} {...CUT}>
+                  <DecisionAccordion decision={decision} index={index} inline />
+                </div>
               ))}
             </>
           )}

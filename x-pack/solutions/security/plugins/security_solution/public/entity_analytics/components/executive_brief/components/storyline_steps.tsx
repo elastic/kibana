@@ -22,6 +22,7 @@ import type {
   StoryEventType,
   Storyline,
 } from '../../../../../common/entity_analytics/executive_brief/types';
+import { BRIEF_CUT_ATTRIBUTE } from '../constants';
 import { getTacticName } from '../utils/resolve_evidence';
 import { EvidenceChip } from './evidence_chip';
 
@@ -63,7 +64,7 @@ export const StorylineSteps: React.FC<{ storyline: Storyline; snapshot: BriefSna
     }[color];
   };
 
-  const items: EuiTimelineItemProps[] = events.map((event) => ({
+  const items: EuiTimelineItemProps[] = events.map((event, eventIndex) => ({
     icon: (
       <EuiAvatar
         name={event.type.replace(/_/g, ' ')}
@@ -77,28 +78,30 @@ export const StorylineSteps: React.FC<{ storyline: Storyline; snapshot: BriefSna
     iconAriaLabel: event.type.replace(/_/g, ' '),
     verticalAlign: 'top',
     children: (
-      <EuiPanel
-        paddingSize="s"
-        hasBorder
-        data-test-subj={`executiveBriefEvent-${event.evidenceId}`}
-      >
-        <EuiText size="xs" color="subdued">
-          {formatTime(event.at)}{' '}
-          {event.tacticId && (
-            <EuiBadge color="hollow">{getTacticName(snapshot, event.tacticId)}</EuiBadge>
+      <div {...(eventIndex > 0 ? { [BRIEF_CUT_ATTRIBUTE]: '' } : {})}>
+        <EuiPanel
+          paddingSize="s"
+          hasBorder
+          data-test-subj={`executiveBriefEvent-${event.evidenceId}`}
+        >
+          <EuiText size="xs" color="subdued">
+            {formatTime(event.at)}{' '}
+            {event.tacticId && (
+              <EuiBadge color="hollow">{getTacticName(snapshot, event.tacticId)}</EuiBadge>
+            )}
+          </EuiText>
+          <EuiText size="s">{event.summary}</EuiText>
+          {event.sourceEvidenceIds.length > 0 && (
+            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+              {event.sourceEvidenceIds.map((id) => (
+                <EuiFlexItem grow={false} key={id}>
+                  <EvidenceChip id={id} />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
           )}
-        </EuiText>
-        <EuiText size="s">{event.summary}</EuiText>
-        {event.sourceEvidenceIds.length > 0 && (
-          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-            {event.sourceEvidenceIds.map((id) => (
-              <EuiFlexItem grow={false} key={id}>
-                <EvidenceChip id={id} />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        )}
-      </EuiPanel>
+        </EuiPanel>
+      </div>
     ),
   }));
 

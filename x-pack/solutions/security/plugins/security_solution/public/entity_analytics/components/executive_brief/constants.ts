@@ -29,6 +29,12 @@ export const EXECUTIVE_BRIEF_SECTION_IDS = {
 export const BRIEF_BLOCK_ATTRIBUTE = 'data-brief-block';
 export const BRIEF_KEEP_WITH_NEXT_ATTRIBUTE = 'data-brief-keep-with-next';
 
+/**
+ * Safe cut point inside a capture block: the PDF layout may break the page right before an
+ * element carrying this attribute (never in the middle of it).
+ */
+export const BRIEF_CUT_ATTRIBUTE = 'data-brief-cut';
+
 /** Attribute set on the flyout body wrapper (value "true") while the PDF is captured. */
 export const BRIEF_PRINT_MODE_ATTRIBUTE = 'data-print-mode';
 

@@ -19,6 +19,7 @@ import { ClaimFlag, useIsPrintMode } from '../components/brief_context';
 import { SectionTitle } from '../components/section_title';
 import {
   BRIEF_BLOCK_ATTRIBUTE,
+  BRIEF_CUT_ATTRIBUTE,
   BRIEF_KEEP_WITH_NEXT_ATTRIBUTE,
   EXECUTIVE_BRIEF_SECTION_IDS,
 } from '../constants';
@@ -167,6 +168,7 @@ export const BlindSpots: React.FC<BlindSpotsProps> = ({ snapshot, blindSpots }) 
           tableCaption="Other visibility gaps"
           items={sortedGaps}
           columns={columns}
+          rowProps={(gap) => (gap === sortedGaps[0] ? {} : { [BRIEF_CUT_ATTRIBUTE]: '' })}
           data-test-subj={TEST_IDS.gapsTable}
         />
         <EuiSpacer size="m" />

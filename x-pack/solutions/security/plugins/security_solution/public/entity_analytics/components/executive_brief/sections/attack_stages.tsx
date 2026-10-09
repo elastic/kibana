@@ -14,7 +14,11 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import type { AttackStagesSummary } from '../../../../../common/entity_analytics/executive_brief/types';
+import { BRIEF_CUT_ATTRIBUTE } from '../constants';
 import { AttackStageTile, UnmappedTile } from '../components/attack_stage_tile';
+
+/** Grid columns; tiles after the first row are safe places to break the page. */
+const TILES_PER_ROW = 4;
 
 export const AttackStages: React.FC<{ summary: AttackStagesSummary }> = ({ summary }) => {
   const maxActivity = Math.max(
@@ -40,9 +44,12 @@ export const AttackStages: React.FC<{ summary: AttackStagesSummary }> = ({ summa
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiFlexGrid columns={4} gutterSize="s" responsive>
-        {summary.stages.map((stage) => (
-          <EuiFlexItem key={stage.tacticId}>
+      <EuiFlexGrid columns={TILES_PER_ROW} gutterSize="s" responsive>
+        {summary.stages.map((stage, index) => (
+          <EuiFlexItem
+            key={stage.tacticId}
+            {...(index >= TILES_PER_ROW ? { [BRIEF_CUT_ATTRIBUTE]: '' } : {})}
+          >
             <AttackStageTile stage={stage} maxActivity={maxActivity} />
           </EuiFlexItem>
         ))}

@@ -16,6 +16,7 @@ import { RiskScoreLevel } from '../../severity/common';
 import { useIsPrintMode } from '../components/brief_context';
 import {
   BRIEF_BLOCK_ATTRIBUTE,
+  BRIEF_CUT_ATTRIBUTE,
   EXECUTIVE_BRIEF_SCOPE_ID,
   EXECUTIVE_BRIEF_SECTION_IDS,
 } from '../constants';
@@ -72,6 +73,7 @@ export const Details: React.FC<{ snapshot: BriefSnapshot }> = ({ snapshot }) => 
           tableCaption="Exposure leaders"
           items={leaders}
           columns={columns}
+          rowProps={(entity) => (entity === leaders[0] ? {} : { [BRIEF_CUT_ATTRIBUTE]: '' })}
         />
         <EuiSpacer size="s" />
         <EuiText size="xs" color="subdued">

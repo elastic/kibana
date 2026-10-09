@@ -9,7 +9,11 @@ import { EuiPanel } from '@elastic/eui';
 import type { ExecutiveBrief } from '../../../../../common/entity_analytics/executive_brief/types';
 import { DecisionAccordion } from '../components/decision_accordion';
 import { SectionTitle } from '../components/section_title';
-import { BRIEF_BLOCK_ATTRIBUTE, EXECUTIVE_BRIEF_SECTION_IDS } from '../constants';
+import {
+  BRIEF_BLOCK_ATTRIBUTE,
+  BRIEF_CUT_ATTRIBUTE,
+  EXECUTIVE_BRIEF_SECTION_IDS,
+} from '../constants';
 
 export const Decisions: React.FC<{ decisions: ExecutiveBrief['decisions'] }> = ({ decisions }) => (
   <section
@@ -24,12 +28,12 @@ export const Decisions: React.FC<{ decisions: ExecutiveBrief['decisions'] }> = (
     />
     <EuiPanel hasBorder paddingSize="m">
       {decisions.map((decision, index) => (
-        <DecisionAccordion
+        <div
           key={`${decision.action}-${index}`}
-          decision={decision}
-          index={index}
-          initialIsOpen={index === 0}
-        />
+          {...(index > 0 ? { [BRIEF_CUT_ATTRIBUTE]: '' } : {})}
+        >
+          <DecisionAccordion decision={decision} index={index} initialIsOpen={index === 0} />
+        </div>
       ))}
     </EuiPanel>
   </section>

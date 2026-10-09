@@ -26,29 +26,14 @@ export const USABLE_PAGE_HEIGHT = A4_POINTS.height - PAGE_PADDING * 2;
 /** Vertical gap between consecutive blocks on a page. */
 export const BLOCK_GAP = 10;
 
-/** How much of a following block taller than a page must fit beside a keep-with-next block. */
-const KEEP_WITH_NEXT_MIN_HEIGHT = 140;
-
-/** Minimum free share of a page needed to start a taller-than-page block on it. */
-const MIN_SLICE_START_SPACE = 0.35;
-
-/** A block up to this many pages tall is shrunk to fit one page instead of being sliced. */
-const MAX_FIT_PAGES = 1.3;
-
-/** Room left above a shrunk block for a preceding heading. */
-const FIT_HEADING_RESERVE = 70;
-
 /**
- * Uniform scale (<= 1) that shrinks a slightly-too-tall block to fit one page, so it is not cut
- * mid-content. Returns 1 for blocks that already fit or are far too tall (those are sliced).
+ * Smallest piece worth placing in the space left on a page: a block is only broken at a cut point
+ * when at least this much room remains, and a heading needs this much of the next block beside it.
  */
-export const fitScaleForTallBlock = (
-  height: number,
-  pageHeight: number = USABLE_PAGE_HEIGHT
-): number =>
-  height > pageHeight && height <= pageHeight * MAX_FIT_PAGES
-    ? (pageHeight - FIT_HEADING_RESERVE) / height
-    : 1;
+export const MIN_FRAGMENT = 120;
+
+/** Tolerance for floating-point comparisons of offsets. */
+const EPSILON = 0.01;
 
 /** A captured block, already scaled to the page width. */
 export interface FlowBlock {
@@ -57,24 +42,51 @@ export interface FlowBlock {
   height: number;
   /** Keep on the same page as the next block (section headings). */
   keepWithNext?: boolean;
+  /** Safe places to break the block, as scaled offsets from its top. Ascending, excluding 0. */
+  cutPoints?: number[];
 }
 
-/** One drawn piece of a block. A block taller than a page yields several slices. */
+/** One drawn piece of a block. A block that is broken yields several fragments (slices). */
 export interface BlockPlacement {
   blockId: string;
   /** Zero-based page index. */
   page: number;
   /** Distance from the top of the usable area to the top of this piece. */
   y: number;
-  /** Distance from the top of the block to the top of this piece (0 unless sliced). */
+  /** Distance from the top of the block to the top of this piece (0 for the first piece). */
   sliceOffset: number;
   /** Height of this piece. */
   height: number;
 }
 
+/** Largest cut point in (from, from + room], if any. */
+const largestCutWithin = (
+  cutPoints: readonly number[],
+  from: number,
+  room: number
+): number | undefined => {
+  let best: number | undefined;
+  for (const cut of cutPoints) {
+    if (cut > from + EPSILON && cut - from <= room + EPSILON) best = cut;
+  }
+  return best;
+};
+
 /**
- * Flows blocks top-down. A new page starts only when the next block does not fit in the space
- * left; only blocks taller than a whole page are sliced.
+ * Space the block needs at the top of a page for its first piece to be worth placing next to a
+ * heading: the whole block when it has no usable cut point, else up to its first cut point that
+ * leaves at least MIN_FRAGMENT.
+ */
+const leadingHeight = (block: FlowBlock): number => {
+  const firstCut = (block.cutPoints ?? []).find((cut) => cut >= MIN_FRAGMENT);
+  return Math.min(block.height, firstCut ?? block.height);
+};
+
+/**
+ * Flows blocks top-down without scaling. A block that does not fit in the space left is broken at
+ * its largest cut point that fits (when at least MIN_FRAGMENT is free), otherwise it moves to the
+ * next page if it fits there, and only as a last resort is sliced at the page height (still
+ * preferring cut points).
  */
 export const flowBlocks = (
   blocks: FlowBlock[],
@@ -85,45 +97,47 @@ export const flowBlocks = (
   let page = 0;
   let y = 0;
 
+  const nextPage = () => {
+    page += 1;
+    y = 0;
+  };
+
   blocks.forEach((block, index) => {
-    if (block.height > pageHeight) {
-      // A block taller than a page flows from where it is when enough room is left, so the page
-      // is not left mostly empty; otherwise it starts on a fresh page.
-      if (y > 0 && pageHeight - y < pageHeight * MIN_SLICE_START_SPACE) {
-        page += 1;
-        y = 0;
-      }
-      let offset = 0;
-      while (offset < block.height) {
-        const room = pageHeight - y;
-        const height = Math.min(room, block.height - offset);
-        placements.push({ blockId: block.id, page, y, sliceOffset: offset, height });
-        offset += height;
-        if (offset < block.height) {
-          page += 1;
-          y = 0;
-        } else {
-          y += height + gap;
-        }
-      }
-      return;
+    const cutPoints = block.cutPoints ?? [];
+    const next = blocks[index + 1];
+
+    if (block.keepWithNext && next && y > 0) {
+      const needed = block.height + gap + Math.min(leadingHeight(next), pageHeight);
+      if (y + needed > pageHeight + EPSILON) nextPage();
     }
 
-    const next = blocks[index + 1];
-    const needed =
-      block.height +
-      (block.keepWithNext && next
-        ? gap +
-          (next.height <= pageHeight
-            ? next.height
-            : Math.min(next.height, KEEP_WITH_NEXT_MIN_HEIGHT))
-        : 0);
-    if (y > 0 && y + needed > pageHeight) {
-      page += 1;
-      y = 0;
+    let offset = 0;
+    while (offset < block.height - EPSILON) {
+      const remaining = block.height - offset;
+      const room = pageHeight - y;
+
+      if (remaining <= room + EPSILON) {
+        placements.push({ blockId: block.id, page, y, sliceOffset: offset, height: remaining });
+        y += remaining + gap;
+        break;
+      }
+
+      const cut = room >= MIN_FRAGMENT ? largestCutWithin(cutPoints, offset, room) : undefined;
+      if (cut !== undefined) {
+        placements.push({ blockId: block.id, page, y, sliceOffset: offset, height: cut - offset });
+        offset = cut;
+        nextPage();
+      } else if (y > 0) {
+        // Nothing fits here: continue on a fresh page, where the rest may fit whole.
+        nextPage();
+      } else {
+        // Fresh page and still too tall: break at a cut point if one fits, else slice at page height.
+        const end = largestCutWithin(cutPoints, offset, pageHeight) ?? offset + pageHeight;
+        placements.push({ blockId: block.id, page, y, sliceOffset: offset, height: end - offset });
+        offset = end;
+        nextPage();
+      }
     }
-    placements.push({ blockId: block.id, page, y, sliceOffset: 0, height: block.height });
-    y += block.height + gap;
   });
 
   return placements;
