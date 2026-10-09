@@ -25,7 +25,8 @@ import { transformControlPanelsOut } from './transform_control_panels';
 import {
   applySessionTabTypeState,
   fromStoredSessionSearchAndTable,
-  fromStoredSessionSettings,
+  fromStoredClassicSessionSettings,
+  fromStoredEsqlSessionSettings,
   pinnedFiltersToAppFilters,
 } from '../../../common/session/session_tab_mapping';
 import { fromStoredSearchAndTable } from '../../../common/session/search_and_table_mapping';
@@ -113,9 +114,12 @@ const fromStoredSessionTab = (
   tab: DiscoverSessionAttributes['tabs'][number],
   searchAndTableFields: DiscoverSessionApiTabBase
 ): ConvertedSessionTab => {
+  const sessionSettings = isDiscoverSessionEsqlTab(searchAndTableFields)
+    ? fromStoredEsqlSessionSettings(tab.attributes)
+    : fromStoredClassicSessionSettings(tab.attributes);
   const apiTab = {
     ...searchAndTableFields,
-    ...fromStoredSessionSettings(tab.attributes),
+    ...sessionSettings,
   };
   const visContext = toApiVisContext(tab.attributes.visContext);
   const { panels: controlPanels, warnings } = transformControlPanelsOut(

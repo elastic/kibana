@@ -29,7 +29,11 @@ import {
 } from '../../../common/constants';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
-import { getCaseSettings, resolveExtractObservables } from '../../../common/utils/case_settings';
+import {
+  canOverrideExtractObservables,
+  getCaseSettings,
+  resolveExtractObservables,
+} from '../../../common/utils/case_settings';
 import type { BulkCreateCasesRequest } from '../../../common/types/api';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import type { Case, CaseSeverity } from '../../../common';
@@ -105,6 +109,17 @@ const getAssigneesFromTemplate = (
 
   return { assignees: templateAssignees };
 };
+
+/**
+ * Resolves the rule-level `extractObservables` override. Returns `null` when the rule inherits the
+ * space default, or when the owner does not auto-extract by default — the owner gate wins over a
+ * rule choice.
+ */
+const getExtractObservablesOverride = (
+  owner: string,
+  extractObservables: boolean | null | undefined
+): boolean | null =>
+  extractObservables == null || !canOverrideExtractObservables(owner) ? null : extractObservables;
 
 export class CasesConnectorExecutor {
   private readonly logger: Logger;
@@ -886,6 +901,10 @@ export class CasesConnectorExecutor {
     );
     const { syncAlerts } = getCaseSettings(params.owner);
     const extractObservables = resolveExtractObservables(params.owner, spaceExtractObservables);
+    const extractObservablesOverride = getExtractObservablesOverride(
+      params.owner,
+      params.extractObservables
+    );
 
     const baseRequest: Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } = {
       id: caseId,
@@ -893,8 +912,14 @@ export class CasesConnectorExecutor {
       tags: this.getCaseTags(params, flattenGrouping, v2Template.tags),
       title: title ?? this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
       connector: resolvedConnector ?? { ...NONE_CASE_CONNECTOR },
-      // Template settings keys are individually optional; merge over owner defaults so syncAlerts is always set.
-      settings: { syncAlerts, extractObservables, ...v2Template.settings },
+      settings: {
+        syncAlerts,
+        extractObservables,
+        ...v2Template.settings,
+        ...(extractObservablesOverride != null
+          ? { extractObservables: extractObservablesOverride }
+          : {}),
+      },
       ...getAssigneesFromTemplate(v2Template.assignees, hasPlatinumLicenseOrGreater),
       owner: params.owner,
       customFields: builtCustomFields,
@@ -976,6 +1001,15 @@ export class CasesConnectorExecutor {
 
     const { syncAlerts } = getCaseSettings(params.owner);
     const extractObservables = resolveExtractObservables(params.owner, spaceExtractObservables);
+    const extractObservablesOverride = getExtractObservablesOverride(
+      params.owner,
+      params.extractObservables
+    );
+    const baseSettings = caseFieldsFromTemplate?.settings ?? { syncAlerts, extractObservables };
+    const resolvedSettings =
+      extractObservablesOverride != null
+        ? { ...baseSettings, extractObservables: extractObservablesOverride }
+        : baseSettings;
 
     return {
       id: caseId,
@@ -987,7 +1021,7 @@ export class CasesConnectorExecutor {
         caseFieldsFromTemplate?.title ??
         this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
       connector: caseFieldsFromTemplate?.connector ?? { ...NONE_CASE_CONNECTOR },
-      settings: caseFieldsFromTemplate?.settings ?? { syncAlerts, extractObservables },
+      settings: resolvedSettings,
       ...getAssigneesFromTemplate(caseFieldsFromTemplate?.assignees, hasPlatinumLicenseOrGreater),
       ...(caseFieldsFromTemplate?.severity ? { severity: caseFieldsFromTemplate?.severity } : {}),
       ...(caseFieldsFromTemplate?.category ? { category: caseFieldsFromTemplate?.category } : null),

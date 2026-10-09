@@ -18,8 +18,9 @@ import type { ServiceAccountRoleLimits } from './constants';
 export const serviceAccountIdSchema = z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH);
 
 /**
- * Also used to validate the name a backend reports back, so `UiamServiceAccounts` refuses a name
- * Kibana cannot round-trip instead of handing it to callers.
+ * Validates the name a caller asks for. Beyond the create parameters it is also what a refused
+ * create checks before naming the account in its audit event, so a rejected name never reaches the
+ * log as received.
  */
 export const serviceAccountNameSchema = z
   .string()
@@ -29,6 +30,17 @@ export const serviceAccountNameSchema = z
     SERVICE_ACCOUNT_NAME_REGEX,
     'must begin with a letter or digit and may contain only letters, digits, hyphens and underscores'
   );
+
+/**
+ * The cap applies to the raw input, before the trim, so the body limit on the route covers every
+ * valid description. A blank description becomes `undefined`. UIAM refuses an empty string and
+ * Elasticsearch accepts one, so Kibana never sends one to either backend.
+ */
+export const serviceAccountDescriptionSchema = z
+  .string()
+  .max(SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH)
+  .trim()
+  .transform((description) => (description === '' ? undefined : description));
 
 /**
  * The role list an account is created with, held to one backend's `limits`. What Kibana reads
@@ -60,6 +72,6 @@ export const getServiceAccountRolesSchema = ({
 export const getCreateServiceAccountParamsSchema = (limits: ServiceAccountRoleLimits) =>
   z.object({
     name: serviceAccountNameSchema,
-    description: z.string().max(SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH).optional(),
+    description: serviceAccountDescriptionSchema.optional(),
     roles: getServiceAccountRolesSchema(limits),
   });

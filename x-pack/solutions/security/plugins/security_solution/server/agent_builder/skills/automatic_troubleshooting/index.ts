@@ -204,7 +204,8 @@ Use exact terms from the user's request and queried endpoint evidence when calli
     name: NAME,
     basePath: BASE_PATH,
     description:
-      'Use to diagnose observed Elastic Defend endpoint behavior and operational outcomes: endpoint health or degraded hosts; ' +
+      'Use to diagnose observed Elastic Defend endpoint behavior and operational outcomes: why an endpoint or host is ' +
+      'offline, unhealthy, degraded, missing or not reporting; why a response action such as isolation or release failed; ' +
       'a policy not taking effect or not being enforced; protection not blocking; unexpected quarantine or allow behavior; ' +
       'policy response failures; or failures involving protection updates, trusted applications, exceptions, blocklists, ' +
       'antivirus compatibility, and endpoint event output.',

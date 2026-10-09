@@ -15,19 +15,17 @@ export const LIST_ACTION_POLICY_EXECUTIONS_RESPONSE: ListPolicyExecutionHistoryR
       dispatched_at: '2026-01-15T12:05:00.000Z',
       policy: { id: 'action-policy-1', name: 'Notify on production alerts' },
       outcome: 'success',
-      episode_count: 1,
-      episodes: [{ id: 'episode-1' }],
+      alert_count: 1,
+      alerts: [{ id: 'episode-1' }],
       action_group_count: 1,
       rules: [{ id: 'rule-1', name: 'Host CPU high' }],
-      total_rule_count: 1,
+      rule_count: 1,
       workflows: [{ id: 'workflow-1', name: 'Notify oncall' }],
-      error: null,
     },
   ],
   page: 1,
   per_page: 20,
   total: 1,
-  search_matches: null,
 };
 
 // Mirrors the page * per_page refinement message in listPolicyExecutionHistoryRequestSchema.

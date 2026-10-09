@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
+import type { CoreStart } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   UpdateWorkerRequestBody,
   Worker,
@@ -18,7 +20,12 @@ import {
   applyWorkerSettingsWrite,
   diffWorkerSettings,
   getCompleteWorkerSettingsSchema,
+  isWorkerEnableBlocked,
 } from '@kbn/alertzero-common';
+import {
+  ensureWorkerServiceAccounts,
+  type CoreServiceAccounts,
+} from '../service_accounts/ensure_worker_service_accounts';
 import { useUpdateWorker } from './use_workers_api';
 
 interface WorkerSettingsDraft {
@@ -34,11 +41,20 @@ interface WorkerDraftOverlay {
   error?: string;
 }
 
+/** A pending switch-on is void once the Worker can't be switched on, so Save never sends it. */
+const isVoidSwitchOn = (worker: Worker, overlay: WorkerDraftOverlay | undefined): boolean =>
+  overlay?.enabled === true && !worker.enabled && isWorkerEnableBlocked(worker.blockingReasons);
+
+/** Hides a void switch-on for the render before the hook drops it from the draft. */
+const draftEnabled = (worker: Worker, overlay: WorkerDraftOverlay | undefined) =>
+  isVoidSwitchOn(worker, overlay) ? undefined : overlay?.enabled;
+
 const isWorkerDirty = (worker: Worker, overlay: WorkerDraftOverlay | undefined): boolean => {
   if (!overlay) {
     return false;
   }
-  const enabledDirty = overlay.enabled !== undefined && overlay.enabled !== worker.enabled;
+  const enabled = draftEnabled(worker, overlay);
+  const enabledDirty = enabled !== undefined && enabled !== worker.enabled;
   const settingsDirty =
     overlay.settings !== undefined && !isEqual(overlay.settings.draft, overlay.settings.baseline);
   return enabledDirty || settingsDirty;
@@ -52,17 +68,39 @@ const isWorkerDirty = (worker: Worker, overlay: WorkerDraftOverlay | undefined):
  * Settings edits are compared, diffed and revision-checked against the saved state the user
  * started from, not against whatever a later refetch returned. Otherwise someone else's change
  * would read as part of this draft and be written back with a fresh revision.
+ *
+ * A Worker saved as enabled without a service account is bound to its prebuilt account first,
+ * which is created if missing. If that fails, the Worker keeps its draft and shows the error.
  */
 export const useWatchSettingsDraft = (workers: Worker[]) => {
+  const {
+    services: { http, serviceAccounts },
+  } = useKibana<CoreStart & { serviceAccounts?: CoreServiceAccounts }>();
   const { mutateAsync } = useUpdateWorker();
   const [overlays, setOverlays] = useState<Record<string, WorkerDraftOverlay>>({});
   const [isSaving, setIsSaving] = useState(false);
+
+  // Dropped rather than hidden, so the switch-on can't come back if the block later clears.
+  useEffect(() => {
+    setOverlays((current) => {
+      const voided = workers.filter((worker) => isVoidSwitchOn(worker, current[worker.id]));
+      if (voided.length === 0) {
+        return current;
+      }
+      const next = { ...current };
+      for (const { id } of voided) {
+        const { enabled: _dropped, ...rest } = next[id];
+        next[id] = rest;
+      }
+      return next;
+    });
+  }, [workers]);
 
   const resolve = useCallback(
     (worker: Worker) => {
       const overlay = overlays[worker.id];
       return {
-        enabled: overlay?.enabled ?? worker.enabled,
+        enabled: draftEnabled(worker, overlay) ?? worker.enabled,
         settings: overlay?.settings?.draft ?? worker.settings,
         error: overlay?.error,
         dirty: isWorkerDirty(worker, overlay),
@@ -109,10 +147,11 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
     setOverlays({});
   }, []);
 
-  const save = useCallback(async (): Promise<void> => {
+  /** Resolves with each written Worker as the server returned it; a failed Worker keeps its draft. */
+  const save = useCallback(async (): Promise<Worker[]> => {
     const outstanding = workers.filter((worker) => isWorkerDirty(worker, overlays[worker.id]));
     if (outstanding.length === 0) {
-      return;
+      return [];
     }
 
     const invalid = outstanding.some(
@@ -123,23 +162,49 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
       throw new Error('invalid');
     }
 
+    const setError = (workerId: string, message: string) =>
+      setOverlays((current) => ({
+        ...current,
+        [workerId]: { ...current[workerId], error: message },
+      }));
+
+    const savedWorkers: Worker[] = [];
     setIsSaving(true);
     try {
+      const needsAccount = outstanding.filter((worker) => {
+        const { enabled, settings } = resolve(worker);
+        return enabled && !settings.serviceAccountId;
+      });
+      const accounts = await ensureWorkerServiceAccounts(
+        http,
+        serviceAccounts,
+        needsAccount.map((worker) => worker.id)
+      );
+
       for (const worker of outstanding) {
         const draft = resolve(worker);
         const settingsDraft = overlays[worker.id]?.settings;
-        const settings = settingsDraft
+        const account = accounts.get(worker.id);
+        if (account && !account.ok) {
+          setError(worker.id, account.error);
+          continue;
+        }
+
+        const changed = settingsDraft
           ? diffWorkerSettings(settingsDraft.baseline, settingsDraft.draft)
           : undefined;
+        const settings = account?.ok
+          ? { ...changed, serviceAccountId: account.serviceAccountId }
+          : changed;
+        const settingsRevision = settingsDraft ? settingsDraft.revision : worker.settingsRevision;
         const patch: UpdateWorkerRequestBody = {
           ...(draft.enabled !== worker.enabled ? { enabled: draft.enabled } : {}),
-          ...(settings === undefined || settingsDraft === undefined
-            ? {}
-            : { settings, settingsRevision: settingsDraft.revision }),
+          ...(settings === undefined ? {} : { settings, settingsRevision }),
         };
 
         try {
-          await mutateAsync({ workerId: worker.id, patch });
+          const { worker: savedWorker } = await mutateAsync({ workerId: worker.id, patch });
+          savedWorkers.push(savedWorker);
           setOverlays((current) => {
             const { [worker.id]: _removed, ...rest } = current;
             return rest;
@@ -154,16 +219,14 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
               : error instanceof Error
               ? error.message
               : String(error);
-          setOverlays((current) => ({
-            ...current,
-            [worker.id]: { ...current[worker.id], error: message },
-          }));
+          setError(worker.id, message);
         }
       }
     } finally {
       setIsSaving(false);
     }
-  }, [mutateAsync, overlays, resolve, workers]);
+    return savedWorkers;
+  }, [http, mutateAsync, overlays, resolve, serviceAccounts, workers]);
 
   return {
     discard,

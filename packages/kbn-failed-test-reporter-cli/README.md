@@ -7,6 +7,14 @@ CLIs that turn CI test results into GitHub issues on `elastic/kibana`.
 Reads JUnit and Scout reports of a CI job and files or updates one `failed-test` issue per
 failing test. Run by `.buildkite/scripts/lifecycle/post_command.sh` after every job.
 
+FTR, Jest (unit and integration), and Scout issues link to the CI space's
+[Single test history](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history)
+dashboard. The link filters `appex-qa:scout-test-events-*` by the test ID and
+shows daily passed/failed attempts, the daily failure percentage, and recent failed
+attempts linked to their Buildkite jobs. Existing issues receive the link the next time the reporter
+updates them; failure comments on `main` include it too. Tests without an exact file path are left
+without a history link.
+
 ## `node scripts/report_flaky_test_issues`
 
 Reads a flaky test report written by `node scripts/scout discover-flaky-tests`, groups the flaky
@@ -22,13 +30,17 @@ suite issue is filed, at most `--max-new-issues` (default 10) per run, titled
 owning teams' labels (in `elastic/kibana` only). The body carries the per-test numbers with the
 branch each test qualified on, the suite details including what the config runs, the suite's
 distinct errors with their share of its failures and the pipelines, branches, targets and job each
-was last seen in, and breakdowns by branch, by Scout target (deployment mode and location, for
+was last seen in, and breakdowns by branch (with the ones every setup skips it on marked ⏭️), by Scout target (deployment mode and location, for
 suites that recorded one) and by pipeline naming the branches each failed on; issues that merely
 mention the file are linked as possibly related. A suite is
 skipped, and the issue recorded, when every one of its tests has an issue, open or closed, a
 per-test one or one about the suite or its file; commenting on and reopening
 those issues is left to a later iteration, so is the stale `failed-test` sweep closing the issues
 of suites that drop out of the report.
+
+Flaky tests that were skipped since are left out first (`--no-omit-skipped-tests` keeps them):
+on every branch the test failed on, every setup (pipeline, config, target) that ran it skipped it
+in its latest run. A suite left with no test gets no issue (`all-tests-skipped`).
 
 The body ends with hidden `flaky-test-suite` metadata (`<!-- kibanaCiData = … -->`): the suite's
 file, title, framework and test ids, the branches a test of the suite failed on (`suite.branches`,

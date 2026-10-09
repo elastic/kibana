@@ -10,6 +10,10 @@
 import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERTZERO_WORKER_MANAGEMENT } from './constants';
 import FLOOR_ALERT_TRIAGE_YAML from './floor_alert_triage.yaml';
 import {
+  ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS,
+  upgradeStoredWorkerSettings,
+} from './worker_settings_defaults';
+import {
   type AlertTriageWorkerTemplateValues,
   renderAlertTriageWorkerYaml,
 } from './worker_template_values';
@@ -22,7 +26,10 @@ export const ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW = {
   id: ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 6,
+  version: 13,
   yamlTemplate: (values: AlertTriageWorkerTemplateValues): string =>
-    renderAlertTriageWorkerYaml(FLOOR_ALERT_TRIAGE_YAML, values),
+    renderAlertTriageWorkerYaml(
+      FLOOR_ALERT_TRIAGE_YAML,
+      upgradeStoredWorkerSettings(ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS, values)
+    ),
 } as const satisfies ManagedWorkflowDefinition<AlertTriageWorkerTemplateValues>;

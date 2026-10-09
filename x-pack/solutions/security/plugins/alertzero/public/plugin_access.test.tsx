@@ -12,19 +12,10 @@ import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from '@kbn
 import { coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
-import { registerAgenticInvestigationTemplateUI } from '@kbn/agentic-investigations-common';
 import { BehaviorSubject } from 'rxjs';
 import { AlertZeroPublicPlugin } from './plugin';
-import { getSharedAppQueryClient } from './shared_app_query_client';
 import { buildAttachment } from './agent_builder/attachment_types/test_utils';
 
-jest.mock('@kbn/agentic-investigations-common', () => ({
-  ...jest.requireActual('@kbn/agentic-investigations-common'),
-  registerAgenticInvestigationTemplateUI: jest.fn(),
-}));
-jest.mock('./pages/conversations/proposed_actions_slot', () => ({
-  ProposedActionsSlot: () => <MockContent name="proposals" />,
-}));
 jest.mock('./agent_builder/attachment_types/threat/threat_inline_content', () => ({
   ThreatAttachmentInlineContent: () => <MockContent name="threat" />,
 }));
@@ -48,6 +39,9 @@ const MockContent = ({ name }: { name: string }) => {
 
 const setup = (serverless: boolean) => {
   const core = coreMock.createStart();
+  // The service-account flag defaults to off. These cases cover license, tier, and the
+  // product setting, so the flag stays on.
+  core.security.serviceAccounts.isEnabled.mockReturnValue(true);
   const setting$ = new BehaviorSubject(true);
   core.uiSettings.get$.mockReturnValue(setting$);
   core.application.capabilities = {
@@ -68,43 +62,35 @@ const setup = (serverless: boolean) => {
     licensing: { ...licensingMock.createStart(), license$ },
     agentBuilder,
     proposals: {},
-    agenticInvestigations: {},
+    agenticInvestigations: { registerImpactEntityOpener: jest.fn() },
   });
   if (serverless) contract.setServerlessTierAvailable(true);
   return { plugin, agentBuilder, license$, setting$, contract };
 };
 
-afterEach(async () => {
-  (await getSharedAppQueryClient()).clear();
+afterEach(() => {
   mockClients.clear();
   jest.clearAllMocks();
 });
 
-describe.each(['proposals', 'threat', 'event'] as const)('%s registered content', (surface) => {
+describe.each(['threat', 'event'] as const)('%s registered content', (surface) => {
   it.each(['license', 'tier', 'setting'] as const)(
     'unmounts content and stops active queries when %s eligibility changes',
     async (change) => {
       const { plugin, agentBuilder, license$, setting$, contract } = setup(change === 'tier');
       const attachmentClient = new QueryClient();
-      let content: React.ReactNode;
-      if (surface === 'proposals') {
-        const registration = jest.mocked(registerAgenticInvestigationTemplateUI).mock.calls[0][0];
-        content = registration.renderProposedActions?.({ conversationId: 'conversation-1' });
-      } else {
-        const type =
-          surface === 'threat' ? 'security.threat' : 'security.significant_security_event';
-        await waitFor(() =>
-          expect(agentBuilder.attachments.addAttachmentType).toHaveBeenCalledTimes(2)
-        );
-        const registration = agentBuilder.attachments.addAttachmentType.mock.calls.find(
-          ([id]) => id === type
-        );
-        if (!registration?.[1].renderInlineContent) throw new Error('Missing attachment renderer');
-        content = registration[1].renderInlineContent({
-          attachment: buildAttachment(type, {}),
-          isSidebar: false,
-        });
-      }
+      const type = surface === 'threat' ? 'security.threat' : 'security.significant_security_event';
+      await waitFor(() =>
+        expect(agentBuilder.attachments.addAttachmentType).toHaveBeenCalledTimes(2)
+      );
+      const registration = agentBuilder.attachments.addAttachmentType.mock.calls.find(
+        ([id]) => id === type
+      );
+      if (!registration?.[1].renderInlineContent) throw new Error('Missing attachment renderer');
+      const content = registration[1].renderInlineContent({
+        attachment: buildAttachment(type, {}),
+        isSidebar: false,
+      });
       const mounted = render(
         <I18nProvider>
           <QueryClientProvider client={attachmentClient}>
@@ -117,7 +103,6 @@ describe.each(['proposals', 'threat', 'event'] as const)('%s registered content'
         await waitFor(() => expect(mockRequest).toHaveBeenCalledWith(surface));
       const queryClient = mockClients.get(surface);
       if (!queryClient) throw new Error('Missing query client');
-      if (surface === 'proposals') expect(queryClient).toBe(await getSharedAppQueryClient());
 
       const setAvailable = (available: boolean) => {
         if (change === 'setting') setting$.next(available);

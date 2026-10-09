@@ -35,7 +35,7 @@ export const servers: ScoutServerConfig = {
       `--plugin-path=${resolve(REPO_ROOT, 'examples/workflows_extensions_example')}`,
       `--plugin-path=${resolve(
         REPO_ROOT,
-        'x-pack/platform/test/security_api_integration/plugins/service_accounts'
+        'x-pack/platform/test/task_manager/plugins/service_accounts'
       )}`,
     ],
   },

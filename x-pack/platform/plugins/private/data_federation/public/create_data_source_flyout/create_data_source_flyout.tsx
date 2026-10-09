@@ -82,7 +82,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
 
   const dataFederationLinks = docLinks.links.dataFederation;
 
-  const enableFederatedIdentityAuth = featureFlags?.enableFederatedIdentityAuth;
+  const enableFederatedIdentity = Boolean(cloudInfo?.jwtIssuer);
   const enableGoogleCloudStorageDataSourceType =
     featureFlags?.enableGoogleCloudStorageDataSourceType;
   const enableAzureDataSourceType = featureFlags?.enableAzureDataSourceType;
@@ -188,7 +188,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
       initialDataSource
         ? authenticationModeFromDataSource(initialDataSource)
         : getDefaultAuthenticationMode(dataSourceType, {
-            enableFederatedIdentity: enableFederatedIdentityAuth,
+            enableFederatedIdentity,
           })
   );
 
@@ -207,11 +207,11 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     if (!isEditMode) {
       setAuthenticationMode(
         getDefaultAuthenticationMode(dataSourceType, {
-          enableFederatedIdentity: enableFederatedIdentityAuth,
+          enableFederatedIdentity,
         })
       );
     }
-  }, [dataSourceType, isEditMode, enableFederatedIdentityAuth]);
+  }, [dataSourceType, isEditMode, enableFederatedIdentity]);
 
   const handleSave = (data: CreateDataSourceFlyoutFormValues) =>
     onSave(
@@ -296,6 +296,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           </EuiFormRow>
           <EuiFormRow
             label={createDataSourceFlyoutStrings.nameLabel()}
+            helpText={createDataSourceFlyoutStrings.nameDescription()}
             isInvalid={Boolean(errors.name)}
             error={errors.name?.message}
             fullWidth
@@ -312,7 +313,11 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               readOnly={isEditMode}
             />
           </EuiFormRow>
-          <EuiFormRow label={createDataSourceFlyoutStrings.descriptionLabel()} fullWidth>
+          <EuiFormRow
+            label={createDataSourceFlyoutStrings.descriptionLabel()}
+            helpText={createDataSourceFlyoutStrings.descriptionDescription()}
+            fullWidth
+          >
             <EuiTextArea
               data-test-subj="createDataSourceFlyoutDescription"
               fullWidth
@@ -334,7 +339,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           <CreateDataSourceFlyoutAuthenticationSelect
             authenticationMode={authenticationMode}
             dataSourceType={dataSourceType}
-            enableFederatedIdentity={enableFederatedIdentityAuth}
+            enableFederatedIdentity={enableFederatedIdentity}
             onAuthenticationModeChange={setAuthenticationMode}
           />
           <CreateDataSourceFlyoutAuthenticationFields

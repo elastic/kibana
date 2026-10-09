@@ -34,6 +34,7 @@ describe('useUnifiedWaterfallFetcher', () => {
 
     expect(result.current.traceItems).toEqual([]);
     expect(result.current.errors).toEqual([]);
+    expect(result.current.totalErrors).toBe(0);
     expect(result.current.agentMarks).toEqual({});
     expect(result.current.entryTransaction).toBeUndefined();
     expect(result.current.status).toBe(useFetcherModule.FETCH_STATUS.NOT_INITIATED);
@@ -48,7 +49,10 @@ describe('useUnifiedWaterfallFetcher', () => {
           timestampUs: 1000000,
           traceId: 'trace-123',
           duration: 500000,
-          errors: [],
+          errors: [
+            { errorDocId: 'apm-error-1', source: 'apm' as const },
+            { errorDocId: 'otel-error-1', source: 'unprocessedOtel' as const },
+          ],
           serviceName: 'test-service',
           spanLinksCount: { incoming: 0, outgoing: 0 },
           docType: 'span' as const,
@@ -79,11 +83,44 @@ describe('useUnifiedWaterfallFetcher', () => {
 
     expect(result.current.traceItems).toEqual(mockData.traceItems);
     expect(result.current.errors).toEqual(mockData.errors);
+    // totalErrors is the sum of per-item errors — what the waterfall rows render.
+    expect(result.current.totalErrors).toBe(2);
     expect(result.current.agentMarks).toEqual(mockData.agentMarks);
     expect(result.current.entryTransaction).toEqual(mockData.entryTransaction);
     expect(result.current.traceDocsTotal).toBe(1000);
     expect(result.current.maxTraceItems).toBe(5000);
     expect(result.current.status).toBe(useFetcherModule.FETCH_STATUS.SUCCESS);
+  });
+
+  it('excludes trace-wide errors that are not attributed to any trace item from totalErrors', () => {
+    mockUseFetcher.mockReturnValue({
+      data: {
+        traceItems: [
+          { id: 'tx-1', errors: [{ errorDocId: 'otel-error-1', source: 'unprocessedOtel' }] },
+          { id: 'span-1', errors: [] },
+        ],
+        // Trace-wide APM errors (e.g. exception logs without a span.id) that the
+        // waterfall cannot render must not be counted in the summary badge either.
+        errors: [{ id: 'apm-error-1' }, { id: 'apm-error-2' }],
+        agentMarks: {},
+        entryTransaction: undefined,
+        traceDocsTotal: 2,
+        maxTraceItems: 5000,
+      } as any,
+      status: useFetcherModule.FETCH_STATUS.SUCCESS,
+      error: undefined,
+      refetch: jest.fn(),
+    });
+
+    const { result } = renderHook(() =>
+      useUnifiedWaterfallFetcher({
+        start: '2025-01-15T00:00:00.000Z',
+        end: '2025-01-15T01:00:00.000Z',
+        traceId: 'trace-123',
+      })
+    );
+
+    expect(result.current.totalErrors).toBe(1);
   });
 
   it('returns traceDocsTotal and maxTraceItems from API response', () => {
