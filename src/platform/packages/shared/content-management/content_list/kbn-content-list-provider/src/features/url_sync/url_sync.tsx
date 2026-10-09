@@ -17,8 +17,8 @@ import {
   decodeNewShape,
   encodeUrlState,
   getInitialQueryText,
+  getSortDirectionsByFieldFromKey,
   getSortingConfigKey,
-  getSortingUrlConfigFromKey,
   hasNewShapeParams,
   mergeAndStringify,
   parseSearch,
@@ -186,8 +186,8 @@ const ContentListUrlSyncInner = ({ initialSort }: ContentListUrlSyncProps): null
   const { state, dispatch } = useContentListState();
   const sortingConfigKey = getSortingConfigKey(features.sorting);
   const initialQueryText = getInitialQueryText(features.search);
-  const { sortDirectionsByField } = useMemo(
-    () => getSortingUrlConfigFromKey(sortingConfigKey),
+  const sortDirectionsByField = useMemo(
+    () => getSortDirectionsByFieldFromKey(sortingConfigKey),
     [sortingConfigKey]
   );
   const [hydrated, setHydrated] = useState(false);

@@ -97,7 +97,7 @@ export interface SortingConfig {
    */
   options?: SortOption[];
 
-  /** Initial sort state. */
+  /** Sort used when the user has not chosen one. A sort the user picked previously (saved per listing) takes precedence. */
   initialSort?: SortState;
 }
 

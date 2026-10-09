@@ -15,21 +15,11 @@ import {
   getAllowedSorts,
   getSortKey,
   isAllowedSort,
-  isSortDirection,
   parseSortKey,
   toSortDirectionsByField,
 } from '../sorting';
 import { encodeQueryValue } from './encode_query_value';
 import type { ParsedQuery, UrlStateSlices } from './types';
-
-/**
- * The configuration for a sorting URL.
- *
- * @property sortDirectionsByField - The directions offered for each sortable field.
- */
-export interface SortingUrlConfig {
-  sortDirectionsByField: SortDirectionsByField;
-}
 
 /**
  * The separator for sort configuration keys.
@@ -46,22 +36,15 @@ export const getSortingConfigKey = (sorting: ContentListFeatures['sorting']): st
   [...new Set(getAllowedSorts(sorting).map(getSortKey))].sort().join(SORT_CONFIG_KEY_SEPARATOR);
 
 /**
- * Gets the sorting URL configuration from the sorting configuration key.
+ * Gets the directions offered for each sortable field from the sorting configuration key.
  *
  * @param key - The sorting configuration key.
- * @returns The sorting URL configuration.
+ * @returns The directions offered for each sortable field.
  */
-export const getSortingUrlConfigFromKey = (key: string): SortingUrlConfig => {
-  const options = key.split(SORT_CONFIG_KEY_SEPARATOR);
-  const parsedSorts = options.flatMap((option): SortState[] => {
-    const separatorIndex = option.lastIndexOf(':');
-    const optionDirection = option.slice(separatorIndex + 1);
-    return isSortDirection(optionDirection)
-      ? [{ field: option.slice(0, separatorIndex), direction: optionDirection }]
-      : [];
-  });
-  return { sortDirectionsByField: toSortDirectionsByField(parsedSorts) };
-};
+export const getSortDirectionsByFieldFromKey = (key: string): SortDirectionsByField =>
+  toSortDirectionsByField(
+    key.split(SORT_CONFIG_KEY_SEPARATOR).flatMap((sortKey) => parseSortKey(sortKey) ?? [])
+  );
 
 /**
  * Gets the initial query text from the search configuration.
