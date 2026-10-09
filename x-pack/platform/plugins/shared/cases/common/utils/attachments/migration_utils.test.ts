@@ -36,6 +36,7 @@ import {
   getAttachmentTypeFromAttributes,
   getReferenceAttachmentId,
   isConvertibleToUnified,
+  isTypeAllowedForOwner,
   isPersistableType,
   resolveUnifiedAttachmentType,
   isUnifiedOnlyAttachmentType,
@@ -164,6 +165,40 @@ describe('migration_utils', () => {
         SECURITY_ALERT_ATTACHMENT_TYPE
       );
     });
+
+    it('lets a dynamically registered owner attach its prefix types', () => {
+      expect(isTypeAllowedForOwner('security.event', customOwner)).toBe(false);
+
+      registerOwnerPrefix(customOwner, 'security');
+
+      expect(isTypeAllowedForOwner('security.event', customOwner)).toBe(true);
+    });
+  });
+
+  describe('isTypeAllowedForOwner', () => {
+    it.each([
+      ['security.event', SECURITY_SOLUTION_OWNER],
+      ['observability.alert', OBSERVABILITY_OWNER],
+      ['stack.alert', GENERAL_CASES_OWNER],
+    ])('accepts %s under %s', (type, typeOwner) => {
+      expect(isTypeAllowedForOwner(type, typeOwner)).toBe(true);
+    });
+
+    it.each([
+      ['security.event', OBSERVABILITY_OWNER],
+      ['observability.alert', SECURITY_SOLUTION_OWNER],
+      ['stack.alert', SECURITY_SOLUTION_OWNER],
+      ['security.alert', 'unknownOwner'],
+    ])('rejects %s under %s', (type, typeOwner) => {
+      expect(isTypeAllowedForOwner(type, typeOwner)).toBe(false);
+    });
+
+    it.each(['comment', 'lens', 'ml.anomaly_swimlane', 'unknown.type'])(
+      'accepts shared type %s under any owner',
+      (type) => {
+        expect(isTypeAllowedForOwner(type, OBSERVABILITY_OWNER)).toBe(true);
+      }
+    );
   });
 
   describe('toUnifiedAttachmentType - legacy actions', () => {

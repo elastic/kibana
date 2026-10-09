@@ -521,6 +521,44 @@ describe('CaseCommentModel', () => {
       expect(second.attributes.metadata.index).toEqual(['idx-3']);
     });
 
+    it('logs the deduped alert ids in the user actions', async () => {
+      clientArgs.services.attachmentService.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [
+          { ...mockCaseComments[0], id: 'comment-1' },
+          { ...mockCaseComments[1], id: 'comment-2' },
+        ],
+      });
+
+      await model.bulkCreate({
+        attachments: [
+          {
+            id: 'comment-1',
+            ...unifiedAlertComment,
+            attachmentId: ['alert-id-a', 'alert-id-b'],
+            metadata: { ...unifiedAlertComment.metadata, index: ['idx-a', 'idx-b'] },
+          },
+          {
+            id: 'comment-2',
+            ...unifiedAlertComment,
+            attachmentId: ['alert-id-b', 'alert-id-c'],
+            metadata: { ...unifiedAlertComment.metadata, index: ['idx-b', 'idx-c'] },
+          },
+        ],
+      });
+
+      const userActionAttachments =
+        clientArgs.services.userActionService.creator.bulkCreateAttachmentCreation.mock.calls[0][0]
+          .attachments;
+
+      expect(userActionAttachments).toHaveLength(2);
+      expect(userActionAttachments[0].attachment).toEqual(
+        expect.objectContaining({ attachmentId: ['alert-id-a', 'alert-id-b'] })
+      );
+      expect(userActionAttachments[1].attachment).toEqual(
+        expect.objectContaining({ attachmentId: ['alert-id-c'] })
+      );
+    });
+
     it('drops the unified event attachment entirely when every id is already attached to the case', async () => {
       clientArgs.services.attachmentService.getter.getAllEventIds.mockResolvedValueOnce(
         new Set(['event-id-1', 'event-id-2'])
@@ -1290,6 +1328,24 @@ describe('CaseCommentModel', () => {
         id: 'comment-1',
         commentReq: unifiedAttackComment,
         createdDate,
+      });
+
+      expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
+        {
+          id: 'attack-id-1',
+          index: '.alerts-security.attack.discovery.alerts-default',
+          status: model.savedObject.attributes.status,
+        },
+      ]);
+    });
+
+    it('syncs an attack attached through bulkCreate to the current case status', async () => {
+      clientArgs.services.attachmentService.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [{ ...mockCaseComments[0], id: 'comment-1' }],
+      });
+
+      await model.bulkCreate({
+        attachments: [{ id: 'comment-1', ...unifiedAttackComment }],
       });
 
       expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([

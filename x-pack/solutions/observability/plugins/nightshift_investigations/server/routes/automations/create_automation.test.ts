@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { parse } from 'yaml';
 import { createAutomationRoute } from './create_automation';
 import { createRouteContext } from './test_helpers';
 
@@ -29,7 +30,7 @@ const body = {
 const call = (overrides: Record<string, unknown> = {}) =>
   handler({
     request: httpServerMock.createKibanaRequest(),
-    params: { body: { ...body, ...overrides } },
+    params: params.parse({ body: { ...body, ...overrides } }),
     getAutomationsSoClient,
     getWorkflowsManagement,
     context: createRouteContext(),
@@ -71,6 +72,22 @@ it('stores tags and the requested enabled state', async () => {
     expect.objectContaining({ tags: ['oncall'], isEnabled: true })
   );
   expect(result).toMatchObject({ tags: ['oncall'], isEnabled: true });
+});
+
+it('turns the UI channel action into an investigation lifecycle destination', async () => {
+  const completion = { action: 'post_to_slack', targetMode: 'channel', destination: '#oncall' };
+  const result = await call({ completion });
+  expect(result.completion).toEqual(completion);
+  const workflow = parse(createWorkflow.mock.calls[0][0].yaml);
+  expect(workflow.steps[0].with.notificationDestinations).toEqual([
+    {
+      type: 'slack',
+      connector_id: 'elastic-apps-slack',
+      params: { channel: '#oncall' },
+      automation_id: 'automation-1',
+      automation_name: 'Triage',
+    },
+  ]);
 });
 
 it('removes the automation when the workflow cannot be created', async () => {

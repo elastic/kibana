@@ -57,7 +57,7 @@ pivot:
     #     security: ">security-breaking"
     #     other:
     # Simple string form: labels as comma-separated string
-    bug-fix: 'release_note:fix'
+    bug-fix: 'release_note:fix, release_note:bug'
     deprecation: 'release_note:deprecation'
     feature: 'release_note:feature'
     enhancement: 'release_note:enhancement'
@@ -208,7 +208,7 @@ pivot:
     'observability':
       - 'Feature:Observability Home'
       - 'Feature:SLO'
-      - 'Team:obs-ux-management'
+      - 'Team:obs-ux-management - DEPRECATED'
       - 'Team:nightshift-context-and-research'
       - 'Team:obs-ux-infra_services - DEPRECATED'
       - 'Team:obs-ux-logs'
@@ -225,7 +225,7 @@ pivot:
       - 'Feature:Logs UI'
       - 'Feature:Infra UI'
       - 'Feature:Service Maps'
-      - 'Team:actionable-obs'
+      - 'Team:actionable-obs - DEPRECATED'
       - 'Team:obs-exploration'
       - 'Team:obs-signals-traces'
       - 'Team:Observability'
