@@ -11,6 +11,7 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 import type { ScoutLogger, ScoutTestConfig } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../common/saved_object_types';
+import type { RuleSavedObjectAttributes } from '../../../../server/saved_objects';
 import { createSystemIndicesEsClient } from './system_indices_es_client';
 
 /**
@@ -34,11 +35,12 @@ const getDocumentId = (ruleId: string, spaceId: string): string =>
 
 /**
  * Test-time direct-index accessor for the rule saved object. The type is
- * `hidden: true`, so the saved objects HTTP API cannot reach it and specs that
- * need framework-owned fields the rule API never returns — namely
- * `references[]` — have to read the raw document.
+ * `hidden: true`, so the saved objects HTTP API cannot reach it, and specs that
+ * need what the rule API never returns — `references[]`, or the stored
+ * attributes before the response projection — have to read the raw document.
  */
 export interface RuleSavedObjectService {
+  getAttributes: (ruleId: string, spaceId?: string) => Promise<RuleSavedObjectAttributes>;
   /** Reads the raw `references[]` of a rule saved object. */
   getReferences: (ruleId: string, spaceId?: string) => Promise<SavedObjectReference[]>;
   /**
@@ -90,6 +92,23 @@ export const getRuleSavedObjectService = ({
   };
 
   return {
+    getAttributes: (ruleId, spaceId = DEFAULT_SPACE_ID) =>
+      measurePerformanceAsync(log, 'ruleSavedObject.getAttributes', async () => {
+        const client = await getSavedObjectClient();
+        const response = await client.get<Record<string, RuleSavedObjectAttributes>>({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          id: getDocumentId(ruleId, spaceId),
+          _source_includes: [RULE_SAVED_OBJECT_TYPE],
+        });
+
+        const attributes = response._source?.[RULE_SAVED_OBJECT_TYPE];
+        if (!attributes) {
+          throw new Error(`Rule saved object "${ruleId}" has no ${RULE_SAVED_OBJECT_TYPE} source`);
+        }
+
+        return attributes;
+      }),
+
     getReferences: (ruleId, spaceId = DEFAULT_SPACE_ID) =>
       measurePerformanceAsync(log, 'ruleSavedObject.getReferences', async () => {
         const client = await getSavedObjectClient();

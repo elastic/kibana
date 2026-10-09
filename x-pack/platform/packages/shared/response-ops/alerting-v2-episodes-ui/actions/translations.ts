@@ -81,6 +81,13 @@ export const getBulkSuccessToast = (processed: number): string =>
     values: { processed },
   });
 
+export const BULK_NO_CHANGES_TOAST = i18n.translate(
+  'xpack.alertingV2Episodes.actions.bulkNoChangesToast',
+  {
+    defaultMessage: 'No changes were needed.',
+  }
+);
+
 export const getBulkPartialSuccessToast = (processed: number, total: number): string =>
   i18n.translate('xpack.alertingV2Episodes.actions.bulkPartialSuccessToast', {
     defaultMessage:
