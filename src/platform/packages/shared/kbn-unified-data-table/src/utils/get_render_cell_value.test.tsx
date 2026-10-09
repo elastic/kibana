@@ -217,7 +217,7 @@ describe('Unified data table cell rendering', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
       closePopover: jest.fn(),
-      columnsMeta: undefined,
+      dataSource: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,

@@ -324,6 +324,10 @@ interface InternalUnifiedDataTableProps {
    */
   onUpdateDataGridDensity?: (dataGridDensity: DataGridDensity) => void;
   /**
+   * Is text base lang mode enabled
+   */
+  isPlainRecord?: boolean;
+  /**
    * Current state value for rowsPerPage
    */
   rowsPerPageState?: number;
@@ -583,6 +587,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       ariaLabelledBy,
       columns,
       dataSource,
+      isPlainRecord,
       showColumnTokens,
       canDragAndDropColumns,
       configHeaderRowHeight,
@@ -786,7 +791,6 @@ const InternalUnifiedDataTable = React.forwardRef<
       dataSource,
       sort,
       dataView,
-      isPlainRecord,
       isSortEnabled: isSortEnabled && isInteractive,
       isInMemorySortEnabled,
       isSummaryOnlyColumn,
@@ -1265,6 +1269,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         disableCellActions,
         hideFilteringOnComputedColumns,
         documentsDisplayMode,
+        isPlainRecord,
       ]
     );
 

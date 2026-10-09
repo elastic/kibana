@@ -185,7 +185,7 @@ export const getRenderCellValueFn = ({
         useTopLevelObjectColumns,
         fieldFormats,
         closePopover,
-        isPlainRecord,
+        dataSource,
         isInteractive,
       });
     }
@@ -240,7 +240,7 @@ function renderPopoverContent({
   useTopLevelObjectColumns,
   fieldFormats,
   closePopover,
-  isPlainRecord,
+  dataSource,
   isInteractive = true,
 }: {
   row: DataTableRecord;
@@ -250,7 +250,7 @@ function renderPopoverContent({
   useTopLevelObjectColumns: boolean;
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
-  isPlainRecord?: boolean;
+  dataSource: DataSource | undefined;
   isInteractive?: boolean;
 }) {
   const closeButton = (
