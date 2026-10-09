@@ -16,13 +16,13 @@ test.describe('Links panel - edit', { tag: ['@local-stateful-classic'] }, () => 
     await kbnClient.importExport.load(DASHBOARD_KBN_ARCHIVE);
   });
 
-  test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.cleanStandardList();
-  });
-
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.dashboard.openDashboardWithIdInEditMode(DASHBOARD_IDS.LINKS_001);
+  });
+
+  test.afterAll(async ({ kbnClient }) => {
+    await kbnClient.savedObjects.cleanStandardList();
   });
 
   test('can reorder, edit and delete links in an existing panel', async ({ page, pageObjects }) => {
