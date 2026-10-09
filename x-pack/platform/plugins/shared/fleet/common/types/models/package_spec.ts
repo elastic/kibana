@@ -41,16 +41,21 @@ export interface PackageDependency {
 
 export interface PackageRequires {
   content?: PackageDependency[];
-  /** Prototype: typed so root tiles can hide a child's input package deps. */
+  /** Prototype: typed so integration group tiles can hide a child's input package deps. */
   input?: PackageDependency[];
-  /** Root packages only (prototype): child integration packages a schema resolves to. */
+  /** Integration groups only (prototype): child integrations, with version ranges, the schemas resolve to. */
   integration?: PackageDependency[];
 }
 
-/** Prototype: root package schema map, e.g. { default: 'otel', ecs: { requires }, otel: { requires } }. */
-export type PackageSchemas = { default: string } & {
-  [schema: string]: { requires?: PackageRequires } | string;
-};
+/** Prototype: one schema of an integration group. `integration` names a `requires.integration` entry. */
+export interface PackageSchema {
+  integration: string;
+  /** Exactly one schema per group should set this. */
+  default?: boolean;
+}
+
+/** Prototype: integration group schema map, e.g. { otel: { integration: 'nginx_otel_integ', default: true }, ecs: { integration: 'nginx' } }. */
+export type PackageSchemas = Record<string, PackageSchema>;
 
 // Based on https://github.com/elastic/package-spec/blob/master/versions/1/manifest.spec.yml#L8
 export interface PackageSpecManifest {
@@ -95,7 +100,7 @@ export interface PackageSpecManifest {
   provider_permissions?: RegistryProviderPermissions[];
   /** Groups related packages (e.g. nginx, nginx_otel) under a shared technology tile. */
   group?: string;
-  /** Prototype: present only on root packages. A package with `schemas` is a root. */
+  /** Prototype: present only on integration groups. A package with `schemas` is a group. */
   schemas?: PackageSchemas;
 }
 export interface DiscoveryDataset {

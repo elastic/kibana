@@ -19,12 +19,12 @@ import { CreatePackagePolicyPage } from '../../../fleet/sections/agent_policy/cr
 
 import { EPMHomePage } from './screens/home';
 import { Detail } from './screens/detail';
-import { RootPackagePage } from './screens/root';
+import { GroupPackagePage } from './screens/group';
 import { Policy } from './screens/policy';
 import { CreateIntegration } from './screens/create';
 import { CustomLanguagesOverview } from './screens/detail/custom_languages_overview';
 
-// PROTOTYPE: remount the create page when pkgkey changes, so the root schema toggle (ECS / OTel)
+// PROTOTYPE: remount the create page when pkgkey changes, so the group schema toggle (ECS / OTel)
 // loads a fresh form for the other child package instead of reusing stale form state.
 const KeyedCreatePackagePolicyPage: React.FC = () => {
   const { pkgkey } = useParams<{ pkgkey: string }>();
@@ -48,8 +48,8 @@ export const EPMApp: React.FunctionComponent = () => {
       <Route path={INTEGRATIONS_ROUTING_PATHS.integration_policy_copy}>
         <CopyPackagePolicyPage />
       </Route>
-      <Route path={INTEGRATIONS_ROUTING_PATHS.integration_root}>
-        <RootPackagePage />
+      <Route path={INTEGRATIONS_ROUTING_PATHS.integration_group}>
+        <GroupPackagePage />
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details}>
         <IntegrationsStateContextProvider>

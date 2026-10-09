@@ -9,10 +9,10 @@ import { installationStatuses } from '../../../../../../../../common/constants';
 import type { PackageListItem } from '../../../../../types';
 
 import {
-  applyRootPackages,
-  getInstalledRootSchemas,
-  getRootInstalledLabel,
-} from './apply_root_packages';
+  applyGroupPackages,
+  getInstalledGroupSchemas,
+  getGroupInstalledLabel,
+} from './apply_group_packages';
 
 jest.mock('../card_utils', () => ({
   mapToCard: ({ item }: { item: PackageListItem }) => ({
@@ -38,41 +38,46 @@ const pkg = (name: string, extra: Record<string, unknown> = {}) =>
 
 const installed = { installationInfo: { install_status: installationStatuses.Installed } };
 
-const root = pkg('nginx_group', {
+const group = pkg('nginx_group', {
   title: 'Nginx',
+  requires: {
+    integration: [
+      { package: 'nginx', version: '^3.0.0' },
+      { package: 'nginx_otel_integ', version: '^0.1.0' },
+    ],
+  },
   schemas: {
-    default: 'otel',
-    ecs: { requires: { integration: [{ package: 'nginx', version: '^3.0.0' }] } },
-    otel: { requires: { integration: [{ package: 'nginx_otel_integ', version: '^0.1.0' }] } },
+    otel: { integration: 'nginx_otel_integ', default: true },
+    ecs: { integration: 'nginx' },
   },
 });
 
 const params = {
   getHref: jest.fn(
-    (page: string, values?: Record<string, unknown>) => `/${page}/${values?.rootName}`
+    (page: string, values?: Record<string, unknown>) => `/${page}/${values?.groupName}`
   ),
   getAbsolutePath: (p: string) => p,
   addBasePath: (p: string) => p,
 };
 
-describe('applyRootPackages', () => {
-  it('no roots: passes items through', () => {
+describe('applyGroupPackages', () => {
+  it('no groups: passes items through', () => {
     const items = [pkg('nginx'), pkg('redis')];
-    const res = applyRootPackages({ items, ...params });
-    expect(res.rootCards).toHaveLength(0);
+    const res = applyGroupPackages({ items, ...params });
+    expect(res.groupCards).toHaveLength(0);
     expect(res.remainingItems).toBe(items);
   });
 
-  it('hides children, emits one root card linking to the root page', () => {
-    const res = applyRootPackages({
-      items: [root, pkg('nginx'), pkg('nginx_otel_integ'), pkg('redis')],
+  it('hides children, emits one group card linking to the group page', () => {
+    const res = applyGroupPackages({
+      items: [group, pkg('nginx'), pkg('nginx_otel_integ'), pkg('redis')],
       ...params,
     });
     expect(res.remainingItems.map((i) => (i as PackageListItem).name)).toEqual(['redis']);
-    expect(res.rootCards).toHaveLength(1);
-    expect(res.rootCards[0].title).toBe('Nginx');
-    expect(res.rootCards[0].url).toBe('/integration_root/nginx_group');
-    expect(res.rootCards[0].installStatus).toBeUndefined();
+    expect(res.groupCards).toHaveLength(1);
+    expect(res.groupCards[0].title).toBe('Nginx');
+    expect(res.groupCards[0].url).toBe('/integration_group/nginx_group');
+    expect(res.groupCards[0].installStatus).toBeUndefined();
   });
 
   it("hides children's input/content deps unless something else requires them", () => {
@@ -88,9 +93,9 @@ describe('applyRootPackages', () => {
     const other = pkg('apache_otel', {
       requires: { input: [{ package: 'filelog_otel', version: '0.2.0' }] },
     });
-    const res = applyRootPackages({
+    const res = applyGroupPackages({
       items: [
-        root,
+        group,
         pkg('nginx'),
         otelChild,
         pkg('nginx_otel_input'),
@@ -107,16 +112,16 @@ describe('applyRootPackages', () => {
   });
 
   it('derives installed state from children', () => {
-    const items = [root, pkg('nginx', installed), pkg('nginx_otel_integ')];
-    expect(getInstalledRootSchemas(root, items)).toEqual(['ecs']);
-    const res = applyRootPackages({ items, ...params });
-    expect(res.rootCards[0].installStatus).toBe(installationStatuses.Installed);
+    const items = [group, pkg('nginx', installed), pkg('nginx_otel_integ')];
+    expect(getInstalledGroupSchemas(group, items)).toEqual(['ecs']);
+    const res = applyGroupPackages({ items, ...params });
+    expect(res.groupCards[0].installStatus).toBe(installationStatuses.Installed);
   });
 
   it('labels', () => {
-    expect(getRootInstalledLabel([])).toBeUndefined();
-    expect(getRootInstalledLabel(['ecs'])).toBe('Installed, ECS');
-    expect(getRootInstalledLabel(['otel'])).toBe('Installed, OTel');
-    expect(getRootInstalledLabel(['ecs', 'otel'])).toBe('Installed, ECS + OTel');
+    expect(getGroupInstalledLabel([])).toBeUndefined();
+    expect(getGroupInstalledLabel(['ecs'])).toBe('Installed, ECS');
+    expect(getGroupInstalledLabel(['otel'])).toBe('Installed, OTel');
+    expect(getGroupInstalledLabel(['ecs', 'otel'])).toBe('Installed, ECS + OTel');
   });
 });

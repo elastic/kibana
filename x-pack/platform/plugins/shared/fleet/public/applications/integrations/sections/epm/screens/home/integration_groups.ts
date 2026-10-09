@@ -22,7 +22,8 @@ export interface IntegrationGroup {
  * group requires a matching elastic/integrations PR tagging the members.
  */
 export const INTEGRATION_GROUPS: Record<string, IntegrationGroup> = {
-  // PROTOTYPE: nginx is now a root package (`nginx_group`), see hooks/apply_root_packages.tsx
+  // PROTOTYPE: nginx is now an integration group (`nginx_group`), not a static group, see
+  // hooks/apply_group_packages.tsx
   redis: {
     title: i18n.translate('xpack.fleet.integrationGroups.redis.title', {
       defaultMessage: 'Redis',

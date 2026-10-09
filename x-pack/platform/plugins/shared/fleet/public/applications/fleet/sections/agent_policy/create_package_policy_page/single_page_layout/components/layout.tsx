@@ -29,9 +29,9 @@ import type {
   RegistryPolicyTemplate,
 } from '../../../../../types';
 import { PackageIcon } from '../../../../../components';
-import { useRootPackage } from '../../../../../../../hooks/use_root_package';
-import { ROOT_QUERYPARAM } from '../../../../../../../../common/services';
-import { RootSchemaToggle } from '../../../../../../integrations/sections/epm/screens/root/schema_toggle';
+import { useGroupPackage } from '../../../../../../../hooks/use_group_package';
+import { GROUP_QUERYPARAM } from '../../../../../../../../common/services';
+import { GroupSchemaToggle } from '../../../../../../integrations/sections/epm/screens/group/schema_toggle';
 import type { EditPackagePolicyFrom } from '../../types';
 
 const AgentPolicyName = styled(EuiDescriptionListDescription)`
@@ -94,10 +94,11 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
       [from]
     );
 
-    // PROTOTYPE: when coming from a root package (`?root=<name>`), show the root's title + icon.
+    // PROTOTYPE: when coming from an integration group (`?group=<name>`), show the group's title + icon.
     // Read window.location directly: this layout is also rendered outside a router.
-    const rootName = new URLSearchParams(window.location.search).get(ROOT_QUERYPARAM) ?? undefined;
-    const { root } = useRootPackage(isAdd ? rootName : undefined);
+    const groupName =
+      new URLSearchParams(window.location.search).get(GROUP_QUERYPARAM) ?? undefined;
+    const { group } = useGroupPackage(isAdd ? groupName : undefined);
 
     const pageTitle = useMemo(() => {
       if ((isAdd || isEdit || isUpgrade) && packageInfo) {
@@ -106,7 +107,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
             id="xpack.fleet.createPackagePolicy.pageTitleWithPackageName"
             defaultMessage="Add {packageName} integration"
             values={{
-              packageName: root?.title || integrationInfo?.title || packageInfo.title,
+              packageName: group?.title || integrationInfo?.title || packageInfo.title,
             }}
           />
         );
@@ -136,11 +137,11 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
         return (
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
-              {root ? (
+              {group ? (
                 <PackageIcon
-                  packageName={root.name}
-                  version={root.version}
-                  icons={root.icons}
+                  packageName={group.name}
+                  version={group.version}
+                  icons={group.icons}
                   size="xl"
                 />
               ) : (
@@ -220,7 +221,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
       integrationInfo?.name,
       integrationInfo?.title,
       packageInfo,
-      root,
+      group,
       defaultPolicyData?.name,
       isAdd,
       isEdit,
@@ -279,9 +280,9 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>{pageTitle}</EuiFlexItem>
-        {root && (
+        {group && (
           <EuiFlexItem>
-            <RootSchemaToggle rootName={root.name} currentPackageName={packageInfo?.name} />
+            <GroupSchemaToggle groupName={group.name} currentPackageName={packageInfo?.name} />
           </EuiFlexItem>
         )}
         <EuiFlexItem>
