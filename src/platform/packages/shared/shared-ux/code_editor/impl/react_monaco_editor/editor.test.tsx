@@ -12,6 +12,7 @@ import type { ComponentProps } from 'react';
 import {
   CODE_EDITOR_DEFAULT_THEME_ID,
   CODE_EDITOR_TRANSPARENT_THEME_ID,
+  initializeRegisteredLanguagesTheme,
   monaco,
 } from '@kbn/monaco';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -123,19 +124,30 @@ describe('react monaco editor', () => {
     });
   });
 
-  it('registers the default theme', () => {
+  it('registers both Kibana themes on first mount, and not again for the same palette', async () => {
+    // Registration is skipped while Monaco already holds themes for the current palette, and
+    // earlier mounts in this file registered it — start from a clean slate so the first mount
+    // below is observable.
+    initializeRegisteredLanguagesTheme.reset();
     const defineThemeSpy = jest.spyOn(window.MonacoEnvironment?.monaco.editor!, 'defineTheme');
 
     render(<MonacoEditor {...defaultProps} />);
 
-    return waitFor(() => {
-      expect(defineThemeSpy).toHaveBeenCalled();
+    await waitFor(() => {
       expect(defineThemeSpy).toHaveBeenCalledWith(CODE_EDITOR_DEFAULT_THEME_ID, expect.any(Object));
       expect(defineThemeSpy).toHaveBeenCalledWith(
         CODE_EDITOR_TRANSPARENT_THEME_ID,
         expect.any(Object)
       );
     });
+    const callsAfterFirstMount = defineThemeSpy.mock.calls.length;
+
+    // Every further editor on the page sees the same palette: no re-registration, which is what
+    // keeps Monaco from regenerating its stylesheet and re-tokenising every model per mount.
+    render(<MonacoEditor {...defaultProps} />);
+
+    expect(defineThemeSpy).toHaveBeenCalledTimes(callsAfterFirstMount);
+    defineThemeSpy.mockRestore();
   });
 
   it('renders the overflow widgets into a portal', async () => {

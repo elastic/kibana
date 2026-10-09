@@ -55,13 +55,13 @@ export const JsonCodeEditorCommon = ({
   const codeEditor = (
     <CodeEditor
       languageId="json"
+      themeOverride={WORKFLOWS_MONACO_EDITOR_THEME}
       width={width}
       height={height}
       value={jsonValue || ''}
       editorDidMount={onEditorDidMount}
       aria-label={codeEditorAriaLabel}
       options={{
-        theme: WORKFLOWS_MONACO_EDITOR_THEME,
         automaticLayout: true,
         fontSize: 12,
         // prevent line numbers margin from being too wide

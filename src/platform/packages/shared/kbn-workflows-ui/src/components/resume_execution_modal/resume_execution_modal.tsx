@@ -207,11 +207,11 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
           onChange={handleInputChange}
           dataTestSubj="workflow-resume-json-editor"
           overflowWidgetsContainerZIndexOverride={6001}
+          themeOverride={WORKFLOWS_MONACO_EDITOR_THEME}
           options={{
             language: 'json',
             fixedOverflowWidgets: true,
             lineNumbersMinChars: 2,
-            theme: WORKFLOWS_MONACO_EDITOR_THEME,
             automaticLayout: true,
             fontSize: 12,
             minimap: {
