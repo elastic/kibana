@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import React, { useState, useEffect } from 'react';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { useEnabledProfilingStatus } from '../../components/contexts/profiling_status/use_enabled_profiling_status';
@@ -34,7 +35,6 @@ import {
   getStorageExplorerAvailability,
   StorageExplorerAvailability,
 } from '../../utils/get_storage_explorer_availability';
-import { UniversalProfilingAddDataTabs } from '../add_data_view/universal_profiling/types';
 
 export function StorageExplorerView() {
   const {
@@ -52,7 +52,7 @@ export function StorageExplorerView() {
     if (availability === StorageExplorerAvailability.NotSetUp) {
       profilingRouter.replace('/add-data-instructions', {
         path: {},
-        query: { selectedTab: UniversalProfilingAddDataTabs.Kubernetes },
+        query: { schema: ProfilingSchema.ECS },
       });
     } else if (availability === StorageExplorerAvailability.NotAvailable) {
       profilingRouter.replace('/', { path: {}, query: { rangeFrom, rangeTo, kuery } });

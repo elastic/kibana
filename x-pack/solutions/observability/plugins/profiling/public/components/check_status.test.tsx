@@ -8,6 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { EnabledProfilingStatus, ProfilingStatus } from '@kbn/profiling-utils';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 
 jest.mock('react-router-dom', () => ({ useLocation: jest.fn() }));
 jest.mock('../hooks/use_profiling_router');
@@ -187,14 +188,14 @@ describe('CheckStatus', () => {
   describe('when data from before 8.9.1 exists', () => {
     const legacyData = makeStatus({ universalProfiling: { hasData: true, hasLegacyData: true } });
 
-    it('redirects to the add data page, which shows the deletion instructions', () => {
+    it('redirects to the Universal Profiling add data instructions, which show how to delete it', () => {
       mockStatus({ data: legacyData });
 
       renderCheckStatus();
 
       expect(routerPush).toHaveBeenCalledWith('/add-data-instructions', {
         path: {},
-        query: {},
+        query: { schema: ProfilingSchema.ECS },
       });
       expect(screen.queryByTestId('profilingApp')).not.toBeInTheDocument();
     });

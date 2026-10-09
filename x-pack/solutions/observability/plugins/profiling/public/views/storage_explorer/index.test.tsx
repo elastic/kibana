@@ -8,6 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { EnabledProfilingStatus } from '@kbn/profiling-utils';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import { IndexLifecyclePhaseSelectOption } from '../../../common/storage_explorer';
 import { useEnabledProfilingStatus } from '../../components/contexts/profiling_status/use_enabled_profiling_status';
 import { TimeRangeContextProvider } from '../../components/contexts/time_range_context';
@@ -15,7 +16,6 @@ import { AsyncStatus } from '../../hooks/use_async';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
-import { UniversalProfilingAddDataTabs } from '../add_data_view/universal_profiling/types';
 import { StorageExplorerView } from '.';
 
 jest.mock('@kbn/ebt-tools', () => ({
@@ -105,7 +105,7 @@ describe('StorageExplorerView', () => {
 
     expect(replace).toHaveBeenCalledWith('/add-data-instructions', {
       path: {},
-      query: { selectedTab: UniversalProfilingAddDataTabs.Kubernetes },
+      query: { schema: ProfilingSchema.ECS },
     });
     expect(queryByTestId('storageExplorerPage')).not.toBeInTheDocument();
     expect(useTimeRangeAsync).not.toHaveBeenCalled();

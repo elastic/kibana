@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import { AsyncStatus } from '../hooks/use_async';
 import { PROFILING_PATHNAMES } from '../routing/pathnames';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
@@ -77,9 +78,12 @@ export function CheckStatus({ children }: { children: React.ReactElement }) {
 
   if (data.universalProfiling.hasLegacyData) {
     if (pathname !== PROFILING_PATHNAMES.addDataInstructions) {
-      // If the cluster still has data from before 8.9.1, redirect to the add data page,
-      // which shows the instructions to delete it
-      router.push(PROFILING_PATHNAMES.addDataInstructions, { path: {}, query: {} });
+      // If the cluster still has data from before 8.9.1, redirect to the Universal Profiling add
+      // data instructions, which show how to delete it
+      router.push(PROFILING_PATHNAMES.addDataInstructions, {
+        path: {},
+        query: { schema: ProfilingSchema.ECS },
+      });
       return null;
     }
     return children;
