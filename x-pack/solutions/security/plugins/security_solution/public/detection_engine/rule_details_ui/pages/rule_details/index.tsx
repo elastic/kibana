@@ -40,7 +40,6 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
-import type { AppHeaderTab } from '@kbn/app-header';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { RuleCustomizationsContextProvider } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
@@ -54,8 +53,6 @@ import { EndpointExceptionsViewer } from '../../../endpoint_exceptions/endpoint_
 import { AlertsTable } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
-import { SecurityAppHeader } from '../../../../common/components/app_header';
-import { useGetSecuritySolutionUrl } from '../../../../common/components/link_to';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import {
   useDeepEqualSelector,
@@ -66,7 +63,6 @@ import type { UpdateDateRange } from '../../../../common/components/charts/commo
 import {
   getDetectionEngineUrl,
   getRuleDetailsTabUrl,
-  getRulesUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
@@ -98,7 +94,7 @@ import {
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
-import { useRuleDetailsMenu } from './use_rule_details_menu';
+import { RuleDetailsAppHeader } from './rule_details_app_header';
 import { SecurityPageName } from '../../../../app/types';
 import { APP_UI_ID, ENABLE_RULE_CHANGES_HISTORY_SETTING } from '../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
@@ -151,63 +147,6 @@ import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_up
 import { useDeprecatedRuleDetailsCallout } from '../../../rule_management/components/rule_deprecation';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
-import { PAGE_TITLE as RULES_PAGE_TITLE } from '../../../common/translations';
-import type { TimeRange } from '../../../rule_gaps/types';
-
-interface RuleDetailsAppHeaderProps {
-  rule: RuleResponse | null;
-  ruleId: string;
-  ruleLoading: boolean;
-  isExistingRule: boolean;
-  hasActionsPrivileges: boolean;
-  tabs: AppHeaderTab[];
-  onRuleEnabledChange: (enabled: boolean) => void;
-  startMlJobsIfNeeded: () => Promise<void>;
-  showBulkDuplicateExceptionsConfirmation: () => Promise<string | null>;
-  showManualRuleRunConfirmation: () => Promise<TimeRange | null>;
-  confirmDeletion: () => Promise<boolean>;
-}
-
-const RuleDetailsAppHeader = ({
-  rule,
-  ruleId,
-  ruleLoading,
-  isExistingRule,
-  hasActionsPrivileges,
-  tabs,
-  onRuleEnabledChange,
-  startMlJobsIfNeeded,
-  showBulkDuplicateExceptionsConfirmation,
-  showManualRuleRunConfirmation,
-  confirmDeletion,
-}: RuleDetailsAppHeaderProps) => {
-  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
-  const menu = useRuleDetailsMenu({
-    rule,
-    ruleId,
-    isExistingRule,
-    hasActionsPrivileges,
-    onRuleEnabledChange,
-    startMlJobsIfNeeded,
-    showBulkDuplicateExceptionsConfirmation,
-    showManualRuleRunConfirmation,
-    confirmDeletion,
-  });
-
-  return (
-    <SecurityAppHeader
-      title={rule?.name ?? i18n.PAGE_TITLE}
-      back={{
-        href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.rules, path: getRulesUrl() }),
-        label: RULES_PAGE_TITLE,
-      }}
-      tabs={tabs}
-      menu={menu}
-      badges={!ruleLoading && !isExistingRule ? [{ label: i18n.DELETED_RULE }] : undefined}
-      spacing="largeBleed"
-    />
-  );
-};
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -731,21 +670,23 @@ export const RuleDetailsPage = connector(
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <RuleCustomizationsContextProvider rule={rule}>
+            <Display show={!globalFullScreen}>
+              <RuleDetailsAppHeader
+                rule={rule}
+                ruleId={ruleId}
+                ruleLoading={ruleLoading}
+                isExistingRule={isExistingRule}
+                hasActionsPrivileges={hasActionsPrivileges}
+                tabs={pageTabs}
+                onRuleEnabledChange={handleOnChangeEnabledRule}
+                startMlJobsIfNeeded={startMlJobsIfNeeded}
+                showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
+                showManualRuleRunConfirmation={showManualRuleRunConfirmation}
+                confirmDeletion={confirmDeletion}
+              />
+            </Display>
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
               <Display show={!globalFullScreen}>
-                <RuleDetailsAppHeader
-                  rule={rule}
-                  ruleId={ruleId}
-                  ruleLoading={ruleLoading}
-                  isExistingRule={isExistingRule}
-                  hasActionsPrivileges={hasActionsPrivileges}
-                  tabs={pageTabs}
-                  onRuleEnabledChange={handleOnChangeEnabledRule}
-                  startMlJobsIfNeeded={startMlJobsIfNeeded}
-                  showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
-                  showManualRuleRunConfirmation={showManualRuleRunConfirmation}
-                  confirmDeletion={confirmDeletion}
-                />
                 <EuiSpacer size="m" />
                 {subTitle && <Subtitle items={subTitle} data-test-subj="header-page-subtitle" />}
                 <EuiSpacer size="xs" />
