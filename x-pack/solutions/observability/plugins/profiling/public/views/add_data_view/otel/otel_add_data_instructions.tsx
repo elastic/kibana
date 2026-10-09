@@ -6,18 +6,43 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-export const OTEL_ADD_DATA_DESCRIPTION = i18n.translate(
-  'xpack.profiling.addDataView.otel.description',
-  { defaultMessage: 'Send profiling data to Elasticsearch with OpenTelemetry.' }
-);
+import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 
 export function OtelAddDataInstructions() {
+  const {
+    start: { core },
+  } = useProfilingDependencies();
+
   return (
-    <EuiText data-test-subj="profilingOtelAddDataInstructions">
-      <p>{OTEL_ADD_DATA_DESCRIPTION}</p>
-    </EuiText>
+    <EuiEmptyPrompt
+      data-test-subj="profilingOtelAddDataInstructions"
+      iconType="logoObservability"
+      title={
+        <h2>
+          {i18n.translate('xpack.profiling.addData.openTelemetry.title', {
+            defaultMessage: 'OpenTelemetry Profiles',
+          })}
+        </h2>
+      }
+      body={i18n.translate('xpack.profiling.addData.openTelemetry.description', {
+        defaultMessage:
+          'The easiest way to start ingesting profiles is by installing the OpenTelemetry Profiling integration. It walks you through deploying the profiler with Elastic Agent and sending the profiles to this deployment.',
+      })}
+      actions={
+        <EuiButton
+          data-test-subj="profilingAddDataViewOtelIntegrationButton"
+          fill
+          iconType="plusCircle"
+          // No version in the package key: Fleet resolves the installed version or the latest one
+          href={core.http.basePath.prepend('/app/integrations/detail/profiling_otel/overview')}
+        >
+          {i18n.translate('xpack.profiling.addData.openTelemetry.integrationButton', {
+            defaultMessage: 'Add OpenTelemetry Profiling integration',
+          })}
+        </EuiButton>
+      }
+    />
   );
 }
