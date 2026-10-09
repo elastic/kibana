@@ -9,7 +9,7 @@
  * Seeds synthetic investigations for local development and review of the investigation template
  * UI. Run from the repo root:
  *
- *   node -r @kbn/setup-node-env x-pack/platform/plugins/shared/agentic_investigations/scripts/seed_investigations.ts
+ *   node -r @kbn/setup-node-env x-pack/platform/plugins/shared/agentic_investigations/scripts/nightshift_seed_investigations.ts
  *
  * Add --help to list the connection flags, --clean to only remove earlier seeds.
  *
