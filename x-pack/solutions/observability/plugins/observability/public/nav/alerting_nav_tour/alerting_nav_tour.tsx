@@ -6,16 +6,20 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import useObservable from 'react-use/lib/useObservable';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
+import {
+  OBSERVABILITY_ALERTING_ALERTS_PATH,
+  OBSERVABILITY_ALERTING_APP_ID,
+} from '@kbn/deeplinks-observability';
 import { AlertingNavGuidedTour } from './guided_tour';
 import { getAlertingNavTourSteps } from './tour_steps';
 import { UnifiedAlertingPromoCard } from './unified_alerting_promo_card';
 
 const ALERTING_NAV_TOUR_STORAGE_KEY = 'observability.alertingNavTour.v3';
-const ALERTING_PANEL_FOOTER_SELECTOR =
-  '[data-test-subj~="kbnChromeNav-sidePanel_alerting"] [data-test-subj="kbnChromeNav-panelFooter"]';
 
 /** Window event to start this tour from other surfaces (e.g. onboarding). */
 export const ALERTING_NAV_START_TOUR_EVENT = 'kbn:alertingOnboarding:startTour';
@@ -26,31 +30,48 @@ interface AlertingNavTourPersistedState {
 
 const DEFAULT_STATE: AlertingNavTourPersistedState = { isDismissed: false };
 
-const useAlertingPanelFooter = (): Element | null => {
-  const [footer, setFooter] = useState<Element | null>(() =>
-    typeof document !== 'undefined' ? document.querySelector(ALERTING_PANEL_FOOTER_SELECTOR) : null
-  );
-
-  useEffect(() => {
-    const sync = () => setFooter(document.querySelector(ALERTING_PANEL_FOOTER_SELECTOR));
-    sync();
-    const observer = new MutationObserver(sync);
-    observer.observe(document.body, { childList: true, subtree: true });
-    return () => observer.disconnect();
-  }, []);
-
-  return footer;
+const isAlertsLandingPath = (pathname: string): boolean => {
+  // Match `/app/observabilityAlerting/alerts` (with optional trailing slash / query handled by caller).
+  const path = pathname.split('?')[0].replace(/\/$/, '');
+  return path.endsWith(OBSERVABILITY_ALERTING_ALERTS_PATH);
 };
 
-/** Promo card in the Alerting side-nav footer + guided tour across Alerting pages. */
+/**
+ * Promo card on the Alerting Alerts landing page (bottom-right) + guided tour.
+ * Spike alternative to side-nav footer placement — see elastic/rna-program#1212.
+ */
 export const AlertingNavTour: React.FC<{ coreStart: CoreStart }> = ({ coreStart }) => {
+  const { euiTheme } = useEuiTheme();
   const isTourEnabled = coreStart.notifications.tours.isEnabled();
-  const footerEl = useAlertingPanelFooter();
+  const currentAppId = useObservable(coreStart.application.currentAppId$, undefined);
+  const [pathname, setPathname] = useState(() =>
+    typeof window !== 'undefined' ? window.location.pathname : ''
+  );
   const [persisted = DEFAULT_STATE, setPersisted] = useLocalStorage<AlertingNavTourPersistedState>(
     ALERTING_NAV_TOUR_STORAGE_KEY,
     DEFAULT_STATE
   );
   const [isTourActive, setIsTourActive] = useState(false);
+
+  useEffect(() => {
+    const onPopState = () => setPathname(window.location.pathname);
+    // Kibana navigations often use history.pushState without a popstate event.
+    const { pushState, replaceState } = window.history;
+    window.history.pushState = function pushStatePatched(...args) {
+      pushState.apply(this, args);
+      setPathname(window.location.pathname);
+    };
+    window.history.replaceState = function replaceStatePatched(...args) {
+      replaceState.apply(this, args);
+      setPathname(window.location.pathname);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => {
+      window.history.pushState = pushState;
+      window.history.replaceState = replaceState;
+      window.removeEventListener('popstate', onPopState);
+    };
+  }, []);
 
   const dismiss = useCallback(() => {
     setPersisted({ isDismissed: true });
@@ -69,14 +90,29 @@ export const AlertingNavTour: React.FC<{ coreStart: CoreStart }> = ({ coreStart 
     return () => window.removeEventListener(ALERTING_NAV_START_TOUR_EVENT, onStart);
   }, [startTour]);
 
+  const showPromoCard =
+    !persisted.isDismissed &&
+    !isTourActive &&
+    currentAppId === OBSERVABILITY_ALERTING_APP_ID &&
+    isAlertsLandingPath(pathname);
+
   return (
     <>
-      {!persisted.isDismissed && footerEl
-        ? createPortal(
-            <UnifiedAlertingPromoCard onTakeTour={startTour} onDismiss={dismiss} />,
-            footerEl
-          )
-        : null}
+      {showPromoCard ? (
+        <div
+          data-test-subj="alertingNavPromoFloatingAnchor"
+          css={css`
+            position: fixed;
+            z-index: ${euiTheme.levels.flyout};
+            right: ${euiTheme.size.l};
+            bottom: ${euiTheme.size.l};
+            width: 280px;
+            max-width: calc(100vw - ${euiTheme.size.xl});
+          `}
+        >
+          <UnifiedAlertingPromoCard onTakeTour={startTour} onDismiss={dismiss} />
+        </div>
+      ) : null}
       {isTourEnabled ? (
         <AlertingNavGuidedTour
           steps={getAlertingNavTourSteps()}
