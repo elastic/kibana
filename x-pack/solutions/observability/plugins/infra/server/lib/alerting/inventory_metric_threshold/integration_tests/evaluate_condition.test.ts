@@ -80,7 +80,6 @@ describe('Inventory Threshold Rule Executor', () => {
     compositeSize: 10000,
     executionTimestamp: new Date(DATES['8.0.0'].hosts_only.max),
     logger,
-    isPodSchemaSelectorEnabled: false,
   };
 
   beforeAll(async () => {

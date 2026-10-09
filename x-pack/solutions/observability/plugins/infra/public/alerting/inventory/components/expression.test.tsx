@@ -19,7 +19,6 @@ import type { InventoryMetricConditions } from '../../../../common/alerting/metr
 import type { AlertContextMeta } from './expression';
 import { defaultExpression, ExpressionRow, Expressions, type ExpressionsProps } from './expression';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { useIsPodSchemaSelectorEnabled } from '../../../hooks/use_is_pod_schema_selector_enabled';
 import type { ResolvedDataView } from '../../../utils/data_view';
 import { DEFAULT_SCHEMA, TIMESTAMP_FIELD } from '../../../../common/constants';
 import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
@@ -67,9 +66,6 @@ jest.mock('../../../hooks/use_kibana', () => ({
   }),
 }));
 
-jest.mock('../../../hooks/use_is_pod_schema_selector_enabled', () => ({
-  useIsPodSchemaSelectorEnabled: jest.fn(() => false),
-}));
 const exampleCustomMetric = {
   id: 'this-is-an-id',
   field: 'some.system.field',
@@ -79,15 +75,7 @@ const exampleCustomMetric = {
 
 const dataViewMock = dataViewPluginMocks.createStartContract();
 
-const mockedUseIsPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled as jest.MockedFunction<
-  typeof useIsPodSchemaSelectorEnabled
->;
-
 describe('Expression', () => {
-  beforeEach(() => {
-    mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(false);
-  });
-
   async function setup(currentOptions: AlertContextMeta) {
     const ruleParams: {
       criteria: unknown[];
@@ -232,10 +220,10 @@ describe('Expression', () => {
       .wrapper.find('[data-test-subj="schemaExpressionSelect"]')
       .prop('value');
 
-  it('previews a pod rule as ecs without rewriting a stored semconv schema', () => {
+  it('previews a pod rule on the stored schema without rewriting it', () => {
     const preview = previewSchema({ nodeType: 'pod', schema: 'semconv' });
 
-    expect(preview.schema).toBe('ecs');
+    expect(preview.schema).toBe('semconv');
     expect(preview.storedSchema).toBe('semconv');
   });
 
@@ -248,47 +236,30 @@ describe('Expression', () => {
   });
 
   describe('Schema control', () => {
-    it('is shown for hosts regardless of the pod flag', () => {
-      expect(hasSchemaControl({ nodeType: 'host' })).toBe(true);
-
-      mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
+    it('is shown for hosts', () => {
       expect(hasSchemaControl({ nodeType: 'host' })).toBe(true);
     });
 
-    it('is hidden for pods while the pod flag is off', () => {
-      expect(hasSchemaControl({ nodeType: 'pod' })).toBe(false);
-    });
-
-    it('is shown for pods once the pod flag is on', () => {
-      mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
-
+    it('is shown for pods', () => {
       expect(hasSchemaControl({ nodeType: 'pod' })).toBe(true);
     });
 
     it('stays hidden for node types that have no schema selector', () => {
-      mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
-
       expect(hasSchemaControl({ nodeType: 'container' })).toBe(false);
       expect(hasSchemaControl({ nodeType: 'awsEC2' })).toBe(false);
     });
 
-    it('previews a pod rule on the selected schema once the pod flag is on', () => {
-      mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
-
+    it('previews a pod rule on the selected schema', () => {
       expect(previewSchema({ nodeType: 'pod', schema: 'semconv' }).schema).toBe('semconv');
       expect(previewSchema({ nodeType: 'pod', schema: 'ecs' }).schema).toBe('ecs');
     });
 
     it('treats a pod rule without a stored schema like a host rule without one', () => {
-      mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
-
       expect(selectedSchema({ nodeType: 'pod' })).toBe(DEFAULT_SCHEMA);
       expect(previewSchema({ nodeType: 'pod' }).schema).toBeUndefined();
     });
 
     it('shows the stored schema of a pod rule', () => {
-      mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
-
       expect(selectedSchema({ nodeType: 'pod', schema: 'semconv' })).toBe('semconv');
       expect(selectedSchema({ nodeType: 'pod', schema: 'ecs' })).toBe('ecs');
     });
@@ -299,8 +270,6 @@ describe('Expression', () => {
     });
 
     it('stores the schema picked in the schema control for a pod rule', () => {
-      mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
-
       const { wrapper, params } = renderShallow({ nodeType: 'pod', schema: 'semconv' });
 
       wrapper.find('[data-test-subj="schemaExpressionSelect"]').simulate('change', 'ecs');
@@ -317,24 +286,13 @@ describe('Expression', () => {
       expect(params.schema).toBe('semconv');
     });
 
-    it('prefills a pod schema from the waffle once the pod flag is on', async () => {
-      mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
-
+    it('prefills a pod schema from the waffle', async () => {
       const { ruleParams } = await setup({
         nodeType: 'pod',
         schema: 'semconv',
       } as AlertContextMeta);
 
       expect(ruleParams.schema).toBe('semconv');
-    });
-
-    it('does not prefill a pod schema while the pod flag is off', async () => {
-      const { ruleParams } = await setup({
-        nodeType: 'pod',
-        schema: 'semconv',
-      } as AlertContextMeta);
-
-      expect(ruleParams.schema).toBeUndefined();
     });
 
     const NON_SCHEMA_AWARE_NODE_TYPES: InventoryItemType[] = [
@@ -348,9 +306,6 @@ describe('Expression', () => {
     it.each(NON_SCHEMA_AWARE_NODE_TYPES)(
       'omits the schema when rule is selected for: %s',
       (nodeType) => {
-        // Pod flag on so the start type (host) still shows the selector and has a schema to drop.
-        mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
-
         const { wrapper, params } = renderShallow({ nodeType: 'host', schema: 'semconv' });
 
         wrapper.find('[data-test-subj="forExpressionSelect"]').simulate('change', nodeType);
@@ -362,8 +317,6 @@ describe('Expression', () => {
     );
 
     it('keeps the schema when rule is selected For another node type that has a selector', () => {
-      mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
-
       const { wrapper, params } = renderShallow({ nodeType: 'host', schema: 'semconv' });
 
       wrapper.find('[data-test-subj="forExpressionSelect"]').simulate('change', 'pod');
