@@ -358,6 +358,11 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     createConversation,
   });
 
+  const uploadingChipNames = useMemo(
+    () => new Set([...uploadingNames, ...loadingPdfNames]),
+    [uploadingNames, loadingPdfNames]
+  );
+
   const handlePasteFile = useCallback(
     (file: File): string | undefined =>
       file.type === SUPPORTED_PDF_MIME_TYPE ? handlePastePdf?.(file) : handlePasteImage?.(file),
@@ -578,8 +583,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
           acceptPdf={isPdfUploadAvailable}
           onAfterInput={handleAfterInput}
           onHoveredPlaceholderChange={setHoveredImageName}
-          uploadingNames={uploadingNames}
-          uploadingPdfNames={loadingPdfNames}
+          uploadingNames={uploadingChipNames}
         />
       </EuiFlexItem>
       {isMessageTooLong && (

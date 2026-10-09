@@ -90,7 +90,7 @@ let mockMessageEditorProps: {
   onPasteFile?: (file: File) => string | undefined;
   onAfterInput?: () => void;
   acceptPdf?: boolean;
-  uploadingPdfNames?: Set<string>;
+  uploadingNames?: ReadonlySet<string>;
 } = {};
 jest.mock('./message_editor', () => ({
   useMessageEditor: jest.fn(),
@@ -572,12 +572,13 @@ describe('ConversationInput', () => {
     });
 
     it('passes the PDF loading names to the editor chips', () => {
-      const loadingPdfNames = new Set(['invoice.pdf']);
-      mockedUsePdfUpload.mockReturnValue(pdfUploadState({ loadingPdfNames }));
+      mockedUsePdfUpload.mockReturnValue(
+        pdfUploadState({ loadingPdfNames: new Set(['invoice.pdf']) })
+      );
 
       renderInput(<ConversationInput />);
 
-      expect(mockMessageEditorProps.uploadingPdfNames).toBe(loadingPdfNames);
+      expect(mockMessageEditorProps.uploadingNames).toEqual(new Set(['invoice.pdf']));
     });
 
     it('holds the submit while a PDF is loading, and shows its pill', () => {

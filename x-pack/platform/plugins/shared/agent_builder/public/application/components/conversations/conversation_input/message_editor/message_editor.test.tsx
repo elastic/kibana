@@ -567,25 +567,23 @@ describe('MessageEditor', () => {
       expect(editor.querySelector('[data-attachment-placeholder]')).toBeNull();
     });
 
-    it('marks a pdf chip as uploading from uploadingPdfNames only', () => {
+    it('marks a pdf chip as uploading from uploadingNames', () => {
       const { messageEditor } = createMockMessageEditor();
       const { rerender } = render(
         <MessageEditor
           messageEditor={messageEditor}
           onSubmit={mockOnSubmit}
-          uploadingNames={new Set(['same.name'])}
           data-test-subj="messageEditor"
         />
       );
       const editor = screen.getByTestId('messageEditor');
-      editor.appendChild(createAttachmentPlaceholderElement('same.name', 'pdf'));
+      editor.appendChild(createAttachmentPlaceholderElement('invoice.pdf', 'pdf'));
 
       rerender(
         <MessageEditor
           messageEditor={messageEditor}
           onSubmit={mockOnSubmit}
-          uploadingNames={new Set(['same.name'])}
-          uploadingPdfNames={new Set(['same.name'])}
+          uploadingNames={new Set(['invoice.pdf'])}
           data-test-subj="messageEditor"
         />
       );

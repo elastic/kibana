@@ -168,13 +168,13 @@ describe('pdf placeholders', () => {
       expect(getPlaceholderNamesFromElement(container, 'pdf')).toEqual(['only.pdf']);
     });
 
-    it('syncs the uploading state of one kind only', () => {
+    it('syncs the uploading state of chips of every kind by name', () => {
       const container = setup();
-      syncChipsUploadingState(container, new Set(['same.name']), 'pdf');
+      syncChipsUploadingState(container, new Set(['only.pdf']));
       const [image, pdf, otherPdf] = Array.from(container.children);
       expect(image.hasAttribute('data-uploading')).toBe(false);
-      expect(pdf.getAttribute('data-uploading')).toBe('true');
-      expect(otherPdf.hasAttribute('data-uploading')).toBe(false);
+      expect(pdf.hasAttribute('data-uploading')).toBe(false);
+      expect(otherPdf.getAttribute('data-uploading')).toBe('true');
     });
   });
 });

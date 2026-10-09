@@ -88,7 +88,6 @@ interface MessageEditorProps {
   onAfterInput?: () => void;
   onHoveredPlaceholderChange?: (name: string | null) => void;
   uploadingNames?: ReadonlySet<string>;
-  uploadingPdfNames?: ReadonlySet<string>;
 }
 
 export const MessageEditor: React.FC<MessageEditorProps> = ({
@@ -103,7 +102,6 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   onAfterInput,
   onHoveredPlaceholderChange,
   uploadingNames,
-  uploadingPdfNames,
 }) => {
   const [isComposing, setIsComposing] = useState(false);
   const commandMenuRef = useRef<CommandMenuHandle>(null);
@@ -154,8 +152,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   useEffect(() => {
     if (!ref.current) return;
     syncChipsUploadingState(ref.current, uploadingNames);
-    syncChipsUploadingState(ref.current, uploadingPdfNames, 'pdf');
-  }, [uploadingNames, uploadingPdfNames, ref]);
+  }, [uploadingNames, ref]);
 
   const handleCompositionStart = () => setIsComposing(true);
   const handleCompositionEnd = () => {

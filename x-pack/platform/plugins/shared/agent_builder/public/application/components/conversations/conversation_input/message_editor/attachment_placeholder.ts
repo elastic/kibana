@@ -151,13 +151,12 @@ export const removePlaceholderByName = (
   }
 };
 
-/** Sets `data-uploading` on every chip of `kind` in `el` whose name is in `uploadingNames`, clears it otherwise. */
+/** Sets `data-uploading` on every chip in `el` whose name is in `uploadingNames`, clears it otherwise. */
 export const syncChipsUploadingState = (
   el: HTMLElement,
-  uploadingNames: ReadonlySet<string> | undefined,
-  kind: PlaceholderKind = 'image'
+  uploadingNames: ReadonlySet<string> | undefined
 ): void => {
-  getChipsOfKind(el, kind).forEach((chip) => {
+  el.querySelectorAll<HTMLElement>(`[${ATTACHMENT_PLACEHOLDER_ATTRIBUTE}]`).forEach((chip) => {
     if (uploadingNames?.has(chip.dataset.placeholderName ?? '')) {
       chip.setAttribute('data-uploading', 'true');
     } else {
