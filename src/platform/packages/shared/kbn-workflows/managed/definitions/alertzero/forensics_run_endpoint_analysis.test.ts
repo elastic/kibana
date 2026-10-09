@@ -1053,7 +1053,10 @@ describe('Endpoint analysis run', () => {
         ignore_unavailable: true,
         size: 1,
         _source: false,
-        query: { term: { 'host.name': '{{ steps.resolve_host.output.host_name }}' } },
+        query: [
+          { term: { 'host.name': '{{ steps.resolve_host.output.host_name }}' } },
+          { range: { '@timestamp': { gte: 'now-72h' } } },
+        ],
       });
       // A read error is a gap, not "no telemetry": the run fails and the indicator stays
       // pending for a cheap retry, like the alert lookups.
@@ -1404,7 +1407,7 @@ describe('Endpoint analysis run', () => {
       const dispatch = stepByName('propose_actions');
       expect(dispatch?.type).toBe('parallel');
       expect(dispatch?.mode).toBe('settled');
-      expect(dispatch?.concurrency?.max).toBe('{{ consts.max_recommended_actions }}');
+      expect(dispatch?.concurrency?.max).toBe(8);
       const recommendedActions = schema?.properties?.recommendedActions as { maxItems?: unknown };
       // Typed expression: `{{ }}` would leave maxItems a string, which Claude rejects.
       expect(recommendedActions?.maxItems).toBe('${{ consts.max_recommended_actions }}');

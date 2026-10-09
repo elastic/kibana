@@ -266,8 +266,11 @@ steps:
               size: 1
               _source: false
               query:
-                term:
-                  host.name: "{{ steps.resolve_host.output.host_name }}"
+                - term:
+                    host.name: "{{ steps.resolve_host.output.host_name }}"
+                - range:
+                    "@timestamp":
+                      gte: "now-72h"
 
           # `checked` tells "no telemetry" apart from "did not look": a skipped step
           # has no output, and that must not read as an empty index.
