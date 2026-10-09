@@ -26,8 +26,8 @@ import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
-import { applyLifecycleInput } from '../../../lib/significant_events/events/lifecycle_controller';
-import { operatorInputFor } from '../../../lib/significant_events/events/lifecycle_state_machine';
+import { applyLifecycleInput } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
+import { operatorInputFor } from '../../../lib/significant_events/events/lifecycle/lifecycle_state_machine';
 import {
   cleanupStaleEvents,
   type CleanupStaleEventsResult,

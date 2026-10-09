@@ -12,7 +12,7 @@ import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { IRulesManagementClient } from '../../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
 import type { RuleEventsClient } from './rule_events_client';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
-import { applyLifecycleInput } from './lifecycle_controller';
+import { applyLifecycleInput } from './lifecycle/lifecycle_controller';
 
 const EVENTS_BATCH_SIZE = 1000;
 const EVENT_STATUS_UPDATE_CONCURRENCY = 10;
