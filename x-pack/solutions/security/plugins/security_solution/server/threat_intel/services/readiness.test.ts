@@ -19,16 +19,12 @@ const logger = loggingSystemMock.createLogger();
 const semanticFieldMappings = {
   '.kibana-threat-reports': {
     mappings: {
-      'content.title': {
-        full_name: 'content.title',
-        mapping: {
-          title: { type: 'semantic_text', inference_id: '.default-embedding' },
-        },
-      },
-      'content.body_text': {
-        full_name: 'content.body_text',
-        mapping: {
-          body_text: { type: 'semantic_text', inference_id: '.default-embedding' },
+      properties: {
+        content: {
+          properties: {
+            title: { type: 'semantic_text', inference_id: '.default-embedding' },
+            body_text: { type: 'semantic_text', inference_id: '.default-embedding' },
+          },
         },
       },
     },
@@ -66,7 +62,11 @@ const buildDefaultDeps = (
 } => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.indices.exists.mockResolvedValue(true);
-  esClient.indices.getFieldMapping.mockResolvedValue(semanticFieldMappings as never);
+  esClient.indices.getMapping.mockResolvedValue(semanticFieldMappings as never);
+  // Serverless answers 410 api_not_available_exception for this API.
+  esClient.indices.getFieldMapping.mockRejectedValue(
+    new Error('api_not_available_exception: 410') as never
+  );
   esClient.inference.get.mockResolvedValue({} as never);
   esClient.search.mockResolvedValue(buildUsableStatsResponse() as never);
 
@@ -215,6 +215,40 @@ describe('getThreatIntelReadiness', () => {
       }
       return {} as never;
     });
+
+    const result = await getThreatIntelReadiness(deps);
+
+    expect(result.reasonCodes).toContain('embedding_endpoint_unavailable');
+  });
+
+  it('resolves embedding endpoints via getMapping and never calls getFieldMapping (serverless 410)', async () => {
+    const deps = buildDefaultDeps();
+
+    const result = await getThreatIntelReadiness(deps);
+
+    expect(result.reasonCodes).not.toContain('embedding_endpoint_unavailable');
+    expect(deps.esClient.indices.getFieldMapping).not.toHaveBeenCalled();
+    expect(deps.esClient.indices.getMapping).toHaveBeenCalledWith({
+      index: '.kibana-threat-reports',
+    });
+  });
+
+  it('returns degraded with embedding_endpoint_unavailable when a semantic field has no inference_id', async () => {
+    const deps = buildDefaultDeps();
+    deps.esClient.indices.getMapping.mockResolvedValue({
+      '.kibana-threat-reports': {
+        mappings: {
+          properties: {
+            content: {
+              properties: {
+                title: { type: 'semantic_text' },
+                body_text: { type: 'semantic_text', inference_id: '.default-embedding' },
+              },
+            },
+          },
+        },
+      },
+    } as never);
 
     const result = await getThreatIntelReadiness(deps);
 
