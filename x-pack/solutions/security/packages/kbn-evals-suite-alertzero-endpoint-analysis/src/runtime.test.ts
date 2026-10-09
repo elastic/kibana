@@ -412,16 +412,55 @@ describe('seedAlertZeroEndpoint', () => {
     expect(paths.filter((path) => path.includes('context-engine'))).toEqual([]);
   });
 
-  it('seeds the Attack Discovery alert the KI points at, with the seeded host', async () => {
+  it('seeds the Attack Discovery alert in the production shape the workflow reads', async () => {
     const es = createEs();
     const fixture = await seedAlertZeroEndpoint(es, createFetch());
 
     const documents = indexed(es);
-    const alert = documents.find(({ index }) => index.includes('attack.discovery.alerts'));
+    const alert = documents.find(
+      ({ index }) => index === '.adhoc.alerts-security.attack.discovery.alerts-default'
+    );
     const ki = documents.find(({ id }) => id === fixture.kiId);
-    expect(alert?.document['host.name']).toBe(fixture.host);
+    const constituentIds = alert?.document['kibana.alert.attack_discovery.alert_ids'] as string[];
+    const constituent = documents.find(({ id }) => id === constituentIds?.[0]);
+
+    // The workflow (forensics_run_endpoint_analysis.yaml) reads the AD alert's
+    // `kibana.alert.attack_discovery.alert_ids`, then resolves the host from its
+    // constituent detections in `.alerts-security.alerts-<space>` via a `host.name`
+    // terms aggregation. The AD alert itself carries no host in production
+    // (transformToBaseAlertDocument), so a flat `host.name` on it is never read.
     expect(alert?.id).toBe(ki?.document.attributes?.attack_discovery_alert_id);
     expect(alert?.document['kibana.alert.uuid']).toBe(alert?.id);
+    expect(alert?.document['host.name']).toBeUndefined();
+    expect(alert?.document['host']).toBeUndefined();
+    expect(constituentIds).toHaveLength(1);
+    expect(constituent?.index).toBe('.alerts-security.alerts-default');
+    expect(constituent?.document.host).toEqual({ name: fixture.host });
+  });
+
+  it('cleans up the seeded constituent detection with the Attack Discovery alert', async () => {
+    const es = createEs();
+    const fixture = await seedAlertZeroEndpoint(es, createFetch());
+    await fixture.cleanup();
+
+    const deleted = (es.delete.mock.calls as unknown[][]).map(
+      ([params]) => params as { index: string; id: string }
+    );
+    const constituent = deleted.find(
+      ({ index }) => index === '.alerts-security.alerts-default'
+    );
+    const documents = indexed(es);
+    const adAlert = documents.find(
+      ({ index }) => index === '.adhoc.alerts-security.attack.discovery.alerts-default'
+    );
+    const constituentIds = adAlert?.document['kibana.alert.attack_discovery.alert_ids'] as string[];
+    expect(deleted).toContainEqual(
+      expect.objectContaining({
+        index: '.adhoc.alerts-security.attack.discovery.alerts-default',
+        id: adAlert?.id,
+      })
+    );
+    expect(constituent?.id).toBe(constituentIds?.[0]);
   });
 
   it('exposes the full seeded command line as the expected IoC evidence', async () => {

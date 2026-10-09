@@ -363,6 +363,17 @@ WORKER_ROLE.elasticsearch.indices.push({
 
 const AI_INDEX_ROUTE = '/api/context_engine/ai_index';
 const ATTACK_DISCOVERY_ADHOC_INDEX = '.adhoc.alerts-security.attack.discovery.alerts-default';
+// Constituent detections live in the space's detections index, which exists in the
+// suite's stack before the spec runs — the attack-analysis suite indexes into it the
+// same way without creating it.
+const CONSTITUENT_ALERTS_INDEX = '.alerts-security.alerts-default';
+// Matches `ALERT_ATTACK_DISCOVERY_ALERT_IDS` from @kbn/attack-discovery-schedules-common
+// (`kibana.alert.attack_discovery.alert_ids`), restated locally: the package is not a
+// kbn_reference of this suite, and the workflow's read path (forensics_run_endpoint_analysis.yaml,
+// `fetch_attack_discovery_alert` → `extract_host_from_ad_constituent_alerts`) reads this key.
+// A test below pins the seeded shape against the workflow's read path, so drift on either
+// side fails the suite rather than silently skipping the analysis.
+const AD_ALERT_IDS_KEY = 'kibana.alert.attack_discovery.alert_ids';
 export const SEEDED_COMMAND = 'powershell.exe -EncodedCommand SQBFAFgA';
 
 export const seedAlertZeroEndpoint = async (
@@ -388,6 +399,7 @@ export const seedAlertZeroEndpoint = async (
   const aiIndexDest = `ai-index-idx-${aiIndexId}`;
   const kiId = `alertzero-ki-${id}`;
   const attackDiscoveryAlertId = `alertzero-discovery-${id}`;
+  const constituentAlertId = `alertzero-constituent-${id}`;
   let conversationId: string | undefined;
   let aiIndexCreated = false;
 
@@ -417,6 +429,15 @@ export const seedAlertZeroEndpoint = async (
           {
             index: ATTACK_DISCOVERY_ADHOC_INDEX,
             id: attackDiscoveryAlertId,
+            refresh: 'wait_for',
+          },
+          { ignore: [404] }
+        ),
+      async () =>
+        es.delete(
+          {
+            index: CONSTITUENT_ALERTS_INDEX,
+            id: constituentAlertId,
             refresh: 'wait_for',
           },
           { ignore: [404] }
@@ -515,7 +536,12 @@ export const seedAlertZeroEndpoint = async (
     }
     // The production analysis resolves the host from the Attack Discovery alert named by the
     // KI's `attack_discovery_alert_id`, not from the KI's own `host_name`; without a real alert
-    // the child skips forensic analysis.
+    // the child skips forensic analysis. Production AD alert documents (transformToBaseAlertDocument
+    // in @kbn/attack-discovery-schedules-common) carry `kibana.alert.attack_discovery.alert_ids`
+    // and NO host of their own: the workflow first reads a `host.name` from the AD doc, then —
+    // for every real alert — resolves it from the AD doc's constituent detections via a
+    // `host.name` terms aggregation over `.alerts-security.alerts-<space>`. Mirror that shape:
+    // flat `alert_ids` key, nested `host.name` on the constituent detection.
     await es.index({
       index: ATTACK_DISCOVERY_ADHOC_INDEX,
       id: attackDiscoveryAlertId,
@@ -527,7 +553,17 @@ export const seedAlertZeroEndpoint = async (
         'kibana.alert.rule.rule_type_id': 'attack-discovery',
         'kibana.alert.workflow_status': 'open',
         'kibana.alert.status': 'active',
-        'host.name': host,
+        [AD_ALERT_IDS_KEY]: [constituentAlertId],
+      },
+    });
+    await es.index({
+      index: CONSTITUENT_ALERTS_INDEX,
+      id: constituentAlertId,
+      refresh: 'wait_for',
+      document: {
+        '@timestamp': new Date(now).toISOString(),
+        'kibana.alert.uuid': constituentAlertId,
+        host: { name: host },
       },
     });
     await fetch(AI_INDEX_ROUTE, {
