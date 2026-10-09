@@ -9,12 +9,25 @@ import { schema } from '@kbn/config-schema';
 
 import { getPutPayloadSchema } from './put_payload';
 
+export const MAX_BULK_ROLES = 100;
+const MAX_ROLE_NAME_LENGTH = 1024;
+
 export function getBulkCreateOrUpdatePayloadSchema(
   getBasePrivilegeNames: () => { global: string[]; space: string[] }
 ) {
   return schema.object(
     {
-      roles: schema.recordOf(schema.string(), getPutPayloadSchema(getBasePrivilegeNames)),
+      roles: schema.recordOf(
+        schema.string({ minLength: 1, maxLength: MAX_ROLE_NAME_LENGTH }),
+        getPutPayloadSchema(getBasePrivilegeNames),
+        {
+          validate: (roles) => {
+            if (Object.keys(roles).length > MAX_BULK_ROLES) {
+              return `cannot contain more than ${MAX_BULK_ROLES} roles`;
+            }
+          },
+        }
+      ),
     },
     {
       meta: {
