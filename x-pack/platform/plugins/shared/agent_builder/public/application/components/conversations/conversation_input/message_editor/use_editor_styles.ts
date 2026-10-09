@@ -8,21 +8,21 @@
 import { css } from '@emotion/react';
 import { euiTextTruncate, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import {
-  IMAGE_PLACEHOLDER_ATTRIBUTE,
-  IMAGE_PLACEHOLDER_ICON_ATTRIBUTE,
-  IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE,
-} from './image_placeholder';
+  ATTACHMENT_PLACEHOLDER_ATTRIBUTE,
+  ATTACHMENT_PLACEHOLDER_ICON_ATTRIBUTE,
+  ATTACHMENT_PLACEHOLDER_REMOVE_ATTRIBUTE,
+} from './attachment_placeholder';
 import {
   imageUploadProgressFillStyles,
   imageUploadProgressTrackColorStyles,
 } from '../image_upload_styles';
 
-/** Returns CSS for the image placeholder chip inside the contenteditable editor. */
-export const useImagePlaceholderStyles = () => {
+/** Returns CSS for the attachment placeholder chip inside the contenteditable editor. */
+export const useAttachmentPlaceholderStyles = () => {
   const { euiTheme } = useEuiTheme();
   const xsFontStyles = useEuiFontSize('m');
   return css`
-    [${IMAGE_PLACEHOLDER_ATTRIBUTE}] {
+    [${ATTACHMENT_PLACEHOLDER_ATTRIBUTE}] {
       display: inline-flex;
       align-items: center;
       gap: ${euiTheme.size.xs};
@@ -40,17 +40,17 @@ export const useImagePlaceholderStyles = () => {
       overflow: hidden;
       height: 20px;
     }
-    [${IMAGE_PLACEHOLDER_ATTRIBUTE}]:hover {
+    [${ATTACHMENT_PLACEHOLDER_ATTRIBUTE}]:hover {
       background-color: ${euiTheme.colors.backgroundLightPrimary};
     }
-    [${IMAGE_PLACEHOLDER_ATTRIBUTE}] > [${IMAGE_PLACEHOLDER_ICON_ATTRIBUTE}] {
+    [${ATTACHMENT_PLACEHOLDER_ATTRIBUTE}] > [${ATTACHMENT_PLACEHOLDER_ICON_ATTRIBUTE}] {
       display: inline-flex;
       flex-shrink: 0;
       align-self: center;
       width: ${euiTheme.size.m};
       height: ${euiTheme.size.m};
     }
-    [${IMAGE_PLACEHOLDER_ATTRIBUTE}] > [${IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE}] {
+    [${ATTACHMENT_PLACEHOLDER_ATTRIBUTE}] > [${ATTACHMENT_PLACEHOLDER_REMOVE_ATTRIBUTE}] {
       display: none;
       cursor: pointer;
       flex-shrink: 0;
@@ -58,30 +58,31 @@ export const useImagePlaceholderStyles = () => {
       width: ${euiTheme.size.m};
       height: ${euiTheme.size.m};
     }
-    [${IMAGE_PLACEHOLDER_ATTRIBUTE}]:hover > [${IMAGE_PLACEHOLDER_ICON_ATTRIBUTE}] {
+    [${ATTACHMENT_PLACEHOLDER_ATTRIBUTE}]:hover > [${ATTACHMENT_PLACEHOLDER_ICON_ATTRIBUTE}] {
       display: none;
     }
-    [${IMAGE_PLACEHOLDER_ATTRIBUTE}]:hover > [${IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE}] {
+    [${ATTACHMENT_PLACEHOLDER_ATTRIBUTE}]:hover > [${ATTACHMENT_PLACEHOLDER_REMOVE_ATTRIBUTE}] {
       display: inline-flex;
     }
-    [${IMAGE_PLACEHOLDER_ATTRIBUTE}] > .image-placeholder-label {
+    [${ATTACHMENT_PLACEHOLDER_ATTRIBUTE}] > .attachment-placeholder-label {
       min-width: 0;
       ${euiTextTruncate('100%')}
       color: ${euiTheme.colors.textPrimary};
       ${xsFontStyles}
       font-weight: ${euiTheme.font.weight.regular};
     }
-    [${IMAGE_PLACEHOLDER_ATTRIBUTE}] > .image-placeholder-progress-track {
+    [${ATTACHMENT_PLACEHOLDER_ATTRIBUTE}] > .attachment-placeholder-progress-track {
       display: none;
     }
-    [${IMAGE_PLACEHOLDER_ATTRIBUTE}][data-uploading='true'] {
+    [${ATTACHMENT_PLACEHOLDER_ATTRIBUTE}][data-uploading='true'] {
       width: calc(${euiTheme.size.l} * 3);
       background-color: ${euiTheme.colors.backgroundBaseSubdued};
     }
-    [${IMAGE_PLACEHOLDER_ATTRIBUTE}][data-uploading='true'] > * {
+    [${ATTACHMENT_PLACEHOLDER_ATTRIBUTE}][data-uploading='true'] > * {
       visibility: hidden;
     }
-    [${IMAGE_PLACEHOLDER_ATTRIBUTE}][data-uploading='true'] > .image-placeholder-progress-track {
+    [${ATTACHMENT_PLACEHOLDER_ATTRIBUTE}][data-uploading='true']
+      > .attachment-placeholder-progress-track {
       display: block;
       visibility: visible;
       position: absolute;
@@ -92,9 +93,9 @@ export const useImagePlaceholderStyles = () => {
       transform: translateY(-50%);
       ${imageUploadProgressTrackColorStyles(euiTheme)}
     }
-    [${IMAGE_PLACEHOLDER_ATTRIBUTE}][data-uploading='true']
-      > .image-placeholder-progress-track
-      > .image-placeholder-progress-fill {
+    [${ATTACHMENT_PLACEHOLDER_ATTRIBUTE}][data-uploading='true']
+      > .attachment-placeholder-progress-track
+      > .attachment-placeholder-progress-fill {
       ${imageUploadProgressFillStyles(euiTheme)}
     }
   `;

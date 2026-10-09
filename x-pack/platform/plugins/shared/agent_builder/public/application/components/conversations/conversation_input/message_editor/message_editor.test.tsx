@@ -12,9 +12,9 @@ import { createTextFragment, NON_BREAKING_SPACE } from './utils';
 import type { MessageEditorController, MessageEditorInstance } from './use_message_editor';
 import { CommandId } from './command_menu';
 import {
-  createImagePlaceholderElement,
-  IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE,
-} from './image_placeholder';
+  createAttachmentPlaceholderElement,
+  ATTACHMENT_PLACEHOLDER_REMOVE_ATTRIBUTE,
+} from './attachment_placeholder';
 import type {
   CommandMenuComponentProps,
   CommandMenuHandle,
@@ -498,7 +498,7 @@ describe('MessageEditor', () => {
     fireEvent.paste(editor, { clipboardData: dataTransfer });
 
     expect(onPasteFile).toHaveBeenCalledWith(pngFile);
-    expect(editor.querySelector('[data-image-placeholder]')).not.toBeNull();
+    expect(editor.querySelector('[data-attachment-placeholder]')).not.toBeNull();
   });
 
   describe('pasting a PDF', () => {
@@ -544,7 +544,7 @@ describe('MessageEditor', () => {
       const { editor, pdfFile } = pastePdf({ acceptPdf: true, onPasteFile });
 
       expect(onPasteFile).toHaveBeenCalledWith(pdfFile);
-      const chip = editor.querySelector('[data-image-placeholder]');
+      const chip = editor.querySelector('[data-attachment-placeholder]');
       expect(chip).not.toBeNull();
       expect(chip?.getAttribute('data-placeholder-kind')).toBe('pdf');
     });
@@ -555,7 +555,7 @@ describe('MessageEditor', () => {
       const { editor } = pastePdf({ acceptPdf: true, onPasteFile });
 
       expect(onPasteFile).toHaveBeenCalled();
-      expect(editor.querySelector('[data-image-placeholder]')).toBeNull();
+      expect(editor.querySelector('[data-attachment-placeholder]')).toBeNull();
     });
 
     it('ignores the pdf when acceptPdf is off', () => {
@@ -564,7 +564,7 @@ describe('MessageEditor', () => {
       const { editor } = pastePdf({ onPasteFile });
 
       expect(onPasteFile).not.toHaveBeenCalled();
-      expect(editor.querySelector('[data-image-placeholder]')).toBeNull();
+      expect(editor.querySelector('[data-attachment-placeholder]')).toBeNull();
     });
 
     it('marks a pdf chip as uploading from uploadingPdfNames only', () => {
@@ -578,7 +578,7 @@ describe('MessageEditor', () => {
         />
       );
       const editor = screen.getByTestId('messageEditor');
-      editor.appendChild(createImagePlaceholderElement('same.name', 'pdf'));
+      editor.appendChild(createAttachmentPlaceholderElement('same.name', 'pdf'));
 
       rerender(
         <MessageEditor
@@ -590,7 +590,7 @@ describe('MessageEditor', () => {
         />
       );
 
-      expect(editor.querySelector('[data-image-placeholder]')).toHaveAttribute(
+      expect(editor.querySelector('[data-attachment-placeholder]')).toHaveAttribute(
         'data-uploading',
         'true'
       );
@@ -627,7 +627,7 @@ describe('MessageEditor', () => {
       },
     });
 
-    const chip = editor.querySelector('[data-image-placeholder]') as HTMLElement;
+    const chip = editor.querySelector('[data-attachment-placeholder]') as HTMLElement;
     expect(chip).not.toBeNull();
     expect(chip.getAttribute('data-uploading')).toBe('true');
   });
@@ -673,7 +673,7 @@ describe('MessageEditor', () => {
       />
     );
 
-    const chip = editor.querySelector('[data-image-placeholder]') as HTMLElement;
+    const chip = editor.querySelector('[data-attachment-placeholder]') as HTMLElement;
     expect(chip).not.toBeNull();
     expect(chip.getAttribute('data-uploading')).toBeNull();
   });
@@ -707,7 +707,7 @@ describe('MessageEditor', () => {
       },
     });
 
-    const chip = editor.querySelector('[data-image-placeholder]') as HTMLElement;
+    const chip = editor.querySelector('[data-attachment-placeholder]') as HTMLElement;
     expect(chip).not.toBeNull();
 
     const spaceNode = chip.nextSibling;
@@ -744,7 +744,7 @@ describe('MessageEditor', () => {
 
     fireEvent.paste(editor, { clipboardData: dataTransfer });
 
-    expect(editor.querySelector('[data-image-placeholder]')).toBeNull();
+    expect(editor.querySelector('[data-attachment-placeholder]')).toBeNull();
   });
 
   it('plain-text paste still works when an image paste handler is registered', () => {
@@ -791,18 +791,18 @@ describe('MessageEditor', () => {
     );
 
     const editor = screen.getByTestId('messageEditor');
-    const chip = createImagePlaceholderElement('test.png');
+    const chip = createAttachmentPlaceholderElement('test.png');
     editor.appendChild(chip);
-    expect(editor.querySelector('[data-image-placeholder]')).not.toBeNull();
+    expect(editor.querySelector('[data-attachment-placeholder]')).not.toBeNull();
 
     const crossIcon = chip.querySelector(
-      `[${IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE}]`
+      `[${ATTACHMENT_PLACEHOLDER_REMOVE_ATTRIBUTE}]`
     ) as SVGSVGElement;
     expect(crossIcon).not.toBeNull();
 
     fireEvent.mouseDown(crossIcon);
 
-    expect(editor.querySelector('[data-image-placeholder]')).toBeNull();
+    expect(editor.querySelector('[data-attachment-placeholder]')).toBeNull();
     expect(messageEditor.onChange).toHaveBeenCalled();
     expect(onAfterInput).toHaveBeenCalled();
   });

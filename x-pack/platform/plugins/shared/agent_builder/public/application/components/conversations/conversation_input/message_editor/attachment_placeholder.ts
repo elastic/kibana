@@ -7,9 +7,9 @@
 
 import { insertNodeAtCursor, insertSpaceAfter, placeCursorAfter } from './utils';
 
-export const IMAGE_PLACEHOLDER_ATTRIBUTE = 'data-image-placeholder';
-export const IMAGE_PLACEHOLDER_ICON_ATTRIBUTE = 'data-image-placeholder-icon';
-export const IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE = 'data-image-placeholder-remove';
+export const ATTACHMENT_PLACEHOLDER_ATTRIBUTE = 'data-attachment-placeholder';
+export const ATTACHMENT_PLACEHOLDER_ICON_ATTRIBUTE = 'data-attachment-placeholder-icon';
+export const ATTACHMENT_PLACEHOLDER_REMOVE_ATTRIBUTE = 'data-attachment-placeholder-remove';
 
 export const PLACEHOLDER_KIND_ATTRIBUTE = 'data-placeholder-kind';
 
@@ -48,7 +48,7 @@ const createKindIconSvg = (kind: PlaceholderKind): SVGSVGElement => {
   svg.setAttribute('viewBox', '0 0 16 16');
   svg.setAttribute('fill', 'currentColor');
   svg.setAttribute('aria-hidden', 'true');
-  svg.setAttribute(IMAGE_PLACEHOLDER_ICON_ATTRIBUTE, 'true');
+  svg.setAttribute(ATTACHMENT_PLACEHOLDER_ICON_ATTRIBUTE, 'true');
   for (const d of ICON_PATHS_BY_KIND[kind]) {
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', d);
@@ -66,20 +66,20 @@ const createCrossIconSvg = (): SVGSVGElement => {
   svg.setAttribute('viewBox', '0 0 16 16');
   svg.setAttribute('fill', 'currentColor');
   svg.setAttribute('aria-hidden', 'true');
-  svg.setAttribute(IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE, 'true');
+  svg.setAttribute(ATTACHMENT_PLACEHOLDER_REMOVE_ATTRIBUTE, 'true');
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   path.setAttribute('d', CROSS_ICON_PATH);
   svg.appendChild(path);
   return svg;
 };
 
-export const createImagePlaceholderElement = (
+export const createAttachmentPlaceholderElement = (
   label: string,
   kind: PlaceholderKind = 'image'
 ): HTMLSpanElement => {
   const span = document.createElement('span');
   span.contentEditable = 'false';
-  span.setAttribute(IMAGE_PLACEHOLDER_ATTRIBUTE, 'true');
+  span.setAttribute(ATTACHMENT_PLACEHOLDER_ATTRIBUTE, 'true');
   span.setAttribute(PLACEHOLDER_KIND_ATTRIBUTE, kind);
   span.setAttribute('role', 'img');
   span.setAttribute('aria-label', label);
@@ -89,15 +89,15 @@ export const createImagePlaceholderElement = (
   span.appendChild(createCrossIconSvg());
 
   const labelSpan = document.createElement('span');
-  labelSpan.className = 'image-placeholder-label';
+  labelSpan.className = 'attachment-placeholder-label';
   labelSpan.textContent = label;
   span.appendChild(labelSpan);
 
   const progressTrack = document.createElement('span');
-  progressTrack.className = 'image-placeholder-progress-track';
+  progressTrack.className = 'attachment-placeholder-progress-track';
   progressTrack.setAttribute('aria-hidden', 'true');
   const progressFill = document.createElement('span');
-  progressFill.className = 'image-placeholder-progress-fill';
+  progressFill.className = 'attachment-placeholder-progress-fill';
   progressTrack.appendChild(progressFill);
   span.appendChild(progressTrack);
 
@@ -108,11 +108,11 @@ export const createImagePlaceholderElement = (
  * Creates a placeholder chip for `label`, inserts it at the current cursor position,
  * and moves the caret to just after it (via a trailing non-breaking space).
  */
-export const insertImagePlaceholderChip = (
+export const insertAttachmentPlaceholderChip = (
   label: string,
   kind: PlaceholderKind = 'image'
 ): void => {
-  const chipEl = createImagePlaceholderElement(label, kind);
+  const chipEl = createAttachmentPlaceholderElement(label, kind);
   chipEl.setAttribute('data-uploading', 'true');
   insertNodeAtCursor(chipEl);
   const sel = window.getSelection();
@@ -122,14 +122,14 @@ export const insertImagePlaceholderChip = (
   }
 };
 
-export const isElementImagePlaceholder = (element: HTMLElement): boolean =>
-  element.getAttribute(IMAGE_PLACEHOLDER_ATTRIBUTE) === 'true';
+export const isElementAttachmentPlaceholder = (element: HTMLElement): boolean =>
+  element.getAttribute(ATTACHMENT_PLACEHOLDER_ATTRIBUTE) === 'true';
 
 export const getPlaceholderKind = (element: HTMLElement): PlaceholderKind =>
   element.getAttribute(PLACEHOLDER_KIND_ATTRIBUTE) === 'pdf' ? 'pdf' : 'image';
 
 const getChipsOfKind = (el: HTMLElement, kind: PlaceholderKind): HTMLElement[] =>
-  Array.from(el.querySelectorAll<HTMLElement>(`[${IMAGE_PLACEHOLDER_ATTRIBUTE}]`)).filter(
+  Array.from(el.querySelectorAll<HTMLElement>(`[${ATTACHMENT_PLACEHOLDER_ATTRIBUTE}]`)).filter(
     (chip) => getPlaceholderKind(chip) === kind
   );
 
@@ -166,7 +166,7 @@ export const syncChipsUploadingState = (
   });
 };
 
-export interface HandleImagePlaceholderRemoveClickOpts {
+export interface HandleAttachmentPlaceholderRemoveClickOpts {
   onChange: () => void;
   onAfterInput?: () => void;
 }
@@ -175,14 +175,14 @@ export interface HandleImagePlaceholderRemoveClickOpts {
  * Handles a mousedown on the editor contentEditable that may have landed on a
  * placeholder chip's remove button. Removes the chip and fires callbacks when matched.
  */
-export const handleImagePlaceholderRemoveClick = (
+export const handleAttachmentPlaceholderRemoveClick = (
   event: MouseEvent,
-  opts: HandleImagePlaceholderRemoveClickOpts
+  opts: HandleAttachmentPlaceholderRemoveClickOpts
 ): void => {
   const target = event.target as Element;
-  const removeButton = target.closest?.(`[${IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE}]`);
+  const removeButton = target.closest?.(`[${ATTACHMENT_PLACEHOLDER_REMOVE_ATTRIBUTE}]`);
   if (!removeButton) return;
-  const chip = removeButton.closest(`[${IMAGE_PLACEHOLDER_ATTRIBUTE}]`);
+  const chip = removeButton.closest(`[${ATTACHMENT_PLACEHOLDER_ATTRIBUTE}]`);
   if (!chip) return;
   event.preventDefault();
   chip.remove();

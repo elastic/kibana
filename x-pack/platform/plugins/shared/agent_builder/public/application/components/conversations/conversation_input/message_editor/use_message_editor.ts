@@ -16,11 +16,11 @@ import {
 } from './command_badge';
 import { serializeEditorContent } from './serialize';
 import {
-  createImagePlaceholderElement,
+  createAttachmentPlaceholderElement,
   getPlaceholderNamesFromElement,
   removePlaceholderByName as removePlaceholderByNameFromDom,
   type PlaceholderKind,
-} from './image_placeholder';
+} from './attachment_placeholder';
 import {
   createCommandRange,
   createTextFragment,
@@ -55,7 +55,7 @@ export interface MessageEditorController {
   removePlaceholderByName: (name: string, kind?: PlaceholderKind) => void;
 }
 
-// The limit applies to what is sent, and image placeholders and command badges serialize to
+// The limit applies to what is sent, and attachment placeholders and command badges serialize to
 // markdown links longer than the text they display. Falls back to the displayed length for a
 // badge that cannot be serialized, which submit reports on its own.
 const getSerializedLength = (element: HTMLElement, displayedLength: number): number => {
@@ -209,9 +209,9 @@ const useMessageEditorController = ({
           } else if (segment.type === 'badge') {
             ref.current.appendChild(createCommandBadgeElement(segment.data));
           } else if (segment.type === 'image') {
-            ref.current.appendChild(createImagePlaceholderElement(segment.name));
+            ref.current.appendChild(createAttachmentPlaceholderElement(segment.name));
           } else if (segment.type === 'pdf') {
-            ref.current.appendChild(createImagePlaceholderElement(segment.name, 'pdf'));
+            ref.current.appendChild(createAttachmentPlaceholderElement(segment.name, 'pdf'));
           }
         }
 

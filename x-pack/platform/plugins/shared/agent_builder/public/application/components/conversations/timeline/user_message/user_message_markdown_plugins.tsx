@@ -17,7 +17,7 @@ import { sortedCommandDefinitions } from '../../conversation_input/message_edito
 import {
   IMAGE_ATTACHMENT_SCHEME,
   PDF_ATTACHMENT_SCHEME,
-} from '../../conversation_input/message_editor/image_placeholder';
+} from '../../conversation_input/message_editor/attachment_placeholder';
 import {
   createConversationMarkdownComponents,
   esqlLanguagePlugin,

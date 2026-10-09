@@ -9,7 +9,7 @@ import type { CommandBadgeData } from './types';
 import { getCommandDefinition } from '../command_menu';
 import { COMMAND_ID_ATTRIBUTE, COMMAND_METADATA_ATTRIBUTE } from './attributes';
 import { getCommandDefinitionByScheme } from '../command_menu/command_definitions';
-import { IMAGE_ATTACHMENT_SCHEME, PDF_ATTACHMENT_SCHEME } from '../image_placeholder';
+import { IMAGE_ATTACHMENT_SCHEME, PDF_ATTACHMENT_SCHEME } from '../attachment_placeholder';
 
 interface TextSegment {
   type: 'text';

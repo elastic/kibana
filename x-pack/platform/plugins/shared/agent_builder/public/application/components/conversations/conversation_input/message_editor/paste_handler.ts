@@ -15,7 +15,7 @@ import {
   isElementCommandBadge,
 } from './command_badge';
 import { COMMAND_METADATA_ATTRIBUTE } from './command_badge/attributes';
-import { insertImagePlaceholderChip, type PlaceholderKind } from './image_placeholder';
+import { insertAttachmentPlaceholderChip, type PlaceholderKind } from './attachment_placeholder';
 import { createTextFragment, ensureCaretTargetBeforeFirstBadge, insertNodeAtCursor } from './utils';
 
 const stringContainsBadge = (html: string): boolean => html.includes(COMMAND_BADGE_ATTRIBUTE);
@@ -93,7 +93,7 @@ const handleFilePaste = (event: ClipboardEvent, opts: HandleEditorPasteOpts): bo
   if (file && kind) {
     const label = onPasteFile(file);
     if (label) {
-      insertImagePlaceholderChip(label, kind);
+      insertAttachmentPlaceholderChip(label, kind);
       onChange();
     }
   }

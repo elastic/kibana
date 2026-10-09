@@ -9,9 +9,9 @@ import { isElementCommandBadge, serializeCommandBadge } from './command_badge';
 import {
   getPlaceholderKind,
   IMAGE_ATTACHMENT_SCHEME,
-  isElementImagePlaceholder,
+  isElementAttachmentPlaceholder,
   PDF_ATTACHMENT_SCHEME,
-} from './image_placeholder';
+} from './attachment_placeholder';
 import { stripZeroWidthSpaces } from './utils';
 
 /**
@@ -41,7 +41,7 @@ export const serializeEditorContent = (editorElement: HTMLElement): string => {
       continue;
     }
     const element = node as HTMLElement;
-    if (isElementImagePlaceholder(element)) {
+    if (isElementAttachmentPlaceholder(element)) {
       const name = element.getAttribute('aria-label') ?? '';
       const displayName = name.replace(/[\[\]]/g, '');
       const scheme =

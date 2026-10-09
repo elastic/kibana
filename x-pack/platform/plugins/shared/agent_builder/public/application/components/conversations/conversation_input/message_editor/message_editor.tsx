@@ -25,11 +25,11 @@ import {
 } from './command_badge';
 import { serializeEditorContent } from './serialize';
 import {
-  handleImagePlaceholderRemoveClick,
+  handleAttachmentPlaceholderRemoveClick,
   syncChipsUploadingState,
-  IMAGE_PLACEHOLDER_ATTRIBUTE,
-} from './image_placeholder';
-import { useImagePlaceholderStyles } from './use_editor_styles';
+  ATTACHMENT_PLACEHOLDER_ATTRIBUTE,
+} from './attachment_placeholder';
+import { useAttachmentPlaceholderStyles } from './use_editor_styles';
 import { getSelectionRange } from './utils';
 import { handleEditorPaste } from './paste_handler';
 
@@ -119,7 +119,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
     }
   `;
   const fontStyles = useEuiFontSize('s');
-  const imagePlaceholderStyles = useImagePlaceholderStyles();
+  const attachmentPlaceholderStyles = useAttachmentPlaceholderStyles();
   const commandBadgeStyles = css`
     [${COMMAND_BADGE_ATTRIBUTE}] {
       display: inline-flex;
@@ -147,7 +147,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
     placeholderStyles,
     fontStyles,
     commandBadgeStyles,
-    imagePlaceholderStyles,
+    attachmentPlaceholderStyles,
   ];
 
   // Flips loading state
@@ -189,12 +189,12 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
           onAfterInput?.();
         }}
         onMouseDown={(event) =>
-          handleImagePlaceholderRemoveClick(event.nativeEvent, { onChange, onAfterInput })
+          handleAttachmentPlaceholderRemoveClick(event.nativeEvent, { onChange, onAfterInput })
         }
         onMouseOver={(event) => {
           const target = event.target as HTMLElement;
           const placeholderEl = target.closest?.(
-            `[${IMAGE_PLACEHOLDER_ATTRIBUTE}]`
+            `[${ATTACHMENT_PLACEHOLDER_ATTRIBUTE}]`
           ) as HTMLElement | null;
           onHoveredPlaceholderChange?.(placeholderEl?.dataset.placeholderName ?? null);
         }}
