@@ -509,7 +509,6 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         const view = applyDeploymentMethodView(s, deploymentMethod);
         // ECF-only services have no agent-based route and ECF needs cloud, so self-managed has no
         // way to deploy them: they are not offered at all.
-        // return view;
         return isSelfManaged && s.ecfOnly ? { ...view, showInUI: false } : view;
       }),
     [rawAwsServiceMatrix, deploymentMethod, isSelfManaged]
