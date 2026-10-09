@@ -381,6 +381,25 @@ describe('reconcileSourceCatalog', () => {
     });
   });
 
+  it('keeps the rules and indicators of a deleted source when its detections fail to retire', async () => {
+    const kiClient = makeKiClient(['gone-source']);
+    const markSourceDetectionsProcessed = jest.fn().mockRejectedValue(new Error('write failed'));
+
+    await expect(
+      reconcileSourceCatalog({
+        sourcesClient: makeSourcesClient([]),
+        kiClient,
+        onboardingClient: onboardingWithRuns([]),
+        getDetectionClient: jest.fn().mockResolvedValue({ markSourceDetectionsProcessed }),
+        maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
+        request,
+      })
+    ).rejects.toThrow('write failed');
+
+    expect(kiClient.deleteOwnedRules).not.toHaveBeenCalled();
+    expect(kiClient.deleteIndicators).not.toHaveBeenCalled();
+  });
+
   it('cancels a running execution whose slug has no catalog row', async () => {
     const kiClient = makeKiClient([]);
     await reconcileSourceCatalog({

@@ -115,6 +115,9 @@ const reconcileSourceRoute = createServerRoute({
     });
     const source = sources[0];
     if (!source) {
+      // Detections first: the rules and indicators removed below are how a later sweep finds this
+      // id, so a failed marker write must leave them in place for the retry.
+      await retireSourceDetections({ sourceId: params.path.sourceId, getDetectionClient });
       await resetSourceKnowledge({
         source: { id: params.path.sourceId, slug: params.body.sourceSlug },
         kiClient,
@@ -122,7 +125,6 @@ const reconcileSourceRoute = createServerRoute({
         sourceKnowledgeState,
         request,
       });
-      await retireSourceDetections({ sourceId: params.path.sourceId, getDetectionClient });
       return { reconciled: true };
     }
     await reconcileSourceRevision({

@@ -437,6 +437,9 @@ export async function reconcileSourceCatalog({
       continue;
     }
     try {
+      // Detections first: the rules and indicators removed below are how a later sweep finds this
+      // id, so a failed marker write must leave them in place for the retry.
+      await retireSourceDetections({ sourceId, getDetectionClient });
       if (sourceKnowledgeState) {
         await sourceKnowledgeState.runExclusive({
           sourceId,
@@ -445,7 +448,6 @@ export async function reconcileSourceCatalog({
       } else {
         await retireSourceKnowledge({ sourceId, kiClient });
       }
-      await retireSourceDetections({ sourceId, getDetectionClient });
     } catch (error) {
       failures.push(error);
     }

@@ -96,7 +96,14 @@ export const createEvalSource = async ({
     method: 'POST',
     body: JSON.stringify({ title, esql }),
   });
-  await fenceAutomaticOnboarding({ fetch, source });
+  try {
+    await fenceAutomaticOnboarding({ fetch, source });
+  } catch (error) {
+    // The caller only gets the source back on success, so nothing else can delete it. A failed
+    // cleanup must not hide the fence failure.
+    await deleteEvalSource({ fetch, source }).catch(() => undefined);
+    throw error;
+  }
   return source;
 };
 
