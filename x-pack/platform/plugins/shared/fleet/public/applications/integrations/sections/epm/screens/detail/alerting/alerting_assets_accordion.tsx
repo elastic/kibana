@@ -22,22 +22,22 @@ const isV2AlertingAsset = (asset: Pick<AlertingAsset, 'attributes'>): boolean =>
 
 const ALERTING_ENGINE_CLASSIC_BADGE = i18n.translate(
   'xpack.fleet.epm.assets.alertingEngineClassicBadgeLabel',
-  { defaultMessage: 'Standard' }
+  { defaultMessage: 'Classic' }
 );
 
 const ALERTING_ENGINE_V2_BADGE = i18n.translate(
   'xpack.fleet.epm.assets.alertingEngineV2BadgeLabel',
-  { defaultMessage: 'ES|QL' }
+  { defaultMessage: 'Universal' }
 );
 
 const ALERTING_ENGINE_CLASSIC_ARIA_LABEL = i18n.translate(
   'xpack.fleet.epm.assets.alertingEngineClassicBadgeAriaLabel',
-  { defaultMessage: 'Standard Rules' }
+  { defaultMessage: 'Classic Rules' }
 );
 
 const ALERTING_ENGINE_V2_ARIA_LABEL = i18n.translate(
   'xpack.fleet.epm.assets.alertingEngineV2BadgeAriaLabel',
-  { defaultMessage: 'ES|QL Rules' }
+  { defaultMessage: 'Universal Rules' }
 );
 
 const getAlertingEngineBadge = (engine?: AlertingEngine): { label: string; ariaLabel: string } => {
@@ -86,7 +86,7 @@ const AlertingEngineTabs: React.FunctionComponent<{
       >
         <FormattedMessage
           id="xpack.fleet.epm.assets.kibanaEsqlRulesTabLabel"
-          defaultMessage="ES|QL Rules"
+          defaultMessage="Universal Rules"
         />
       </EuiTab>
       <EuiTab
@@ -96,7 +96,7 @@ const AlertingEngineTabs: React.FunctionComponent<{
       >
         <FormattedMessage
           id="xpack.fleet.epm.assets.kibanaStandardRulesTabLabel"
-          defaultMessage="Standard Rules"
+          defaultMessage="Classic Rules"
         />
       </EuiTab>
     </EuiTabs>
