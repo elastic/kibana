@@ -69,19 +69,21 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(status).to.be(200);
         expect(body.hasData).to.be(true);
-        // Exactly one Elasticsearch call proves the recent-data phase matched and
-        // short-circuited; a second would mean it missed and the unbounded
-        // fallback produced the answer.
+        // One ES call means the recent-data phase matched and short-circuited.
         expect(body._inspect).to.have.length(1);
       });
     });
 
-    // The esArchiver fixture is timestamped well outside the recent-data window,
-    // so it can only be answered by the unbounded fallback. Without this case a
-    // fallback that stopped running would go unnoticed.
+    // The esArchiver fixture is timestamped outside the recent-data window, so
+    // only the unbounded fallback can answer it.
     describe('when only old data is loaded', () => {
-      before(() => esArchiver.load(ARCHIVER_ROUTES['8.0.0']));
-      after(() => esArchiver.unload(ARCHIVER_ROUTES['8.0.0']));
+      before(async () => {
+        await esArchiver.load(ARCHIVER_ROUTES['8.0.0']);
+      });
+
+      after(async () => {
+        await esArchiver.unload(ARCHIVER_ROUTES['8.0.0']);
+      });
 
       it('returns hasData=true from the unbounded fallback', async () => {
         const { status, body } = await apmApiClient.readUser({
