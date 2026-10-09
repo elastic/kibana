@@ -85,23 +85,29 @@ describe('AlertZeroRuntime.installWorker', () => {
       }
       return {};
     });
-    await new AlertZeroRuntime(fetch).installWorker(WORKER);
+    const runtime = new AlertZeroRuntime(fetch);
+    await runtime.installWorker(WORKER);
 
     // The enable PATCH must carry the service account id: since #295215 a bare
     // {"enabled":true} is rejected with 400 on a stack where no account is bound.
-    const patchCalls = fetch.mock.calls.filter(
-      ([path, options]) =>
-        String(path).startsWith('/internal/alertzero/workers/') && options?.method === 'PATCH'
-    );
-    expect(patchCalls).toHaveLength(2);
-    expect(JSON.parse(patchCalls[0][1].body)).toEqual({
+    const patchCalls = () =>
+      fetch.mock.calls.filter(
+        ([path, options]) =>
+          String(path).startsWith('/internal/alertzero/workers/') && options?.method === 'PATCH'
+      );
+    // The workflow test API refuses a disabled workflow (400, build 1430): the Worker must
+    // still be enabled when installWorker returns, i.e. the disable PATCH must NOT fire yet.
+    expect(patchCalls()).toHaveLength(1);
+    expect(JSON.parse(patchCalls()[0][1].body)).toEqual({
       enabled: true,
       settings: { serviceAccountId: 'sa-eval-1' },
       // A settings patch without settingsRevision is rejected by the workers service.
       settingsRevision: null,
     });
-    // The Worker was disabled before the suite, so the suite must leave it disabled.
-    expect(JSON.parse(patchCalls[1][1].body)).toEqual({ enabled: false });
+    // The Worker was disabled before the suite, so cleanup must leave it disabled.
+    await runtime.restoreWorker();
+    expect(patchCalls()).toHaveLength(2);
+    expect(JSON.parse(patchCalls()[1][1].body)).toEqual({ enabled: false });
   });
 
   it('leaves an already-enabled worker enabled', async () => {
@@ -116,7 +122,10 @@ describe('AlertZeroRuntime.installWorker', () => {
       }
       return {};
     });
-    await new AlertZeroRuntime(fetch).installWorker(WORKER);
+    const runtime = new AlertZeroRuntime(fetch);
+    await runtime.installWorker(WORKER);
+    // Already enabled before the suite: cleanup must not disable it.
+    await runtime.restoreWorker();
 
     const patchBodies = fetch.mock.calls
       .filter(

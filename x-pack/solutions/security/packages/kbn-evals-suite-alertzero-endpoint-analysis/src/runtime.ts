@@ -59,6 +59,7 @@ const proposalHeaders = {
 };
 export class AlertZeroRuntime {
   readonly executionIds = new Set<string>();
+  private readonly workersToDisable = new Set<string>();
   constructor(public readonly fetch: HttpHandler) {}
   /**
    * Each Worker installs per space as `${workerWorkflowId}-${spaceId}` (see
@@ -191,8 +192,8 @@ export class AlertZeroRuntime {
    * stack a bare `{"enabled":true}` never installs anything. The eval therefore creates the
    * prebuilt `alertzero_endpoint_analysis` role + service account — the same setup
    * `ensureWorkerServiceAccounts` performs for the UI, against the same public APIs — and
-   * passes its id in the same PATCH. The suite uses the workflow test API, which executes
-   * the installed definition regardless of the enabled flag. Idempotent: a second PATCH with
+   * passes its id in the same PATCH. The workflow test API refuses a disabled workflow, so the
+   * Worker stays enabled until `restoreWorker()`. Idempotent: a second PATCH with
    * the same body is a no-op revision bump, and an existing role/account is reused as is.
    */
   async installWorker(id: string): Promise<void> {
@@ -227,9 +228,16 @@ export class AlertZeroRuntime {
     });
     // A Worker that was off before the suite must be off after it: the per-space schedule
     // would otherwise keep sweeping the stack's indicators for unrelated alerts every
-    // interval after the eval ends. Restore only the flag — the account stays bound either
-    // way, and on a fresh stack the Worker did not exist before this run.
-    if (!wasEnabled) {
+    // interval after the eval ends. The workflow test API REFUSES a disabled workflow
+    // (400 "Workflow is disabled", build 1430), so the Worker has to stay enabled while the
+    // suite runs; `restoreWorker()` turns it back off from the suite's cleanup. The account
+    // stays bound either way, and on a fresh stack the Worker did not exist before this run.
+    if (!wasEnabled) this.workersToDisable.add(id);
+  }
+
+  /** Disables every Worker `installWorker` enabled that was off before the suite. */
+  async restoreWorker(): Promise<void> {
+    for (const id of [...this.workersToDisable]) {
       await this.fetch(
         ALERTZERO_WORKER_URL_TEMPLATE.replace('{workerId}', encodeURIComponent(id)),
         {
@@ -242,6 +250,7 @@ export class AlertZeroRuntime {
           body: JSON.stringify({ enabled: false }),
         }
       );
+      this.workersToDisable.delete(id);
     }
   }
 }

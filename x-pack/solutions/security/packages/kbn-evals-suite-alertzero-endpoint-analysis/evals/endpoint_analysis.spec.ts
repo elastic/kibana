@@ -183,6 +183,7 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
       } finally {
         await runAllCleanups([
           () => runtime.cancelAll(),
+          () => runtime.restoreWorker(),
           async () => seededFixture?.cleanup(),
           restoreInference,
         ]);
@@ -245,6 +246,7 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
       } finally {
         await runAllCleanups([
           () => runtime.cancelAll(),
+          () => runtime.restoreWorker(),
           async () => seededFixture?.cleanup(),
           restoreInference,
         ]);
