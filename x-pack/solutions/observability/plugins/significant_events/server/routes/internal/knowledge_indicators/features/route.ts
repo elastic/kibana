@@ -19,7 +19,10 @@ import { searchModeSchema } from '../../../utils/search_mode';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { StatusError } from '../../../../lib/errors/status_error';
-import { requestedOrAllSourceIds } from '../../../utils/resolve_source_ids';
+import {
+  filterReadableSourceIds,
+  requestedOrAllSourceIds,
+} from '../../../utils/resolve_source_ids';
 import type { KIBulkOperation } from '../../../../lib/knowledge_indicators';
 
 const MAX_INPUT_STRING_LENGTH = 255;
@@ -224,7 +227,11 @@ export const listAllFeaturesRoute = createServerRoute({
       licensing: scopedClients.licensing,
     });
 
-    const sourceIds = await requestedOrAllSourceIds(undefined, scopedClients.sourcesClient);
+    // The reader below runs as the internal user, so keep only the sources the caller can read.
+    const sourceIds = await filterReadableSourceIds(
+      await requestedOrAllSourceIds(undefined, scopedClients.sourcesClient),
+      scopedClients.sourcesClient
+    );
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const {

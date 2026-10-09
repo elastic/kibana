@@ -94,6 +94,7 @@ export const mockSourcesClient = (slugs: readonly string[]) => ({
     sources: slugs.map((slug) => sourceWithSlug(slug)),
     total: slugs.length,
   }),
+  assertReadable: jest.fn().mockResolvedValue(undefined),
 });
 
 export const createMockRequest = () => httpServerMock.createKibanaRequest();

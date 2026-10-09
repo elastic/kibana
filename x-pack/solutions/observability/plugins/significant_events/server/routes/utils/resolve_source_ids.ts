@@ -6,6 +6,8 @@
  */
 
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
+import { isBoom } from '@hapi/boom';
+import pLimit from 'p-limit';
 import { MAX_SOURCES_PER_PAGE } from '@kbn/nightshift-shared';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { z } from '@kbn/zod/v4';
@@ -39,4 +41,34 @@ export async function requestedOrAllSourceIds(
     return sourceIds;
   }
   return (await listAllSources(sourcesClient)).map((source) => source.id);
+}
+
+const READABLE_CHECK_CONCURRENCY = 10;
+
+/**
+ * The source ids whose data the caller can read. Stored knowledge is read through the internal
+ * user, so a read across several sources has to drop the ones the caller's own index privileges
+ * do not cover. Only a 403 drops a source; any other failure is rethrown.
+ */
+export async function filterReadableSourceIds(
+  sourceIds: string[],
+  sourcesClient: SourcesClient
+): Promise<string[]> {
+  const limiter = pLimit(READABLE_CHECK_CONCURRENCY);
+  const readable = await Promise.all(
+    sourceIds.map((sourceId) =>
+      limiter(async () => {
+        try {
+          await sourcesClient.assertReadable(sourceId);
+          return true;
+        } catch (error) {
+          if (isBoom(error) && error.output.statusCode === 403) {
+            return false;
+          }
+          throw error;
+        }
+      })
+    )
+  );
+  return sourceIds.filter((_, index) => readable[index]);
 }

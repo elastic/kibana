@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { forbidden } from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
 import {
@@ -110,6 +111,25 @@ describe('ki_features_get tool', () => {
 
     const result = await invokeHandler(tool, { slug: 'logs.test' }, createMockToolContext());
 
+    expect(getFeatures).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
+  });
+
+  it('does not load stored features when the caller cannot read the source data', async () => {
+    const sourcesClient = mockSourcesClient(['logs.test']);
+    sourcesClient.assertReadable.mockRejectedValue(forbidden('Cannot read source logs.test'));
+    getScopedClients.mockResolvedValueOnce({
+      sourcesClient,
+      getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
+    } as unknown as RouteHandlerScopedClients);
+
+    const result = await invokeHandler(
+      createTool(),
+      { slug: 'logs.test' },
+      createMockToolContext()
+    );
+
+    expect(sourcesClient.assertReadable).toHaveBeenCalledWith('logs.test');
     expect(getFeatures).not.toHaveBeenCalled();
     expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
