@@ -32,7 +32,7 @@ const HUNT_WORKER_ID = SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
 const TRIAGE_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
 const TRIAGE_DEFAULT_EXTRAS = {
   autoCloseConfidenceScoreMinThreshold: 0.85,
-  budgetPerHour: 300,
+  budgetPerHour: 1300,
   lookbackHours: 24,
 };
 
@@ -469,13 +469,13 @@ describe('createWorkerSettingsRegistration', () => {
       ).toEqual({
         ...stored,
         autonomyLevel: 'manual',
-        scheduleInterval: '10m',
+        scheduleInterval: '15m',
         extras: TRIAGE_DEFAULT_EXTRAS,
       });
       expect(registration.toSettings(stored)).toEqual({
         workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
         autonomy: 'manual',
-        scheduleInterval: '10m',
+        scheduleInterval: '15m',
         extras: TRIAGE_DEFAULT_EXTRAS,
       });
     });
@@ -487,7 +487,7 @@ describe('createWorkerSettingsRegistration', () => {
         values: {
           settingsVersion: 1,
           autonomyLevel: 'manual',
-          scheduleInterval: '10m',
+          scheduleInterval: '15m',
           extras: TRIAGE_DEFAULT_EXTRAS,
         },
       });
@@ -688,7 +688,7 @@ describe('createWorkerSettingsRegistration', () => {
         values: {
           settingsVersion: 1,
           autonomyLevel: 'supervised',
-          scheduleInterval: '10m',
+          scheduleInterval: '15m',
           extras: TRIAGE_DEFAULT_EXTRAS,
         },
       });

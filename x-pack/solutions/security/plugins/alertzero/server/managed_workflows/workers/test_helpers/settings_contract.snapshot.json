@@ -231,10 +231,10 @@
       "defaults": {
         "workerId": "system-security-floor-alert-triage",
         "autonomy": "manual",
-        "scheduleInterval": "10m",
+        "scheduleInterval": "15m",
         "extras": {
           "autoCloseConfidenceScoreMinThreshold": 0.85,
-          "budgetPerHour": 300,
+          "budgetPerHour": 1300,
           "lookbackHours": 24
         }
       },
