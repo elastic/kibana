@@ -94,12 +94,12 @@ export const CONDITION_FIELD_TITLE: { [K in BlocklistConditionEntryField]: strin
     { defaultMessage: 'Signature' }
   ),
   'file.name': i18n.translate('xpack.securitySolution.blocklist.entry.field.fileName', {
-    defaultMessage: 'File Name',
+    defaultMessage: 'File name',
   }),
   'file.name.caseless': i18n.translate(
     'xpack.securitySolution.blocklist.entry.field.fileName.caseless',
     {
-      defaultMessage: 'File Name',
+      defaultMessage: 'File name',
     }
   ),
 };
