@@ -330,6 +330,7 @@ export function SloListCompactView({ sloList, loading, error, isInteractive = tr
             slo={slo}
             activeAlerts={activeAlertsBySlo.get(slo)}
             viewMode="compact"
+            isInteractive={isInteractive}
           />
         </>
       ),

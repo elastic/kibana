@@ -1337,7 +1337,7 @@ Array [
     },
     "id": "message",
     "isResizable": true,
-    "isSortable": false,
+    "isSortable": true,
     "schema": "string",
     "visibleCellActions": undefined,
   },

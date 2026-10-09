@@ -46,7 +46,7 @@ export interface TimeseriesVisProps {
     series: PanelData[],
     points: Array<[GeometryValue, XYChartSeriesIdentifier]>
   ) => Promise<void>;
-  onUiState: (
+  onUiState?: (
     field: string,
     value: {
       column: string;

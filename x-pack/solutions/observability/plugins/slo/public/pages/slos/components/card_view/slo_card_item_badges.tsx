@@ -59,7 +59,12 @@ export function SloCardItemBadges({
         ) : (
           <>
             <SloStateBadge slo={slo} />
-            <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} viewMode="compact" />
+            <SloActiveAlertsBadge
+              slo={slo}
+              activeAlerts={activeAlerts}
+              viewMode="compact"
+              isInteractive={isInteractive}
+            />
             <SLOCardItemInstanceBadge slo={slo} />
             <SloRulesBadge
               rules={rules}

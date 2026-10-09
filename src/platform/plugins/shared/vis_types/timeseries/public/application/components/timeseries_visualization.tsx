@@ -201,14 +201,17 @@ function TimeseriesVisualization({
             visData={visData}
             uiState={uiState}
             initialRender={initialRender}
-            onUiState={handleUiState}
             syncColors={syncColors}
             syncTooltips={syncTooltips}
             syncCursor={syncCursor}
             palettesService={palettesService}
             indexPattern={indexPattern}
             fieldFormatMap={indexPattern?.fieldFormatMap}
-            {...(interactive && { onBrush, onFilterClick: handleFilterClick })}
+            {...(interactive && {
+              onUiState: handleUiState,
+              onBrush,
+              onFilterClick: handleFilterClick,
+            })}
           />
         </Suspense>
       </EuiFlexItem>
