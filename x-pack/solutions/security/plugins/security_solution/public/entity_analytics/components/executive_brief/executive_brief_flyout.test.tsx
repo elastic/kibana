@@ -108,6 +108,7 @@ jest.mock('../anomalies/mitre/components/mitre_attack_chain', () => ({
 
 const baseResult: UseExecutiveBriefResult = {
   job: FIXTURE_JOB_SUCCEEDED,
+  hasRequested: true,
   isGenerating: false,
   requestError: undefined,
   mode: 'names',
@@ -144,20 +145,7 @@ describe('ExecutiveBriefFlyout', () => {
     expect(screen.getByTestId('executiveBriefDetails')).toBeInTheDocument();
     expect(screen.getByTestId(TEST_IDS.debugPanel)).toBeInTheDocument();
     expect(screen.getByTestId(TEST_IDS.basedOn)).toBeInTheDocument();
-    ['postureScore', 'materialRiskEntities', 'activeSignals', 'stagesWithActivity'].forEach((id) =>
-      expect(screen.getByTestId(TEST_IDS.statTile(id))).toBeInTheDocument()
-    );
-  });
-
-  it('renders the stat delta', () => {
-    render(<ExecutiveBriefFlyout timeRange="7d" onClose={jest.fn()} />);
-
-    const tile = screen.getByTestId(TEST_IDS.statTile('materialRiskEntities'));
-    expect(within(tile).getByText('+4')).toBeInTheDocument();
-    expect(tile.querySelector('.euiBadge')).toHaveAttribute(
-      'class',
-      expect.stringContaining('euiBadge')
-    );
+    expect(screen.queryByTestId('executiveBriefStatTile-postureScore')).not.toBeInTheDocument();
   });
 
   it('renders one card per storyline and resolves entity chips to names', () => {
@@ -256,6 +244,25 @@ describe('ExecutiveBriefFlyout', () => {
     expect(callout).toHaveTextContent('The job timed out');
     fireEvent.click(within(callout).getByText('Regenerate'));
     expect(regenerate).toHaveBeenCalled();
+  });
+
+  it('opens on a start panel and does not generate until the user clicks Generate brief', () => {
+    const regenerate = jest.fn();
+    mockUseExecutiveBrief.mockReturnValue({
+      ...baseResult,
+      job: undefined,
+      hasRequested: false,
+      regenerate,
+    });
+    render(<ExecutiveBriefFlyout timeRange="7d" onClose={jest.fn()} />);
+
+    expect(screen.getByTestId(TEST_IDS.startPanel)).toBeInTheDocument();
+    expect(screen.queryByTestId(TEST_IDS.progress)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(TEST_IDS.regenerate)).not.toBeInTheDocument();
+    expect(regenerate).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId(TEST_IDS.generate));
+    expect(regenerate).toHaveBeenCalledTimes(1);
   });
 
   it('has Copy as markdown, Export PDF and Regenerate in the footer', () => {

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type {
   BriefNarrationMode,
   BriefTimeRange,
@@ -46,6 +46,8 @@ const readFixtureJob = (): ExecutiveBriefJob | undefined => {
 
 export interface UseExecutiveBriefResult {
   job: ExecutiveBriefJob | undefined;
+  /** True once the user has asked for a brief in this flyout session (or a fixture is loaded). */
+  hasRequested: boolean;
   /** True while the POST or the polling is in flight. */
   isGenerating: boolean;
   /** Transport-level failure (POST failed or polling timed out); job failures live on job.error. */
@@ -57,8 +59,8 @@ export interface UseExecutiveBriefResult {
 const TEMPLATE_SELECTION: BriefGenerationSelection = { isReady: true, generator: 'template' };
 
 /**
- * Starts a generation once the generator selection is ready and exposes the polled job. Fixture
- * mode skips the API entirely.
+ * Exposes the polled job for a brief the user explicitly asked for; nothing is generated until
+ * `regenerate` is called. Fixture mode skips the API entirely.
  */
 export const useExecutiveBrief = (
   range: BriefTimeRangeKey,
@@ -68,7 +70,6 @@ export const useExecutiveBrief = (
   const useFixture = fixtureJob !== undefined;
   const [mode, setMode] = useState<BriefNarrationMode>('names');
   const { mutate, data, error: mutationError, isLoading: isPosting } = useGenerateExecutiveBrief();
-  const hasStarted = useRef(false);
   const regenerate = useCallback(
     (nextMode?: BriefNarrationMode) => {
       if (useFixture) return;
@@ -84,17 +85,6 @@ export const useExecutiveBrief = (
     [mode, mutate, range, selection.connectorId, selection.generator, useFixture]
   );
 
-  useEffect(() => {
-    if (hasStarted.current || useFixture || !selection.isReady) return;
-    hasStarted.current = true;
-    mutate({
-      timeRange: toBriefTimeRange(range),
-      mode,
-      generator: selection.generator,
-      connectorId: selection.connectorId,
-    });
-  }, [mutate, range, mode, useFixture, selection]);
-
   const {
     data: job,
     error: jobError,
@@ -104,6 +94,7 @@ export const useExecutiveBrief = (
   if (useFixture) {
     return {
       job: fixtureJob,
+      hasRequested: true,
       isGenerating: false,
       requestError: undefined,
       mode,
@@ -116,9 +107,12 @@ export const useExecutiveBrief = (
     : undefined;
   const isTerminal =
     job?.status === 'succeeded' || job?.status === 'failed' || job?.status === 'canceled';
+  const hasRequested = isPosting || data?.id !== undefined || Boolean(mutationError);
   return {
     job,
-    isGenerating: isPosting || (!isTerminal && !timeoutError && !jobError && !mutationError),
+    hasRequested,
+    isGenerating:
+      isPosting || (hasRequested && !isTerminal && !timeoutError && !jobError && !mutationError),
     requestError: mutationError ?? jobError ?? timeoutError ?? undefined,
     mode,
     regenerate,

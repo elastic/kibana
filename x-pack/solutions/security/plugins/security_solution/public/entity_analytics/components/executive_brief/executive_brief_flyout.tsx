@@ -10,6 +10,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCopy,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -28,6 +29,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
+import { AiButton, AiIcon } from '@kbn/shared-ux-ai-components';
 import type {
   BriefJobStage,
   BriefSnapshot,
@@ -201,7 +203,7 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
     selectedName,
     getConnectorName,
   } = useBriefConnectors();
-  const { job, isGenerating, requestError, mode, regenerate } = useExecutiveBrief(
+  const { job, hasRequested, isGenerating, requestError, mode, regenerate } = useExecutiveBrief(
     timeRange,
     selection
   );
@@ -340,6 +342,33 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <PrintSurface isPrintMode={isPrintMode}>
+          {!hasRequested && !succeeded && (
+            <EuiEmptyPrompt
+              icon={<AiIcon iconType="sparkles" size="xxl" aria-hidden={true} />}
+              title={<h3>{'Generate an executive brief'}</h3>}
+              body={
+                <p>
+                  {`Priority threats, blind spots and recommended decisions for the ${TIME_RANGE_LABEL[
+                    timeRange
+                  ].toLowerCase()}. `}
+                  {selection.generator === 'inference'
+                    ? `Written by ${selectedName ?? 'the selected model'}; takes about 30 seconds.`
+                    : 'Uses the template generator (no AI); takes a few seconds.'}
+                </p>
+              }
+              actions={
+                <AiButton
+                  iconType="sparkles"
+                  onClick={() => regenerate()}
+                  isDisabled={!selection.isReady}
+                  data-test-subj={TEST_IDS.generate}
+                >
+                  {'Generate brief'}
+                </AiButton>
+              }
+              data-test-subj={TEST_IDS.startPanel}
+            />
+          )}
           {hasFailed && (
             <KbnDangerCallout
               title="The brief could not be generated"
@@ -430,17 +459,19 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="refresh"
-              isLoading={isGenerating}
-              isDisabled={isGenerating}
-              onClick={() => regenerate()}
-              data-test-subj={TEST_IDS.regenerate}
-            >
-              {'Regenerate'}
-            </EuiButton>
-          </EuiFlexItem>
+          {hasRequested && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="refresh"
+                isLoading={isGenerating}
+                isDisabled={isGenerating}
+                onClick={() => regenerate()}
+                data-test-subj={TEST_IDS.regenerate}
+              >
+                {'Regenerate'}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
