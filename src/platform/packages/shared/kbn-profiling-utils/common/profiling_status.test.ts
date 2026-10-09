@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ProfilingStatus } from '@kbn/profiling-utils';
-import { hasUsableProfilingData } from '.';
+import type { ProfilingSchemasStatus } from './profiling_status';
+import { hasUsableProfilingData } from './profiling_status';
 
 const makeStatus = (
   otelData: boolean,
   universalProfilingData: boolean,
   universalProfilingSetup = true
-): ProfilingStatus => ({
+): ProfilingSchemasStatus => ({
   isEnabled: true,
   otel: { isAvailable: true, hasData: otelData },
   universalProfiling: {
@@ -20,7 +22,6 @@ const makeStatus = (
     hasSetup: universalProfilingSetup,
     hasData: universalProfilingData,
     hasLegacyData: false,
-    canSetup: true,
   },
 });
 

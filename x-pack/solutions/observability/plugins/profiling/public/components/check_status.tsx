@@ -8,13 +8,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { ProfilingSchema } from '@kbn/profiling-utils';
+import { hasUsableProfilingData, ProfilingSchema } from '@kbn/profiling-utils';
 import { AsyncStatus } from '../hooks/use_async';
 import { PROFILING_PATHNAMES } from '../routing/pathnames';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { useLicenseContext } from './contexts/license/use_license_context';
 import { useProfilingStatus } from './contexts/profiling_status/use_profiling_status';
-import { hasUsableProfilingData } from '../utils/has_usable_profiling_data';
 import { LicensePrompt } from './license_prompt';
 import { ProfilingAppPageTemplate } from './profiling_app_page_template';
 import { ProfilingStatusErrorPrompt } from './profiling_status_error_prompt';

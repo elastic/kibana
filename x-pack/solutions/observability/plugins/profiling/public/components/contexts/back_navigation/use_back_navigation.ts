@@ -10,11 +10,11 @@ import qs from 'query-string';
 import type { AppHeaderBack } from '@kbn/app-header';
 import { useLocation } from 'react-router-dom';
 import type { PathsOf } from '@kbn/typed-react-router-config';
+import { hasUsableProfilingData } from '@kbn/profiling-utils';
 import { useProfilingDependencies } from '../profiling_dependencies/use_profiling_dependencies';
 import { useProfilingStatus } from '../profiling_status/use_profiling_status';
 import type { ProfilingRoutes } from '../../../routing';
 import { PROFILING_PATHNAMES } from '../../../routing/pathnames';
-import { hasUsableProfilingData } from '../../../utils/has_usable_profiling_data';
 import { useSchemaQueryParam } from '../../../hooks/use_schema_query_param';
 
 // Routes that render a back button in AppHeader.

@@ -35,6 +35,7 @@ export {
   topNComparisonFunctionSortFieldRt,
 } from './common/functions';
 export { convertTonsToKgs } from './common/utils';
+export { hasUsableProfilingData } from './common/profiling_status';
 export {
   ProfilingSchema,
   profilingSchemaRt,
