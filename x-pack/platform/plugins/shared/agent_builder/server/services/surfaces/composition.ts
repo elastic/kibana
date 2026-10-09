@@ -25,7 +25,7 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
-import { validateComposition } from './pack';
+import { isomerRuntime } from './pack';
 
 const { tagName, attributes } = renderAttachmentElement;
 
@@ -147,7 +147,7 @@ const resolveAttachmentNode = (
       version: attachmentVersion.version,
     });
 
-    const { valid, errors } = validateComposition(composition);
+    const { valid, errors } = isomerRuntime.validate(composition);
 
     if (!valid) {
       const reasons = errors.map(formatValidationError).join('; ');

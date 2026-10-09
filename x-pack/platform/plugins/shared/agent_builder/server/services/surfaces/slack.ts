@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { renderSlackEnvelope } from '@elastic/isomer-sdk/slack';
 import { ConversationOriginType } from '@kbn/agent-builder-common';
-import { compositionDispatcher } from './pack';
+import { isomerRuntime } from './pack';
 import type { SurfaceRenderer } from './types';
 
 /** Renders the response message as Block Kit, for Slack. */
 export const slackSurface: SurfaceRenderer = {
   id: ConversationOriginType.Slack,
   render: (composition) => {
-    const { text, blocks } = renderSlackEnvelope(composition, compositionDispatcher, {
-      heading: false,
-    });
+    const { text, blocks } = isomerRuntime.surfaces.slack.render(composition, { heading: false });
 
     return { text, blocks };
   },

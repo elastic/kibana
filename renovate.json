@@ -2222,15 +2222,6 @@
       "enabled": true
     },
     {
-      "groupName": "@elastic/isomer-sdk",
-      "matchDepNames": ["@elastic/isomer-sdk"],
-      "reviewers": ["team:workchat-eng"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:agent-builder"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "@cfworker/json-schema",
       "matchDepNames": ["@cfworker/json-schema"],
       "reviewers": ["team:workchat-eng"],

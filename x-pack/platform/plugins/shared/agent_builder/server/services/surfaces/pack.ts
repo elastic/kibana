@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import type { SurfaceNode, MarkdownNode } from '@kbn/agent-builder-server/attachments';
-import {
-  composePacks,
-  createCompositionValidator,
-  createPrimitiveDispatcher,
-  definePrimitive,
-  definePrimitivePack,
-  requiredString,
-  z,
-} from '@elastic/isomer-sdk';
+import type { MarkdownNode } from '@kbn/agent-builder-server/attachments';
+import { createKibanaIsomerRuntime } from '@kbn/isomer';
+import { definePrimitive, definePrimitivePack, requiredString, z } from '@elastic/isomer-sdk';
 import { md } from '@elastic/isomer-sdk/markdown';
 
 const markdown = definePrimitive<MarkdownNode>({
@@ -44,10 +37,5 @@ export const agentBuilderPack = definePrimitivePack({
   primitives: [markdown],
 });
 
-const { definitions } = composePacks([agentBuilderPack]);
-
-/** Renders compositions on any surface. */
-export const compositionDispatcher = createPrimitiveDispatcher<SurfaceNode>(definitions);
-
-/** Checks a composition against the pack's schemas before it renders. */
-export const validateComposition = createCompositionValidator<SurfaceNode>(definitions);
+/** Validates compositions against the Agent Builder pack, and renders them on every surface. */
+export const isomerRuntime = createKibanaIsomerRuntime({ packs: [agentBuilderPack] });
