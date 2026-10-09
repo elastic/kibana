@@ -37,6 +37,10 @@ export const defaultValueFormatter = (value: unknown) => {
   return renderToString(<>{content}</>);
 };
 
+// Only multiple values are kept as an array. A single value is unwrapped and an empty
+// result stays undefined.
+const toPreviewValue = (values: unknown[]): unknown => (values.length > 1 ? values : values[0]);
+
 interface PreviewControllerArgs {
   dataView: DataViewLazy;
   dataViewToUpdate: DataView | DataViewLazy;
@@ -138,6 +142,9 @@ export class PreviewController {
   state$: BehaviorObservable<PreviewState>;
 
   private previewCount = 0;
+
+  /** Id (see previewCount) of the _execute request whose response will still be accepted, if any */
+  private inFlightPreviewId: number | null = null;
 
   private updateState = (newState: Partial<PreviewState>) => {
     this.internalState$.next({ ...this.state$.getValue(), ...newState });
@@ -628,6 +635,7 @@ export class PreviewController {
 
   reset = () => {
     this.previewCount = 0;
+    this.inFlightPreviewId = null;
     this.updateState({
       documents: [],
       previewResponse: { fields: [], error: null },
@@ -650,7 +658,36 @@ export class PreviewController {
 
   getPreviewCount = () => this.previewCount;
 
-  incrementPreviewCount = () => ++this.previewCount;
+  incrementPreviewCount = () => {
+    this.inFlightPreviewId = ++this.previewCount;
+    return this.inFlightPreviewId;
+  };
+
+  /** Marks the _execute request with the given id as settled, whether its response is used or not. */
+  completePreviewRequest = (previewId: number) => {
+    if (this.inFlightPreviewId === previewId) {
+      this.inFlightPreviewId = null;
+    }
+  };
+
+  /**
+   * Makes the response of the in-flight _execute request, if any, be discarded when it arrives.
+   * As the discarded request will never update the preview, the params cache is invalidated so
+   * that the next updatePreview() issues a new request, even if the form went back to the params
+   * of the discarded request. Without an in-flight request the cache is still accurate: no-op.
+   */
+  discardInFlightPreview = () => {
+    if (this.inFlightPreviewId === null) {
+      return;
+    }
+    ++this.previewCount;
+    this.inFlightPreviewId = null;
+    this.lastExecutePainlessRequestParams = {
+      type: null,
+      script: undefined,
+      documentId: undefined,
+    };
+  };
 
   allParamsDefined = (
     type: Params['type'],
@@ -669,7 +706,7 @@ export class PreviewController {
     type: Params['type'],
     format: Params['format']
   ) => {
-    const [value] = values;
+    const value = toPreviewValue(values);
     const formattedValue = this.valueFormatter({ value, type, format });
 
     this.setPreviewResponse({
@@ -698,7 +735,7 @@ export class PreviewController {
         const { 1: fieldName } = key.split('composite_field.');
         updatedFieldsInScript.push(fieldName);
 
-        const [value] = values;
+        const value = toPreviewValue(values);
         const formattedValue = this.valueFormatter({ value, type, format });
 
         return {
@@ -707,7 +744,7 @@ export class PreviewController {
             : `${fieldName$Value ?? ''}.${fieldName}`,
           value,
           formattedValue,
-          type: valueTypeToSelectedType(value),
+          type: valueTypeToSelectedType(values[0]),
         };
       })
       .filter(filterSubfield)

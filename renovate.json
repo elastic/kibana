@@ -5,6 +5,10 @@
     "helpers:pinGitHubActionDigests",
     "helpers:pinGitHubActionDigestsToSemver"
   ],
+  "gitIgnoredAuthors": [
+    "174716857+elastic-renovate-prod[bot]@users.noreply.github.com",
+    "42973632+kibanamachine@users.noreply.github.com"
+  ],
   "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**"],
   "enabledManagers": ["npm", "github-actions", "custom.regex", "devcontainer"],
   "baseBranches": ["main", "9.3", "9.2", "8.19"],
@@ -738,8 +742,8 @@
     {
       "groupName": "LaunchDarkly",
       "matchDepNames": [
-        "launchdarkly-js-client-sdk",
         "@openfeature/launchdarkly-client-provider",
+        "@launchdarkly/js-client-sdk",
         "@launchdarkly/node-server-sdk",
         "@launchdarkly/openfeature-node-server"
       ],
@@ -832,6 +836,7 @@
       "matchDepNames": [
         "@apidevtools/swagger-parser",
         "@redocly/cli",
+        "bump-cli",
         "openapi-types",
         "ajv",
         "ajv-draft-04",
@@ -1559,7 +1564,7 @@
     },
     {
       "groupName": "reporting dependencies",
-      "matchDepNames": ["@types/extract-zip", "@types/pdfmake", "extract-zip", "pdfmake"],
+      "matchDepNames": ["@types/pdfmake", "pdfmake"],
       "reviewers": ["team:response-ops"],
       "matchBaseBranches": ["main"],
       "labels": [
@@ -2032,13 +2037,14 @@
       "matchDepNames": [
         "@emotion/jest",
         "@jest/console",
+        "@ampproject/remapping",
         "@jest/reporters",
         "@jest/transform",
         "@jest/types",
+        "@swc/jest",
         "@types/jest",
         "babel-jest",
         "expect",
-        "jest",
         "jest-canvas-mock",
         "jest-cli",
         "jest-config",
@@ -2050,7 +2056,8 @@
         "jest-specific-snapshot",
         "jest-snapshot",
         "jest-styled-components",
-        "mutation-observer"
+        "jest",
+        "magic-string"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -2657,7 +2664,7 @@
     },
     {
       "groupName": "@swc",
-      "matchDepNames": ["@swc/core", "@swc/helpers"],
+      "matchDepNames": ["@swc/core", "@swc/helpers", "@swc/plugin-emotion"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],

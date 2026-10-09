@@ -1,6 +1,6 @@
 {
   "_no_owner": {
-    "oas_docs/package-lock.json": "'package-lock.json' should be snake_case",
+    "oas_docs": "'oas_docs' should be kebab-case",
     "packages/kbn-tsconfig": "'kbn-tsconfig' should be snake_case",
     "pnpm-lock.yaml": "'pnpm-lock.yaml' should be snake_case",
     "pnpm-workspace.yaml": "'pnpm-workspace.yaml' should be snake_case",

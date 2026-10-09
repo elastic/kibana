@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/cases-plugin",
-  "owner": ["@elastic/kibana-cases"],
+  "owner": ["@elastic/security-investigations"],
   "group": "platform",
   "visibility": "shared",
   "description": "The Case management system in Kibana",

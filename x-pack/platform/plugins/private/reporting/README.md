@@ -10,6 +10,10 @@ This new endpoint is designed to have a more automation-friendly signature. It w
 ## Generate CSV
 Although historically related to reporting, the CsvGenerator class has now be moved into its own package `@kbn/generate-csv`. 
 
+## Legacy scheduled report ownership
+
+Scheduled reports with neither `createdById` nor `createdByApiKeyId` retain username-based access for listing, updating, deleting, enabling, and disabling. Updates leave them without ownership IDs. Realm-aware ownership applies only to newly created reports; legacy reports retain the previous cross-realm username behavior.
+
 ## Serverless configuration
 There are several improvements made for reporting in serverless environments. Most changes are reflected in `reporting/server/config/schema.ts` for reference. 
 

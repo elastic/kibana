@@ -2,6 +2,7 @@
 
 SCRIPTS_COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPTS_COMMON_DIR}/vault_fns.sh"
+source "${SCRIPTS_COMMON_DIR}/gcs_tmp_artifacts.sh"
 
 is_pr() {
   [[ "${GITHUB_PR_NUMBER-}" ]] && return
@@ -207,68 +208,70 @@ set_git_merge_base() {
 # Download an artifact using the buildkite-agent, takes the same arguments as https://buildkite.com/docs/agent/v3/cli-artifact#downloading-artifacts-usage
 # times-out after 60 seconds and retries up to 3 times
 download_artifact() {
-  retry 3 1 timeout 3m buildkite-agent artifact download "$@"
+  retry 3 1 timeout 10m buildkite-agent artifact download "$@"
 }
 
-GCS_CI_ARTIFACT_REGIONS=("asia-south2" "europe-west2" "northamerica-northeast2" "southamerica-east1" "us-central1" "us-east1" "us-west1")
-download_tmp_artifact() {
-  local artifact_name="$1" dest_dir="$2" build_id="$3"
-  local region use_gcs=false
+# Restores a moon cache archive into ./.moon/cache, only if it passes validate_moon_cache_archive.
+extract_moon_cache() {
+  local archive="$1" staging_dir
 
-  for region in "${GCS_CI_ARTIFACT_REGIONS[@]}"; do
-    if [[ "${BUILDKITE_AGENT_GCP_REGION:-}" == "$region" ]]; then
-      use_gcs=true
-      break
-    fi
-  done
-
-  if [[ "$use_gcs" == "true" ]]; then
-    if "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}" \
-      && gcloud storage cp \
-        "gs://kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}/tmp/builds/${build_id}/${artifact_name}" \
-        "${dest_dir}/${artifact_name}"; then
-      return 0
-    fi
-    echo "GCS download failed for ${artifact_name} from kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION} (build ${build_id})."
+  if ! validate_moon_cache_archive "$archive"; then
+    echo "Skipping moon cache restore." >&2
+    return 1
   fi
 
-  echo "Falling back to Buildkite artifact download for ${artifact_name} (build ${build_id})."
-  download_artifact "$artifact_name" "$dest_dir" --build "$build_id"
+  mkdir -p ./.moon
+  staging_dir="$(mktemp -d ./.moon/cache-restore.XXXXXX)"
+  if ! tar -xf "$archive" --no-same-owner --no-same-permissions -C "$staging_dir"; then
+    rm -rf "$staging_dir"
+    echo "Failed to extract ${archive}, skipping moon cache restore." >&2
+    return 1
+  fi
+
+  rm -rf ./.moon/cache
+  mv "$staging_dir/.moon/cache" ./.moon/cache
+  rm -rf "$staging_dir"
 }
 
-upload_tmp_artifact() {
-  local local_path="$1" artifact_name="$2" build_id="$3"
-  local region pids=() failures=0
+# Checks that a moon cache archive only contains regular files and directories under .moon/cache.
+validate_moon_cache_archive() {
+  local archive="$1" entries names
 
-  if ! "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}"; then
-    echo "Service account activation failed; skipping GCS upload of ${artifact_name}. Same-region downloads will fall back to the buildkite artifact." >&2
-    return 0
+  # `tar -tv` prints one line per entry, starting with its type and permissions (e.g. "-rw-r--r--")
+  if ! entries="$(tar -tvf "$archive")"; then
+    echo "Unable to list ${archive}." >&2
+    return 1
   fi
 
-  for region in "${GCS_CI_ARTIFACT_REGIONS[@]}"; do
-    upload_tmp_artifact_to_region "$local_path" "$artifact_name" "$build_id" "$region" &
-    pids+=("$!")
-  done
-
-  for pid in "${pids[@]}"; do
-    if ! wait "$pid"; then
-      failures=$((failures + 1))
-    fi
-  done
-
-  if [[ "$failures" -gt 0 ]]; then
-    echo "GCS upload of ${artifact_name} failed for ${failures}/${#GCS_CI_ARTIFACT_REGIONS[@]} bucket(s); same-region downloads will fall back to the buildkite artifact." >&2
+  # `tar -t` prints only the entry paths
+  if ! names="$(tar -tf "$archive")"; then
+    echo "Unable to list ${archive}." >&2
+    return 1
   fi
 
-  return 0
-}
+  # Only regular files ("-") and directories ("d") are allowed: no symlinks, devices or fifos
+  if grep -qv '^[-d]' <<< "$entries"; then
+    echo "${archive} contains entries that are not regular files or directories." >&2
+    return 1
+  fi
 
-upload_tmp_artifact_to_region() {
-  local local_path="$1" artifact_name="$2" build_id="$3" region="$4"
+  # Some tar implementations list hard links with a regular file type and a " link to <target>" suffix
+  if grep -q ' link to ' <<< "$entries"; then
+    echo "${archive} contains hard links." >&2
+    return 1
+  fi
 
-  retry 3 5 env CLOUDSDK_STORAGE_PARALLEL_COMPOSITE_UPLOAD_ENABLED=False gcloud storage cp \
-    "$local_path" \
-    "gs://kibana-ci-artifacts-${region}/tmp/builds/${build_id}/${artifact_name}"
+  # Every entry must be .moon/cache itself or live inside it (relative path, no leading "/" or "./")
+  if grep -qvE '^\.moon/cache(/|$)' <<< "$names"; then
+    echo "${archive} contains entries outside .moon/cache." >&2
+    return 1
+  fi
+
+  # No entry may contain a ".." path segment
+  if grep -qE '(^|/)\.\.(/|$)' <<< "$names"; then
+    echo "${archive} contains parent-directory path segments." >&2
+    return 1
+  fi
 }
 
 print_if_dry_run() {

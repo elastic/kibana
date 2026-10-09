@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
@@ -14,14 +14,16 @@ import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_
 import { securityTool } from './constants';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
-const attackDiscoverySearchSchema = z.object({
-  alertIds: z
-    .array(z.string())
-    .min(1)
-    .describe(
-      'An array of alert IDs to search for in attack discoveries. The tool will find attack discoveries where kibana.alert.attack_discovery.alert_ids contains any of the provided alert IDs.'
-    ),
-});
+const attackDiscoverySearchSchema = lazySchema(() =>
+  z.object({
+    alertIds: z
+      .array(z.string())
+      .min(1)
+      .describe(
+        'An array of alert IDs to search for in attack discoveries. The tool will find attack discoveries where kibana.alert.attack_discovery.alert_ids contains any of the provided alert IDs.'
+      ),
+  })
+);
 
 export const SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID = securityTool('attack_discovery_search');
 

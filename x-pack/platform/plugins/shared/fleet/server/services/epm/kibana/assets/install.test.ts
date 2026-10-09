@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { v5 } from 'uuid';
+
 import type {
   ISavedObjectsImporter,
   SavedObjectsImportFailure,
@@ -120,6 +122,47 @@ describe('installKibanaSavedObjects', () => {
 
     expect(mockImporter.import).toHaveBeenCalledTimes(1);
     expect(mockImporter.resolveImportErrors).toHaveBeenCalledTimes(1);
+  });
+
+  it('preserves importer-provided destinationId in initial import success results for additional-space objects', async () => {
+    // When overwrite:true finds a single existing object sharing the same origin, core's
+    // import returns { id: spaceScopedId, destinationId: existingObjectId }. The initial
+    // normalization must preserve that destinationId rather than overwriting it with
+    // spaceScopedId, otherwise Fleet persists the wrong id and upgrades/uninstalls/markdown
+    // rewrites target the wrong saved object.
+    const archiveId = 'my-dashboard-archive-id';
+    const spaceId = 'my-space';
+    const existingDestId = 'existing-dest-uuid';
+
+    const archiveAsset = createAsset({
+      id: archiveId,
+      type: KibanaSavedObjectType.dashboard,
+      attributes: {},
+    });
+
+    const spaceScopedId = v5(`$${spaceId}:${archiveId}`, v5.DNS);
+
+    // Initial import succeeds and returns the existing object as destinationId
+    mockImporter.import.mockResolvedValueOnce(
+      createImportResponse(
+        [],
+        [{ id: spaceScopedId, type: archiveAsset.type, meta: {}, destinationId: existingDestId }]
+      )
+    );
+
+    const result = await installKibanaSavedObjects({
+      savedObjectsImporter: mockImporter,
+      logger: mockLogger,
+      kibanaAssets: [archiveAsset],
+      options: { installAsAdditionalSpace: true, spaceId },
+    });
+
+    // id must be the archive id; destinationId must be the importer-chosen existing object
+    expect(result).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: archiveId, destinationId: existingDestId }),
+      ])
+    );
   });
 
   it('resolves ambiguous_conflict by calling resolveImportErrors with the most-recently-updated destinationId', async () => {
@@ -309,6 +352,165 @@ describe('installKibanaSavedObjects', () => {
     );
   });
 
+  it('normalizes id/destinationId on ambiguous_conflict resolve results for additional-space objects', async () => {
+    // For additional-space installs, createSavedObjectKibanaAsset rewrites the archive id
+    // to a v5 UUID and stores the archive id in originId. The initial import normalizes
+    // results (lines 729-737), but the ambiguous-conflict resolve pass did not apply the
+    // same swap before the Libra fix. Without normalization the stored ref uses the
+    // space-scoped UUID instead of the archive id, breaking subsequent installs.
+    const archiveId = 'my-dashboard-archive-id';
+    const spaceId = 'my-space';
+
+    // A raw archive asset installed via installAsAdditionalSpace — createSavedObjectKibanaAsset
+    // rewrites its id to a v5 UUID and sets originId = archive id.
+    const archiveAsset = createAsset({
+      id: archiveId,
+      type: KibanaSavedObjectType.dashboard,
+      attributes: {},
+    });
+
+    // Compute the space-scoped id the same way createSavedObjectKibanaAsset does, so the
+    // ambiguous error and resolve response use the real rewritten id.
+    const spaceScopedId = v5(`$${spaceId}:${archiveId}`, v5.DNS);
+
+    const ambiguousError: SavedObjectsImportFailure = {
+      type: archiveAsset.type,
+      id: spaceScopedId,
+      meta: {},
+      error: {
+        type: 'ambiguous_conflict',
+        destinations: [{ id: 'dest-chosen-uuid', updatedAt: '2024-01-01T00:00:00.000Z' }],
+      },
+    };
+
+    const chosenDestId = 'dest-chosen-uuid';
+    mockImporter.import.mockResolvedValueOnce(createImportResponse([ambiguousError]));
+    // resolveImportErrors returns the space-scoped UUID as id and the chosen object as
+    // destinationId — exactly what the real importer produces for ambiguous_conflict resolution.
+    mockImporter.resolveImportErrors.mockResolvedValueOnce(
+      createImportResponse(
+        [],
+        [{ id: spaceScopedId, type: archiveAsset.type, meta: {}, destinationId: chosenDestId }]
+      )
+    );
+
+    const result = await installKibanaSavedObjects({
+      savedObjectsImporter: mockImporter,
+      logger: mockLogger,
+      kibanaAssets: [archiveAsset],
+      options: { installAsAdditionalSpace: true, spaceId },
+    });
+
+    // After normalization: id = archive id, destinationId = the importer-chosen object (not
+    // the space-scoped UUID). Previously the code always set destinationId = spaceScopedId,
+    // losing the real chosen destination.
+    expect(result).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: archiveId, destinationId: chosenDestId }),
+      ])
+    );
+  });
+
+  it('sends pre-processed objects with correct id and originId to the importer on the preProcessedObjects path', async () => {
+    // Positive regression for the preProcessedObjects bypass: verifies that a SavedObjectToBe
+    // with id=spaceScopedId and originId=archiveId (as queued by replaceInMarkdown) is
+    // forwarded to the importer unchanged. Reverting to reconstruction via
+    // createSavedObjectKibanaAsset (without options) would drop originId, severing the
+    // origin chain.
+    const archiveId = 'dashboard-markdown-ref';
+    const spaceId = 'my-space';
+
+    const spaceScopedId = v5(`$${spaceId}:${archiveId}`, v5.DNS);
+
+    // Simulate an already-processed SavedObjectToBe as replaceInMarkdown would queue it:
+    // id already rewritten to space-scoped UUID, originId = archive id.
+    const preProcessed = {
+      id: spaceScopedId,
+      type: KibanaSavedObjectType.dashboard,
+      originId: archiveId,
+      attributes: { description: 'updated markdown' },
+      references: [],
+    } as any;
+
+    // Capture the stream passed to the importer to inspect its contents
+    const capturedObjects: any[] = [];
+    mockImporter.import.mockImplementationOnce(async ({ readStream }) => {
+      for await (const obj of readStream) capturedObjects.push(obj);
+      return createImportResponse([], [{ id: spaceScopedId, type: preProcessed.type, meta: {} }]);
+    });
+
+    await installKibanaSavedObjects({
+      savedObjectsImporter: mockImporter,
+      logger: mockLogger,
+      kibanaAssets: [
+        {
+          id: archiveId,
+          type: KibanaSavedObjectType.dashboard,
+          attributes: { description: 'updated markdown' },
+          references: [],
+        },
+      ],
+      options: { installAsAdditionalSpace: true, spaceId },
+    });
+
+    // The importer must have received an object with id=spaceScopedId and originId=archiveId
+    expect(capturedObjects).toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: spaceScopedId, originId: archiveId })])
+    );
+  });
+
+  it('normalizes id/destinationId on missing_references resolve results for additional-space objects', async () => {
+    // Regression: normalizeResolveResults is applied to both resolveImportErrors calls.
+    // This test covers the missing-references pass specifically: an additional-space
+    // dashboard whose initial import fails with missing_references must have its resolve
+    // result normalized (id = archiveId, destinationId = importer-chosen uuid) before
+    // being concatenated to allSuccessResults.
+    const archiveId = 'dashboard-with-ref-error';
+    const spaceId = 'my-space';
+    const chosenDestId = 'chosen-dest-uuid';
+
+    const archiveAsset = createAsset({
+      id: archiveId,
+      type: KibanaSavedObjectType.dashboard,
+      attributes: {},
+    });
+
+    const spaceScopedId = v5(`$${spaceId}:${archiveId}`, v5.DNS);
+
+    // Initial import returns missing_references for the rewritten dashboard
+    mockImporter.import.mockResolvedValueOnce(
+      createImportResponse([
+        {
+          id: spaceScopedId,
+          type: archiveAsset.type,
+          meta: {},
+          error: { type: 'missing_references', references: [] },
+        },
+      ])
+    );
+    // resolveImportErrors returns the space-scoped id with a distinct destinationId
+    mockImporter.resolveImportErrors.mockResolvedValueOnce(
+      createImportResponse(
+        [],
+        [{ id: spaceScopedId, type: archiveAsset.type, meta: {}, destinationId: chosenDestId }]
+      )
+    );
+
+    const result = await installKibanaSavedObjects({
+      savedObjectsImporter: mockImporter,
+      logger: mockLogger,
+      kibanaAssets: [archiveAsset],
+      options: { installAsAdditionalSpace: true, spaceId },
+    });
+
+    // After normalization: id = archive id, destinationId = importer-chosen object
+    expect(result).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: archiveId, destinationId: chosenDestId }),
+      ])
+    );
+  });
+
   it('does not throw on empty destinations array in ambiguous_conflict error', async () => {
     const asset = createAsset({ id: 'dashboard-abc', attributes: {} });
     const ambiguousError: SavedObjectsImportFailure = {
@@ -384,6 +586,26 @@ describe('createSavedObjectKibanaAsset', () => {
     });
 
     expect(result.id).toEqual('system-logs-template');
+    expect(result.originId).toBeUndefined();
+  });
+
+  it('does not pick up originId from a raw archive asset (package JSON must not influence origin tracking)', () => {
+    // Raw package archive assets may contain an originId field in their JSON. Previously
+    // a cast to SavedObjectToBe would read it and preserve it, potentially remapping onto
+    // an existing user object with overwrite:true. createSavedObjectKibanaAsset must ignore
+    // archive-supplied originId on the normal import path.
+    const archiveAssetWithOriginId = {
+      id: 'my-dashboard-id',
+      type: KibanaSavedObjectType.dashboard,
+      // originId present in raw archive JSON — must be ignored
+      originId: 'some-other-origin',
+      attributes: { title: 'My Dashboard' },
+      references: [],
+    } as any;
+
+    const result = createSavedObjectKibanaAsset(archiveAssetWithOriginId);
+
+    // No rewriteId (no options), so originId must not be set from the archive field
     expect(result.originId).toBeUndefined();
   });
 });

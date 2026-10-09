@@ -232,6 +232,7 @@ import { getInputsWithIds } from './package_policies/get_input_with_ids';
 import { runWithCache } from './epm/packages/cache';
 import {
   getAgentVersionsForVersionSpecificPolicies,
+  hasAgentVersionCondition,
   hasAgentVersionConditionInInputTemplate,
 } from './utils/version_specific_policies';
 import { recompileInputsWithAgentVersion } from './agent_policies/package_policies_to_agent_inputs';
@@ -830,10 +831,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicy: PackagePolicy,
     agentVersions?: string[]
   ) {
-    if (!appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
-      return;
-    }
-    if (!hasAgentVersionConditionInInputTemplate(assetsMap)) {
+    // Covers both manifest level (`conditions.agent.version`) and template level conditions, and
+    // checks the `enableVersionSpecificPolicies` feature flag.
+    if (!hasAgentVersionCondition(packageInfo, assetsMap)) {
       return;
     }
     return withActiveSpan(
@@ -1796,7 +1796,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectType,
         id,
         {
-          ...restOfPackagePolicy,
+          ...omit(restOfPackagePolicy, 'package_agent_version_condition'),
           ...(restOfPackagePolicy.package
             ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
             : {}),
@@ -1815,7 +1815,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           revision: oldPackagePolicy.revision + 1,
           updated_at: new Date().toISOString(),
           updated_by: options?.user?.username ?? 'system',
-          package_agent_version_condition: pkgInfo?.conditions?.agent?.version,
+          ...((pkgInfo?.conditions?.agent?.version !== undefined ||
+            oldPackagePolicy.package_agent_version_condition) && {
+            package_agent_version_condition: pkgInfo?.conditions?.agent?.version ?? '',
+          }),
         },
         {
           version,
@@ -2243,11 +2246,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
         }
 
+        const targetAgentVersionCondition = pkgInfo?.conditions?.agent?.version;
+
         policiesToUpdate.push({
           type: savedObjectType,
           id,
           attributes: {
-            ...restOfPackagePolicy,
+            ...omit(restOfPackagePolicy, 'package_agent_version_condition'),
             ...(restOfPackagePolicy.package
               ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
               : {}),
@@ -2266,6 +2271,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             revision: oldPackagePolicy.revision + 1,
             updated_at: new Date().toISOString(),
             updated_by: options?.user?.username ?? 'system',
+            ...((targetAgentVersionCondition !== undefined ||
+              oldPackagePolicy.package_agent_version_condition) && {
+              package_agent_version_condition: targetAgentVersionCondition ?? '',
+            }),
           },
           version,
         });
@@ -2774,7 +2783,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser; force?: boolean },
+    options?: { user?: AuthenticatedUser; force?: boolean; batchSize?: number },
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse> {
     return _packagePoliciesBulkUpgrade({
@@ -3239,6 +3248,34 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
       );
     }
+  }
+
+  /**
+   * Returns the set of space IDs for package policies that reference the given output ID.
+   * Used for pre-deletion authz checks.
+   */
+  public async getSpacesForPoliciesUsingOutput(outputId: string): Promise<{
+    spaceIds: Set<string>;
+    truncated: boolean;
+  }> {
+    const savedObjectType = await getPackagePolicySavedObjectType();
+    const result = await appContextService
+      .getInternalUserSOClientWithoutSpaceExtension()
+      .find<PackagePolicySOAttributes>({
+        type: savedObjectType,
+        fields: ['spaceIds'],
+        searchFields: ['output_id'],
+        search: escapeSearchQueryPhrase(outputId),
+        perPage: SO_SEARCH_LIMIT,
+        namespaces: ['*'],
+      });
+    const spaceIds = new Set<string>();
+    for (const so of result.saved_objects) {
+      for (const ns of so.namespaces ?? []) {
+        spaceIds.add(ns);
+      }
+    }
+    return { spaceIds, truncated: result.saved_objects.length < result.total };
   }
 
   async fetchAllItemIds(

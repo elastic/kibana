@@ -71,7 +71,10 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
 
     const hasOnlyDefaultSpace = this.config.maxSpaces === 1;
 
-    this.spacesManager = new SpacesManager(core.http);
+    this.spacesManager = new SpacesManager(
+      core.http,
+      this.initializerContext.logger.get('spaces_manager')
+    );
     this.spacesApi = {
       ui: getUiApi({
         spacesManager: this.spacesManager,

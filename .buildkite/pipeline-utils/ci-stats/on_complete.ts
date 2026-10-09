@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BuildkiteClient } from '../buildkite';
-import { CiStatsClient } from './client';
+import { BuildkiteClient } from '../buildkite/index.ts';
+import { CiStatsClient } from './client.ts';
 
 const buildkite = new BuildkiteClient();
 const ciStats = new CiStatsClient();

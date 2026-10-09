@@ -90,7 +90,7 @@ overrides:
   'cheerio': '1.0.0-rc.12'
   'chokidar': '3.5.3'
   'd3-scale>d3-color': 'npm:@elastic/kibana-d3-color@2.0.1'
-  'esbuild': '0.27.2'
+  'esbuild': '0.28.1'
   'fast-xml-parser': '5.5.7'
   'flatted': '3.4.2'
   'globby>fast-glob': '3.3.3'
@@ -100,8 +100,8 @@ overrides:
   'pixelmatch': '5.3.0'
   'qs': '6.16.0'
   'remark-parse>trim': '1.0.1'
-  'serialize-javascript': '7.0.5'
-  'sharp': '0.35.2'
+  'serialize-javascript': '7.1.2'
+  'sharp': '0.35.4'
   'typescript': '6.0.3'
   'util': '0.12.5'
   'yauzl': '3.4.0'
@@ -237,6 +237,7 @@ packages:
   - 'examples/user_profile_examples'
   - 'examples/v8_profiler_examples'
   - 'examples/workflows_extensions_example'
+  - 'oas_docs'
   - 'packages/kbn-api-contracts'
   - 'packages/kbn-babel-preset'
   - 'packages/kbn-capture-oas-snapshot-cli'
@@ -819,6 +820,7 @@ packages:
   - 'src/platform/packages/shared/kbn-rule-data-utils'
   - 'src/platform/packages/shared/kbn-safer-lodash-set'
   - 'src/platform/packages/shared/kbn-saved-search-component'
+  - 'src/platform/packages/shared/kbn-schema-string-helpers'
   - 'src/platform/packages/shared/kbn-scout'
   - 'src/platform/packages/shared/kbn-scout-synthtrace'
   - 'src/platform/packages/shared/kbn-search-agent'
@@ -1526,3 +1528,6 @@ packages:
   - 'x-pack/solutions/workplaceai/plugins/workplace_ai_app'
   - 'x-pack/solutions/workplaceai/test'
 # END GENERATED PACKAGES
+
+# Keep a last field entry, because a trailing comment might be removed by some parsers. 
+lockfile: true
