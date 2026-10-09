@@ -8,21 +8,14 @@
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { EntityType } from '../../../../common/entity_analytics/types';
-import {
-  EntityPanelKeyByType,
-  EntityPanelParamByType,
-} from '../../../flyout/entity_details/shared/constants';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import type { FlyoutOrigin } from '../../../common/lib/telemetry/events/flyout_v2/types';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
-import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import {
   getOpenEntityFlyoutLabel,
   VIEW_ENTITY_DETAILS,
 } from '../threat_hunting/top_threat_hunting_leads/translations';
 import { getEntityIcon } from '../threat_hunting/top_threat_hunting_leads/utils';
+import { useOpenEntityFlyout } from './use_open_entity_flyout';
 
 const ENTITY_BADGE_NAME_CLASS = 'leadEntityBadge__name';
 
@@ -35,9 +28,6 @@ const entityBadgeContainerCss = css`
   max-width: 100%;
   vertical-align: bottom;
 `;
-
-const isKnownEntityType = (type: string): type is EntityType =>
-  (Object.values(EntityType) as string[]).includes(type);
 
 interface EntityBadgeProps {
   entity: { type: string; name: string; id: string };
@@ -57,9 +47,7 @@ export const EntityBadge: React.FC<EntityBadgeProps> = ({
   scopeId,
   origin = FLYOUT_ORIGIN.THREAT_HUNTING_LEADS,
 }) => {
-  const enableNewFlyout = useIsNewFlyoutEnabled();
-  const { openFlyout } = useExpandableFlyoutApi();
-  const { openEntityFlyout } = useFlyoutApi();
+  const { canOpen, open } = useOpenEntityFlyout(scopeId, origin);
   const { euiTheme } = useEuiTheme();
 
   const badgeContent = (
@@ -93,7 +81,7 @@ export const EntityBadge: React.FC<EntityBadgeProps> = ({
     </EuiFlexGroup>
   );
 
-  if (!isKnownEntityType(entity.type)) {
+  if (!canOpen(entity)) {
     return (
       <EuiBadge color="hollow" css={entityBadgeContainerCss}>
         {badgeContent}
@@ -101,36 +89,7 @@ export const EntityBadge: React.FC<EntityBadgeProps> = ({
     );
   }
 
-  if (!enableNewFlyout && !EntityPanelKeyByType[entity.type]) {
-    return (
-      <EuiBadge color="hollow" css={entityBadgeContainerCss}>
-        {badgeContent}
-      </EuiBadge>
-    );
-  }
-
-  const handleOpenEntityFlyout = () => {
-    const sharedParams = { entityId: entity.id, contextID: scopeId, scopeId };
-
-    if (enableNewFlyout) {
-      openEntityFlyout({
-        engineType: entity.type,
-        entityName: entity.name,
-        origin,
-        ...sharedParams,
-      });
-      return;
-    }
-
-    const entityType = entity.type as EntityType;
-    const panelKey = EntityPanelKeyByType[entityType];
-    const paramName = EntityPanelParamByType[entityType];
-    if (panelKey && paramName) {
-      openFlyout({
-        right: { id: panelKey, params: { [paramName]: entity.name, ...sharedParams } },
-      });
-    }
-  };
+  const handleOpenEntityFlyout = () => open(entity);
 
   // Rendered as a `span[role=button]` (rather than passing `onClick` to
   // `EuiBadge`, which would render a nested `<button>`) since these badges

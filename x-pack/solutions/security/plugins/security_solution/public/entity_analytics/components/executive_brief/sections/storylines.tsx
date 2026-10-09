@@ -88,6 +88,7 @@ export const Storylines: React.FC<StorylinesProps> = ({ snapshot, brief }) => {
                     snapshot={snapshot}
                     storyline={storyline}
                     narrative={narrative}
+                    brief={brief}
                     decisions={brief.decisions
                       .map((decision, index) => ({ decision, index }))
                       .filter(({ decision }) => decision.relatesTo === storyline.evidenceId)}

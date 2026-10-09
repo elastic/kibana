@@ -165,6 +165,15 @@ const buildThreatsTriage = (
       ),
     };
   }
+  return buildStorylineTriagePrompt(storyline, snapshot, brief);
+};
+
+/** Triage prompt for one priority threat, used by the threats area and each threat card. */
+export const buildStorylineTriagePrompt = (
+  storyline: Storyline,
+  snapshot: BriefSnapshot,
+  brief?: BriefLike
+): TriagePrompt => {
   const title = storylineTitle(snapshot, storyline, brief);
   const entities = storyline.entityEuids.flatMap((euid) => {
     const entity = getEntityByEuid(snapshot, euid);

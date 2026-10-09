@@ -6,3 +6,4 @@
  */
 
 export { EntityBadge } from './entity_badge';
+export { useOpenEntityFlyout } from './use_open_entity_flyout';

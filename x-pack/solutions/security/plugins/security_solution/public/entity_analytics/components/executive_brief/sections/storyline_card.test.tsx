@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { render as rtlRender, screen, within } from '@testing-library/react';
+import { fireEvent, render as rtlRender, screen, within } from '@testing-library/react';
 import { EuiProvider, useEuiTheme } from '@elastic/eui';
 import { ThemeProvider } from '@emotion/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,8 +14,16 @@ import type { BriefSnapshot } from '../../../../../common/entity_analytics/execu
 import { BriefContextProvider } from '../components/brief_context';
 import { StorylineCard } from './storyline_card';
 
+const mockOpenChat = jest.fn();
+const mockOpenEntityFlyout = jest.fn();
+
 jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({ services: { application: { navigateToUrl: jest.fn() } } }),
+  useKibana: () => ({
+    services: {
+      application: { navigateToUrl: jest.fn() },
+      agentBuilder: { openChat: mockOpenChat },
+    },
+  }),
   useDateFormat: jest.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
   useTimeZone: jest.fn(() => 'UTC'),
 }));
@@ -30,7 +38,7 @@ jest.mock('../../../../common/hooks/use_has_graph_visualization_license', () => 
 }));
 jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
   useFlyoutApi: () => ({
-    openEntityFlyout: jest.fn(),
+    openEntityFlyout: mockOpenEntityFlyout,
     openEntityGraphView: jest.fn(),
     openRuleFlyout: jest.fn(),
   }),
@@ -83,6 +91,11 @@ const narrativeFor = (id: string) => {
 const toggle = (rank: number) => screen.getByTestId(`executiveBriefStorylineToggle-${rank}`);
 
 describe('StorylineCard', () => {
+  beforeEach(() => {
+    mockOpenChat.mockReset();
+    mockOpenEntityFlyout.mockReset();
+  });
+
   it('shows the preview when collapsed and the rank-1 card open by default', () => {
     render(
       <>
@@ -106,11 +119,68 @@ describe('StorylineCard', () => {
 
     const collapsed = within(screen.getByTestId(`executiveBriefStorylineCard-${story2.rank}`));
     expect(collapsed.getByTestId('executiveBriefSeverity')).toBeInTheDocument();
-    expect(collapsed.getAllByTestId('executiveBriefResponseState').length).toBeGreaterThan(0);
+    expect(collapsed.getByTestId('executiveBriefStorylineResponseState')).toBeInTheDocument();
     expect(collapsed.getByTestId('executiveBriefConfidence')).toBeInTheDocument();
+    expect(collapsed.getByTestId('executiveBriefStorylineTactics')).toHaveTextContent('→');
     expect(collapsed.getByTestId('executiveBriefPreviewEntities')).toBeInTheDocument();
     expect(collapsed.getByTestId('executiveBriefNarrativePreview')).toBeVisible();
-    expect(collapsed.getAllByTestId('executiveBriefTacticChip').length).toBeGreaterThan(0);
+    expect(
+      screen.queryByTestId(`executiveBriefStorylineBody-${story2.rank}`)
+    ).not.toBeInTheDocument();
+  });
+
+  it('keeps the next step, triage and clickable entities in the header when collapsed', () => {
+    const [decision] = FIXTURE_JOB_SUCCEEDED.brief?.decisions ?? [];
+    render(
+      <StorylineCard
+        snapshot={snapshot}
+        storyline={story2}
+        narrative={narrativeFor(story2.evidenceId)}
+        decisions={decision ? [{ decision, index: 0 }] : []}
+        brief={brief}
+      />
+    );
+    expect(toggle(story2.rank)).toHaveAttribute('aria-expanded', 'false');
+    if (decision) {
+      expect(screen.getByTestId('executiveBriefStorylineNextStep')).toHaveTextContent(
+        decision.action
+      );
+    }
+
+    fireEvent.click(screen.getByTestId(`executiveBriefStorylineTriage-${story2.rank}`));
+    expect(mockOpenChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        initialMessage: expect.stringContaining(`Triage priority threat ${story2.rank}`),
+      })
+    );
+
+    const entity = snapshot.entities[story2.entityEuids[0]];
+    const entities = within(screen.getByTestId('executiveBriefPreviewEntities'));
+    fireEvent.click(entities.getByTestId(`leadEntityBadge-${entity.name}`));
+    expect(mockOpenEntityFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({ entityId: entity.euid, entityName: entity.name })
+    );
+  });
+
+  it('toggles from the title and puts recommended actions first in the details', () => {
+    const [decision] = FIXTURE_JOB_SUCCEEDED.brief?.decisions ?? [];
+    render(
+      <StorylineCard
+        snapshot={snapshot}
+        storyline={story2}
+        narrative={narrativeFor(story2.evidenceId)}
+        decisions={decision ? [{ decision, index: 0 }] : []}
+      />
+    );
+    fireEvent.click(screen.getByTestId(`executiveBriefStorylineTitle-${story2.rank}`));
+    expect(toggle(story2.rank)).toHaveAttribute('aria-expanded', 'true');
+    const body = screen.getByTestId(`executiveBriefStorylineBody-${story2.rank}`);
+    expect(screen.queryByTestId('executiveBriefStorylineNextStep')).not.toBeInTheDocument();
+    if (decision) {
+      const text = body.textContent ?? '';
+      expect(text.indexOf('Recommended actions')).toBeLessThan(text.indexOf('Why it matters'));
+      expect(screen.getByTestId('executiveBriefInvestigate-0-inline')).toBeInTheDocument();
+    }
   });
 
   it('expands every card with forceExpanded', () => {
@@ -144,5 +214,21 @@ describe('StorylineCard', () => {
       expect(node.getByTestId(`executiveBriefExposure-${entity.name}`)).toBeInTheDocument();
     });
     expect(screen.queryByTestId('executiveBriefExposureColumn')).not.toBeInTheDocument();
+  });
+
+  it('opens the entity flyout from a diagram node name', () => {
+    render(
+      <StorylineCard
+        snapshot={snapshot}
+        storyline={story1}
+        narrative={narrativeFor(story1.evidenceId)}
+        decisions={[]}
+      />
+    );
+    const entity = snapshot.entities[story1.entityEuids[0]];
+    fireEvent.click(screen.getByTestId(`executiveBriefDiagramEntityLink-${entity.name}`));
+    expect(mockOpenEntityFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({ entityId: entity.euid })
+    );
   });
 });

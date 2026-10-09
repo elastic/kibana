@@ -7,8 +7,9 @@
 import React, { useMemo } from 'react';
 import { EuiBasicTable, EuiBadge, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type {
+  AttentionLevel,
   BlindSpotGap,
   BlindSpotGroup,
   BriefSnapshot,
@@ -36,6 +37,14 @@ const GROUP_LABEL: Record<BlindSpotGroup, string> = {
   response_gap: 'Response gaps',
 };
 
+// The callout follows the Detection coverage traffic light so its colour means the same thing.
+const HEADLINE_CALLOUT: Record<AttentionLevel, typeof KbnWarningCallout> = {
+  urgent: KbnDangerCallout,
+  action: KbnWarningCallout,
+  watch: KbnInfoCallout,
+  clear: KbnInfoCallout,
+};
+
 const SEVERITY_RANK: Record<BlindSpotGap['severity'], number> = { danger: 0, warning: 1, info: 2 };
 
 interface BlindSpotsProps {
@@ -52,6 +61,10 @@ export const BlindSpots: React.FC<BlindSpotsProps> = ({ snapshot, blindSpots }) 
 
   const headline = useMemo(() => pickBlindSpotHeadline(snapshot), [snapshot]);
   const headlineStage = headline?.stage;
+  const coverageLevel = snapshot.glance.assessment?.areas.find(
+    ({ id }) => id === 'coverage'
+  )?.level;
+  const HeadlineCallout = HEADLINE_CALLOUT[coverageLevel ?? 'action'];
 
   // Most severe first (danger, warning, info), then by gap group.
   const sortedGaps = useMemo(
@@ -139,7 +152,7 @@ export const BlindSpots: React.FC<BlindSpotsProps> = ({ snapshot, blindSpots }) 
         />
         {headline && headlineStage && (
           <>
-            <KbnWarningCallout
+            <HeadlineCallout
               title={headline.title}
               actionProps={
                 isPrintMode
@@ -154,7 +167,7 @@ export const BlindSpots: React.FC<BlindSpotsProps> = ({ snapshot, blindSpots }) 
               data-test-subj="executiveBriefHeadlineGap"
             >
               {`${headlineStage.coverage.effective} of ${headlineStage.coverage.enabled} enabled rules are working and ${headlineStage.observed.alerts} alerts were seen.`}
-            </KbnWarningCallout>
+            </HeadlineCallout>
             <EuiSpacer size="m" />
           </>
         )}

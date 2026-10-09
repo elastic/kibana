@@ -156,7 +156,7 @@ describe('ExecutiveBriefFlyout', () => {
       expect(screen.getByTestId(TEST_IDS.storylineCard(id))).toBeInTheDocument()
     );
     const story1 = screen.getByTestId(TEST_IDS.storylineCard('STORY-1'));
-    const chips = within(story1).getByTestId('executiveBriefEntityChips');
+    const chips = within(story1).getByTestId('executiveBriefPreviewEntities');
     ['a.rodriguez', 'LAPTOP-FIN03', 'jump-box-01', 'docker-host-prod-01'].forEach((name) =>
       expect(within(chips).getByText(name)).toBeInTheDocument()
     );

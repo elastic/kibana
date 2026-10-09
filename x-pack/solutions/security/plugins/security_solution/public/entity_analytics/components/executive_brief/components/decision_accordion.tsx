@@ -14,7 +14,7 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { AiButton } from '@kbn/shared-ux-ai-components';
+import { AiButtonEmpty } from '@kbn/shared-ux-ai-components';
 import type { ExecutiveBriefDecision } from '../../../../../common/entity_analytics/executive_brief/types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { buildDecisionPrompt } from '../utils/decision_prompt';
@@ -83,6 +83,18 @@ export const DecisionAccordion: React.FC<DecisionAccordionProps> = ({
       onToggle={isPrintMode ? noop : undefined}
       paddingSize="s"
       data-test-subj={`${TEST_IDS.decision(index)}${inline ? '-inline' : ''}`}
+      extraAction={
+        isPrintMode || !canInvestigate ? undefined : (
+          <AiButtonEmpty
+            size="xs"
+            iconType="productAgent"
+            onClick={investigate}
+            data-test-subj={`${TEST_IDS.investigate(index)}${inline ? '-inline' : ''}`}
+          >
+            {'Triage with AI Agent'}
+          </AiButtonEmpty>
+        )
+      }
       buttonContent={
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
           <EuiFlexItem grow={false}>
@@ -131,19 +143,6 @@ export const DecisionAccordion: React.FC<DecisionAccordionProps> = ({
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      {!isPrintMode && (
-        <AiButton
-          variant="outlined"
-          size="s"
-          iconType="productAgent"
-          isDisabled={!canInvestigate}
-          onClick={investigate}
-          data-test-subj={`${TEST_IDS.investigate(index)}${inline ? '-inline' : ''}`}
-        >
-          {'Triage with AI Agent'}
-        </AiButton>
-      )}
     </EuiAccordion>
   );
 };

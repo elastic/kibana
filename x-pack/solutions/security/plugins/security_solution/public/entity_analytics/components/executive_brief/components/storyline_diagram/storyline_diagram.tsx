@@ -5,13 +5,16 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiLink, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
   BriefEntity,
   BriefSnapshot,
   Storyline,
 } from '../../../../../../common/entity_analytics/executive_brief/types';
+import { useOpenEntityFlyout } from '../../../entity_badge';
+import { EXECUTIVE_BRIEF_SCOPE_ID } from '../../constants';
+import { useIsPrintMode } from '../brief_context';
 import { EntityExposureFacts } from '../exposure_column';
 import type { DiagramNode, DiagramPair } from '../../utils/build_storyline_graph_layout';
 import {
@@ -37,7 +40,11 @@ const EntityCard: React.FC<{ node: DiagramNode; top: number; side: 'left' | 'rig
   side,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const isPrintMode = useIsPrintMode();
+  const { canOpen, open } = useOpenEntityFlyout(EXECUTIVE_BRIEF_SCOPE_ID);
   const { entity, isHub } = node;
+  const name = entity?.name ?? node.euid;
+  const openable = entity ? { type: entity.type, name: entity.name, id: entity.euid } : undefined;
   return (
     <div
       data-test-subj={`executiveBriefDiagramNode-${entity?.name ?? node.euid}`}
@@ -81,7 +88,18 @@ const EntityCard: React.FC<{ node: DiagramNode; top: number; side: 'left' | 'rig
             white-space: nowrap;
           `}
         >
-          {entity?.name ?? node.euid}
+          {openable && !isPrintMode && canOpen(openable) ? (
+            <EuiLink
+              color="text"
+              onClick={() => open(openable)}
+              aria-label={`Open ${name} details`}
+              data-test-subj={`executiveBriefDiagramEntityLink-${name}`}
+            >
+              {name}
+            </EuiLink>
+          ) : (
+            name
+          )}
         </EuiText>
       </div>
       {entity && <EntityExposureFacts entity={entity} />}
