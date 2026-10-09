@@ -229,6 +229,33 @@ export interface RuntimeStart {
 }
 
 /**
+ * Opt-in to the `ai.conversation.updated` workflow trigger for conversations of given templates.
+ */
+export interface ConversationUpdatedOptIn {
+  /**
+   * Templates whose conversations emit the trigger. Writes to conversations of other templates,
+   * or without a template, never run `isEnabled`.
+   */
+  templateIds: readonly string[];
+  /**
+   * Resolves whether the trigger is emitted for the request that performed the write.
+   */
+  isEnabled: (request: KibanaRequest) => Promise<boolean>;
+}
+
+/**
+ * AgentBuilder conversations service's setup contract.
+ */
+export interface ConversationsSetup {
+  /**
+   * Opts in to the `ai.conversation.updated` workflow trigger. A conversation write emits it when
+   * an opt-in registered for the conversation's template resolves `true` for the request that
+   * performed it. Without a matching opt-in, the trigger is never emitted.
+   */
+  enableUpdatedTrigger(optIn: ConversationUpdatedOptIn): void;
+}
+
+/**
  * AgentBuilder conversations service's start contract.
  */
 export interface ConversationsStart {
@@ -272,6 +299,10 @@ export interface AgentBuilderPluginSetup {
    * Conversation templates setup contract, which can be used to register templates.
    */
   conversationTemplates: ConversationTemplatesSetup;
+  /**
+   * Conversations setup contract, which can be used to opt in to conversation workflow triggers.
+   */
+  conversations: ConversationsSetup;
   /**
    * Renderers setup contract, which can be used to register renderer types.
    */

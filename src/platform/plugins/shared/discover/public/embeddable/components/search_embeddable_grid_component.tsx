@@ -110,7 +110,7 @@ export function SearchEmbeddableGridComponent({
     fetchContext,
     rows,
     totalHitCount,
-    columnsMeta,
+    resultDataSource,
     grid,
     panelTitle,
     panelDescription,
@@ -128,7 +128,7 @@ export function SearchEmbeddableGridComponent({
     api.fetchContext$,
     stateManager.rows,
     stateManager.totalHitCount,
-    stateManager.columnsMeta,
+    stateManager.resultDataSource,
     stateManager.grid,
     api.title$,
     api.description$,
@@ -153,11 +153,11 @@ export function SearchEmbeddableGridComponent({
   const originalColumns = useMemo(() => {
     return replaceColumnsWithVariableDriven(
       savedSearch.columns,
-      columnsMeta,
+      resultDataSource,
       esqlVariables,
       isEsql
     );
-  }, [columnsMeta, isEsql, esqlVariables, savedSearch.columns]);
+  }, [resultDataSource, isEsql, esqlVariables, savedSearch.columns]);
 
   const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useColumns({
     capabilities: discoverServices.capabilities,
@@ -329,7 +329,7 @@ export function SearchEmbeddableGridComponent({
     if (!isEsql) {
       return undefined;
     }
-    const table = buildDatatableFromTextBasedGrid({ rows, columnsMeta });
+    const table = buildDatatableFromTextBasedGrid({ rows, resultDataSource });
     if (!table || !savedSearchQuery) {
       return undefined;
     }
@@ -349,7 +349,7 @@ export function SearchEmbeddableGridComponent({
     };
   }, [
     abortSignal,
-    columnsMeta,
+    resultDataSource,
     esqlVariables,
     fetchContext,
     isEsql,
@@ -364,7 +364,7 @@ export function SearchEmbeddableGridComponent({
       onUpdateSampleSize={isEsql ? undefined : onStateEditedProps.onUpdateSampleSize}
       columns={columns}
       dataView={dataView}
-      dataSource={kbnDataSource}
+      dataSource={resultDataSource ?? kbnDataSource}
       interceptedWarnings={interceptedWarnings}
       onFilter={onAddFilter}
       rows={rows}
@@ -382,12 +382,10 @@ export function SearchEmbeddableGridComponent({
       }
       cellActionsMetadata={isInSecuritySolution ? undefined : cellActionsMetadata}
       cellActionsHandling={isInSecuritySolution ? 'replace' : 'append'}
-      columnsMeta={columnsMeta}
       configHeaderRowHeight={defaults.headerRowHeight}
       configRowHeight={defaults.rowHeight}
       headerRowHeightState={savedSearch.headerRowHeight}
       rowHeightState={savedSearch.rowHeight}
-      isPlainRecord={isEsql}
       loadingState={Boolean(loading) ? DataLoadingState.loading : DataLoadingState.loaded}
       maxAllowedSampleSize={getMaxAllowedSampleSize(discoverServices.uiSettings)}
       query={savedSearchQuery}

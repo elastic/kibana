@@ -200,9 +200,6 @@ module.exports = {
       ],
     ],
 
-    '@kbn/disable/no_protected_eslint_disable': 'error',
-    '@kbn/disable/no_naked_eslint_disable': 'error',
-    '@kbn/eslint/no_unsafe_hash': 'error',
     '@kbn/imports/no_unresolvable_imports': 'error',
     '@kbn/imports/uniform_imports': 'error',
     '@kbn/imports/no_unused_imports': 'error',
@@ -215,13 +212,6 @@ module.exports = {
     'no-new-func': 'error',
     'no-implied-eval': 'error',
     'no-prototype-builtins': 'error',
-
-    /**
-     * kbn-ui rules
-     */
-    '@kbn/kbn-ui/prefer_toast_action_props': 'warn',
-    '@kbn/kbn-ui/prefer_kbn_ui_callout': 'warn',
-    '@kbn/kbn-ui/no_restricted_package_imports': 'error',
 
     /**
      * EUI Team rules

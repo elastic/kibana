@@ -12,7 +12,7 @@ Chart presentation is checked on each panel's Lens Config API config, against th
 
 ## What it evaluates
 
-- **Dashboard Skill Routing** (`CODE`): the request reaches the skill its gold `route` names. `dashboard` loads the dashboards skill, `visualization` loads visualization creation without generating a dashboard, and `none` uses neither.
+- **Dashboard Skill Routing** (`CODE`): the request reaches the skill its gold `route` names. `dashboard` loads the dashboards skill, `visualization` loads visualization creation without generating a dashboard, and `none` uses neither. Enhance examples also have to read `dashboards/enhance.md`; that path is taken from the same `read_file` / `filestore.read` steps.
 - **Dashboard Structure** (`CODE`): what the prompt pins down. That is a panel count range, an exact number of panels per kind (`{ metric: 6 }`), a section count, and sections matched by title terms and minimum size. Scored as the fraction of gold assertions that hold.
 - **Dashboard Layout Rules** (`CODE`): panels stay inside the 48-column grid, no two panels overlap in a section, and no metric or gauge spans the full width.
 - **Dashboard Composition Order** (`CODE`): metric and gauge panels come before other charts, in the top level and in every section. Panels are read top to bottom, then left to right, so a metric to the right of a chart in the same row counts as after it.
