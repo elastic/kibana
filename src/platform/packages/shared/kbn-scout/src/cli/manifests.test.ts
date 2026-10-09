@@ -43,7 +43,7 @@ describe('generateScoutConfigManifest', () => {
         passWithNoTests: true,
         project: 'local',
       }),
-      {},
+      { SCOUT_IGNORE_TEST_LIMITS: 'true' },
       undefined
     );
   });

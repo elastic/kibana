@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { testTargets } from '@kbn/scout-info';
-import type { ScoutTargetArch, ScoutTargetDomain, ScoutTargetLocation } from '@kbn/scout-info';
+import { escapeRegExp } from 'lodash';
+import { ScoutTestLimit, testLimits, testTargets } from '@kbn/scout-info';
+import type {
+  ScoutLimitSelectionMethod,
+  ScoutTargetArch,
+  ScoutTargetAttribute,
+  ScoutTargetDomain,
+  ScoutTargetLocation,
+} from '@kbn/scout-info';
 
 /**
  * Get a list of Playwright tags that select a particular test target
@@ -27,6 +34,45 @@ export const getPlaywrightTagsFor = (
   return (location === 'all' ? testTargets.all : testTargets.forLocation(location))
     .filter((target) => target.arch === arch && target.domain === domain)
     .map((target) => target.playwrightTag);
+};
+
+/**
+ * Get the Playwright tag that limits a test to targets with (or without) a given attribute
+ *
+ * @param selectionMethod `only` to require the attribute, `except` to require its absence
+ * @param targetAttribute Test target attribute the limit applies to
+ *
+ * @return Tag ready to use with Scout Playwright tests
+ */
+export const getPlaywrightLimitTagFor = (
+  selectionMethod: ScoutLimitSelectionMethod,
+  targetAttribute: ScoutTargetAttribute
+): string => new ScoutTestLimit(selectionMethod, targetAttribute).playwrightTag;
+
+/**
+ * Build the Playwright `grepInvert` pattern that drops every test whose limit tags are
+ * not satisfied by the given target attributes.
+ *
+ * @param attributes Attributes of the test target the tests are about to run against
+ *
+ * @return Pattern to pass to Playwright, or `undefined` when nothing has to be dropped
+ */
+export const getPlaywrightLimitGrepInvert = (
+  attributes: Iterable<ScoutTargetAttribute>
+): RegExp | undefined => {
+  const unsatisfiedTags = testLimits
+    .unsatisfiedBy(attributes)
+    .map((limit) => escapeRegExp(limit.playwrightTag));
+
+  if (unsatisfiedTags.length === 0) {
+    return undefined;
+  }
+
+  // Playwright matches this against the title path and tags joined by spaces, so anchor on
+  // whitespace: an unanchored '@limit/only-fips' would also match '@limit/only-fips140'.
+  // Playwright offers no tags-only matcher, so a title containing a limit tag verbatim is
+  // still matched and its test skipped.
+  return new RegExp(`(?:^|\\s)(?:${unsatisfiedTags.join('|')})(?=\\s|$)`);
 };
 
 export const tags = {
@@ -103,4 +149,31 @@ export const tags = {
     ];
   },
   performance: ['@perf'],
+
+  /**
+   * Limits narrowing the test targets a test runs on, based on target attributes.
+   * They complement — never replace — the deployment tags above: a test still needs
+   * at least one deployment tag to be discovered at all.
+   *
+   * ```ts
+   * test.describe('FIPS-only behavior', {
+   *   tag: [...tags.deploymentAgnostic, tags.limit.only.fips],
+   * }, () => { ... });
+   * ```
+   */
+  limit: {
+    /**
+     * Run the test **only** when the attribute is present
+     */
+    only: {
+      fips: getPlaywrightLimitTagFor('only', 'fips'),
+    },
+
+    /**
+     * Run the test **only** when the attribute is **not** present
+     */
+    except: {
+      fips: getPlaywrightLimitTagFor('except', 'fips'),
+    },
+  },
 };

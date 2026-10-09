@@ -101,7 +101,7 @@ if is_pr; then
   if is_pr_with_label "ci:ingest-test-logs"; then
     export CI_STATS_INGEST_TEST_LOGS=true
   fi
-  
+
   export BUILD_URL="$BUILDKITE_BUILD_URL"
 
   set_git_merge_base
@@ -152,6 +152,9 @@ if should_enable_fips; then
   export ES_SECURITY_ENABLED
   # used by FIPS agents to link FIPS OpenSSL modules
   export OPENSSL_MODULES=$HOME/openssl/lib/ossl-modules
+  # Declares the FIPS test target attribute to Scout, so it can honor
+  # '@limit/only-fips' / '@limit/except-fips' tags when distributing and running tests
+  export SCOUT_TARGET_ATTRIBUTES=fips
 
   if [[ -f "$KIBANA_DIR/config/node.options" ]]; then
     echo -e '\n--enable-fips' >>"$KIBANA_DIR/config/node.options"

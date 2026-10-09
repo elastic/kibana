@@ -198,6 +198,19 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     );
   }
 
+  // Written back to the environment so the pre-flight `--list` check below, the Playwright
+  // config (which derives `grepInvert` from it) and every worker agree on which limited
+  // tests are in scope.
+  process.env.SCOUT_TARGET_ATTRIBUTES = options.targetAttributes.join(',');
+
+  if (options.targetAttributes.length > 0) {
+    log.info(
+      `scout: Test target attributes: ${options.targetAttributes.join(
+        ', '
+      )}; tests limited to other attributes will be skipped`
+    );
+  }
+
   const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
   const pwCmdArgs = [
     'test',
@@ -216,6 +229,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       SCOUT_TARGET_LOCATION: options.testTarget.location,
       SCOUT_TARGET_ARCH: options.testTarget.arch,
       SCOUT_TARGET_DOMAIN: options.testTarget.domain,
+      SCOUT_TARGET_ATTRIBUTES: options.targetAttributes.join(','),
       SCOUT_RUN_COMMAND: scoutRunCommandForReporting,
     };
 

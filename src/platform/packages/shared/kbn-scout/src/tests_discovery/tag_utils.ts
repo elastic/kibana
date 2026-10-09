@@ -7,9 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutTargetArch, ScoutTargetDomain } from '@kbn/scout-info';
-import { ScoutTestTarget, testTargets } from '@kbn/scout-info';
+import type { ScoutTargetArch, ScoutTargetAttribute, ScoutTargetDomain } from '@kbn/scout-info';
+import { ScoutTestTarget, targetAttributes, testLimits, testTargets } from '@kbn/scout-info';
 import { tags } from '../playwright/tags';
+
+/**
+ * Resolve the test target attributes a run should assume.
+ *
+ * Attributes are never auto-detected: they come from `--targetAttribute` (repeatable and/or
+ * comma-separated) and fall back to the `SCOUT_TARGET_ATTRIBUTES` environment variable.
+ */
+export const resolveTargetAttributes = (
+  rawAttributes: string[] | undefined
+): ScoutTargetAttribute[] => {
+  const values = (rawAttributes ?? [])
+    .flatMap((rawAttribute) => rawAttribute.split(','))
+    .map((rawAttribute) => rawAttribute.trim())
+    .filter((rawAttribute) => rawAttribute.length > 0);
+
+  if (values.length === 0) {
+    return targetAttributes.current();
+  }
+
+  return [...new Set(values.map((value) => targetAttributes.fromString(value)))];
+};
 
 // Gets test tags for a given target type
 export const getTestTagsForTarget = (target: string): string[] => {
@@ -47,7 +68,92 @@ export const isScoutTestFile = (test: {
   );
 };
 
-// Collects unique tags from runnable tests (skip global setup/teardown hooks)
+export interface LimitableTest {
+  tags?: string[];
+  title?: string;
+  location?: { file?: string };
+}
+
+/**
+ * Whether a test may run against a test target carrying the given attributes, i.e. whether
+ * its `@limit/<selection-method>-<target-attr>` tags are all satisfied.
+ *
+ * A malformed limit tag is fatal rather than ignored — silently dropping it would let a
+ * limited test run everywhere — so point at the test that carries it.
+ */
+export const isTestAllowedForTargetAttributes = (
+  test: LimitableTest,
+  attributes: Iterable<ScoutTargetAttribute>
+): boolean => {
+  try {
+    return testLimits.allow(test.tags ?? [], attributes);
+  } catch (e) {
+    throw new Error(
+      `Invalid Scout test limit tag on test "${test.title ?? '<unknown>'}" ` +
+        `in '${test.location?.file ?? '<unknown file>'}': ${
+          e instanceof Error ? e.message : String(e)
+        }`
+    );
+  }
+};
+
+/**
+ * Keeps only the tests that may run against a test target carrying the given attributes.
+ */
+export const selectTestsForTargetAttributes = <T extends LimitableTest>(
+  tests: T[],
+  attributes: readonly ScoutTargetAttribute[]
+): T[] => tests.filter((test) => isTestAllowedForTargetAttributes(test, attributes));
+
+/**
+ * Report misuse of `@limit/*` tags on a manifest test.
+ *
+ * The `validateTags` fixture applies the same rules, but only to tests that actually run —
+ * and a test breaking either rule is filtered out long before that, so the fixture can never
+ * see it. Checking the manifest is what makes these rules enforceable.
+ */
+export const findLimitTagIssues = (test: LimitableTest): string[] => {
+  const testTags = test.tags ?? [];
+  const limits = testLimits.fromPlaywrightTags(testTags.filter(testLimits.isPlaywrightTag));
+
+  if (limits.length === 0) {
+    return [];
+  }
+
+  const issues: string[] = [];
+  const selectionTags = new Set([
+    ...testTargets.all.map((target) => target.playwrightTag),
+    ...tags.performance,
+  ]);
+
+  if (!testTags.some((tag) => selectionTags.has(tag))) {
+    issues.push(
+      'carries limit tags but no test target tag, so it would never be selected to run. ' +
+        'A limit narrows an existing target selection, it cannot be one.'
+    );
+  }
+
+  const selectionMethodsByAttribute = new Map<string, Set<string>>();
+  for (const limit of limits) {
+    const methods = selectionMethodsByAttribute.get(limit.targetAttribute) ?? new Set<string>();
+    methods.add(limit.selectionMethod);
+    selectionMethodsByAttribute.set(limit.targetAttribute, methods);
+  }
+
+  for (const [targetAttribute, methods] of selectionMethodsByAttribute) {
+    if (methods.size > 1) {
+      issues.push(
+        `carries conflicting limit tags for the '${targetAttribute}' target attribute ` +
+          `(${[...methods].sort().join(' and ')}), so it would never run.`
+      );
+    }
+  }
+
+  return issues;
+};
+
+// Collects unique test target tags from runnable tests (skip global setup/teardown hooks).
+// Limit tags are dropped: they narrow a selection rather than being a selection themselves.
 export const collectUniqueTags = (
   tests: Array<{ tags?: string[]; expectedStatus?: string; location?: { file?: string } }>
 ): string[] => {
@@ -55,6 +161,9 @@ export const collectUniqueTags = (
   for (const test of tests) {
     if (isScoutTestFile(test) && test.tags) {
       for (const testTag of test.tags) {
+        if (testLimits.isPlaywrightTag(testTag)) {
+          continue;
+        }
         tagSet.add(testTag);
       }
     }
@@ -81,6 +190,7 @@ export const getServerRunFlagsFromTags = (testTags: string[]): string[] => {
   // TODO: Uncomment above to run tests for these targets in CI
 
   const flags = [...new Set(testTags)]
+    .filter((tag) => !testLimits.isPlaywrightTag(tag))
     .map((tag) => ScoutTestTarget.fromPlaywrightTag(tag))
     .filter((target) =>
       supportedArchDomainCombos.some(

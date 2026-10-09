@@ -15,9 +15,10 @@ import {
   scoutPlaywrightReporter,
   generateTestRunId,
 } from '@kbn/scout-reporting';
-import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
+import { SCOUT_SERVERS_ROOT, targetAttributes } from '@kbn/scout-info';
 import type { ScoutPlaywrightOptions, ScoutTestOptions } from '../types';
 import { VALID_CONFIG_MARKER } from '../types';
+import { getPlaywrightLimitGrepInvert } from '../tags';
 
 const DEFAULT_CI_RETRIES = 1;
 
@@ -129,6 +130,13 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     fullyParallel: false,
     /* Fail the build on CI if you accidentally left test.only in the source code. */
     forbidOnly: !!process.env.CI,
+    /* Drop tests whose '@limit/*' tags aren't satisfied by SCOUT_TARGET_ATTRIBUTES. Set here
+     * rather than by each caller so every entry point agrees; since Playwright composes
+     * '--grep-invert' with this instead of overriding it, callers that must enumerate every
+     * test (manifest generation) opt out via SCOUT_IGNORE_TEST_LIMITS. */
+    grepInvert: process.env.SCOUT_IGNORE_TEST_LIMITS
+      ? undefined
+      : getPlaywrightLimitGrepInvert(targetAttributes.current()),
     /* Retries happen immediately, in a fresh worker. See resolveRetries(). */
     retries: options.retries ?? resolveRetries(),
     /* Opt out of parallel tests on CI. */
