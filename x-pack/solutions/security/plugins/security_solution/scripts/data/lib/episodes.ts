@@ -423,10 +423,8 @@ const DC2_JOIN_EPISODE_ID = 'ep1';
 const DC2_JOIN_HOST = HOSTS['WIN-ANALYST01'];
 
 /** Prefer the DC2 pinned host for ep1; otherwise keep the clone's pool selection. */
-export const hostForEpisodeScaling = (
-  episodeId: string,
-  selectedHost: CatalogHost
-): CatalogHost => (episodeId === DC2_JOIN_EPISODE_ID ? DC2_JOIN_HOST : selectedHost);
+export const hostForEpisodeScaling = (episodeId: string, selectedHost: CatalogHost): CatalogHost =>
+  episodeId === DC2_JOIN_EPISODE_ID ? DC2_JOIN_HOST : selectedHost;
 
 export const stampEpisodeCloudAccountIds = (
   doc: Record<string, unknown>,

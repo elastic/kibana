@@ -47,11 +47,11 @@ const PROCESS_MAPPING_PATH = scriptsDataDir('episodes', 'attacks', 'mapping.json
  * `allow_restricted_indices: true` scoped to the index, used only for the `.fleet-agents`
  * calls below via a per-request auth override (no separate Client/connection needed).
  */
-type SystemIndicesSession = {
+interface SystemIndicesSession {
   auth: { headers: { authorization: string } };
   roleName: string;
   username: string;
-};
+}
 
 /**
  * Creates a short-lived native role/user with restricted-index write access, then returns
@@ -80,7 +80,9 @@ const acquireSystemIndicesAuth = async (
   } catch (e) {
     const status = getStatusCode(e);
     // Best-effort cleanup if role succeeded but user failed.
-    await esClient.security.deleteRole({ name: roleName }, { ignore: [404] }).catch(() => undefined);
+    await esClient.security
+      .deleteRole({ name: roleName }, { ignore: [404] })
+      .catch(() => undefined);
     log.warning(
       `Pack host correlation: cannot create restricted-index user ` +
         `(status ${status ?? 'unknown'}). Skipping .fleet-agents seed ` +
@@ -427,7 +429,9 @@ export const buildProcessDoc = (
  */
 export const resolveProcessAnchorMs = (startMs: number, endMs: number): number => {
   if (endMs <= startMs) {
-    throw new Error(`Invalid host-correlation window: endMs (${endMs}) must be after startMs (${startMs})`);
+    throw new Error(
+      `Invalid host-correlation window: endMs (${endMs}) must be after startMs (${startMs})`
+    );
   }
   const preferred = endMs - 3 * 24 * 60 * 60 * 1000;
   if (preferred >= startMs) return preferred;
