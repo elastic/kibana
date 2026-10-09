@@ -7,11 +7,7 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import {
-  CHANGE_TYPES,
-  CONTESTED_FIXTURE_IDS,
-  EXCEPTION_OPERATOR_PAYLOAD,
-} from './constants';
+import { CHANGE_TYPES, CONTESTED_FIXTURE_IDS, EXCEPTION_OPERATOR_PAYLOAD } from './constants';
 
 /**
  * Characterization tests for the rule-tuning eval suite.
@@ -276,7 +272,7 @@ describe('rule-tuning coverage characterization', () => {
     // labels `schedule` and `threshold` with — those fixtures are uncontested,
     // so an accidental contesting would gut the uncontested accuracy number.
     const uncontestedLabels = [...labels.entries()]
-      .filter(([id]) => !contested.includes(id))
+      .filter(([id]) => !(contested as readonly string[]).includes(id))
       .map(([, label]) => label);
     expect(uncontestedLabels).toContain('threshold');
     expect(uncontestedLabels).toContain('schedule');

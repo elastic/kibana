@@ -45,7 +45,11 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { selectEvaluators, type EvaluationDataset, type Example } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
 import { runRuleTuningWorkflow, type RuleTuningVerdict } from '../src/workflow_task';
-import { changeTypeAccuracy, changeTypeAccuracyUncontested, validProposal } from '../src/evaluators';
+import {
+  changeTypeAccuracy,
+  changeTypeAccuracyUncontested,
+  validProposal,
+} from '../src/evaluators';
 import {
   assertToolSpansReachable,
   createToolRoutingEvaluator,

@@ -108,7 +108,11 @@ describe('rule-tuning evaluators', () => {
       const result = await changeTypeAccuracyUncontested.evaluate!({
         output: verdict('manual'),
         expected: { change_type: 'manual' },
-        metadata: { fixtureId: 'fp-manual-newterms-dns', ruleType: 'new_terms', expected: 'manual' },
+        metadata: {
+          fixtureId: 'fp-manual-newterms-dns',
+          ruleType: 'new_terms',
+          expected: 'manual',
+        },
       } as never);
       expect(result.score).toBeNull();
     });
