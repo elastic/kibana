@@ -20,6 +20,7 @@ import {
   EuiIconTip,
   EuiLink,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -273,19 +274,21 @@ export const CreateServiceAccountFlyout = ({
                 />
               </>
             }
-            helpText={
+            labelAppend={
               createRoleUrl ? (
-                <EuiLink
-                  href={createRoleUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  data-test-subj="createServiceAccountRoleLink"
-                >
-                  <FormattedMessage
-                    id="xpack.security.management.serviceAccounts.create.createRoleLinkText"
-                    defaultMessage="Create new role"
-                  />
-                </EuiLink>
+                <EuiText size="xs" component="span">
+                  <EuiLink
+                    href={createRoleUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-test-subj="createServiceAccountRoleLink"
+                  >
+                    <FormattedMessage
+                      id="xpack.security.management.serviceAccounts.create.createRoleLinkText"
+                      defaultMessage="Create new role"
+                    />
+                  </EuiLink>
+                </EuiText>
               ) : undefined
             }
             isInvalid={
