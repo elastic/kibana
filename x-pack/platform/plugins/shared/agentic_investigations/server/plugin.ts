@@ -44,6 +44,7 @@ import { InvestigationStatusService } from './investigations/services/investigat
 import { registerInvestigationRoutes } from './investigations/routes/register_routes';
 import { createInvestigationsPrivilegesReader } from './investigations/services/check_investigations_privileges';
 import { deleteInvestigationDataAcrossSpaces } from './investigations/services/delete_investigation_data_across_spaces';
+import { countPendingProposals } from './investigations/services/count_pending_proposals';
 import { InProgressResolver } from './investigations/services/in_progress';
 import { InvestigationsQueryService } from './investigations/services/investigations_query_service';
 import { createInvestigationsClient } from './investigations/services/investigations_client';
@@ -274,6 +275,14 @@ export class AgenticInvestigationsPlugin
           plugins.agentBuilder.attachments.getScopedClient({ request }),
         conversationTemplates: plugins.agentBuilder.conversationTemplates,
         getInvestigationStatusService: () => this.requireInvestigationStatusService(),
+        countPendingProposals: (request, conversationIds) =>
+          countPendingProposals({
+            proposals: plugins.proposals,
+            request,
+            conversationIds,
+            spaceId: this.getSpaceId(request),
+            logger: this.logger,
+          }),
       });
     }
 
