@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css, keyframes } from '@emotion/react';
 import {
@@ -66,6 +66,14 @@ export function AnimatedEdge({
     data && typeof data === 'object' && 'unitConnection' in data && data.unitConnection
   );
 
+  useEffect(() => {
+    if (selected) {
+      menu.on();
+    } else {
+      menu.off();
+    }
+  }, [selected, menu]);
+
   // The built-in unhook circles sit on the line just outside each handle and are
   // easy to miss. Pressing the line itself starts that same drag from the
   // destination end, so pulling the line onto empty canvas disconnects it.
@@ -124,11 +132,6 @@ export function AnimatedEdge({
   const isActive = isHovered || Boolean(selected);
   const strokeColor = isActive ? 'transparent' : euiTheme.colors.borderBaseProminent;
 
-  const edgeStyle = useMemo(
-    () => ({ ...style, stroke: strokeColor, strokeWidth: 1 }),
-    [style, strokeColor]
-  );
-
   const MenuButton = (
     <EuiIcon
       data-test-subj="streamsCanvasEdgeMenuButton"
@@ -157,8 +160,15 @@ export function AnimatedEdge({
         data-test-subj="streamsCanvasBasicEdge"
         path={edgePath}
         markerEnd={markerEnd}
-        style={edgeStyle}
+        style={style}
         interactionWidth={24}
+        css={css`
+          stroke: ${strokeColor} !important;
+          stroke-width: 1;
+          .react-flow__edge:focus & {
+            stroke: ${isActive ? 'transparent' : euiTheme.colors.borderStrongPrimary} !important;
+          }
+        `}
       />
       {isActive ? (
         <path

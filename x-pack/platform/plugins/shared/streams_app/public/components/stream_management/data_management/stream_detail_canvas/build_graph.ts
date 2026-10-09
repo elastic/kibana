@@ -34,6 +34,7 @@ export const buildClassicStreamsGraph = (
       target: destination.id,
       type: ANIMATED_EDGE_TYPE,
       reconnectable: false,
+      selectable: true,
     });
   });
 

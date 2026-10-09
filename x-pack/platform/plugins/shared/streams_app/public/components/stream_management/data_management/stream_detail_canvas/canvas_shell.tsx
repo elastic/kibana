@@ -12,6 +12,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import {
   Background,
   ConnectionLineType,
+  type EdgeSelectionChange,
   ReactFlow,
   ReactFlowProvider,
   SelectionMode,
@@ -260,27 +261,47 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
   // React Flow uses) so it works while nodes are controlled by the parent.
   const handleFocus = useCallback(
     (event: React.FocusEvent<HTMLDivElement>) => {
-      if (!onNodesChange) {
+      if (!onNodesChange || !onEdgesChange) {
         return;
       }
       const nodeElement = (event.target as HTMLElement).closest('.react-flow__node');
-      const focusedId = nodeElement?.getAttribute('data-id');
-      const focusVisible = nodeElement ? nodeElement.matches(':focus-visible') : false;
-      if (!focusedId || !focusVisible) {
+      const edgeElement = (event.target as HTMLElement).closest('.react-flow__edge');
+      const focusedNodeId = nodeElement?.getAttribute('data-id');
+      const focusedEdgeId = edgeElement?.getAttribute('data-id');
+      const nodeFocusVisible = nodeElement ? nodeElement.matches(':focus-visible') : false;
+      const edgeFocusVisible = edgeElement ? edgeElement.matches(':focus-visible') : false;
+
+      if (!focusedNodeId || !nodeFocusVisible) {
         return;
       }
-      const changes = nodes
-        .filter((node) => node.selected !== (node.id === focusedId))
+      const nodeChanges = nodes
+        .filter((node) => node.selected !== (node.id === focusedNodeId))
         .map<NodeSelectionChange>((node) => ({
           id: node.id,
           type: 'select',
-          selected: node.id === focusedId,
+          selected: node.id === focusedNodeId,
         }));
-      if (changes.length > 0) {
-        onNodesChange(changes);
+
+      if (nodeChanges.length > 0) {
+        onNodesChange(nodeChanges);
+      }
+
+      if (!focusedEdgeId || !edgeFocusVisible) {
+        return;
+      }
+      const edgeChanges = edges
+        .filter((edge) => edge.selected !== (edge.id === focusedEdgeId))
+        .map<EdgeSelectionChange>((node) => ({
+          id: node.id,
+          type: 'select',
+          selected: node.id === focusedEdgeId,
+        }));
+
+      if (edgeChanges.length > 0) {
+        onEdgesChange(edgeChanges);
       }
     },
-    [nodes, onNodesChange]
+    [nodes, edges, onNodesChange, onEdgesChange]
   );
 
   return (
