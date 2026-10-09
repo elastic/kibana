@@ -201,10 +201,10 @@ describe('getWorkerWarningReasons', () => {
   it('uses the Endpoint Analysis → Attack Discovery copy', () => {
     const state = enabledById({ [ENDPOINT_ANALYSIS]: false, [ATTACK_DISCOVERY]: true });
 
-    expect(messages(getWorkerWarningReasons(ATTACK_DISCOVERY, state))).toEqual([
+    expect(messages(warnings(subject(ATTACK_DISCOVERY), state))).toEqual([
       "Endpoint Analysis is disabled — attacks handed off for analysis aren't analyzed.",
     ]);
-    expect(messages(getWorkerWarningReasons(ENDPOINT_ANALYSIS, state))).toEqual([
+    expect(messages(warnings(subject(ENDPOINT_ANALYSIS), state))).toEqual([
       "Attack Discovery is enabled but its handoffs aren't analyzed while this Worker is off.",
     ]);
   });
@@ -228,10 +228,14 @@ describe('getBlockedAfterSaveNotices', () => {
   });
 
   it('notifies when the save turns Attack Discovery on while Endpoint Analysis is off', () => {
+    const enabledAfterSave = enabledById({
+      [ATTACK_DISCOVERY]: true,
+      [ENDPOINT_ANALYSIS]: false,
+    });
     const notices = getBlockedAfterSaveNotices(
       enabledById({ [ATTACK_DISCOVERY]: false, [ENDPOINT_ANALYSIS]: false }),
-      enabledById({ [ATTACK_DISCOVERY]: true, [ENDPOINT_ANALYSIS]: false }),
-      [ATTACK_DISCOVERY]
+      enabledAfterSave,
+      saved(enabledAfterSave, [ATTACK_DISCOVERY])
     );
 
     expect(notices.map(({ workerId }) => workerId)).toEqual([ATTACK_DISCOVERY]);
