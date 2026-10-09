@@ -20,8 +20,7 @@ settings:
     key: hunt-continuous-threat-hunt
     strategy: drop
     max: 1
-# Triggers are rendered from autonomy: manual = manual only; assisted/supervised
-# add the schedule.
+# Always scheduled (locked 4h) plus manual with optional reportIds.
 triggers:
 __WORKER_TRIGGERS__
 consts:
