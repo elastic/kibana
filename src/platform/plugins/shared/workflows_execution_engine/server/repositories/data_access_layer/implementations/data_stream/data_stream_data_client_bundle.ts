@@ -9,11 +9,11 @@
 
 import type { CoreSetup, CoreStart, ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import { DataStreamDataClient } from './data_stream_data_client';
 import {
   STEP_EXECUTIONS_DATA_STREAM_DEFINITION,
   WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION,
-} from './data-stream-definitions';
-import { DataStreamDataClient } from './data_stream_data_client';
+} from './data_stream_definitions';
 import { DataStreamMetadataManager } from './data_stream_metadata_manager';
 import { DocumentVersionManager } from './document_version_manager';
 import { createRetryingEsClient } from '../../../../lib/create_retrying_es_client';

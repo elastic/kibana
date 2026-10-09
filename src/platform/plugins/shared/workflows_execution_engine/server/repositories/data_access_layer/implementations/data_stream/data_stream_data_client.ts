@@ -440,7 +440,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     if (item.seqNo !== undefined) {
       return { index, seqNo: item.seqNo, primaryTerm: item.primaryTerm };
     }
-    if (item.retryOnConflict !== undefined) {
+    if (item.operation !== 'create' && item.retryOnConflict !== undefined) {
       return { index };
     }
     return { index, seqNo: version.seqNo, primaryTerm: version.primaryTerm };
