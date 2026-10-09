@@ -19,9 +19,11 @@ import { BRIEF_BLOCK_ATTRIBUTE, EXECUTIVE_BRIEF_SECTION_IDS } from '../constants
 interface AtAGlanceProps {
   snapshot: BriefSnapshot;
   glance: ExecutiveBrief['glance'];
+  /** Optional: lets triage prompts use the generated storyline titles. */
+  brief?: Pick<ExecutiveBrief, 'storylines'>;
 }
 
-export const AtAGlance: React.FC<AtAGlanceProps> = ({ snapshot, glance }) => {
+export const AtAGlance: React.FC<AtAGlanceProps> = ({ snapshot, glance, brief }) => {
   const { assessment } = snapshot.glance;
   return (
     <section
@@ -34,7 +36,7 @@ export const AtAGlance: React.FC<AtAGlanceProps> = ({ snapshot, glance }) => {
         title="At a glance"
         subtitle="Overall attention needed, based on active threats, response, detection coverage and visibility"
       />
-      <AttentionVerdict assessment={assessment}>
+      <AttentionVerdict assessment={assessment} snapshot={snapshot} brief={brief}>
         <EuiSpacer size="s" />
         <EuiText size="s" data-test-subj="executiveBriefThreatNarrative">
           <p>
@@ -45,7 +47,7 @@ export const AtAGlance: React.FC<AtAGlanceProps> = ({ snapshot, glance }) => {
       {assessment ? (
         <>
           <EuiSpacer size="m" />
-          <AttentionAreaRows areas={assessment.areas} />
+          <AttentionAreaRows areas={assessment.areas} snapshot={snapshot} brief={brief} />
         </>
       ) : null}
       <EuiSpacer size="m" />

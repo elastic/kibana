@@ -4,25 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiPanel,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import { AiButtonIcon } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
 import type {
   AttentionArea,
   AttentionAreaId,
   AttentionLevel,
+  BriefSnapshot,
+  ExecutiveBrief,
 } from '../../../../../common/entity_analytics/executive_brief/types';
+import { useKibana } from '../../../../common/lib/kibana';
 import { EXECUTIVE_BRIEF_SECTION_IDS } from '../constants';
 import { TEST_IDS } from '../test_ids';
-import { useIsPrintMode } from './brief_context';
+import { buildTriageMessage, buildTriagePrompt } from '../utils/triage_prompts';
+import { useIsPrintMode, useRequestStorylineOpen } from './brief_context';
 
 export const AREA_ORDER: readonly AttentionAreaId[] = [
   'threats',
@@ -85,35 +91,90 @@ const STATUS_DISPLAY: Record<AttentionLevel, { color: string; icon: string }> = 
 export const sortAreas = (areas: readonly AttentionArea[]): AttentionArea[] =>
   AREA_ORDER.flatMap((id) => areas.filter((area) => area.id === id));
 
-const scrollToSection = (id: string): void => {
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+const scrollToElement = (element: HTMLElement | null): void => {
+  element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
-const AttentionAreaRow: React.FC<{ area: AttentionArea }> = ({ area }) => {
+const storylineRankOf = (area: AttentionArea): number => {
+  const match = area.evidence.map((id) => /^STORY-(\d+)$/.exec(id)).find(Boolean);
+  return match ? Number(match[1]) : 1;
+};
+
+export type BriefForTriage = Pick<ExecutiveBrief, 'storylines'>;
+
+interface AttentionActions {
+  /** Agent Builder is available; the triage buttons are hidden otherwise. */
+  canTriage: boolean;
+  triage: (area: AttentionArea) => void;
+  /** Jumps to the section behind an area; for threats also expands the storyline card. */
+  view: (area: AttentionArea) => void;
+}
+
+/** Shared by the verdict and the rows so both act identically. */
+export const useAttentionActions = (
+  snapshot: BriefSnapshot,
+  brief?: BriefForTriage
+): AttentionActions => {
+  const { agentBuilder } = useKibana().services;
+  const requestStorylineOpen = useRequestStorylineOpen();
+  const canTriage = Boolean(agentBuilder?.openChat);
+
+  const triage = useCallback(
+    (area: AttentionArea) => {
+      agentBuilder?.openChat?.({
+        autoSendInitialMessage: false,
+        newConversation: true,
+        initialMessage: buildTriageMessage(buildTriagePrompt(area, snapshot, brief)),
+        sessionTag: 'security',
+      });
+    },
+    [agentBuilder, snapshot, brief]
+  );
+
+  const view = useCallback(
+    (area: AttentionArea) => {
+      const section = document.getElementById(AREA_TARGETS[area.id]);
+      if (area.id !== 'threats') {
+        scrollToElement(section);
+        return;
+      }
+      const rank = storylineRankOf(area);
+      requestStorylineOpen(rank);
+      scrollToElement(
+        document.querySelector<HTMLElement>(
+          `[data-test-subj="executiveBriefStorylineCard-${rank}"]`
+        ) ?? section
+      );
+    },
+    [requestStorylineOpen]
+  );
+
+  return { canTriage, triage, view };
+};
+
+const TRIAGE_LABEL = 'Triage with AI Agent';
+
+interface AttentionAreaRowProps {
+  area: AttentionArea;
+  actions: AttentionActions;
+}
+
+const AttentionAreaRow: React.FC<AttentionAreaRowProps> = ({ area, actions }) => {
   const { euiTheme } = useEuiTheme();
   const isPrintMode = useIsPrintMode();
   const { color, icon } = STATUS_DISPLAY[area.level];
-  const target = AREA_TARGETS[area.id];
+  const showActions = !isPrintMode && area.level !== 'clear';
+  const badge = (
+    <EuiBadge color={color} iconType={icon} data-test-subj="executiveBriefAreaStatus">
+      {STATUS_LABELS[area.level]}
+    </EuiBadge>
+  );
   return (
     <div
       key={area.id}
       data-test-subj={TEST_IDS.attentionRow(area.id)}
-      role={isPrintMode ? undefined : 'button'}
-      tabIndex={isPrintMode ? undefined : 0}
-      onClick={isPrintMode ? undefined : () => scrollToSection(target)}
-      onKeyDown={
-        isPrintMode
-          ? undefined
-          : (event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                scrollToSection(target);
-              }
-            }
-      }
       css={css`
         padding: ${euiTheme.size.s} ${euiTheme.size.m};
-        cursor: ${isPrintMode ? 'default' : 'pointer'};
         border-top: ${euiTheme.border.thin};
       `}
     >
@@ -129,11 +190,15 @@ const AttentionAreaRow: React.FC<{ area: AttentionArea }> = ({ area }) => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={{ width: '6.5em' }}>
-          <span>
-            <EuiBadge color={color} iconType={icon} data-test-subj="executiveBriefAreaStatus">
-              {STATUS_LABELS[area.level]}
-            </EuiBadge>
-          </span>
+          {isPrintMode ? (
+            <span>{badge}</span>
+          ) : (
+            <EuiToolTip content={area.rule}>
+              <span tabIndex={0} data-test-subj={`executiveBriefAreaPill-${area.id}`}>
+                {badge}
+              </span>
+            </EuiToolTip>
+          )}
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s" data-test-subj="executiveBriefAreaSummary">
@@ -145,23 +210,50 @@ const AttentionAreaRow: React.FC<{ area: AttentionArea }> = ({ area }) => {
             </EuiText>
           ) : null}
         </EuiFlexItem>
-        {isPrintMode ? null : (
-          <EuiFlexItem grow={false} data-test-subj={`executiveBriefAreaWhy-${area.id}`}>
-            <EuiIconTip
-              type="question"
-              size="s"
-              aria-label={`Why ${areaFullName(area.id)} is ${STATUS_LABELS[area.level]}`}
-              content={area.rule}
-            />
+        {showActions ? (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={() => actions.view(area)}
+                  aria-label={`View ${areaFullName(area.id)}`}
+                  data-test-subj={`executiveBriefAreaView-${area.id}`}
+                >
+                  {'View'}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              {actions.canTriage ? (
+                <EuiFlexItem grow={false}>
+                  <AiButtonIcon
+                    size="xs"
+                    iconType="productAgent"
+                    variant="empty"
+                    withToolTip
+                    toolTipContent={TRIAGE_LABEL}
+                    aria-label={`${TRIAGE_LABEL}: ${AREA_NAMES[area.id]}`}
+                    onClick={() => actions.triage(area)}
+                    data-test-subj={`executiveBriefAreaTriage-${area.id}`}
+                  />
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
           </EuiFlexItem>
-        )}
+        ) : null}
       </EuiFlexGroup>
     </div>
   );
 };
 
-export const AttentionAreaRows: React.FC<{ areas: readonly AttentionArea[] }> = ({ areas }) => {
+interface AttentionAreaRowsProps {
+  areas: readonly AttentionArea[];
+  snapshot: BriefSnapshot;
+  brief?: BriefForTriage;
+}
+
+export const AttentionAreaRows: React.FC<AttentionAreaRowsProps> = ({ areas, snapshot, brief }) => {
   const { euiTheme } = useEuiTheme();
+  const actions = useAttentionActions(snapshot, brief);
   return (
     <EuiPanel hasBorder paddingSize="none" data-test-subj="executiveBriefAttentionRows">
       {AREA_GROUPS.map((group, groupIndex) => {
@@ -181,7 +273,7 @@ export const AttentionAreaRows: React.FC<{ areas: readonly AttentionArea[] }> = 
               </EuiText>
             </div>
             {groupAreas.map((area) => (
-              <AttentionAreaRow key={area.id} area={area} />
+              <AttentionAreaRow key={area.id} area={area} actions={actions} />
             ))}
           </div>
         );

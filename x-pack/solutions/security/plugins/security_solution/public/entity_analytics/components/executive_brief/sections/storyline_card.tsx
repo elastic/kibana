@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAccordion,
@@ -32,7 +32,7 @@ import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { EntityBadge } from '../../entity_badge';
 import { BRIEF_CUT_ATTRIBUTE, EXECUTIVE_BRIEF_SCOPE_ID } from '../constants';
 import { TEST_IDS } from '../test_ids';
-import { useIsPrintMode } from '../components/brief_context';
+import { useIsPrintMode, useStorylineOpenRequest } from '../components/brief_context';
 import { DecisionAccordion } from '../components/decision_accordion';
 import { ResponseRow, ResponseStateBadge } from '../components/response_row';
 import { StorylineAttackStrip } from '../components/storyline_attack_strip';
@@ -85,6 +85,10 @@ export const StorylineCard: React.FC<StorylineCardProps> = ({
 }) => {
   const isPrintMode = useIsPrintMode();
   const [isOpen, setIsOpen] = useState(storyline.rank === 1);
+  const openRequest = useStorylineOpenRequest();
+  useEffect(() => {
+    if (openRequest?.rank === storyline.rank) setIsOpen(true);
+  }, [openRequest, storyline.rank]);
   const expanded = forceExpanded || isPrintMode || isOpen;
   const severityColor = useSeverityColor(storyline.severity);
   const isNewFlyoutEnabled = useIsNewFlyoutEnabled();

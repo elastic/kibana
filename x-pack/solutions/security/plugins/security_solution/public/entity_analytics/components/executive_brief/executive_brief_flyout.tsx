@@ -342,7 +342,11 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
               isPrintMode={isPrintMode}
             >
               <SectionErrorBoundary fallbackText="AtAGlance could not be displayed">
-                <AtAGlance snapshot={succeeded.snapshot} glance={succeeded.brief.glance} />
+                <AtAGlance
+                  snapshot={succeeded.snapshot}
+                  glance={succeeded.brief.glance}
+                  brief={succeeded.brief}
+                />
               </SectionErrorBoundary>
               <EuiSpacer size="xl" />
               <SectionErrorBoundary fallbackText="Priority threats could not be displayed">

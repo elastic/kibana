@@ -141,7 +141,7 @@ export const DecisionAccordion: React.FC<DecisionAccordionProps> = ({
           onClick={investigate}
           data-test-subj={`${TEST_IDS.investigate(index)}${inline ? '-inline' : ''}`}
         >
-          {'Investigate with AI Agent'}
+          {'Triage with AI Agent'}
         </AiButton>
       )}
     </EuiAccordion>

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { EuiIconTip } from '@elastic/eui';
 import type {
   BriefSnapshot,
@@ -19,6 +19,14 @@ interface BriefContextValue {
   flags: readonly ClaimFlagEntry[];
   /** True while the PDF is being captured: interactive controls are hidden or rendered as text. */
   isPrintMode: boolean;
+  /** Latest request to expand a storyline card (from "View threat"); `nonce` makes repeats distinct. */
+  storylineOpenRequest?: StorylineOpenRequest;
+  requestStorylineOpen: (rank: number) => void;
+}
+
+export interface StorylineOpenRequest {
+  rank: number;
+  nonce: number;
 }
 
 const BriefContext = createContext<BriefContextValue | undefined>(undefined);
@@ -37,7 +45,16 @@ export const BriefContextProvider: React.FC<React.PropsWithChildren<BriefContext
   isPrintMode = false,
   children,
 }) => {
-  const value = useMemo(() => ({ snapshot, flags, isPrintMode }), [snapshot, flags, isPrintMode]);
+  const [storylineOpenRequest, setStorylineOpenRequest] = useState<StorylineOpenRequest>();
+  const requestStorylineOpen = useCallback(
+    (rank: number) =>
+      setStorylineOpenRequest((previous) => ({ rank, nonce: (previous?.nonce ?? 0) + 1 })),
+    []
+  );
+  const value = useMemo(
+    () => ({ snapshot, flags, isPrintMode, storylineOpenRequest, requestStorylineOpen }),
+    [snapshot, flags, isPrintMode, storylineOpenRequest, requestStorylineOpen]
+  );
   return <BriefContext.Provider value={value}>{children}</BriefContext.Provider>;
 };
 
@@ -51,6 +68,16 @@ export const useBriefSnapshot = (): BriefSnapshot => {
 
 /** True while the brief is rendered for PDF capture. Safe outside the provider (returns false). */
 export const useIsPrintMode = (): boolean => useContext(BriefContext)?.isPrintMode ?? false;
+
+const NOOP_REQUEST = (): void => {};
+
+/** Asks the matching storyline card to expand. A no-op outside the provider. */
+export const useRequestStorylineOpen = (): ((rank: number) => void) =>
+  useContext(BriefContext)?.requestStorylineOpen ?? NOOP_REQUEST;
+
+/** The latest storyline expand request, if any. */
+export const useStorylineOpenRequest = (): StorylineOpenRequest | undefined =>
+  useContext(BriefContext)?.storylineOpenRequest;
 
 /** Flags whose claimPath equals `claimPath`, or starts with it followed by `.` or `[`. */
 export const useClaimFlags = (claimPath: string): readonly ClaimFlagEntry[] => {
