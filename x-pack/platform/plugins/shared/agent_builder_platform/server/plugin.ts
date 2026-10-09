@@ -22,6 +22,8 @@ import { registerSkills } from './skills';
 import { createConnectorSmlType } from './sml_types/connector';
 import { createConnectorLifecycleHandler } from './connector_lifecycle/connector_lifecycle_handler';
 import { setAgentBuilderDashboard } from './dashboard/install_dashboard';
+import { checkPdfExtractionAvailability } from './attachment_types/pdf/extraction_availability';
+import { registerPdfAvailabilityRoute } from './routes/pdf_availability';
 
 export class AgentBuilderPlatformPlugin
   implements
@@ -50,6 +52,7 @@ export class AgentBuilderPlatformPlugin
       coreSetup,
       setupDeps,
     });
+    registerPdfAvailabilityRoute({ router: coreSetup.http.createRouter() });
     registerConversationTemplates({ setupDeps });
     registerConversationEventTypes({ setupDeps });
     const getActionsStart = async () => {
@@ -82,6 +85,11 @@ export class AgentBuilderPlatformPlugin
   }
 
   start(coreStart: CoreStart): AgentBuilderPlatformPluginStart {
+    checkPdfExtractionAvailability({
+      esClient: coreStart.elasticsearch.client.asInternalUser,
+      logger: this.logger.get('pdf-extraction'),
+    });
+
     return {
       tracingFeatures: {
         setDashboard: ({ enabled, spaceId }) =>
