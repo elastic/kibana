@@ -20,7 +20,11 @@ import { css } from '@emotion/react';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { WorkflowStepExecutionDto, WorkflowTokenUsage } from '@kbn/workflows';
+import type {
+  WorkflowExecutionDto,
+  WorkflowStepExecutionDto,
+  WorkflowTokenUsage,
+} from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { type ApprovalLabels, ResumeExecutionButton } from './resume_execution_button';
 import { ResumeUnavailableCallout } from './resume_unavailable_callout';
@@ -90,7 +94,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
       | {
           isTestRun?: boolean;
           executedBy?: string;
-          effectiveIdentity?: { type: 'service_account'; id: string };
+          effectiveIdentity?: WorkflowExecutionDto['effectiveIdentity'];
         }
       | undefined;
     const isTestRun = executionData?.isTestRun === true;
@@ -100,6 +104,8 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
     return (
       <EuiPanel
         hasShadow={false}
+        hasBorder={false}
+        borderRadius="none"
         paddingSize="m"
         css={{ height: '100%', paddingTop: euiTheme.size.m /* overrides EuiPanel's paddingTop */ }}
         data-test-subj="workflowExecutionOverview"
@@ -121,9 +127,13 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                     description: executionData.executedBy ?? '-',
                   },
                   {
-                    title: i18n.translate('workflows.execution.runAsLabel', {
-                      defaultMessage: 'Run as',
-                    }),
+                    title: executionData.effectiveIdentity.inheritedFrom
+                      ? i18n.translate('workflows.execution.inheritedRunAsLabel', {
+                          defaultMessage: 'Run as (inherited from parent)',
+                        })
+                      : i18n.translate('workflows.execution.runAsLabel', {
+                          defaultMessage: 'Run as',
+                        }),
                     description: <ServiceAccountName id={executionData.effectiveIdentity.id} />,
                   },
                 ]}

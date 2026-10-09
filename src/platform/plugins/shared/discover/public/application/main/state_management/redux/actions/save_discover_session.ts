@@ -20,6 +20,7 @@ import { cloneDeep, isObject } from 'lodash';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { selectAllTabs } from '../selectors';
 import { createInternalStateAsyncThunk } from '../utils';
+import { internalStateSlice } from '../internal_state';
 import { selectTabRuntimeState, selectTabTypeForPersistence } from '../runtime_state';
 import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 import { appendAdHocDataViews, replaceAdHocDataViewWithId } from './data_views';
@@ -206,12 +207,13 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       copyOnSave: newCopyOnSave,
     };
 
-    const discoverSession = await services.savedSearch.saveDiscoverSession(saveParams, saveOptions);
+    const discoverSession = await services.discoverSessionService.save(saveParams, saveOptions);
 
     if (discoverSession) {
       if (customizationContext.displayMode === 'standalone' && discoverSession.id) {
         rememberDiscoverSession(services.core.http, services.chrome, discoverSession);
       }
+      dispatch(internalStateSlice.actions.setDraftSessionTitle(undefined));
       await dispatch(
         resetDiscoverSession({ updatedDiscoverSession: discoverSession, nextSelectedTabId })
       ).unwrap();

@@ -8,25 +8,22 @@
 import { createAlertEventDataSchema } from '@kbn/alerting-v2-schemas';
 import {
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
-  SIGNIFICANT_EVENTS_SEVERITY_MAP,
-  SIGNIFICANT_EVENTS_STATUS_MAP,
   type BlastRadiusEntry,
   type CausalFeature,
   type SignalEntry,
   type SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
-import type { SignificantEvent } from './data_stream';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { toRuleEvent } from './to_rule_event';
 
 const createSignificantEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
-  event_uuid: 'uuid-1',
   event_id: 'stable-id-1',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.test'],
   title: 'API gateway — upstream connection refused',
   summary: 'Connection refused on port 8080.',
-  severity: '60-high',
+  severity: 'high',
   confidence: 0.75,
   ...overrides,
 });
@@ -95,8 +92,8 @@ describe('toRuleEvent', () => {
       const event = createSignificantEvent({
         event_id: 'ev-max',
         '@timestamp': '2026-03-01T09:00:00.000Z',
-        status: 'dismissed',
-        severity: '80-critical',
+        status: 'inactive',
+        severity: 'critical',
         confidence: 0.9,
         symptom_hypothesis: 'Pool exhausted.',
         assessment_note: 'False alarm.',
@@ -194,29 +191,15 @@ describe('toRuleEvent', () => {
     });
   });
 
-  describe('severity mapping', () => {
-    it.each(Object.entries(SIGNIFICANT_EVENTS_SEVERITY_MAP))('maps %s → %s', (input, expected) => {
-      const event = createSignificantEvent({ severity: input as SignificantEvent['severity'] });
-      expect(toRuleEvent(event).severity).toBe(expected);
-    });
-
-    it('covers all SEVERITY_OPTIONS (exhaustiveness enforced by typed Record)', () => {
-      expect(Object.keys(SIGNIFICANT_EVENTS_SEVERITY_MAP)).toEqual(
-        expect.arrayContaining(['80-critical', '60-high', '40-medium', '20-low'])
-      );
+  describe('severity', () => {
+    it.each(['critical', 'high', 'medium', 'low'] as const)('passes %s through', (severity) => {
+      expect(toRuleEvent(createSignificantEvent({ severity })).severity).toBe(severity);
     });
   });
 
-  describe('status mapping', () => {
-    it.each(Object.entries(SIGNIFICANT_EVENTS_STATUS_MAP))('maps %s → %s', (input, expected) => {
-      const event = createSignificantEvent({ status: input as SignificantEvent['status'] });
-      expect(toRuleEvent(event).alert_status).toBe(expected);
-    });
-
-    it('covers all SIGNIFICANT_EVENT_STATUS_OPTIONS (exhaustiveness enforced by typed Record)', () => {
-      expect(Object.keys(SIGNIFICANT_EVENTS_STATUS_MAP)).toEqual(
-        expect.arrayContaining(['open', 'closed', 'dismissed'])
-      );
+  describe('status', () => {
+    it.each(['active', 'inactive'] as const)('passes %s through', (status) => {
+      expect(toRuleEvent(createSignificantEvent({ status })).alert_status).toBe(status);
     });
   });
 
@@ -234,27 +217,23 @@ describe('toRuleEvent', () => {
     });
 
     it('does not include status in data', () => {
-      expect(getEventData(createSignificantEvent({ status: 'dismissed' }))).not.toHaveProperty(
+      expect(getEventData(createSignificantEvent({ status: 'inactive' }))).not.toHaveProperty(
         'status'
       );
     });
 
     it('does not include severity in data', () => {
-      expect(getEventData(createSignificantEvent({ severity: '80-critical' }))).not.toHaveProperty(
+      expect(getEventData(createSignificantEvent({ severity: 'critical' }))).not.toHaveProperty(
         'severity'
       );
     });
 
     it('does not include event_uuid in data', () => {
-      expect(getEventData(createSignificantEvent({ event_uuid: 'uuid-x' }))).not.toHaveProperty(
-        'event_uuid'
-      );
+      expect(getEventData(createSignificantEvent())).not.toHaveProperty('event_uuid');
     });
 
     it('does not include previous_event_uuid in data', () => {
-      expect(
-        getEventData(createSignificantEvent({ previous_event_uuid: 'prev-uuid' }))
-      ).not.toHaveProperty('previous_event_uuid');
+      expect(getEventData(createSignificantEvent())).not.toHaveProperty('previous_event_uuid');
     });
 
     it('omits optional fields when absent', () => {

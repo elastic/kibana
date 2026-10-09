@@ -35,4 +35,12 @@ describe('getPrivateLocationEditPayload', () => {
       tags: ['prod'],
     });
   });
+
+  it('sends the agent policy only when it changed', () => {
+    expect(getPrivateLocationEditPayload(form({ agentPolicyId: 'policy-2' }), existing)).toEqual({
+      label: 'Local',
+      tags: ['prod'],
+      agentPolicyId: 'policy-2',
+    });
+  });
 });

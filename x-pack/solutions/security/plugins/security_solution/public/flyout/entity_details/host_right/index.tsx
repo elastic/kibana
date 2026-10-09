@@ -11,7 +11,7 @@ import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/u
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { EuiFlyoutFooter, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { useAlertTimeRange } from '../../../entity_analytics/hooks/use_alert_time_range';
 import { useAssetCriticalityPrivileges } from '../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
@@ -38,6 +38,10 @@ import {
   getRiskFromEntityRecord,
 } from '../shared/entity_store_risk_utils';
 import { useEntityFromStore, type EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import {
@@ -50,6 +54,7 @@ import {
 } from '../../../flyout_v2/entity/host/main/constants';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutBody } from '../../shared/components/flyout_body';
+import { FlyoutFooter } from '../../shared/components/flyout_footer';
 import { useEntityPanelTabs, TABLE_TAB_ID } from '../shared/hooks/use_entity_panel_tabs';
 import { EntityPanelHeaderTabs } from '../shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../shared/components/entity_store_table_tab';
@@ -77,6 +82,16 @@ export interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {
 }
 
 export const HostPreviewPanelKey: HostPanelExpandableFlyoutProps['key'] = 'host-preview-panel';
+
+const HOST_ENTITY_FROM_STORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'host_entity_from_store'
+);
+
+const HOST_RISK_SCORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'host_risk_score'
+);
 
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
@@ -106,6 +121,7 @@ export const HostPanel = memo(function HostPanel({
     identityFields: hostStoreIdentityFields,
     entityType: 'host',
     skip: isInitializing,
+    executionContext: HOST_ENTITY_FROM_STORE_CONTEXT,
   });
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
@@ -130,6 +146,7 @@ export const HostPanel = memo(function HostPanel({
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: !!observedHost?.entityRecord,
+    executionContext: HOST_RISK_SCORE_CONTEXT,
   });
 
   const { inspect, refetch, loading } = riskScoreState;
@@ -336,15 +353,13 @@ export const HostPanel = memo(function HostPanel({
         />
       )}
       {!isPreviewMode && assetInventoryEnabled && (
-        <EuiFlyoutFooter>
-          <EuiPanel color="transparent">
-            <Footer
-              hostName={hostName}
-              identityFields={documentEntityIdentifiers}
-              entity={entityFromStore}
-            />
-          </EuiPanel>
-        </EuiFlyoutFooter>
+        <FlyoutFooter>
+          <Footer
+            hostName={hostName}
+            identityFields={documentEntityIdentifiers}
+            entity={entityFromStore}
+          />
+        </FlyoutFooter>
       )}
     </>
   );

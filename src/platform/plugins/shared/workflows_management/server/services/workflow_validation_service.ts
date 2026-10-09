@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core/server';
 import {
   type ConnectorContractUnion,
   toCustomTriggerSchemaConfigs,
   type ValidateWorkflowResponseDto,
+  WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
 } from '@kbn/workflows';
 import type { GetAvailableConnectorsResponse } from '@kbn/workflows/types/v1';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
@@ -79,8 +81,14 @@ export class WorkflowValidationService {
       allConnectors,
       toCustomTriggerSchemaConfigs(triggerDefinitions)
     );
+    const warnIgnoredKibanaFetcher = await firstValueFrom(
+      this.deps
+        .getCoreStart()
+        .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false)
+    );
     return validateWorkflowYaml(yaml, zodSchema, {
       triggerDefinitions,
+      warnIgnoredKibanaFetcher,
       ...(includeVariableRules && {
         variableValidationRegistry: this.createContextRegistry(allConnectors),
       }),

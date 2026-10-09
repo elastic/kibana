@@ -14,10 +14,10 @@ import {
 import type { ApprovalProposal } from './types';
 
 const proposal = (overrides: Partial<ApprovalProposal> = {}): ApprovalProposal => ({
+  title: 'Tune the Okta rule',
   comment: 'Tune the noisy rule',
   impact: 'low',
   status: 'pending',
-  expired: false,
   ...overrides,
 });
 
@@ -118,7 +118,7 @@ describe('getProposalCaption', () => {
         proposal({
           category: 'configure',
           impact: 'high',
-          expired: true,
+          status: 'expired',
           expiresAt: '2024-01-05T17:00:00.000Z',
         }),
         { includeRiskDetails: true }
@@ -206,15 +206,27 @@ describe('getProposalDecision', () => {
       )
     ).toMatchObject({ status: 'declined' });
   });
+
+  it("reports a failed action's error as its reason", () => {
+    expect(
+      getProposalDecision(
+        proposal({
+          decision: 'approved',
+          status: 'failed',
+          executionError: 'The rule was changed after this proposal was created',
+          rationale: 'Looks right',
+        })
+      )
+    ).toMatchObject({
+      status: 'failed',
+      reason: 'The rule was changed after this proposal was created',
+    });
+  });
 });
 
 describe('isProposalExpired', () => {
-  it('is true once the computed deadline flag is set', () => {
-    expect(isProposalExpired(proposal({ expired: true }))).toBe(true);
-  });
-
-  it('is true for an expiry the workflow settled before the deadline', () => {
-    expect(isProposalExpired(proposal({ expired: false, status: 'expired' }))).toBe(true);
+  it('is true once the workflow settles the status as expired', () => {
+    expect(isProposalExpired(proposal({ status: 'expired' }))).toBe(true);
   });
 
   it('is false for a proposal still awaiting a decision', () => {

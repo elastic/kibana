@@ -8,12 +8,14 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
 } from '@kbn/workflows-execution-engine/server';
 
 import { deleteWorkflows } from './workflow_deletion';
+import type { WorkflowProperties } from '../../storage/workflow_storage';
 
 const logger = loggerMock.create();
 
@@ -64,6 +66,12 @@ const makeStorageClient = (
 
 const makeExecutionsDataAccess = () => {
   const workflowExecutionsDataClient = {
+    search: jest.fn().mockResolvedValue({
+      took: 0,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { hits: [] },
+    }),
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
   } as unknown as WorkflowExecutionsDataClient;
   const stepExecutionsDataClient = {
@@ -96,7 +104,7 @@ describe('deleteWorkflows', () => {
         assertCanDelete,
       })
     ).rejects.toThrow('Access revoked');
-    expect(assertCanDelete).toHaveBeenCalledWith(expect.objectContaining({ name: 'Test' }));
+    expect(assertCanDelete).toHaveBeenCalledWith(expect.objectContaining({ name: 'Test' }), 'wf-1');
     expect(client.bulk).not.toHaveBeenCalled();
     expect(client.delete).not.toHaveBeenCalled();
   });
@@ -658,8 +666,14 @@ describe('deleteWorkflows', () => {
             ? dataClients.stepExecutionsDataClient.deleteByQuery
             : dataClients.workflowExecutionsDataClient.deleteByQuery
         );
+        const persistentVersionConflict =
+          !(response instanceof Error) &&
+          'version_conflicts' in response &&
+          Boolean(response.version_conflicts);
         if (response instanceof Error) {
           deleteByQuery.mockRejectedValueOnce(response);
+        } else if (persistentVersionConflict) {
+          deleteByQuery.mockResolvedValue(response);
         } else {
           deleteByQuery.mockResolvedValueOnce(response);
         }
@@ -677,6 +691,8 @@ describe('deleteWorkflows', () => {
             getWorkflowExecutions: noopExecutions,
           })
         ).rejects.toThrow(message);
+
+        expect(deleteByQuery).toHaveBeenCalledTimes(persistentVersionConflict ? 3 : 1);
 
         expect(client.delete).not.toHaveBeenCalled();
         expect(client.bulk).toHaveBeenCalledTimes(1);
@@ -731,13 +747,121 @@ describe('deleteWorkflows', () => {
           }
         }
       );
+
+      const versionConflictError = () =>
+        Object.assign(new Error('version_conflict_engine_exception'), {
+          statusCode: 409,
+          body: {
+            timed_out: false,
+            version_conflicts: 1,
+            failures: [
+              {
+                cause: {
+                  type: 'version_conflict_engine_exception',
+                  reason: 'version conflict',
+                },
+              },
+            ],
+          },
+        });
+
+      const privateForceDelete = () => {
+        const { client, storage } = makeStorageClient([
+          {
+            _id: 'wf-1',
+            _source: makeWorkflowSource({
+              owner_id: 'owner',
+              access_control: { access_mode: 'private', entries: [] },
+            }),
+          },
+        ]);
+        const dataClients = makeExecutionsDataAccess();
+        const deleteByQuery = jest.mocked(
+          target === 'steps'
+            ? dataClients.stepExecutionsDataClient.deleteByQuery
+            : dataClients.workflowExecutionsDataClient.deleteByQuery
+        );
+        const run = () =>
+          deleteWorkflows({
+            ids: ['wf-1'],
+            spaceId: 'default',
+            force: true,
+            acknowledgeAclLoss: true,
+            storage,
+            ...dataClients,
+            taskScheduler: null,
+            logger,
+            getWorkflowExecutions: noopExecutions,
+          });
+        return { client, deleteByQuery, run };
+      };
+
+      it('completes deletion when a version conflict clears on retry', async () => {
+        const { client, deleteByQuery, run } = privateForceDelete();
+        deleteByQuery
+          .mockResolvedValueOnce({ version_conflicts: 1 })
+          .mockResolvedValueOnce({ deleted: 1 });
+
+        await expect(run()).resolves.toEqual({
+          total: 1,
+          deleted: 1,
+          successfulIds: ['wf-1'],
+          failures: [],
+        });
+        expect(client.delete).toHaveBeenCalledTimes(1);
+        expect(deleteByQuery).toHaveBeenCalledTimes(2);
+      });
+
+      it('completes deletion when a thrown version conflict clears on retry', async () => {
+        const { client, deleteByQuery, run } = privateForceDelete();
+        deleteByQuery
+          .mockRejectedValueOnce(versionConflictError())
+          .mockResolvedValueOnce({ deleted: 1 });
+
+        await expect(run()).resolves.toEqual({
+          total: 1,
+          deleted: 1,
+          successfulIds: ['wf-1'],
+          failures: [],
+        });
+        expect(client.delete).toHaveBeenCalledTimes(1);
+        expect(deleteByQuery).toHaveBeenCalledTimes(2);
+      });
+
+      it('retains the workflow ACL when a thrown version conflict persists', async () => {
+        const { client, deleteByQuery, run } = privateForceDelete();
+        deleteByQuery.mockRejectedValue(versionConflictError());
+
+        await expect(run()).rejects.toThrow('version_conflict_engine_exception');
+        expect(deleteByQuery).toHaveBeenCalledTimes(3);
+        expect(client.delete).not.toHaveBeenCalled();
+      });
+
+      it('does not retry a purge failure that is not only a version conflict', async () => {
+        const { client, deleteByQuery, run } = privateForceDelete();
+        deleteByQuery.mockResolvedValue({
+          version_conflicts: 1,
+          failures: [
+            {
+              id: 'step-1',
+              index: '.workflows-step-executions',
+              status: 500,
+              cause: { type: 'index_not_found_exception', reason: 'missing' },
+            },
+          ],
+        });
+
+        await expect(run()).rejects.toThrow('failures=1');
+        expect(deleteByQuery).toHaveBeenCalledTimes(1);
+        expect(client.delete).not.toHaveBeenCalled();
+      });
     });
   });
 });
 
 describe('bound workflow deletion OCC', () => {
   const setup = (force: boolean, privateWorkflow = false) => {
-    const document = makeWorkflowSource(
+    const document: WorkflowProperties = makeWorkflowSource(
       privateWorkflow
         ? { owner_id: 'owner', access_control: { access_mode: 'private', entries: [] } }
         : {}
@@ -808,9 +932,10 @@ describe('bound workflow deletion OCC', () => {
       const { client, params, deleteDocument } = setup(true, true);
       const dataClient =
         target === 'steps' ? params.stepExecutionsDataClient : params.workflowExecutionsDataClient;
-      jest.mocked(dataClient.deleteByQuery).mockResolvedValueOnce({ version_conflicts: 1 });
+      jest.mocked(dataClient.deleteByQuery).mockResolvedValue({ version_conflicts: 1 });
 
       await expect(deleteWorkflows(params)).rejects.toThrow('remains soft-deleted');
+      expect(dataClient.deleteByQuery).toHaveBeenCalledTimes(3);
       expect(deleteDocument).not.toHaveBeenCalled();
       expect(client.index).toHaveBeenCalledTimes(1);
       expect(client.index).toHaveBeenCalledWith(
@@ -839,6 +964,84 @@ describe('bound workflow deletion OCC', () => {
       expect(params.workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
     }
   );
+
+  it('blocks deleting a global managed workflow with executions in any space', async () => {
+    const { client, params, deleteDocument } = setup(true);
+    params.spaceId = '*';
+    params.guardedDelete.document.spaceId = '*';
+    params.guardedDelete.document.managed = true;
+    jest.mocked(params.workflowExecutionsDataClient.search).mockResolvedValueOnce({
+      took: 0,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { hits: [{ _index: 'executions', _id: 'running-child-in-concrete-space' }] },
+    });
+    await expect(deleteWorkflows(params)).rejects.toThrow('running executions');
+    expect(params.getWorkflowExecutions).not.toHaveBeenCalled();
+    expect(params.workflowExecutionsDataClient.search).toHaveBeenCalledWith({
+      query: {
+        bool: {
+          filter: [
+            { term: { workflowId: 'bound' } },
+            { terms: { status: [...NonTerminalExecutionStatuses] } },
+          ],
+        },
+      },
+      size: 1,
+      _source: false,
+      allow_partial_search_results: false,
+    });
+    expect(deleteDocument).not.toHaveBeenCalled();
+    expect(client.index).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        document: params.guardedDelete.document,
+      })
+    );
+  });
+
+  it('fails closed and restores the global definition when execution lookup fails', async () => {
+    const { client, params, deleteDocument } = setup(true);
+    params.spaceId = '*';
+    params.guardedDelete.document.spaceId = '*';
+    params.guardedDelete.document.managed = true;
+    jest
+      .mocked(params.workflowExecutionsDataClient.search)
+      .mockRejectedValueOnce(new Error('unavailable'));
+    await expect(deleteWorkflows(params)).rejects.toThrow('unavailable');
+    expect(deleteDocument).not.toHaveBeenCalled();
+    expect(client.index).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    { timed_out: true, failed: 0 },
+    { timed_out: false, failed: 1 },
+  ])('rejects an incomplete global execution search (%j)', async ({ timed_out, failed }) => {
+    const { client, params, deleteDocument } = setup(true);
+    params.spaceId = '*';
+    params.guardedDelete.document.spaceId = '*';
+    params.guardedDelete.document.managed = true;
+    jest.mocked(params.workflowExecutionsDataClient.search).mockResolvedValueOnce({
+      took: 0,
+      timed_out,
+      _shards: { total: 1, successful: 1 - failed, skipped: 0, failed },
+      hits: { hits: [] },
+    });
+    await expect(deleteWorkflows(params)).rejects.toThrow('active execution search was incomplete');
+    expect(deleteDocument).not.toHaveBeenCalled();
+    expect(params.workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
+    expect(client.index).toHaveBeenLastCalledWith(
+      expect.objectContaining({ document: params.guardedDelete.document })
+    );
+  });
+
+  it('deletes a global managed workflow after all executions finish', async () => {
+    const { params, deleteDocument } = setup(true);
+    params.spaceId = '*';
+    params.guardedDelete.document.spaceId = '*';
+    params.guardedDelete.document.managed = true;
+    await expect(deleteWorkflows(params)).resolves.toMatchObject({ deleted: 1 });
+    expect(deleteDocument).toHaveBeenCalled();
+  });
 
   it('hard-deletes only the revision it disabled', async () => {
     const { params, deleteDocument } = setup(true);

@@ -83,7 +83,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
     for (const event of events) {
       expect(event.type).toBe('signal');
-      expect(event.episode).toBeUndefined();
+      expect(event.alert).toBeUndefined();
     }
   });
 
@@ -120,9 +120,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
       for (const event of events) {
         expect(event.type).toBe('alert');
-        expect(event.episode).toBeDefined();
-        expect(event.episode?.id).toBeDefined();
-        expect(['inactive', 'pending', 'active', 'recovering']).toContain(event.episode!.status);
+        expect(event.alert).toBeDefined();
+        expect(event.alert?.id).toBeDefined();
+        expect(['inactive', 'pending', 'active', 'recovering']).toContain(event.alert!.status);
       }
     }
   );
@@ -177,8 +177,8 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       });
 
       const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
-      const episodeIds = new Set(events.map((event) => event.episode?.id));
-      const observedStatuses = new Set(events.map((event) => event.episode?.status));
+      const episodeIds = new Set(events.map((event) => event.alert?.id));
+      const observedStatuses = new Set(events.map((event) => event.alert?.status));
 
       expect(episodeIds.size).toBe(1);
       expect(observedStatuses).toStrictEqual(
@@ -220,7 +220,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const firstActiveEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         episodeStatus: 'active',
       });
-      const firstEpisodeId = firstActiveEvents[0].episode?.id;
+      const firstEpisodeId = firstActiveEvents[0].alert?.id;
 
       expect(firstEpisodeId).toBeDefined();
 
@@ -256,7 +256,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
           async () => {
             const states = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
             return Array.from(states.values()).some(
-              (doc) => doc.episode?.status === 'active' && doc.episode.id !== firstEpisodeId
+              (doc) => doc.alert?.status === 'active' && doc.alert?.id !== firstEpisodeId
             );
           },
           { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
@@ -318,7 +318,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       });
 
       const groupHash = firstActive.group_hash;
-      const activeEpisodeId = firstActive.episode?.id;
+      const activeEpisodeId = firstActive.alert?.id;
       expect(activeEpisodeId).toBeDefined();
 
       // 2. Stop breaching and let the engine drive the episode all the
@@ -356,7 +356,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       //    pre-reopen lifecycle.
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
       expect(latestStates.get(groupHash)).toMatchObject({
-        episode: { id: activeEpisodeId, status: 'active' },
+        alert: { id: activeEpisodeId, status: 'active' },
       });
 
       // 6. Every rule-events doc emitted from the reopen onward carries
@@ -380,10 +380,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
           event.group_hash === groupHash && new Date(event['@timestamp']).getTime() >= activateTs
       );
 
-      const offActive = postReopenGroupEvents.filter((event) => event.episode?.status !== 'active');
+      const offActive = postReopenGroupEvents.filter((event) => event.alert?.status !== 'active');
       expect(offActive).toStrictEqual([]);
 
-      const postReopenEpisodeIds = new Set(postReopenGroupEvents.map((event) => event.episode?.id));
+      const postReopenEpisodeIds = new Set(postReopenGroupEvents.map((event) => event.alert?.id));
       expect(postReopenEpisodeIds).toStrictEqual(new Set([activeEpisodeId]));
     }
   );
@@ -412,7 +412,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
           query: {
             base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-basic-strategy" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
-          state_transition: null,
+          state_transition: undefined,
         })
       );
 
@@ -432,13 +432,13 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       });
 
       const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
-      const observedStatuses = new Set(events.map((event) => event.episode?.status));
+      const observedStatuses = new Set(events.map((event) => event.alert?.status));
       expect(observedStatuses.has('pending')).toBe(true);
       expect(observedStatuses.has('active')).toBe(true);
       expect(observedStatuses.has('recovering')).toBe(true);
 
       for (const event of events) {
-        expect(event.episode?.status_count).toBeUndefined();
+        expect(event.alert?.status_count).toBeUndefined();
       }
     }
   );
@@ -458,9 +458,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         ],
       });
 
-      // pending.count=3 — director needs status_count to climb 1 → 2 → 3 to
-      // promote the episode to active. Also lets us assert that active events
-      // do not carry status_count.
+      // pending.count=3 — the episode spends three evaluations in pending,
+      // with status_count climbing 1 → 2 → 3, and becomes active on the
+      // fourth. Also lets us assert that active events do not carry
+      // status_count.
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-count-increment' },
@@ -472,26 +473,26 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       );
 
       // Wait for the active transition — by then the executor will have run
-      // at least three times for this group, walking status_count 1 → 2.
+      // at least four times for this group, walking status_count 1 → 2 → 3.
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
         episodeStatus: 'active',
       });
 
       const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
       const pendingCounts = events
-        .filter((event) => event.episode?.status === 'pending')
-        .map((event) => event.episode!.status_count)
+        .filter((event) => event.alert?.status === 'pending')
+        .map((event) => event.alert!.status_count)
         .filter((count): count is number => typeof count === 'number');
 
-      expect(pendingCounts).toHaveLength(2);
+      expect(pendingCounts).toHaveLength(3);
       expect(Math.min(...pendingCounts)).toBe(1);
-      expect(Math.max(...pendingCounts)).toBe(2);
+      expect(Math.max(...pendingCounts)).toBe(3);
 
-      const activeEvents = events.filter((event) => event.episode?.status === 'active');
+      const activeEvents = events.filter((event) => event.alert?.status === 'active');
       expect(activeEvents.length).toBeGreaterThanOrEqual(1);
       // Active events must not carry status_count.
       for (const event of activeEvents) {
-        expect(event.episode?.status_count).toBeUndefined();
+        expect(event.alert?.status_count).toBeUndefined();
       }
     }
   );
@@ -536,7 +537,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         episodeStatus: 'pending',
       });
 
-      const firstLifecycleEpisodeId = firstPendingEvents[0].episode?.id;
+      const firstLifecycleEpisodeId = firstPendingEvents[0].alert?.id;
       expect(firstLifecycleEpisodeId).toBeDefined();
 
       // 2) Stop breaching while still pending — the episode goes
@@ -570,9 +571,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
             const states = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
             return Array.from(states.values()).some(
               (event) =>
-                event.episode?.status === 'pending' &&
-                event.episode.id !== firstLifecycleEpisodeId &&
-                event.episode.status_count === 1
+                event.alert?.status === 'pending' &&
+                event.alert?.id !== firstLifecycleEpisodeId &&
+                event.alert?.status_count === 1
             );
           },
           { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
@@ -625,7 +626,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
     expect(inactiveEvents.length).toBeGreaterThanOrEqual(1);
     for (const event of inactiveEvents) {
-      expect(event.episode?.status_count).toBeUndefined();
+      expect(event.alert?.status_count).toBeUndefined();
     }
   });
 
@@ -674,16 +675,16 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
 
       const recoveringCounts = events
-        .filter((event) => event.episode?.status === 'recovering')
-        .map((event) => event.episode!.status_count)
+        .filter((event) => event.alert?.status === 'recovering')
+        .map((event) => event.alert!.status_count)
         .filter((count): count is number => typeof count === 'number');
 
-      // Every recovering event must carry a status_count, and we must have
-      // observed at least two distinct values (i.e. the count climbed before
-      // the threshold was met).
-      expect(recoveringCounts).toHaveLength(2);
+      // Every recovering event must carry a status_count. recovering.count=3
+      // spends three evaluations in recovering (1 → 2 → 3) before the episode
+      // becomes inactive on the fourth.
+      expect(recoveringCounts).toHaveLength(3);
       expect(Math.min(...recoveringCounts)).toBe(1);
-      expect(Math.max(...recoveringCounts)).toBe(2);
+      expect(Math.max(...recoveringCounts)).toBe(3);
     }
   );
 
@@ -819,7 +820,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const activeEventsBefore = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         episodeStatus: 'active',
       });
-      const initialActiveEpisodeId = activeEventsBefore[0].episode?.id;
+      const initialActiveEpisodeId = activeEventsBefore[0].alert?.id;
 
       await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
@@ -880,10 +881,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         (event) => Date.parse(event['@timestamp']) > lastRecoveringTimestamp
       );
 
-      expect(reactivatedEvent?.episode?.id).toBe(initialActiveEpisodeId);
+      expect(reactivatedEvent?.alert?.id).toBe(initialActiveEpisodeId);
       // The re-active event is a steady-state status, so the director must
       // not carry over the recovering status_count onto it.
-      expect(reactivatedEvent?.episode?.status_count).toBeUndefined();
+      expect(reactivatedEvent?.alert?.status_count).toBeUndefined();
     }
   );
 
@@ -929,7 +930,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       });
 
       const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
-      const observedStatuses = new Set(events.map((event) => event.episode?.status));
+      const observedStatuses = new Set(events.map((event) => event.alert?.status));
 
       // The episode must NOT have visited active or recovering — it went
       // pending → inactive directly via the basic state machine's
@@ -979,7 +980,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         async () => {
           const states = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
           return Array.from(states.values())
-            .map((event) => event.episode?.status)
+            .map((event) => event.alert?.status)
             .sort();
         },
         { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
@@ -1011,8 +1012,8 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         async () => {
           const states = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
           return {
-            a: states.get(groupHashA!)?.episode?.status,
-            b: states.get(groupHashB!)?.episode?.status,
+            a: states.get(groupHashA!)?.alert?.status,
+            b: states.get(groupHashB!)?.alert?.status,
           };
         },
         { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
@@ -1025,11 +1026,11 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
     expect(eventsA.length).toBeGreaterThan(0);
     expect(eventsB.length).toBeGreaterThan(0);
-    expect(eventsA.some((event) => event.episode?.status === 'inactive')).toBe(true);
-    expect(eventsB.some((event) => event.episode?.status === 'inactive')).toBe(false);
+    expect(eventsA.some((event) => event.alert?.status === 'inactive')).toBe(true);
+    expect(eventsB.some((event) => event.alert?.status === 'inactive')).toBe(false);
 
-    const idsA = new Set(eventsA.map((event) => event.episode?.id));
-    const idsB = new Set(eventsB.map((event) => event.episode?.id));
+    const idsA = new Set(eventsA.map((event) => event.alert?.id));
+    const idsB = new Set(eventsB.map((event) => event.alert?.id));
     const [idA] = idsA;
     const [idB] = idsB;
 
@@ -1075,8 +1076,8 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       });
 
       const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
-      const pendingEvents = events.filter((event) => event.episode?.status === 'pending');
-      const activeEvents = events.filter((event) => event.episode?.status === 'active');
+      const pendingEvents = events.filter((event) => event.alert?.status === 'pending');
+      const activeEvents = events.filter((event) => event.alert?.status === 'active');
 
       // Must observe both: at least one pending event (statusCount cannot
       // possibly reach 1000 in this test window) and at least one active
@@ -1087,7 +1088,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       // None of the pending events should have status_count high enough to
       // satisfy the count threshold on their own.
       for (const event of pendingEvents) {
-        expect(event.episode!.status_count!).toBeLessThan(1000);
+        expect(event.alert!.status_count!).toBeLessThan(1000);
       }
     }
   );
@@ -1136,21 +1137,21 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       });
 
       const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
-      const recoveringEvents = events.filter((event) => event.episode?.status === 'recovering');
-      const inactiveEvents = events.filter((event) => event.episode?.status === 'inactive');
+      const recoveringEvents = events.filter((event) => event.alert?.status === 'recovering');
+      const inactiveEvents = events.filter((event) => event.alert?.status === 'inactive');
 
       expect(recoveringEvents.length).toBeGreaterThanOrEqual(1);
       expect(inactiveEvents.length).toBeGreaterThanOrEqual(1);
 
       for (const event of recoveringEvents) {
-        expect(event.episode!.status_count!).toBeLessThan(1000);
+        expect(event.alert!.status_count!).toBeLessThan(1000);
       }
 
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
       const [latestState] = Array.from(latestStates.values());
 
       expect(latestStates.size).toBe(1);
-      expect(latestState.episode?.status).toBe('inactive');
+      expect(latestState.alert?.status).toBe('inactive');
     }
   );
 
@@ -1218,14 +1219,14 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       expect(inactiveEvents).toHaveLength(0);
 
       for (const event of recoveringEvents) {
-        expect(event.episode!.status_count!).toBeLessThan(1000);
+        expect(event.alert!.status_count!).toBeLessThan(1000);
       }
 
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
       const [latestState] = Array.from(latestStates.values());
 
       expect(latestStates.size).toBe(1);
-      expect(latestState.episode?.status).toBe('recovering');
+      expect(latestState.alert?.status).toBe('recovering');
     }
   );
 
@@ -1281,14 +1282,14 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       expect(activeEvents).toHaveLength(0);
 
       for (const event of pendingEvents) {
-        expect(event.episode!.status_count!).toBeLessThan(1000);
+        expect(event.alert!.status_count!).toBeLessThan(1000);
       }
 
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
       const [latestState] = Array.from(latestStates.values());
 
       expect(latestStates.size).toBe(1);
-      expect(latestState.episode?.status).toBe('pending');
+      expect(latestState.alert?.status).toBe('pending');
     }
   );
 
@@ -1326,8 +1327,8 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       });
 
       const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
-      const pendingEvents = events.filter((event) => event.episode?.status === 'pending');
-      const activeEvents = events.filter((event) => event.episode?.status === 'active');
+      const pendingEvents = events.filter((event) => event.alert?.status === 'pending');
+      const activeEvents = events.filter((event) => event.alert?.status === 'active');
 
       expect(pendingEvents.length).toBeGreaterThanOrEqual(1);
       expect(activeEvents.length).toBeGreaterThanOrEqual(1);
@@ -1335,13 +1336,13 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       // status_count must have observed value 1 in pending (proves the
       // count side was being walked) and must not be set on active events.
       const pendingCounts = pendingEvents
-        .map((event) => event.episode!.status_count)
+        .map((event) => event.alert!.status_count)
         .filter((count): count is number => typeof count === 'number');
 
       expect(pendingCounts).toContain(1);
 
       for (const event of activeEvents) {
-        expect(event.episode?.status_count).toBeUndefined();
+        expect(event.alert?.status_count).toBeUndefined();
       }
     }
   );
@@ -1398,7 +1399,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
       expect(noDataEvents.length).toBeGreaterThanOrEqual(1);
       for (const event of noDataEvents) {
-        expect(event.episode?.status).toBe('pending');
+        expect(event.alert?.status).toBe('pending');
       }
     }
   );
@@ -1457,7 +1458,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       // The director resolves the episode directly to inactive on a no_data
       // event when no_data.strategy is 'resolve'.
       for (const event of noDataEvents) {
-        expect(event.episode?.status).toBe('inactive');
+        expect(event.alert?.status).toBe('inactive');
       }
     }
   );

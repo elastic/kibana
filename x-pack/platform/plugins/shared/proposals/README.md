@@ -16,7 +16,7 @@ This plugin owns the record, the decision, and the guarantee that an approved ac
                           @kbn/agentic-investigations-common's investigation flyout
 server/
   plugin.ts config.ts types.ts constants.ts features.ts
-  routes/ services/ storage/ step_types/ attachments/ managed_workflows/
+  routes/ services/ storage/ step_types/ attachments/ managed_workflows/ tools/
 public/
   plugin.ts index.ts types.ts
   hooks/ components/ attachments/ step_types/
@@ -64,7 +64,32 @@ All checks **fail closed**, including when the `security` plugin is absent entir
 - A **proposal** is a recommendation awaiting a human decision. It lives in `.kibana-proposals` and points at the conversation it belongs to.
 - An **action proposal** additionally references a managed **action workflow** (`actionWorkflowId`) plus its `actionInput`. Approving it runs that workflow.
 - A **non-action proposal** carries only its `comment` — instructions the analyst carries out themselves before approving. It is always gated: autonomy governs whether an action may run unattended, and there is no action here to govern, so `autoApprove` is ignored.
+- Every proposal declares an **`origin`**: which feature produced it, so that feature's queue can show it and another's cannot. It is a closed enum, required, and fixed for the whole revision chain. See "Origin is a closed routing key" below.
+- Every proposal carries a **`title`**: a short plain-text label, distinct from the markdown `comment`. Required on the record and resolved on write — the caller's own title, else the action's name, else the `DEFAULT_PROPOSAL_TITLE` constant — so a reader renders the field rather than re-deriving a fallback chain. Deliberately untranslated, like the `comment` beside it: both are stored English.
 - Proposals are immutable once **decided**. An undecided proposal can still be **revised**: `revise()` supersedes the current head with a new revision that carries the correction, and the gate decides whichever revision is live when the analyst answers. The predecessor is marked `superseded` and hidden from the queue by `excludeSuperseded`, so a chain shows one live row at a time.
+
+### Origin is a closed routing key
+
+`origin` is a `z.enum` in `@kbn/proposals-common`, one member per producing feature. That is deliberately unlike `category`, which is an open per-solution keyword, because the two fail differently: a typo'd category still appears, as a group with a silly name, while a typo'd origin matches no queue's filter and the proposal is never seen by anyone.
+
+Consumers filter on **exact equality** — AlertZero's queues pass `ALERTZERO_PROPOSAL_ORIGIN` and therefore never show Nightshift's or Context Engine's rows, nor a proposal raised from the standalone chat surface. So the value is a routing key every producer and consumer must agree on character for character, which is what an enum enforces and an open vocabulary cannot.
+
+Adding a producer is a deliberate change to that enum, reviewed alongside the queue-visibility consequences it carries. Members nothing writes yet are declared intent.
+
+It is also **immutable**: `create()` is the only writer, `revise()` and `clone()` inherit it through the spread, and `UpdateProposalParams` has no field for it. A chain therefore cannot split across two queues.
+
+The one thing the enum cannot catch is a valid member used by the wrong producer — an AlertZero Worker declaring `nightshift` on a copy-paste. A producer can close that gap for itself by owning the value rather than asking each call site for it, which is what AlertZero does.
+
+#### Producers may front the gate with a bridge
+
+AlertZero's Workers do not call `system-create-proposal`. They call `system-create-alertzero-proposal`, a managed workflow that forwards every input and supplies `origin: alertzero` as a literal. The bridge declares no `origin` input at all, so there is nothing for a call site to get wrong.
+
+Two properties make this safe to copy for another producer:
+
+- **It must outlive the gate it waits on.** `workflow.execute` parks the caller in `WAITING_FOR_CHILD` for as long as the decision is held, and the engine's default workflow timeout is 6h. Because `expiresIn` is caller-configurable there is no fixed window to size against, so the bridge tracks the gate's `52w` sentinel rather than any particular deadline. A bridge that leaves `settings.timeout` unset is cancelled mid-decision, and a cancelled parent runs no handler, so the proposal strands `pending`.
+- **It must re-declare the gate's `outputs`.** Callers read `steps.<step>.output.decision`, `.status` and `.proposalId`. A bridge that does not forward them leaves every one of those expressions undefined — falsy, so approval branches simply stop firing, with nothing logged.
+
+`create_proposal.test.ts` next to the bridge pins both, plus input parity with the gate, so an input added to `system-create-proposal` fails the build rather than being silently dropped at the hop. `proposal_origin.test.ts` in the AlertZero plugin sweeps every AlertZero definition to keep the bridge the only thing that reaches the gate.
 
 ### Decision and status are two axes
 
@@ -108,6 +133,20 @@ Re-writing the *same* terminal status is deliberately allowed, so settling stays
 
 `supersededBy` points at the proposal that replaced this one — written when a failed action is re-offered as a fresh proposal. The queue filters superseded records out so a chain of retries appears once rather than per attempt.
 
+### Conversation history
+
+Creation, revisions, and failed-action retries each attach their own proposal to
+the conversation after the proposal writes succeed. Attachment writes are
+best-effort: failure logs a warning without failing the proposal operation.
+Existing conversations are not backfilled.
+
+Each card reads its own proposal. Replaced cards retain their original content,
+show a replaced notice and disabled decision buttons, and do not redirect to the
+successor. Replacement navigation is deferred pending Agent Builder support.
+The agent receives the replaced proposal as historical and non-actionable, with
+the successor ID when available. Queue views continue to show only the latest
+proposal.
+
 ### The revision chain
 
 A proposal that is still undecided can be corrected rather than dismissed and
@@ -125,9 +164,36 @@ authorized and before any write, resolves the carried id to the chain head. An
 approval therefore carries the `actionInput` of the revision the approver was
 shown, not the one the Worker first proposed.
 
-Chains predating this field have `rootProposalId` on neither row; the term query
-misses and the fallback returns the row asked about, which is the correct answer
-for a chain of one. The plugin is unshipped, so there is nothing to migrate.
+Every stored proposal carries `rootProposalId` and `revision`. The plugin is
+unshipped, so legacy records without these fields are not supported.
+
+### Caller-supplied ids
+
+`create()` takes an optional `id`, and a UUID is required. Without one it mints a
+random id, exactly as before. With one, the proposal is created under that id with
+`op_type: 'create'`, so two callers that derive the same id from the same thing meet
+at the same document and Elasticsearch decides which one creates it, with no
+check-then-create window in application code.
+
+An id that already exists is refused with `ProposalAlreadyExistsError`. The service
+reads nothing and returns nothing on the way there: what a duplicate means is the
+caller's to decide, which is why the caller chose the id. The error extends
+`ProposalConflictError`, so it is already a 409 on the routes and a `ConflictError`
+in a workflow. A caller that wants to converge on the existing proposal looks it up
+itself, with `get` and `getLatestRevision` (after a `revise()` the row at the
+original id is a superseded stub, not the head). A caller that wants a new proposal
+once the old one has settled derives its next id.
+
+The index is shared across spaces and the service does not scope the id, so the
+caller must put the space (and its own producer) into whatever the id is derived
+from. A clash is refused and never returned, so a missing space costs the caller a
+failed create and nothing more.
+
+`proposals.createProposal`, `system-create-proposal` and
+`system-create-alertzero-proposal` take the id as `proposalId` and pass it down. A
+duplicate fails the create step, before the gate workflow holds a proposal id, so
+nothing is parked or settled. A workflow that wants to handle it can branch on the
+step's `ConflictError`.
 
 ### Architecture
 
@@ -260,6 +326,8 @@ Call the gate workflow; do not write proposals directly.
     workflow-id: system-create-proposal
     inputs:
       conversationId: '{{ steps.investigate.output.conversation_id }}'
+      origin: alertzero
+      title: 'Tune noisy rule'
       comment: 'Tune the noisy rule that produced this alert'
       actionWorkflowId: '{{ steps.suggest_action.output.structured_output.actionWorkflowId }}'
       actionInput: '${{ steps.suggest_action.output.structured_output.actionInput }}'
@@ -273,6 +341,8 @@ The input contract:
 | --- | --- | --- |
 | `conversationId` | yes | The conversation the proposal belongs to. |
 | `comment` | yes | Markdown explaining what is being proposed. A proposal a human cannot read is not reviewable. |
+| `origin` | yes | Which feature is producing the proposal. Must be a member of `proposalOriginSchema` — an unrecognised value fails the step rather than being stored. |
+| `title` | no | Short plain-text label. Takes precedence over the action workflow's own name, which is stored instead when this is omitted — and `Proposed action` when the action has no name either. |
 | `actionWorkflowId` | no | Omit for a proposal the analyst carries out themselves. |
 | `actionInput` | no | Passed to the action workflow as its single `actionInput` object. |
 | `impact`, `confidence` | no | Snapshotted at creation; used for queue ordering. `impact` overrides the action's own. |
@@ -299,6 +369,17 @@ An action declaring `always-gate` therefore overrides any autonomy the caller re
 **The calling workflow must itself be managed.** An unmanaged parent can neither execute a managed child nor see globally-installed definitions, so a Worker registered outside `@kbn/workflows/managed` cannot reach the gate.
 
 Omitting an optional input is safe. A Liquid template for an absent input still renders — as `''` — so every optional step input is declared with `optionalStepInput`, which treats `''` and `null` as absent. Without it, `actionInput: '${{ inputs.actionInput }}'` on a non-action proposal would fail schema validation before the handler ran.
+
+### How an agent creates a proposal
+
+The builtin Agent Builder tool `proposals.create` (`server/tools/create_proposal_tool.ts`, allow-listed in `@kbn/agent-builder-server`; the `proposals` tool namespace is reserved for built-in tools in `@kbn/agent-builder-common`) lets an agent propose an action in the conversation it runs in. It takes `title`, `comment` (Markdown), `origin` (the closed enum above; the agent's instructions name it), and optionally `impact`, `confidence`, and `category`. It takes no `actionWorkflowId`: the analyst carries the action out and approves or dismisses it.
+
+- **It goes through the gate like any Worker.** The tool starts `system-create-proposal` with `workflowsManagement.management.executeWorkflow`, as the caller's request, with the conversation id of the innermost agent on the run stack. It does not call `ProposalsService.create`, because a proposal's decision is only ever recorded behind its gate (`resumeGate` refuses a proposal with no gate execution).
+- **The card is attached by the gate's create step**, through the public attachment client (`render_inline: true`), not through the run's attachment state. That write needs the caller to own the conversation, which holds for an investigation run started by its owner; otherwise the proposal is still created and only the card is missing, as for any Worker. Because the attachment is written out of band, the agent does not see its id in the same turn; the card is shown to the analyst all the same.
+- **It waits briefly for the proposal.** It polls `findByWorkflowExecutionId` for up to 5 seconds and returns `{ acknowledged, proposal_id, title, status, workflow_execution_id }`. If the create step has not run by then, it returns `{ acknowledged, workflow_execution_id, note }` and tells the agent not to create the proposal again.
+- **Cost:** each call leaves one gate execution parked (52-week sentinel timeout) until the analyst decides or the proposal expires (72h default), the same as every Worker proposal.
+- **Availability:** unavailable unless workflows are available, the principal holds `manage_proposals`, and it may execute `system-create-proposal` (`assertWorkflowAccess(..., 'execute')`). The handler re-checks `manage_proposals` on every call, and `executeWorkflow` re-checks execute access.
+- **`origin` comes from the agent.** Any agent with the tool can file into any feature's queue (for example `alertzero`), including one steered by injected content. Binding an origin per agent is a possible follow-up.
 
 ### Authoring an action workflow
 
@@ -365,7 +446,9 @@ The service surface follows from that: `releaseGate()` makes at most that one an
 - **The gate step is resolved explicitly.** The platform's waiting-step lookup only matches `waitForInput`; for a `waitForApproval` gate it returns nothing and would resume *without* claiming the step or stamping the audit envelope. `resumeGate` finds the step itself and passes `stepExecutionId`.
 - **The decision actor is server-derived.** Never accepted from a request body. `createdBy` and `decidedBy` store `{ username, fullName, email, profileUid? }`, the shape Cases established: the profile uid is the stable identity a UI resolves an avatar from, and the names are stored rather than looked up so attribution survives a missing profile. The uid is genuinely often absent — security disabled, a `run-as` proxy, a session without a profile, or an API key whose creator has no activated profile, which is exactly what the resume path runs under.
 - **Approval carries the action input the approver was shown**, so an approval that no longer matches the record is refused with a conflict.
-- **Action metadata is resolved on read** from the action workflow's `consts.actionMetadata`, never copied onto the proposal, so a catalog change is picked up rather than going stale. `impact` is the exception: it is snapshotted at creation, as `params.impact ?? metadata.impact ?? 'low'`. The caller wins because it knows the situation the proposal came out of, which the action's own metadata cannot; the `low` floor exists because `impactRank` is the queue's primary sort key and must always have a value.
+- **Action metadata is resolved on read** from the action workflow's `consts.actionMetadata`, never copied onto the proposal, so a catalog change is picked up rather than going stale. `impact` is the exception: it is snapshotted at creation, as `params.impact ?? metadata.impact ?? 'low'`. The caller wins because it knows the situation the proposal came out of, which the action's own metadata cannot; the `low` floor exists because `ranks.impact` is the queue's primary sort key and must always have a value.
+- **`previousExecutionError` is a deliberate denormalisation.** It holds the `executionError` of the attempt the proposal re-offers: copied from the predecessor when a failed proposal is cloned, then carried through revisions untouched, since revising runs nothing. It therefore names the last attempt that actually ran and failed, which sits further back than `supersedes` once a clone has been revised. The queue answers "did the last attempt fail, and how" on every row it renders, and deriving it through the chain would cost one extra fetch per row. It holds one failure only — "failed three times" is `revision` plus a chain query — and it is absent while nothing in the chain has run and failed, which a consumer must not read as "the previous attempt succeeded".
+- **The derived ranks live under `ranks.*`.** `ranks.impact` and `ranks.confidence` are computed from the snapshotted enums, not authored, and nesting them says so in the document shape. It also keeps `stripRanks` a single deletion however many ranks are added.
 - **`actionInput` is validated at creation**, against the schema the action declares on its manual trigger, so a proposal that could never run never reaches a human. Best-effort: the JSON Schema to zod conversion does not cover every keyword.
 - **The queue's order lives in Elasticsearch.** `impact` and `confidence` are keywords, which sort alphabetically, so each is mirrored by a numeric rank written at creation. That is what makes the list pageable rather than capped at one fetch; the ranks are stripped before a proposal leaves the service.
 - **`category` is an arbitrary keyword this plugin does not own.** Each solution defines the vocabulary its own actions declare and its own queries group by — AlertZero's set is not NightShift's — so there is no shared enum and no default to fall back on. Resolved as `params.category ?? metadata.category`, the same precedence as `impact` and for the same reason; a caller-supplied value is also the *only* way a proposal carrying no action gets one, since there is no action metadata to read it from. That matters because consumers group the queue by category and drop what has none, so an uncategorised non-action proposal would have nowhere to appear. Nothing sorts on it, and which category leads is a UI decision rather than a stored rank.
@@ -449,3 +532,69 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 - **`.kibana-*` index naming** buys us out of a system index registration, at the cost of living in a namespace we do not own.
 - **No Scout API coverage yet.** The HTTP surface is covered by Jest only, as `anonymization` shipped.
 - **Proposals without a conversation.** Every proposal points at a `conversationId` and a `workflowExecutionId`; a standalone execution cannot create one yet.
+
+## Revising proposals with Elastic AI
+
+When the proposals plugin is enabled, it registers the built-in
+`proposal-management` skill and `platform.proposals.revise` tool. This works for
+AlertZero, Nightshift, and standalone chat proposals, including when AlertZero is
+disabled. Agents with Elastic capabilities enabled can discover the skill;
+loading it exposes `platform.proposals.revise` without manually adding the tool.
+Custom agents can explicitly select the skill instead. Skill availability checks
+the current request's proposal-management
+privilege without caching across users. The revision tool also enforces that
+privilege when invoked; skill visibility does not replace authorization.
+
+Proposal attachments expose a live, explicit JSON view of their identity,
+revision links, status, complete Markdown comment, action input, action metadata,
+and decision details. Internal storage and gate-execution fields are excluded.
+Reading the attachment still requires proposal read privileges.
+
+The revision tool accepts a complete replacement comment and shallow-merges
+action input. The skill instructs the agent to preserve the full narrative and
+all unchanged parameters, and update prose and input together. Agent Builder
+automatically renders the new pending revision. The skill directs attachment
+lookup through `attachments.list` and `attachments.read`. Superseding does not
+dismiss, approve, or execute a proposal.
+Because the chat displays the revision history, comment edits must stay localized:
+copy unaffected text and Markdown verbatim, preserving title styling and layout.
+Do not add sections or rewrite existing passages unless explicitly requested.
+
+### Model evaluation: preserve a complete proposal
+
+Run against a local stack with proposals enabled and a configured model, using
+the default Elastic AI agent without manually assigned proposal tools:
+
+1. Use the AlertZero plugin's `scripts/seed_proposal_attachments.sh` or the proposals
+   workflow to create proposal conversations.
+   Pick a pending rule proposal containing rationale, a warning that the rule is
+   created disabled, an Index table row with `logs-*`, and matching
+   `actionInput.index: ["logs-*"]`. Save its complete comment and action input.
+2. Ask: “Change the index pattern in this proposal from logs-* to logs*.”
+3. Inspect the tool trace: the agent should load
+   `proposal-management`, read the current attachment, and call
+   `platform.proposals.revise` once. It must not approve or execute.
+4. Compare documents: the successor is pending and undecided, retains
+   `rootProposalId`, increments `revision`, and points back via `supersedes`.
+   The predecessor is superseded and points forward via `supersededBy`.
+5. The successor's complete comment retains the title, rationale, disabled-rule
+   warning, and all unchanged table rows. Only the requested index changes.
+   Compare the raw Markdown: apart from the index replacements, it must be
+   identical, with no larger title, new headings, or added rationale/safety sections.
+   The complete action input retains name, description, query, severity,
+   risk_score, and any other original fields, with index changed to `["logs*"]`.
+6. Agent Builder automatically renders the successor. The response explains that
+   it awaits a human decision. Any attachment verification uses `attachments.list`
+   and `attachments.read` with a listed attachment ID. Repeat by referencing the
+   older card: the agent should read the current revision and preserve the first
+   edit in its next one.
+
+Also exercise a comment-only edit, a superseded chain, and a decided/expired
+proposal. The latter must not produce a new revision. This live-model evaluation
+is distinct from unit tests of the schema, formatter, registration, and service.
+
+Repeat the revision check with AlertZero disabled and a Nightshift or standalone
+chat proposal. Verify that the skill loads and revisions still succeed, while a
+user without proposal-management privileges cannot invoke the tool. Custom agents
+configured with the old `alertzero-proposal-management` skill or
+`security.alertzero.proposals.revise` tool should select the new identifiers.

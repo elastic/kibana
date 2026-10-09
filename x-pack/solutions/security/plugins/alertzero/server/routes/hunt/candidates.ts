@@ -11,20 +11,14 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { MAX_PROPOSALS_PAGE_OFFSET, MAX_PROPOSALS_PAGE_SIZE } from '@kbn/proposals-common';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
+import { ALERTZERO_API_PRIVILEGE_READ, CANDIDATES_URL } from '../../../common/constants';
+import { OPEN_PROPOSAL_STATUSES } from '../../../common/proposals/open_statuses';
 import { buildCandidateQuery } from '../../services/watches/hunt/common/build_candidate_query';
 import type { OpenProposalConversationIdsReader } from '../../services/watches/hunt/common/build_candidate_query';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
 
-export const CANDIDATES_URL = `${HUNT_INTERNAL_ROUTE_BASE}/candidates` as const;
-
-/**
- * An "active" Hunt Proposal, per the selection contract: awaiting a decision, or
- * decided and currently running. The remaining statuses (`expired`, `failed`,
- * `no_action`, `succeeded`) are terminal, so a report carrying only those is
- * free to be hunted again.
- */
-const OPEN_PROPOSAL_STATUSES = ['pending', 'executing'] as const;
+export { CANDIDATES_URL };
 
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
 
@@ -113,7 +107,7 @@ export const registerCandidatesRoute = ({
           },
         },
       },
-      async (context, request, response) => {
+      withAlertZeroEnabled(async (context, request, response) => {
         try {
           const spaceId = getSpaceId(request);
           // Internal user: `.kibana-threat-reports` is a plugin-owned hidden index and
@@ -150,6 +144,6 @@ export const registerCandidatesRoute = ({
             body: { message: 'Failed to build candidate query' },
           });
         }
-      }
+      })
     );
 };
