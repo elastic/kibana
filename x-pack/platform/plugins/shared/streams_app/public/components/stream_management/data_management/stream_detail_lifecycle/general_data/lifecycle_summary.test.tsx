@@ -106,17 +106,17 @@ const FlyoutRegistrant = ({ id, isOpen }: { id: StreamLifecycleFlyoutId; isOpen:
 };
 
 describe('LifecycleSummary', () => {
-  const renderWithSync = (ui: React.ReactElement) => {
-    return render(
-      <I18nProvider>
-        <LifecycleAfterSaveProvider>
-          <LifecyclePreviewProvider>
-            <LifecycleFlyoutCoordinationProvider>{ui}</LifecycleFlyoutCoordinationProvider>
-          </LifecyclePreviewProvider>
-        </LifecycleAfterSaveProvider>
-      </I18nProvider>
-    );
-  };
+  const wrapWithSync = (ui: React.ReactElement) => (
+    <I18nProvider>
+      <LifecycleAfterSaveProvider>
+        <LifecyclePreviewProvider>
+          <LifecycleFlyoutCoordinationProvider>{ui}</LifecycleFlyoutCoordinationProvider>
+        </LifecyclePreviewProvider>
+      </LifecycleAfterSaveProvider>
+    </I18nProvider>
+  );
+
+  const renderWithSync = (ui: React.ReactElement) => render(wrapWithSync(ui));
 
   // Renders `ui` alongside a sibling probe in the *same* LifecycleFlyoutCoordinationProvider, so
   // tests can observe the shared registry the way a real sibling (e.g. the failure store section)
@@ -242,6 +242,19 @@ describe('LifecycleSummary', () => {
         },
       },
     } as unknown as Streams.ingest.all.GetResponse);
+
+  // The ILM stats fetch resolves to the definition its stats belong to, so the summary can tell
+  // settled stats from ones whose refetch hasn't started yet. Mirror that shape, and hand back the
+  // definition to render with.
+  const mockIlmStats = <TStats,>(stats: TStats) => {
+    const definition = createIlmDefinition();
+    mockUseStreamsAppFetch.mockReturnValue({
+      value: { definition, stats },
+      loading: false,
+      refresh: jest.fn(),
+    });
+    return definition;
+  };
 
   const createDisabledDefinition = () =>
     ({
@@ -734,6 +747,76 @@ describe('LifecycleSummary', () => {
 
       expect(screen.getByTestId('dataLifecycleSummary-skeleton')).toBeInTheDocument();
     });
+
+    it('reports the stats readiness signal as loading while the held stats predate the definition', () => {
+      const ilmStatsValue = {
+        phases: { hot: { name: 'hot', min_age: '0ms', size_in_bytes: 1000, rollover: {} } },
+      };
+      // A definition refresh re-renders before the stats refetch effect runs, so the fetch hook
+      // still reports `loading: false` while holding the previous definition's stats.
+      mockIlmStats(ilmStatsValue);
+
+      renderWithSync(<LifecycleSummary definition={createIlmDefinition()} isMetricsStream />);
+
+      expect(screen.getByTestId('dataLifecycleSummary-stats-loading')).toBeInTheDocument();
+      expect(screen.queryByTestId('dataLifecycleSummary-stats-loaded')).not.toBeInTheDocument();
+    });
+
+    it('reports the stats readiness signal as loaded once the held stats match the definition', () => {
+      const definition = mockIlmStats({
+        phases: { hot: { name: 'hot', min_age: '0ms', size_in_bytes: 1000, rollover: {} } },
+      });
+
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
+
+      expect(screen.getByTestId('dataLifecycleSummary-stats-loaded')).toBeInTheDocument();
+    });
+
+    it('reports the stats readiness signal as loaded when the stats fetch failed', () => {
+      // A failed refetch keeps holding the previous definition's stats with `loading: false`. No
+      // stats are coming for the current definition, so the signal has to settle - staying loading
+      // would strand the preview hold, which is released on the loading true->false transition.
+      mockUseStreamsAppFetch.mockReturnValue({
+        value: {
+          definition: createIlmDefinition(),
+          stats: {
+            phases: { hot: { name: 'hot', min_age: '0ms', size_in_bytes: 1000, rollover: {} } },
+          },
+        },
+        loading: false,
+        error: new Error('stats fetch failed'),
+        refresh: jest.fn(),
+      });
+
+      renderWithSync(<LifecycleSummary definition={createIlmDefinition()} isMetricsStream />);
+
+      expect(screen.getByTestId('dataLifecycleSummary-stats-loaded')).toBeInTheDocument();
+    });
+
+    it('reports loading after the definition changes while a previous stats error is retained', () => {
+      const previousDefinition = createIlmDefinition();
+      const definition = createIlmDefinition();
+      mockUseStreamsAppFetch.mockReturnValue({
+        value: {
+          definition: previousDefinition,
+          stats: {
+            phases: { hot: { name: 'hot', min_age: '0ms', size_in_bytes: 1000, rollover: {} } },
+          },
+        },
+        loading: false,
+        error: new Error('previous stats fetch failed'),
+        refresh: jest.fn(),
+      });
+
+      const { rerender } = renderWithSync(
+        <LifecycleSummary definition={previousDefinition} isMetricsStream />
+      );
+      rerender(wrapWithSync(<LifecycleSummary definition={definition} isMetricsStream />));
+
+      expect(screen.getByTestId('dataLifecycleSummary-stats-loading')).toBeInTheDocument();
+      expect(screen.queryByTestId('dataLifecycleSummary-stats-loaded')).not.toBeInTheDocument();
+    });
+
     it('should open edit policy modal when removing an ILM phase with affected resources', async () => {
       const policies = [
         {
@@ -750,12 +833,6 @@ describe('LifecycleSummary', () => {
         },
       };
 
-      mockUseStreamsAppFetch.mockReturnValue({
-        value: ilmStatsValue,
-        loading: false,
-        refresh: jest.fn(),
-      });
-
       mockFetch.mockImplementation((endpoint: string) => {
         if (endpoint === 'GET /internal/streams/lifecycle/_policies') {
           return Promise.resolve(policies);
@@ -766,7 +843,7 @@ describe('LifecycleSummary', () => {
         return Promise.resolve(undefined);
       });
 
-      const definition = createIlmDefinition();
+      const definition = mockIlmStats(ilmStatsValue);
 
       renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
@@ -805,12 +882,6 @@ describe('LifecycleSummary', () => {
         },
       };
 
-      mockUseStreamsAppFetch.mockReturnValue({
-        value: ilmStatsValue,
-        loading: false,
-        refresh: jest.fn(),
-      });
-
       mockFetch.mockImplementation((endpoint: string) => {
         if (endpoint === 'GET /internal/streams/lifecycle/_policies') {
           return Promise.resolve(policies);
@@ -821,7 +892,7 @@ describe('LifecycleSummary', () => {
         return Promise.resolve(undefined);
       });
 
-      const definition = createIlmDefinition();
+      const definition = mockIlmStats(ilmStatsValue);
 
       renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
@@ -865,13 +936,7 @@ describe('LifecycleSummary', () => {
         },
       };
 
-      mockUseStreamsAppFetch.mockReturnValue({
-        value: ilmStatsValue,
-        loading: false,
-        refresh: jest.fn(),
-      });
-
-      const definition = createIlmDefinition();
+      const definition = mockIlmStats(ilmStatsValue);
 
       renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
@@ -893,13 +958,7 @@ describe('LifecycleSummary', () => {
         },
       };
 
-      mockUseStreamsAppFetch.mockReturnValue({
-        value: ilmStatsValue,
-        loading: false,
-        refresh: jest.fn(),
-      });
-
-      const definition = createIlmDefinition();
+      const definition = mockIlmStats(ilmStatsValue);
 
       renderWithSync(<LifecycleSummary definition={definition} isMetricsStream={false} />);
 
@@ -924,11 +983,6 @@ describe('LifecycleSummary', () => {
         },
       };
 
-      mockUseStreamsAppFetch.mockReturnValue({
-        value: ilmStatsValue,
-        loading: false,
-        refresh: jest.fn(),
-      });
       mockFetch.mockImplementation((endpoint: string) => {
         if (endpoint === 'GET /internal/streams/lifecycle/_policies') {
           return Promise.resolve(policies);
@@ -939,7 +993,7 @@ describe('LifecycleSummary', () => {
         return Promise.resolve(undefined);
       });
 
-      const definition = createIlmDefinition();
+      const definition = mockIlmStats(ilmStatsValue);
 
       renderWithSync(
         <LifecycleSummary
@@ -990,11 +1044,6 @@ describe('LifecycleSummary', () => {
         },
       };
 
-      mockUseStreamsAppFetch.mockReturnValue({
-        value: ilmStatsValue,
-        loading: false,
-        refresh: jest.fn(),
-      });
       mockFetch.mockImplementation((endpoint: string) => {
         if (endpoint === 'GET /internal/streams/lifecycle/_policies') {
           return Promise.resolve(policies);
@@ -1005,7 +1054,7 @@ describe('LifecycleSummary', () => {
         return Promise.resolve(undefined);
       });
 
-      const definition = createIlmDefinition();
+      const definition = mockIlmStats(ilmStatsValue);
 
       renderWithProbe(
         <LifecycleSummary
@@ -1070,11 +1119,6 @@ describe('LifecycleSummary', () => {
         },
       };
 
-      mockUseStreamsAppFetch.mockReturnValue({
-        value: ilmStatsValue,
-        loading: false,
-        refresh: jest.fn(),
-      });
       mockFetch.mockImplementation((endpoint: string) => {
         if (endpoint === 'GET /internal/streams/lifecycle/_policies') {
           return Promise.resolve(policies);
@@ -1085,7 +1129,7 @@ describe('LifecycleSummary', () => {
         return Promise.resolve(undefined);
       });
 
-      const definition = createIlmDefinition();
+      const definition = mockIlmStats(ilmStatsValue);
 
       renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 

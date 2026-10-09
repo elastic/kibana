@@ -291,9 +291,9 @@ const IlmLifecycleSummary = ({
   });
 
   // Release a held preview only once the ILM stats have finished loading, otherwise the held
-  // preview would be swapped for a loading skeleton. `loading` starts false and flips true after
-  // the fetch effect runs, so release on the true->false transition, not on `!loading`. No-op
-  // unless a clear is held.
+  // preview would be swapped for a loading skeleton. `loading` can still read false for a render
+  // after a refresh is requested, so release on the true->false transition, not on `!loading`.
+  // No-op unless a clear is held.
   const wasIlmLoadingRef = useRef(ilmSummary.loading);
   useEffect(() => {
     const wasLoading = wasIlmLoadingRef.current;
