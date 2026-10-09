@@ -14,7 +14,8 @@ import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { EntityBadge } from '../../entity_badge';
 import { EXECUTIVE_BRIEF_SCOPE_ID } from '../constants';
 import { getTacticName } from '../utils/resolve_evidence';
-import { useBriefSnapshot } from './brief_context';
+import { useOpenStoryline } from './attention_area_rows';
+import { useBriefSnapshot, useIsPrintMode } from './brief_context';
 
 const CASE_STATUS: Record<'open' | 'in-progress' | 'closed', CaseStatuses> = {
   open: CaseStatuses.open,
@@ -27,6 +28,8 @@ export const EvidenceChip: React.FC<{ id: EvidenceId }> = ({ id }) => {
   const snapshot = useBriefSnapshot();
   const { openRuleFlyout } = useFlyoutApi();
   const isNewFlyoutEnabled = useIsNewFlyoutEnabled();
+  const isPrintMode = useIsPrintMode();
+  const openStoryline = useOpenStoryline();
   const entry = snapshot.catalog[id];
 
   if (!entry) {
@@ -99,8 +102,18 @@ export const EvidenceChip: React.FC<{ id: EvidenceId }> = ({ id }) => {
       );
     }
     case 'story':
-      return (
+      return isPrintMode ? (
         <EuiBadge color="hollow" iconType="timeline">
+          {`Threat ${entry.rank}`}
+        </EuiBadge>
+      ) : (
+        <EuiBadge
+          color="hollow"
+          iconType="timeline"
+          onClick={() => openStoryline(entry.rank)}
+          onClickAriaLabel={`Go to threat ${entry.rank}`}
+          data-test-subj={`executiveBriefStoryChip-${entry.rank}`}
+        >
           {`Threat ${entry.rank}`}
         </EuiBadge>
       );

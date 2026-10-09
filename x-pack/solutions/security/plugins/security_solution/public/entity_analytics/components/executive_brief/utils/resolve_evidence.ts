@@ -36,3 +36,26 @@ export const getTacticName = (snapshot: BriefSnapshot, tacticId: string): string
   const stage = snapshot.blindSpots.attackStages.stages.find((s) => s.tacticId === tacticId);
   return stage?.tacticName ?? tacticId;
 };
+
+/** Short plain-text name for any evidence id, e.g. "Threat 1" or a gap title. */
+export const getEvidenceLabel = (snapshot: BriefSnapshot, id: EvidenceId): string => {
+  const entry = snapshot.catalog[id];
+  switch (entry?.kind) {
+    case 'entity':
+      return snapshot.entities[entry.euid]?.name ?? entry.euid;
+    case 'rule':
+      return entry.name;
+    case 'attack_discovery':
+    case 'lead':
+    case 'case':
+      return entry.title;
+    case 'tactic':
+      return getTacticName(snapshot, entry.tacticId);
+    case 'gap':
+      return snapshot.blindSpots.gaps.find(({ signal }) => signal === entry.signal)?.title ?? id;
+    case 'story':
+      return `Threat ${entry.rank}`;
+    default:
+      return id;
+  }
+};

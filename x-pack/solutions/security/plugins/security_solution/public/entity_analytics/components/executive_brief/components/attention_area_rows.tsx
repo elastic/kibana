@@ -95,6 +95,22 @@ const scrollToElement = (element: HTMLElement | null): void => {
   element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
+/** Expands a threat card and scrolls to it (or to the threats section if it is not rendered). */
+export const useOpenStoryline = (): ((rank: number) => void) => {
+  const requestStorylineOpen = useRequestStorylineOpen();
+  return useCallback(
+    (rank: number) => {
+      requestStorylineOpen(rank);
+      scrollToElement(
+        document.querySelector<HTMLElement>(
+          `[data-test-subj="executiveBriefStorylineCard-${rank}"]`
+        ) ?? document.getElementById(EXECUTIVE_BRIEF_SECTION_IDS.storylines)
+      );
+    },
+    [requestStorylineOpen]
+  );
+};
+
 const storylineRankOf = (area: AttentionArea): number => {
   const match = area.evidence.map((id) => /^STORY-(\d+)$/.exec(id)).find(Boolean);
   return match ? Number(match[1]) : 1;
@@ -116,7 +132,7 @@ export const useAttentionActions = (
   brief?: BriefForTriage
 ): AttentionActions => {
   const { agentBuilder } = useKibana().services;
-  const requestStorylineOpen = useRequestStorylineOpen();
+  const openStoryline = useOpenStoryline();
   const canTriage = Boolean(agentBuilder?.openChat);
 
   const triage = useCallback(
@@ -133,20 +149,13 @@ export const useAttentionActions = (
 
   const view = useCallback(
     (area: AttentionArea) => {
-      const section = document.getElementById(AREA_TARGETS[area.id]);
-      if (area.id !== 'threats') {
-        scrollToElement(section);
+      if (area.id === 'threats') {
+        openStoryline(storylineRankOf(area));
         return;
       }
-      const rank = storylineRankOf(area);
-      requestStorylineOpen(rank);
-      scrollToElement(
-        document.querySelector<HTMLElement>(
-          `[data-test-subj="executiveBriefStorylineCard-${rank}"]`
-        ) ?? section
-      );
+      scrollToElement(document.getElementById(AREA_TARGETS[area.id]));
     },
-    [requestStorylineOpen]
+    [openStoryline]
   );
 
   return { canTriage, triage, view };
