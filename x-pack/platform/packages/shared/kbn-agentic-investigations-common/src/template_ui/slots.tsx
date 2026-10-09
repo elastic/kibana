@@ -20,7 +20,12 @@ import {
   conversationToInvestigation,
   conversationToEscalationHeader,
 } from './conversation_to_investigation';
-import type { RenderAssignees, RenderStatus, RenderLinkedInvestigations } from './types';
+import type {
+  RenderAssignees,
+  RenderStatus,
+  RenderLinkedInvestigations,
+  RenderSyncIndicator,
+} from './types';
 
 /**
  * The investigation flyout's slot contents, kept in one module so `register` can pull them in a
@@ -133,12 +138,14 @@ export interface EscalationHeaderSlotProps {
   refetchConversation?: () => Promise<void>;
   renderAssignees?: RenderAssignees;
   renderStatus?: RenderStatus;
+  renderSyncIndicator?: RenderSyncIndicator;
 }
 
 export const EscalationHeaderSlot = ({
   conversation,
   renderAssignees,
   renderStatus,
+  renderSyncIndicator,
   refetchConversation,
 }: EscalationHeaderSlotProps) => {
   const { status, assigneeUids } = conversationToEscalationHeader(conversation);
@@ -170,6 +177,7 @@ export const EscalationHeaderSlot = ({
       assigneeUids={assigneeUids}
       assigneesNode={assigneesNode}
       statusNode={statusNode}
+      syncNode={renderSyncIndicator?.({ escalationId: conversation.id })}
     />
   );
 };
@@ -188,7 +196,8 @@ export interface EscalationOverviewSlotProps {
 /**
  * The body tab for the escalation details flyout: the summary and grouped attachments, then the
  * linked investigations list via `renderLinkedInvestigations` (supplied by the consuming plugin so
- * it can use HTTP hooks). The list is omitted when no render prop is provided.
+ * it can use HTTP hooks), then the Impact copied over from the linked investigations. The list is
+ * omitted when no render prop is provided.
  */
 export const EscalationOverviewSlot = ({
   conversation,

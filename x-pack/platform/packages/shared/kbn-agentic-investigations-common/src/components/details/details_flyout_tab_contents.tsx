@@ -11,6 +11,7 @@ import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments'
 import type { Investigation } from '../../types';
 import type { FlyoutGroupedAttachmentsRegistry } from '../grouped_attachments';
 import { DetailsBlock } from './detail_block';
+import { ImpactSection } from './impact_section';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { WhatsHappenedBlock } from './whats_happened_block';
 
@@ -46,6 +47,8 @@ export const OverviewTab = memo<OverviewTabProps>(
             groupedAttachments={groupedAttachments}
           />
         </EuiFlexItem>
+
+        <ImpactSection attachments={attachments} />
 
         {proposedActionsContent && (
           <EuiFlexItem>

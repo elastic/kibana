@@ -161,6 +161,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-create-alertzero-proposal
+          run-as-mode: inherit
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
             title: Review detection gap
@@ -438,6 +439,7 @@ steps:
               continue: true
             with:
               workflow-id: system-security-rule-creation
+              run-as-mode: inherit
               inputs:
                 technique: "{{ steps.gap.output.technique }}"
                 gap_description: "{{ steps.gap.output.description }}"
@@ -454,6 +456,7 @@ steps:
             if: "${{ steps.resolve_rule.output.id != null }}"
             with:
               workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: |-
@@ -487,6 +490,7 @@ steps:
             if: "${{ steps.resolve_rule.output.id == null }}"
             with:
               workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: |-
@@ -515,6 +519,7 @@ steps:
             if: "${{ steps.install_target.output.ready == true }}"
             with:
               workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: |-
@@ -546,6 +551,7 @@ steps:
             if: "${{ steps.install_target.output.ready != true }}"
             with:
               workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: |-
@@ -568,6 +574,7 @@ steps:
             if: "${{ steps.resolve_rule.output.enabled == true }}"
             with:
               workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: |-
@@ -598,6 +605,7 @@ steps:
             if: "${{ steps.resolve_rule.output.enabled != true }}"
             with:
               workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: |-
@@ -620,6 +628,7 @@ steps:
             and steps.coverage_check.output.structured_output.verdict != '' }}
         with:
           workflow-id: system-create-alertzero-proposal
+          run-as-mode: inherit
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
             comment: |-

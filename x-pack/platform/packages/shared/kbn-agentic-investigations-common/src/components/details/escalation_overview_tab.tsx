@@ -9,6 +9,7 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { FlyoutGroupedAttachmentsRegistry } from '../grouped_attachments';
+import { ImpactSection } from './impact_section';
 import { WhatsHappenedBlock } from './whats_happened_block';
 
 export interface EscalationOverviewTabProps {
@@ -32,6 +33,7 @@ export const EscalationOverviewTab = memo<EscalationOverviewTabProps>(
       {linkedInvestigationsContent && (
         <EuiFlexItem grow={false}>{linkedInvestigationsContent}</EuiFlexItem>
       )}
+      <ImpactSection attachments={attachments} />
     </EuiFlexGroup>
   )
 );

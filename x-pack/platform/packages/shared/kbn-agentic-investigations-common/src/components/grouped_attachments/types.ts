@@ -12,6 +12,8 @@ export enum FlyoutGroupedAttachments {
   ALERTS = 'alerts',
   ATTACKS = 'attacks',
   RULES = 'rules',
+  TIMELINE = 'timeline',
+  IOCS = 'iocs',
 }
 
 /** The order the flyouts list the groups in; a registered group not listed here does not render. */
@@ -19,6 +21,8 @@ export const FLYOUT_GROUPED_ATTACHMENTS_ORDER: readonly FlyoutGroupedAttachments
   FlyoutGroupedAttachments.ALERTS,
   FlyoutGroupedAttachments.ATTACKS,
   FlyoutGroupedAttachments.RULES,
+  FlyoutGroupedAttachments.TIMELINE,
+  FlyoutGroupedAttachments.IOCS,
 ];
 
 export interface FlyoutGroupedAttachmentRendererProps {
