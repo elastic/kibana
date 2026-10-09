@@ -18,8 +18,8 @@ export const apiTest = baseApiTest.extend<
   ScoutWorkerFixtures & { realFleet: RealFleet }
 >({
   realFleet: [
-    async ({ kbnClient, log }, use) => {
-      const { realFleet, stop } = await startRealFleet(kbnClient as any, log);
+    async ({ kbnClient, esClient, log }, use) => {
+      const { realFleet, stop } = await startRealFleet(kbnClient as any, esClient, log);
       try {
         await use(realFleet);
       } finally {

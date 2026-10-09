@@ -78,6 +78,8 @@ apiTest.describe(
         .toBe(policyId);
 
     apiTest.beforeAll(async ({ kbnClient, realFleet }) => {
+      // the default hook timeout is shorter than the time an agent can take to come online
+      apiTest.setTimeout(TEST_TIMEOUT_MS);
       const { data } = await kbnClient.request<{ item: { id: string } }>({
         method: 'POST',
         path: '/api/fleet/agent_policies',
