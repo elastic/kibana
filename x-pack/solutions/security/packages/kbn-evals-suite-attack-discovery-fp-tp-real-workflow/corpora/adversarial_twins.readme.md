@@ -20,7 +20,7 @@ exactly (a/b and mdm/sccm variants are distinguished in `description` only).
 
 > **Label integrity:** the FP labels above are known-contested — mutations rewrite the
 > entity/parent/domain fields but retain the base chain's free-text event messages,
-> which still describe the malicious behavior. See `docs/label-integrity-findings.md`
+> which still describe the malicious behavior. See `docs/label_integrity_findings.md`
 > before relying on adversarial_twins FP cases in gated metrics.
 
 ## Discarded mutations (unbroken invariants) — 3
