@@ -20,6 +20,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   const sqlQuery = `SELECT index, bytes FROM "logstash-*" ORDER BY "@timestamp" DESC`;
 
+  // Migration recommendation: MIGRATE TO SCOUT (API)
+  // Needs a real ES SQL async search; no Scout coverage of the `sql` strategy. Tag `@local-stateful-classic`.
   describe('SQL search', () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();

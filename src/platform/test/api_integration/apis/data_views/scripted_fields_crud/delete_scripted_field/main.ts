@@ -14,6 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
+  // Migration recommendation: MIGRATE TO SCOUT (API)
+  // Removes a scripted field and checks it is gone from the data view.
   describe('main', () => {
     before(async () => {
       await esArchiver.load(

@@ -14,6 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
+  // Migration recommendation: MIGRATE TO SCOUT (API)
+  // 404, non-scripted-field and too-long ID errors for DELETE.
   describe('errors', () => {
     const basicIndex = 'b*sic_index';
     let indexPattern: any;

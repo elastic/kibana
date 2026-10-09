@@ -17,6 +17,9 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
+  // Migration recommendation: MIGRATE TO SCOUT (API)
+  // Jest covers detection logic; only this checks registration in `/api/deprecations`. Tag
+  // `@local-stateful-classic`.
   describe('scripted field deprecations', () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();

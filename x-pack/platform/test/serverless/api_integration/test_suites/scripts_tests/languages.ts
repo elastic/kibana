@@ -16,6 +16,8 @@ export default function ({ getService }: FtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 
+  // Migration recommendation: REPLACE WITH UNIT/JEST
+  // Serverless copy of src/platform/test/api_integration/apis/scripts/languages.js; delete.
   describe('Script Languages API', function getLanguages() {
     before(async () => {
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(

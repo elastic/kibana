@@ -15,6 +15,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
+  // Migration recommendation: ALREADY COVERED - DELETE
+  // Covered by Scout:
+  // src/platform/plugins/shared/data_views/test/scout/api/tests/{index_patterns,data_views}/runtime_fields_delete_*.spec.ts
   describe('errors', () => {
     const basicIndex = 'b*sic_index';
     let indexPattern: any;

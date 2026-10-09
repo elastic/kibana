@@ -14,6 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
+  // Migration recommendation: MIGRATE TO SCOUT (API)
+  // Overwrite and add-new cases for PUT.
   describe('main', () => {
     before(async () => {
       await esArchiver.load(

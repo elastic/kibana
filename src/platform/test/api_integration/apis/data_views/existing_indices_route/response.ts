@@ -19,6 +19,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
+  // Migration recommendation: ALREADY COVERED - DELETE
+  // Covered by Scout:
+  // src/platform/plugins/shared/data_views/test/scout/api/tests/existing_indices_route/response.spec.ts
   describe('_existing_indices response', () => {
     before(() =>
       esArchiver.load(

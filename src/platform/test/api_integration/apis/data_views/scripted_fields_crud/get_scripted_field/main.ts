@@ -14,6 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
+  // Migration recommendation: MIGRATE TO SCOUT (API)
+  // Happy-path fetch of a scripted field.
   describe('main', () => {
     before(async () => {
       await esArchiver.load(

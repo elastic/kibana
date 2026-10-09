@@ -22,6 +22,8 @@ export default function ({ getService }) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
 
+  // Migration recommendation: ALREADY COVERED - DELETE
+  // Covered by data_views/server/fetcher/lib/errors.test.ts
   describe('index_patterns/* error handler', () => {
     let indexNotFoundError;
     let docNotFoundError;

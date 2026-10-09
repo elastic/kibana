@@ -22,6 +22,9 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
 
+  // Migration recommendation: MIXED. See individual tests.
+  // No Scout coverage of POST /internal/kql_opt_in_stats. Condense with the serverless copy into one
+  // Scout API test tagged `tags.deploymentAgnostic`.
   describe('telemetry API', () => {
     before(async () => {
       await kibanaServer.importExport.load(
@@ -34,6 +37,8 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
+    // MIGRATE TO SCOUT (API)
+    // This and the next three tests: counter increments need the saved objects index.
     it('should increment the opt *in* counter in the .kibana_analytics/kql-telemetry document', async () => {
       await supertest
         .post('/internal/kql_opt_in_stats')
@@ -102,6 +107,8 @@ export default function ({ getService }: FtrProviderContext) {
         });
     });
 
+    // REPLACE WITH UNIT/JEST
+    // Only exercises the route schema.
     it('should only accept literal boolean values for the opt_in POST body param', function () {
       return Promise.all([
         supertest

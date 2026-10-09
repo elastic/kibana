@@ -15,6 +15,10 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
+  // Migration recommendation: ALREADY COVERED - DELETE
+  // Covered by Scout:
+  // src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts
+  // (11 vs 12 `it`s: check the `customStringAttribute` one).
   describe('main', () => {
     const basicIndex = 'ba*ic_index';
     let indexPattern: any;

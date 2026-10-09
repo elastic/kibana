@@ -48,10 +48,15 @@ export default function ({ getService }: FtrProviderContext) {
     await es.indices.delete({ index: INDEX_NAME }, { ignore: [404] });
   };
 
+  // Migration recommendation: MIXED. See individual tests.
+  // No existing coverage. Merge with the serverless copy into one Scout API test
+  // (`tags.deploymentAgnostic`).
   describe('Field preview', function () {
     before(async () => await createIndex());
     after(async () => await deleteIndex());
 
+    // Migration recommendation: MIGRATE TO SCOUT (API)
+    // Runs real painless scripts against an index; needs real ES.
     describe('should return the script value', () => {
       const tests = [
         {
@@ -99,6 +104,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    // Migration recommendation: REPLACE WITH UNIT/JEST
+    // The 400s only exercise the route's schema validation.
     describe('payload validation', () => {
       it('should require a script', async () => {
         await supertest
@@ -140,6 +147,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    // Migration recommendation: MIGRATE TO SCOUT (API)
+    // Pins ES's cast error wording parsed by `getErrorCodeFromErrorReason`; needs real ES.
     describe('Error messages', () => {
       // As ES does not return error codes we will add a test to make sure its error message string
       // does not change overtime as we rely on it to extract our own error code.

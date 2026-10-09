@@ -19,6 +19,9 @@ export default function ({ getService }: FtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 
+  // Migration recommendation: MIXED. See individual tests.
+  // Serverless copy of src/platform/test/api_integration/apis/kql_telemetry/kql_telemetry.ts; condense into one Scout API test
+  // tagged `tags.deploymentAgnostic`.
   describe('telemetry API', () => {
     before(async () => {
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
@@ -44,6 +47,8 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
+    // MIGRATE TO SCOUT (API)
+    // This and the next three tests: counter increments need the saved objects index.
     it('should increment the opt *in* counter in the .kibana_analytics/kql-telemetry document', async () => {
       await supertestAdminWithCookieCredentials
         .post('/internal/kql_opt_in_stats')
@@ -96,6 +101,8 @@ export default function ({ getService }: FtrProviderContext) {
       expect(body.success).to.be(true);
     });
 
+    // REPLACE WITH UNIT/JEST
+    // Only exercises the route schema.
     it('should only accept literal boolean values for the opt_in POST body param', function () {
       return Promise.all([
         supertestAdminWithCookieCredentials

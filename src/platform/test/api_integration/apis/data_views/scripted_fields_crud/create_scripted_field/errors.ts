@@ -13,6 +13,8 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
+  // Migration recommendation: MIGRATE TO SCOUT (API)
+  // Body validation errors (missing field, scripted: false) for create.
   describe('errors', () => {
     it('returns an error field object is not provided', async () => {
       const title = `foo-${Date.now()}-${Math.random()}*`;

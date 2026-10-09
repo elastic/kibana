@@ -18,6 +18,9 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
+  // Migration recommendation: MIGRATE TO SCOUT (API)
+  // HTTP caching (cache-control, etag, 304, uiSetting) is only testable end to end. Tag
+  // `@local-stateful-classic`.
   describe('cache headers', () => {
     before(() =>
       esArchiver.load(

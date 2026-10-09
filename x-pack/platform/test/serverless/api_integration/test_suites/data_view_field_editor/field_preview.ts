@@ -49,6 +49,10 @@ export default function ({ getService }: FtrProviderContext) {
     await es.indices.delete({ index: INDEX_NAME }, { ignore: [404] });
   };
 
+  // Migration recommendation: MIXED. See individual tests.
+  // Serverless copy of src/platform/test/api_integration/apis/data_view_field_editor/field_preview.ts,
+  // audited there. Migrate together with the stateful test, condensed into a single Scout API test
+  // tagged with `tags.deploymentAgnostic`.
   describe('Field preview', function () {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
@@ -59,6 +63,9 @@ export default function ({ getService }: FtrProviderContext) {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
+    // Migration recommendation: MIGRATE TO SCOUT (API)
+    // Runs a real painless script through the route against an index, so it needs a real ES.
+    // Not coverable with Jest.
     describe('should return the script value', () => {
       const tests = [
         {
@@ -108,6 +115,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    // Migration recommendation: REPLACE WITH UNIT/JEST
+    // The three 400s (missing script / context / index) only exercise the route's config-schema
+    // validation, no ES involved. Cover them with a Jest test of the route's request schema.
     describe('payload validation', () => {
       it('should require a script', async () => {
         await supertestWithoutAuth
@@ -155,6 +165,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    // Migration recommendation: MIGRATE TO SCOUT (API)
+    // Pins the wording of the ES error message that `getErrorCodeFromErrorReason` parses to derive
+    // CAST_ERROR. It only fails if real ES changes its message, so it must run against real ES.
     describe('Error messages', () => {
       // As ES does not return error codes we will add a test to make sure its error message string
       // does not change overtime as we rely on it to extract our own error code.

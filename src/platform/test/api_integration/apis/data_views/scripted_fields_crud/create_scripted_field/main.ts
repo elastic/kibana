@@ -14,6 +14,9 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
+  // Migration recommendation: MIGRATE TO SCOUT (API)
+  // Legacy-only, deprecated routes with no Scout/unit coverage; condense all scripted_fields_crud
+  // files into one Scout API spec. No serverless copy: tag `@local-stateful-classic`.
   describe('main', () => {
     before(async () => {
       await esArchiver.load(

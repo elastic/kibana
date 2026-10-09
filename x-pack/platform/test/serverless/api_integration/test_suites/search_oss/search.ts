@@ -18,6 +18,9 @@ export default function ({ getService }: FtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 
+  // Migration recommendation: MIXED. See individual tests.
+  // Serverless copy of src/platform/test/api_integration/apis/search/search.ts; condense into one Scout API test
+  // tagged `tags.deploymentAgnostic`.
   describe('search', () => {
     before(async () => {
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
@@ -45,6 +48,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('post', () => {
+      // MIGRATE TO SCOUT (API)
+      // This and the terminated-early test need real ES; add to data/test/scout/api/tests/search/.
       it('should return 200 when correctly formatted searches are provided', async () => {
         const resp = await supertestAdminWithCookieCredentials
           .post(`/internal/search/es`)
@@ -90,6 +95,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.header).to.have.property(ELASTIC_HTTP_VERSION_HEADER, '1');
       });
 
+      // REPLACE WITH UNIT/JEST
+      // Router behaviour; add to data/server/search/routes/search.test.ts.
       it('should return 404 when if no strategy is provided', async () => {
         const resp = await supertestAdminWithCookieCredentials
           .post(`/internal/search`)
@@ -122,6 +129,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.header).to.have.property(ELASTIC_HTTP_VERSION_HEADER, '1');
       });
 
+      // MIGRATE TO SCOUT (API)
+      // This and the next two tests depend on real ES error shapes.
       it('should return 400 with illegal ES argument', async () => {
         const resp = await supertestAdminWithCookieCredentials
           .post(`/internal/search/es`)
@@ -168,6 +177,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    // REPLACE WITH UNIT/JEST
+    // Both tests are handler behaviour, already partly in search.test.ts.
     describe('delete', () => {
       it('should return 404 when no search id provided', async () => {
         const resp = await supertestAdminWithCookieCredentials

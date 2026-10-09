@@ -79,6 +79,9 @@ export default function ({ getService }: FtrProviderContext) {
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send({ title, id });
 
+  // Migration recommendation: MIXED. See individual tests.
+  // No serverless copy: tag the Scout API test `@local-stateful-classic`. Existing Scout coverage
+  // (`saved_query_shared_delete.spec.ts`) does not overlap.
   describe('Saved queries API', function () {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
@@ -97,6 +100,9 @@ export default function ({ getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['query'] });
     });
 
+    // MIGRATE TO SCOUT (API)
+    // Duplicate-title 400 needs the real saved objects client; the invalid-body 400 and undefined
+    // filters case are covered by data/server/query/route_handler_context.test.ts.
     describe('create', () => {
       it('should return 200 for create saved query', () =>
         createQuery()
@@ -142,6 +148,8 @@ export default function ({ getService }: FtrProviderContext) {
           ));
     });
 
+    // MIGRATE TO SCOUT (API)
+    // Same as create: 404/duplicate-title need real saved objects; the rest is unit covered.
     describe('update', () => {
       it('should return 200 for update saved query', () =>
         createQuery()
@@ -214,6 +222,8 @@ export default function ({ getService }: FtrProviderContext) {
           ));
     });
 
+    // MIGRATE TO SCOUT (API)
+    // Needs real saved objects.
     describe('delete', () => {
       it('should return 200 for delete saved query', () =>
         createQuery()
@@ -224,6 +234,8 @@ export default function ({ getService }: FtrProviderContext) {
         deleteQuery('invalid_id').expect(404));
     });
 
+    // MIGRATE TO SCOUT (API)
+    // Needs real saved objects.
     describe('get', () => {
       it('should return 200 for get saved query', () =>
         createQuery()
@@ -241,6 +253,8 @@ export default function ({ getService }: FtrProviderContext) {
         getQuery('invalid_id').expect(404));
     });
 
+    // MIGRATE TO SCOUT (API)
+    // Search/pagination run against real saved objects; the bad-request 400 is unit covered.
     describe('find', () => {
       it('should return 200 for find saved queries', () => findQueries().expect(200));
 
@@ -382,6 +396,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    // MIGRATE TO SCOUT (API)
+    // Needs real saved objects.
     describe('count', () => {
       it('should return 200 for saved query count', () => countQueries().expect(200));
 
@@ -412,6 +428,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    // MIGRATE TO SCOUT (API)
+    // Needs real saved objects.
     describe('isDuplicateTitle', () => {
       it('should return isDuplicate = true for _is_duplicate_title check with a duplicate title', () =>
         createQuery()
