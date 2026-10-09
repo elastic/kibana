@@ -108,6 +108,7 @@ steps:
     if: "${{ steps.find_or_create.output.investigationConversationId != nil and steps.find_or_create.output.investigationConversationId != empty }}"
     with:
       workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
       inputs:
         conversation_id: "{{ steps.find_or_create.output.investigationConversationId }}"
         message: |-
