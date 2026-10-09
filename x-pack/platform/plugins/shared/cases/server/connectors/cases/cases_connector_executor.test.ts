@@ -284,6 +284,7 @@ describe('CasesConnectorExecutor', () => {
                       "owner": "cases",
                       "settings": Object {
                         "extractObservables": false,
+                        "extractObservablesSource": "space_default",
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -311,6 +312,7 @@ describe('CasesConnectorExecutor', () => {
                       "owner": "cases",
                       "settings": Object {
                         "extractObservables": false,
+                        "extractObservablesSource": "space_default",
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -338,6 +340,7 @@ describe('CasesConnectorExecutor', () => {
                       "owner": "cases",
                       "settings": Object {
                         "extractObservables": false,
+                        "extractObservablesSource": "space_default",
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -599,6 +602,7 @@ describe('CasesConnectorExecutor', () => {
                   "owner": "cases",
                   "settings": Object {
                     "extractObservables": false,
+                    "extractObservablesSource": "space_default",
                     "syncAlerts": false,
                   },
                   "tags": Array [
@@ -974,6 +978,7 @@ describe('CasesConnectorExecutor', () => {
                   "owner": "cases",
                   "settings": Object {
                     "extractObservables": false,
+                    "extractObservablesSource": "space_default",
                     "syncAlerts": false,
                   },
                   "tags": Array [
@@ -1140,6 +1145,7 @@ describe('CasesConnectorExecutor', () => {
                     "id": "mock-id-4",
                     "owner": "cases",
                     "settings": Object {
+                      "extractObservablesSource": "space_default",
                       "syncAlerts": true,
                     },
                     "severity": "high",
@@ -1224,6 +1230,7 @@ describe('CasesConnectorExecutor', () => {
                     "owner": "cases",
                     "settings": Object {
                       "extractObservables": false,
+                      "extractObservablesSource": "space_default",
                       "syncAlerts": false,
                     },
                     "tags": Array [
@@ -1298,6 +1305,7 @@ fields: []
             expect(createdCase.settings).toEqual({
               syncAlerts: false,
               extractObservables: false,
+              extractObservablesSource: 'space_default',
             });
             expect(createdCase.assignees).toBeUndefined();
             expect(createdCase.customFields).toEqual([]);
@@ -1366,6 +1374,7 @@ fields: []
             expect(createdCase.settings).toEqual({
               syncAlerts: true,
               extractObservables: true,
+              extractObservablesSource: 'template',
             });
             expect(createdCase.assignees).toEqual([{ uid: 'assignee-uid-1' }]);
             expect(actionsClient.get).toHaveBeenCalledWith({ id: 'jira-1' });
@@ -1411,6 +1420,7 @@ fields: []
               expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
                 syncAlerts: true,
                 extractObservables: false,
+                extractObservablesSource: 'rule',
               });
             });
 
@@ -1425,6 +1435,7 @@ fields: []
               expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
                 syncAlerts: true,
                 extractObservables: true,
+                extractObservablesSource: 'template',
               });
             });
           });
@@ -1543,6 +1554,7 @@ fields: []
             expect(createdCase.settings).toEqual({
               syncAlerts: false,
               extractObservables: true,
+              extractObservablesSource: 'template',
             });
           });
 
@@ -1656,6 +1668,7 @@ fields: []
             expect(createdCase.settings).toEqual({
               syncAlerts: true,
               extractObservables: false,
+              extractObservablesSource: 'template',
             });
             expect(createdCase.assignees).toEqual([{ uid: 'legacy-assignee' }]);
             expect(createdCase.template).toEqual({ id: 'migrated-v2-id', version: 2 });
@@ -2339,6 +2352,7 @@ fields: []
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
               syncAlerts: true,
               extractObservables: true,
+              extractObservablesSource: 'space_default',
             });
           });
 
@@ -2355,6 +2369,7 @@ fields: []
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
               syncAlerts: false,
               extractObservables: false,
+              extractObservablesSource: 'space_default',
             });
           });
 
@@ -2371,6 +2386,7 @@ fields: []
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
               syncAlerts: true,
               extractObservables: true,
+              extractObservablesSource: 'space_default',
             });
           });
 
@@ -2394,6 +2410,7 @@ fields: []
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
               syncAlerts: true,
               extractObservables: false,
+              extractObservablesSource: 'space_default',
             });
           });
 
@@ -2418,6 +2435,7 @@ fields: []
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
               syncAlerts: true,
               extractObservables: false,
+              extractObservablesSource: 'rule',
             });
           });
 
@@ -2442,6 +2460,7 @@ fields: []
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
               syncAlerts: true,
               extractObservables: true,
+              extractObservablesSource: 'rule',
             });
           });
 
@@ -2466,6 +2485,7 @@ fields: []
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
               syncAlerts: true,
               extractObservables: true,
+              extractObservablesSource: 'space_default',
             });
           });
 
@@ -2483,6 +2503,7 @@ fields: []
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
               syncAlerts: false,
               extractObservables: false,
+              extractObservablesSource: 'space_default',
             });
           });
 
@@ -2507,6 +2528,7 @@ fields: []
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
               syncAlerts: false,
               extractObservables: false,
+              extractObservablesSource: 'space_default',
             });
           });
         });
@@ -2604,6 +2626,7 @@ fields: []
                     "owner": "cases",
                     "settings": Object {
                       "extractObservables": false,
+                      "extractObservablesSource": "space_default",
                       "syncAlerts": false,
                     },
                     "tags": Array [
@@ -2685,6 +2708,7 @@ fields: []
                     "owner": "cases",
                     "settings": Object {
                       "extractObservables": false,
+                      "extractObservablesSource": "space_default",
                       "syncAlerts": false,
                     },
                     "tags": Array [
@@ -4605,6 +4629,7 @@ fields: []
                       "owner": "cases",
                       "settings": Object {
                         "extractObservables": false,
+                        "extractObservablesSource": "space_default",
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -4630,6 +4655,7 @@ fields: []
                       "owner": "cases",
                       "settings": Object {
                         "extractObservables": false,
+                        "extractObservablesSource": "space_default",
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -4655,6 +4681,7 @@ fields: []
                       "owner": "cases",
                       "settings": Object {
                         "extractObservables": false,
+                        "extractObservablesSource": "space_default",
                         "syncAlerts": false,
                       },
                       "tags": Array [
