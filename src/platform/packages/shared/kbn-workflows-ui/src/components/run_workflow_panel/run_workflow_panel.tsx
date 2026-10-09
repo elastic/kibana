@@ -181,7 +181,11 @@ export const RunWorkflowPanel = ({
           ...(telemetry?.itemCount !== undefined && { item_count: telemetry.itemCount }),
           owner: telemetry?.owner ?? UNKNOWN_RUN_WORKFLOW_TELEMETRY_VALUE,
         };
-        analytics?.reportEvent(RUN_WORKFLOW_EXECUTED_EVENT_TYPE, event);
+        try {
+          analytics?.reportEvent(RUN_WORKFLOW_EXECUTED_EVENT_TYPE, event);
+        } catch (e) {
+          // `reportEvent` throws when the event type is unregistered; telemetry must not break the run flow.
+        }
       };
 
       const onError = (err: unknown) => {

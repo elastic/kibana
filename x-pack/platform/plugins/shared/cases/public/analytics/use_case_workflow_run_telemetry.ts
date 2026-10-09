@@ -14,7 +14,7 @@ import {
   CASE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
-} from '../../common/constants/workflow';
+} from '../../common/types/domain/user_action/workflow/constants';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { getEbtOwner } from './get_ebt_owner';
 
@@ -30,13 +30,8 @@ export const CASES_LIST_WORKFLOW_RUN_TELEMETRY_ORIGIN = 'cases.cases' as const;
  * attachment type (such as `security.alert`) separately.
  */
 export const getCaseWorkflowRunTelemetry = (
-  origin: CaseWorkflowRunOrigin | undefined,
-  caseCount: number
+  origin: CaseWorkflowRunOrigin
 ): Pick<RunWorkflowTelemetry, 'origin' | 'itemCount' | 'attachmentType'> => {
-  if (origin === undefined) {
-    return { origin: CASES_LIST_WORKFLOW_RUN_TELEMETRY_ORIGIN, itemCount: caseCount };
-  }
-
   switch (origin.type) {
     case CASE_WORKFLOW_ORIGIN_TYPE:
     case OBSERVABLE_WORKFLOW_ORIGIN_TYPE:
@@ -54,16 +49,34 @@ export const getCaseWorkflowRunTelemetry = (
   }
 };
 
+/** Maps a cases-list run over `caseCount` cases to the `origin` and `itemCount` reported by `RunWorkflowPanel`. */
+export const getCasesListWorkflowRunTelemetry = (
+  caseCount: number
+): Pick<RunWorkflowTelemetry, 'origin' | 'itemCount'> => ({
+  origin: CASES_LIST_WORKFLOW_RUN_TELEMETRY_ORIGIN,
+  itemCount: caseCount,
+});
+
 /** Returns the `RunWorkflowPanel` telemetry context for a Cases run, including the solution owner. */
 export const useCaseWorkflowRunTelemetry = (
-  origin: CaseWorkflowRunOrigin | undefined,
-  caseCount: number
+  origin: CaseWorkflowRunOrigin
 ): RunWorkflowTelemetry => {
   const { owner } = useCasesContext();
   const ebtOwner = getEbtOwner(owner);
 
   return useMemo(
-    () => ({ ...getCaseWorkflowRunTelemetry(origin, caseCount), owner: ebtOwner }),
-    [caseCount, ebtOwner, origin]
+    () => ({ ...getCaseWorkflowRunTelemetry(origin), owner: ebtOwner }),
+    [ebtOwner, origin]
+  );
+};
+
+/** Returns the `RunWorkflowPanel` telemetry context for a cases-list run, including the solution owner. */
+export const useCasesListWorkflowRunTelemetry = (caseCount: number): RunWorkflowTelemetry => {
+  const { owner } = useCasesContext();
+  const ebtOwner = getEbtOwner(owner);
+
+  return useMemo(
+    () => ({ ...getCasesListWorkflowRunTelemetry(caseCount), owner: ebtOwner }),
+    [caseCount, ebtOwner]
   );
 };

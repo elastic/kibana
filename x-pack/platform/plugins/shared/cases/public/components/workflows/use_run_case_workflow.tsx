@@ -200,7 +200,7 @@ export const useRunCaseWorkflow = ({
   );
 
   const runWorkflow = useCasesWorkflowExecutor({ caseId: caseData.id, origin });
-  const telemetry = useCaseWorkflowRunTelemetry(origin, 1);
+  const telemetry = useCaseWorkflowRunTelemetry(origin);
 
   return {
     canRunWorkflow,

@@ -91,7 +91,7 @@ export const useCaseAttachmentWorkflowRun = ({
     return {
       runWorkflow: createExecutor(origin),
       showSuccessToast: false,
-      telemetry: { ...getCaseWorkflowRunTelemetry(origin, 1), owner },
+      telemetry: { ...getCaseWorkflowRunTelemetry(origin), owner },
     };
   }, [attachmentType, context, target]);
 };

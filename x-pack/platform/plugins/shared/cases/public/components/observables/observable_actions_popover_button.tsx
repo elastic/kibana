@@ -83,7 +83,7 @@ export const ObservableActionsPopoverButton: React.FC<ObservableActionsPopoverBu
   );
 
   const runWorkflow = useCasesWorkflowExecutor({ caseId: caseData.id, origin });
-  const workflowTelemetry = useCaseWorkflowRunTelemetry(origin, 1);
+  const workflowTelemetry = useCaseWorkflowRunTelemetry(origin);
   const { filterWorkflow, sortWorkflow } = useCaseWorkflowFilters();
 
   const tooglePopover = useCallback(() => setIsPopoverOpen((prevValue) => !prevValue), []);

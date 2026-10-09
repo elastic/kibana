@@ -45,11 +45,10 @@ const SO = CASE_USER_ACTION_SAVED_OBJECT;
 const UNATTRIBUTED_ORIGIN = 'unattributed';
 
 /**
- * Cap on the origin and attachment type `terms` aggregations. Both values are validated before a
- * run is recorded (origin against the API schema, attachment type against the registry), so the
- * number of distinct keys stays well below this.
+ * Cap on the origin and attachment type `terms` aggregations. Origins are a small fixed set;
+ * attachment types come from the registry and may reach the hundreds, so the cap leaves headroom.
  */
-const TYPE_TERMS_SIZE = 50;
+const TYPE_TERMS_SIZE = 500;
 
 type WorkflowRunScopeAggs = ReferencesAggregation & {
   doc_count: number;
