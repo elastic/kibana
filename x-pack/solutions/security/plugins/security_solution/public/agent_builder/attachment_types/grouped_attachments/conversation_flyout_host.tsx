@@ -48,6 +48,8 @@ export const ConversationFlyoutHost = ({
     return null;
   }
 
+  const measuredWidth = getOpenConversationFlyoutWidth();
+
   return flyoutProviders({
     services: bundle.kibanaServices,
     store: bundle.store,
@@ -57,7 +59,9 @@ export const ConversationFlyoutHost = ({
           session: 'start',
           historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
           type: 'push',
-          size: getOpenConversationFlyoutWidth() ?? 's',
+          // Omit size when the panel cannot be measured. A fallback of 's' would still
+          // skip the stored Security width.
+          ...(measuredWidth !== undefined ? { size: measuredWidth } : {}),
         }}
       >
         {children}

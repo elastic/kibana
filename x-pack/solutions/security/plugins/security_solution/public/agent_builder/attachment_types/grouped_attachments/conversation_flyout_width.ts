@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-/** The system flyout and the in-chat flyout. Either one is the panel the page is inset for. */
+/**
+ * The system flyout and the in-chat flyout. They live on different pages and share a flyout
+ * history key, so at most one of them is on the document.
+ */
 const CONVERSATION_FLYOUT_TEST_SUBJECTS = [
   'agentBuilderConversationDetailsFlyout-snapshot',
   'agentBuilderConversationDetailsFlyout-live',

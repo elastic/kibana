@@ -54,6 +54,7 @@ describe('GroupedAttachmentFlyoutOpener', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     dataViewStatus = 'ready';
+    document.body.innerHTML = '';
     jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
   });
 
@@ -73,7 +74,35 @@ describe('GroupedAttachmentFlyoutOpener', () => {
       expect.anything(),
       FLYOUT_ORIGIN.ATTACHMENT_SUMMARY
     );
-    expect(pinnedSize).toBe('s');
+    expect(pinnedSize).toBeUndefined();
+  });
+
+  it('opens at the measured conversation flyout width', async () => {
+    const flyout = document.createElement('div');
+    flyout.setAttribute('data-test-subj', 'agentBuilderConversationDetailsFlyout-live');
+    jest.spyOn(flyout, 'getBoundingClientRect').mockReturnValue({
+      width: 640,
+      height: 0,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    });
+    document.body.appendChild(flyout);
+
+    let pinnedSize: number | string | undefined;
+    jest.mocked(useFlyoutApi).mockImplementation(() => {
+      pinnedSize = useFlyoutSessionContext().size;
+      return createFlyoutApiMock();
+    });
+
+    renderOpener();
+
+    await waitFor(() => expect(openDescriptorAsStart).toHaveBeenCalledTimes(1));
+    expect(pinnedSize).toBe(640);
   });
 
   it('initialises the data view manager when nothing else has', async () => {

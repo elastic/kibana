@@ -77,6 +77,7 @@ describe('InvestigationIocsFlyoutOpener', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockPinnedSessionSize = undefined;
+    document.body.innerHTML = '';
     jest.mocked(useOpenFlyout).mockReturnValue(openFlyout);
   });
 
@@ -108,6 +109,33 @@ describe('InvestigationIocsFlyoutOpener', () => {
     );
     expect(openFlyout.mock.calls[0][1]).not.toHaveProperty('flyoutMenuProps');
     expect(openFlyout.mock.calls[0][1]).not.toHaveProperty('maxWidth');
-    expect(mockPinnedSessionSize).toBe('s');
+    expect(mockPinnedSessionSize).toBeUndefined();
+  });
+
+  it('opens at the measured conversation flyout width', async () => {
+    const flyout = document.createElement('div');
+    flyout.setAttribute('data-test-subj', 'agentBuilderConversationDetailsFlyout-live');
+    jest.spyOn(flyout, 'getBoundingClientRect').mockReturnValue({
+      width: 640,
+      height: 0,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    });
+    document.body.appendChild(flyout);
+
+    render(
+      <InvestigationIocsFlyoutOpener
+        categories={categories}
+        resolveSecurityCanvasContext={resolveSecurityCanvasContext}
+      />
+    );
+
+    await waitFor(() => expect(openFlyout).toHaveBeenCalledTimes(1));
+    expect(mockPinnedSessionSize).toBe(640);
   });
 });

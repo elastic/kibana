@@ -111,7 +111,7 @@ describe('InvestigationTimelineFlyoutOpener', () => {
     );
     expect(openFlyout.mock.calls[0][1]).not.toHaveProperty('flyoutMenuProps');
     expect(openFlyout.mock.calls[0][1]).not.toHaveProperty('maxWidth');
-    expect(mockPinnedSessionSize).toBe('s');
+    expect(mockPinnedSessionSize).toBeUndefined();
   });
 
   it('opens at the conversation flyout width', async () => {
