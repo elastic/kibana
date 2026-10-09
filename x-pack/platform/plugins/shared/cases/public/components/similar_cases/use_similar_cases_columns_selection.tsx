@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { CasesColumnSelection } from '../all_cases/types';
 import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
 import { useCasesColumnsConfiguration } from '../all_cases/hooks/use_cases_columns_configuration';
@@ -23,7 +23,18 @@ export const SIMILAR_CASES_CHECKED_DEFAULTS = new Set([
   'severity',
 ]);
 
-export const useSimilarCasesColumnsSelection = () => {
+const isColumnSelection = (value: unknown): value is CasesColumnSelection =>
+  typeof value === 'object' &&
+  value !== null &&
+  typeof (value as CasesColumnSelection).field === 'string' &&
+  typeof (value as CasesColumnSelection).isChecked === 'boolean';
+
+export interface UseSimilarCasesColumnsSelectionReturnValue {
+  selectedColumns: CasesColumnSelection[];
+  setSelectedColumns: (columns: CasesColumnSelection[]) => void;
+}
+
+export const useSimilarCasesColumnsSelection = (): UseSimilarCasesColumnsSelectionReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(false);
 
   const [storedTableColumns, setStoredTableColumns] = useCasesLocalStorage<CasesColumnSelection[]>(
@@ -34,17 +45,28 @@ export const useSimilarCasesColumnsSelection = () => {
   // Override each catalog entry's isCheckedDefault to match the Similar Cases
   // default visible set. Custom fields and any standard fields not in the set
   // default to unchecked.
-  const similarCasesColumnsConfig: CasesColumnsConfiguration = Object.fromEntries(
-    Object.entries(casesColumnsConfig).map(([key, value]) => [
-      key,
-      { ...value, isCheckedDefault: SIMILAR_CASES_CHECKED_DEFAULTS.has(key) },
-    ])
+  const similarCasesColumnsConfig: CasesColumnsConfiguration = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(casesColumnsConfig).map(([key, value]) => [
+          key,
+          { ...value, isCheckedDefault: SIMILAR_CASES_CHECKED_DEFAULTS.has(key) },
+        ])
+      ),
+    [casesColumnsConfig]
   );
 
-  const selectedColumns = mergeSelectedColumnsWithConfiguration({
-    selectedColumns: storedTableColumns ?? [],
-    casesColumnsConfig: similarCasesColumnsConfig,
-  });
+  const selectedColumns = useMemo(
+    () =>
+      mergeSelectedColumnsWithConfiguration({
+        // Stored JSON can have any shape; ignore anything that is not a valid selection list.
+        selectedColumns: Array.isArray(storedTableColumns)
+          ? storedTableColumns.filter(isColumnSelection)
+          : [],
+        casesColumnsConfig: similarCasesColumnsConfig,
+      }),
+    [storedTableColumns, similarCasesColumnsConfig]
+  );
 
   const setSelectedColumns = useCallback(
     (newColumns: CasesColumnSelection[]) => {
