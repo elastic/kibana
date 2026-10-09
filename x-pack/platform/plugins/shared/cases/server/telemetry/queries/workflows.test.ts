@@ -272,14 +272,14 @@ describe('workflows', () => {
       expect(aggs?.all?.aggs?.byOriginType).toEqual({
         terms: {
           field: 'cases-user-actions.attributes.payload.origin.type',
-          size: 50,
+          size: 500,
           missing: 'unattributed',
         },
       });
       expect(aggs?.all?.aggs?.byAttachmentType).toEqual({
         terms: {
           field: 'cases-user-actions.attributes.payload.origin.attachmentType',
-          size: 50,
+          size: 500,
         },
       });
     });

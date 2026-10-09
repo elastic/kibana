@@ -74,7 +74,7 @@ export const ObservablesBulkActions: React.FC<ObservablesBulkActionsProps> = ({
   );
 
   const runWorkflow = useCasesWorkflowExecutor({ caseId: caseData.id, origin });
-  const workflowTelemetry = useCaseWorkflowRunTelemetry(origin, 1);
+  const workflowTelemetry = useCaseWorkflowRunTelemetry(origin);
   const { filterWorkflow, sortWorkflow } = useCaseWorkflowFilters();
 
   const handleBulkDeleteClick = useCallback(() => {

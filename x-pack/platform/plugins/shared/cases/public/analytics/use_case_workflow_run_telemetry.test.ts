@@ -13,12 +13,14 @@ import {
   CASE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
-} from '../../common/constants/workflow';
+} from '../../common/types/domain/user_action/workflow/constants';
 import type { CaseWorkflowRunOrigin } from '../../common/types/api';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import {
   CASES_LIST_WORKFLOW_RUN_TELEMETRY_ORIGIN,
   getCaseWorkflowRunTelemetry,
+  getCasesListWorkflowRunTelemetry,
+  useCasesListWorkflowRunTelemetry,
   useCaseWorkflowRunTelemetry,
 } from './use_case_workflow_run_telemetry';
 
@@ -66,11 +68,13 @@ describe('getCaseWorkflowRunTelemetry', () => {
       { origin: ATTACHMENTS_WORKFLOW_ORIGIN_TYPE, attachmentType: 'security.event', itemCount: 3 },
     ],
   ])('maps a run from %s', (_label, origin, expected) => {
-    expect(getCaseWorkflowRunTelemetry(origin, 1)).toEqual(expected);
+    expect(getCaseWorkflowRunTelemetry(origin)).toEqual(expected);
   });
+});
 
-  it('reports a cases-list run over the selected cases when there is no origin', () => {
-    expect(getCaseWorkflowRunTelemetry(undefined, 4)).toEqual({
+describe('getCasesListWorkflowRunTelemetry', () => {
+  it('reports a cases-list run over the selected cases', () => {
+    expect(getCasesListWorkflowRunTelemetry(4)).toEqual({
       origin: CASES_LIST_WORKFLOW_RUN_TELEMETRY_ORIGIN,
       itemCount: 4,
     });
@@ -84,7 +88,7 @@ describe('useCaseWorkflowRunTelemetry', () => {
     } as ReturnType<typeof useCasesContext>);
 
     const { result } = renderHook(() =>
-      useCaseWorkflowRunTelemetry({ type: CASE_WORKFLOW_ORIGIN_TYPE, caseId: 'case-1' }, 1)
+      useCaseWorkflowRunTelemetry({ type: CASE_WORKFLOW_ORIGIN_TYPE, caseId: 'case-1' })
     );
 
     expect(result.current).toEqual({
@@ -99,7 +103,7 @@ describe('useCaseWorkflowRunTelemetry', () => {
       owner: ['not-a-solution'],
     } as ReturnType<typeof useCasesContext>);
 
-    const { result } = renderHook(() => useCaseWorkflowRunTelemetry(undefined, 2));
+    const { result } = renderHook(() => useCasesListWorkflowRunTelemetry(2));
 
     expect(result.current.owner).toBe('unknown');
   });

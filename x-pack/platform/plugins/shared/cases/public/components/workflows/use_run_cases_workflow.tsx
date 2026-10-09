@@ -11,7 +11,7 @@ import type { RunWorkflowExecutor, RunWorkflowTelemetry } from '@kbn/workflows-u
 import type { CasesUI } from '../../containers/types';
 import { useCaseWorkflowFilters, useCanRunCaseWorkflow } from './use_run_case_workflow';
 import { useRunWorkflowOnCases } from './use_run_workflow_on_cases';
-import { useCaseWorkflowRunTelemetry } from '../../analytics/use_case_workflow_run_telemetry';
+import { useCasesListWorkflowRunTelemetry } from '../../analytics/use_case_workflow_run_telemetry';
 
 interface UseRunCasesWorkflowResult {
   /** Whether the current user is allowed to run a workflow from a case. */
@@ -56,7 +56,7 @@ export const useRunCasesWorkflow = (): UseRunCasesWorkflowResult => {
   }, []);
 
   const runWorkflow = useRunWorkflowOnCases({ cases: selectedCases });
-  const telemetry = useCaseWorkflowRunTelemetry(undefined, selectedCases.length);
+  const telemetry = useCasesListWorkflowRunTelemetry(selectedCases.length);
 
   return {
     canRunWorkflow,
