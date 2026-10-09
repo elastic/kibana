@@ -216,6 +216,8 @@ export const HEAVY_STATE_KEYS = [
 ];
 
 export interface TabState extends TabItem {
+  // Unsaved changes restored from storage, retained until the tab can be compared at runtime.
+  hasUnsavedChanges?: boolean;
   initializationState:
     | { initializationStatus: Exclude<TabInitializationStatus, TabInitializationStatus.Error> }
     | { initializationStatus: TabInitializationStatus.Error; error: Error | SerializedError };
@@ -271,6 +273,7 @@ export interface TabState extends TabItem {
 
 export interface RecentlyClosedTabState extends TabState {
   closedAt: number;
+  savedSessionId?: string;
 }
 
 export enum TabsBarVisibility {

@@ -17,8 +17,13 @@ import type { UISession } from '@kbn/data-plugin/public';
 import type { OpenInNewTabParams } from '../../../../../context_awareness/types';
 import { ProfileStateType, type ProfileStateMap } from '../../../../../../common/context_awareness';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
-import type { DiscoverAppState, TabState } from '../types';
-import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
+import type { DiscoverAppState, RecentlyClosedTabState, TabState } from '../types';
+import {
+  selectAllTabs,
+  selectRecentlyClosedTabs,
+  selectTab,
+  selectTabHasUnsavedChangesForPersistence,
+} from '../selectors';
 import {
   internalStateSlice,
   discardFlyoutsOnTabChange,
@@ -53,6 +58,7 @@ import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
 import { assignSessionDataViewIds } from '../../utils/assign_session_data_view_ids';
 import { showSessionWarnings } from '../../../../../session';
+import { clearUrlStateWrittenForTab } from '../../utils/cleanup_url_state';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -81,10 +87,14 @@ export const setTabs: InternalStateThunkActionCreator<
     const addedTabs = discoverSessionChanged
       ? params.allTabs
       : differenceBy(params.allTabs, previousTabs, differenceIterateeByTabId);
-    const justRemovedTabs: TabState[] = [];
+    const justRemovedTabs: Array<Omit<RecentlyClosedTabState, 'closedAt'>> = [];
 
     for (const tab of removedTabs) {
-      const newRecentlyClosedTab: TabState = { ...tab };
+      const newRecentlyClosedTab = {
+        ...tab,
+        hasUnsavedChanges: selectTabHasUnsavedChangesForPersistence(previousState, tab.id),
+        savedSessionId: previousState.persistedDiscoverSession?.id,
+      };
       // make sure to get the latest internal and app state from runtime state manager before deleting the runtime state
       newRecentlyClosedTab.initialInternalState =
         selectTabRuntimeInternalState({ runtimeStateManager, tabState: tab, services }) ??
@@ -478,23 +488,35 @@ export const initializeTabs = createInternalStateAsyncThunk(
       : undefined;
 
     const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;
-    const { draftSessionTitle, ...initialTabsState } = tabsStorageManager.loadLocally({
-      userId,
-      spaceId,
-      persistedDiscoverSession,
-      shouldClearAllTabs,
-      defaultTabState: byValueEmbeddableTabState ?? DEFAULT_TAB_STATE,
-      // Assign IDs before mapping saved tabs, using the incoming link and same-session local tabs.
-      prepareSession: (session, localTabs, selectedTabId) =>
-        assignSessionDataViewIds(session, localTabs, {
-          tabId: selectedTabId ?? session.tabs[0]?.id,
-          dataViewSpec: initialTabState?.dataViewSpec,
-        }),
-    });
+    const { draftSessionTitle, previousSelectedTab, ...initialTabsState } =
+      tabsStorageManager.loadLocally({
+        userId,
+        spaceId,
+        persistedDiscoverSession,
+        shouldClearAllTabs,
+        defaultTabState: byValueEmbeddableTabState ?? DEFAULT_TAB_STATE,
+        // Assign IDs before mapping saved tabs, using the incoming link and same-session local tabs.
+        prepareSession: (session, localTabs, selectedTabId) =>
+          assignSessionDataViewIds(session, localTabs, {
+            tabId: selectedTabId ?? session.tabs[0]?.id,
+            dataViewSpec: initialTabState?.dataViewSpec,
+          }),
+      });
 
     // Hand the location state over to the tab initialization before updating the URL below, which
     // discards it, so initial state such as ad hoc data view specs is passed on
     services.initialTabStateService.capture(initialTabState);
+
+    if (!initialTabState) {
+      await clearUrlStateWrittenForTab({
+        previousTab: previousSelectedTab,
+        savedTab: initialTabsState.updatedDiscoverSession?.tabs.find(
+          ({ id }) => id === initialTabsState.selectedTabId
+        ),
+        urlStateStorage,
+        profileStateRegistry: services.profileStateRegistry,
+      });
+    }
 
     // Replace instead of push the tab ID to the URL on initialization in order to
     // avoid capturing a browser history entry with a potentially empty _tab state

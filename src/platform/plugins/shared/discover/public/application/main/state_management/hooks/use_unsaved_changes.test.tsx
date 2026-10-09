@@ -21,6 +21,7 @@ import type { AppLeaveActionFactory } from '@kbn/core-application-browser';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { selectTabHasUnsavedChangesForPersistence } from '../redux/selectors';
 
 const mockSelectHasUnsavedChanges = jest.mocked(selectHasUnsavedChanges);
 
@@ -101,6 +102,9 @@ describe('useUnsavedChanges', () => {
     const { internalState, getCurrentTab } = await setup();
     expect(internalState.getState().hasUnsavedChanges).toBe(false);
     expect(internalState.getState().tabs.unsavedIds).toEqual([]);
+    expect(
+      selectTabHasUnsavedChangesForPersistence(internalState.getState(), getCurrentTab().id)
+    ).toBe(false);
     const prevAppState = getCurrentTab().appState;
     internalState.dispatch(
       internalStateActions.updateAppState({
@@ -112,6 +116,9 @@ describe('useUnsavedChanges', () => {
     );
     expect(internalState.getState().hasUnsavedChanges).toBe(true);
     expect(internalState.getState().tabs.unsavedIds).toEqual([getCurrentTab().id]);
+    expect(
+      selectTabHasUnsavedChangesForPersistence(internalState.getState(), getCurrentTab().id)
+    ).toBe(true);
 
     internalState.dispatch(
       internalStateActions.updateAppState({
@@ -123,6 +130,9 @@ describe('useUnsavedChanges', () => {
     );
     expect(internalState.getState().hasUnsavedChanges).toBe(false);
     expect(internalState.getState().tabs.unsavedIds).toEqual([]);
+    expect(
+      selectTabHasUnsavedChangesForPersistence(internalState.getState(), getCurrentTab().id)
+    ).toBe(false);
   });
 
   it('should detect changes when global state changes', async () => {

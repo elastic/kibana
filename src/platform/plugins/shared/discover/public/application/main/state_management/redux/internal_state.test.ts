@@ -19,7 +19,10 @@ import {
   selectTabRuntimeState,
   selectTab,
 } from '.';
-import { discardFlyoutsOnTabChange } from './internal_state';
+import { discardFlyoutsOnTabChange, internalStateSlice } from './internal_state';
+import { getTabStateMock } from './__mocks__/internal_state.mocks';
+import { TabInitializationStatus } from './types';
+import { TABS_LOCAL_STORAGE_KEY } from '../tabs_storage_manager';
 import {
   buildDataViewMock,
   dataViewMock,
@@ -30,6 +33,63 @@ import { mockControlState } from '../../../../__mocks__/esql_controls';
 import { selectDataSourceProfileId } from './runtime_state';
 
 describe('InternalStateStore', () => {
+  describe('local persistence during initialization', () => {
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    it('does not write drafts until session initialization finishes', () => {
+      const { internalState, services } = getDiscoverInternalStateMock({
+        tabsStorageEnabled: true,
+      });
+      const storageSet = jest.spyOn(services.storage, 'set');
+      const tab = getTabStateMock({
+        id: 'tab',
+        initializationState: { initializationStatus: TabInitializationStatus.Complete },
+      });
+      const args = { discoverSessionId: undefined };
+      internalState.dispatch(internalStateActions.initializeTabs.pending('request', args));
+      internalState.dispatch(
+        internalStateSlice.actions.setTabs({
+          allTabs: [tab],
+          selectedTabId: tab.id,
+          recentlyClosedTabs: [],
+        })
+      );
+      internalState.dispatch(
+        internalStateActions.setUnsavedChanges({
+          hasUnsavedChanges: true,
+          unsavedTabIds: [tab.id],
+        })
+      );
+      internalState.dispatch(internalStateActions.syncLocallyPersistedTabState({ tabId: tab.id }));
+      jest.advanceTimersByTime(300);
+
+      expect(storageSet).not.toHaveBeenCalled();
+
+      internalState.dispatch(
+        internalStateActions.initializeTabs.fulfilled(
+          { userId: 'user', spaceId: 'space', persistedDiscoverSession: undefined },
+          'request',
+          args
+        )
+      );
+      internalState.dispatch(
+        internalStateActions.setUnsavedChanges({
+          hasUnsavedChanges: true,
+          unsavedTabIds: [tab.id],
+        })
+      );
+      jest.advanceTimersByTime(300);
+
+      expect(storageSet).toHaveBeenCalledWith(
+        TABS_LOCAL_STORAGE_KEY,
+        expect.objectContaining({
+          openTabs: [expect.objectContaining({ id: tab.id, hasUnsavedChanges: true })],
+        })
+      );
+    });
+  });
+
   const setup = async () => {
     const toolkit = getDiscoverInternalStateMock({
       persistedDataViews: [dataViewMock],

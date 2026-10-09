@@ -8,14 +8,26 @@
  */
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isEqual, isUndefined, omit, omitBy } from 'lodash';
+import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
+import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverServices } from '../../../../build_services';
-import type { DiscoverAppState } from '../redux';
+import type { DiscoverAppState, TabState } from '../redux';
+import {
+  ProfileStateType,
+  type ProfileStateMap,
+  type ProfileStateRegistry,
+} from '../../../../../common/context_awareness';
 import { migrateLegacyQuery } from '../../../../utils/migrate_legacy_query';
 import { getMaxAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
-import { APP_STATE_URL_KEY } from '../../../../../common';
+import {
+  APP_STATE_URL_KEY,
+  GLOBAL_STATE_URL_KEY,
+  PROFILE_STATE_URL_KEY,
+} from '../../../../../common/constants';
 
 export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
   /**
@@ -124,3 +136,80 @@ export function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: 
     {}
   );
 }
+
+/** Recognizes a URL matching the stored draft, leaving different or partial shared links untouched. */
+export const isUrlStateFromTab = ({
+  tab,
+  appState,
+  globalState,
+  profileState,
+  profileStateRegistry,
+}: {
+  tab: TabState;
+  appState: AppStateUrl | null;
+  globalState: GlobalQueryStateFromUrl | null;
+  profileState: ProfileStateMap | null;
+  profileStateRegistry: ProfileStateRegistry;
+}): boolean => {
+  const { timeRange: time, refreshInterval, filters } = tab.globalState;
+  const profileUrlState = (profileStateMap: ProfileStateMap | undefined) =>
+    profileStateRegistry.pickStateByType({
+      profileStateMap,
+      stateTypes: [ProfileStateType.Url],
+      defaultsHandling: 'strip',
+    });
+
+  return (
+    appState !== null &&
+    isEqual(omitBy(appState, isUndefined), omitBy(tab.appState, isUndefined)) &&
+    (globalState === null ||
+      isEqual(
+        omitBy(globalState, isUndefined),
+        omitBy({ time, refreshInterval, filters }, isUndefined)
+      )) &&
+    isEqual(profileUrlState(profileState ?? undefined), profileUrlState(tab.profileState))
+  );
+};
+
+/** Clears matching URL overrides for a clean saved tab before the existing sync writes its new state. */
+export const clearUrlStateWrittenForTab = async ({
+  previousTab,
+  savedTab,
+  urlStateStorage,
+  profileStateRegistry,
+}: {
+  previousTab: TabState | undefined;
+  savedTab: DiscoverSessionTab | undefined;
+  urlStateStorage: IKbnUrlStateStorage;
+  profileStateRegistry: ProfileStateRegistry;
+}): Promise<void> => {
+  if (previousTab?.hasUnsavedChanges !== false || !savedTab) {
+    return;
+  }
+
+  const globalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
+  if (
+    !isUrlStateFromTab({
+      tab: previousTab,
+      appState: urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
+      globalState,
+      profileState: urlStateStorage.get<ProfileStateMap>(PROFILE_STATE_URL_KEY),
+      profileStateRegistry,
+    })
+  ) {
+    return;
+  }
+
+  const updates = [urlStateStorage.set(APP_STATE_URL_KEY, undefined, { replace: true })];
+  if (savedTab.timeRestore) {
+    updates.push(
+      urlStateStorage.set(
+        GLOBAL_STATE_URL_KEY,
+        omit(globalState ?? {}, 'time', 'refreshInterval'),
+        { replace: true }
+      )
+    );
+  }
+
+  await Promise.all(updates);
+};

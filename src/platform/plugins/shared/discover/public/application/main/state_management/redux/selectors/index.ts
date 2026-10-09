@@ -13,6 +13,7 @@ export {
   selectPersistedDiscoverSession,
   selectSavedDataViews,
   selectTab,
+  selectTabHasUnsavedChangesForPersistence,
   selectTabAppState,
   selectTabCombinedFilters,
   selectIsTabsBarHidden,

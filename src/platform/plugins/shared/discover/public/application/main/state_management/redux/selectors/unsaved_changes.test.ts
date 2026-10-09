@@ -16,7 +16,9 @@ import type { RefreshInterval } from '@kbn/data-plugin/common';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { getPersistedTabMock, getTabStateMock } from '../__mocks__/internal_state.mocks';
-import { internalStateActions } from '..';
+import { internalStateActions, TabInitializationStatus } from '..';
+import type { TabState } from '../types';
+import { selectTabHasUnsavedChangesForPersistence } from './tabs';
 import { FilterStateStore, type Filter } from '@kbn/es-query';
 import { searchSourceComparator, selectHasUnsavedChanges } from './unsaved_changes';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
@@ -57,6 +59,83 @@ const setup = async () => {
 
   return { internalState, runtimeStateManager, services, getCurrentTab, addNewTab };
 };
+
+describe('selectTabHasUnsavedChangesForPersistence', () => {
+  it.each<{
+    name: string;
+    initializationState?: TabState['initializationState'];
+    restoredFlag?: boolean;
+    unsaved?: boolean;
+    saved?: boolean;
+    areInitializing?: boolean;
+    expected: boolean | undefined;
+  }>([
+    { name: 'initialized clean tab', restoredFlag: true, expected: false },
+    { name: 'initialized modified tab', restoredFlag: false, unsaved: true, expected: true },
+    { name: 'new local tab', saved: false, expected: true },
+    { name: 'session initialization', areInitializing: true, expected: undefined },
+    {
+      name: 'tab initialization',
+      initializationState: { initializationStatus: TabInitializationStatus.InProgress },
+      restoredFlag: false,
+      expected: undefined,
+    },
+    ...[false, true, undefined].map((restoredFlag) => ({
+      name: `uninitialized draft with flag ${restoredFlag}`,
+      initializationState: { initializationStatus: TabInitializationStatus.NotStarted as const },
+      restoredFlag,
+      expected: restoredFlag,
+    })),
+  ])(
+    '$name',
+    ({
+      initializationState,
+      restoredFlag,
+      unsaved,
+      saved = true,
+      areInitializing = false,
+      expected,
+    }) => {
+      const { internalState, services } = getDiscoverInternalStateMock();
+      const initialState = internalState.getState();
+      const tab = getTabStateMock({
+        id: 'tab',
+        hasUnsavedChanges: restoredFlag,
+        initializationState: initializationState ?? {
+          initializationStatus: TabInitializationStatus.Complete,
+        },
+      });
+      const savedTab = getPersistedTabMock({
+        tabId: tab.id,
+        dataView: dataViewWithTimefieldMock,
+        services,
+      });
+      const state = {
+        ...initialState,
+        persistedDiscoverSession: createDiscoverSessionMock({
+          id: 'session',
+          tabs: saved ? [savedTab] : [],
+        }),
+        tabs: {
+          ...initialState.tabs,
+          byId: { [tab.id]: tab },
+          allIds: [tab.id],
+          unsavedIds: unsaved ? [tab.id] : [],
+          areInitializing,
+        },
+      };
+
+      expect(selectTabHasUnsavedChangesForPersistence(state, tab.id)).toBe(expected);
+    }
+  );
+
+  it('returns an unknown state for a missing tab', () => {
+    const { internalState } = getDiscoverInternalStateMock();
+    expect(
+      selectTabHasUnsavedChangesForPersistence(internalState.getState(), 'missing-tab')
+    ).toBeUndefined();
+  });
+});
 
 describe('selectHasUnsavedChanges', () => {
   describe('control order', () => {
