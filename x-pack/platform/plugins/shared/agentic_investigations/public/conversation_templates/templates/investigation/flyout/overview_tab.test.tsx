@@ -79,7 +79,8 @@ describe('InvestigationOverview', () => {
     expect(screen.getByText('Checkout p99 tripled.')).toBeInTheDocument();
     expect(screen.getByText('Checkout is degraded')).toBeInTheDocument();
     expect(screen.getByText('A bad deploy.')).toBeInTheDocument();
-    expect(screen.getByText('Bad deploy')).toBeInTheDocument();
+    // The tree card replaces the hypotheses list.
+    expect(screen.queryByTestId('investigationHypotheses')).not.toBeInTheDocument();
     expect(screen.getByTestId('investigationHypothesisTreeButton')).toHaveTextContent(
       '1 hypothesis analyzed'
     );
