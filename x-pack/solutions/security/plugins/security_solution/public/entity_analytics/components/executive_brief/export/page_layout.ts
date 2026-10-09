@@ -6,7 +6,7 @@
  */
 
 /**
- * Pure functions for laying out sections across A4 pages in a PDF.
+ * Pure functions for flowing captured blocks across A4 pages in a PDF.
  * All measurements in points (1 point = 1/72 inch).
  */
 
@@ -23,91 +23,108 @@ export const PAGE_PADDING = 20;
 export const USABLE_PAGE_WIDTH = A4_POINTS.width - PAGE_PADDING * 2;
 export const USABLE_PAGE_HEIGHT = A4_POINTS.height - PAGE_PADDING * 2;
 
-/** A section to be rendered on a page. */
-export interface Section {
+/** Vertical gap between consecutive blocks on a page. */
+export const BLOCK_GAP = 10;
+
+/** How much of a following block taller than a page must fit beside a keep-with-next block. */
+const KEEP_WITH_NEXT_MIN_HEIGHT = 140;
+
+/** Minimum free share of a page needed to start a taller-than-page block on it. */
+const MIN_SLICE_START_SPACE = 0.35;
+
+/** A block up to this many pages tall is shrunk to fit one page instead of being sliced. */
+const MAX_FIT_PAGES = 1.3;
+
+/** Room left above a shrunk block for a preceding heading. */
+const FIT_HEADING_RESERVE = 70;
+
+/**
+ * Uniform scale (<= 1) that shrinks a slightly-too-tall block to fit one page, so it is not cut
+ * mid-content. Returns 1 for blocks that already fit or are far too tall (those are sliced).
+ */
+export const fitScaleForTallBlock = (
+  height: number,
+  pageHeight: number = USABLE_PAGE_HEIGHT
+): number =>
+  height > pageHeight && height <= pageHeight * MAX_FIT_PAGES
+    ? (pageHeight - FIT_HEADING_RESERVE) / height
+    : 1;
+
+/** A captured block, already scaled to the page width. */
+export interface FlowBlock {
   id: string;
-  height: number; // in points
-  image: string; // data URL or blob URL
+  /** Scaled height in points. */
+  height: number;
+  /** Keep on the same page as the next block (section headings). */
+  keepWithNext?: boolean;
 }
 
-/** A page containing one or more sections. */
-export interface PageLayout {
-  sections: Array<{ sectionId: string; x: number; y: number; width: number; height: number }>;
+/** One drawn piece of a block. A block taller than a page yields several slices. */
+export interface BlockPlacement {
+  blockId: string;
+  /** Zero-based page index. */
+  page: number;
+  /** Distance from the top of the usable area to the top of this piece. */
+  y: number;
+  /** Distance from the top of the block to the top of this piece (0 unless sliced). */
+  sliceOffset: number;
+  /** Height of this piece. */
+  height: number;
 }
 
 /**
- * Layouts sections across multiple A4 pages.
- *
- * @param sections - Sections to layout, in order
- * @param pageHeight - Usable height per page (default: USABLE_PAGE_HEIGHT)
- * @returns Array of pages, each describing its sections
- *
- * Strategy:
- * - Each section is scaled to fit the page width
- * - Sections are placed top-to-bottom, left-aligned
- * - If a section doesn't fit on the current page, start a new page
- * - Sections that are taller than a page are split across multiple pages (each slice is page-height)
+ * Flows blocks top-down. A new page starts only when the next block does not fit in the space
+ * left; only blocks taller than a whole page are sliced.
  */
-export const layoutSectionsOnPages = (
-  sections: Section[],
-  pageHeight: number = USABLE_PAGE_HEIGHT
-): PageLayout[] => {
-  const pages: PageLayout[] = [];
-  let currentPage: PageLayout['sections'] = [];
-  let currentPageYOffset = 0;
+export const flowBlocks = (
+  blocks: FlowBlock[],
+  pageHeight: number = USABLE_PAGE_HEIGHT,
+  gap: number = BLOCK_GAP
+): BlockPlacement[] => {
+  const placements: BlockPlacement[] = [];
+  let page = 0;
+  let y = 0;
 
-  for (const section of sections) {
-    const scaledWidth = USABLE_PAGE_WIDTH;
-    const scaledHeight = (section.height / section.height) * section.height; // maintain aspect ratio
-
-    // If section is taller than a page, split it
-    if (scaledHeight > pageHeight) {
-      const slicesNeeded = Math.ceil(scaledHeight / pageHeight);
-
-      for (let i = 0; i < slicesNeeded; i++) {
-        const sliceHeight = Math.min(pageHeight, scaledHeight - i * pageHeight);
-
-        currentPage.push({
-          sectionId: section.id,
-          x: PAGE_PADDING,
-          y: PAGE_PADDING,
-          width: scaledWidth,
-          height: sliceHeight,
-        });
-
-        pages.push({ sections: currentPage });
-        currentPage = [];
-        currentPageYOffset = 0;
+  blocks.forEach((block, index) => {
+    if (block.height > pageHeight) {
+      // A block taller than a page flows from where it is when enough room is left, so the page
+      // is not left mostly empty; otherwise it starts on a fresh page.
+      if (y > 0 && pageHeight - y < pageHeight * MIN_SLICE_START_SPACE) {
+        page += 1;
+        y = 0;
       }
-    } else if (currentPageYOffset + scaledHeight > pageHeight) {
-      // Section doesn't fit on current page; start a new one
-      pages.push({ sections: currentPage });
-      currentPage = [
-        {
-          sectionId: section.id,
-          x: PAGE_PADDING,
-          y: PAGE_PADDING,
-          width: scaledWidth,
-          height: scaledHeight,
-        },
-      ];
-      currentPageYOffset = scaledHeight;
-    } else {
-      // Section fits on current page
-      currentPage.push({
-        sectionId: section.id,
-        x: PAGE_PADDING,
-        y: PAGE_PADDING + currentPageYOffset,
-        width: scaledWidth,
-        height: scaledHeight,
-      });
-      currentPageYOffset += scaledHeight;
+      let offset = 0;
+      while (offset < block.height) {
+        const room = pageHeight - y;
+        const height = Math.min(room, block.height - offset);
+        placements.push({ blockId: block.id, page, y, sliceOffset: offset, height });
+        offset += height;
+        if (offset < block.height) {
+          page += 1;
+          y = 0;
+        } else {
+          y += height + gap;
+        }
+      }
+      return;
     }
-  }
 
-  if (currentPage.length > 0) {
-    pages.push({ sections: currentPage });
-  }
+    const next = blocks[index + 1];
+    const needed =
+      block.height +
+      (block.keepWithNext && next
+        ? gap +
+          (next.height <= pageHeight
+            ? next.height
+            : Math.min(next.height, KEEP_WITH_NEXT_MIN_HEIGHT))
+        : 0);
+    if (y > 0 && y + needed > pageHeight) {
+      page += 1;
+      y = 0;
+    }
+    placements.push({ blockId: block.id, page, y, sliceOffset: 0, height: block.height });
+    y += block.height + gap;
+  });
 
-  return pages.length > 0 ? pages : [];
+  return placements;
 };

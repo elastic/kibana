@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -19,10 +19,14 @@ import {
   EuiProgress,
   EuiSkeletonText,
   EuiSpacer,
+  EuiSuperSelect,
   EuiText,
+  EuiThemeProvider,
   EuiTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type {
   BriefJobStage,
@@ -32,8 +36,15 @@ import type {
 } from '../../../../common/entity_analytics/executive_brief/types';
 import { documentFlyoutHistoryKey } from '../../../flyout_v2/shared/constants/flyout_history';
 import { SectionErrorBoundary } from './components/section_error_boundary';
+import { BriefJumpNav } from './components/brief_jump_nav';
 import { BriefContextProvider } from './components/brief_context';
-import { EXECUTIVE_BRIEF_BODY_ID, EXECUTIVE_BRIEF_SECTION_IDS } from './constants';
+import {
+  BRIEF_BLOCK_ATTRIBUTE,
+  BRIEF_PRINT_MODE_ATTRIBUTE,
+  EXECUTIVE_BRIEF_BODY_ID,
+  EXECUTIVE_BRIEF_SECTION_IDS,
+} from './constants';
+import { TEMPLATE_OPTION_ID, useBriefConnectors } from './hooks/use_brief_connectors';
 import { useExecutiveBrief } from './hooks/use_executive_brief';
 import { AtAGlance } from './sections/at_a_glance';
 import { BlindSpots } from './sections/blind_spots';
@@ -94,12 +105,17 @@ interface ProgressProps {
   job: ExecutiveBriefJob | undefined;
 }
 
-const Progress: React.FC<ProgressProps> = ({ job }) => (
+const stageLabel = (stage: BriefJobStage, modelName: string | undefined): string =>
+  stage === 'generate' && modelName
+    ? `Writing the brief with ${modelName}… this usually takes about 30 seconds`
+    : STAGE_LABEL[stage];
+
+const Progress: React.FC<ProgressProps & { modelName?: string }> = ({ job, modelName }) => (
   <div data-test-subj={TEST_IDS.progress}>
     <EuiProgress size="xs" color="accent" />
     <EuiSpacer size="m" />
     <EuiText size="s">
-      <p>{job?.stage ? STAGE_LABEL[job.stage] : 'Starting the brief'}</p>
+      <p>{job?.stage ? stageLabel(job.stage, modelName) : 'Starting the brief'}</p>
     </EuiText>
     <EuiSpacer size="m" />
     <EuiSkeletonText lines={4} />
@@ -112,9 +128,63 @@ export interface ExecutiveBriefFlyoutProps {
   /** Page time range (24h | 7d | 30d). */
   timeRange: BriefTimeRangeKey;
   onClose: () => void;
-  /** Wired by the PDF export lane; the button is disabled until provided. */
-  onExportPdf?: (job: ExecutiveBriefJob) => void;
+  /** Wired by the PDF export hook; the button is disabled until provided. */
+  onExportPdf?: (
+    job: ExecutiveBriefJob,
+    onProgress?: (done: number, total: number) => void
+  ) => void | Promise<void>;
 }
+
+/** Waits for React to apply print mode (and EuiAccordion to open) before the capture starts. */
+const waitForPrintRender = (): Promise<void> =>
+  new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 800)));
+  });
+
+interface PrintSurfaceProps {
+  isPrintMode: boolean;
+}
+
+/**
+ * Wraps the brief body. In print mode it forces the light colour scheme and a plain background,
+ * and hides the graph-view buttons through this component's own `data-print-mode` attribute.
+ */
+const PrintSurfaceContent: React.FC<React.PropsWithChildren<PrintSurfaceProps>> = ({
+  isPrintMode,
+  children,
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const printStyles = css`
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+    &[${BRIEF_PRINT_MODE_ATTRIBUTE}='true'] [data-test-subj='executiveBriefOpenGraph'] {
+      display: none;
+    }
+  `;
+  return (
+    <div
+      id={EXECUTIVE_BRIEF_BODY_ID}
+      css={isPrintMode ? printStyles : undefined}
+      {...{ [BRIEF_PRINT_MODE_ATTRIBUTE]: isPrintMode ? 'true' : 'false' }}
+    >
+      {children}
+    </div>
+  );
+};
+
+const PrintSurface: React.FC<React.PropsWithChildren<PrintSurfaceProps>> = ({
+  isPrintMode,
+  children,
+}) => {
+  // The light theme only wraps the content while printing, so normal rendering is untouched.
+  if (!isPrintMode) {
+    return <PrintSurfaceContent isPrintMode={false}>{children}</PrintSurfaceContent>;
+  }
+  return (
+    <EuiThemeProvider colorMode="light">
+      <PrintSurfaceContent isPrintMode>{children}</PrintSurfaceContent>
+    </EuiThemeProvider>
+  );
+};
 
 export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
   timeRange,
@@ -122,7 +192,21 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
   onExportPdf,
 }) => {
   const titleId = useGeneratedHtmlId({ prefix: 'executiveBriefFlyoutTitle' });
-  const { job, isGenerating, requestError, mode, regenerate } = useExecutiveBrief(timeRange);
+  const {
+    connectors,
+    isLoading: isLoadingConnectors,
+    selectedId,
+    setSelectedId,
+    selection,
+    selectedName,
+    getConnectorName,
+  } = useBriefConnectors();
+  const { job, isGenerating, requestError, mode, regenerate } = useExecutiveBrief(
+    timeRange,
+    selection
+  );
+  const [isPrintMode, setIsPrintMode] = useState(false);
+  const [exportProgress, setExportProgress] = useState<{ done: number; total: number }>();
 
   const succeeded = job?.status === 'succeeded' && job.snapshot && job.brief ? job : undefined;
   const failureMessage =
@@ -130,6 +214,41 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
       ? job.error?.message ?? `The brief ${job.status}`
       : requestError?.message;
   const hasFailed = Boolean(failureMessage) && !succeeded;
+
+  const modelLabel = useMemo(() => {
+    if (!succeeded) return undefined;
+    if (succeeded.params.generator !== 'inference') return 'Template generator';
+    return succeeded.model ?? getConnectorName(succeeded.params.connectorId) ?? 'AI generator';
+  }, [succeeded, getConnectorName]);
+
+  const connectorOptions = useMemo(
+    () => [
+      ...connectors.map(({ id, name }) => ({
+        value: id,
+        inputDisplay: name,
+        'data-test-subj': `executiveBriefConnectorOption-${id}`,
+      })),
+      {
+        value: TEMPLATE_OPTION_ID,
+        inputDisplay: 'Template (no AI)',
+        'data-test-subj': 'executiveBriefConnectorOption-template',
+      },
+    ],
+    [connectors]
+  );
+
+  const exportPdf = useCallback(async () => {
+    if (!succeeded || !onExportPdf) return;
+    setIsPrintMode(true);
+    try {
+      await waitForPrintRender();
+      setExportProgress({ done: 0, total: 0 });
+      await onExportPdf(succeeded, (done, total) => setExportProgress({ done, total }));
+    } finally {
+      setExportProgress(undefined);
+      setIsPrintMode(false);
+    }
+  }, [onExportPdf, succeeded]);
 
   const markdown = useMemo(() => (succeeded ? briefToMarkdown(succeeded) : ''), [succeeded]);
 
@@ -145,7 +264,11 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
       flyoutMenuProps={{ title: 'Executive brief' }}
       data-test-subj={TEST_IDS.flyout}
     >
-      <EuiFlyoutHeader hasBorder id={EXECUTIVE_BRIEF_SECTION_IDS.header}>
+      <EuiFlyoutHeader
+        hasBorder
+        id={EXECUTIVE_BRIEF_SECTION_IDS.header}
+        {...{ [BRIEF_BLOCK_ATTRIBUTE]: 'header' }}
+      >
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
@@ -159,22 +282,64 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="xs" />
-        <EuiText size="xs" color="subdued" data-test-subj="executiveBriefMeta">
-          {succeeded?.snapshot
-            ? `Generated ${formatDateTime(succeeded.snapshot.generatedAt)} · ${
-                TIME_RANGE_LABEL[succeeded.snapshot.timeRange.range]
-              } · ${succeeded.params.generator} generator`
-            : TIME_RANGE_LABEL[timeRange]}
-        </EuiText>
+        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued" data-test-subj="executiveBriefMeta">
+              {succeeded?.snapshot
+                ? `Generated ${formatDateTime(succeeded.snapshot.generatedAt)} · ${
+                    TIME_RANGE_LABEL[succeeded.snapshot.timeRange.range]
+                  } · ${modelLabel}`
+                : TIME_RANGE_LABEL[timeRange]}
+            </EuiText>
+          </EuiFlexItem>
+          {!isPrintMode && (
+            <EuiFlexItem grow={false}>
+              <EuiSuperSelect
+                compressed
+                options={connectorOptions}
+                valueOfSelected={selectedId}
+                onChange={setSelectedId}
+                isLoading={isLoadingConnectors}
+                disabled={isGenerating}
+                aria-label="Model used to write the brief"
+                prepend="Model"
+                data-test-subj="executiveBriefConnectorPicker"
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
         {succeeded?.snapshot && (
           <>
             <EuiSpacer size="s" />
             <BasedOn snapshot={succeeded.snapshot} />
           </>
         )}
+        {succeeded?.snapshot && succeeded.brief && !isPrintMode && (
+          <>
+            <EuiSpacer size="s" />
+            <BriefJumpNav
+              items={[
+                { id: EXECUTIVE_BRIEF_SECTION_IDS.atAGlance, label: 'At a glance' },
+                {
+                  id: EXECUTIVE_BRIEF_SECTION_IDS.storylines,
+                  label: `Storylines (${succeeded.brief.storylines.length})`,
+                },
+                {
+                  id: EXECUTIVE_BRIEF_SECTION_IDS.blindSpots,
+                  label: `Blind spots (${succeeded.snapshot.blindSpots.gaps.length} gaps)`,
+                },
+                {
+                  id: EXECUTIVE_BRIEF_SECTION_IDS.decisions,
+                  label: `Decisions (${succeeded.brief.decisions.length})`,
+                },
+                { id: EXECUTIVE_BRIEF_SECTION_IDS.details, label: 'Details' },
+              ]}
+            />
+          </>
+        )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <div id={EXECUTIVE_BRIEF_BODY_ID}>
+        <PrintSurface isPrintMode={isPrintMode}>
           {hasFailed && (
             <KbnDangerCallout
               title="The brief could not be generated"
@@ -187,9 +352,18 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
               {failureMessage}
             </KbnDangerCallout>
           )}
-          {!hasFailed && !succeeded && isGenerating && <Progress job={job} />}
+          {!hasFailed && !succeeded && isGenerating && (
+            <Progress
+              job={job}
+              modelName={selectedName ?? getConnectorName(job?.params.connectorId)}
+            />
+          )}
           {succeeded?.snapshot && succeeded.brief && (
-            <BriefContextProvider snapshot={succeeded.snapshot}>
+            <BriefContextProvider
+              snapshot={succeeded.snapshot}
+              flags={succeeded.validation?.flags}
+              isPrintMode={isPrintMode}
+            >
               <SectionErrorBoundary fallbackText="AtAGlance could not be displayed">
                 <AtAGlance snapshot={succeeded.snapshot} glance={succeeded.brief.glance} />
               </SectionErrorBoundary>
@@ -209,11 +383,19 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
               <SectionErrorBoundary fallbackText="Details could not be displayed">
                 <Details snapshot={succeeded.snapshot} />
               </SectionErrorBoundary>
-              <EuiSpacer size="m" />
-              <DebugPanel job={succeeded} mode={mode} onModeChange={(next) => regenerate(next)} />
+              {!isPrintMode && (
+                <>
+                  <EuiSpacer size="m" />
+                  <DebugPanel
+                    job={succeeded}
+                    mode={mode}
+                    onModeChange={(next) => regenerate(next)}
+                  />
+                </>
+              )}
             </BriefContextProvider>
           )}
-        </div>
+        </PrintSurface>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
@@ -236,11 +418,14 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   iconType="download"
-                  isDisabled={!succeeded || !onExportPdf}
-                  onClick={() => succeeded && onExportPdf?.(succeeded)}
+                  isDisabled={!succeeded || !onExportPdf || isPrintMode}
+                  isLoading={isPrintMode}
+                  onClick={exportPdf}
                   data-test-subj={TEST_IDS.exportPdf}
                 >
-                  {'Export PDF'}
+                  {exportProgress
+                    ? `Exporting PDF… ${exportProgress.done}/${exportProgress.total}`
+                    : 'Export PDF'}
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>

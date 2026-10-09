@@ -4,19 +4,42 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { createContext, useContext } from 'react';
-import type { BriefSnapshot } from '../../../../../common/entity_analytics/executive_brief/types';
+import React, { createContext, useContext, useMemo } from 'react';
+import { EuiIconTip } from '@elastic/eui';
+import type {
+  BriefSnapshot,
+  BriefValidation,
+} from '../../../../../common/entity_analytics/executive_brief/types';
+
+type ClaimFlagEntry = NonNullable<BriefValidation['flags']>[number];
 
 interface BriefContextValue {
   snapshot: BriefSnapshot;
+  /** `validation.flags`: claims kept but not fully backed by the evidence. */
+  flags: readonly ClaimFlagEntry[];
+  /** True while the PDF is being captured: interactive controls are hidden or rendered as text. */
+  isPrintMode: boolean;
 }
 
 const BriefContext = createContext<BriefContextValue | undefined>(undefined);
 
-export const BriefContextProvider: React.FC<React.PropsWithChildren<BriefContextValue>> = ({
+interface BriefContextProviderProps {
+  snapshot: BriefSnapshot;
+  flags?: readonly ClaimFlagEntry[];
+  isPrintMode?: boolean;
+}
+
+const NO_FLAGS: readonly ClaimFlagEntry[] = [];
+
+export const BriefContextProvider: React.FC<React.PropsWithChildren<BriefContextProviderProps>> = ({
   snapshot,
+  flags = NO_FLAGS,
+  isPrintMode = false,
   children,
-}) => <BriefContext.Provider value={{ snapshot }}>{children}</BriefContext.Provider>;
+}) => {
+  const value = useMemo(() => ({ snapshot, flags, isPrintMode }), [snapshot, flags, isPrintMode]);
+  return <BriefContext.Provider value={value}>{children}</BriefContext.Provider>;
+};
 
 export const useBriefSnapshot = (): BriefSnapshot => {
   const value = useContext(BriefContext);
@@ -24,4 +47,42 @@ export const useBriefSnapshot = (): BriefSnapshot => {
     throw new Error('useBriefSnapshot must be used inside BriefContextProvider');
   }
   return value.snapshot;
+};
+
+/** True while the brief is rendered for PDF capture. Safe outside the provider (returns false). */
+export const useIsPrintMode = (): boolean => useContext(BriefContext)?.isPrintMode ?? false;
+
+/** Flags whose claimPath equals `claimPath`, or starts with it followed by `.` or `[`. */
+export const useClaimFlags = (claimPath: string): readonly ClaimFlagEntry[] => {
+  const flags = useContext(BriefContext)?.flags ?? NO_FLAGS;
+  return useMemo(
+    () =>
+      flags.filter(
+        ({ claimPath: path }) =>
+          path === claimPath || path.startsWith(`${claimPath}.`) || path.startsWith(`${claimPath}[`)
+      ),
+    [flags, claimPath]
+  );
+};
+
+/**
+ * Subtle warning icon rendered next to a claim that validation flagged (for example
+ * `storylines[0].narrative`). Renders nothing when the claim is not flagged or in print mode.
+ */
+export const ClaimFlag: React.FC<{ claimPath: string }> = ({ claimPath }) => {
+  const matches = useClaimFlags(claimPath);
+  const isPrintMode = useIsPrintMode();
+  if (matches.length === 0 || isPrintMode) return null;
+  return (
+    <span data-test-subj="executiveBriefClaimFlag">
+      <EuiIconTip
+        type="warning"
+        color="warning"
+        size="s"
+        aria-label="Not fully verified"
+        title="Not fully verified"
+        content={matches.map(({ statement, reason }) => `${statement} (${reason})`).join(' ')}
+      />
+    </span>
+  );
 };

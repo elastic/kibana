@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiProgress,
+  EuiSpacer,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -22,6 +23,14 @@ interface AttackStageTileProps {
   /** Highest alert count across stages, used to scale the activity fill. */
   maxActivity: number;
 }
+
+/** Plain-language rule coverage: leads with what is broken, avoids "1/1 working" next to a warning. */
+export const describeRuleCoverage = ({ enabled, effective }: AttackStage['coverage']): string => {
+  if (enabled === 0) return 'No detection rules';
+  if (enabled > effective) return `${enabled - effective} of ${enabled} rules not working`;
+  if (effective <= 2) return `Only ${effective} detection ${effective === 1 ? 'rule' : 'rules'}`;
+  return `${effective}/${enabled} rules working`;
+};
 
 const activityOf = (stage: AttackStage): number =>
   stage.observed.alerts + stage.observed.attackDiscoveries + stage.observed.mlAnomalies;
@@ -39,10 +48,11 @@ export const AttackStageTile: React.FC<AttackStageTileProps> = ({ stage, maxActi
         <strong>{stage.tacticName}</strong>
       </EuiText>
       {stage.topTechnique && (
-        <EuiText size="xs" color="subdued">
-          {`${stage.topTechnique.id} ${stage.topTechnique.name}`}
+        <EuiText size="xs" color="subdued" data-test-subj="executiveBriefStageTechnique">
+          <span>{`${stage.topTechnique.id} ${stage.topTechnique.name}`}</span>
         </EuiText>
       )}
+      <EuiSpacer size="xs" />
       <EuiProgress
         size="xs"
         color="subdued"
@@ -57,8 +67,12 @@ export const AttackStageTile: React.FC<AttackStageTileProps> = ({ stage, maxActi
       </EuiText>
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
         <EuiFlexItem grow={false}>
-          <EuiText size="xs" data-test-subj="executiveBriefRulesWorking">
-            {`${stage.coverage.effective}/${stage.coverage.enabled} rules working`}
+          <EuiText
+            size="xs"
+            color={stage.coverage.enabled > stage.coverage.effective ? 'danger' : undefined}
+            data-test-subj="executiveBriefRulesWorking"
+          >
+            {describeRuleCoverage(stage.coverage)}
           </EuiText>
         </EuiFlexItem>
         {stage.flag === 'limited_coverage' && (

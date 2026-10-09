@@ -12,6 +12,7 @@ import type {
   StoryResponse,
 } from '../../../../../common/entity_analytics/executive_brief/types';
 import { CaseDetailsLink } from '../../../../common/components/links';
+import { useIsPrintMode } from './brief_context';
 
 export const RESPONSE_STATE_LABEL: Record<ResponseState, string> = {
   unaddressed: 'Unaddressed',
@@ -39,6 +40,7 @@ export const ResponseStateBadge: React.FC<{ state: ResponseState }> = ({ state }
 
 export const ResponseRow: React.FC<{ response: StoryResponse }> = ({ response }) => {
   const { alerts } = response;
+  const isPrintMode = useIsPrintMode();
   return (
     <div data-test-subj="executiveBriefResponse">
       <EuiTitle size="xxs">
@@ -51,9 +53,13 @@ export const ResponseRow: React.FC<{ response: StoryResponse }> = ({ response })
         {response.cases.map((storyCase) => (
           <EuiFlexItem grow={false} key={storyCase.evidenceId}>
             <EuiText size="s">
-              <CaseDetailsLink detailName={storyCase.caseId} title={storyCase.title}>
-                {storyCase.title}
-              </CaseDetailsLink>{' '}
+              {isPrintMode ? (
+                storyCase.title
+              ) : (
+                <CaseDetailsLink detailName={storyCase.caseId} title={storyCase.title}>
+                  {storyCase.title}
+                </CaseDetailsLink>
+              )}{' '}
               <Status status={CASE_STATUS[storyCase.status]} />
             </EuiText>
           </EuiFlexItem>

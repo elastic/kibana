@@ -19,8 +19,10 @@ import type { ExecutiveBriefDecision } from '../../../../../common/entity_analyt
 import { useKibana } from '../../../../common/lib/kibana';
 import { buildDecisionPrompt } from '../utils/decision_prompt';
 import { TEST_IDS } from '../test_ids';
-import { useBriefSnapshot } from './brief_context';
+import { ClaimFlag, useBriefSnapshot, useIsPrintMode } from './brief_context';
 import { EvidenceChip } from './evidence_chip';
+
+const noop = (): void => {};
 
 const URGENCY: Record<
   ExecutiveBriefDecision['urgency'],
@@ -56,9 +58,11 @@ export const DecisionAccordion: React.FC<DecisionAccordionProps> = ({
   inline = false,
 }) => {
   const snapshot = useBriefSnapshot();
+  const isPrintMode = useIsPrintMode();
   const { agentBuilder } = useKibana().services;
   const accordionId = useGeneratedHtmlId({ prefix: 'executiveBriefDecision' });
   const urgency = URGENCY[decision.urgency];
+  const ownerLabel = decision.owner ? OWNER_LABEL[decision.owner] : undefined;
   const canInvestigate = Boolean(agentBuilder?.openChat);
 
   const investigate = () => {
@@ -74,6 +78,9 @@ export const DecisionAccordion: React.FC<DecisionAccordionProps> = ({
     <EuiAccordion
       id={accordionId}
       initialIsOpen={initialIsOpen}
+      arrowDisplay={isPrintMode ? 'none' : 'left'}
+      forceState={isPrintMode ? 'open' : undefined}
+      onToggle={isPrintMode ? noop : undefined}
       paddingSize="s"
       data-test-subj={`${TEST_IDS.decision(index)}${inline ? '-inline' : ''}`}
       buttonContent={
@@ -86,10 +93,10 @@ export const DecisionAccordion: React.FC<DecisionAccordionProps> = ({
               <strong>{decision.action}</strong>
             </EuiText>
           </EuiFlexItem>
-          {decision.owner && (
+          {ownerLabel && (
             <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow" iconType="user">
-                {OWNER_LABEL[decision.owner]}
+              <EuiBadge color="hollow" iconType="user" data-test-subj="executiveBriefDecisionOwner">
+                {ownerLabel}
               </EuiBadge>
             </EuiFlexItem>
           )}
@@ -97,7 +104,9 @@ export const DecisionAccordion: React.FC<DecisionAccordionProps> = ({
       }
     >
       <EuiText size="s">
-        <p>{decision.rationale}</p>
+        <p>
+          {decision.rationale} <ClaimFlag claimPath={`decisions[${index}]`} />
+        </p>
       </EuiText>
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
@@ -123,16 +132,18 @@ export const DecisionAccordion: React.FC<DecisionAccordionProps> = ({
         ))}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <AiButton
-        variant="outlined"
-        size="s"
-        iconType="productAgent"
-        isDisabled={!canInvestigate}
-        onClick={investigate}
-        data-test-subj={`${TEST_IDS.investigate(index)}${inline ? '-inline' : ''}`}
-      >
-        {'Investigate with AI Agent'}
-      </AiButton>
+      {!isPrintMode && (
+        <AiButton
+          variant="outlined"
+          size="s"
+          iconType="productAgent"
+          isDisabled={!canInvestigate}
+          onClick={investigate}
+          data-test-subj={`${TEST_IDS.investigate(index)}${inline ? '-inline' : ''}`}
+        >
+          {'Investigate with AI Agent'}
+        </AiButton>
+      )}
     </EuiAccordion>
   );
 };

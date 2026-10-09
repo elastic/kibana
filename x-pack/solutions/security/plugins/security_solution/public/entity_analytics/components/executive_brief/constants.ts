@@ -21,6 +21,17 @@ export const EXECUTIVE_BRIEF_SECTION_IDS = {
   details: 'executiveBriefDetails',
 } as const;
 
+/**
+ * PDF capture blocks. Every element carrying this attribute is captured as one image, in DOM
+ * order; blocks are never split across pages unless taller than a page. The attribute value is a
+ * label; `data-brief-keep-with-next` asks the layout to keep a block on the same page as the next.
+ */
+export const BRIEF_BLOCK_ATTRIBUTE = 'data-brief-block';
+export const BRIEF_KEEP_WITH_NEXT_ATTRIBUTE = 'data-brief-keep-with-next';
+
+/** Attribute set on the flyout body wrapper (value "true") while the PDF is captured. */
+export const BRIEF_PRINT_MODE_ATTRIBUTE = 'data-print-mode';
+
 /** Id of the scrollable flyout body that wraps all sections. */
 export const EXECUTIVE_BRIEF_BODY_ID = 'executiveBriefBody';
 

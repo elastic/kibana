@@ -5,106 +5,126 @@
  * 2.0.
  */
 
-import type { PDFDocument as PdfDocument } from 'pdf-lib';
+import type { PDFDocument as PdfDocument, PDFImage } from 'pdf-lib';
 import type domtoimageModule from 'dom-to-image-more';
 import type { ExecutiveBriefJob } from '../../../../../common/entity_analytics/executive_brief/types';
-import { EXECUTIVE_BRIEF_BODY_ID, EXECUTIVE_BRIEF_SECTION_IDS } from '../constants';
-import { A4_POINTS, PAGE_PADDING, USABLE_PAGE_HEIGHT, USABLE_PAGE_WIDTH } from './page_layout';
+import { BRIEF_BLOCK_ATTRIBUTE, BRIEF_KEEP_WITH_NEXT_ATTRIBUTE } from '../constants';
+import type { FlowBlock } from './page_layout';
+import {
+  A4_POINTS,
+  PAGE_PADDING,
+  USABLE_PAGE_WIDTH,
+  fitScaleForTallBlock,
+  flowBlocks,
+} from './page_layout';
 
-const SECTION_GAP = 12;
+/** Called after each captured block: `done` of `total`. */
+export type ExportProgressCallback = (done: number, total: number) => void;
+
+/** Lets the browser paint and handle input between heavy synchronous steps. */
+const yieldToBrowser = (): Promise<void> =>
+  new Promise((resolve) => {
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(() => resolve(), { timeout: 50 });
+    } else {
+      setTimeout(resolve, 0);
+    }
+  });
+
+interface CapturedBlock {
+  id: string;
+  blob: Blob;
+  keepWithNext: boolean;
+}
 
 /**
  * Exports an executive brief to a PDF file.
  *
  * Strategy:
- * 1. Before capture, expand any collapsed accordions (decisions section)
- * 2. Capture each section (header, at a glance, storylines, blind spots, decisions, details) as an image
- * 3. Layout images across A4 pages using the page layout algorithm
- * 4. Create a PDF with pdf-lib and download it
+ * 1. The caller puts the brief in print mode first (controls hidden, decisions expanded, light
+ *    theme); see the flyout. This function only captures.
+ * 2. Capture every `[data-brief-block]` element (header, glance, each storyline card, blind-spot
+ *    blocks, decisions, details) as its own image, in DOM order.
+ * 3. Flow the images top-down across A4 pages, starting a new page only when the next block does
+ *    not fit and slicing only blocks taller than a page.
+ * 4. Create a PDF with pdf-lib and download it.
  *
  * @param job - The completed executive brief job with snapshot and brief
- * @throws Error if the flyout body or section elements are not found
+ * @throws Error if no capture blocks are found
  */
-export const exportBriefToPdf = async (job: ExecutiveBriefJob): Promise<void> => {
-  // Lazy-load dependencies
+export const exportBriefToPdf = async (
+  job: ExecutiveBriefJob,
+  onProgress?: ExportProgressCallback
+): Promise<void> => {
   const domtoimage = (await import('dom-to-image-more')).default;
   const { PDFDocument } = await import('pdf-lib');
 
-  const bodyElement = document.getElementById(EXECUTIVE_BRIEF_BODY_ID);
-  if (!bodyElement) {
-    throw new Error('Executive brief body element not found');
+  const blockElements = getTopLevelBlocks();
+  if (blockElements.length === 0) {
+    throw new Error('Executive brief content not found');
   }
 
-  // Expand collapsed accordions for PDF
-  expandAccordions(bodyElement);
-
-  try {
-    // Capture each section as an image
-    const sectionIds = Object.values(EXECUTIVE_BRIEF_SECTION_IDS);
-    const images: Array<{ id: string; blob: Blob; height: number }> = [];
-
-    const sectionElements = sectionIds.flatMap((sectionId) => {
-      const sectionElement = document.getElementById(sectionId);
-      return sectionElement ? [{ sectionId, sectionElement }] : [];
+  const captured: CapturedBlock[] = [];
+  onProgress?.(0, blockElements.length);
+  for (const [index, element] of blockElements.entries()) {
+    const blob = await captureBlock(element, domtoimage);
+    await yieldToBrowser();
+    onProgress?.(index + 1, blockElements.length);
+    captured.push({
+      id: `${element.getAttribute(BRIEF_BLOCK_ATTRIBUTE) ?? 'block'}-${index}`,
+      blob,
+      keepWithNext: element.hasAttribute(BRIEF_KEEP_WITH_NEXT_ATTRIBUTE),
     });
-
-    for (const { sectionId, sectionElement } of sectionElements) {
-      const sectionBlob = await captureSection(sectionElement, domtoimage);
-      const img = new Image();
-      img.src = URL.createObjectURL(sectionBlob);
-
-      // Wait for image to load so we can get its dimensions
-      await new Promise<void>((resolve) => {
-        img.onload = () => resolve();
-      });
-
-      images.push({
-        id: sectionId,
-        blob: sectionBlob,
-        height: img.naturalHeight,
-      });
-
-      URL.revokeObjectURL(img.src);
-    }
-
-    // Create PDF with images laid out across pages
-    const pdfDoc = await PDFDocument.create();
-    await addImagesToPdf(pdfDoc, images);
-
-    // Download the PDF
-    const pdfBytes = await pdfDoc.save();
-    // Copy into an ArrayBuffer-backed view so it satisfies BlobPart.
-    const pdfBlob = new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' });
-    downloadBlob(pdfBlob, generateFileName());
-  } finally {
-    // Restore original state (collapse accordions)
-    collapseAccordions(bodyElement);
   }
+
+  const pdfDoc = await PDFDocument.create();
+  await addBlocksToPdf(pdfDoc, captured);
+
+  const pdfBytes = await pdfDoc.save();
+  // Copy into an ArrayBuffer-backed view so it satisfies BlobPart.
+  const pdfBlob = new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' });
+  downloadBlob(pdfBlob, generateFileName(job));
 };
 
-/**
- * Captures a DOM element as a PNG blob.
- * Scales 2x for better quality on screen.
- */
-const captureSection = async (
+/** Capture blocks in DOM order; a block nested in another block is part of its parent. */
+const getTopLevelBlocks = (): HTMLElement[] =>
+  Array.from(document.querySelectorAll<HTMLElement>(`[${BRIEF_BLOCK_ATTRIBUTE}]`)).filter(
+    (element) => !element.parentElement?.closest(`[${BRIEF_BLOCK_ATTRIBUTE}]`)
+  );
+
+const SKIPPED_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEMPLATE']);
+
+/** Skips nodes that cannot render (hidden, print-hidden, non-visual) so they are not cloned. */
+const shouldCaptureNode = (node: Node): boolean => {
+  if (!(node instanceof HTMLElement)) return true;
+  return !(
+    SKIPPED_TAGS.has(node.tagName) ||
+    node.hidden ||
+    node.style.display === 'none' ||
+    node.hasAttribute('data-print-hide')
+  );
+};
+
+/** Captures a DOM element as a PNG blob, at most 1.5x for quality versus cost. */
+const captureBlock = async (
   element: HTMLElement,
   domtoimage: { toBlob: (el: HTMLElement, opts?: domtoimageModule.Options) => Promise<Blob> }
 ): Promise<Blob> => {
-  const scale = 2;
-  const width = element.offsetWidth * scale;
-  const height = element.offsetHeight * scale;
+  const scale = Math.min(window.devicePixelRatio || 1, 1.5);
+  const { offsetWidth, offsetHeight } = element;
 
-  const blob = await domtoimage.toBlob(element, {
+  return domtoimage.toBlob(element, {
     quality: 1,
     bgcolor: '#ffffff',
     cacheBust: true,
-    width,
-    height,
+    filter: shouldCaptureNode,
+    width: offsetWidth * scale,
+    height: offsetHeight * scale,
     style: {
       transform: `scale(${scale})`,
       transformOrigin: 'top left',
-      width: `${element.offsetWidth}px`,
-      height: `${element.offsetHeight}px`,
+      width: `${offsetWidth}px`,
+      height: `${offsetHeight}px`,
     },
     styleFilter: (style: CSSStyleSheet) => {
       try {
@@ -115,119 +135,84 @@ const captureSection = async (
       }
     },
   });
-
-  return blob;
 };
 
-/**
- * Adds captured images to a PDF document, laying them out across A4 pages.
- * Each image is scaled to fit the page width. If a tall image doesn't fit on the current page,
- * it starts a new page (no splitting of individual images).
- */
-const addImagesToPdf = async (
-  pdfDoc: PdfDocument,
-  images: Array<{ id: string; blob: Blob; height: number }>
-): Promise<void> => {
-  const imageUrls: Array<{ id: string; url: string; height: number }> = [];
-
-  // Convert blobs to data URLs
-  for (const { id, blob, height } of images) {
-    const url = URL.createObjectURL(blob);
-    imageUrls.push({ id, url, height });
+/** Embeds the captured blocks and draws them onto pages using the flow layout. */
+const addBlocksToPdf = async (pdfDoc: PdfDocument, blocks: CapturedBlock[]): Promise<void> => {
+  const embedded: Array<{
+    id: string;
+    image: PDFImage;
+    scaledWidth: number;
+    scaledHeight: number;
+    keep: boolean;
+  }> = [];
+  for (const { id, blob, keepWithNext } of blocks) {
+    const image = await pdfDoc.embedPng(await blob.arrayBuffer());
+    await yieldToBrowser();
+    const fullHeight = image.height * (USABLE_PAGE_WIDTH / image.width);
+    const fit = fitScaleForTallBlock(fullHeight);
+    embedded.push({
+      id,
+      image,
+      scaledWidth: USABLE_PAGE_WIDTH * fit,
+      scaledHeight: fullHeight * fit,
+      keep: keepWithNext,
+    });
   }
 
-  try {
-    // pdf-lib's origin is bottom-left, so `usedHeight` tracks space consumed from the top margin.
-    const pageTop = A4_POINTS.height - PAGE_PADDING;
-    let currentPage = pdfDoc.addPage([A4_POINTS.width, A4_POINTS.height]);
-    let usedHeight = 0;
+  const flowInput: FlowBlock[] = embedded.map(({ id, scaledHeight, keep }) => ({
+    id,
+    height: scaledHeight,
+    keepWithNext: keep,
+  }));
+  const placements = flowBlocks(flowInput);
 
-    for (const { url } of imageUrls) {
-      const imageBytes = await fetch(url).then((r) => r.arrayBuffer());
-      const pngImage = await pdfDoc.embedPng(imageBytes);
-
-      const scaledWidth = USABLE_PAGE_WIDTH;
-      const scaledHeight = pngImage.height * (USABLE_PAGE_WIDTH / pngImage.width);
-
-      if (scaledHeight <= USABLE_PAGE_HEIGHT) {
-        if (usedHeight + scaledHeight > USABLE_PAGE_HEIGHT) {
-          currentPage = pdfDoc.addPage([A4_POINTS.width, A4_POINTS.height]);
-          usedHeight = 0;
-        }
-        currentPage.drawImage(pngImage, {
-          x: PAGE_PADDING,
-          y: pageTop - usedHeight - scaledHeight,
-          width: scaledWidth,
-          height: scaledHeight,
-        });
-        usedHeight += scaledHeight + SECTION_GAP;
-      } else {
-        // Taller than a page: draw the same image on consecutive pages, shifted up by one page
-        // height each time; the page boundary clips each slice.
-        if (usedHeight > 0) {
-          currentPage = pdfDoc.addPage([A4_POINTS.width, A4_POINTS.height]);
-        }
-        for (let offset = 0; offset < scaledHeight; offset += USABLE_PAGE_HEIGHT) {
-          if (offset > 0) {
-            currentPage = pdfDoc.addPage([A4_POINTS.width, A4_POINTS.height]);
-          }
-          currentPage.drawImage(pngImage, {
-            x: PAGE_PADDING,
-            y: pageTop - scaledHeight + offset,
-            width: scaledWidth,
-            height: scaledHeight,
-          });
-        }
-        usedHeight = (scaledHeight % USABLE_PAGE_HEIGHT) + SECTION_GAP;
-      }
+  const pageTop = A4_POINTS.height - PAGE_PADDING;
+  const pages: Array<ReturnType<PdfDocument['addPage']>> = [];
+  const getPage = (index: number) => {
+    while (pages.length <= index) {
+      pages.push(pdfDoc.addPage([A4_POINTS.width, A4_POINTS.height]));
     }
-  } finally {
-    // Clean up blob URLs
-    for (const { url } of imageUrls) {
-      URL.revokeObjectURL(url);
+    return pages[index];
+  };
+
+  for (const { blockId, page, y, sliceOffset, height } of placements) {
+    const block = embedded.find(({ id }) => id === blockId);
+    if (!block) {
+      throw new Error(`Captured block ${blockId} not found`);
+    }
+    const pdfPage = getPage(page);
+    // pdf-lib's origin is bottom-left: the block's top sits `sliceOffset` above this piece's top.
+    pdfPage.drawImage(block.image, {
+      x: PAGE_PADDING,
+      y: pageTop - y - block.scaledHeight + sliceOffset,
+      width: block.scaledWidth,
+      height: block.scaledHeight,
+    });
+    if (sliceOffset > 0 || height < block.scaledHeight) {
+      // Mask the neighbouring slices that bleed into the page margins.
+      const white = { type: 'RGB' as const, red: 1, green: 1, blue: 1 };
+      pdfPage.drawRectangle({
+        x: 0,
+        y: pageTop,
+        width: A4_POINTS.width,
+        height: PAGE_PADDING,
+        color: white,
+        borderWidth: 0,
+      });
+      pdfPage.drawRectangle({
+        x: 0,
+        y: 0,
+        width: A4_POINTS.width,
+        height: PAGE_PADDING,
+        color: white,
+        borderWidth: 0,
+      });
     }
   }
 };
 
-/**
- * Expands all collapsed EuiAccordions in the container by simulating clicks on their buttons.
- * EuiAccordion uses aria-expanded to track open/closed state.
- */
-const expandAccordions = (container: HTMLElement): void => {
-  const accordionButtons = container.querySelectorAll<HTMLElement>(
-    '[id^="executiveBriefDecision"][role="button"]'
-  );
-
-  accordionButtons.forEach((button) => {
-    const isOpen = button.getAttribute('aria-expanded') === 'true';
-    if (!isOpen) {
-      button.click();
-    }
-  });
-};
-
-/**
- * Collapses all expanded EuiAccordions in the container by simulating clicks on their buttons.
- * Only collapses accordions that weren't originally open (those after the first decision).
- * EuiAccordion components rendered with initialIsOpen={index === 0} means only the first is open.
- */
-const collapseAccordions = (container: HTMLElement): void => {
-  const accordionButtons = container.querySelectorAll<HTMLElement>(
-    '[id^="executiveBriefDecision"][role="button"]'
-  );
-
-  accordionButtons.forEach((button, index) => {
-    const isOpen = button.getAttribute('aria-expanded') === 'true';
-    // Keep first accordion open (initialIsOpen={index === 0})
-    if (isOpen && index > 0) {
-      button.click();
-    }
-  });
-};
-
-/**
- * Downloads a blob as a file.
- */
+/** Downloads a blob as a file. */
 const downloadBlob = (blob: Blob, filename: string): void => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -237,11 +222,7 @@ const downloadBlob = (blob: Blob, filename: string): void => {
   URL.revokeObjectURL(url);
 };
 
-/**
- * Generates a filename for the exported PDF.
- */
-const generateFileName = (): string => {
-  const date = new Date();
-  const isoString = date.toISOString().split('T')[0]; // YYYY-MM-DD
-  return `executive-brief-${isoString}.pdf`;
+const generateFileName = (job: ExecutiveBriefJob): string => {
+  const isoDate = new Date(job.snapshot?.generatedAt ?? Date.now()).toISOString().split('T')[0];
+  return `executive-brief-${isoDate}.pdf`;
 };

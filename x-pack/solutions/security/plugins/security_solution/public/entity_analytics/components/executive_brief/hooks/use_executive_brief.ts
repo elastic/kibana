@@ -12,6 +12,7 @@ import type {
   ExecutiveBriefJob,
 } from '../../../../../common/entity_analytics/executive_brief/types';
 import { EXECUTIVE_BRIEF_FIXTURE_STORAGE_KEY } from '../constants';
+import type { BriefGenerationSelection } from './use_brief_connectors';
 import { useExecutiveBriefJob } from './use_executive_brief_job';
 import { useGenerateExecutiveBrief } from './use_generate_executive_brief';
 
@@ -53,8 +54,16 @@ export interface UseExecutiveBriefResult {
   regenerate: (mode?: BriefNarrationMode) => void;
 }
 
-/** Starts a generation on mount and exposes the polled job. Fixture mode skips the API entirely. */
-export const useExecutiveBrief = (range: BriefTimeRangeKey): UseExecutiveBriefResult => {
+const TEMPLATE_SELECTION: BriefGenerationSelection = { isReady: true, generator: 'template' };
+
+/**
+ * Starts a generation once the generator selection is ready and exposes the polled job. Fixture
+ * mode skips the API entirely.
+ */
+export const useExecutiveBrief = (
+  range: BriefTimeRangeKey,
+  selection: BriefGenerationSelection = TEMPLATE_SELECTION
+): UseExecutiveBriefResult => {
   const fixtureJob = useMemo(readFixtureJob, []);
   const useFixture = fixtureJob !== undefined;
   const [mode, setMode] = useState<BriefNarrationMode>('names');
@@ -65,16 +74,26 @@ export const useExecutiveBrief = (range: BriefTimeRangeKey): UseExecutiveBriefRe
       if (useFixture) return;
       const resolvedMode = nextMode ?? mode;
       setMode(resolvedMode);
-      mutate({ timeRange: toBriefTimeRange(range), mode: resolvedMode });
+      mutate({
+        timeRange: toBriefTimeRange(range),
+        mode: resolvedMode,
+        generator: selection.generator,
+        connectorId: selection.connectorId,
+      });
     },
-    [mode, mutate, range, useFixture]
+    [mode, mutate, range, selection.connectorId, selection.generator, useFixture]
   );
 
   useEffect(() => {
-    if (hasStarted.current || useFixture) return;
+    if (hasStarted.current || useFixture || !selection.isReady) return;
     hasStarted.current = true;
-    mutate({ timeRange: toBriefTimeRange(range), mode });
-  }, [mutate, range, mode, useFixture]);
+    mutate({
+      timeRange: toBriefTimeRange(range),
+      mode,
+      generator: selection.generator,
+      connectorId: selection.connectorId,
+    });
+  }, [mutate, range, mode, useFixture, selection]);
 
   const {
     data: job,

@@ -11,9 +11,10 @@ import type {
   BriefSnapshot,
   ExecutiveBrief,
 } from '../../../../../common/entity_analytics/executive_brief/types';
+import { ClaimFlag } from '../components/brief_context';
 import { BriefStatTile } from '../components/brief_stat_tile';
 import { SectionTitle } from '../components/section_title';
-import { EXECUTIVE_BRIEF_SECTION_IDS } from '../constants';
+import { BRIEF_BLOCK_ATTRIBUTE, EXECUTIVE_BRIEF_SECTION_IDS } from '../constants';
 
 interface AtAGlanceProps {
   snapshot: BriefSnapshot;
@@ -23,7 +24,11 @@ interface AtAGlanceProps {
 export const AtAGlance: React.FC<AtAGlanceProps> = ({ snapshot, glance }) => {
   const { euiTheme } = useEuiTheme();
   return (
-    <section id={EXECUTIVE_BRIEF_SECTION_IDS.atAGlance} data-test-subj="executiveBriefAtAGlance">
+    <section
+      id={EXECUTIVE_BRIEF_SECTION_IDS.atAGlance}
+      data-test-subj="executiveBriefAtAGlance"
+      {...{ [BRIEF_BLOCK_ATTRIBUTE]: 'glance' }}
+    >
       <SectionTitle index={1} title="At a glance" subtitle="How are we doing?" />
       <EuiFlexGrid columns={4} gutterSize="m" responsive>
         {snapshot.glance.stats.map((stat) => (
@@ -43,9 +48,11 @@ export const AtAGlance: React.FC<AtAGlanceProps> = ({ snapshot, glance }) => {
       >
         <EuiText size="s">
           <p>
-            <strong>{glance.headline}</strong>
+            <strong>{glance.headline}</strong> <ClaimFlag claimPath="glance.headline" />
           </p>
-          <p>{glance.threatNarrative}</p>
+          <p>
+            {glance.threatNarrative} <ClaimFlag claimPath="glance.threatNarrative" />
+          </p>
         </EuiText>
       </EuiPanel>
     </section>

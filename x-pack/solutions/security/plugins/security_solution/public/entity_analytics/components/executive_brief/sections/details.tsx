@@ -13,10 +13,18 @@ import type {
 } from '../../../../../common/entity_analytics/executive_brief/types';
 import { EntityBadge } from '../../entity_badge';
 import { RiskScoreLevel } from '../../severity/common';
-import { EXECUTIVE_BRIEF_SCOPE_ID, EXECUTIVE_BRIEF_SECTION_IDS } from '../constants';
+import { useIsPrintMode } from '../components/brief_context';
+import {
+  BRIEF_BLOCK_ATTRIBUTE,
+  EXECUTIVE_BRIEF_SCOPE_ID,
+  EXECUTIVE_BRIEF_SECTION_IDS,
+} from '../constants';
+
+const noop = (): void => {};
 
 /** Collapsed exposure leaders and risk concentration. */
 export const Details: React.FC<{ snapshot: BriefSnapshot }> = ({ snapshot }) => {
+  const isPrintMode = useIsPrintMode();
   const leaders = snapshot.glance.exposureLeaders
     .map((euid) => snapshot.entities[euid])
     .filter((entity): entity is BriefEntity => entity !== undefined);
@@ -47,11 +55,18 @@ export const Details: React.FC<{ snapshot: BriefSnapshot }> = ({ snapshot }) => 
   ];
 
   return (
-    <section id={EXECUTIVE_BRIEF_SECTION_IDS.details} data-test-subj="executiveBriefDetails">
+    <section
+      id={EXECUTIVE_BRIEF_SECTION_IDS.details}
+      data-test-subj="executiveBriefDetails"
+      {...{ [BRIEF_BLOCK_ATTRIBUTE]: 'details' }}
+    >
       <EuiAccordion
         id="executiveBriefDetailsAccordion"
         buttonContent="Details: exposure leaders"
         paddingSize="m"
+        arrowDisplay={isPrintMode ? 'none' : 'left'}
+        forceState={isPrintMode ? 'open' : undefined}
+        onToggle={isPrintMode ? noop : undefined}
       >
         <EuiBasicTable<BriefEntity>
           tableCaption="Exposure leaders"

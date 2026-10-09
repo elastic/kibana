@@ -10,6 +10,7 @@ import {
   EXECUTIVE_BRIEF_POC_GENERATE_URL,
 } from '../../../../../common/entity_analytics/executive_brief/constants';
 import type {
+  BriefGeneratorKind,
   BriefNarrationMode,
   BriefTimeRange,
   GenerateBriefRequestBody,
@@ -20,15 +21,22 @@ import { useKibana } from '../../../../common/lib/kibana';
 export interface GenerateExecutiveBriefVariables {
   timeRange: BriefTimeRange;
   mode?: BriefNarrationMode;
+  generator?: BriefGeneratorKind;
+  connectorId?: string;
 }
 
-/** POSTs a new brief generation job (PoC: template generator only) and returns the job id. */
+/** POSTs a new brief generation job (template or LLM generator) and returns the job id. */
 export const useGenerateExecutiveBrief = () => {
   const { http } = useKibana().services;
 
   return useMutation<GenerateBriefResponse, Error, GenerateExecutiveBriefVariables>({
-    mutationFn: ({ timeRange, mode = 'names' }) => {
-      const body: GenerateBriefRequestBody = { timeRange, generator: 'template', mode };
+    mutationFn: ({ timeRange, mode = 'names', generator = 'template', connectorId }) => {
+      const body: GenerateBriefRequestBody = {
+        timeRange,
+        generator,
+        mode,
+        ...(generator === 'inference' && connectorId ? { connectorId } : {}),
+      };
       return http.fetch<GenerateBriefResponse>(EXECUTIVE_BRIEF_POC_GENERATE_URL, {
         method: 'POST',
         version: EXECUTIVE_BRIEF_API_VERSION,

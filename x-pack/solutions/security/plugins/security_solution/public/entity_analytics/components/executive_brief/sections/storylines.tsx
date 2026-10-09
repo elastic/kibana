@@ -11,10 +11,16 @@ import type {
   ExecutiveBrief,
 } from '../../../../../common/entity_analytics/executive_brief/types';
 import { EntityBadge } from '../../entity_badge';
+import { ClaimFlag, useClaimFlags } from '../components/brief_context';
 import { SectionErrorBoundary } from '../components/section_error_boundary';
 import { SectionTitle } from '../components/section_title';
 import { StorylineCard } from './storyline_card';
-import { EXECUTIVE_BRIEF_SCOPE_ID, EXECUTIVE_BRIEF_SECTION_IDS } from '../constants';
+import {
+  BRIEF_BLOCK_ATTRIBUTE,
+  BRIEF_KEEP_WITH_NEXT_ATTRIBUTE,
+  EXECUTIVE_BRIEF_SCOPE_ID,
+  EXECUTIVE_BRIEF_SECTION_IDS,
+} from '../constants';
 import { TEST_IDS } from '../test_ids';
 import { getStoryline } from '../utils/resolve_evidence';
 
@@ -23,9 +29,28 @@ interface StorylinesProps {
   brief: ExecutiveBrief;
 }
 
+/**
+ * Fallback marker below a card whose narrative was flagged by validation. Cards may also render
+ * `ClaimFlag` inline next to the claim; this note only shows when the card does not.
+ */
+const StorylineFlagNote: React.FC<{ index: number }> = ({ index }) => {
+  const flags = useClaimFlags(`storylines[${index}]`);
+  if (flags.length === 0) return null;
+  return (
+    <EuiText size="xs" color="subdued" data-test-subj="executiveBriefStorylineFlagNote">
+      <ClaimFlag claimPath={`storylines[${index}]`} />
+      {' Some wording in this storyline could not be fully verified against the evidence.'}
+    </EuiText>
+  );
+};
+
 export const Storylines: React.FC<StorylinesProps> = ({ snapshot, brief }) => {
   const rendered = brief.storylines
-    .map((narrative) => ({ narrative, storyline: getStoryline(snapshot, narrative.storylineId) }))
+    .map((narrative, narrativeIndex) => ({
+      narrative,
+      narrativeIndex,
+      storyline: getStoryline(snapshot, narrative.storylineId),
+    }))
     .filter(
       (item): item is typeof item & { storyline: NonNullable<typeof item.storyline> } =>
         item.storyline !== undefined
@@ -34,7 +59,11 @@ export const Storylines: React.FC<StorylinesProps> = ({ snapshot, brief }) => {
 
   return (
     <section id={EXECUTIVE_BRIEF_SECTION_IDS.storylines} data-test-subj="executiveBriefStorylines">
-      <SectionTitle index={2} title="Storylines" subtitle="What's happening?" />
+      <div
+        {...{ [BRIEF_BLOCK_ATTRIBUTE]: 'storylines-title', [BRIEF_KEEP_WITH_NEXT_ATTRIBUTE]: '' }}
+      >
+        <SectionTitle index={2} title="Storylines" subtitle="What's happening?" />
+      </div>
       {rendered.length === 0 ? (
         <EuiEmptyPrompt
           iconType="timeline"
@@ -45,34 +74,40 @@ export const Storylines: React.FC<StorylinesProps> = ({ snapshot, brief }) => {
         />
       ) : (
         <EuiFlexGroup direction="column" gutterSize="l">
-          {rendered.map(({ narrative, storyline }) => (
+          {rendered.map(({ narrative, narrativeIndex, storyline }) => (
             <EuiFlexItem key={storyline.evidenceId}>
-              <SectionErrorBoundary
-                fallbackText={`Storyline ${storyline.rank} could not be displayed`}
-              >
-                <StorylineCard
-                  snapshot={snapshot}
-                  storyline={storyline}
-                  narrative={narrative}
-                  decisions={brief.decisions
-                    .map((decision, index) => ({ decision, index }))
-                    .filter(({ decision }) => decision.relatesTo === storyline.evidenceId)}
-                />
-              </SectionErrorBoundary>
+              <div {...{ [BRIEF_BLOCK_ATTRIBUTE]: 'storyline' }}>
+                <SectionErrorBoundary
+                  fallbackText={`Storyline ${storyline.rank} could not be displayed`}
+                >
+                  <StorylineCard
+                    snapshot={snapshot}
+                    storyline={storyline}
+                    narrative={narrative}
+                    decisions={brief.decisions
+                      .map((decision, index) => ({ decision, index }))
+                      .filter(({ decision }) => decision.relatesTo === storyline.evidenceId)}
+                  />
+                </SectionErrorBoundary>
+                <StorylineFlagNote index={narrativeIndex} />
+              </div>
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
       )}
       {brief.crossStorylineConclusion && (
-        <>
+        <div {...{ [BRIEF_BLOCK_ATTRIBUTE]: 'cross-storyline' }}>
           <EuiSpacer size="m" />
           <EuiText size="s" data-test-subj="executiveBriefCrossStoryline">
-            <p>{brief.crossStorylineConclusion.statement}</p>
+            <p>
+              {brief.crossStorylineConclusion.statement}{' '}
+              <ClaimFlag claimPath="crossStorylineConclusion" />
+            </p>
           </EuiText>
-        </>
+        </div>
       )}
       {otherNotableEntities.length > 0 && (
-        <>
+        <div {...{ [BRIEF_BLOCK_ATTRIBUTE]: 'other-notable' }}>
           <EuiSpacer size="m" />
           <EuiFlexGroup
             gutterSize="xs"
@@ -102,7 +137,7 @@ export const Storylines: React.FC<StorylinesProps> = ({ snapshot, brief }) => {
               );
             })}
           </EuiFlexGroup>
-        </>
+        </div>
       )}
     </section>
   );

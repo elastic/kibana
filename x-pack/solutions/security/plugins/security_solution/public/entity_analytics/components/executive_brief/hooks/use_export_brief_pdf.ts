@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import type { ExecutiveBriefJob } from '../../../../../common/entity_analytics/executive_brief/types';
 import { useToasts } from '../../../../common/lib/kibana';
+import type { ExportProgressCallback } from '../export/export_brief_pdf';
 import { exportBriefToPdf } from '../export/export_brief_pdf';
 
 /**
@@ -18,9 +19,10 @@ export const useExportBriefPdf = () => {
   const toasts = useToasts();
 
   const handleExportPdf = useCallback(
-    async (job: ExecutiveBriefJob) => {
+    async (job: ExecutiveBriefJob, onProgress?: ExportProgressCallback) => {
       try {
-        await exportBriefToPdf(job);
+        await exportBriefToPdf(job, onProgress);
+        toasts.addSuccess('Executive brief PDF exported');
       } catch (err) {
         toasts.addError(err, {
           title: 'Failed to export executive brief PDF',
