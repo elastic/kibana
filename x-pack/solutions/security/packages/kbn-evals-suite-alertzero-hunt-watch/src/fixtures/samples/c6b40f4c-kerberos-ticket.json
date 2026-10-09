@@ -1,0 +1,175 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "c6b40f4c-c6a9-434e-adb8-989b0d06d005"
+  },
+  "chain": "wmi-lateral",
+  "step": "Kerberos ticket request from non-lsass process (DC 4769)",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.network",
+        "at": -121,
+        "doc": {
+          "event": {
+            "category": [
+              "network"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "connection_attempted",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-karen-06",
+            "id": "azqa-wks-karen-06",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-karen-06"
+          },
+          "user": {
+            "name": "karen.d"
+          },
+          "process": {
+            "name": "powershell.exe",
+            "executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "pid": 5120,
+            "entity_id": "azqa-ps-krb"
+          },
+          "source": {
+            "ip": "10.20.0.16",
+            "port": 53311
+          },
+          "destination": {
+            "ip": "10.20.0.5",
+            "port": 88
+          },
+          "network": {
+            "direction": "egress"
+          }
+        }
+      },
+      {
+        "stream": "logs-system.security",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "authentication"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "kerberos-service-ticket-requested",
+            "code": "4769",
+            "kind": "event",
+            "outcome": "success"
+          },
+          "host": {
+            "name": "dc-fs-09",
+            "id": "azqa-dc-fs-09",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "dc-fs-09"
+          },
+          "user": {
+            "name": "karen.d"
+          },
+          "source": {
+            "ip": "10.20.0.16",
+            "port": 53311
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "Port-88 connection is made by lsass.exe (the legitimate Kerberos client)",
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.network",
+        "at": -121,
+        "doc": {
+          "event": {
+            "category": [
+              "network"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "connection_attempted",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-karen-06",
+            "id": "azqa-wks-karen-06",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-karen-06"
+          },
+          "user": {
+            "name": "karen.d"
+          },
+          "process": {
+            "name": "lsass.exe",
+            "executable": "C:\\Windows\\system32\\lsass.exe",
+            "pid": 700,
+            "entity_id": "azqa-lsass-krb"
+          },
+          "source": {
+            "ip": "10.20.0.16",
+            "port": 53311
+          },
+          "destination": {
+            "ip": "10.20.0.5",
+            "port": 88
+          },
+          "network": {
+            "direction": "egress"
+          }
+        }
+      },
+      {
+        "stream": "logs-system.security",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "authentication"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "kerberos-service-ticket-requested",
+            "code": "4769",
+            "kind": "event",
+            "outcome": "success"
+          },
+          "host": {
+            "name": "dc-fs-09",
+            "id": "azqa-dc-fs-09",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "dc-fs-09"
+          },
+          "user": {
+            "name": "karen.d"
+          },
+          "source": {
+            "ip": "10.20.0.16",
+            "port": 53311
+          }
+        }
+      }
+    ]
+  }
+}

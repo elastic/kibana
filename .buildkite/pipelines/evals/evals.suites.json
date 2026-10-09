@@ -308,6 +308,21 @@
       "serverConfigSet": "evals_entity_analytics_v2"
     },
     {
+      "id": "alertzero-hunt-watch",
+      "name": "Alertzero Hunt Watch",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-alertzero-hunt-watch/playwright.config.ts",
+      "tags": [
+        "security",
+        "alertzero",
+        "hunt-watch"
+      ],
+      "ciLabels": [
+        "evals:alertzero-hunt-watch"
+      ],
+      "serverConfigSet": "evals_threat_intel"
+    },
+    {
       "id": "attack-discovery",
       "name": "Attack Discovery",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery/playwright.config.ts",

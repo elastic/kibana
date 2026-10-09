@@ -1,0 +1,710 @@
+version: ad2-v1
+profile: clean
+project: b7583d2ee03e4de9983378f1c0a3a02c
+run_scope:
+  count_only_alerts_after: ${RUN_START}
+  exclude_alert_ids_file: manifests/baseline-pre-detonation.json
+  exclude_rule_ids:
+  - a198fbbd-9413-45ec-a269-47ae4ccf59ce
+baseline:
+  file: manifests/baseline-pre-detonation.json
+  total: 158
+  causes:
+    lab-build: 151
+    rule-preview-control-leak: 5
+    guided-onboarding: 2
+sinkhole_zones:
+- malicious-c2.example.com
+- payload-cdn.example.net
+- drops.example.io
+- stage2.example.org
+chains:
+- key: bits-mshta
+  kind: endpoint
+  hosts:
+  - wks-jordan-04
+  users:
+  - jordan.park
+  user_aliases:
+  - jordan.park@corp.example.com
+  steps:
+  - step: LSASS via comsvcs.dll MiniDump
+    rule_id: 00140285-b827-4aee-aa09-8113f58a08f3
+    rule_source: prebuilt
+    rule_name: Potential Credential Access via Windows Utilities
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/00140285-lsass-comsvcs.json
+    techniques:
+    - T1003.001
+    - T1003.003
+    - T1218.011
+  - step: PDF reader -> bitsadmin
+    rule_id: 53a26770-9cbd-40c5-8b57-61d01a325e14
+    rule_source: prebuilt
+    rule_name: Suspicious PDF Reader Child Process
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/53a26770-pdf-child.json
+    techniques:
+    - T1016.001
+    - T1033
+    - T1057
+    - T1082
+    - T1203
+    - T1204.002
+    - T1218.003
+    - T1218.004
+    - T1218.005
+    - T1218.008
+    - T1218.009
+    - T1218.010
+    - T1566.001
+  - step: Defend detect-only alert promotion (credential access); also the Endpoint Analysis observable
+    rule_id: 9a1a2dae-0b5f-4c3d-8305-a268d404c306
+    rule_source: prebuilt
+    rule_name: Endpoint Security (Elastic Defend)
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/9a1a2dae-defend-promotion.json
+    techniques: []
+  - step: schtasks persistence
+    rule_id: afcce5ad-65de-4ed2-8516-5e093d3ac99a
+    rule_source: prebuilt
+    rule_name: Local Scheduled Task Creation
+    min_alerts: 1
+    preview:
+      positive: 3
+      negative: 0
+      pass: true
+    sample: samples/afcce5ad-schtasks.json
+    techniques:
+    - T1053.005
+  - step: mshta HTTP
+    rule_id: c2d90150-0133-451c-a783-533e736c12d7
+    rule_source: prebuilt
+    rule_name: Mshta Making Network Connections
+    min_alerts: 1
+    preview:
+      positive: 3
+      negative: 0
+      pass: true
+    sample: samples/c2d90150-mshta-network.json
+    techniques:
+    - T1218.005
+  - step: BITS job notify command line (T1197 persistence)
+    rule_id: c3b915e0-22f3-4bf7-991d-b643513c722f
+    rule_source: prebuilt
+    rule_name: Persistence via BITS Job Notify Cmdline
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/c3b915e0-bits-notify-cmdline.json
+    techniques:
+    - T1197
+  expected_attack:
+    count: 1
+    hosts:
+    - wks-jordan-04
+    users:
+    - jordan.park
+    techniques:
+    - T1003.001
+    - T1003.003
+    - T1016.001
+    - T1033
+    - T1053.005
+    - T1057
+    - T1082
+    - T1197
+    - T1203
+    - T1204.002
+    - T1218.003
+    - T1218.004
+    - T1218.005
+    - T1218.008
+    - T1218.009
+    - T1218.010
+    - T1218.011
+    - T1566.001
+- key: cloud-identity
+  kind: cloud
+  hosts:
+  - dev-cloudops-04
+  users:
+  - alice.chen
+  - jordan.park
+  - karen.d
+  user_aliases:
+  - alice.chen@corp.example.com
+  - jordan.park@corp.example.com
+  - karen.d@corp.example.com
+  steps:
+  - step: karen.d consent grant to an unverified app
+    rule_id: 1c6a8c7a-5cb6-4a82-ba27-d5a5b8a40a38
+    rule_source: prebuilt
+    rule_name: Entra ID Illicit Consent Grant via Registered Application
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/1c6a8c7a-entra-consent-grant.json
+    techniques:
+    - T1199
+    - T1528
+    - T1566.002
+    entity_source:
+    - field: azure.auditlogs.properties.initiated_by.user.userPrincipalName
+      kind: user
+  - step: karen.d reads a credential file from S3 (S3 data-access step)
+    rule_id: 2f0ee9fe-4529-4b9e-9f78-6c81ef33c6ba
+    rule_source: prebuilt
+    rule_name: AWS S3 Credential File Retrieved from Bucket
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/2f0ee9fe-aws-s3-credential-file.json
+    techniques:
+    - T1530
+    - T1552.001
+  - step: alice.chen MFA factors reset
+    rule_id: 729aa18d-06a6-41c7-b175-b65b739b1181
+    rule_source: prebuilt
+    rule_name: Attempt to Reset MFA Factors for an Okta User Account
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/729aa18d-okta-mfa-reset.json
+    techniques:
+    - T1098
+    - T1556.006
+  - step: jordan.park legacy ROPC sign-in without MFA
+    rule_id: 8d696bd0-5756-11f0-8e3b-f661ea17fbcd
+    rule_source: prebuilt
+    rule_name: Entra ID OAuth ROPC Grant Login Detected
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/8d696bd0-entra-ropc.json
+    techniques:
+    - T1078.004
+  - step: alice.chen long-term access key used from new source IP
+    rule_id: 9f8e3c5e-f72e-4e91-93f6-e98a4fae3e4f
+    rule_source: prebuilt
+    rule_name: AWS IAM Long-Term Access Key First Seen from Source IP
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/9f8e3c5e-aws-key-new-ip.json
+    techniques:
+    - T1078.004
+    - T1552
+  - step: alice.chen SSM SendCommand then LOLBin on the instance
+    rule_id: a8b3e2f0-8c7d-11ef-b4c6-f661ea17fbcd
+    rule_source: prebuilt
+    rule_name: AWS EC2 LOLBin Execution via SSM SendCommand
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/a8b3e2f0-aws-ssm-lolbin.json
+    techniques:
+    - T1059.004
+    - T1105
+    - T1651
+    entity_source:
+    - field: Esql.host_name_values
+      kind: host
+    - field: Esql_priv.user_name_values
+      kind: user
+    - field: Esql_priv.aws_cloudtrail_user_identity_arn_values
+      kind: user
+  - step: jordan.park modifies an Okta application
+    rule_id: c74fd275-ab2c-4d49-8890-e2943fa65c09
+    rule_source: prebuilt
+    rule_name: Attempt to Modify an Okta Application
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/c74fd275-okta-app-modify.json
+    techniques: []
+  - step: karen.d MFA disabled (post-compromise)
+    rule_id: dafa3235-76dc-40e2-9f71-1773b96d24cf
+    rule_source: prebuilt
+    rule_name: Entra ID MFA Disabled for User
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/dafa3235-entra-mfa-disabled.json
+    techniques:
+    - T1556.006
+  - step: karen.d mailbox read through Graph by the newly consented app
+    rule_id: e882e934-2aaa-11f0-8272-f661ea17fbcc
+    rule_source: prebuilt
+    rule_name: Microsoft Graph Email Access by Unusual User and Client
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/e882e934-graph-mail-access.json
+    techniques:
+    - T1114.002
+    - T1550.001
+    entity_source:
+    - field: user.id
+      kind: id
+      values:
+      - a11ce000-0000-4000-8000-000000000003
+  - step: jordan.park console login without MFA
+    rule_id: f5778acd-80e3-4ca0-a32a-6259386dfb20
+    rule_source: prebuilt
+    rule_name: AWS IAM User Console Login Without MFA
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/f5778acd-aws-console-no-mfa.json
+    techniques:
+    - T1078.004
+  expected_attack:
+    count: 1
+    hosts:
+    - dev-cloudops-04
+    users:
+    - alice.chen
+    - jordan.park
+    - karen.d
+    techniques:
+    - T1059.004
+    - T1078.004
+    - T1098
+    - T1105
+    - T1114.002
+    - T1199
+    - T1528
+    - T1530
+    - T1550.001
+    - T1552
+    - T1552.001
+    - T1556.006
+    - T1566.002
+    - T1651
+- key: linux-curl
+  kind: endpoint
+  hosts:
+  - web-prod-07
+  users:
+  - www-data
+  user_aliases:
+  - www-data@corp.example.com
+  steps:
+  - step: curl to drops.example.io piped to bash
+    rule_id: 3ebdc01e-7788-4845-8e7a-c8a671ad46ea
+    rule_source: prebuilt
+    rule_name: File Downloaded by Curl/Wget and Piped to Interpreter
+    min_alerts: 1
+    preview:
+      positive: 3
+      negative: 0
+      pass: true
+    sample: samples/3ebdc01e-curl-pipe-bash.json
+    techniques:
+    - T1059.004
+    - T1071
+  - step: SUID bash in /tmp
+    rule_id: 8a1b0278-0f9a-487d-96bd-d4833298e87a
+    rule_source: prebuilt
+    rule_name: SUID/SGID Bit Set
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/8a1b0278-suid-bit.json
+    techniques:
+    - T1548.001
+  - step: nginx -> curl fetching the dropper
+    rule_id: f16fca20-4d6c-43f9-aec1-20b6de3b0aeb
+    rule_source: prebuilt
+    rule_name: Suspicious Child Execution via Web Server
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/f16fca20-web-child.json
+    techniques:
+    - T1059
+    - T1190
+    - T1505.003
+  - step: cron write by www-data
+    rule_id: ff10d4d8-fea7-422d-afb1-e5a2702369a9
+    rule_source: prebuilt
+    rule_name: Cron Job Created or Modified
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/ff10d4d8-cron-write.json
+    techniques:
+    - T1053.003
+  expected_attack:
+    count: 1
+    hosts:
+    - web-prod-07
+    users:
+    - www-data
+    techniques:
+    - T1053.003
+    - T1059
+    - T1059.004
+    - T1071
+    - T1190
+    - T1505.003
+    - T1548.001
+- key: encoded-powershell
+  kind: endpoint
+  hosts:
+  - wks-alice-01
+  - srv-files-02
+  users:
+  - alice.chen
+  user_aliases:
+  - alice.chen@corp.example.com
+  steps:
+  - step: Executable dropped over SMB on srv-files-02 (target side of the ADMIN$ copy)
+    rule_id: 58bc134c-e8d2-4291-a552-b4b3e537c60b
+    rule_source: prebuilt
+    rule_name: Potential Lateral Tool Transfer via SMB Share
+    min_alerts: 1
+    preview:
+      positive: 3
+      negative: 0
+      pass: true
+    sample: samples/58bc134c-lateral-tool-transfer-smb.json
+    techniques:
+    - T1021.002
+    - T1570
+  - step: Run key persistence
+    rule_id: 97fc44d3-8dae-4019-ae83-298c3015600f
+    rule_source: prebuilt
+    rule_name: Startup or Run Key Registry Modification
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/97fc44d3-run-key.json
+    techniques:
+    - T1112
+    - T1547.001
+  - step: Office -> encoded PowerShell
+    rule_id: a624863f-a70d-417f-a7d2-7a404638d47f
+    rule_source: prebuilt
+    rule_name: Suspicious MS Office Child Process
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/a624863f-office-child.json
+    techniques:
+    - T1016
+    - T1033
+    - T1049
+    - T1057
+    - T1059.001
+    - T1059.003
+    - T1082
+    - T1203
+    - T1218.001
+    - T1218.002
+    - T1218.003
+    - T1218.004
+    - T1218.005
+    - T1218.008
+    - T1218.009
+    - T1218.010
+    - T1218.011
+    - T1566.001
+  - step: C2 connection (also covers the bits-mshta and linux-curl IoC domains)
+    rule_id: qa-custom-ti-domain-indicator-match
+    rule_source: custom
+    rule_name: 'QA custom: DNS lookup of a known-bad indicator domain'
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/custom-ti-domain-match.json
+    techniques:
+    - T1071.004
+  - step: ADMIN$ copy to srv-files-02
+    rule_id: fa01341d-6662-426b-9d0c-6d81e33c8a9d
+    rule_source: prebuilt
+    rule_name: Remote File Copy to a Hidden Share
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/fa01341d-hidden-share-copy.json
+    techniques:
+    - T1021.002
+    - T1074.002
+    - T1570
+  expected_attack:
+    count: 1
+    hosts:
+    - wks-alice-01
+    - srv-files-02
+    users:
+    - alice.chen
+    techniques:
+    - T1016
+    - T1021.002
+    - T1033
+    - T1049
+    - T1057
+    - T1059.001
+    - T1059.003
+    - T1071.004
+    - T1074.002
+    - T1082
+    - T1112
+    - T1203
+    - T1218.001
+    - T1218.002
+    - T1218.003
+    - T1218.004
+    - T1218.005
+    - T1218.008
+    - T1218.009
+    - T1218.010
+    - T1218.011
+    - T1547.001
+    - T1566.001
+    - T1570
+- key: wmi-lateral
+  kind: endpoint
+  hosts:
+  - wks-karen-06
+  - dc-fs-09
+  users:
+  - karen.d
+  user_aliases:
+  - karen.d@corp.example.com
+  steps:
+  - step: Remote schtasks on dc-fs-09
+    rule_id: 954ee7c8-5437-49ae-b2d6-2960883898e9
+    rule_source: prebuilt
+    rule_name: Remote Scheduled Task Creation
+    min_alerts: 1
+    preview:
+      positive: 3
+      negative: 0
+      pass: true
+    sample: samples/954ee7c8-remote-schtasks.json
+    techniques:
+    - T1021
+    - T1053.005
+  - step: msiexec/rundll32 scriptlet -> command shell
+    rule_id: 9ccf3ce0-0057-440a-91f5-870c6ad39093
+    rule_source: prebuilt
+    rule_name: Command Shell Activity Started via RunDLL32
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/9ccf3ce0-rundll32-shell.json
+    techniques:
+    - T1059.001
+    - T1059.003
+    - T1218.011
+    - T1552
+  - step: Kerberos ticket request from non-lsass process (DC 4769)
+    rule_id: c6b40f4c-c6a9-434e-adb8-989b0d06d005
+    rule_source: prebuilt
+    rule_name: Suspicious Kerberos Authentication Ticket Request
+    min_alerts: 1
+    preview:
+      positive: 3
+      negative: 0
+      pass: true
+    sample: samples/c6b40f4c-kerberos-ticket.json
+    techniques:
+    - T1550.003
+    - T1558.003
+    - T1558.004
+  - step: WMI event subscription persistence
+    rule_id: e72f87d0-a70e-4f8d-8443-a6407bc34643
+    rule_source: prebuilt
+    rule_name: Suspicious WMI Event Subscription Created
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/e72f87d0-wmi-subscription.json
+    techniques:
+    - T1546.003
+  - step: WMI incoming lateral movement on dc-fs-09 (target side)
+    rule_id: f3475224-b179-4f78-8877-c2bd64c26b88
+    rule_source: prebuilt
+    rule_name: WMI Incoming Lateral Movement
+    min_alerts: 1
+    preview:
+      positive: 3
+      negative: 0
+      pass: true
+    sample: samples/f3475224-wmi-incoming.json
+    techniques:
+    - T1021.003
+    - T1047
+  - step: WMI remote execution (source side, wks-karen-06)
+    rule_id: f59668de-caa0-4b84-94c1-3a1549e1e798
+    rule_source: prebuilt
+    rule_name: WMIC Remote Command
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/f59668de-wmic-remote.json
+    techniques:
+    - T1021.003
+    - T1021.006
+    - T1047
+    note: Source-side WMI execution on wks-karen-06; the decision-record target-side rule f3475224 covers dc-fs-09
+  - step: certutil download
+    rule_id: fd70c98a-c410-42dc-a2e3-761c71848acf
+    rule_source: prebuilt
+    rule_name: Suspicious CertUtil Commands
+    min_alerts: 1
+    preview:
+      positive: 1
+      negative: 0
+      pass: true
+    sample: samples/fd70c98a-certutil.json
+    techniques:
+    - T1105
+    - T1140
+    - T1552.004
+  expected_attack:
+    count: 1
+    hosts:
+    - wks-karen-06
+    - dc-fs-09
+    users:
+    - karen.d
+    techniques:
+    - T1021
+    - T1021.003
+    - T1021.006
+    - T1047
+    - T1053.005
+    - T1059.001
+    - T1059.003
+    - T1105
+    - T1140
+    - T1218.011
+    - T1546.003
+    - T1550.003
+    - T1552
+    - T1552.004
+    - T1558.003
+    - T1558.004
+  notes: 'Live qa-custom TI preview showed user patrykkopycinski on dc-fs-09 and wks-alice-01: operator/lab accounts share these hosts, so host-only
+    entity matches can pull in non-chain users. Match on rule_id AND (host OR user).'
+waivers: []
+anticheat:
+  esql_ancestry_exempt:
+  - rule_id: a8b3e2f0-8c7d-11ef-b4c6-f661ea17fbcd
+    reason: Aggregating ES|QL (cloudtrail x endpoint); ancestors are the empty placeholder
+  - rule_id: 1c6a8c7a-5cb6-4a82-ba27-d5a5b8a40a38
+    reason: Aggregating ES|QL (suppressed per user); ancestors are the empty placeholder
+  - rule_id: 29531d20-0e80-41d4-9ec6-d6b58e4a475c
+    reason: Aggregating ES|QL over prior alerts (Alerts in Different ATT&CK Tactics by Host)
+  - rule_id: 98cfaa44-83f0-4aba-90c4-363fb9d51a75
+    reason: Aggregating ES|QL over prior alerts (AWS IAM key correlated with detection alerts)
+  - rule_id: 7306ce7d-5c90-4f42-aa6c-12b0dc2fe3b8
+    reason: Aggregating ES|QL (Newly Observed Elastic Defend Behavior Alert)
+  - rule_id: 25a4207c-5c05-4680-904c-6e3411b275fa
+    reason: Aggregating ES|QL over prior alerts (Multiple Elastic Defend Alerts from a Single Process Tree)
+  - rule_id: c4f7a2b1-5d8e-4c3a-9b6e-2f1a0d8c7e5b
+    reason: Aggregating ES|QL over prior alerts (Multiple Rare Elastic Defend Behavior Rules by Host)
+  - rule_id: 3dc4e312-346b-4a10-b05f-450e1eeab91c
+    reason: Aggregating ES|QL (LLM-Based Compromised User Triage by User); ancestors are the empty placeholder
+twins:
+- of: encoded-powershell
+  removed_link: Run-key persistence step removed; Office child-process doc replaced by a non-Office parent
+  expected_attacks: 0
+- of: bits-mshta
+  removed_link: mshta never opens its network connection, so the Mshta sequence does not complete
+  expected_attacks: 0
+- of: linux-curl
+  removed_link: web-server parent replaced by systemd for the first step
+  expected_attacks: 0
+- of: wmi-lateral
+  removed_link: WMI consumer is NTEventLogEventConsumer and schtasks targets localhost
+  expected_attacks: 0
+- of: cloud-identity
+  removed_link: MFA enabled on the console login and ROPC sign-in; consent grants only User.Read
+  expected_attacks: 0
+workers:
+- worker: attack-discovery
+  observable: Exactly 4 endpoint attacks + >=1 cross-source cloud attack; each attack host/user/technique set contains the manifest set; twin
+    chains yield 0 attacks; no noise-only attack
+- worker: alert-triage
+  observable: Noise alerts closed/acknowledged with rationale; chain true positives escalated, not closed
+- worker: endpoint-analysis
+  observable: Forensic report names the correct process tree + IoCs; isolate/kill-process runs on the right agent id and is verified in .logs-endpoint.actions-*
+  response_target_host: wks-alice-01
+- worker: continuous-threat-hunt
+  observable: Hunt finds a host not pre-alerted (srv-files-02) and produces a hunt package
+  tokens:
+  - srv-files-02
+- worker: rule-tuning
+  observable: Exception proposal scoped to the noisy svc-backup process on srv-files-02
+  tokens:
+  - svc-backup
+  - srv-files-02
+- worker: rule-coverage
+  observable: Coverage report flags the T1071.004 gap covered only by the qa-custom indicator-match rule
+  tokens:
+  - T1071.004
+  - qa-custom
+- worker: lead-generation
+  observable: alice.chen and wks-alice-01 among top leads; noise-only entities not top-ranked
+  must_include:
+  - alice.chen
+  - wks-alice-01
