@@ -1350,6 +1350,7 @@ x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer @el
 x-pack/platform/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin @elastic/kibana-security
 x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
+x-pack/platform/test/task_manager/plugins/service_accounts @elastic/response-ops
 x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 x-pack/platform/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
 x-pack/platform/test/usage_collection/plugins/stack_management_usage_test @elastic/kibana-management

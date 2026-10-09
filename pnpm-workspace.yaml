@@ -1543,6 +1543,7 @@ packages:
   - 'x-pack/platform/test/security_functional/plugins/test_endpoints'
   - 'x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin'
   - 'x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin'
+  - 'x-pack/platform/test/task_manager/plugins/service_accounts'
   - 'x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin'
   - 'x-pack/platform/test/usage_collection/plugins/application_usage_test'
   - 'x-pack/platform/test/usage_collection/plugins/stack_management_usage_test'
