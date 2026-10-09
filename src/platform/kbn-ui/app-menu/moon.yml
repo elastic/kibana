@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/ui-chrome-layout'
+  - '@kbn/ui-ai-components'
 tags:
   - shared-browser
   - package
