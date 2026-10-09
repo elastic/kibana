@@ -133,7 +133,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const isExpired = isProposalExpired(proposal);
     const isReplaced = proposal.supersededBy !== undefined || proposal.status === 'superseded';
     const displayMode = isReplaced ? 'view' : mode;
-    const decision = isReplaced ? undefined : getProposalDecision(proposal);
+    const decision = getProposalDecision(proposal);
     const tone = getProposalTone(proposal);
 
     const primaryAction: ApprovalAction | undefined = onApprove
@@ -233,8 +233,16 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const bannerSuffix = decision?.reason ?? banner?.hint;
     const isSettledOrTransient = approvalPhase !== 'pending';
 
+    const replacedCaption = isReplaced ? getProposalCaption(proposal) : undefined;
     const headerCaption = decision?.actorName ? (
-      <ApprovalActorTime actorName={decision.actorName} at={decision.decidedAt} />
+      <>
+        {replacedCaption && `${replacedCaption} • `}
+        <ApprovalActorTime
+          actorName={decision.actorName}
+          at={decision.decidedAt}
+          executed={decision.status === 'failed'}
+        />
+      </>
     ) : !isReplaced && isSubmitting && since ? (
       <ApprovalActorTime actorName={actorName} at={since} live />
     ) : (

@@ -23,6 +23,8 @@ export interface ApprovalActorTimeProps {
    * decided at rather than how long ago that now reads.
    */
   live?: boolean;
+  /** Prefixes "executed", for an approved action that ran and failed. */
+  executed?: boolean;
 }
 
 const UPDATE_INTERVAL_SECONDS = 1;
@@ -34,12 +36,21 @@ const INCREMENTABLE_UNITS: ReadonlyArray<ReturnType<typeof selectUnit>['unit']> 
   'hour',
 ];
 
-export const ApprovalActorTime = ({ actorName, at, live = false }: ApprovalActorTimeProps) => {
+export const ApprovalActorTime = ({
+  actorName,
+  at,
+  live = false,
+  executed = false,
+}: ApprovalActorTimeProps) => {
   if (at === undefined) {
     return (
       <FormattedMessage
-        id="xpack.proposals.approvalActorTime.labelWithoutTime"
-        defaultMessage="by {actorName}"
+        id={
+          executed
+            ? 'xpack.proposals.approvalActorTime.executedLabelWithoutTime'
+            : 'xpack.proposals.approvalActorTime.labelWithoutTime'
+        }
+        defaultMessage={executed ? 'executed by {actorName}' : 'by {actorName}'}
         values={{ actorName: <strong>{actorName}</strong> }}
       />
     );
@@ -49,8 +60,12 @@ export const ApprovalActorTime = ({ actorName, at, live = false }: ApprovalActor
 
   return (
     <FormattedMessage
-      id="xpack.proposals.approvalActorTime.label"
-      defaultMessage="by {actorName} at {time}"
+      id={
+        executed
+          ? 'xpack.proposals.approvalActorTime.executedLabel'
+          : 'xpack.proposals.approvalActorTime.label'
+      }
+      defaultMessage={executed ? 'executed by {actorName} at {time}' : 'by {actorName} at {time}'}
       values={{
         actorName: <strong>{actorName}</strong>,
         time: live ? (
