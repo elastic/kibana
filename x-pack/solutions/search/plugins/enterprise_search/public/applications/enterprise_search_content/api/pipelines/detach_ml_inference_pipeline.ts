@@ -20,7 +20,9 @@ export type DetachMlInferencePipelineResponse = DeleteMlInferencePipelineRespons
 export const detachMlInferencePipeline = async (
   args: DetachMlInferencePipelineApiLogicArgs
 ): Promise<DetachMlInferencePipelineResponse> => {
-  const route = `/internal/enterprise_search/indices/${args.indexName}/ml_inference/pipeline_processors/${args.pipelineName}/detach`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(
+    args.indexName
+  )}/ml_inference/pipeline_processors/${encodeURIComponent(args.pipelineName)}/detach`;
   return await HttpLogic.values.http.delete<DetachMlInferencePipelineResponse>(route);
 };
 

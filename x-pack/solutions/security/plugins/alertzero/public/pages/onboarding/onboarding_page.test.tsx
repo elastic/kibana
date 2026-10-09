@@ -525,13 +525,14 @@ describe('OnboardingPage', () => {
       expect(screen.getByTestId('alertZeroOnboardingBackButton')).toBeInTheDocument();
     });
 
-    it('navigates to Security and does not send PATCHes when Back is clicked', () => {
+    it('returns to the intro step and does not send PATCHes when Back is clicked', () => {
       const httpPatch = jest.fn();
       const { application } = renderPage({ canWrite: true, httpPatch });
 
       fireEvent.click(screen.getByTestId('alertZeroOnboardingBackButton'));
 
-      expect(application.navigateToApp).toHaveBeenCalledWith(SECURITY_APP_ID);
+      expect(screen.getByTestId('alertZeroOnboardingIntroPromo')).toBeInTheDocument();
+      expect(application.navigateToApp).not.toHaveBeenCalled();
       expect(httpPatch).not.toHaveBeenCalled();
     });
 

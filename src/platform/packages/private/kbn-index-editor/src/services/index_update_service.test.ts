@@ -94,6 +94,26 @@ describe('IndexUpdateService', () => {
     });
   });
 
+  describe('dataSource$', () => {
+    it('emits the ES|QL source of the index with the table columns', async () => {
+      (getESQLAdHocDataview as jest.Mock).mockResolvedValue({
+        fields: {
+          getByName: () => {},
+          create: () => ({}),
+          concat: () => [{ name: 'foo', type: 'string', esTypes: ['keyword'], spec: {} }],
+        },
+      });
+      service.setIndexName('my-index');
+
+      const dataSource = await firstValueFrom(service.dataSource$);
+
+      expect(dataSource.query).toBe('FROM "my-index"');
+      expect(dataSource.getColumns()).toEqual([
+        expect.objectContaining({ name: 'foo', type: 'string', esType: 'keyword' }),
+      ]);
+    });
+  });
+
   describe('Unsaved changes', () => {
     it('unsaved changes should be false after adding a new empty row', async () => {
       const initial = await firstValueFrom(service.hasUnsavedChanges$);
@@ -180,7 +200,9 @@ describe('IndexUpdateService', () => {
     it('keeps the raw text for string-typed fields so object-like values are not coerced', async () => {
       const rows = await firstValueFrom(service.rows$);
 
-      service.updateDoc(rows[0].id, { asd4: '{}' }, { asd4: { type: 'string', esType: 'text' } });
+      service.updateDoc(rows[0].id, { asd4: '{}' }, [
+        { id: 'asd4', name: 'asd4', meta: { type: 'string', esType: 'text' } },
+      ]);
 
       const rowsAfterEdition = await firstValueFrom(service.rows$);
       expect(rowsAfterEdition[0].raw).toEqual({ asd4: '{}' });

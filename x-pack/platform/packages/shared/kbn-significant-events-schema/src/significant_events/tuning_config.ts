@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 export interface TuningConfigFieldBounds {
   min: number;
@@ -17,20 +17,22 @@ export interface TuningConfigFieldBounds {
 // Shape-only schema — no bounds or cross-field checks. Bounds and validation
 // logic live exclusively in SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS and
 // validateSignificantEventsTuningConfig to avoid drift between two sources.
-export const significantEventsTuningConfigSchema = z.object({
-  sample_size: z.number(),
-  max_iterations: z.number(),
-  feature_ttl_days: z.number(),
-  entity_filtered_ratio: z.number(),
-  diverse_ratio: z.number(),
-  max_excluded_features_in_prompt: z.number(),
-  max_entity_filters: z.number(),
-  semantic_min_score: z.number(),
-  rrf_rank_constant: z.number(),
-  sampling_timeout_ms: z.number(),
-  query_validation_timeout_ms: z.number(),
-  computed_features_timeout_ms: z.number(),
-});
+export const significantEventsTuningConfigSchema = lazySchema(() =>
+  z.object({
+    sample_size: z.number(),
+    max_iterations: z.number(),
+    feature_ttl_days: z.number(),
+    entity_filtered_ratio: z.number(),
+    diverse_ratio: z.number(),
+    max_excluded_features_in_prompt: z.number(),
+    max_entity_filters: z.number(),
+    semantic_min_score: z.number(),
+    rrf_rank_constant: z.number(),
+    sampling_timeout_ms: z.number(),
+    query_validation_timeout_ms: z.number(),
+    computed_features_timeout_ms: z.number(),
+  })
+);
 
 export type SignificantEventsTuningConfig = z.infer<typeof significantEventsTuningConfigSchema>;
 

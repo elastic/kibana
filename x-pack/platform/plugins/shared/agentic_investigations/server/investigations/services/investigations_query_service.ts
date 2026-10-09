@@ -22,7 +22,6 @@ import { INVESTIGATION_TEMPLATE_ID } from '../../../common/escalations/constants
 import type { InvestigationHypotheses } from '../../../common/hypotheses/hypotheses';
 import type { Impact } from '../../../common/impact/impact';
 import {
-  INVESTIGATION_SEVERITIES,
   INVESTIGATION_SEVERITY_NONE,
   MAX_INVESTIGATION_CANDIDATES,
   MAX_INVESTIGATIONS_PAGE_SIZE,
@@ -40,6 +39,7 @@ import type {
   ListInvestigationsQuery,
   ListInvestigationsResponse,
 } from '../../../common/investigations/investigation';
+import { isInvestigationSeverity } from '../../../common/investigations/severity';
 import { isInvestigationTitlePending } from '../../../common/investigations/title';
 import type {
   InvestigationSubject,
@@ -670,9 +670,6 @@ const severityRank = (conversation: ConversationSummary): number => {
   return severity ? SEVERITY_RANK[severity] : 0;
 };
 
-const isSeverity = (value: MetadataFieldValue | undefined): value is InvestigationSeverity =>
-  typeof value === 'string' && (INVESTIGATION_SEVERITIES as readonly string[]).includes(value);
-
 const optionalText = (value: MetadataFieldValue | undefined): string | undefined =>
   typeof value === 'string' && value.length > 0 ? value : undefined;
 
@@ -684,7 +681,7 @@ export const toMetadata = (
   const verdict = optionalText(metadata?.verdict);
   return {
     status: metadata?.status === 'closed' ? 'closed' : 'open',
-    ...(isSeverity(severity) && { severity }),
+    ...(isInvestigationSeverity(severity) && { severity }),
     ...(summary !== undefined && { summary }),
     ...(verdict !== undefined && { verdict }),
   };

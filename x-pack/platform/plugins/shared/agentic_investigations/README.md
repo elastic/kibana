@@ -45,12 +45,14 @@ public/
   hypotheses/            hypotheses attachment UI
   evidence/              evidence renderer (Markdown + line/bar chart), exported as `LazyEvidenceView`
   investigation_attachments/  attachment renderer registration helper
+  investigations/        data layer: query API hooks (investigation, privileges), status, close preview and assignee hooks, query keys, the brief cards loader
   escalations/           browser hooks
   user_profiles/         browser hooks
   conversation_templates/  investigation and escalation conversation template UI
     registry/            `TemplateDefinition` and `registerTemplate`, called once from `plugin.ts`
     shared/              connected components shared by the templates and exported to solutions (assignees, status, close confirmation, escalation modal, proposed actions)
     templates/           one directory per template: its `register.ts` and its own flyout parts
+      investigation/     also the investigation card and brief card, their view model, and the flyout's header title, live state (severity, running), and overview tab
   hooks/                 capability and open-in-chat hooks
 ```
 
@@ -169,9 +171,14 @@ The public plugin registers the conversation template UI for `investigation` and
 
   The status toggle and assignee pickers render disabled or read-only when the check fails; the other slots render nothing. When the UI capability is missing, the hooks (`useCanManageInvestigations`, `useCanManageEscalations`, `useCanReadEscalations`) ask `GET /internal/investigations/_privileges` once per page and share the answer; users with the capabilities never make that request. The route reports `{ investigations: { read, manage }, escalations: { read, manage } }` for the caller and needs no privilege of its own.
 - **No solution gates.** A solution's license or tier, its feature privileges and its settings do not gate the flyout. For example AlertZero's subscription check, its `securitySolution:enableAlertZero` setting and its `AccessBoundary` gate AlertZero's own pages, routes and attachment renderers, not this flyout. A solution that needs stricter rules on its own pages narrows the capabilities there (AlertZero's queue also requires AlertZero All for manage actions).
+- **Overview tab.** Sections, each only when there is data: Subject(s) (the query API's subjects as compact rows, where several alerts collapse into one "N alerts" row that expands to them, each with its start time, then a solution's own subject attachments such as security alerts), What happened (`metadata.summary`), Impact (with evidence), Conclusion (`metadata.verdict`), Proposed actions, Investigation trace (hypotheses with evidence). The data comes from `GET /internal/investigations/investigations/{id}`, read again every 5 s while `in_progress` is true; when that read fails the tab shows what the conversation carries. The header shows the severity and, while an agent works on it, a running indicator.
+- **Untitled investigations.** Until Agent Builder has titled an investigation (`title_pending`), the header (`renderTitle`) and the brief card name it after its first subject (an alert's rule name, the question, a Slack thread's question), or else "New investigation".
+- **Brief card.** The `investigation` template registers a `briefCard`: severity, title, running dot, a two-line summary, the impacted entities, and the pending proposals count. It shows no subjects; only the overview lists them. Cards rendered in the same tick share one list call (`id` filter). The same presentational card is on the start contract as `InvestigationCard` for solutions that list investigations from the query API (for example a solution's landing page).
 - **Icons.** The investigation template uses the solution-neutral `magnifyExclamation` (AlertZero used the security-specific `securitySignalDetected`) and the escalation template `warning`, kept from AlertZero.
 
 The status and assignee signals and the shared query client in `public/` are module-level singletons. Solution pages must import them from `@kbn/agentic-investigations-plugin/public` so a change in the flyout reaches their queue views.
+
+To see the template UI without an agent run, `scripts/nightshift_seed_investigations.ts` seeds synthetic investigations (a completed alert investigation with impact, hypotheses, and proposed actions, a completed question, and an untitled one that was just started) and prints a link to each conversation in Agent Builder. Run it with `node -r @kbn/setup-node-env x-pack/platform/plugins/shared/agentic_investigations/scripts/nightshift_seed_investigations.ts` (`--help` for the connection flags, `--clean` to remove the seeds). Proposed actions need `xpack.proposals.enabled: true`.
 
 ## Index naming
 
