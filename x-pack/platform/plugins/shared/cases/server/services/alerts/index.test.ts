@@ -834,6 +834,119 @@ describe('updateAlertsStatus', () => {
       );
     });
   });
+
+  describe('ensureAttacksAuthorized', () => {
+    const ATTACK_INDEX = '.alerts-security.attack.discovery.alerts-default';
+    const attacks = [{ id: 'attack-1', index: ATTACK_INDEX }];
+
+    const attackDoc = (source: Record<string, unknown>) => ({
+      docs: [{ _index: ATTACK_INDEX, _id: 'attack-1', found: true, _source: source }],
+    });
+
+    const validAttackSource = {
+      'kibana.alert.rule.rule_type_id': 'attack-discovery',
+      'kibana.space_ids': ['default'],
+    };
+
+    it('authorizes an attack discovery alert in the current space', async () => {
+      esClient.mget.mockResolvedValueOnce(attackDoc(validAttackSource) as never);
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).resolves.not.toThrow();
+
+      expect(esClient.mget).toHaveBeenCalledWith({
+        docs: [{ _id: 'attack-1', _index: ATTACK_INDEX }],
+        _source_includes: ['kibana.alert.rule.rule_type_id', 'kibana.space_ids'],
+      });
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).toHaveBeenCalledWith({ alerts: attacks });
+    });
+
+    it('throws when the referenced document does not exist', async () => {
+      esClient.mget.mockResolvedValueOnce({
+        docs: [{ _index: ATTACK_INDEX, _id: 'attack-1', found: false }],
+      } as never);
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).rejects.toThrow(/Referenced attack\(s\) not found: attack-1/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('throws when the referenced document is not an alert', async () => {
+      esClient.mget.mockResolvedValueOnce(attackDoc({ message: 'just a document' }) as never);
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).rejects.toThrow(/are not attack discoveries in space default: attack-1/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('throws when the referenced alert is not an attack discovery', async () => {
+      esClient.mget.mockResolvedValueOnce(
+        attackDoc({
+          'kibana.alert.rule.rule_type_id': 'siem.queryRule',
+          'kibana.space_ids': ['default'],
+        }) as never
+      );
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).rejects.toThrow(/are not attack discoveries in space default: attack-1/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('throws when the referenced attack belongs to another space', async () => {
+      esClient.mget.mockResolvedValueOnce(
+        attackDoc({
+          'kibana.alert.rule.rule_type_id': 'attack-discovery',
+          'kibana.space_ids': ['space-2'],
+        }) as never
+      );
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).rejects.toThrow(/are not attack discoveries in space default: attack-1/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('throws without calling mget when the index belongs to a linked project (CPS)', async () => {
+      await expect(
+        alertService.ensureAttacksAuthorized({
+          attacks: [{ id: 'attack-1', index: `my-linked-project:${ATTACK_INDEX}` }],
+          spaceId: 'default',
+        })
+      ).rejects.toThrow(/linked project or remote cluster/);
+
+      expect(esClient.mget).not.toHaveBeenCalled();
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('does not call mget when there are no non-empty attacks', async () => {
+      await expect(
+        alertService.ensureAttacksAuthorized({
+          attacks: [{ id: '', index: '' }],
+          spaceId: 'default',
+        })
+      ).resolves.not.toThrow();
+
+      expect(esClient.mget).not.toHaveBeenCalled();
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('wraps and rethrows authorization errors', async () => {
+      esClient.mget.mockResolvedValueOnce(attackDoc(validAttackSource) as never);
+      alertsClient.ensureAllAlertsAuthorizedRead.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).rejects.toThrow(/Failed to authorize attacks/);
+    });
+  });
 });
 
 describe('updateAlertsStatus — event bus', () => {

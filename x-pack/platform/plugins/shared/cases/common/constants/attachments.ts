@@ -24,6 +24,7 @@ export const INDICATOR_ATTACHMENT_TYPE = 'security.indicator';
 // type with no legacy v1 equivalent, so it is intentionally absent from the legacy maps.
 export const SECURITY_ENTITY_ATTACHMENT_TYPE = 'security.entity';
 export const SECURITY_TIMELINE_ATTACHMENT_TYPE = 'security.timeline';
+export const SECURITY_ATTACK_ATTACHMENT_TYPE = 'security.attack';
 
 export const ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE = 'ml.anomaly_swimlane';
 export const ML_ANOMALY_CHARTS_ATTACHMENT_TYPE = 'ml.anomaly_charts';
