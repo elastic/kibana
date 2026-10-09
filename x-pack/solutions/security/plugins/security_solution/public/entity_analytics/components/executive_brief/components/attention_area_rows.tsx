@@ -162,7 +162,6 @@ const AttentionAreaRow: React.FC<{ area: AttentionArea }> = ({ area }) => {
 
 export const AttentionAreaRows: React.FC<{ areas: readonly AttentionArea[] }> = ({ areas }) => {
   const { euiTheme } = useEuiTheme();
-  const isPrintMode = useIsPrintMode();
   return (
     <EuiPanel hasBorder paddingSize="none" data-test-subj="executiveBriefAttentionRows">
       {AREA_GROUPS.map((group, groupIndex) => {
