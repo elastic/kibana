@@ -381,7 +381,7 @@ describe('ArtifactViewFlyout', () => {
 
   it('opens edit and delete from the take action menu', () => {
     const onTakeAction = jest.fn();
-    render({ labels: artifactListPageLabels, onTakeAction });
+    render({ onTakeAction });
 
     fireEvent.click(renderResult.getByTestId('viewFlyout-takeActionButton'));
 

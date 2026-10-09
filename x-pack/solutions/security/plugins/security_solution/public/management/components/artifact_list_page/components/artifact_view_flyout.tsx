@@ -52,6 +52,7 @@ import {
 } from '../../context_menu_with_router_support';
 import { ArtifactOperatingSystemBadges } from './artifact_os_badges';
 import { ArtifactViewPolicyAssignment } from './artifact_view_policy_assignment';
+import { ARTIFACT_CARD_ACTION_LABELS } from '../translations';
 
 export const ARTIFACT_VIEW_FLYOUT_LABELS = Object.freeze({
   viewFlyoutLastUpdatedFieldLabel: i18n.translate(
@@ -98,16 +99,13 @@ export const ARTIFACT_VIEW_FLYOUT_LABELS = Object.freeze({
 });
 
 type ArtifactViewFlyoutLabels = typeof ARTIFACT_VIEW_FLYOUT_LABELS &
-  ArtifactEnabledSwitchProps['labels'] & {
-    /** Same strings as the simple table edit and delete actions. */
-    cardActionEditLabel?: string;
-    cardActionDeleteLabel?: string;
-  };
+  ArtifactEnabledSwitchProps['labels'] &
+  typeof ARTIFACT_CARD_ACTION_LABELS;
 
 const isNotFoundError = (error: IHttpFetchError<Error>): boolean => {
   const httpError = error as IHttpFetchError<{ statusCode?: number }>;
   return httpError.response?.status === 404 || httpError.body?.statusCode === 404;
-  };
+};
 
 export type ArtifactViewFlyoutTakeAction = (action: {
   type: 'edit' | 'delete';
@@ -175,6 +173,7 @@ export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
         ...ARTIFACT_VIEW_FLYOUT_LABELS,
         ...ARTIFACT_ENABLED_SWITCH_LABELS,
         ...ARTIFACT_ENABLE_DISABLE_ACTION_LABELS,
+        ...ARTIFACT_CARD_ACTION_LABELS,
         ..._labels,
       }),
       [_labels]
@@ -206,7 +205,7 @@ export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
 
       // A refetch keeps the previous item. Close when nothing loaded, or when the artifact is gone.
       if (!item || isNotFoundError(error)) {
-      onClose();
+        onClose();
       }
     }, [error, item, labels, onClose, toasts]);
 

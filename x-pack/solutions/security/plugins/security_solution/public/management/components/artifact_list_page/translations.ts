@@ -13,6 +13,21 @@ import { ARTIFACT_DELETE_ACTION_LABELS } from './hooks/use_with_artifact_delete_
 import { ARTIFACT_ENABLED_SWITCH_LABELS } from './components/artifact_enabled_switch';
 import { ARTIFACT_ENABLE_DISABLE_ACTION_LABELS } from './hooks/use_with_artifact_enable_disable';
 
+export const ARTIFACT_CARD_ACTION_LABELS = Object.freeze({
+  cardActionEditLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.cardActionEditLabel',
+    {
+      defaultMessage: 'Edit artifact',
+    }
+  ),
+  cardActionDeleteLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.cardActionDeleteLabel',
+    {
+      defaultMessage: 'Delete artifact',
+    }
+  ),
+});
+
 export const artifactListPageLabels = Object.freeze({
   // ------------------------------
   // PAGE labels
@@ -177,18 +192,7 @@ export const artifactListPageLabels = Object.freeze({
   // ------------------------------
   // CARD ACTIONS labels
   // ------------------------------
-  cardActionEditLabel: i18n.translate(
-    'xpack.securitySolution.artifactListPage.cardActionEditLabel',
-    {
-      defaultMessage: 'Edit artifact',
-    }
-  ),
-  cardActionDeleteLabel: i18n.translate(
-    'xpack.securitySolution.artifactListPage.cardActionDeleteLabel',
-    {
-      defaultMessage: 'Delete artifact',
-    }
-  ),
+  ...ARTIFACT_CARD_ACTION_LABELS,
 
   // ------------------------------
   // TABLE labels
