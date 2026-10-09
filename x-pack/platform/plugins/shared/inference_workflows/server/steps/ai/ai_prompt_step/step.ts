@@ -8,7 +8,10 @@
 import type { CoreSetup } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { validateReasoningEffort } from '@kbn/inference-common';
-import { AiPromptStepCommonDefinition } from '../../../../common/steps/ai';
+import {
+  AiPromptStepCommonDefinition,
+  normalizeOptionalConnectorParam,
+} from '../../../../common/steps/ai';
 import type { InferenceWorkflowsStartDeps } from '../../../types';
 import { AI_PROMPT_FEATURE_ID } from '../ai_feature_ids';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
@@ -50,8 +53,10 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
     handler: async (context) => {
       const [, { inference, searchInferenceEndpoints }] = await coreSetup.getStartServices();
 
-      const connectorIdByFeature = context.config['connector-id-by-feature'];
-      const connectorId = context.config['connector-id'];
+      const connectorIdByFeature = normalizeOptionalConnectorParam(
+        context.config['connector-id-by-feature']
+      );
+      const connectorId = normalizeOptionalConnectorParam(context.config['connector-id']);
       const request = context.contextManager.getFakeRequest();
 
       let resolvedConnectorId: string;

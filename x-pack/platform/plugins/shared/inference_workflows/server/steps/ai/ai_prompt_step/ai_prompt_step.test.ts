@@ -19,6 +19,9 @@ jest.mock('../../../../common/steps/ai', () => ({
     inputSchema: {},
     outputSchema: {},
   },
+  // The real helper, so the handler tests cover how blank connector fields are treated.
+  normalizeOptionalConnectorParam: jest.requireActual('../../../../common/steps/ai/ai_prompt_step')
+    .normalizeOptionalConnectorParam,
 }));
 
 jest.mock('@kbn/workflows-extensions/server', () => ({
@@ -644,6 +647,51 @@ describe('aiPromptStepDefinition', () => {
         );
         expect(mockResolveConnectorId).not.toHaveBeenCalled();
       });
+
+      it.each(['', '   '])(
+        'uses the feature when connector-id is blank (%j), as a templated value that is unset on this path renders',
+        async (blank) => {
+          const contextWithBlankConnector = {
+            ...mockContext,
+            config: { 'connector-id': blank, 'connector-id-by-feature': 'context_engine_prompt' },
+          };
+          mockSearchInferenceEndpoints.features.get.mockReturnValue({
+            taskType: 'chat_completion',
+          });
+          mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({
+            endpoints: [{ connectorId: 'gemini-flash-connector' }],
+          });
+          mockChatModel.invoke.mockResolvedValue({ content: 'ok', response_metadata: {} });
+
+          await handler(contextWithBlankConnector);
+
+          expect(mockResolveConnectorId).not.toHaveBeenCalled();
+          expect(mockInference.getChatModel).toHaveBeenCalledWith(
+            expect.objectContaining({ connectorId: 'gemini-flash-connector' })
+          );
+        }
+      );
+
+      it.each(['', '   '])(
+        'uses connector-id when connector-id-by-feature is blank (%j)',
+        async (blank) => {
+          const contextWithBlankFeature = {
+            ...mockContext,
+            config: { 'connector-id': 'explicit-connector', 'connector-id-by-feature': blank },
+          };
+          mockChatModel.invoke.mockResolvedValue({ content: 'ok', response_metadata: {} });
+
+          await handler(contextWithBlankFeature);
+
+          expect(mockSearchInferenceEndpoints.endpoints.getForFeature).not.toHaveBeenCalled();
+          expect(mockResolveConnectorId).toHaveBeenCalledWith(
+            'explicit-connector',
+            expect.anything(),
+            expect.anything(),
+            expect.anything()
+          );
+        }
+      );
 
       it('throws when the feature resolves to no endpoints', async () => {
         const contextWithFeature = {

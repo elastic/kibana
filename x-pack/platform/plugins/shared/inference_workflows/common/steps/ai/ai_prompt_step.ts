@@ -16,6 +16,15 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
  */
 export const AiPromptStepTypeId = 'ai.prompt';
 
+/**
+ * A connector field that renders to an empty or blank string (for example a templated value that
+ * is not set on this path) counts as absent, so one step can list both connector fields.
+ */
+export const normalizeOptionalConnectorParam = (value: string | undefined): string | undefined => {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
+};
+
 export const ConfigSchema = z
   .object({
     'connector-id': z.string().max(255).optional(),
@@ -34,7 +43,10 @@ export const ConfigSchema = z
       ),
   })
   .superRefine((cfg, ctx) => {
-    if (cfg['connector-id'] !== undefined && cfg['connector-id-by-feature'] !== undefined) {
+    if (
+      normalizeOptionalConnectorParam(cfg['connector-id']) !== undefined &&
+      normalizeOptionalConnectorParam(cfg['connector-id-by-feature']) !== undefined
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'Cannot specify both connector-id and connector-id-by-feature.',
