@@ -5,26 +5,23 @@
  * 2.0.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { createActionHandler } from './create_action_handler';
-import { createDynamicQueries } from './create_queries';
+import { buildQueries } from './create_queries';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { packSavedObjectType } from '../../../common/types';
+import { PACK_LOOKUP_FAILED, PACK_NOT_FOUND } from '../../../common/translations/errors';
 
-jest.mock('./create_queries', () => {
-  const actual = jest.requireActual('./create_queries');
-
-  return {
-    ...actual,
-    createDynamicQueries: jest.fn(),
-  };
-});
+jest.mock('./create_queries', () => ({
+  ...jest.requireActual('./create_queries'),
+  buildQueries: jest.fn(),
+}));
 jest.mock('../../lib/parse_agent_groups');
 jest.mock('../../utils/get_internal_saved_object_client');
 
-const mockedCreateDynamicQueries = createDynamicQueries as jest.MockedFunction<
-  typeof createDynamicQueries
->;
+const mockedBuildQueries = buildQueries as jest.MockedFunction<typeof buildQueries>;
 const mockedParseAgentSelection = parseAgentSelection as jest.MockedFunction<
   typeof parseAgentSelection
 >;
@@ -71,13 +68,13 @@ describe('createActionHandler', () => {
     jest.clearAllMocks();
     mockedGetInternalSOClient.mockReturnValue({} as ReturnType<typeof mockedGetInternalSOClient>);
     mockedParseAgentSelection.mockResolvedValue([TEST_AGENT]);
-    mockedCreateDynamicQueries.mockResolvedValue([
+    mockedBuildQueries.mockResolvedValue([
       {
         action_id: QUERY_ACTION_ID,
         id: 'q1',
         query: 'SELECT * FROM os_version;',
         agents: [TEST_AGENT],
-      } as unknown as Awaited<ReturnType<typeof mockedCreateDynamicQueries>>[number],
+      } as unknown as Awaited<ReturnType<typeof mockedBuildQueries>>[number],
     ]);
   });
 
@@ -87,7 +84,10 @@ describe('createActionHandler', () => {
     await createActionHandler(
       context,
       { query: 'SELECT * FROM os_version;', agent_ids: [TEST_AGENT] },
-      { space: { id: 'production' } }
+      {
+        space: { id: 'production' },
+        dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
+      }
     );
 
     expect(bulkCreate).toHaveBeenCalledTimes(1);
@@ -106,7 +106,7 @@ describe('createActionHandler', () => {
     await createActionHandler(
       context,
       { query: 'SELECT * FROM os_version;', agent_ids: [TEST_AGENT] },
-      {}
+      { dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } } }
     );
 
     const [actions] = bulkCreate.mock.calls[0];
@@ -119,13 +119,15 @@ describe('createActionHandler', () => {
     const result = await createActionHandler(
       context,
       { query: 'SELECT * FROM os_version;', agent_ids: [TEST_AGENT] },
-      { space: { id: 'production' } }
+      {
+        space: { id: 'production' },
+        dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
+      }
     );
 
     expect(result.response.space_id).toBe('production');
     const [fleetActions] = bulkCreate.mock.calls[0];
     expect(fleetActions[0].space_id).toBe('production');
-    // and the action SO write goes to the bulk indexer
     expect(bulk).toHaveBeenCalledTimes(1);
   });
 
@@ -140,7 +142,10 @@ describe('createActionHandler', () => {
       createActionHandler(
         context,
         { query: 'SELECT * FROM os_version;', agent_ids: [TEST_AGENT] },
-        { space: { id: 'production' } }
+        {
+          space: { id: 'production' },
+          dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
+        }
       )
     ).rejects.toThrow(/Failed to write osquery action document .*: rejected/);
     expect(reportEvent).not.toHaveBeenCalled();
@@ -156,7 +161,10 @@ describe('createActionHandler', () => {
     await createActionHandler(
       context,
       { query: 'SELECT * FROM os_version;', agent_ids: [TEST_AGENT] },
-      { space: { id: 'production' } }
+      {
+        space: { id: 'production' },
+        dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
+      }
     );
 
     const [actions] = bulkCreate.mock.calls[0];
@@ -169,7 +177,7 @@ describe('createActionHandler', () => {
     await createActionHandler(
       context,
       { query: 'SELECT * FROM os_version;', agent_ids: [TEST_AGENT] },
-      {}
+      { dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } } }
     );
 
     const [actions] = bulkCreate.mock.calls[0];
@@ -182,7 +190,10 @@ describe('createActionHandler', () => {
     await createActionHandler(
       context,
       { query: 'SELECT * FROM os_version;', agent_ids: [TEST_AGENT] },
-      { space: { id: 'production' } }
+      {
+        space: { id: 'production' },
+        dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
+      }
     );
 
     const [actions] = bulkCreate.mock.calls[0];
@@ -200,7 +211,10 @@ describe('createActionHandler', () => {
       createActionHandler(
         context,
         { query: 'SELECT * FROM os_version;', agent_ids: [] },
-        { space: { id: 'production' } }
+        {
+          space: { id: 'production' },
+          dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
+        }
       )
     ).rejects.toThrow('No agents found for selection');
 
@@ -213,11 +227,14 @@ describe('createActionHandler', () => {
     await createActionHandler(
       context,
       { query: 'SELECT * FROM os_version;', agent_ids: [TEST_AGENT] },
-      { space: { id: 'production' }, error: 'license error' }
+      {
+        space: { id: 'production' },
+        error: 'license error',
+        dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
+      }
     );
 
     expect(bulkCreate).not.toHaveBeenCalled();
-    // telemetry still fires for the action document
     expect(reportEvent).toHaveBeenCalledTimes(1);
   });
 
@@ -229,11 +246,219 @@ describe('createActionHandler', () => {
     await createActionHandler(
       context,
       { query: 'SELECT * FROM os_version;', agent_ids: [TEST_AGENT] },
-      { space: { id: 'production' } }
+      {
+        space: { id: 'production' },
+        dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
+      }
     );
 
     expect(bulkCreate).toHaveBeenCalledTimes(1);
     expect(bulk).not.toHaveBeenCalled();
+  });
+
+  it('does not dispatch anything when the referenced pack cannot be read (live_query)', async () => {
+    mockedGetInternalSOClient.mockReturnValue({
+      get: jest
+        .fn()
+        .mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError(packSavedObjectType, 'missing-pack')
+        ),
+    } as unknown as ReturnType<typeof mockedGetInternalSOClient>);
+    const { context, bulkCreate, bulk, reportEvent } = buildOsqueryContext();
+
+    await expect(
+      createActionHandler(
+        context,
+        { pack_id: 'missing-pack', query: 'SELECT 42 AS custom;', agent_ids: [TEST_AGENT] },
+        {
+          space: { id: 'production' },
+          dispatch: {
+            entryPoint: 'live_query',
+            source: { kind: 'pack', packSavedObjectId: 'missing-pack' },
+          },
+        }
+      )
+    ).rejects.toThrow();
+
+    expect(bulkCreate).not.toHaveBeenCalled();
+    expect(bulk).not.toHaveBeenCalled();
+    expect(reportEvent).not.toHaveBeenCalled();
+  });
+
+  it('records an error on the action instead of throwing when rule_run and the pack is gone', async () => {
+    mockedGetInternalSOClient.mockReturnValue({
+      get: jest
+        .fn()
+        .mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError(packSavedObjectType, 'missing-pack')
+        ),
+      find: jest.fn().mockResolvedValue({ saved_objects: [], total: 0 }),
+      resolve: jest
+        .fn()
+        .mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError(packSavedObjectType, 'missing-pack')
+        ),
+    } as unknown as ReturnType<typeof mockedGetInternalSOClient>);
+    // Use actual buildQueries so the unresolved source produces an error row
+    mockedBuildQueries.mockImplementation(jest.requireActual('./create_queries').buildQueries);
+    const { context, bulkCreate, bulk } = buildOsqueryContext();
+
+    const result = await createActionHandler(
+      context,
+      { pack_id: 'missing-pack', agent_ids: [TEST_AGENT] },
+      {
+        space: { id: 'production' },
+        dispatch: {
+          entryPoint: 'rule_run',
+          preflight: undefined,
+        },
+      }
+    );
+
+    expect(result.fleetActionsCount).toBe(0);
+    expect(bulkCreate).not.toHaveBeenCalled();
+    expect(bulk).toHaveBeenCalledTimes(1);
+    expect(result.response.queries).toEqual([
+      expect.objectContaining({ id: 'missing-pack', error: PACK_NOT_FOUND }),
+    ]);
+  });
+
+  it('records a pack lookup-failure error when rule_run and pack get throws a generic SO error', async () => {
+    mockedGetInternalSOClient.mockReturnValue({
+      get: jest.fn().mockRejectedValue(new Error('elasticsearch unavailable')),
+      find: jest.fn().mockResolvedValue({ saved_objects: [], total: 0 }),
+      resolve: jest.fn().mockRejectedValue(new Error('elasticsearch unavailable')),
+    } as unknown as ReturnType<typeof mockedGetInternalSOClient>);
+    // Use actual buildQueries so the unresolved source produces an error row
+    mockedBuildQueries.mockImplementation(jest.requireActual('./create_queries').buildQueries);
+    const { context, bulkCreate, bulk } = buildOsqueryContext();
+
+    const result = await createActionHandler(
+      context,
+      { pack_id: 'missing-pack', agent_ids: [TEST_AGENT] },
+      {
+        space: { id: 'production' },
+        dispatch: {
+          entryPoint: 'rule_run',
+          preflight: undefined,
+        },
+      }
+    );
+
+    expect(result.fleetActionsCount).toBe(0);
+    expect(bulkCreate).not.toHaveBeenCalled();
+    expect(bulk).toHaveBeenCalledTimes(1);
+    expect(result.response.queries).toEqual([
+      expect.objectContaining({ id: 'missing-pack', error: PACK_LOOKUP_FAILED }),
+    ]);
+    expect(result.response.queries[0].error).not.toBe(PACK_NOT_FOUND);
+  });
+
+  it('rethrows non-404 pack errors when entry point is live_query', async () => {
+    mockedGetInternalSOClient.mockReturnValue({
+      get: jest.fn().mockRejectedValue(new Error('elasticsearch unavailable')),
+    } as unknown as ReturnType<typeof mockedGetInternalSOClient>);
+    const { context, bulkCreate, bulk, reportEvent } = buildOsqueryContext();
+
+    await expect(
+      createActionHandler(
+        context,
+        { pack_id: 'missing-pack', query: 'SELECT 42 AS custom;', agent_ids: [TEST_AGENT] },
+        {
+          space: { id: 'production' },
+          dispatch: {
+            entryPoint: 'live_query',
+            source: { kind: 'pack', packSavedObjectId: 'missing-pack' },
+          },
+        }
+      )
+    ).rejects.toThrow('elasticsearch unavailable');
+
+    expect(bulkCreate).not.toHaveBeenCalled();
+    expect(bulk).not.toHaveBeenCalled();
+    expect(reportEvent).not.toHaveBeenCalled();
+  });
+
+  it('passes saved_query dispatch source to buildQueries', async () => {
+    const { context } = buildOsqueryContext();
+    const storedQuery = { savedObjectId: 'sq-so', query: 'select 1;' };
+
+    await createActionHandler(
+      context,
+      { saved_query_id: 'sq-1', query: 'select 42 as custom;', agent_ids: [TEST_AGENT] },
+      {
+        space: { id: 'production' },
+        dispatch: {
+          entryPoint: 'live_query',
+          source: { kind: 'saved_query', savedQueryId: 'sq-1', stored: storedQuery },
+        },
+      }
+    );
+
+    expect(mockedBuildQueries).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: { kind: 'saved_query', savedQueryId: 'sq-1', stored: storedQuery },
+      })
+    );
+  });
+
+  it('dispatches pack SO SQL to Fleet even when the caller posted a different queries[]', async () => {
+    const storedPackQuery = 'select * from processes;';
+    const callerQuery = 'select 42 as custom;';
+    const get = jest.fn().mockResolvedValue({
+      attributes: {
+        name: 'pack',
+        queries: [{ id: 'processes', name: 'processes', query: storedPackQuery }],
+      },
+      references: [],
+    });
+    mockedGetInternalSOClient.mockReturnValue({
+      get,
+    } as unknown as ReturnType<typeof mockedGetInternalSOClient>);
+    // Use actual buildQueries for this test to verify the SO content is dispatched
+    mockedBuildQueries.mockImplementation(jest.requireActual('./create_queries').buildQueries);
+    const { context, bulkCreate } = buildOsqueryContext();
+
+    await createActionHandler(
+      context,
+      {
+        pack_id: 'pack-1',
+        queries: [{ id: 'processes', query: callerQuery }],
+        agent_ids: [TEST_AGENT],
+      } as unknown as Parameters<typeof createActionHandler>[1],
+      {
+        space: { id: 'production' },
+        dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
+      }
+    );
+
+    expect(bulkCreate).toHaveBeenCalledTimes(1);
+    const [actions] = bulkCreate.mock.calls[0];
+    expect(actions).toHaveLength(1);
+    expect(actions[0].data.query).toBe(storedPackQuery);
+    expect(actions[0].data.query).not.toBe(callerQuery);
+  });
+
+  it('looks up a padded pack_id using the trimmed id', async () => {
+    const get = jest.fn().mockResolvedValue({
+      attributes: { name: 'pack', queries: [] },
+      references: [],
+    });
+    mockedGetInternalSOClient.mockReturnValue({
+      get,
+    } as unknown as ReturnType<typeof mockedGetInternalSOClient>);
+    const { context } = buildOsqueryContext();
+
+    await createActionHandler(
+      context,
+      { pack_id: '  pack-1  ', agent_ids: [TEST_AGENT] },
+      {
+        space: { id: 'production' },
+        dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
+      }
+    );
+
+    expect(get).toHaveBeenCalledWith(packSavedObjectType, 'pack-1');
   });
 
   describe('pack_id path', () => {
@@ -252,6 +477,11 @@ describe('createActionHandler', () => {
       } as unknown as ReturnType<typeof mockedGetInternalSOClient>);
     };
 
+    beforeEach(() => {
+      // Use actual buildQueries for pack tests
+      mockedBuildQueries.mockImplementation(jest.requireActual('./create_queries').buildQueries);
+    });
+
     it('dispatches only enabled queries from a pack', async () => {
       mockPackGet({
         queries: [
@@ -264,7 +494,10 @@ describe('createActionHandler', () => {
       const result = await createActionHandler(
         context,
         { pack_id: 'pack-1', agent_ids: [TEST_AGENT] },
-        { space: { id: 'production' } }
+        {
+          space: { id: 'production' },
+          dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
+        }
       );
 
       expect(result.response.queries).toHaveLength(1);
@@ -286,7 +519,10 @@ describe('createActionHandler', () => {
       await createActionHandler(
         context,
         { pack_id: 'pack-1', agent_ids: [TEST_AGENT] },
-        { space: { id: 'production' } }
+        {
+          space: { id: 'production' },
+          dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
+        }
       );
 
       const [fleetActions] = bulkCreate.mock.calls[0];
@@ -320,7 +556,10 @@ describe('createActionHandler', () => {
       await createActionHandler(
         context,
         { pack_id: 'pack-1', agent_ids: [TEST_AGENT] },
-        { space: { id: 'production' } }
+        {
+          space: { id: 'production' },
+          dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
+        }
       );
 
       const [fleetActions] = bulkCreate.mock.calls[0];
@@ -347,7 +586,10 @@ describe('createActionHandler', () => {
       await createActionHandler(
         context,
         { pack_id: 'pack-1', agent_ids: [TEST_AGENT] },
-        { space: { id: 'production' } }
+        {
+          space: { id: 'production' },
+          dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
+        }
       );
 
       const [fleetActions] = bulkCreate.mock.calls[0];
