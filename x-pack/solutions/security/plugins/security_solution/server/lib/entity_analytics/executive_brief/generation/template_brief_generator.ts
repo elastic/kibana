@@ -8,6 +8,8 @@
 import { STORY_EDGE_CONFIG } from '../../../../../common/entity_analytics/executive_brief/constants';
 import type {
   AttackStage,
+  AttentionArea,
+  AttentionAssessment,
   BriefConfidence,
   BriefEntity,
   BriefNarrationMode,
@@ -21,6 +23,7 @@ import type {
   StoryEdgeType,
   Storyline,
 } from '../../../../../common/entity_analytics/executive_brief/types';
+import { ATTENTION_LEVEL_RANK } from '../assessment';
 import type { BriefGenerationInput, BriefGenerationResult, BriefGenerator } from './types';
 
 const MAX_PAIR_SENTENCES = 3;
@@ -30,6 +33,7 @@ const MAX_DECISIONS = 5;
 const MAX_COVERAGE_DECISIONS = 2;
 const MAX_STAGE_SENTENCES = 3;
 const MAX_GAP_SENTENCES = 3;
+const MAX_HEADLINE_LENGTH = 140;
 
 const NUMBER_WORDS = [
   'zero',
@@ -387,8 +391,79 @@ const statPhrase = (
   return `${base}, unchanged`;
 };
 
+const truncate = (text: string, max: number): string =>
+  text.length <= max ? text : `${text.slice(0, max - 1).trimEnd()}…`;
+
+/** The area behind the verdict: the most severe one, the first of them in display order. */
+const leadingArea = ({ areas }: AttentionAssessment): AttentionArea | undefined =>
+  areas.reduce<AttentionArea | undefined>(
+    (lead, area) =>
+      lead === undefined || ATTENTION_LEVEL_RANK[area.level] > ATTENTION_LEVEL_RANK[lead.level]
+        ? area
+        : lead,
+    undefined
+  );
+
+/**
+ * One sentence giving the main reason for the attention level, from the leading area's rule and
+ * summary. It never repeats the level label. An urgent threat is described by its rule ("Unaddressed
+ * critical threat involves a privileged identity"); every other area by its summary.
+ */
+const assessmentHeadline = (area: AttentionArea): string => {
+  const [firstReason] = area.rule.split('; ');
+  const text = area.id === 'threats' && area.level === 'urgent' ? firstReason : area.summary;
+  return truncate(capitalise(text), MAX_HEADLINE_LENGTH);
+};
+
+const buildAssessmentGlance = (
+  ctx: TemplateContext,
+  assessment: AttentionAssessment
+): ExecutiveBrief['glance'] => {
+  const { storylines } = ctx.snapshot.storylines;
+  const lead = leadingArea(assessment);
+  const headline = lead ? assessmentHeadline(lead) : 'No priority threats';
+
+  const top = storylines[0];
+  const topPrimary = top ? primaryEuid(top) : undefined;
+  const opening =
+    storylines.length === 0
+      ? `No priority threats were found in the last ${ctx.rangePhrase}.`
+      : `${capitalise(numberWord(storylines.length))} priority ${
+          storylines.length === 1 ? 'threat is' : 'threats are'
+        } active in the last ${ctx.rangePhrase}${
+          top && topPrimary
+            ? `, the top one centred on ${ctx.label(topPrimary)} and ${responsePhrase(top)}`
+            : ''
+        }.`;
+  const others = assessment.areas.filter(({ id, level }) => id !== 'threats' && level !== 'clear');
+  const closing =
+    others.length > 0
+      ? `${others.map(({ summary }) => summary).join('; ')}.`
+      : 'Nothing else was flagged.';
+
+  const flagged = assessment.areas.filter(({ level }) => level !== 'clear');
+  const cited = ctx.valid([
+    ...(lead?.evidence ?? []),
+    ...flagged.flatMap(({ evidence }) => evidence),
+  ]);
+  // A fully clear assessment cites no area evidence; fall back to the exposure leaders.
+  const evidence =
+    cited.length > 0
+      ? cited
+      : ctx.valid(
+          ctx.snapshot.glance.exposureLeaders
+            .slice(0, 3)
+            .flatMap((euid) => ctx.entityEvidence(euid))
+        );
+  return { headline, threatNarrative: `${opening} ${closing}`, evidence };
+};
+
 const buildGlance = (ctx: TemplateContext): ExecutiveBrief['glance'] => {
   const { snapshot } = ctx;
+  if (snapshot.glance.assessment) {
+    return buildAssessmentGlance(ctx, snapshot.glance.assessment);
+  }
+  // Snapshots stored before the assessment existed keep the original wording.
   const { storylines } = snapshot.storylines;
   const top = storylines[0];
   const topPrimary = top ? primaryEuid(top) : undefined;

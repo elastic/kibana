@@ -26,6 +26,7 @@ Rules:
 - Decisions: concrete, at most 5, ordered by urgency. Every decision MUST have an "owner" (soc, it, iam, cloud, detection_engineering or leadership) and relates to a STORY-*, GAP-* or TAC-* id.
 - Lower your confidence when the snapshot lists data gaps (sources that are not "ok").
 - Use plain language. Do not write MITRE ATT&CK ids (TAxxxx, Txxxx) in prose; they belong in the evidence arrays.
+- Attention assessment: the snapshot's "attentionAssessment" is the deterministic verdict (level, four areas with a summary, the rule that fired and evidence ids, and a trend). Never change, contradict or re-derive it, and never write the level label itself ("urgent", "attention needed", "keep watching" or "no action needed"); the reader already sees it. Write "glance.headline" as ONE sentence of at most 140 characters that gives the main reason for the level, taken from the most severe area's summary and rule, and cite that area's evidence ids in "glance.evidence". Write "glance.threatNarrative" as at most 2 sentences about the priority threats and what is being done about them. Use the area summaries as given; do not recompute their numbers.
 - Be concise. A storyline narrative is at most 3 sentences. A storyline title is a short headline of at most 10 words and 70 characters, written as what happened (for example "Stolen credentials reach a production host via a jump box"), never a template such as "X to Y activity".
 - Storylines: narrate only the computed storylines, one entry per storyline. Describe a relation between two entities ONLY with the exact "allowedVerb" of the edge that links them, and never imply a link between two entities that have no edge. Listing the entities of a storyline is fine; a verb between two entities is only allowed when an edge backs it. Do not say "moved laterally", "pivoted", "compromised", "exfiltrated to" or similar unless an edge or a cited rule backs it. Say how strongly the storyline is linked (linkStrength), give "why it matters" from criticality, privilege and exposure, and state the response status plainly (for example "no one is working this yet").
 - Write at most one sentence that mentions two entities with a verb between them, and only when an edge links them.
@@ -48,8 +49,12 @@ export const BRIEF_OUTPUT_SCHEMA = {
     glance: {
       type: 'object',
       properties: {
-        headline: { type: 'string', description: 'One sentence, plain language' },
-        threatNarrative: { type: 'string', description: 'Two to four sentences' },
+        headline: {
+          type: 'string',
+          description:
+            'ONE sentence, at most 140 characters: the main reason for the attention level, citing evidence. Never state the level label itself',
+        },
+        threatNarrative: { type: 'string', description: 'At most 2 sentences' },
         evidence: EVIDENCE_ARRAY,
       },
       required: ['headline', 'threatNarrative', 'evidence'],
@@ -246,8 +251,22 @@ export const buildBriefPayload = (snapshot: BriefSnapshot, mode: BriefNarrationM
       message: message && redact(message),
     }));
 
+  const { assessment } = snapshot.glance;
+  const attentionAssessment = assessment && {
+    level: assessment.level,
+    areas: assessment.areas.map((area) => ({
+      id: area.id,
+      level: area.level,
+      summary: redact(area.summary),
+      rule: redact(area.rule),
+      evidence: area.evidence,
+    })),
+    trend: assessment.trend,
+  };
+
   const payload = {
     timeRange: snapshot.timeRange,
+    attentionAssessment,
     metrics: {
       stats: snapshot.glance.stats,
       needsAttention: snapshot.glance.needsAttention.map((tile) => ({

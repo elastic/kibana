@@ -10,6 +10,8 @@ import type {
   BriefNarrationMode,
   BriefSnapshot,
 } from '../../../../../common/entity_analytics/executive_brief/types';
+import { assessAttention } from '../assessment';
+import { LLM_RUN_SNAPSHOT } from '../validation/__fixtures__/llm_sonnet5_names_run';
 import { validateBrief } from '../validation/validate_brief';
 import { TemplateBriefGenerator } from './template_brief_generator';
 
@@ -462,5 +464,164 @@ describe('TemplateBriefGenerator', () => {
       );
       expect(validateBrief({ brief, snapshot }).validation.droppedClaims).toBe(0);
     });
+  });
+});
+
+describe('TemplateBriefGenerator: glance from the attention assessment', () => {
+  const withAssessment = (snapshot: BriefSnapshot): BriefSnapshot => ({
+    ...snapshot,
+    glance: { ...snapshot.glance, assessment: assessAttention(snapshot) },
+  });
+  const sentenceCount = (text: string): number =>
+    text.split(/(?<=[.!?])\s+(?=[A-Z0-9])/).filter((part) => part.trim().length > 0).length;
+  const LEVEL_LABELS = /urgent attention needed|attention needed|keep watching|no action needed/i;
+
+  describe('real LLM run snapshot', () => {
+    const snapshot = withAssessment(LLM_RUN_SNAPSHOT);
+
+    it('headlines the most severe area (an urgent threat) in one sentence, without the level label', async () => {
+      const { glance } = (await generator.generate({ snapshot, mode: 'names' })).brief;
+      expect(glance.headline).toBe(
+        'Unaddressed critical threat involves a privileged identity and an extreme-impact asset'
+      );
+      expect(glance.headline.length).toBeLessThanOrEqual(140);
+      expect(sentenceCount(glance.headline)).toBe(1);
+      expect(glance.headline).not.toMatch(LEVEL_LABELS);
+      expect(glance.headline).not.toMatch(/storyline/i);
+    });
+
+    it('writes at most two sentences and cites the leading area first', async () => {
+      const { glance } = (await generator.generate({ snapshot, mode: 'names' })).brief;
+      expect(sentenceCount(glance.threatNarrative)).toBeLessThanOrEqual(2);
+      expect(glance.threatNarrative).toContain(
+        'Three priority threats are active in the last 7 days, the top one centred on a.rodriguez and no one is working this yet.'
+      );
+      expect(glance.threatNarrative).toContain(
+        '9 high/critical alerts have no case; Lateral Movement: 1 of 2 rules not working; 1 key asset without criticality · 173 identities unresolved.'
+      );
+      expect(glance.threatNarrative).not.toMatch(LEVEL_LABELS);
+      expect(glance.evidence.slice(0, 1)).toEqual(['STORY-1']);
+      expect(glance.evidence).toEqual(
+        expect.arrayContaining(['GAP-B17', 'TAC-TA0008', 'GAP-B6', 'GAP-B5'])
+      );
+      glance.evidence.forEach((id) => expect(snapshot.catalog).toHaveProperty([id]));
+    });
+
+    it('passes the validator with nothing dropped, in both narration modes', async () => {
+      for (const mode of ['names', 'ids_only'] as const) {
+        const brief = (await generator.generate({ snapshot, mode })).brief;
+        const { validation } = validateBrief({ brief, snapshot, mode });
+        expect(validation.droppedClaims).toBe(0);
+        expect(validation.inventedNumbers).toEqual([]);
+      }
+    });
+
+    it('ids_only mode never emits a display name in the glance', async () => {
+      const { glance } = (await generator.generate({ snapshot, mode: 'ids_only' })).brief;
+      expect(glance.threatNarrative).toContain('ENT-1');
+      expect(glance.threatNarrative).not.toContain('a.rodriguez');
+    });
+  });
+
+  it('uses the summary of a non-threat area when that area is the most severe', async () => {
+    const snapshot = withAssessment({
+      ...FIXTURE_SNAPSHOT,
+      storylines: { storylines: [], otherNotableEntities: [], trace: [] },
+      blindSpots: {
+        ...FIXTURE_SNAPSHOT.blindSpots,
+        gaps: [
+          {
+            evidenceId: 'GAP-B17',
+            signal: 'B17',
+            group: 'response_gap',
+            severity: 'warning',
+            title: '9 open High/Critical alerts in storylines have no case',
+            value: 9,
+          },
+        ],
+        attackStages: { ...FIXTURE_SNAPSHOT.blindSpots.attackStages, stages: [] },
+      },
+    });
+    const { glance } = (await generator.generate({ snapshot, mode: 'names' })).brief;
+    expect(glance.headline).toBe('9 high/critical alerts have no case');
+    expect(glance.threatNarrative).toBe(
+      'No priority threats were found in the last 7 days. 9 high/critical alerts have no case.'
+    );
+  });
+
+  it('headlines an unaddressed non-urgent threat with its count', async () => {
+    const [first] = FIXTURE_SNAPSHOT.storylines.storylines;
+    const snapshot = withAssessment({
+      ...FIXTURE_SNAPSHOT,
+      entities: Object.fromEntries(
+        Object.entries(FIXTURE_SNAPSHOT.entities).map(([euid, entity]) => [
+          euid,
+          { ...entity, isPrivileged: false, criticality: undefined },
+        ])
+      ),
+      storylines: {
+        ...FIXTURE_SNAPSHOT.storylines,
+        storylines: [
+          { ...first, severity: 'medium', response: { ...first.response, state: 'unaddressed' } },
+        ],
+      },
+      blindSpots: { ...FIXTURE_SNAPSHOT.blindSpots, gaps: [] },
+    });
+    expect(snapshot.glance.assessment?.areas[0].level).toBe('action');
+    const { glance } = (await generator.generate({ snapshot, mode: 'names' })).brief;
+    expect(glance.headline).toBe('1 threat unaddressed');
+  });
+
+  it('keeps a headline within 140 characters', async () => {
+    const snapshot = withAssessment(LLM_RUN_SNAPSHOT);
+    const longRule = `unaddressed ${'x'.repeat(200)}`;
+    const assessment = {
+      ...snapshot.glance.assessment!,
+      areas: snapshot.glance.assessment!.areas.map((area) =>
+        area.id === 'threats' ? { ...area, rule: longRule } : area
+      ),
+    };
+    const { glance } = (
+      await generator.generate({
+        snapshot: { ...snapshot, glance: { ...snapshot.glance, assessment } },
+        mode: 'names',
+      })
+    ).brief;
+    expect(glance.headline.length).toBe(140);
+    expect(glance.headline.endsWith('…')).toBe(true);
+  });
+
+  it('when everything is clear, says what was found without a level label, citing leaders', async () => {
+    const snapshot = withAssessment({
+      ...FIXTURE_SNAPSHOT,
+      glance: { ...FIXTURE_SNAPSHOT.glance, exposureLeaders: ['host:docker-host-prod-01'] },
+      storylines: { storylines: [], otherNotableEntities: [], trace: [] },
+      blindSpots: {
+        attackStages: { stages: [], unmapped: { alerts: 0, share: 0, topRuleEvidenceIds: [] } },
+        gaps: [],
+      },
+    });
+    expect(snapshot.glance.assessment?.level).toBe('clear');
+    const { glance } = (await generator.generate({ snapshot, mode: 'names' })).brief;
+    expect(glance.headline).toBe('No priority threats');
+    expect(glance.threatNarrative).toBe(
+      'No priority threats were found in the last 7 days. Nothing else was flagged.'
+    );
+    expect(glance.evidence).toEqual(['ENT-4']);
+  });
+
+  it('is deterministic', async () => {
+    const snapshot = withAssessment(LLM_RUN_SNAPSHOT);
+    expect((await generator.generate({ snapshot, mode: 'names' })).brief).toEqual(
+      (await generator.generate({ snapshot, mode: 'names' })).brief
+    );
+  });
+
+  it('keeps the original wording for a snapshot without an assessment', async () => {
+    const { glance } = (await generator.generate({ snapshot: LLM_RUN_SNAPSHOT, mode: 'names' }))
+      .brief;
+    expect(glance.headline).toBe(
+      'The top priority threat centres on a.rodriguez and no one is working this yet'
+    );
   });
 });

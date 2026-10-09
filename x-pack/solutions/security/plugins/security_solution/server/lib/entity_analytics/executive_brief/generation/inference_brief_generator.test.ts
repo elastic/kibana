@@ -8,7 +8,10 @@
 import { createInferenceRequestError } from '@kbn/inference-common';
 import { FIXTURE_BRIEF } from '../../../../../common/entity_analytics/executive_brief/__fixtures__/brief';
 import { FIXTURE_SNAPSHOT } from '../../../../../common/entity_analytics/executive_brief/__fixtures__/snapshot';
+import type { BriefSnapshot } from '../../../../../common/entity_analytics/executive_brief/types';
+import { assessAttention } from '../assessment';
 import { BriefJobError, toJobError } from '../job/job_errors';
+import { LLM_RUN_SNAPSHOT } from '../validation/__fixtures__/llm_sonnet5_names_run';
 import { validateBrief } from '../validation/validate_brief';
 import { BRIEF_OUTPUT_SCHEMA, BRIEF_SYSTEM_PROMPT, buildBriefPayload } from './brief_prompt';
 import { EXECUTIVE_BRIEF_INFERENCE_ID, InferenceBriefGenerator } from './inference_brief_generator';
@@ -243,6 +246,60 @@ describe('brief prompt and schema (D8, V5)', () => {
 
   it('allows listing entities but not verbs between unlinked entities', () => {
     expect(BRIEF_SYSTEM_PROMPT).toMatch(/Listing the entities of a storyline is fine/);
+  });
+});
+
+describe('assessment in the prompt and payload', () => {
+  const snapshot: BriefSnapshot = {
+    ...LLM_RUN_SNAPSHOT,
+    glance: { ...LLM_RUN_SNAPSHOT.glance, assessment: assessAttention(LLM_RUN_SNAPSHOT) },
+  };
+
+  it('puts the level, every area summary, rule and evidence, and the trend in the payload', () => {
+    const payload = JSON.parse(buildBriefPayload(snapshot, 'names'));
+    expect(payload.attentionAssessment.level).toBe('urgent');
+    expect(payload.attentionAssessment.trend).toBe('more');
+    expect(payload.attentionAssessment.areas.map((a: { id: string }) => a.id)).toEqual([
+      'threats',
+      'response',
+      'coverage',
+      'visibility',
+    ]);
+    expect(payload.attentionAssessment.areas[1]).toEqual({
+      id: 'response',
+      level: 'action',
+      summary: '9 high/critical alerts have no case',
+      rule: expect.any(String),
+      evidence: ['GAP-B17'],
+    });
+  });
+
+  it('is sent to the model by the generator', async () => {
+    const { client, calls } = clientReturning(FIXTURE_BRIEF);
+    await new InferenceBriefGenerator(client).generate({ snapshot, mode: 'names' });
+    expect(calls[0].input).toContain('"attentionAssessment":{"level":"urgent"');
+    expect(calls[0].input).toContain('9 high/critical alerts have no case');
+  });
+
+  it('omits it for a snapshot without an assessment instead of inventing one', () => {
+    expect(JSON.parse(buildBriefPayload(LLM_RUN_SNAPSHOT, 'names'))).not.toHaveProperty(
+      'attentionAssessment'
+    );
+  });
+
+  it('asks for a one-sentence headline of at most 140 characters, a narrative of at most 2 sentences, and never the level label', () => {
+    expect(BRIEF_SYSTEM_PROMPT).toMatch(/ONE sentence of at most 140 characters/);
+    expect(BRIEF_SYSTEM_PROMPT).toMatch(/at most 2 sentences/);
+    expect(BRIEF_SYSTEM_PROMPT).toMatch(/never write the level label itself/);
+    const { headline, threatNarrative } = BRIEF_OUTPUT_SCHEMA.properties.glance.properties;
+    expect(headline.description).toMatch(/ONE sentence, at most 140 characters/);
+    expect(headline.description).toMatch(/Never state the level label/);
+    expect(threatNarrative.description).toBe('At most 2 sentences');
+    expect(BRIEF_OUTPUT_SCHEMA.properties.glance.required).toEqual([
+      'headline',
+      'threatNarrative',
+      'evidence',
+    ]);
   });
 });
 

@@ -16,6 +16,7 @@ import type {
   GlanceStat,
   StorylinesResult,
 } from '../../../../../common/entity_analytics/executive_brief/types';
+import { assessAttention } from '../assessment';
 import type { BriefGenerator } from '../generation/types';
 import type { SnapshotContext, SnapshotPart, SnapshotSources } from '../snapshot/context';
 import { validateBrief } from '../validation/validate_brief';
@@ -201,17 +202,26 @@ export const runExecutiveBrief = async ({
       ...blindSpotsPart.sources,
     };
 
+    const entities = markHubs(
+      { ...leaderEntities, ...fetched },
+      storylinesPart.value.storylines.flatMap((storyline) => storyline.hubEuids)
+    );
+    // Deterministic verdict; needs threats, blind spots and entity records, so it comes last.
+    const assessment = assessAttention({
+      glance,
+      storylines: storylinesPart.value,
+      blindSpots: blindSpotsPart.value,
+      entities,
+    });
+
     const snapshot: BriefSnapshot = {
       spaceId: context.spaceId,
       generatedAt: context.timeRange.to,
       timeRange: context.timeRange,
-      glance,
+      glance: { ...glance, assessment },
       storylines: storylinesPart.value,
       blindSpots: blindSpotsPart.value,
-      entities: markHubs(
-        { ...leaderEntities, ...fetched },
-        storylinesPart.value.storylines.flatMap((storyline) => storyline.hubEuids)
-      ),
+      entities,
       catalog: context.registry.toCatalog(),
       sources,
     };

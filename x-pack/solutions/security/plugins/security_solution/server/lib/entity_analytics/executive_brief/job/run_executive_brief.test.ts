@@ -28,6 +28,7 @@ import { TemplateBriefGenerator } from '../generation/template_brief_generator';
 import type { SnapshotContext } from '../snapshot/context';
 import { EvidenceRegistry } from '../snapshot/evidence_registry';
 import type { BriefJobPatch, BriefJobStore } from './brief_job_store';
+import { assessAttention } from '../assessment';
 import { BriefJobError } from './job_errors';
 import { runExecutiveBrief } from './run_executive_brief';
 import type { SnapshotBuilders } from './run_executive_brief';
@@ -290,6 +291,93 @@ describe('runExecutiveBrief', () => {
       });
     });
 
+    describe('attention assessment', () => {
+      it('sets glance.assessment from the final snapshot parts, before generating', async () => {
+        const generator = generatorReturning(FIXTURE_BRIEF);
+        const { store } = await run({ generator });
+        const snapshot = store.doc.snapshot;
+        if (!snapshot) {
+          throw new Error('snapshot missing');
+        }
+        expect(snapshot.glance.assessment).toEqual(
+          assessAttention({
+            glance: snapshot.glance,
+            storylines: snapshot.storylines,
+            blindSpots: snapshot.blindSpots,
+            entities: snapshot.entities,
+          })
+        );
+        // The generator saw the assessment too.
+        expect(generator.generate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            snapshot: expect.objectContaining({
+              glance: expect.objectContaining({ assessment: snapshot.glance.assessment }),
+            }),
+          })
+        );
+        expect(snapshot.glance.assessment?.areas.map(({ id }) => id)).toEqual([
+          'threats',
+          'response',
+          'coverage',
+          'visibility',
+        ]);
+      });
+
+      it('uses the entity records fetched after the storylines (a privileged member makes it urgent)', async () => {
+        const builders = createBuilders();
+        const [first, ...others] = FIXTURE_SNAPSHOT.storylines.storylines;
+        builders.buildStorylines.mockResolvedValue({
+          value: {
+            ...FIXTURE_SNAPSHOT.storylines,
+            storylines: [
+              {
+                ...first,
+                severity: 'low',
+                response: { ...first.response, state: 'unaddressed' },
+              },
+              ...others.map((storyline) => ({
+                ...storyline,
+                response: { ...storyline.response, state: 'contained' as const },
+              })),
+            ],
+          },
+          sources: {},
+        });
+        builders.fetchBriefEntities.mockImplementation(async (_ctx, euids) =>
+          Object.fromEntries(
+            Object.entries(entitiesFor(euids)).map(([euid, entity]) => [
+              euid,
+              { ...entity, criticality: undefined, isPrivileged: euid === EUID.rodriguez },
+            ])
+          )
+        );
+        const { store } = await run({ builders });
+        expect(store.doc.snapshot?.glance.assessment?.areas[0]).toMatchObject({
+          id: 'threats',
+          level: 'urgent',
+          rule: 'unaddressed threat involves a privileged identity',
+        });
+      });
+
+      it('does not fail the job when the assessment is all clear', async () => {
+        const builders = createBuilders();
+        builders.buildStorylines.mockResolvedValue({
+          value: { storylines: [], otherNotableEntities: [], trace: [] },
+          sources: {},
+        });
+        builders.buildBlindSpots.mockResolvedValue({
+          value: {
+            attackStages: { stages: [], unmapped: { alerts: 0, share: 0, topRuleEvidenceIds: [] } },
+            gaps: [],
+          },
+          sources: {},
+        });
+        const { store } = await run({ builders });
+        expect(store.doc.status).toBe('succeeded');
+        expect(store.doc.snapshot?.glance.assessment?.level).toBe('clear');
+      });
+    });
+
     it('counts a stage as active from ML anomalies alone and replaces a stale stat', async () => {
       const builders = createBuilders();
       const [stage, ...rest] = FIXTURE_SNAPSHOT.blindSpots.attackStages.stages;
@@ -360,8 +448,9 @@ describe('runExecutiveBrief', () => {
         glance: { ...FIXTURE_BRIEF.glance, threatNarrative: '57 entities are compromised.' },
       });
       const { store } = await run({ generator, params: { ...params, mode: 'ids_only' } });
-      expect(store.doc.brief?.glance.headline).toContain('ENT-1');
-      expect(store.doc.brief?.glance.headline).not.toContain('a.rodriguez');
+      // The assessment headline names no entity; the narrative uses the ENT id.
+      expect(store.doc.brief?.glance.threatNarrative).toContain('ENT-1');
+      expect(JSON.stringify(store.doc.brief?.glance)).not.toContain('a.rodriguez');
     });
 
     it('records the model name for an inference generator, and none for the template generator', async () => {
