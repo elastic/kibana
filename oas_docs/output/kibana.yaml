@@ -181139,6 +181139,9 @@ components:
                 - pin
               type: string
             - enum:
+                - popout
+              type: string
+            - enum:
                 - sort_down
               type: string
             - enum:
