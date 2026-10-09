@@ -24,7 +24,7 @@ const existing = {
   workflowId: 'workflow-1',
   trigger: { rows: [{ kind: 'alert' }] },
   execution: { promptTemplate: 'Find the cause' },
-  completion: {},
+  completions: [],
   runtime: { dailyDispatchLimit: 20 },
   createdAt: '2026-10-01T00:00:00.000Z',
   updatedAt: '2026-10-01T00:00:00.000Z',
@@ -87,22 +87,32 @@ it('clears managed nested values when the request sends null', async () => {
   const result = await call({
     description: null,
     execution: { promptTemplate: null },
-    completion: { action: null, targetMode: null, destination: null },
+    completions: [],
     runtime: { dailyDispatchLimit: null },
   });
 
   expect(result).toMatchObject({
     execution: {},
-    completion: {},
+    completions: [],
     runtime: {},
   });
   expect(result.description).toBeUndefined();
   expect(soClient.update).toHaveBeenCalledWith(
     'nightshift-automation',
     'automation-1',
-    expect.objectContaining({ execution: {}, completion: {}, runtime: {} }),
+    expect.objectContaining({ execution: {}, completions: [], runtime: {} }),
     { mergeAttributes: false }
   );
+});
+
+it('replaces a non-empty completions array', async () => {
+  const result = await call({
+    completions: [{ action: 'post_to_slack', targetMode: 'thread' }, { action: 'silent' }],
+  });
+
+  expect(result).toMatchObject({
+    completions: [{ action: 'post_to_slack', targetMode: 'thread' }, { action: 'silent' }],
+  });
 });
 
 describe('request validation', () => {

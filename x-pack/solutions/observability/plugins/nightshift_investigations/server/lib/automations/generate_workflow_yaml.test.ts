@@ -15,7 +15,7 @@ const baseAutomation = (): NightshiftAutomationAttributes => ({
   isEnabled: true,
   trigger: { rows: [{ kind: 'alert' }] },
   execution: {},
-  completion: {},
+  completions: [],
   runtime: {},
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedAt: '2026-01-01T00:00:00.000Z',

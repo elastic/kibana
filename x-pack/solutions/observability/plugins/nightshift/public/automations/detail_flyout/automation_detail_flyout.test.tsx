@@ -33,7 +33,7 @@ const automation = {
   tags: [],
   trigger: { rows: [{ kind: 'alert' }] },
   execution: { reasoningMode: 'investigate' },
-  completion: {},
+  completions: [],
   runtime: { dailyDispatchLimit: 20 },
   author: 'alice',
 } as unknown as Automation;

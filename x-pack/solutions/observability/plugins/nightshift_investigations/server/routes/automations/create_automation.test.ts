@@ -22,7 +22,7 @@ const body = {
   name: 'Triage',
   trigger: { rows: [{ kind: 'alert' as const }] },
   execution: {},
-  completion: {},
+  completions: [],
   runtime: { dailyDispatchLimit: 20 },
 };
 
