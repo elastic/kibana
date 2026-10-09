@@ -1079,6 +1079,41 @@ describe('TabsStorageManager', () => {
     }
   );
 
+  it('keeps the local saved query when restoring a clean draft from the saved session', () => {
+    const { tabsStorageManager, urlStateStorage, services } = create();
+    const savedTab = getPersistedTabMock({
+      tabId: mockTab1.id,
+      dataView: dataViewMockWithTimeField,
+      services,
+      appStateOverrides: { columns: ['updated'] },
+    });
+    const session = createDiscoverSessionMock({ id: 'session', tabs: [savedTab] });
+    const cleanTab = {
+      ...mockTab1,
+      hasUnsavedChanges: false,
+      appState: { ...mockTab1.appState, savedQuery: 'saved-query-id' },
+    };
+    services.storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      discoverSessionId: session.id,
+      openTabs: [toStoredTab(cleanTab)],
+      closedTabs: [],
+    });
+    urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: mockTab1.id });
+
+    const restored = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      persistedDiscoverSession: session,
+      defaultTabState: DEFAULT_TAB_STATE,
+    });
+
+    expect(restored.allTabs[0].appState).toEqual(
+      expect.objectContaining({ columns: savedTab.columns, savedQuery: 'saved-query-id' })
+    );
+  });
+
   it.each([
     { hasUnsavedChanges: false, savedSessionId: 'session', usesSavedContent: true },
     { hasUnsavedChanges: true, savedSessionId: 'session', usesSavedContent: false },

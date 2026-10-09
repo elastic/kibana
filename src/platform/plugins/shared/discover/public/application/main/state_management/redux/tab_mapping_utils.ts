@@ -13,7 +13,7 @@ import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plug
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DiscoverTabType } from '@kbn/discover-session-constants';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { isEqual, isObject, isUndefined, omitBy } from 'lodash';
+import { isEqual, isObject, isUndefined, omitBy, pick } from 'lodash';
 import { createDataSource } from '../../../../../common/data_sources';
 import type { ProfileStateRegistry } from '../../../../../common/context_awareness';
 import { ProfileStateType } from '../../../../../common/context_awareness';
@@ -131,10 +131,14 @@ export const restoreUnmodifiedSavedTab = <T extends TabState>({
   }
 
   const restoredTab = fromSavedObjectTabToTabState({ tab: savedTab, profileStateRegistry });
+  // The saved query is not part of the saved tab, so it never counts as an unsaved change
+  const appState = { ...restoredTab.appState, ...pick(tab.appState, 'savedQuery') };
 
   return {
     ...tab,
     ...restoredTab,
+    appState,
+    previousAppState: appState,
     profileState: profileStateRegistry.mergeState(
       profileStateRegistry.pickStateByType({
         profileStateMap: tab.profileState,
