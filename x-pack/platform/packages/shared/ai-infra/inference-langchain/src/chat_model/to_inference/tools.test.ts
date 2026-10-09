@@ -64,10 +64,7 @@ describe('toolDefinitionToInference preserves $defs', () => {
   });
 
   it('keeps $defs for a plain JSON Schema tool definition', () => {
-    // This mirrors what withStructuredOutput produces: the zod schema is
-    // converted to JSON Schema up front (z4.toJSONSchema), so the tool
-    // arrives at toolDefinitionToInference as a plain ToolDefinition whose
-    // parameters are already plain JSON Schema with $defs + $refs.
+    // withStructuredOutput path: parameters arrive as plain JSON Schema
     const converted = z.toJSONSchema(
       z.object({
         operations: z.array(
@@ -94,9 +91,8 @@ describe('toolDefinitionToInference preserves $defs', () => {
   });
 
   it('keeps definitions for a zod v3 schema', () => {
-    // LangChain's isZodSchema recognizes zod v3, so this exercises the
-    // zod-to-json-schema branch of resolveToolSchema. A sub-schema used
-    // twice makes zod-to-json-schema emit a $ref for the second use.
+    // exercises the zod-to-json-schema branch of resolveToolSchema; a
+    // sub-schema reused twice makes it emit a $ref
     const timeRange = z3.object({ from: z3.string(), to: z3.string() });
     const v3Tool = tool(async () => 'ok', {
       name: 'extract_v3',
@@ -110,11 +106,34 @@ describe('toolDefinitionToInference preserves $defs', () => {
     const defs = toolDefinitionToInference([v3Tool as never]);
     const schema = defs.extract_v3.schema as unknown as Record<string, unknown>;
     expectAllRefsResolve(schema);
-    // when zod-to-json-schema dedupes into a definitions block, it must
-    // survive the pick instead of leaving dangling $refs
-    if (collectRefs(schema).some((ref) => ref.startsWith('#/definitions/'))) {
-      expect(schema.definitions).toBeDefined();
-    }
+  });
+
+  it('keeps definitions for plain JSON Schema with a #/definitions/ ref', () => {
+    const defs = toolDefinitionToInference([
+      {
+        type: 'function',
+        function: {
+          name: 'extract_json',
+          description: 'plain JSON Schema with draft-07 definitions',
+          parameters: {
+            type: 'object',
+            properties: {
+              range: { $ref: '#/definitions/range' },
+            },
+            definitions: {
+              range: { type: 'object', properties: { from: { type: 'string' } } },
+            },
+          } as unknown as Record<string, unknown>,
+        },
+      },
+    ]);
+    const schema = defs.extract_json.schema as unknown as Record<string, unknown>;
+    expect(schema.definitions).toBeDefined();
+    expect((schema.definitions as Record<string, unknown>).range).toEqual({
+      type: 'object',
+      properties: { from: { type: 'string' } },
+    });
+    expectAllRefsResolve(schema);
   });
 
   it('keeps $defs for a recursive schema', () => {

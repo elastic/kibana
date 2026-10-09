@@ -94,11 +94,7 @@ function stripUnsupportedSchemaKeywords<T extends ToolSchemaType>(schemaPart: T)
   return rest as unknown as T;
 }
 
-/**
- * Applies `fixSchemaArrayProperties` to every entry of a `$defs` /
- * `definitions` block so unsupported keywords are stripped from
- * referenced sub-schemas too, not just from the top-level schema.
- */
+/** Applies fixSchemaArrayProperties to each entry of a $defs/definitions block. */
 function mapDefs(
   defs: Record<string, ToolSchemaType> | undefined
 ): Record<string, ToolSchemaType> | undefined {

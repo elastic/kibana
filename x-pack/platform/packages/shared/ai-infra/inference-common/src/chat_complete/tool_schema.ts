@@ -15,9 +15,9 @@ export interface ToolSchemaTypeObject extends ToolSchemaFragmentBase {
   type: 'object';
   properties: Record<string, ToolSchemaType>;
   required?: string[] | readonly string[];
-  /** Referenced sub-schemas (Zod v4 / JSON Schema 2019-09+) */
+  /** Referenced sub-schemas (JSON Schema 2019-09+) */
   $defs?: Record<string, ToolSchemaType>;
-  /** Referenced sub-schemas (zod-to-json-schema / JSON Schema draft-07) */
+  /** Referenced sub-schemas (draft-07) */
   definitions?: Record<string, ToolSchemaType>;
 }
 

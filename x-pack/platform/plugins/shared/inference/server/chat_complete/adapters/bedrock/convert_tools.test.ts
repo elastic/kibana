@@ -20,7 +20,7 @@ describe('fixSchemaArrayProperties walks $defs/definitions', () => {
         filter: {
           type: 'object' as const,
           properties: {
-            // z.record() output: propertyNames + additionalProperties
+            // z.record() output
             tags: {
               type: 'object' as const,
               propertyNames: { type: 'string' as const },
@@ -50,7 +50,6 @@ describe('fixSchemaArrayProperties walks $defs/definitions', () => {
       type: 'object',
       properties: { key: { type: 'string' } },
     });
-    // the $ref target itself is preserved
     expect(result.properties.filters).toEqual({ $ref: '#/$defs/filter' });
   });
 
