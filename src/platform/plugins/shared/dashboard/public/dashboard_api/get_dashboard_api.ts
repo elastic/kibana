@@ -43,6 +43,7 @@ import type {
   DashboardCreationOptions,
   DashboardInternalApi,
   DashboardSaveEvent,
+  DashboardSetStateOptions,
   DashboardUser,
   UserActivity,
 } from './types';
@@ -60,6 +61,7 @@ export function getDashboardApi({
   savedObjectId,
   user,
   isAccessControlEnabled,
+  changeSources,
 }: {
   creationOptions?: DashboardCreationOptions;
   panelFlyoutType?: EuiFlyoutProps['type'];
@@ -69,6 +71,7 @@ export function getDashboardApi({
   savedObjectId?: string;
   user?: DashboardUser;
   isAccessControlEnabled?: boolean;
+  changeSources?: readonly string[];
 }) {
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = readResult?.meta.managed ?? false;
@@ -148,7 +151,8 @@ export function getDashboardApi({
 
   const approximationManager = initializeApproximationManager(initialState);
 
-  async function setState(state: DashboardState) {
+  async function setState(state: DashboardState, options?: DashboardSetStateOptions) {
+    unsavedChangesManager.internalApi.addChangeSources(options?.changeSources ?? []);
     await layoutManager.internalApi.reset(state);
     unifiedSearchManager.internalApi.reset(state);
     projectRoutingManager?.internalApi.reset(state);
@@ -201,6 +205,7 @@ export function getDashboardApi({
     approximationManager,
     setState,
     onSave$: onSave$.asObservable(),
+    initialChangeSources: changeSources,
   });
 
   const initialState$ = new Subject<DashboardState>();

@@ -8,7 +8,23 @@
  */
 
 import { DEFAULT_DASHBOARD_STATE } from '../../common/default_dashboard_state';
+import { coreServices } from '../services/kibana_services';
 import { getDashboardApi } from './get_dashboard_api';
+import { openSaveModal } from './save_modal/open_save_modal';
+import { saveDashboard } from './save_modal/save_dashboard';
+
+jest.mock('./save_modal/save_dashboard', () => ({
+  saveDashboard: jest.fn(),
+}));
+
+jest.mock('./save_modal/open_save_modal', () => ({
+  openSaveModal: jest.fn(),
+}));
+
+const getDashboardSavedEvents = () =>
+  jest
+    .mocked(coreServices.analytics.reportEvent)
+    .mock.calls.filter(([eventType]) => eventType === 'dashboard_saved');
 
 describe('initializeSettingsManager', () => {
   describe('anyStateChange$', () => {
@@ -34,5 +50,69 @@ describe('initializeSettingsManager', () => {
         title: 'Updated title',
       });
     });
+  });
+});
+
+describe('dashboard_saved telemetry', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('reports each successful quick save once, with sources changed since the last save', async () => {
+    jest
+      .mocked(saveDashboard)
+      .mockResolvedValueOnce({ error: 'conflict' })
+      .mockResolvedValue({ id: 'existing-id' });
+    const { api } = getDashboardApi({
+      incomingEmbeddables: [],
+      initialState: DEFAULT_DASHBOARD_STATE,
+      savedObjectId: 'existing-id',
+      changeSources: ['agent'],
+    });
+
+    await api.runQuickSave();
+    await api.runQuickSave();
+    await api.runQuickSave();
+
+    expect(getDashboardSavedEvents()).toEqual([
+      [
+        'dashboard_saved',
+        {
+          is_new: false,
+          is_copy: false,
+          change_sources: ['agent'],
+          panel_count: 0,
+          panel_types: [],
+        },
+      ],
+      ['dashboard_saved', { is_new: false, is_copy: false, panel_count: 0, panel_types: [] }],
+    ]);
+  });
+
+  test('reports an interactive save of an existing dashboard as a new copy with setState sources', async () => {
+    jest.mocked(openSaveModal).mockImplementation(({ onSave, serializeState }) => {
+      onSave({ id: 'copy-id', savedState: serializeState() });
+    });
+    const { api } = getDashboardApi({
+      incomingEmbeddables: [],
+      initialState: DEFAULT_DASHBOARD_STATE,
+      savedObjectId: 'existing-id',
+    });
+
+    api.setState(DEFAULT_DASHBOARD_STATE, { changeSources: ['agent'] });
+    await api.runInteractiveSave();
+
+    expect(getDashboardSavedEvents()).toEqual([
+      [
+        'dashboard_saved',
+        {
+          is_new: true,
+          is_copy: true,
+          change_sources: ['agent'],
+          panel_count: 0,
+          panel_types: [],
+        },
+      ],
+    ]);
   });
 });

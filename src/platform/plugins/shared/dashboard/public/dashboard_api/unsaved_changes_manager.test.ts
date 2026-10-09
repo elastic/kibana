@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, Subject, skip } from 'rxjs';
+import { BehaviorSubject, Subject, config as rxjsConfig, skip } from 'rxjs';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { DEFAULT_DASHBOARD_STATE } from '../../common/default_dashboard_state';
@@ -23,6 +23,7 @@ import type { initializeApproximationManager } from './approximation_manager';
 import type { DashboardPanel } from '@kbn/as-code-dashboard-schema';
 import type { DashboardSaveEvent } from './types';
 import { getSampleDashboardState } from '../mocks';
+import { coreServices } from '../services/kibana_services';
 
 const setStateMock = () => new Promise<void>((resolve) => resolve());
 
@@ -271,6 +272,161 @@ describe('unsavedChangesManager', () => {
       });
 
       approximationChanges$.next({ esql_approximation: true });
+    });
+  });
+
+  describe('change sources', () => {
+    const grid = { x: 0, y: 0, w: 12, h: 8 };
+    const agentPanel: DashboardPanel = { type: 'testType', grid, config: { title: 'Agent panel' } };
+    const userPanel: DashboardPanel = { type: 'testType', grid, config: { title: 'User panel' } };
+
+    const createManager = ({
+      storeUnsavedChanges = false,
+      initialChangeSources,
+      setState = setStateMock,
+    }: {
+      storeUnsavedChanges?: boolean;
+      initialChangeSources?: string[];
+      setState?: (state: DashboardState) => Promise<void>;
+    } = {}) =>
+      initializeUnsavedChangesManager({
+        viewMode$,
+        storeUnsavedChanges,
+        lastSavedState: DEFAULT_DASHBOARD_STATE,
+        layoutManager: layoutManagerMock,
+        savedObjectId$,
+        settingsManager: settingsManagerMock,
+        unifiedSearchManager: unifiedSearchManagerMock,
+        projectRoutingManager: projectRoutingManagerMock,
+        approximationManager: approximationManagerMock,
+        setState,
+        onSave$: onSave$.asObservable(),
+        initialChangeSources,
+      });
+
+    const emitLayoutChanges = (changes: { panels?: DashboardState['panels'] }) => {
+      layoutUnsavedChanges$.next(changes);
+      jest.advanceTimersByTime(100);
+    };
+
+    const save = (panels: DashboardState['panels'] = [agentPanel]) =>
+      onSave$.next({
+        previousDashboardId: 'dashboard1234',
+        dashboardId: 'dashboard1234',
+        dashboardState: { ...DEFAULT_DASHBOARD_STATE, panels },
+      });
+
+    const savedEvent = (changeSources?: string[]) => [
+      'dashboard_saved',
+      {
+        is_new: false,
+        is_copy: false,
+        ...(changeSources && { change_sources: changeSources }),
+        panel_count: 1,
+        panel_types: ['testType'],
+      },
+    ];
+
+    const reportEventMock = jest.mocked(coreServices.analytics.reportEvent);
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+      rxjsConfig.onUnhandledError = null;
+    });
+
+    it('reports added and restored sources on the next save, then clears them', () => {
+      const { internalApi } = createManager({ initialChangeSources: ['restored'] });
+      internalApi.addChangeSources(['agent']);
+      emitLayoutChanges({ panels: [agentPanel] });
+
+      save();
+      save();
+
+      expect(reportEventMock.mock.calls).toEqual([savedEvent(['restored', 'agent']), savedEvent()]);
+    });
+
+    it('keeps sources when edits return to the last saved state', () => {
+      const { internalApi } = createManager();
+      internalApi.addChangeSources(['agent']);
+      emitLayoutChanges({ panels: [agentPanel] });
+      emitLayoutChanges({});
+
+      save();
+
+      expect(reportEventMock.mock.calls).toEqual([savedEvent(['agent'])]);
+    });
+
+    it('clears sources on reset to the last saved state', async () => {
+      const { api } = createManager({ initialChangeSources: ['agent'] });
+
+      await api.asyncResetToLastSavedState();
+      save();
+
+      expect(reportEventMock.mock.calls).toEqual([savedEvent()]);
+    });
+
+    it('keeps sources added while a reset is being applied', async () => {
+      let finishReset = () => {};
+      const { api, internalApi } = createManager({
+        initialChangeSources: ['restored'],
+        setState: () => new Promise((resolve) => (finishReset = resolve)),
+      });
+
+      const reset = api.asyncResetToLastSavedState();
+      internalApi.addChangeSources(['agent']);
+      finishReset();
+      await reset;
+      save();
+
+      expect(reportEventMock.mock.calls).toEqual([savedEvent(['agent'])]);
+    });
+
+    it('backs up sources only alongside dashboard edits', () => {
+      createManager({ storeUnsavedChanges: true, initialChangeSources: ['agent'] });
+
+      emitLayoutChanges({});
+      expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', { viewMode: 'edit' });
+
+      emitLayoutChanges({ panels: [agentPanel] });
+      expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', {
+        viewMode: 'edit',
+        panels: [agentPanel],
+        changeSources: ['agent'],
+      });
+    });
+
+    it('updates the last saved state and notifies other subscribers when reporting throws', () => {
+      const telemetryError = new Error('telemetry failed');
+      reportEventMock.mockImplementationOnce(() => {
+        throw telemetryError;
+      });
+      const onUnhandledError = jest.fn();
+      rxjsConfig.onUnhandledError = onUnhandledError;
+      const { internalApi } = createManager({ initialChangeSources: ['agent'] });
+      const otherSubscriber = jest.fn();
+      onSave$.subscribe(otherSubscriber);
+
+      save([userPanel]);
+      jest.runAllTimers();
+
+      expect(internalApi.getLastSavedState()).toEqual({
+        ...DEFAULT_DASHBOARD_STATE,
+        panels: [userPanel],
+      });
+      expect(otherSubscriber.mock.calls).toEqual([
+        [
+          {
+            previousDashboardId: 'dashboard1234',
+            dashboardId: 'dashboard1234',
+            dashboardState: { ...DEFAULT_DASHBOARD_STATE, panels: [userPanel] },
+          },
+        ],
+      ]);
+      expect(onUnhandledError.mock.calls).toEqual([[telemetryError]]);
     });
   });
 

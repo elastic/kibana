@@ -23,6 +23,7 @@ import type { initializeApproximationManager } from './approximation_manager';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { initializeSettingsManager } from './settings_manager';
+import { reportDashboardSaved } from './telemetry/report_dashboard_saved';
 import type { PublishesOnSave } from './types';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
 
@@ -40,6 +41,7 @@ export function initializeUnsavedChangesManager({
   approximationManager,
   setState,
   onSave$,
+  initialChangeSources = [],
 }: {
   lastSavedState: DashboardState;
   storeUnsavedChanges?: boolean;
@@ -52,6 +54,7 @@ export function initializeUnsavedChangesManager({
   approximationManager: ReturnType<typeof initializeApproximationManager>;
   setState: (state: DashboardState) => Promise<void>;
   onSave$: PublishesOnSave['onSave$'];
+  initialChangeSources?: readonly string[];
 }): {
   api: {
     hasUnsavedChanges$: PublishingSubject<boolean>;
@@ -61,12 +64,18 @@ export function initializeUnsavedChangesManager({
   internalApi: {
     getLastSavedState: () => DashboardState;
     unsavedChanges$: Observable<Partial<DashboardState>>;
+    addChangeSources: (sources: readonly string[]) => void;
   };
 } {
   const hasUnsavedChanges$ = new BehaviorSubject(false);
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
-  const onSaveSubscription = onSave$.subscribe(({ dashboardState }) => {
-    lastSavedState$.next(dashboardState);
+  const changeSources = new Set<string>(initialChangeSources);
+
+  const onSaveSubscription = onSave$.subscribe((saveEvent) => {
+    const savedChangeSources = [...changeSources];
+    changeSources.clear();
+    lastSavedState$.next(saveEvent.dashboardState);
+    reportDashboardSaved({ ...saveEvent, changeSources: savedChangeSources });
   });
 
   const dashboardStateChanges$ = combineLatest([
@@ -92,10 +101,12 @@ export function initializeUnsavedChangesManager({
 
       if (storeUnsavedChanges) {
         const { time_restore, ...restOfDashboardChanges } = dashboardChanges;
+        const hasEditsToBackUp = Object.keys(restOfDashboardChanges).length > 0;
         const dashboardBackupState: DashboardBackupState = {
           // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
           viewMode,
           ...restOfDashboardChanges,
+          ...(hasEditsToBackUp && changeSources.size > 0 && { changeSources: [...changeSources] }),
         };
         getDashboardBackupService().setState(savedObjectId$.value, dashboardBackupState);
       }
@@ -107,6 +118,7 @@ export function initializeUnsavedChangesManager({
   return {
     api: {
       asyncResetToLastSavedState: async () => {
+        changeSources.clear();
         await setState(lastSavedState$.value);
       },
       hasUnsavedChanges$,
@@ -121,6 +133,7 @@ export function initializeUnsavedChangesManager({
     internalApi: {
       getLastSavedState: () => lastSavedState$.value,
       unsavedChanges$: dashboardStateChanges$,
+      addChangeSources: (sources) => sources.forEach((source) => changeSources.add(source)),
     },
   };
 }
