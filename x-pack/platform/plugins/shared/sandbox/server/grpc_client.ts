@@ -375,6 +375,12 @@ function deserializeMkdirsResponse(buf: Buffer): boolean[] {
   return results;
 }
 
+/**
+ * Hard upper bound for any single sandbox RPC (allocation included). gRPC aborts the call with
+ * DEADLINE_EXCEEDED once it passes, so a hung sandbox-api can never block a caller longer.
+ */
+export const SANDBOX_CALL_DEADLINE_MS = 5 * 60 * 1000;
+
 // ---------------------------------------------------------------------------
 // SandboxApiClient — one shared gRPC connection to sandbox-api.
 // Each method takes a conversationId injected as x-conversation-id metadata.
@@ -468,11 +474,16 @@ export class SandboxApiClient {
     return md;
   }
 
+  private callOptions(): grpc.CallOptions {
+    return { deadline: Date.now() + SANDBOX_CALL_DEADLINE_MS };
+  }
+
   async runCommand(conversationId: string, params: RunCommandParams): Promise<RunCommandResult> {
     const call = promisify(
       (this.client as any).runCommand.bind(this.client) as (
         request: RunCommandRequestProto,
         metadata: grpc.Metadata,
+        options: grpc.CallOptions,
         callback: (err: grpc.ServiceError | null, response: RunCommandResult) => void
       ) => void
     );
@@ -484,7 +495,8 @@ export class SandboxApiClient {
         timeout_seconds: params.timeout_seconds ?? 0,
         task_group_id: '',
       },
-      this.metadata(conversationId)
+      this.metadata(conversationId),
+      this.callOptions()
     );
   }
 
@@ -493,10 +505,11 @@ export class SandboxApiClient {
       (this.client as any).statFiles.bind(this.client) as (
         request: string[],
         metadata: grpc.Metadata,
+        options: grpc.CallOptions,
         callback: (err: grpc.ServiceError | null, response: FileMetadata[]) => void
       ) => void
     );
-    return call(paths, this.metadata(conversationId));
+    return call(paths, this.metadata(conversationId), this.callOptions());
   }
 
   async readFiles(
@@ -507,10 +520,11 @@ export class SandboxApiClient {
       (this.client as any).readFiles.bind(this.client) as (
         request: Array<{ path: string; maxReadBytes?: number }>,
         metadata: grpc.Metadata,
+        options: grpc.CallOptions,
         callback: (err: grpc.ServiceError | null, response: ReadFileResult[]) => void
       ) => void
     );
-    return call(requests, this.metadata(conversationId));
+    return call(requests, this.metadata(conversationId), this.callOptions());
   }
 
   async writeFiles(
@@ -521,10 +535,11 @@ export class SandboxApiClient {
       (this.client as any).writeFiles.bind(this.client) as (
         request: Array<{ path: string; content: Buffer }>,
         metadata: grpc.Metadata,
+        options: grpc.CallOptions,
         callback: (err: grpc.ServiceError | null, response: WriteFileResult[]) => void
       ) => void
     );
-    return call(requests, this.metadata(conversationId));
+    return call(requests, this.metadata(conversationId), this.callOptions());
   }
 
   async mkdirs(conversationId: string, paths: string[]): Promise<boolean[]> {
@@ -532,10 +547,11 @@ export class SandboxApiClient {
       (this.client as any).mkdirs.bind(this.client) as (
         request: string[],
         metadata: grpc.Metadata,
+        options: grpc.CallOptions,
         callback: (err: grpc.ServiceError | null, response: boolean[]) => void
       ) => void
     );
-    return call(paths, this.metadata(conversationId));
+    return call(paths, this.metadata(conversationId), this.callOptions());
   }
 
   close(): void {
