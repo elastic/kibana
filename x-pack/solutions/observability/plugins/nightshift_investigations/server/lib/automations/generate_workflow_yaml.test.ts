@@ -162,25 +162,27 @@ describe('generateWorkflowYaml', () => {
       event: 'message',
       ...overrides,
     });
-    const guards =
-      'event.text:* and not event.botId:* and not event.threadId:* and (not event.subtype:* or event.subtype:file_share)';
 
-    it('emits a slack2.message trigger on the Elastic Slack app connector', () => {
+    it('emits a slack2.message trigger with no condition when the row has no filters', () => {
       const yaml = parse(generateWorkflowYaml('auto-123', slackAutomation(slackRow())));
       expect(yaml.triggers).toEqual([
-        {
-          type: 'slack2.message',
-          'connector-id': 'elastic-apps-slack',
-          on: { condition: guards },
-        },
+        { type: 'slack2.message', 'connector-id': 'elastic-apps-slack' },
       ]);
+    });
+
+    it('adds no exclusions beyond the row filters', () => {
+      const yaml = parse(
+        generateWorkflowYaml('auto-123', slackAutomation(slackRow({ channels: ['C1'] })))
+      );
+      const condition: string = yaml.triggers[0].on.condition;
+      expect(condition).not.toMatch(/botId|threadId|subtype/);
     });
 
     it('filters by a single channel', () => {
       const yaml = parse(
         generateWorkflowYaml('auto-123', slackAutomation(slackRow({ channels: ['C1'] })))
       );
-      expect(yaml.triggers[0].on.condition).toBe(`${guards} and (event.channel:"C1")`);
+      expect(yaml.triggers[0].on.condition).toBe('event.channel:"C1"');
     });
 
     it('ORs multiple channels and ANDs them with users and text', () => {
@@ -193,7 +195,7 @@ describe('generateWorkflowYaml', () => {
         )
       );
       expect(yaml.triggers[0].on.condition).toBe(
-        `${guards} and ((event.channel:"C1" or event.channel:"C2") and event.sender:"U1" and event.text:"deploy failed")`
+        '(event.channel:"C1" or event.channel:"C2") and event.sender:"U1" and event.text:"deploy failed"'
       );
     });
 
@@ -214,7 +216,7 @@ describe('generateWorkflowYaml', () => {
           slackAutomation(slackRow({ channels: [' ', ''], users: [], messageFilter: '   ' }))
         )
       );
-      expect(yaml.triggers[0].on.condition).toBe(guards);
+      expect(yaml.triggers[0].on).toBeUndefined();
     });
 
     it('merges several slack rows into one trigger with OR-joined rows', () => {
@@ -225,19 +227,17 @@ describe('generateWorkflowYaml', () => {
         )
       );
       expect(yaml.triggers).toHaveLength(1);
-      expect(yaml.triggers[0].on.condition).toBe(
-        `${guards} and ((event.channel:"C1") or (event.sender:"U1"))`
-      );
+      expect(yaml.triggers[0].on.condition).toBe('(event.channel:"C1") or (event.sender:"U1")');
     });
 
-    it('drops the row filter when any row has no filters', () => {
+    it('emits no condition when any row has no filters', () => {
       const yaml = parse(
         generateWorkflowYaml(
           'auto-123',
           slackAutomation(slackRow({ channels: ['C1'] }), slackRow())
         )
       );
-      expect(yaml.triggers[0].on.condition).toBe(guards);
+      expect(yaml.triggers[0].on).toBeUndefined();
     });
 
     it('emits both triggers, alert first, for mixed alert and slack rows', () => {

@@ -22,13 +22,6 @@ const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
 const ALERT_TRIGGER_TYPE = 'alerting.alertStatusChanged';
 const SLACK_MESSAGE_TRIGGER_TYPE = 'slack2.message';
 
-const SLACK_MESSAGE_GUARDS = [
-  'event.text:*',
-  'not event.botId:*',
-  'not event.threadId:*',
-  '(not event.subtype:* or event.subtype:file_share)',
-];
-
 // One investigation per message, so concurrent messages in a channel do not share a subject.
 const SLACK_SUBJECT_ID = '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}';
 
@@ -221,35 +214,34 @@ function buildTriggers(alertRows: AlertRow[], slackRows: SlackRow[]): unknown[] 
   if (slackRows.length > 0) {
     // One trigger for all Slack rows: two triggers that both match a message would start the
     // workflow twice for it.
-    triggers.push({
+    const trigger: Record<string, unknown> = {
       type: SLACK_MESSAGE_TRIGGER_TYPE,
       'connector-id': ELASTIC_APPS_SLACK_CONNECTOR_ID,
-      on: { condition: buildSlackCondition(slackRows) },
-    });
+    };
+    const condition = buildSlackCondition(slackRows);
+    if (condition) {
+      trigger.on = { condition };
+    }
+    triggers.push(trigger);
   }
 
   return triggers.length > 0 ? triggers : [{ type: 'manual' }];
 }
 
 /**
- * KQL over the `slack2.message` event payload. The guards mirror the managed Slack thread
- * workflow: only human messages with text, since the app's own posts carry `botId` and edits carry
- * a `message_changed` subtype. Thread replies are excluded because the managed workflow continues
- * existing investigations from them.
+ * KQL over the `slack2.message` event payload, built only from the filters on the trigger rows.
+ * Nothing is excluded beyond what the user chose. The Relay already drops the Slack app's own
+ * posts and edits.
  *
  * `channels` and `users` are matched against `event.channel` and `event.sender`, which are Slack
  * ids, so a channel name never matches. `messageFilter` is a phrase match, not a substring match.
- * A row with no filters matches every message, which makes the whole row filter unnecessary.
+ * A row with no filters matches every message, so no condition is emitted at all.
  */
 function buildSlackCondition(rows: SlackRow[]): string {
   const rowConditions = rows.map(buildSlackRowCondition);
-  const guards = SLACK_MESSAGE_GUARDS.join(' and ');
-  if (rowConditions.some((c) => c === '')) {
-    return guards;
-  }
-  const rowFilter =
-    rowConditions.length === 1 ? rowConditions[0] : rowConditions.map((c) => `(${c})`).join(' or ');
-  return `${guards} and (${rowFilter})`;
+  if (rowConditions.some((c) => c === '')) return '';
+  if (rowConditions.length === 1) return rowConditions[0];
+  return rowConditions.map((c) => `(${c})`).join(' or ');
 }
 
 function buildSlackRowCondition(row: SlackRow): string {
