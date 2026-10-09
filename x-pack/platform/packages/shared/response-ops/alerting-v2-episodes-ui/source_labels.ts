@@ -48,19 +48,13 @@ const resolve = <T>(
   universal: T,
   classic: T
 ): T | string => {
-  if (sourceId != null && sources) {
-    const match = sources.find((source) => source.id === sourceId);
-    if (match?.label) {
-      return match.label;
-    }
-  }
   if (sourceId == null || sourceId === ALERTING_V2_EPISODE_SOURCE_ID) {
     return universal;
   }
   if (sourceId === CLASSIC_EPISODE_SOURCE_ID) {
     return classic;
   }
-  return sourceId;
+  return sources?.find((source) => source.id === sourceId)?.label ?? sourceId;
 };
 
 /** Short source name for the alerts table column. */
