@@ -49,6 +49,7 @@ export const configureAlertAnalysisWorkflow = async ({
       connectorId,
       agentId,
       createConversation: false,
+      usePrompt: false,
       autoCloseEnabled: false,
       autoCloseConfidenceScoreMinThreshold: 0.9,
       autoCloseConfidenceScoreMaxThreshold: 1,
