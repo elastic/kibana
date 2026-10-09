@@ -31,6 +31,15 @@ describe('buildRulePayload', () => {
     });
   });
 
+  it('drops the server-managed metadata.template', () => {
+    const result = buildRulePayload({
+      ...minimalData,
+      metadata: { name: 'Host CPU high', template: { id: 'template-1' } },
+    });
+
+    expect(result.metadata).toEqual({ name: 'Host CPU high' });
+  });
+
   it('uses provided time_field over the default', () => {
     const result = buildRulePayload({ ...minimalData, time_field: 'event.created' });
 

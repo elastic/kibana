@@ -168,6 +168,8 @@ const ESQL_GENERATION_CONCURRENCY = 3;
  * `behaviors`, they just do not spend a generation call.
  */
 const MAX_GENERATED_BEHAVIORS = 20;
+/** Matches the `evidence_quote` cap of the package-report step input. */
+const MAX_EVIDENCE_QUOTE_CHARS = 2000;
 /** LIMIT the generator writes into a hunt query when the caller has no row bound. */
 const DEFAULT_HUNT_QUERY_LIMIT = 100;
 /**
@@ -648,6 +650,8 @@ export const huntBehavior = async (
     const parentTechniqueId = subtechnique?.parentTechniqueId;
     validated.push({
       ...candidate,
+      // Bounded for packaging's input schema; grounding above already used the full quote.
+      evidence_quote: candidate.evidence_quote.slice(0, MAX_EVIDENCE_QUOTE_CHARS),
       technique_id: techniqueId,
       confidence: candidate.llm_confidence,
       technique_name: entry.name,

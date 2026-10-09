@@ -7,7 +7,7 @@
 
 import { useMemo, useState } from 'react';
 import type { ListWorkersResponse } from '@kbn/alertzero-common';
-import { SYSTEM_SECURITY_WORKER_CATALOG } from '@kbn/alertzero-common';
+import { SYSTEM_SECURITY_WORKER_CATALOG, isWorkerEnableBlocked } from '@kbn/alertzero-common';
 import { useWorkers } from '../../hooks/use_workers_api';
 
 type WorkerToggleState = Record<string, boolean>;
@@ -36,6 +36,14 @@ export const useWorkerSelection = () => {
     [serverWorkers]
   );
   const availableWorkerIds = useMemo(() => workers.map(({ id }) => id), [workers]);
+  // The model check runs as the requesting user, so for a user who can't change Workers it can
+  // report no model in a space that has one.
+  const isModelMissing =
+    canModifyWorkers &&
+    availableWorkerIds.some((id) => {
+      const serverWorker = serverWorkers.get(id);
+      return serverWorker != null && isWorkerEnableBlocked(serverWorker.blockingReasons);
+    });
 
   const [workerEnabled, setWorkerEnabled] = useState<WorkerToggleState>(initialToggleState);
 
@@ -53,6 +61,7 @@ export const useWorkerSelection = () => {
     workerEnabled,
     enabledCount,
     canModifyWorkers,
+    isModelMissing,
     toggleWorker,
   };
 };
