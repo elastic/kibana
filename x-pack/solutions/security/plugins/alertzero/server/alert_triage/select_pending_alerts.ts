@@ -9,7 +9,6 @@ import {
   OPEN_ALERT_STATUSES,
   TRIAGE_FAILED_TAG,
   TRIAGE_PENDING_TAG,
-  TRIAGE_STALE_TAG,
   VERDICT_TAGS,
 } from './constants';
 import type { TriageAlert } from './types';
@@ -27,8 +26,6 @@ export interface SelectPendingAlertsParams {
 export interface SelectedAlerts {
   /** Inside the look-back, unclaimed and not yet analysed. */
   pending: TriageAlert[];
-  /** Older than the look-back and not yet tagged stale. Returned so they are tagged, not dropped. */
-  stale: TriageAlert[];
   /** Carrying the claim tag, whatever their age. */
   claimed: TriageAlert[];
 }
@@ -48,7 +45,7 @@ export const selectPendingAlerts = ({
   analysisTagPrefix,
 }: SelectPendingAlertsParams): SelectedAlerts => {
   const cutoff = now - lookbackHours * HOUR_MS;
-  const selected: SelectedAlerts = { pending: [], stale: [], claimed: [] };
+  const selected: SelectedAlerts = { pending: [], claimed: [] };
 
   for (const alert of alerts) {
     if (!(OPEN_ALERT_STATUSES as readonly string[]).includes(alert.status)) continue;
@@ -56,11 +53,8 @@ export const selectPendingAlerts = ({
 
     if (alert.tags.includes(TRIAGE_PENDING_TAG)) {
       selected.claimed.push(alert);
-    } else if (alert.tags.includes(TRIAGE_STALE_TAG)) {
-      continue;
-    } else if (alert.timestamp < cutoff) {
-      selected.stale.push(alert);
-    } else {
+    } else if (alert.timestamp >= cutoff) {
+      // Older alerts are left alone: the search window is the look-back, so they are never tagged.
       selected.pending.push(alert);
     }
   }

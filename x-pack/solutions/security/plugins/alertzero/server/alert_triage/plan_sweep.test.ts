@@ -6,7 +6,7 @@
  */
 
 import { IN_FLIGHT_CEILING } from './constants';
-import { planSweep, type SweepPorts } from './plan_sweep';
+import { planSweep, tagInChunks, type SweepPorts } from './plan_sweep';
 import { NOW, HOUR_MS, makeAlert, makeAlerts } from './test_helpers';
 import type { HeadroomResult, TriageAlert } from './types';
 
@@ -16,15 +16,21 @@ const setup = ({
   alerts = [],
   live = new Set<string>(),
   headroom = OK,
+  agedOut = 0,
 }: {
   alerts?: TriageAlert[];
   live?: ReadonlySet<string> | 'unreadable';
   headroom?: HeadroomResult;
+  agedOut?: number | 'fails';
 } = {}) => {
   const tagAlerts = jest.fn().mockResolvedValue(undefined);
   const ports: SweepPorts = {
     readHeadroom: async () => headroom,
     fetchAlerts: async () => alerts,
+    countAgedOutAlerts: async () => {
+      if (agedOut === 'fails') throw new Error('count failed');
+      return agedOut;
+    },
     listLiveExecutionIds: async () => (live === 'unreadable' ? undefined : live),
     tagAlerts,
   };
@@ -147,7 +153,7 @@ describe('planSweep', () => {
 
   it('reports the planning numbers so an idle sweep can be told from a blocked one', async () => {
     const { run } = setup({
-      alerts: [...makeAlerts(4), makeAlert({ timestamp: NOW - 48 * HOUR_MS })],
+      alerts: makeAlerts(4),
     });
 
     const { numbers } = await run();
@@ -155,7 +161,6 @@ describe('planSweep', () => {
     expect(numbers).toEqual(
       expect.objectContaining({
         pendingAlerts: 4,
-        staleAlerts: 1,
         plannedBatches: 1,
         plannedAlerts: 4,
         sweepBudget: 100,
@@ -163,21 +168,79 @@ describe('planSweep', () => {
     );
   });
 
-  it('returns alerts older than the look-back for stale tagging instead of dropping them', async () => {
-    const old = makeAlert({ timestamp: NOW - 48 * HOUR_MS });
-    const { run } = setup({ alerts: [old] });
+  describe('aged-out count', () => {
+    it('reports how many alerts aged out unserved, without writing anything for them', async () => {
+      const { run, tagAlerts } = setup({ alerts: [], agedOut: 42 });
 
-    expect((await run()).staleAlertIds).toEqual([old.id]);
+      const { numbers } = await run();
+
+      expect(numbers.agedOutAlerts).toBe(42);
+      expect(tagAlerts).not.toHaveBeenCalled();
+    });
+
+    it('reports it on a sweep that Task Manager blocked, so a blocked sweep still shows the backlog', async () => {
+      const { run } = setup({ headroom: { status: 'behind', lagMs: 999_999 }, agedOut: 7 });
+
+      const plan = await run();
+
+      expect(plan.skipReason).toBe('tm_behind');
+      expect(plan.numbers.agedOutAlerts).toBe(7);
+    });
+
+    it('leaves the number out, and still plans, when the count fails', async () => {
+      const { run } = setup({ alerts: makeAlerts(2), agedOut: 'fails' });
+
+      const plan = await run();
+
+      expect(plan.skipReason).toBe('none');
+      expect(plan.numbers.agedOutAlerts).toBeUndefined();
+    });
   });
 
-  it('marks a reclaimed alert stale when it aged out of the look-back while claimed', async () => {
+  it('does not plan or tag an alert older than the look-back', async () => {
+    const old = makeAlert({ timestamp: NOW - 48 * HOUR_MS });
+    const { run, tagAlerts } = setup({ alerts: [old] });
+
+    const plan = await run();
+
+    expect(plan.skipReason).toBe('nothing_pending');
+    expect(tagAlerts).not.toHaveBeenCalled();
+  });
+
+  it('releases the claim on an alert that aged out of the look-back while claimed, without re-planning it', async () => {
     const old = makeAlert({ timestamp: NOW - 48 * HOUR_MS, tags: ['az:triage_pending'] });
-    const { run } = setup({ alerts: [old] });
+    const { run, tagAlerts } = setup({ alerts: [old] });
 
     const plan = await run();
 
     expect(plan.reclaimAlertIds).toEqual([old.id]);
-    expect(plan.staleAlertIds).toEqual([old.id]);
     expect(plan.batches).toEqual([]);
+    expect(tagAlerts).toHaveBeenCalledWith({
+      alertIds: [old.id],
+      add: [],
+      remove: ['az:triage_pending'],
+    });
+  });
+});
+
+describe('tagInChunks', () => {
+  it('splits a large update into bounded calls', async () => {
+    const tagAlerts = jest.fn().mockResolvedValue(undefined);
+
+    await tagInChunks(tagAlerts, {
+      alertIds: Array.from({ length: 1200 }, (_, i) => `a-${i}`),
+      add: ['x'],
+      remove: [],
+    });
+
+    expect(tagAlerts.mock.calls.map(([{ alertIds }]) => alertIds.length)).toEqual([500, 500, 200]);
+  });
+
+  it('makes no call for an empty list', async () => {
+    const tagAlerts = jest.fn();
+
+    await tagInChunks(tagAlerts, { alertIds: [], add: ['x'], remove: [] });
+
+    expect(tagAlerts).not.toHaveBeenCalled();
   });
 });

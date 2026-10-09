@@ -12,9 +12,7 @@ import { z } from '@kbn/zod/v4';
 
 export const TRIAGE_HEADROOM_STEP_ID = 'alertzero.triage.headroom' as const;
 export const TRIAGE_PLAN_SWEEP_STEP_ID = 'alertzero.triage.planSweep' as const;
-export const TRIAGE_TAG_STALE_STEP_ID = 'alertzero.triage.tagStale' as const;
 
-const MAX_ALERT_IDS = 10_000;
 const idSchema = z.string().trim().min(1).max(256);
 
 const headroomSchema = z.object({
@@ -69,10 +67,12 @@ const planSweepOutputSchema = z.object({
   batches: z.array(
     z.object({ rule_id: z.string(), rule_name: z.string(), alert_ids: z.array(z.string()) })
   ),
-  stale_alert_ids: z.array(z.string()),
   numbers: z.object({
     pending_alerts: z.number(),
-    stale_alerts: z.number(),
+    aged_out_alerts: z
+      .number()
+      .optional()
+      .describe('Open alerts older than the look-back that were never triaged.'),
     claimed_alerts: z.number(),
     reclaimed_alerts: z.number(),
     live_batches: z.number(),
@@ -99,27 +99,4 @@ export const triagePlanSweepStepCommonDefinition: CommonStepDefinition<
   stability: 'tech_preview',
   inputSchema: planSweepInputSchema,
   outputSchema: planSweepOutputSchema,
-};
-
-const tagStaleInputSchema = z.object({
-  alert_ids: z.array(idSchema).max(MAX_ALERT_IDS),
-});
-
-const tagStaleOutputSchema = z.object({ tagged: z.number().int().min(0) });
-
-export const triageTagStaleStepCommonDefinition: CommonStepDefinition<
-  typeof tagStaleInputSchema,
-  typeof tagStaleOutputSchema
-> = {
-  id: TRIAGE_TAG_STALE_STEP_ID,
-  label: i18n.translate('xpack.alertzero.workflows.steps.triageTagStale.label', {
-    defaultMessage: 'Tag stale alerts',
-  }),
-  description: i18n.translate('xpack.alertzero.workflows.steps.triageTagStale.description', {
-    defaultMessage: 'Tags alerts that aged out of the look-back with az:triage_stale.',
-  }),
-  category: StepCategory.KibanaSecurity,
-  stability: 'tech_preview',
-  inputSchema: tagStaleInputSchema,
-  outputSchema: tagStaleOutputSchema,
 };

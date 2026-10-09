@@ -15,7 +15,6 @@ export {
   TRIAGE_EXEC_TAG_PREFIX,
   TRIAGE_FAILED_TAG,
   TRIAGE_PENDING_TAG,
-  TRIAGE_STALE_TAG,
 } from './constants';
 export type {
   HeadroomResult,

@@ -11,13 +11,17 @@ import { ExecutionError } from '@kbn/workflows/server';
 import {
   triageHeadroomStepCommonDefinition,
   triagePlanSweepStepCommonDefinition,
-  triageTagStaleStepCommonDefinition,
 } from '../../../common/step_types/alert_triage';
-import { TRIAGE_STALE_TAG } from '../../alert_triage/constants';
 import { readHeadroom } from '../../alert_triage/headroom';
-import { planSweep, tagInChunks } from '../../alert_triage/plan_sweep';
+import { planSweep } from '../../alert_triage/plan_sweep';
 import type { HeadroomResult } from '../../alert_triage/types';
-import { fetchTriageAlerts, listLiveExecutionIds, readWorkflowRunLagMs, tagAlerts } from './ports';
+import {
+  countAgedOutAlerts,
+  fetchTriageAlerts,
+  listLiveExecutionIds,
+  readWorkflowRunLagMs,
+  tagAlerts,
+} from './ports';
 
 export interface AlertTriageStepDependencies {
   getTaskManager: () => Pick<TaskManagerStartContract, 'aggregate'>;
@@ -72,16 +76,28 @@ export const getTriagePlanSweepStepDefinition = () =>
             ? { status: 'behind', lagMs: given.lag_ms ?? 0 }
             : { status: 'unknown' };
 
+        const now = Date.now();
         const plan = await planSweep(
           {
             readHeadroom: async () => headroom,
-            fetchAlerts: () => fetchTriageAlerts(contextManager, input.analysis_tag_prefix),
+            countAgedOutAlerts: () =>
+              countAgedOutAlerts(
+                contextManager,
+                input.analysis_tag_prefix,
+                now - input.lookback_hours * 60 * 60 * 1000
+              ),
+            fetchAlerts: () =>
+              fetchTriageAlerts(
+                contextManager,
+                input.analysis_tag_prefix,
+                now - input.lookback_hours * 60 * 60 * 1000
+              ),
             listLiveExecutionIds: () =>
               listLiveExecutionIds(contextManager, input.batch_workflow_id),
             tagAlerts: tagAlerts(contextManager),
           },
           {
-            now: Date.now(),
+            now,
             budgetPerHour: input.budget_per_hour,
             intervalMinutes: input.interval_minutes,
             lookbackHours: input.lookback_hours,
@@ -97,10 +113,9 @@ export const getTriagePlanSweepStepDefinition = () =>
               rule_name: ruleName,
               alert_ids: alerts.map(({ id }) => id),
             })),
-            stale_alert_ids: [...plan.staleAlertIds],
             numbers: {
               pending_alerts: numbers.pendingAlerts,
-              stale_alerts: numbers.staleAlerts,
+              aged_out_alerts: numbers.agedOutAlerts,
               claimed_alerts: numbers.claimedAlerts,
               reclaimed_alerts: numbers.reclaimedAlerts,
               live_batches: numbers.liveBatches,
@@ -113,24 +128,6 @@ export const getTriagePlanSweepStepDefinition = () =>
         };
       } catch (error) {
         throw toApiError(error, 'plan triage sweep');
-      }
-    },
-  });
-
-export const getTriageTagStaleStepDefinition = () =>
-  createServerStepDefinition({
-    ...triageTagStaleStepCommonDefinition,
-    handler: async ({ input, contextManager }) => {
-      try {
-        const alertIds = Array.isArray(input.alert_ids) ? input.alert_ids : [];
-        await tagInChunks(tagAlerts(contextManager), {
-          alertIds,
-          add: [TRIAGE_STALE_TAG],
-          remove: [],
-        });
-        return { output: { tagged: alertIds.length } };
-      } catch (error) {
-        throw toApiError(error, 'tag stale alerts');
       }
     },
   });

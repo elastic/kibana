@@ -34,7 +34,6 @@ export const ALERT_FETCH_LIMIT = 10_000;
 
 export const TRIAGE_PENDING_TAG = 'az:triage_pending';
 export const TRIAGE_EXEC_TAG_PREFIX = 'az:triage_exec:';
-export const TRIAGE_STALE_TAG = 'az:triage_stale';
 export const TRIAGE_FAILED_TAG = 'az:triage_failed';
 
 /** Verdict tags written by the batch's classification. Any of them means the alert is done. */
