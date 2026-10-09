@@ -12,6 +12,7 @@ import {
   splitArtifactsByType,
 } from '../../form/utils/artifact_mappers';
 import { ruleQueryToApiQuery, apiQueryToFormQuery } from '../../form/utils/query_mappers';
+import { toUpdateRuleData } from '../../form/utils/rule_request_mappers';
 import {
   apiStateTransitionToFormStateTransition,
   buildStateTransitionRequest,
@@ -38,9 +39,12 @@ export const composeFormToCreateRequest = (
     kind: formValues.kind,
     metadata: {
       name: formValues.metadata.name,
-      description: formValues.metadata.description,
+      ...(formValues.metadata.description ? { description: formValues.metadata.description } : {}),
       ...(formValues.metadata.tags?.length ? { tags: formValues.metadata.tags } : {}),
-      ...(builderType ? { builder_type: builderType } : {}),
+      ...(formValues.metadata.routingTags?.length
+        ? { routing_tags: formValues.metadata.routingTags }
+        : {}),
+      ...(builderType ? { builder: { type: builderType } } : {}),
     },
     time_field: formValues.timeField,
     schedule: { every: formValues.schedule.every, lookback: formValues.schedule.lookback },
@@ -60,19 +64,11 @@ export const composeFormToUpdateRequest = (
   builderType?: string
 ): UpdateRuleData => {
   const { kind, ...request } = composeFormToCreateRequest(formValues, builderType);
-  const { grouping, state_transition, artifacts, metadata, ...rest } = request;
+  const update = toUpdateRuleData(request);
+
   return {
-    ...rest,
-    metadata: {
-      ...metadata,
-      builder_type: metadata.builder_type ?? null,
-      // Empty tags must be sent as an explicit `null` to clear them; omitting
-      // the key would preserve the existing tags on a partial update.
-      tags: formValues.metadata.tags?.length ? formValues.metadata.tags : null,
-    },
-    grouping: grouping ?? null,
-    state_transition: state_transition ?? null,
-    artifacts: artifacts ?? null,
+    ...update,
+    metadata: { ...update.metadata, builder: request.metadata.builder ?? null },
   };
 };
 
@@ -98,6 +94,7 @@ export const mapRuleToComposeFormValues = (rule: RuleResponse): FormValues => {
       description: rule.metadata.description,
       enabled: rule.enabled,
       tags: rule.metadata.tags,
+      routingTags: rule.metadata.routing_tags,
     },
     timeField: rule.time_field,
     schedule: {

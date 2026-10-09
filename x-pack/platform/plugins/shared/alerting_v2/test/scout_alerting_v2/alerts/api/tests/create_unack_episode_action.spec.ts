@@ -11,6 +11,7 @@ import {
   ALERTING_V2_ALERTS_READ_ROLE,
   apiTest,
   buildAlertEvent,
+  getAckEpisodeActionUrl,
   getUnackEpisodeActionUrl,
   NO_ACCESS_ROLE,
   testData,
@@ -46,6 +47,12 @@ apiTest.describe('Create unack episode action API', { tag: '@local-stateful-clas
         alert: { id: episodeId, status: 'active' },
       }),
     ]);
+    const ackResponse = await apiClient.post(getAckEpisodeActionUrl(episodeId), {
+      headers: writerHeaders,
+      body: {},
+    });
+    expect(ackResponse).toHaveStatusCode(204);
+
     const response = await apiClient.post(getUnackEpisodeActionUrl(episodeId), {
       headers: writerHeaders,
       body: {},
@@ -60,7 +67,7 @@ apiTest.describe('Create unack episode action API', { tag: '@local-stateful-clas
     expect(actions[0]).toMatchObject({
       action_type: 'unack',
       group_hash: groupHash,
-      episode_id: episodeId,
+      alert_id: episodeId,
       rule_id: ruleId,
       space_id: 'default',
     });
@@ -95,6 +102,12 @@ apiTest.describe('Create unack episode action API', { tag: '@local-stateful-clas
         }),
       ]);
 
+      const ackResponse = await apiClient.post(getAckEpisodeActionUrl(olderEpisodeId), {
+        headers: writerHeaders,
+        body: {},
+      });
+      expect(ackResponse).toHaveStatusCode(204);
+
       const response = await apiClient.post(getUnackEpisodeActionUrl(olderEpisodeId), {
         headers: writerHeaders,
         body: {},
@@ -109,8 +122,42 @@ apiTest.describe('Create unack episode action API', { tag: '@local-stateful-clas
       expect(actions[0]).toMatchObject({
         action_type: 'unack',
         group_hash: groupHash,
-        episode_id: olderEpisodeId,
+        alert_id: olderEpisodeId,
       });
+    }
+  );
+
+  apiTest(
+    'unack: unacking an alert that is not acknowledged returns 409',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'unack-no-op-rule';
+      const groupHash = 'unack-no-op-group';
+      const episodeId = 'unack-no-op-episode';
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          alert: { id: episodeId, status: 'active' },
+        }),
+      ]);
+
+      const response = await apiClient.post(getUnackEpisodeActionUrl(episodeId), {
+        headers: writerHeaders,
+        body: {},
+      });
+      expect(response).toHaveStatusCode(409);
+      expect(response.body.code).toBe('INVALID_ALERT_STATE_TRANSITION');
+      expect(response.body.details).toMatchObject({
+        alert_id: episodeId,
+        group_hash: groupHash,
+        action_type: 'unack',
+      });
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['unack'],
+      });
+      expect(actions).toHaveLength(0);
     }
   );
 

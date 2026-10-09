@@ -23,7 +23,7 @@ import {
   DEFAULT_STRATEGY_FOR_MODE,
   DEFAULT_THROTTLE_INTERVAL,
   GROUPING_MODE_OPTIONS,
-  PER_EPISODE_STRATEGY_OPTIONS,
+  PER_ALERT_STRATEGY_OPTIONS,
   THROTTLE_INTERVAL_PATTERN,
 } from '../constants';
 import { needsInterval } from '../form_utils';
@@ -53,7 +53,7 @@ export const NotificationControlsSection = () => {
   const showInterval = needsInterval(throttleStrategy);
 
   const strategyOptions =
-    groupingMode === 'per_episode' ? PER_EPISODE_STRATEGY_OPTIONS : AGGREGATE_STRATEGY_OPTIONS;
+    groupingMode === 'per_alert' ? PER_ALERT_STRATEGY_OPTIONS : AGGREGATE_STRATEGY_OPTIONS;
 
   return (
     <>
@@ -120,7 +120,7 @@ export const NotificationControlsSection = () => {
               error={error?.message}
               helpText={i18n.translate('xpack.alertingV2.actionPolicy.form.groupBy.helpText', {
                 defaultMessage:
-                  'Episodes that share these field values are grouped into a single notification.',
+                  'Alerts that share these field values are grouped into a single notification.',
               })}
             >
               <EuiComboBox

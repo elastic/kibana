@@ -1,5 +1,5 @@
 {
-  "sha1": "e05efea8bd2cc31fb45f15e1a214fed03e176660",
+  "sha1": "84f2316e714fe6d2920a4169047892c3e7041dfe",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -58,6 +58,90 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_editor.spec.ts",
         "line": 59,
         "column": 21
+      }
+    },
+    {
+      "id": "064f4c74e143ef0-652e23c15960113",
+      "title": "Service account picker for a workflow-only user explains missing security privileges without management actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_picker_restricted.spec.ts",
+        "line": 34,
+        "column": 11
+      }
+    },
+    {
+      "id": "beb9bedc7d0a68d-bbf99183eb3fb8e",
+      "title": "Service account picker states opens from the empty prompt and preserves YAML when focusing Manage",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_picker_states.spec.ts",
+        "line": 17,
+        "column": 8
+      }
+    },
+    {
+      "id": "beb9bedc7d0a68d-8e37ce0b72d02a0",
+      "title": "Service account picker states explains denied directory access instead of claiming the directory is empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_picker_states.spec.ts",
+        "line": 35,
+        "column": 20
+      }
+    },
+    {
+      "id": "beb9bedc7d0a68d-ecfb7ac43477cda",
+      "title": "Service account picker states retries a temporary failure and selects the recovered account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_picker_states.spec.ts",
+        "line": 50,
+        "column": 18
+      }
+    },
+    {
+      "id": "beb9bedc7d0a68d-87fe89aa8805d39",
+      "title": "Service account picker states shows a genuinely empty directory without permission guidance",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_picker_states.spec.ts",
+        "line": 62,
+        "column": 8
+      }
+    },
+    {
+      "id": "beb9bedc7d0a68d-b162235dcceb9d6",
+      "title": "Service account picker states creates through the shared flyout and keeps the workflow unsaved",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_picker_states.spec.ts",
+        "line": 70,
+        "column": 18
       }
     },
     {

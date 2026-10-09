@@ -6,17 +6,25 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButtonEmpty, EuiContextMenu, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiContextMenu,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPopover,
+  EuiText,
+  EuiTextColor,
+} from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { Observable } from '../../../common/types/domain/observable/v1';
 import type { CaseUI } from '../../containers/types';
 import { OBSERVABLES_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
 import { useCasesWorkflowExecutor } from '../workflows/use_cases_workflow_executor';
-import {
-  untaggedCaseWorkflowFilter,
-  untaggedCaseWorkflowComparator,
-} from '../workflows/use_run_case_workflow';
+import { useCaseWorkflowFilters } from '../workflows/use_run_case_workflow';
 import { RunCaseWorkflowModal } from '../workflows/run_case_workflow_modal';
+import { DeleteConfirmationModal } from '../configure_cases/delete_confirmation_modal';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { useBulkDeleteObservables } from '../../containers/use_bulk_delete_observables';
 import * as i18n from './translations';
 import * as workflowI18n from '../workflows/translations';
 
@@ -26,15 +34,21 @@ const WORKFLOW_INPUTS: Record<string, unknown> = {};
 export interface ObservablesBulkActionsProps {
   caseData: CaseUI;
   selectedObservables: Observable[];
+  canRunWorkflow: boolean;
+  onActionSuccess?: () => void;
 }
 
 /** Bulk action bar for selected observables. Returns null when the selection is empty. */
 export const ObservablesBulkActions: React.FC<ObservablesBulkActionsProps> = ({
   caseData,
   selectedObservables,
+  canRunWorkflow,
+  onActionSuccess,
 }) => {
+  const { permissions } = useCasesContext();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [showRunWorkflowModal, setShowRunWorkflowModal] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -42,6 +56,11 @@ export const ObservablesBulkActions: React.FC<ObservablesBulkActionsProps> = ({
   const observableIds = useMemo(
     () => selectedObservables.map(({ id }) => id),
     [selectedObservables]
+  );
+
+  const { mutate: bulkDeleteObservables, isLoading: isBulkDeleting } = useBulkDeleteObservables(
+    caseData.id,
+    { onSuccess: onActionSuccess }
   );
 
   const origin = useMemo(
@@ -54,26 +73,50 @@ export const ObservablesBulkActions: React.FC<ObservablesBulkActionsProps> = ({
   );
 
   const runWorkflow = useCasesWorkflowExecutor({ caseId: caseData.id, origin });
+  const { filterWorkflow, sortWorkflow } = useCaseWorkflowFilters();
 
-  const panels: EuiContextMenuPanelDescriptor[] = useMemo(
-    () => [
-      {
-        id: 0,
-        items: [
-          {
-            name: workflowI18n.RUN_WORKFLOW,
-            icon: 'play',
-            onClick: () => {
-              closePopover();
-              setShowRunWorkflowModal(true);
-            },
-            'data-test-subj': 'cases-observables-bulk-actions-run-workflow',
-          },
-        ],
-      },
-    ],
-    [closePopover]
-  );
+  const handleBulkDeleteClick = useCallback(() => {
+    closePopover();
+    setIsDeleteModalVisible(true);
+  }, [closePopover]);
+
+  const handleConfirmBulkDelete = useCallback(() => {
+    bulkDeleteObservables({ observableIds });
+    setIsDeleteModalVisible(false);
+  }, [bulkDeleteObservables, observableIds]);
+
+  const handleCancelBulkDelete = useCallback(() => {
+    setIsDeleteModalVisible(false);
+  }, []);
+
+  const panels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
+    const items = [];
+
+    if (canRunWorkflow) {
+      items.push({
+        name: workflowI18n.RUN_WORKFLOW,
+        icon: 'play',
+        onClick: () => {
+          closePopover();
+          setShowRunWorkflowModal(true);
+        },
+        disabled: isBulkDeleting,
+        'data-test-subj': 'cases-observables-bulk-actions-run-workflow',
+      });
+    }
+
+    if (permissions.update) {
+      items.push({
+        name: <EuiTextColor color="danger">{i18n.BULK_DELETE_OBSERVABLES}</EuiTextColor>,
+        icon: <EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />,
+        onClick: handleBulkDeleteClick,
+        disabled: isBulkDeleting,
+        'data-test-subj': 'cases-observables-bulk-actions-delete',
+      });
+    }
+
+    return [{ id: 0, items }];
+  }, [canRunWorkflow, closePopover, handleBulkDeleteClick, isBulkDeleting, permissions.update]);
 
   if (selectedObservables.length === 0) {
     return null;
@@ -113,12 +156,20 @@ export const ObservablesBulkActions: React.FC<ObservablesBulkActionsProps> = ({
           />
         </EuiPopover>
       </EuiFlexItem>
+      {isDeleteModalVisible && (
+        <DeleteConfirmationModal
+          title={i18n.BULK_DELETE_TITLE(selectedObservables.length)}
+          message={i18n.BULK_DELETE_MESSAGE(selectedObservables.length)}
+          onCancel={handleCancelBulkDelete}
+          onConfirm={handleConfirmBulkDelete}
+        />
+      )}
       {showRunWorkflowModal && (
         <RunCaseWorkflowModal
           inputs={WORKFLOW_INPUTS}
           runWorkflow={runWorkflow}
-          filterWorkflow={untaggedCaseWorkflowFilter}
-          sortWorkflow={untaggedCaseWorkflowComparator}
+          filterWorkflow={filterWorkflow}
+          sortWorkflow={sortWorkflow}
           onClose={() => setShowRunWorkflowModal(false)}
         />
       )}

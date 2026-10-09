@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout';
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
+import { expectOnboardingStepVisible } from '../helpers/onboarding';
 
 // Both services are in the "security_identity_compliance" category,
 // visible without switching signal filter or category.
@@ -90,7 +91,7 @@ test.describe('Onboarding — downstream step invalidation', { tag: tags.statefu
     });
     await page.gotoApp('onboarding/aws#services');
 
-    await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
+    await expectOnboardingStepVisible(page, 'services');
 
     // Confirm service-settings starts as complete.
     await expect(page.testSubj.locator('onboardingStepIndicator-service-settings')).toHaveAttribute(

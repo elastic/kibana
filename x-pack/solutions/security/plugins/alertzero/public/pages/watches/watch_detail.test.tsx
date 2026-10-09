@@ -9,9 +9,9 @@ import React from 'react';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter, Route, Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
-import { I18nProvider } from '@kbn/i18n-react';
 import {
   RULE_COVERAGE_DEFAULT_EXTRAS,
   RULE_TUNING_DEFAULT_EXTRAS,
@@ -42,6 +42,20 @@ jest.mock('../../hooks/use_can_write_alertzero', () => ({
 }));
 jest.mock('../../hooks/use_watches_api');
 jest.mock('../../hooks/use_workers_api');
+jest.mock('../../components/worker_dependencies/worker_dependencies_callout', () => ({
+  WorkerDependenciesCallout: ({ worker, surface }: { worker: { id: string }; surface: string }) => (
+    <div data-test-subj={`alertZeroWorkerDependencies-${surface}-${worker.id}`} />
+  ),
+}));
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useKibana: () => ({
+    services: {
+      http: { get: jest.fn().mockResolvedValue(undefined) },
+      application: { getUrlForApp: jest.fn(() => '/app/workflows') },
+    },
+  }),
+}));
 jest.mock('./components/watches_section_layout', () => ({
   WatchesSectionLayout: ({
     children,
@@ -113,6 +127,8 @@ jest.mock('./components/watches_section_layout', () => ({
   },
 }));
 
+const renderWithI18n = (ui: React.ReactElement) => render(ui, { wrapper: I18nProvider });
+
 const mockUseWatch = jest.mocked(useWatch);
 const mockUseWorkers = jest.mocked(useWorkers);
 const mockUseUpdateWorker = jest.mocked(useUpdateWorker);
@@ -120,18 +136,26 @@ const mockUseCanWriteAlertZero = jest.mocked(useCanWriteAlertZero);
 
 const createWorker = (
   overrides: Partial<Worker> & Pick<Worker, 'id' | 'name' | 'watchIds'>
-): Worker => ({
-  enabled: false,
-  lastRun: null,
-  state: 'paused',
-  settingsRevision: null,
-  workflowId: null,
-  settings: {
-    workerId: overrides.id,
-    autonomy: 'manual',
-  },
-  ...overrides,
-});
+): Worker => {
+  const worker: Worker = {
+    enabled: false,
+    lastRun: null,
+    state: 'paused',
+    settingsRevision: null,
+    workflowId: null,
+    blockingReasons: [],
+    settings: {
+      workerId: overrides.id,
+      autonomy: 'manual',
+    },
+    ...overrides,
+  };
+  return {
+    ...worker,
+    // Workers that already have an account skip prebuilt account setup on save.
+    settings: { ...worker.settings, serviceAccountId: 'kibana/az-worker-1' },
+  };
+};
 
 const floorWorkers: Worker[] = [
   createWorker({
@@ -162,6 +186,11 @@ const huntWorker = createWorker({
   id: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   name: 'Continuous Threat Hunt',
   watchIds: [SYSTEM_SECURITY_WATCH_HUNT_ID],
+  settings: {
+    workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+    autonomy: 'manual',
+    scheduleInterval: '4h',
+  },
 });
 
 /** Complete Rule Tuning extras; cases vary the window and keep the FP thresholds at default. */
@@ -193,7 +222,7 @@ const detectionWorkers: Worker[] = [
   }),
 ];
 
-const renderWatch = (watchId: string, workers: Worker[]) => {
+const renderWatch = (watchId: string, workers: Worker[], canModifyWorkers?: boolean) => {
   mockUseWatch.mockReturnValue({
     data: { watch: createCatalogWatchPlaceholder(watchId as CatalogWatchId) },
     isLoading: false,
@@ -201,13 +230,24 @@ const renderWatch = (watchId: string, workers: Worker[]) => {
     refetch: jest.fn(),
   } as never);
   mockUseWorkers.mockReturnValue({
-    data: { workers },
+    data: {
+      workers,
+      ...(canModifyWorkers === undefined ? {} : { canModifyWorkers }),
+    },
     isLoading: false,
     error: null,
     refetch: jest.fn(),
   } as never);
   const mutate = jest.fn();
-  const mutateAsync = jest.fn().mockResolvedValue({ worker: workers[0] });
+  // Answers like the server: the written Worker, with an Enabled patch applied.
+  const mutateAsync = jest.fn(
+    async ({ workerId, patch }: { workerId: string; patch: { enabled?: boolean } }) => {
+      const worker = workers.find(({ id }) => id === workerId) ?? workers[0];
+      return {
+        worker: patch.enabled === undefined ? worker : { ...worker, enabled: patch.enabled },
+      };
+    }
+  );
   mockUseUpdateWorker.mockReturnValue({ mutate, mutateAsync } as never);
 
   render(
@@ -257,6 +297,9 @@ describe('WatchDetailPage', () => {
 
     for (const worker of floorWorkers) {
       const section = screen.getByTestId(`alertZeroWatchWorkerSection-${worker.id}`);
+      expect(
+        within(section).getByTestId(`alertZeroWorkerDependencies-settings-${worker.id}`)
+      ).toBeInTheDocument();
       expect(
         within(section).getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`)
       ).toBeInTheDocument();
@@ -334,6 +377,11 @@ describe('WatchDetailPage', () => {
       )
     ).toBeInTheDocument();
     expect(within(section).getByTestId('alertZeroAutonomyLevelControl')).toBeInTheDocument();
+    expect(
+      within(section).getByTestId(
+        `alertZeroModelsRow-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
+      )
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('alertZeroCandidateLimit')).not.toBeInTheDocument();
   });
 
@@ -342,6 +390,7 @@ describe('WatchDetailPage', () => {
 
     for (const worker of floorWorkers) {
       expect(screen.getByTestId(`alertZeroWatchWorkerAccordion-${worker.id}`)).toBeInTheDocument();
+      expect(screen.getByTestId(`alertZeroModelsRow-${worker.id}`)).toBeInTheDocument();
     }
 
     // A Watch with exactly one Worker has no accordion chrome — its settings are a static panel.
@@ -454,7 +503,7 @@ describe('WatchDetailPage', () => {
     } as never);
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
 
-    render(
+    renderWithI18n(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -509,7 +558,7 @@ describe('WatchDetailPage', () => {
     } as never);
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
 
-    const { rerender } = render(
+    const { rerender } = renderWithI18n(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -704,7 +753,7 @@ describe('WatchDetailPage', () => {
         </Route>
       </MemoryRouter>
     );
-    const { rerender } = render(tree());
+    const { rerender } = renderWithI18n(tree());
 
     const field = screen.getByTestId('alertZeroAnalysisWindowDays');
     fireEvent.change(field, { target: { value: '7' } });
@@ -944,6 +993,196 @@ describe('WatchDetailPage', () => {
     });
   });
 
+  describe('no-model block', () => {
+    const [ruleTuning, ruleCoverage] = detectionWorkers;
+    const blocked = (worker: Worker, enabled: boolean): Worker => ({
+      ...worker,
+      enabled,
+      blockingReasons: ['no_model'],
+    });
+    const enabledSwitch = (worker: Worker) =>
+      screen.getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`);
+    const editAnalysisWindow = () => {
+      const field = screen.getByTestId('alertZeroAnalysisWindowDays');
+      fireEvent.change(field, { target: { value: '7' } });
+      fireEvent.blur(field);
+    };
+    const editLookback = () => {
+      const field = screen.getByTestId('alertZeroLookbackDays');
+      fireEvent.change(field, { target: { value: '30' } });
+      fireEvent.blur(field);
+    };
+
+    it('locks switching a blocked Worker on but lets a running one be switched off', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, [
+        blocked(ruleTuning, true),
+        blocked(ruleCoverage, false),
+      ]);
+
+      expect(enabledSwitch(ruleTuning)).toBeEnabled();
+      expect(enabledSwitch(ruleCoverage)).toBeDisabled();
+      for (const worker of [ruleTuning, ruleCoverage]) {
+        expect(screen.getByTestId(`alertZeroWorkerWarningIcon-${worker.id}`)).toBeInTheDocument();
+        expect(screen.getByTestId(`alertZeroModelsRow-${worker.id}`)).toBeInTheDocument();
+      }
+
+      fireEvent.click(enabledSwitch(ruleTuning));
+
+      expect(enabledSwitch(ruleTuning)).toHaveAttribute('aria-checked', 'false');
+      expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeEnabled();
+    });
+
+    it('shows no no-model warning to a user who cannot change Workers', () => {
+      renderWatch(
+        SYSTEM_SECURITY_WATCH_DETECTION_ID,
+        [blocked(ruleTuning, true), blocked(ruleCoverage, false)],
+        false
+      );
+
+      for (const worker of [ruleTuning, ruleCoverage]) {
+        expect(
+          screen.queryByTestId(`alertZeroWorkerWarningIcon-${worker.id}`)
+        ).not.toBeInTheDocument();
+      }
+    });
+
+    it('gives Hunt the Models row and the block like every other Worker', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_HUNT_ID, [blocked(huntWorker, false)]);
+
+      expect(enabledSwitch(huntWorker)).toBeDisabled();
+      expect(screen.getByTestId(`alertZeroWorkerWarningIcon-${huntWorker.id}`)).toBeInTheDocument();
+      expect(screen.getByTestId(`alertZeroModelsRow-${huntWorker.id}`)).toBeInTheDocument();
+    });
+
+    it('drops a pending switch-on when the block appears, and keeps it dropped after the block clears', () => {
+      mockUseWatch.mockReturnValue({
+        data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_DETECTION_ID) },
+        isLoading: false,
+        error: null,
+        refetch: jest.fn(),
+      } as never);
+      const workersQuery = (workers: Worker[]) =>
+        ({ data: { workers }, isLoading: false, error: null, refetch: jest.fn() } as never);
+      mockUseWorkers.mockReturnValue(workersQuery(detectionWorkers));
+      const mutateAsync = jest.fn();
+      mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync } as never);
+      const tree = () => (
+        <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_DETECTION_ID}`]}>
+          <Route path="/watches/:watchId">
+            <WatchDetailPage />
+          </Route>
+        </MemoryRouter>
+      );
+      const { rerender } = renderWithI18n(tree());
+
+      fireEvent.click(enabledSwitch(ruleTuning));
+      expect(enabledSwitch(ruleTuning)).toHaveAttribute('aria-checked', 'true');
+
+      mockUseWorkers.mockReturnValue(
+        workersQuery([blocked(ruleTuning, false), blocked(ruleCoverage, false)])
+      );
+      rerender(tree());
+
+      expect(enabledSwitch(ruleTuning)).toHaveAttribute('aria-checked', 'false');
+      expect(enabledSwitch(ruleTuning)).toBeDisabled();
+      expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+
+      mockUseWorkers.mockReturnValue(workersQuery(detectionWorkers));
+      rerender(tree());
+
+      expect(enabledSwitch(ruleTuning)).toBeEnabled();
+      expect(enabledSwitch(ruleTuning)).toHaveAttribute('aria-checked', 'false');
+      expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+    });
+
+    it('tells the user after Save that a running blocked Worker will not run properly, until acknowledged', async () => {
+      const workers = [blocked(ruleTuning, true), ruleCoverage];
+      const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, workers);
+      mutateAsync.mockResolvedValue({ worker: workers[0] });
+
+      editAnalysisWindow();
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+
+      const modal = await screen.findByTestId('alertZeroWorkerBlockedAfterSaveModal');
+      expect(modal).toHaveTextContent("Saved — but Rule Tuning won't run properly yet");
+      expect(modal).toHaveTextContent(
+        'Some AI-powered steps in this Worker may not be configured. Check Feature settings'
+      );
+
+      fireEvent.click(screen.getByTestId('alertZeroWorkerBlockedAfterSaveAcknowledge'));
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('alertZeroWorkerBlockedAfterSaveModal')).not.toBeInTheDocument()
+      );
+    });
+
+    it('shows no notice after saving a blocked Worker that is off', async () => {
+      const workers = [blocked(ruleTuning, false), ruleCoverage];
+      const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, workers);
+      mutateAsync.mockResolvedValue({ worker: workers[0] });
+
+      editAnalysisWindow();
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+
+      await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+      expect(screen.queryByTestId('alertZeroWorkerBlockedAfterSaveModal')).not.toBeInTheDocument();
+    });
+
+    it('reads the block from the save response, not from the list loaded before Save', async () => {
+      const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, [
+        blocked(ruleTuning, true),
+        ruleCoverage,
+      ]);
+      mutateAsync.mockResolvedValue({
+        worker: { ...ruleTuning, enabled: true, blockingReasons: [] },
+      });
+
+      editAnalysisWindow();
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+
+      await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+      expect(screen.queryByTestId('alertZeroWorkerBlockedAfterSaveModal')).not.toBeInTheDocument();
+    });
+
+    it('shows one notice per running blocked Worker, one after the other', async () => {
+      const workers = [blocked(ruleTuning, true), blocked(ruleCoverage, true)];
+      const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, workers);
+      mutateAsync.mockImplementation(async ({ workerId }: { workerId: string }) => ({
+        worker: workers.find(({ id }) => id === workerId) ?? workers[0],
+      }));
+
+      editAnalysisWindow();
+      editLookback();
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+
+      expect(await screen.findByTestId('alertZeroWorkerBlockedAfterSaveModal')).toHaveTextContent(
+        'Rule Tuning'
+      );
+      fireEvent.click(screen.getByTestId('alertZeroWorkerBlockedAfterSaveAcknowledge'));
+      await waitFor(() =>
+        expect(screen.getByTestId('alertZeroWorkerBlockedAfterSaveModal')).toHaveTextContent(
+          'Rule Coverage'
+        )
+      );
+      fireEvent.click(screen.getByTestId('alertZeroWorkerBlockedAfterSaveAcknowledge'));
+      await waitFor(() =>
+        expect(screen.queryByTestId('alertZeroWorkerBlockedAfterSaveModal')).not.toBeInTheDocument()
+      );
+    });
+  });
+
+  it('locks worker settings when the caller lacks manage_security', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers, false);
+
+    expect(screen.getByTestId('alertZeroReadOnlyCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+    expect(
+      screen.getByTestId(
+        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      )
+    ).toBeDisabled();
+  });
+
   it('locks worker settings and disables save/discard with a tooltip when the user cannot write', () => {
     mockUseCanWriteAlertZero.mockReturnValue(false);
     renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
@@ -997,7 +1236,7 @@ describe('WatchDetailPage', () => {
     const history = createMemoryHistory({
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
-    render(
+    renderWithI18n(
       <Router history={history}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -1007,11 +1246,16 @@ describe('WatchDetailPage', () => {
 
     const [first] = floorWorkers;
     // With `buttonElement="div"` EUI puts `aria-expanded` on the arrow control, not the
-    // data-test-subj node, and the enable switch is also a button — so query by expanded.
-    const arrowFor = (workerId: string, expanded: boolean) =>
-      within(screen.getByTestId(`alertZeroWatchWorkerAccordion-${workerId}`)).getByRole('button', {
-        expanded,
-      });
+    // data-test-subj node. The Run as control is also a button with `aria-expanded`.
+    const arrowFor = (workerId: string, expanded: boolean) => {
+      const arrow = within(screen.getByTestId(`alertZeroWatchWorkerAccordion-${workerId}`))
+        .getAllByRole('button', { expanded })
+        .find((button) => button.getAttribute('aria-controls') === `${workerId}-settings`);
+      if (!arrow) {
+        throw new Error(`expected the ${workerId} accordion arrow`);
+      }
+      return arrow;
+    };
     fireEvent.click(screen.getByTestId(`alertZeroWorkerAccordionHeader-${first.id}`));
     expect(arrowFor(first.id, false)).toBeInTheDocument();
 
@@ -1074,7 +1318,7 @@ describe('WatchDetailPage', () => {
     const history = createMemoryHistory({
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
-    render(
+    renderWithI18n(
       <Router history={history}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -1139,7 +1383,7 @@ describe('WatchDetailPage', () => {
     const history = createMemoryHistory({
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
-    render(
+    renderWithI18n(
       <Router history={history}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -1192,7 +1436,7 @@ describe('WatchDetailPage', () => {
     const mutateAsync = jest.fn().mockRejectedValue(new Error('patch failed'));
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync } as never);
 
-    render(
+    renderWithI18n(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -1261,6 +1505,22 @@ describe('WatchDetailPage', () => {
       expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeEnabled();
       expect(mutateAsync).not.toHaveBeenCalled();
       expect(warningIcon(HUNT)).toBeInTheDocument();
+    });
+
+    it('still asks before turning off a blocked Continuous Threat Hunt while Rule Coverage is enabled', () => {
+      const workers = allWorkers([HUNT, RULE_COVERAGE]).map(
+        (worker): Worker => ({ ...worker, blockingReasons: ['no_model'] })
+      );
+      renderWatch(SYSTEM_SECURITY_WATCH_HUNT_ID, workers);
+
+      expect(enabledSwitch(HUNT)).toBeEnabled();
+      fireEvent.click(enabledSwitch(HUNT));
+      expect(disableModal()).toHaveTextContent('Disable Continuous Threat Hunt?');
+
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(enabledSwitch(HUNT)).not.toBeChecked();
+      expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeEnabled();
     });
 
     it('drops an open disable dialog when navigating to another Watch', () => {
@@ -1438,7 +1698,7 @@ describe('WatchDetailPage', () => {
         workerId: RULE_COVERAGE,
         patch: { enabled: true },
       });
-      expect(notice).toHaveTextContent("Saved — but Rule Coverage won't run yet");
+      expect(notice).toHaveTextContent("Saved — but Rule Coverage won't run properly yet");
       expect(notice).toHaveTextContent(
         'Continuous Threat Hunt is disabled — no gap signals to act on.'
       );

@@ -403,20 +403,23 @@ export function generateEsqlQuery(
   const termsBuckets = bucketEsAggsEntries.flatMap(([, col], index) =>
     isColumnOfType<TermsIndexPatternColumn>('terms', col) ? [{ col, index }] : []
   );
+  const termsConversionContext = {
+    hasDateHistogram,
+    termsBucketCount: termsBuckets.length,
+  };
+  // Fail fast on terms blockers before building bucket expressions; metric
+  // failures above still take precedence. One reason per terms column; take the first.
+  const termsFailureReason = termsBuckets
+    .map(({ col }) => getTermsConversionFailure(col, termsConversionContext))
+    .find((reason): reason is EsqlConversionFailureReason => reason !== undefined);
+  if (termsFailureReason) {
+    return getEsqlQueryFailedResult(termsFailureReason);
+  }
+
   const resolvedBucketExprs = new Map<number, string>();
   const usedBucketAliases = new Set<string>();
   const bucketAliasesByExpression = new Map<string, string>();
   const bucketsResult: EsqlConversion[] = bucketEsAggsEntries.map(([colId, col], index) => {
-    if (isColumnOfType<TermsIndexPatternColumn>('terms', col)) {
-      const termsFailure = getTermsConversionFailure(col, {
-        hasDateHistogram,
-        termsBucketCount: termsBuckets.length,
-      });
-      if (termsFailure) {
-        return getEsqlQueryFailedResult(termsFailure);
-      }
-    }
-
     const toESQL = getToEsqlFn(col.operationType);
     if (!toESQL) {
       return getEsqlQueryFailedResult('function_not_supported', col.operationType);
@@ -452,20 +455,11 @@ export function generateEsqlQuery(
       }
     }
 
-    if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
-      const column = col;
-      if (
-        column.params?.dropPartials &&
-        // set to false when detached from time picker
-        (indexPattern.timeFieldName === indexPattern.getFieldByName(column.sourceField)?.name ||
-          !column.params?.ignoreTimeRange)
-      ) {
-        return getEsqlQueryFailedResult('drop_partials_not_supported');
-      }
-
-      if (column.params?.includeEmptyRows) {
-        return getEsqlQueryFailedResult('include_empty_rows_not_supported');
-      }
+    if (
+      isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col) &&
+      col.params?.includeEmptyRows
+    ) {
+      return getEsqlQueryFailedResult('include_empty_rows_not_supported');
     }
 
     const rawResult = toESQL(
@@ -598,7 +592,7 @@ export function generateEsqlQuery(
       const innerSortKey = resolveTermsSortKey(innerTermsBucket.col, innerTermsBucket.index);
 
       if (!innerSortKey) {
-        return getEsqlQueryFailedResult('terms_order_by_not_supported');
+        return getEsqlQueryFailedResult('terms_rank_metric_not_supported');
       }
 
       const outerBuckets = [...resolvedBucketExprs.entries()]
@@ -644,7 +638,7 @@ export function generateEsqlQuery(
         }
 
         if (!outerSortKey || !scoreFragment) {
-          return getEsqlQueryFailedResult('terms_order_by_not_supported');
+          return getEsqlQueryFailedResult('terms_rank_metric_not_supported');
         }
         outerSortKeys.push(outerSortKey);
 

@@ -61,12 +61,14 @@ export const createDefaultWorkerSettings = (workerId: string): WorkerSettings =>
 export const getAllowedAutonomyLevels = (workerId: string): readonly WatchAutonomyLevel[] =>
   getContract(workerId).declaration.allowedAutonomyLevels;
 
-export { applyMissingWorkerSettingDefaults } from './apply_missing_defaults';
+export {
+  nearestLowerAutonomyLevel,
+  upgradeStoredWorkerSettings,
+} from '@kbn/workflows/managed/definitions/alertzero/worker_settings_defaults';
 export {
   applyWorkerSettingsWrite,
   diffWorkerSettings,
   formatWorkerSettingsIssues,
-  projectStoredAutonomyLevel,
   touchesWorkerSettings,
 } from './contract';
 export {
@@ -89,4 +91,5 @@ export {
   RULE_TUNING_DEFAULT_EXTRAS,
 } from './detection_watch';
 export { ALERT_TRIAGE_DEFAULT_EXTRAS } from './floor_watch';
+export { CONTINUOUS_THREAT_HUNT_SETTINGS } from './hunt_watch';
 export type { WorkerSettingsDeclaration } from './types';

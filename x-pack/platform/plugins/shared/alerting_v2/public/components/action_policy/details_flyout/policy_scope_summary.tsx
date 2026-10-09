@@ -7,6 +7,7 @@
 
 import { EuiBadge, EuiCode, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
+import { normalizeMatcher } from '@kbn/alerting-v2-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -17,16 +18,17 @@ export const POLICY_SCOPE_LABEL = i18n.translate(
 
 export type PolicyScopeKind = 'catchAll' | 'expressionOnly' | 'tagsOnly' | 'tagsAndExpression';
 
-const POLICY_SCOPE_SUMMARIES: Record<PolicyScopeKind, string> = {
+export const POLICY_SCOPE_SUMMARIES: Record<PolicyScopeKind, string> = {
   tagsAndExpression: i18n.translate(
     'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.tagsAndExpression',
     {
       defaultMessage:
-        'This policy matches all alerts from rules with one of the following tags AND the matching query.',
+        'This policy matches all alerts from rules with one of the following routing tags AND the matching query.',
     }
   ),
   tagsOnly: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.tags', {
-    defaultMessage: 'This policy matches all alerts from rules with one of the following tags.',
+    defaultMessage:
+      'This policy matches all alerts from rules with one of the following routing tags.',
   }),
   expressionOnly: i18n.translate(
     'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.expression',
@@ -37,14 +39,9 @@ const POLICY_SCOPE_SUMMARIES: Record<PolicyScopeKind, string> = {
   }),
 };
 
-const normalizeMatcher = (matcher?: PolicyMatcher | null) => ({
-  tags: matcher?.tags?.length ? matcher.tags : null,
-  expression: matcher?.expression?.trim() || null,
-});
-
-/** Classifies a policy matcher by whether rule tags, the matching query, or both narrow down its alerts. */
+/** Classifies a policy matcher by whether routing tags, the matching query, or both narrow down its alerts. */
 export const getPolicyScopeKind = (matcher?: PolicyMatcher | null): PolicyScopeKind => {
-  const { tags, expression } = normalizeMatcher(matcher);
+  const { tags, expression } = normalizeMatcher(matcher) ?? {};
   if (tags) {
     return expression ? 'tagsAndExpression' : 'tagsOnly';
   }
@@ -56,7 +53,7 @@ interface Props {
 }
 
 export const PolicyScopeSummary = ({ matcher }: Props) => {
-  const { tags: matcherTags, expression: matcherExpression } = normalizeMatcher(matcher);
+  const { tags: matcherTags, expression: matcherExpression } = normalizeMatcher(matcher) ?? {};
 
   return (
     <>
@@ -69,7 +66,7 @@ export const PolicyScopeSummary = ({ matcher }: Props) => {
               <EuiText size="s" color="subdued">
                 {i18n.translate(
                   'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.ruleTags',
-                  { defaultMessage: 'Rule tags:' }
+                  { defaultMessage: 'Routing tags:' }
                 )}
               </EuiText>
             </EuiFlexItem>
