@@ -6,7 +6,8 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { Conversation } from '@kbn/agent-builder-common';
+import type { ApiStateChangedEventData, Conversation } from '@kbn/agent-builder-common';
+import type { ApiReference } from '@kbn/agent-builder-common/apis/known_apis';
 import type { BrowserChatEvent } from './events';
 
 export interface ActiveConversation {
@@ -30,6 +31,15 @@ export interface ChatUiEventsContract {
    * Backed by a `BehaviorSubject`: new subscribers receive the current value immediately.
    */
   activeConversation$: Observable<ActiveConversation | null>;
+}
+
+export interface ApiStateChangesOptions {
+  /**
+   * Operations to listen for. Each entry pairs a target with `*`, a namespace wildcard such as
+   * `cases.*`, or an exact operation id such as `cases.create-case`, and only
+   * matches operations on its own target.
+   */
+  apis: readonly ApiReference[];
 }
 
 /**
@@ -72,6 +82,20 @@ export interface EventsServiceStartContract {
    *   ).subscribe((event) => { ... });
    */
   getChatEvents$: (conversationId: string) => Observable<BrowserChatEvent>;
+
+  /**
+   * Returns a hot observable of the successful, non-read-only operations the agent ran through
+   * `execute_api` in the conversation the UI is focused on, following `ui.activeConversation$`.
+   * Standalone executions report nothing, and past operations are not replayed.
+   *
+   *   events.getApiStateChanges$({
+   *     apis: [{ target: 'kibana', api: 'cases.*' }],
+   *   }).subscribe(({ api, method, path }) => refreshCases());
+   *
+   * @param options - The operations to listen for.
+   * @returns The matching operations, each with its target, id, HTTP method and request path.
+   */
+  getApiStateChanges$: (options: ApiStateChangesOptions) => Observable<ApiStateChangedEventData>;
 
   /**
    * Chat UI-shell state observables.

@@ -6,9 +6,24 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, Subject, filter, map, share } from 'rxjs';
-import type { ChatEvent } from '@kbn/agent-builder-common';
-import type { ActiveConversation, BrowserChatEvent } from '@kbn/agent-builder-browser/events';
+import {
+  BehaviorSubject,
+  EMPTY,
+  Subject,
+  distinctUntilChanged,
+  filter,
+  map,
+  share,
+  switchMap,
+} from 'rxjs';
+import { isApiStateChangedEvent } from '@kbn/agent-builder-common';
+import type { ApiStateChangedEventData, ChatEvent } from '@kbn/agent-builder-common';
+import { matchesAnyApiSelector } from '@kbn/agent-builder-common/apis/known_apis';
+import type {
+  ActiveConversation,
+  ApiStateChangesOptions,
+  BrowserChatEvent,
+} from '@kbn/agent-builder-browser/events';
 
 interface TaggedChatEvent {
   /** The conversation that produced this event. */
@@ -51,6 +66,24 @@ export class EventsService {
     return this.events$.pipe(
       filter((tagged) => tagged.conversationId === conversationId),
       map(({ event }) => event)
+    );
+  }
+
+  /**
+   * Returns a hot observable of the state-changing `execute_api` operations reported in the
+   * active conversation, switching whenever the active conversation changes.
+   *
+   * @param options - The target/selector pairs an operation must match to be emitted.
+   * @returns The matching operations' event payloads.
+   */
+  getApiStateChanges$({ apis }: ApiStateChangesOptions): Observable<ApiStateChangedEventData> {
+    return this.activeConversation$.pipe(
+      map((activeConversation) => activeConversation?.id),
+      distinctUntilChanged(),
+      switchMap((conversationId) => (conversationId ? this.getChatEvents$(conversationId) : EMPTY)),
+      filter(isApiStateChangedEvent),
+      map(({ data: { data } }) => data),
+      filter((change) => matchesAnyApiSelector(apis, change))
     );
   }
 

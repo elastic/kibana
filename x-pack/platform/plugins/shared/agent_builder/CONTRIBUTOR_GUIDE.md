@@ -1300,7 +1300,7 @@ Pending attachments added through `agentBuilder.addAttachment(...)` can include 
 
 ## Events
 
-The `agentBuilder` start contract exposes observables on the `events.ui` namespace that let plugins react to the chat surface lifecycle (currently the active conversation binding).
+The `agentBuilder` start contract exposes observables on the `events` namespace that let plugins react to the chat surface lifecycle through `events.ui` (currently the active conversation binding), follow per-conversation chat event streams, and react to the API state changes the agent makes.
 
 ### Observing sidebar open state
 
@@ -1403,6 +1403,42 @@ All chat in Kibana is initiated through the agent_builder UI (sidebar, embeddabl
 or full-page chat), and the UI generates a client-side conversation UUID before
 each request. Plugins consuming this contract have access to that id via
 `events.ui.activeConversation$` and can pass it straight to `getChatEvents$`.
+
+### Reacting to `execute_api` state changes
+
+The agent can create, update and delete resources through the `execute_api` tool. To keep a page
+in sync with those changes without parsing the tool's result, subscribe to
+`events.getApiStateChanges$({ apis })`.
+
+After each successful call to an API that is not read-only, `execute_api` emits a `tool_ui` event
+whose `custom_event` is `API_STATE_CHANGED_UI_EVENT` (`'api_state_changed'`). The read-only flag
+comes from the API registry in `@elastic/schemas`, so creates, updates, deletes and side-effecting
+`GET`s are reported, while read-only `POST`s such as `esql.query` are not. Only conversation runs
+report changes, while standalone executions (such as workflow steps) that run an agent outside a
+conversation don't emit the event, and sub-agent and background runs don't forward their tool
+events to the browser. The payload is `ApiStateChangedEventData`:
+
+- `target` - `'kibana'` or `'elasticsearch'`
+- `api` - the operation id, e.g. `cases.create-case`
+- `method` - the HTTP method the call was dispatched with
+- `path` - the request path, with path parameters resolved
+
+`getApiStateChanges$` follows `events.ui.activeConversation$`, so you only receive changes from the
+conversation the user is focused on. Events are live and not replayed to late subscribers, so keep
+fetching fresh data when your view mounts. The `apis` option selects operations per target with
+`*`, a namespace wildcard such as `cases.*`, or an exact operation id.
+
+```ts
+useEffect(() => {
+  const subscription = agentBuilder.events
+    .getApiStateChanges$({ apis: [{ target: 'kibana', api: 'cases.*' }] })
+    .subscribe(() => {
+      queryClient.invalidateQueries({ queryKey: ['cases', 'list'], exact: true });
+    });
+
+  return () => subscription.unsubscribe();
+}, [agentBuilder.events, queryClient]);
+```
 
 ## Registering skills
 
