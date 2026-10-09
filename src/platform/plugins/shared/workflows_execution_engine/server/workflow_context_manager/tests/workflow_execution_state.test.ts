@@ -58,6 +58,9 @@ describe('WorkflowExecutionState', () => {
   beforeEach(() => {
     workflowExecutionRepository = {} as unknown as WorkflowExecutionRepository;
     workflowExecutionRepository.updateWorkflowExecution = jest.fn();
+    workflowExecutionRepository.getWorkflowExecutionCancelState = jest
+      .fn()
+      .mockResolvedValue(undefined);
 
     stepExecutionRepository = {} as unknown as StepExecutionRepository;
     stepExecutionRepository.bulkUpsert = jest.fn();
