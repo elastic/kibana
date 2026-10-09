@@ -197,6 +197,19 @@ describe('ActionPolicyFormFlyout', () => {
     expect(screen.getByTestId(TEST_SUBJ.submitButton)).toBeDisabled();
   });
 
+  it('keeps submit enabled and reveals the errors instead of saving an incomplete form', async () => {
+    const onSave = jest.fn();
+    renderFlyout({ onClose: jest.fn(), onSave });
+
+    const saveButton = screen.getByTestId(TEST_SUBJ.submitButton);
+    expect(saveButton).toBeEnabled();
+    fireEvent.click(saveButton);
+
+    expect(await screen.findByText('Name is required.')).toBeInTheDocument();
+    expect(screen.getByText('At least one destination is required')).toBeInTheDocument();
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
   it('renders the inline simple workflow builder alongside the existing-workflow selector', () => {
     renderFlyout({ onClose: jest.fn(), onSave: jest.fn() });
 

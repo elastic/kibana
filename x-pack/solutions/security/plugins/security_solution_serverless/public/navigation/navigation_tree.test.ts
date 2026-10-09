@@ -12,6 +12,8 @@ import { STACK_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { mockServices } from '../common/services/__mocks__/services.mock';
 import type { Services } from '../common/services';
+import { SecurityPageName } from '@kbn/deeplinks-security';
+import { alertZeroLink } from '@kbn/security-solution-navigation/links';
 import { createNavigationTree } from './navigation_tree';
 
 const containsLink = (nodes: NavigationTreeDefinition['body'], link: string): boolean =>
@@ -37,6 +39,22 @@ describe('createNavigationTree', () => {
       ...mockServices.uiSettings,
       get: jest.fn(<T>(_key: string, defaultValue?: T) => defaultValue as T),
     },
+  });
+
+  it('places Escalations right under AlertZero, with Watches after them', async () => {
+    const { body } = (await createNavigationTree(
+      createServices(),
+      AIChatExperience.Agent
+    )) as NavigationTreeDefinition;
+
+    const links = body.map((item) => item.link);
+    const alertZeroIndex = links.indexOf(alertZeroLink());
+    const escalationsIndex = links.indexOf(alertZeroLink(SecurityPageName.alertZeroEscalations));
+    const watchesIndex = links.indexOf(alertZeroLink(SecurityPageName.alertZeroWatches));
+
+    expect(alertZeroIndex).toBeGreaterThanOrEqual(0);
+    expect(escalationsIndex).toBe(alertZeroIndex + 1);
+    expect(watchesIndex).toBeGreaterThan(escalationsIndex);
   });
 
   it('includes context engine first in classic chat experience, with no agent builder link', async () => {

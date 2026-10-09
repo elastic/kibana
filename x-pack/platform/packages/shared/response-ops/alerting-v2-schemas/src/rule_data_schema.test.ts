@@ -28,6 +28,7 @@ import {
   bulkCreateRulesRequestSchema,
   bulkCreateRulesResponseSchema,
   ruleTagsParamsSchema,
+  ruleResponseSchema,
   findRulesRequestSchema,
 } from './rule_data_schema';
 import { tagsResponseSchema } from './common';
@@ -367,6 +368,17 @@ describe('createRuleDataSchema', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         metadata: { name: 'test rule', routing_tags: ['a'.repeat(129)] },
+      });
+
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('metadata.template', () => {
+    it('is not accepted in a request body', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', template: { id: 'template-1' } },
       });
 
       expect(result.success).toBe(false);
@@ -1368,6 +1380,11 @@ describe('updateRuleDataSchema', () => {
     expect(result.success).toBe(false);
   });
 
+  it('rejects metadata.template', () => {
+    const result = updateRuleDataSchema.safeParse({ metadata: { template: { id: 'template-1' } } });
+    expect(result.success).toBe(false);
+  });
+
   it('accepts artifacts in update payload and supports null removal', () => {
     const withArtifacts = updateRuleDataSchema.parse({
       artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
@@ -1686,6 +1703,21 @@ describe('updateRuleDataSchema', () => {
 
       expect(result.success).toBe(false);
     });
+  });
+});
+
+describe('ruleResponseSchema metadata', () => {
+  it('returns metadata.template when present', () => {
+    const result = ruleResponseSchema.shape.metadata.parse({
+      name: 'test rule',
+      template: { id: 'template-1' },
+    });
+
+    expect(result.template).toEqual({ id: 'template-1' });
+  });
+
+  it('accepts metadata without a template', () => {
+    expect(ruleResponseSchema.shape.metadata.safeParse({ name: 'test rule' }).success).toBe(true);
   });
 });
 
