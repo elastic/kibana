@@ -423,7 +423,7 @@ describe('find', () => {
       it('passes a sort list to getSearchDsl', async () => {
         const sort = [
           { field: 'updated_at', order: 'desc' as const },
-          { field: '_id', order: 'asc' as const },
+          { field: '_shard_doc', order: 'asc' as const },
         ];
         const relevantOpts: SavedObjectsFindOptions = {
           type: [type],

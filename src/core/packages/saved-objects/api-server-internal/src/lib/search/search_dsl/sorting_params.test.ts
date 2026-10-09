@@ -249,11 +249,11 @@ describe('searchDsl/getSortParams', () => {
   });
 
   describe('sort array', () => {
-    it('sorts by several fields and uses a later field as a tiebreaker', () => {
+    it('sorts by several fields and uses _shard_doc as a tiebreaker inside a point in time', () => {
       expect(
-        getSortingParams(MAPPINGS, 'saved', undefined, undefined, undefined, [
+        getSortingParams(MAPPINGS, 'saved', undefined, undefined, { id: 'abc123' }, [
           { field: 'title', order: 'desc' },
-          { field: '_id', order: 'asc' },
+          { field: '_shard_doc', order: 'asc' },
         ])
       ).toEqual({
         sort: [
@@ -264,7 +264,7 @@ describe('searchDsl/getSortParams', () => {
             },
           },
           {
-            _id: {
+            _shard_doc: {
               order: 'asc',
             },
           },
@@ -361,14 +361,37 @@ describe('searchDsl/getSortParams', () => {
     it('rejects combining sort with sortField or sortOrder', () => {
       expect(() =>
         getSortingParams(MAPPINGS, 'saved', 'title', undefined, undefined, [
-          { field: '_id', order: 'asc' },
+          { field: 'type', order: 'asc' },
         ])
       ).toThrowError(/cannot be combined with sortField or sortOrder/);
       expect(() =>
         getSortingParams(MAPPINGS, 'saved', undefined, 'desc', undefined, [
-          { field: '_id', order: 'asc' },
+          { field: 'type', order: 'asc' },
         ])
       ).toThrowError(/cannot be combined with sortField or sortOrder/);
+    });
+
+    it('rejects _id because Elasticsearch disables fielddata on it', () => {
+      expect(() =>
+        getSortingParams(MAPPINGS, 'saved', undefined, undefined, { id: 'abc123' }, [
+          { field: 'title', order: 'desc' },
+          { field: '_id', order: 'asc' },
+        ])
+      ).toThrowError(/Cannot sort by _id/);
+      expect(() => getSortingParams(MAPPINGS, 'saved', '_id', 'asc')).toThrowError(
+        /Cannot sort by _id/
+      );
+    });
+
+    it('rejects _shard_doc unless a point in time is open', () => {
+      expect(() =>
+        getSortingParams(MAPPINGS, 'saved', undefined, undefined, undefined, [
+          { field: '_shard_doc', order: 'asc' },
+        ])
+      ).toThrowError(/_shard_doc requires a point in time/);
+      expect(() => getSortingParams(MAPPINGS, 'saved', '_shard_doc', 'asc')).toThrowError(
+        /_shard_doc requires a point in time/
+      );
     });
   });
 });

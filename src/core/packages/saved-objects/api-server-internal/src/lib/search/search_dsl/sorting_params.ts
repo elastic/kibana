@@ -15,7 +15,7 @@ import type {
 } from '@kbn/core-saved-objects-api-server/src/apis';
 import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
-const TOP_LEVEL_FIELDS = ['_id', '_score'];
+const TOP_LEVEL_FIELDS = ['_score'];
 
 /** Upper bound for {@link SavedObjectsFindSort} lists passed to `find`. */
 export const MAX_FIND_SORT_FIELDS = 10;
@@ -50,7 +50,7 @@ export function getSortingParams(
       throw Boom.badRequest(`Duplicate sort field ${field}`);
     }
     seen.add(field);
-    return buildSortClause(mappings, type, field, entry.order);
+    return buildSortClause(mappings, type, field, entry.order, pit);
   });
 
   return { sort: clauses };
@@ -81,8 +81,29 @@ function buildSortClause(
   mappings: IndexMapping,
   type: string | string[],
   sortField: string,
-  sortOrder?: SortOrder
+  sortOrder?: SortOrder,
+  pit?: SavedObjectsPitParams
 ): SortCombinations {
+  if (sortField === '_id') {
+    throw Boom.badRequest(
+      'Cannot sort by _id. Elasticsearch disables fielddata on _id by default. Open a point in time and sort by _shard_doc to break ties.'
+    );
+  }
+
+  if (sortField === '_shard_doc') {
+    if (!pit) {
+      throw Boom.badRequest(
+        'Sorting by _shard_doc requires a point in time. Open one with openPointInTimeForType and pass it as pit.'
+      );
+    }
+
+    return {
+      _shard_doc: {
+        order: sortOrder,
+      },
+    };
+  }
+
   if (TOP_LEVEL_FIELDS.includes(sortField)) {
     return {
       [sortField]: {

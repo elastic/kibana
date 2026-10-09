@@ -49,7 +49,7 @@ export interface SavedObjectsPitParams {
 export interface SavedObjectsFindSort {
   /**
    * Field to sort by. Attribute names are resolved against the saved object type.
-   * `_id` and `_score` are root fields.
+   * `_score` is a root field. `_shard_doc` breaks ties and requires `pit`.
    */
   field: string;
   /** Sort direction for this field. Omitted values use Elasticsearch's default. */
@@ -80,17 +80,20 @@ export interface SavedObjectsFindOptions {
   sortOrder?: SortOrder;
   /**
    * Sort by one or more fields, applied in order. Later entries break ties from earlier ones,
-   * including tied `_score` values. Pass `_id` last when pages must keep a stable order.
+   * including tied `_score` values. For a stable page order, open a point in time and pass
+   * `_shard_doc` last. `_id` cannot be sorted; Elasticsearch disables fielddata on it by default.
    *
    * Mutually exclusive with `sortField` and `sortOrder`. At most 10 entries.
    *
    * @example
    * ```ts
-   * savedObjectsClient.find({
+   * const { id } = await savedObjectsClient.openPointInTimeForType('dashboard');
+   * const page = await savedObjectsClient.find({
    *   type: 'dashboard',
+   *   pit: { id },
    *   sort: [
    *     { field: 'updated_at', order: 'desc' },
-   *     { field: '_id', order: 'asc' },
+   *     { field: '_shard_doc', order: 'asc' },
    *   ],
    * });
    * ```

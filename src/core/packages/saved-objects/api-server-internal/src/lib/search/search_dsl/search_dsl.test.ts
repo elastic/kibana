@@ -52,7 +52,7 @@ describe('getSearchDsl', () => {
         getSearchDsl(mappings, registry, {
           type: 'foo',
           sortField: 'title',
-          sort: [{ field: '_id', order: 'asc' }],
+          sort: [{ field: 'updated_at', order: 'asc' }],
         });
       }).toThrow(/sort cannot be combined with sortField or sortOrder/);
     });
@@ -124,7 +124,7 @@ describe('getSearchDsl', () => {
       getSortingParams.mockReturnValue({});
       const sort = [
         { field: 'updated_at', order: 'desc' as const },
-        { field: '_id', order: 'asc' as const },
+        { field: '_shard_doc', order: 'asc' as const },
       ];
 
       getSearchDsl(mappings, registry, { type: 'foo', sort });
