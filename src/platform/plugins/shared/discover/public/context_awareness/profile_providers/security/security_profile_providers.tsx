@@ -143,6 +143,9 @@ export const createSecurityDocumentProfileProviders = (
                   id: 'doc_view_alerts_overview',
                   title: i18n.overviewTabTitle(isAlert),
                   order: 0,
+                  shareableStateSchema: providerServices.discoverShared.features.registry.getById(
+                    'security-solution-alert-flyout-overview-tab'
+                  )?.shareableStateSchema,
                   render: (props) => (
                     <EnhancedAlertEventOverviewLazy
                       {...props}

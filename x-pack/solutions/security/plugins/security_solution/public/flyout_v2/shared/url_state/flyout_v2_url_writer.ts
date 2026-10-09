@@ -12,6 +12,7 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { FlyoutDescriptor, FlyoutV2UrlParamValue } from './flyout_v2_url_param';
 import { decodeFlyoutV2UrlParam } from './flyout_v2_url_param';
 import { markFlyoutV2UrlWrite } from './flyout_v2_url_write_guard';
+import { getFlyoutV2StateSink } from './flyout_v2_state_sink';
 
 // ---------------------------------------------------------------------------
 // Generation tracking (cascade-close guard)
@@ -50,6 +51,10 @@ const writeGenerations: Record<string, number> = {};
  * that never got popped (e.g. a flyout unmounted through a path that skipped `onClose`).
  */
 const openGenerationStacks: Record<string, number[]> = {};
+
+/** Whether the writer believes any flyout recorded under `urlParamKey` is still open. */
+export const hasOpenFlyoutV2 = (urlParamKey: string): boolean =>
+  (openGenerationStacks[urlParamKey]?.length ?? 0) > 0;
 
 // ---------------------------------------------------------------------------
 // Public interface
@@ -93,16 +98,13 @@ export interface FlyoutUrlWriter {
  * exposes it for use by the restore hook (T-003). Writes use `history.replace` (never `push`)
  * to avoid creating extra Back/Forward stops.
  *
+ * When a `FlyoutV2StateSink` is registered for `historyKey` (e.g. by Discover's doc viewer),
+ * the stack is read from and written to that sink instead of the URL param.
+ *
  * Degrades to a no-op when `history` lacks `location`/`replace` (many unit tests pass a
- * minimal history object).
+ * minimal history object) and no sink is registered.
  */
-export const useFlyoutV2UrlWriter = (
-  urlParamKey: string,
-  // historyKey is not used internally for URL writes but is part of the contract: callers
-  // instantiate one writer per context (page vs. Timeline) and pass the matching historyKey
-  // so the restore hook (T-003) can identify which EUI flyout chain to restore into.
-  _historyKey: symbol
-): FlyoutUrlWriter => {
+export const useFlyoutV2UrlWriter = (urlParamKey: string, historyKey: symbol): FlyoutUrlWriter => {
   const history = useHistory();
   const hasUsableHistory = !!history?.location && typeof history.replace === 'function';
 
@@ -123,17 +125,24 @@ export const useFlyoutV2UrlWriter = (
   // Reads the current URL stack, preferring the pending (unflushed) value in urlStorage
   // so 'inherit' appends are consistent even when urlStorage has buffered an update.
   const readCurrentStack = useCallback((): FlyoutV2UrlParamValue => {
+    const sink = getFlyoutV2StateSink(historyKey);
+    if (sink) return sink.read();
     const pending = urlStorage?.get<FlyoutV2UrlParamValue>(urlParamKey);
     if (pending) return pending;
     const raw = new URLSearchParams(history.location.search).get(urlParamKey);
     return decodeFlyoutV2UrlParam(raw) ?? [];
-  }, [urlStorage, urlParamKey, history]);
+  }, [historyKey, urlStorage, urlParamKey, history]);
 
   // Writes directly via history.replace so the URL update is synchronous.
   // Using history.replace (not push) means no extra Back/Forward stops are created.
   // Mark before replace so useFlyoutV2RestoreFromUrl's history listener ignores self-writes.
   const writeToUrl = useCallback(
     (stack: FlyoutV2UrlParamValue | null) => {
+      const sink = getFlyoutV2StateSink(historyKey);
+      if (sink) {
+        sink.write(stack);
+        return;
+      }
       if (!hasUsableHistory) return;
       const params = new URLSearchParams(history.location.search);
       if (stack && stack.length > 0) {
@@ -145,12 +154,18 @@ export const useFlyoutV2UrlWriter = (
       markFlyoutV2UrlWrite(urlParamKey);
       history.replace({ ...history.location, search: serialized ? `?${serialized}` : '' });
     },
-    [hasUsableHistory, history, urlParamKey]
+    [hasUsableHistory, history, historyKey, urlParamKey]
+  );
+
+  // Resolved at call time: the sink may be registered after this hook was created.
+  const canWrite = useCallback(
+    () => hasUsableHistory || !!getFlyoutV2StateSink(historyKey),
+    [hasUsableHistory, historyKey]
   );
 
   const writeOnOpen = useCallback(
     (descriptor: FlyoutDescriptor, mode: 'start' | 'inherit' = 'start') => {
-      if (!hasUsableHistory) return;
+      if (!canWrite()) return;
       const generation = (writeGenerations[urlParamKey] ?? 0) + 1;
       writeGenerations[urlParamKey] = generation;
 
@@ -171,12 +186,12 @@ export const useFlyoutV2UrlWriter = (
         openGenerationStacks[urlParamKey] = [generation];
       }
     },
-    [hasUsableHistory, urlParamKey, readCurrentStack, writeToUrl]
+    [canWrite, urlParamKey, readCurrentStack, writeToUrl]
   );
 
   const buildOnClose = useCallback(
     (fallback: FlyoutDescriptor | null): (() => void) => {
-      if (!hasUsableHistory) return () => {};
+      if (!canWrite()) return () => {};
       const ownGeneration = writeGenerations[urlParamKey] ?? 0;
       return () => {
         const stack = openGenerationStacks[urlParamKey] ?? [];
@@ -191,7 +206,7 @@ export const useFlyoutV2UrlWriter = (
         writeToUrl(fallback ? [fallback] : null);
       };
     },
-    [hasUsableHistory, urlParamKey, writeToUrl]
+    [canWrite, urlParamKey, writeToUrl]
   );
 
   return useMemo(() => ({ writeOnOpen, buildOnClose }), [writeOnOpen, buildOnClose]);

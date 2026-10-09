@@ -177,6 +177,21 @@ right `useFlyoutApi()` method. **When you add a descriptor kind, you must add a 
 fall through to the `default` for tools). Tool restorers rebuild header callbacks (e.g. `buildShowEntityCallback`)
 because tools open as `'start'` and don't persist their parent.
 
+### Discover doc viewer (`use_flyout_v2_doc_viewer_state.ts`)
+
+In Discover, the chain is not written to `flyoutV2`. Discover deep-links the expanded document and its doc viewer
+state (`_a.docViewerState`), so the alert/event Overview tab stores the chain as its own doc view state instead:
+
+- `useFlyoutV2DocViewerState` registers a `FlyoutV2StateSink` (`flyout_v2_state_sink.ts`) for
+  `DOC_VIEWER_FLYOUT_HISTORY_KEY`. While it is registered, the writer reads/writes the stack through the sink, which
+  reports it via the doc view's `onInitialStateChange`. Registration is module-scoped because flyouts render in their
+  own React roots.
+- `flyoutV2DocViewerStateSchema` (`flyout_v2_doc_viewer_state_schema.ts`) is exposed as the overview tab feature's
+  `shareableStateSchema`, so Discover puts the chain in the URL and validates it on read.
+- On mount the hook reopens the chain from `initialState`, unless the writer still tracks it as open (the tab
+  remounts on doc viewer tab switches). Tools targeting the displayed document reuse its record; others fall back to
+  their document flyout.
+
 ## Providers (`shared/components/flyout_provider.tsx`)
 
 `overlays.openSystemFlyout` mounts each flyout into its **own React root** (an EUI portal), so it is outside the app's

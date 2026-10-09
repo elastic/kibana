@@ -7,7 +7,10 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type {
+  DocViewRenderProps,
+  DocViewRestorableStateProps,
+} from '@kbn/unified-doc-viewer/types';
 import { EuiSpacer } from '@elastic/eui';
 import type { CellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { OverviewTab } from '../../flyout_v2/document/main/tabs/overview_tab';
@@ -17,8 +20,12 @@ import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provid
 import { DataViewManagerBootstrap } from './data_view_manager_bootstrap';
 import { DiscoverCellActions } from '../cell_actions';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import type { FlyoutV2DocViewerState } from '../../flyout_v2/shared/url_state/flyout_v2_doc_viewer_state_schema';
+import type { UseFlyoutV2DocViewerStateParams } from '../../flyout_v2/shared/url_state/use_flyout_v2_doc_viewer_state';
+import { useFlyoutV2DocViewerState } from '../../flyout_v2/shared/url_state/use_flyout_v2_doc_viewer_state';
 
-export interface AlertFlyoutOverviewTabProps {
+export interface AlertFlyoutOverviewTabProps
+  extends DocViewRestorableStateProps<FlyoutV2DocViewerState> {
   /**
    * The document record that will be used to render the content of the overview tab in the alert details flyout.
    */
@@ -62,6 +69,8 @@ export const AlertFlyoutOverviewTab = ({
   filter,
   onAddColumn,
   onRemoveColumn,
+  initialState,
+  onInitialStateChange,
 }: AlertFlyoutOverviewTabProps) => {
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
@@ -115,12 +124,15 @@ export const AlertFlyoutOverviewTab = ({
         hit={hit}
         renderCellActions={renderCellActions}
         onAlertUpdated={onAlertUpdated}
+        initialState={initialState}
+        onInitialStateChange={onInitialStateChange}
       />
     ),
   });
 };
 
-interface AlertFlyoutOverviewTabContentProps {
+interface AlertFlyoutOverviewTabContentProps
+  extends DocViewRestorableStateProps<FlyoutV2DocViewerState> {
   /**
    * The document record that will be used to render the content of the overview tab in the alert details flyout.
    */
@@ -142,12 +154,21 @@ const AlertFlyoutOverviewTabContent = ({
   hit,
   renderCellActions,
   onAlertUpdated,
+  initialState,
+  onInitialStateChange,
 }: AlertFlyoutOverviewTabContentProps) => {
   const isInSecurityApp = useIsInSecurityApp();
 
   return (
     <>
       {!isInSecurityApp && <DataViewManagerBootstrap />}
+      {!isInSecurityApp && (
+        <FlyoutV2DocViewerStateSync
+          hit={hit}
+          initialState={initialState}
+          onInitialStateChange={onInitialStateChange}
+        />
+      )}
       <EuiSpacer size="m" />
       <OverviewTab
         hit={hit}
@@ -156,4 +177,17 @@ const AlertFlyoutOverviewTabContent = ({
       />
     </>
   );
+};
+
+/**
+ * Syncs the flyouts opened from Discover's doc viewer with the doc view state, so Discover can
+ * deep-link them. Inside the Security app the flyouts keep using the `flyoutV2` URL param instead.
+ */
+const FlyoutV2DocViewerStateSync = ({
+  hit,
+  initialState,
+  onInitialStateChange,
+}: UseFlyoutV2DocViewerStateParams) => {
+  useFlyoutV2DocViewerState({ hit, initialState, onInitialStateChange });
+  return null;
 };
