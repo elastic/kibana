@@ -528,10 +528,14 @@ class InferDeploymentTest(unittest.TestCase):
 
 
 class InstallMethodTest(unittest.TestCase):
-    def test_scout_serverless_is_elastic_cloud(self):
+    def test_local_scout_serverless_is_from_source(self):
         self.assertEqual(
             _install_method({"kind": "scout", "type": "serverless"}),
-            "Elastic Cloud",
+            "from source (dev)",
+        )
+        self.assertEqual(
+            _install_method({"kind": "scout", "arch": "serverless"}),
+            "from source (dev)",
         )
 
     def test_scout_ech_is_elastic_cloud(self):
@@ -540,14 +544,23 @@ class InstallMethodTest(unittest.TestCase):
             "Elastic Cloud",
         )
 
-    def test_scout_arch_serverless_is_elastic_cloud(self):
+    def test_scout_cloud_url_is_elastic_cloud(self):
         self.assertEqual(
-            _install_method({"kind": "scout", "arch": "serverless"}),
+            _install_method(
+                {
+                    "kind": "scout",
+                    "type": "serverless",
+                    "url": "https://foo.kb.region.elastic.cloud",
+                }
+            ),
             "Elastic Cloud",
         )
 
     def test_local_scout_is_from_source(self):
         self.assertEqual(_install_method({"kind": "scout"}), "from source (dev)")
+
+    def test_serverless_without_kind_or_url_is_omitted(self):
+        self.assertIsNone(_install_method({"type": "serverless"}))
 
 
 class InferReleaseLabelTest(unittest.TestCase):

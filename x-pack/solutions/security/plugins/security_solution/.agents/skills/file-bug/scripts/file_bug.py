@@ -487,8 +487,8 @@ def _install_method(environment: dict) -> str | None:
     if explicit:
         return explicit
     env_type = str(environment.get("type") or "").lower()
-    arch = str(environment.get("arch") or "").lower()
-    if env_type in {"stateful-ess", "serverless"} or arch == "serverless":
+    url = _first_text(environment.get("url"), environment.get("kibana_url"))
+    if env_type == "stateful-ess" or (url and "cloud" in url.lower()):
         return "Elastic Cloud"
     if environment.get("kind") in _LOCAL_KINDS or env_type == "stateful-classic":
         return _DEV_INSTALL
