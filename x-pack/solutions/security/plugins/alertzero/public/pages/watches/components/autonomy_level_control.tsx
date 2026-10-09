@@ -10,8 +10,10 @@ import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiCheckableCard,
+  EuiHorizontalRule,
   EuiIcon,
   EuiText,
+  euiFontSize,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -75,19 +77,28 @@ function FactParts({ parts }: { parts: LevelCardFactPart[] }) {
 const FACT_LABEL_GAP_PX = 12;
 
 function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
+  const factLabelFont = euiFontSize(euiThemeContext, 'xs');
   return (
     <div>
       <EuiText size="xs" color="subdued">
         <p
           data-test-subj="alertZeroAutonomyCardWho"
           css={css`
-            margin: 0 0 6px;
+            margin: 0;
           `}
         >
           {card.who}
         </p>
       </EuiText>
+      <EuiHorizontalRule
+        margin="none"
+        data-test-subj="alertZeroAutonomyCardDivider"
+        css={css`
+          margin-block: 10px;
+        `}
+      />
       {/*
         Label-left / value-right, on the same `SettingRow` grid the rest of the Worker's settings
         use, so a card's facts line up with the rows above and below it instead of stacking.
@@ -97,7 +108,7 @@ function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
           display: grid;
           grid-template-columns: max-content minmax(0, 1fr);
           column-gap: ${FACT_LABEL_GAP_PX}px;
-          row-gap: 2px;
+          row-gap: 8px;
           align-items: baseline;
           margin: 0;
         `}
@@ -113,7 +124,8 @@ function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
             <dt
               css={css`
                 margin: 0;
-                font-size: inherit;
+                font-size: ${factLabelFont.fontSize};
+                line-height: ${factLabelFont.lineHeight};
                 font-weight: ${euiTheme.font.weight.semiBold};
               `}
             >

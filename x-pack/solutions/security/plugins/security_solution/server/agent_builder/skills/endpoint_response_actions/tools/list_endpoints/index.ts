@@ -21,13 +21,20 @@ import {
   responseActionErrorResult,
 } from '../types';
 
+/**
+ * ES `from + size` cannot exceed `max_result_window` (10,000). Pages beyond
+ * this bound would make the underlying search throw, so they are rejected
+ * with a typed error instead.
+ */
+export const MAX_LIST_ENDPOINTS_PAGE = 199;
+
 const listEndpointsSchema = z.object({
   hostNameFilter: z
     .string()
     .max(MAX_HOSTNAME_FILTER_LENGTH)
     .optional()
     .describe(
-      'Optional hostname substring to filter results. Only endpoints whose hostname contains this value will be returned.'
+      'Optional hostname substring to filter results. Only endpoints whose hostname contains this value (case-sensitive) will be returned.'
     ),
   page: z
     .number()
@@ -41,12 +48,12 @@ const listEndpointsSchema = z.object({
 
 export const listEndpointsTool = (
   endpointAppContextService: EndpointAppContextService
-): BuiltinSkillBoundedTool => {
+): BuiltinSkillBoundedTool<typeof listEndpointsSchema> => {
   return {
     id: LIST_ENDPOINTS_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Lists endpoints enrolled with Elastic Defend that response actions can be executed on. Returns hostname, status, isolation state, OS, and last seen time for each endpoint.',
+      'Lists endpoints enrolled with Elastic Defend that response actions can be executed on. Returns hostname, status, isolation state (null when the endpoint has not reported it), OS, and last seen time for each endpoint.',
     schema: listEndpointsSchema,
     handler: async (params, { logger, request, spaceId }) => {
       try {
@@ -61,13 +68,41 @@ export const listEndpointsTool = (
 
         const metadataService = endpointAppContextService.getEndpointMetadataService(spaceId);
 
-        // `hostNameFilter` is user/LLM-controlled, so escape it before
-        // interpolating into the KQL wildcard expression.
-        const kuery = params.hostNameFilter
-          ? `united.endpoint.host.hostname: *${escapeKuery(params.hostNameFilter as string)}*`
+        // `hostNameFilter` is user/LLM-controlled, so validate and escape it
+        // before interpolating into the KQL wildcard expression. Whitespace is
+        // rejected rather than escaped: with no index pattern, the wildcard
+        // compiles to a `query_string` query, which splits on whitespace —
+        // `*prod web*` would silently become `*prod OR web*`. `{` and `}` are
+        // rejected because `escapeKuery` does not escape them and the KQL
+        // grammar treats them as special, so they throw parser errors. Real
+        // hostnames contain none of these characters.
+        const hostNameFilter = params.hostNameFilter;
+        if (hostNameFilter && /[\s{}]/.test(hostNameFilter)) {
+          return responseActionErrorResult(
+            'invalid_argument',
+            'hostNameFilter must not contain whitespace or curly braces. Use a contiguous hostname fragment instead.'
+          );
+        }
+
+        // `united.endpoint.host.hostname` is a `keyword` with no normalizer, so
+        // the wildcard is case-sensitive. The filter is passed through as
+        // typed, like the Endpoints list search (`useGetEndpointsList`);
+        // lowercasing it would make stored names with capitals (`WIN-ABC123`)
+        // unmatchable.
+        const kuery = hostNameFilter
+          ? `united.endpoint.host.hostname: *${escapeKuery(hostNameFilter)}*`
           : undefined;
 
-        const page = (params.page as number | undefined) ?? 0;
+        const page = params.page ?? 0;
+
+        if (page > MAX_LIST_ENDPOINTS_PAGE) {
+          return responseActionErrorResult(
+            'invalid_argument',
+            `The endpoint inventory is capped at the first ${
+              (MAX_LIST_ENDPOINTS_PAGE + 1) * LIST_ENDPOINTS_PAGE_SIZE
+            } endpoints. Narrow the list with the hostNameFilter once a hostname is known instead of paging further.`
+          );
+        }
 
         // Request-scoped services so this read fans out to linked projects
         // under CPS. Without them the query is origin-only and a deployment
@@ -92,6 +127,12 @@ export const listEndpointsTool = (
           const host = metadata?.host;
           const os = host?.os;
           const agent = metadata?.agent;
+          // Report the FLEET agent id (`elastic.agent.id`) first — that is the
+          // identity hostname resolution and response-action host keys use;
+          // top-level `agent.id` is the endpoint's own id and the two diverge
+          // on current agents (same fleet-id-first ordering as endpoint_lookup).
+          const fleetAgentId = (metadata as { elastic?: { agent?: { id?: string } } } | undefined)
+            ?.elastic?.agent?.id;
           const endpointState = metadata?.Endpoint?.state;
           const appliedPolicy = metadata?.Endpoint?.policy?.applied;
 
@@ -100,9 +141,13 @@ export const listEndpointsTool = (
 
           return {
             hostName: host?.hostname || 'unknown',
-            agentId: agent?.id || 'unknown',
-            status: entry.host_status || 'offline',
-            isolated: Boolean(endpointState?.isolation),
+            agentId: fleetAgentId || agent?.id || 'unknown',
+            // Missing `host_status` means unknown, not offline — reporting
+            // 'offline' here would fabricate a down state the metadata never
+            // confirmed.
+            status: entry.host_status || 'unknown',
+            // Optional in the metadata: absent means unknown, not "not isolated".
+            isolated: endpointState?.isolation ?? null,
             os: osLabel,
             lastSeen: entry.last_checkin || null,
             // The endpoint's applied integration policy, so the agent can give
@@ -132,8 +177,13 @@ export const listEndpointsTool = (
                 page,
                 pageSize: LIST_ENDPOINTS_PAGE_SIZE,
                 // Report truncation explicitly: the agent must not treat a
-                // partial page as the complete inventory.
-                hasMore: page * LIST_ENDPOINTS_PAGE_SIZE + endpoints.length < total,
+                // partial page as the complete inventory. At the page cap the
+                // answer is always `false`: the next page would be rejected by
+                // the cap above, so signaling more data would send the agent
+                // into a guaranteed-error request.
+                hasMore:
+                  page < MAX_LIST_ENDPOINTS_PAGE &&
+                  page * LIST_ENDPOINTS_PAGE_SIZE + endpoints.length < total,
               },
             },
           ],

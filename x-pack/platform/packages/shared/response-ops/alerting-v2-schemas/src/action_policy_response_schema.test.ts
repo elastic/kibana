@@ -12,14 +12,13 @@ import {
 
 const validResponse = {
   id: 'np-1',
-  version: 'WzEsMV0=',
   name: 'My Policy',
   description: 'A test policy',
   enabled: true,
   destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
   matcher: { expression: 'host.name: "server-1"' },
   group_by: ['host.name'],
-  grouping_mode: 'per_episode' as const,
+  grouping_mode: 'per_alert' as const,
   throttle: { strategy: 'on_status_change' as const, interval: null },
   snoozed_until: null,
   created_by: { profile_uid: 'user-1' },
@@ -37,7 +36,6 @@ describe('actionPolicyResponseSchema', () => {
   it('accepts nullable fields as null', () => {
     const result = actionPolicyResponseSchema.parse({
       ...validResponse,
-      version: undefined,
       matcher: null,
       group_by: null,
       grouping_mode: null,

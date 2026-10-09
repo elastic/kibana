@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Conversation } from '@kbn/agent-builder-common';
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import {
   ConversationDetailsFlyoutHeader,
   ConversationDetailsFlyoutFooter,
@@ -15,11 +15,18 @@ import {
   type ConversationDetailsFlyoutFooterProps,
   OverviewTab,
 } from '../components/details';
+import { ImpactSection } from '../components/details/impact_section';
+import type { FlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
 import {
   conversationToInvestigation,
   conversationToEscalationHeader,
 } from './conversation_to_investigation';
-import type { RenderAssignees, RenderStatus, RenderLinkedInvestigations } from './types';
+import type {
+  RenderAssignees,
+  RenderStatus,
+  RenderLinkedInvestigations,
+  RenderSyncIndicator,
+} from './types';
 
 /**
  * The investigation flyout's slot contents, kept in one module so `register` can pull them in a
@@ -34,28 +41,28 @@ interface InvestigationSlotProps {
 }
 
 export interface OverviewSlotProps extends InvestigationSlotProps {
-  /**
-   * Captured at registration: the flyout can mount outside a `KibanaContextProvider`, so the
-   * attachment registry cannot be reached from ambient context.
-   */
-  attachmentsService: AttachmentServiceStartContract;
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   /**
    * Renders the "Proposed actions" section's content. Called with the conversation's own id so a
    * host can fetch its proposals; omitted entirely (see `OverviewTab`) when the caller has none.
    */
   renderProposedActions?: (props: { conversationId: string }) => React.ReactNode;
+  /** Renders a count shown beside the "Proposed actions" heading. */
+  renderProposedActionsCount?: (props: { conversationId: string }) => React.ReactNode;
 }
 
 export const OverviewSlot = ({
   conversation,
-  attachmentsService,
+  groupedAttachments,
   renderProposedActions,
+  renderProposedActionsCount,
 }: OverviewSlotProps) => (
   <OverviewTab
     investigation={conversationToInvestigation(conversation)}
     attachments={conversation.attachments}
-    attachmentsService={attachmentsService}
+    groupedAttachments={groupedAttachments}
     proposedActionsContent={renderProposedActions?.({ conversationId: conversation.id })}
+    proposedActionsCount={renderProposedActionsCount?.({ conversationId: conversation.id })}
   />
 );
 
@@ -98,21 +105,27 @@ export const HeaderSlot = ({
 };
 
 export interface FooterSlotProps extends InvestigationSlotProps {
+  isOpenedFromChat: boolean;
   onOpenChat: () => void;
   onOpenEscalation?: ConversationDetailsFlyoutFooterProps['onOpenEscalation'];
+  wrapEscalationButton?: ConversationDetailsFlyoutFooterProps['wrapEscalationButton'];
   onCloseInvestigation?: ConversationDetailsFlyoutFooterProps['onCloseInvestigation'];
 }
 
 export const FooterSlot = ({
+  isOpenedFromChat,
   conversation,
   onOpenChat,
   onOpenEscalation,
+  wrapEscalationButton,
   onCloseInvestigation,
 }: FooterSlotProps) => (
   <ConversationDetailsFlyoutFooter
     investigation={conversationToInvestigation(conversation)}
+    isOpenedFromChat={isOpenedFromChat}
     onOpenChat={onOpenChat}
     onOpenEscalation={onOpenEscalation}
+    wrapEscalationButton={wrapEscalationButton}
     onCloseInvestigation={onCloseInvestigation}
   />
 );
@@ -126,12 +139,14 @@ export interface EscalationHeaderSlotProps {
   refetchConversation?: () => Promise<void>;
   renderAssignees?: RenderAssignees;
   renderStatus?: RenderStatus;
+  renderSyncIndicator?: RenderSyncIndicator;
 }
 
 export const EscalationHeaderSlot = ({
   conversation,
   renderAssignees,
   renderStatus,
+  renderSyncIndicator,
   refetchConversation,
 }: EscalationHeaderSlotProps) => {
   const { status, assigneeUids } = conversationToEscalationHeader(conversation);
@@ -163,6 +178,7 @@ export const EscalationHeaderSlot = ({
       assigneeUids={assigneeUids}
       assigneesNode={assigneesNode}
       statusNode={statusNode}
+      syncNode={renderSyncIndicator?.({ escalationId: conversation.id })}
     />
   );
 };
@@ -179,25 +195,28 @@ export interface EscalationOverviewSlotProps {
 
 /**
  * The body tab for the escalation details flyout. Renders the linked investigations list via
- * `renderLinkedInvestigations` (supplied by the consuming plugin so it can use HTTP hooks).
- * Returns `null` when no render prop is provided.
+ * `renderLinkedInvestigations` (supplied by the consuming plugin so it can use HTTP hooks), then
+ * the Impact copied over from the linked investigations.
  */
 export const EscalationOverviewSlot = ({
   conversation,
   renderLinkedInvestigations,
   onOpenInvestigation,
 }: EscalationOverviewSlotProps) => {
-  if (!renderLinkedInvestigations) return null;
-
   const { linkedInvestigationIds } = conversationToEscalationHeader(conversation);
 
   return (
-    <>
-      {renderLinkedInvestigations({
-        escalationId: conversation.id,
-        linkedInvestigationIds,
-        onOpenInvestigation,
-      })}
-    </>
+    <EuiFlexGroup direction="column" gutterSize="m">
+      {renderLinkedInvestigations && (
+        <EuiFlexItem>
+          {renderLinkedInvestigations({
+            escalationId: conversation.id,
+            linkedInvestigationIds,
+            onOpenInvestigation,
+          })}
+        </EuiFlexItem>
+      )}
+      <ImpactSection attachments={conversation.attachments} />
+    </EuiFlexGroup>
   );
 };

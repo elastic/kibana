@@ -13,7 +13,6 @@ import type {
   HuntIoc,
 } from '@kbn/alertzero-common';
 import { assertHuntWindow } from '../common/assert_hunt_window';
-import { buildMatchesRequired } from '../common/matches_required';
 import { summarizeHit } from '../common/summarize_hit';
 import {
   ALERT_TECHNIQUE_ID_FIELDS,
@@ -80,11 +79,11 @@ const buildTechniqueShould = (techniques: string[]): Array<Record<string, unknow
     : ALERT_TECHNIQUE_ID_FIELDS.map((field) => ({ terms: { [field]: techniques } }));
 
 /**
- * Bucket cap for the `_index` terms aggregation that sets the hit bar. Every
- * data-stream generation is its own `_index` value, so a 30-day window over a
- * handful of patterns can span far more concrete indices than patterns; a cap
- * derived from the pattern count could drop the required bucket and read a
- * real hit as clean.
+ * Bucket cap for the `_index` terms aggregation. Every data-stream generation is its
+ * own `_index` value, so a 30-day window over a handful of patterns can span far more
+ * concrete indices than patterns; a cap derived from the pattern count could drop the
+ * buckets the coordinator turns into Tier 2 targets. The hit bar does not read these
+ * buckets: it is the search's own hit count.
  */
 const PER_INDEX_MAX_BUCKETS = 500;
 
@@ -243,15 +242,14 @@ const classifyIdentityType = (
 };
 
 /**
- * Tier 1 deterministic hunt: searches the resolved scope for a report's IOCs
- * and/or ATT&CK technique IDs. The index list comes from `params.scope` rather
- * than a hardcoded allow-list.
+ * Tier 1 deterministic hunt: searches the hunt universe for a report's IOCs
+ * and/or ATT&CK technique IDs. The index list comes from `params.scope`
+ * (`search_patterns`) rather than a hardcoded allow-list.
  *
- * Hit bar: at least one confirmed match in a *required* index pattern inside
- * the window. A match only in an optional pattern (including the alerts
- * pattern), or outside the window, does not set `has_confirmed_hit`. It can
- * still appear in `hits`/`counts`/`per_index` for context. The coordinator's
- * `tier2_when: on_hits` gate follows `has_confirmed_hit` for the same reason.
+ * Hit bar: at least one match inside the window in any searched index. There is
+ * no non-confirming bucket, so `has_confirmed_hit` is the search's own hit
+ * count. A match outside the window does not set it. The coordinator's
+ * `tier2_when: on_hits` gate follows `has_confirmed_hit`.
  */
 export const huntForThreat = async (
   esClient: ElasticsearchClient,
@@ -295,6 +293,18 @@ export const huntForThreat = async (
 
   assertHuntWindow({ from, to });
 
+  // An empty index list would search every index rather than none, and a list of
+  // exclusions alone resolves to none: neither is a universe to hunt.
+  if (!scope.search_patterns.some((pattern) => !pattern.startsWith('-'))) {
+    return emptyHuntForThreatResult(
+      'scope_blocked',
+      iocs,
+      techniques,
+      { from, to },
+      'The hunt has no index pattern to search, so nothing was searched.'
+    );
+  }
+
   const iocShould = buildIocShould(iocs);
   const techniqueShould = buildTechniqueShould(techniques);
   const should = [...iocShould, ...techniqueShould];
@@ -311,16 +321,12 @@ export const huntForThreat = async (
     );
   }
 
-  // `required` and `optional` (which already includes the space-derived alerts
-  // pattern) are searched together with `ignore_unavailable` and `allow_no_indices`.
-  // A scope reaching this point already passed the blocked/degraded gate, so the
-  // search never needs to distinguish required from optional; that distinction only
-  // matters for the hit bar below.
-  const searchIndices = [...scope.required, ...scope.optional];
-  // `per_index` buckets on `_index`, which is a concrete index/data-stream name
-  // (e.g. `logs-aws.cloudtrail-default`), never the wildcard pattern it resolved
-  // from (e.g. `logs-aws.*`). Shared with Tier 2 so both hit bars agree.
-  const matchesRequired = buildMatchesRequired(scope.required);
+  // A scope reaching this point already passed the blocked gate, so the search is
+  // issued with `ignore_unavailable` and `allow_no_indices` and never needs to tell a
+  // missing pattern from an empty one. `per_index` buckets on `_index`, which is a
+  // concrete index or backing-index name (`.ds-logs-okta.system-default-...`), never
+  // the wildcard it resolved from.
+  const searchIndices = scope.search_patterns;
 
   const huntQuery = {
     bool: {
@@ -401,43 +407,24 @@ export const huntForThreat = async (
   const perIndex = (aggs?.per_index?.buckets ?? []).map((b) => ({
     index: b.key,
     hit_count: b.doc_count,
-    required: matchesRequired(b.key),
+    required: true,
   }));
 
-  // The hit bar cannot be read off `per_index`: those buckets are ordered by doc
-  // count and capped, so a required index holding a single real match can be
-  // absent from the response while optional indices fill the cap, and the hunt
-  // would call that clean. Count the required patterns on their own instead, and
-  // let Elasticsearch resolve them exactly as the main search does rather than
-  // re-implementing pattern matching over `_index` here. `per_index` stays as
-  // display context.
-  // An empty `required` would count across every index rather than none, so the
-  // bar is unreachable by definition instead.
-  const requiredMatches =
-    scope.required.length === 0
-      ? undefined
-      : await esClient.count({
-          index: scope.required,
-          ignore_unavailable: true,
-          allow_no_indices: true,
-          query: huntQuery,
-        });
-  const hasConfirmedHit = (requiredMatches?.count ?? 0) > 0;
+  // One universe, one search: its own hit count is the hit bar, and `per_index` is
+  // display context that can be capped without hiding a hit.
+  const hasConfirmedHit = total > 0;
 
-  const incomplete = [
-    ...shardCoverageGaps('scope search', response),
-    ...(requiredMatches ? shardCoverageGaps('required-index count', requiredMatches) : []),
-  ];
-  // `ignore_unavailable` stops one missing optional pattern from failing the whole
-  // search, but it applies to the required patterns too: one that resolved at scope
-  // time and was deleted before the count returns zero shards and therefore zero
-  // matches, which is indistinguishable from a searched-and-clean required index.
-  if (requiredMatches && requiredMatches._shards?.total === 0) {
+  const incomplete = shardCoverageGaps('scope search', response);
+  // `ignore_unavailable` stops one missing pattern from failing the whole search,
+  // but it applies to every pattern: if all of them went away between scope
+  // resolution and the search, zero shards answered, which is indistinguishable from a
+  // searched-and-clean universe.
+  if (response._shards?.total === 0) {
     incomplete.push({
       reason: 'index_unavailable',
       detail:
-        `No index backed the required patterns (${scope.required.join(', ')}) when the hit bar ` +
-        `was counted, so the hunt never searched the indices that can confirm a hit.`,
+        `No index backed the searched patterns (${searchIndices.join(', ')}), so the hunt ` +
+        `never searched the universe it was asked to.`,
     });
   }
 

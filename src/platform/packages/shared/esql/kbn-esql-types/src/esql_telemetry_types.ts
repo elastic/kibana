@@ -24,7 +24,8 @@ export enum QuerySource {
   MANUAL = 'manual',
   HELP = 'help',
   AUTOCOMPLETE = 'autocomplete',
-  QUICK_SEARCH = 'quick_search',
+  QUICK_SEARCH_KQL = 'quick_search_kql',
+  QUICK_SEARCH_NL = 'quick_search_nl',
   SEARCH_BUTTON = 'search_button',
   TIME_FILTER = 'time_filter',
 }

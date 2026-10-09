@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 import React, { useEffect } from 'react';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
@@ -13,7 +14,14 @@ import { useTimeRangeContext } from '../../hooks/use_time_range_context';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingSearchBar } from './profiling_search_bar';
 
-export function PrimaryProfilingSearchBar({ showSubmitButton }: { showSubmitButton?: boolean }) {
+export function PrimaryProfilingSearchBar({
+  showSubmitButton,
+  schema,
+}: {
+  showSubmitButton?: boolean;
+  /** Schema whose events the query suggests fields from, Universal Profiling when omitted. */
+  schema?: ProfilingSchema;
+}) {
   const {
     start: { data },
   } = useProfilingDependencies();
@@ -72,6 +80,7 @@ export function PrimaryProfilingSearchBar({ showSubmitButton }: { showSubmitButt
         refresh();
       }}
       showSubmitButton={showSubmitButton}
+      schema={schema}
     />
   );
 }

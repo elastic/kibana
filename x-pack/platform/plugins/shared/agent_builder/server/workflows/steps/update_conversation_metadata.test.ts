@@ -11,9 +11,8 @@ import {
   createWorkflowStepConversationClientMock,
 } from '../../test_utils/workflow_steps';
 
-const experimentalEnabled = jest.fn().mockResolvedValue(true);
-const experimentalDisabled = jest.fn().mockResolvedValue(false);
 const getAgentRegistry = jest.fn().mockResolvedValue({ get: jest.fn() });
+const getExecutionService = jest.fn();
 
 describe('updateConversationMetadataStepDefinition', () => {
   const baseInput = {
@@ -26,7 +25,7 @@ describe('updateConversationMetadataStepDefinition', () => {
     const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
       getAgentRegistry,
-      isExperimentalEnabled: experimentalEnabled,
+      getExecutionService,
     });
 
     expect(definition.id).toBe('ai.conversation.metadata.patch');
@@ -48,7 +47,7 @@ describe('updateConversationMetadataStepDefinition', () => {
     const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
       getAgentRegistry,
-      isExperimentalEnabled: experimentalEnabled,
+      getExecutionService,
     });
     const result = await definition.handler(
       createStepHandlerContext({
@@ -57,7 +56,11 @@ describe('updateConversationMetadataStepDefinition', () => {
       })
     );
 
-    expect(patchMetadata).toHaveBeenCalledWith('conv-1', { status: 'resolved', severity: 'low' });
+    expect(patchMetadata).toHaveBeenCalledWith(
+      'conv-1',
+      { status: 'resolved', severity: 'low' },
+      { access: 'owner', source: 'workflow' }
+    );
     expect(result).toEqual({
       output: {
         conversation_id: 'conv-1',
@@ -78,7 +81,7 @@ describe('updateConversationMetadataStepDefinition', () => {
     const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
       getAgentRegistry,
-      isExperimentalEnabled: experimentalEnabled,
+      getExecutionService,
     });
     const result = await definition.handler(
       createStepHandlerContext({
@@ -103,7 +106,7 @@ describe('updateConversationMetadataStepDefinition', () => {
     const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
       getAgentRegistry,
-      isExperimentalEnabled: experimentalEnabled,
+      getExecutionService,
     });
     const result = await definition.handler(createStepHandlerContext({ input: baseInput }));
 
@@ -117,7 +120,7 @@ describe('updateConversationMetadataStepDefinition', () => {
     const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
       getAgentRegistry,
-      isExperimentalEnabled: experimentalEnabled,
+      getExecutionService,
     });
 
     expect(
@@ -130,24 +133,9 @@ describe('updateConversationMetadataStepDefinition', () => {
     const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
       getAgentRegistry,
-      isExperimentalEnabled: experimentalEnabled,
+      getExecutionService,
     });
 
     expect(definition.inputSchema.safeParse({ updates: { status: 'open' } }).success).toBe(false);
-  });
-
-  it('returns an error when experimental features are disabled', async () => {
-    const { getConversationClient } = createWorkflowStepConversationClientMock();
-    const definition = updateConversationMetadataStepDefinition({
-      getConversationClient,
-      getAgentRegistry,
-      isExperimentalEnabled: experimentalDisabled,
-    });
-
-    const result = await definition.handler(createStepHandlerContext({ input: baseInput }));
-
-    expect(result).toEqual({
-      error: expect.objectContaining({ message: expect.stringContaining('experimental features') }),
-    });
   });
 });

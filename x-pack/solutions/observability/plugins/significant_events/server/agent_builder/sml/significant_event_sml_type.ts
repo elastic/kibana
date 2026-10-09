@@ -10,21 +10,13 @@ import { getSmlOriginId, kibanaPermissions } from '@kbn/agent-builder-sml-plugin
 import { type SignificantEvent } from '@kbn/significant-events-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import { SIGNIFICANT_EVENT_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
-import {
-  EventService,
-  eventsDataStream,
-  type eventsMappings,
-  type EventClient,
-  type StoredEvent,
-} from '../../lib/significant_events/events';
+import { RuleEventsClient } from '../../lib/significant_events/events/rule_events_client';
 import type { GetScopedClients } from '../../routes/types';
 
 interface CreateSignificantEventSmlTypeOptions {
   getScopedClients: GetScopedClients;
-  getDataStreams: () => Promise<DataStreamsStart>;
   isAvailable: () => Promise<boolean>;
 }
 
@@ -46,29 +38,17 @@ const eventToSmlContent = (event: SignificantEvent): string => {
 
 export const createSignificantEventSmlType = ({
   getScopedClients,
-  getDataStreams,
   isAvailable,
 }: CreateSignificantEventSmlTypeOptions): SmlTypeDefinition => {
-  const eventService = new EventService();
-  const getSmlEventClient = async (esClient: ElasticsearchClient) => {
+  const getSmlEventClient = async (
+    esClient: ElasticsearchClient,
+    space: string = DEFAULT_SPACE_ID
+  ): Promise<RuleEventsClient | undefined> => {
     if (!(await isAvailable())) {
       return;
     }
 
-    const dataStreams = await getDataStreams();
-    const dataStreamClient = await dataStreams.initializeClient<typeof eventsMappings, StoredEvent>(
-      eventsDataStream.name
-    );
-
-    // `EventService.getClient()` returns `EventClient | RuleEventsClient` now that
-    // `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ` exists, but this SML type doesn't pass
-    // `useRuleEventsRead` (always false here), so the result is always an `EventClient` at
-    // runtime. See the equivalent note in `significant_events_clients.ts`.
-    return eventService.getClient({
-      dataStreamClient,
-      esClient,
-      space: DEFAULT_SPACE_ID,
-    }) as EventClient;
+    return new RuleEventsClient({ esClient, space });
   };
 
   return {
@@ -115,8 +95,7 @@ export const createSignificantEventSmlType = ({
         if (!eventClient) {
           return undefined;
         }
-        const { hits } = await eventClient.findByEventId(originId);
-        const event = hits.at(-1);
+        const event = await eventClient.findLatestByEventId(originId);
 
         if (!event) {
           return undefined;
@@ -138,18 +117,19 @@ export const createSignificantEventSmlType = ({
     getPermissions: () => kibanaPermissions({ kiType: SIGNIFICANT_EVENT_KI_TYPE }),
 
     toAttachment: async (item, context) => {
-      if (!(await isAvailable())) {
-        return undefined;
-      }
-
       const originId = getSmlOriginId(item);
       if (!originId) {
         return undefined;
       }
-      const { getEventClient } = await getScopedClients({ request: context.request });
-      const eventClient = await getEventClient();
-      const { hits } = await eventClient.findByEventId(originId);
-      const event = hits.at(-1);
+      const { scopedClusterClient } = await getScopedClients({ request: context.request });
+      const eventClient = await getSmlEventClient(
+        scopedClusterClient.asCurrentUser,
+        context.spaceId
+      );
+      if (!eventClient) {
+        return undefined;
+      }
+      const event = await eventClient.findLatestByEventId(originId);
 
       if (!event) {
         return undefined;

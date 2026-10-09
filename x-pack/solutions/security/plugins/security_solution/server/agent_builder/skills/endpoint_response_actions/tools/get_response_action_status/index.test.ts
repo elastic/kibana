@@ -20,7 +20,12 @@ import { NotFoundError } from '../../../../../endpoint/errors';
 import { getActionDetailsById } from '../../../../../endpoint/services/actions';
 import { GET_RESPONSE_ACTION_STATUS_TOOL_ID } from '../..';
 import { getResponseActionStatusTool } from '.';
-import { MAX_ACTION_ERRORS, MAX_ACTION_HOSTS, MAX_AGENT_STATE_ENTRIES } from '../types';
+import {
+  GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS,
+  MAX_ACTION_ERRORS,
+  MAX_ACTION_HOSTS,
+  MAX_AGENT_STATE_ENTRIES,
+} from '../types';
 
 jest.mock('../../../../../endpoint/services/actions', () => {
   const original = jest.requireActual('../../../../../endpoint/services/actions');
@@ -56,6 +61,11 @@ describe('getResponseActionStatusTool', () => {
     service = createMockEndpointAppContext().service;
   });
 
+  it('accepts a non-UUID caller-supplied action ID (HTTP details route allows any nonempty ID up to 256 chars)', () => {
+    const tool = getResponseActionStatusTool(service);
+    expect(() => tool.schema.parse({ actionId: 'my-custom-action-id-001' })).not.toThrow();
+  });
+
   it('returns a valid read-only builtin tool definition', () => {
     const tool = getResponseActionStatusTool(service);
     expect(tool.type).toBe(ToolType.builtin);
@@ -81,6 +91,27 @@ describe('getResponseActionStatusTool', () => {
     const denialData = results[0].data as Record<string, unknown>;
     expect(denialData.error).toBe('insufficient_privileges');
     expect(denialData.privilege).toBe('canAccessEndpointActionsLogManagement');
+    expect(mockGetActionDetailsById).not.toHaveBeenCalled();
+  });
+
+  it('returns insufficient_privileges for an actions-log-only caller without canReadSecuritySolution', async () => {
+    // The details route requires the `securitySolution` feature privilege on
+    // top of the actions-log check; the actions-log sub-feature does not grant it.
+    service.getEndpointAuthz = jest.fn().mockResolvedValue(
+      getEndpointAuthzInitialStateMock({
+        canReadSecuritySolution: false,
+        canAccessEndpointActionsLogManagement: true,
+      })
+    );
+
+    const tool = getResponseActionStatusTool(service);
+    const result = await tool.handler({ actionId: ACTION_ID }, mockContext);
+
+    const results = assertStandardReturn(result);
+    expect(results[0].type).toBe(ToolResultType.error);
+    const denialData = results[0].data as Record<string, unknown>;
+    expect(denialData.error).toBe('insufficient_privileges');
+    expect(denialData.privilege).toBe('canReadSecuritySolution');
     expect(mockGetActionDetailsById).not.toHaveBeenCalled();
   });
 
@@ -271,7 +302,19 @@ describe('getResponseActionStatusTool', () => {
     expect(data.totalHosts).toBe(120);
     expect(data.hostsTruncated).toBe(120 - MAX_ACTION_HOSTS);
     expect(Object.keys(data.agentState as object)).toHaveLength(MAX_AGENT_STATE_ENTRIES);
-    expect(data.agentsTruncated).toBe(120 - MAX_AGENT_STATE_ENTRIES);
+    // Counters are scoped to the field they describe: `agentState*` for
+    // agentState, never a bare `totalAgents`/`agentsTruncated` next to `hosts`.
+    expect(data.agentStateTotal).toBe(120);
+    expect(data.agentStateTruncated).toBe(120 - MAX_AGENT_STATE_ENTRIES);
+    expect(data).not.toHaveProperty('totalAgents');
+    expect(data).not.toHaveProperty('agentsTruncated');
+  });
+
+  it('raises the tool result token budget above the default guardrail', () => {
+    const tool = getResponseActionStatusTool(service);
+
+    expect(tool.maxResultTokens).toBe(GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS);
+    expect(GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS).toBeGreaterThan(20_000);
   });
 
   it('returns ToolResultType.error for unexpected lookup failures', async () => {

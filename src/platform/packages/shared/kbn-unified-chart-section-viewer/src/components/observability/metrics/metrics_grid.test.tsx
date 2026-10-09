@@ -20,13 +20,17 @@ import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/publ
 import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { createESQLQuery } from '../../../common/utils';
-import { openAfterDismissingOtherFlyouts } from '@kbn/discover-utils';
+import { dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import {
   MetricsExperienceStateProvider,
   useMetricsExperienceState,
 } from './context/metrics_experience_state_provider';
 import { withRestorableState } from '../../../restorable_state';
 import type { FlyoutState } from '../../../restorable_state';
+
+jest.mock('./hooks/use_fetch_exemplars', () => ({
+  useFetchExemplars: jest.fn(() => undefined),
+}));
 
 jest.mock('@kbn/discover-utils', () => {
   const {
@@ -38,7 +42,7 @@ jest.mock('@kbn/discover-utils', () => {
 
   return {
     DiscoverFlyouts: { metricInsights: 'metricInsights' },
-    openAfterDismissingOtherFlyouts: jest.fn((_flyout: string, open: () => void) => open()),
+    dismissAllFlyoutsExceptFor: jest.fn(),
     METRICS_GRID_HISTOGRAM_PERCENTILES,
     METRICS_GRID_SETTINGS_DEFAULTS,
     METRICS_GRID_SIMPLE_AGGREGATIONS,
@@ -119,6 +123,7 @@ describe('MetricsGrid', () => {
     services,
     actions,
     isTabSelected: true,
+    isComponentVisible: true,
   };
 
   const renderMetricsGrid = (props: Partial<MetricsGridProps> = {}) => {
@@ -368,8 +373,8 @@ describe('MetricsGrid', () => {
     );
   });
 
-  // Regression coverage for issue #262360: the user-typed source must be threaded
-  // from `fetchParams.query` through `MetricsGrid` into `createESQLQuery` as
+  // Regression coverage for issue #262360: the user-typed source, computed once
+  // by the parent and passed as `userSource`, must reach `createESQLQuery` as
   // `originalSource`, so backing-index queries stay at the same scope METRICS_INFO
   // scanned (avoiding cross-backing-index field-type conflicts being re-introduced
   // when the chart query widens back to the parent data stream).
@@ -398,7 +403,7 @@ describe('MetricsGrid', () => {
     });
 
     it('forwards the user-typed backing index as originalSource', () => {
-      renderMetricsGrid({ fetchParams: backingIndexFetchParams });
+      renderMetricsGrid({ fetchParams: backingIndexFetchParams, userSource: backingIndex });
 
       expect(createESQLQuery).toHaveBeenCalledWith(
         expect.objectContaining({ originalSource: backingIndex })
@@ -406,7 +411,10 @@ describe('MetricsGrid', () => {
     });
 
     it('forwards the user-typed data stream as originalSource', () => {
-      renderMetricsGrid({ fetchParams: sourceFetchParams });
+      renderMetricsGrid({
+        fetchParams: sourceFetchParams,
+        userSource: 'edge-case-gauge-to-counter',
+      });
 
       expect(createESQLQuery).toHaveBeenCalledWith(
         expect.objectContaining({ originalSource: 'edge-case-gauge-to-counter' })
@@ -414,7 +422,7 @@ describe('MetricsGrid', () => {
     });
 
     it('forwards the raw glob pattern as originalSource (createESQLQuery falls back to indexName)', () => {
-      renderMetricsGrid({ fetchParams: globFetchParams });
+      renderMetricsGrid({ fetchParams: globFetchParams, userSource: 'edge-case-*' });
 
       expect(createESQLQuery).toHaveBeenCalledWith(
         expect.objectContaining({ originalSource: 'edge-case-*' })
@@ -616,9 +624,9 @@ describe('MetricsGrid', () => {
     });
   });
 
-  describe('flyout dismissal before opening', () => {
-    it('should open the insights flyout through the other flyouts being dismissed first', () => {
-      renderMetricsGrid();
+  describe('flyout dismissal on open', () => {
+    it('dismisses the other flyouts when View details opens the insights flyout', () => {
+      const { queryByTestId } = renderMetricsGrid();
 
       // Get the onViewDetails callback passed to the first Chart
       const chartCalls = (Chart as jest.Mock).mock.calls;
@@ -627,29 +635,20 @@ describe('MetricsGrid', () => {
       const firstChartProps = chartCalls[0][0];
       expect(firstChartProps.onViewDetails).toBeDefined();
 
-      (openAfterDismissingOtherFlyouts as jest.Mock).mockClear();
+      (dismissAllFlyoutsExceptFor as jest.Mock).mockClear();
 
       // Trigger the onViewDetails callback
       act(() => {
         firstChartProps.onViewDetails();
       });
 
-      // The flyout must only be opened by the sequencing helper, so it never mounts while
-      // another push flyout still owns the shared offset.
-      expect(openAfterDismissingOtherFlyouts).toHaveBeenCalledTimes(1);
-      expect(openAfterDismissingOtherFlyouts).toHaveBeenCalledWith(
-        'metricInsights',
-        expect.any(Function)
-      );
+      expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledTimes(1);
+      expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledWith('metricInsights');
+      expect(queryByTestId('metricsExperienceFlyout')).toBeInTheDocument();
     });
 
-    it('keeps a restored flyout unmounted until the other flyouts have been dismissed', () => {
-      let openFlyout: (() => void) | undefined;
-      (openAfterDismissingOtherFlyouts as jest.Mock).mockImplementationOnce(
-        (_flyout: string, open: () => void) => {
-          openFlyout = open;
-        }
-      );
+    it('dismisses the other flyouts when a tab restores its insights flyout', () => {
+      (dismissAllFlyoutsExceptFor as jest.Mock).mockClear();
 
       const initialFlyoutState: FlyoutState = {
         gridPosition: 1,
@@ -668,7 +667,8 @@ describe('MetricsGrid', () => {
         />
       );
 
-      expect(openAfterDismissingOtherFlyouts).not.toHaveBeenCalled();
+      expect(dismissAllFlyoutsExceptFor).not.toHaveBeenCalled();
+      expect(queryByTestId('metricsExperienceFlyout')).not.toBeInTheDocument();
 
       rerender(
         <MetricsGridWithRestorableState
@@ -680,14 +680,7 @@ describe('MetricsGrid', () => {
         />
       );
 
-      expect(openAfterDismissingOtherFlyouts).toHaveBeenCalledWith(
-        'metricInsights',
-        expect.any(Function)
-      );
-      expect(queryByTestId('metricsExperienceFlyout')).not.toBeInTheDocument();
-
-      act(() => openFlyout?.());
-
+      expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledWith('metricInsights');
       expect(queryByTestId('metricsExperienceFlyout')).toBeInTheDocument();
     });
   });

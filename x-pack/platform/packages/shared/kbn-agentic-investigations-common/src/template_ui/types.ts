@@ -32,6 +32,8 @@ export interface AssigneesSlotRenderProps {
    * reflects the server-confirmed state without waiting for the 5 s poll.
    */
   refetchConversation?: () => Promise<void>;
+  /** Size of the button icon. */
+  buttonIconSize?: 'xs' | 's';
 }
 
 /**
@@ -94,3 +96,16 @@ export interface LinkedInvestigationsSlotRenderProps {
 export type RenderLinkedInvestigations = (
   props: LinkedInvestigationsSlotRenderProps
 ) => React.ReactNode;
+
+/** Props passed to the `renderSyncIndicator` render prop. */
+export interface SyncIndicatorSlotRenderProps {
+  /** Escalation conversation id whose attachments are synced while the flyout is open. */
+  escalationId: string;
+}
+
+/**
+ * A render prop that the consuming plugin provides to render the sync indicator beside the
+ * escalation title (a spinner while syncing). It also owns the sync request and its toasts, so
+ * the shared package stays free of HTTP hooks. When absent, the header shows nothing there.
+ */
+export type RenderSyncIndicator = (props: SyncIndicatorSlotRenderProps) => React.ReactNode;

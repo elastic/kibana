@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { OBSERVABILITY_SPA_SHELL_TIMEOUT_MS, tags } from '@kbn/scout-oblt';
+import { OBSERVABILITY_SPA_SHELL_TIMEOUT_MS } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
+// Suite fails on MKI: https://github.com/elastic/kibana/issues/267191
 test.describe(
   'Serverless Observability Navigation - Complete tier body',
-  { tag: [...tags.serverless.observability.complete] },
+  { tag: ['@local-serverless-observability_complete'] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
@@ -120,11 +121,7 @@ test.describe(
       await test.step('Cases (via More menu)', async () => {
         await nav.openMoreMenu();
         await nav.navItemInMoreByDeepLinkId('observability-overview:cases').click();
-        // Cases list title: legacy header (`cases-all-title`) or the cases-redesign app
-        // header (`appHeaderTitle`); only one renders depending on the casesRedesign flag.
-        await expect(
-          page.testSubj.locator('cases-all-title').or(page.testSubj.locator('appHeaderTitle'))
-        ).toHaveText('Cases', {
+        await expect(page.testSubj.locator('appHeaderTitle')).toHaveText('Cases', {
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });

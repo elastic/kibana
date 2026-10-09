@@ -9,15 +9,7 @@ import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import {
-  isolateHostTool,
-  unisolateHostTool,
-  getEndpointStatusTool,
-  listEndpointsTool,
-  getRunningProcessesTool,
-  scanHostTool,
-  getResponseActionStatusTool,
-} from './tools';
+import { getEndpointStatusTool, listEndpointsTool, getResponseActionStatusTool } from './tools';
 import { ENDPOINT_RESPONSE_ACTIONS_REFERENCE } from './skill_reference';
 
 const ID = 'endpoint-response-actions';
@@ -26,47 +18,55 @@ const BASE_PATH = 'skills/security/endpoint';
 function toolName(name: string) {
   return `${ID}.${name}`;
 }
-export const ISOLATE_TOOL_ID = toolName('isolate_host');
-export const UNISOLATE_TOOL_ID = toolName('unisolate_host');
 export const GET_ENDPOINT_STATUS_TOOL_ID = toolName('get_endpoint_status');
 export const LIST_ENDPOINTS_TOOL_ID = toolName('list_endpoints');
-export const RUNNING_PROCESSES_TOOL_ID = toolName('running_processes');
-export const SCAN_TOOL_ID = toolName('scan');
 export const GET_RESPONSE_ACTION_STATUS_TOOL_ID = toolName('get_response_action_status');
 
 const SYSTEM_INSTRUCTIONS = `# Endpoint Response Actions Skill
 
 ## When to Use This Skill
 
-Use when the analyst wants to list endpoints, isolate or release a host, check
-host status, list running processes, scan a path for malware, or look up a prior
-response action by ID. Slice 1 only — do not attempt execute, kill-process,
-get-file, upload, runscript, or memory-dump.
+Use when the analyst wants to list enrolled endpoints, check the status of a
+host by hostname or agent ID (status, healthy, unhealthy, updating, offline,
+inactive, unenrolled; unknown when not yet reported — isolated or not), or look
+up a previously dispatched response action by its action ID. Not for diagnosing
+why a host is unhealthy, offline, or missing, or why an isolation or other
+response action failed — that routes to the elastic-defend-configuration-troubleshooting
+skill.
+
+This skill is **read-only**. It cannot isolate, release, scan, or otherwise
+change the state of an endpoint. If the analyst asks for a state-changing
+action (isolate, release/unisolate, scan, running processes, execute,
+kill-process, get-file, upload, runscript, memory-dump), say it is not
+available from chat and point them to the Response Actions UI — never
+improvise one with another tool.
 
 ## Process
 
+0. If the question asks WHY a host is unhealthy, offline, or missing, or WHY a response action (e.g. isolation) failed, stop: do not call this skill's tools; load elastic-defend-configuration-troubleshooting and follow it.
+
 1. **Route intent to the right tool**
    - list / available hosts → \`list_endpoints\`
-   - isolate / quarantine / contain → \`isolate_host\` (write, platform-confirmed)
-   - release / unisolate / reconnect → \`unisolate_host\` (write, platform-confirmed)
-   - status / is isolated → \`get_endpoint_status\`
-   - running processes → \`running_processes\`
-   - scan path → \`scan\` (write, platform-confirmed)
+   - status / is it isolated → \`get_endpoint_status\`
    - prior action status / action ID → \`get_response_action_status\`
 
-2. **Write tools** — call directly; Agent Builder shows the confirmation card.
-   Do not ask for chat confirmation first. If declined, report cancelled.
-
-3. **Report** — always include action ID, status, and output. For pending actions,
-   offer \`get_response_action_status\` follow-up. See \`./reference\` for error
-   codes and best practices.
+2. **Report** — include host identity and state, or the action ID, status, and
+   output. See \`./reference\` for error codes and best practices.
 
 ## Guardrails
 
-- Verify host with \`get_endpoint_status\` before isolate/release.
-- Never use \`platform.core.search\` for response action status.
-- Branch on typed tool errors (\`insufficient_privileges\`, \`endpoint_not_found\`,
-  \`action_not_found\`, \`unknown_error\`) — details in \`./reference\`.`;
+- For status and response action lookups, use the tools above instead of
+  \`platform.core.search\` or raw Elasticsearch queries. This does not restrict
+  diagnostic queries made by other loaded skills.
+- Never claim an endpoint was isolated, released, or scanned. This skill only
+  reads state.
+- Branch on the typed signals the tools return: a missing host or action is
+  \`found: false\` with \`reason: endpoint_not_found\` / \`reason: action_not_found\`
+  (and \`reason: ambiguous_hostname\` when several endpoints share the name);
+  \`error: invalid_argument\` means the request itself was out of range (narrow
+  filters instead of paging further), while \`error: insufficient_privileges\`
+  and \`error: unknown_error\` mean the lookup itself could not run. Details in
+  \`./reference\`.`;
 
 export const createEndpointResponseActionsSkill = (
   endpointAppContextService: EndpointAppContextService
@@ -76,7 +76,7 @@ export const createEndpointResponseActionsSkill = (
     name: NAME,
     basePath: BASE_PATH,
     description:
-      'Execute endpoint response actions (isolate, release, check status, list running processes, scan for malware, look up prior action status) from chat conversations. Resolves hostnames to endpoint identities and dispatches actions through the Elastic Defend Response Actions service. Write actions require analyst confirmation.',
+      'List enrolled Elastic Defend endpoints, check a host status by hostname or agent ID and its isolation state, and look up a previously dispatched response action by ID. Read-only — it does not isolate, release, or scan endpoints. For root-cause diagnosis of unhealthy hosts or failed actions, use elastic-defend-configuration-troubleshooting.',
     content: SYSTEM_INSTRUCTIONS,
     referencedContent: [
       {
@@ -87,11 +87,7 @@ export const createEndpointResponseActionsSkill = (
     ],
     getInlineTools: () => [
       listEndpointsTool(endpointAppContextService),
-      isolateHostTool(endpointAppContextService),
-      unisolateHostTool(endpointAppContextService),
       getEndpointStatusTool(endpointAppContextService),
-      getRunningProcessesTool(endpointAppContextService),
-      scanHostTool(endpointAppContextService),
       getResponseActionStatusTool(endpointAppContextService),
     ],
   });

@@ -18,7 +18,7 @@ const trelloId = (label: string) =>
       `Trello ${label} ID (24-character hex string, e.g. "5f8a1b2c3d4e5f6a7b8c9d0e"), as returned by listBoards, search, or another action.`
     );
 
-const cardPosition = z.union([z.enum(['top', 'bottom']), z.number().positive()]);
+const cardPosition = lazySchema(() => z.union([z.enum(['top', 'bottom']), z.number().positive()]));
 
 export const EmptyInputSchema = lazySchema(() => z.object({}));
 export type EmptyInput = z.infer<typeof EmptyInputSchema>;

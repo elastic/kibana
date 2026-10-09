@@ -38,6 +38,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const dashboardAddPanel = getService('dashboardAddPanel');
   const queryBar = getService('queryBar');
   const dataViews = getService('dataViews');
+  const monacoEditor = getService('monacoEditor');
 
   const { common, header, timePicker, dashboard, timeToVisualize, unifiedSearch, share, exports } =
     getPageObjects([
@@ -166,6 +167,39 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
     },
 
+    /**
+     * Selects a combobox option and waits for the choice to be committed to the Lens state,
+     * re-selecting when the option click never landed.
+     *
+     * @param testTargetId - the selector of the combobox, which must also carry `committedAttribute`
+     * @param committedAttribute - the attribute holding the committed option label
+     * @param name - the option label to select
+     */
+    async selectCommittedOptionFromComboBox(
+      testTargetId: string,
+      committedAttribute: string,
+      name: string
+    ) {
+      // EUI drops the option click under load, and the filter text setElement leaves behind makes
+      // the input read back as `name` either way. Match case-insensitively, as comboBox itself does.
+      const expected = name.trim().toLowerCase();
+      await retry.try(
+        async () => {
+          await this.selectOptionFromComboBox(testTargetId, name);
+          await retry.waitForWithTimeout(`[${name}] selection to commit`, 10_000, async () => {
+            const combo = await testSubjects.find(testTargetId);
+            const committed = (await combo.getAttribute(committedAttribute)) ?? '';
+            return committed.trim().toLowerCase() === expected;
+          });
+        },
+        {
+          description: `select [${name}] from [${testTargetId}]`,
+          timeout: 60_000,
+          onFailureBlock: async () => comboBox.clearInputField(testTargetId),
+        }
+      );
+    },
+
     async configureQueryAnnotation(opts: {
       queryString: string;
       timeField: string;
@@ -243,17 +277,28 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       const field = opts.field;
       if (field) {
-        await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
         // Close too early discards the operation→field transition. Do not wait on the
         // combobox input: setElement types `field` as a filter before the option is
         // clicked. data-selected-field is the committed option display name and
         // updates only after insertOrReplaceColumn. Independent of aria-invalid
         // (incompleteOperation / CCS). Compare exactly — labels are case-sensitive.
-        await retry.waitFor('field selection to commit', async () => {
-          const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
-          const committedLabel = (await fieldCombo.getAttribute('data-selected-field')) ?? '';
-          return committedLabel === field;
-        });
+        // Re-select on failure because EUI drops the option click under load, and the filter text
+        // setElement leaves behind makes both its own check and the input read back as `field`.
+        await retry.try(
+          async () => {
+            await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
+            await retry.waitForWithTimeout('field selection to commit', 10_000, async () => {
+              const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
+              const committedLabel = (await fieldCombo.getAttribute('data-selected-field')) ?? '';
+              return committedLabel === field;
+            });
+          },
+          {
+            description: `configureDimension - select field [${field}]`,
+            timeout: 60_000,
+            onFailureBlock: async () => comboBox.clearInputField('indexPattern-dimension-field'),
+          }
+        );
       }
 
       if (opts.formula) {
@@ -289,15 +334,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       isPreviousIncompatible?: boolean;
     }) {
       if (opts.operation) {
-        await this.selectOptionFromComboBox(
-          'indexPattern-subFunction-selection-row',
+        await this.selectCommittedOptionFromComboBox(
+          'indexPattern-subFunction-selection-row > indexPattern-reference-function',
+          'data-selected-function',
           opts.operation
         );
       }
 
       if (opts.field) {
-        await this.selectOptionFromComboBox(
-          'indexPattern-reference-field-selection-row',
+        await this.selectCommittedOptionFromComboBox(
+          'indexPattern-reference-field-selection-row > indexPattern-dimension-field',
+          'data-selected-field',
           opts.field
         );
       }
@@ -784,7 +831,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         `input[data-test-subj="${testSubj}"][type='number']`
       );
       await numericInput.click();
-      await numericInput.clearValue();
+      // These inputs are controlled by React state, so the clear has to arrive as real key events
+      await numericInput.clearValueWithKeyboard();
       return numericInput;
     },
 
@@ -946,9 +994,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       await find.clickByCssSelector('button[data-test-subj="style"]');
-      await retry.try(async () => {
-        await find.byCssSelector('#lnsDimensionContainerTitle');
-      });
+      await testSubjects.existOrFail('lnsStyleSettingsFlyout');
     },
 
     async openLegendSettingsFlyout() {
@@ -964,8 +1010,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (await this.hasLegendToolbarButton()) {
         const button = await find.byCssSelector('button[data-test-subj="legend"]');
         await button.click();
+        await testSubjects.existOrFail('lnsLegendSettingsFlyout');
       }
     },
+    /**
+     * Opens the layer settings flyout and waits for it to be present in the DOM.
+     */
+    async openLayerSettings() {
+      await testSubjects.click('lnsLayerSettings');
+      await testSubjects.existOrFail('lnsLayerSettingsFlyout');
+    },
+
     async closeFlyoutWithBackButton() {
       await retry.try(async () => {
         if (await testSubjects.exists('lns-indexPattern-dimensionContainerBack')) {
@@ -1597,6 +1652,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return findService.allByCssSelector('[data-test-subj="mtrVis"] .echChart li');
     },
 
+    /**
+     * Number of columns the rendered metric grid is laid out with, which reflects the
+     * "Layout columns" (`maxCols`) setting once it has been committed to the Lens state.
+     */
+    async getMetricGridColumnCount() {
+      const grid = await findService.byCssSelector('[data-test-subj="mtrVis"] .echMetricContainer');
+      const columns = await grid.getComputedStyle('grid-template-columns');
+      return columns.trim().split(/\s+/).length;
+    },
+
     async getMetricElementIfExists(
       selector: string,
       container: WebElementWrapper,
@@ -2040,13 +2105,27 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async typeFormula(formula: string) {
-      await find.byCssSelector('.monaco-editor');
-      await find.clickByCssSelectorWhenNotDisabledWithoutRetry('.monaco-editor');
-      const input = await find.activeElement();
-      await input.clearValueWithKeyboard({ charByChar: true });
-      await input.type(formula);
+      await monacoEditor.setCodeEditorValueByCssSelector(
+        '[data-test-subj="lnsFormulaEditor"]',
+        formula
+      );
       // Debounce time for formula
       await common.sleep(300);
+    },
+
+    /**
+     * Simulate typing text in the formula editor (triggers Monaco's type command).
+     */
+    async simulateTypingInFormula(text: string) {
+      await monacoEditor.simulateTyping('lnsFormulaEditor', text);
+      await common.sleep(100);
+    },
+
+    /**
+     * Simulate pressing a key in the formula editor.
+     */
+    async simulateKeyInFormula(key: string) {
+      await this.simulateTypingInFormula(key);
     },
 
     async expectFormulaText(formula: string) {

@@ -76,7 +76,8 @@
     "xpack.ingestPipelines": "platform/plugins/shared/ingest_pipelines",
     "xpack.inference": "platform/plugins/shared/inference",
     "xpack.inferenceWorkflows": "platform/plugins/shared/inference_workflows",
-    "xpack.investigationOutput": "platform/packages/shared/kbn-investigation-output",
+    "xpack.investigationOutput": "solutions/observability/packages/kbn-investigation-output",
+    "xpack.isomer": "platform/packages/shared/isomer",
     "xpack.inventory": "solutions/observability/plugins/inventory",
     "xpack.kubernetesSecurity": "solutions/security/plugins/kubernetes_security",
     "xpack.lens": [
@@ -140,8 +141,6 @@
     "xpack.searchGettingStarted": "solutions/search/plugins/search_getting_started",
     "xpack.searchHomepage": "solutions/search/plugins/search_homepage",
     "xpack.searchNavigation": "solutions/search/plugins/search_navigation",
-    "xpack.searchNotebooks": "solutions/search/plugins/search_notebooks",
-    "xpack.searchPlayground": "solutions/search/plugins/search_playground",
     "xpack.searchInferenceEndpoints": "platform/plugins/shared/search_inference_endpoints",
     "xpack.searchAssistant": "solutions/search/plugins/search_assistant",
     "xpack.searchProfiler": "platform/plugins/shared/searchprofiler",
