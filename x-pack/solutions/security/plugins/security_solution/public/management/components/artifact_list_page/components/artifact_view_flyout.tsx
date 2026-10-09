@@ -26,6 +26,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -110,6 +111,8 @@ interface ArtifactViewFlyoutBaseProps {
   apiClient: ExceptionsListApiClient;
   /** Id of the artifact to load. The list page only opens this flyout when the URL has one. */
   itemId: string;
+  /** Matches the create/edit flyout size for the same artifact page. */
+  size?: EuiFlyoutSize;
   /** Any label overrides */
   labels?: Partial<ArtifactViewFlyoutLabels>;
   /** Renders the artifact-specific definition. Receives the full artifact item. */
@@ -145,6 +148,7 @@ export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
   ({
     apiClient,
     itemId,
+    size,
     labels: _labels,
     ViewModeComponent,
     showEnabledSwitch = false,
@@ -210,6 +214,7 @@ export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
                 defaultMessage: 'Artifact details',
               })
         }
+        size={size}
         maskProps={maskProps}
       >
         <EuiFlyoutHeader hasBorder>
