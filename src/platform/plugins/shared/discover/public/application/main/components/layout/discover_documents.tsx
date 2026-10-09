@@ -36,7 +36,6 @@ import type {
 import {
   DataLoadingState,
   useColumns,
-  type DataTableColumnsMeta,
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
   getRowHeight,
@@ -71,7 +70,6 @@ import {
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { showTimeFieldColumn } from '../../../../utils/show_time_field_column';
-import { columnsToColumnsMeta } from '../../../../utils/columns_to_columns_meta';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type {
   CellRenderersExtensionParams,
@@ -330,13 +328,6 @@ function DiscoverDocumentsComponent({
     [uiSettings, query]
   );
 
-  const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
-    () =>
-      currentDataSource.kind === 'esql'
-        ? columnsToColumnsMeta(currentDataSource.getColumns())
-        : undefined,
-    [currentDataSource]
-  );
   const filters = useCurrentTabSelector(selectTabCombinedFilters);
 
   const cellActionsMetadata = useAdditionalCellActions({
@@ -503,11 +494,12 @@ function DiscoverDocumentsComponent({
   const latestCascadedDocumentsDataGridsUiState = useLatest(
     useCurrentTabSelector((tab) => tab.uiState.cascadedDocumentsDataGridMap)
   );
-  const {
-    availableCascadeGroups,
-    selectedCascadeGroups,
-    columnsMeta: cascadedColumnsMeta,
-  } = useCurrentTabSelector((tab) => tab.cascadedDocumentsState);
+  const cascadedLeafDataSource = useCurrentTabRuntimeState(
+    (runtimeState) => runtimeState.cascadedLeafDataSource$
+  );
+  const { availableCascadeGroups, selectedCascadeGroups } = useCurrentTabSelector(
+    (tab) => tab.cascadedDocumentsState
+  );
   const setSelectedCascadeGroups = useCurrentTabAction(
     internalStateActions.setSelectedCascadeGroups
   );
@@ -527,7 +519,7 @@ function DiscoverDocumentsComponent({
       cascadedDocumentsFetcher,
       availableCascadeGroups,
       selectedCascadeGroups,
-      cascadedColumnsMeta,
+      cascadedLeafDataSource,
       esqlQuery: query,
       esqlVariables,
       timeRange: requestParams.timeRangeAbsolute,
@@ -552,7 +544,7 @@ function DiscoverDocumentsComponent({
   }, [
     availableCascadeGroups,
     cascadedDocumentsFetcher,
-    cascadedColumnsMeta,
+    cascadedLeafDataSource,
     dispatch,
     esqlVariables,
     expandedDoc$,
@@ -602,7 +594,6 @@ function DiscoverDocumentsComponent({
             ariaLabelledBy="documentsAriaLabel"
             cascadedDocumentsContext={cascadedDocumentsContext}
             columns={currentColumns}
-            columnsMeta={columnsMeta}
             expandedDoc={expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER ? expandedDoc : undefined}
             dataView={dataView}
             dataSource={currentDataSource}
@@ -630,7 +621,6 @@ function DiscoverDocumentsComponent({
             rowHeightState={rowHeight}
             onUpdateRowHeight={onUpdateRowHeight}
             isSortEnabled={true}
-            isPlainRecord={isEsqlMode}
             isPaginationEnabled={!isEsqlMode}
             rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
             onUpdateRowsPerPage={onUpdateRowsPerPage}

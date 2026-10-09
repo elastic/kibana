@@ -8,7 +8,11 @@
 import type React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { RenderAssignees, RenderStatus } from '@kbn/agentic-investigations-common';
+import type {
+  FlyoutGroupedAttachmentsRegistry,
+  RenderAssignees,
+  RenderStatus,
+} from '@kbn/agentic-investigations-common';
 import type { AgenticInvestigationsPublicStartDependencies } from '../../types';
 
 export type TemplateStartDependencies = AgenticInvestigationsPublicStartDependencies & {
@@ -35,6 +39,7 @@ export interface TemplateRegistrationContext {
   /** When false, no template offers escalation actions. */
   escalationsEnabled: boolean;
   makeLazyWithProviders: MakeLazyWithProviders;
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   renderAssignees: RenderAssignees;
   renderStatus: RenderStatus;
 }

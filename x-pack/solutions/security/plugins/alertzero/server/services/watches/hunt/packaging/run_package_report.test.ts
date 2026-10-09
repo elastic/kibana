@@ -158,6 +158,7 @@ const deps = (overrides: Partial<RunPackageReportDeps> = {}): RunPackageReportDe
   resolveHostEnrollment: async () => ({ enrolled: true, agentId: 'agent-1' }),
   rehydrateProcessSelectors: async () => [],
   countExistingProposals: async () => 0,
+  hasOpenProposal: async () => false,
   ...overrides,
 });
 
@@ -172,6 +173,7 @@ describe('runPackageReport', () => {
         huntStatus: 'success',
         hasConfirmedHit: true,
         attachments: [sseAttachment({ hit: true, hostName: 'h1' })],
+        expectedSseCount: 1,
         deps: deps(),
       })
     ).rejects.toBeInstanceOf(PackageReportIdentityError);
@@ -188,6 +190,7 @@ describe('runPackageReport', () => {
       huntStatus: 'success',
       hasConfirmedHit: false,
       attachments: [],
+      expectedSseCount: 0,
       deps: deps(),
     });
 
@@ -220,6 +223,7 @@ describe('runPackageReport', () => {
         huntStatus,
         hasConfirmedHit: false,
         attachments: [],
+        expectedSseCount: 0,
         deps: deps(),
       });
 
@@ -241,12 +245,55 @@ describe('runPackageReport', () => {
       huntStatus: 'success',
       hasConfirmedHit: true,
       attachments: [],
+      expectedSseCount: 1,
       deps: deps(),
     });
     expect(result).toEqual({
       status: 'run_incomplete',
       reason: expect.stringContaining(runId),
     });
+  });
+
+  // `attach_sse`'s foreach swallows a per-item attach failure with `continue`, so a shortfall
+  // leaves a non-empty but incomplete current-run state -- the gap the all-missing case above
+  // cannot see. This must not package off the findings that did land; the dropped one would
+  // never get a proposal or a retry.
+  it('returns run_incomplete when fewer current-run SSEs are found than the hunt prepared', async () => {
+    const result = await runPackageReport({
+      spaceId: 'default',
+      reportId,
+      investigationConversationId: conversationId,
+      runId,
+      huntStatus: 'success',
+      hasConfirmedHit: true,
+      attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+      expectedSseCount: 2,
+      deps: deps(),
+    });
+    expect(result).toEqual({
+      status: 'run_incomplete',
+      reason: expect.stringContaining('1'),
+    });
+  });
+
+  // An already-installed Worker that has not yet picked up the call site supplying this field
+  // (its `yamlTemplate` hash does not cover the imported YAML it renders, so it only updates
+  // once its own `version` bumps) must not have its packaging calls start erroring just because
+  // this step's schema grew a field it does not send -- that would turn a staleness gap into an
+  // outage. Omitting the field has to behave exactly as it did before this check existed.
+  it('skips the shortfall check when expectedSseCount is omitted', async () => {
+    const result = await runPackageReport({
+      spaceId: 'default',
+      reportId,
+      investigationConversationId: conversationId,
+      runId,
+      huntStatus: 'success',
+      hasConfirmedHit: true,
+      attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+      expectedSseCount: undefined,
+      deps: deps(),
+    });
+    expect(result.status).toBe('packaged');
   });
 
   it('packages a clean run: dismiss, coverage written, no proposals', async () => {
@@ -258,6 +305,7 @@ describe('runPackageReport', () => {
       huntStatus: 'success',
       hasConfirmedHit: false,
       attachments: [sseAttachment({ hit: false })],
+      expectedSseCount: 1,
       deps: deps(),
     });
     expect(result.status).toBe('packaged');
@@ -279,6 +327,7 @@ describe('runPackageReport', () => {
       huntStatus: 'success',
       hasConfirmedHit: true,
       attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+      expectedSseCount: 1,
       deps: deps(),
     });
     expect(result.status).toBe('packaged');
@@ -301,6 +350,7 @@ describe('runPackageReport', () => {
       huntStatus: 'success',
       hasConfirmedHit: true,
       attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+      expectedSseCount: 1,
       deps: deps({ resolveHostEnrollment: async () => ({ enrolled: false }) }),
     });
     expect(result.status).toBe('packaged');
@@ -323,6 +373,7 @@ describe('runPackageReport', () => {
       huntStatus: 'success',
       hasConfirmedHit: true,
       attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+      expectedSseCount: 1,
       deps: deps({
         listRespondActions: async () => ({ ok: true, actions: [killProcess, suspendProcess] }),
         rehydrateProcessSelectors: async () => [
@@ -351,6 +402,85 @@ describe('runPackageReport', () => {
     }
   });
 
+  describe('open-Proposal dismiss guard', () => {
+    const cleanRun = (hasOpenProposal: RunPackageReportDeps['hasOpenProposal']) =>
+      runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus: 'success',
+        hasConfirmedHit: false,
+        attachments: [],
+        expectedSseCount: 0,
+        deps: deps({ hasOpenProposal }),
+      });
+
+    it('dismisses a clean run when no Proposal is open', async () => {
+      const result = await cleanRun(async () => false);
+      expect(result.status === 'packaged' && result.dismiss).toBe(true);
+      expect(result.status === 'packaged' && result.dismissHold).toBe('none');
+    });
+
+    it('holds a clean run open when a Proposal is still pending or executing', async () => {
+      const result = await cleanRun(async () => true);
+      expect(result.status).toBe('packaged');
+      if (result.status !== 'packaged') {
+        return;
+      }
+      expect(result.dismiss).toBe(false);
+      expect(result.dismissHold).toBe('open_proposal');
+      // The step output must not claim a closure that did not happen.
+      expect(result.closureSummary).not.toContain('Closing');
+      expect(result.closureSummary).toContain('Leaving the Investigation open');
+      expect(result.proposals).toEqual([]);
+      expect(result.expectedProposalCount).toBe(0);
+      // Coverage is still recorded: the hunt did look.
+      expect(result.coverage.written.length).toBeGreaterThan(0);
+    });
+
+    it('fails closed when the open-Proposal lookup throws', async () => {
+      const result = await cleanRun(async () => {
+        throw new Error('boom');
+      });
+      expect(result.status === 'packaged' && result.dismiss).toBe(false);
+      expect(result.status === 'packaged' && result.dismissHold).toBe('check_failed');
+    });
+
+    it('holds the decided clean-with-SSE dismissal too', async () => {
+      const result = await runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus: 'success',
+        hasConfirmedHit: false,
+        attachments: [sseAttachment({ hit: false })],
+        expectedSseCount: 1,
+        deps: deps({ hasOpenProposal: async () => true }),
+      });
+      expect(result.status === 'packaged' && result.dismiss).toBe(false);
+      expect(result.status === 'packaged' && result.dismissHold).toBe('open_proposal');
+    });
+
+    it('does not look up open Proposals for a run that is not a dismissal', async () => {
+      const hasOpenProposal = jest.fn().mockResolvedValue(true);
+      const result = await runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus: 'success',
+        hasConfirmedHit: true,
+        attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+        expectedSseCount: 1,
+        deps: deps({ hasOpenProposal }),
+      });
+      expect(hasOpenProposal).not.toHaveBeenCalled();
+      expect(result.status === 'packaged' && result.dismissHold).toBe('none');
+    });
+  });
+
   // Phase 1 of the Proposals-side dedup Sergi/Astra raised: a rerun that lands back on an
   // Investigation that already has a Proposal (any status, including settled) must not mint a
   // second, independent chain for what may be the same finding.
@@ -364,6 +494,7 @@ describe('runPackageReport', () => {
         huntStatus: 'success',
         hasConfirmedHit: true,
         attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+        expectedSseCount: 1,
         deps: deps({ countExistingProposals: async () => 1 }),
       });
       expect(result.status).toBe('packaged');
@@ -389,6 +520,7 @@ describe('runPackageReport', () => {
         huntStatus: 'success',
         hasConfirmedHit: true,
         attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+        expectedSseCount: 1,
         deps: deps({
           countExistingProposals: async () => {
             throw new Error('proposals index unavailable');
@@ -415,6 +547,7 @@ describe('runPackageReport', () => {
         huntStatus: 'success',
         hasConfirmedHit: false,
         attachments: [sseAttachment({ hit: false })],
+        expectedSseCount: 1,
         deps: deps({ countExistingProposals }),
       });
       expect(result.status).toBe('packaged');
@@ -439,6 +572,7 @@ describe('runPackageReport', () => {
         huntStatus: 'success',
         hasConfirmedHit: true,
         attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+        expectedSseCount: 1,
         deps: deps({ countExistingProposals: async () => 4 }),
       });
       expect(result.status).toBe('packaged');
