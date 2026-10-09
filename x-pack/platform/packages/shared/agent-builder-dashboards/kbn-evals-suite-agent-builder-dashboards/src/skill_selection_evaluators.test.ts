@@ -6,6 +6,7 @@
  */
 
 import type { DashboardAgentTaskOutput } from './types';
+import { dashboardRoutingEvaluator } from './evaluators/dashboard_routing';
 import {
   dashboardSkillActivatedEvaluator,
   dashboardSkillNotActivatedEvaluator,
@@ -41,12 +42,67 @@ describe('skill selection evaluators', () => {
       },
       {
         type: 'tool_call',
+        tool_id: 'read_file',
+        params: { path: '/skills/platform/dashboard/dashboards/enhance.md' },
+      },
+      {
+        type: 'tool_call',
         tool_id: 'platform.dashboard.generate_dashboard',
       },
     ]);
 
-    expect(getSkillReadPaths(output)).toEqual(['skills/platform/dashboard/dashboards']);
-    expect(getToolIds(output)).toEqual(['filestore.read', 'platform.dashboard.generate_dashboard']);
+    expect(getSkillReadPaths(output)).toEqual([
+      'skills/platform/dashboard/dashboards',
+      '/skills/platform/dashboard/dashboards/enhance.md',
+    ]);
+    expect(getToolIds(output)).toEqual([
+      'filestore.read',
+      'read_file',
+      'platform.dashboard.generate_dashboard',
+    ]);
+  });
+
+  it('requires enhance examples to read the enhance file', async () => {
+    const enhance = { mode: 'appearance' as const, asksMode: false, defects: [] };
+    const skillOnly = createOutput([
+      {
+        type: 'tool_call',
+        tool_id: 'read_file',
+        params: { path: '/skills/platform/dashboard/dashboards/SKILL.md' },
+      },
+    ]);
+    const withEnhanceFile = createOutput([
+      {
+        type: 'tool_call',
+        tool_id: 'read_file',
+        params: { path: '/skills/platform/dashboard/dashboards/enhance.md' },
+      },
+    ]);
+
+    const missed = await dashboardRoutingEvaluator.evaluate({
+      input: { question: 'Enhance this dashboard' },
+      expected: { route: 'dashboard', enhance },
+      metadata: undefined,
+      output: skillOnly,
+    });
+    expect(missed.score).toBe(0);
+    expect(missed.explanation).toContain('dashboards/enhance.md');
+
+    const read = await dashboardRoutingEvaluator.evaluate({
+      input: { question: 'Enhance this dashboard' },
+      expected: { route: 'dashboard', enhance },
+      metadata: undefined,
+      output: withEnhanceFile,
+    });
+    expect(read.score).toBe(1);
+
+    const creation = await dashboardRoutingEvaluator.evaluate({
+      input: { question: 'Create a dashboard' },
+      expected: { route: 'dashboard' },
+      metadata: undefined,
+      output: skillOnly,
+    });
+    expect(creation.score).toBe(1);
   });
 
   it('passes when dashboard skill is loaded for dashboard requests', async () => {
