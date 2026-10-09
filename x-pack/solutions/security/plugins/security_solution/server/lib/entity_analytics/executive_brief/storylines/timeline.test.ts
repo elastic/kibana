@@ -7,10 +7,16 @@
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { MAX_STORYLINE_EVENTS } from '../../../../../common/entity_analytics/executive_brief/constants';
-import type { BriefTimeRange } from '../../../../../common/entity_analytics/executive_brief/types';
+import type {
+  BriefTimeRange,
+  StoryEdgeType,
+} from '../../../../../common/entity_analytics/executive_brief/types';
 import { buildEntityRefs } from './alert_queries';
 import {
   buildDraftEvents,
+  dedupeEvents,
+  dedupeRelationshipFirstSeen,
+  dedupeRiskJumps,
   detectRiskJumps,
   fetchFirstAlertsPerTactic,
   fetchRelationshipFirstSeen,
@@ -260,6 +266,201 @@ describe('event building', () => {
   it('returns nothing for empty input', () => {
     expect(buildDraftEvents(emptyInput())).toEqual([]);
     expect(orderAndCapEvents([])).toEqual({ events: [], truncated: 0 });
+  });
+});
+
+describe('event deduplication', () => {
+  const draftRelationship = (
+    edgeType: StoryEdgeType,
+    at: string,
+    from: string = 'user:a',
+    to: string = 'host:b',
+    summary?: string
+  ): DraftEvent => ({
+    type: 'relationship_first_seen' as const,
+    at,
+    entityEuids: [from, to],
+    summary:
+      summary ||
+      `New relationship: ${from.split(':')[1]} ${
+        edgeType === 'accesses_infrequently' ? 'logged on to (rarely)' : 'regularly logs on to'
+      } ${to.split(':')[1]} (first observed on or around ${at.slice(0, 10)})`,
+    sourceEvidenceIds: [],
+    edge: {
+      type: edgeType,
+      from,
+      to,
+    },
+  });
+
+  const draftRiskJump = (
+    entityEuid: string,
+    at: string,
+    from: number,
+    to: number,
+    name: string = 'entity'
+  ): DraftEvent => ({
+    type: 'risk_jump' as const,
+    at,
+    entityEuids: [entityEuid],
+    summary: `${name} risk ${from} → ${to} (Moderate)`,
+    sourceEvidenceIds: ['ENT-1'],
+  });
+
+  describe('relationship first-seen deduplication', () => {
+    it('leaves single relationship events unchanged', () => {
+      const events = [draftRelationship('accesses_infrequently', day(-1), 'user:a', 'host:b')];
+      expect(dedupeRelationshipFirstSeen(events)).toEqual(events);
+    });
+
+    it('leaves relationships on different days unchanged', () => {
+      const event1 = draftRelationship('accesses_infrequently', day(-2), 'user:a', 'host:b');
+      const event2 = draftRelationship('accesses_infrequently', day(-1), 'user:a', 'host:b');
+      const events = [event1, event2];
+      const result = dedupeRelationshipFirstSeen(events);
+      expect(result).toHaveLength(2);
+    });
+
+    it('merges duplicate relationships on the same day with strongest verb', () => {
+      const event1 = draftRelationship('accesses_infrequently', day(-1), 'user:a', 'host:b');
+      const event2 = draftRelationship('accesses_frequently', day(-1), 'user:a', 'host:b');
+      const events = [event1, event2];
+      const result = dedupeRelationshipFirstSeen(events);
+      expect(result).toHaveLength(1);
+      // accesses_infrequently has weight 0.6 > accesses_frequently 0.3
+      // For access relationships, we use "First-ever logon" format
+      expect(result[0].summary).toMatch(/^First-ever logon: a → b$/);
+    });
+
+    it('uses "First-ever logon" summary for access relationships', () => {
+      const event1 = draftRelationship('accesses_infrequently', day(-1), 'user:a', 'host:b');
+      const event2 = draftRelationship('accesses_frequently', day(-1), 'user:a', 'host:b');
+      const events = [event1, event2];
+      const result = dedupeRelationshipFirstSeen(events);
+      expect(result[0].summary).toMatch(/^First-ever logon: a → b$/);
+    });
+
+    it('uses "New relationship" summary for non-access relationships', () => {
+      const event1 = draftRelationship('owns', day(-1), 'user:a', 'host:b');
+      const event2 = draftRelationship('owns', day(-1), 'user:a', 'host:b');
+      const events = [event1, event2];
+      const result = dedupeRelationshipFirstSeen(events);
+      expect(result[0].summary).toMatch(/^New relationship: a owns b$/);
+    });
+
+    it('handles unordered pair (a,b) and (b,a) the same', () => {
+      const event1 = draftRelationship('accesses_infrequently', day(-1), 'user:a', 'host:b');
+      const event2 = draftRelationship('accesses_frequently', day(-1), 'host:b', 'user:a');
+      const events = [event1, event2];
+      const result = dedupeRelationshipFirstSeen(events);
+      expect(result).toHaveLength(1);
+    });
+
+    it('unions source evidence ids from merged events', () => {
+      const event1: DraftEvent = {
+        type: 'relationship_first_seen',
+        at: day(-1),
+        entityEuids: ['user:a', 'host:b'],
+        summary: 'test',
+        sourceEvidenceIds: ['RULE-1', 'RULE-2'],
+        edge: { type: 'accesses_infrequently', from: 'user:a', to: 'host:b' },
+      };
+      const event2: DraftEvent = {
+        type: 'relationship_first_seen',
+        at: day(-1),
+        entityEuids: ['user:a', 'host:b'],
+        summary: 'test',
+        sourceEvidenceIds: ['RULE-2', 'RULE-3'],
+        edge: { type: 'accesses_frequently', from: 'user:a', to: 'host:b' },
+      };
+      const events = [event1, event2];
+      const result = dedupeRelationshipFirstSeen(events);
+      expect(result[0].sourceEvidenceIds).toHaveLength(3);
+      expect(result[0].sourceEvidenceIds).toContain('RULE-1');
+      expect(result[0].sourceEvidenceIds).toContain('RULE-2');
+      expect(result[0].sourceEvidenceIds).toContain('RULE-3');
+    });
+
+    it('preserves non-relationship events', () => {
+      const relationshipEvent = draftRelationship(
+        'accesses_infrequently',
+        day(-1),
+        'user:a',
+        'host:b'
+      );
+      const otherEvent: DraftEvent = {
+        type: 'alert_first',
+        at: day(-2),
+        entityEuids: [],
+        summary: 'First alert',
+        sourceEvidenceIds: [],
+      };
+      const events = [otherEvent, relationshipEvent];
+      const result = dedupeRelationshipFirstSeen(events);
+      expect(result).toHaveLength(2);
+      expect(result.some((e) => e.type === 'alert_first')).toBe(true);
+    });
+  });
+
+  describe('risk jump deduplication', () => {
+    it('leaves single risk jump events unchanged', () => {
+      const events = [draftRiskJump('user:a', day(-1), 10, 50)];
+      expect(dedupeRiskJumps(events)).toEqual(events);
+    });
+
+    it('keeps the largest rise per entity', () => {
+      const event1 = draftRiskJump('user:a', day(-2), 10, 50, 'a'); // rise: 40
+      const event2 = draftRiskJump('user:a', day(-1), 60, 65, 'a'); // rise: 5
+      const events = [event1, event2];
+      const result = dedupeRiskJumps(events);
+      expect(result).toHaveLength(1);
+      expect(result[0].at).toBe(day(-2));
+      expect(result[0].summary).toContain('10 → 50');
+    });
+
+    it('breaks ties by earliest timestamp', () => {
+      const event1 = draftRiskJump('user:a', day(-2), 10, 50, 'a'); // rise: 40
+      const event2 = draftRiskJump('user:a', day(-1), 60, 100, 'a'); // rise: 40 (tie)
+      const events = [event1, event2];
+      const result = dedupeRiskJumps(events);
+      expect(result).toHaveLength(1);
+      expect(result[0].at).toBe(day(-2)); // earlier one wins
+    });
+
+    it('keeps separate jumps for different entities', () => {
+      const event1 = draftRiskJump('user:a', day(-1), 10, 50, 'a');
+      const event2 = draftRiskJump('host:b', day(-1), 20, 60, 'b');
+      const events = [event1, event2];
+      const result = dedupeRiskJumps(events);
+      expect(result).toHaveLength(2);
+    });
+
+    it('preserves non-risk-jump events', () => {
+      const riskEvent = draftRiskJump('user:a', day(-1), 10, 50);
+      const otherEvent: DraftEvent = {
+        type: 'alert_first',
+        at: day(-2),
+        entityEuids: [],
+        summary: 'First alert',
+        sourceEvidenceIds: [],
+      };
+      const events = [riskEvent, otherEvent];
+      const result = dedupeRiskJumps(events);
+      expect(result).toHaveLength(2);
+      expect(result.some((e) => e.type === 'alert_first')).toBe(true);
+    });
+  });
+
+  describe('combined deduplication', () => {
+    it('applies both relationship and risk jump deduplication', () => {
+      const rel1 = draftRelationship('accesses_infrequently', day(-1), 'user:a', 'host:b');
+      const rel2 = draftRelationship('accesses_frequently', day(-1), 'user:a', 'host:b');
+      const risk1 = draftRiskJump('user:a', day(-2), 10, 50, 'a');
+      const risk2 = draftRiskJump('user:a', day(-1), 60, 65, 'a');
+      const events = [rel1, rel2, risk1, risk2];
+      const result = dedupeEvents(events);
+      expect(result).toHaveLength(2); // 1 merged relationship + 1 kept risk jump
+    });
   });
 });
 

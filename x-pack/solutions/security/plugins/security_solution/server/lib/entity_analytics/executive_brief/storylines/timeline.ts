@@ -645,3 +645,167 @@ export const fetchRelationshipFirstSeen = async ({
 
 export const relationshipKey = (request: RelationshipFirstSeenQuery): string =>
   `${request.kind}|${request.actorEuids[0]}|${request.targetEuids[0]}`;
+
+// ---------------------------------------------------------------------------------------------
+// Timeline event deduplication (pure)
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * Unordered pair key: ensures (a, b) and (b, a) are treated as the same pair.
+ * Used for relationship_first_seen merging.
+ */
+const unorderedPairKey = (a: string, b: string): string => {
+  const sorted = [a, b].sort(compare);
+  return `${sorted[0]}|${sorted[1]}`;
+};
+
+/**
+ * Day from ISO timestamp (e.g., "2026-10-05T23:00:00.000Z" → "2026-10-05").
+ */
+const dayFromTimestamp = (timestamp: string): string => timestamp.slice(0, 10);
+
+/**
+ * Merges relationship_first_seen events for the same unordered entity pair within the same day.
+ * When multiple events exist for the same pair on the same day:
+ * - Uses the strongest relationship kind by weight from STORY_EDGE_CONFIG
+ * - For access relationships (accesses_infrequently, accesses_frequently): "First-ever logon: <from> → <to>"
+ * - Otherwise: "New relationship: <from> <verb> <to>"
+ * - Unions sourceEvidenceIds (if present)
+ */
+export const dedupeRelationshipFirstSeen = (events: DraftEvent[]): DraftEvent[] => {
+  const relationshipEvents = events.filter(
+    (e): e is DraftEvent & { edge: NonNullable<DraftEvent['edge']> } =>
+      e.type === 'relationship_first_seen' && e.edge !== undefined
+  );
+  const otherEvents = events.filter((e) => e.type !== 'relationship_first_seen');
+
+  if (relationshipEvents.length === 0) {
+    return events;
+  }
+
+  // Group by (day, unordered pair)
+  const groups = new Map<string, Array<DraftEvent & { edge: NonNullable<DraftEvent['edge']> }>>();
+  for (const event of relationshipEvents) {
+    const [a, b] = [event.edge.from, event.edge.to].sort(compare);
+    const day = dayFromTimestamp(event.at);
+    const key = `${day}|${unorderedPairKey(a, b)}`;
+    const existing = groups.get(key);
+    if (existing) {
+      existing.push(event);
+    } else {
+      groups.set(key, [event]);
+    }
+  }
+
+  // Merge each group
+  const merged: DraftEvent[] = [];
+  for (const group of groups.values()) {
+    if (group.length === 1) {
+      merged.push(group[0]);
+    } else {
+      // Find the event with the strongest edge type by weight
+      let strongest = group[0];
+      let maxWeight = STORY_EDGE_CONFIG[strongest.edge.type].weight;
+      for (let i = 1; i < group.length; i++) {
+        const weight = STORY_EDGE_CONFIG[group[i].edge.type].weight;
+        if (weight > maxWeight) {
+          maxWeight = weight;
+          strongest = group[i];
+        }
+      }
+
+      // Build summary based on relationship type
+      const edgeType = strongest.edge.type;
+      const isAccessRelationship =
+        edgeType === 'accesses_infrequently' || edgeType === 'accesses_frequently';
+
+      const fromName = strongest.edge.from.split(':')[1];
+      const toName = strongest.edge.to.split(':')[1];
+      const summary = isAccessRelationship
+        ? `First-ever logon: ${fromName} → ${toName}`
+        : `New relationship: ${fromName} ${STORY_EDGE_CONFIG[edgeType].verb} ${toName}`;
+
+      // Union sourceEvidenceIds from all events in the group
+      const unionedIds = [
+        ...new Set(group.flatMap((e) => e.sourceEvidenceIds)),
+      ] as DraftEvent['sourceEvidenceIds'];
+
+      merged.push({
+        ...strongest,
+        summary,
+        sourceEvidenceIds: unionedIds,
+      });
+    }
+  }
+
+  return [...otherEvents, ...merged];
+};
+
+/**
+ * Keeps at most ONE risk_jump event per entity: the one with the largest rise.
+ * When there's a tie in rise amount, keeps the earliest by timestamp.
+ */
+export const dedupeRiskJumps = (events: DraftEvent[]): DraftEvent[] => {
+  const riskJumpEvents = events.filter((e) => e.type === 'risk_jump');
+  const otherEvents = events.filter((e) => e.type !== 'risk_jump');
+
+  if (riskJumpEvents.length === 0) {
+    return events;
+  }
+
+  // Group by entity euid
+  const byEntity = new Map<string, DraftEvent[]>();
+  for (const event of riskJumpEvents) {
+    const entityEuid = event.entityEuids[0];
+    const existing = byEntity.get(entityEuid);
+    if (existing) {
+      existing.push(event);
+    } else {
+      byEntity.set(entityEuid, [event]);
+    }
+  }
+
+  // For each entity, keep only the largest rise (earliest for ties)
+  const kept: DraftEvent[] = [];
+  for (const group of byEntity.values()) {
+    if (group.length === 1) {
+      kept.push(group[0]);
+    } else {
+      // Extract the rise amount from the summary: "name risk FROM → TO (Level)"
+      // e.g., "a.rodriguez risk 33 → 62 (Moderate)"
+      const getRise = (event: DraftEvent): { rise: number; from: number; to: number } => {
+        const match = event.summary.match(/risk (\d+) → (\d+)/);
+        if (match) {
+          const from = parseInt(match[1], 10);
+          const to = parseInt(match[2], 10);
+          return { rise: to - from, from, to };
+        }
+        return { rise: 0, from: 0, to: 0 };
+      };
+
+      let best = group[0];
+      let bestRise = getRise(best).rise;
+      for (let i = 1; i < group.length; i++) {
+        const rise = getRise(group[i]).rise;
+        if (rise > bestRise || (rise === bestRise && compare(group[i].at, best.at) < 0)) {
+          bestRise = rise;
+          best = group[i];
+        }
+      }
+      kept.push(best);
+    }
+  }
+
+  return [...otherEvents, ...kept];
+};
+
+/**
+ * Applies all event deduplication rules:
+ * 1. Merges relationship_first_seen events for the same unordered pair on the same day
+ * 2. Keeps at most one risk_jump per entity (the largest rise, earliest for ties)
+ */
+export const dedupeEvents = (events: DraftEvent[]): DraftEvent[] => {
+  const afterRelationships = dedupeRelationshipFirstSeen(events);
+  const afterRisks = dedupeRiskJumps(afterRelationships);
+  return afterRisks;
+};

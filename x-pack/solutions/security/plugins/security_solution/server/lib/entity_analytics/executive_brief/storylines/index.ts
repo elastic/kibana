@@ -45,6 +45,7 @@ import type { DiscoveryInfo, LeadInfo } from './seeds';
 import { setSourceStatus, runStorySource, errorMessage } from './source';
 import {
   buildDraftEvents,
+  dedupeEvents,
   detectRiskJumps,
   fetchFirstAlertsPerTactic,
   fetchRelationshipFirstSeen,
@@ -717,7 +718,8 @@ const finalizeStoryline = ({
           }
         : undefined,
   });
-  const { events: ordered, truncated } = orderAndCapEvents(drafts);
+  const deduped = dedupeEvents(drafts);
+  const { events: ordered, truncated } = orderAndCapEvents(deduped);
 
   const events: StoryEvent[] = ordered.map(({ edge: _edge, ...draft }, position) => ({
     ...draft,
