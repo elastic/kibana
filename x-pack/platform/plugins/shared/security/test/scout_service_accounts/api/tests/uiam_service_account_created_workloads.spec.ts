@@ -22,7 +22,10 @@ import {
 import { exchangeUiamServiceAccountToken } from '../fixtures/uiam_service_account_token';
 
 const TASKS_PATH = 'internal/service_accounts_test/_tasks';
-// A rule test waits for up to two runs, each polled for up to two minutes.
+// How long to wait for a rule run, and for Task Manager's index to show a new task.
+const RULE_RUN_TIMEOUT_MS = 120_000;
+const STORED_TASK_TIMEOUT_MS = 10_000;
+// A rule test waits for up to two runs.
 const RULE_TEST_TIMEOUT_MS = 300_000;
 const uniqueName = () => `sa-uiam-workloads-${randomUUID()}`;
 
@@ -107,7 +110,7 @@ apiTest.describe(
             stored = hits.hits[0]?._source?.[type];
             return hits.hits.length;
           },
-          { timeout: 10_000, message: `No saved object for ${type} ${id}` }
+          { timeout: STORED_TASK_TIMEOUT_MS, message: `No saved object for ${type} ${id}` }
         )
         .toBe(1);
       const { apiKey, uiamApiKey } = stored ?? {};
@@ -142,7 +145,11 @@ apiTest.describe(
             });
             return data.data.map(({ status }) => status);
           },
-          { timeout: 120_000, intervals: [2_000], message: `Rule ${ruleId} did not run` }
+          {
+            timeout: RULE_RUN_TIMEOUT_MS,
+            intervals: [2_000],
+            message: `Rule ${ruleId} did not run`,
+          }
         )
         .toContain('success');
     };
