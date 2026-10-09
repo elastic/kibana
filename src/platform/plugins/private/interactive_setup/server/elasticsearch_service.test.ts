@@ -8,10 +8,9 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { BehaviorSubject } from 'rxjs';
 import tls from 'tls';
 
-import { pollEsNodesVersion } from '@kbn/core/server';
+import { checkEsNodesVersion } from '@kbn/core/server';
 import type { NodesVersionCompatibility } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -24,16 +23,16 @@ import { ElasticsearchConnectionStatus } from '../common';
 
 jest.mock('tls');
 jest.mock('@kbn/core/server', () => ({
-  pollEsNodesVersion: jest.fn(),
+  checkEsNodesVersion: jest.fn(),
 }));
 
 const tlsConnectMock = tls.connect as jest.MockedFunction<typeof tls.connect>;
-const mockPollEsNodesVersion = pollEsNodesVersion as jest.MockedFunction<typeof pollEsNodesVersion>;
+const mockCheckEsNodesVersion = checkEsNodesVersion as jest.MockedFunction<
+  typeof checkEsNodesVersion
+>;
 
 function mockCompatibility(isCompatible: boolean, message?: string) {
-  mockPollEsNodesVersion.mockReturnValue(
-    new BehaviorSubject({ isCompatible, message } as NodesVersionCompatibility).asObservable()
-  );
+  mockCheckEsNodesVersion.mockResolvedValue({ isCompatible, message } as NodesVersionCompatibility);
 }
 
 describe('ElasticsearchService', () => {
