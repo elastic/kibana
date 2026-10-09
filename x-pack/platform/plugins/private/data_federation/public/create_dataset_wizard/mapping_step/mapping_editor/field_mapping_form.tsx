@@ -10,6 +10,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiFieldText,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -156,101 +157,95 @@ export function FieldMappingForm({
             />
           </EuiFlexItem>
 
-          <EuiFlexItem css={remainingFieldsGroupStyles}>
-            <div css={remainingFieldsGridStyles}>
-              <EuiFlexItem>
-                <EuiFormRow
-                  label={i18n.translate('xpack.dataFederation.mappingEditor.logicalName', {
-                    defaultMessage: 'Field name',
-                  })}
-                  helpText={i18n.translate('xpack.dataFederation.mappingEditor.logicalNameHelp', {
-                    defaultMessage: 'How this field should be named in queries.',
-                  })}
+          <EuiFlexGrid
+            responsive={false}
+            css={[remainingFieldsGroupStyles, remainingFieldsGridStyles]}
+          >
+            <EuiFlexItem>
+              <EuiFormRow
+                label={i18n.translate('xpack.dataFederation.mappingEditor.logicalName', {
+                  defaultMessage: 'Field name',
+                })}
+                helpText={i18n.translate('xpack.dataFederation.mappingEditor.logicalNameHelp', {
+                  defaultMessage: 'How this field should be named in queries.',
+                })}
+                isInvalid={Boolean(errors?.name)}
+                error={errors?.name}
+                fullWidth
+              >
+                <EuiFieldText
                   isInvalid={Boolean(errors?.name)}
-                  error={errors?.name}
                   fullWidth
-                >
-                  <EuiFieldText
-                    isInvalid={Boolean(errors?.name)}
-                    fullWidth
-                    value={draft.name}
-                    onChange={(e) => updateDraft({ name: e.target.value })}
-                    data-test-subj="dataFederationMappingEditorFieldName"
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
+                  value={draft.name}
+                  onChange={(e) => updateDraft({ name: e.target.value })}
+                  data-test-subj="dataFederationMappingEditorFieldName"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFormRow
+                label={i18n.translate('xpack.dataFederation.mappingEditor.originalFieldNameLabel', {
+                  defaultMessage: 'Original field name',
+                })}
+                helpText={i18n.translate(
+                  'xpack.dataFederation.mappingEditor.originalFieldNameHelp',
+                  {
+                    defaultMessage:
+                      'Name as it appears in your source files, when different from the field name',
+                  }
+                )}
+                fullWidth
+              >
+                <EuiFieldText
+                  fullWidth
+                  value={draft.path}
+                  onChange={(e) => updateDraft({ path: e.target.value })}
+                  data-test-subj="dataFederationMappingEditorFieldPath"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+
+            {isDateType ? (
               <EuiFlexItem>
                 <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.dataFederation.mappingEditor.originalFieldNameLabel',
-                    {
-                      defaultMessage: 'Original field name',
-                    }
-                  )}
-                  helpText={i18n.translate(
-                    'xpack.dataFederation.mappingEditor.originalFieldNameHelp',
-                    {
-                      defaultMessage:
-                        'Name as it appears in your source files, when different from the field name',
-                    }
-                  )}
+                  label={
+                    <FormRowLabelWithInfo
+                      label={i18n.translate('xpack.dataFederation.mappingEditor.formatLabel', {
+                        defaultMessage: 'Date format',
+                      })}
+                      infoText={i18n.translate('xpack.dataFederation.mappingEditor.formatTooltip', {
+                        defaultMessage: 'Date parsing pattern, for example yyyy-MM-dd HH:mm:ss.',
+                      })}
+                    />
+                  }
+                  isInvalid={Boolean(errors?.format)}
+                  error={errors?.format}
                   fullWidth
                 >
-                  <EuiFieldText
-                    fullWidth
-                    value={draft.path}
-                    onChange={(e) => updateDraft({ path: e.target.value })}
-                    data-test-subj="dataFederationMappingEditorFieldPath"
+                  <DatetimeFormatComboBox
+                    value={draft.format}
+                    onChange={(next) => updateDraft({ format: next })}
+                    onBlur={() => {}}
+                    placeholder={i18n.translate(
+                      'xpack.dataFederation.mappingEditor.formatPlaceholder',
+                      {
+                        defaultMessage: 'Select or enter a format',
+                      }
+                    )}
+                    data-test-subj="dataFederationMappingEditorFieldFormat"
+                    aria-label={i18n.translate(
+                      'xpack.dataFederation.mappingEditor.formatAriaLabel',
+                      {
+                        defaultMessage: 'Select or enter a format',
+                      }
+                    )}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
-
-              {isDateType ? (
-                <EuiFlexItem>
-                  <EuiFormRow
-                    label={
-                      <FormRowLabelWithInfo
-                        label={i18n.translate('xpack.dataFederation.mappingEditor.formatLabel', {
-                          defaultMessage: 'Date format',
-                        })}
-                        infoText={i18n.translate(
-                          'xpack.dataFederation.mappingEditor.formatTooltip',
-                          {
-                            defaultMessage:
-                              'Date parsing pattern, for example yyyy-MM-dd HH:mm:ss.',
-                          }
-                        )}
-                      />
-                    }
-                    isInvalid={Boolean(errors?.format)}
-                    error={errors?.format}
-                    fullWidth
-                  >
-                    <DatetimeFormatComboBox
-                      value={draft.format}
-                      onChange={(next) => updateDraft({ format: next })}
-                      onBlur={() => {}}
-                      placeholder={i18n.translate(
-                        'xpack.dataFederation.mappingEditor.formatPlaceholder',
-                        {
-                          defaultMessage: 'Select or enter a format',
-                        }
-                      )}
-                      data-test-subj="dataFederationMappingEditorFieldFormat"
-                      aria-label={i18n.translate(
-                        'xpack.dataFederation.mappingEditor.formatAriaLabel',
-                        {
-                          defaultMessage: 'Select or enter a format',
-                        }
-                      )}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-              ) : (
-                <></>
-              )}
-            </div>
-          </EuiFlexItem>
+            ) : (
+              <></>
+            )}
+          </EuiFlexGrid>
         </EuiFlexGroup>
       </EuiFlexItem>
 
