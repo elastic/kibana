@@ -31,12 +31,12 @@ export const alertingGlobalAdvancedSettings = {
   [ALERTING_V2_ENABLED_SETTING_ID]: {
     category: [ALERTING_V2_CATEGORY],
     name: i18n.translate('xpack.alertingVTwo.enabledSettingName', {
-      defaultMessage: 'Alerting V2',
+      defaultMessage: 'Universal Alerting',
     }),
     type: 'boolean',
     value: false,
     description: i18n.translate('xpack.alertingVTwo.enabledSettingDescription', {
-      defaultMessage: 'Enables the alerting V2 APIs and UI.',
+      defaultMessage: 'Enables the Universal Alerting APIs and UI.',
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
@@ -66,12 +66,12 @@ export const alertingSpaceAdvancedSettings = {
   [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: {
     category: [ALERTING_CATEGORY],
     name: i18n.translate('xpack.alertingV2.experimentalFeaturesSettingName', {
-      defaultMessage: 'Alerting V2: Experimental Features',
+      defaultMessage: 'Universal Alerting experimental features',
     }),
     type: 'boolean',
     value: false,
     description: i18n.translate('xpack.alertingV2.experimentalFeaturesSettingDescription', {
-      defaultMessage: 'Enables experimental features for Alerting V2.',
+      defaultMessage: 'Enables experimental features for Universal Alerting.',
     }),
     schema: schema.boolean(),
     requiresPageReload: true,

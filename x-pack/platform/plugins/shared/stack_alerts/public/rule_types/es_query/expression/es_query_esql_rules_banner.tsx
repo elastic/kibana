@@ -39,7 +39,7 @@ export const EsQueryEsqlRulesBanner = () => {
       <EuiCallOut
         announceOnMount
         title={BANNER_TITLE}
-        iconType="sparkles"
+        iconType="info"
         data-test-subj="esQueryEsqlRulesBanner"
       >
         <p>

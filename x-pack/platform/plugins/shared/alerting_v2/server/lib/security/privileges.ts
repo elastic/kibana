@@ -24,7 +24,7 @@ export { ALERTING_V2_API_PRIVILEGES };
 const category: AppCategory = {
   id: 'alerting',
   label: i18n.translate('xpack.alertingV2.privileges.sectionLabel', {
-    defaultMessage: 'Universal alerting',
+    defaultMessage: 'Universal Alerting',
   }),
   order: 1000,
   euiIconType: 'watchesApp',

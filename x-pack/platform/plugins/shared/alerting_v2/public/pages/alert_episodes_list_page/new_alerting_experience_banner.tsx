@@ -25,7 +25,7 @@ const DESCRIPTION = i18n.translate(
   'xpack.alertingV2.episodesList.newAlertingExperienceBanner.description',
   {
     defaultMessage:
-      "We've improved the alerts experience to work across alerting frameworks. This new alerts page includes alerts from Universal alerting, Classic alerting, and external sources so you can triage them in one place.",
+      "We've improved the alerts experience to work across alerting frameworks. This new alerts page includes alerts from Universal Alerting, Classic Alerting, and external sources so you can triage them in one place.",
   }
 );
 

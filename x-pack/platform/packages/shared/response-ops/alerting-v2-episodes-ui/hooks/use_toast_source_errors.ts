@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
-import { getEpisodeSourceLabel } from '../source_labels';
+import { getEpisodeSourceAlertingName } from '../source_labels';
 import type { EpisodeFetchErrorSurface } from '../types/episode_data_source';
 import type { EpisodeSourceError } from '../utils/fetch_from_sources';
 import { shouldSwallowFetchError } from '../utils/should_swallow_fetch_error';
@@ -38,7 +38,7 @@ export const useToastSourceErrors = (
       if (!shouldSwallowFetchError(error)) {
         toasts.addError(error, {
           title: EPISODES_FETCH_ERROR_TOAST_TITLE[surface](
-            getEpisodeSourceLabel(sourceId, sources)
+            getEpisodeSourceAlertingName(sourceId, sources)
           ),
         });
       }

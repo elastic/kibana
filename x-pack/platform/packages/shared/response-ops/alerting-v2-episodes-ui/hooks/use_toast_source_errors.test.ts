@@ -24,7 +24,7 @@ describe('useToastSourceErrors', () => {
 
     expect(addError).toHaveBeenCalledTimes(1);
     expect(addError).toHaveBeenCalledWith(error, {
-      title: 'Failed to fetch alerts for Universal alerting',
+      title: 'Failed to fetch alerts for Universal Alerting',
     });
   });
 
@@ -35,7 +35,7 @@ describe('useToastSourceErrors', () => {
     renderHook(() => useToastSourceErrors([{ sourceId: 'v1', error }], { addError }, 'list'));
 
     expect(addError).toHaveBeenCalledWith(error, {
-      title: 'Failed to fetch alerts for Classic alerting',
+      title: 'Failed to fetch alerts for Classic Alerting',
     });
   });
 
@@ -57,10 +57,10 @@ describe('useToastSourceErrors', () => {
 
     expect(addError).toHaveBeenCalledTimes(2);
     expect(addError).toHaveBeenNthCalledWith(1, classicError, {
-      title: 'Failed to fetch KPIs for Classic alerting',
+      title: 'Failed to fetch KPIs for Classic Alerting',
     });
     expect(addError).toHaveBeenNthCalledWith(2, v2Error, {
-      title: 'Failed to fetch KPIs for Universal alerting',
+      title: 'Failed to fetch KPIs for Universal Alerting',
     });
   });
 
@@ -71,7 +71,7 @@ describe('useToastSourceErrors', () => {
     renderHook(() => useToastSourceErrors([{ sourceId: 'v1', error }], { addError }, 'histogram'));
 
     expect(addError).toHaveBeenCalledWith(error, {
-      title: 'Failed to fetch histogram data for Classic alerting',
+      title: 'Failed to fetch histogram data for Classic Alerting',
     });
   });
 

@@ -15,7 +15,7 @@ export const getObservabilityAlertsFeature = (): KibanaFeatureConfig => {
   return {
     id: observabilityAlertsFeatureId,
     name: i18n.translate('xpack.observability.featureRegistry.observabilityAlertsTitle', {
-      defaultMessage: 'Classic alerting',
+      defaultMessage: 'Classic Observability Alerts',
     }),
     order: 1300,
     category: DEFAULT_APP_CATEGORIES.observability,

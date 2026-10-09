@@ -66,7 +66,7 @@ export const DEFAULT_EPISODES_TABLE_COLUMN_SETTINGS: EpisodesTableColumnSettings
   duration: { width: 110 },
   assignees: { width: 120 },
   'episode.status': { width: 110 },
-  alerting_source: { width: 140 },
+  alerting_source: { width: 110 },
   severity: { width: 100 },
 };
 

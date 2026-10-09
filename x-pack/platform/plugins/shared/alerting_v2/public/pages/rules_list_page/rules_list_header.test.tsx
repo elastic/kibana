@@ -114,19 +114,19 @@ describe('RulesListHeader', () => {
 
     expect(v1Tab).toHaveAttribute('aria-selected', 'false');
     expect(v2Tab).toHaveAttribute('aria-selected', 'true');
-    expect(v1Tab).toHaveTextContent('Classic rules');
-    expect(v2Tab).toHaveTextContent('Universal rules');
+    expect(v1Tab).toHaveTextContent('Classic');
+    expect(v2Tab).toHaveTextContent('Universal');
     expect(await screen.findAllByRole('tab')).toHaveLength(2);
   });
 
-  it('orders the Classic rules tab before the Universal rules tab', async () => {
+  it('orders the Universal tab before the Classic tab', async () => {
     renderHeader();
 
     const tabs = await screen.findAllByRole('tab');
 
     expect(tabs.map((tab) => tab.getAttribute('data-test-subj'))).toEqual([
-      'v1RulesTab',
       'v2RulesTab',
+      'v1RulesTab',
     ]);
   });
 

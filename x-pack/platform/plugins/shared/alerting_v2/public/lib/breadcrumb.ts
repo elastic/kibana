@@ -27,7 +27,7 @@ export const getAlertingV2Breadcrumb = (
     case 'root':
       return {
         text: i18n.translate('xpack.alertingV2.breadcrumbs.rootTitle', {
-          defaultMessage: 'Universal alerting',
+          defaultMessage: 'Universal Alerting',
         }),
       };
     case 'rules_list':

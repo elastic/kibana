@@ -173,7 +173,7 @@ export const AlertEpisodeDetailsFlyout = ({
     groupAction,
     isFlapping,
   } = useEpisodeDetailsHeaderData({ episodeId, groupHash, services });
-  const { label: sourceLabel } = useEpisodeSource(sourceId);
+  const { systemName: sourceLabel } = useEpisodeSource(sourceId);
 
   const showRuleDependentTabs = isRuleLoaded(ruleState);
   const episodes = useMemo(() => (episode ? [episode] : []), [episode]);
