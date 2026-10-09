@@ -61,7 +61,8 @@ evaluate.describe(
                     'The assistant does not claim that no email connector is configured — one exists in the environment and should be discovered (e.g. via platform.workflows.get_connectors).',
                     'The action policy uses per_alert grouping and on_status_change throttle.',
                     'The final manage_action_policy call ends with a validate operation, and validation succeeds (after corrective retries if needed).',
-                    'The assistant never claims the rule, workflow, or action policy has been created, saved, or activated — it directs the user to save in order Rule → Workflow → Action Policy via the attachment action buttons.',
+                    'The assistant never claims the rule, workflow, or action policy has been saved or activated (describing them as prepared drafts is fine) — it directs the user to save them via the attachment action buttons, with the workflow saved before the action policy.',
+                    'The assistant does not require the rule to be saved before the action policy, but reminds the user that the rule is still unsaved and that the policy will not match any alerts until the rule carrying its routing tag is saved.',
                   ],
                   expectedSkills: [
                     RULE_MANAGEMENT_SKILL_ID,
@@ -102,7 +103,11 @@ evaluate.describe(
                     expect(workflowId).toEqual(expect.any(String));
                     expect(workflow?.yaml).toEqual(expect.any(String));
                     expect(actionPolicy).toBeDefined();
-                    expect(actionPolicy!.matcher).toBe(`rule.id: "${ruleId}"`);
+                    // The policy is linked to the rule only through a shared routing tag.
+                    const routingTags = rule?.metadata?.routing_tags ?? [];
+                    const matcherTags = actionPolicy!.matcher?.tags ?? [];
+                    expect(matcherTags.length).toBeGreaterThan(0);
+                    expect(routingTags).toEqual(expect.arrayContaining(matcherTags));
                     expect(actionPolicy!.destinations).toEqual([
                       { type: 'workflow', id: workflowId },
                     ]);
