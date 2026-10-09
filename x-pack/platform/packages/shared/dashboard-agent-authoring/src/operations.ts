@@ -11,6 +11,7 @@ import type { ResolvePanelContent } from './operations/panels';
 import type { ResolveAttachmentPanel, ResolveControlFieldCapabilities } from './operations/types';
 import type { OperationFailure } from './utils';
 import type { PanelAuthoringNote } from './resolve_panel';
+import { discardInvalidChanges, type ValidateDashboard } from './validate_dashboard';
 import {
   dashboardOperationSchema,
   executeOperationHandler,
@@ -28,7 +29,14 @@ interface ExecuteDashboardOperationsParams {
   resolvePanelContent?: ResolvePanelContent;
   resolveAttachmentPanel?: ResolveAttachmentPanel;
   resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
+  finalizeDashboard?: FinalizeDashboard;
+  validateDashboard?: ValidateDashboard;
 }
+
+/** Completes the dashboard after all operations ran and before it is validated. */
+export type FinalizeDashboard = (
+  dashboardData: DashboardAttachmentData
+) => Promise<DashboardAttachmentData>;
 
 /**
  * Environment-agnostic dashboard generation: turns a prior dashboard payload (or
@@ -36,7 +44,10 @@ interface ExecuteDashboardOperationsParams {
  * persistence, and result shape belong to the calling tool. Inline panel content
  * is resolved via the injected `resolvePanelContent` callback, so the core never
  * reads any store. Control fields are validated against index mappings when
- * the host provides `resolveControlFieldCapabilities`.
+ * the host provides `resolveControlFieldCapabilities`. The host can complete the
+ * result with `finalizeDashboard` (e.g. a default time range) before it is
+ * validated. When the host provides `validateDashboard`, changes that make the dashboard invalid are discarded and
+ * reported as failures.
  */
 export const executeDashboardOperations = async ({
   dashboardData,
@@ -45,18 +56,21 @@ export const executeDashboardOperations = async ({
   resolvePanelContent,
   resolveAttachmentPanel,
   resolveControlFieldCapabilities,
+  finalizeDashboard,
+  validateDashboard,
 }: ExecuteDashboardOperationsParams): Promise<{
   dashboardData: DashboardAttachmentData;
   failures: OperationFailure[];
   panelAuthoringNotes: PanelAuthoringNote[];
 }> => {
-  let nextDashboardData = structuredClone(
+  const originalDashboardData = structuredClone(
     dashboardData ?? {
       title: 'User Dashboard',
       description: undefined,
       panels: [],
     }
   );
+  let nextDashboardData = structuredClone(originalDashboardData);
   const failures: OperationFailure[] = [];
   const panelAuthoringNotes: PanelAuthoringNote[] = [];
 
@@ -79,9 +93,25 @@ export const executeDashboardOperations = async ({
     });
   }
 
-  return {
+  if (finalizeDashboard) {
+    nextDashboardData = await finalizeDashboard(nextDashboardData);
+  }
+
+  if (!validateDashboard) {
+    return { dashboardData: nextDashboardData, failures, panelAuthoringNotes };
+  }
+
+  const validationResult = discardInvalidChanges({
+    originalDashboardData,
     dashboardData: nextDashboardData,
-    failures,
-    panelAuthoringNotes,
+    validateDashboard,
+  });
+
+  return {
+    dashboardData: validationResult.dashboardData,
+    failures: [...failures, ...validationResult.failures],
+    panelAuthoringNotes: panelAuthoringNotes.filter(
+      ({ panelId }) => !validationResult.discardedPanelIds.has(panelId)
+    ),
   };
 };
