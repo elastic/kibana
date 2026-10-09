@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
+import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { getConversationMetadataStepCommonDefinition } from '@kbn/agent-builder-plugin/common/workflows/steps/get_conversation_metadata';
 import { updateConversationMetadataStepCommonDefinition } from '@kbn/agent-builder-plugin/common/workflows/steps/update_conversation_metadata';
@@ -13,8 +15,32 @@ import { addAttachmentStepCommonDefinition } from '@kbn/agent-builder-plugin/com
 import { readAttachmentStepCommonDefinition } from '@kbn/agent-builder-plugin/common/workflows/steps/attachment_read';
 import { updateAttachmentStepCommonDefinition } from '@kbn/agent-builder-plugin/common/workflows/steps/attachment_update';
 import { runAgentStepCommonDefinition } from '@kbn/agent-builder-plugin/common/step_types/run_agent_step';
-import { setAttackStatusStepCommonDefinition } from '@kbn/security-solution-plugin/common/workflows/step_types/set_attack_status_step/set_attack_status_step_common';
 import { createKiStepCommonDefinition } from '@kbn/context-engine-plugin/common/step_types/create_ki';
+
+/**
+ * Local mirror of `security.setAttackStatus`'s contract (id + input/output shape).
+ *
+ * Not imported from `@kbn/security-solution-plugin`: that plugin already depends on
+ * `@kbn/alertzero-plugin`, so the reverse edge makes the moon project graph cyclic and
+ * blocks `kbn bootstrap`. Only the fields the chain's workflows use are modeled; the
+ * handler below is the fake that records calls.
+ */
+const setAttackStatusStepCommonDefinition = {
+  id: 'security.setAttackStatus' as const,
+  category: StepCategory.KibanaSecurity,
+  label: 'Set Attack Status',
+  description: 'Change the status of one or multiple attacks to open, acknowledged, or closed.',
+  inputSchema: z.object({
+    ids: z.union([z.string().min(1).max(256), z.array(z.string().min(1).max(256)).min(1)]),
+    status: z.enum(['open', 'acknowledged', 'closed']),
+    reason: z.string().min(1).max(1024).optional(),
+    update_related_alerts: z.boolean().optional().default(false),
+  }),
+  outputSchema: z.object({
+    success: z.boolean(),
+    message: z.string().max(1000).optional(),
+  }),
+};
 
 /**
  * One conversation record: metadata plus every attachment, versioned.

@@ -82,7 +82,6 @@ dependsOn:
   - '@kbn/core-chrome-browser-context-mocks'
   - '@kbn/core-chrome-browser-mocks'
   - '@kbn/context-engine-plugin'
-  - '@kbn/security-solution-plugin'
   - '@kbn/workflows-execution-engine'
 tags:
   - plugin
