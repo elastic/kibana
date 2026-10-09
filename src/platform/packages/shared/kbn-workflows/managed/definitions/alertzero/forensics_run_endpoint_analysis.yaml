@@ -924,7 +924,8 @@ steps:
     foreach: "${{ steps.forensic_analysis.output.structured_output.recommendedActions }}"
     mode: settled
     concurrency:
-      max: "{{ consts.max_recommended_actions }}"
+      # must use a literal until https://github.com/elastic/security-team/issues/19967 is fixed
+      max: 8
     steps:
       - name: propose_action
         type: workflow.executeAsync
