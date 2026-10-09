@@ -44,13 +44,10 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
 
     await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
-    await pageObjects.workflowExecution.executionPanel
-      .getByRole('button', { name: 'hello_world_step' })
-      .click();
-    const stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
-    const dataViewer = stepDetails.getByTestId('workflowJsonDataViewer');
-    await dataViewer.waitFor({ state: 'visible' });
-    await expect(dataViewer).toContainText('Test run: true');
+    await (await pageObjects.workflowExecution.getStep('hello_world_step')).click();
+    await expect(pageObjects.workflowExecution.getStepResultSection('output')).toContainText(
+      'Test run: true'
+    );
   });
 
   test('should show the test execute modal Event tab and trigger events table', async ({
@@ -96,13 +93,10 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
 
     await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
-    await pageObjects.workflowExecution.executionPanel
-      .getByRole('button', { name: 'hello_world_step' })
-      .click();
-    const stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
-    const dataViewer = stepDetails.getByTestId('workflowJsonDataViewer');
-    await dataViewer.waitFor({ state: 'visible' });
-    await expect(dataViewer).toContainText('Test run: true');
+    await (await pageObjects.workflowExecution.getStep('hello_world_step')).click();
+    await expect(pageObjects.workflowExecution.getStepResultSection('output')).toContainText(
+      'Test run: true'
+    );
   });
 
   test('should not allow running a disabled workflow, then enable and run it', async ({
@@ -144,13 +138,10 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
     );
 
     // Not a test run since we ran from the list (enabled workflow), so isTestRun: false
-    await pageObjects.workflowExecution.executionPanel
-      .getByRole('button', { name: 'hello_world_step' })
-      .click();
-    const stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
-    const dataViewer = stepDetails.getByTestId('workflowJsonDataViewer');
-    await dataViewer.waitFor({ state: 'visible' });
-    await expect(dataViewer).toContainText('Test run: false');
+    await (await pageObjects.workflowExecution.getStep('hello_world_step')).click();
+    await expect(pageObjects.workflowExecution.getStepResultSection('output')).toContainText(
+      'Test run: false'
+    );
   });
 
   test('should run individual step with custom context override', async ({ pageObjects, page }) => {
@@ -173,16 +164,13 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
 
     await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
-    const helloWorldSteps = pageObjects.workflowExecution.executionPanel.getByRole('button', {
-      name: 'test_console_step',
-    });
+    const helloWorldSteps = pageObjects.workflowExecution.stepsByName('test_console_step');
     await expect(helloWorldSteps).toHaveCount(1);
 
     await helloWorldSteps.click();
-    const stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
-    const dataViewer = stepDetails.getByTestId('workflowJsonDataViewer');
-    await dataViewer.waitFor({ state: 'visible' });
-    await expect(dataViewer).toContainText('Test run: false, timestamp: now');
+    await expect(pageObjects.workflowExecution.getStepResultSection('output')).toContainText(
+      'Test run: false, timestamp: now'
+    );
   });
 
   test('should allow providing "event" in manual inputs', async ({ pageObjects, page }) => {
