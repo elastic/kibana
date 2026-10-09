@@ -24,9 +24,9 @@ import { startTrackingHistory } from '@kbn/rxjs-history';
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { initializeTrackOverlay } from './track_overlay';
-import type { ChangeSourceVersions } from './unsaved_changes_manager';
+import type { LatestChangeBySource } from './change_source_tracker';
 
-export type DashboardHistoryState = DashboardState & { changeSourceVersions: ChangeSourceVersions };
+export type DashboardHistoryState = DashboardState & { latestChangeBySource: LatestChangeBySource };
 
 export function initializeHistoryManager({
   anyStateChange$,
@@ -64,11 +64,11 @@ export function initializeHistoryManager({
   const { api: historyApi, cleanup: cleanupHistoryTracking } =
     startTrackingHistory<DashboardHistoryState>({
       onStateChange$: merge(initialState$, onStateChange$).pipe(
-        // A snapshot that differs only in change source versions is not an undo step. Re-emit the
+        // A snapshot that differs only in its latest change numbers is not an undo step. Re-emit the
         // previous snapshot instead of filtering it out, because rxjs-history skips the first
         // emission after an undo or redo.
         scan<DashboardHistoryState>((previous, current) =>
-          isEqual({ ...current, changeSourceVersions: previous.changeSourceVersions }, previous)
+          isEqual({ ...current, latestChangeBySource: previous.latestChangeBySource }, previous)
             ? previous
             : current
         )

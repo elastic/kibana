@@ -17,10 +17,10 @@ import type {
 } from '@kbn/presentation-publishing';
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import { DASHBOARD_CHANGE_SOURCES, type DashboardChangeSource } from '../../common/change_sources';
 import { getDashboardBackupService } from '../services/dashboard_api_services';
 import { type DashboardBackupState } from '../services/dashboard_backup_service';
 import type { initializeApproximationManager } from './approximation_manager';
+import type { ChangeSourceTracker, LatestChangeBySource } from './change_source_tracker';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { initializeSettingsManager } from './settings_manager';
@@ -30,11 +30,8 @@ import type { initializeUnifiedSearchManager } from './unified_search_manager';
 
 const DEBOUNCE_TIME = 100;
 
-/** For each change source, the version of its latest change in a dashboard state. */
-export type ChangeSourceVersions = Readonly<Partial<Record<DashboardChangeSource, number>>>;
-
 export type DashboardSaveWithChangeSources = DashboardSaveEvent & {
-  changeSourceVersions: ChangeSourceVersions;
+  latestChangeBySource: LatestChangeBySource;
 };
 
 export function initializeUnsavedChangesManager({
@@ -49,7 +46,7 @@ export function initializeUnsavedChangesManager({
   approximationManager,
   setState,
   onSave$,
-  initialChangeSources = [],
+  changeSourceTracker,
 }: {
   lastSavedState: DashboardState;
   storeUnsavedChanges?: boolean;
@@ -62,7 +59,7 @@ export function initializeUnsavedChangesManager({
   approximationManager: ReturnType<typeof initializeApproximationManager>;
   setState: (state: DashboardState) => Promise<void>;
   onSave$: Observable<DashboardSaveWithChangeSources>;
-  initialChangeSources?: readonly DashboardChangeSource[];
+  changeSourceTracker: ChangeSourceTracker;
 }): {
   api: {
     hasUnsavedChanges$: PublishingSubject<boolean>;
@@ -72,40 +69,14 @@ export function initializeUnsavedChangesManager({
   internalApi: {
     getLastSavedState: () => DashboardState;
     unsavedChanges$: Observable<Partial<DashboardState>>;
-    addChangeSources: (sources: readonly DashboardChangeSource[]) => void;
-    getChangeSourceVersions: () => ChangeSourceVersions;
-    setChangeSourceVersions: (versions: ChangeSourceVersions) => void;
   };
 } {
   const hasUnsavedChanges$ = new BehaviorSubject(false);
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
-
-  // Each labeled change gets the next version number, and each source keeps the version of its
-  // latest change. Undo history stores these versions, so an undone change is not reported.
-  let latestVersion = 0;
-  let versions: ChangeSourceVersions = {};
-  let savedVersions: ChangeSourceVersions = {};
-
-  const addChangeSources = (sources: readonly DashboardChangeSource[]) => {
-    if (sources.length === 0) return;
-    latestVersion++;
-    versions = {
-      ...versions,
-      ...Object.fromEntries(sources.map((source) => [source, latestVersion])),
-    };
-  };
-  addChangeSources(initialChangeSources);
-
-  const getSourcesChangedSinceSave = (draftVersions: ChangeSourceVersions) =>
-    DASHBOARD_CHANGE_SOURCES.filter(
-      (source) => (draftVersions[source] ?? 0) > (savedVersions[source] ?? 0)
-    );
-
-  const onSaveSubscription = onSave$.subscribe(({ changeSourceVersions, ...saveEvent }) => {
-    const changeSourcesInSave = getSourcesChangedSinceSave(changeSourceVersions);
-    savedVersions = changeSourceVersions;
+  const onSaveSubscription = onSave$.subscribe(({ latestChangeBySource, ...saveEvent }) => {
+    const changeSources = changeSourceTracker.markSaved(latestChangeBySource);
     lastSavedState$.next(saveEvent.dashboardState);
-    reportDashboardSaved({ ...saveEvent, changeSources: changeSourcesInSave });
+    reportDashboardSaved({ ...saveEvent, changeSources });
   });
 
   const dashboardStateChanges$ = combineLatest([
@@ -132,7 +103,7 @@ export function initializeUnsavedChangesManager({
       if (storeUnsavedChanges) {
         const { time_restore, ...restOfDashboardChanges } = dashboardChanges;
         const hasEditsToBackUp = Object.keys(restOfDashboardChanges).length > 0;
-        const changeSourcesToBackUp = getSourcesChangedSinceSave(versions);
+        const changeSourcesToBackUp = changeSourceTracker.getUnsavedSources();
         const dashboardBackupState: DashboardBackupState = {
           // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
           viewMode,
@@ -150,7 +121,7 @@ export function initializeUnsavedChangesManager({
   return {
     api: {
       asyncResetToLastSavedState: async () => {
-        versions = savedVersions;
+        changeSourceTracker.resetToSaved();
         await setState(lastSavedState$.value);
       },
       hasUnsavedChanges$,
@@ -165,11 +136,6 @@ export function initializeUnsavedChangesManager({
     internalApi: {
       getLastSavedState: () => lastSavedState$.value,
       unsavedChanges$: dashboardStateChanges$,
-      addChangeSources,
-      getChangeSourceVersions: () => versions,
-      setChangeSourceVersions: (nextVersions) => {
-        versions = nextVersions;
-      },
     },
   };
 }

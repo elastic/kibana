@@ -11,9 +11,9 @@ import { BehaviorSubject, Subject, config as rxjsConfig, skip } from 'rxjs';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import {
   initializeUnsavedChangesManager,
-  type ChangeSourceVersions,
   type DashboardSaveWithChangeSources,
 } from './unsaved_changes_manager';
+import { initializeChangeSourceTracker, type LatestChangeBySource } from './change_source_tracker';
 import type { DashboardChangeSource } from '../../common/change_sources';
 import { DEFAULT_DASHBOARD_STATE } from '../../common/default_dashboard_state';
 import type { initializeLayoutManager } from './layout_manager';
@@ -115,6 +115,7 @@ describe('unsavedChangesManager', () => {
           approximationManager: approximationManagerMock,
           setState: setStateMock,
           onSave$: onSave$.asObservable(),
+          changeSourceTracker: initializeChangeSourceTracker(),
         });
 
         unsavedChangesManager.api.hasUnsavedChanges$
@@ -142,6 +143,7 @@ describe('unsavedChangesManager', () => {
           approximationManager: approximationManagerMock,
           setState: setStateMock,
           onSave$: onSave$.asObservable(),
+          changeSourceTracker: initializeChangeSourceTracker(),
         });
 
         setBackupStateMock.mockImplementation((id, backupState) => {
@@ -198,6 +200,7 @@ describe('unsavedChangesManager', () => {
         approximationManager: approximationManagerMock,
         setState: setStateMock,
         onSave$: onSave$.asObservable(),
+        changeSourceTracker: initializeChangeSourceTracker(),
       });
 
       unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
@@ -234,6 +237,7 @@ describe('unsavedChangesManager', () => {
         approximationManager: approximationManagerMock,
         setState: setStateMock,
         onSave$: onSave$.asObservable(),
+        changeSourceTracker: initializeChangeSourceTracker(),
       });
 
       unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
@@ -268,6 +272,7 @@ describe('unsavedChangesManager', () => {
         approximationManager: customApproximationManagerMock,
         setState: setStateMock,
         onSave$: onSave$.asObservable(),
+        changeSourceTracker: initializeChangeSourceTracker(),
       });
 
       unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
@@ -292,8 +297,9 @@ describe('unsavedChangesManager', () => {
       storeUnsavedChanges?: boolean;
       initialChangeSources?: DashboardChangeSource[];
       setState?: (state: DashboardState) => Promise<void>;
-    } = {}) =>
-      initializeUnsavedChangesManager({
+    } = {}) => {
+      const changeSourceTracker = initializeChangeSourceTracker(initialChangeSources);
+      const manager = initializeUnsavedChangesManager({
         viewMode$,
         storeUnsavedChanges,
         lastSavedState: DEFAULT_DASHBOARD_STATE,
@@ -305,8 +311,10 @@ describe('unsavedChangesManager', () => {
         approximationManager: approximationManagerMock,
         setState,
         onSave$: onSave$.asObservable(),
-        initialChangeSources,
+        changeSourceTracker,
       });
+      return { ...manager, changeSourceTracker };
+    };
 
     const emitLayoutChanges = (changes: { panels?: DashboardState['panels'] }) => {
       layoutUnsavedChanges$.next(changes);
@@ -314,20 +322,20 @@ describe('unsavedChangesManager', () => {
     };
 
     const finishSave = (
-      changeSourceVersions: ChangeSourceVersions,
+      latestChangeBySource: LatestChangeBySource,
       panels: DashboardState['panels'] = [agentPanel]
     ) =>
       onSave$.next({
         previousDashboardId: 'dashboard1234',
         dashboardId: 'dashboard1234',
         dashboardState: { ...DEFAULT_DASHBOARD_STATE, panels },
-        changeSourceVersions,
+        latestChangeBySource,
       });
 
     const save = (
-      { internalApi }: ReturnType<typeof createManager>,
+      { changeSourceTracker }: ReturnType<typeof createManager>,
       panels: DashboardState['panels'] = [agentPanel]
-    ) => finishSave(internalApi.getChangeSourceVersions(), panels);
+    ) => finishSave(changeSourceTracker.getLatestChanges(), panels);
 
     const savedEvent = (changeSources?: string[]) => [
       'dashboard_saved',
@@ -353,7 +361,7 @@ describe('unsavedChangesManager', () => {
 
     it('reports restored and added sources once on the next save, then clears them', () => {
       const manager = createManager({ initialChangeSources: ['agent'] });
-      manager.internalApi.addChangeSources(['agent']);
+      manager.changeSourceTracker.recordChange(['agent']);
       emitLayoutChanges({ panels: [agentPanel] });
 
       save(manager);
@@ -365,9 +373,9 @@ describe('unsavedChangesManager', () => {
     it('reports sources added during a save on the following save', () => {
       const manager = createManager();
 
-      const versionsInSave = manager.internalApi.getChangeSourceVersions();
-      manager.internalApi.addChangeSources(['agent']);
-      finishSave(versionsInSave);
+      const latestChangesInSave = manager.changeSourceTracker.getLatestChanges();
+      manager.changeSourceTracker.recordChange(['agent']);
+      finishSave(latestChangesInSave);
       save(manager);
 
       expect(reportEventMock.mock.calls).toEqual([savedEvent(), savedEvent(['agent'])]);
@@ -375,7 +383,7 @@ describe('unsavedChangesManager', () => {
 
     it('keeps sources when edits return to the last saved state', () => {
       const manager = createManager();
-      manager.internalApi.addChangeSources(['agent']);
+      manager.changeSourceTracker.recordChange(['agent']);
       emitLayoutChanges({ panels: [agentPanel] });
       emitLayoutChanges({});
 
@@ -400,7 +408,7 @@ describe('unsavedChangesManager', () => {
       });
 
       const reset = manager.api.asyncResetToLastSavedState();
-      manager.internalApi.addChangeSources(['agent']);
+      manager.changeSourceTracker.recordChange(['agent']);
       finishReset();
       await reset;
       save(manager);
@@ -411,7 +419,7 @@ describe('unsavedChangesManager', () => {
     it('backs up the sources of unsaved changes', () => {
       const manager = createManager({ storeUnsavedChanges: true });
 
-      manager.internalApi.addChangeSources(['agent']);
+      manager.changeSourceTracker.recordChange(['agent']);
       emitLayoutChanges({ panels: [agentPanel] });
 
       expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', {
@@ -431,7 +439,7 @@ describe('unsavedChangesManager', () => {
         panels: [agentPanel, userPanel],
       });
 
-      manager.internalApi.addChangeSources(['agent']);
+      manager.changeSourceTracker.recordChange(['agent']);
       emitLayoutChanges({ panels: [agentPanel] });
       expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', {
         viewMode: 'edit',
@@ -478,7 +486,7 @@ describe('unsavedChangesManager', () => {
             previousDashboardId: 'dashboard1234',
             dashboardId: 'dashboard1234',
             dashboardState: { ...DEFAULT_DASHBOARD_STATE, panels: [userPanel] },
-            changeSourceVersions: { agent: 1 },
+            latestChangeBySource: { agent: 1 },
           },
         ],
       ]);
@@ -500,12 +508,13 @@ describe('unsavedChangesManager', () => {
         approximationManager: approximationManagerMock,
         setState: setStateMock,
         onSave$: onSave$.asObservable(),
+        changeSourceTracker: initializeChangeSourceTracker(),
       });
       const saveEvent = {
         previousDashboardId: 'dashboard-a',
         dashboardId: 'dashboard-b',
         dashboardState: currentState,
-        changeSourceVersions: {},
+        latestChangeBySource: {},
       };
 
       onSave$.next(saveEvent);

@@ -15,7 +15,7 @@ import { waitFor } from '@testing-library/react';
 const makeSetup = async () => {
   const initialState: DashboardHistoryState = {
     ...getSampleDashboardState(),
-    changeSourceVersions: {},
+    latestChangeBySource: {},
   };
   // Mutable ref so getState's implementation is never replaced (mockReturnValue would drop the
   // getStateCalled$.next() side-effect; updating stateRef keeps the implementation intact).
