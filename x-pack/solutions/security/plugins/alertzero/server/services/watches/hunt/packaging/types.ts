@@ -63,7 +63,7 @@ export interface HuntEvidenceSummary {
 }
 
 /** Whether the query a coverage KI carries matched anything in the hunt window. */
-export type EsqlStatus = 'executed_hit' | 'executed_no_rows';
+export type EsqlStatus = 'executed_hit' | 'executed_no_rows' | 'executed_inconclusive';
 
 /** One Tier 2 behavior that executed, normalized from the coordinator result or an SSE. */
 export interface CoverageBehavior {
@@ -77,6 +77,8 @@ export interface CoverageBehavior {
   validatedEsql: string;
   rowCount: number;
   hit: boolean;
+  /** Why a `hit: false` execution is not evidence of absence (rows it could not evaluate). */
+  inconclusiveReason?: string;
 }
 
 /** The coordinator result packaging is handed because a clean run leaves no SSE to read it from. */

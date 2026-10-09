@@ -229,6 +229,10 @@ export const runPackageReport = async ({
             logger: deps.logger,
           })
         : undefined;
+      const dismissHold = await resolveDismissHold(
+        deps.hasOpenProposal,
+        investigationConversationId
+      );
       const subjects = deriveCleanCoverageSubjects({
         spaceId,
         reportId,
@@ -238,14 +242,11 @@ export const runPackageReport = async ({
         investigationSummary: buildCleanInvestigationSummary({
           inputs: coordinator,
           reportContext,
+          dismissHold,
         }),
         investigationConversationId,
       });
       const coverage = await deps.writeCoverageKis(subjects);
-      const dismissHold = await resolveDismissHold(
-        deps.hasOpenProposal,
-        investigationConversationId
-      );
       return {
         status: 'packaged',
         coverage,
@@ -305,19 +306,6 @@ export const runPackageReport = async ({
           logger: deps.logger,
         })
       : undefined;
-  const subjects = deriveCoverageSubjects({
-    spaceId,
-    state: {
-      ...state,
-      severity: state.severity ?? reportContext?.severity,
-      investigationSummary: buildInvestigationSummary({ state, decided }),
-      coordinator,
-      reportContext,
-    },
-    investigationConversationId,
-  });
-  const coverage = await deps.writeCoverageKis(subjects);
-
   const dismissHold: DismissHold = decided.dismiss
     ? await resolveDismissHold(deps.hasOpenProposal, investigationConversationId)
     : 'none';
@@ -340,6 +328,26 @@ export const runPackageReport = async ({
     }
   }
   const proposals = mintSuppression === 'none' ? decided.proposals : [];
+
+  // Written once the proposal outcome is known, so the summary describes what was minted: a run
+  // the existing-Proposal guard suppressed proposed nothing, and one held open was not dismissed.
+  const subjects = deriveCoverageSubjects({
+    spaceId,
+    state: {
+      ...state,
+      severity: state.severity ?? reportContext?.severity,
+      investigationSummary: buildInvestigationSummary({
+        state,
+        decided: { dismiss: decided.dismiss, proposals },
+        mintSuppression,
+        dismissHold,
+      }),
+      coordinator,
+      reportContext,
+    },
+    investigationConversationId,
+  });
+  const coverage = await deps.writeCoverageKis(subjects);
 
   // Threaded through to the packaging workflow's per-Proposal gate fan-out as a plain
   // workflow input (`hunt_package_report.yaml`'s `dispatch_gate` step) — the settlement

@@ -139,6 +139,36 @@ describe('deriveCleanCoverageSubjects', () => {
     expect(deriveCleanCoverageSubjects(defaultArgs).every((s) => !s.hasConfirmedHit)).toBe(true);
   });
 
+  describe('with an execution whose rows could not be evaluated', () => {
+    const inconclusiveArgs = {
+      ...defaultArgs,
+      inputs: {
+        ...inputs,
+        behaviors: (inputs.behaviors ?? []).map((behavior) => ({
+          ...behavior,
+          execution: {
+            executed: true,
+            row_count: 0,
+            hit: false,
+            inconclusive_reason: 'rows_unclassifiable',
+          },
+        })),
+      },
+    };
+
+    it('does not tell Detection that nothing matched', () => {
+      expect(deriveCleanCoverageSubjects(inconclusiveArgs)[0].esqlStatus).toBe(
+        'executed_inconclusive'
+      );
+    });
+
+    it('says in content that the rows could not be evaluated', () => {
+      expect(deriveCleanCoverageSubjects(inconclusiveArgs)[0].content).toContain(
+        'ES|QL: executed_inconclusive, rows could not be evaluated'
+      );
+    });
+  });
+
   describe('without coordinator inputs', () => {
     const noInputs = { ...defaultArgs, inputs: {} };
 

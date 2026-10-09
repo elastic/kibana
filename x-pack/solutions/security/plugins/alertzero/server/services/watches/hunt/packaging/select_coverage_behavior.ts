@@ -31,6 +31,9 @@ export const toCoverageBehaviors = (behaviors: PackageReportBehavior[]): Coverag
             validatedEsql: behavior.validated_esql,
             rowCount: behavior.execution.row_count,
             hit: behavior.execution.hit,
+            ...(behavior.execution.inconclusive_reason
+              ? { inconclusiveReason: behavior.execution.inconclusive_reason }
+              : {}),
           },
         ]
       : []
@@ -75,7 +78,13 @@ export const selectCoverageBehavior = ({
   }
   return {
     validatedEsql,
-    esqlStatus: best.hit ? 'executed_hit' : 'executed_no_rows',
+    // `hit: false` alone is ambiguous: an execution whose rows the hunt could not evaluate is
+    // "could not tell", not "nothing matched", and Detection must not read it as the latter.
+    esqlStatus: best.hit
+      ? 'executed_hit'
+      : best.inconclusiveReason
+      ? 'executed_inconclusive'
+      : 'executed_no_rows',
     behavior: best,
   };
 };

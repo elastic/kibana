@@ -33,6 +33,11 @@ const esqlLine = ({
       ? `ES|QL: omitted: query exceeds the ${MAX_VALIDATED_ESQL_CHARS} character limit`
       : 'ES|QL: omitted: no behavior executed';
   }
+  if (selected.esqlStatus === 'executed_inconclusive') {
+    return `ES|QL: executed_inconclusive, rows could not be evaluated${
+      formatWindow(window) ? `, ${formatWindow(window)}` : ''
+    }`;
+  }
   const parts = [
     selected.esqlStatus,
     `${selected.behavior.rowCount} ${selected.behavior.rowCount === 1 ? 'row' : 'rows'}`,

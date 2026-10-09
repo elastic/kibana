@@ -227,11 +227,20 @@ export const resolveTier2Targets = async ({
 
   const intent = uniq([...constrainedReportMatches, ...constrainedModelMatches]);
   const boundedIntent = boundTargetPatterns(intent);
-  const reportIntentTargets = !boundedIntent.fits
+  const intentExpanded = !boundedIntent.fits
     ? []
     : boundedIntent.collapsed
     ? constrainToUniverse(boundedIntent.patterns)
     : boundedIntent.patterns;
+  // Universe narrowing can trade a collapsed dataset pattern back for its streams, so the bound
+  // is checked again, as it is for `tier2_targets`. The route and the packaging step both cap
+  // this list, so one that no longer fits would make the whole coordinator result invalid.
+  const reportIntentTargets = fitsRequestPath(intentExpanded) ? intentExpanded : [];
+  if (intentExpanded.length > 0 && reportIntentTargets.length === 0) {
+    logger?.warn(
+      `Hunt report-intent targets grew to ${intentExpanded.length} stream pattern(s) after the universe check, more than a request may carry; none are reported this run`
+    );
+  }
   const contributing = bySource.filter(([, patterns]) => patterns.length > 0);
   const union = uniq(contributing.flatMap(([, patterns]) => patterns));
   if (union.length === 0) {

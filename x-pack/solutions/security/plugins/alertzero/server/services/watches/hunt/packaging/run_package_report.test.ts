@@ -345,6 +345,28 @@ describe('runPackageReport', () => {
       expect(subjects.map((subject) => subject.severity)).toEqual(subjects.map(() => 'high'));
     });
 
+    it('does not claim actions were proposed when the existing-Proposal guard suppressed the mint', async () => {
+      await runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus: 'success',
+        hasConfirmedHit: true,
+        attachments: [sseAttachment({ hit: true, hostName: 'h1' })],
+        expectedSseCount: 1,
+        deps: deps({
+          writeCoverageKis,
+          getEsReportContextClient,
+          countExistingProposals: async () => 1,
+        }),
+      });
+
+      expect(writeCoverageKis.mock.calls[0][0][0].investigationSummary).toContain(
+        'Packaging: no new proposals, the Investigation already has proposals from an earlier run'
+      );
+    });
+
     it('keeps the full investigation summary on the written subjects', async () => {
       await cleanRun();
 

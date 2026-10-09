@@ -85,15 +85,56 @@ const assembleSummary = ({
 };
 
 /**
+ * The packaging outcome, from what was actually minted rather than what was decided: a run the
+ * existing-Proposal guard suppressed proposed nothing, and one held open was not dismissed.
+ */
+const packagingLine = ({
+  decided,
+  mintSuppression,
+  dismissHold,
+  proposalTitles,
+}: {
+  decided: Pick<DecidePackageReportResult, 'dismiss' | 'proposals'>;
+  mintSuppression: 'none' | 'existing_proposals' | 'check_failed';
+  dismissHold: 'none' | 'open_proposal' | 'check_failed';
+  proposalTitles: string[];
+}): string => {
+  if (mintSuppression === 'existing_proposals') {
+    return 'Packaging: no new proposals, the Investigation already has proposals from an earlier run';
+  }
+  if (mintSuppression === 'check_failed') {
+    return 'Packaging: no new proposals, existing proposals could not be checked';
+  }
+  if (decided.dismiss && dismissHold === 'open_proposal') {
+    return 'Packaging: no new proposals, left open for a pending proposal from an earlier run';
+  }
+  if (decided.dismiss && dismissHold === 'check_failed') {
+    return 'Packaging: no new proposals, left open because existing proposals could not be checked';
+  }
+  if (decided.dismiss || decided.proposals.length === 0)
+    return 'Packaging: dismissed, no proposals';
+  const count = decided.proposals.length;
+  return `Packaging: proposed ${count} ${count === 1 ? 'action' : 'actions'}${
+    proposalTitles.length > 0 ? `: ${proposalTitles.join('; ')}` : ''
+  }`;
+};
+
+/**
  * What this hunt run did, for a run that confirmed a hit. Unlike the Investigation's closing
  * line it keeps every deduped evidence line and the full host and user names.
  */
 export const buildInvestigationSummary = ({
   state,
   decided,
+  mintSuppression = 'none',
+  dismissHold = 'none',
 }: {
   state: CurrentRunState;
   decided: Pick<DecidePackageReportResult, 'dismiss' | 'proposals'>;
+  /** Why this run minted nothing even though it found something to propose. */
+  mintSuppression?: 'none' | 'existing_proposals' | 'check_failed';
+  /** Why a run that would dismiss left the Investigation open instead. */
+  dismissHold?: 'none' | 'open_proposal' | 'check_failed';
 }): string => {
   const hitSources = [
     ...((state.evidence.tier1HitCount ?? 0) > 0 ? ['tier1'] : []),
@@ -118,11 +159,7 @@ export const buildInvestigationSummary = ({
     ...(corroborated.length > 0 ? [`Techniques corroborated: ${corroborated.join(', ')}`] : []),
     ...(hosts.length > 0 ? [`Hosts: ${hosts.join(', ')}`] : []),
     ...(state.users.length > 0 ? [`Users: ${state.users.join(', ')}`] : []),
-    decided.dismiss || decided.proposals.length === 0
-      ? 'Packaging: dismissed, no proposals'
-      : `Packaging: proposed ${decided.proposals.length} ${
-          decided.proposals.length === 1 ? 'action' : 'actions'
-        }${proposalTitles.length > 0 ? `: ${proposalTitles.join('; ')}` : ''}`,
+    packagingLine({ decided, mintSuppression, dismissHold, proposalTitles }),
   ];
   // Evidence sits after the entity sections and before the packaging line.
   return assembleSummary({
@@ -136,9 +173,11 @@ export const buildInvestigationSummary = ({
 export const buildCleanInvestigationSummary = ({
   inputs,
   reportContext,
+  dismissHold = 'none',
 }: {
   inputs: CoordinatorInputs;
   reportContext?: ReportHuntContext;
+  dismissHold?: 'none' | 'open_proposal' | 'check_failed';
 }): string => {
   const executed = toCoverageBehaviors(inputs.behaviors ?? []);
   const sections = [
@@ -150,13 +189,20 @@ export const buildCleanInvestigationSummary = ({
             .map(
               (behavior) =>
                 `${techniqueLabel(behavior.techniqueId, behavior.techniqueName)} (${
-                  behavior.rowCount
-                } ${behavior.rowCount === 1 ? 'row' : 'rows'})`
+                  behavior.inconclusiveReason
+                    ? 'inconclusive'
+                    : `${behavior.rowCount} ${behavior.rowCount === 1 ? 'row' : 'rows'}`
+                })`
             )
             .join(', ')}`,
         ]
       : []),
-    'Packaging: dismissed, no proposals',
+    packagingLine({
+      decided: { dismiss: true, proposals: [] },
+      mintSuppression: 'none',
+      dismissHold,
+      proposalTitles: [],
+    }),
   ];
   return assembleSummary({ sections, evidenceLines: [], evidenceIndex: sections.length });
 };

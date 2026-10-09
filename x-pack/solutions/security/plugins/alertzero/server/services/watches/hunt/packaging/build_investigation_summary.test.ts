@@ -113,7 +113,80 @@ describe('buildInvestigationSummary', () => {
   });
 });
 
+describe('buildInvestigationSummary packaging outcome', () => {
+  it.each([
+    [
+      'the existing-Proposal guard suppressed the mint',
+      { mintSuppression: 'existing_proposals' as const },
+      'Packaging: no new proposals, the Investigation already has proposals from an earlier run',
+    ],
+    [
+      'the existing-Proposal check failed',
+      { mintSuppression: 'check_failed' as const },
+      'Packaging: no new proposals, existing proposals could not be checked',
+    ],
+  ])('says no new proposals when %s', (_label, args, expected) => {
+    expect(
+      buildInvestigationSummary({
+        state: state(),
+        decided: { dismiss: false, proposals: [] },
+        ...args,
+      })
+    ).toContain(expected);
+  });
+
+  it('does not claim actions were proposed when the mint was suppressed', () => {
+    expect(
+      buildInvestigationSummary({
+        state: state(),
+        decided: { dismiss: false, proposals: [] },
+        mintSuppression: 'existing_proposals',
+      })
+    ).not.toContain('proposed');
+  });
+
+  it('says the Investigation was left open when a dismissal was held for a pending proposal', () => {
+    expect(
+      buildInvestigationSummary({
+        state: state(),
+        decided: { dismiss: true, proposals: [] },
+        dismissHold: 'open_proposal',
+      })
+    ).toContain(
+      'Packaging: no new proposals, left open for a pending proposal from an earlier run'
+    );
+  });
+});
+
 describe('buildCleanInvestigationSummary', () => {
+  it('says the Investigation was left open when a pending proposal holds it', () => {
+    expect(buildCleanInvestigationSummary({ inputs: {}, dismissHold: 'open_proposal' })).toContain(
+      'left open for a pending proposal'
+    );
+  });
+
+  it('describes an inconclusive execution as inconclusive rather than 0 rows', () => {
+    expect(
+      buildCleanInvestigationSummary({
+        inputs: {
+          behaviors: [
+            {
+              technique_id: 'T1110.003',
+              confidence: 0.9,
+              validated_esql: 'FROM logs-aws.cloudtrail-* | LIMIT 5',
+              execution: {
+                executed: true,
+                row_count: 0,
+                hit: false,
+                inconclusive_reason: 'rows_unclassifiable',
+              },
+            },
+          ],
+        },
+      })
+    ).toContain('T1110.003 (inconclusive)');
+  });
+
   it('states a clean outcome', () => {
     expect(buildCleanInvestigationSummary({ inputs: {} })).toContain('Outcome: no confirmed hits.');
   });

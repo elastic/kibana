@@ -66,6 +66,9 @@ const toFinding = (sse: ParsedSse): CurrentRunFinding => ({
             validatedEsql: behavior.validated_esql,
             rowCount: behavior.execution.row_count,
             hit: behavior.execution.hit,
+            ...(behavior.execution.inconclusive_reason
+              ? { inconclusiveReason: behavior.execution.inconclusive_reason }
+              : {}),
           },
         ]
       : []

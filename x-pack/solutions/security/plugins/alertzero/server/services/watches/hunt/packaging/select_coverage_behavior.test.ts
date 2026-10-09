@@ -71,6 +71,37 @@ describe('selectCoverageBehavior', () => {
     expect(selectCoverageBehavior({ behaviors: [behavior()] }).esqlStatus).toBe('executed_no_rows');
   });
 
+  it('returns executed_inconclusive when the rows could not be evaluated', () => {
+    expect(
+      selectCoverageBehavior({
+        behaviors: [behavior({ inconclusiveReason: 'rows_unclassifiable' })],
+      }).esqlStatus
+    ).toBe('executed_inconclusive');
+  });
+
+  it('returns executed_hit for a hit even when its document refs were unavailable', () => {
+    expect(
+      selectCoverageBehavior({
+        behaviors: [behavior({ hit: true, rowCount: 2, inconclusiveReason: 'refs_unavailable' })],
+      }).esqlStatus
+    ).toBe('executed_hit');
+  });
+
+  it('carries the inconclusive reason through from the coordinator input', () => {
+    expect(
+      toCoverageBehaviors([
+        coordinatorBehavior({
+          execution: {
+            executed: true,
+            row_count: 0,
+            hit: false,
+            inconclusive_reason: 'rows_unclassifiable',
+          },
+        }),
+      ])[0].inconclusiveReason
+    ).toBe('rows_unclassifiable');
+  });
+
   it('returns executed_hit for a behavior that matched', () => {
     expect(
       selectCoverageBehavior({ behaviors: [behavior({ hit: true, rowCount: 2 })] }).esqlStatus

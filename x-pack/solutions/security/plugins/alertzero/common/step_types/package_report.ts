@@ -109,6 +109,7 @@ export const packageReportInputSchema = z.object({
             executed: z.boolean(),
             row_count: z.number(),
             hit: z.boolean(),
+            inconclusive_reason: z.string().max(64).optional(),
           })
           .optional(),
       })

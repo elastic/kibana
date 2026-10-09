@@ -49,6 +49,25 @@ describe('packageReportInputSchema coordinator results', () => {
     ).toBe(true);
   });
 
+  it('accepts an inconclusive reason on a behavior execution', () => {
+    expect(
+      packageReportInputSchema.safeParse({
+        ...defaultInput,
+        behaviors: [
+          {
+            ...behavior,
+            execution: {
+              executed: true,
+              row_count: 0,
+              hit: false,
+              inconclusive_reason: 'rows_unclassifiable',
+            },
+          },
+        ],
+      }).success
+    ).toBe(true);
+  });
+
   it('strips fields it does not declare, such as raw hit documents', () => {
     expect(
       packageReportInputSchema.parse({

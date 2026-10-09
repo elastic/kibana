@@ -326,14 +326,41 @@ describe('Hunt Watch worker chain', () => {
       ).toEqual([]);
     });
 
-    it('reads behaviors from the coordinator Tier 2 result', () => {
+    const behaviorsOutput = (behaviors: unknown[]) =>
+      evaluateExpression(resultVariables().result_behaviors as string, {
+        steps: { run_hunt_coordinator: { output: { tier2: { behaviors } } } },
+      });
+    const executedBehavior = (technique_id: string) => ({
+      technique_id,
+      execution: { executed: true, row_count: 0, hit: false },
+    });
+
+    it('reads the executed behaviors from the coordinator Tier 2 result', () => {
+      expect(behaviorsOutput([executedBehavior('T1110')])).toEqual([executedBehavior('T1110')]);
+    });
+
+    it('leaves out behaviors that did not execute', () => {
       expect(
-        evaluateExpression(resultVariables().result_behaviors as string, {
-          steps: {
-            run_hunt_coordinator: { output: { tier2: { behaviors: [{ technique_id: 'T1110' }] } } },
-          },
-        })
-      ).toEqual([{ technique_id: 'T1110' }]);
+        behaviorsOutput([
+          { technique_id: 'T1078' },
+          { technique_id: 'T1059', execution: { executed: false, row_count: 0, hit: false } },
+          executedBehavior('T1110'),
+        ])
+      ).toEqual([executedBehavior('T1110')]);
+    });
+
+    it('keeps an executed behavior that follows more than 20 unexecuted ones', () => {
+      const unexecuted = Array.from({ length: 25 }, (_, i) => ({ technique_id: `T${i}` }));
+
+      expect(behaviorsOutput([...unexecuted, executedBehavior('T1110')])).toEqual([
+        executedBehavior('T1110'),
+      ]);
+    });
+
+    it('caps the executed behaviors at the 20 packaging accepts', () => {
+      const executed = Array.from({ length: 25 }, (_, i) => executedBehavior(`T${i}`));
+
+      expect((behaviorsOutput(executed) as unknown[]).length).toBe(20);
     });
 
     it('forwards the report-intent targets and behaviors from the hunt output into the packaging call', () => {

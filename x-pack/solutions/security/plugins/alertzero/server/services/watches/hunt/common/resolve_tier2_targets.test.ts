@@ -431,6 +431,39 @@ describe('resolveTier2Targets', () => {
         expect.objectContaining({ tier2_targets: [], tier2_target_sources: [], degraded: true })
       );
     });
+
+    it('drops the report-intent targets too when the same re-expansion grows past the request-path limit', async () => {
+      const vendorDatasetCount = MAX_SCOPE_TARGETS / 2;
+      const vendorMatches = Array.from({ length: vendorDatasetCount }, (_, index) => [
+        `logs-vendor${index}.stream-default*`,
+        `logs-vendor${index}.stream-prod*`,
+        `logs-vendor${index}.stream-staging*`,
+      ]).flat();
+
+      // Discovery found 40 namespaces for this dataset — none of them 'prod' — so
+      // narrowing back out of the dataset-wide collapse re-expands to all 40.
+      const manyStreams = Array.from({ length: 40 }, (_, index) => `logs-okta.system-ns${index}`);
+      const oktaManyStreams: DiscoveredDataset = {
+        index_pattern: 'logs-okta.system-*',
+        dataset: 'okta.system',
+        vendor: 'okta',
+        data_streams: manyStreams,
+        search_patterns: manyStreams.map((stream) => `${stream}*`),
+      };
+
+      const result = await resolveTier2Targets({
+        scope: {
+          ...emptyScope,
+          report_matches: [...vendorMatches, 'logs-okta.system-ns0*'],
+          discovered: [oktaManyStreams],
+          index_patterns: ['logs-*', '-logs-okta.system-prod*'],
+        },
+        tier1: hits(),
+        logger,
+      });
+
+      expect(result.report_intent_targets).toEqual([]);
+    });
   });
 
   it('returns empty, not degraded, when every signal is empty', async () => {
