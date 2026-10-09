@@ -21,31 +21,46 @@ import { UISchemas, type ConnectorSpec } from '../../connector_spec';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import type {
   CallToolInput,
-  GetEscalationPolicyInput,
-  GetIncidentInput,
-  GetScheduleInput,
-  GetTeamInput,
-  ListEscalationPoliciesInput,
-  ListIncidentsInput,
-  ListOncallsInput,
-  ListSchedulesInput,
-  ListTeamsInput,
-  ListUsersInput,
+  BrowseIncidentsInput,
+  BrowseServicesInput,
+  BrowseSchedulesInput,
+  BrowseTeamsInput,
+  BrowseUsersInput,
+  BrowseEscalationPoliciesInput,
+  BrowseEventOrchestrationsInput,
+  BrowseAlertGroupingInput,
+  BrowseChangeEventsInput,
+  BrowseStatusPagesInput,
+  BrowseActivityInput,
+  ManageIncidentsInput,
+  ManageServicesInput,
+  ManageSchedulesInput,
+  ManageTeamsInput,
+  ManageEventOrchestrationsInput,
+  ManageAlertGroupingInput,
+  ManageStatusPagesInput,
 } from './types';
 import {
-  ListToolsInputSchema,
-  GetUserDataInputSchema,
-  ListSchedulesInputSchema,
-  ListEscalationPoliciesInputSchema,
-  ListIncidentsInputSchema,
-  ListOncallsInputSchema,
-  ListUsersInputSchema,
-  ListTeamsInputSchema,
-  GetScheduleInputSchema,
-  GetIncidentInputSchema,
-  GetEscalationPolicyInputSchema,
-  GetTeamInputSchema,
   CallToolInputSchema,
+  ListToolsInputSchema,
+  BrowseIncidentsInputSchema,
+  BrowseServicesInputSchema,
+  BrowseSchedulesInputSchema,
+  BrowseTeamsInputSchema,
+  BrowseUsersInputSchema,
+  BrowseEscalationPoliciesInputSchema,
+  BrowseEventOrchestrationsInputSchema,
+  BrowseAlertGroupingInputSchema,
+  BrowseChangeEventsInputSchema,
+  BrowseStatusPagesInputSchema,
+  BrowseActivityInputSchema,
+  ManageIncidentsInputSchema,
+  ManageServicesInputSchema,
+  ManageSchedulesInputSchema,
+  ManageTeamsInputSchema,
+  ManageEventOrchestrationsInputSchema,
+  ManageAlertGroupingInputSchema,
+  ManageStatusPagesInputSchema,
 } from './types';
 
 const PAGERDUTY_MCP_SERVER_URL = 'https://mcp.pagerduty.com/mcp';
@@ -107,113 +122,183 @@ export const PagerdutyConnector: ConnectorSpec = {
   },
 
   actions: {
-    getUserData: {
+    browseUsers: {
       isTool: true,
       description:
-        'Return the current PagerDuty user — i.e. the account that owns the API key. Returns id, name, email, summary, role, and teams. No inputs required. Use this to confirm which user the connector is authenticated as.',
-      input: GetUserDataInputSchema,
-      handler: async (ctx) => {
-        return callToolJson(ctx, 'get_user_data');
+        "Read PagerDuty users. Set request.action to get (the current authenticated user's profile; no other fields) or list (optional query and team_ids).",
+      input: BrowseUsersInputSchema,
+      handler: async (ctx, input: BrowseUsersInput) => {
+        return callToolJson(ctx, 'browse_users', input);
       },
     },
 
-    listSchedules: {
+    manageIncidents: {
       isTool: true,
       description:
-        'List PagerDuty on-call schedules. Supports free-text search across name and description fields (e.g., "primary" or "weekend"), filtering by team or user IDs, and including related resources such as schedule_layers, overrides_subschedule, or final_schedule.',
-      input: ListSchedulesInputSchema,
-      handler: async (ctx, input: ListSchedulesInput) => {
-        return callToolJson(ctx, 'list_schedules', { query_model: input });
+        'Modify PagerDuty incidents. Set request.action to create (incident.title and incident.service.id), update (manage_request.incident_ids with status acknowledged or resolved, urgency, assignment, or escalation_level), add_note, add_responders, or start_workflow.',
+      input: ManageIncidentsInputSchema,
+      handler: async (ctx, input: ManageIncidentsInput) => {
+        return callToolJson(ctx, 'manage_incidents', input);
       },
     },
 
-    listEscalationPolicies: {
+    browseServices: {
       isTool: true,
       description:
-        'List PagerDuty escalation policies. Supports free-text search across name and description fields (e.g., "production" or "on-call"), and filtering by user or team IDs. Returns each policy\'s escalation rules, targets, associated services, and teams.',
-      input: ListEscalationPoliciesInputSchema,
-      handler: async (ctx, input: ListEscalationPoliciesInput) => {
-        return callToolJson(ctx, 'list_escalation_policies', { query_model: input });
+        'Read PagerDuty services. Set request.action to list (optional query and team_ids) or get (service_id). Use list to find a service ID before creating an incident.',
+      input: BrowseServicesInputSchema,
+      handler: async (ctx, input: BrowseServicesInput) => {
+        return callToolJson(ctx, 'browse_services', input);
       },
     },
 
-    listIncidents: {
+    manageServices: {
       isTool: true,
       description:
-        'List PagerDuty incidents. Supports filtering by status (triggered, acknowledged, resolved), service IDs, user IDs, urgency, and date range. Dates use ISO 8601 format. Results can be scoped to all incidents, team incidents, or those assigned to the current user. Supports sorting by incident_number, created_at, resolved_at, or urgency.',
-      input: ListIncidentsInputSchema,
-      handler: async (ctx, input: ListIncidentsInput) => {
-        return callToolJson(ctx, 'list_incidents', { query_model: input });
+        'Create or update PagerDuty services. Set request.action to create (service_data.service with name and escalation_policy.id) or update (service_id and service_data).',
+      input: ManageServicesInputSchema,
+      handler: async (ctx, input: ManageServicesInput) => {
+        return callToolJson(ctx, 'manage_services', input);
       },
     },
 
-    listOncalls: {
+    browseSchedules: {
       isTool: true,
       description:
-        'Get current on-call assignments in PagerDuty. Use this to find who is currently on call for specific schedules or escalation policies. Supports filtering by schedule IDs, user IDs, or escalation policy IDs, and time range queries using ISO 8601 dates. Set earliest=true to return only the first on-call entry per user+policy combination.',
-      input: ListOncallsInputSchema,
-      handler: async (ctx, input: ListOncallsInput) => {
-        return callToolJson(ctx, 'list_oncalls', { query_model: input });
+        'Read PagerDuty schedules and on-call data. Set request.action to list, get, list_users, list_oncalls (who is on call, filterable by schedule, user, escalation policy, or service), or, for shift-based (v3) schedules, list_rotations, get_rotation, list_rotation_events, get_rotation_event, list_custom_shifts, get_custom_shift, list_overrides, get_override.',
+      input: BrowseSchedulesInputSchema,
+      handler: async (ctx, input: BrowseSchedulesInput) => {
+        return callToolJson(ctx, 'browse_schedules', input);
       },
     },
 
-    listUsers: {
+    browseEscalationPolicies: {
       isTool: true,
       description:
-        "List PagerDuty users. Supports free-text search across name and email fields. Returns each user's id, name, email, summary, and role.",
-      input: ListUsersInputSchema,
-      handler: async (ctx, input: ListUsersInput) => {
-        return callToolJson(ctx, 'list_users', { query_model: input });
+        'Read PagerDuty escalation policies. Set request.action to list (optional query, user_ids, team_ids, include) or get (policy_id).',
+      input: BrowseEscalationPoliciesInputSchema,
+      handler: async (ctx, input: BrowseEscalationPoliciesInput) => {
+        return callToolJson(ctx, 'browse_escalation_policies', input);
       },
     },
 
-    listTeams: {
+    browseIncidents: {
       isTool: true,
       description:
-        "List PagerDuty teams. Supports free-text search across name and description fields. Returns each team's id, name, description, and summary.",
-      input: ListTeamsInputSchema,
-      handler: async (ctx, input: ListTeamsInput) => {
-        return callToolJson(ctx, 'list_teams', { query_model: input });
+        'Read PagerDuty incident data. Set request.action to one of: list (filter by request_scope, statuses, urgencies, priorities, service_ids, team_ids, since/until), get (incident_id), list_alerts, get_alert, list_notes, context (context_type: related, past, or outlier), list_change_events, list_workflows, get_workflow.',
+      input: BrowseIncidentsInputSchema,
+      handler: async (ctx, input: BrowseIncidentsInput) => {
+        return callToolJson(ctx, 'browse_incidents', input);
       },
     },
 
-    getSchedule: {
+    browseTeams: {
       isTool: true,
       description:
-        "Get a specific PagerDuty on-call schedule by its ID. Returns the schedule's name, description, time zone, schedule layers (including rotation settings and assigned users), and the list of users on the schedule.",
-      input: GetScheduleInputSchema,
-      handler: async (ctx, input: GetScheduleInput) => {
-        return callToolJson(ctx, 'get_schedule', { schedule_id: input.schedule_id });
+        'Read PagerDuty teams. Set request.action to list (scope all or my, optional query), get (team_id), or list_members (team_id).',
+      input: BrowseTeamsInputSchema,
+      handler: async (ctx, input: BrowseTeamsInput) => {
+        return callToolJson(ctx, 'browse_teams', input);
       },
     },
 
-    getIncident: {
+    manageSchedules: {
       isTool: true,
       description:
-        "Get a specific PagerDuty incident by its ID. Returns the incident's summary, status, urgency, service, current assignments (who is assigned and when), and creation/update timestamps.",
-      input: GetIncidentInputSchema,
-      handler: async (ctx, input: GetIncidentInput) => {
-        return callToolJson(ctx, 'get_incident', { incident_id: input.incident_id });
+        'Create, update, or delete PagerDuty schedules. Legacy (v2) schedules use create, update, and create_override. Shift-based (v3) schedules use create, update, delete_schedule_v3, create_rotation, delete_rotation, create_rotation_event, update_rotation_event, delete_rotation_event, create_custom_shifts, update_custom_shift, delete_custom_shift, create_overrides, update_override, and delete_override.',
+      input: ManageSchedulesInputSchema,
+      handler: async (ctx, input: ManageSchedulesInput) => {
+        return callToolJson(ctx, 'manage_schedules', input);
       },
     },
 
-    getEscalationPolicy: {
+    manageTeams: {
       isTool: true,
       description:
-        "Get a specific PagerDuty escalation policy by its ID. Returns the policy's name, description, escalation rules (with delay minutes and targets), associated services, and teams.",
-      input: GetEscalationPolicyInputSchema,
-      handler: async (ctx, input: GetEscalationPolicyInput) => {
-        return callToolJson(ctx, 'get_escalation_policy', { policy_id: input.policy_id });
+        'Create, update, or delete PagerDuty teams and membership. Set request.action to create, update, delete, add_member (member_data.user_id and role), or remove_member.',
+      input: ManageTeamsInputSchema,
+      handler: async (ctx, input: ManageTeamsInput) => {
+        return callToolJson(ctx, 'manage_teams', input);
       },
     },
 
-    getTeam: {
+    browseEventOrchestrations: {
       isTool: true,
       description:
-        "Get a specific PagerDuty team by its ID. Returns the team's id, name, description, and summary.",
-      input: GetTeamInputSchema,
-      handler: async (ctx, input: GetTeamInput) => {
-        return callToolJson(ctx, 'get_team', { team_id: input.team_id });
+        'Read PagerDuty event orchestrations. Set request.action to list, get (orchestration_id), get_router (orchestration_id), get_service (service_id), or get_global (orchestration_id).',
+      input: BrowseEventOrchestrationsInputSchema,
+      handler: async (ctx, input: BrowseEventOrchestrationsInput) => {
+        return callToolJson(ctx, 'browse_event_orchestrations', input);
+      },
+    },
+
+    manageEventOrchestrations: {
+      isTool: true,
+      description:
+        'Modify PagerDuty event orchestration routing. Set request.action to update_router (replaces the full router config) or append_router_rule (adds a rule to the end of the router).',
+      input: ManageEventOrchestrationsInputSchema,
+      handler: async (ctx, input: ManageEventOrchestrationsInput) => {
+        return callToolJson(ctx, 'manage_event_orchestrations', input);
+      },
+    },
+
+    browseAlertGrouping: {
+      isTool: true,
+      description:
+        'Read PagerDuty alert grouping settings. Set request.action to list (optional service_ids, cursor pagination with after/before) or get (setting_id).',
+      input: BrowseAlertGroupingInputSchema,
+      handler: async (ctx, input: BrowseAlertGroupingInput) => {
+        return callToolJson(ctx, 'browse_alert_grouping', input);
+      },
+    },
+
+    manageAlertGrouping: {
+      isTool: true,
+      description:
+        'Create, update, or delete PagerDuty alert grouping settings. Set request.action to create, update, or delete (setting_id).',
+      input: ManageAlertGroupingInputSchema,
+      handler: async (ctx, input: ManageAlertGroupingInput) => {
+        return callToolJson(ctx, 'manage_alert_grouping', input);
+      },
+    },
+
+    browseChangeEvents: {
+      isTool: true,
+      description:
+        'Read PagerDuty change events. Set request.action to list (filter by since/until, team_ids, integration_ids), get (change_event_id), or list_service (service_id).',
+      input: BrowseChangeEventsInputSchema,
+      handler: async (ctx, input: BrowseChangeEventsInput) => {
+        return callToolJson(ctx, 'browse_change_events', input);
+      },
+    },
+
+    browseStatusPages: {
+      isTool: true,
+      description:
+        'Read PagerDuty status pages. Set request.action to list, list_severities, list_impacts, list_statuses (each needs status_page_id), get_post, or list_post_updates (status_page_id and post_id). Use the severity, impact, and status IDs when creating posts.',
+      input: BrowseStatusPagesInputSchema,
+      handler: async (ctx, input: BrowseStatusPagesInput) => {
+        return callToolJson(ctx, 'browse_status_pages', input);
+      },
+    },
+
+    manageStatusPages: {
+      isTool: true,
+      description:
+        'Create status page posts and post updates. Set request.action to create_post (needs at least one update) or create_post_update.',
+      input: ManageStatusPagesInputSchema,
+      handler: async (ctx, input: ManageStatusPagesInput) => {
+        return callToolJson(ctx, 'manage_status_pages', input);
+      },
+    },
+
+    browseActivity: {
+      isTool: true,
+      description:
+        'Read PagerDuty account activity. Set request.action to list_log_entries (since/until default to the last 7 days) or get_log_entry (log_entry_id).',
+      input: BrowseActivityInputSchema,
+      handler: async (ctx, input: BrowseActivityInput) => {
+        return callToolJson(ctx, 'browse_activity', input);
       },
     },
 
@@ -259,37 +344,36 @@ export const PagerdutyConnector: ConnectorSpec = {
   skill: [
     '## PagerDuty Connector Usage Guide',
     '',
-    '### Identifying the Authenticated User (getUserData)',
+    '### Identifying the Authenticated User',
     '',
-    'Call `getUserData` with no inputs to retrieve the currently authenticated PagerDuty user.',
+    'Call `browseUsers` with `request.action` set to `get` to retrieve the currently authenticated PagerDuty user.',
     "This returns the user's id, name, email, summary, role, and team memberships.",
-    "Use this to confirm which account the connector is acting as, or to obtain the current user's ID for subsequent filtered queries.",
+    'Use this to confirm which account the connector is acting as.',
     '',
     '### Finding Who Is On Call',
     '',
     'To find who is currently on call for a named schedule:',
-    '1. Call `listSchedules` with a `query` matching the schedule name (e.g., "primary" or "database") to get candidate schedule IDs.',
-    '2. Call `listOncalls` with `schedule_ids` set to the IDs returned in step 1 to get the current on-call assignments.',
+    '1. Call `browseSchedules` (`list`) with a `query` matching the schedule name (e.g., "primary" or "database") to get candidate schedule IDs.',
+    '2. Call `browseSchedules` (`list_oncalls`) with `schedule_ids` set to the IDs returned in step 1 to get the current on-call assignments.',
     '',
-    'If you only need to know who is on call right now without knowing which schedule, call `listOncalls` directly with a `since`/`until` time range (ISO 8601 format) and optionally an `escalation_policy_ids` filter.',
+    'If you only need to know who is on call right now without knowing which schedule, call `browseSchedules` (`list_oncalls`) directly with a `since`/`until` time range (ISO 8601 format) and optionally an `escalation_policy_ids` filter.',
     'Set `earliest: true` to return only the first on-call entry per user+policy combination and reduce noise.',
     '',
     '### Investigating Incidents',
     '',
-    'To investigate incidents, use `listIncidents` with one or more of these filters:',
-    '- `status`: array of statuses — "triggered", "acknowledged", or "resolved"',
+    'To investigate incidents, use `browseIncidents` (`list`) with one or more of these filters:',
+    '- `statuses`: array of statuses — "triggered", "acknowledged", or "resolved"',
     '- `urgencies`: array — "high" or "low"',
     '- `since` / `until`: ISO 8601 date range to scope by creation time',
     '- `service_ids`: limit to specific services',
     '- `request_scope`: "all" (default), "teams", or "assigned" (incidents assigned to the current user)',
-    '- `sort_by`: array of sort fields with direction, e.g. ["created_at:desc"]',
     '',
-    'Once you have an incident ID from the list, call `getIncident` for full details including assignments, service, and timestamps.',
+    'Once you have an incident ID from the list, call `browseIncidents` (`get`) for full details including assignments, service, and timestamps.',
     '',
     '### Working with Escalation Policies',
     '',
     'To explore escalation policies:',
-    '1. Call `listEscalationPolicies` with an optional `query` (free-text name/description search) or `team_ids` / `user_ids` filters.',
-    '2. Use the returned IDs to call `getEscalationPolicy` for full details: escalation rules, delay minutes, targets, associated services, and teams.',
+    '1. Call `browseEscalationPolicies` (`list`) with an optional `query` (free-text name/description search) or `team_ids` / `user_ids` filters.',
+    '2. Use the returned IDs to call `browseEscalationPolicies` (`get`) for full details: escalation rules, delay minutes, targets, associated services, and teams.',
   ].join('\n'),
 };
