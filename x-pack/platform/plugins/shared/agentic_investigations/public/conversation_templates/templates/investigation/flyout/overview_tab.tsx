@@ -51,7 +51,7 @@ export const toOverviewSections = (
       />
     ) : undefined,
     conclusion,
-    trace:
+    reasoning:
       investigation && hypotheses.length > 0 ? (
         <HypothesisTreeCard
           input={{

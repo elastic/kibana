@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
 import type { FlyoutGroupedAttachmentsRegistry } from '../grouped_attachments';
@@ -47,8 +47,11 @@ export interface OverviewSections {
   impact?: React.ReactNode;
   /** The conclusion, as markdown. */
   conclusion?: string;
-  /** How the investigation got there: hypotheses and their evidence. */
-  trace?: React.ReactNode;
+  /**
+   * How the investigation got there, such as an entry point to its hypotheses. Shown right under
+   * the conclusion, in its section, or on its own while there is no conclusion yet.
+   */
+  reasoning?: React.ReactNode;
 }
 
 export const OverviewTab = memo<OverviewTabProps>(
@@ -60,7 +63,7 @@ export const OverviewTab = memo<OverviewTabProps>(
     proposedActionsCount,
     sections = {},
   }) => {
-    const { subjects, impact, conclusion, trace } = sections;
+    const { subjects, impact, conclusion, reasoning } = sections;
 
     return (
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -86,12 +89,24 @@ export const OverviewTab = memo<OverviewTabProps>(
           <ImpactSection attachments={attachments} />
         )}
 
-        {conclusion && (
+        {conclusion ? (
           <EuiFlexItem data-test-subj="investigationOverviewConclusion">
             <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.conclusion}>
               <EuiMarkdownFormat textSize="s">{conclusion}</EuiMarkdownFormat>
+              {reasoning && (
+                <>
+                  <EuiSpacer size="m" />
+                  <div data-test-subj="investigationOverviewReasoning">{reasoning}</div>
+                </>
+              )}
             </DetailsBlock>
           </EuiFlexItem>
+        ) : (
+          reasoning && (
+            <EuiFlexItem grow={false} data-test-subj="investigationOverviewReasoning">
+              {reasoning}
+            </EuiFlexItem>
+          )
         )}
 
         {proposedActionsContent && (
@@ -102,12 +117,6 @@ export const OverviewTab = memo<OverviewTabProps>(
             >
               {proposedActionsContent}
             </DetailsBlock>
-          </EuiFlexItem>
-        )}
-
-        {trace && (
-          <EuiFlexItem data-test-subj="investigationOverviewTrace">
-            <DetailsBlock title={OVERVIEW_SECTION_LABELS.trace}>{trace}</DetailsBlock>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
