@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export enum AddDataTabs {
+export enum UniversalProfilingAddDataTabs {
   Kubernetes = 'kubernetes',
   Docker = 'docker',
   Binary = 'binary',
@@ -15,14 +15,16 @@ export enum AddDataTabs {
   Symbols = 'symbols',
 }
 
-export interface AddDataStep {
+export const DEFAULT_UNIVERSAL_PROFILING_ADD_DATA_TAB = UniversalProfilingAddDataTabs.Kubernetes;
+
+export interface UniversalProfilingAddDataStep {
   title: string;
   content: string | React.ReactNode;
 }
 
-export interface AddDataTab<TKey extends string = string> {
+export interface UniversalProfilingAddDataTab<TKey extends string = string> {
   key: TKey;
   title: string;
-  steps?: AddDataStep[];
-  subTabs?: AddDataTab[];
+  steps?: UniversalProfilingAddDataStep[];
+  subTabs?: UniversalProfilingAddDataTab[];
 }
