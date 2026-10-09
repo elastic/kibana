@@ -149,11 +149,6 @@ export interface LegendSettingsProps<LegendStats extends LegendValue = XYLegendV
    * Callback on layout change. When called with `undefined`, the default layout behavior is used.
    */
   onLayoutChange?: (layout?: LegendLayout) => void;
-  /**
-   * Whether to show auto legend size option. Should only be true for pre 8.3 visualizations that already had it as their setting.
-   * (We're trying to get people to stop using it so it can eventually be removed.)
-   */
-  showAutoLegendSizeOption: boolean;
   titlePlaceholder?: string;
   legendTitle?: string;
   isTitleVisible?: boolean;
@@ -291,7 +286,6 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
   onLegendSizeChange,
   layout,
   onLayoutChange,
-  showAutoLegendSizeOption,
   titlePlaceholder,
 }: LegendSettingsProps<LegendStats>) {
   const isLegendNotHidden = mode !== 'hide';
@@ -387,7 +381,6 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
               isVerticalLegend={
                 !position || position === Position.Left || position === Position.Right
               }
-              showAutoOption={showAutoLegendSizeOption}
             />
           )}
           {location && (
