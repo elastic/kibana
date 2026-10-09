@@ -343,12 +343,35 @@ describe('registerEscalationTemplateUI', () => {
       conversationTemplates: contract,
       templateId: 'escalation',
       name: 'Escalation',
+      onCopyLink: () => true,
     });
 
     const definition = contract.getTemplateUIDefinition('escalation');
     expect(definition?.tabs).toEqual(['escalation.overview']);
     expect(definition?.detailsFlyout?.header).toBeDefined();
     expect(definition?.detailsFlyout?.footer).toBeUndefined();
+  });
+
+  it('adds a Copy link flyout action that calls onCopyLink', () => {
+    const onCopyLink = jest.fn().mockReturnValue(true);
+    const { contract } = createFakeService();
+
+    registerEscalationTemplateUI({
+      conversationTemplates: contract,
+      templateId: 'escalation',
+      name: 'Escalation',
+      onCopyLink,
+    });
+
+    const getActions =
+      contract.getTemplateUIDefinition('escalation')?.detailsFlyout?.trailingActions;
+    const [action] = getActions?.({ conversation: escalationConversation }) ?? [];
+
+    expect(action).toMatchObject({ iconType: 'link', 'aria-label': 'Copy link' });
+    action.onClick?.({} as never);
+    expect(onCopyLink).toHaveBeenCalledWith(
+      'http://localhost/app/agent_builder/agents/agent/conversations/escalation-1?openConversationDetails=true'
+    );
   });
 
   it('calls renderAssignees with templateId "escalation"', async () => {
@@ -359,6 +382,7 @@ describe('registerEscalationTemplateUI', () => {
       conversationTemplates: contract,
       templateId: 'escalation',
       name: 'Escalation',
+      onCopyLink: () => true,
       renderAssignees,
     });
 
@@ -393,6 +417,7 @@ describe('registerEscalationTemplateUI', () => {
       conversationTemplates: contract,
       templateId: 'escalation',
       name: 'Escalation',
+      onCopyLink: () => true,
     });
 
     const Header = contract.getTemplateUIDefinition('escalation')?.detailsFlyout?.header;
@@ -413,6 +438,7 @@ describe('registerEscalationTemplateUI', () => {
       conversationTemplates: contract,
       templateId: 'escalation',
       name: 'Escalation',
+      onCopyLink: () => true,
     });
 
     const tab = contract.getTab('escalation.overview');
@@ -428,6 +454,7 @@ describe('registerEscalationTemplateUI', () => {
       conversationTemplates: contract,
       templateId: 'escalation',
       name: 'Escalation',
+      onCopyLink: () => true,
       renderLinkedInvestigations,
     });
 
@@ -465,6 +492,7 @@ describe('registerEscalationTemplateUI', () => {
       conversationTemplates: contract,
       templateId: 'escalation',
       name: 'Escalation',
+      onCopyLink: () => true,
       renderLinkedInvestigations,
     });
 

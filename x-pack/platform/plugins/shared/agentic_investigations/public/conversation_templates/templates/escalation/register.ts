@@ -15,6 +15,7 @@ import {
   type SyncIndicatorSlotRenderProps,
 } from '@kbn/agentic-investigations-common';
 import { ESCALATION_TEMPLATE_ID } from '../../../../common';
+import { copyLink } from '../../shared/copy_link';
 import { EscalationModalBoundary } from '../../shared/escalation_modal/escalation_modal_boundary';
 import type { TemplateDefinition } from '../../registry/types';
 
@@ -31,7 +32,14 @@ const LINKED_INVESTIGATIONS_LOADING_LABEL = i18n.translate(
 /** The `escalation` template: status and the linked investigations. */
 export const escalationTemplate: TemplateDefinition = {
   templateId: ESCALATION_TEMPLATE_ID,
-  register: ({ templateId, startDeps, makeLazyWithProviders, renderAssignees, renderStatus }) => {
+  register: ({
+    core,
+    templateId,
+    startDeps,
+    makeLazyWithProviders,
+    renderAssignees,
+    renderStatus,
+  }) => {
     const { agentBuilder } = startDeps;
 
     // Registered unconditionally: whether the user may see escalations is decided at render time,
@@ -88,6 +96,8 @@ export const escalationTemplate: TemplateDefinition = {
       renderStatus,
       renderLinkedInvestigations,
       renderSyncIndicator,
+      // The flyout's Copy link button confirms success itself; only a failure needs a toast.
+      onCopyLink: (url) => copyLink(core.notifications.toasts, url),
     });
   },
 };
