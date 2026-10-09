@@ -10,6 +10,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import type {
   EvaluationExperimentDatasetExample,
   GetEvaluationExperimentExampleDetailsResponse,
+  ReasoningEffort,
 } from '@kbn/evals-common';
 import { useExperimentExampleDetails } from '../../hooks/use_evals_api';
 import { ExampleScoresTable, getVerdictBadgeColor } from '.';
@@ -28,6 +29,7 @@ const buildScore = ({
   evaluatorMetadata,
   evaluatorTraceId,
   evaluatorModelId = 'evaluator-model-1',
+  evaluatorReasoningEffort,
   evaluatorVersion,
   repetitionIndex = 0,
 }: {
@@ -40,6 +42,7 @@ const buildScore = ({
   evaluatorMetadata?: Record<string, unknown> | null;
   evaluatorTraceId?: string | null;
   evaluatorModelId?: string;
+  evaluatorReasoningEffort?: ReasoningEffort;
   evaluatorVersion?: string;
   repetitionIndex?: number;
 } = {}): EvaluationExperimentDatasetExample['scores'][number] => ({
@@ -66,7 +69,12 @@ const buildScore = ({
     metadata: evaluatorMetadata,
     trace_id: evaluatorTraceId,
     version: evaluatorVersion,
-    model: evaluatorModelId ? { id: evaluatorModelId } : undefined,
+    model: evaluatorModelId
+      ? {
+          id: evaluatorModelId,
+          ...(evaluatorReasoningEffort && { reasoning_effort: evaluatorReasoningEffort }),
+        }
+      : undefined,
   },
   metadata: {
     total_repetitions: 2,
@@ -292,6 +300,26 @@ describe('ExampleScoresTable', () => {
     expect(screen.getByText('PARTIAL')).toBeInTheDocument();
     expect(screen.getByText('judged by openai-gpt-5.6-luna')).toBeInTheDocument();
     expect(screen.getByText('judged by google-gemini-3.5-flash')).toBeInTheDocument();
+  });
+
+  it('names the reasoning effort a judge ran with', () => {
+    renderTable([
+      buildExample('example-reasoning-judge', [
+        buildScore({
+          evaluatorName: 'correctness.factuality',
+          evaluatorModelId: 'anthropic-claude-4.6-opus',
+          evaluatorReasoningEffort: 'high',
+        }),
+        buildScore({
+          evaluatorName: 'correctness.relevance',
+          evaluatorModelId: 'anthropic-claude-4.6-opus',
+          evaluatorReasoningEffort: 'low',
+        }),
+      ]),
+    ]);
+
+    expect(screen.getByText('judged by anthropic-claude-4.6-opus (high)')).toBeInTheDocument();
+    expect(screen.getByText('judged by anthropic-claude-4.6-opus (low)')).toBeInTheDocument();
   });
 
   describe('evaluator version', () => {

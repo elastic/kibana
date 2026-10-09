@@ -74,6 +74,7 @@ export interface GetEvalsRemotesResponse {
 export interface ExperimentsListFilters {
   suiteId?: string;
   modelId?: string;
+  reasoningEffort?: string;
   branch?: string;
   /** Free-text term matched against experiment name or git branch. */
   search?: string;
@@ -481,6 +482,7 @@ export const useEvaluationExperiments = (filters: ExperimentsListFilters = {}) =
       const query: Record<string, string | number> = {};
       if (filters.suiteId) query.suite_id = filters.suiteId;
       if (filters.modelId) query.model_id = filters.modelId;
+      if (filters.reasoningEffort) query.reasoning_effort = filters.reasoningEffort;
       if (filters.branch) query.branch = filters.branch;
       if (filters.search) query.search = filters.search;
       if (filters.buildId) query.build_id = filters.buildId;

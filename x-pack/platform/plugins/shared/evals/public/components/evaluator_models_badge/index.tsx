@@ -8,6 +8,7 @@
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { buildModelDisplayLabel } from '@kbn/evals-common';
 
 const getModelsBadge = (count: number) =>
   i18n.translate('xpack.evals.evaluatorModelsBadge.multiple', {
@@ -18,7 +19,7 @@ const getModelsBadge = (count: number) =>
 const NO_MODEL = '-';
 
 interface EvaluatorModelsBadgeProps {
-  models: Array<{ id: string }> | undefined;
+  models: Array<{ id: string; reasoning_effort?: string }> | undefined;
 }
 
 /**
@@ -27,7 +28,11 @@ interface EvaluatorModelsBadgeProps {
  * badge that would misattribute the rest. Experiments only code evaluators scored have none.
  */
 export const EvaluatorModelsBadge: React.FC<EvaluatorModelsBadgeProps> = ({ models }) => {
-  const modelIds = Array.from(new Set((models ?? []).map(({ id }) => id).filter(Boolean))).sort();
+  const modelIds = Array.from(
+    new Set(
+      (models ?? []).filter(({ id }) => Boolean(id)).map((model) => buildModelDisplayLabel(model))
+    )
+  ).sort();
 
   if (modelIds.length === 0) {
     return <>{NO_MODEL}</>;

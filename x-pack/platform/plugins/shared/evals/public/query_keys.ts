@@ -36,6 +36,7 @@ export const queryKeys = {
     list: (filters?: {
       suiteId?: string;
       modelId?: string;
+      reasoningEffort?: string;
       branch?: string;
       buildId?: string;
       page?: number;

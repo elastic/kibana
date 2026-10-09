@@ -28,7 +28,11 @@ import {
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { EvaluationExperimentSummary } from '@kbn/evals-common';
+import {
+  buildModelDisplayLabel,
+  ReasoningEffortEnum,
+  type EvaluationExperimentSummary,
+} from '@kbn/evals-common';
 import { useEvaluationExperiments } from '../../hooks/use_evals_api';
 import { NewExperimentFlyout } from '../../components/new_experiment_flyout/new_experiment_flyout';
 import { EvaluatorModelsBadge } from '../../components/evaluator_models_badge';
@@ -36,6 +40,11 @@ import { resolvePrUrl } from '../../utils/pr_url';
 import { CopyableDetail } from './copyable_detail';
 import { LinkDetail } from './link_detail';
 import * as i18n from './translations';
+
+const REASONING_EFFORT_OPTIONS = [
+  { value: '', text: i18n.REASONING_EFFORT_FILTER_ALL_OPTION },
+  ...Object.values(ReasoningEffortEnum).map((level) => ({ value: level, text: level })),
+];
 
 const ExperimentRowDetails: React.FC<{ item: EvaluationExperimentSummary }> = ({ item }) => {
   const { services } = useKibana();
@@ -143,6 +152,7 @@ export const ExperimentsListPage: React.FC = () => {
   const [pageSize, setPageSize] = useState(25);
   const [searchText, setSearchText] = useState('');
   const [suiteIdFilter, setSuiteIdFilter] = useState('');
+  const [reasoningEffortFilter, setReasoningEffortFilter] = useState('');
   const [selectedExperiments, setSelectedExperiments] = useState<EvaluationExperimentSummary[]>([]);
   const [isNewExperimentOpen, setIsNewExperimentOpen] = useState(false);
 
@@ -151,6 +161,7 @@ export const ExperimentsListPage: React.FC = () => {
     perPage: pageSize,
     search: searchText || undefined,
     suiteId: suiteIdFilter || undefined,
+    reasoningEffort: reasoningEffortFilter || undefined,
   });
 
   const { data: suiteFilterData } = useEvaluationExperiments({
@@ -246,7 +257,7 @@ export const ExperimentsListPage: React.FC = () => {
         name: i18n.COLUMN_TASK_MODEL,
         width: '19%',
         render: (model: EvaluationExperimentSummary['task_model']) =>
-          model ? <EuiBadge color="primary">{model.id}</EuiBadge> : '-',
+          model ? <EuiBadge color="primary">{buildModelDisplayLabel(model)}</EuiBadge> : '-',
       },
       {
         field: 'evaluator_models',
@@ -356,6 +367,18 @@ export const ExperimentsListPage: React.FC = () => {
             value={suiteIdFilter}
             onChange={(event) => {
               setSuiteIdFilter(event.target.value);
+              setPageIndex(0);
+              setSelectedExperiments([]);
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ minWidth: 200 }}>
+          <EuiSelect
+            aria-label={i18n.REASONING_EFFORT_FILTER_ARIA_LABEL}
+            options={REASONING_EFFORT_OPTIONS}
+            value={reasoningEffortFilter}
+            onChange={(event) => {
+              setReasoningEffortFilter(event.target.value);
               setPageIndex(0);
               setSelectedExperiments([]);
             }}

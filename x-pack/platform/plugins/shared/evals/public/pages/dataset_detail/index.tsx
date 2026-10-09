@@ -50,6 +50,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import {
   MAX_DATASET_DESCRIPTION_LENGTH,
+  buildModelDisplayLabel,
   type DatasetExample,
   type DatasetMaturity,
   type EvaluationExperimentSummary,
@@ -504,7 +505,7 @@ export const DatasetDetailPage: React.FC = () => {
           const executionId = row.execution_id ?? row.experiment_id;
           const dsParam = encodeURIComponent(datasetId);
           const query = `?execution_id=${encodeURIComponent(executionId)}&dataset_id=${dsParam}`;
-          const modelId = row.task_model?.id;
+          const modelId = row.task_model ? buildModelDisplayLabel(row.task_model) : undefined;
           return (
             <EuiToolTip content={executionId}>
               <div tabIndex={0}>
