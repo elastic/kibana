@@ -19,12 +19,17 @@
  * TPSuppressedByTuning is tracked separately (follow-up card t_71ea2621).
  */
 
+// eslint-disable-next-line import/no-nodejs-modules
 import { randomUUID } from 'crypto';
 import type { HttpHandler } from '@kbn/core/public';
 import type { EvalConnector, EvaluationDataset, Example } from '@kbn/evals';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { evaluate, selectEvaluators, tags } from '@kbn/evals-suite-attack-discovery-fp-tp/src/evaluate';
+import {
+  evaluate,
+  selectEvaluators,
+  tags,
+} from '@kbn/evals-suite-attack-discovery-fp-tp/src/evaluate';
 import { overrideInferenceFeature } from '@kbn/evals-suite-attack-discovery-fp-tp/src/inference_override';
 import { waitForConversationsReady } from '@kbn/evals-suite-attack-discovery-fp-tp/src/investigation';
 import { kbnRequestFromFetch } from '@kbn/evals-suite-attack-discovery-fp-tp/src/kbn_request';
@@ -36,7 +41,7 @@ import {
   ensureFpTpSeedPrerequisites,
   seedFixture,
 } from '@kbn/evals-suite-attack-discovery-fp-tp/src/world';
-import { ALERTZERO_REASONING_FEATURE_ID, WORKFLOW_IDS } from '../src/constants';
+import { ALERTZERO_REASONING_FEATURE_ID, WORKER_IDS } from '../src/constants';
 import {
   captureWorker,
   restoreWorker,
@@ -96,10 +101,10 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
       // Applied, not declared: capture first, then write. A failed write after the
       // capture still gets restored because the snapshot is pushed before writing.
       const ctx = ctxOf(fetch);
-      snapshots.push(await captureWorker(ctx, WORKFLOW_IDS.alertTriage));
-      await writeWorkerAutonomy(ctx, WORKFLOW_IDS.alertTriage, 'supervised');
-      snapshots.push(await captureWorker(ctx, WORKFLOW_IDS.attackDiscoveryRunner));
-      await writeWorkerAutonomy(ctx, WORKFLOW_IDS.attackDiscoveryRunner, 'manual');
+      snapshots.push(await captureWorker(ctx, WORKER_IDS.alertTriage));
+      await writeWorkerAutonomy(ctx, WORKER_IDS.alertTriage, 'supervised');
+      snapshots.push(await captureWorker(ctx, WORKER_IDS.attackDiscovery));
+      await writeWorkerAutonomy(ctx, WORKER_IDS.attackDiscovery, 'manual');
       log.info('AlertZero worker-chain harness ready');
     }
   );

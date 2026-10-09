@@ -17,6 +17,18 @@
  *   - the workflows_management and agent_builder public API versions
  */
 
+/**
+ * Registered Worker ids (SYSTEM_SECURITY_WORKER_CATALOG). These address the
+ * Workers API (settings capture/write/read/restore) and nothing else. They are
+ * NOT workflow ids: the AD Worker is `floor-attack-discovery`, while the
+ * workflow the harness runs for AD is the `attack-discovery-worker` runner
+ * (WORKFLOW_IDS.attackDiscoveryRunner). Guarded by constants.test.ts.
+ */
+export const WORKER_IDS = {
+  alertTriage: 'system-security-floor-alert-triage',
+  attackDiscovery: 'system-security-floor-attack-discovery',
+} as const;
+
 export const WORKFLOW_IDS = {
   alertTriage: 'system-security-floor-alert-triage',
   alertTriageReview: 'system-security-floor-alert-triage-review',

@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "functional-tests",
   "id": "@kbn/evals-suite-alertzero-worker-chain",
   "owner": "@elastic/security-generative-ai",
   "group": "security",

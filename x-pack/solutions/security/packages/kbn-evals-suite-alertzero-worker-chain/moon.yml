@@ -21,13 +21,11 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/evals'
   - '@kbn/evals-suite-attack-discovery-fp-tp'
-  - '@kbn/scout'
   - '@kbn/security-evals-chain-safety'
-  - '@kbn/security-evals-workflow-traces'
   - '@kbn/tooling-log'
   - '@kbn/workflows'
 tags:
-  - shared-common
+  - functional-tests
   - package
   - dev
   - group-security
@@ -37,7 +35,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-    - '!evals/**/*'
   jest-config:
     - jest.config.js
 tasks: {}

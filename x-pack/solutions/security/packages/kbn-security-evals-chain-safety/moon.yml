@@ -16,8 +16,7 @@ project:
   channel: ''
   owner: '@elastic/security-generative-ai'
   sourceRoot: x-pack/solutions/security/packages/kbn-security-evals-chain-safety
-dependsOn:
-  - '@kbn/evals'
+dependsOn: []
 tags:
   - shared-common
   - package

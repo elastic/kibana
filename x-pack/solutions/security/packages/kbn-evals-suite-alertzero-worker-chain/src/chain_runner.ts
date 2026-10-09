@@ -7,7 +7,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
-  ExecutionStatus,
+  type ExecutionStatus,
   TerminalExecutionStatuses,
   type WorkflowExecutionDto,
 } from '@kbn/workflows';
@@ -25,9 +25,15 @@ import {
   PROPOSALS_API_VERSION,
   PROPOSALS_URL,
   PUBLIC_API_VERSION,
+  WORKER_IDS,
   WORKFLOW_IDS,
 } from './constants';
-import { readWorkerAutonomy, spacePath, type KbnRequestContext } from './worker_settings';
+import {
+  readWorkerAutonomy,
+  resolveWorkerWorkflowId,
+  spacePath,
+  type KbnRequestContext,
+} from './worker_settings';
 
 const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatuses.includes(status);
 
@@ -281,7 +287,13 @@ export const runChain = async ({
   let appliedVerdictOrigin: VerdictOrigin | undefined;
 
   if (scenario.workerChain.includes('alert-triage')) {
-    const triageAutonomy = await readBackAutonomy('alert-triage', WORKFLOW_IDS.alertTriage);
+    const triageAutonomy = await readBackAutonomy('alert-triage', WORKER_IDS.alertTriage);
+    // The installed per-space workflow id (`<workerId>-<space>`), not the bare Worker id.
+    const triageWorkflowId = await resolveWorkerWorkflowId(
+      ctx,
+      WORKER_IDS.alertTriage,
+      WORKFLOW_IDS.alertTriage
+    );
     const inputs =
       triageTrigger === 'manual-event'
         ? {
@@ -295,7 +307,7 @@ export const runChain = async ({
             },
           }
         : { alertIds: scenario.alerts.map((a) => a.id) };
-    const executionId = await runWorkflow(ctx, WORKFLOW_IDS.alertTriage, inputs);
+    const executionId = await runWorkflow(ctx, triageWorkflowId, inputs);
     const { status, overrun } = await waitForTerminal(
       ctx,
       log,
@@ -306,7 +318,7 @@ export const runChain = async ({
     );
     record(
       'floor_alert_triage',
-      WORKFLOW_IDS.alertTriage,
+      triageWorkflowId,
       executionId,
       overrun ? 'timeout' : status,
       triageTrigger === 'manual-event' ? 'manual' : 'alert',
@@ -331,10 +343,7 @@ export const runChain = async ({
   if (scenario.workerChain.includes('attack-discovery')) {
     // B7: the runner's declared inputs are strict (additionalProperties: false)
     // and carry no investigation_id; autonomy is passed per-run.
-    const adAutonomy = await readBackAutonomy(
-      'attack-discovery',
-      WORKFLOW_IDS.attackDiscoveryRunner
-    );
+    const adAutonomy = await readBackAutonomy('attack-discovery', WORKER_IDS.attackDiscovery);
     const executionId = await runWorkflow(ctx, WORKFLOW_IDS.attackDiscoveryRunner, {
       ...(adAutonomy ? { autonomy: adAutonomy } : {}),
     });
@@ -360,6 +369,7 @@ export const runChain = async ({
     // from the product — never scenario.goldVerdict.
     const children = await listChildExecutions(ctx, executionId);
     for (const child of children) {
+      // eslint-disable-next-line no-continue
       if (child.workflowId !== WORKFLOW_IDS.attackDiscoveryReview) continue;
       const reviewExec = await readExecution(ctx, child.id).catch(() => undefined);
       const verdict = (reviewExec?.context?.output as { verdict?: string } | undefined)?.verdict;

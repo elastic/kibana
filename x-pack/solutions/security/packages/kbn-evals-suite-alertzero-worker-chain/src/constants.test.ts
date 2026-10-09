@@ -6,6 +6,11 @@
  */
 
 import {
+  SYSTEM_SECURITY_WORKER_CATALOG,
+  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+} from '@kbn/alertzero-common';
+import {
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
   ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID,
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
@@ -18,7 +23,23 @@ import {
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
 } from '@kbn/workflows/managed/definitions/alertzero';
-import { WORKFLOW_IDS, ACTION_IDS } from './constants';
+import { WORKER_IDS, WORKFLOW_IDS, ACTION_IDS } from './constants';
+
+// Drift guard: a Workers-API id must be a registered Worker, not a workflow id.
+describe('Worker ids are registered Workers', () => {
+  it('match the upstream catalog and exported constants', () => {
+    const catalogIds = SYSTEM_SECURITY_WORKER_CATALOG.map(({ id }) => id);
+    expect(WORKER_IDS.alertTriage).toBe(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID);
+    expect(WORKER_IDS.attackDiscovery).toBe(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID);
+    for (const id of Object.values(WORKER_IDS)) {
+      expect(catalogIds).toContain(id);
+    }
+  });
+
+  it('the AD runner workflow id is not a Worker id', () => {
+    expect(Object.values(WORKER_IDS)).not.toContain(WORKFLOW_IDS.attackDiscoveryRunner);
+  });
+});
 
 // Drift guard (review B1/B2): every inlined id must equal the upstream managed
 // definition's exported constant. If upstream renames one, this fails before any

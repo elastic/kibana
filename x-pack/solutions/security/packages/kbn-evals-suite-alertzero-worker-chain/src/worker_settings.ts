@@ -31,6 +31,8 @@ interface WorkerState {
   enabled: boolean;
   settingsRevision: number | null;
   settings: { autonomy?: string };
+  /** Installed per-space workflow id (`<workerId>-<space>`); null until installed. */
+  workflowId?: string | null;
 }
 
 const listWorkers = async ({ fetch, spaceId }: KbnRequestContext): Promise<WorkerState[]> => {
@@ -70,6 +72,18 @@ const patchWorker = async (
     } satisfies HttpFetchOptions
   );
 };
+
+/**
+ * The id to POST /run for a Worker's workflow. Managed Worker workflows install
+ * per space as `<workerId>-<spaceId>`, so the bare Worker id can 404; the
+ * Workers list reports the installed id as `workflowId`. Falls back to
+ * `fallbackWorkflowId` only when the Worker is not installed (null).
+ */
+export const resolveWorkerWorkflowId = async (
+  ctx: KbnRequestContext,
+  workerId: string,
+  fallbackWorkflowId: string = workerId
+): Promise<string> => (await findWorker(ctx, workerId)).workflowId ?? fallbackWorkflowId;
 
 /**
  * Snapshot of a Worker's autonomy/enabled state, so a run can restore it in a
