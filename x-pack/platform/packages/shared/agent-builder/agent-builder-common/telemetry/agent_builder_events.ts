@@ -41,6 +41,7 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   HitlQuestionAnswered: `${TELEMETRY_PREFIX}_hitl_question_answered`,
   FeedbackSubmitted: `${TELEMETRY_PREFIX}_feedback_submitted`,
   FeedbackRetracted: `${TELEMETRY_PREFIX}_feedback_retracted`,
+  CompactionTriggered: `${TELEMETRY_PREFIX}_compaction_triggered`,
 } as const;
 
 export type OptInSource =
@@ -423,6 +424,18 @@ export interface ReportFeedbackRetractedParams {
   llm_calls?: number;
 }
 
+export type CompactionTrigger = 'forced' | 'round_start' | 'proactive';
+
+export interface ReportCompactionTriggeredParams {
+  agent_id: string;
+  execution_id?: string;
+  trigger: CompactionTrigger;
+  token_count_before: number;
+  token_count_after: number;
+  summarized_cycle_count: number;
+  model_id: string;
+}
+
 export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.OptInAction]: ReportOptInActionParams;
   [AGENT_BUILDER_EVENT_TYPES.OptOut]: ReportOptOutParams;
@@ -457,6 +470,7 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.HitlQuestionAnswered]: ReportHitlQuestionAnsweredParams;
   [AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted]: ReportFeedbackSubmittedParams;
   [AGENT_BUILDER_EVENT_TYPES.FeedbackRetracted]: ReportFeedbackRetractedParams;
+  [AGENT_BUILDER_EVENT_TYPES.CompactionTriggered]: ReportCompactionTriggeredParams;
 }
 
 export type AgentBuilderTelemetryEvent =
@@ -487,7 +501,8 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportHitlPromptShownParams>
   | EventTypeOpts<ReportHitlQuestionAnsweredParams>
   | EventTypeOpts<ReportFeedbackSubmittedParams>
-  | EventTypeOpts<ReportFeedbackRetractedParams>;
+  | EventTypeOpts<ReportFeedbackRetractedParams>
+  | EventTypeOpts<ReportCompactionTriggeredParams>;
 // Type union of all event type strings for use in union types
 export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.OptInAction
@@ -517,7 +532,8 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.HitlPromptShown
   | typeof AGENT_BUILDER_EVENT_TYPES.HitlQuestionAnswered
   | typeof AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted
-  | typeof AGENT_BUILDER_EVENT_TYPES.FeedbackRetracted;
+  | typeof AGENT_BUILDER_EVENT_TYPES.FeedbackRetracted
+  | typeof AGENT_BUILDER_EVENT_TYPES.CompactionTriggered;
 
 const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.OptInAction,
@@ -1872,6 +1888,54 @@ const FEEDBACK_RETRACTED_EVENT: AgentBuilderTelemetryEvent = {
   },
 };
 
+const COMPACTION_TRIGGERED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.CompactionTriggered,
+  schema: {
+    agent_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'ID of the agent (normalized: built-in agents keep ID, custom agents become "custom-<sha256_prefix>")',
+        optional: false,
+      },
+    },
+    execution_id: {
+      type: 'keyword',
+      _meta: { description: 'Agent execution ID', optional: true },
+    },
+    trigger: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Reason compaction was triggered: "forced" (context window exceeded), "round_start" (previous round was too long), or "proactive" (approaching the limit)',
+        optional: false,
+      },
+    },
+    token_count_before: {
+      type: 'long',
+      _meta: { description: 'Context token count before compaction', optional: false },
+    },
+    token_count_after: {
+      type: 'long',
+      _meta: { description: 'Context token count after compaction', optional: false },
+    },
+    summarized_cycle_count: {
+      type: 'long',
+      _meta: {
+        description: 'Number of conversation cycles compressed by this compaction',
+        optional: false,
+      },
+    },
+    model_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the inference connector/endpoint used for the agent',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   OPT_IN_EVENT,
   OPT_OUT_EVENT,
@@ -1904,4 +1968,5 @@ export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unk
   ROUND_ERROR_EVENT,
   TOOL_CALL_SUCCESS_EVENT,
   TOOL_CALL_ERROR_EVENT,
+  COMPACTION_TRIGGERED_EVENT,
 ];

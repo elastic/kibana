@@ -118,7 +118,12 @@ export {
   applyAfterExecutionResult,
 } from './hooks/apply_result';
 export { chatSystemIndex, chatSystemIndexPrefix } from './indices';
-export type { AgentBuilderAnalytics, AgentBuilderTracking, SkillInvokedEvent } from './telemetry';
+export type {
+  AgentBuilderAnalytics,
+  AgentBuilderTracking,
+  CompactionTriggeredEvent,
+  SkillInvokedEvent,
+} from './telemetry';
 export { toHashedId } from './telemetry';
 export type {
   BuiltInPluginDefinition,

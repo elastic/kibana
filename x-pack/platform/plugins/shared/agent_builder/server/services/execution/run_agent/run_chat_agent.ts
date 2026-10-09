@@ -403,6 +403,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       resultStore: context.resultStore,
       resultTransformer,
       logger,
+      analyticsService: context.analyticsService,
+      agentId,
+      executionId,
     },
   });
 

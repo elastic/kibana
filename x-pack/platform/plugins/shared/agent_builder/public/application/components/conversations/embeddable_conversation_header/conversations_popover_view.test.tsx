@@ -10,15 +10,15 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ConversationsPopoverView } from './conversations_popover_view';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
+import { useResolvedAgent } from '../../../hooks/agents/use_resolved_agent';
 import { useAgentId } from '../../../hooks/use_conversation';
 
 jest.mock('../../../context/conversation/conversation_context', () => ({
   useConversationContext: jest.fn(),
 }));
 
-jest.mock('../../../hooks/agents/use_agents', () => ({
-  useAgentBuilderAgents: jest.fn(),
+jest.mock('../../../hooks/agents/use_resolved_agent', () => ({
+  useResolvedAgent: jest.fn(),
 }));
 
 jest.mock('../../../hooks/use_conversation', () => ({
@@ -53,7 +53,7 @@ jest.mock('../../common/agent_avatar', () => ({
 }));
 
 const mockUseConversationContext = jest.mocked(useConversationContext);
-const mockUseAgentBuilderAgents = jest.mocked(useAgentBuilderAgents);
+const mockUseResolvedAgent = jest.mocked(useResolvedAgent);
 const mockUseAgentId = jest.mocked(useAgentId);
 
 const renderView = (onClose = jest.fn()) =>
@@ -83,9 +83,7 @@ describe('ConversationsPopoverView — New chat button', () => {
       isEmbeddedContext: true,
     });
 
-    mockUseAgentBuilderAgents.mockReturnValue({
-      agents: [],
-    } as unknown as ReturnType<typeof useAgentBuilderAgents>);
+    mockUseResolvedAgent.mockReturnValue({ agent: undefined, isLoading: false });
 
     mockUseAgentId.mockReturnValue('agent-1');
   });
