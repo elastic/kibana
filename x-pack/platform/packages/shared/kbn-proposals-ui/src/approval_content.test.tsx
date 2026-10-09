@@ -99,6 +99,28 @@ describe('ApprovalContent', () => {
     expect(screen.queryByTestId('approvalContent-outcome')).not.toBeInTheDocument();
   });
 
+  it('shows a Failed badge on a replaced proposal whose action failed', () => {
+    renderContent({
+      proposal: {
+        ...baseProposal,
+        status: 'failed',
+        decision: 'approved',
+        decidedBy: { username: 'elastic', fullName: null, email: null },
+        decidedAt: '2026-10-09T14:05:00.000Z',
+        supersededBy: 'successor',
+      },
+    });
+    expect(screen.getByText('Failed')).toBeInTheDocument();
+    expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+    expect(screen.getByTestId('approvalContent-confirm')).toBeDisabled();
+  });
+
+  it('shows no status badge on a replaced revision that was never decided', () => {
+    renderContent({ proposal: { ...baseProposal, status: 'superseded', supersededBy: 'next' } });
+    expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+    expect(screen.queryByText('Failed')).not.toBeInTheDocument();
+  });
+
   it('prefixes the actor with "executed" when the approved action failed', () => {
     renderContent({
       proposal: {

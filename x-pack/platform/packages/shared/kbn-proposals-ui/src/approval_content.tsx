@@ -228,7 +228,11 @@ export const ApprovalContent = memo<ApprovalContentProps>(
       ? decision.status
       : isSubmitting ?? 'pending';
 
-    const badge = getApprovalOutcomeBadge(approvalPhase);
+    // A replaced card stays 'pending' for the footer and banner (see `approvalPhase`), but a failed
+    // attempt still has to say how it ended; replaced revisions keep no badge, since their
+    // successor carries the live state.
+    const isReplacedFailure = isReplaced && decision?.status === 'failed';
+    const badge = getApprovalOutcomeBadge(isReplacedFailure ? 'failed' : approvalPhase);
     const banner = isReplaced ? undefined : getApprovalOutcomeBanner(approvalPhase);
     const bannerSuffix = decision?.reason ?? banner?.hint;
     const isSettledOrTransient = approvalPhase !== 'pending';
@@ -265,7 +269,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
       <>
         <ApprovalContentHeader
           badge={badge}
-          showStatusBadge={!isReplaced}
+          showStatusBadge={!isReplaced || isReplacedFailure}
           caption={headerCaption}
           title={proposal.title}
           titleId={titleId ?? generatedTitleId}
