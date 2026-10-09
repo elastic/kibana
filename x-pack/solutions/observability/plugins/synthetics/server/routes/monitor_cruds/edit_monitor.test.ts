@@ -215,7 +215,7 @@ describe('editSyntheticsMonitorRoute', () => {
 
     const { routeContext } = getRouteContextMock();
     routeContext.request = {
-      params: { monitorId },
+      params: { id: monitorId },
       query: {},
       body: { [ConfigKey.KIBANA_SPACES]: ['space-a'] },
     } as any;

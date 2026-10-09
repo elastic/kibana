@@ -41,7 +41,7 @@ const existingLocation = {
 const makeRouteContext = (body: Record<string, unknown>, { hasEnterprise = false } = {}) => {
   const response = httpServerMock.createResponseFactory();
   const routeContext = {
-    request: { params: { locationId: 'loc-1' }, body },
+    request: { params: { id: 'loc-1' }, body },
     response,
     savedObjectsClient: {},
     monitorConfigRepository: {
@@ -164,7 +164,7 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
     } as any);
 
     const result = await editPrivateLocationRoute().handler({
-      request: { params: { locationId: 'location-1' }, body: { label: 'New label' } },
+      request: { params: { id: 'location-1' }, body: { label: 'New label' } },
       response,
       savedObjectsClient: {},
       context: {

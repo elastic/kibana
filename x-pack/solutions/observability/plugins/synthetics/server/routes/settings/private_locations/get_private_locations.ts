@@ -21,14 +21,14 @@ import { allLocationsToClientContract } from './helpers';
 
 const getPrivateLocationsHandler: SyntheticsRouteHandler<
   SyntheticsPrivateLocations | PrivateLocation,
-  { locationId?: string }
+  { id?: string }
 > = async (routeContext) => {
   const { savedObjectsClient, syntheticsMonitorClient, request, response, server } = routeContext;
 
   const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
   await migrateLegacyPrivateLocations(internalSOClient, server.logger);
 
-  const { locationId: id } = request.params;
+  const { id } = request.params;
 
   const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(
     savedObjectsClient,
@@ -65,10 +65,10 @@ export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<
 
 export const getPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   SyntheticsPrivateLocations | PrivateLocation,
-  { locationId: string }
+  { id: string }
 > = () => ({
   method: 'GET',
-  path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{locationId}',
+  path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{id}',
   options: {
     summary: 'Get a private location',
     description:
@@ -80,7 +80,7 @@ export const getPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   validation: {
     request: {
       params: z.strictObject({
-        locationId: routeId.describe('A private location identifier or label.'),
+        id: routeId.describe('A private location identifier or label.'),
       }),
     },
   },

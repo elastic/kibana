@@ -48,7 +48,7 @@ export const EditPrivateLocationSchema = z.strictObject({
 });
 
 const EditPrivateLocationQuery = z.strictObject({
-  locationId: routeId.describe('The unique identifier of the private location to update.'),
+  id: routeId.describe('The unique identifier of the private location to update.'),
 });
 
 export type EditPrivateLocationAttributes = Pick<
@@ -146,7 +146,7 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   z.infer<typeof EditPrivateLocationSchema>
 > = () => ({
   method: 'PUT',
-  path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{locationId}',
+  path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{id}',
   options: {
     summary: 'Update a private location',
     description:
@@ -164,7 +164,7 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
     const { response, request, savedObjectsClient, context } = routeContext;
-    const { locationId } = request.params;
+    const { id: locationId } = request.params;
     const {
       label: newLocationLabel,
       tags: newTags,

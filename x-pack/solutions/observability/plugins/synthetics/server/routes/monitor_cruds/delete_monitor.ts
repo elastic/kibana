@@ -38,10 +38,10 @@ const deleteMonitors = async (routeContext: RouteContext, monitorIds: string[]):
 
 export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],
-  { monitorId: string }
+  { id: string }
 > = () => ({
   method: 'DELETE',
-  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
+  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{id}',
   options: {
     summary: 'Delete a monitor',
     description:
@@ -53,12 +53,11 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
   validation: {
     request: {
       params: z.strictObject({
-        monitorId: routeId.describe('The identifier for the monitor that you want to delete.'),
+        id: routeId.describe('The identifier for the monitor that you want to delete.'),
       }),
     },
   },
-  handler: async (routeContext) =>
-    deleteMonitors(routeContext, [routeContext.request.params.monitorId]),
+  handler: async (routeContext) => deleteMonitors(routeContext, [routeContext.request.params.id]),
 });
 
 /** Superseded by `POST /monitors/_bulk_delete`; kept for existing clients. */

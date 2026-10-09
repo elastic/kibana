@@ -51,7 +51,7 @@ import { getBrowserTimeoutWarningForMonitor } from './monitor_warnings';
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
-  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
+  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{id}',
   options: {
     summary: 'Update a monitor',
     description:
@@ -63,7 +63,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
   validation: {
     request: {
       params: z.strictObject({
-        monitorId: routeId.describe('The identifier for the monitor that you want to update.'),
+        id: routeId.describe('The identifier for the monitor that you want to update.'),
       }),
       query: z.strictObject({
         internal: queryBoolean.optional().default(false).describe('For internal use only.'),
@@ -76,7 +76,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     const { logger } = server;
     const monitor = request.body as SyntheticsMonitor;
     const reqQuery = request.query as { internal?: boolean };
-    const { monitorId } = request.params;
+    const { id: monitorId } = request.params;
 
     if (!monitor || typeof monitor !== 'object' || isEmpty(monitor) || Array.isArray(monitor)) {
       return response.badRequest({

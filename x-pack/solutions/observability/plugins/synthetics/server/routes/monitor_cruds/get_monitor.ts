@@ -30,7 +30,7 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   validation: {
     request: {
       params: z.strictObject({
-        monitorId: routeId.describe('The ID of the monitor.'),
+        id: routeId.describe('The ID of the monitor.'),
       }),
       query: z.strictObject({
         internal: queryBoolean.optional().default(false).describe('For internal use only.'),
@@ -44,7 +44,7 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     spaceId,
     monitorConfigRepository,
   }): Promise<any> => {
-    const { monitorId } = request.params;
+    const { id: monitorId } = request.params;
     try {
       const { internal } = request.query;
 

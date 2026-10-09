@@ -19,7 +19,7 @@ import { privateLocationSavedObjectName } from '../../../../common/saved_objects
 
 export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined> = () => ({
   method: 'DELETE',
-  path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{locationId}',
+  path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{id}',
   options: {
     summary: 'Delete a private location',
     description:
@@ -31,7 +31,7 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
   validation: {
     request: {
       params: z.strictObject({
-        locationId: routeId.describe('The unique identifier of the private location to delete.'),
+        id: routeId.describe('The unique identifier of the private location to delete.'),
       }),
     },
   },
@@ -49,7 +49,7 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
 
     await migrateLegacyPrivateLocations(internalSOClient, server.logger);
 
-    const { locationId } = request.params as { locationId: string };
+    const { id: locationId } = request.params;
 
     const { locations } = await getPrivateLocationsAndAgentPolicies(
       savedObjectsClient,

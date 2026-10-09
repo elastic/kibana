@@ -61,7 +61,7 @@ describe('monitor request body OAS', () => {
             validationSchemas: { request: wrappedCreate },
           },
           {
-            path: '/api/synthetics/monitors/{monitorId}',
+            path: '/api/synthetics/monitors/{id}',
             method: 'put',
             options: { access: 'public', summary: 'Edit monitor' },
             validationSchemas: { request: wrappedEdit },
@@ -112,7 +112,7 @@ describe('monitor request body OAS', () => {
     expect(createSchema?.oneOf).toHaveLength(5);
 
     const editSchema = deref(
-      bodySchemaOf(doc.paths['/api/synthetics/monitors/{monitorId}']?.put),
+      bodySchemaOf(doc.paths['/api/synthetics/monitors/{id}']?.put),
       components
     );
     expect(editSchema?.type).toBe('object');

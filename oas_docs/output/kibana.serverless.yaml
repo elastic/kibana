@@ -127285,12 +127285,12 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/synthetics/monitors/{monitorId}:
+  /api/synthetics/monitors/{id}:
     delete:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/monitors/{monitorId}</span></div>
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/monitors/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
@@ -127308,7 +127308,7 @@ paths:
             type: string
         - description: The identifier for the monitor that you want to delete.
           in: path
-          name: monitorId
+          name: id
           required: true
           schema:
             maxLength: 1024
@@ -127348,7 +127348,7 @@ paths:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/monitors/{monitorId}</span></div>
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/monitors/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
@@ -127359,7 +127359,7 @@ paths:
       parameters:
         - description: The ID of the monitor.
           in: path
-          name: monitorId
+          name: id
           required: true
           schema:
             maxLength: 1024
@@ -127444,7 +127444,7 @@ paths:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/monitors/{monitorId}</span></div>
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/monitors/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
@@ -127469,7 +127469,7 @@ paths:
             type: string
         - description: The identifier for the monitor that you want to update.
           in: path
-          name: monitorId
+          name: id
           required: true
           schema:
             maxLength: 1024
@@ -128417,12 +128417,12 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/synthetics/private_locations/{locationId}:
+  /api/synthetics/private_locations/{id}:
     delete:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/private_locations/{locationId}</span></div>
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/private_locations/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
@@ -128440,7 +128440,7 @@ paths:
             type: string
         - description: The unique identifier of the private location to delete.
           in: path
-          name: locationId
+          name: id
           required: true
           schema:
             maxLength: 1024
@@ -128461,7 +128461,7 @@ paths:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/private_locations/{locationId}</span></div>
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/private_locations/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
@@ -128470,7 +128470,7 @@ paths:
       parameters:
         - description: A private location identifier or label.
           in: path
-          name: locationId
+          name: id
           required: true
           schema:
             maxLength: 1024
@@ -128549,7 +128549,7 @@ paths:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/private_locations/{locationId}</span></div>
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/private_locations/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
@@ -128569,7 +128569,7 @@ paths:
             type: string
         - description: The unique identifier of the private location to update.
           in: path
-          name: locationId
+          name: id
           required: true
           schema:
             maxLength: 1024
