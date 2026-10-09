@@ -1178,3 +1178,40 @@ describe('floor_alert_triage — closure review hand-off', () => {
     expect(rendered).toContain('The outcome is posted here');
   });
 });
+
+describe('floor_alert_triage — classification comment attribution', () => {
+  const renderResults = (output: Record<string, unknown>): string =>
+    renderString(
+      (stepByName('post_comment_classification_results')?.with as { message: string }).message,
+      {
+        steps: {
+          classify_alerts: {
+            output: {
+              true_positive_count: 1,
+              false_positive_count: 2,
+              inconclusive_count: 0,
+              grouped_counts_summary: '',
+              generated_summary: 'Looks benign.',
+              ...output,
+            },
+          },
+        },
+      }
+    );
+
+  it('names the connector and the agent when an agent classified the alerts', () => {
+    const comment = renderResults({ connector_id: 'connector-1', agent_id: 'elastic-ai-agent' });
+    expect(comment).toContain('Connector: `connector-1`, Agent: `elastic-ai-agent`');
+  });
+
+  it('names only the connector when a prompt classified the alerts, because no agent ran', () => {
+    const comment = renderResults({ connector_id: 'connector-1', agent_id: '' });
+    expect(comment).toContain('_(Connector: `connector-1`)_');
+    expect(comment).not.toContain('Agent:');
+  });
+
+  it('names neither when no call was made', () => {
+    const comment = renderResults({ connector_id: '', agent_id: '' });
+    expect(comment).not.toContain('Connector:');
+  });
+});
