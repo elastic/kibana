@@ -8,87 +8,23 @@
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 import {
   decideLifecycle,
+  operatorInputFor,
   type LifecycleDecision,
   type LifecycleInput,
 } from './lifecycle_state_machine';
-import { RECOVERING_COUNT } from './status_transition';
 
 const decide = (
   status: SignificantEventStatus | undefined,
-  input: LifecycleInput,
-  evaluations = 0
-): LifecycleDecision => decideLifecycle({ state: { status, evaluations }, input });
+  input: LifecycleInput
+): LifecycleDecision => decideLifecycle({ state: { status }, input });
+
+const ACTIVE = { write: true, status: 'active' } as const;
+const RECOVERING = { write: true, status: 'recovering' } as const;
+const INACTIVE = { write: true, status: 'inactive' } as const;
+const NOT_A_BREACH = { write: false, reason: 'not_a_breach' } as const;
+const ALREADY_IN_STATE = { write: false, reason: 'already_in_state' } as const;
 
 describe('decideLifecycle', () => {
-  describe('evaluation', () => {
-    it.each<
-      [string, SignificantEventStatus, 'breaching' | 'clean' | 'no_data', number, LifecycleDecision]
-    >([
-      ['active, still breaching', 'active', 'breaching', 0, { write: false, reason: 'unchanged' }],
-      [
-        'active, clean: enters recovering with one evaluation',
-        'active',
-        'clean',
-        0,
-        { write: true, status: 'recovering', evaluations: 1 },
-      ],
-      [
-        'recovering, breach returns: back to active, count cleared',
-        'recovering',
-        'breaching',
-        2,
-        { write: true, status: 'active' },
-      ],
-      [
-        'recovering, clean below N: another evaluation',
-        'recovering',
-        'clean',
-        1,
-        { write: true, status: 'recovering', evaluations: 2 },
-      ],
-      [
-        'recovering, clean at N-1',
-        'recovering',
-        'clean',
-        RECOVERING_COUNT - 1,
-        { write: true, status: 'recovering', evaluations: RECOVERING_COUNT },
-      ],
-      [
-        'recovering, clean at N: closes, count cleared',
-        'recovering',
-        'clean',
-        RECOVERING_COUNT,
-        { write: true, status: 'inactive' },
-      ],
-      [
-        'active, no data: status stands',
-        'active',
-        'no_data',
-        0,
-        { write: false, reason: 'no_data' },
-      ],
-      [
-        'recovering, no data: status and count stand',
-        'recovering',
-        'no_data',
-        2,
-        { write: false, reason: 'no_data' },
-      ],
-    ])('%s', (_label, status, outcome, evaluations, expected) => {
-      expect(decide(status, { kind: 'evaluation', outcome }, evaluations)).toEqual(expected);
-    });
-
-    it.each<SignificantEventStatus | undefined>(['inactive', undefined])(
-      'does not evaluate a series that is not live (%s)',
-      (status) => {
-        expect(decide(status, { kind: 'evaluation', outcome: 'clean' })).toEqual({
-          write: false,
-          reason: 'not_live',
-        });
-      }
-    );
-  });
-
   describe('assessment (what discovery stored about the members)', () => {
     it.each<
       [
@@ -98,123 +34,71 @@ describe('decideLifecycle', () => {
         LifecycleDecision
       ]
     >([
-      ['opens a new series on a breach', undefined, 'breaching', { write: true, status: 'active' }],
+      ['opens a new series on a breach', undefined, 'breaching', ACTIVE],
+      ['reopens a closed series on a breach', 'inactive', 'breaching', ACTIVE],
+      ['keeps an active series active on a breach', 'active', 'breaching', ACTIVE],
+      ['returns a recovering series to active on a breach', 'recovering', 'breaching', ACTIVE],
+      ['starts recovery when every member is healthy', 'active', 'clean', RECOVERING],
+      ['keeps an active series active when a member cannot be judged', 'active', 'no_data', ACTIVE],
       [
-        'reopens a closed series on a breach',
-        'inactive',
-        'breaching',
-        { write: true, status: 'active' },
-      ],
-      [
-        'keeps an active series active on a breach',
-        'active',
-        'breaching',
-        { write: true, status: 'active' },
-      ],
-      [
-        'returns a recovering series to active on a breach',
+        'keeps a recovering series recovering while members stay healthy',
         'recovering',
-        'breaching',
-        { write: true, status: 'active' },
-      ],
-      [
-        'starts recovery when every member is healthy',
-        'active',
         'clean',
-        { write: true, status: 'recovering', evaluations: 1 },
+        RECOVERING,
       ],
       [
-        'keeps an active series active when a member cannot be judged',
-        'active',
+        'keeps a recovering series recovering when a member cannot be judged',
+        'recovering',
         'no_data',
-        { write: true, status: 'active' },
+        RECOVERING,
       ],
-      [
-        'does not open a new series on healthy members',
-        undefined,
-        'clean',
-        { write: false, reason: 'not_a_breach' },
-      ],
-      [
-        'does not open a new series on unjudged members',
-        undefined,
-        'no_data',
-        { write: false, reason: 'not_a_breach' },
-      ],
-      [
-        'does not reopen a closed series on healthy members',
-        'inactive',
-        'clean',
-        { write: false, reason: 'not_a_breach' },
-      ],
-      [
-        'does not reopen a closed series on unjudged members',
-        'inactive',
-        'no_data',
-        { write: false, reason: 'not_a_breach' },
-      ],
+      ['does not open a new series on healthy members', undefined, 'clean', NOT_A_BREACH],
+      ['does not open a new series on unjudged members', undefined, 'no_data', NOT_A_BREACH],
+      ['does not reopen a closed series on healthy members', 'inactive', 'clean', NOT_A_BREACH],
+      ['does not reopen a closed series on unjudged members', 'inactive', 'no_data', NOT_A_BREACH],
     ])('%s', (_label, status, outcome, expected) => {
       expect(decide(status, { kind: 'assessment', outcome })).toEqual(expected);
     });
-
-    it.each<'clean' | 'no_data'>(['clean', 'no_data'])(
-      'carries evidence onto a recovering series without moving its status or count (%s)',
-      (outcome) => {
-        expect(decide('recovering', { kind: 'assessment', outcome }, 2)).toEqual({
-          write: true,
-          status: 'recovering',
-          evaluations: 2,
-        });
-      }
-    );
   });
 
   describe('operator intent', () => {
     it.each<SignificantEventStatus>(['active', 'recovering'])(
       'deactivates a %s series',
       (status) => {
-        expect(decide(status, { kind: 'operator', intent: 'deactivate' }, 2)).toEqual({
-          write: true,
-          status: 'inactive',
-        });
+        expect(decide(status, { kind: 'operator', intent: 'deactivate' })).toEqual(INACTIVE);
       }
     );
 
     it('does not deactivate what is already inactive', () => {
-      expect(decide('inactive', { kind: 'operator', intent: 'deactivate' })).toEqual({
-        write: false,
-        reason: 'already_in_state',
-      });
+      expect(decide('inactive', { kind: 'operator', intent: 'deactivate' })).toEqual(
+        ALREADY_IN_STATE
+      );
     });
 
-    it.each<SignificantEventStatus>(['inactive', 'recovering'])(
-      'activates a %s series, overriding the engine',
+    it.each<SignificantEventStatus | undefined>(['inactive', 'recovering', undefined])(
+      'activates a %s series, overriding the assessment',
       (status) => {
-        expect(decide(status, { kind: 'operator', intent: 'activate' }, 2)).toEqual({
-          write: true,
-          status: 'active',
-        });
+        expect(decide(status, { kind: 'operator', intent: 'activate' })).toEqual(ACTIVE);
       }
     );
 
     it('does not activate what is already active', () => {
-      expect(decide('active', { kind: 'operator', intent: 'activate' })).toEqual({
-        write: false,
-        reason: 'already_in_state',
-      });
+      expect(decide('active', { kind: 'operator', intent: 'activate' })).toEqual(ALREADY_IN_STATE);
+    });
+
+    it('maps a manual status to the intent it expresses', () => {
+      expect(operatorInputFor('active')).toEqual({ kind: 'operator', intent: 'activate' });
+      expect(operatorInputFor('inactive')).toEqual({ kind: 'operator', intent: 'deactivate' });
     });
   });
 
   describe('rule_deleted', () => {
     it.each<SignificantEventStatus>(['active', 'recovering'])('closes a %s series', (status) => {
-      expect(decide(status, { kind: 'rule_deleted' })).toEqual({ write: true, status: 'inactive' });
+      expect(decide(status, { kind: 'rule_deleted' })).toEqual(INACTIVE);
     });
 
     it('leaves an inactive series alone', () => {
-      expect(decide('inactive', { kind: 'rule_deleted' })).toEqual({
-        write: false,
-        reason: 'already_in_state',
-      });
+      expect(decide('inactive', { kind: 'rule_deleted' })).toEqual(ALREADY_IN_STATE);
     });
   });
 
@@ -226,9 +110,6 @@ describe('decideLifecycle', () => {
       'inactive',
     ];
     const inputs: LifecycleInput[] = [
-      { kind: 'evaluation', outcome: 'breaching' },
-      { kind: 'evaluation', outcome: 'clean' },
-      { kind: 'evaluation', outcome: 'no_data' },
       { kind: 'assessment', outcome: 'breaching' },
       { kind: 'assessment', outcome: 'clean' },
       { kind: 'assessment', outcome: 'no_data' },
@@ -236,46 +117,21 @@ describe('decideLifecycle', () => {
       { kind: 'operator', intent: 'deactivate' },
       { kind: 'rule_deleted' },
     ];
-    const evaluationCounts = [0, 1, RECOVERING_COUNT - 1, RECOVERING_COUNT, RECOVERING_COUNT + 1];
     const everyCase = statuses.flatMap((status) =>
-      inputs.flatMap((input) =>
-        evaluationCounts.map((evaluations) => ({
-          status,
-          input,
-          evaluations,
-          decision: decide(status, input, evaluations),
-        }))
-      )
+      inputs.map((input) => ({ status, input, decision: decide(status, input) }))
     );
 
-    it('sets an evaluation count only on a recovering write', () => {
-      everyCase.forEach(({ decision }) => {
-        if (decision.write && decision.status !== 'recovering') {
-          expect(decision.evaluations).toBeUndefined();
-        }
-        if (decision.write && decision.status === 'recovering') {
-          expect(decision.evaluations).toBeGreaterThanOrEqual(0);
-        }
-      });
-    });
-
-    it('never advances the count except on an evaluation', () => {
-      everyCase.forEach(({ status, input, evaluations, decision }) => {
-        if (
-          status === 'recovering' &&
-          input.kind !== 'evaluation' &&
-          decision.write &&
-          decision.status === 'recovering'
-        ) {
-          expect(decision.evaluations).toBe(evaluations);
-        }
-      });
-    });
-
-    it('leaves recovering only through an evaluation, an assessment, an operator or a deleted rule', () => {
+    it('is deterministic: the same state and input always give the same decision', () => {
       everyCase.forEach(({ status, input, decision }) => {
-        if (status === 'recovering' && decision.write && decision.status !== 'recovering') {
-          expect(['evaluation', 'assessment', 'operator', 'rule_deleted']).toContain(input.kind);
+        expect(decide(status, input)).toEqual(decision);
+      });
+    });
+
+    it('enters recovering only from an assessment of an active series', () => {
+      everyCase.forEach(({ status, input, decision }) => {
+        if (decision.write && decision.status === 'recovering' && status !== 'recovering') {
+          expect(input.kind).toBe('assessment');
+          expect(status).toBe('active');
         }
       });
     });
@@ -300,11 +156,10 @@ describe('decideLifecycle', () => {
       });
     });
 
-    it('enters recovering only from an evaluation or an assessment on an active series', () => {
-      everyCase.forEach(({ status, input, decision }) => {
-        if (decision.write && decision.status === 'recovering' && status !== 'recovering') {
-          expect(['evaluation', 'assessment']).toContain(input.kind);
-          expect(status).toBe('active');
+    it('closes a series only through an operator or a deleted rule', () => {
+      everyCase.forEach(({ input, decision }) => {
+        if (decision.write && decision.status === 'inactive') {
+          expect(['operator', 'rule_deleted']).toContain(input.kind);
         }
       });
     });

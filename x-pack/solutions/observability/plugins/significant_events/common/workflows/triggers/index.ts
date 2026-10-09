@@ -25,7 +25,9 @@ const baseEventSchema = z.object({
   summary: z.string().describe('Short human-readable description of what is happening.'),
   status: z
     .enum(SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS)
-    .describe('Current lifecycle status: "active" or "inactive".'),
+    .describe(
+      'Current lifecycle status: "active" or "inactive". An event winding down ("recovering") is still live and is reported as "active".'
+    ),
   severity: severitySchema.describe('Severity: "critical", "high", "medium", or "low".'),
   source_ids: z.array(z.string()).describe('Nightshift source ids associated with this event.'),
   occurred_at: z.string().describe('When the triggered event happened (ISO 8601 timestamp).'),
@@ -101,7 +103,8 @@ export const eventStatusChangedTriggerCommonDefinition: CommonTriggerDefinition 
   description: i18n.translate(
     'xpack.significantEvents.workflowTriggers.eventStatusChanged.description',
     {
-      defaultMessage: 'Emitted when a significant event status changes.',
+      defaultMessage:
+        'Emitted when a significant event status changes between active and inactive. A move between active and recovering is not reported: both read as "active".',
     }
   ),
   documentation: {

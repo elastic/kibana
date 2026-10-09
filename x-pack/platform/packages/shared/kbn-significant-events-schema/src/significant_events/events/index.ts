@@ -27,7 +27,7 @@ export const SIGNIFICANT_EVENT_STATUS_OPTIONS = [
 export const significantEventStatusSchema = lazySchema(() =>
   z.enum(SIGNIFICANT_EVENT_STATUS_OPTIONS).describe(dedent`
       "${ALERT_EPISODE_STATUS.ACTIVE}" = a current failure, material degradation, or sensitive-data exposure is confirmed or remains plausibly unverified. A mechanism found at an unchanged background rate (rate-flat inconclusive) is verified as not newly elevated — it is not "plausibly unverified" and must not create a new event;
-      "${ALERT_EPISODE_STATUS.RECOVERING}" = engine-written: no member rule is currently breaching. The event closes after consecutive clean runs, and returns to "${ALERT_EPISODE_STATUS.ACTIVE}" in the same episode if a breach comes back;
+      "${ALERT_EPISODE_STATUS.RECOVERING}" = derived, never set by a caller: entered when every member rule was last judged healthy. It stays until a breach in any member returns it to "${ALERT_EPISODE_STATUS.ACTIVE}" in the same episode, an operator deactivates it, or its rule is deleted;
       "${ALERT_EPISODE_STATUS.INACTIVE}" = the event is no longer active: every confirming signal on it has been re-checked and cleared. A healthy result from one rule never closes signals it did not check; while any confirming signal on the event is unresolved, it stays "${ALERT_EPISODE_STATUS.ACTIVE}". Record the recovery, false-alarm, benign-change, or other assessment rationale in "assessment_note".
     `)
 );
@@ -35,9 +35,9 @@ export const significantEventStatusSchema = lazySchema(() =>
 export type SignificantEventStatus = z.infer<typeof significantEventStatusSchema>;
 
 /**
- * Statuses an operator or tool may set by hand. `recovering` is engine-only: Alerting v2 gives
- * operators `activate` / `deactivate`, and the series' recovering count assumes only the status
- * reconciliation writes it.
+ * Statuses an operator or tool may set by hand. `recovering` is not settable: only the lifecycle
+ * state machine writes it (an assessment that every member is healthy, on an active event).
+ * Alerting v2 gives operators only `activate` / `deactivate`.
  */
 export const SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS = [
   ALERT_EPISODE_STATUS.ACTIVE,
@@ -106,14 +106,6 @@ export const significantEventSchema = lazySchema(() =>
         `
       ),
     investigations: z.array(significantEventInvestigationSchema).max(100).optional(),
-    status_evaluations: z
-      .number()
-      .int()
-      .min(0)
-      .optional()
-      .describe(
-        'Engine-owned: evaluations the series has spent in "recovering". Set only on a recovering version and cleared in every other state; never supplied by a caller.'
-      ),
   })
 );
 

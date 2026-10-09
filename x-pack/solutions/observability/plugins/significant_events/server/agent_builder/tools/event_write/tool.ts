@@ -19,6 +19,7 @@ import {
   MAX_SIGNAL_DESCRIPTION_LENGTH,
   MAX_SUMMARY_LENGTH,
   MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  significantEventManualStatusSchema,
   significantEventSchema,
 } from '@kbn/significant-events-schema';
 import { nightshiftSourceSlugsField } from '@kbn/nightshift-shared';
@@ -64,6 +65,8 @@ export const eventsWriteItemSchema = lazySchema(() =>
       slugs: nightshiftSourceSlugsField(
         'This event covers these sources. Nested signal, causal feature, and blast radius `source_id` values are slugs too. Disabled sources are accepted.'
       ),
+      // `recovering` is derived by the lifecycle state machine and is never set by a caller.
+      status: significantEventManualStatusSchema,
       event_id: z
         .string()
         .optional()

@@ -27,7 +27,7 @@ import { updateEventStatusToolHandler } from './handler';
 export const SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID =
   platformSignificantEventsTools.updateEventStatus;
 
-const eventStatusUpdateSchema = lazySchema(() =>
+export const eventStatusUpdateSchema = lazySchema(() =>
   significantEventSchema
     .pick({
       event_id: true,

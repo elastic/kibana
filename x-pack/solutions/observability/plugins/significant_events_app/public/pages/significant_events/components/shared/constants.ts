@@ -9,6 +9,6 @@ import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 
 export const SIGNIFICANT_EVENT_STATUS_COLORS: Record<SignificantEventStatus, string> = {
   active: 'danger',
-  recovering: 'warning',
+  recovering: 'danger',
   inactive: 'default',
 };

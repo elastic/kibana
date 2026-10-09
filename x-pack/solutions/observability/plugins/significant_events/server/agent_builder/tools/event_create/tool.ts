@@ -31,7 +31,7 @@ import { assignStoredSourceIds, sourceSlugsSchema } from '../../utils/stored_sou
 
 export const SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID = platformSignificantEventsTools.createEvent;
 
-const createEventSchema = lazySchema(() =>
+export const createEventSchema = lazySchema(() =>
   significantEventSchema
     .pick({
       title: true,

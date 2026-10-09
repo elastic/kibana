@@ -353,7 +353,7 @@ describe('POST /internal/significant_events/events/{id}/update — body schema',
     expect(result.success).toBe(true);
   });
 
-  it('rejects recovering, which only the status reconciliation writes', () => {
+  it('rejects recovering, which only the lifecycle state machine writes', () => {
     expect(bodySchema.safeParse({ status: 'recovering' }).success).toBe(false);
   });
 });
