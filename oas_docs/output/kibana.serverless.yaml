@@ -951,10 +951,10 @@ paths:
         List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: get-agent-builder-agents
       parameters:
-        - in: query
+        - description: When true, hidden agents (such as built-in system agents) are included in the response.
+          in: query
           name: include_hidden
           required: false
-          description: When true, hidden agents (such as built-in system agents) are included in the response.
           schema:
             default: false
             type: boolean
