@@ -16,15 +16,15 @@ import {
 import { toEsqlQueryState } from '@kbn/custom-content-common';
 import {
   createPanelFailureResult,
-  EMBEDDABLE_TYPE_BY_RENDERER,
   type InlinePanelOperationType,
   type PanelContent,
   type PanelContentAttempt,
+  getRendererEmbeddableType,
 } from '@kbn/dashboard-agent-authoring';
 
 /** Maps a stored visualization payload onto the embeddable that renders it. */
 const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {
-  const type = EMBEDDABLE_TYPE_BY_RENDERER[getEffectiveRenderer(data)];
+  const type = getRendererEmbeddableType(getEffectiveRenderer(data));
 
   // Custom content stores markup rather than a chart config, so its panel config is rebuilt.
   if (isCustomContentVisualization(data)) {
