@@ -16,7 +16,6 @@ export const KI_STREAM_NAME = 'logs.otel';
 export const EVENTS_ENDPOINT = 'internal/significant_events/events';
 export const DETECTIONS_ENDPOINT = 'internal/significant_events/detections';
 export const MARK_SCANNED_ENDPOINT = 'internal/significant_events/detections/_mark_scanned';
-export const FEATURES_ENDPOINT = 'internal/streams/_features';
 export const STREAM_FEATURES_ENDPOINT = `internal/streams/${KI_STREAM_NAME}/features`;
 export const RUN_QUOTAS_ENDPOINT = 'internal/significant_events/run_quotas';
 export const TOOL_EXECUTE_ENDPOINT = 'api/agent_builder/tools/_execute';

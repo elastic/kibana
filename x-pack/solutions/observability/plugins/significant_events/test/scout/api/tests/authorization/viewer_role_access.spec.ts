@@ -14,7 +14,6 @@ import {
   DETECTIONS_ENDPOINT,
   EVENTS_ENDPOINT,
   EVENT_SEARCH_TOOL_ID,
-  FEATURES_ENDPOINT,
   KI_FEATURE_CREATE_TOOL_ID,
   KI_STREAM_NAME,
   MARK_SCANNED_ENDPOINT,
@@ -103,7 +102,10 @@ apiTest.describe(
     });
 
     apiTest('lists knowledge indicators', async ({ apiClient }) => {
-      const response = await apiClient.get(FEATURES_ENDPOINT, { headers, responseType: 'json' });
+      const response = await apiClient.get(STREAM_FEATURES_ENDPOINT, {
+        headers,
+        responseType: 'json',
+      });
       expect(response).toHaveStatusCode(200);
       expect(response.body.features).toStrictEqual(
         expect.arrayContaining([

@@ -21,6 +21,22 @@ apiTest.describe(
   'Significant Events settings access for built-in roles',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    let quotasToRestore: { headers: Record<string, string>; body: RunQuotaLimits } | undefined;
+
+    apiTest.afterAll(async ({ apiClient }) => {
+      if (!quotasToRestore) {
+        return;
+      }
+      const { headers, body } = quotasToRestore;
+      quotasToRestore = undefined;
+      const restoreResponse = await apiClient.put(RUN_QUOTAS_ENDPOINT, {
+        headers,
+        body,
+        responseType: 'json',
+      });
+      expect(restoreResponse).toHaveStatusCode(200);
+    });
+
     for (const role of ['viewer', 'editor'] as const) {
       apiTest(`denies settings changes to the ${role} role`, async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(role);
@@ -49,14 +65,10 @@ apiTest.describe(
       const nextDetectionLimit =
         limits.detection === 10_000 ? limits.detection - 1 : limits.detection + 1;
 
+      quotasToRestore = { headers, body: { enabled, limits } };
       const updateResponse = await apiClient.put(RUN_QUOTAS_ENDPOINT, {
         headers,
         body: { limits: { detection: nextDetectionLimit } },
-        responseType: 'json',
-      });
-      const restoreResponse = await apiClient.put(RUN_QUOTAS_ENDPOINT, {
-        headers,
-        body: { enabled, limits },
         responseType: 'json',
       });
 
@@ -65,7 +77,6 @@ apiTest.describe(
         limits: { ...limits, detection: nextDetectionLimit },
         canManage: true,
       });
-      expect(restoreResponse).toHaveStatusCode(200);
     });
   }
 );
