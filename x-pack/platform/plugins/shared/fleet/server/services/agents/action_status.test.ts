@@ -219,6 +219,12 @@ describe('getActionStatuses policy change actions', () => {
       .map(([request]) => request)
       .filter((request) => request.index === '.fleet-policies');
     expect(policySearches.map((request) => request.from)).toEqual([0, 20]);
+    // stable order between pages when documents share a timestamp
+    expect(policySearches[0].sort).toEqual([
+      { '@timestamp': { order: 'desc' } },
+      { policy_id: { order: 'asc' } },
+      { revision_idx: { order: 'asc' } },
+    ]);
   });
 
   it('does not return version specific and sentinel policy docs', async () => {

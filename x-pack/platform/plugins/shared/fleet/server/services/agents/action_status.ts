@@ -413,12 +413,12 @@ async function getPolicyChangeActions(
       from,
       size: limit,
       query: namespacedQuery,
+      // Tiebreakers keep the order stable between pages when documents share a timestamp, as
+      // they do when a policy is deployed with its `#sentinel` copy.
       sort: [
-        {
-          '@timestamp': {
-            order: 'desc',
-          },
-        },
+        { '@timestamp': { order: 'desc' } },
+        { policy_id: { order: 'asc' } },
+        { revision_idx: { order: 'asc' } },
       ],
       _source: ['revision_idx', '@timestamp', 'policy_id'],
     });
