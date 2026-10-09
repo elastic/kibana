@@ -24,6 +24,7 @@ import type {
   AgenticInvestigationsPublicPluginStart,
   AgenticInvestigationsPublicSetupDependencies,
   AgenticInvestigationsPublicStartDependencies,
+  ImpactEntityOpener,
 } from './types';
 
 const LazyInvestigationCardComponent = React.lazy(async () => {
@@ -59,6 +60,7 @@ export class AgenticInvestigationsPublicPlugin
 {
   private readonly escalationsEnabled: boolean;
   private readonly groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
+  private impactEntityOpener: ImpactEntityOpener | undefined;
 
   constructor(context: PluginInitializerContext<AgenticInvestigationsPublicConfig>) {
     this.escalationsEnabled = context.config.get().escalations.enabled;
@@ -80,7 +82,7 @@ export class AgenticInvestigationsPublicPlugin
   ): AgenticInvestigationsPublicPluginStart {
     const { agentBuilder } = startDeps;
     if (agentBuilder) {
-      registerImpactAttachmentTypes(agentBuilder);
+      registerImpactAttachmentTypes(agentBuilder, () => this.impactEntityOpener);
       if (this.escalationsEnabled) {
         registerEscalationConversationEventUiDefinitions({
           conversationEvents: agentBuilder.conversationEvents,
@@ -96,13 +98,21 @@ export class AgenticInvestigationsPublicPlugin
         // and the investigation template has no escalate action.
         escalationsEnabled: this.escalationsEnabled,
         groupedAttachments: this.groupedAttachments,
+        getImpactEntityOpener: () => this.impactEntityOpener,
         templates: this.escalationsEnabled
           ? [investigationTemplate, escalationTemplate]
           : [investigationTemplate],
       });
     }
-    return { InvestigationCard: LazyInvestigationCard };
+    return {
+      registerImpactEntityOpener: (opener) => {
+        this.impactEntityOpener = opener;
+      },
+      InvestigationCard: LazyInvestigationCard,
+    };
   }
 
-  stop() {}
+  stop() {
+    this.impactEntityOpener = undefined;
+  }
 }

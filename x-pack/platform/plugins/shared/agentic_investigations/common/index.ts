@@ -114,6 +114,7 @@ export {
   ESCALATION_LINKED_INVESTIGATIONS_URL,
   ESCALATION_STATUS_FIELD,
   ESCALATION_STATUS_URL,
+  ESCALATION_SYNC_URL,
   ESCALATION_TEMPLATE_ID,
   ESCALATIONS_INTERNAL_URL,
   ESCALATIONS_UI_CAPABILITY_MANAGE,
@@ -205,6 +206,7 @@ export type {
   ListEscalationsQuery,
   ListEscalationsResponse,
   ListLinkedInvestigationsResponse,
+  SyncEscalationResponse,
 } from './escalations';
 
 export {

@@ -525,6 +525,15 @@ function getExpressionForLayer(
             isTextBased: [isFormBasedEsqlMode],
           },
         },
+        ...(isFormBasedEsqlMode
+          ? [
+              {
+                type: 'function' as const,
+                function: 'lens_date_histogram_textbased',
+                arguments: {},
+              },
+            ]
+          : []),
         ...expressions,
         ...formatterOverrides,
         ...timeScaleFunctions,

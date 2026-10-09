@@ -5,29 +5,16 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiMarkdownFormat,
-  EuiText,
-} from '@elastic/eui';
+import React, { memo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat } from '@elastic/eui';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
-import { FlyoutGroupedAttachments, GroupedAttachmentsSection } from '../grouped_attachments';
 import type { FlyoutGroupedAttachmentsRegistry } from '../grouped_attachments';
 import { DetailsBlock } from './detail_block';
+import { ImpactSection } from './impact_section';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { OVERVIEW_SECTION_LABELS } from './overview_translations';
-
-const SUMMARY_LIMIT = 120;
-
-const GROUPED_ATTACHMENTS_ORDER: readonly FlyoutGroupedAttachments[] = [
-  FlyoutGroupedAttachments.ALERTS,
-  FlyoutGroupedAttachments.ATTACKS,
-  FlyoutGroupedAttachments.RULES,
-];
+import { WhatsHappenedBlock } from './whats_happened_block';
 
 export interface OverviewTabProps {
   investigation: Investigation;
@@ -53,6 +40,10 @@ export interface OverviewTabProps {
 export interface OverviewSections {
   /** What the investigation is about. Shown above the subject attachments. */
   subjects?: React.ReactNode;
+  /**
+   * Replaces the impact read from the conversation's `investigation_impact` attachment, for a
+   * host that reads fresher impact itself. Absent, the tab renders the attachment.
+   */
   impact?: React.ReactNode;
   /** The conclusion, as markdown. */
   conclusion?: string;
@@ -69,21 +60,7 @@ export const OverviewTab = memo<OverviewTabProps>(
     proposedActionsCount,
     sections = {},
   }) => {
-    const { summary } = investigation;
     const { subjects, impact, conclusion, trace } = sections;
-    const [expanded, setExpanded] = useState(false);
-
-    const isCondensed = summary != null && summary.length > SUMMARY_LIMIT;
-    const displayedSummary =
-      isCondensed && !expanded ? `${summary.slice(0, SUMMARY_LIMIT)}...` : summary;
-
-    const attachmentsSection = (
-      <GroupedAttachmentsSection
-        attachments={attachments}
-        registry={groupedAttachments}
-        order={GROUPED_ATTACHMENTS_ORDER}
-      />
-    );
 
     return (
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -93,36 +70,20 @@ export const OverviewTab = memo<OverviewTabProps>(
           </EuiFlexItem>
         )}
 
-        {summary && (
-          <EuiFlexItem>
-            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.overview}>
-              <EuiText size="s" color="subdued">
-                <p>{displayedSummary}</p>
-              </EuiText>
-              {isCondensed && (
-                <div>
-                  <EuiButtonEmpty
-                    size="s"
-                    flush="left"
-                    onClick={() => setExpanded((prev) => !prev)}
-                  >
-                    {expanded
-                      ? DETAILS_FLYOUT_LABELS.overview.showLess
-                      : DETAILS_FLYOUT_LABELS.overview.showMore}
-                  </EuiButtonEmpty>
-                </div>
-              )}
-              {attachmentsSection}
-            </DetailsBlock>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <WhatsHappenedBlock
+            summary={investigation.summary}
+            attachments={attachments}
+            groupedAttachments={groupedAttachments}
+          />
+        </EuiFlexItem>
 
-        {!summary && attachmentsSection}
-
-        {impact && (
+        {impact ? (
           <EuiFlexItem data-test-subj="investigationOverviewImpact">
-            <DetailsBlock title={OVERVIEW_SECTION_LABELS.impact}>{impact}</DetailsBlock>
+            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.impact}>{impact}</DetailsBlock>
           </EuiFlexItem>
+        ) : (
+          <ImpactSection attachments={attachments} />
         )}
 
         {conclusion && (

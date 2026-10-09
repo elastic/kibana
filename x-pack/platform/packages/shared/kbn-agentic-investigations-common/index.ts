@@ -89,6 +89,8 @@ export {
   type RenderStatus,
   type StatusSlotRenderProps,
   type RenderLinkedInvestigations,
+  type RenderSyncIndicator,
+  type SyncIndicatorSlotRenderProps,
   type LinkedInvestigationsSlotRenderProps,
   type RenderOverview,
   type OverviewSlotRenderProps,
@@ -113,6 +115,15 @@ export {
   CONVERSATION_CATEGORY_COLORS,
 } from './src/types/queue';
 
+export {
+  clearImpactDetailsRenderer,
+  registerImpactDetailsRenderer,
+  renderImpactDetails,
+} from './src/components/impact/impact_details_renderer';
+export {
+  entityStoreIdType,
+  type ImpactEntityTarget,
+} from './src/components/impact/open_impact_entity';
 export {
   Impact,
   impactPills,
