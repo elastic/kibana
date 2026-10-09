@@ -5,7 +5,7 @@
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "dependencies": {
     "graphql": "^17.0.2",
-    "mongodb": "6.21.0",
-    "mongodb-connection-string-url": "3.0.2"
+    "mongodb": "7.6.0",
+    "mongodb-connection-string-url": "7.0.2"
   }
 }
