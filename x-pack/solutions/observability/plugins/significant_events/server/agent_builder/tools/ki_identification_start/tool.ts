@@ -6,7 +6,7 @@
  */
 
 import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -32,20 +32,22 @@ import type { GetScopedClients } from '../../../routes/types';
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID =
   'platform.sig_events.ki_identification_start';
 
-const onboardingStartSchema = z.object({
-  slug: nightshiftSourceSlugField('The source must be enabled.'),
-  steps: z
-    .array(z.enum(KIsOnboardingStep))
-    .optional()
-    .default([KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration])
-    .describe('Optional ordered KI identification steps for the background task.'),
-  connectors: z
-    .object({
-      features: z.string().max(MAX_ID_LENGTH).optional(),
-      queries: z.string().max(MAX_ID_LENGTH).optional(),
-    })
-    .optional(),
-});
+const onboardingStartSchema = lazySchema(() =>
+  z.object({
+    slug: nightshiftSourceSlugField('The source must be enabled.'),
+    steps: z
+      .array(z.enum(KIsOnboardingStep))
+      .optional()
+      .default([KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration])
+      .describe('Optional ordered KI identification steps for the background task.'),
+    connectors: z
+      .object({
+        features: z.string().max(MAX_ID_LENGTH).optional(),
+        queries: z.string().max(MAX_ID_LENGTH).optional(),
+      })
+      .optional(),
+  })
+);
 
 export const createKiIdentificationStartTool = ({
   server,

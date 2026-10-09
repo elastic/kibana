@@ -10,7 +10,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { significantEventSchema } from '@kbn/significant-events-schema';
@@ -41,142 +41,150 @@ import { sourceSlugsSchema } from '../../utils/stored_source_fields';
 
 export const SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID = platformSignificantEventsTools.searchEvent;
 
-const searchEventsSchema = significantEventSchema
-  .pick({
-    status: true,
-  })
-  .extend({
-    slugs: sourceSlugsSchema.optional().describe(
-      i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.slugs', {
-        defaultMessage:
-          'Optional Nightshift source slugs. Omit to search events for every source. Not titles and not view names. Disabled sources are accepted.',
-      })
-    ),
-    status: significantEventSchema.shape.status.default('active').describe(
-      i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.status', {
-        defaultMessage:
-          'Event status to filter by. Defaults to "active". Use "inactive" when intentionally reviewing resolved events.',
-      })
-    ),
-    query: z
-      .string()
-      .transform(normalizeEventSearchQuery)
-      .optional()
-      .describe(
-        i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.query', {
+const searchEventsSchema = lazySchema(() =>
+  significantEventSchema
+    .pick({
+      status: true,
+    })
+    .extend({
+      slugs: sourceSlugsSchema.optional().describe(
+        i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.slugs', {
           defaultMessage:
-            'Optional substring search over the event title, summary, and symptom hypothesis fields. ' +
-            'Defaults to no text filter. Use it to narrow results to a known incident. ' +
-            'Matching is case-insensitive and not semantic — omit it when you want all events for a source or state.',
+            'Optional Nightshift source slugs. Omit to search events for every source. Not titles and not view names. Disabled sources are accepted.',
         })
       ),
-    rule_uuids: z
-      .array(z.string())
-      .max(100)
-      .transform((ruleUuids) => (ruleUuids.length === 0 ? undefined : ruleUuids))
-      .optional()
-      .describe(
-        i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.ruleUuids', {
+      status: significantEventSchema.shape.status.default('active').describe(
+        i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.status', {
           defaultMessage:
-            'Optional rule UUIDs to match against event signals. Defaults to no rule filter. When combined with source slugs, only events matching both filters are returned.',
+            'Event status to filter by. Defaults to "active". Use "inactive" when intentionally reviewing resolved events.',
         })
       ),
-    event_ids: z
-      .array(z.string())
-      .max(100)
-      .optional()
-      .describe(
-        i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.eventIds', {
-          defaultMessage: 'Optional stable event IDs to retrieve. Defaults to no event ID filter.',
-        })
-      ),
-    topology_feature_ids: z
-      .array(z.string())
-      .max(100)
-      .optional()
-      .describe(
-        i18n.translate(
-          'xpack.significantEvents.agentBuilder.tools.eventSearch.schema.topologyFeatureIds',
-          {
+      query: z
+        .string()
+        .transform(normalizeEventSearchQuery)
+        .optional()
+        .describe(
+          i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.query', {
             defaultMessage:
-              'Optional Knowledge Indicator feature.id values to match against causal_features.feature_id or blast_radius.feature_id. Defaults to no topology filter. An event matches when either topology field contains any requested ID.',
-          }
-        )
-      ),
-    view: z
-      .enum(['compact', 'full'])
-      .optional()
-      .default('compact')
-      .describe(
-        i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.view', {
-          defaultMessage:
-            'Response detail. Defaults to "compact", which returns bounded routing data. "full" requires exactly one event_id and returns one bounded page of that event’s signal details.',
-        })
-      ),
-    signals_page: z
-      .number()
-      .int()
-      .min(1)
-      .optional()
-      .default(1)
-      .describe('Signal page for a "full" event response. Defaults to 1.'),
-    signals_per_page: z
-      .number()
-      .int()
-      .min(1)
-      .max(EVENT_SEARCH_SIGNAL_PAGE_SIZE)
-      .optional()
-      .default(EVENT_SEARCH_SIGNAL_PAGE_SIZE)
-      .describe('Number of signals per "full" event response. Defaults to 10 and is capped at 10.'),
-    page: z
-      .number()
-      .int()
-      .min(1)
-      .optional()
-      .default(1)
-      .describe(
-        i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.page', {
-          defaultMessage: 'Current compact-result page. Defaults to 1.',
-        })
-      ),
-    per_page: z
-      .number()
-      .int()
-      .min(1)
-      .max(EVENT_SEARCH_MAX_PER_PAGE)
-      .optional()
-      .default(EVENT_SEARCH_DEFAULT_PER_PAGE)
-      .describe(
-        i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.perPage', {
-          defaultMessage:
-            'Number of compact events to return per page. Defaults to 20 and is capped at 50. "full" returns exactly one known event.',
-        })
-      ),
-    from: z
-      .string()
-      .optional()
-      .default(DEFAULT_EVENTS_SEARCH_FROM)
-      .describe(
-        i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.from', {
-          defaultMessage:
-            'Start of the search range as ISO 8601 or Elasticsearch date math. Defaults to "now-7d".',
-        })
-      ),
-    to: z
-      .string()
-      .optional()
-      .default(DEFAULT_EVENTS_SEARCH_TO)
-      .describe(
-        i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.to', {
-          defaultMessage:
-            'End of the search range as ISO 8601 or Elasticsearch date math. Defaults to "now".',
-        })
-      ),
-  })
-  .refine(({ event_ids, view }) => view !== 'full' || event_ids?.length === 1, {
-    message: 'Full event search requires exactly one event_id.',
-    path: ['event_ids'],
-  });
+              'Optional substring search over the event title, summary, and symptom hypothesis fields. ' +
+              'Defaults to no text filter. Use it to narrow results to a known incident. ' +
+              'Matching is case-insensitive and not semantic — omit it when you want all events for a source or state.',
+          })
+        ),
+      rule_uuids: z
+        .array(z.string())
+        .max(100)
+        .transform((ruleUuids) => (ruleUuids.length === 0 ? undefined : ruleUuids))
+        .optional()
+        .describe(
+          i18n.translate(
+            'xpack.significantEvents.agentBuilder.tools.eventSearch.schema.ruleUuids',
+            {
+              defaultMessage:
+                'Optional rule UUIDs to match against event signals. Defaults to no rule filter. When combined with source slugs, only events matching both filters are returned.',
+            }
+          )
+        ),
+      event_ids: z
+        .array(z.string())
+        .max(100)
+        .optional()
+        .describe(
+          i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.eventIds', {
+            defaultMessage:
+              'Optional stable event IDs to retrieve. Defaults to no event ID filter.',
+          })
+        ),
+      topology_feature_ids: z
+        .array(z.string())
+        .max(100)
+        .optional()
+        .describe(
+          i18n.translate(
+            'xpack.significantEvents.agentBuilder.tools.eventSearch.schema.topologyFeatureIds',
+            {
+              defaultMessage:
+                'Optional Knowledge Indicator feature.id values to match against causal_features.feature_id or blast_radius.feature_id. Defaults to no topology filter. An event matches when either topology field contains any requested ID.',
+            }
+          )
+        ),
+      view: z
+        .enum(['compact', 'full'])
+        .optional()
+        .default('compact')
+        .describe(
+          i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.view', {
+            defaultMessage:
+              'Response detail. Defaults to "compact", which returns bounded routing data. "full" requires exactly one event_id and returns one bounded page of that event’s signal details.',
+          })
+        ),
+      signals_page: z
+        .number()
+        .int()
+        .min(1)
+        .optional()
+        .default(1)
+        .describe('Signal page for a "full" event response. Defaults to 1.'),
+      signals_per_page: z
+        .number()
+        .int()
+        .min(1)
+        .max(EVENT_SEARCH_SIGNAL_PAGE_SIZE)
+        .optional()
+        .default(EVENT_SEARCH_SIGNAL_PAGE_SIZE)
+        .describe(
+          'Number of signals per "full" event response. Defaults to 10 and is capped at 10.'
+        ),
+      page: z
+        .number()
+        .int()
+        .min(1)
+        .optional()
+        .default(1)
+        .describe(
+          i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.page', {
+            defaultMessage: 'Current compact-result page. Defaults to 1.',
+          })
+        ),
+      per_page: z
+        .number()
+        .int()
+        .min(1)
+        .max(EVENT_SEARCH_MAX_PER_PAGE)
+        .optional()
+        .default(EVENT_SEARCH_DEFAULT_PER_PAGE)
+        .describe(
+          i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.perPage', {
+            defaultMessage:
+              'Number of compact events to return per page. Defaults to 20 and is capped at 50. "full" returns exactly one known event.',
+          })
+        ),
+      from: z
+        .string()
+        .optional()
+        .default(DEFAULT_EVENTS_SEARCH_FROM)
+        .describe(
+          i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.from', {
+            defaultMessage:
+              'Start of the search range as ISO 8601 or Elasticsearch date math. Defaults to "now-7d".',
+          })
+        ),
+      to: z
+        .string()
+        .optional()
+        .default(DEFAULT_EVENTS_SEARCH_TO)
+        .describe(
+          i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.to', {
+            defaultMessage:
+              'End of the search range as ISO 8601 or Elasticsearch date math. Defaults to "now".',
+          })
+        ),
+    })
+    .refine(({ event_ids, view }) => view !== 'full' || event_ids?.length === 1, {
+      message: 'Full event search requires exactly one event_id.',
+      path: ['event_ids'],
+    })
+);
 
 /**
  * Filter sources first, then any other catalog source named on the returned

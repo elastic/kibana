@@ -10,7 +10,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
@@ -31,13 +31,15 @@ import {
 export const SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID =
   platformSignificantEventsTools.searchSimilarFeatures;
 
-const featureSimilaritySearchSchema = z.object({
-  slug: nightshiftSourceSlugField('Disabled sources are included.'),
-  candidates: z
-    .array(featureCandidateSchema)
-    .max(MAX_SEARCH_CANDIDATES)
-    .describe('Candidate features to check in one call. Results are grouped by candidate_id.'),
-});
+const featureSimilaritySearchSchema = lazySchema(() =>
+  z.object({
+    slug: nightshiftSourceSlugField('Disabled sources are included.'),
+    candidates: z
+      .array(featureCandidateSchema)
+      .max(MAX_SEARCH_CANDIDATES)
+      .describe('Candidate features to check in one call. Results are grouped by candidate_id.'),
+  })
+);
 
 export const createFeatureSimilaritySearchTool = ({
   getScopedClients,

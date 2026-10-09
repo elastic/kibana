@@ -3682,6 +3682,7 @@ paths:
                   type: string
                 input:
                   description: The user input message to send to the agent.
+                  maxLength: 100000
                   type: string
                 project_routing:
                   description: Cross-project search routing expression resolved from the header project picker, applied to the run's searches. Serverless (CPS) only; ignored elsewhere.
@@ -4164,6 +4165,7 @@ paths:
                   type: string
                 input:
                   description: The user input message to send to the agent.
+                  maxLength: 100000
                   type: string
                 project_routing:
                   description: Cross-project search routing expression resolved from the header project picker, applied to the run's searches. Serverless (CPS) only; ignored elsewhere.
@@ -46467,6 +46469,8 @@ paths:
                 type: object
                 properties:
                   is_action_secrets_storage_enabled:
+                    type: boolean
+                  is_fips_enabled:
                     type: boolean
                   is_secrets_storage_enabled:
                     type: boolean
@@ -135529,9 +135533,10 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update an existing private location's label.
+        Update an existing private location's label or agent policy.
         You must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
         When a private location's label is updated, all monitors using this location will also be updated to maintain data consistency.
+        When a private location's agent policy is changed, the package policies of all monitors using this location are deleted and recreated on the new agent policy. Monitors stop running on the previous agents until agents on the new policy pick them up. The new agent policy must be available in all spaces of the private location and must not be used by another private location.
       operationId: put-private-location
       parameters:
         - description: The unique identifier of the private location to be updated.
@@ -135550,15 +135555,23 @@ paths:
                   {
                     "label": "Updated Private Location Name"
                   }
+              putPrivateLocationRequestExample2:
+                description: Move a private location to another agent policy.
+                value: |-
+                  {
+                    "agentPolicyId": "new-agent-policy-id"
+                  }
             schema:
               type: object
               properties:
+                agentPolicyId:
+                  description: The ID of the Fleet agent policy to move the private location to.
+                  minLength: 1
+                  type: string
                 label:
                   description: A new label for the private location. Must be at least 1 character long.
                   minLength: 1
                   type: string
-              required:
-                - label
         required: true
       responses:
         '200':
@@ -135584,7 +135597,8 @@ paths:
                 $ref: '#/components/schemas/Synthetics_getPrivateLocation'
           description: A successful response.
         '400':
-          description: If the `label` is shorter than 1 character the API will return a 400 Bad Request response with a corresponding error message.
+          description: |
+            If the `label` is shorter than 1 character, or the `agentPolicyId` is not available in the current space, does not cover all spaces of the private location, or is already used by another private location, the API will return a 400 Bad Request response with a corresponding error message.
         '404':
           description: If the private location with the specified ID does not exist, the API will return a 404 Not Found response.
       summary: Update a private location

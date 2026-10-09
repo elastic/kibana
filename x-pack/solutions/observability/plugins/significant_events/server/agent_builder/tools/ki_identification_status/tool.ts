@@ -6,7 +6,7 @@
  */
 
 import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -26,9 +26,11 @@ import type { GetScopedClients } from '../../../routes/types';
 export const SIGNIFICANT_EVENTS_KI_IDENTIFICATION_STATUS_TOOL_ID =
   'platform.sig_events.ki_identification_status';
 
-const onboardingStatusSchema = z.object({
-  slug: nightshiftSourceSlugField('Disabled sources are accepted.'),
-});
+const onboardingStatusSchema = lazySchema(() =>
+  z.object({
+    slug: nightshiftSourceSlugField('Disabled sources are accepted.'),
+  })
+);
 
 export const createKiIdentificationStatusTool = ({
   server,

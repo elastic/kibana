@@ -6,7 +6,7 @@
  */
 
 import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
@@ -33,22 +33,26 @@ import {
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_QUERY_TOOL_ID =
   platformSignificantEventsTools.createQueryKnowledgeIndicator;
 
-const queryInputSchema = upsertStreamQueryRequestSchema.extend({
-  id: z.string().max(MAX_ID_LENGTH).optional(),
-  expires_at: z.iso
-    .datetime()
-    .optional()
-    .describe(
-      'Optional expiry deadline (ISO 8601). Provide to create a managed KI that expires at this date. ' +
-        'Omit to create a durable KI with no expiry.'
-    ),
-});
-
-const createQueryKnowledgeIndicatorSchema = z
-  .object({
-    slug: nightshiftSourceSlugField('The query KI is saved on this source.'),
+const queryInputSchema = lazySchema(() =>
+  upsertStreamQueryRequestSchema.extend({
+    id: z.string().max(MAX_ID_LENGTH).optional(),
+    expires_at: z.iso
+      .datetime()
+      .optional()
+      .describe(
+        'Optional expiry deadline (ISO 8601). Provide to create a managed KI that expires at this date. ' +
+          'Omit to create a durable KI with no expiry.'
+      ),
   })
-  .extend(queryInputSchema.shape);
+);
+
+const createQueryKnowledgeIndicatorSchema = lazySchema(() =>
+  z
+    .object({
+      slug: nightshiftSourceSlugField('The query KI is saved on this source.'),
+    })
+    .extend(queryInputSchema.shape)
+);
 
 export function createQueryKnowledgeIndicatorTool({
   getScopedClients,

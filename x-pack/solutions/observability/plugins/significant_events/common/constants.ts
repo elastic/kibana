@@ -127,3 +127,14 @@ export const DEFAULT_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE = 80;
 export const MIN_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE = 0;
 // 101 means "no rule is exempt" — severity scores top out at 100.
 export const MAX_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE = 101;
+
+/**
+ * Agent Builder agent and tool IDs. Plain strings so consumers (e.g. evals) can import them
+ * without loading any server implementation code.
+ */
+export const SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID = 'significant-events.discovery';
+export const KI_QUERY_GENERATION_AGENT_ID = 'significant-events.ki-query-generation';
+export const FEATURE_IDENTIFICATION_AGENT_ID = 'significant-events.feature-identification';
+export const SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID =
+  'platform.sig_events.ki_queries_validate';
+export const FINALIZE_FEATURES_TOOL_ID = 'platform_sig_events_ki_feature_finalize';

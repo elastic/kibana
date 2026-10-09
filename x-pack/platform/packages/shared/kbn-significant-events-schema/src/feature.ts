@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { isEqual, uniq } from 'lodash';
 import objectHash from 'object-hash';
 import { v5 } from 'uuid';
@@ -37,54 +37,60 @@ export const INFERRED_FEATURE_TYPES = [
 // TODO: it would be nice to rename id->slug and uuid->id for consistency with queries
 // The owning source is not part of the write payload: the server stamps it from the
 // route (or tool) it was submitted through. See `featureSchema` for the read shape.
-export const baseFeatureSchema = z.object({
-  id: z.string().max(MAX_ID_LENGTH),
-  type: z.string().max(MAX_ID_LENGTH),
-  subtype: z.string().max(MAX_ID_LENGTH).optional(),
-  title: z.string().max(MAX_TITLE_LENGTH).optional(),
-  description: z.string().max(MAX_TEXT_LENGTH),
-  properties: z.record(z.string().max(MAX_ID_LENGTH), z.unknown()),
-  confidence: z.number().min(0).max(100),
-  evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
-  evidence_doc_ids: z.array(z.string().max(MAX_ID_LENGTH)).optional(),
-  tags: z.array(z.string().max(MAX_ID_LENGTH)).optional(),
-  filter: conditionSchema.optional(),
-  meta: z.record(z.string().max(MAX_ID_LENGTH), z.unknown()).optional(),
-});
+export const baseFeatureSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(MAX_ID_LENGTH),
+    type: z.string().max(MAX_ID_LENGTH),
+    subtype: z.string().max(MAX_ID_LENGTH).optional(),
+    title: z.string().max(MAX_TITLE_LENGTH).optional(),
+    description: z.string().max(MAX_TEXT_LENGTH),
+    properties: z.record(z.string().max(MAX_ID_LENGTH), z.unknown()),
+    confidence: z.number().min(0).max(100),
+    evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
+    evidence_doc_ids: z.array(z.string().max(MAX_ID_LENGTH)).optional(),
+    tags: z.array(z.string().max(MAX_ID_LENGTH)).optional(),
+    filter: conditionSchema.optional(),
+    meta: z.record(z.string().max(MAX_ID_LENGTH), z.unknown()).optional(),
+  })
+);
 
 export type BaseFeature = z.infer<typeof baseFeatureSchema>;
 
 // Stricter schema for LLM-identified features — makes subtype, title, evidence, tags required
-export const identifiedFeatureSchema = baseFeatureSchema
-  .omit({ subtype: true, title: true, evidence: true, tags: true })
-  .and(
+export const identifiedFeatureSchema = lazySchema(() =>
+  baseFeatureSchema.omit({ subtype: true, title: true, evidence: true, tags: true }).and(
     z.object({
       subtype: z.string().max(MAX_ID_LENGTH),
       title: z.string().max(MAX_TITLE_LENGTH),
       evidence: z.array(z.string().max(MAX_TEXT_LENGTH)),
       tags: z.array(z.string().max(MAX_ID_LENGTH)),
     })
-  );
+  )
+);
 
-export const ignoredFeatureSchema = z.object({
-  feature_id: z.string().max(MAX_ID_LENGTH),
-  feature_title: z.string().max(MAX_TITLE_LENGTH),
-  excluded_feature_id: z.string().max(MAX_ID_LENGTH),
-  reason: z.string().max(MAX_TEXT_LENGTH),
-});
+export const ignoredFeatureSchema = lazySchema(() =>
+  z.object({
+    feature_id: z.string().max(MAX_ID_LENGTH),
+    feature_title: z.string().max(MAX_TITLE_LENGTH),
+    excluded_feature_id: z.string().max(MAX_ID_LENGTH),
+    reason: z.string().max(MAX_TEXT_LENGTH),
+  })
+);
 
 export type IgnoredFeature = z.infer<typeof ignoredFeatureSchema>;
 
 // Creation/write payload. `uuid` is derived from (id, source_id) at the
 // storage boundary (see `computeFeatureUuid` / `toStoredFeature`), so it is not
 // part of the input — callers never supply it.
-export const featureUpsertSchema = baseFeatureSchema.and(
-  z.object({
-    run_id: z.string().max(MAX_ID_LENGTH).optional(),
-    excluded: z.boolean().optional(),
-    updated_at: z.iso.datetime().optional(),
-    expires_at: z.iso.datetime().optional(),
-  })
+export const featureUpsertSchema = lazySchema(() =>
+  baseFeatureSchema.and(
+    z.object({
+      run_id: z.string().max(MAX_ID_LENGTH).optional(),
+      excluded: z.boolean().optional(),
+      updated_at: z.iso.datetime().optional(),
+      expires_at: z.iso.datetime().optional(),
+    })
+  )
 );
 
 export type FeatureUpsert = z.infer<typeof featureUpsertSchema>;
@@ -93,11 +99,13 @@ export type FeatureUpsert = z.infer<typeof featureUpsertSchema>;
 // always carries its derived `uuid` and the source it belongs to. `source_id`
 // is stamped by the server from the route the feature was written through;
 // internally it maps to `source.id` in storage.
-export const featureSchema = featureUpsertSchema.and(
-  z.object({
-    uuid: z.string().max(MAX_ID_LENGTH),
-    source_id: z.string().max(MAX_ID_LENGTH),
-  })
+export const featureSchema = lazySchema(() =>
+  featureUpsertSchema.and(
+    z.object({
+      uuid: z.string().max(MAX_ID_LENGTH),
+      source_id: z.string().max(MAX_ID_LENGTH),
+    })
+  )
 );
 
 export type Feature = z.infer<typeof featureSchema>;

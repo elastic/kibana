@@ -14,7 +14,7 @@ import type {
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { baseFeatureSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
@@ -33,16 +33,18 @@ export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID =
   platformSignificantEventsTools.createFeatureKnowledgeIndicator;
 
 // `slug` routes the feature to its source; the stored feature key is `source_id`.
-const createFeatureKISchema = baseFeatureSchema.extend({
-  slug: nightshiftSourceSlugField('The feature belongs to this source.'),
-  expires_at: z.iso
-    .datetime()
-    .optional()
-    .describe(
-      'Optional expiry deadline (ISO 8601). Provide to create a managed KI that expires at this date. ' +
-        'Omit to create a durable KI with no expiry.'
-    ),
-});
+const createFeatureKISchema = lazySchema(() =>
+  baseFeatureSchema.extend({
+    slug: nightshiftSourceSlugField('The feature belongs to this source.'),
+    expires_at: z.iso
+      .datetime()
+      .optional()
+      .describe(
+        'Optional expiry deadline (ISO 8601). Provide to create a managed KI that expires at this date. ' +
+          'Omit to create a durable KI with no expiry.'
+      ),
+  })
+);
 
 export function createFeatureKnowledgeIndicatorTool({
   getScopedClients,

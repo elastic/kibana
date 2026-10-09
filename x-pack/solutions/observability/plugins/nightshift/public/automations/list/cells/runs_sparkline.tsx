@@ -31,7 +31,7 @@ export const RunsSparkline = ({
   const series = [
     {
       color: euiTheme.colors.vis.euiColorVisSuccess0,
-      matches: (status: string) => status === 'completed',
+      matches: (status: string) => status === 'succeeded',
     },
     {
       color: euiTheme.colors.vis.euiColorVisDanger0,
@@ -55,9 +55,10 @@ export const RunsSparkline = ({
   return (
     <svg
       aria-hidden="true"
-      width={SPARKLINE_WIDTH}
+      width="100%"
       height={SPARKLINE_HEIGHT}
       viewBox={`0 0 ${SPARKLINE_WIDTH} ${SPARKLINE_HEIGHT}`}
+      preserveAspectRatio="none"
     >
       {series.map(({ color, buckets }, index) => {
         if (index > 0 && buckets.every((count) => count === 0)) return null;
@@ -69,7 +70,13 @@ export const RunsSparkline = ({
               fill={color}
               fillOpacity={0.2}
             />
-            <path d={line} fill="none" stroke={color} strokeWidth={1.5} />
+            <path
+              d={line}
+              fill="none"
+              stroke={color}
+              strokeWidth={1.5}
+              vectorEffect="non-scaling-stroke"
+            />
           </g>
         );
       })}

@@ -11,6 +11,7 @@ import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-b
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { significantEventSchema } from '@kbn/significant-events-schema';
+import { lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -25,16 +26,18 @@ import { assignStoredSourceIds, sourceSlugsSchema } from '../../utils/stored_sou
 
 export const SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID = platformSignificantEventsTools.createEvent;
 
-const createEventSchema = significantEventSchema
-  .pick({
-    status: true,
-    title: true,
-    symptom_hypothesis: true,
-    summary: true,
-    severity: true,
-    confidence: true,
-  })
-  .extend({ slugs: sourceSlugsSchema });
+const createEventSchema = lazySchema(() =>
+  significantEventSchema
+    .pick({
+      status: true,
+      title: true,
+      symptom_hypothesis: true,
+      summary: true,
+      severity: true,
+      confidence: true,
+    })
+    .extend({ slugs: sourceSlugsSchema })
+);
 
 export function createEventTool({
   getScopedClients,
