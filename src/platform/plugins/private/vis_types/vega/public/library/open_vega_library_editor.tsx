@@ -21,10 +21,12 @@ export const openVegaLibraryEditor = async ({
   core,
   deps,
   id,
+  allowSaveAsNew,
 }: {
   core: CoreStart;
   deps: Pick<VegaPluginStartDependencies, 'dataViews' | 'unifiedSearch' | 'savedObjectsTaggingOss'>;
   id: string;
+  allowSaveAsNew?: boolean;
 }): Promise<void> => {
   const client = createVegaLibraryClient(core.http);
 
@@ -58,6 +60,7 @@ export const openVegaLibraryEditor = async ({
           item={item}
           defaultDataView={defaultDataView ?? undefined}
           canSave={Boolean(core.application.capabilities.visualize_v2?.save)}
+          allowSaveAsNew={allowSaveAsNew}
           closeFlyout={closeFlyout}
           ariaLabelledBy={ariaLabelledBy}
         />

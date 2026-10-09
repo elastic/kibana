@@ -10,7 +10,7 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
-import type { VegaByValueState } from './schema';
+import type { VegaByReferenceState, VegaByValueState } from './schema';
 import { getTransforms, type StoredVegaState } from './transforms';
 
 const drilldownReference: SavedObjectReference = {
@@ -95,6 +95,26 @@ describe('Vega embeddable transforms', () => {
     expect(storedState.filters).toBeUndefined();
     expect(transformOut(storedState, references)).toEqual(expect.objectContaining({ spec }));
     expect(transformOut(storedState, references).filters).toBeUndefined();
+  });
+
+  it('moves the library item ID of a by-reference panel into a reference and restores it on read', () => {
+    const byReferenceState = {
+      ref_id: 'library-item',
+      title: 'Panel title',
+      time_range: { from: 'now-7d', to: 'now' },
+      filters: [panelFilter],
+      drilldowns: [{ type: 'dashboard_drilldown' }],
+    } as unknown as VegaByReferenceState;
+
+    const { state: storedState, references } = transformIn(byReferenceState);
+
+    expect(storedState).not.toHaveProperty('ref_id');
+    expect(references).toEqual([
+      { name: 'savedObjectRef', type: 'vega', id: 'library-item' },
+      drilldownReference,
+      expect.objectContaining({ type: 'index-pattern', id: 'logs-data-view' }),
+    ]);
+    expect(transformOut(storedState, references)).toEqual(byReferenceState);
   });
 
   it('keeps filters and logs a warning when a filter reference is missing', () => {

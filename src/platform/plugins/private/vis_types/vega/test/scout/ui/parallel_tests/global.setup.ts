@@ -11,9 +11,12 @@ import { globalSetupHook } from '@kbn/scout';
 
 export const VEGA_TEST_INDEX = 'vega-test-index';
 
-globalSetupHook('Enable the Vega API feature flag', async ({ apiServices }) => {
+globalSetupHook('Enable the Vega feature flags', async ({ apiServices }) => {
   await apiServices.core.settings({
-    'feature_flags.overrides': { 'vega.apiEnabled': true },
+    'feature_flags.overrides': {
+      'vega.apiEnabled': true,
+      'vega.standaloneEmbeddable': true,
+    },
   });
 });
 

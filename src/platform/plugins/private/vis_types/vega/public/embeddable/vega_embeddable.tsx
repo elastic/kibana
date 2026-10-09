@@ -47,6 +47,7 @@ import {
   initializeTitleManager,
   type CanCancelRequests,
   type HasEditCapabilities,
+  type HasLibraryTransforms,
   type ProjectRoutingOverrides,
   type PublishesBlockingError,
   type PublishesDataLoading,
@@ -74,12 +75,18 @@ import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from 
 import type { VegaRenderDescriptor } from '../data_model/types';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { toPanelFilters } from '../lib/library_draft';
+import { mergeQueries } from '../lib/merge_queries';
+import { hasTooManyFilters, tooManyFiltersMessage } from '../components/vega_editor_body';
+import {
+  createVegaLibraryClient,
+  hasVegaLibraryItemWithTitle,
+} from '../library/vega_library_client';
 import { extractProjectRoutingOverrides } from '../lib/extract_project_routing_overrides';
 import { getEsqlQueriesFromSpec } from '../lib/spec_uses_esql';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
 import { getDataViews } from '../services';
 import { createInspectorAdapters } from '../vega_inspector';
-import type { VegaByValueState } from '../../server';
+import type { VegaByReferenceState, VegaByValueState, VegaEmbeddableState } from '../../server';
 // Frame only. The spec editor stays a separate lazy chunk inside this module, so Edit does not
 // wait on `vega_editor_flyout` before the flyout can render.
 import { VegaEditorFlyout } from './vega_editor_flyout';
@@ -100,12 +107,14 @@ interface VegaRenderInput {
 }
 
 /**
- * By-value state for the dedicated Dashboard Vega panel.
+ * API of the dedicated Dashboard Vega panel. The panel stores its spec by value, or references a
+ * Vega library item.
  *
  * When `vega.standaloneEmbeddable` is enabled, the server registers a schema for this type so it
  * participates in public dashboards-as-code validation and OpenAPI generation.
  */
-export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
+export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaEmbeddableState> &
+  Partial<HasLibraryTransforms<VegaByReferenceState, VegaByValueState>> &
   CanCancelRequests &
   HasDrilldowns &
   HasEditCapabilities &
@@ -133,12 +142,19 @@ interface VegaEmbeddableDependencies {
   uiActions: Pick<VegaPluginStartDependencies['uiActions'], 'executeTriggerActions'>;
   SearchBar: VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'];
   visualizationDependencies: VegaVisualizationDependencies;
+  /** Used to edit the library item of a by-reference panel. */
+  libraryEditorDependencies: Pick<
+    VegaPluginStartDependencies,
+    'dataViews' | 'unifiedSearch' | 'savedObjectsTaggingOss'
+  >;
+  /** Whether panels can be linked to and unlinked from the library. */
+  isLibraryEnabled: boolean;
 }
 
 export const vegaEmbeddableFactory = (
   core: CoreStart,
   deps: VegaEmbeddableDependencies
-): EmbeddablePublicDefinition<VegaByValueState, VegaEmbeddableApi> => ({
+): EmbeddablePublicDefinition<VegaEmbeddableState, VegaEmbeddableApi> => ({
   type: VEGA_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({
     initializeDrilldownsManager,
@@ -147,10 +163,24 @@ export const vegaEmbeddableFactory = (
     parentApi,
     uuid,
   }) => {
+    const libraryClient = createVegaLibraryClient(core.http);
+    // Linking and unlinking replace the panel, so a panel stays by value or by reference.
+    const libraryId = 'ref_id' in initialState ? initialState.ref_id : undefined;
+    const isByReference = libraryId !== undefined;
+    // Throws `SavedObjectNotFound` for a missing item, which the panel shows as an error.
+    const libraryItem$ = new BehaviorSubject(
+      isByReference ? (await libraryClient.get(libraryId)).data : undefined
+    );
+    const initialLibraryItem = libraryItem$.getValue();
+
     const titleManager = initializeTitleManager(initialState);
     const timeRangeManager = initializeTimeRangeManager(initialState);
     const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
-    const spec$ = new BehaviorSubject(initialState.spec);
+    const spec$ = new BehaviorSubject(
+      initialLibraryItem ? initialLibraryItem.spec : (initialState as VegaByValueState).spec
+    );
+    const defaultTitle$ = new BehaviorSubject(initialLibraryItem?.title);
+    const defaultDescription$ = new BehaviorSubject(initialLibraryItem?.description);
     const panelSearchStateManager = initializeStateManager<{
       query?: Query | AggregateQuery;
       filters?: Filter[];
@@ -200,21 +230,55 @@ export const vegaEmbeddableFactory = (
     const inspectorAdapters = createInspectorAdapters();
     let abortController = new AbortController();
 
-    const stateApi = initializeStateApi<VegaByValueState>({
+    const serializePanelOwnedState = () => ({
+      ...titleManager.getLatestState(),
+      ...timeRangeManager.getLatestState(),
+      ...drilldownsManager.getLatestState(),
+    });
+
+    const serializePanelSearch = () => {
+      const panelQuery = panelSearchStateManager.api.query$.getValue();
+      return {
+        query: isOfQueryType(panelQuery) ? toAsCodeQuery(panelQuery) : undefined,
+        filters: fromStoredFilters(panelSearchStateManager.api.filters$.getValue()),
+      };
+    };
+
+    // Unlinking keeps what the library item and the panel each apply: the filters of both, and
+    // one query, plus a filter when their query languages differ.
+    const serializeByValue = (): VegaByValueState => {
+      const libraryItem = libraryItem$.getValue();
+      const panelSearch = serializePanelSearch();
+      if (!libraryItem) {
+        return { ...serializePanelOwnedState(), ...panelSearch, spec: spec$.getValue() };
+      }
+      const { query, filters: queryFilters } = mergeQueries(libraryItem.query, panelSearch.query);
+      const filters = [
+        ...(libraryItem.filters ?? []),
+        ...(panelSearch.filters ?? []),
+        ...queryFilters,
+      ];
+      return {
+        ...serializePanelOwnedState(),
+        query,
+        filters: filters.length ? filters : undefined,
+        spec: libraryItem.spec,
+      };
+    };
+
+    // Linking moves the panel query and filters to the new library item.
+    const serializeByReference = (refId: string): VegaByReferenceState => ({
+      ...serializePanelOwnedState(),
+      ref_id: refId,
+    });
+
+    const stateApi = initializeStateApi<VegaEmbeddableState>({
       uuid,
       parentApi,
-      serializeState: () => {
-        const panelQuery = panelSearchStateManager.api.query$.getValue();
-
-        return {
-          ...titleManager.getLatestState(),
-          ...timeRangeManager.getLatestState(),
-          ...drilldownsManager.getLatestState(),
-          query: isOfQueryType(panelQuery) ? toAsCodeQuery(panelQuery) : undefined,
-          filters: fromStoredFilters(panelSearchStateManager.api.filters$.getValue()),
-          spec: spec$.getValue(),
-        };
-      },
+      serializeState: () =>
+        isByReference
+          ? { ...serializePanelOwnedState(), ...serializePanelSearch(), ref_id: libraryId }
+          : { ...serializePanelOwnedState(), ...serializePanelSearch(), spec: spec$.getValue() },
       anyStateChange$: merge(
         titleManager.anyStateChange$,
         timeRangeManager.anyStateChange$,
@@ -231,7 +295,9 @@ export const vegaEmbeddableFactory = (
         ...drilldownsManager.comparators,
         query: 'deepEquality',
         filters: 'deepEquality',
-        spec: 'deepEquality',
+        // The library item's spec is saved by its editor, not with the dashboard.
+        spec: isByReference ? 'skip' : 'deepEquality',
+        ref_id: 'skip',
       }),
       applySerializedState: (nextState) => {
         titleManager.reinitializeState(nextState);
@@ -241,9 +307,45 @@ export const vegaEmbeddableFactory = (
           query: toStoredQuery(nextState.query),
           filters: toPanelFilters(nextState.filters),
         });
-        spec$.next(nextState.spec);
+        if ('spec' in nextState) spec$.next(nextState.spec);
       },
     });
+
+    const reloadLibraryItem = async (refId: string) => {
+      try {
+        const { data } = await libraryClient.get(refId);
+        defaultTitle$.next(data.title);
+        defaultDescription$.next(data.description);
+        spec$.next(data.spec);
+        libraryItem$.next(data);
+      } catch (error) {
+        blockingError$.next(error);
+      }
+    };
+
+    const libraryTransforms: HasLibraryTransforms<VegaByReferenceState, VegaByValueState> = {
+      canLinkToLibrary: async () => !isByReference,
+      canUnlinkFromLibrary: async () => isByReference,
+      hasLibraryItemWithTitle: (title) => hasVegaLibraryItemWithTitle(libraryClient, title),
+      saveToLibrary: async (title) => {
+        const { query, filters } = serializePanelSearch();
+        if (hasTooManyFilters(filters)) {
+          // The dashboard only reports that saving failed, so explain why.
+          core.notifications.toasts.addDanger(tooManyFiltersMessage);
+          throw new Error(tooManyFiltersMessage);
+        }
+        const { id } = await libraryClient.create({
+          title,
+          description: titleManager.getLatestState().description,
+          spec: spec$.getValue(),
+          query,
+          filters,
+        });
+        return id;
+      },
+      getSerializedStateByReference: serializeByReference,
+      getSerializedStateByValue: serializeByValue,
+    };
 
     const getEditPanel = async ({
       ariaLabelledBy,
@@ -301,8 +403,24 @@ export const vegaEmbeddableFactory = (
       supportedTriggers: () => VEGA_SUPPORTED_TRIGGERS,
       getTypeDisplayName: () => 'Vega',
       isEditingEnabled: () => true,
+      defaultTitle$,
+      defaultDescription$,
+      ...(deps.isLibraryEnabled && libraryTransforms),
       getEditPanel,
       onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
+        if (isByReference) {
+          const { openVegaLibraryEditor } = await import('../library/open_vega_library_editor');
+          // A new copy couldn't replace the item this panel references.
+          await openVegaLibraryEditor({
+            core,
+            deps: deps.libraryEditorDependencies,
+            id: libraryId,
+            allowSaveAsNew: false,
+          });
+          await reloadLibraryItem(libraryId);
+          returnFocus?.();
+          return;
+        }
         openVegaEditor({
           core,
           parentApi,
@@ -353,9 +471,10 @@ export const vegaEmbeddableFactory = (
       fetch$(api),
       panelSearchStateManager.api.query$,
       panelSearchStateManager.api.filters$,
+      libraryItem$,
     ])
       .pipe(
-        switchMap(async ([spec, data, panelQuery, panelFilters]) => {
+        switchMap(async ([spec, data, panelQuery, panelFilters, libraryItem]) => {
           abortController.abort();
           abortController = new AbortController();
           const { signal } = abortController;
@@ -391,8 +510,14 @@ export const vegaEmbeddableFactory = (
             const visData = await requestHandler({
               timeRange,
               // buildEsQuery ANDs these and ignores empty and ES|QL queries.
-              query: [data.query, panelQuery].filter(isOfQueryType),
-              filters: [...(data.filters ?? []), ...(panelFilters ?? [])],
+              query: [data.query, toStoredQuery(libraryItem?.query), panelQuery].filter(
+                isOfQueryType
+              ),
+              filters: [
+                ...(data.filters ?? []),
+                ...(toPanelFilters(libraryItem?.filters) ?? []),
+                ...(panelFilters ?? []),
+              ],
               visParams: {
                 spec: spec.format === 'json' ? JSON.stringify(spec.value) : spec.value,
               },

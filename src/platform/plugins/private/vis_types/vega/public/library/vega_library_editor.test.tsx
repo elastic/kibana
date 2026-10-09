@@ -62,7 +62,10 @@ const item: { id: string; data: VegaReadResponseBody['data'] } = {
 
 const lastPreviewState = () => mockPreview.mock.lastCall?.[0].serializedState;
 
-const renderEditor = ({ canSave = true }: { canSave?: boolean } = {}) => {
+const renderEditor = ({
+  canSave = true,
+  allowSaveAsNew,
+}: { canSave?: boolean; allowSaveAsNew?: boolean } = {}) => {
   const core = coreMock.createStart();
   core.uiSettings.get.mockReturnValue([]);
   const client = {
@@ -83,6 +86,7 @@ const renderEditor = ({ canSave = true }: { canSave?: boolean } = {}) => {
       SearchBar={SearchBar as VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar']}
       item={item}
       canSave={canSave}
+      allowSaveAsNew={allowSaveAsNew}
       closeFlyout={closeFlyout}
       ariaLabelledBy="vegaLibraryEditorTitle"
     />
@@ -192,6 +196,29 @@ describe('VegaLibraryEditor', () => {
       );
       expect(client.update).not.toHaveBeenCalled();
       expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith('Saved "Copy"');
+    });
+
+    it('offers no copy when it is opened from a dashboard panel', async () => {
+      renderEditor({ allowSaveAsNew: false });
+
+      await userEvent.click(await screen.findByText('changeSpec'));
+
+      expect(screen.getByTestId('vegaLibraryEditorSaveButton')).toBeEnabled();
+      expect(screen.queryByTestId('vegaLibraryEditorSaveButtonMenu')).not.toBeInTheDocument();
+    });
+
+    it('cannot be saved with more than 100 filters', async () => {
+      const { getSearchBarProps } = renderEditor();
+      await userEvent.click(await screen.findByText('changeSpec'));
+
+      await act(async () => {
+        getSearchBarProps().onFiltersUpdated?.(
+          Array.from({ length: 101 }, () => ({ meta: {}, query: { match_all: {} } }))
+        );
+      });
+
+      expect(screen.getByTestId('vegaEditorTooManyFiltersCallout')).toBeInTheDocument();
+      expect(screen.getByTestId('vegaLibraryEditorSaveButtonPrimary')).toBeDisabled();
     });
 
     it('can save a copy of an unchanged item', async () => {
