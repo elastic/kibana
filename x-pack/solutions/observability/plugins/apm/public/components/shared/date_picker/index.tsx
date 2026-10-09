@@ -11,6 +11,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
+import { useTimeRangeId } from '../../../context/time_range_id/use_time_range_id';
 import { clearCache } from '../../../services/rest/call_api';
 import { fromQuery, isInactiveHistoryError, toQuery } from '../links/url_helpers';
 import type { TimePickerQuickRange } from './typings';
@@ -32,6 +33,7 @@ export function DatePicker({
   const location = useLocation();
   const { core, plugins } = useApmPluginContext();
   const { isXSmall, isSmall } = useBreakpoints();
+  const { timeRangeId } = useTimeRangeId();
 
   const isMobile = isXSmall || isSmall;
 
@@ -97,7 +99,13 @@ export function DatePicker({
   }, [rangeFrom, rangeTo, plugins]);
 
   return (
+    // Remount the picker whenever the time range id changes (i.e. on refresh)
+    // so that relative ranges (e.g. `now-30m`) re-resolve their displayed
+    // absolute bounds. The relative range stays in the URL, keeping bookmark
+    // semantics intact, while the shown from/to timestamps advance in step with
+    // the data, which also re-resolves off `timeRangeId`.
     <EuiSuperDatePicker
+      key={timeRangeId}
       start={rangeFrom}
       end={rangeTo}
       isPaused={refreshPaused}

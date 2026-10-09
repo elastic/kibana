@@ -14,9 +14,27 @@ import { createMemoryHistory } from 'history';
 import { useLocation } from 'react-router-dom';
 import qs from 'query-string';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
+
+jest.mock('../../../context/time_range_id/use_time_range_id', () => ({
+  useTimeRangeId: jest.fn(),
+}));
+
 import { DatePicker } from '.';
+import { useTimeRangeId } from '../../../context/time_range_id/use_time_range_id';
 
 const mockRefreshTimeRange = jest.fn();
+let mockTimeRangeId = 0;
+
+function setMockTimeRangeId(timeRangeId: number) {
+  mockTimeRangeId = timeRangeId;
+  (useTimeRangeId as jest.Mock).mockReturnValue({
+    incrementTimeRangeId: jest.fn(),
+    timeRangeId: mockTimeRangeId,
+    isAutoRefreshPaused: false,
+    pauseAutoRefresh: jest.fn(),
+    resumeAutoRefresh: jest.fn(),
+  });
+}
 let history: MemoryHistory;
 let mockHistoryPush: jest.SpyInstance;
 let mockHistoryReplace: jest.SpyInstance;
@@ -97,6 +115,7 @@ describe('DatePicker', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    setMockTimeRangeId(0);
   });
 
   it('updates the URL when the date range changes', async () => {
@@ -162,6 +181,48 @@ describe('DatePicker', () => {
     await waitFor(() => {
       expect(mockRefreshTimeRange).not.toHaveBeenCalled();
     });
+  });
+
+  it('remounts the picker when timeRangeId changes so relative ranges re-resolve', () => {
+    setMockTimeRangeId(0);
+    const { rerender } = renderDatePicker({
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+    });
+
+    const before = screen.getByTestId('superDatePickerToggleQuickMenuButton');
+
+    // Simulate a Refresh bumping the time range id.
+    setMockTimeRangeId(1);
+    act(() => {
+      rerender(
+        <MockApmPluginContextWrapper
+          value={
+            {
+              plugins: {
+                data: {
+                  query: {
+                    timefilter: {
+                      timefilter: { setTime: jest.fn(), getTime: jest.fn().mockReturnValue({}) },
+                    },
+                  },
+                },
+              },
+            } as any
+          }
+          history={history}
+        >
+          <DatePickerWrapper />
+        </MockApmPluginContextWrapper>
+      );
+    });
+
+    const after = screen.getByTestId('superDatePickerToggleQuickMenuButton');
+
+    // A changed `key` forces React to unmount the previous EuiSuperDatePicker and
+    // mount a fresh one, which re-resolves `now-15m`/`now` to current wall-clock
+    // bounds instead of reusing the stale absolute preview.
+    expect(after).not.toBe(before);
   });
 
   it('sets time when both rangeTo and rangeFrom are provided', async () => {
