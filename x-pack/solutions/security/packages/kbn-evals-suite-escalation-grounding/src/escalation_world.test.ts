@@ -14,6 +14,7 @@ import {
 } from '@kbn/agentic-investigations-plugin/common/escalations/constants';
 import { escalationCases } from './dataset';
 import {
+  CONVERSE_URL,
   EscalationWorldSetupError,
   runEscalationCase,
   spacePath,
@@ -26,7 +27,8 @@ const c = escalationCases[0];
 const SYNC_PATH = ESCALATION_SYNC_URL.replace('{id}', 'esc-1');
 const LINK_PATH = ESCALATION_LINK_URL.replace('{id}', 'esc-1');
 const CONVERSATIONS_PATH = '/api/agent_builder/conversations';
-const CONVERSE_PATH = '/api/agent_builder/chat/converse';
+// Literal on purpose: the fake pins the real route independently of the constant under test.
+const CONVERSE_PATH = '/api/agent_builder/converse';
 const ESCALATIONS_PATH = '/internal/investigations/escalations';
 
 const totalEvents = c.investigations.reduce((sum, inv) => sum + inv.events.length, 0);
@@ -208,6 +210,52 @@ describe('runEscalationCase', () => {
     // the failed question stays in the denominator
     expect(scored.metadata.total).toBe(c.questions.length);
     expect(scored.score).toBe(0);
+  });
+});
+
+describe('converse route', () => {
+  it('asks every question through the real agent_builder converse route', async () => {
+    const kibana = createFakeKibana();
+    await run(kibana.fetch);
+
+    const converseCalls = kibana.calls.filter((call) => /converse$/.test(call.path));
+    expect(converseCalls).toHaveLength(c.questions.length);
+    expect(converseCalls.every((call) => call.path === CONVERSE_PATH)).toBe(true);
+    expect(CONVERSE_URL).toBe(CONVERSE_PATH);
+    expect(converseCalls[0].body).toMatchObject({
+      conversation_id: 'esc-1',
+      agent_id: 'agent',
+      connector_id: 'connector',
+    });
+  });
+
+  it('fails the run when every converse round fails (no silent all-zero green run)', async () => {
+    const kibana = createFakeKibana({
+      converse: async () => {
+        throw new Error('503 Service Unavailable');
+      },
+    });
+
+    const error = await run(kibana.fetch).catch((e) => e);
+
+    expect(error).toBeInstanceOf(EscalationWorldSetupError);
+    expect(error.message).toContain(`All ${c.questions.length} converse rounds failed`);
+    expect(error.message).toContain('503 Service Unavailable');
+  });
+
+  it('throws when the converse route does not exist (the 404 that went green)', async () => {
+    const kibana = createFakeKibana();
+    const realFetch = kibana.fetch as unknown as (
+      path: string,
+      options: unknown
+    ) => Promise<unknown>;
+    const wrongRoute = ((path: string, options: unknown) =>
+      realFetch(
+        path.replace('/agent_builder/converse', '/agent_builder/chat/converse'),
+        options
+      )) as unknown as HttpHandler;
+
+    await expect(run(wrongRoute)).rejects.toThrow(/converse rounds failed.*404 Not Found/);
   });
 });
 

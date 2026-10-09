@@ -9,6 +9,7 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
 import { v4 as uuidv4 } from 'uuid';
+import { publicApiPath as AGENT_BUILDER_API_PATH } from '@kbn/agent-builder-plugin/common/constants';
 import { AGENTIC_INVESTIGATIONS_API_VERSION } from '@kbn/agentic-investigations-plugin/common/constants';
 import {
   ESCALATIONS_INTERNAL_URL,
@@ -26,6 +27,9 @@ const internalHeaders = {
   'x-elastic-internal-origin': 'kibana',
   'elastic-api-version': AGENTIC_INVESTIGATIONS_API_VERSION,
 } as const;
+
+/** agent_builder's public converse route (`/api/agent_builder/converse`); there is no `/chat/converse`. */
+export const CONVERSE_URL = `${AGENT_BUILDER_API_PATH}/converse`;
 
 const escalationUrl = (template: string, escalationId: string): string =>
   template.replace('{id}', encodeURIComponent(escalationId));
@@ -346,7 +350,7 @@ export const runEscalationCase = async ({
       // there are still asked (the interesting failure mode) unless the caller
       // prunes them itself.
       try {
-        const response = await post<ConverseResponse>(fetch, '/api/agent_builder/chat/converse', {
+        const response = await post<ConverseResponse>(fetch, CONVERSE_URL, {
           input: q.question,
           conversation_id: esclId,
           agent_id: agentId,
@@ -359,6 +363,18 @@ export const runEscalationCase = async ({
         answers[q.id] = undefined;
         answerErrors[q.id] = message;
       }
+    }
+
+    // Every round failing means the chat path itself is broken (wrong route,
+    // dead connector), not that the product answered badly: fail the run
+    // instead of reporting a green run full of silent zeros.
+    const failedRounds = Object.keys(answerErrors);
+    if (c.questions.length > 0 && failedRounds.length === c.questions.length) {
+      throw new EscalationWorldSetupError(
+        `All ${c.questions.length} converse rounds failed for ${c.id}; first error: ${
+          answerErrors[failedRounds[0]]
+        }`
+      );
     }
 
     log.info(
