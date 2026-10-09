@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   ALERTING_V2_ACTION_POLICY_FORM_ROLE,
@@ -13,6 +12,7 @@ import {
   buildCreateRuleData,
   buildWorkflowYaml,
   test,
+  testData,
 } from '../fixtures';
 
 /*
@@ -22,7 +22,7 @@ import {
  * accept fails the test — something the RTL suite cannot catch because it
  * asserts against a mocked client.
  */
-test.describe('Action Policies - create and edit', { tag: [...tags.stateful.classic] }, () => {
+test.describe('Action Policies - create and edit', { tag: testData.UI_STATEFUL_TAG }, () => {
   const RUN_ID = Date.now().toString();
   const CREATED_POLICY_NAME = `scout-action-policy-created-${RUN_ID}`;
   const SEEDED_POLICY_NAME = `scout-action-policy-to-edit-${RUN_ID}`;
@@ -62,7 +62,7 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
 
   test(
     'creates a policy from the form and persists what was typed',
-    { tag: ['@local-serverless-observability_complete'] },
+    { tag: testData.UI_SERVERLESS_TAG },
     async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICY_FORM_ROLE);
       const { actionPoliciesList, actionPolicyForm } = pageObjects;

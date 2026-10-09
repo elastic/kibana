@@ -6,14 +6,14 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { test, testData } from '../fixtures';
 
 const SAMPLE_DATA_SET = 'ecommerce';
 
 test.describe(
   'Discover Alerts menu with alerting v2',
   {
-    tag: ['@local-stateful-classic', '@local-serverless-observability_complete'],
+    tag: testData.UI_ENGINE_TAG,
   },
   () => {
     test.beforeAll(async ({ apiServices }) => {

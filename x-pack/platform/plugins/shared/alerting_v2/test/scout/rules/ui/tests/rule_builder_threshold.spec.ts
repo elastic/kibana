@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { buildCreateRuleData, test } from '../fixtures';
+import { buildCreateRuleData, test, testData } from '../fixtures';
 
 const TEST_INDEX = 'test-rule-builder';
 const RULE_NAME = 'scout-rule-builder-create';
@@ -15,7 +15,7 @@ const EDITED_RULE_NAME = 'scout-rule-builder-edited';
 
 test.describe(
   'Rule Builder — threshold create and edit flows',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  { tag: testData.UI_ENGINE_TAG },
   () => {
     const createdRuleIds: string[] = [];
 

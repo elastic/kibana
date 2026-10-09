@@ -12,6 +12,7 @@ import {
   ALERTING_V2_ALERTS_READ_ROLE,
   buildAlertEvent,
   test,
+  testData,
 } from '../fixtures';
 
 const SEEDED_TAG = 'scout-alerts-mgmt-priv-v2';
@@ -56,12 +57,11 @@ const assertEpisodesManagementHappyPath = async ({
 /*
  * Privilege gating for the Alerts management page (default v2 gate).
  * v1-only users never reach this mount; they are covered by the observability
- * plugin. Tagged @local-stateful-classic because custom-role auth is not on
- * Elastic Cloud Hosted yet.
+ * plugin.
  */
 test.describe(
   'Alerts management page - privilege-based access',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  { tag: testData.UI_ENGINE_TAG },
   () => {
     test.beforeAll(async ({ apiServices }) => {
       test.setTimeout(180_000);

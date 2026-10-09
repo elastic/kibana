@@ -5,38 +5,34 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   ALERTING_V2_RULES_READ_ROLE,
   ALERTING_V2_RULES_READ_AND_V1_READ_ROLE,
   test,
+  testData,
 } from '../fixtures';
 
-test.describe(
-  'Rules list - heading tabs privileges',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  () => {
-    test('shows the V1 and V2 rules tabs when the user can read both surfaces', async ({
-      browserAuth,
-      pageObjects,
-    }) => {
-      await browserAuth.loginWithCustomRole(ALERTING_V2_RULES_READ_AND_V1_READ_ROLE);
-      await pageObjects.rulesList.goto();
+test.describe('Rules list - heading tabs privileges', { tag: testData.UI_ENGINE_TAG }, () => {
+  test('shows the V1 and V2 rules tabs when the user can read both surfaces', async ({
+    browserAuth,
+    pageObjects,
+  }) => {
+    await browserAuth.loginWithCustomRole(ALERTING_V2_RULES_READ_AND_V1_READ_ROLE);
+    await pageObjects.rulesList.goto();
 
-      await expect(pageObjects.rulesList.v1RulesTab).toBeVisible();
-      await expect(pageObjects.rulesList.v2RulesTab).toBeVisible();
-    });
+    await expect(pageObjects.rulesList.v1RulesTab).toBeVisible();
+    await expect(pageObjects.rulesList.v2RulesTab).toBeVisible();
+  });
 
-    test('hides the tab strip when the user cannot read the v1 Rules page', async ({
-      browserAuth,
-      pageObjects,
-    }) => {
-      await browserAuth.loginWithCustomRole(ALERTING_V2_RULES_READ_ROLE);
-      await pageObjects.rulesList.goto();
+  test('hides the tab strip when the user cannot read the v1 Rules page', async ({
+    browserAuth,
+    pageObjects,
+  }) => {
+    await browserAuth.loginWithCustomRole(ALERTING_V2_RULES_READ_ROLE);
+    await pageObjects.rulesList.goto();
 
-      await expect(pageObjects.rulesList.v1RulesTab).toBeHidden();
-      await expect(pageObjects.rulesList.v2RulesTab).toBeHidden();
-    });
-  }
-);
+    await expect(pageObjects.rulesList.v1RulesTab).toBeHidden();
+    await expect(pageObjects.rulesList.v2RulesTab).toBeHidden();
+  });
+});

@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
-import { buildCreateRuleData, test } from '../fixtures';
+import { buildCreateRuleData, test, testData } from '../fixtures';
 
 // Importing @kbn/alerting-v2-rule-form transitively pulls in monaco-editor CSS,
 // which Playwright's test-listing phase cannot handle. Mirror the value here.
@@ -54,7 +54,7 @@ const TWO_DATE_FIELDS_RULE_NAME = 'scout-compose-discover-two-date-fields';
 
 test.describe(
   'ComposeDiscoverFlyout — create and edit flows',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  { tag: testData.UI_ENGINE_TAG },
   () => {
     const createdRuleIds: string[] = [];
 

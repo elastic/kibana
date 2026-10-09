@@ -12,6 +12,7 @@ import {
   ALERTING_V2_ALERTS_READ_ROLE,
   buildCreateRuleData,
   test,
+  testData,
 } from '../fixtures';
 
 const SOURCE_INDEX = 'test-alerting-v2-alerts-privileges-source';
@@ -45,86 +46,82 @@ const ALERTS_V2_RULES_READ_ROLE = {
   ),
 };
 
-test.describe(
-  'Alerts page - read/write privileges',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
-  () => {
-    let ruleId: string | undefined;
+test.describe('Alerts page - read/write privileges', { tag: testData.UI_ENGINE_TAG }, () => {
+  let ruleId: string | undefined;
 
-    const deletePrivilegesRule = async (rules: RulesApiService): Promise<void> => {
-      await rules.deleteByQuery({
-        filter: `metadata.name: "${RULE_NAME}"`,
-        force: true,
-      });
-    };
+  const deletePrivilegesRule = async (rules: RulesApiService): Promise<void> => {
+    await rules.deleteByQuery({
+      filter: `metadata.name: "${RULE_NAME}"`,
+      force: true,
+    });
+  };
 
-    test.beforeAll(async ({ apiServices }) => {
-      test.setTimeout(180_000);
-      await deletePrivilegesRule(apiServices.alertingV2.rules);
-      await apiServices.alertingV2.sourceIndex.create({
-        index: SOURCE_INDEX,
-        mappings: {
-          'host.name': { type: 'keyword' },
+  test.beforeAll(async ({ apiServices }) => {
+    test.setTimeout(180_000);
+    await deletePrivilegesRule(apiServices.alertingV2.rules);
+    await apiServices.alertingV2.sourceIndex.create({
+      index: SOURCE_INDEX,
+      mappings: {
+        'host.name': { type: 'keyword' },
+      },
+    });
+    await apiServices.alertingV2.sourceIndex.indexDocs({
+      index: SOURCE_INDEX,
+      docs: [{ '@timestamp': new Date().toISOString(), 'host.name': SOURCE_HOST }],
+    });
+
+    const rule = await apiServices.alertingV2.rules.create(
+      buildCreateRuleData({
+        metadata: { name: RULE_NAME },
+        query: {
+          base: `FROM ${SOURCE_INDEX} | WHERE host.name == "${SOURCE_HOST}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
         },
-      });
-      await apiServices.alertingV2.sourceIndex.indexDocs({
-        index: SOURCE_INDEX,
-        docs: [{ '@timestamp': new Date().toISOString(), 'host.name': SOURCE_HOST }],
-      });
-
-      const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({
-          metadata: { name: RULE_NAME },
-          query: {
-            base: `FROM ${SOURCE_INDEX} | WHERE host.name == "${SOURCE_HOST}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-          },
-        })
-      );
-      ruleId = rule.id;
-      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
-        episodeStatus: 'active',
-      });
+      })
+    );
+    ruleId = rule.id;
+    await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
+      episodeStatus: 'active',
     });
+  });
 
-    test.afterAll(async ({ apiServices }) => {
-      try {
-        if (ruleId) {
-          await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId });
-        }
-      } finally {
-        try {
-          await deletePrivilegesRule(apiServices.alertingV2.rules);
-        } finally {
-          await apiServices.alertingV2.sourceIndex.delete({ index: SOURCE_INDEX });
-        }
+  test.afterAll(async ({ apiServices }) => {
+    try {
+      if (ruleId) {
+        await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId });
       }
+    } finally {
+      try {
+        await deletePrivilegesRule(apiServices.alertingV2.rules);
+      } finally {
+        await apiServices.alertingV2.sourceIndex.delete({ index: SOURCE_INDEX });
+      }
+    }
+  });
+
+  test('editor sees the mutating episode actions menu', async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginWithCustomRole(ALERTING_V2_ALERTS_ALL_ROLE);
+    const { alertEpisodesList } = pageObjects;
+    await alertEpisodesList.goto();
+    await expect(alertEpisodesList.pageContainer).toBeVisible();
+
+    await expect(alertEpisodesList.rowActionsMenuButton).toBeVisible();
+  });
+
+  test('read-only user only sees the read-safe open-in-discover action', async ({
+    browserAuth,
+    pageObjects,
+  }) => {
+    await browserAuth.loginWithCustomRole(ALERTS_V2_RULES_READ_ROLE);
+    const { alertEpisodesList } = pageObjects;
+    await alertEpisodesList.goto();
+    await expect(alertEpisodesList.pageContainer).toBeVisible();
+
+    await test.step('the read-safe open-in-discover control is available', async () => {
+      await expect(alertEpisodesList.openInDiscoverRowControl).toBeVisible();
     });
 
-    test('editor sees the mutating episode actions menu', async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginWithCustomRole(ALERTING_V2_ALERTS_ALL_ROLE);
-      const { alertEpisodesList } = pageObjects;
-      await alertEpisodesList.goto();
-      await expect(alertEpisodesList.pageContainer).toBeVisible();
-
-      await expect(alertEpisodesList.rowActionsMenuButton).toBeVisible();
+    await test.step('the mutating actions menu is not rendered', async () => {
+      await expect(alertEpisodesList.rowActionsMenuButton).toHaveCount(0);
     });
-
-    test('read-only user only sees the read-safe open-in-discover action', async ({
-      browserAuth,
-      pageObjects,
-    }) => {
-      await browserAuth.loginWithCustomRole(ALERTS_V2_RULES_READ_ROLE);
-      const { alertEpisodesList } = pageObjects;
-      await alertEpisodesList.goto();
-      await expect(alertEpisodesList.pageContainer).toBeVisible();
-
-      await test.step('the read-safe open-in-discover control is available', async () => {
-        await expect(alertEpisodesList.openInDiscoverRowControl).toBeVisible();
-      });
-
-      await test.step('the mutating actions menu is not rendered', async () => {
-        await expect(alertEpisodesList.rowActionsMenuButton).toHaveCount(0);
-      });
-    });
-  }
-);
+  });
+});

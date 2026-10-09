@@ -12,6 +12,7 @@ import {
   buildCreateActionPolicyData,
   buildCreateRuleData,
   test,
+  testData,
 } from '../fixtures';
 
 const POLICY_NAME = 'scout-action-policy-affected-rules';
@@ -26,7 +27,7 @@ const OTHER_RULE_NAME = 'scout-unaffected-rule';
  * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
  * Elastic Cloud Hosted, so this suite only runs on local stateful (classic).
  */
-test.describe('Action Policies - affected rules', { tag: '@local-stateful-classic' }, () => {
+test.describe('Action Policies - affected rules', { tag: testData.UI_STATEFUL_TAG }, () => {
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.alertingV2.actionPolicies.cleanUp();
     await apiServices.alertingV2.rules.cleanUp();

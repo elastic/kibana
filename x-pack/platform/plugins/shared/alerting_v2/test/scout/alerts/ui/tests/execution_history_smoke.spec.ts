@@ -40,7 +40,7 @@ const SMOKE_VIEWER_ROLE: KibanaRole = {
  * action policy plus a disabled rule, then a seeded alert event that the
  * dispatcher turns into a fire action and an execution-history event.
  */
-test.describe('Execution history — smoke', { tag: '@local-stateful-classic' }, () => {
+test.describe('Execution history — smoke', { tag: testData.UI_STATEFUL_TAG }, () => {
   let policyId: string;
   let policyName: string;
   let ruleId: string;

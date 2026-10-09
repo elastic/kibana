@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout/ui';
 import type { AlertingApiServicesFixture } from '../../../common/alerting_api_services';
 import type { AlertingPageObjects } from '../fixtures';
-import { buildCreateRuleData, test } from '../fixtures';
+import { buildCreateRuleData, test, testData } from '../fixtures';
 
 const TEST_INDEX = 'test-compose-discover-recovery-yaml-sync';
 const BASE_QUERY = `FROM ${TEST_INDEX}`;
@@ -48,7 +48,7 @@ const yamlRule = ({
 
 test.describe(
   'ComposeDiscoverFlyout — recovery strategy YAML <-> GUI round trip (#278327)',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  { tag: testData.UI_ENGINE_TAG },
   () => {
     const createdRuleIds: string[] = [];
 

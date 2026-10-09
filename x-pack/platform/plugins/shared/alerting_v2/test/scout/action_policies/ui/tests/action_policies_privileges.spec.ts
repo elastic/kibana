@@ -11,16 +11,17 @@ import {
   ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   buildCreateActionPolicyData,
   test,
+  testData,
 } from '../fixtures';
 
 /*
- * Covers the UI capability gating on the Action Policies page (PR #277390).
+ * Covers the UI capability gating on the Action Policies page.
  * Read-only users can view action policies and open the details flyout, but
  * every write affordance (create, row edit/actions, snooze toggle, details
  * flyout Take action button) is hidden and the `/edit/:id` route is gated by
  * the required-privileges interstitial.
  */
-test.describe('Action Policies - read/write privileges', { tag: '@local-stateful-classic' }, () => {
+test.describe('Action Policies - read/write privileges', { tag: testData.UI_STATEFUL_TAG }, () => {
   const RUN_ID = Date.now().toString();
   let policyId: string;
   let policyName: string;
@@ -70,9 +71,6 @@ test.describe('Action Policies - read/write privileges', { tag: '@local-stateful
 
     await test.step('details flyout opens but hides the Take action button', async () => {
       await actionPoliciesList.openDetailsFlyout(policyName);
-      // Positive, privilege-independent anchor: confirm the flyout actually
-      // rendered before asserting the write affordances are absent, otherwise
-      // the toHaveCount(0) check would pass even if the flyout never opened.
       await expect(actionPoliciesList.detailsFlyout).toBeVisible();
       await expect(actionPoliciesList.detailsFlyoutTakeActionButton).toHaveCount(0);
     });
