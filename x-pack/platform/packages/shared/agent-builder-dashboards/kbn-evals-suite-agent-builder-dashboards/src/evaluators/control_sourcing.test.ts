@@ -24,22 +24,17 @@ interface Attempt {
   userRequested?: boolean;
 }
 
-/** One generate_dashboard call with an add_controls operation and optional grouped failures. */
+/** One generate_dashboard call that sends controls, with optional grouped failures. */
 const call = (attempts: Attempt[], failedFields: string[] = []): Record<string, unknown> => ({
   type: 'tool_call',
   tool_id: GENERATE_DASHBOARD_TOOL_ID,
   params: {
-    operations: [
-      {
-        operation: 'add_controls',
-        controls: attempts.map(({ field, userRequested }) => ({
-          type: 'options_list_control',
-          field_name: field,
-          index: 'logs',
-          ...(userRequested ? { user_requested: true } : {}),
-        })),
-      },
-    ],
+    controls: attempts.map(({ field, userRequested }) => ({
+      type: 'options_list_control',
+      field_name: field,
+      index: 'logs',
+      ...(userRequested ? { user_requested: true } : {}),
+    })),
   },
   results: [
     {
@@ -50,7 +45,7 @@ const call = (attempts: Attempt[], failedFields: string[] = []): Record<string, 
           ? {
               failures: [
                 {
-                  type: 'add_controls',
+                  type: 'upsert_dashboard',
                   identifier: failedFields.join(', '),
                   error: 'Not mapped on index "logs".',
                 },

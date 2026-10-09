@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-export { dashboardOperationSchema, executeDashboardOperations } from './src/operations';
-export type { FinalizeDashboard } from './src/operations';
+export {
+  executeDashboardUpsert,
+  hasValidNewDashboardMetadata,
+  upsertDashboardSchema,
+} from './src/upsert';
+export type { DashboardUpsert, DashboardUpsertResult, FinalizeDashboard } from './src/upsert';
 
-export { getErrorMessage, hasValidCreateMetadataOperations } from './src/utils';
+export { getErrorMessage } from './src/utils';
+export type { DashboardFailure } from './src/utils';
 
 export { createPanelFailureResult } from './src/resolve_panel';
-export type {
-  InlinePanelOperationType,
-  PanelContent,
-  PanelContentAttempt,
-} from './src/resolve_panel';
+export type { PanelContent, PanelContentAttempt } from './src/resolve_panel';
 
 export type { DashboardValidationIssue, ValidateDashboard } from './src/validate_dashboard';
 
@@ -32,4 +33,4 @@ export type {
   ControlFieldCapability,
   ResolveAttachmentPanel,
   ResolveControlFieldCapabilities,
-} from './src/operations/types';
+} from './src/types';

@@ -63,7 +63,7 @@ describe('registerSkills', () => {
   it('delegates enhance presentation defaults to the chart author', () => {
     const guidance = enhanceGuidance();
     expect(guidance).toContain('applyChartRules: true');
-    expect(guidance).toContain('for every existing ES|QL Lens panel');
+    expect(guidance).toContain('Edit every existing ES|QL Lens panel');
     expect(guidance).toContain('preserveESQL: true');
     expect(skill.content).toContain(
       'a query change and presentation enhancement can share one edit'
@@ -91,7 +91,7 @@ describe('registerSkills', () => {
 
   it('separates appearance-only and content enhance modes', () => {
     const guidance = enhanceGuidance();
-    expect(guidance).toContain('**Appearance mode.** Keep every chart panel ID');
+    expect(guidance).toContain('**Appearance mode.** Keep every chart panel id');
     expect(guidance).toContain('Markdown panels may be rewritten or removed.');
     expect(guidance).toContain(
       'Do not add, remove, or recreate other panels, add controls, or change queries'
@@ -100,9 +100,9 @@ describe('registerSkills', () => {
       "Skip this step when the user's message already asks for appearance only"
     );
     expect(guidance).toContain('**Content mode.** Do everything appearance mode does');
-    expect(guidance).toContain('`remove_panels`');
+    expect(guidance).toContain('Remove panels that meet the removal criteria with `remove`');
     expect(guidance).toContain(
-      'replace non-ES|QL panels with new ES|QL Lens panels without asking again'
+      'replace non-ES|QL panels with new ES|QL Lens content under the same id without asking again'
     );
     expect(guidance).toContain('Keep the existing time range');
     expect(guidance).toContain('In content mode, confirm the resulting panel set');

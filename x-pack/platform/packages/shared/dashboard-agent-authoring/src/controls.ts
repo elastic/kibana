@@ -16,17 +16,14 @@ import {
   TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
 import type { DashboardPinnedPanel } from '@kbn/as-code-dashboard-schema';
+import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { Logger } from '@kbn/logging';
 import { formatEsqlIdentifier } from '@kbn/esql-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { z } from '@kbn/zod/v4';
-import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
-import { getErrorMessage, type OperationFailure } from '../utils';
-import {
-  defineOperation,
-  type ControlFieldCapabilities,
-  type ResolveControlFieldCapabilities,
-} from './types';
+import { DASHBOARD_FAILURE_TYPES } from './failure_types';
+import { getErrorMessage, type DashboardFailure } from './utils';
+import type { ControlFieldCapabilities, ResolveControlFieldCapabilities } from './types';
 
 const controlWidthSchema = z
   .enum(['small', 'medium', 'large'])
@@ -83,13 +80,13 @@ const timeSliderControlInputSchema = z.object({
   ...controlLayoutFields,
 });
 
-const controlInputSchema = z.discriminatedUnion('type', [
+export const controlInputSchema = z.discriminatedUnion('type', [
   optionsListControlInputSchema,
   rangeSliderControlInputSchema,
   timeSliderControlInputSchema,
 ]);
 
-type ControlInput = z.infer<typeof controlInputSchema>;
+export type ControlInput = z.infer<typeof controlInputSchema>;
 
 /**
  * Keep at most one time slider. Extra user-requested ones are reported as
@@ -104,7 +101,7 @@ const filterDuplicateTimeSliders = ({
   existingControls: Array<{ type?: string }>;
   controlsToAdd: ControlInput[];
   logger: Logger;
-  failures: OperationFailure[];
+  failures: DashboardFailure[];
 }): ControlInput[] => {
   const hasTimeSlider = existingControls.some((control) => control.type === TIME_SLIDER_CONTROL);
   let canAddTimeSlider = !hasTimeSlider;
@@ -127,7 +124,7 @@ const filterDuplicateTimeSliders = ({
     }
 
     failures.push({
-      type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
+      type: DASHBOARD_FAILURE_TYPES.upsertDashboard,
       identifier: `controls[${controlInputIndex}]`,
       error: 'A dashboard can contain at most one time_slider_control.',
     });
@@ -201,11 +198,11 @@ const recordControlFailure = ({
   fieldName,
   message,
 }: {
-  failures: OperationFailure[];
+  failures: DashboardFailure[];
   fieldName: string;
   message: string;
 }) => {
-  const type = DASHBOARD_OPERATION_FAILURE_TYPES.addControls;
+  const type = DASHBOARD_FAILURE_TYPES.upsertDashboard;
   const group = failures.find((failure) => failure.type === type && failure.error === message);
   if (group) {
     group.identifier = `${group.identifier}, ${fieldName}`;
@@ -303,7 +300,7 @@ const resolveControlFields = async ({
   resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
   projectRouting?: string;
   logger: Logger;
-  failures: OperationFailure[];
+  failures: DashboardFailure[];
 }): Promise<ControlInput[]> => {
   if (!resolveControlFieldCapabilities) {
     return controls;
@@ -405,35 +402,39 @@ const buildStoredControl = (control: ControlInput): DashboardPinnedPanel => {
   };
 };
 
-export const addControlsOperation = defineOperation({
-  schema: z.object({
-    operation: z.literal('add_controls'),
-    controls: z
-      .array(controlInputSchema)
-      .min(1)
-      .describe(
-        'Controls to append. Use options_list_control for categorical/keyword fields, range_slider_control for numeric fields, time_slider_control for time sub-range filtering (at most one per dashboard).'
-      ),
-  }),
-  handler: async ({ dashboardData, operation, context }) => {
-    const existingControls = dashboardData.pinned_panels ?? [];
-    const controlsToAdd = await resolveControlFields({
-      controls: filterDuplicateTimeSliders({
-        existingControls,
-        controlsToAdd: operation.controls,
-        logger: context.logger,
-        failures: context.failures,
-      }),
-      resolveControlFieldCapabilities: context.resolveControlFieldCapabilities,
-      projectRouting: dashboardData.project_routing,
-      logger: context.logger,
-      failures: context.failures,
-    });
+/**
+ * Appends controls to the dashboard, leaving out duplicate time sliders and controls whose field
+ * cannot back them.
+ */
+export const appendControls = async ({
+  dashboardData,
+  controls,
+  logger,
+  failures,
+  resolveControlFieldCapabilities,
+}: {
+  dashboardData: DashboardAttachmentData;
+  controls: ControlInput[];
+  logger: Logger;
+  failures: DashboardFailure[];
+  resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
+}): Promise<DashboardAttachmentData> => {
+  const existingControls = dashboardData.pinned_panels ?? [];
+  const controlsToAdd = await resolveControlFields({
+    controls: filterDuplicateTimeSliders({
+      existingControls,
+      controlsToAdd: controls,
+      logger,
+      failures,
+    }),
+    resolveControlFieldCapabilities,
+    projectRouting: dashboardData.project_routing,
+    logger,
+    failures,
+  });
 
-    const newControls = controlsToAdd.map(buildStoredControl);
-    return {
-      ...dashboardData,
-      pinned_panels: [...existingControls, ...newControls],
-    };
-  },
-});
+  return {
+    ...dashboardData,
+    pinned_panels: [...existingControls, ...controlsToAdd.map(buildStoredControl)],
+  };
+};
