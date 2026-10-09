@@ -79,15 +79,17 @@ export const applyAuthenticationModeToDataSource = (
     case 's3': {
       const settings = authFormatSettingsByDataSourceType['s3'][mode as S3AuthenticationMode](data);
 
-      return { ...data, settings};
+      return { ...data, settings };
     }
     case 'gcs': {
-      const settings = authFormatSettingsByDataSourceType['gcs'][mode as GcsAuthenticationMode](data);
+      const settings =
+        authFormatSettingsByDataSourceType['gcs'][mode as GcsAuthenticationMode](data);
 
       return { ...data, settings };
     }
     case 'azure': {
-      const settings = authFormatSettingsByDataSourceType['azure'][mode as AzureAuthenticationMode](data);
+      const settings =
+        authFormatSettingsByDataSourceType['azure'][mode as AzureAuthenticationMode](data);
 
       return { ...data, settings };
     }

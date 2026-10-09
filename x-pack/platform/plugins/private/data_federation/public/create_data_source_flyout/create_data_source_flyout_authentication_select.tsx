@@ -28,7 +28,6 @@ import {
   type CreateDataSourceAuthenticationMode,
 } from './create_data_source_flyout_authentication';
 import { authenticationStrings } from './create_data_source_flyout_authentication_i18n';
-import { authOptionsByDataSourceType } from './auth_options';
 
 const withRecommendedBadge = (label: ReactNode, recommended?: boolean): ReactNode => {
   if (!recommended) {
@@ -57,14 +56,14 @@ export function CreateDataSourceFlyoutAuthenticationSelect({
   onAuthenticationModeChange: (mode: CreateDataSourceAuthenticationMode) => void;
 }) {
   const {
-    services: { docLinks },
+    services: { docLinks, serviceRegistry },
   } = useKibana<DataFederationKibanaServices>();
 
   if (!DATA_SOURCE_TYPES_WITH_AUTHENTICATION.has(dataSourceType)) {
     return null;
   }
 
-  const options = authOptionsByDataSourceType(!!enableFederatedIdentity)[dataSourceType];
+  const options = serviceRegistry.get(dataSourceType)?.authOptions(!!enableFederatedIdentity) ?? [];
 
   const selectedDescription = options.find((o) => o.value === authenticationMode)?.description;
   const docsUrl = docLinks.links.dataFederation[AUTHENTICATION_DOC_LINK_KEYS[authenticationMode]];

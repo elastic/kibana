@@ -9,8 +9,7 @@ import type { CreateDataSourceAuthenticationMode } from './create_data_source_fl
 import { authenticationStrings } from './create_data_source_flyout_authentication_i18n';
 import type { DataSourceType } from '../../common/datasource_types';
 
-
-interface AuthOption {
+export interface AuthOption {
   value: CreateDataSourceAuthenticationMode;
   text: string;
   description: string;
@@ -25,8 +24,8 @@ export function federatedIdentitySourceType(dataSourceType: DataSourceType): Aut
     description: authenticationStrings.federatedIdentityDescription[dataSourceType],
     recommended: true,
     hasAuthFields: true,
-  }
-};
+  };
+}
 
 export function accessAndSecretKeysSourceType(dataSourceType: DataSourceType): AuthOption {
   return {
@@ -35,7 +34,7 @@ export function accessAndSecretKeysSourceType(dataSourceType: DataSourceType): A
     description: authenticationStrings.storedCredentialsDescription[dataSourceType],
     hasAuthFields: true,
   };
-};
+}
 
 export function anonymousSourceType(dataSourceType: DataSourceType): AuthOption {
   return {
@@ -43,8 +42,8 @@ export function anonymousSourceType(dataSourceType: DataSourceType): AuthOption 
     text: authenticationStrings.anonymousLabel,
     description: authenticationStrings.anonymousDescription[dataSourceType],
     hasAuthFields: false,
-  }
-};
+  };
+}
 
 export const azureCredentialsSourceType: AuthOption = {
   value: 'credentials',
@@ -53,29 +52,17 @@ export const azureCredentialsSourceType: AuthOption = {
   hasAuthFields: true,
 };
 
-const azureAuthOptions: AuthOption[] = [
+export const azureAuthOptions: AuthOption[] = [
   azureCredentialsSourceType,
-  anonymousSourceType('azure')
+  anonymousSourceType('azure'),
 ];
 
-const s3AuthOptions: AuthOption[] = [
+export const s3AuthOptions: AuthOption[] = [
   accessAndSecretKeysSourceType('s3'),
-  anonymousSourceType('s3')
+  anonymousSourceType('s3'),
 ];
 
-const gcsAuthOptions: AuthOption[] = [
+export const gcsAuthOptions: AuthOption[] = [
   accessAndSecretKeysSourceType('gcs'),
-  anonymousSourceType('gcs')
+  anonymousSourceType('gcs'),
 ];
-
-export function authOptionsByDataSourceType(federatedIdentity: boolean): Record<DataSourceType, AuthOption[]> {
-  const s3Options = federatedIdentity ? [federatedIdentitySourceType('s3'), ...s3AuthOptions] : s3AuthOptions;
-  const gcsOptions = federatedIdentity ? [federatedIdentitySourceType('gcs'), ...gcsAuthOptions] : gcsAuthOptions;
-  const azureOptions = federatedIdentity ? [federatedIdentitySourceType('azure'), ...azureAuthOptions] : azureAuthOptions;
-
- return {
-  azure: azureOptions,
-  s3: s3Options,
-  gcs: gcsOptions,
- };
-};
