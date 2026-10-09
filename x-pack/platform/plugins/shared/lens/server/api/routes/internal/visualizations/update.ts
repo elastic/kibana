@@ -94,26 +94,20 @@ export const registerLensInternalVisualizationsUpdateAPIRoute: RegisterAPIRouteF
 
       // Note: these types are to enforce loose param typings of client methods
       const { references, ...data } = getLensInternalRequestConfig(builder, req.body);
-      const options: LensUpdateIn['options'] = { ...req.query, references };
-
-      let createdNew = false;
-      try {
-        await client.get(req.params.id);
-      } catch (error) {
-        if (isBoom(error) && error.output.statusCode === 404) {
-          createdNew = true;
-        }
-      }
 
       try {
-        const { result } = await client.update(req.params.id, data, options);
+        const updateOptions: LensUpdateIn['options'] = { ...req.query, references };
+        const { result: updateResult } = await client.update(req.params.id, data, updateOptions);
 
-        if (result.item.error) {
-          throw result.item.error;
+        if (updateResult.item.error) {
+          throw updateResult.item.error;
         }
 
+        // Saved Objects only returns creation metadata when update takes the upsert path.
+        const createdNew = updateResult.item.createdAt !== undefined;
+        const { result: persistedResult } = await client.get(req.params.id);
         const responseItem = lensUpdateResponseBodySchema.parse(
-          getLensInternalResponseItem(builder, result.item)
+          getLensInternalResponseItem(builder, persistedResult.item)
         );
 
         if (createdNew) {

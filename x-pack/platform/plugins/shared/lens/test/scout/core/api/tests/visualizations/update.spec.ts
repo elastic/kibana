@@ -97,6 +97,106 @@ apiTest.describe('lens visualizations - update', { tag: tags.deploymentAgnostic 
     expect(response.body.data.title).toBe(title);
   });
 
+  apiTest(
+    'should preserve created_at when updating an existing visualization',
+    async ({ apiClient }) => {
+      const createResponse = await apiClient.post(LENS_API_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...editorCredentials.apiKeyHeader,
+        },
+        body: getExampleLensBody('created-at original'),
+        responseType: 'json',
+      });
+
+      expect(createResponse).toHaveStatusCode(201);
+      const { id } = createResponse.body;
+      const createdAt = createResponse.body.meta.created_at;
+      expect(createdAt).toStrictEqual(expect.any(String));
+
+      const updateResponse = await apiClient.put(`${LENS_API_PATH}/${id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...editorCredentials.apiKeyHeader,
+        },
+        body: getExampleLensBody('created-at updated'),
+        responseType: 'json',
+      });
+
+      expect(updateResponse).toHaveStatusCode(200);
+      expect(updateResponse.body.meta.created_at).toBe(createdAt);
+
+      const getResponse = await apiClient.get(`${LENS_API_PATH}/${id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...editorCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(getResponse).toHaveStatusCode(200);
+      expect(getResponse.body.meta.created_at).toBe(createdAt);
+    }
+  );
+
+  apiTest('should fully replace nested chart configuration on update', async ({ apiClient }) => {
+    const id = randomUUID();
+    const withSecondary = {
+      ...getExampleLensBody('with secondary'),
+      metrics: [
+        {
+          type: 'primary' as const,
+          operation: 'count' as const,
+          label: 'Count of records',
+          empty_as_null: true,
+        },
+        {
+          type: 'secondary' as const,
+          operation: 'count' as const,
+          label: 'Secondary count',
+          empty_as_null: true,
+        },
+      ],
+    };
+
+    const createResponse = await apiClient.put(`${LENS_API_PATH}/${id}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: withSecondary,
+      responseType: 'json',
+    });
+
+    expect(createResponse).toHaveStatusCode(201);
+    expect(createResponse.body.data.metrics).toHaveLength(2);
+
+    const updateResponse = await apiClient.put(`${LENS_API_PATH}/${id}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: getExampleLensBody('primary only'),
+      responseType: 'json',
+    });
+
+    expect(updateResponse).toHaveStatusCode(200);
+    expect(updateResponse.body.data.metrics).toHaveLength(1);
+    expect(updateResponse.body.data.metrics[0].type).toBe('primary');
+
+    const getResponse = await apiClient.get(`${LENS_API_PATH}/${id}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      responseType: 'json',
+    });
+
+    expect(getResponse).toHaveStatusCode(200);
+    expect(getResponse.body.data.metrics).toHaveLength(1);
+    expect(getResponse.body.data.metrics[0].type).toBe('primary');
+  });
+
   apiTest('validation - returns 400 for an invalid id', async ({ apiClient }) => {
     const response = await apiClient.put(`${LENS_API_PATH}/${INVALID_LENS_ID}`, {
       headers: {
