@@ -71,6 +71,7 @@ export class ConversationProposalsService {
         origin: ALERTZERO_PROPOSAL_ORIGIN,
         status: 'pending',
         excludeSuperseded: true,
+        excludeUndecidedSuperseded: false,
         excludeExpired: false,
         size,
         from,
@@ -99,6 +100,7 @@ export class ConversationProposalsService {
         // failed attempt is the one that was decided. Undecided superseded records
         // (revisions) carry no `decidedAt`, so the window above already drops them.
         excludeSuperseded: false,
+        excludeUndecidedSuperseded: false,
         excludeExpired: false,
         size,
         from,
