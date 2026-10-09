@@ -42,11 +42,8 @@ export class DiscoverPageObject extends FtrService {
 
   public readonly APP_ID = 'discover';
 
-  public async navigateToApp(opts: { queryMode?: 'classic' | 'esql' } = {}) {
-    if (opts.queryMode) {
-      await this.setQueryMode(opts.queryMode);
-    }
-
+  public async navigateToApp(opts: { queryMode: 'classic' | 'esql' }) {
+    await this.setQueryMode(opts.queryMode);
     await this.common.navigateToApp(this.APP_ID);
   }
 
