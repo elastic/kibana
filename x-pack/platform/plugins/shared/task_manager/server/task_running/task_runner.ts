@@ -681,7 +681,9 @@ export class TaskManagerRunner implements TaskRunner {
 
   /**
    * Marks the task as failed instead of removing it, so it can be inspected and revived with
-   * `runSoon`. Claiming never picks up a failed task.
+   * `runSoon`. Claiming never picks up a failed task. The task didn't run, so the attempt its claim
+   * used up is given back; otherwise a one-off task on its last attempt would be deleted when
+   * claimed after `runSoon`.
    */
   private async failAndKeepTask(
     error: DecoratedError,
@@ -696,6 +698,7 @@ export class TaskManagerRunner implements TaskRunner {
             id: task.id,
             version: task.version,
             status: TaskStatus.Failed,
+            attempts: Math.max(task.attempts - 1, 0),
             startedAt: null,
             retryAt: null,
             ownerId: null,

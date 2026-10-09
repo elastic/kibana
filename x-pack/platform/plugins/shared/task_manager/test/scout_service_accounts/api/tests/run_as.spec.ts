@@ -27,14 +27,31 @@ apiTest.describe('Task Manager service account runs', { tag: ['@local-stateful-c
   const serviceAccountId = `kibana/${accountName}`;
   const workloadId = uniqueName();
   const taskId = uniqueName();
+  const tamperedTaskId = uniqueName();
   let headers: Record<string, string>;
 
-  const readTaskState = async (esClient: EsClient) => {
-    const { _source } = await esClient.get<{ task: { state: string } }>({
+  const readTask = async (esClient: EsClient, id: string) => {
+    const { _source } = await esClient.get<{
+      task: { state: string; status: string; attempts: number };
+    }>({
       index: TASK_MANAGER_INDEX,
-      id: `task:${taskId}`,
+      id: `task:${id}`,
     });
-    return _source ? JSON.parse(_source.task.state) : undefined;
+    return _source?.task;
+  };
+
+  const readTaskState = async (esClient: EsClient) => {
+    const task = await readTask(esClient, taskId);
+    return task ? JSON.parse(task.state) : undefined;
+  };
+
+  const runSoon = async (apiClient: ApiClientFixture, id: string) => {
+    const ranSoon = await apiClient.post(`internal/ftr/task_manager/${id}/run_soon`, {
+      headers,
+      responseType: 'json',
+    });
+    expect(ranSoon).toHaveStatusCode(200);
+    expect(ranSoon.body).toStrictEqual({ id, forced: false });
   };
 
   const getTaskTypeRunMetrics = async (apiClient: ApiClientFixture, reset: boolean) => {
@@ -72,12 +89,12 @@ apiTest.describe('Task Manager service account runs', { tag: ['@local-stateful-c
     };
     const failures: Error[] = [];
     const cleanup = [
-      async () => {
-        const removed = await apiClient.delete(`internal/task_manager/tasks/${taskId}`, {
+      ...[taskId, tamperedTaskId].map((id) => async () => {
+        const removed = await apiClient.delete(`internal/task_manager/tasks/${id}`, {
           headers: cleanupHeaders,
         });
         expect([200, 404]).toContain(removed.statusCode);
-      },
+      }),
       async () => {
         const unbound = await apiClient.post(workloadPath(workloadId), {
           headers: cleanupHeaders,
@@ -147,12 +164,7 @@ apiTest.describe('Task Manager service account runs', { tag: ['@local-stateful-c
 
       // Metrics reset every 30s; resetting now leaves the next run's counts in place until then.
       await getTaskTypeRunMetrics(apiClient, true);
-      const ranSoon = await apiClient.post(`internal/ftr/task_manager/${taskId}/run_soon`, {
-        headers,
-        responseType: 'json',
-      });
-      expect(ranSoon).toHaveStatusCode(200);
-      expect(ranSoon.body).toStrictEqual({ id: taskId, forced: false });
+      await runSoon(apiClient, taskId);
 
       await expect
         .poll(() => getTaskTypeRunMetrics(apiClient, false), {
@@ -160,6 +172,44 @@ apiTest.describe('Task Manager service account runs', { tag: ['@local-stateful-c
           message: 'the run after unbinding was not counted as a user error',
         })
         .toMatchObject({ total: 1, success: 0, user_errors: 1, framework_errors: 0 });
+    }
+  );
+
+  apiTest(
+    'marks the task as failed without deleting it once its credential is changed outside Task Manager',
+    async ({ apiClient, esClient }) => {
+      const scheduled = await apiClient.post(taskPath(tamperedTaskId), {
+        headers,
+        body: {
+          enabled: true,
+          runAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          runAs: {
+            workloadType: 'task_manager_test',
+            workloadId,
+            spaceId: 'default',
+            expectedServiceAccountId: serviceAccountId,
+          },
+        },
+        responseType: 'json',
+      });
+      expect(scheduled).toHaveStatusCode(200);
+
+      const changed = await apiClient.post(`${taskPath(tamperedTaskId)}/_change_credential`, {
+        headers,
+        body: { workloadId: 'another-workload' },
+      });
+      expect(changed).toHaveStatusCode(204);
+
+      await runSoon(apiClient, tamperedTaskId);
+
+      await expect
+        .poll(async () => (await readTask(esClient, tamperedTaskId))?.status, {
+          timeout: RUN_TIMEOUT_MS,
+          message: 'the task with a changed credential was not marked as failed',
+        })
+        .toBe('failed');
+      // It never ran, and the attempt its claim used up was given back.
+      expect(await readTask(esClient, tamperedTaskId)).toMatchObject({ state: '{}', attempts: 0 });
     }
   );
 });

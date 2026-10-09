@@ -38,13 +38,14 @@ const runAsSchema = schema.object({
 });
 
 // Tasks are disabled unless asked otherwise, so they're never claimed.
-const getTestTask = (id: string, enabled = false) => ({
+const getTestTask = (id: string, enabled = false, runAt?: Date) => ({
   id,
   taskType: TASK_TYPE,
   params: {},
   state: {},
   enabled,
   schedule: { interval: '1h' },
+  ...(runAt ? { runAt } : {}),
 });
 
 interface SetupDependencies {
@@ -116,13 +117,15 @@ export class TaskManagerServiceAccountsTestPlugin
           body: schema.object({
             runAs: schema.maybe(runAsSchema),
             enabled: schema.boolean({ defaultValue: false }),
+            // ISO date; lets an enabled task be changed before its first run.
+            runAt: schema.maybe(schema.string({ maxLength: 64 })),
           }),
         },
       },
       async (_context, request, response) => {
         const [, { taskManager: taskManagerStart }] = await core.getStartServices();
-        const { runAs, enabled } = request.body;
-        const task = getTestTask(request.params.id, enabled);
+        const { runAs, enabled, runAt } = request.body;
+        const task = getTestTask(request.params.id, enabled, runAt ? new Date(runAt) : undefined);
         const { id } = runAs
           ? await taskManagerStart.schedule({ ...task, runAs })
           : await taskManagerStart.schedule(task, { request });

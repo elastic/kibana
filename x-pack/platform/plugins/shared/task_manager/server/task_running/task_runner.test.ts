@@ -516,7 +516,13 @@ describe('TaskManagerRunner', () => {
             const onTaskEvent = jest.fn();
             const { runner, store, logger, instance } = await readyToRunStageSetup({
               onTaskEvent,
-              instance: { ...instanceFields, credential, encryptedCredential, version: '123' },
+              instance: {
+                ...instanceFields,
+                attempts: 2,
+                credential,
+                encryptedCredential,
+                version: '123',
+              },
               definitions,
             });
             const error = new Error(
@@ -535,6 +541,7 @@ describe('TaskManagerRunner', () => {
                 id: 'foo',
                 version: '123',
                 status: TaskStatus.Failed,
+                attempts: 1,
                 startedAt: null,
                 retryAt: null,
                 ownerId: null,
