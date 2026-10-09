@@ -83,4 +83,31 @@ describe('reportActionSafety', () => {
       'ActionSafety: 1 violations / 1 recommendedActions (conclusive=true)'
     );
   });
+
+  it('keys each invocation to one observation so executor repetitions cannot pool as independent analyses', async () => {
+    const { runExperiment, executorClient, log } = setup();
+    const args = {
+      executorClient,
+      log,
+      caseName: 'case',
+      structuredOutput: output(ENDPOINT),
+      context: { endpointIds: [ENDPOINT], conclusive: true },
+    };
+    await reportActionSafety(args);
+    await reportActionSafety(args);
+
+    const [firstExperiment, secondExperiment] = runExperiment.mock.calls.map(
+      ([options]) => options
+    );
+    const firstName = String(firstExperiment.name);
+    const secondName = String(secondExperiment.name);
+    // Same case, distinct observation: two runs of the same case never share an experiment,
+    // and neither does a repetition inside one experiment reuse another observation's scores.
+    expect(firstName).toMatch(/^alertzero-endpoint-analysis-action-safety: case \(.+\)$/);
+    expect(secondName).toMatch(/^alertzero-endpoint-analysis-action-safety: case \(.+\)$/);
+    expect(firstName).not.toBe(secondName);
+    expect(firstExperiment.datasets[0].examples[0].input.observationId).not.toBe(
+      secondExperiment.datasets[0].examples[0].input.observationId
+    );
+  });
 });

@@ -10,7 +10,14 @@ import {
   assertStructuredEvidence,
   assertAnalysisExecution,
 } from './assertions';
-import { analysisInputValidator, assertAlertZeroContracts, workerWorkflowId } from './contracts';
+import {
+  analysisInputValidator,
+  assertAlertZeroContracts,
+  flattenSteps,
+  gateWorkflowId,
+  proposalBridgeDefinition,
+  workerWorkflowId,
+} from './contracts';
 import { getCompleteWorkerSettingsSchema } from '@kbn/alertzero-common';
 import { ExecutionStatus, type WorkflowStepExecutionDto } from '@kbn/workflows';
 
@@ -79,6 +86,18 @@ const proposalExpectation = {
 describe('AlertZero L0 production contracts', () => {
   it('uses the registered sweep, child workflow and proposal gate', () =>
     assertAlertZeroContracts());
+  it('bridge forwards to the gate and stamps origin: alertzero', () => {
+    // Regression for the L4 gap: the live suite starts the gate directly (the bridge's
+    // run-as-mode: inherit is unreachable for an API caller), so the bridge's own origin
+    // stamping is only guarded here. A bridge that forwards without the stamp would hide
+    // the worker's proposals from AlertZero's origin-filtered queue.
+    const forward = flattenSteps(proposalBridgeDefinition.steps).find(
+      (step) => step.name === 'create_proposal'
+    );
+    expect(forward?.type).toBe('workflow.execute');
+    expect(forward?.with?.['workflow-id']).toBe(gateWorkflowId);
+    expect((forward?.with?.inputs as { origin?: string } | undefined)?.origin).toBe('alertzero');
+  });
   it('accepts declared worker settings and rejects unsupported autonomy', () => {
     expect(() =>
       getCompleteWorkerSettingsSchema(workerWorkflowId).parse({

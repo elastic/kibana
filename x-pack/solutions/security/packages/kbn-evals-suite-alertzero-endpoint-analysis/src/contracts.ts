@@ -73,6 +73,15 @@ const manualInputs = analysisDefinition.triggers.find(
 )?.inputs;
 if (!manualInputs) throw new Error('Missing production AlertZero manual input schema');
 export const analysisInputValidator = buildFieldsZodValidator(manualInputs);
+// The production bridge `system-create-alertzero-proposal`, the only door the worker uses
+// into the proposal gate. Parsed here so the L0 contract can pin its origin stamping; L4
+// cannot execute it live because its `run-as-mode: inherit` requires a managed parent
+// running as a service account, which a plain API caller cannot be (see endpoint_analysis L4).
+const proposalBridge = getManagedWorkflowDefinition(proposalWorkflowId);
+if (!proposalBridge?.yaml) {
+  throw new Error('Missing production AlertZero proposal bridge definition');
+}
+export const proposalBridgeDefinition = parse(proposalBridge.yaml) as AlertZeroDefinition;
 export const assertAlertZeroContracts = () => {
   if (!new Set<string>(ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS).has(workerWorkflowId)) {
     throw new Error('Endpoint analysis is not registered as a managed worker');
@@ -94,5 +103,19 @@ export const assertAlertZeroContracts = () => {
   }
   if (findAnalysisStep('propose_action').with?.['workflow-id'] !== proposalWorkflowId) {
     throw new Error('Endpoint analysis bypasses the AlertZero proposal gate');
+  }
+  // The bridge must stamp `origin: alertzero` itself — the gate's inputs close to
+  // additional properties and callers cannot pass one — so the worker's proposals land in
+  // AlertZero's queue rather than disappearing. L4 starts the gate directly (the bridge's
+  // run-as-mode: inherit is unreachable for an API caller), so this contract is what
+  // catches a regression that drops the stamp: without it, the live suite would pass.
+  const forward = flattenSteps(proposalBridgeDefinition.steps).find(
+    (step) => step.name === 'create_proposal'
+  );
+  if (forward?.type !== 'workflow.execute' || forward.with?.['workflow-id'] !== gateWorkflowId) {
+    throw new Error('AlertZero proposal bridge does not forward to the proposal gate');
+  }
+  if ((forward.with?.inputs as { origin?: string } | undefined)?.origin !== 'alertzero') {
+    throw new Error('AlertZero proposal bridge does not stamp origin: alertzero');
   }
 };

@@ -19,9 +19,12 @@ import {
 } from '@kbn/proposals-common';
 import {
   ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID,
+  ALERTZERO_WORKERS_URL,
   ALERTZERO_WORKER_URL_TEMPLATE,
   API_VERSIONS,
   INTERNAL_API_ACCESS,
+  SECURITY_SERVICE_ACCOUNT_URL,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
 } from '@kbn/alertzero-common';
 import {
   analysisWorkflowId,
@@ -139,12 +142,28 @@ export class AlertZeroRuntime {
   /**
    * Global AlertZero workflows install at plugin start, but each Worker is a per-space
    * managed document (yamlTemplate) that installs only on its first save/enable via
-   * PATCH /internal/alertzero/workers/{workerId}. Enabling installs the defaults and
-   * leaves the scheduled worker running; the suite uses the workflow test API, which
-   * executes the installed definition regardless of the enabled flag, so the schedule
-   * stays on. Idempotent: a second PATCH with the same body is a no-op revision bump.
+   * PATCH /internal/alertzero/workers/{workerId}. Since #295215 the PATCH is REJECTED while
+   * the Worker has no service account (`nextEnabled && !nextAccount` → 400), so on a fresh
+   * stack a bare `{"enabled":true}` never installs anything. The eval therefore creates the
+   * prebuilt `alertzero_endpoint_analysis` role + service account — the same setup
+   * `ensureWorkerServiceAccounts` performs for the UI, against the same public APIs — and
+   * passes its id in the same PATCH. The suite uses the workflow test API, which executes
+   * the installed definition regardless of the enabled flag. Idempotent: a second PATCH with
+   * the same body is a no-op revision bump, and an existing role/account is reused as is.
    */
   async installWorker(id: string): Promise<void> {
+    const serviceAccountId = await ensureWorkerServiceAccount(this.fetch, id);
+    const response = await this.fetch<{ workers?: Array<{ id: string; enabled?: boolean }> }>(
+      ALERTZERO_WORKERS_URL,
+      {
+        headers: {
+          'elastic-api-version': API_VERSIONS.internal.v1,
+          'kbn-xsrf': 'true',
+          'x-elastic-internal-origin': INTERNAL_API_ACCESS,
+        },
+      }
+    );
+    const wasEnabled = response.workers?.find((worker) => worker.id === id)?.enabled ?? false;
     await this.fetch(ALERTZERO_WORKER_URL_TEMPLATE.replace('{workerId}', encodeURIComponent(id)), {
       method: 'PATCH',
       headers: {
@@ -152,10 +171,167 @@ export class AlertZeroRuntime {
         'kbn-xsrf': 'true',
         'x-elastic-internal-origin': INTERNAL_API_ACCESS,
       },
-      body: JSON.stringify({ enabled: true }),
+      body: JSON.stringify({ enabled: true, settings: { serviceAccountId } }),
     });
+    // A Worker that was off before the suite must be off after it: the per-space schedule
+    // would otherwise keep sweeping the stack's indicators for unrelated alerts every
+    // interval after the eval ends. Restore only the flag — the account stays bound either
+    // way, and on a fresh stack the Worker did not exist before this run.
+    if (!wasEnabled) {
+      await this.fetch(
+        ALERTZERO_WORKER_URL_TEMPLATE.replace('{workerId}', encodeURIComponent(id)),
+        {
+          method: 'PATCH',
+          headers: {
+            'elastic-api-version': API_VERSIONS.internal.v1,
+            'kbn-xsrf': 'true',
+            'x-elastic-internal-origin': INTERNAL_API_ACCESS,
+          },
+          body: JSON.stringify({ enabled: false }),
+        }
+      );
+    }
   }
 }
+
+interface ServiceAccountEntry {
+  id: string;
+  name: string;
+  enabled: boolean;
+  assumable: boolean;
+}
+
+const SERVICE_ACCOUNT_ROLE_NAME = 'alertzero_endpoint_analysis';
+const SECURITY_ROLE_API_VERSION = '2023-10-31' as const;
+const buildSecurityRoleUrl = (roleName: string) =>
+  `/api/security/role/${encodeURIComponent(roleName)}`;
+
+const isConflict = (error: unknown) =>
+  typeof error === 'object' &&
+  error !== null &&
+  ((error as { statusCode?: number }).statusCode === 409 ||
+    (error as { response?: { status?: number } }).response?.status === 409);
+
+/**
+ * Ensures the prebuilt role + service account exist and returns the account id. Mirrors
+ * `ensureWorkerServiceAccounts` (AlertZero's onboarding path): the role is created with
+ * `createOnly` so an existing one is never overwritten, and an existing account with the
+ * same name is reused.
+ */
+const ensureWorkerServiceAccount = async (
+  fetch: HttpHandler,
+  workerId: string
+): Promise<string> => {
+  if (workerId !== SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID) {
+    throw new Error(`No service account provisioning implemented for worker: ${workerId}`);
+  }
+  const accounts: ServiceAccountEntry[] = [];
+  let after: string | undefined;
+  do {
+    const page = await fetch<{ serviceAccounts: ServiceAccountEntry[]; nextPage?: string }>(
+      SECURITY_SERVICE_ACCOUNT_URL,
+      {
+        headers: { 'kbn-xsrf': 'true' },
+        query: { limit: 100, ...(after ? { after } : {}) },
+      }
+    );
+    accounts.push(...page.serviceAccounts);
+    after = page.nextPage;
+  } while (after);
+  const existing = accounts.find((account) => account.name === SERVICE_ACCOUNT_ROLE_NAME);
+  if (existing) return existing.id;
+
+  try {
+    await fetch(buildSecurityRoleUrl(SERVICE_ACCOUNT_ROLE_NAME), {
+      method: 'PUT',
+      headers: { 'elastic-api-version': SECURITY_ROLE_API_VERSION, 'kbn-xsrf': 'true' },
+      query: { createOnly: true },
+      body: JSON.stringify(WORKER_ROLE),
+    });
+  } catch (error) {
+    // Created concurrently, or already present from a previous run.
+    if (!isConflict(error)) throw error;
+  }
+  try {
+    const created = await fetch<{ id: string }>(SECURITY_SERVICE_ACCOUNT_URL, {
+      method: 'POST',
+      headers: { 'kbn-xsrf': 'true' },
+      body: JSON.stringify({
+        name: SERVICE_ACCOUNT_ROLE_NAME,
+        description: 'AlertZero endpoint-analysis eval service account',
+        roles: [SERVICE_ACCOUNT_ROLE_NAME],
+      }),
+    });
+    return created.id;
+  } catch (error) {
+    if (!isConflict(error)) throw error;
+    // Created concurrently: list again and use that one.
+    const page = await fetch<{ serviceAccounts: ServiceAccountEntry[] }>(
+      SECURITY_SERVICE_ACCOUNT_URL,
+      { headers: { 'kbn-xsrf': 'true' }, query: { limit: 100 } }
+    );
+    const account = page.serviceAccounts.find(
+      (candidate) => candidate.name === SERVICE_ACCOUNT_ROLE_NAME
+    );
+    if (!account) throw error;
+    return account.id;
+  }
+};
+
+/**
+ * The prebuilt `alertzero_endpoint_analysis` role, mirroring the production definition in
+ * `x-pack/solutions/security/plugins/alertzero/common/worker_roles.ts`. Duplicated here
+ * because that module is plugin-internal: it lives in the alertzero plugin's `common/`
+ * tree, which this eval package does not (and should not) depend on. When the role
+ * definitions move into `@kbn/alertzero-common`, import from there instead.
+ */
+const WORKER_ROLE = {
+  description: 'Privileges for the AlertZero Endpoint analysis worker. Created by AlertZero.',
+  elasticsearch: {
+    cluster: ['monitor_inference'],
+    indices: [
+      {
+        names: [
+          'apm-*-transaction*',
+          'auditbeat-*',
+          'endgame-*',
+          'filebeat-*',
+          'logs-*',
+          'packetbeat-*',
+          'traces-apm*',
+          'winlogbeat-*',
+        ],
+        privileges: ['read'],
+      },
+      { names: ['.alerts-security.alerts-default'], privileges: ['read'] },
+      { names: ['.alerts-security.attack.discovery.alerts-default'], privileges: ['read'] },
+      {
+        names: [
+          'logs-endpoint.events.process-*',
+          'logs-endpoint.events.network-*',
+          'logs-endpoint.events.file-*',
+          'logs-endpoint.events.registry-*',
+        ],
+        privileges: ['read', 'view_index_metadata'],
+      },
+    ],
+    run_as: [],
+  },
+  kibana: [
+    {
+      spaces: ['*'],
+      base: [],
+      feature: {
+        siemV5: [
+          'minimal_read',
+          'host_isolation_all',
+          'process_operations_all',
+          'actions_log_management_read',
+        ],
+      },
+    },
+  ],
+} as const;
 
 const AI_INDEX_ROUTE = '/api/context_engine/ai_index';
 const ATTACK_DISCOVERY_ADHOC_INDEX = '.adhoc.alerts-security.attack.discovery.alerts-default';

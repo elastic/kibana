@@ -263,6 +263,12 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
       }),
     });
     try {
+      // The gate runs directly, not through the production bridge: the bridge forwards
+      // with run-as-mode: inherit, which only a managed parent running as a service
+      // account may do — a plain API caller fails at the reopen step. The bridge's own
+      // contribution (stamping origin: alertzero, which the gate's closed inputs forbid
+      // callers from passing) is pinned by the L0 contract in src/contracts.ts, so a
+      // regression that drops the stamp fails there instead of passing here unnoticed.
       const gateRunId = await runtime.run(gateWorkflowId, {
         origin: 'alertzero',
         conversationId: conversation.id,

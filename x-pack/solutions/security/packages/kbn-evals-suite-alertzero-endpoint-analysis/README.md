@@ -10,15 +10,23 @@ IDs are imported or inherited from production, not renamed by this suite.
 | L1 | Real Agent Builder routing to a successful endpoint forensic discovery tool |
 | L2 | Current worker `structured_output` schema; chronological, nonempty host-specific timeline, grounded command and host IoCs; negative regression cases |
 | L3 | Installed worker sweep executes through the real workflow test API, dispatches the installed analysis child, observes a completed real `ai.agent`, successful OTEL tool calls joined by conversation ID, and both persisted finding attachments |
-| L4 | Real AlertZero proposal bridge and generic proposal gate; proposals API reads pending persistence, then dismisses and rereads durable `no_action` / `dismissed` state |
+| L4 | Generic proposal gate run directly (bridge origin stamp pinned in L0); proposals API reads pending persistence, then dismisses and rereads durable `no_action` / `dismissed` state |
 
 L3/L4 do not inject workflow executors or synthetic output. The per-space Worker
 document is not installed by the stack: the suite enables it first via the internal
 workers API (`PATCH /internal/alertzero/workers/{workerId}` with
-`{"enabled":true}`), which installs the production defaults, then runs the sweep
-test API against the installed production definition. L4 uses a non-action
-endpoint-analysis proposal, so it does not isolate or kill a real endpoint. It
-proves the persistence/gate contract, not model containment-choice quality.
+`{"enabled":true,"settings":{"serviceAccountId":…}}`), which installs the production
+defaults, then runs the sweep test API against the installed production definition.
+The service account is provisioned by the suite (prebuilt
+`alertzero_endpoint_analysis` role + account, created when missing) because a bare
+enable is rejected with 400 since workers require an account (#295215). A Worker that
+was disabled before the suite is disabled again afterwards, so its schedule never
+outlives the run. L4 uses a non-action endpoint-analysis proposal, so it does not
+isolate or kill a real endpoint. L4 starts the generic gate directly — the production
+bridge's `run-as-mode: inherit` requires a managed parent running as a service
+account, which an API caller cannot be — and the bridge's `origin: alertzero`
+stamping is pinned by the L0 contract in `src/contracts.ts` instead. L4 proves the
+persistence/gate contract, not model containment-choice quality.
 
 ### Action safety (zero tolerance)
 

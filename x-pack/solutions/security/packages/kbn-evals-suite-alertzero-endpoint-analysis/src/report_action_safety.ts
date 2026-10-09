@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
+
 import type { EvalsExecutorClient } from '@kbn/evals';
 import {
   actionSafetyEvaluator,
@@ -43,16 +45,23 @@ export const reportActionSafety = async ({
   log.info(
     `ActionSafety: ${violations.length} violations / ${recommendedActions.length} recommendedActions (conclusive=${context.conclusive})`
   );
+  // The task replays one already-observed workflow output, and the evaluator is deterministic
+  // (CODE kind), so every executor repetition of it re-scores the same observation. A stable
+  // experiment name would pool those duplicate scores with every other invocation of this
+  // case as if they were independent analyses, overstating the sample size. The observation
+  // id keys each invocation to exactly the execution it scored, so duplicated reps stay
+  // attributable to one observation instead of inflating the count.
+  const observationId = randomUUID();
   await executorClient.runExperiment(
     {
-      name: `alertzero-endpoint-analysis-action-safety: ${caseName}`,
+      name: `alertzero-endpoint-analysis-action-safety: ${caseName} (${observationId})`,
       datasets: [
         {
           name: `alertzero-endpoint-analysis-action-safety: ${caseName}`,
           description: `Zero-tolerance action safety of the Endpoint Analysis recommendedActions (${caseName}).`,
           examples: [
             {
-              input: { caseName },
+              input: { caseName, observationId },
               output: context as unknown as Record<string, unknown>,
               metadata: null,
             },

@@ -64,18 +64,64 @@ describe('AlertZeroRuntime.read', () => {
 });
 
 describe('AlertZeroRuntime.installWorker', () => {
-  it('enables the worker through the internal workers API, installing its per-space document', async () => {
-    const fetch = createFetch(() => ({}));
-    await new AlertZeroRuntime(fetch).installWorker('worker-id');
+  const WORKER = 'system-security-forensics-endpoint-analysis';
 
-    expect(fetch).toHaveBeenCalledWith(
-      '/internal/alertzero/workers/worker-id',
-      expect.objectContaining({
-        method: 'PATCH',
-        body: JSON.stringify({ enabled: true }),
-        headers: expect.objectContaining({ 'elastic-api-version': '1' }),
-      })
+  it('enables the worker with a provisioned service account and disables it when it was off', async () => {
+    const fetch = createFetch((path, options) => {
+      if (path === '/internal/security/service_account' && !options?.method) {
+        return { serviceAccounts: [], nextPage: undefined };
+      }
+      if (path === '/internal/security/service_account' && options?.method === 'POST') {
+        return { id: 'sa-eval-1' };
+      }
+      if (path === '/internal/alertzero/workers' && !options?.method) {
+        return { workers: [{ id: WORKER, enabled: false }], canModifyWorkers: true };
+      }
+      if (path === `/internal/alertzero/workers/${WORKER}`) {
+        return { worker: { id: WORKER, enabled: true } };
+      }
+      return {};
+    });
+    await new AlertZeroRuntime(fetch).installWorker(WORKER);
+
+    // The enable PATCH must carry the service account id: since #295215 a bare
+    // {"enabled":true} is rejected with 400 on a stack where no account is bound.
+    const patchCalls = fetch.mock.calls.filter(
+      ([path, options]) =>
+        String(path).startsWith('/internal/alertzero/workers/') && options?.method === 'PATCH'
     );
+    expect(patchCalls).toHaveLength(2);
+    expect(JSON.parse(patchCalls[0][1].body)).toEqual({
+      enabled: true,
+      settings: { serviceAccountId: 'sa-eval-1' },
+    });
+    // The Worker was disabled before the suite, so the suite must leave it disabled.
+    expect(JSON.parse(patchCalls[1][1].body)).toEqual({ enabled: false });
+  });
+
+  it('leaves an already-enabled worker enabled', async () => {
+    const fetch = createFetch((path, options) => {
+      if (path === '/internal/security/service_account' && !options?.method) {
+        return { serviceAccounts: [{ id: 'sa-existing', name: 'alertzero_endpoint_analysis' }] };
+      }
+      if (path === '/internal/alertzero/workers' && !options?.method) {
+        return { workers: [{ id: WORKER, enabled: true }], canModifyWorkers: true };
+      }
+      return {};
+    });
+    await new AlertZeroRuntime(fetch).installWorker(WORKER);
+
+    const patchBodies = fetch.mock.calls
+      .filter(
+        ([path, options]) =>
+          String(path).startsWith('/internal/alertzero/workers/') && options?.method === 'PATCH'
+      )
+      .map(([, options]) => JSON.parse((options as { body: string }).body));
+    expect(patchBodies).toHaveLength(1);
+    expect(patchBodies[0]).toEqual({
+      enabled: true,
+      settings: { serviceAccountId: 'sa-existing' },
+    });
   });
 });
 
