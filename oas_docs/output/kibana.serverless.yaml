@@ -13093,8 +13093,6 @@ paths:
                           tags:
                             - production
                             - infra
-                          template:
-                            id: host-cpu-high
                         no_data:
                           strategy: keep_last
                         query:
@@ -13282,8 +13280,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      template:
-                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -13500,8 +13496,6 @@ paths:
                           tags:
                             - production
                             - infra
-                          template:
-                            id: host-cpu-high
                         no_data:
                           strategy: keep_last
                         query:
@@ -13540,8 +13534,6 @@ paths:
                           tags:
                             - production
                             - infra
-                          template:
-                            id: host-cpu-high
                         no_data:
                           strategy: keep_last
                         query:
@@ -14059,8 +14051,6 @@ paths:
                           tags:
                             - production
                             - infra
-                          template:
-                            id: host-cpu-high
                         no_data:
                           strategy: keep_last
                         query:
@@ -15137,8 +15127,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      template:
-                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -15359,8 +15347,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      template:
-                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -15409,8 +15395,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      template:
-                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -15579,8 +15563,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      template:
-                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -15767,8 +15749,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      template:
-                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -145458,18 +145438,20 @@ components:
           properties:
             builder:
               additionalProperties: false
-              description: The rule builder that generated this rule's ES|QL query. Kibana sets this field. Omit it if you write the query yourself.
+              description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL; send `null` on PATCH to clear it.
               type: object
               properties:
                 type:
-                  description: The rule builder type, for example, `threshold`.
+                  description: Rule builder type.
                   maxLength: 64
+                  minLength: 1
                   type: string
               required:
                 - type
             description:
-              description: Human-readable description of the rule.
+              description: Human-readable description of the rule. Omit to leave it unset; send `null` on PATCH to clear it. An empty string is rejected.
               maxLength: 1024
+              minLength: 1
               type: string
             name:
               description: Rule name (must be unique within the space).
@@ -145477,7 +145459,7 @@ components:
               minLength: 1
               type: string
             routing_tags:
-              description: Tags that route this rule's alerts to action policies. A policy matches these alerts when its `matcher.tags` includes at least one of these tags. Only allowed when kind is alert.
+              description: Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".
               items:
                 maxLength: 128
                 minLength: 1
@@ -145486,7 +145468,7 @@ components:
               minItems: 1
               type: array
             tags:
-              description: Tags for organizing and filtering rules, for example, ["production", "infra"]. Action policies don't match on these tags. They only match on `routing_tags`.
+              description: Tags for categorization, e.g. ["production", "infra"].
               items:
                 maxLength: 128
                 minLength: 1
@@ -145496,11 +145478,11 @@ components:
               type: array
             template:
               additionalProperties: false
-              description: Rule template that this rule was created from. Not set for rules created without a template.
+              description: The rule template this rule was created from.
               type: object
               properties:
                 id:
-                  description: ID of the rule template.
+                  description: Id of the rule template.
                   type: string
               required:
                 - id
