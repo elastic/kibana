@@ -46,8 +46,8 @@ export class RulesListPage {
     return this.page.testSubj.locator(`checkboxSelectRow-${ruleId}`);
   }
 
-  expandRuleButton(ruleId: string) {
-    return this.page.testSubj.locator(`expandRule-${ruleId}`);
+  ruleNameLink(ruleId: string) {
+    return this.page.testSubj.locator(`ruleNameLink-${ruleId}`);
   }
 
   enabledSwitch(ruleId: string) {
