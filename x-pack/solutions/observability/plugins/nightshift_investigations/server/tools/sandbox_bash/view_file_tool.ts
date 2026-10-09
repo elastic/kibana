@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -18,26 +18,28 @@ export const SANDBOX_VIEW_FILE_TOOL_ID = 'nightshift_sandbox_view_file';
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 
-const viewFileSchema = z.object({
-  file_path: z
-    .string()
-    .max(4096)
-    .describe(
-      'Path to the file. Absolute paths are used as-is; relative paths are resolved under /workspace.'
-    ),
-  start_line: z
-    .number()
-    .int()
-    .min(1)
-    .optional()
-    .describe('First line to show (1-indexed, default: 1).'),
-  end_line: z
-    .number()
-    .int()
-    .min(0)
-    .optional()
-    .describe('Last line to show inclusive (default: 0 = end of file).'),
-});
+const viewFileSchema = lazySchema(() =>
+  z.object({
+    file_path: z
+      .string()
+      .max(4096)
+      .describe(
+        'Path to the file. Absolute paths are used as-is; relative paths are resolved under /workspace.'
+      ),
+    start_line: z
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .describe('First line to show (1-indexed, default: 1).'),
+    end_line: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe('Last line to show inclusive (default: 0 = end of file).'),
+  })
+);
 
 export const createSandboxViewFileTool = ({
   getSandboxStart,

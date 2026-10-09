@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
 /**
@@ -26,38 +26,49 @@ export const INVESTIGATION_FAILED_TRIGGER_ID = 'nightshift-investigations.failed
 
 export const EMITTED_INVESTIGATION_STATUSES = ['running', 'completed', 'failed'] as const;
 
-const subjectSchema = z.object({
-  type: z.enum(INVESTIGATION_SUBJECT_TYPES).describe('Kind of entity being investigated.'),
-  id: z.string().describe('Identifier of the investigated entity.'),
-});
+// Lazy so the event schemas are only built when a trigger is emitted or described.
+const subjectSchema = lazySchema(() =>
+  z.object({
+    type: z.enum(INVESTIGATION_SUBJECT_TYPES).describe('Kind of entity being investigated.'),
+    id: z.string().describe('Identifier of the investigated entity.'),
+  })
+);
 
-const baseInvestigationSchema = z.object({
-  investigation_id: z.string().describe('ID of the investigation (the workflow execution ID).'),
-  status: z
-    .enum(EMITTED_INVESTIGATION_STATUSES)
-    .describe('Lifecycle status of the investigation at emit time.'),
-  subject: subjectSchema.describe('The entity this investigation is about.'),
-  trigger_type: z
-    .enum(INVESTIGATION_TRIGGER_TYPES)
-    .describe('What initiated the investigation: automatic or manual.'),
-  started_at: z.string().describe('When the investigation started (ISO 8601 timestamp).'),
-});
+const baseInvestigationSchema = lazySchema(() =>
+  z.object({
+    investigation_id: z.string().describe('ID of the investigation (the workflow execution ID).'),
+    status: z
+      .enum(EMITTED_INVESTIGATION_STATUSES)
+      .describe('Lifecycle status of the investigation at emit time.'),
+    subject: subjectSchema.describe('The entity this investigation is about.'),
+    trigger_type: z
+      .enum(INVESTIGATION_TRIGGER_TYPES)
+      .describe('What initiated the investigation: automatic or manual.'),
+    started_at: z.string().describe('When the investigation started (ISO 8601 timestamp).'),
+  })
+);
 
 export type InvestigationsTriggerBasePayload = z.infer<typeof baseInvestigationSchema>;
 
-const startedSchema = baseInvestigationSchema.extend({
-  status: z.literal('running').describe('Always "running" for this trigger.'),
-});
+const startedSchema = lazySchema(() =>
+  baseInvestigationSchema.extend({
+    status: z.literal('running').describe('Always "running" for this trigger.'),
+  })
+);
 
-const completedSchema = baseInvestigationSchema.extend({
-  status: z.literal('completed').describe('Always "completed" for this trigger.'),
-  completed_at: z.string().describe('When the investigation finished (ISO 8601 timestamp).'),
-});
+const completedSchema = lazySchema(() =>
+  baseInvestigationSchema.extend({
+    status: z.literal('completed').describe('Always "completed" for this trigger.'),
+    completed_at: z.string().describe('When the investigation finished (ISO 8601 timestamp).'),
+  })
+);
 
-const failedSchema = baseInvestigationSchema.extend({
-  status: z.literal('failed').describe('Always "failed" for this trigger.'),
-  completed_at: z.string().describe('When the investigation finished (ISO 8601 timestamp).'),
-});
+const failedSchema = lazySchema(() =>
+  baseInvestigationSchema.extend({
+    status: z.literal('failed').describe('Always "failed" for this trigger.'),
+    completed_at: z.string().describe('When the investigation finished (ISO 8601 timestamp).'),
+  })
+);
 
 export type InvestigationStartedTriggerPayload = z.infer<typeof startedSchema>;
 export type InvestigationCompletedTriggerPayload = z.infer<typeof completedSchema>;

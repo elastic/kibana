@@ -6,7 +6,7 @@
  */
 
 import { notFound } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
@@ -21,9 +21,11 @@ export const getCortexPageRoute = createNightshiftInvestigationsServerRoute({
     authz: { requiredPrivileges: ['agentBuilder:read'] },
   },
   params: z.object({
-    path: z.object({
-      id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-    }),
+    path: lazySchema(() =>
+      z.object({
+        id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+      })
+    ),
   }),
   handler: async ({ request, params, getCortexPageStore, isCortexEnabled }) => {
     if (!isCortexEnabled()) throw notFound('Cortex is not enabled');

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
@@ -28,9 +28,11 @@ export const getInvestigationRoute = createNightshiftInvestigationsServerRoute({
     },
   },
   params: z.object({
-    path: z.object({
-      id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-    }),
+    path: lazySchema(() =>
+      z.object({
+        id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+      })
+    ),
   }),
   handler: async ({ request, params, getInvestigationsClient }) => {
     const investigationClient = getInvestigationsClient(request);

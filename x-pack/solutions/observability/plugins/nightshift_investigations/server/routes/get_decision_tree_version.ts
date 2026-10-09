@@ -6,7 +6,7 @@
  */
 
 import { notFound } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import {
   diffDecisionTrees,
   parseStoredDecisionTree,
@@ -28,10 +28,12 @@ export const getDecisionTreeVersionRoute = createNightshiftInvestigationsServerR
     authz: { requiredPrivileges: ['agentBuilder:read'] },
   },
   params: z.object({
-    path: z.object({
-      symptom: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-      version: z.coerce.number().int().positive(),
-    }),
+    path: lazySchema(() =>
+      z.object({
+        symptom: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+        version: z.coerce.number().int().positive(),
+      })
+    ),
   }),
   handler: async ({ request, params, getDecisionTreeStore, isDecisionTreesEnabled }) => {
     if (!isDecisionTreesEnabled()) throw notFound('Decision trees are not enabled');

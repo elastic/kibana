@@ -6,7 +6,7 @@
  */
 
 import * as path from 'path';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -17,18 +17,20 @@ import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 
 export const SANDBOX_WRITE_FILE_TOOL_ID = 'nightshift_sandbox_write_file';
 
-const writeFileSchema = z.object({
-  file_path: z
-    .string()
-    .max(4096)
-    .describe(
-      'Path for the file to write. Absolute paths are used as-is; relative paths are resolved under /workspace. Parent directories are created automatically.'
-    ),
-  content: z
-    .string()
-    .max(10 * 1024 * 1024)
-    .describe('Full content to write. Overwrites the file if it already exists.'),
-});
+const writeFileSchema = lazySchema(() =>
+  z.object({
+    file_path: z
+      .string()
+      .max(4096)
+      .describe(
+        'Path for the file to write. Absolute paths are used as-is; relative paths are resolved under /workspace. Parent directories are created automatically.'
+      ),
+    content: z
+      .string()
+      .max(10 * 1024 * 1024)
+      .describe('Full content to write. Overwrites the file if it already exists.'),
+  })
+);
 
 export const createSandboxWriteFileTool = ({
   getSandboxStart,

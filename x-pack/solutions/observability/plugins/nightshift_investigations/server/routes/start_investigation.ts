@@ -6,7 +6,7 @@
  */
 
 import { serverUnavailable } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import { freeFormContextSchema } from '../../common';
 import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID, MAX_KEYWORD_LENGTH } from '../../common';
@@ -14,21 +14,8 @@ import { fetchAlertSnapshot } from '../lib/alert_snapshot';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
 
-const subjectIdAndSummary = {
-  id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-  summary: z.string().max(MAX_TEXT_LENGTH).optional(),
-};
-
-const startInvestigationMessage = {
-  message: z.string().min(1).max(MAX_TEXT_LENGTH).optional(),
-};
-
-const startInvestigationModel = {
-  connector_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
-};
-
 /** Headline shown in the list and flyout from the moment the record exists. */
-const titleSchema = z.string().min(1).max(MAX_TITLE_LENGTH);
+const titleSchema = lazySchema(() => z.string().min(1).max(MAX_TITLE_LENGTH));
 
 /** Keeps a derived title to one readable line, since it is rendered as a list headline. */
 const MAX_DERIVED_TITLE_LENGTH = 200;
@@ -45,38 +32,42 @@ const deriveTitleFromMessage = (message: string): string =>
 // the alert server-side (through the RAC alerts client, which enforces alert-index
 // authorization) and builds the snapshot itself. zod's discriminatedUnion needs the
 // discriminator at the top level, and ours is nested under `subject`, hence a plain union.
-const startInvestigationBodySchema = z.union([
-  z.object({
-    subject: z.object({
-      type: z.literal('alert'),
-      ...subjectIdAndSummary,
+const startInvestigationBodySchema = lazySchema(() => {
+  const connectorId = z.string().min(1).max(MAX_KEYWORD_LENGTH).optional();
+  return z.union([
+    z.object({
+      subject: z.object({
+        type: z.literal('alert'),
+        id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+        summary: z.string().max(MAX_TEXT_LENGTH).optional(),
+      }),
+      // Optional here only: the handler derives it from the alert's rule name when omitted.
+      title: titleSchema.optional(),
+      concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+      message: z.string().min(1).max(MAX_TEXT_LENGTH).optional(),
+      connector_id: connectorId,
     }),
-    // Optional here only: the handler derives it from the alert's rule name when omitted.
-    title: titleSchema.optional(),
-    concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
-    ...startInvestigationMessage,
-    ...startInvestigationModel,
-  }),
-  // A manual investigation is defined by its question, so `message` is required and the
-  // subject id is optional: there is no entity to point at, only the prompt. The title is
-  // optional for the same reason: the handler derives it from the question when omitted.
-  z.object({
-    subject: z.object({
-      type: z.literal('manual'),
-      id: z
-        .string()
-        .min(1)
-        .max(MAX_KEYWORD_LENGTH)
-        .default(DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID),
-      summary: z.string().max(MAX_TEXT_LENGTH).optional(),
+    // A manual investigation is defined by its question, so `message` is required and the
+    // subject id is optional: there is no entity to point at, only the prompt. The title is
+    // optional for the same reason: the handler derives it from the question when omitted.
+    z.object({
+      subject: z.object({
+        type: z.literal('manual'),
+        id: z
+          .string()
+          .min(1)
+          .max(MAX_KEYWORD_LENGTH)
+          .default(DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID),
+        summary: z.string().max(MAX_TEXT_LENGTH).optional(),
+      }),
+      title: titleSchema.optional(),
+      concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+      context: freeFormContextSchema.optional(),
+      message: z.string().min(1).max(MAX_TEXT_LENGTH),
+      connector_id: connectorId,
     }),
-    title: titleSchema.optional(),
-    concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
-    context: freeFormContextSchema.optional(),
-    message: z.string().min(1).max(MAX_TEXT_LENGTH),
-    ...startInvestigationModel,
-  }),
-]);
+  ]);
+});
 
 type StartInvestigationBody = z.infer<typeof startInvestigationBodySchema>;
 type AlertInvestigationBody = Extract<StartInvestigationBody, { subject: { type: 'alert' } }>;

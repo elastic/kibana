@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
@@ -37,38 +37,45 @@ export const decisionTreeReinforceStepDefinition = ({
     description:
       "Runs the reinforcement agent with the investigator's round as conversation history (its " +
       'tool calls and their results as real tool messages), followed by the prepared turn message.',
-    inputSchema: z.object({
-      prompt: z.string().max(MAX_INPUT_CHARS).describe('The user message that started the round.'),
-      response: z
-        .string()
-        .max(MAX_INPUT_CHARS)
-        .describe("The investigator's final response for the round."),
-      round_id: z
-        .string()
-        .max(1024)
-        .optional()
-        .describe("Id of the investigator's round, reused for the rebuilt history round."),
-      message: z
-        .string()
-        .max(MAX_INPUT_CHARS)
-        .describe('Turn message from nightshift.decisionTreePrepare.'),
-      turn_kind: z
-        .enum(['initial_investigation', 'feedback_reinforcement'])
-        .describe('Turn kind from nightshift.decisionTreePrepare. Picks the tool set.'),
-      connector_id: z
-        .string()
-        .max(MAX_KEYWORD_LENGTH)
-        .optional()
-        .describe('Inference connector for the reinforcement run.'),
-      tool_calls: toolCallsSchema.describe('Investigator tool calls from this round.'),
-      tool_results: toolResultsSchema.describe(
-        'Results of the investigator tool calls, keyed by tool_call_id.'
-      ),
-    }),
-    outputSchema: z.object({
-      message: z.string().describe("The reinforcement agent's final response."),
-      skipped: z.boolean().optional(),
-    }),
+    inputSchema: lazySchema(() =>
+      z.object({
+        prompt: z
+          .string()
+          .max(MAX_INPUT_CHARS)
+          .describe('The user message that started the round.'),
+        response: z
+          .string()
+          .max(MAX_INPUT_CHARS)
+          .describe("The investigator's final response for the round."),
+        round_id: z
+          .string()
+          .max(1024)
+          .optional()
+          .describe("Id of the investigator's round, reused for the rebuilt history round."),
+        message: z
+          .string()
+          .max(MAX_INPUT_CHARS)
+          .describe('Turn message from nightshift.decisionTreePrepare.'),
+        turn_kind: z
+          .enum(['initial_investigation', 'feedback_reinforcement'])
+          .describe('Turn kind from nightshift.decisionTreePrepare. Picks the tool set.'),
+        connector_id: z
+          .string()
+          .max(MAX_KEYWORD_LENGTH)
+          .optional()
+          .describe('Inference connector for the reinforcement run.'),
+        tool_calls: toolCallsSchema.describe('Investigator tool calls from this round.'),
+        tool_results: toolResultsSchema.describe(
+          'Results of the investigator tool calls, keyed by tool_call_id.'
+        ),
+      })
+    ),
+    outputSchema: lazySchema(() =>
+      z.object({
+        message: z.string().describe("The reinforcement agent's final response."),
+        skipped: z.boolean().optional(),
+      })
+    ),
     handler: async (context) => {
       // The combined optimize workflow installs with Cortex or Memory, so this step is registered
       // even when the tree feature is off.

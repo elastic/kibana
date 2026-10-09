@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
@@ -32,28 +32,32 @@ export const decisionTreePrepareStepDefinition = ({
     description:
       'Builds the closing reinforcement message for a completed investigation round: the decision ' +
       'trees available to edit, the learnings already on file, and the turn script.',
-    inputSchema: z.object({
-      response: z
-        .string()
-        .max(MAX_INPUT_CHARS)
-        .describe("The investigator's final response for the round."),
-      agent_id: z
-        .string()
-        .max(1024)
-        .optional()
-        .describe('Agent id that produced the round. Rounds from other agents are skipped.'),
-      tool_calls: toolCallsSchema.describe(
-        'Investigator tool calls from this round. Used to see which decision-tree files were read.'
-      ),
-    }),
-    outputSchema: z.object({
-      message: z.string().describe('Message to hand the reinforcement agent.'),
-      tree_count: z.number().describe('Number of decision trees the agent may edit.'),
-      turn_kind: z
-        .enum(['initial_investigation', 'feedback_reinforcement'])
-        .describe('Whether this round seeds the trees or follows up on them.'),
-      skipped: z.boolean().describe('True when this round is not eligible for reinforcement.'),
-    }),
+    inputSchema: lazySchema(() =>
+      z.object({
+        response: z
+          .string()
+          .max(MAX_INPUT_CHARS)
+          .describe("The investigator's final response for the round."),
+        agent_id: z
+          .string()
+          .max(1024)
+          .optional()
+          .describe('Agent id that produced the round. Rounds from other agents are skipped.'),
+        tool_calls: toolCallsSchema.describe(
+          'Investigator tool calls from this round. Used to see which decision-tree files were read.'
+        ),
+      })
+    ),
+    outputSchema: lazySchema(() =>
+      z.object({
+        message: z.string().describe('Message to hand the reinforcement agent.'),
+        tree_count: z.number().describe('Number of decision trees the agent may edit.'),
+        turn_kind: z
+          .enum(['initial_investigation', 'feedback_reinforcement'])
+          .describe('Whether this round seeds the trees or follows up on them.'),
+        skipped: z.boolean().describe('True when this round is not eligible for reinforcement.'),
+      })
+    ),
     handler: async (context) => {
       const { response, agent_id: agentId, tool_calls: toolCalls } = context.input;
       const skippedOutput = {

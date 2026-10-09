@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import {
   MAX_ARRAY_LENGTH,
   MAX_ID_LENGTH,
@@ -17,49 +17,51 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { INVESTIGATION_TRIGGER_TYPES } from '../../common';
 import type { GetInvestigationsClient } from '../routes/types';
 
-const inputSchema = z.object({
-  subject_type: z
-    .enum(['significant_event', 'alert'])
-    .describe('The type of entity being investigated'),
-  subject_id: z.string().min(1).describe('The ID of the entity being investigated'),
-  title: z
-    .string()
-    .min(1)
-    .max(MAX_TITLE_LENGTH)
-    .describe('Human-readable headline for the investigation, e.g. the event title or rule name'),
-  trigger_type: z
-    .enum(INVESTIGATION_TRIGGER_TYPES)
-    .optional()
-    .describe('What initiated this investigation. Defaults to "automatic".'),
-  summary: z
-    .string()
-    .max(MAX_TEXT_LENGTH)
-    .optional()
-    .describe('Short description of the subject, returned on reads as subject.summary'),
-  message: z
-    .string()
-    .min(1)
-    .max(MAX_TEXT_LENGTH)
-    .optional()
-    .describe('Caller-supplied prompt for the investigation agent'),
-  stream_names: z
-    .array(z.string().max(MAX_ID_LENGTH))
-    .max(MAX_ARRAY_LENGTH)
-    .optional()
-    .describe('Logical stream names to scope the investigation'),
-  concurrency_key: z
-    .string()
-    .optional()
-    .describe(
-      'Caller key for cancel-and-replace concurrency control (maps to concurrencyGroupKey)'
-    ),
-  context: z
-    .record(z.string(), z.unknown())
-    .optional()
-    .describe(
-      'Additional context to pass to the investigation workflow. When subject_type is "alert" this must carry an "alerts" array of alert snapshots, or the investigation is rejected.'
-    ),
-});
+const inputSchema = lazySchema(() =>
+  z.object({
+    subject_type: z
+      .enum(['significant_event', 'alert'])
+      .describe('The type of entity being investigated'),
+    subject_id: z.string().min(1).describe('The ID of the entity being investigated'),
+    title: z
+      .string()
+      .min(1)
+      .max(MAX_TITLE_LENGTH)
+      .describe('Human-readable headline for the investigation, e.g. the event title or rule name'),
+    trigger_type: z
+      .enum(INVESTIGATION_TRIGGER_TYPES)
+      .optional()
+      .describe('What initiated this investigation. Defaults to "automatic".'),
+    summary: z
+      .string()
+      .max(MAX_TEXT_LENGTH)
+      .optional()
+      .describe('Short description of the subject, returned on reads as subject.summary'),
+    message: z
+      .string()
+      .min(1)
+      .max(MAX_TEXT_LENGTH)
+      .optional()
+      .describe('Caller-supplied prompt for the investigation agent'),
+    stream_names: z
+      .array(z.string().max(MAX_ID_LENGTH))
+      .max(MAX_ARRAY_LENGTH)
+      .optional()
+      .describe('Logical stream names to scope the investigation'),
+    concurrency_key: z
+      .string()
+      .optional()
+      .describe(
+        'Caller key for cancel-and-replace concurrency control (maps to concurrencyGroupKey)'
+      ),
+    context: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .describe(
+        'Additional context to pass to the investigation workflow. When subject_type is "alert" this must carry an "alerts" array of alert snapshots, or the investigation is rejected.'
+      ),
+  })
+);
 
 export const triggerInvestigationStepDefinition = (
   getInvestigationsClient: GetInvestigationsClient
@@ -71,11 +73,13 @@ export const triggerInvestigationStepDefinition = (
     description:
       'Start an investigation for a given subject (significant event, alert, or other entity). Returns investigation_id for tracking.',
     inputSchema,
-    outputSchema: z.object({
-      investigation_id: z
-        .string()
-        .describe('The workflow execution ID for the started investigation'),
-    }),
+    outputSchema: lazySchema(() =>
+      z.object({
+        investigation_id: z
+          .string()
+          .describe('The workflow execution ID for the started investigation'),
+      })
+    ),
     handler: async (context) => {
       const request = context.contextManager.getFakeRequest();
       // getFakeRequest() does not carry space info, so the space ID must be extracted from the

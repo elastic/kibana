@@ -21,12 +21,11 @@ export type {
 } from './types';
 export type { DeleteAllInvestigationsResult } from './storage';
 
-export {
-  alertSnapshotSchema,
-  NIGHTSHIFT_INVESTIGATION_AGENT_ID,
-  type AlertSnapshot,
-} from '../common';
+// Value exports come from leaf modules so loading this entry does not pull in the plugin's schemas.
+export { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../common/constants';
+export type { AlertSnapshot } from '../common';
 
-export { InvestigationQuotaDeniedError, InvestigationUnavailableError } from './client/errors';
+export { InvestigationQuotaDeniedError } from './client/errors/investigation_quota_denied_error';
+export { InvestigationUnavailableError } from './client/errors/investigation_unavailable_error';
 
 export type { NightshiftInvestigationsRouteRepository } from './routes';

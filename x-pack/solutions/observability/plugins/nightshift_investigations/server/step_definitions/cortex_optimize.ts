@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { AnalyticsServiceSetup, CoreStart, Logger } from '@kbn/core/server';
@@ -67,52 +67,56 @@ export const cortexOptimizeStepDefinition = ({
       'Proposes Cortex wiki edits from a completed investigation round and writes them ' +
       'to the Context Engine AI index. sandbox_id identifies the workspace this round used; ' +
       'the optimizer currently reads the transcript, not the sandbox files.',
-    inputSchema: z.object({
-      prompt: z
-        .string()
-        .max(MAX_ROUND_TEXT_LENGTH)
-        .describe('The user message that started the round.'),
-      response: z
-        .string()
-        .max(MAX_ROUND_TEXT_LENGTH)
-        .describe("The assistant's final response for the round."),
-      agent_id: z.string().max(1024).optional().describe('Agent id that produced the round.'),
-      sandbox_id: z
-        .string()
-        .max(1024)
-        .optional()
-        .describe('Workspace key from nightshift.obtainSandbox. Already space-scoped.'),
-      conversation_id: z
-        .string()
-        .max(1024)
-        .optional()
-        .describe('Conversation the round belongs to. Recorded on the edit telemetry events.'),
-      round_id: z
-        .string()
-        .max(1024)
-        .optional()
-        .describe('Id of the completed round. Recorded on the edit telemetry events.'),
-      connector_id: z
-        .string()
-        .max(MAX_KEYWORD_LENGTH)
-        .optional()
-        .describe('Strict model override for a direct run. Fails when the id does not resolve.'),
-      round_connector_id: z
-        .string()
-        .max(MAX_KEYWORD_LENGTH)
-        .optional()
-        .describe('Inference connector the triggering agent used for this round.'),
-      tool_calls: toolCallsSchema.describe(
-        'Investigator tool calls from this round. Shows the optimizer what the investigator queried.'
-      ),
-      tool_results: toolResultsSchema.describe(
-        'Results of the investigator tool calls, keyed by tool_call_id. Shows the optimizer what each query returned.'
-      ),
-    }),
-    outputSchema: z.object({
-      status: z.literal('ok').describe('The optimizer finished without throwing.'),
-      skipped: z.boolean().optional(),
-    }),
+    inputSchema: lazySchema(() =>
+      z.object({
+        prompt: z
+          .string()
+          .max(MAX_ROUND_TEXT_LENGTH)
+          .describe('The user message that started the round.'),
+        response: z
+          .string()
+          .max(MAX_ROUND_TEXT_LENGTH)
+          .describe("The assistant's final response for the round."),
+        agent_id: z.string().max(1024).optional().describe('Agent id that produced the round.'),
+        sandbox_id: z
+          .string()
+          .max(1024)
+          .optional()
+          .describe('Workspace key from nightshift.obtainSandbox. Already space-scoped.'),
+        conversation_id: z
+          .string()
+          .max(1024)
+          .optional()
+          .describe('Conversation the round belongs to. Recorded on the edit telemetry events.'),
+        round_id: z
+          .string()
+          .max(1024)
+          .optional()
+          .describe('Id of the completed round. Recorded on the edit telemetry events.'),
+        connector_id: z
+          .string()
+          .max(MAX_KEYWORD_LENGTH)
+          .optional()
+          .describe('Strict model override for a direct run. Fails when the id does not resolve.'),
+        round_connector_id: z
+          .string()
+          .max(MAX_KEYWORD_LENGTH)
+          .optional()
+          .describe('Inference connector the triggering agent used for this round.'),
+        tool_calls: toolCallsSchema.describe(
+          'Investigator tool calls from this round. Shows the optimizer what the investigator queried.'
+        ),
+        tool_results: toolResultsSchema.describe(
+          'Results of the investigator tool calls, keyed by tool_call_id. Shows the optimizer what each query returned.'
+        ),
+      })
+    ),
+    outputSchema: lazySchema(() =>
+      z.object({
+        status: z.literal('ok').describe('The optimizer finished without throwing.'),
+        skipped: z.boolean().optional(),
+      })
+    ),
     handler: async (context) => {
       if (isEnabled && !isEnabled()) {
         context.logger.info('Skipped Cortex optimize (flag off)');

@@ -6,7 +6,7 @@
  */
 
 import { notFound } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { CORTEX_PAGE_STATUSES } from '../../common/cortex';
 import type { DecisionTreeStats, DecisionTreeSummary } from '../../common/decision_trees';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
@@ -40,12 +40,14 @@ export const listDecisionTreesRoute = createNightshiftInvestigationsServerRoute(
     authz: { requiredPrivileges: ['agentBuilder:read'] },
   },
   params: z.object({
-    query: z
-      .object({
-        status: z.enum(CORTEX_PAGE_STATUSES).optional(),
-      })
-      .optional()
-      .default({}),
+    query: lazySchema(() =>
+      z
+        .object({
+          status: z.enum(CORTEX_PAGE_STATUSES).optional(),
+        })
+        .optional()
+        .default({})
+    ),
   }),
   handler: async ({ request, params, getDecisionTreeStore, isDecisionTreesEnabled }) => {
     if (!isDecisionTreesEnabled()) throw notFound('Decision trees are not enabled');

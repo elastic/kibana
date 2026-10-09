@@ -6,7 +6,7 @@
  */
 
 import { badRequest, conflict, notFound } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type {
   GetSandboxSecretsResponse,
@@ -71,20 +71,22 @@ const putSandboxSecretsRoute = createNightshiftInvestigationsServerRoute({
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
   params: z.object({
-    body: z.object({
-      entries: z
-        .array(
-          z.object({
-            key: z.string().max(MAX_SANDBOX_SECRET_KEY_LENGTH),
-            // Only the upper bound is enforced here, as a DoS guard on request size; the exact
-            // valid range (including the minimum) is the sandboxSecretsClient's job, so both
-            // bounds are defined and checked in one place: validateSandboxSecretValue.
-            value: z.string().max(MAX_SANDBOX_SECRET_VALUE_LENGTH).optional(),
-          })
-        )
-        .max(MAX_SANDBOX_SECRETS),
-      version: z.string().max(MAX_SANDBOX_SECRETS_VERSION_LENGTH).optional(),
-    }),
+    body: lazySchema(() =>
+      z.object({
+        entries: z
+          .array(
+            z.object({
+              key: z.string().max(MAX_SANDBOX_SECRET_KEY_LENGTH),
+              // Only the upper bound is enforced here, as a DoS guard on request size; the exact
+              // valid range (including the minimum) is the sandboxSecretsClient's job, so both
+              // bounds are defined and checked in one place: validateSandboxSecretValue.
+              value: z.string().max(MAX_SANDBOX_SECRET_VALUE_LENGTH).optional(),
+            })
+          )
+          .max(MAX_SANDBOX_SECRETS),
+        version: z.string().max(MAX_SANDBOX_SECRETS_VERSION_LENGTH).optional(),
+      })
+    ),
   }),
   handler: async ({
     request,
