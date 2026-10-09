@@ -85,6 +85,20 @@ describe('run quota drafts', () => {
     });
   });
 
+  it('activates legacy enforcement after a cleared limit is repaired', () => {
+    let state = createRunQuotaDraftState(response);
+    state = setRunLimitEnabled(state, 'detection', true);
+    state = setRunLimitEnabled(state, 'ki_extraction', true);
+    state.draft.limits.detection = '';
+    state = setRunLimitEnabled(state, 'ki_extraction', false);
+    state.draft.limits.detection = 20;
+
+    expect(state.draft.enabled).toBe(false);
+    expect(buildRunQuotaSettingsUpdate(state)).toEqual({
+      activateLimits: { detection: 20 },
+    });
+  });
+
   it('does not build an update for unchanged or invalid drafts', () => {
     expect(buildRunQuotaSettingsUpdate(createRunQuotaDraftState(response))).toBeUndefined();
 

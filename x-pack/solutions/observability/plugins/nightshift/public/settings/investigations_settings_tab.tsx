@@ -61,7 +61,7 @@ export const InvestigationsSettingsTab = ({
             'xpack.nightshift.settings.investigationRunLimitsDescription',
             {
               defaultMessage:
-                'These limits apply only to scheduled investigation, manual runs are not limited. When a limit is reached, new scheduled runs are blocked until it resets.',
+                'These limits apply only to automatic investigations; manual runs are not limited. When a limit is reached, new automatic investigations are blocked until it resets.',
             }
           )}
           onSave={saveRunLimits}

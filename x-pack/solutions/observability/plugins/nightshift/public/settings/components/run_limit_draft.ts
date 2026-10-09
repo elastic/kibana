@@ -141,7 +141,10 @@ export const buildRunQuotaSettingsUpdate = (
     return undefined;
   }
 
-  if (!state.saved.enabled && state.draft.enabled) {
+  const hasActiveDraftLimits = RUN_QUOTA_GROUPS.some((group) =>
+    isValidLimitedRunLimitDraft(state.draft.limits[group])
+  );
+  if (!state.saved.enabled && hasActiveDraftLimits) {
     const activateLimits = Object.fromEntries(
       RUN_QUOTA_GROUPS.flatMap((group) =>
         isValidLimitedRunLimitDraft(state.draft.limits[group])

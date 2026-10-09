@@ -19,9 +19,12 @@ const mockContinuousSave = jest.fn();
 const mockRunLimitsRequestSave = jest.fn();
 const mockRunLimitsConfirmAndSave = jest.fn();
 const mockRunLimitsCancel = jest.fn();
+const mockTokenTrackingSave = jest.fn();
+const mockTokenTrackingCancel = jest.fn();
 let mockContinuousHasChanged = false;
 let mockScheduledEnabled = false;
 let mockRunLimitsIsDirty = false;
+let mockTokenTrackingIsDirty = false;
 let mockBlocksActivity = false;
 let mockRunLimitGroups: readonly string[] = [];
 
@@ -74,6 +77,18 @@ jest.mock('./components/stale_event_cleanup_section', () => ({
 }));
 jest.mock('./components/cost_estimate', () => ({
   CostEstimate: () => <div data-test-subj="cost-estimate" />,
+}));
+jest.mock('./components/use_token_tracking_form', () => ({
+  useTokenTrackingForm: () => ({
+    enabled: true,
+    savedEnabled: true,
+    canEdit: true,
+    isDirty: mockTokenTrackingIsDirty,
+    isSaving: false,
+    updateEnabled: jest.fn(),
+    save: mockTokenTrackingSave,
+    cancel: mockTokenTrackingCancel,
+  }),
 }));
 jest.mock('./components/run_limits_section', () => ({
   RunLimitsSection: ({ onConfirmSave }: { onConfirmSave: () => Promise<void> }) => (
@@ -198,11 +213,13 @@ describe('DetectionsSettingsTab', () => {
     mockContinuousHasChanged = false;
     mockScheduledEnabled = false;
     mockRunLimitsIsDirty = false;
+    mockTokenTrackingIsDirty = false;
     mockBlocksActivity = false;
     mockRunLimitGroups = [];
     mockContinuousSave.mockResolvedValue(undefined);
     mockRunLimitsRequestSave.mockResolvedValue('saved');
     mockRunLimitsConfirmAndSave.mockResolvedValue('saved');
+    mockTokenTrackingSave.mockResolvedValue('saved');
     settingsGlobalClientSet.mockResolvedValue(true);
   });
 
@@ -224,38 +241,46 @@ describe('DetectionsSettingsTab', () => {
     expect(mockRunLimitGroups).toEqual(['detection', 'ki_extraction']);
   });
 
-  it('saves run limits and activity settings through one bottom bar', async () => {
+  it('saves run limits, activity settings, and token tracking through one bottom bar', async () => {
     mockRunLimitsIsDirty = true;
     mockContinuousHasChanged = true;
-    setup();
+    mockTokenTrackingIsDirty = true;
+    setup({ isDeveloperMode: true });
 
     fireEvent.click(screen.getByTestId('streams-settings-save-button'));
 
     await waitFor(() => {
       expect(mockRunLimitsRequestSave).toHaveBeenCalledTimes(1);
       expect(mockContinuousSave).toHaveBeenCalledTimes(1);
+      expect(mockTokenTrackingSave).toHaveBeenCalledTimes(1);
     });
     expect(mockRunLimitsRequestSave.mock.invocationCallOrder[0]).toBeLessThan(
       mockContinuousSave.mock.invocationCallOrder[0]
     );
+    expect(mockContinuousSave.mock.invocationCallOrder[0]).toBeLessThan(
+      mockTokenTrackingSave.mock.invocationCallOrder[0]
+    );
   });
 
-  it('waits for run-limit confirmation before saving activity settings', async () => {
+  it('waits for run-limit confirmation before saving the remaining settings', async () => {
     mockRunLimitsIsDirty = true;
     mockContinuousHasChanged = true;
+    mockTokenTrackingIsDirty = true;
     mockRunLimitsRequestSave.mockResolvedValue('needs-confirmation');
-    setup();
+    setup({ isDeveloperMode: true });
 
     fireEvent.click(screen.getByTestId('streams-settings-save-button'));
 
     await waitFor(() => expect(mockRunLimitsRequestSave).toHaveBeenCalledTimes(1));
     expect(mockContinuousSave).not.toHaveBeenCalled();
+    expect(mockTokenTrackingSave).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByTestId('runLimitsConfirmStub'));
 
     await waitFor(() => {
       expect(mockRunLimitsConfirmAndSave).toHaveBeenCalledTimes(1);
       expect(mockContinuousSave).toHaveBeenCalledTimes(1);
+      expect(mockTokenTrackingSave).toHaveBeenCalledTimes(1);
     });
   });
 

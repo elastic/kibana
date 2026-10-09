@@ -24,6 +24,7 @@ import { StaleEventCleanupSection } from './components/stale_event_cleanup_secti
 import { TuningSection } from './components/tuning_section';
 import { useDetectionSettingsForm } from './components/use_detection_settings_form';
 import { useRunLimitsForm } from './components/use_run_limits_form';
+import { useTokenTrackingForm } from './components/use_token_tracking_form';
 
 const DETECTION_RUN_LIMIT_GROUPS = ['detection', 'ki_extraction'] as const;
 
@@ -31,15 +32,27 @@ export const DetectionsSettingsTab = () => {
   const { appParams, application, http, overlays } = useKibana().services;
   const form = useDetectionSettingsForm();
   const runLimits = useRunLimitsForm({ groups: DETECTION_RUN_LIMIT_GROUPS });
+  const tokenTracking = useTokenTrackingForm({
+    isEnabled: form.isDeveloperMode && !form.isDeveloperModeSaving && runLimits.canManage,
+  });
 
   useUnsavedChangesPrompt({
-    hasUnsavedChanges: form.hasChanges || runLimits.isDirty,
+    hasUnsavedChanges: form.hasChanges || runLimits.isDirty || tokenTracking.isDirty,
     http,
     openConfirm: overlays.openConfirm,
     navigateToUrl: application.navigateToUrl,
     history: appParams.history,
     shouldPromptOnReplace: false,
   });
+
+  const saveRemainingSettings = async () => {
+    if (form.hasActivitySettingsChanges) {
+      await form.handleSave();
+    }
+    if (tokenTracking.isDirty) {
+      await tokenTracking.save();
+    }
+  };
 
   const saveSettings = async () => {
     if (runLimits.isDirty) {
@@ -49,29 +62,30 @@ export const DetectionsSettingsTab = () => {
       }
     }
 
-    if (form.hasActivitySettingsChanges) {
-      await form.handleSave();
-    }
+    await saveRemainingSettings();
   };
 
   const confirmRunLimitsAndSaveSettings = async () => {
     const result = await runLimits.confirmAndSave();
-    if (result === 'saved' && form.hasActivitySettingsChanges) {
-      await form.handleSave();
+    if (result === 'saved') {
+      await saveRemainingSettings();
     }
   };
 
   const cancelSettings = () => {
     runLimits.cancel();
     form.handleCancel();
+    tokenTracking.cancel();
   };
 
-  const hasSaveBarChanges = form.hasActivitySettingsChanges || runLimits.isDirty;
+  const hasSaveBarChanges =
+    form.hasActivitySettingsChanges || runLimits.isDirty || tokenTracking.isDirty;
   const activitySaveBlockedByPause = form.hasActivitySettingsChanges && form.saveBlockedByPause;
   const isSaveDisabled =
     form.isDeveloperModeSaving ||
     activitySaveBlockedByPause ||
-    (runLimits.isDirty && (!runLimits.canManage || !runLimits.update));
+    (runLimits.isDirty && (!runLimits.canManage || !runLimits.update)) ||
+    (tokenTracking.isDirty && !tokenTracking.canEdit);
 
   return (
     <>
@@ -134,7 +148,7 @@ export const DetectionsSettingsTab = () => {
 
             <EuiHorizontalRule margin="l" />
 
-            <CostEstimate />
+            <CostEstimate tokenTracking={tokenTracking} />
 
             {!form.isDeveloperModeSaving && (
               <>
@@ -159,7 +173,9 @@ export const DetectionsSettingsTab = () => {
 
       <SettingsSaveBar
         hasChanges={hasSaveBarChanges}
-        isSaving={form.isSaving || form.isSavingTuningConfig || runLimits.isSaving}
+        isSaving={
+          form.isSaving || form.isSavingTuningConfig || runLimits.isSaving || tokenTracking.isSaving
+        }
         onCancel={cancelSettings}
         onSave={saveSettings}
         isSaveDisabled={isSaveDisabled}
