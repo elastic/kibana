@@ -177,6 +177,7 @@ storybookConversationEventsService.register(storyNoteWithHeaderEventDefinition);
 
 const defaultServices: AgentBuilderInternalService = {
   filesClient: storybookFilesClient,
+  pdfFilesClient: storybookFilesClient,
   agentService: {
     list: () =>
       Promise.resolve([

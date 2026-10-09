@@ -27,6 +27,9 @@ export interface AttachmentPillsRowProps {
   justifyContent?: EuiFlexGroupProps['justifyContent'];
   onRemoveAttachment?: (attachment: ConversationAttachment) => void;
   uploadingNames?: Set<string>;
+  /** PDFs that are uploading or being read, drawn as named pills with a spinner. */
+  loadingPdfNames?: Set<string>;
+  onRemoveLoadingPdf?: (name: string) => void;
   hoveredImageName?: string | null;
 }
 
@@ -79,12 +82,15 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
   justifyContent = 'flexStart',
   onRemoveAttachment,
   uploadingNames,
+  loadingPdfNames,
+  onRemoveLoadingPdf,
   hoveredImageName,
 }) => {
   const { removeAttachment } = useConversationContext();
   const uploadingEntries = uploadingNames ? [...uploadingNames] : [];
+  const loadingPdfEntries = loadingPdfNames ? [...loadingPdfNames] : [];
 
-  if (attachments.length === 0 && uploadingEntries.length === 0) {
+  if (attachments.length === 0 && uploadingEntries.length === 0 && loadingPdfEntries.length === 0) {
     return null;
   }
 
@@ -131,6 +137,7 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
                 data: (attachment.data ?? {}) as Record<string, unknown>,
                 hidden: attachment.hidden,
                 origin: attachment.origin,
+                description: attachment.description,
               }}
               onRemoveAttachment={
                 removable
@@ -145,6 +152,20 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
           </EuiFlexItem>
         );
       })}
+      {loadingPdfEntries.map((name) => (
+        <EuiFlexItem key={`loading-pdf-${name}`} grow={false} role="listitem">
+          <AttachmentPill
+            attachment={{
+              id: name,
+              type: AttachmentType.pdf,
+              data: {},
+              description: name,
+            }}
+            isLoading
+            onRemoveAttachment={removable ? () => onRemoveLoadingPdf?.(name) : undefined}
+          />
+        </EuiFlexItem>
+      ))}
       {uploadingEntries.map((name) => (
         <EuiFlexItem key={`uploading-${name}`} grow={false} role="listitem">
           <UploadingImagePill name={name} />

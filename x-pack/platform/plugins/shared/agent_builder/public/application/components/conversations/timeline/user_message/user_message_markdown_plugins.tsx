@@ -14,7 +14,10 @@ import {
 } from '@elastic/eui';
 import type { PluggableList } from 'unified';
 import { sortedCommandDefinitions } from '../../conversation_input/message_editor/command_menu';
-import { IMAGE_ATTACHMENT_SCHEME } from '../../conversation_input/message_editor/image_placeholder';
+import {
+  IMAGE_ATTACHMENT_SCHEME,
+  PDF_ATTACHMENT_SCHEME,
+} from '../../conversation_input/message_editor/image_placeholder';
 import {
   createConversationMarkdownComponents,
   esqlLanguagePlugin,
@@ -36,6 +39,7 @@ export const ALLOWED_LINK_PROTOCOLS = [
   'mailto:',
   ...sortedCommandDefinitions.map((definition) => `${definition.scheme}:`),
   `${IMAGE_ATTACHMENT_SCHEME}:`,
+  `${PDF_ATTACHMENT_SCHEME}:`,
 ];
 
 export const parseSchemeAndPath = (href: string): { scheme: string; path: string } | undefined => {
@@ -113,6 +117,20 @@ export const useUserMessageMarkdownPlugins = ({
                 onMouseLeave={onHoverImage ? () => onHoverImage(null) : undefined}
               >
                 <EuiIcon type="image" size="s" aria-hidden={true} />
+                <span className="image-badge-label" css={styles.imageBadgeInner}>
+                  {name}
+                </span>
+              </span>
+            </EuiToolTip>
+          );
+        }
+
+        if (parsed?.scheme === PDF_ATTACHMENT_SCHEME) {
+          const name = decodeBadgeName(parsed.path);
+          return (
+            <EuiToolTip content={name} disableScreenReaderOutput>
+              <span css={styles.imageBadgeWrapper} tabIndex={0}>
+                <EuiIcon type="document" size="s" aria-hidden={true} />
                 <span className="image-badge-label" css={styles.imageBadgeInner}>
                   {name}
                 </span>

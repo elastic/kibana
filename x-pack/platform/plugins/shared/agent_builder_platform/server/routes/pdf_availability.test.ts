@@ -13,7 +13,8 @@ jest.mock('../attachment_types/pdf/extraction_availability', () => ({
   isPdfExtractionAvailable: () => mockIsPdfExtractionAvailable(),
 }));
 
-import { pdfAvailabilityPath, registerPdfAvailabilityRoute } from './pdf_availability';
+import { pdfAvailabilityPath } from '@kbn/agent-builder-plugin/common/constants';
+import { registerPdfAvailabilityRoute } from './pdf_availability';
 
 describe('registerPdfAvailabilityRoute', () => {
   const setup = () => {

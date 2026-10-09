@@ -84,9 +84,12 @@ interface MessageEditorProps {
   ariaLabel?: string;
   'data-test-subj'?: string;
   onPasteFile?: (file: File) => string | undefined;
+  /** Lets a pasted PDF reach `onPasteFile`. Off by default, so a PDF paste is a plain paste. */
+  acceptPdf?: boolean;
   onAfterInput?: () => void;
   onHoveredPlaceholderChange?: (name: string | null) => void;
   uploadingNames?: ReadonlySet<string>;
+  uploadingPdfNames?: ReadonlySet<string>;
 }
 
 export const MessageEditor: React.FC<MessageEditorProps> = ({
@@ -97,9 +100,11 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   ariaLabel,
   'data-test-subj': dataTestSubj,
   onPasteFile,
+  acceptPdf,
   onAfterInput,
   onHoveredPlaceholderChange,
   uploadingNames,
+  uploadingPdfNames,
 }) => {
   const [isComposing, setIsComposing] = useState(false);
   const commandMenuRef = useRef<CommandMenuHandle>(null);
@@ -150,7 +155,8 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   useEffect(() => {
     if (!ref.current) return;
     syncChipsUploadingState(ref.current, uploadingNames);
-  }, [uploadingNames, ref]);
+    syncChipsUploadingState(ref.current, uploadingPdfNames, 'pdf');
+  }, [uploadingNames, uploadingPdfNames, ref]);
 
   const handleCompositionStart = () => setIsComposing(true);
   const handleCompositionEnd = () => {
@@ -201,6 +207,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
         onPaste={(event) =>
           handleEditorPaste(event.nativeEvent, {
             onPasteFile,
+            acceptPdf,
             editorRef: ref,
             onChange,
             onAfterInput,

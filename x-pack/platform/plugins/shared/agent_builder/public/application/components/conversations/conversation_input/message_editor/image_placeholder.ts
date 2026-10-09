@@ -11,8 +11,15 @@ export const IMAGE_PLACEHOLDER_ATTRIBUTE = 'data-image-placeholder';
 export const IMAGE_PLACEHOLDER_ICON_ATTRIBUTE = 'data-image-placeholder-icon';
 export const IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE = 'data-image-placeholder-remove';
 
+export const PLACEHOLDER_KIND_ATTRIBUTE = 'data-placeholder-kind';
+
+export type PlaceholderKind = 'image' | 'pdf';
+
 /** Scheme used in serialized image attachment markdown links. */
 export const IMAGE_ATTACHMENT_SCHEME = 'image';
+
+/** Scheme used in serialized pdf attachment markdown links. */
+export const PDF_ATTACHMENT_SCHEME = 'pdf';
 
 // Mirrors the EUI `image` icon (packages/eui/src/components/icon/assets/image.tsx).
 // Inlined because the placeholder is imperative DOM inside contentEditable — React can't own it.
@@ -21,10 +28,20 @@ const IMAGE_ICON_PATHS = [
   'M14.102 2.005A1 1 0 0 1 15 3v10a.962.962 0 0 1-.012.143l-.008.058a.993.993 0 0 1-.077.226l-.012.028-.03.05-.022.038-.023.032a.997.997 0 0 1-.1.121l-.02.022a.979.979 0 0 1-.075.064l-.04.03-.033.023a1.013 1.013 0 0 1-.057.034l-.021.013a.952.952 0 0 1-.052.025c-.012.006-.024.013-.037.018a.998.998 0 0 1-.07.025l-.015.005A.997.997 0 0 1 14 14H2a1 1 0 0 1-.128-.01l-.037-.005a1.007 1.007 0 0 1-.122-.028l-.02-.007a.98.98 0 0 1-.111-.043l-.018-.008a1.02 1.02 0 0 1-.116-.066l-.01-.006a1.002 1.002 0 0 1-.292-.306l-.01-.017a.992.992 0 0 1-.131-.402L1 13V3a1 1 0 0 1 1-1h12l.102.005Zm-6.395 9.288L9.414 13H14v-2l-3-3-3.293 3.293ZM2 13h6l-3-3-3 3Zm0-1.414 2.293-2.293a1 1 0 0 1 1.414 0L7 10.586l3.293-3.293a1 1 0 0 1 1.414 0L14 9.586V3H2v8.586Z',
 ];
 
+// Mirrors the EUI `document` icon (packages/eui/src/components/icon/assets/document.tsx).
+const DOCUMENT_ICON_PATHS = [
+  'M3 2a1 1 0 0 1 1-1h4.707L13 5.293V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2Zm5 0H4v12h8V6H9a1 1 0 0 1-1-1V2Zm1 .707L11.293 5H9V2.707Z',
+];
+
+const ICON_PATHS_BY_KIND: Record<PlaceholderKind, string[]> = {
+  image: IMAGE_ICON_PATHS,
+  pdf: DOCUMENT_ICON_PATHS,
+};
+
 const CROSS_ICON_PATH =
   'M7.293 8 2.646 3.354l.708-.708L8 7.293l4.646-4.647.708.708L8.707 8l4.647 4.646-.707.708L8 8.707l-4.646 4.647-.708-.707L7.293 8Z';
 
-const createImageIconSvg = (): SVGSVGElement => {
+const createKindIconSvg = (kind: PlaceholderKind): SVGSVGElement => {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('width', '12');
   svg.setAttribute('height', '12');
@@ -32,7 +49,7 @@ const createImageIconSvg = (): SVGSVGElement => {
   svg.setAttribute('fill', 'currentColor');
   svg.setAttribute('aria-hidden', 'true');
   svg.setAttribute(IMAGE_PLACEHOLDER_ICON_ATTRIBUTE, 'true');
-  for (const d of IMAGE_ICON_PATHS) {
+  for (const d of ICON_PATHS_BY_KIND[kind]) {
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', d);
     path.setAttribute('fill-rule', 'evenodd');
@@ -56,15 +73,19 @@ const createCrossIconSvg = (): SVGSVGElement => {
   return svg;
 };
 
-export const createImagePlaceholderElement = (label: string): HTMLSpanElement => {
+export const createImagePlaceholderElement = (
+  label: string,
+  kind: PlaceholderKind = 'image'
+): HTMLSpanElement => {
   const span = document.createElement('span');
   span.contentEditable = 'false';
   span.setAttribute(IMAGE_PLACEHOLDER_ATTRIBUTE, 'true');
+  span.setAttribute(PLACEHOLDER_KIND_ATTRIBUTE, kind);
   span.setAttribute('role', 'img');
   span.setAttribute('aria-label', label);
   span.dataset.placeholderName = label;
 
-  span.appendChild(createImageIconSvg());
+  span.appendChild(createKindIconSvg(kind));
   span.appendChild(createCrossIconSvg());
 
   const labelSpan = document.createElement('span');
@@ -87,8 +108,11 @@ export const createImagePlaceholderElement = (label: string): HTMLSpanElement =>
  * Creates a placeholder chip for `label`, inserts it at the current cursor position,
  * and moves the caret to just after it (via a trailing non-breaking space).
  */
-export const insertImagePlaceholderChip = (label: string): void => {
-  const chipEl = createImagePlaceholderElement(label);
+export const insertImagePlaceholderChip = (
+  label: string,
+  kind: PlaceholderKind = 'image'
+): void => {
+  const chipEl = createImagePlaceholderElement(label, kind);
   chipEl.setAttribute('data-uploading', 'true');
   insertNodeAtCursor(chipEl);
   const sel = window.getSelection();
@@ -101,14 +125,25 @@ export const insertImagePlaceholderChip = (label: string): void => {
 export const isElementImagePlaceholder = (element: HTMLElement): boolean =>
   element.getAttribute(IMAGE_PLACEHOLDER_ATTRIBUTE) === 'true';
 
-export const getPlaceholderNamesFromElement = (el: HTMLElement): string[] =>
-  Array.from(el.querySelectorAll<HTMLElement>(`[${IMAGE_PLACEHOLDER_ATTRIBUTE}]`)).map(
-    (s) => s.dataset.placeholderName ?? ''
+export const getPlaceholderKind = (element: HTMLElement): PlaceholderKind =>
+  element.getAttribute(PLACEHOLDER_KIND_ATTRIBUTE) === 'pdf' ? 'pdf' : 'image';
+
+const getChipsOfKind = (el: HTMLElement, kind: PlaceholderKind): HTMLElement[] =>
+  Array.from(el.querySelectorAll<HTMLElement>(`[${IMAGE_PLACEHOLDER_ATTRIBUTE}]`)).filter(
+    (chip) => getPlaceholderKind(chip) === kind
   );
 
-export const removePlaceholderByName = (el: HTMLElement, name: string): void => {
-  const spans = el.querySelectorAll<HTMLElement>(`[${IMAGE_PLACEHOLDER_ATTRIBUTE}]`);
-  for (const span of Array.from(spans)) {
+export const getPlaceholderNamesFromElement = (
+  el: HTMLElement,
+  kind: PlaceholderKind = 'image'
+): string[] => getChipsOfKind(el, kind).map((chip) => chip.dataset.placeholderName ?? '');
+
+export const removePlaceholderByName = (
+  el: HTMLElement,
+  name: string,
+  kind: PlaceholderKind = 'image'
+): void => {
+  for (const span of getChipsOfKind(el, kind)) {
     if (span.dataset.placeholderName === name) {
       span.remove();
       return;
@@ -116,12 +151,13 @@ export const removePlaceholderByName = (el: HTMLElement, name: string): void => 
   }
 };
 
-/** Sets `data-uploading` on every chip in `el` whose name is in `uploadingNames`, clears it otherwise. */
+/** Sets `data-uploading` on every chip of `kind` in `el` whose name is in `uploadingNames`, clears it otherwise. */
 export const syncChipsUploadingState = (
   el: HTMLElement,
-  uploadingNames: ReadonlySet<string> | undefined
+  uploadingNames: ReadonlySet<string> | undefined,
+  kind: PlaceholderKind = 'image'
 ): void => {
-  el.querySelectorAll<HTMLElement>(`[${IMAGE_PLACEHOLDER_ATTRIBUTE}]`).forEach((chip) => {
+  getChipsOfKind(el, kind).forEach((chip) => {
     if (uploadingNames?.has(chip.dataset.placeholderName ?? '')) {
       chip.setAttribute('data-uploading', 'true');
     } else {

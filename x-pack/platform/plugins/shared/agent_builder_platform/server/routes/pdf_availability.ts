@@ -7,10 +7,8 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
-import { internalApiPath } from '@kbn/agent-builder-plugin/common/constants';
+import { pdfAvailabilityPath } from '@kbn/agent-builder-plugin/common/constants';
 import { isPdfExtractionAvailable } from '../attachment_types/pdf/extraction_availability';
-
-export const pdfAvailabilityPath = `${internalApiPath}/attachments/pdf/_available`;
 
 export const registerPdfAvailabilityRoute = ({ router }: { router: IRouter }) => {
   router.get(

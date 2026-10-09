@@ -20,7 +20,7 @@ import type {
   ListAttachmentsResult,
   UpdateAttachmentArgs,
 } from '@kbn/agent-builder-browser';
-import { publicApiPath } from '../../../common/constants';
+import { pdfAvailabilityPath, publicApiPath } from '../../../common/constants';
 import type {
   CheckStaleAttachmentsResponse,
   CreateAttachmentResponse,
@@ -137,14 +137,24 @@ export class AttachmentsService {
     return attachment;
   }
 
-  async create({ conversationId, ...body }: CreateAttachmentArgs): Promise<VersionedAttachment> {
+  async create({
+    conversationId,
+    signal,
+    ...body
+  }: CreateAttachmentArgs): Promise<VersionedAttachment> {
     const { attachment } = await this.http.post<CreateAttachmentResponse>(
       buildPath(`${publicApiPath}/conversations/{conversationId}/attachments`, {
         conversationId,
       }),
-      { body: JSON.stringify(body) }
+      { body: JSON.stringify(body), signal }
     );
     return attachment;
+  }
+
+  /** Whether the server can read PDFs right now. */
+  async isPdfAvailable(): Promise<boolean> {
+    const { available } = await this.http.get<{ available: boolean }>(pdfAvailabilityPath);
+    return available === true;
   }
 
   async update({

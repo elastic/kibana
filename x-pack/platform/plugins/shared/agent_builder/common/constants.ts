@@ -8,6 +8,8 @@
 export const publicApiPath = `/api/agent_builder`;
 export const internalApiPath = `/internal/agent_builder`;
 
+export const pdfAvailabilityPath = `${internalApiPath}/attachments/pdf/_available`;
+
 export const chatApiPath = `/api/chat`;
 
 export const AGENTBUILDER_PLUGIN_ID = 'agentBuilder';

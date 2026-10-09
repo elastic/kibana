@@ -19,6 +19,7 @@ import {
   createImagePlaceholderElement,
   getPlaceholderNamesFromElement,
   removePlaceholderByName as removePlaceholderByNameFromDom,
+  type PlaceholderKind,
 } from './image_placeholder';
 import {
   createCommandRange,
@@ -49,8 +50,9 @@ export interface MessageEditorController {
   setContent: (text: string) => void;
   clear: () => void;
   isEmpty: boolean;
-  getPlaceholderNames: () => string[];
-  removePlaceholderByName: (name: string) => void;
+  /** Names of the chips of `kind` (images by default). */
+  getPlaceholderNames: (kind?: PlaceholderKind) => string[];
+  removePlaceholderByName: (name: string, kind?: PlaceholderKind) => void;
 }
 
 // The limit applies to what is sent, and image placeholders and command badges serialize to
@@ -208,6 +210,8 @@ const useMessageEditorController = ({
             ref.current.appendChild(createCommandBadgeElement(segment.data));
           } else if (segment.type === 'image') {
             ref.current.appendChild(createImagePlaceholderElement(segment.name));
+          } else if (segment.type === 'pdf') {
+            ref.current.appendChild(createImagePlaceholderElement(segment.name, 'pdf'));
           }
         }
 
@@ -221,10 +225,11 @@ const useMessageEditorController = ({
           syncIsEmpty();
         }
       },
-      getPlaceholderNames: () => (ref.current ? getPlaceholderNamesFromElement(ref.current) : []),
-      removePlaceholderByName: (name: string) => {
+      getPlaceholderNames: (kind?: PlaceholderKind) =>
+        ref.current ? getPlaceholderNamesFromElement(ref.current, kind) : [],
+      removePlaceholderByName: (name: string, kind?: PlaceholderKind) => {
         if (ref.current) {
-          removePlaceholderByNameFromDom(ref.current, name);
+          removePlaceholderByNameFromDom(ref.current, name, kind);
           syncIsEmpty();
         }
       },
