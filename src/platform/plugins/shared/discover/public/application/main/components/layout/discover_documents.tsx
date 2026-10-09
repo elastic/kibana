@@ -36,8 +36,6 @@ import type {
 import {
   DataLoadingState,
   useColumns,
-  type DataTableColumnsMeta,
-  getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
   getRowHeight,
@@ -83,6 +81,7 @@ import { getGridRequestId } from '../../../../utils/get_grid_request_id';
 import {
   DEFAULT_EXPANDED_DOC_OWNER,
   internalStateActions,
+  useCurrentDataSource,
   useCurrentTabAction,
   useCurrentTabSelector,
   useCurrentTabDataStateContainer,
@@ -158,6 +157,7 @@ function DiscoverDocumentsComponent({
   const isEsqlMode = useIsEsqlMode();
   const dataStateContainer = useCurrentTabDataStateContainer();
   const documentState = useDataState(dataStateContainer.data$.documents$);
+  const currentDataSource = useCurrentDataSource();
   const isWarningCalloutDismissed = useCurrentTabSelector(
     (state) => state.isWarningCalloutDismissed
   );
@@ -328,13 +328,6 @@ function DiscoverDocumentsComponent({
     [uiSettings, query]
   );
 
-  const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
-    () =>
-      documentState.esqlQueryColumns
-        ? getTextBasedColumnsMeta(documentState.esqlQueryColumns)
-        : undefined,
-    [documentState.esqlQueryColumns]
-  );
   const filters = useCurrentTabSelector(selectTabCombinedFilters);
 
   const cellActionsMetadata = useAdditionalCellActions({
@@ -384,12 +377,12 @@ function DiscoverDocumentsComponent({
     () =>
       getEsqlDatatableFromDocuments({
         documentsValue: documentState,
-        isEsqlMode,
       }),
-    [documentState, isEsqlMode]
+    [documentState]
   );
   // New result identity after refresh - keeps sparkline cache from reusing a stale series.
   const requestId = useMemo(() => getGridRequestId(documentState.result), [documentState.result]);
+  const abortSignal = dataStateContainer.getAbortController()?.signal;
   const searchContext = useMemo(() => {
     if (!isEsqlMode || !esqlTable || !query) {
       return undefined;
@@ -404,8 +397,10 @@ function DiscoverDocumentsComponent({
       // Match the table's ES|QL fast-mode setting on the sparkline follow-up.
       isApproximate: esqlApproximation,
       requestId,
+      abortSignal,
     };
   }, [
+    abortSignal,
     esqlApproximation,
     esqlTable,
     esqlVariables,
@@ -499,11 +494,12 @@ function DiscoverDocumentsComponent({
   const latestCascadedDocumentsDataGridsUiState = useLatest(
     useCurrentTabSelector((tab) => tab.uiState.cascadedDocumentsDataGridMap)
   );
-  const {
-    availableCascadeGroups,
-    selectedCascadeGroups,
-    columnsMeta: cascadedColumnsMeta,
-  } = useCurrentTabSelector((tab) => tab.cascadedDocumentsState);
+  const cascadedLeafDataSource = useCurrentTabRuntimeState(
+    (runtimeState) => runtimeState.cascadedLeafDataSource$
+  );
+  const { availableCascadeGroups, selectedCascadeGroups } = useCurrentTabSelector(
+    (tab) => tab.cascadedDocumentsState
+  );
   const setSelectedCascadeGroups = useCurrentTabAction(
     internalStateActions.setSelectedCascadeGroups
   );
@@ -523,7 +519,7 @@ function DiscoverDocumentsComponent({
       cascadedDocumentsFetcher,
       availableCascadeGroups,
       selectedCascadeGroups,
-      cascadedColumnsMeta,
+      cascadedLeafDataSource,
       esqlQuery: query,
       esqlVariables,
       timeRange: requestParams.timeRangeAbsolute,
@@ -548,7 +544,7 @@ function DiscoverDocumentsComponent({
   }, [
     availableCascadeGroups,
     cascadedDocumentsFetcher,
-    cascadedColumnsMeta,
+    cascadedLeafDataSource,
     dispatch,
     esqlVariables,
     expandedDoc$,
@@ -598,9 +594,9 @@ function DiscoverDocumentsComponent({
             ariaLabelledBy="documentsAriaLabel"
             cascadedDocumentsContext={cascadedDocumentsContext}
             columns={currentColumns}
-            columnsMeta={columnsMeta}
             expandedDoc={expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER ? expandedDoc : undefined}
             dataView={dataView}
+            dataSource={currentDataSource}
             loadingState={
               isDataLoading
                 ? DataLoadingState.loading
@@ -625,7 +621,6 @@ function DiscoverDocumentsComponent({
             rowHeightState={rowHeight}
             onUpdateRowHeight={onUpdateRowHeight}
             isSortEnabled={true}
-            isPlainRecord={isEsqlMode}
             isPaginationEnabled={!isEsqlMode}
             rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
             onUpdateRowsPerPage={onUpdateRowsPerPage}

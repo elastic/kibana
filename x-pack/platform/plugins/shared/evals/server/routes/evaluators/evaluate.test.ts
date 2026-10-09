@@ -845,27 +845,18 @@ describe('POST /internal/evals/_evaluate', () => {
     expect(response.payload).toEqual({ message: 'multi-turn evaluation is not yet supported' });
   });
 
-  it('returns 400 when single-turn mode does not have exactly one trace', async () => {
-    const { handler } = setup({
-      evaluatorRegistry: buildEvaluatorRegistry([buildEvaluator({ name: 'groundedness' })]),
-    });
-
-    const response = await handler(
-      buildContext() as unknown as Parameters<typeof handler>[0],
-      {
-        body: {
-          subject: {
-            mode: 'single-turn',
-            traces: [{ trace_id: 'trace-1' }, { trace_id: 'trace-2' }],
-          },
-          evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }],
+  it('refuses more than one trace at the request boundary', () => {
+    // The handler does not re-check this: the schema is what keeps a second trace from
+    // being silently ignored, so that is where it is asserted.
+    expect(
+      EvaluateRequestBody.safeParse({
+        subject: {
+          mode: 'single-turn',
+          traces: [{ trace_id: 'trace-1' }, { trace_id: 'trace-2' }],
         },
-      } as unknown as Parameters<typeof handler>[1],
-      kibanaResponseFactory
-    );
-
-    expect(response.status).toBe(400);
-    expect(response.payload).toEqual({ message: 'single-turn mode requires exactly one trace' });
+        evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }],
+      }).success
+    ).toBe(false);
   });
 
   it('returns 400 for an invalid trace_id', async () => {
@@ -939,7 +930,7 @@ describe('POST /internal/evals/_evaluate', () => {
           kind: 'llm',
           direction: 'maximize',
         },
-        error: { message: 'Error: failed badly' },
+        error: { message: 'failed badly' },
       },
       expect.objectContaining({
         status: 'ok',
@@ -1190,7 +1181,7 @@ describe('POST /internal/evals/_evaluate', () => {
     expect(response.status).toBe(404);
     expect(response.payload).toEqual({
       message:
-        'TraceReadinessError: Trace abc123 has documents but evidence is unresolvable for profile "elastic-inference"',
+        'Trace abc123 has documents but evidence is unresolvable for profile "elastic-inference"',
     });
     expect(groundedness.evaluate).not.toHaveBeenCalled();
     expect(latency.evaluate).not.toHaveBeenCalled();
@@ -1224,8 +1215,7 @@ describe('POST /internal/evals/_evaluate', () => {
 
     expect(response.status).toBe(404);
     expect(response.payload).toEqual({
-      message:
-        'TraceReadinessError: Trace abc123 is not ready: no documents indexed in traces-* or logs-* yet',
+      message: 'Trace abc123 is not ready: no documents indexed in traces-* or logs-* yet',
     });
     expect(groundedness.evaluate).not.toHaveBeenCalled();
   });

@@ -14,7 +14,9 @@ import {
   EXECUTION_HISTORY_MAX_RULE_ID_FILTER,
 } from './constants';
 import {
+  MAX_EMBEDDED_ALERTS_PER_ITEM,
   MAX_EMBEDDED_RULES_PER_ITEM,
+  dispatchFailureReasonSchema,
   listPolicyExecutionHistoryRequestSchema,
   listPolicyExecutionHistoryResponseSchema,
   policyExecutionHistoryItemSchema,
@@ -26,28 +28,36 @@ import {
 const validItem = {
   dispatched_at: '2026-06-01T00:00:00.000Z',
   policy: { id: 'policy-1', name: 'My policy' },
-  outcome: 'dispatched' as const,
-  episode_count: 2,
+  outcome: 'success' as const,
+  alert_count: 2,
+  alerts: [{ id: 'alert-1' }, { id: 'alert-2' }],
   action_group_count: 1,
   rules: [{ id: 'rule-1', name: 'Rule 1' }],
-  total_rule_count: 1,
+  rule_count: 1,
   workflows: [{ id: 'workflow-1', name: 'Workflow 1' }],
-  error: null,
 };
 
 describe('policy_execution_history_schema', () => {
   describe('policyExecutionOutcomeSchema', () => {
-    it('accepts dispatched', () => {
-      expect(policyExecutionOutcomeSchema.parse('dispatched')).toBe('dispatched');
+    it('accepts success', () => {
+      expect(policyExecutionOutcomeSchema.parse('success')).toBe('success');
     });
 
     it('accepts throttled', () => {
       expect(policyExecutionOutcomeSchema.parse('throttled')).toBe('throttled');
     });
 
+    it('accepts failure', () => {
+      expect(policyExecutionOutcomeSchema.parse('failure')).toBe('failure');
+    });
+
+    it('rejects the stored event.action vocabulary', () => {
+      expect(policyExecutionOutcomeSchema.safeParse('dispatched').success).toBe(false);
+      expect(policyExecutionOutcomeSchema.safeParse('dispatch_failed').success).toBe(false);
+      expect(policyExecutionOutcomeSchema.safeParse('unmatched').success).toBe(false);
+    });
+
     it('rejects outcomes the action policy stream does not emit', () => {
-      expect(policyExecutionOutcomeSchema.safeParse('success').success).toBe(false);
-      expect(policyExecutionOutcomeSchema.safeParse('failure').success).toBe(false);
       expect(policyExecutionOutcomeSchema.safeParse('unknown').success).toBe(false);
       expect(policyExecutionOutcomeSchema.safeParse('').success).toBe(false);
     });
@@ -61,12 +71,12 @@ describe('policy_execution_history_schema', () => {
 
   describe('policyExecutionOutcomeFilterSchema', () => {
     it('accepts a single string and coerces it to an array', () => {
-      expect(policyExecutionOutcomeFilterSchema.parse('dispatched')).toEqual(['dispatched']);
+      expect(policyExecutionOutcomeFilterSchema.parse('success')).toEqual(['success']);
     });
 
-    it('accepts an array of both outcomes', () => {
-      expect(policyExecutionOutcomeFilterSchema.parse(['dispatched', 'throttled'])).toEqual([
-        'dispatched',
+    it('accepts an array of outcomes', () => {
+      expect(policyExecutionOutcomeFilterSchema.parse(['success', 'throttled'])).toEqual([
+        'success',
         'throttled',
       ]);
     });
@@ -76,19 +86,15 @@ describe('policy_execution_history_schema', () => {
     });
 
     it('rejects an invalid outcome value', () => {
-      expect(policyExecutionOutcomeFilterSchema.safeParse(['dispatched', 'skipped']).success).toBe(
+      expect(policyExecutionOutcomeFilterSchema.safeParse(['success', 'skipped']).success).toBe(
         false
       );
     });
 
     it('rejects arrays longer than the number of distinct outcomes', () => {
       expect(
-        policyExecutionOutcomeFilterSchema.safeParse([
-          'dispatched',
-          'throttled',
-          'dispatch_failed',
-          'dispatched',
-        ]).success
+        policyExecutionOutcomeFilterSchema.safeParse(['success', 'throttled', 'failure', 'success'])
+          .success
       ).toBe(false);
     });
   });
@@ -100,7 +106,7 @@ describe('policy_execution_history_schema', () => {
         expect(parsed).toEqual({
           page: 1,
           per_page: EXECUTION_HISTORY_DEFAULT_PER_PAGE,
-          sort: 'dispatched_at',
+          sort_field: 'dispatched_at',
           sort_order: 'desc',
         });
       });
@@ -109,8 +115,8 @@ describe('policy_execution_history_schema', () => {
         const parsed = listPolicyExecutionHistoryRequestSchema.parse({});
         expect(parsed).not.toHaveProperty('search');
         expect(parsed).not.toHaveProperty('rule_ids');
-        expect(parsed).not.toHaveProperty('episode_ids');
-        expect(parsed).not.toHaveProperty('outcome');
+        expect(parsed).not.toHaveProperty('alert_ids');
+        expect(parsed).not.toHaveProperty('outcomes');
         expect(parsed).not.toHaveProperty('from');
         expect(parsed).not.toHaveProperty('to');
       });
@@ -217,21 +223,21 @@ describe('policy_execution_history_schema', () => {
       });
     });
 
-    describe('episode_ids', () => {
+    describe('alert_ids', () => {
       it('accepts a single string and coerces it to an array', () => {
-        const parsed = listPolicyExecutionHistoryRequestSchema.parse({ episode_ids: 'episode-x' });
-        expect(parsed.episode_ids).toEqual(['episode-x']);
+        const parsed = listPolicyExecutionHistoryRequestSchema.parse({ alert_ids: 'episode-x' });
+        expect(parsed.alert_ids).toEqual(['episode-x']);
       });
 
-      it('accepts an array of valid episode ids', () => {
+      it('accepts an array of valid alert ids', () => {
         const parsed = listPolicyExecutionHistoryRequestSchema.parse({
-          episode_ids: ['episode-x', 'episode-y'],
+          alert_ids: ['episode-x', 'episode-y'],
         });
-        expect(parsed.episode_ids).toEqual(['episode-x', 'episode-y']);
+        expect(parsed.alert_ids).toEqual(['episode-x', 'episode-y']);
       });
 
       it('rejects an empty array', () => {
-        expect(listPolicyExecutionHistoryRequestSchema.safeParse({ episode_ids: [] }).success).toBe(
+        expect(listPolicyExecutionHistoryRequestSchema.safeParse({ alert_ids: [] }).success).toBe(
           false
         );
       });
@@ -239,37 +245,37 @@ describe('policy_execution_history_schema', () => {
       it(`rejects an entry longer than ID_MAX_LENGTH (${ID_MAX_LENGTH}) chars`, () => {
         expect(
           listPolicyExecutionHistoryRequestSchema.safeParse({
-            episode_ids: ['episode-x', 'a'.repeat(ID_MAX_LENGTH + 1)],
+            alert_ids: ['episode-x', 'a'.repeat(ID_MAX_LENGTH + 1)],
           }).success
         ).toBe(false);
       });
     });
 
-    describe('outcome', () => {
+    describe('outcomes', () => {
       it('accepts a single string and coerces it to an array', () => {
-        const parsed = listPolicyExecutionHistoryRequestSchema.parse({ outcome: 'dispatched' });
-        expect(parsed.outcome).toEqual(['dispatched']);
+        const parsed = listPolicyExecutionHistoryRequestSchema.parse({ outcomes: 'success' });
+        expect(parsed.outcomes).toEqual(['success']);
       });
 
       it('accepts an array of valid outcomes', () => {
         const parsed = listPolicyExecutionHistoryRequestSchema.parse({
-          outcome: ['dispatched', 'throttled'],
+          outcomes: ['success', 'throttled'],
         });
-        expect(parsed.outcome).toEqual(['dispatched', 'throttled']);
+        expect(parsed.outcomes).toEqual(['success', 'throttled']);
       });
 
       it('rejects an empty array', () => {
-        expect(listPolicyExecutionHistoryRequestSchema.safeParse({ outcome: [] }).success).toBe(
+        expect(listPolicyExecutionHistoryRequestSchema.safeParse({ outcomes: [] }).success).toBe(
           false
         );
       });
 
       it('rejects outcome values the action policy stream does not emit', () => {
         expect(
-          listPolicyExecutionHistoryRequestSchema.safeParse({ outcome: ['success'] }).success
+          listPolicyExecutionHistoryRequestSchema.safeParse({ outcomes: ['dispatched'] }).success
         ).toBe(false);
         expect(
-          listPolicyExecutionHistoryRequestSchema.safeParse({ outcome: ['unknown'] }).success
+          listPolicyExecutionHistoryRequestSchema.safeParse({ outcomes: ['unknown'] }).success
         ).toBe(false);
       });
     });
@@ -303,19 +309,19 @@ describe('policy_execution_history_schema', () => {
       });
     });
 
-    describe('sort / sort_order', () => {
+    describe('sort_field / sort_order', () => {
       it('accepts dispatched_at as the sort field', () => {
-        expect(listPolicyExecutionHistoryRequestSchema.parse({ sort: 'dispatched_at' }).sort).toBe(
-          'dispatched_at'
-        );
+        expect(
+          listPolicyExecutionHistoryRequestSchema.parse({ sort_field: 'dispatched_at' }).sort_field
+        ).toBe('dispatched_at');
       });
 
       it('rejects sort fields the action policy stream does not expose', () => {
         expect(
-          listPolicyExecutionHistoryRequestSchema.safeParse({ sort: 'started_at' }).success
+          listPolicyExecutionHistoryRequestSchema.safeParse({ sort_field: 'started_at' }).success
         ).toBe(false);
         expect(
-          listPolicyExecutionHistoryRequestSchema.safeParse({ sort: 'duration' }).success
+          listPolicyExecutionHistoryRequestSchema.safeParse({ sort_field: 'duration' }).success
         ).toBe(false);
       });
 
@@ -357,8 +363,10 @@ describe('policy_execution_history_schema', () => {
         expect(listPolicyExecutionHistoryRequestSchema.parse({ per_page: '25' }).per_page).toBe(25);
       });
 
-      it('accepts per_page=0 for a count-only read', () => {
-        expect(listPolicyExecutionHistoryRequestSchema.parse({ per_page: 0 }).per_page).toBe(0);
+      it('rejects per_page=0', () => {
+        expect(listPolicyExecutionHistoryRequestSchema.safeParse({ per_page: 0 }).success).toBe(
+          false
+        );
       });
 
       it('rejects negative per_page', () => {
@@ -411,15 +419,6 @@ describe('policy_execution_history_schema', () => {
           listPolicyExecutionHistoryRequestSchema.safeParse({ page: boundaryPage + 1 }).success
         ).toBe(false);
       });
-
-      it('never trips the guard for a count-only read (per_page=0)', () => {
-        expect(
-          listPolicyExecutionHistoryRequestSchema.safeParse({
-            page: EXECUTION_HISTORY_MAX_RESULT_WINDOW,
-            per_page: 0,
-          }).success
-        ).toBe(true);
-      });
     });
 
     it('round-trips a fully populated query (with already-array fields)', () => {
@@ -428,12 +427,12 @@ describe('policy_execution_history_schema', () => {
         per_page: 25,
         from: '2026-06-01T00:00:00Z',
         to: '2026-06-02T00:00:00Z',
-        episode_ids: ['episode-x', 'episode-y'],
-        sort: 'dispatched_at' as const,
+        alert_ids: ['episode-x', 'episode-y'],
+        sort_field: 'dispatched_at' as const,
         sort_order: 'asc' as const,
         search: 'db outage',
         rule_ids: ['rule-x', 'rule-y'],
-        outcome: ['dispatched', 'throttled'] as const,
+        outcomes: ['success', 'throttled'] as const,
       };
       expect(listPolicyExecutionHistoryRequestSchema.parse(input)).toEqual(input);
     });
@@ -450,39 +449,41 @@ describe('policy_execution_history_schema', () => {
       expect(policyExecutionHistoryItemSchema.parse(validItem)).toEqual(validItem);
     });
 
-    it('accepts a null policy name', () => {
-      const item = { ...validItem, policy: { id: 'policy-1', name: null } };
-      expect(policyExecutionHistoryItemSchema.parse(item).policy.name).toBeNull();
-    });
-
-    it('accepts a missing policy name (optional)', () => {
+    it('accepts a missing policy name', () => {
       const item = { ...validItem, policy: { id: 'policy-1' } };
-      expect(policyExecutionHistoryItemSchema.safeParse(item).success).toBe(true);
+      expect(policyExecutionHistoryItemSchema.parse(item).policy).not.toHaveProperty('name');
     });
 
-    it('rejects an outcome the item stream does not emit', () => {
-      const item = { ...validItem, outcome: 'success' };
+    it('rejects an outcome outside the API vocabulary', () => {
+      const item = { ...validItem, outcome: 'dispatched' };
       expect(policyExecutionHistoryItemSchema.safeParse(item).success).toBe(false);
     });
 
-    it('accepts a populated error object with a nullable stack trace', () => {
+    it('accepts a populated error object with a stack trace', () => {
       const item = {
         ...validItem,
-        outcome: 'dispatch_failed' as const,
+        outcome: 'failure' as const,
         failure_reason: 'schedule_error' as const,
-        error: { message: 'boom', stack_trace: null },
+        error: { message: 'boom', stack_trace: 'at foo (bar.ts:1:1)' },
       };
       expect(policyExecutionHistoryItemSchema.parse(item)).toEqual(item);
     });
 
-    it('requires error.stack_trace when error is present', () => {
-      const item = { ...validItem, error: { message: 'boom' } };
-      expect(policyExecutionHistoryItemSchema.safeParse(item).success).toBe(false);
-    });
+    it.each(dispatchFailureReasonSchema.options)(
+      'accepts the %s failure reason',
+      (failureReason) => {
+        const item = {
+          ...validItem,
+          outcome: 'failure' as const,
+          failure_reason: failureReason,
+        };
+        expect(policyExecutionHistoryItemSchema.parse(item)).toEqual(item);
+      }
+    );
 
-    it('rejects a missing error key (absence is encoded as null)', () => {
-      const { error: _omit, ...rest } = validItem;
-      expect(policyExecutionHistoryItemSchema.safeParse(rest).success).toBe(false);
+    it('accepts an error whose stack trace the source did not record', () => {
+      const item = { ...validItem, error: { message: 'boom' } };
+      expect(policyExecutionHistoryItemSchema.parse(item).error).toEqual({ message: 'boom' });
     });
 
     it(`accepts a rules array at the embedded cap (${MAX_EMBEDDED_RULES_PER_ITEM})`, () => {
@@ -502,6 +503,29 @@ describe('policy_execution_history_schema', () => {
       expect(policyExecutionHistoryItemSchema.safeParse({ ...validItem, rules }).success).toBe(
         false
       );
+    });
+
+    it(`accepts an alerts array at the embedded cap (${MAX_EMBEDDED_ALERTS_PER_ITEM})`, () => {
+      const alerts = Array.from({ length: MAX_EMBEDDED_ALERTS_PER_ITEM }, (_, i) => ({
+        id: `alert-${i}`,
+      }));
+      expect(policyExecutionHistoryItemSchema.safeParse({ ...validItem, alerts }).success).toBe(
+        true
+      );
+    });
+
+    it(`rejects an alerts array above the embedded cap (${MAX_EMBEDDED_ALERTS_PER_ITEM})`, () => {
+      const alerts = Array.from({ length: MAX_EMBEDDED_ALERTS_PER_ITEM + 1 }, (_, i) => ({
+        id: `alert-${i}`,
+      }));
+      expect(policyExecutionHistoryItemSchema.safeParse({ ...validItem, alerts }).success).toBe(
+        false
+      );
+    });
+
+    it('rejects a missing alerts key (absence is encoded as an empty array)', () => {
+      const { alerts: _omit, ...rest } = validItem;
+      expect(policyExecutionHistoryItemSchema.safeParse(rest).success).toBe(false);
     });
 
     it('rejects rows missing a required field', () => {
@@ -528,16 +552,15 @@ describe('policy_execution_history_schema', () => {
   });
 
   describe('listPolicyExecutionHistoryResponseSchema', () => {
-    it('accepts a valid empty page with search_matches=null', () => {
+    it('accepts a valid empty page with no search_matches', () => {
       const parsed = listPolicyExecutionHistoryResponseSchema.parse({
         items: [],
         page: 1,
         per_page: EXECUTION_HISTORY_DEFAULT_PER_PAGE,
         total: 0,
-        search_matches: null,
       });
       expect(parsed.items).toEqual([]);
-      expect(parsed.search_matches).toBeNull();
+      expect(parsed).not.toHaveProperty('search_matches');
     });
 
     it('accepts a page of items with populated search_matches', () => {
@@ -551,16 +574,15 @@ describe('policy_execution_history_schema', () => {
       expect(parsed.items).toHaveLength(1);
     });
 
-    it('accepts per_page=0 for a count-only read', () => {
+    it('rejects per_page=0', () => {
       expect(
         listPolicyExecutionHistoryResponseSchema.safeParse({
           items: [],
           page: 1,
           per_page: 0,
           total: 42,
-          search_matches: null,
         }).success
-      ).toBe(true);
+      ).toBe(false);
     });
 
     it('rejects page below 1', () => {
@@ -570,7 +592,6 @@ describe('policy_execution_history_schema', () => {
           page: 0,
           per_page: 20,
           total: 0,
-          search_matches: null,
         }).success
       ).toBe(false);
     });
@@ -582,7 +603,6 @@ describe('policy_execution_history_schema', () => {
           page: 1,
           per_page: -1,
           total: 0,
-          search_matches: null,
         }).success
       ).toBe(false);
     });
@@ -594,20 +614,18 @@ describe('policy_execution_history_schema', () => {
           page: 1,
           per_page: 20,
           total: -1,
-          search_matches: null,
         }).success
       ).toBe(false);
     });
 
     it('rejects items that do not conform to the item schema', () => {
-      const badItem = { ...validItem, outcome: 'success' };
+      const badItem = { ...validItem, outcome: 'dispatched' };
       expect(
         listPolicyExecutionHistoryResponseSchema.safeParse({
           items: [badItem],
           page: 1,
           per_page: 20,
           total: 1,
-          search_matches: null,
         }).success
       ).toBe(false);
     });

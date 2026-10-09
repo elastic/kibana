@@ -6,17 +6,65 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID } from '@kbn/workflows';
+import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
 import {
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
+  SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   type Worker,
 } from '@kbn/alertzero-common';
 import { WorkerSettingsPanel } from './worker_settings_panel';
+import { getBlockingWarningReasons } from './blocking_warning_reasons';
+
+jest.mock('../../../hooks/use_hunt_threat_intel_supply', () => ({
+  useHuntThreatIntelSupplyStatus: jest.fn(() => ({
+    data: {
+      huntEnabled: false,
+      drift: false,
+      hardGate: { ok: true, reasonCodes: [] },
+      workflows: [
+        {
+          key: 'ingest',
+          workflowId: 'ingest',
+          enabled: false,
+          installed: true,
+          scope: 'deployment',
+        },
+        {
+          key: 'enrich',
+          workflowId: 'enrich',
+          enabled: false,
+          installed: true,
+          scope: 'deployment',
+        },
+        {
+          key: 'attribute',
+          workflowId: 'attribute',
+          enabled: false,
+          installed: true,
+          scope: 'space',
+        },
+      ],
+    },
+    isLoading: false,
+    isError: false,
+  })),
+  useRestoreHuntThreatIntelSupply: jest.fn(() => ({
+    mutate: jest.fn(),
+    isLoading: false,
+  })),
+}));
 
 const WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
+const HUNT_WORKER_ID = SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
 /** Not `<workerId>-<spaceId>`, so a client that rebuilds that convention fails this test. */
 const WORKFLOW_ID = 'opaque-installed-workflow';
 
@@ -29,6 +77,7 @@ const createWorker = (workflowId: string | null): Worker => ({
   state: 'ok',
   settingsRevision: 1,
   workflowId,
+  blockingReasons: [],
   settings: {
     workerId: WORKER_ID,
     autonomy: 'manual',
@@ -37,27 +86,57 @@ const createWorker = (workflowId: string | null): Worker => ({
   },
 });
 
-const renderPanel = (workflowId: string | null, isAccordion: boolean) => {
+const FEATURE_SETTINGS_URL = '/app/management/modelManagement/model_settings';
+
+const renderPanel = (
+  workflowId: string | null,
+  isAccordion: boolean,
+  {
+    blockingReasons = [],
+    enabled = true,
+    showManagedWorkflows = true,
+    canChangeAdvancedSettings = true,
+  }: Pick<Partial<Worker>, 'blockingReasons' | 'enabled'> & {
+    showManagedWorkflows?: boolean;
+    canChangeAdvancedSettings?: boolean;
+  } = {}
+) => {
+  const worker: Worker = { ...createWorker(workflowId), enabled, blockingReasons };
   const core = coreMock.createStart();
+  core.http.get.mockResolvedValue(undefined);
   core.application.getUrlForApp.mockImplementation(
-    (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
+    (appId: string, options?: { path?: string; deepLinkId?: string }) =>
+      options?.deepLinkId === 'model_settings'
+        ? FEATURE_SETTINGS_URL
+        : `/app/${appId}${options?.path ?? ''}`
   );
+  core.settings.client.get.mockReturnValue(showManagedWorkflows);
+  core.settings.client.get$.mockReturnValue(of(showManagedWorkflows));
+  core.application.capabilities = {
+    ...core.application.capabilities,
+    advancedSettings: { show: true, save: canChangeAdvancedSettings },
+    workflowsManagement: { [WorkflowsManagementUiActions.readManagedExecution]: true },
+  };
 
   render(
-    <KibanaContextProvider services={core}>
-      <WorkerSettingsPanel
-        worker={createWorker(workflowId)}
-        isAccordion={isAccordion}
-        isExpanded
-        onToggle={jest.fn()}
-        enabled
-        settings={createWorker(workflowId).settings}
-        settingsLocked={false}
-        isSaving={false}
-        onEnabledChange={jest.fn()}
-        onSettingsChange={jest.fn()}
-      />
-    </KibanaContextProvider>
+    <I18nProvider>
+      <KibanaContextProvider services={core}>
+        <WorkerSettingsPanel
+          worker={worker}
+          isAccordion={isAccordion}
+          isExpanded
+          onToggle={jest.fn()}
+          enabled={enabled}
+          settings={worker.settings}
+          warningReasons={getBlockingWarningReasons(worker, { withLink: false })}
+          settingsLocked={false}
+          isSaving={false}
+          canWrite
+          onEnabledChange={jest.fn()}
+          onSettingsChange={jest.fn()}
+        />
+      </KibanaContextProvider>
+    </I18nProvider>
   );
 
   return core;
@@ -92,6 +171,35 @@ describe('WorkerSettingsPanel view executions link', () => {
   it.each([
     ['accordion', true],
     ['single-Worker', false],
+  ])(
+    'offers the managed workflows setting instead of the workflow when it is off (%s)',
+    (_layout, isAccordion) => {
+      renderPanel(WORKFLOW_ID, isAccordion, { showManagedWorkflows: false });
+
+      const link = screen.getByTestId(`alertZeroWorkerViewExecutions-${WORKER_ID}`);
+      expect(link).not.toHaveAttribute('href');
+
+      fireEvent.click(link);
+
+      expect(
+        screen.getByText(
+          'Execution history lives in Managed workflows, which is turned off for this space.'
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`alertZeroWorkerViewExecutions-${WORKER_ID}-open-advanced-settings`)
+      ).toHaveAttribute(
+        'href',
+        `/app/management/kibana/settings?query=${encodeURIComponent(
+          WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID
+        )}`
+      );
+    }
+  );
+
+  it.each([
+    ['accordion', true],
+    ['single-Worker', false],
   ])('omits the link when the per-space workflow is not installed (%s)', (_layout, isAccordion) => {
     renderPanel(null, isAccordion);
 
@@ -99,5 +207,238 @@ describe('WorkerSettingsPanel view executions link', () => {
       screen.queryByTestId(`alertZeroWorkerViewExecutions-${WORKER_ID}`)
     ).not.toBeInTheDocument();
     expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`)).toBeInTheDocument();
+  });
+});
+
+describe('WorkerSettingsPanel models and no-model block', () => {
+  it.each([
+    ['accordion', true],
+    ['single-Worker', false],
+  ])('points the Models row at Feature settings in a new tab (%s)', (_layout, isAccordion) => {
+    const core = renderPanel(WORKFLOW_ID, isAccordion);
+
+    expect(screen.getByTestId(`alertZeroModelsRow-${WORKER_ID}`)).toHaveTextContent(
+      'This Worker uses models configured in Feature settings'
+    );
+    const link = screen.getByTestId(`alertZeroModelsLink-${WORKER_ID}`);
+    expect(link).toHaveAttribute('href', FEATURE_SETTINGS_URL);
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(core.application.getUrlForApp).toHaveBeenCalledWith('management', {
+      deepLinkId: 'model_settings',
+    });
+  });
+
+  it('leaves the switch usable and shows no warning when nothing blocks the Worker', () => {
+    renderPanel(WORKFLOW_ID, false, { enabled: false });
+
+    expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`)).toBeEnabled();
+    expect(screen.queryByTestId(`alertZeroWorkerWarningIcon-${WORKER_ID}`)).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['accordion', true],
+    ['single-Worker', false],
+  ])(
+    'locks the switch of a blocked Worker that is off and explains why (%s)',
+    async (_layout, isAccordion) => {
+      renderPanel(WORKFLOW_ID, isAccordion, { blockingReasons: ['no_model'], enabled: false });
+
+      const enabledSwitch = screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`);
+      expect(enabledSwitch).toBeDisabled();
+      expect(enabledSwitch).toHaveAttribute('aria-checked', 'false');
+
+      fireEvent.mouseOver(screen.getByTestId(`alertZeroWorkerWarningIcon-${WORKER_ID}`));
+      const tooltip = await screen.findByRole('tooltip');
+      expect(tooltip).toHaveTextContent(
+        'Some AI-powered steps in this Worker may not be configured. Check Feature settings below.'
+      );
+      // A tooltip closes before the pointer reaches it, so it must not offer a link.
+      expect(within(tooltip).queryByRole('link')).not.toBeInTheDocument();
+    }
+  );
+
+  it('lets a blocked Worker that is on be switched off', () => {
+    renderPanel(WORKFLOW_ID, false, { blockingReasons: ['no_model'], enabled: true });
+
+    const enabledSwitch = screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`);
+    expect(enabledSwitch).toBeEnabled();
+    expect(enabledSwitch).toHaveAttribute('aria-checked', 'true');
+  });
+});
+
+describe('WorkerSettingsPanel service account', () => {
+  it('lets a worker without an account be turned on and shows no Run as control', () => {
+    renderPanel(WORKFLOW_ID, false, { enabled: false });
+
+    expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`)).not.toBeDisabled();
+    expect(screen.queryByTestId(`alertZeroServiceAccountRow-${WORKER_ID}`)).not.toBeInTheDocument();
+  });
+});
+
+describe('WorkerSettingsPanel header band title', () => {
+  /*
+   * Style contract, not layout: jsdom has no flexbox engine, so these assertions pin the CSS that
+   * keeps the worker name on one line instead of stacking it (the accordion band hands width to the
+   * trailing actions before the title). Reverting any one of them re-creates that regression.
+   */
+  it.each([
+    ['accordion', true],
+    ['single-Worker', false],
+  ])('keeps the title on one line and lets the badge group wrap (%s)', (_layout, isAccordion) => {
+    renderPanel(WORKFLOW_ID, isAccordion);
+
+    const title = screen.getByText('Rule Tuning');
+    // `white-space: nowrap` is the whole one-line guarantee: EuiTitle pins
+    // `overflow-wrap: break-word !important`, so a `overflowWrap: normal` override here would be
+    // dead CSS - only the nowrap declaration stops EUI from stacking the name.
+    expect(title).toHaveStyleRule('white-space', 'nowrap');
+    expect(title).toHaveStyleRule('overflow', 'hidden');
+    expect(title).toHaveStyleRule('text-overflow', 'ellipsis');
+    // An ellipsized name stays recoverable on hover.
+    expect(title).toHaveAttribute('title', 'Rule Tuning');
+
+    // The 100% clamp is what makes an over-long name ellipsize instead of overflowing the band.
+    expect(title.closest('.euiFlexItem')).toHaveStyleRule('max-width', '100%');
+
+    // The badge group wraps to its own line before the title gives up any width.
+    expect(title.closest('.euiFlexGroup')).toHaveStyleRule('flex-wrap', 'wrap');
+  });
+
+  it('gives the accordion trigger min-width relief so the nowrap title cannot set its floor', () => {
+    // EuiAccordion's trigger is a flex item left at `min-width: auto`, so the nowrap title's
+    // min-content becomes its minimum size: without this relief the band cannot shrink and a long
+    // name pushes the header past its panel instead of clipping.
+    renderPanel(WORKFLOW_ID, true);
+
+    const accordionButton = screen
+      .getByTestId(`alertZeroWatchWorkerAccordion-${WORKER_ID}`)
+      .querySelector('.euiAccordion__button');
+
+    expect(accordionButton).toHaveStyleRule('min-width', '0');
+  });
+});
+
+describe('WorkerSettingsPanel Hunt threat intel supply', () => {
+  const { useHuntThreatIntelSupplyStatus } = jest.requireMock(
+    '../../../hooks/use_hunt_threat_intel_supply'
+  ) as {
+    useHuntThreatIntelSupplyStatus: jest.Mock;
+  };
+
+  const renderHuntPanel = () => {
+    const core = coreMock.createStart();
+    core.http.get.mockResolvedValue(undefined);
+    core.application.getUrlForApp.mockReturnValue('/app/workflows');
+    core.settings.client.get.mockReturnValue(true);
+    core.settings.client.get$.mockReturnValue(of(true));
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      advancedSettings: { show: true, save: true },
+      workflowsManagement: { [WorkflowsManagementUiActions.readManagedExecution]: true },
+    };
+
+    const huntWorker: Worker = {
+      id: HUNT_WORKER_ID,
+      name: 'Continuous Threat Hunt',
+      watchIds: [SYSTEM_SECURITY_WATCH_HUNT_ID],
+      enabled: false,
+      lastRun: null,
+      state: 'ok',
+      settingsRevision: 1,
+      workflowId: null,
+      blockingReasons: [],
+      settings: {
+        workerId: HUNT_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '4h',
+        serviceAccountId: 'sa-1',
+      },
+    };
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+    render(
+      <I18nProvider>
+        <KibanaContextProvider services={core}>
+          <QueryClientProvider client={queryClient}>
+            <WorkerSettingsPanel
+              worker={huntWorker}
+              isAccordion={false}
+              isExpanded
+              onToggle={jest.fn()}
+              enabled={false}
+              settings={huntWorker.settings}
+              warningReasons={[]}
+              settingsLocked={false}
+              isSaving={false}
+              canWrite
+              onEnabledChange={jest.fn()}
+              onSettingsChange={jest.fn()}
+            />
+          </QueryClientProvider>
+        </KibanaContextProvider>
+      </I18nProvider>
+    );
+  };
+
+  it('renders the threat intel supply section for Hunt', () => {
+    renderHuntPanel();
+    expect(screen.getByTestId('alertZeroThreatIntelSupplySection')).toBeInTheDocument();
+  });
+
+  it('omits the threat intel supply section for non-Hunt workers', () => {
+    renderPanel(WORKFLOW_ID, false);
+    expect(screen.queryByTestId('alertZeroThreatIntelSupplySection')).not.toBeInTheDocument();
+  });
+
+  it('disables Enabled while supply status is still loading', () => {
+    useHuntThreatIntelSupplyStatus.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+    });
+    renderHuntPanel();
+    expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${HUNT_WORKER_ID}`)).toBeDisabled();
+  });
+
+  it('disables Enabled when the hard-gate fails', async () => {
+    useHuntThreatIntelSupplyStatus.mockReturnValue({
+      data: {
+        huntEnabled: false,
+        drift: false,
+        hardGate: { ok: false, reasonCodes: ['embedding_endpoint_unavailable'] },
+        workflows: [],
+      },
+      isLoading: false,
+      isError: false,
+    });
+    renderHuntPanel();
+    await waitFor(() => {
+      expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${HUNT_WORKER_ID}`)).toBeDisabled();
+    });
+  });
+
+  it('disables Enabled when the supply status request fails', async () => {
+    useHuntThreatIntelSupplyStatus.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+    });
+    renderHuntPanel();
+    await waitFor(() => {
+      expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${HUNT_WORKER_ID}`)).toBeDisabled();
+    });
+    expect(screen.getByTestId('alertZeroThreatIntelSupplyStatusErrorCallout')).toBeInTheDocument();
+  });
+
+  it('shows fixed Manual autonomy rather than a multi-level control', () => {
+    renderHuntPanel();
+    expect(screen.getByTestId('alertZeroAutonomyCard-manual')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertZeroAutonomyCard-assisted')).not.toBeInTheDocument();
+  });
+
+  it('disables the 4h schedule control because the interval is read-only', () => {
+    renderHuntPanel();
+    expect(screen.getByTestId(`alertZeroTriggerAmount-${HUNT_WORKER_ID}`)).toBeDisabled();
   });
 });

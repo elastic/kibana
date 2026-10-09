@@ -8,9 +8,11 @@
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
+import { CLASSIC_EPISODE_SOURCE_ID } from '../classic_alerts/constants';
+import type { AlertEpisode } from '../queries/episodes_query';
 import { createUnresolveAction } from './unresolve';
 import * as bulk from './bulk_create_alert_actions';
-import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+
 const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
   '@timestamp': '2026-04-23T00:00:00Z',
   'episode.id': 'e1',
@@ -55,6 +57,34 @@ describe('createUnresolveAction', () => {
     expect(createUnresolveAction(makeDeps()).isCompatible({ episodes: [] })).toBe(false);
   });
 
+  it('shows Unresolve disabled for a resolved classic alert', () => {
+    const action = createUnresolveAction(makeDeps());
+    const episodes = [
+      makeEpisode({
+        'episode.status': ALERT_EPISODE_STATUS.INACTIVE,
+        supports_actions: false,
+        source_id: CLASSIC_EPISODE_SOURCE_ID,
+      }),
+    ];
+
+    expect(action.isCompatible({ episodes })).toBe(false);
+    expect(action.showWhenDisabled?.({ episodes })).toBe(true);
+  });
+
+  it('hides Unresolve for an active classic alert', () => {
+    const action = createUnresolveAction(makeDeps());
+    const episodes = [
+      makeEpisode({
+        'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+        supports_actions: false,
+        source_id: CLASSIC_EPISODE_SOURCE_ID,
+      }),
+    ];
+
+    expect(action.isCompatible({ episodes })).toBe(false);
+    expect(action.showWhenDisabled?.({ episodes })).toBe(false);
+  });
+
   it('execute: POSTs per-episode ACTIVATE items with reason, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
     jest
@@ -66,8 +96,8 @@ describe('createUnresolveAction', () => {
       onSuccess,
     });
     expect(bulk.bulkActivateEpisodeActions).toHaveBeenCalledWith(deps.http, [
-      { episode_id: 'e1', reason: expect.any(String) },
-      { episode_id: 'e2', reason: expect.any(String) },
+      { alert_id: 'e1', reason: expect.any(String) },
+      { alert_id: 'e2', reason: expect.any(String) },
     ]);
     expect(deps.notifications.toasts.add).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();
@@ -87,7 +117,7 @@ describe('createUnresolveAction', () => {
       onSuccess,
     });
     expect(bulk.bulkActivateEpisodeActions).toHaveBeenCalledWith(deps.http, [
-      { episode_id: 'e1', reason: expect.any(String) },
+      { alert_id: 'e1', reason: expect.any(String) },
     ]);
     expect(onSuccess).toHaveBeenCalled();
   });

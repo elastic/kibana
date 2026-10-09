@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useCallback, useMemo, useState } from 'react';
 import { TraceWaterfallFlyout } from '../../app/transaction_details/waterfall_with_summary/trace_waterfall_flyout';
+import { useResolvedApmIndices } from '../../../hooks/use_apm_indices';
 import { TransactionDetailFlyoutHeader } from './header';
 import { TransactionDetailFlyoutFooter } from './footer';
 import { TransactionDetailFlyoutLatencyDistribution } from './latency_distribution';
@@ -50,11 +51,13 @@ export function TransactionDetailFlyout({
   refreshToken = 0,
   preferDocumentBasedCharts,
   schema,
-  indices,
+  indicesSource,
+  alertsCount,
 }: TransactionDetailFlyoutComponentProps) {
   const { transactionName, rangeFrom, rangeTo, start, end } = filters;
   const titleId = useGeneratedHtmlId({ prefix: 'transactionDetailFlyoutTitle' });
   const [fullTraceFlyout, setFullTraceFlyout] = useState<FullTraceFlyoutState | null>(null);
+  const indices = useResolvedApmIndices({ http: deps.core.http, indicesSource });
 
   const openFullTraceFlyout = useCallback((state: FullTraceFlyoutState) => {
     setFullTraceFlyout(state);
@@ -69,6 +72,7 @@ export function TransactionDetailFlyout({
       preferDocumentBasedCharts,
       schema,
       indices,
+      alertsCount,
       openFullTraceFlyout,
     }),
     [
@@ -79,6 +83,7 @@ export function TransactionDetailFlyout({
       preferDocumentBasedCharts,
       schema,
       indices,
+      alertsCount,
       openFullTraceFlyout,
     ]
   );
@@ -139,6 +144,7 @@ export function TransactionDetailFlyout({
           contextSpanIds={fullTraceFlyout.contextSpanIds}
           historyKey={historyKey}
           deps={deps}
+          indicesSource={{ indices }}
         />
       ) : null}
     </TransactionDetailFlyoutContextProvider>

@@ -221,6 +221,21 @@ export const isErrorResult = (result: ToolResult): result is ErrorResult => {
   return result.type === ToolResultType.error;
 };
 
+/**
+ * `metadata.declined_reason` of the error result a non-interactive run returns in place of a HITL
+ * prompt (tool confirmation, on-demand prompt, destructive API approval): with no user to answer,
+ * the call is declined and the agent is told why.
+ */
+export const NON_INTERACTIVE_DECLINED_REASON = 'non_interactive';
+
+/** True for the error result that stands in for a HITL prompt auto-declined in a non-interactive run. */
+export const isNonInteractiveDeclinedResult = (result: ToolResult): result is ErrorResult => {
+  return (
+    isErrorResult(result) &&
+    result.data.metadata?.declined_reason === NON_INTERACTIVE_DECLINED_REASON
+  );
+};
+
 export const isFileReferenceResult = (result: ToolResult): result is FileReferenceResult => {
   return result.type === ToolResultType.fileReference;
 };

@@ -6,23 +6,28 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { queryIntSchema } from './common';
+import { ESTIMATED_COUNT_NOTE, queryIntSchema } from './common';
 import {
   ID_MAX_LENGTH,
   RULE_CHANGE_HISTORY_DEFAULT_PER_PAGE,
   RULE_CHANGE_HISTORY_MAX_PER_PAGE,
   RULE_CHANGE_HISTORY_MAX_RESULT_WINDOW,
 } from './constants';
-import type { RuleResponse } from './rule_data_schema';
+import { ruleIdSchema, type RuleResponse } from './rule_data_schema';
 
 /**
- * Query params for `GET …/rules/{id}/history`.
+ * Query params for `GET …/change_history/rules`.
+ *
+ * `rule_id` is singular because each row's diff is computed against its
+ * predecessor in the same rule's stream; interleaving rules would diff
+ * unrelated configurations.
  *
  * Pagination mirrors execution-history: 1-based `page`, bounded `per_page`,
  * and a max result window guard so callers cannot page arbitrarily deep.
  */
 export const listRuleChangeHistoryRequestSchema = z
   .object({
+    rule_id: ruleIdSchema,
     page: queryIntSchema({ min: 1, max: RULE_CHANGE_HISTORY_MAX_RESULT_WINDOW })
       .default(1)
       .describe('Page number (1-based).'),
@@ -35,17 +40,17 @@ export const listRuleChangeHistoryRequestSchema = z
     message: `page * per_page cannot exceed ${RULE_CHANGE_HISTORY_MAX_RESULT_WINDOW}.`,
     path: ['page'],
   });
+
 export type ListRuleChangeHistoryRequest = z.infer<typeof listRuleChangeHistoryRequestSchema>;
 
-/** Path params for `GET …/rules/{id}/history/{event_id}`. */
+/** Path params for `GET …/change_history/rules/{change_id}`. */
 export const getRuleChangeHistoryEventParamsSchema = z
   .object({
-    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The identifier for the rule.'),
-    event_id: z
+    change_id: z
       .string()
       .min(1)
       .max(ID_MAX_LENGTH)
-      .describe('The change-history event identifier (`event.id`).'),
+      .describe('The change-history event identifier.'),
   })
   .strict();
 export type GetRuleChangeHistoryEventParams = z.infer<typeof getRuleChangeHistoryEventParamsSchema>;
@@ -59,6 +64,21 @@ export const ruleChangeHistoryActorSchema = z.object({
   profile_id: z.string().optional(),
 });
 export type RuleChangeHistoryActor = z.infer<typeof ruleChangeHistoryActorSchema>;
+
+/**
+ * Rule lifecycle actions recorded by the change-history write path. `unknown`
+ * is the read fallback for a document written by a newer version: the row is
+ * still returned so the audit trail stays complete.
+ */
+export const ruleChangeHistoryActionSchema = z.enum([
+  'rule_create',
+  'rule_update',
+  'rule_delete',
+  'rule_enable',
+  'rule_disable',
+  'unknown',
+]);
+export type RuleChangeHistoryAction = z.infer<typeof ruleChangeHistoryActionSchema>;
 
 /**
  * Server-computed diff vs the chronologically older version. `summary` is an
@@ -76,20 +96,35 @@ export type RuleChangeHistoryChanges = z.infer<typeof ruleChangeHistoryChangesSc
  */
 export const ruleChangeHistoryListItemSchema = z.object({
   id: z.string(),
-  timestamp: z.string(),
+  created_at: z.iso
+    .datetime()
+    .describe(
+      'The ISO datetime when this change-history record was written. The rule change itself is timestamped by `updated_at` on the snapshot.'
+    ),
   actor: ruleChangeHistoryActorSchema,
-  action: z.string(),
+  action: ruleChangeHistoryActionSchema,
   changes: ruleChangeHistoryChangesSchema.optional(),
   comment: z.string().optional(),
   is_current: z.boolean().optional(),
   tags: z.array(z.string()).optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
+  version: z
+    .number()
+    .int()
+    .min(1)
+    .optional()
+    .describe(
+      'Monotonically increasing rule configuration version this entry captures, incremented on every change.'
+    ),
 });
 export type RuleChangeHistoryListItem = z.infer<typeof ruleChangeHistoryListItemSchema>;
 
 export const listRuleChangeHistoryResponseSchema = z.object({
   items: z.array(ruleChangeHistoryListItemSchema),
-  total: z.number().int().nonnegative(),
+  total: z
+    .number()
+    .int()
+    .nonnegative()
+    .describe(`The number of change events matching the query. ${ESTIMATED_COUNT_NOTE}`),
 });
 export type ListRuleChangeHistoryResponse = z.infer<typeof listRuleChangeHistoryResponseSchema>;
 
@@ -101,7 +136,7 @@ export type ListRuleChangeHistoryResponse = z.infer<typeof listRuleChangeHistory
  * development. The TypeScript type is narrowed to the write-path snapshot
  * shape for autocomplete. Same rationale as alerting v1 `get_rule_history`.
  */
-export type RuleChangeHistorySnapshot = Omit<RuleResponse, 'version'>;
+export type RuleChangeHistorySnapshot = RuleResponse;
 
 const ruleChangeHistorySnapshotSchema = z.record(z.string(), z.unknown()) as z.ZodType<
   RuleChangeHistorySnapshot | Record<string, unknown>

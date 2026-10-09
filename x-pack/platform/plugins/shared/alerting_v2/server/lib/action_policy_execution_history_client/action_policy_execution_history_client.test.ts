@@ -20,7 +20,7 @@ const buildEvent = ({
   policyId,
   ruleIds = [],
   workflowIds = [],
-  episodeCount = 1,
+  alertCount = 1,
   actionGroupCount = 1,
   action = ACTION_POLICY_EVENT_ACTIONS.DISPATCHED,
   timestamp = '2026-05-05T10:00:00.000Z',
@@ -28,7 +28,7 @@ const buildEvent = ({
   policyId: string;
   ruleIds?: string[];
   workflowIds?: string[];
-  episodeCount?: number;
+  alertCount?: number;
   actionGroupCount?: number;
   action?: 'dispatched' | 'throttled';
   timestamp?: string;
@@ -42,7 +42,7 @@ const buildEvent = ({
     ],
     alerting_v2: {
       dispatcher: {
-        episode_count: episodeCount,
+        alert_count: alertCount,
         action_group_count: actionGroupCount,
         workflow_ids: workflowIds,
       },
@@ -74,8 +74,10 @@ const createMocks = () => {
   const rulesClient = {
     findRules: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 0 }),
   } as unknown as jest.Mocked<RulesClient>;
+  const getWorkflowsByIds = jest.fn().mockResolvedValue([]);
   const workflowsManagement = {
-    getWorkflowsByIds: jest.fn().mockResolvedValue([]),
+    getWorkflowsByIds,
+    getClient: jest.fn(() => ({ getWorkflowsByIds })),
   };
   const spaces = {
     spacesService: {
@@ -156,7 +158,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       const { client, eventLogService } = createMocks();
       const request = httpServerMock.createKibanaRequest();
 
-      await client.listExecutionHistory({ request, sort: 'dispatched_at', sortOrder: 'asc' });
+      await client.listExecutionHistory({ request, sortField: 'dispatched_at', sortOrder: 'asc' });
 
       expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
         expect.objectContaining({ sortOrder: 'asc' })
@@ -191,6 +193,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
         expect.objectContaining({ spaceId: 'my-space' })
       );
+      expect(workflowsManagement.getClient).toHaveBeenCalledWith(request);
       expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith(['w-1'], 'my-space');
     });
 
@@ -212,6 +215,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         filter: expect.stringContaining(`id: "r-1"`),
         perPage: 1000,
       });
+      expect(workflowsManagement.getClient).toHaveBeenCalledWith(request);
       expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith(['w-1'], 'default');
     });
 
@@ -223,6 +227,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
       expect(actionPolicyClient.getActionPolicies).toHaveBeenCalledWith({ ids: [] });
       expect(rulesClient.findRules).not.toHaveBeenCalled();
+      expect(workflowsManagement.getClient).toHaveBeenCalledWith(request);
       expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith([], 'default');
     });
 
@@ -275,50 +280,50 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       await expect(client.listExecutionHistory({ request })).rejects.toThrow('boom');
     });
 
-    describe('outcome filter', () => {
-      it('passes the explicit outcome array through to the event log service', async () => {
+    describe('outcomes filter', () => {
+      it('resolves the outcomes to the event actions they select', async () => {
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
 
-        await client.listExecutionHistory({ request, outcome: ['throttled'] });
+        await client.listExecutionHistory({ request, outcomes: ['throttled', 'failure'] });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ outcomes: ['throttled'] })
+          expect.objectContaining({ actions: ['throttled', 'dispatch_failed'] })
         );
       });
 
-      it('passes undefined outcomes to the service (no narrowing) when not provided', async () => {
+      it('leaves the action filter unset (no narrowing) when no outcome is provided', async () => {
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
 
         await client.listExecutionHistory({ request });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ outcomes: undefined })
+          expect.objectContaining({ actions: undefined })
         );
       });
     });
 
-    describe('episodeIds filter', () => {
-      it('forwards the episodeIds through to the event log service', async () => {
+    describe('alertIds filter', () => {
+      it('forwards the alertIds through to the event log service', async () => {
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
 
-        await client.listExecutionHistory({ request, episodeIds: ['ep-1', 'ep-2'] });
+        await client.listExecutionHistory({ request, alertIds: ['ep-1', 'ep-2'] });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ episodeIds: ['ep-1', 'ep-2'] })
+          expect.objectContaining({ alertIds: ['ep-1', 'ep-2'] })
         );
       });
 
-      it('forwards episodeIds as undefined when not provided', async () => {
+      it('forwards alertIds as undefined when not provided', async () => {
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
 
         await client.listExecutionHistory({ request });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ episodeIds: undefined })
+          expect.objectContaining({ alertIds: undefined })
         );
       });
     });
@@ -329,10 +334,10 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         const request = httpServerMock.createKibanaRequest();
         const from = '2026-01-01T00:00:00.000Z';
 
-        await client.listExecutionHistory({ request, episodeIds: ['ep-1'], from });
+        await client.listExecutionHistory({ request, alertIds: ['ep-1'], from });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ startDate: from, episodeIds: ['ep-1'] })
+          expect.objectContaining({ startDate: from, alertIds: ['ep-1'] })
         );
       });
 
@@ -348,6 +353,19 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         );
 
         jest.useRealTimers();
+      });
+    });
+
+    describe('to', () => {
+      it('forwards endDate as undefined when `to` is not provided', async () => {
+        const { client, eventLogService } = createMocks();
+        const request = httpServerMock.createKibanaRequest();
+
+        await client.listExecutionHistory({ request });
+
+        expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
+          expect.objectContaining({ endDate: undefined })
+        );
       });
     });
 
@@ -567,7 +585,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         return mocks;
       };
 
-      it('falls back to null workflow names and logs error when workflows lookup rejects', async () => {
+      it('omits workflow names and logs an error when the workflows lookup rejects', async () => {
         const mocks = setup();
         mocks.workflowsManagement.getWorkflowsByIds.mockRejectedValue(new Error('wf down'));
         const request = httpServerMock.createKibanaRequest();
@@ -577,7 +595,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         expect(result.items[0]).toMatchObject({
           policy: { name: 'Policy 1' },
           rules: [{ name: 'Rule 1' }],
-          workflows: [{ id: 'w-1', name: null }],
+          workflows: [{ id: 'w-1' }],
         });
         expect(mocks.logger.warn).toHaveBeenCalledWith(
           'Execution history lookup failed',
@@ -587,14 +605,14 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         );
       });
 
-      it('falls back to null policy names when policy lookup rejects', async () => {
+      it('omits policy names when the policy lookup rejects', async () => {
         const mocks = setup();
         mocks.actionPolicyClient.getActionPolicies.mockRejectedValue(new Error('so down'));
         const request = httpServerMock.createKibanaRequest();
 
         const result = await mocks.client.listExecutionHistory({ request });
 
-        expect(result.items[0].policy).toEqual({ id: 'p-1', name: null });
+        expect(result.items[0].policy).toEqual({ id: 'p-1' });
         expect(mocks.logger.warn).toHaveBeenCalledWith(
           'Execution history lookup failed',
           expect.objectContaining({
@@ -603,14 +621,14 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         );
       });
 
-      it('falls back to null rule names when rules lookup rejects', async () => {
+      it('omits rule names when the rules lookup rejects', async () => {
         const mocks = setup();
         (mocks.rulesClient.findRules as jest.Mock).mockRejectedValue(new Error('rules down'));
         const request = httpServerMock.createKibanaRequest();
 
         const result = await mocks.client.listExecutionHistory({ request });
 
-        expect(result.items[0].rules[0]).toEqual({ id: 'r-1', name: null });
+        expect(result.items[0].rules[0]).toEqual({ id: 'r-1' });
         expect(mocks.logger.warn).toHaveBeenCalledWith(
           'Execution history lookup failed',
           expect.objectContaining({
@@ -621,7 +639,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
     });
 
     describe('missing rule ids in name resolution', () => {
-      it('uses names for found ids and falls back to null for missing ones (no rejection)', async () => {
+      it('uses names for found ids and omits them for missing ones (no rejection)', async () => {
         const { client, eventLogService, rulesClient } = createMocks();
         eventLogService.findActionPolicyExecutionEvents.mockResolvedValue({
           events: [
@@ -641,7 +659,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         const result = await client.listExecutionHistory({ request });
 
         expect(result.items[0].rules[0]).toEqual({ id: 'r-1', name: 'Rule 1' });
-        expect(result.items[1].rules[0]).toEqual({ id: 'r-2', name: null });
+        expect(result.items[1].rules[0]).toEqual({ id: 'r-2' });
         expect(result.items[2].rules[0]).toEqual({ id: 'r-3', name: 'Rule 3' });
       });
     });

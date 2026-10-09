@@ -13,7 +13,7 @@ import {
 } from '../../common/saved_objects/private_locations';
 
 describe('getPrivateLocations', () => {
-  it('surfaces isAgentSharding from saved object attributes', async () => {
+  it('maps saved objects to locations with their spaces', async () => {
     const savedObjectsClient = {
       createPointInTimeFinder: () => ({
         async *find() {
@@ -27,7 +27,6 @@ describe('getPrivateLocations', () => {
                   id: 'loc-1',
                   agentPolicyId: 'ap-1',
                   isServiceManaged: false,
-                  isAgentSharding: true,
                 },
               },
             ],
@@ -50,7 +49,6 @@ describe('getPrivateLocations', () => {
     expect(locations).toEqual([
       expect.objectContaining({
         id: 'loc-1',
-        isAgentSharding: true,
         spaces: ['default'],
       }),
     ]);

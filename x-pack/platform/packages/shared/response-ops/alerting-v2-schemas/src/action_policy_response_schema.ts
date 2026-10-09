@@ -6,52 +6,45 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { actorSchema, durationSchema } from './common';
+import { actorSchema, ESTIMATED_COUNT_NOTE } from './common';
 import {
-  groupingModeSchema,
   actionPolicyDestinationSchema,
-  throttleStrategySchema,
+  actionPolicyGroupingSchema,
+  throttleSchema,
 } from './action_policy_data_schema';
 import { POLICY_MATCHER_DESCRIPTION, policyMatcherSchema } from './policy_matcher_schema';
 
 export const actionPolicyResponseSchema = z
   .object({
     id: z.string().describe('The unique identifier for the action policy.'),
-    version: z
+    name: z.string().describe('The name of the action policy.'),
+    description: z
       .string()
       .optional()
-      .describe('The version, used for optimistic concurrency control.'),
-    name: z.string().describe('The name of the action policy.'),
-    description: z.string().describe('A description of the action policy.'),
+      .describe('A description of the action policy. Omitted when the policy has none.'),
     enabled: z.boolean().describe('Whether the action policy is enabled.'),
     destinations: z.array(actionPolicyDestinationSchema).describe('The list of destinations.'),
-    matcher: policyMatcherSchema.nullable().describe(POLICY_MATCHER_DESCRIPTION),
-    group_by: z
-      .array(z.string())
-      .nullable()
-      .describe('The fields used to group alerts, or null for no grouping.'),
-    grouping_mode: groupingModeSchema
-      .nullable()
-      .describe('The grouping mode for alert notifications.'),
-    throttle: z
-      .object({
-        strategy: throttleStrategySchema.optional().describe('The throttle strategy.'),
-        interval: durationSchema
-          .nullable()
-          .describe(
-            'The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.'
-          ),
-      })
-      .nullable()
-      .describe('The throttle configuration for notifications.'),
+    matcher: policyMatcherSchema.optional().describe(POLICY_MATCHER_DESCRIPTION),
+    grouping: actionPolicyGroupingSchema
+      .optional()
+      .describe(
+        'How matched alerts are batched into notifications. Omitted when none is set, which groups per alert.'
+      ),
+    throttle: throttleSchema
+      .optional()
+      .describe('The throttle configuration for notifications. Omitted when none is set.'),
     snoozed_until: z
       .string()
-      .nullable()
-      .describe('The ISO datetime until which the policy is snoozed, or null if not snoozed.'),
+      .optional()
+      .describe(
+        'The ISO datetime until which the policy is snoozed. Omitted when the policy is not snoozed.'
+      ),
     created_by: actorSchema.nullable().describe('The actor who created the action policy.'),
-    created_at: z.string().describe('The ISO datetime when the action policy was created.'),
+    created_at: z.iso.datetime().describe('The ISO datetime when the action policy was created.'),
     updated_by: actorSchema.nullable().describe('The actor who last updated the action policy.'),
-    updated_at: z.string().describe('The ISO datetime when the action policy was last updated.'),
+    updated_at: z.iso
+      .datetime()
+      .describe('The ISO datetime when the action policy was last updated.'),
   })
   .meta({ id: 'alerting_action_policy_response' });
 
@@ -60,7 +53,9 @@ export type ActionPolicyResponse = z.infer<typeof actionPolicyResponseSchema>;
 export const findActionPoliciesResponseSchema = z
   .object({
     items: z.array(actionPolicyResponseSchema).describe('The list of action policies.'),
-    total: z.number().describe('The total number of action policies matching the query.'),
+    total: z
+      .number()
+      .describe(`The number of action policies matching the query. ${ESTIMATED_COUNT_NOTE}`),
     page: z.number().describe('The current page number.'),
     per_page: z.number().describe('The number of action policies per page.'),
   })

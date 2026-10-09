@@ -10,9 +10,11 @@ import { z } from '@kbn/zod/v4';
 export interface CanvasUrlSchema {
   flyoutName?: string | null;
   flyoutTab?: string | null;
+  query?: string | null;
 }
 
 export const canvasUrlSchema = z.object({
   flyoutName: z.string().nullable(),
   flyoutTab: z.string().nullable(),
+  query: z.string().nullish(),
 }) satisfies z.ZodType<CanvasUrlSchema>;

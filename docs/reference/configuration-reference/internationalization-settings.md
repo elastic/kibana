@@ -17,7 +17,12 @@ To apply these settings in your deployment, refer to [Elastic Stack settings](do
 
 ## Built-in and custom locales
 
-{{kib}} ships translation files for English, French, Japanese, Simplified Chinese, and German. Plugins and admin-installed translation files can add additional locales. Any locale listed in `i18n.locales` for which a translation file exists will be served; locales without translation files fall back to English.
+{{kib}} ships translation files for the following locales:
+
+- {applies_to}`serverless: ga` {applies_to}`stack: ga 9.6+` English, French, Japanese, Simplified Chinese, German, and Portuguese (Brazil)
+- {applies_to}`stack: ga 9.0-9.5` English, French, Japanese, Simplified Chinese, and German
+
+Plugins and admin-installed translation files can add additional locales. Any locale listed in `i18n.locales` for which a translation file exists will be served. Locales without translation files fall back to English.
 
 ## Per-user language selection
 ```{applies_to}
@@ -50,6 +55,7 @@ When `i18n.locales` is not empty, language selection is available to users. When
    the browser's `Accept-Language` preferences. The first weighted
    preference matching an entry in `i18n.locales`, exactly or by language
    (`fr-CH` or bare `fr` can resolve to a configured `fr-FR`), wins.
+   Skipped when `i18n.detectBrowserLocale` is `false`.
 5. **`i18n.defaultLocale` config** — The server-wide default (`en` unless
    overridden) set in `kibana.yml`, used when nothing above matches.
 
@@ -76,7 +82,7 @@ previously resolved locale.
 ## Example configurations
 
 ```yaml
-# 1. Default behavior — language selection offers the five bundled locales,
+# 1. Default behavior — language selection offers the bundled locales,
 #    server defaults to English. Equivalent to omitting all i18n.* keys.
 
 # 2. Curate the available languages to a subset:
@@ -94,4 +100,8 @@ i18n.locale: "ja-JP"
 
 # 5. Disable the KBN_LOCALE cookie:
 i18n.allowLocaleCookie: false
+
+# 6. Keep language selection, but never pick the language from the browser.
+#    Users see i18n.defaultLocale until they choose a language themselves:
+i18n.detectBrowserLocale: false
 ```

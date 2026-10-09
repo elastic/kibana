@@ -13,11 +13,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Streams } from '@kbn/streams-schema';
 import { SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID } from '../../agent_builder/skills/ki_query_generation';
-import {
-  buildKIQueryGenerationUserMessage,
-  executeKIQueryGenerationAgent,
-  MAX_EXISTING_QUERIES_FOR_CONTEXT,
-} from './identify_ki_queries_via_agent';
+import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
 
 const definition: Streams.WiredStream.Definition = {
   name: 'logs.test',
@@ -120,6 +116,7 @@ describe('executeKIQueryGenerationAgent', () => {
         agentBuilder,
         request,
         connectorId: 'connector-1',
+        interactionId: 'run-1',
         definition,
         existingQueries: [],
         signal: requestSignal,
@@ -149,7 +146,18 @@ describe('executeKIQueryGenerationAgent', () => {
     expect(timeoutSpy).toHaveBeenCalledWith(300_000);
     expect(anySpy).toHaveBeenCalledWith([requestSignal, timeoutSignal]);
     expect(executeAgent).toHaveBeenCalledWith(
-      expect.objectContaining({ abortSignal: executionSignal })
+      expect.objectContaining({
+        abortSignal: executionSignal,
+        params: expect.objectContaining({
+          telemetryMetadata: {
+            pluginId: 'nightshift_ki_query_generation',
+            aggregateBy: 'nightshift',
+            productSolution: 'observability',
+            productFeature: 'nightshift',
+            interactionId: 'run-1',
+          },
+        }),
+      })
     );
   });
 
@@ -187,47 +195,11 @@ describe('executeKIQueryGenerationAgent', () => {
         agentBuilder,
         request: {} as KibanaRequest,
         connectorId: 'connector-1',
+        interactionId: 'run-1',
         definition,
         existingQueries: [],
         logger: loggerMock.create(),
       })
     ).rejects.toThrow('KI query generation agent finalized for unexpected target "logs.other"');
-  });
-});
-
-describe('buildKIQueryGenerationUserMessage', () => {
-  const target = {
-    id: 'logs.test',
-    name: 'logs.test',
-    sources: ['logs.test'],
-    samplingSource: 'logs.test',
-  };
-
-  it('omits existing_queries when there are none', () => {
-    expect(buildKIQueryGenerationUserMessage(target, [])).toBe('`target_id`: logs.test');
-  });
-
-  it('bounds existing queries by severity, count and description length', () => {
-    const existingQueries = Array.from(
-      { length: MAX_EXISTING_QUERIES_FOR_CONTEXT + 5 },
-      (_, i) => ({
-        id: `query-${i}`,
-        title: 'Error rate',
-        type: 'stats',
-        severity_score: i,
-        description: 'x'.repeat(250),
-        esql: 'FROM logs.test | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)',
-      })
-    );
-
-    const [, context] = buildKIQueryGenerationUserMessage(target, existingQueries).split(
-      '`existing_queries`:\n'
-    );
-    const surfaced: Array<{ severity_score: number; description: string }> = JSON.parse(context);
-
-    expect(surfaced).toHaveLength(MAX_EXISTING_QUERIES_FOR_CONTEXT);
-    expect(surfaced[0].severity_score).toBe(MAX_EXISTING_QUERIES_FOR_CONTEXT + 4);
-    expect(surfaced.at(-1)?.severity_score).toBe(5);
-    expect(surfaced[0].description).toHaveLength(200);
   });
 });

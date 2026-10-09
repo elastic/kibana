@@ -19,6 +19,7 @@ export const CreateAiIndexButton = () => {
   return (
     <EuiButton
       fill
+      iconType="plusCircle"
       data-test-subj="contextCreateAiIndexButton"
       href={createContextEngineUrl(CONTEXT_ENGINE_PATHS.create)}
       {...getEbtProps({

@@ -295,6 +295,47 @@ agentBuilder.agents.register({
 Refer to [`AgentConfiguration`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts)
 for the full list of available configuration options.
 
+### Choosing the agent's model
+
+By default, agents run on the model selected by the user in the Chat UI, or on the first model of the
+Agent Builder inference feature. A built-in agent can instead run on a model of its own, by declaring an
+inference feature in its configuration.
+
+First, register a `chat_completion` inference feature with the `searchInferenceEndpoints` plugin, during setup.
+Admins can then pick the models of that feature from the model settings page, and `recommendedEndpoints`
+is used until they do:
+
+```ts
+const result = searchInferenceEndpoints.features.register({
+  featureId: 'my_solution_agent',
+  parentFeatureId: 'my_solution', // optional, groups the feature under a parent in the UI
+  featureName: 'My solution agent',
+  featureDescription: 'Models used by the My solution agent',
+  taskType: 'chat_completion',
+  recommendedEndpoints: ['.anthropic-claude-5-sonnet-chat_completion'],
+});
+if (!result.ok) {
+  logger.warn(`Failed to register the inference feature: ${result.error}`);
+}
+```
+
+Then reference the feature from the agent's configuration:
+
+```ts
+agentBuilder.agents.register({
+  id: 'platform.my_solution.agent',
+  name: 'My solution agent',
+  description: 'Agent specialized in my solution',
+  configuration: {
+    instructions: 'You are a specialist [...]',
+    tools: [{ tool_ids: ['[...]'] }],
+    inference_feature_id: 'my_solution_agent',
+  },
+});
+```
+
+`inference_feature_id` is only supported for built-in agents, and cannot be set by agent types.
+
 ## Registering attachment types
 
 Attachments are used to provide additional context when conversing with an agent.
@@ -379,6 +420,31 @@ const myAttachmentType: AttachmentTypeDefinition = {
 
 Do **not** include guidance on *when* to render inline — that is the responsibility of the
 skill that owns the relevant task. See [Inline rendering guidance in skills](#inline-rendering-guidance-in-skills).
+
+#### `toSurfaceComposition` — rendering outside Kibana
+
+Response messages of rounds from external systems, such as Slack, are rendered in code from the message: its markdown, plus a node for each `<render_attachment>` tag. An attachment renders there only if its type defines `toSurfaceComposition`, which maps the data of one attachment version to a surface composition: an [Isomer](https://github.com/elastic/isomer) composition of `markdown` nodes, which renders to every surface. Without it, the attachment is left out there.
+
+```ts
+const myAttachmentType: AttachmentTypeDefinition<'my_type', MyData> = {
+  id: 'my_type',
+  validate: ...,
+  format: ...,
+  toSurfaceComposition: (data) => ({
+    type: 'view',
+    title: data.name,
+    body: [{ type: 'markdown', text: `Status: ${data.status}` }],
+  }),
+};
+```
+
+GitHub-flavored markdown is converted per surface: tables become native Slack tables and code fences become code blocks. A mapping that throws leaves the attachment out. See the `text` type for an example.
+
+#### Real example: the built-in image attachment
+
+Agent Builder already ships a built-in `image` attachment type, so agents can see images pasted into the chat input. It's a real, file-backed attachment type and a good reference to copy from — the placeholder above just reuses the same `id` to illustrate `getAgentDescription`. See `x-pack/platform/plugins/shared/agent_builder_platform/server/attachment_types/image.ts`.
+
+It validates by looking up the file through a request-scoped Files client, so a user can never read another user's file. `format` downloads and base64-encodes the file lazily, only when the agent actually reads the attachment, so the bytes never end up in a tool result. The binary itself lives in the Files plugin under the `chat-attachment-images` file kind (registered in `agent_builder/server/plugin.ts`); the attachment only carries a `file_id` pointer. Limits — PNG/JPEG only, 3.5 MB max, 10 images per message — are defined in `agent-builder-common/attachments/attachment_types.ts`; the count limit is enforced client-side only.
 
 ### Browser-side registration
 
@@ -1094,6 +1160,69 @@ agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation',
   },
 }));
 ```
+
+### Conversation details menu actions
+
+Menu actions are icon buttons rendered in the flyout menu bar before the close button. Each entry
+is an `EuiFlyoutMenuAction` (`iconType`, `aria-label`, and `onClick` or `href`, plus optional
+`toolTipContent`, `isDisabled` and `isLoading`). Each flyout takes them from a different place:
+
+- The in-chat flyout (opened from the chat's "Chat info" button) uses the template's
+  `detailsFlyout.trailingActions`, re-evaluated when the conversation updates.
+- Flyouts opened with `openConversationDetails` use only its `trailingActions` option, fixed when
+  the flyout opens. They don't read the template's `trailingActions`, because the template isn't
+  known until the conversation has loaded.
+
+Define the actions once and pass the same function to both:
+
+```tsx
+const getTrailingActions = (conversationId: string): EuiFlyoutMenuAction[] => [
+  {
+    iconType: 'link',
+    'aria-label': copyLinkLabel,
+    toolTipContent: copyLinkLabel,
+    onClick: () => copyToClipboard(getShareUrl(conversationId)),
+  },
+];
+
+agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation', () => ({
+  name: investigationTemplateName,
+  tabs: ['investigation.details'],
+  detailsFlyout: {
+    trailingActions: ({ conversation }) => getTrailingActions(conversation.id),
+  },
+}));
+
+agentBuilder.openConversationDetails({
+  conversationId,
+  trailingActions: getTrailingActions(conversationId),
+});
+```
+
+### Opening flyouts from conversation details content
+
+Both conversation details flyouts are managed EUI flyouts in the
+`CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY` history group. To open your own flyout from a tab, header,
+footer, or attachment renderer and have it stack on top with a Back button, open it as a main flyout
+in the same group by passing these options when you open it:
+
+```tsx
+import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
+
+const options = {
+  session: 'start',
+  historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
+};
+```
+
+Back returns to the conversation details flyout. Closing any flyout in the group closes all of them.
+A flyout opened with a different `historyKey` hides the conversation details flyout until it closes,
+with no Back button.
+
+In the full-screen conversation, Agent Builder's own flyouts (canvas, trace, execution JSON, tool
+response, sub-agent execution, clarification questions) join the same group, so they stack on top of
+the conversation details flyout and of each other. Outside-click doesn't close them; use Back, the
+close button or Escape. In the embeddable sidebar these flyouts are not managed and don't stack.
 
 ### Rules
 

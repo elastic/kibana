@@ -71,10 +71,11 @@ export const fetchClassicAlertsAsEpisodes = async ({
 
   if (episodes.length === 0) return episodes;
 
-  return enrichWithSnoozeState(episodes, http, abortSignal);
+  return enrichClassicEpisodesWithSnoozeState(episodes, http, abortSignal);
 };
 
-const enrichWithSnoozeState = async (
+/** Stamps classic snooze fields from the rules API, rethrowing abort and ignoring other lookup failures. */
+export const enrichClassicEpisodesWithSnoozeState = async (
   episodes: AlertEpisode[],
   http: HttpStart,
   abortSignal?: AbortSignal
@@ -86,7 +87,11 @@ const enrichWithSnoozeState = async (
   try {
     const result = await getAlertSnoozeStateByRule({ http, ruleIds, signal: abortSignal });
     snoozeData = result.data;
-  } catch {
+  } catch (error) {
+    // A cancelled query must not cache episodes that are missing snooze state.
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw error;
+    }
     return episodes;
   }
 
@@ -114,11 +119,11 @@ const enrichWithSnoozeState = async (
     const snoozedInstances = snoozedByRule.get(ruleId);
     const isSnoozed = snoozedInstances?.has(instanceId) ?? false;
 
-    if (isSnoozed) {
+    if (isSnoozed && snoozedInstances) {
       return {
         ...ep,
         last_snooze_action: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-        snooze_expiry: snoozedInstances!.get(instanceId) ?? null,
+        snoozed_until: snoozedInstances.get(instanceId) ?? null,
         ...(isMuted ? { is_muted: true } : {}),
       };
     }
@@ -127,7 +132,7 @@ const enrichWithSnoozeState = async (
       return {
         ...ep,
         last_snooze_action: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-        snooze_expiry: null,
+        snoozed_until: null,
         is_muted: true,
       };
     }

@@ -13,6 +13,7 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   ChatCompletionReasoningEffort,
   ConnectorTelemetryMetadata,
@@ -42,6 +43,7 @@ import type {
   ScopedRunnerRunAgentParams,
   SubAgentExecutor,
   WritableToolResultStore,
+  ExecutionConversationAccess,
 } from '@kbn/agent-builder-server';
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -69,6 +71,7 @@ import type { AgentsServiceStart } from '../../agents';
 import type { ConversationService } from '../../conversation';
 import type { AttachmentServiceStart } from '../../attachments';
 import type { RendererServiceStart } from '../../renderers';
+import type { ConversationEventsServiceStart } from '../../conversation_events';
 import type { ModelProviderFactoryFn } from './model_provider';
 import type { AnalyticsService, TrackingService } from '../../../telemetry';
 import {
@@ -85,6 +88,7 @@ import { createSkillsStore } from './store/volumes/skills/skills_store';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
 import type { ConversationTemplatesServiceStart } from '../../conversation/templates';
+import type { DeploymentInfo } from '../../../utils/deployment_info';
 
 export interface CreateScopedRunnerDeps {
   // core services
@@ -96,6 +100,7 @@ export interface CreateScopedRunnerDeps {
   // external plugin deps
   spaces: SpacesPluginStart | undefined;
   actions: ActionsPluginStart;
+  licensing: LicensingPluginStart;
   // internal service deps
   modelProvider: ModelProvider;
   toolsService: ToolsServiceStart;
@@ -103,6 +108,7 @@ export interface CreateScopedRunnerDeps {
   conversationService: ConversationService;
   attachmentsService: AttachmentServiceStart;
   renderersService: RendererServiceStart;
+  conversationEventsService: ConversationEventsServiceStart;
   conversationTemplates: ConversationTemplatesServiceStart;
   promptManager: PromptManager;
   stateManager: ConversationStateManager;
@@ -137,6 +143,8 @@ export interface CreateScopedRunnerDeps {
   interactivity: InteractivityConfig;
   /** Id of the parent execution that spawned this one, if any. */
   parentExecutionId?: string;
+  /** How this run relates to its conversation. */
+  conversationAccess: ExecutionConversationAccess;
   /** Sub-agent executor for spawning child executions. */
   subAgentExecutor: SubAgentExecutor;
   /** Experimental features enabled for this runner context. */
@@ -148,6 +156,8 @@ export interface CreateScopedRunnerDeps {
    * Populated only for the `deductive.ai` agent when the deployment opted in.
    */
   deductive?: DeductiveRuntimeConfig;
+  /** Static deployment information exposed to agents. */
+  deploymentInfo: DeploymentInfo;
   /**
    * `xpack.agentBuilder.deductive.register` for this deployment. One half of the
    * Deductive double switch; the other is the `agentBuilder:deductiveEnabled` setting.
@@ -172,6 +182,7 @@ export type CreateRunnerDeps = Omit<
   | 'executionMode'
   | 'interactivity'
   | 'parentExecutionId'
+  | 'conversationAccess'
   | 'experimentalFeatures'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
@@ -271,6 +282,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     executionMode,
     interactivity,
     parentExecutionId,
+    conversationAccess = 'readWrite',
   }: {
     request: KibanaRequest;
     /** Agent id for this run; used to lazily resolve Deductive-only config. */
@@ -287,6 +299,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     executionMode: AgentExecutionMode;
     interactivity: InteractivityConfig;
     parentExecutionId?: string;
+    conversationAccess?: ExecutionConversationAccess;
   }): Promise<ScopedRunner> => {
     const resultStore = createResultStore({ conversation });
     const skillsStore = createSkillsStore({ skills: [] });
@@ -332,11 +345,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       skills: true,
       aiIndices: experimentalEnabled && contextEngineEnabled,
       relevantSkills: experimentalEnabled,
-      subagents: experimentalEnabled,
       todos: experimentalEnabled,
-      datasets: experimentalEnabled,
       // forcefully disabled until the UI is implemented
-      askUserQuestion: false, // isExperimentalEnabled,
       bash: bashEnabled,
       apiDiscovery: apiDiscoveryEnabled,
     };
@@ -372,6 +382,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       executionMode,
       interactivity,
       parentExecutionId,
+      conversationAccess,
       subAgentExecutor,
       experimentalFeatures,
       ...(deductive ? { deductive } : {}),
@@ -420,6 +431,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         executionMode = AgentExecutionMode.conversation,
         interactive,
         parentExecutionId,
+        conversationAccess = 'readWrite',
         ...otherParams
       } = params;
       const { agentId } = params;
@@ -439,9 +451,11 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         executionMode,
         interactivity,
         parentExecutionId,
+        conversationAccess,
         promptState: getAgentPromptStorageState({
           input: nextInput,
           conversation,
+          allowResume: conversationAccess === 'readWrite',
         }),
       });
       return runner.runAgent(otherParams);

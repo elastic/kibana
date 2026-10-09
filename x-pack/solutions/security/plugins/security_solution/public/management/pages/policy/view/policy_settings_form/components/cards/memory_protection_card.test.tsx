@@ -15,11 +15,8 @@ import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep } from 'lodash';
 import userEvent from '@testing-library/user-event';
 import type { MemoryProtectionCardProps } from './memory_protection_card';
-import {
-  CUSTOM_YARA_SIGNATURES_LICENSE_UPSELL,
-  LOCKED_CARD_MEMORY_TITLE,
-  MemoryProtectionCard,
-} from './memory_protection_card';
+import { LOCKED_CARD_MEMORY_TITLE, MemoryProtectionCard } from './memory_protection_card';
+import { CUSTOM_YARA_SIGNATURES_LICENSE_UPSELL } from '../shared_translations';
 import { createLicenseServiceMock } from '../../../../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../../../../common/hooks/__mocks__/use_license';
 import { useLicense as _useLicense } from '../../../../../../../common/hooks/use_license';

@@ -18,13 +18,15 @@ project:
   sourceRoot: x-pack/platform/packages/shared/agent_builder_visualizations/kbn-evals-suite-agent-builder-visualizations
 dependsOn:
   - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-visualizations-common'
   - '@kbn/core'
-  - '@kbn/es-snapshot-loader'
   - '@kbn/esql-language'
   - '@kbn/evals'
   - '@kbn/inference-common'
   - '@kbn/inference-prompt-utils'
   - '@kbn/lens-embeddable-utils'
+  - '@kbn/synthtrace'
+  - '@kbn/synthtrace-client'
   - '@kbn/tooling-log'
   - '@kbn/zod'
 tags:

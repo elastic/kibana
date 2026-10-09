@@ -9,16 +9,19 @@ import pMap from 'p-map';
 import { chunk, flatten, omit } from 'lodash';
 import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
 import {
   TaskStatus,
+  type TaskPriority,
   type ApiKeyOptions,
   type ConcreteTaskInstance,
   type IntervalSchedule,
   type RruleSchedule,
   type ScheduleOptions,
+  type TaskCredential,
   type TaskInstanceWithDeprecatedFields,
   type TaskInstanceWithId,
 } from './task';
@@ -29,7 +32,14 @@ import type { ErrorOutput } from './lib/bulk_operation_buffer';
 import { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
 import { TaskAlreadyRunningError } from './lib/errors';
 import type { TaskPollingLifecycle } from './polling_lifecycle';
+import type { TaskTypeDictionary } from './task_type_dictionary';
 import { getExecutionId } from './lib/get_execution_id';
+import { credentialMatchesRunAs } from './lib/service_account_credential';
+import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
+import {
+  taskManagerClaimNudgeTelemetry,
+  type ClaimNudgeSource,
+} from './otel/claim_nudge_telemetry';
 
 const scheduleOptionsToStoreApiKeyOptions = (
   options?: ScheduleOptions
@@ -61,7 +71,9 @@ export interface TaskSchedulingOpts {
   taskStore: TaskStore;
   middleware: Middleware;
   taskManagerId: string;
+  definitions: TaskTypeDictionary;
   taskPollingLifecycle?: TaskPollingLifecycle; // subscribe to task lifecycle events
+  claimNudgeService?: TaskManagerClaimNudgeService;
 }
 
 /**
@@ -78,6 +90,24 @@ export interface BulkUpdateTaskResult {
    */
   errors: ErrorOutput[];
 }
+
+export interface BulkUpdateSchedulesOptions extends ApiKeyOptions {
+  /** When true, also update tasks that are currently running or claiming, not just idle ones. */
+  includeRunningTasks?: boolean;
+}
+
+export interface RunSoonOptions {
+  /** Run even when the task is already running on another node. */
+  force?: boolean;
+  /** Overrides the task priority in the same version-checked write as `runAt`. */
+  priority?: TaskPriority;
+  /**
+   * Also requests a best-effort extra claim cycle on background nodes. The cycle may claim other
+   * eligible tasks too, so any required delay must be part of a task's eligibility.
+   */
+  requestImmediateClaim?: boolean;
+}
+
 export interface RunSoonResult {
   id: ConcreteTaskInstance['id'];
   forced: boolean;
@@ -101,7 +131,9 @@ export class TaskScheduling {
   private store: TaskStore;
   private logger: Logger;
   private middleware: Middleware;
+  private readonly definitions: TaskTypeDictionary;
   private readonly taskPolling: TaskPollingLifecycle | undefined;
+  private readonly claimNudgeService: TaskManagerClaimNudgeService | undefined;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -112,7 +144,29 @@ export class TaskScheduling {
     this.logger = opts.logger;
     this.middleware = opts.middleware;
     this.store = opts.taskStore;
+    this.definitions = opts.definitions;
     this.taskPolling = opts.taskPollingLifecycle;
+    this.claimNudgeService = opts.claimNudgeService;
+  }
+
+  private get claimNudgeEnabled(): boolean {
+    return this.claimNudgeService !== undefined;
+  }
+
+  private async notifyClaimNudge(taskId: string, source: ClaimNudgeSource) {
+    if (!this.claimNudgeService) {
+      return;
+    }
+    try {
+      taskManagerClaimNudgeTelemetry.recordClaimNudge(source);
+      await this.claimNudgeService.notify();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      // Not "failed": a timed-out write may still have been applied.
+      this.logger.warn(
+        `Could not confirm the Task Manager claim nudge for task ${taskId}; it will run on the next poll cycle: ${message}`
+      );
+    }
   }
 
   /**
@@ -125,9 +179,10 @@ export class TaskScheduling {
     taskInstance: TaskInstanceWithDeprecatedFields,
     options?: ScheduleOptions
   ): Promise<ConcreteTaskInstance> {
+    const { runAs, ...taskInstanceWithoutRunAs } = taskInstance;
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...omit(options, 'apiKey', 'request'),
-      taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
+      taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstanceWithoutRunAs, this.logger),
     });
 
     const traceparent =
@@ -137,7 +192,8 @@ export class TaskScheduling {
 
     return await this.store.schedule(
       {
-        ...modifiedTask,
+        ...omit(modifiedTask, 'runAs'),
+        ...(runAs ? { runAs } : {}),
         traceparent: traceparent || '',
         enabled: modifiedTask.enabled ?? true,
       },
@@ -160,11 +216,12 @@ export class TaskScheduling {
         ? agent.currentTraceparent
         : '';
     const modifiedTasks = await Promise.all(
-      taskInstances.map(async (taskInstance, i, arr) => {
-        const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
+      taskInstances.map(async ({ runAs, ...taskInstance }, i, arr) => {
+        const { taskInstance: middlewareTask } = await this.middleware.beforeSave({
           ...omit(options, 'apiKey', 'request'),
           taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
         });
+        const modifiedTask = { ...omit(middlewareTask, 'runAs'), ...(runAs ? { runAs } : {}) };
         const enabled = modifiedTask.enabled ?? true;
         let scheduling: Partial<{ runAt: Date; scheduledAt: Date }> = {};
         if (enabled) {
@@ -255,30 +312,41 @@ export class TaskScheduling {
 
   /**
    * Bulk updates schedules for tasks by ids.
-   * Only tasks with `idle` status will be updated. Running tasks are skipped even when
-   * `regenerateApiKey` is provided, because their `schedule` and `runAt` are recalculated after
-   * the task run finishes.
+   * By default only tasks with `idle` status are updated. Pass `includeRunningTasks: true` to also
+   * update running/claiming tasks; for those only `schedule` (and API keys) are written, and the
+   * next `runAt` is derived from the new schedule when the current run finishes.
    * @param {string[]} taskIds  - list of task ids
    * @param {IntervalSchedule | RruleSchedule} schedule  - new schedule
+   * @param {BulkUpdateSchedulesOptions} options  - API key options and `includeRunningTasks` flag
    * @returns {Promise<BulkUpdateTaskResult>}
    */
   public async bulkUpdateSchedules(
     taskIds: string[],
     schedule: IntervalSchedule | RruleSchedule,
-    options?: ApiKeyOptions
+    options?: BulkUpdateSchedulesOptions
   ): Promise<BulkUpdateTaskResult> {
-    const shouldRegenerateApiKey = options?.regenerateApiKey === true;
+    const { includeRunningTasks = false, ...apiKeyOptions } = options ?? {};
+    const shouldRegenerateApiKey = apiKeyOptions.regenerateApiKey === true;
+    const updatableStatuses = includeRunningTasks
+      ? new Set([TaskStatus.Idle, TaskStatus.Running, TaskStatus.Claiming])
+      : new Set([TaskStatus.Idle]);
 
     return retryableBulkUpdate({
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
       filter: (task) =>
-        task.status === TaskStatus.Idle &&
+        updatableStatuses.has(task.status) &&
         (shouldRegenerateApiKey || !isEqual(task.schedule, schedule)),
       map: (task) => {
         if (isEqual(task.schedule, schedule)) {
           return task;
+        }
+
+        // For a running/claiming task `runAt` is the time the current execution was due; the task
+        // runner computes the next `runAt` from it and the new schedule once the run completes.
+        if (task.status !== TaskStatus.Idle) {
+          return { ...task, schedule };
         }
 
         const newRunAtInMs = calculateNextRunAtFromSchedule({
@@ -294,7 +362,7 @@ export class TaskScheduling {
        * where both are defined by passing mergeAttributes: false here.
        */
       mergeAttributes: false,
-      options,
+      options: apiKeyOptions,
     });
   }
 
@@ -308,15 +376,29 @@ export class TaskScheduling {
   }
 
   /**
-   * Run task.
+   * Makes a task eligible to run now, optionally updating its priority in the same version-checked write.
    *
    * @param taskId - The task being scheduled.
-   * @returns {Promise<RunSoonResult>}
+   * @param forceOrOptions - Legacy positional `force`, or the options bag. Set
+   * `requestImmediateClaim` to also request a best-effort extra claim cycle.
    */
-  public async runSoon(taskId: string, force: boolean = false): Promise<RunSoonResult> {
+  public async runSoon(
+    taskId: string,
+    forceOrOptions?: boolean | RunSoonOptions
+  ): Promise<RunSoonResult> {
+    const options: RunSoonOptions =
+      typeof forceOrOptions === 'boolean' ? { force: forceOrOptions } : forceOrOptions ?? {};
+    const force = options.force === true;
+    const { priority } = options;
+    // The refresh only serves the nudge, so both are skipped together.
+    const nudge = options.requestImmediateClaim === true && this.claimNudgeEnabled;
     let forced: boolean = false;
     let conflict: boolean = false;
     const task = await this.store.get(taskId);
+
+    if (priority !== undefined && !this.definitions.get(task.taskType)?.allowPriorityOverride) {
+      throw new Error(`Task type "${task.taskType}" does not allow priority overrides`);
+    }
 
     if (task.status === TaskStatus.Unrecognized) {
       throw new Error(`Failed to run task "${taskId}" with status ${task.status}`);
@@ -349,8 +431,9 @@ export class TaskScheduling {
           status: TaskStatus.Idle,
           scheduledAt: new Date(),
           runAt: new Date(),
+          ...(priority !== undefined ? { priority } : {}),
         },
-        { validate: false }
+        { validate: false, refresh: nudge }
       );
     } catch (e) {
       if (e.statusCode === 409) {
@@ -363,6 +446,11 @@ export class TaskScheduling {
         throw e;
       }
     }
+
+    if (!conflict && nudge) {
+      void this.notifyClaimNudge(taskId, 'run_soon');
+    }
+
     return conflict ? { id: task.id, forced, conflict: true } : { id: task.id, forced };
   }
 
@@ -400,6 +488,8 @@ export class TaskScheduling {
     taskInstance: TaskInstanceWithId,
     options?: ScheduleOptions
   ): Promise<TaskInstanceWithId> {
+    await this.ensureExistingCredentialMatchesRunAs(taskInstance);
+
     // check if task specifies a schedule interval
     // if so,try to update the just the schedule
     // only works for interval schedule
@@ -420,6 +510,30 @@ export class TaskScheduling {
       }
     }
     return taskInstance;
+  }
+
+  // A task's identity is only set when it is created, so a different `runAs` can't be applied to an
+  // existing task, and keeping the old identity would run it as an account the caller didn't ask for.
+  // The schedule update reads the task again, so a task removed and scheduled again with another
+  // `runAs` in between gets this schedule. That's accepted: the update keeps the task's credential.
+  private async ensureExistingCredentialMatchesRunAs({ id, runAs }: TaskInstanceWithId) {
+    let credential: TaskCredential | undefined;
+    try {
+      credential = await this.store.getCredential(id);
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        return;
+      }
+      throw e;
+    }
+
+    if (!credentialMatchesRunAs(credential, runAs)) {
+      const error = SavedObjectsErrorHelpers.decorateConflictError(
+        new Error(`Task "${id}" exists with a different runAs. Remove it and schedule it again.`)
+      );
+      // `bulkSchedule`'s conflict only has a top-level `statusCode`, so set it here too.
+      throw Object.assign(error, { statusCode: VERSION_CONFLICT_STATUS });
+    }
   }
 }
 
