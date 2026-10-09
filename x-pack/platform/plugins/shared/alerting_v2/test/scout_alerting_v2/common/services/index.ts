@@ -14,6 +14,12 @@ export type {
 } from './rule_changes_history_service';
 export { getRuleChangesHistoryApiService } from './rule_changes_history_service';
 
+export type { RuleSavedObjectService } from './rule_saved_object_service';
+export { getRuleSavedObjectService } from './rule_saved_object_service';
+
+export type { ActionPolicySavedObjectService } from './action_policy_saved_object_service';
+export { getActionPolicySavedObjectService } from './action_policy_saved_object_service';
+
 export type { RuleTemplatesApiService, SeedRuleTemplateParams } from './rule_templates_api_service';
 export { getRuleTemplatesApiService } from './rule_templates_api_service';
 

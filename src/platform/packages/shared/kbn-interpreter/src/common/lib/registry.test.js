@@ -77,7 +77,7 @@ describe('Registry', () => {
 
     it('throws when object is missing the lookup prop', () => {
       const check = () => registry.register(() => ({ hello: 'world' }));
-      expect(check).toThrowError(/object with a name property/);
+      expect(check).toThrow(/object with a name property/);
     });
   });
 
@@ -106,7 +106,7 @@ describe('Registry', () => {
 
     it('throws when object is missing the lookup prop', () => {
       const check = () => registry.register(() => ({ hello: 'world' }));
-      expect(check).toThrowError(/object with a type property/);
+      expect(check).toThrow(/object with a type property/);
     });
   });
 
@@ -184,6 +184,6 @@ describe('Registry', () => {
 
   describe('throws when lookup prop is not a string', () => {
     const check = () => new Registry(2);
-    expect(check).toThrowError(/must be a string/);
+    expect(check).toThrow(/must be a string/);
   });
 });

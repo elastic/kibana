@@ -26,6 +26,7 @@ import {
   type GetInitialCaseValueArgs,
 } from '../../../common/utils/get_initial_case_value';
 import { getNoneConnector } from '../../../common/utils/connectors';
+import { getCaseSettings } from '../../../common/utils/case_settings';
 import { parseTemplate } from '../../routes/api/templates/parse_template';
 
 const findTemplateById = (
@@ -100,10 +101,9 @@ export const createCaseFromTemplateStepDefinition = (
 
           // Build a MINIMAL create payload: only the wire-required fields (title / description /
           // tags / connector / settings / owner) plus the pinned template reference. We must NOT
-          // materialize severity / assignees / category / settings.extractObservables here, because
-          // `cases.create`'s expansion only applies a template default when the field is
-          // `=== undefined`. Seeding those (as getInitialCaseValue does) would silently suppress the
-          // template's own severity / assignees / extractObservables / category defaults.
+          // materialize severity / assignees / category here, because `cases.create`'s expansion
+          // only applies a template default when the field is `=== undefined`.
+          const { syncAlerts } = getCaseSettings(owner);
           const createPayload = {
             owner,
             title: '',
@@ -112,10 +112,10 @@ export const createCaseFromTemplateStepDefinition = (
             // tags. A `.none` connector leaves the template connector default free to apply.
             tags: [],
             connector: getNoneConnector(),
-            // Unlike the other defaults, expansion always treats `syncAlerts` as caller-supplied
-            // (see `applyTemplateDefaultsToCreateRequest`), so it must be seeded from the template
-            // here or a `syncAlerts: false` template default would be silently dropped.
-            settings: { syncAlerts: parsed.definition.settings?.syncAlerts ?? true },
+            // Expansion never fills `syncAlerts` (required on the wire). `extractObservables` is
+            // omitted here so the server applies space-config → autoExtractDefault precedence when
+            // the template definition does not declare it (explicit template value still wins via the spread).
+            settings: { syncAlerts, ...parsed.definition.settings },
             ...seededDefaults,
             // Caller overwrites win over the template's seeded title / description and the
             // wire-required scaffolding above.
@@ -146,11 +146,28 @@ export const createCaseFromTemplateStepDefinition = (
         throw new Error(`Case template not found for owner "${owner}": ${case_template_id}`);
       }
 
-      const mergedCreatePayload = getInitialCaseValue({
+      const templateCaseFields = template.caseFields ?? {};
+      // Key-by-key settings merge: a partial overwrites.settings (e.g. only syncAlerts) must not
+      // replace the template's full settings object and silently drop extractObservables.
+      const hasSettings =
+        templateCaseFields.settings !== undefined || normalizedOverwrites.settings !== undefined;
+      const mergedSettings = hasSettings
+        ? { ...templateCaseFields.settings, ...normalizedOverwrites.settings }
+        : undefined;
+      const mergedInput = {
         owner,
-        ...(template.caseFields ?? {}),
+        ...templateCaseFields,
         ...normalizedOverwrites,
-      } as GetInitialCaseValueArgs);
+        ...(mergedSettings !== undefined ? { settings: mergedSettings } : {}),
+      } as GetInitialCaseValueArgs;
+      const mergedBase = getInitialCaseValue(mergedInput);
+      // Omit extractObservables when neither the legacy template nor overwrites supplied it so the
+      // server applies space-config → autoExtractDefault → false precedence.
+      let mergedCreatePayload = mergedBase;
+      if (mergedInput.settings?.extractObservables === undefined) {
+        const { extractObservables: _omitted, ...settingsWithoutExtract } = mergedBase.settings;
+        mergedCreatePayload = { ...mergedBase, settings: settingsWithoutExtract };
+      }
 
       const createdCase = await casesClient.cases.create(mergedCreatePayload);
       return safeParseCaseForWorkflowOutput(

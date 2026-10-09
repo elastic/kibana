@@ -5,25 +5,11 @@
  * 2.0.
  */
 
-import type {
-  CreateAlertActionBody,
-  CreateEpisodeAlertActionBody,
-  CreateSeriesAlertActionBody,
-} from '@kbn/alerting-v2-schemas';
-import type { AlertAction } from '../../resources/datastreams/alert_actions';
-import type { AlertEvent } from '../../resources/datastreams/alert_events';
+import type { CreateAlertActionBody } from '@kbn/alerting-v2-schemas';
+import type { AlertActionDocument } from '../../resources/datastreams/alert_actions';
+import type { AlertEventDocument } from '../../resources/datastreams/alert_events';
 import type { AlertEventRecord } from './types';
-
-/**
- * Union of every action body shape the handler layer can receive: the legacy
- * combined union (episode_id in ack/unack/assign bodies) plus the split
- * series/episode unions. Collapses to just the split unions once the legacy
- * routes are removed.
- */
-export type AnyAlertActionBody =
-  | CreateAlertActionBody
-  | CreateSeriesAlertActionBody
-  | CreateEpisodeAlertActionBody;
+import type { AlertActionState } from './context_loaders/load_alert_action_states';
 
 /**
  * Prepared write payload for one alert action. The audit `.alert-actions`
@@ -38,8 +24,8 @@ export type AnyAlertActionBody =
  * domain events.
  */
 export interface PreparedAction {
-  alertActionDoc: AlertAction;
-  ruleEvent?: AlertEvent;
+  alertActionDoc: AlertActionDocument;
+  ruleEvent?: AlertEventDocument;
 }
 
 /**
@@ -53,11 +39,16 @@ export interface PreparedAction {
  *   from `action` + `alertEvent`. Handlers pass it through unchanged
  *   for audit-only actions, or wrap it alongside a synthetic
  *   `.rule-events` doc for lifecycle actions.
+ * - `actionState` — the alert's current ack / assignee / tags, which the
+ *   preconditioned handlers compare their request against. Only loaded for
+ *   handlers that declare {@link ActionHandler.requiresActionState}; the
+ *   rest receive the empty state and must not read it.
  */
-export interface HandlerItem<TBody extends AnyAlertActionBody> {
+export interface HandlerItem<TBody extends CreateAlertActionBody> {
   action: TBody;
   alertEvent: AlertEventRecord;
-  alertActionDoc: AlertAction;
+  alertActionDoc: AlertActionDocument;
+  actionState: AlertActionState;
 }
 
 /**
@@ -66,20 +57,27 @@ export interface HandlerItem<TBody extends AnyAlertActionBody> {
  * persistence, telemetry, or sibling handlers.
  *
  * Handlers are pure and synchronous: preconditions are evaluated and
- * the write payload is built from `item` alone. If a future handler
- * genuinely needs to preload extra state, add a preload phase then —
- * not speculatively. The current design deliberately has none.
+ * the write payload is built from `item` alone. A handler that needs
+ * more than the alert event declares it with
+ * {@link ActionHandler.requiresActionState} and reads it off the item;
+ * the orchestrator owns every round-trip.
  *
  * Type parameter `TBody` is the clean discriminated-union variant for
  * this action_type (e.g. the `ack` body, not the union), so each
  * handler pulls off the fields it needs without `in` checks.
  */
-export interface ActionHandler<TBody extends AnyAlertActionBody = AnyAlertActionBody> {
+export interface ActionHandler<TBody extends CreateAlertActionBody = CreateAlertActionBody> {
+  /**
+   * Declares that `prepare` reads `item.actionState`, so the orchestrator
+   * only pays for the `.alert-actions` round-trip when a request contains
+   * one of these actions.
+   */
+  readonly requiresActionState?: boolean;
   /**
    * Pure, synchronous precondition check + doc build. Throws Boom 4xx on
    * precondition failure (same error codes routes already surface); the
-   * bulk path catches 400/404 and silent-skips, the single path lets
-   * them propagate. No I/O — everything needed is already on `item`.
+   * bulk path records 400/404/409 per item, the single path lets them
+   * propagate. No I/O — everything needed is already on `item`.
    */
   prepare(item: HandlerItem<TBody>): PreparedAction;
 }

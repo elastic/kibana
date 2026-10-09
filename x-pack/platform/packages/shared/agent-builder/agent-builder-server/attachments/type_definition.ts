@@ -5,14 +5,23 @@
  * 2.0.
  */
 
+import type { Composition, PrimitiveNode } from '@elastic/isomer-sdk';
 import type { MaybePromise } from '@kbn/utility-types';
 import type {
   Attachment,
+  VersionedAttachment,
   VersionedAttachmentWithOrigin,
 } from '@kbn/agent-builder-common/attachments';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { AttachmentBoundedTool } from './tools';
+
+/**
+ * Context passed to the {@link AttachmentTypeDefinition.validate} function.
+ */
+export interface AttachmentValidateContext {
+  request: KibanaRequest;
+}
 
 /**
  * Server-side definition of an attachment type.
@@ -25,7 +34,10 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
   /**
    * validation function, which will be called when the attachment is added to the conversation.
    */
-  validate: (input: unknown) => MaybePromise<AttachmentValidationResult<TContent>>;
+  validate: (
+    input: unknown,
+    context?: AttachmentValidateContext
+  ) => MaybePromise<AttachmentValidationResult<TContent>>;
   /**
    * format the attachment to presented to the LLM
    */
@@ -79,6 +91,14 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
    * Defaults to the global DEFAULT_MAX_CONTENT_LENGTH (10 000).
    */
   maxContentLength?: number;
+  /**
+   * Maps the attachment's data to a surface composition, so it renders on surfaces other than
+   * Kibana, such as Slack. Without it, those surfaces leave it out.
+   */
+  toSurfaceComposition?: (
+    data: TContent,
+    context: AttachmentSurfaceCompositionContext
+  ) => SurfaceComposition;
 }
 
 /**
@@ -98,6 +118,30 @@ export interface AttachmentResolveContext extends AttachmentFormatContext {
    */
   savedObjectsClient: SavedObjectsClientContract;
 }
+
+/**
+ * Context passed to the {@link AttachmentTypeDefinition.toSurfaceComposition} function.
+ */
+export interface AttachmentSurfaceCompositionContext {
+  attachment: VersionedAttachment;
+  version: number;
+}
+
+/** A block of GitHub-flavored markdown in a {@link SurfaceComposition}. */
+export interface MarkdownNode extends PrimitiveNode {
+  type: 'markdown';
+  text: string;
+}
+
+/** The node types of a {@link SurfaceComposition}, the ones Agent Builder's Isomer pack renders. */
+export type SurfaceNode = MarkdownNode;
+
+/**
+ * An [Isomer](https://github.com/elastic/isomer) composition built from Agent Builder's node
+ * types: the same document renders to every surface, such as Slack. What an attachment type's
+ * `toSurfaceComposition` returns, and what a response message becomes.
+ */
+export type SurfaceComposition = Composition<SurfaceNode>;
 
 /**
  * Return type for attachment's validation handlers.
@@ -122,11 +166,18 @@ export interface TextAttachmentRepresentation {
 }
 
 /**
- * Representation of an attachment when exposed to the LLM.
- *
- * Only plain text (inlined into the message) is supported for now.
+ * Image representation of an attachment when exposed to the LLM.
  */
-export type AttachmentRepresentation = TextAttachmentRepresentation;
+export interface ImageAttachmentRepresentation {
+  type: 'image';
+  mimeType: string;
+  getBase64: () => MaybePromise<string>;
+}
+
+/**
+ * Representation of an attachment when exposed to the LLM.
+ */
+export type AttachmentRepresentation = TextAttachmentRepresentation | ImageAttachmentRepresentation;
 
 /**
  * Structure containing all methods which will be used to present the attachment to the agent.

@@ -9,8 +9,6 @@ import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 
-export type TransportType = 'aws-s3' | 'aws-cloudwatch';
-
 export const AWS_REGION_OPTIONS = [
   'ap-southeast-1',
   'ap-southeast-2',
@@ -24,52 +22,174 @@ export const AWS_REGION_OPTIONS = [
 
 export interface FieldMeta {
   def: RegistryVarsEntry;
-  /** Undefined when the var appears under both inputs — then it always renders. */
-  transport?: TransportType;
   isBool: boolean;
   multi: boolean;
   /** Whether the manifest marks this var as user-visible (show_user: true). */
   showUser: boolean;
 }
 
-const TRANSPORT_TYPES: TransportType[] = ['aws-s3', 'aws-cloudwatch'];
+/**
+ * ECF trigger vars are `multi: false` in the upstream package manifest, but ECF can route
+ * multiple sources per service. We override `multi: true` so the flyout renders an "Add row"
+ * list and buildStreamVars emits a string array.
+ *
+ * TODO: remove this override once elastic/integrations sets `multi: true` for these vars
+ * in all AWS package data streams that ECF services use.
+ */
+export const ECF_TRIGGER_VAR_NAMES = new Set(['bucket_arn', 'log_group_arn']);
 
-/** Resolve display metadata for a var straight from the package manifest. */
+/**
+ * Resolve display metadata for a var from the package manifest.
+ *
+ * Mirrors Fleet's positional scoping: scope is determined by which input's bucket the var sits in,
+ * not by a field on the var entry. When `activeInput` is non-null the lookup is direct
+ * (varDefsByInput[activeInput][fieldName]); when null, the first match across all inputs is used
+ * (for services with a single input or when no input is in scope yet).
+ */
 export function resolveFieldMeta(
   service: AwsServiceMatrixEntry,
+  activeInput: string | null,
   fieldName: string
 ): FieldMeta | undefined {
-  const vd = service.varDefs?.[fieldName];
-  if (!vd) return undefined;
-  // A var scoped to exactly one transport renders only for that transport.
-  // Vars shared by both inputs get no transport filter and always render.
-  const transport =
-    vd.inputs.length === 1 ? TRANSPORT_TYPES.find((t) => t === vd.inputs[0]) : undefined;
+  const varDefsByInput = service.varDefsByInput;
+  if (!varDefsByInput) return undefined;
+
+  let def: RegistryVarsEntry | undefined;
+  if (activeInput !== null) {
+    def = varDefsByInput[activeInput]?.[fieldName];
+  } else {
+    for (const byName of Object.values(varDefsByInput)) {
+      if (fieldName in byName) {
+        def = byName[fieldName];
+        break;
+      }
+    }
+  }
+  if (!def) return undefined;
+
   return {
-    def: vd.def,
-    transport,
-    isBool: vd.def.type === 'bool',
-    multi: vd.def.multi === true,
-    showUser: vd.def.show_user === true,
+    def,
+    isBool: def.type === 'bool',
+    multi: def.multi === true || ECF_TRIGGER_VAR_NAMES.has(fieldName),
+    showUser: def.show_user === true,
   };
+}
+
+/** True when a draft/stored var holds at least one non-blank value (string or multi-value array). */
+function hasValue(value: string | string[] | boolean | undefined): boolean {
+  return Array.isArray(value)
+    ? value.some((v) => v.trim() !== '')
+    : typeof value === 'string' && value.trim() !== '';
+}
+
+/** Sources that only make sense when `collect_s3_logs` is on (collect from the bucket, not SQS). */
+const BUCKET_MODE_SOURCE_VARS = ['bucket_arn', 'access_point_arn'];
+
+/**
+ * `bucket_arn` / `access_point_arn` and `queue_url` are alternatives gated by `collect_s3_logs`: an
+ * S3 input given only a bucket or access-point ARN silently polls SQS unless the toggle is on.
+ * Returns true when the toggle should default to on: the input declares it, the user left it
+ * unset, and a bucket or access-point ARN is present.
+ * Not applied to ECF-scoped services, which never read the toggle.
+ */
+export function shouldDefaultCollectS3Logs(
+  service: AwsServiceMatrixEntry,
+  input: string,
+  vars: Record<string, string | string[] | boolean> | undefined
+): boolean {
+  if (service.settingsScope === 'ecf') return false;
+  if (!service.varDefsByInput?.[input]?.collect_s3_logs) return false;
+  if (vars?.collect_s3_logs !== undefined) return false;
+  return BUCKET_MODE_SOURCE_VARS.some((name) => hasValue(vars?.[name]));
+}
+
+/**
+ * Input types whose manifest marks every source var optional while documenting that at least one
+ * is mandatory (e.g. "Mandatory if the Collect logs via S3 Bucket switch is on"). Without one the
+ * input starts but can never collect anything. Keyed by input type; the manifest has no
+ * machinery to express "one of", so the groups live here (verified against aws@8.7.1).
+ */
+const SOURCE_VAR_GROUPS: Record<string, string[]> = {
+  'aws-s3': ['bucket_arn', 'access_point_arn', 'queue_url'],
+  'aws-cloudwatch': ['log_group_arn', 'log_group_name', 'log_group_name_prefix'],
+};
+
+/**
+ * Whether the "at least one source" rule applies to `service` right now: ECF-capable services
+ * shown in the agent-based view, where Step 2 first collected only the trigger ARN. Widening the
+ * rule to more services only needs a change here.
+ */
+function appliesSourceRule(service: AwsServiceMatrixEntry): boolean {
+  return !!service.ecfSettings && service.settingsScope !== 'ecf';
+}
+
+/**
+ * The source vars `input` still needs, or undefined when its source is complete. The flyout hint
+ * and the Step 2 / Step 3 gates both use this, so they cannot disagree.
+ *
+ * For S3 inputs that declare `collect_s3_logs` the source must match the collection mode: with the
+ * toggle on a bucket or access-point ARN is required, with it off a queue URL is. An unset toggle
+ * is derived the way `buildStreamVars` does (a bucket or access-point ARN means on, otherwise SQS),
+ * so either kind of source is accepted. Without that check a stored `true` (inferred from a
+ * since-replaced ARN) would let a queue-URL-only config through and deploy a bucket input with no
+ * bucket.
+ */
+export function getMissingSourceGroup(
+  service: AwsServiceMatrixEntry,
+  input: string,
+  vars: Record<string, string | string[] | boolean> | undefined
+): string[] | undefined {
+  if (!appliesSourceRule(service)) return undefined;
+  const defs = service.varDefsByInput?.[input];
+  const group = (SOURCE_VAR_GROUPS[input] ?? []).filter((name) => defs?.[name]);
+  if (group.length < 2) return undefined;
+
+  if (defs?.collect_s3_logs) {
+    const bucketModeVars = BUCKET_MODE_SOURCE_VARS.filter((name) => defs[name]);
+    const hasBucketSource = bucketModeVars.some((name) => hasValue(vars?.[name]));
+    const hasQueueUrl = hasValue(vars?.queue_url);
+    const toggle = vars?.collect_s3_logs;
+    if (toggle === undefined) {
+      return hasBucketSource || hasQueueUrl ? undefined : group;
+    }
+    const isBucketMode = toggle === true || toggle === 'true';
+    if (isBucketMode) return hasBucketSource ? undefined : bucketModeVars;
+    return hasQueueUrl ? undefined : ['queue_url'];
+  }
+
+  return group.some((name) => hasValue(vars?.[name])) ? undefined : group;
 }
 
 /**
  * Convert a string draft value to the typed value Fleet's component and buildStreamVars expect.
  * bool → boolean, multi → string[], otherwise string.
  */
-export function toTyped(raw: string | undefined, meta: FieldMeta): string | boolean | string[] {
-  if (meta.isBool) return raw === undefined ? meta.def.default === true : raw === 'true';
-  if (meta.multi)
-    return raw
-      ? raw
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : [];
-  // For unset text/duration/etc fields, surface the manifest default so the flyout pre-fills.
-  if (raw === undefined && typeof meta.def.default === 'string') return meta.def.default;
-  return raw ?? '';
+export function toTyped(
+  raw: string | string[] | boolean | undefined,
+  meta: FieldMeta
+): string | boolean | string[] {
+  if (meta.isBool) {
+    if (typeof raw === 'boolean') return raw;
+    const s = Array.isArray(raw) ? raw[0] : raw;
+    return s === undefined ? meta.def.default === true : s === 'true';
+  }
+  // Boolean raw values only occur for isBool fields (handled above); narrow for string branches.
+  const strRaw = typeof raw === 'boolean' ? undefined : raw;
+  if (meta.multi) {
+    if (Array.isArray(strRaw)) return strRaw;
+    if (strRaw)
+      return strRaw
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+    if (strRaw === undefined && Array.isArray(meta.def.default))
+      return meta.def.default as string[];
+    return [];
+  }
+  const s = Array.isArray(strRaw) ? strRaw.join(',') : strRaw;
+  // For unset fields, surface the manifest default (string or number/duration) so the flyout pre-fills.
+  if (s === undefined && meta.def.default != null) return String(meta.def.default);
+  return s ?? '';
 }
 
 /**
@@ -80,71 +200,80 @@ export function toDraft(value: unknown): string {
   return value === undefined || value === null ? '' : String(value);
 }
 
-export function hasTransportChoice(service: AwsServiceMatrixEntry): boolean {
-  const inputs = service.inputs ?? [];
-  return inputs.includes('aws-s3') && inputs.includes('aws-cloudwatch');
+export function hasInputChoice(service: AwsServiceMatrixEntry): boolean {
+  return (service.inputs ?? []).length >= 2;
 }
 
-export function getDefaultTransport(
-  service: AwsServiceMatrixEntry | undefined
-): TransportType | null {
-  const inputs = service?.inputs ?? [];
-  if (inputs.includes('aws-s3')) return 'aws-s3';
-  if (inputs.includes('aws-cloudwatch')) return 'aws-cloudwatch';
-  return null;
+/** Returns the single input to check field visibility against when the flyout has no toggle. */
+export function getDefaultInput(service: AwsServiceMatrixEntry | undefined): string | null {
+  // Use the first manifest-enabled input; fall back to the first available input.
+  return service?.defaultEnabledInputs?.[0] ?? service?.inputs?.[0] ?? null;
 }
 
+// TODO: add the "Create dedicated index template for custom dataset (recommended)" switch
+// that Fleet shows in advanced options for input packages when data_stream.dataset is customised
+// (package_policy_input_stream.tsx, rendered after advancedVars when showPipelinesAndMappings is true).
+// It is a Fleet UI construct, not a manifest var — needs Fleet's useIndexTemplateExists hook.
 export function getFlyoutFields(
   service: AwsServiceMatrixEntry,
-  activeTransport: TransportType | null
+  activeInput: string | null
 ): string[] {
   const allFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
   return allFields.filter((f) => {
-    const meta = resolveFieldMeta(service, f);
+    const meta = resolveFieldMeta(service, activeInput, f);
     if (!meta) return false;
-    if (!meta.showUser) return false;
     // Bool fields are rendered as switches in their own section; exclude from text flyout fields.
     if (meta.isBool) return false;
-    if (meta.transport && activeTransport && meta.transport !== activeTransport) return false;
+    // show_user:false vars intentionally surface here (under Advanced options via isAdvancedVar)
+    // to match the Integrations UI which shows all vars regardless of show_user.
     return true;
   });
 }
 
 export const REGION_FIELD_NAMES = new Set(['region', 'region_name', 'aws_region']);
 
+function hasConfigurableFlyoutFieldsForInput(
+  service: AwsServiceMatrixEntry,
+  activeInput: string | null
+): boolean {
+  if (getRequiredTextFields(service, activeInput).length > 0) return true;
+  if (getRequiredBooleanFields(service, activeInput).length > 0) return true;
+  const flyoutFields = getFlyoutFields(service, activeInput);
+  const requiredSet = new Set(getRequiredTextFields(service, activeInput));
+  return flyoutFields.some((f) => !REGION_FIELD_NAMES.has(f) && !requiredSet.has(f));
+}
+
 /** Returns true when the flyout has at least one visible field for the given service. */
 export function hasConfigurableFlyoutFields(service: AwsServiceMatrixEntry): boolean {
-  if (hasTransportChoice(service)) return true;
-  const defaultTransport = getDefaultTransport(service);
-  if (getRequiredTextFields(service, defaultTransport).length > 0) return true;
-  if (getRequiredBooleanFields(service, defaultTransport).length > 0) return true;
-  const flyoutFields = getFlyoutFields(service, defaultTransport);
-  const requiredSet = new Set(getRequiredTextFields(service, defaultTransport));
-  return flyoutFields.some((f) => !REGION_FIELD_NAMES.has(f) && !requiredSet.has(f));
+  const allInputs = service.inputs;
+  if (!allInputs || allInputs.length === 0) {
+    return hasConfigurableFlyoutFieldsForInput(service, getDefaultInput(service));
+  }
+  return allInputs.some((input) => hasConfigurableFlyoutFieldsForInput(service, input));
 }
 
 export function getRegionFieldName(
   service: AwsServiceMatrixEntry,
-  activeTransport: string | null
+  activeInput: string | null
 ): string {
   const rc = service.requiredConfig ?? [];
-  if (activeTransport === 'aws-s3' && rc.includes('region')) return 'region';
-  if (activeTransport === 'aws-cloudwatch' && rc.includes('region_name')) return 'region_name';
+  if (activeInput === 'aws-s3' && rc.includes('region')) return 'region';
+  if (activeInput === 'aws-cloudwatch' && rc.includes('region_name')) return 'region_name';
   if (rc.includes('aws_region')) return 'aws_region';
+  if (rc.includes('region')) return 'region'; // input packages (e.g. otelcol)
   return 'aws_region';
 }
 
 export function getRequiredTextFields(
   service: AwsServiceMatrixEntry,
-  activeTransport: TransportType | null
+  activeInput: string | null
 ): string[] {
   return (service.requiredConfig ?? []).filter((f) => {
-    const meta = resolveFieldMeta(service, f);
+    const meta = resolveFieldMeta(service, activeInput, f);
     if (!meta) return false;
     if (!meta.showUser) return false;
     if (meta.isBool) return false;
     if (REGION_FIELD_NAMES.has(f)) return false;
-    if (meta.transport && activeTransport && meta.transport !== activeTransport) return false;
     return true;
   });
 }
@@ -162,14 +291,13 @@ export function isAdvancedVar(def: RegistryVarsEntry): boolean {
 
 export function getRequiredBooleanFields(
   service: AwsServiceMatrixEntry,
-  activeTransport: TransportType | null
+  activeInput: string | null
 ): string[] {
   return (service.requiredConfig ?? []).filter((f) => {
-    const meta = resolveFieldMeta(service, f);
+    const meta = resolveFieldMeta(service, activeInput, f);
     if (!meta) return false;
     if (!meta.showUser) return false;
     if (!meta.isBool) return false;
-    if (meta.transport && activeTransport && meta.transport !== activeTransport) return false;
     return true;
   });
 }

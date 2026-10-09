@@ -8,11 +8,10 @@
 import {
   CASE_DETAILS_URL,
   INTERNAL_CASE_METRICS_DETAILS_URL,
-  CASE_COMMENTS_URL,
   CASE_PUSH_URL,
   CASE_CONFIGURE_DETAILS_URL,
   CASE_ALERTS_URL,
-  CASE_COMMENT_DELETE_URL,
+  CASE_ATTACHMENT_DETAILS_URL,
   INTERNAL_CASE_FIND_USER_ACTIONS_URL,
   INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
   INTERNAL_BULK_GET_ATTACHMENTS_URL,
@@ -25,6 +24,8 @@ import {
   INTERNAL_CASE_OBSERVABLES_PATCH_URL,
   INTERNAL_CASE_SIMILAR_CASES_URL,
   INTERNAL_CASE_OBSERVABLES_DELETE_URL,
+  INTERNAL_CASE_OBSERVABLES_BULK_DELETE_URL,
+  INTERNAL_CASE_WORKFLOW_RUN_URL,
 } from '../constants';
 
 export const getCaseDetailsUrl = (id: string): string => {
@@ -35,16 +36,12 @@ export const getCaseDetailsMetricsUrl = (id: string): string => {
   return INTERNAL_CASE_METRICS_DETAILS_URL.replace('{case_id}', id);
 };
 
-export const getCaseCommentsUrl = (id: string): string => {
-  return CASE_COMMENTS_URL.replace('{case_id}', id);
-};
-
 export const getCaseFindAttachmentsUrl = (caseId: string): string => {
   return CASE_FIND_ATTACHMENTS_URL.replace('{case_id}', caseId);
 };
 
-export const getCaseCommentDeleteUrl = (caseId: string, commentId: string): string => {
-  return CASE_COMMENT_DELETE_URL.replace('{case_id}', caseId).replace('{comment_id}', commentId);
+export const getCaseAttachmentDetailsUrl = (caseId: string, attachmentId: string): string => {
+  return CASE_ATTACHMENT_DETAILS_URL.replace('{case_id}', caseId).replace('{id}', attachmentId);
 };
 
 export const getCaseUserActionStatsUrl = (id: string): string => {
@@ -108,6 +105,14 @@ export const getCaseDeleteObservableUrl = (id: string, observableId: string): st
   );
 };
 
+export const getCaseBulkDeleteObservablesUrl = (id: string): string => {
+  return INTERNAL_CASE_OBSERVABLES_BULK_DELETE_URL.replace('{case_id}', id);
+};
+
 export const getCaseSimilarCasesUrl = (caseId: string) => {
   return INTERNAL_CASE_SIMILAR_CASES_URL.replace('{case_id}', caseId);
+};
+
+export const getRunCaseWorkflowUrl = (workflowId: string): string => {
+  return INTERNAL_CASE_WORKFLOW_RUN_URL.replace('{workflow_id}', workflowId);
 };

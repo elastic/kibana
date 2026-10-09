@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pick } from 'lodash';
+import { omit, pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, map, skip } from 'rxjs';
@@ -19,12 +19,16 @@ import type {
   PublishesWritableUnifiedSearch,
   PublishesWritableDataViews,
   ProjectRoutingOverrides,
-  PublishesEsqlUsage,
+  PublishesEsql,
   PublishesProjectRoutingOverrides,
 } from '@kbn/presentation-publishing';
 import type { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import type { DataGridDensity, DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type {
+  DataGridDensity,
+  JsonModeSettings,
+  DocumentsDisplayMode,
+} from '@kbn/unified-data-table';
 
 import {
   isOfAggregateQueryType,
@@ -35,8 +39,9 @@ import {
 import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
 import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import { getEsqlDataView } from '@kbn/discover-utils';
+import { unregisterFromDataViewsCache, type EsqlSource } from '@kbn/data-source';
 import type { DiscoverServices } from '../build_services';
+import { resolveEsqlSource } from '../application/main/data_fetching/resolve_esql_source';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
 import type {
   PublishesWritableSavedSearch,
@@ -46,14 +51,20 @@ import type {
 
 const initializeSearchSource = async (
   discoverServices: DiscoverServices,
-  serializedSearchSource?: SerializedSearchSourceFields
+  serializedSearchSource?: SerializedSearchSourceFields,
+  previousSourceId?: string
 ) => {
   let searchSource: ISearchSource;
   let parentSearchSource: ISearchSource;
+  // The ES|QL data view is resolved from the query below; hydrating the saved one would only
+  // cost a field caps request and cache a DataView under the id the ES|QL shim uses.
+  const searchSourceFields = isOfAggregateQueryType(serializedSearchSource?.query)
+    ? omit(serializedSearchSource, 'index')
+    : serializedSearchSource;
 
   try {
     [searchSource, parentSearchSource] = await Promise.all([
-      discoverServices.data.search.searchSource.create(serializedSearchSource),
+      discoverServices.data.search.searchSource.create(searchSourceFields),
       discoverServices.data.search.searchSource.create(),
     ]);
   } catch (error) {
@@ -70,19 +81,31 @@ const initializeSearchSource = async (
   searchSource.setParent(parentSearchSource);
 
   const query = searchSource.getField('query');
-  let dataView = searchSource.getField('index');
+  const dataView = searchSource.getField('index');
 
   if (isOfAggregateQueryType(query)) {
-    dataView = await getEsqlDataView(query, dataView, discoverServices);
+    const { esqlSource, dataView: esqlDataView } = await resolveEsqlSource({
+      esql: query.esql,
+      services: discoverServices,
+      previousSourceId,
+    });
+    searchSource.setField('index', esqlDataView);
+    return { searchSource, dataView: esqlDataView, esqlSource };
   }
 
-  return { searchSource, dataView };
+  if (previousSourceId) {
+    discoverServices.dataSourceService.unregisterEsqlSource(previousSourceId);
+    unregisterFromDataViewsCache(previousSourceId);
+  }
+
+  return { searchSource, dataView, esqlSource: undefined };
 };
 
 const initializedSavedSearch = (
   stateManager: SearchEmbeddableStateManager,
   searchSource: ISearchSource,
-  discoverServices: DiscoverServices
+  discoverServices: DiscoverServices,
+  tabTypeState: SavedSearch['tabTypeState']
 ): SavedSearch => {
   return {
     ...Object.keys(stateManager).reduce((prev, key) => {
@@ -92,6 +115,7 @@ const initializedSavedSearch = (
       };
     }, discoverServices.savedSearch.getNew()),
     searchSource,
+    tabTypeState,
   };
 };
 
@@ -115,19 +139,24 @@ export const initializeSearchEmbeddableApi = async ({
     PublishesWritableDataViews &
     Omit<PublishesWritableUnifiedSearch, keyof PublishesWritableTimeRange> &
     PublishesProjectRoutingOverrides &
-    PublishesEsqlUsage;
+    PublishesEsql;
+  internalApi: {
+    setApproximationApplied: (approximationApplied?: boolean) => void;
+  };
   stateManager: SearchEmbeddableStateManager;
   anyStateChange$: Observable<void>;
   cleanup: () => void;
   reinitializeState: (lastSaved: SearchEmbeddableSerializedAttributes) => Promise<void>;
+  esqlSource$: BehaviorSubject<EsqlSource | undefined>;
 }> => {
   /** We **must** have a search source, so start by initializing it  */
-  const { searchSource, dataView } = await initializeSearchSource(
+  const { searchSource, dataView, esqlSource } = await initializeSearchSource(
     discoverServices,
     initialState.serializedSearchSource
   );
   const searchSource$ = new BehaviorSubject<ISearchSource>(searchSource);
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(dataView ? [dataView] : undefined);
+  const esqlSource$ = new BehaviorSubject<EsqlSource | undefined>(esqlSource);
 
   /** This is the state that can be initialized from the saved initial state */
   const columns$ = new BehaviorSubject<string[] | undefined>(initialState.columns);
@@ -137,6 +166,12 @@ export const initializeSearchEmbeddableApi = async ({
   const rowsPerPage$ = new BehaviorSubject<number | undefined>(initialState.rowsPerPage);
   const sampleSize$ = new BehaviorSubject<number | undefined>(initialState.sampleSize);
   const density$ = new BehaviorSubject<DataGridDensity | undefined>(initialState.density);
+  const documentsDisplayMode$ = new BehaviorSubject<DocumentsDisplayMode | undefined>(
+    initialState.documentsDisplayMode
+  );
+  const jsonModeSettings$ = new BehaviorSubject<JsonModeSettings | undefined>(
+    initialState.jsonModeSettings
+  );
   const sort$ = new BehaviorSubject<SortOrder[] | undefined>(initialState.sort);
   const savedSearchViewMode$ = new BehaviorSubject<VIEW_MODE | undefined>(initialState.viewMode);
 
@@ -156,13 +191,16 @@ export const initializeSearchEmbeddableApi = async ({
   const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(
     getProjectRoutingOverrides(initialQuery)
   );
-  const usesEsql$ = new BehaviorSubject<boolean>(isOfAggregateQueryType(initialQuery));
+  const esql$ = new BehaviorSubject<AggregateQuery[]>(
+    isOfAggregateQueryType(initialQuery) ? [initialQuery] : []
+  );
+  const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
 
   const canEditUnifiedSearch = () => false;
 
   /** This is the state that has to be fetched */
   const rows$ = new BehaviorSubject<DataTableRecord[]>([]);
-  const columnsMeta$ = new BehaviorSubject<DataTableColumnsMeta | undefined>(undefined);
+  const resultDataSource$ = new BehaviorSubject<EsqlSource | undefined>(undefined);
   const totalHitCount$ = new BehaviorSubject<number | undefined>(undefined);
   const inspectorAdapters$ = new BehaviorSubject<Adapters>({});
 
@@ -172,7 +210,7 @@ export const initializeSearchEmbeddableApi = async ({
    */
   const stateManager: SearchEmbeddableStateManager = {
     columns: columns$,
-    columnsMeta: columnsMeta$,
+    resultDataSource: resultDataSource$,
     grid: grid$,
     headerRowHeight: headerRowHeight$,
     rows: rows$,
@@ -183,12 +221,14 @@ export const initializeSearchEmbeddableApi = async ({
     totalHitCount: totalHitCount$,
     viewMode: savedSearchViewMode$,
     density: density$,
+    documentsDisplayMode: documentsDisplayMode$,
+    jsonModeSettings: jsonModeSettings$,
     inspectorAdapters: inspectorAdapters$,
   };
 
   /** The saved search should be the source of truth for all state  */
   const savedSearch$ = new BehaviorSubject(
-    initializedSavedSearch(stateManager, searchSource, discoverServices)
+    initializedSavedSearch(stateManager, searchSource, discoverServices, initialState.tabTypeState)
   );
 
   /** This will fire when any of the **editable** state changes */
@@ -223,16 +263,25 @@ export const initializeSearchEmbeddableApi = async ({
     // Trigger dataLoading$ and clear rows$ to show the initial loading state
     dataLoading$.next(true);
     rows$.next([]);
+    resultDataSource$.next(undefined);
 
-    const { searchSource: newSearchSource, dataView: newDataView } = await initializeSearchSource(
+    const previousSourceId = esqlSource$.getValue()?.id;
+    const {
+      searchSource: newSearchSource,
+      dataView: newDataView,
+      esqlSource: newEsqlSource,
+    } = await initializeSearchSource(
       discoverServices,
-      state.serializedSearchSource
+      state.serializedSearchSource,
+      previousSourceId
     );
 
     // Ensure all state updates happen synchronously to prevent multiple reloads
+    savedSearch$.next({ ...savedSearch$.getValue(), tabTypeState: state.tabTypeState });
     searchSource$.next(newSearchSource);
 
     dataViews$.next(newDataView ? [newDataView] : undefined);
+    esqlSource$.next(newEsqlSource);
 
     const newQuery = newSearchSource.getField('query');
     const newFilters = newSearchSource.getField('filter') as Filter[] | undefined;
@@ -248,6 +297,8 @@ export const initializeSearchEmbeddableApi = async ({
     headerRowHeight$.next(state.headerRowHeight);
     savedSearchViewMode$.next(state.viewMode);
     density$.next(state.density);
+    documentsDisplayMode$.next(state.documentsDisplayMode);
+    jsonModeSettings$.next(state.jsonModeSettings);
   };
 
   /** Keep the saved search in sync with any state changes */
@@ -264,7 +315,7 @@ export const initializeSearchEmbeddableApi = async ({
       savedSearch$.next(newSavedSearch);
     });
 
-  /** Keep projectRoutingOverrides$ and usesEsql$ in sync with query$ changes */
+  /** Keep projectRoutingOverrides$ and esql$ in sync with query$ changes */
   const syncProjectRoutingOverrides = query$.subscribe((query) => {
     const currentOverrides = projectRoutingOverrides$.getValue();
     const nextOverrides = getProjectRoutingOverrides(query);
@@ -273,16 +324,32 @@ export const initializeSearchEmbeddableApi = async ({
       projectRoutingOverrides$.next(nextOverrides);
     }
 
-    const nextUsesEsql = isOfAggregateQueryType(query);
-    if (usesEsql$.getValue() !== nextUsesEsql) {
-      usesEsql$.next(nextUsesEsql);
+    const nextEsql = isOfAggregateQueryType(query) ? [query] : [];
+    if (!deepEqual(esql$.getValue(), nextEsql)) {
+      esql$.next(nextEsql);
+      if (nextEsql.length === 0) approximationApplied$.next(undefined);
     }
   });
+
+  const setApproximationApplied = (value: boolean | undefined) => {
+    if (approximationApplied$.getValue() !== value) {
+      approximationApplied$.next(value);
+    }
+  };
 
   return {
     cleanup: () => {
       syncSavedSearch.unsubscribe();
       syncProjectRoutingOverrides.unsubscribe();
+      const sourceId = esqlSource$.getValue()?.id;
+      if (sourceId) {
+        discoverServices.dataSourceService.unregisterEsqlSource(sourceId);
+        unregisterFromDataViewsCache(sourceId);
+      }
+    },
+    esqlSource$,
+    internalApi: {
+      setApproximationApplied,
     },
     api: {
       setDataViews,
@@ -293,7 +360,8 @@ export const initializeSearchEmbeddableApi = async ({
       query$,
       setQuery,
       projectRoutingOverrides$,
-      usesEsql$,
+      esql$,
+      approximationApplied$,
       canEditUnifiedSearch,
       setColumns,
     },

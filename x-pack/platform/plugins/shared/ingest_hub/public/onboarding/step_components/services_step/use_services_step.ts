@@ -8,6 +8,7 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import type { SignalType } from '../../aws_service_matrix';
+import { isAgentBasedOnly } from '../../aws_service_matrix';
 import type { ServiceCategory } from '../../service_categories';
 import { CATEGORY_ORDER } from '../../service_categories';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
@@ -18,8 +19,13 @@ export { CATEGORY_ORDER };
 export type SignalFilter = SignalType | 'all';
 
 export function useServicesStep({ onContinue }: { onContinue: () => void }) {
-  const { servicesStep, setSelectedServiceIds, awsServiceMatrix: rawMatrix } = useOnboardingFlow();
-  const { selectedServiceIds } = servicesStep;
+  const {
+    servicesStep,
+    setSelectedServiceIds,
+    setDataFormat,
+    awsServiceMatrix: rawMatrix,
+  } = useOnboardingFlow();
+  const { selectedServiceIds, dataFormat } = servicesStep;
 
   const awsServiceMatrix = useMemo(() => rawMatrix ?? [], [rawMatrix]);
 
@@ -32,10 +38,11 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     return awsServiceMatrix.filter(
       (s) =>
         s.showInUI &&
-        (signalFilter === 'all' || s.signalType === signalFilter) &&
+        (s.dataFormat ?? 'ecs') === dataFormat &&
+        (signalFilter === 'all' || s.signalTypes.includes(signalFilter)) &&
         (q === '' || s.name.toLowerCase().includes(q))
     );
-  }, [awsServiceMatrix, signalFilter, searchQuery]);
+  }, [awsServiceMatrix, signalFilter, searchQuery, dataFormat]);
 
   const categories = useMemo(() => {
     const present = new Set(filteredServices.map((s) => s.category));
@@ -69,9 +76,12 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
   const signalFilteredServices = useMemo(
     () =>
       awsServiceMatrix.filter(
-        (s) => s.showInUI && (signalFilter === 'all' || s.signalType === signalFilter)
+        (s) =>
+          s.showInUI &&
+          (s.dataFormat ?? 'ecs') === dataFormat &&
+          (signalFilter === 'all' || s.signalTypes.includes(signalFilter))
       ),
-    [awsServiceMatrix, signalFilter]
+    [awsServiceMatrix, signalFilter, dataFormat]
   );
 
   const categoryStats = useMemo(() => {
@@ -86,6 +96,11 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     }
     return stats;
   }, [categories, signalFilteredServices, selectedSet]);
+
+  const agentBasedOnlySelected = useMemo(
+    () => awsServiceMatrix?.filter((s) => selectedSet.has(s.id) && isAgentBasedOnly(s)) ?? [],
+    [awsServiceMatrix, selectedSet]
+  );
 
   const isReady = selectedServiceIds.length > 0;
 
@@ -138,5 +153,8 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     handleSelectAllInCategory,
     handleDeselectAllInCategory,
     handleNext,
+    dataFormat,
+    setDataFormat,
+    agentBasedOnlySelected,
   };
 }

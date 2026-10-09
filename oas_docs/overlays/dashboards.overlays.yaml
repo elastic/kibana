@@ -134,7 +134,7 @@ actions:
         | `field_stats_table` | Field statistics table |
 
         > info
-        > The following panel types are supported in the Kibana UI but not yet by the REST API: `map`, `legacy_vis`. Write operations (`POST`, `PUT`) return a `400` error when these panel types are included. Read operations (`GET`) strip these panels from the response and include them in a list of warnings.
+        > The following panel types are supported in the Kibana UI but not yet by the REST API: `map`, `legacy_vis`, `alerts_table`. Write operations (`POST`, `PUT`) return a `400` error when these panel types are included. Read operations (`GET`) strip these panels from the response and include them in a list of warnings.
 
         ### Embedding library items
 
@@ -227,36 +227,3 @@ actions:
         description: Dashboards documentation
         url: https://www.elastic.co/docs/explore-analyze/dashboards
       x-displayName: Dashboards
-
-  # ──────────────────────────────────────────────
-  # Operation IDs
-  # ──────────────────────────────────────────────
-  # Pin every operationId to a stable, human-readable name.
-  #
-  # Without these actions the router generates the ID from the method and the
-  # path, which produces names like `put-dashboards-id`. Those names ship to
-  # SDK and CLI code generators, where they become command and method names.
-  #
-  # These pins must survive the retirement of the bump-slim overlay. See
-  # https://github.com/elastic/kibana/issues/266195. The bump-slim overlay sets
-  # the same IDs today. Keep the two files in agreement until it is retired.
-  - target: "$.paths['/api/dashboards'].get"
-    description: "Pin operationId for GET /api/dashboards"
-    update:
-      operationId: search-dashboards
-  - target: "$.paths['/api/dashboards'].post"
-    description: "Pin operationId for POST /api/dashboards"
-    update:
-      operationId: create-dashboard
-  - target: "$.paths['/api/dashboards/{id}'].get"
-    description: "Pin operationId for GET /api/dashboards/{id}"
-    update:
-      operationId: get-dashboard
-  - target: "$.paths['/api/dashboards/{id}'].put"
-    description: "Pin operationId for PUT /api/dashboards/{id}"
-    update:
-      operationId: upsert-dashboard
-  - target: "$.paths['/api/dashboards/{id}'].delete"
-    description: "Pin operationId for DELETE /api/dashboards/{id}"
-    update:
-      operationId: delete-dashboard

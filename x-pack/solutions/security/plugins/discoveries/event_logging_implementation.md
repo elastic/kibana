@@ -197,8 +197,8 @@ The following verification steps require manual execution:
 
 1. **Start Kibana and Elasticsearch**
    ```bash
-   yarn es snapshot --E xpack.security.enabled=true
-   yarn start --no-base-path
+   pnpm es snapshot --E xpack.security.enabled=true
+   pnpm start --no-base-path
    ```
 
 2. **Delete existing event log entries (clean slate)**

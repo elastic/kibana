@@ -50,4 +50,31 @@ describe('deleteSyntheticsMonitorRoute', () => {
 
     expect(result).toEqual([{ id: 'mon-1', deleted: true }]);
   });
+
+  it('returns the not found result for a monitor that does not exist', async () => {
+    installExecuteResult({ errors: [] }, [
+      { id: 'mon-1', deleted: false, error: 'Monitor id mon-1 not found!' },
+    ]);
+
+    const result = await route.handler(mockRouteContext());
+
+    expect(result).toEqual([{ id: 'mon-1', deleted: false, error: 'Monitor id mon-1 not found!' }]);
+  });
+
+  it('reports the errors from deleting the monitor at the service', async () => {
+    const errors = [
+      { locationId: 'us_central', error: { status: 404, reason: 'monitor delete failed' } },
+    ];
+    installExecuteResult({ errors });
+    const routeContext = mockRouteContext();
+
+    await route.handler(routeContext);
+
+    expect(routeContext.response.ok).toHaveBeenCalledWith({
+      body: {
+        message: 'Error pushing monitor to the service',
+        attributes: { errors },
+      },
+    });
+  });
 });

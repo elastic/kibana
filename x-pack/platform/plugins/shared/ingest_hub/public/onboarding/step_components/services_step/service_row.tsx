@@ -42,7 +42,7 @@ export const ServiceRow: React.FC<ServiceRowProps> = ({
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <SignalTypeBadge signalType={service.signalType} />
+              <SignalTypeBadge signalTypes={service.signalTypes} />
             </EuiFlexItem>
           </EuiFlexGroup>
         }

@@ -190,7 +190,7 @@ describe('SubActionConnector', () => {
       const res = await service.testUrl({ url: 'https://example.com' }, connectorUsageCollector);
 
       expect(requestMock).toHaveBeenCalledTimes(1);
-      expect(requestMock).toBeCalledWith({
+      expect(requestMock).toHaveBeenCalledWith({
         axios: axiosInstanceMock,
         configurationUtilities: mockedActionsConfig,
         logger,
@@ -204,7 +204,7 @@ describe('SubActionConnector', () => {
         connectorUsageCollector,
       });
 
-      expect(logger.debug).toBeCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         'Request to external service. Connector Id: test-id. Connector type: .test Method: get. URL: https://example.com'
       );
 
@@ -324,7 +324,7 @@ describe('SubActionConnector', () => {
       await service.testAuth(undefined, connectorUsageCollector);
 
       expect(requestMock).toHaveBeenCalledTimes(1);
-      expect(requestMock).toBeCalledWith({
+      expect(requestMock).toHaveBeenCalledWith({
         axios: axiosInstanceMock,
         configurationUtilities: mockedActionsConfig,
         logger,
@@ -347,7 +347,7 @@ describe('SubActionConnector', () => {
       );
 
       expect(requestMock).toHaveBeenCalledTimes(1);
-      expect(requestMock).toBeCalledWith({
+      expect(requestMock).toHaveBeenCalledWith({
         axios: axiosInstanceMock,
         configurationUtilities: mockedActionsConfig,
         logger,

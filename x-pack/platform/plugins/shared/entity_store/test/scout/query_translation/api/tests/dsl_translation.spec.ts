@@ -7,14 +7,13 @@
 
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '@kbn/scout';
+import { ENTITY_STORE_TAGS } from '../../../common/fixtures/constants';
 import {
-  PUBLIC_HEADERS,
-  ENTITY_STORE_ROUTES,
-  ENTITY_STORE_TAGS,
-  UPDATES_INDEX,
-} from '../../../common/fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
-import { clearEntityStoreIndices, ingestDoc } from '../../../common/fixtures/helpers';
+  ingestDoc,
+  QUERY_TRANSLATION_TEST_INDEX,
+  setupQueryTranslationTestDataStream,
+  teardownQueryTranslationTestDataStream,
+} from '../../../common/fixtures/helpers';
 import {
   getEuidDslFilterBasedOnDocument,
   getEuidDslDocumentsContainsIdFilter,
@@ -47,7 +46,7 @@ async function searchWithFilter(
   size = 100
 ) {
   return esClient.search({
-    index: UPDATES_INDEX,
+    index: QUERY_TRANSLATION_TEST_INDEX,
     query: query ? { ...query } : {},
     size,
   }) as Promise<{
@@ -74,39 +73,15 @@ function hasDocWith(
 }
 
 apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
-  let defaultHeaders: Record<string, string>;
-
-  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
-    const credentials = await samlAuth.asInteractiveUser('admin');
-    defaultHeaders = {
-      ...credentials.cookieHeader,
-      ...PUBLIC_HEADERS,
-    };
-
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
-
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(201);
-
+  apiTest.beforeAll(async ({ esArchiver, esClient }) => {
+    await setupQueryTranslationTestDataStream(esClient);
     await esArchiver.loadIfNeeded(
-      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/updates'
+      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/query_translation_source'
     );
   });
 
-  apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(200);
-    await clearEntityStoreIndices(esClient);
+  apiTest.afterAll(async ({ esClient }) => {
+    await teardownQueryTranslationTestDataStream(esClient);
   });
 
   apiTest(
@@ -216,7 +191,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     apiTest(
       `user.ts DSL (ingested asset + cloud.provider): single hit for scenario "${scenario.id}"`,
       async ({ esClient }) => {
-        await ingestDoc(esClient, scenario.ingestSource!);
+        await ingestDoc(esClient, scenario.ingestSource!, QUERY_TRANSLATION_TEST_INDEX);
         const dsl = getEuidDslFilterBasedOnDocument('user', scenario.dslFilterSource);
         expect(dsl).toBeDefined();
 
@@ -236,7 +211,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
         });
 
         await esClient.deleteByQuery({
-          index: UPDATES_INDEX,
+          index: QUERY_TRANSLATION_TEST_INDEX,
           refresh: true,
           query: scenario.query as object,
         });

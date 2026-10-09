@@ -13,6 +13,7 @@ import type { RunToolReturn } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { isArray } from 'lodash';
 import { cleanPrompt } from '../prompts';
+import { sanitizeToolId } from './tools';
 
 /**
  * Extract the text content from a langchain message or chunk.
@@ -108,9 +109,24 @@ export const generateFakeToolCallId = () => {
 
 export const createUserMessage = (
   content: string,
-  { clean = false }: { clean?: boolean } = {}
+  {
+    clean = false,
+    images,
+  }: { clean?: boolean; images?: Array<{ base64: string; mimeType: string }> } = {}
 ): HumanMessage => {
-  return new HumanMessage({ content: clean ? cleanPrompt(content) : content });
+  const text = clean ? cleanPrompt(content) : content;
+  if (images && images.length > 0) {
+    return new HumanMessage({
+      content: [
+        { type: 'text', text },
+        ...images.map((i) => ({
+          type: 'image_url' as const,
+          image_url: { url: `data:${i.mimeType};base64,${i.base64}` },
+        })),
+      ],
+    });
+  }
+  return new HumanMessage({ content: text });
 };
 
 export const createAIMessage = (
@@ -153,7 +169,7 @@ export const createToolCallMessage = (
     tool_calls: toolCalls.map((toolCall) => {
       return {
         id: toolCall.toolCallId,
-        name: toolCall.toolName,
+        name: sanitizeToolId(toolCall.toolName),
         args: toolCall.reasoning
           ? { _reasoning: toolCall.reasoning, ...toolCall.args }
           : toolCall.args,

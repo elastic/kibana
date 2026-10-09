@@ -17,7 +17,7 @@ module.exports = {
    * Node.js path logic as described here:
    * https://babeljs.io/docs/options#matchpattern
    *
-   * Used by `kbn-babel-preset` and `kbn-eslint-config`.
+   * Used by `kbn-babel-preset` and `.oxlint/module_migration.mts`.
    */
   USES_STYLED_COMPONENTS: [
     /src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-ui-shared-deps-npm[\/\\]/,
@@ -261,14 +261,12 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]explore[\/\\]components[\/\\]paginated_table[\/\\]index.test.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]explore[\/\\]components[\/\\]paginated_table[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]flyout[\/\\]rule_details[\/\\]right[\/\\]index.test.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_card_grid[\/\\]components[\/\\]grid_header.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_entry_card[\/\\]components[\/\\]date_field_value.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_entry_card[\/\\]components[\/\\]effect_scope.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_entry_card[\/\\]components[\/\\]touched_by_users.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_entry_card[\/\\]utils[\/\\]get_formatted_comments.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_list_page[\/\\]components[\/\\]no_data_empty_state.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]back_to_external_app_button[\/\\]back_to_external_app_button.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]context_menu_with_router_support[\/\\]context_menu_item_nav_by_router.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]management_empty_state_wrapper.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]package_action_item[\/\\]package_action_item_error.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]paginated_content[\/\\]paginated_content.tsx/,

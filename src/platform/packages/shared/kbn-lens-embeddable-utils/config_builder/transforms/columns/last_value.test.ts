@@ -171,21 +171,17 @@ describe('Last Value Transforms', () => {
       expect(result.multi_value).toBe(true);
     });
 
-    it('should default multi_value to false when showArrayValues is undefined', () => {
+    it('should default multi_value to false when showArrayValues is absent', () => {
       const input: LastValueIndexPatternColumn = {
         operationType: 'last_value',
-        sourceField: 'memory',
-        label: 'Last value of memory',
+        sourceField: 'status',
+        label: 'Last value of status',
         isBucketed: false,
-        dataType: 'number',
-        params: {
-          sortField: '@timestamp',
-          showArrayValues: undefined,
-        },
+        dataType: 'string',
+        params: { sortField: '@timestamp' } as LastValueIndexPatternColumn['params'],
       };
 
-      const result = fromLastValueLensStateToAPI(input);
-      expect(result.multi_value).toBe(false);
+      expect(fromLastValueLensStateToAPI(input).multi_value).toBe(false);
     });
   });
 });

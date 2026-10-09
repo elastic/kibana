@@ -80,6 +80,12 @@ To ensure that a record of every operation is persisted even in case of an unexp
 | | `failure` | Failed attempt to update a knowledge base entry |
 | `knowledge_base_entry_delete` | `success` | User has deleted knowledge base entry [id=x] |
 | | `failure` | Failed attempt to delete a knowledge base entry |
+| `workflow_create` {applies_to}`stack: preview 9.4+` | `success` | User has created a workflow [id=x]. |
+| | `failure` | Failed attempt to create a workflow. |
+| `workflow_bulk_create` {applies_to}`stack: preview 9.4+` | `success` | User has created a workflow via bulk import [id=x]. One event is written per workflow. |
+| | `failure` | Failed attempt to create a workflow via bulk import. |
+| `workflow_clone` {applies_to}`stack: preview 9.4+` | `success` | User has cloned a workflow [sourceId=x] to [id=y]. |
+| | `failure` | Failed attempt to clone a workflow [id=x]. |
 
 #### Type: change
 
@@ -175,6 +181,22 @@ To ensure that a record of every operation is persisted even in case of an unexp
 | `ml_update_trained_model_deployment` | `success` | Updating trained model deployment. |
 | | `failure` | Failed to update trained model deployment. |
 | `product_documentation_update` | `unknown` | User requested to update the product documentation for use in AI Assistants. |
+| `workflow_update` {applies_to}`stack: preview 9.4+` | `success` | User has updated a workflow [id=x]. |
+| | `failure` | Failed attempt to update a workflow [id=x]. |
+| `workflow_restore` {applies_to}`stack: preview 9.5+` | `success` | User has restored a workflow from history [id=x]. |
+| | `failure` | Failed attempt to restore a workflow from history [id=x]. |
+| `workflow_run` {applies_to}`stack: preview 9.4+` | `success` | User has started a workflow execution [id=x] [executionId=y]. |
+| | `failure` | Failed attempt to run a workflow [id=x]. |
+| `workflow_test` {applies_to}`stack: preview 9.4+` | `success` | User has tested a workflow. |
+| | `failure` | Failed attempt to test a workflow. |
+| `workflow_test_step` {applies_to}`stack: preview 9.4+` | `success` | User has tested a workflow step [stepId=x]. |
+| | `failure` | Failed attempt to test a workflow step [stepId=x]. |
+| `workflow_execution_cancel` {applies_to}`stack: preview 9.4+` | `success` | User has canceled a workflow execution [executionId=x]. Canceling every active execution writes one event per execution. |
+| | `failure` | Failed attempt to cancel a workflow execution. |
+| `workflow_execution_resume` {applies_to}`stack: preview 9.4+` | `success` | User has resumed a workflow execution [executionId=x]. |
+| | `failure` | Failed attempt to resume a workflow execution [executionId=x]. |
+| `workflow_hitl_waiting` {applies_to}`stack: preview 9.5+` | `success` | A workflow execution is waiting for human input or approval [executionId=x]. |
+| `workflow_hitl_timed_out` {applies_to}`stack: preview 9.5+` | `success` | A workflow human-input or approval wait has timed out [executionId=x]. |
 
 #### Type: deletion
 
@@ -221,6 +243,10 @@ To ensure that a record of every operation is persisted even in case of an unexp
 | `ml_delete_trained_model` | `success` | Deleting trained model. |
 | | `failure` | Failed to delete trained model. |
 | `product_documentation_delete` | `unknown` | User requested to delete the product documentation for use in AI Assistants. |
+| `workflow_delete` {applies_to}`stack: preview 9.4+` | `success` | User has deleted a workflow [id=x]. A forced delete includes `(force)` in the message. |
+| | `failure` | Failed attempt to delete a workflow [id=x]. |
+| `workflow_bulk_delete` {applies_to}`stack: preview 9.4+` | `success` | User has deleted a workflow via bulk delete [id=x]. One event is written per workflow. |
+| | `failure` | Failed attempt to delete a workflow via bulk delete. |
 
 #### Type: access
 
@@ -304,6 +330,47 @@ To ensure that a record of every operation is persisted even in case of an unexp
 | | `failure` | User is not authorized to access the connectors of a case. |
 | `ml_infer_trained_model` | `success` | Inferring using trained model. |
 | | `failure` | Failed to infer using trained model. |
+| `workflow_get` {applies_to}`stack: preview 9.4+` | `success` | User has accessed a workflow [id=x]. |
+| | `failure` | Failed attempt to read a workflow [id=x]. |
+| `workflow_mget` {applies_to}`stack: preview 9.4+` | `success` | User has requested workflows by id. The message includes the requested and returned counts. |
+| | `failure` | Failed attempt to read workflows by id. |
+| `workflow_export` {applies_to}`stack: preview 9.4+` | `success` | User has exported a workflow [id=x]. One event is written per workflow. |
+| | `failure` | Failed attempt to export workflows. |
+
+::::{note}
+Workflow events (`workflow_*`) are logged after the operation finishes, with `event.outcome` of `success` or `failure`. When no user request is available (for example a human-in-the-loop wait, timeout, or system cancel), the message actor is `System`. Managed workflows append `[managed=true]` to the message, plus `originalWorkflowId`, `ownerPlugin`, `space`, and `reason` when those values are present.
+::::
+
+### Category: iam
+#### Type: creation
+
+| **Action** | **Outcome** | **Description** |
+| --- | --- | --- |
+| `service_account_create` {applies_to}`stack: preview 9.6+` | `success` | User has created service account [id=x, name=y]. Logged after the account exists, so the event carries the id the backend assigned. |
+| | `failure` | Failed attempt to create service account [name=y]: the user is not authorized. The name is omitted when it did not pass validation. |
+| | `unknown` | Failed attempt to create service account [id=x, name=y], which might have been left behind. The create failed after writing to {{es}} and {{kib}} could not confirm that it removed the partially created account. Refer to the {{kib}} server logs. |
+
+#### Type: change
+
+| **Action** | **Outcome** | **Description** |
+| --- | --- | --- |
+| `service_account_workload_bind` {applies_to}`stack: preview 9.6+` | `unknown` | User is binding service account [id=x] to workload [plugin/type/id]. Binding a workload that is already bound to a different account also writes a `service_account_workload_unbind` event for that account first. |
+| | `failure` | Failed attempt to bind service account [id=x] to workload [plugin/type/id]: the user is not authorized. |
+| `service_account_workload_unbind` {applies_to}`stack: preview 9.6+` | `unknown` | User is unbinding service account [id=x] from workload [plugin/type/id]. When the workload has no binding, or the stored binding failed integrity verification, the message drops `[id=x]` and `user.target` is omitted. |
+| | `failure` | Failed attempt to unbind service account from workload [plugin/type/id]: the user is not authorized. |
+
+#### Type: deletion
+
+| **Action** | **Outcome** | **Description** |
+| --- | --- | --- |
+| `service_account_delete` {applies_to}`stack: preview 9.6+` | `unknown` | User is deleting service account [id=x]. A forced delete, which skips the check for bound workloads and leaves their bindings behind, appends `[force=true]` to the message. |
+| | `failure` | Failed attempt to delete service account [id=x]: the user is not authorized. A forced delete appends `[force=true]` to this message too. |
+
+::::{note}
+Following ECS, every event in this category has two values in `event.type`: the type it is listed under and `user`, for example `[user, creation]`. An `ignore_filters` rule that matches on `types` has to list both.
+
+Across the `service_account_*` events, `failure` means the user was not authorized. Other errors, such as a missing license or encryption key or an invalid request, leave no event. Binding and delete events follow the convention for writes: `unknown` is logged once the user is authorized and before the write, so it records the attempt, not the result. It is also written when an unbind matches no binding or a delete names no account, and a write that later fails or is refused leaves no further event. Refer to the {{kib}} server logs for write errors. A delete refused because workloads are still bound to the account leaves no event. `service_account_create` is logged after the operation instead, because the backend assigns the id.
+::::
 
 ### Category: web
 
@@ -314,7 +381,9 @@ To ensure that a record of every operation is persisted even in case of an unexp
 
 ## Audit schema [xpack-security-ecs-audit-schema]
 
-Audit logs are written in JSON using [Elastic Common Schema (ECS)][Elastic Common Schema (ECS)](ecs://reference/index.md)) specification.
+Audit logs are written in JSON using the [Elastic Common Schema (ECS)](ecs://reference/index.md) specification.
+
+{applies_to}`serverless: preview` In {{serverless-full}}, {{kib}} audit logs delivered through [audit trail log delivery](docs-content://deploy-manage/monitor/log-delivery/audit-trail.md) use OpenTelemetry field names. Refer to [Serverless OpenTelemetry field names](#serverless-otel-field-names) for more information.
 
 ### Base fields
 
@@ -328,9 +397,9 @@ Audit logs are written in JSON using [Elastic Common Schema (ECS)][Elastic Commo
 | **Field** | **Description** |
 | --- | --- |
 | `event.action` | The action captured by the event.<br>Refer to [Audit events](./kibana-audit-events.md#xpack-security-ecs-audit-logging) for a table of possible actions. |
-| `event.category` | High level category associated with the event.<br>This field is closely related to `event.type`, which is used as a subcategory.<br>Possible values:`database`,`web`,`authentication` |
-| `event.type` | Subcategory associated with the event.<br>This field can be used along with the `event.category` field to enable filtering events down to a level appropriate for single visualization.<br>Possible values:`creation`,`access`,`change`,`deletion` |
-| `event.outcome` | Denotes whether the event represents a success or failure:<br><br>* Any actions that the user is not authorized to perform are logged with outcome:  `failure`<br>* Authorized read operations are only logged after successfully fetching the data from {{es}} with outcome: `success`<br>* Authorized create, update, or delete operations are logged before attempting the operation in {{es}} with outcome: `unknown`<br><br>Possible values: `success`, `failure`, `unknown`<br> |
+| `event.category` | High level category associated with the event.<br>This field is closely related to `event.type`, which is used as a subcategory.<br>Possible values:`database`,`web`,`authentication`,`iam` |
+| `event.type` | Subcategory associated with the event.<br>This field can be used along with the `event.category` field to enable filtering events down to a level appropriate for single visualization.<br>Possible values:`creation`,`access`,`change`,`deletion`,`user` |
+| `event.outcome` | Denotes whether the event represents a success or failure:<br><br>* Any actions that the user is not authorized to perform are logged with outcome:  `failure`<br>* Authorized read operations are only logged after successfully fetching the data from {{es}} with outcome: `success`<br>* Authorized create, update, or delete operations are logged before attempting the operation in {{es}} with outcome: `unknown`, unless the event's own description says otherwise (for example `service_account_create` is logged after the operation)<br><br>Possible values: `success`, `failure`, `unknown`<br> |
 
 ### User fields
 
@@ -338,7 +407,11 @@ Audit logs are written in JSON using [Elastic Common Schema (ECS)][Elastic Commo
 | --- | --- |
 | `user.id` | Unique identifier of the user across sessions (See [user profiles](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/user-profiles.md)). |
 | `user.name` | Login name of the user.<br>Example: `jdoe` |
+| `user.email` | Email address of the user at the time of the event, when provided by the identity source. |
+| `user.full_name` | Full name of the user at the time of the event, when provided by the identity source. |
 | `user.roles[]` | Set of user roles at the time of the event.<br>Example: `[kibana_admin, reporting_user]` |
+| `user.target.id` | ID of the service account the event targets.<br>Example: `kibana/nightshift-relay` |
+| `user.target.name` | Name of the service account the event targets.<br>Example: `nightshift-relay` |
 
 
 ### Kibana fields
@@ -349,6 +422,9 @@ Audit logs are written in JSON using [Elastic Common Schema (ECS)][Elastic Commo
 | `kibana.session_id` | ID of the user session associated with the event.<br>Each login attempt results in a unique session id. |
 | `kibana.saved_object.type` | Type of saved object associated with the event.<br>Example: `dashboard` |
 | `kibana.saved_object.id` | ID of the saved object associated with the event. |
+| `kibana.workload.plugin_id` | ID of the plugin that owns the workload a service account is bound to as part of the event.<br>Example: `workflowsManagement` |
+| `kibana.workload.type` | Type of the workload.<br>Example: `workflow` |
+| `kibana.workload.id` | ID of the workload. |
 | `kibana.authentication_provider` | Name of the authentication provider associated with the event.<br>Example: `my-saml-provider` |
 | `kibana.authentication_type` | Type of the authentication provider associated with the event.<br>Example: `saml` |
 | `kibana.authentication_realm` | Name of the Elasticsearch realm that has authenticated the user.<br>Example: `native` |
@@ -383,3 +459,38 @@ Audit logs are written in JSON using [Elastic Common Schema (ECS)][Elastic Commo
 | **Field** | **Description** |
 | --- | --- |
 | `trace.id` | Unique identifier allowing events of the same transaction from {{kib}} and {{es}} to be correlated. |
+
+### Serverless OpenTelemetry field names [serverless-otel-field-names]
+
+```{applies_to}
+serverless: preview
+```
+
+In {{serverless-full}}, {{kib}} audit logs are delivered through [audit trail log delivery](docs-content://deploy-manage/monitor/log-delivery/audit-trail.md) and use the following OpenTelemetry field names instead of the ECS fields in the [audit schema](#xpack-security-ecs-audit-schema). This mapping is specific to {{serverless-full}}. On self-managed and {{ech}} deployments, the `otel` appender ships the ECS audit schema fields unchanged.
+
+| **Audit schema field** | **OpenTelemetry field** |
+| --- | --- |
+| `trace.id` | `http.request.id` |
+| `kibana.space_id` | `kibana.space.id` |
+| `kibana.session_id` | `kibana.session.id` |
+| `kibana.authentication_type` | `authentication.type` |
+| `kibana.authentication_realm` | `user.domain` |
+| `http.request.headers.x-forwarded-for` | `network.forwarded_ip` |
+| `client.ip` | `source.address` and `source.ip` |
+| `url.scheme`, `url.domain`, and `url.path` | Omitted. `url.original` is added when all three are non-empty strings. |
+| `url.port` | Omitted |
+| `url.query` | Omitted |
+| `kibana.authentication_provider` | Omitted |
+| `kibana.lookup_realm` | Omitted |
+
+`url.original` is written when `url.scheme`, `url.domain`, and `url.path` are all non-empty strings. The value is `scheme://domain/path`, as in `https://www.elastic.co/search`. `url.scheme`, `url.domain`, `url.path`, `url.port`, and `url.query` are removed from the log record.
+
+`http.request.method` uses uppercase values, such as `GET`, `POST`, `PUT`, and `DELETE`.
+
+`user.id` is the user's login name, the same value as `user.name`. When the event has no login name, the log record omits `user.id`.
+
+`user.domain` is the name of the {{es}} realm that authenticated the user. It is present on successful `user_login` events and on events logged for authenticated requests. Events that do not carry the realm, such as `user_logout` and `session_cleanup`, omit it even when `user.name` is set.
+
+When the event has no `event.type`, the log record sets `event.type` to `["access"]`. When the event has no `log.type`, the log record sets `log.type` to `audit`.
+
+The log resource includes only `service.name`, set to `serverless-kibana`, and `service.type`, set to `kibana`, so detected attributes such as `host.name` stay off the resource. `project.id` is written on each log record rather than on the resource. `service.version` is removed from the log record.

@@ -22,7 +22,6 @@ import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import {
   type CustomCellRenderer,
   type CustomGridColumnsConfiguration,
-  type DataTableColumnsMeta,
   getRenderCustomToolbarWithElements,
   type UnifiedDataTableRenderCustomToolbar,
   type UnifiedDataTableRenderCustomToolbarProps,
@@ -40,6 +39,10 @@ import type {
   UseTriggerEventTableConfigOptions,
   UseTriggerEventTableConfigResult,
 } from './trigger_event_table_config_types';
+import {
+  sortTriggerEventRows,
+  TRIGGER_EVENT_TABLE_SORTABLE_COLUMNS,
+} from './trigger_event_table_sort';
 import { WorkflowExecuteDataGridCellPopover } from './workflow_execute_data_grid_cell_popover';
 import {
   TriggerEventRunPayloadSelectionSync,
@@ -128,17 +131,9 @@ export function useTriggerEventTableConfig(
       })),
     [rows]
   );
-
-  const columnsMeta: DataTableColumnsMeta = useMemo(
-    () => ({
-      summary: { type: 'string' },
-      eventId: { type: 'string' },
-      triggerId: { type: 'string' },
-      spaceId: { type: 'string' },
-      subscriptions: { type: 'string' },
-      payload: { type: 'string' },
-    }),
-    []
+  const sortedDataTableRows = useMemo(
+    () => sortTriggerEventRows(dataTableRows, sort),
+    [dataTableRows, sort]
   );
 
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
@@ -225,6 +220,19 @@ export function useTriggerEventTableConfig(
     }),
     [euiTheme.size.xs, summaryCopyPayloadCellAction]
   );
+  const sortableGridColumnsConfiguration = useMemo<CustomGridColumnsConfiguration>(
+    () =>
+      Object.fromEntries(
+        TRIGGER_EVENT_TABLE_SORTABLE_COLUMNS.map((columnId) => [
+          columnId,
+          (props: Parameters<CustomGridColumnsConfiguration[string]>[0]) => ({
+            ...(customGridColumnsConfiguration[columnId]?.(props) ?? props.column),
+            isSortable: true,
+          }),
+        ])
+      ),
+    [customGridColumnsConfiguration]
+  );
 
   const unifiedDataTableServices = useMemo(
     () => buildUnifiedDataTableServices(services),
@@ -258,7 +266,7 @@ export function useTriggerEventTableConfig(
               defaultMessage: 'documents',
             })}
             <EuiIconTip
-              type="iInCircle"
+              type="info"
               css={{ marginLeft: euiTheme.size.xs }}
               content={i18n.translate(
                 'workflows.workflowExecuteEventTriggerForm.cappedDocumentCountTooltip',
@@ -328,10 +336,9 @@ export function useTriggerEventTableConfig(
     visibleTableColumns,
     showTimeColumn,
     sort,
-    dataTableRows,
-    columnsMeta,
+    dataTableRows: sortedDataTableRows,
     externalCustomRenderers,
-    customGridColumnsConfiguration,
+    customGridColumnsConfiguration: sortableGridColumnsConfiguration,
     unifiedDataTableServices,
     getNoCellActions: getNoUnifiedDataTableCellActions,
     handleSortChange,

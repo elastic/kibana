@@ -12,15 +12,16 @@ import type {
   RouteConfigOptions,
   RouteMethod,
 } from '@kbn/core-http-server';
-import type { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/core/server';
 import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import { BaseAlertingRoute, type AlertingRouteSchemas } from './base_alerting_route';
-import { ALERTING_ERROR_CODES } from '../lib/errors/error_codes';
+import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../lib/errors/error_codes';
 import type { MockUiSettingsClient } from '../lib/services/settings_service/settings_service.mock';
 import { deriveErrorCodeFromStatus } from './derive_error_code';
 import { createRouteDependencies } from './test_utils';
 import type { computeRouteValidate } from './compute_route_validate';
+import { ZodRequestValidationError } from './zod_request_validation';
 
 type ComputedValidate = Exclude<ReturnType<typeof computeRouteValidate>, false>;
 
@@ -65,14 +66,16 @@ class TestRoute extends BaseAlertingRoute {
 
 describe('BaseAlertingRoute', () => {
   let response: jest.Mocked<KibanaResponseFactory>;
-  let logger: jest.Mocked<Logger>;
+  let mockLogger: jest.Mocked<Logger>;
   let mockUiSettingsClient: MockUiSettingsClient;
   let route: TestRoute;
+  let serverTiming: KibanaRequest['serverTiming'];
 
   beforeEach(() => {
     const deps = createRouteDependencies();
+    serverTiming = deps.ctx.request.serverTiming;
     response = deps.response;
-    logger = deps.logger;
+    mockLogger = deps.mockLogger;
     mockUiSettingsClient = deps.mockUiSettingsClient;
     route = new TestRoute(deps.ctx);
   });
@@ -85,6 +88,35 @@ describe('BaseAlertingRoute', () => {
 
     expect(result).toBe(expectedResponse);
     expect(route.executeFn).toHaveBeenCalledTimes(1);
+  });
+
+  describe('server timing', () => {
+    it('records a timing event named after the route when execute() succeeds', async () => {
+      route.executeFn.mockResolvedValue(response.ok({ body: {} }));
+
+      await route.handle();
+
+      expect(serverTiming.getEvents()).toEqual([
+        { name: 'alerting-v2-route', description: 'test route', duration: expect.any(Number) },
+      ]);
+    });
+
+    it('records a timing event when execute() throws', async () => {
+      route.executeFn.mockRejectedValue(Boom.notFound('rule not found'));
+
+      await route.handle();
+
+      expect(serverTiming.getEvents()).toHaveLength(1);
+    });
+
+    it('records a timing event when the kill switch short-circuits the request', async () => {
+      mockUiSettingsClient.get.mockResolvedValue(false);
+
+      await route.handle();
+
+      expect(route.executeFn).not.toHaveBeenCalled();
+      expect(serverTiming.getEvents()).toHaveLength(1);
+    });
   });
 
   describe('alerting kill switch', () => {
@@ -264,10 +296,11 @@ describe('BaseAlertingRoute', () => {
 
       await route.handle();
 
-      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('test route error'), {
-        error: cause,
+      expect(mockLogger.error).toHaveBeenCalledWith('boom', {
+        labels: { code: ALERTING_LOG_CODES.ROUTES_HANDLER_FAILED },
+        error: expect.objectContaining({ message: 'boom', type: 'TypeError' }),
       });
-      expect(logger.debug).not.toHaveBeenCalled();
+      expect(mockLogger.debug).not.toHaveBeenCalled();
     });
 
     it('logs 4xx errors at debug level only', async () => {
@@ -275,8 +308,10 @@ describe('BaseAlertingRoute', () => {
 
       await route.handle();
 
-      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('test route error'));
-      expect(logger.error).not.toHaveBeenCalled();
+      expect(mockLogger.debug).toHaveBeenCalledWith('Route handler returned client error', {
+        labels: { resource: 'test route' },
+      });
+      expect(mockLogger.error).not.toHaveBeenCalled();
     });
   });
 
@@ -288,7 +323,7 @@ describe('BaseAlertingRoute', () => {
     it('returns default options when no routeOptions are declared', () => {
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
-          access: 'public',
+          access: 'internal',
           tags: ['oas-tag:alerting-v2'],
           availability: { stability: 'experimental', since: '9.5.0' },
           oasOperationObject: expect.any(Function),
@@ -301,7 +336,7 @@ describe('BaseAlertingRoute', () => {
 
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
-          access: 'public',
+          access: 'internal',
           tags: ['oas-tag:alerting-v2'],
           availability: { stability: 'experimental', since: '9.5.0' },
           summary: 'Get a rule',
@@ -311,11 +346,11 @@ describe('BaseAlertingRoute', () => {
     });
 
     it('overrides defaults with child values', () => {
-      TestRoute.routeOptions = { access: 'internal' };
+      TestRoute.routeOptions = { access: 'public' };
 
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
-          access: 'internal',
+          access: 'public',
           tags: ['oas-tag:alerting-v2'],
           availability: { stability: 'experimental', since: '9.5.0' },
           oasOperationObject: expect.any(Function),
@@ -328,7 +363,7 @@ describe('BaseAlertingRoute', () => {
 
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
-          access: 'public',
+          access: 'internal',
           tags: ['oas-tag:alerting-v2', 'extra-tag'],
           availability: { stability: 'experimental', since: '9.5.0' },
           oasOperationObject: expect.any(Function),
@@ -341,7 +376,7 @@ describe('BaseAlertingRoute', () => {
 
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
-          access: 'public',
+          access: 'internal',
           tags: ['oas-tag:alerting-v2'],
           availability: { stability: 'experimental', since: '1.0' },
           oasOperationObject: expect.any(Function),
@@ -597,6 +632,39 @@ describe('BaseAlertingRoute', () => {
         },
         bypassErrorFormat: true,
       });
+    });
+
+    it('adds the per-field errors when the rejection carries the Zod issues', async () => {
+      const schema = z.object({ name: z.string(), age: z.number() });
+      TestRoute.schemas = { request: { body: schema } };
+      const validate = TestRoute.validate as ComputedValidate;
+
+      const parsed = schema.safeParse({ age: 'not-a-number' });
+      const rawError = new ZodRequestValidationError(
+        (parsed as { success: false; error: z.ZodError }).error
+      );
+
+      await validate.onRequestValidationError?.(
+        { message: rawError.message, source: 'body', rawError },
+        {} as unknown as KibanaRequest,
+        response
+      );
+
+      expect(response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            details: {
+              source: 'body',
+              errors: expect.objectContaining({
+                properties: {
+                  name: { errors: [expect.any(String)] },
+                  age: { errors: [expect.any(String)] },
+                },
+              }),
+            },
+          }),
+        })
+      );
     });
   });
 });

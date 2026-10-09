@@ -8,7 +8,6 @@
 import type { EuiRangeProps } from '@elastic/eui';
 import { EuiFieldNumber, EuiRange } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import type { TranslateArguments } from '@kbn/i18n';
 import { i18n } from '@kbn/i18n';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import type {
@@ -18,67 +17,28 @@ import type {
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_ID, PERCENTILE_NAME } from '@kbn/lens-formula-docs';
-import { memoize } from 'lodash';
 import type { PercentileIndexPatternColumn } from '@kbn/lens-common';
-import { esql } from '@elastic/esql';
+import {
+  toEsqlRegistry,
+  ofNamePercentile,
+  ALLOWED_DECIMAL_DIGITS,
+  getSafeName,
+  percentileEsqlMeta,
+} from '@kbn/lens-common';
 import type { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
-  getSafeName,
   isValidNumber,
   getFilter,
   hasOperationType,
   getNumberParam,
 } from './helpers';
-import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { FormRow } from './shared_components';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey, groupByKey } from './get_group_by_key';
 
 const DEFAULT_PERCENTILE_VALUE = 95;
-const ALLOWED_DECIMAL_DIGITS = 4;
-
-function ofName(
-  name: string,
-  percentile: number,
-  timeShift: string | undefined,
-  reducedTimeRange: string | undefined
-) {
-  const formatters: TranslateArguments['formatters'] = {
-    getNumberFormat: memoize(
-      (locale, opts) =>
-        new Intl.NumberFormat(locale, {
-          ...(opts as Intl.NumberFormatOptions), // To resolve a type mismatch in the 'useGrouping' property
-          maximumFractionDigits: ALLOWED_DECIMAL_DIGITS,
-        })
-    ),
-    // @ts-expect-error - There’s a small mismatch between @formatjs type and Intl API that only applies to the date function, we’re ignoring that
-    getDateTimeFormat: memoize((locale, opts) => new Intl.DateTimeFormat(locale, opts)),
-    getPluralRules: memoize(
-      (locale, opts) =>
-        new Intl.PluralRules(locale, {
-          ...opts,
-          maximumFractionDigits: ALLOWED_DECIMAL_DIGITS, // ensures the correct ordinal suffix is selected based on the matching number of decimal digits used in the number formatter
-        })
-    ),
-  };
-
-  return adjustTimeScaleLabelSuffix(
-    i18n.translate('xpack.lens.indexPattern.percentileOf', {
-      defaultMessage:
-        '{percentile, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} percentile of {name}',
-      values: { name, percentile },
-      formatters,
-    }),
-    undefined,
-    undefined,
-    undefined,
-    timeShift,
-    undefined,
-    reducedTimeRange
-  );
-}
 
 function getInvalidErrorMessage(
   value: string | undefined,
@@ -128,9 +88,8 @@ export const percentileOperation: OperationDefinition<
   operationParams: [
     { name: 'percentile', type: 'number', required: false, defaultValue: DEFAULT_PERCENTILE_VALUE },
   ],
-  filterable: true,
+  ...percentileEsqlMeta,
   shiftable: true,
-  canReduceTimeRange: true,
   getPossibleOperationForField: ({
     aggregationRestrictions,
     aggregatable,
@@ -161,7 +120,7 @@ export const percentileOperation: OperationDefinition<
     );
   },
   getDefaultLabel: (column, columns, indexPattern) =>
-    ofName(
+    ofNamePercentile(
       getSafeName(column.sourceField, indexPattern),
       column.params.percentile,
       column.timeShift,
@@ -174,7 +133,7 @@ export const percentileOperation: OperationDefinition<
     const newPercentileParam =
       columnParams?.percentile ?? existingPercentileParam ?? DEFAULT_PERCENTILE_VALUE;
     return {
-      label: ofName(
+      label: ofNamePercentile(
         getSafeName(field.name, indexPattern),
         newPercentileParam,
         previousColumn?.timeShift,
@@ -196,7 +155,7 @@ export const percentileOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(
+      label: ofNamePercentile(
         field.displayName,
         oldColumn.params.percentile,
         oldColumn.timeShift,
@@ -205,12 +164,7 @@ export const percentileOperation: OperationDefinition<
       sourceField: field.name,
     };
   },
-  toESQL: (column) => {
-    if (column.timeShift) return;
-    return {
-      template: `PERCENTILE(${esql.col(column.sourceField)}, ${column.params.percentile})`,
-    };
-  },
+  toESQL: toEsqlRegistry[PERCENTILE_ID],
   toEsAggsFn: (column, columnId, _indexPattern) => {
     return buildExpressionFunction<AggFunctionsMapping['aggSinglePercentile']>(
       'aggSinglePercentile',
@@ -370,7 +324,7 @@ export const percentileOperation: OperationDefinition<
           ...currentColumn,
           label: currentColumn.customLabel
             ? currentColumn.label
-            : ofName(
+            : ofNamePercentile(
                 indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
                   currentColumn.sourceField,
                 Number(value),

@@ -7,18 +7,19 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { DEFAULT_FORM_STATE } from './constants';
 import { ActionPolicyForm } from './action_policy_form';
-import type { ActionPolicyFormState } from './types';
+import type { ActionPolicyFormConfig, ActionPolicyFormState } from './types';
 
 const mockGetUrlForApp = jest.fn(
   (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
 );
 let mockWorkflowsEnabled = true;
+const mockRefetchWorkflows = jest.fn();
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
@@ -53,8 +54,17 @@ const INLINE_DEFS = [
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
   getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
-  InlineWorkflowEditor: ({ value }: { value: { id: string } }) => (
-    <div data-test-subj={`inlineWorkflowEditor-${value.id}`} />
+  InlineWorkflowEditor: ({
+    value,
+    connectorCreationConfig,
+  }: {
+    value: { id: string };
+    connectorCreationConfig?: { mode: string; href?: string };
+  }) => (
+    <div
+      data-test-subj={`inlineWorkflowEditor-${value.id}`}
+      data-connector-creation-mode={connectorCreationConfig?.mode}
+    />
   ),
   isActionValid: () => true,
   buildInlineWorkflowYaml: () => 'workflow: yaml',
@@ -82,22 +92,23 @@ jest.mock('../../../hooks/use_fetch_rules', () => ({
   useFetchRules: () => ({ data: { items: [], total: 0 }, isLoading: false }),
 }));
 
-jest.mock('../../../hooks/use_fetch_rule_tags', () => ({
-  useFetchRuleTags: () => ({ data: [], isLoading: false }),
-}));
-
-jest.mock('../../../hooks/use_fetch_tags', () => ({
-  useFetchTags: () => ({ data: [], isLoading: false }),
+jest.mock('../../../hooks/use_fetch_rule_routing_tags', () => ({
+  useFetchRuleRoutingTags: () => ({ data: [], isLoading: false }),
 }));
 
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
   useFetchWorkflows: () => ({
     data: { results: [], total: 0, page: 1, size: 100 },
     isLoading: false,
+    refetch: mockRefetchWorkflows,
   }),
 }));
 
-const renderForm = (defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE) => {
+const renderForm = (
+  defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE,
+  config?: ActionPolicyFormConfig
+) => {
+  const onSubmit = jest.fn();
   const TestComponent = () => {
     const methods = useForm<ActionPolicyFormState>({
       mode: 'onBlur',
@@ -107,16 +118,27 @@ const renderForm = (defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE) =
     return (
       <I18nProvider>
         <FormProvider {...methods}>
-          <ActionPolicyForm />
+          <ActionPolicyForm config={config} />
+          <button type="button" data-test-subj="submit" onClick={methods.handleSubmit(onSubmit)}>
+            submit
+          </button>
         </FormProvider>
       </I18nProvider>
     );
   };
 
-  return render(<TestComponent />);
+  return { ...render(<TestComponent />), onSubmit };
+};
+
+const NAMED_FORM_STATE: ActionPolicyFormState = { ...DEFAULT_FORM_STATE, name: 'My policy' };
+
+const VALID_FORM_STATE: ActionPolicyFormState = {
+  ...NAMED_FORM_STATE,
+  destinations: [{ type: 'workflow', id: 'workflow-1' }],
 };
 
 const TEST_SUBJ = {
+  submit: 'submit',
   nameInput: 'nameInput',
   groupingModeToggle: 'groupingModeToggle',
   strategySelect: 'strategySelect',
@@ -130,9 +152,50 @@ describe('ActionPolicyForm', () => {
     jest.clearAllMocks();
   });
 
-  it('renders tags input', () => {
+  it('renders static sections by default', () => {
     renderForm();
-    expect(screen.getByTestId('tagsInput')).toBeInTheDocument();
+
+    expect(screen.getByRole('heading', { name: 'Policy details' })).toBeInTheDocument();
+    expect(screen.queryByTestId('actionPolicyFormSection-policyDetails')).not.toBeInTheDocument();
+  });
+
+  it('uses the flyout layout and only collapses configured sections', async () => {
+    const user = userEvent.setup();
+    renderForm(DEFAULT_FORM_STATE, {
+      layout: 'flyout',
+      connectorCreation: { mode: 'new-tab', href: '/connectors' },
+      collapsibleSections: {
+        notificationControls: { initialIsOpen: false },
+        destination: { initialIsOpen: true },
+      },
+    });
+
+    expect(screen.getByRole('heading', { name: 'Policy details' }).tagName).toBe('H3');
+    expect(screen.getByRole('heading', { name: 'Policy scope' }).tagName).toBe('H3');
+    expect(screen.getByTestId('actionPolicyFormSection-policyDetails')).toContainElement(
+      screen.getByTestId(TEST_SUBJ.nameInput)
+    );
+    expect(screen.getByTestId('actionPolicyFormSection-policyScope')).toContainElement(
+      screen.getByTestId('routingTagsSelector')
+    );
+
+    const notificationControlsButton = within(
+      screen.getByTestId('actionPolicyFormSection-notificationControls')
+    )
+      .getByText('Notification controls')
+      .closest('button');
+    const destinationButton = within(screen.getByTestId('actionPolicyFormSection-destination'))
+      .getByText('Destination')
+      .closest('button');
+
+    expect(notificationControlsButton).toHaveAttribute('aria-expanded', 'false');
+    await waitFor(() => expect(destinationButton).toHaveAttribute('aria-expanded', 'true'));
+
+    await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+    expect(await screen.findByTestId(/inlineWorkflowEditor-/)).toHaveAttribute(
+      'data-connector-creation-mode',
+      'new-tab'
+    );
   });
 
   it('shows required errors for name on blur', async () => {
@@ -144,17 +207,84 @@ describe('ActionPolicyForm', () => {
     expect(await screen.findByText('Name is required.')).toBeInTheDocument();
   });
 
-  it('renders grouping mode toggle with Per Episode selected by default', () => {
+  it('shows the name error for a whitespace-only name on blur', async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    await user.type(screen.getByTestId(TEST_SUBJ.nameInput), '   ');
+    await user.tab();
+    expect(await screen.findByText('Name is required.')).toBeInTheDocument();
+  });
+
+  describe('on submit', () => {
+    it('blocks submit and shows the name and destination errors for an empty form', async () => {
+      const user = userEvent.setup();
+      const { onSubmit } = renderForm();
+
+      await user.click(screen.getByTestId(TEST_SUBJ.submit));
+
+      expect(await screen.findByText('Name is required.')).toBeInTheDocument();
+      expect(screen.getByText('At least one destination is required')).toBeInTheDocument();
+      expect(onSubmit).not.toHaveBeenCalled();
+    });
+
+    it('submits a valid form', async () => {
+      const user = userEvent.setup();
+      const { onSubmit } = renderForm(VALID_FORM_STATE);
+
+      await user.click(screen.getByTestId(TEST_SUBJ.submit));
+
+      await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+    });
+
+    it('clears the destination error once a simple workflow is added', async () => {
+      const user = userEvent.setup();
+      renderForm(NAMED_FORM_STATE);
+
+      await user.click(screen.getByTestId(TEST_SUBJ.submit));
+      expect(await screen.findByText('At least one destination is required')).toBeInTheDocument();
+
+      await user.click(screen.getByTestId('simpleWorkflowAdd-email'));
+
+      await waitFor(() =>
+        expect(screen.queryByText('At least one destination is required')).not.toBeInTheDocument()
+      );
+    });
+
+    it('blocks submit without destinations when workflows are disabled', async () => {
+      mockWorkflowsEnabled = false;
+      const user = userEvent.setup();
+      const { onSubmit } = renderForm(NAMED_FORM_STATE);
+
+      await user.click(screen.getByTestId(TEST_SUBJ.submit));
+
+      expect(await screen.findByText('At least one destination is required')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowsDisabledCallout')).toBeInTheDocument();
+      expect(onSubmit).not.toHaveBeenCalled();
+    });
+
+    it('submits existing destinations when workflows are disabled', async () => {
+      mockWorkflowsEnabled = false;
+      const user = userEvent.setup();
+      const { onSubmit } = renderForm(VALID_FORM_STATE);
+
+      await user.click(screen.getByTestId(TEST_SUBJ.submit));
+
+      await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+    });
+  });
+
+  it('renders grouping mode toggle with Per Alert selected by default', () => {
     renderForm();
 
     const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
     expect(toggle).toBeInTheDocument();
-    const perEpisodeButton = toggle.querySelector('button[aria-pressed="true"]');
-    expect(perEpisodeButton).toBeInTheDocument();
+    const perAlertButton = toggle.querySelector('button[aria-pressed="true"]');
+    expect(perAlertButton).toBeInTheDocument();
     expect(screen.getByTestId(TEST_SUBJ.strategySelect)).toHaveValue('on_status_change');
   });
 
-  it('shows strategy select for per_episode mode', () => {
+  it('shows strategy select for per_alert mode', () => {
     renderForm();
 
     const strategySelect = screen.getByTestId(TEST_SUBJ.strategySelect);
@@ -242,7 +372,7 @@ describe('ActionPolicyForm', () => {
     const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
     const buttons = toggle.querySelectorAll('button');
 
-    // Switch to Per Episode
+    // Switch to Per Alert
     await user.click(buttons[0]);
     expect(screen.queryByTestId(TEST_SUBJ.groupByInput)).not.toBeInTheDocument();
 
@@ -276,6 +406,14 @@ describe('ActionPolicyForm', () => {
       '/app/workflows/create'
     );
     expect(screen.getByTestId('createWorkflowLink')).toHaveAttribute('target', '_blank');
+  });
+
+  it('refetches workflows when the selector receives focus', () => {
+    renderForm();
+
+    fireEvent.focus(within(screen.getByTestId('destinationsInput')).getByRole('combobox'));
+
+    expect(mockRefetchWorkflows).toHaveBeenCalled();
   });
 
   it('renders warning callout when workflows are disabled', () => {

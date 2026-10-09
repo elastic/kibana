@@ -95,6 +95,7 @@ function buildScorePayload(event: EvaluationCompleteEvent): IngestScore {
       ...(result?.explanation !== undefined && { explanation: result.explanation }),
       ...(isPlainObject(result?.metadata) && { metadata: result.metadata }),
       ...(evaluationRun.traceId !== undefined && { trace_id: evaluationRun.traceId }),
+      direction: evaluationRun.direction,
       ...(evaluationRun.kind !== undefined && { kind: toIngestKind(evaluationRun.kind) }),
       ...(evaluationRun.model !== undefined && { model: evaluationRun.model }),
     },

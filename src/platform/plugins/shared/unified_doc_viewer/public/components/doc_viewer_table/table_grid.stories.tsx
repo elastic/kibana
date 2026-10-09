@@ -65,7 +65,7 @@ const rows: FieldRow[] = fieldNames.map((fieldName) => {
     }),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     isPinned: false,
-    columnsMeta: {},
+    dataSource: undefined,
   });
 });
 
@@ -103,7 +103,6 @@ export const CustomRenderers: Story = {
     onAddColumn: () => {},
     onRemoveColumn: () => {},
     columns: [GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE],
-    initialPageSize: 25,
     pinnedFields: [],
     hidePinColumn: false,
     customRenderCellValue: ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {

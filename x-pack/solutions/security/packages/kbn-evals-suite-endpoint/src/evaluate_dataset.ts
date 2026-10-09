@@ -13,6 +13,7 @@ import type {
   EvalsExecutorClient,
   Example,
 } from '@kbn/evals';
+import type { EndpointResponseActionsRouting } from './endpoint_response_actions_routing_evaluator';
 import { converseQuestionToTaskOutput } from './converse_task';
 
 export interface SecurityDatasetExample extends Example {
@@ -21,6 +22,9 @@ export interface SecurityDatasetExample extends Example {
   };
   output: {
     criteria: string[];
+    /** Optional deterministic routing contract enforced by extra evaluators. */
+    routing?: EndpointResponseActionsRouting;
+    required_tool?: string;
   };
 }
 
@@ -30,6 +34,7 @@ export type EvaluateSecurityDataset = (options: {
     description: string;
     examples: SecurityDatasetExample[];
   };
+  extraEvaluators?: Evaluator[];
 }) => Promise<void>;
 
 export function createEndpointCriteriaEvaluator({
@@ -40,6 +45,7 @@ export function createEndpointCriteriaEvaluator({
   return {
     name: 'Criteria',
     kind: 'LLM' as const,
+    direction: 'maximize',
     evaluate: async ({ expected, ...rest }) => {
       const criteria: string[] = (expected as SecurityDatasetExample['output'])?.criteria ?? [];
       return evaluators.criteria(criteria).evaluate({ expected, ...rest });
@@ -58,12 +64,14 @@ export function createEvaluateSecurityDataset({
 }): EvaluateSecurityDataset {
   return async function evaluateSecurityDataset({
     dataset: { name, description, examples },
+    extraEvaluators = [],
   }: {
     dataset: {
       name: string;
       description: string;
       examples: SecurityDatasetExample[];
     };
+    extraEvaluators?: Evaluator[];
   }) {
     const dataset = {
       name,
@@ -76,7 +84,7 @@ export function createEvaluateSecurityDataset({
         datasets: [dataset],
         task: async ({ input }) => converseQuestionToTaskOutput(agentBuilderClient, input.question),
       },
-      [createEndpointCriteriaEvaluator({ evaluators })]
+      [createEndpointCriteriaEvaluator({ evaluators }), ...extraEvaluators]
     );
   };
 }

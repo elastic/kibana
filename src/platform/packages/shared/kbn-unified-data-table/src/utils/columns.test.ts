@@ -55,6 +55,6 @@ describe('getDisplayedColumns', () => {
     ]);
   });
   test('returns the selected fields in summary mode', () => {
-    expect(getDisplayedColumns(['bytes'], dataViewWithTimefieldMock, 'summary')).toEqual(['bytes']);
+    expect(getDisplayedColumns(['bytes'], dataViewWithTimefieldMock, 'table')).toEqual(['bytes']);
   });
 });

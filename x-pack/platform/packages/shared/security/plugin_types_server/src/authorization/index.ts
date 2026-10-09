@@ -7,6 +7,7 @@
 
 export type {
   Actions,
+  AiIndexActions,
   AlertingActions,
   AlertsActions,
   ApiActions,

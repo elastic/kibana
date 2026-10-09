@@ -33,8 +33,12 @@ apiTest.describe(
       expect(await h.markAllRead(apiClient)).toHaveStatusCode(403);
     });
 
-    // Listing must stay open to profile-less callers. When the read-state annotation lands,
-    // these callers get items with `isRead` omitted rather than a 403.
+    apiTest('unread status is forbidden', async ({ apiClient }) => {
+      expect(await h.getUnreadStatus(apiClient)).toHaveStatusCode(403);
+    });
+
+    // Listing must stay open to profile-less callers: they get items with `isRead`
+    // omitted rather than a 403.
     apiTest('listing notifications stays available', async ({ apiClient }) => {
       const response = await h.getNotifications(apiClient);
       expect(response).toHaveStatusCode(200);

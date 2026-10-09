@@ -30,8 +30,9 @@ import type {
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { CoreSetup } from '@kbn/core/server';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { AssetManagerClient } from './domain/asset_manager';
 import type {
   EntityMaintainersClient,
@@ -39,7 +40,6 @@ import type {
 } from './domain/entity_maintainers';
 import type { FeatureFlags } from './infra/feature_flags';
 import type { LogsExtractionClient } from './domain/logs_extraction';
-import type { RemoteLogsExtractionClient } from './domain/logs_extraction/remote';
 import type { HistorySnapshotClient } from './domain/history_snapshot';
 import type { CRUDClient } from './domain/crud';
 import type { EntityMetadataClient } from './domain/entity_metadata';
@@ -48,12 +48,18 @@ import type { ResolutionClient } from './domain/resolution';
 import type { ResolutionRulesClient } from './domain/resolution/rules';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 import type { TelemetryReporter } from './telemetry/events';
+import type {
+  EntityDefinitionsClient,
+  RegistrableEntityDefinition,
+  RegisterResult,
+} from './domain/definitions/registry';
 
 export interface EntityStoreSetupPlugins {
   taskManager: TaskManagerSetupContract;
   spaces: SpacesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface EntityStoreStartPlugins {
@@ -76,8 +82,9 @@ export interface EntityStoreApiRequestHandlerContext {
   relationshipsClient: RelationshipsClient;
   resolutionClient: ResolutionClient;
   entityResolutionRuleClient: ResolutionRulesClient;
-  remoteLogsExtractionClient: RemoteLogsExtractionClient;
   featureFlags: FeatureFlags;
+  /** Cloud feature flag gating the dual-process (priority + non-priority) extraction architecture. */
+  isDualProcessEnabled: () => Promise<boolean>;
   logsExtractionClient: LogsExtractionClient;
   historySnapshotClient: HistorySnapshotClient;
   security: SecurityPluginStart;
@@ -113,14 +120,42 @@ export interface EntityStoreStartContract {
     namespace: string
   ) => RelationshipsClient;
   createResolutionClient: (esClient: ElasticsearchClient, namespace: string) => ResolutionClient;
+  createResolutionRulesClient: (
+    savedObjectsClient: SavedObjectsClientContract,
+    namespace: string
+  ) => ResolutionRulesClient;
   getMaintainerStatus: (
     namespace: string,
     ids?: string[]
   ) => Promise<EntityMaintainerStatusEntry[]>;
+  /**
+   * Returns a client for reading entity definitions in the request's space.
+   * Reading definitions requires no Kibana privilege today because all definitions are plugin
+   * code. Authorisation will apply once definitions can be stored and managed outside plugin code;
+   * the request parameter exists so that can be added without changing callers.
+   */
+  getEntityDefinitionsClient: (request: KibanaRequest) => EntityDefinitionsClient;
+  /**
+   * Returns a client for reading entity definitions in the given space, for background work
+   * with no request.
+   * Reading definitions requires no Kibana privilege today because all definitions are plugin
+   * code. Authorisation will apply once definitions can be stored and managed outside plugin code;
+   * request-scoped callers should use `getEntityDefinitionsClient` so that can be added without
+   * changing them.
+   */
+  getEntityDefinitionsClientForSpace: (spaceId: string) => EntityDefinitionsClient;
 }
 
 export interface EntityStoreSetupContract {
   registerEntityMaintainer: RegisterEntityMaintainer;
+  /**
+   * Registers an entity definition. Registration is only possible during plugin setup; calls
+   * after setup are logged and ignored. Type names must match `ENTITY_DEFINITION_TYPE_PATTERN`
+   * (at most 64 characters) and be unique. The definition must carry
+   * `managedBy: { kind: 'plugin', id: <your plugin id> }`. A rejected definition is logged and
+   * skipped, and Kibana keeps starting.
+   */
+  registerEntityDefinition: (definition: RegistrableEntityDefinition) => RegisterResult;
 }
 
 export type EntityStoreCoreSetup = CoreSetup<EntityStoreStartPlugins, EntityStoreStartContract>;

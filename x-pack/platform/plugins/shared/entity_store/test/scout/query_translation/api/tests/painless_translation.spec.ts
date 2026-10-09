@@ -7,19 +7,18 @@
 
 import { expect } from '@kbn/scout/api';
 import { apiTest, type EsClient } from '@kbn/scout';
+import { ENTITY_STORE_TAGS } from '../../../common/fixtures/constants';
 import {
-  PUBLIC_HEADERS,
-  ENTITY_STORE_ROUTES,
-  ENTITY_STORE_TAGS,
-  UPDATES_INDEX,
-} from '../../../common/fixtures/constants';
-import { clearEntityStoreIndices, ingestDoc } from '../../../common/fixtures/helpers';
+  ingestDoc,
+  QUERY_TRANSLATION_TEST_INDEX,
+  setupQueryTranslationTestDataStream,
+  teardownQueryTranslationTestDataStream,
+} from '../../../common/fixtures/helpers';
 import { deriveUserEntityPreAggMetadata } from '../fixtures/user_entity_pre_agg_metadata';
 import {
   USER_TS_EXTRACTION_CASES,
   type UserTsExtractionCase,
 } from '../fixtures/user_ts_extraction_cases';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import { getEuidPainlessRuntimeMapping } from '../../../../../common/domain/euid/painless';
 import { getEuidFromObject } from '../../../../../common/domain/euid/memory';
 import { getEntityDefinitionWithoutId } from '../../../../../common/domain/definitions/registry';
@@ -37,7 +36,7 @@ const userRuntimeSearchBody = {
 
 async function runUserRuntimeSearch(esClient: EsClient, query: object, size = 10) {
   return esClient.search({
-    index: UPDATES_INDEX,
+    index: QUERY_TRANSLATION_TEST_INDEX,
     body: {
       ...userRuntimeSearchBody,
       query,
@@ -62,7 +61,7 @@ async function ingestAndRunUserTsPainlessScenario(
   scenario: UserTsExtractionCase
 ): Promise<{ _source?: unknown; fields?: Record<string, unknown> }> {
   if (scenario.ingestSource) {
-    await ingestDoc(esClient, scenario.ingestSource);
+    await ingestDoc(esClient, scenario.ingestSource!, QUERY_TRANSLATION_TEST_INDEX);
   }
 
   const result = await runUserRuntimeSearch(esClient, scenario.query, 10);
@@ -91,39 +90,15 @@ function assertRuntimeEuidMatchesEntityTypeFormat(
 }
 
 apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS }, () => {
-  let defaultHeaders: Record<string, string>;
-
-  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
-    const credentials = await samlAuth.asInteractiveUser('admin');
-    defaultHeaders = {
-      ...credentials.cookieHeader,
-      ...PUBLIC_HEADERS,
-    };
-
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
-
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(201);
-
+  apiTest.beforeAll(async ({ esArchiver, esClient }) => {
+    await setupQueryTranslationTestDataStream(esClient);
     await esArchiver.loadIfNeeded(
-      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/updates'
+      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/query_translation_source'
     );
   });
 
-  apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(200);
-    await clearEntityStoreIndices(esClient);
+  apiTest.afterAll(async ({ esClient }) => {
+    await teardownQueryTranslationTestDataStream(esClient);
   });
 
   for (const entityType of Object.values(EntityType.options)) {
@@ -131,7 +106,7 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
       `should match in-memory euid for every document using getEuidPainlessRuntimeMapping (${entityType})`,
       async ({ esClient }) => {
         const result = await esClient.search({
-          index: UPDATES_INDEX,
+          index: QUERY_TRANSLATION_TEST_INDEX,
           body: {
             query: { match_all: {} },
             runtime_mappings: {
@@ -197,12 +172,16 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
   apiTest(
     'should omit user entity_id for excluded user.name; runtime matches in-memory euid (LOCAL_NAMESPACE_EXCLUDED_USER_NAMES, user_entity_constants)',
     async ({ esClient }) => {
-      await ingestDoc(esClient, {
-        '@timestamp': '2026-01-20T12:05:25Z',
-        event: { kind: 'event', category: 'network', outcome: 'success' },
-        user: { name: 'root' },
-        host: { id: 'painless-excluded-root-host', name: 'server' },
-      });
+      await ingestDoc(
+        esClient,
+        {
+          '@timestamp': '2026-01-20T12:05:25Z',
+          event: { kind: 'event', category: 'network', outcome: 'success' },
+          user: { name: 'root' },
+          host: { id: 'painless-excluded-root-host', name: 'server' },
+        },
+        QUERY_TRANSLATION_TEST_INDEX
+      );
       const result = await runUserRuntimeSearch(esClient, {
         bool: {
           must: [

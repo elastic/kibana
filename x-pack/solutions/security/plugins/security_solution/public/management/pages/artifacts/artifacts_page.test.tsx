@@ -10,6 +10,7 @@ import { act, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   BLOCKLIST_PATH,
+  CUSTOM_YARA_SIGNATURES_PATH,
   ENDPOINT_EXCEPTIONS_PATH,
   EVENT_FILTERS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
@@ -22,6 +23,7 @@ import type { EndpointPrivileges } from '../../../../common/endpoint/types';
 import { ArtifactsPage } from './artifacts_page';
 import {
   BLOCKLIST_TAB,
+  CUSTOM_YARA_SIGNATURES_TAB,
   ENDPOINT_EXCEPTIONS_TAB,
   EVENT_FILTERS_TAB,
   HOST_ISOLATION_EXCEPTIONS_TAB,
@@ -67,6 +69,12 @@ jest.mock('../blocklist/view/blocklist', () => ({
   Blocklist: () => <div data-test-subj="artifacts-stub-blocklist">{'blocklist'}</div>,
 }));
 
+jest.mock('../custom_yara_signatures/view/custom_yara_signatures_list', () => ({
+  CustomYaraSignaturesList: () => (
+    <div data-test-subj="artifacts-stub-customYaraSignatures">{'custom-yara-signatures'}</div>
+  ),
+}));
+
 const fullArtifactReadPrivileges: Partial<EndpointPrivileges> = {
   canReadEndpointExceptions: true,
   canReadTrustedApplications: true,
@@ -75,6 +83,7 @@ const fullArtifactReadPrivileges: Partial<EndpointPrivileges> = {
   canReadHostIsolationExceptions: true,
   canAccessHostIsolationExceptions: true,
   canReadBlocklist: true,
+  canReadCustomYaraSignatures: true,
 };
 
 describe('ArtifactsPage', () => {
@@ -88,6 +97,7 @@ describe('ArtifactsPage', () => {
     mockedContext.setExperimentalFlag({
       endpointExceptionsMovedUnderManagement: true,
       trustedDevices: true,
+      customYaraSignaturesEnabled: true,
     });
     mockUseUserPrivileges.mockReturnValue({
       endpointPrivileges: fullArtifactReadPrivileges,
@@ -139,6 +149,7 @@ describe('ArtifactsPage', () => {
       within(tabs).getByRole('tab', { name: HOST_ISOLATION_EXCEPTIONS_TAB })
     ).toBeInTheDocument();
     expect(within(tabs).getByRole('tab', { name: BLOCKLIST_TAB })).toBeInTheDocument();
+    expect(within(tabs).getByRole('tab', { name: CUSTOM_YARA_SIGNATURES_TAB })).toBeInTheDocument();
   });
 
   it('deep link opens the correct tab and content (event filters)', async () => {
@@ -161,6 +172,20 @@ describe('ArtifactsPage', () => {
     });
 
     expect(history.location.pathname).toBe(BLOCKLIST_PATH);
+  });
+
+  it('deep link opens custom YARA signatures tab from URL', async () => {
+    renderResult = renderArtifactsAtPath(CUSTOM_YARA_SIGNATURES_PATH);
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('artifacts-stub-customYaraSignatures')).toBeInTheDocument();
+    });
+
+    expect(history.location.pathname).toBe(CUSTOM_YARA_SIGNATURES_PATH);
+    const tabs = renderResult.getByRole('tablist');
+    expect(within(tabs).getByRole('tab', { selected: true })).toHaveTextContent(
+      CUSTOM_YARA_SIGNATURES_TAB
+    );
   });
 
   it('switches tabs and updates URL and content when a tab is clicked', async () => {
@@ -222,6 +247,7 @@ describe('ArtifactsPage', () => {
     mockedContext.setExperimentalFlag({
       endpointExceptionsMovedUnderManagement: false,
       trustedDevices: true,
+      customYaraSignaturesEnabled: true,
     });
     renderResult = renderArtifactsAtPath(TRUSTED_APPS_PATH);
 
@@ -239,6 +265,7 @@ describe('ArtifactsPage', () => {
     mockedContext.setExperimentalFlag({
       endpointExceptionsMovedUnderManagement: true,
       trustedDevices: false,
+      customYaraSignaturesEnabled: true,
     });
     renderResult = renderArtifactsAtPath(TRUSTED_APPS_PATH);
 
@@ -248,6 +275,24 @@ describe('ArtifactsPage', () => {
 
     const tabs = renderResult.getByRole('tablist');
     expect(within(tabs).queryByRole('tab', { name: TRUSTED_DEVICES_TAB })).not.toBeInTheDocument();
+  });
+
+  it('hides Custom YARA signatures tab when customYaraSignaturesEnabled is off', async () => {
+    mockedContext.setExperimentalFlag({
+      endpointExceptionsMovedUnderManagement: true,
+      trustedDevices: true,
+      customYaraSignaturesEnabled: false,
+    });
+    renderResult = renderArtifactsAtPath(TRUSTED_APPS_PATH);
+
+    await waitFor(() => {
+      expect(renderResult.getByRole('tablist')).toBeInTheDocument();
+    });
+
+    const tabs = renderResult.getByRole('tablist');
+    expect(
+      within(tabs).queryByRole('tab', { name: CUSTOM_YARA_SIGNATURES_TAB })
+    ).not.toBeInTheDocument();
   });
 
   it('defaults to first visible tab when URL does not match an artifact tab', async () => {

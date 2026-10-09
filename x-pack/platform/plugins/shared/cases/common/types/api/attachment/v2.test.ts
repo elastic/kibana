@@ -5,378 +5,92 @@
  * 2.0.
  */
 
+import { PathReporter } from 'io-ts/lib/PathReporter';
+import { MAX_BULK_CREATE_ATTACHMENTS } from '../../../constants';
+import { COMMENT_ATTACHMENT_TYPE } from '../../../constants/attachments';
 import { AttachmentType } from '../../domain/attachment/v1';
-import { AttachmentRequestRtV2, BulkCreateAttachmentsRequestRtV2 } from './v2';
-import {
-  AttachmentRequestSchemaV2,
-  BulkCreateAttachmentsRequestSchemaV2,
-} from '../../api_zod/attachment/v2';
+import { BulkCreateUnifiedAttachmentsRequestSchema } from '../../api_zod/attachment/v2';
+import { BulkCreateUnifiedAttachmentsRequestRt, UnifiedAttachmentsFindQueryParamsRt } from './v2';
 
-describe('Unified Attachments', () => {
-  describe('AttachmentRequestRtV2', () => {
-    it('accepts v1 user comment attachment request', () => {
-      const v1Request = {
-        comment: 'This is a comment',
-        type: AttachmentType.user,
-        owner: 'cases',
-      };
-
-      const query = AttachmentRequestRtV2.decode(v1Request);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: v1Request,
-      });
-    });
-
-    it('accepts v2 unified attachment request', () => {
-      const v2Request = {
-        type: 'lens',
-        attachmentId: 'attachment-123',
-        owner: 'cases',
-        data: {
-          attributes: {
-            title: 'My Visualization',
-            visualizationType: 'lens',
-          },
-          timeRange: {
-            from: 'now-1d',
-            to: 'now',
-          },
-        },
-        metadata: {
-          description: 'A test visualization',
-        },
-      };
-
-      const query = AttachmentRequestRtV2.decode(v2Request);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: v2Request,
-      });
-    });
-
-    it('accepts v2 unified attachment request with only attachmentId', () => {
-      const v2Request = {
-        type: 'lens',
-        owner: 'cases',
-        attachmentId: 'attachment-123',
-      };
-
-      const query = AttachmentRequestRtV2.decode(v2Request);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: v2Request,
-      });
-    });
-
-    it('accepts v2 unified attachment request with only data', () => {
-      const v2Request = {
-        type: 'user',
-        owner: 'cases',
-        data: {
-          content: {
-            title: 'My comment',
-          },
-        },
-      };
-
-      const query = AttachmentRequestRtV2.decode(v2Request);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: v2Request,
-      });
-    });
-
-    it('rejects v2 unified attachment request with neither attachmentId nor data', () => {
-      const v2Request = {
-        type: 'lens',
-        owner: 'cases',
-      };
-
-      const query = AttachmentRequestRtV2.decode(v2Request);
-
-      expect(query._tag).toBe('Left');
-    });
-
-    it('removes foo:bar attributes from v1 request', () => {
-      const v1Request = {
-        comment: 'This is a comment',
-        type: AttachmentType.user,
-        owner: 'cases',
-        foo: 'bar',
-      };
-
-      const query = AttachmentRequestRtV2.decode(v1Request);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: {
-          comment: 'This is a comment',
-          type: AttachmentType.user,
-          owner: 'cases',
-        },
-      });
-    });
-
-    it('removes foo:bar attributes from v2 request', () => {
-      const v2Request = {
-        type: 'lens',
-        attachmentId: 'attachment-123',
-        owner: 'cases',
-        data: {
-          attributes: {
-            title: 'My Visualization',
-          },
-        },
-        metadata: {
-          description: 'A test visualization',
-        },
-        foo: 'bar',
-      };
-
-      const query = AttachmentRequestRtV2.decode(v2Request);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: {
-          type: 'lens',
-          attachmentId: 'attachment-123',
-          owner: 'cases',
-          data: {
-            attributes: {
-              title: 'My Visualization',
-            },
-          },
-          metadata: {
-            description: 'A test visualization',
-          },
-        },
-      });
-    });
-
-    it('accepts v1 request even with extra v2 fields (v1 type ignores extra fields)', () => {
-      const requestWithExtraFields = {
-        comment: 'This is a comment',
-        type: AttachmentType.user,
-        owner: 'cases',
-        attachmentId: 'attachment-123',
-        data: {
-          content: 'My comment',
-        },
-      };
-
-      const query = AttachmentRequestRtV2.decode(requestWithExtraFields);
-
-      expect(query._tag).toBe('Right');
-      if (query._tag === 'Right') {
-        // v1 type matches and strips extra fields
-        expect(query.right).toMatchObject({
-          comment: 'This is a comment',
-          type: AttachmentType.user,
-          owner: 'cases',
-        });
-        expect(query.right).not.toHaveProperty('attachmentId');
-        expect(query.right).not.toHaveProperty('data');
-      }
-    });
-
-    it('zod: accepts v1 user comment attachment request', () => {
-      const v1Request = {
-        comment: 'This is a comment',
-        type: AttachmentType.user,
-        owner: 'cases',
-      };
-      const result = AttachmentRequestSchemaV2.safeParse(v1Request);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(v1Request);
-    });
-
-    it('zod: accepts v2 unified attachment request', () => {
-      const v2Request = {
-        type: 'lens',
-        attachmentId: 'attachment-123',
-        owner: 'cases',
-      };
-      const result = AttachmentRequestSchemaV2.safeParse(v2Request);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(v2Request);
-    });
+describe('UnifiedAttachmentsFindQueryParamsRt', () => {
+  it('accepts an omitted type (every attachment type)', () => {
+    expect(UnifiedAttachmentsFindQueryParamsRt.decode({})._tag).toBe('Right');
   });
 
-  describe('BulkCreateAttachmentsRequestRtV2', () => {
-    it('accepts empty array', () => {
-      const query = BulkCreateAttachmentsRequestRtV2.decode([]);
+  it('accepts a single type string', () => {
+    expect(UnifiedAttachmentsFindQueryParamsRt.decode({ type: 'comment' })._tag).toBe('Right');
+  });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: [],
-      });
-    });
+  it('accepts a non-empty type array', () => {
+    expect(
+      UnifiedAttachmentsFindQueryParamsRt.decode({ type: ['comment', 'security.alert'] })._tag
+    ).toBe('Right');
+  });
 
-    it('accepts array of v1 attachment requests', () => {
-      const v1Requests = [
-        {
-          comment: 'First comment',
-          type: AttachmentType.user,
-          owner: 'cases',
-        },
-        {
-          comment: 'Second comment',
-          type: AttachmentType.user,
-          owner: 'cases',
-        },
-      ];
+  it('rejects an empty type array', () => {
+    expect(UnifiedAttachmentsFindQueryParamsRt.decode({ type: [] })._tag).toBe('Left');
+  });
+});
 
-      const query = BulkCreateAttachmentsRequestRtV2.decode(v1Requests);
+describe('BulkCreateUnifiedAttachmentsRequestRt', () => {
+  const unifiedComment = {
+    type: COMMENT_ATTACHMENT_TYPE,
+    data: { content: 'Solve this fast!' },
+    owner: 'cases',
+  };
+  const legacyComment = {
+    type: AttachmentType.user,
+    comment: 'Solve this fast!',
+    owner: 'cases',
+  };
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: v1Requests,
-      });
-    });
+  it('accepts an empty array', () => {
+    expect(PathReporter.report(BulkCreateUnifiedAttachmentsRequestRt.decode([]))).toStrictEqual([
+      'No errors!',
+    ]);
+  });
 
-    it('accepts array of v2 attachment requests', () => {
-      const v2Requests = [
-        {
-          type: 'lens',
-          attachmentId: 'attachment-1',
-          owner: 'cases',
-          data: {
-            attributes: {
-              title: 'First Visualization',
-            },
-          },
-        },
-        {
-          type: 'lens',
-          attachmentId: 'attachment-2',
-          owner: 'cases',
-          data: {
-            attributes: {
-              title: 'Second Visualization',
-            },
-          },
-        },
-      ];
+  it(`accepts ${MAX_BULK_CREATE_ATTACHMENTS} attachments`, () => {
+    const attachments = Array(MAX_BULK_CREATE_ATTACHMENTS).fill(unifiedComment);
 
-      const query = BulkCreateAttachmentsRequestRtV2.decode(v2Requests);
+    expect(
+      PathReporter.report(BulkCreateUnifiedAttachmentsRequestRt.decode(attachments))
+    ).toStrictEqual(['No errors!']);
+  });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: v2Requests,
-      });
-    });
+  it(`rejects more than ${MAX_BULK_CREATE_ATTACHMENTS} attachments`, () => {
+    const attachments = Array(MAX_BULK_CREATE_ATTACHMENTS + 1).fill(unifiedComment);
 
-    it('accepts security.event reference payloads with attachmentId and metadata', () => {
-      const securityEventRequests = [
-        {
-          type: 'security.event',
-          attachmentId: 'doc-id',
-          owner: 'securitySolution',
-          metadata: { index: '.siem-signals-index' },
-        },
-      ];
+    expect(
+      PathReporter.report(BulkCreateUnifiedAttachmentsRequestRt.decode(attachments))
+    ).toContain(
+      `The length of the field attachments is too long. Array must be of length <= ${MAX_BULK_CREATE_ATTACHMENTS}.`
+    );
+  });
 
-      const query = BulkCreateAttachmentsRequestRtV2.decode(securityEventRequests);
+  it('rejects a legacy comment payload', () => {
+    expect(BulkCreateUnifiedAttachmentsRequestRt.decode([legacyComment])._tag).toBe('Left');
+  });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: securityEventRequests,
-      });
-    });
+  it('zod: accepts an empty array', () => {
+    expect(BulkCreateUnifiedAttachmentsRequestSchema.safeParse([]).success).toBe(true);
+  });
 
-    it('accepts mixed array of v1 and v2 attachment requests', () => {
-      const mixedRequests = [
-        {
-          comment: 'This is a comment',
-          type: AttachmentType.user,
-          owner: 'cases',
-        },
-        {
-          type: 'lens',
-          attachmentId: 'attachment-123',
-          owner: 'cases',
-          data: {
-            attributes: {
-              title: 'My Visualization',
-            },
-          },
-          metadata: {
-            description: 'A test visualization',
-          },
-        },
-      ];
+  it(`zod: accepts ${MAX_BULK_CREATE_ATTACHMENTS} attachments`, () => {
+    const attachments = Array(MAX_BULK_CREATE_ATTACHMENTS).fill(unifiedComment);
 
-      const query = BulkCreateAttachmentsRequestRtV2.decode(mixedRequests);
+    expect(BulkCreateUnifiedAttachmentsRequestSchema.safeParse(attachments).success).toBe(true);
+  });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: mixedRequests,
-      });
-    });
+  it(`zod: rejects more than ${MAX_BULK_CREATE_ATTACHMENTS} attachments`, () => {
+    const attachments = Array(MAX_BULK_CREATE_ATTACHMENTS + 1).fill(unifiedComment);
 
-    it('removes foo:bar attributes from requests in array', () => {
-      const requestsWithExtraFields = [
-        {
-          comment: 'This is a comment',
-          type: AttachmentType.user,
-          owner: 'cases',
-          foo: 'bar',
-        },
-        {
-          type: 'user',
-          attachmentId: 'attachment-123',
-          data: {
-            content: 'My comment',
-          },
-          owner: 'cases',
-          foo: 'bar',
-        },
-      ];
+    expect(BulkCreateUnifiedAttachmentsRequestSchema.safeParse(attachments).success).toBe(false);
+  });
 
-      const query = BulkCreateAttachmentsRequestRtV2.decode(requestsWithExtraFields);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: [
-          {
-            comment: 'This is a comment',
-            type: AttachmentType.user,
-            owner: 'cases',
-          },
-          {
-            type: 'user',
-            attachmentId: 'attachment-123',
-            data: {
-              content: 'My comment',
-            },
-            owner: 'cases',
-          },
-        ],
-      });
-    });
-
-    it('zod: accepts array of v1 attachment requests', () => {
-      const v1Requests = [
-        {
-          comment: 'First comment',
-          type: AttachmentType.user,
-          owner: 'cases',
-        },
-      ];
-      const result = BulkCreateAttachmentsRequestSchemaV2.safeParse(v1Requests);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(v1Requests);
-    });
-
-    it('zod: accepts empty array', () => {
-      const result = BulkCreateAttachmentsRequestSchemaV2.safeParse([]);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual([]);
-    });
+  it('zod: rejects a legacy comment payload', () => {
+    expect(BulkCreateUnifiedAttachmentsRequestSchema.safeParse([legacyComment]).success).toBe(
+      false
+    );
   });
 });

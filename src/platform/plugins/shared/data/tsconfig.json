@@ -13,7 +13,8 @@
     "../../../../../typings/index.d.ts",
     "test/scout/**/*",
     "test/scout_http2/**/*",
-    "test/scout_search_sessions/**/*"
+    "test/scout_search_sessions/**/*",
+    "test/scout_test_plugins/**/*"
   ],
   "kbn_references": [
     "@kbn/scout",
@@ -25,7 +26,6 @@
     "@kbn/inspector-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/data-views-plugin",
     "@kbn/screenshot-mode-plugin",
@@ -37,7 +37,6 @@
     "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/utility-types-jest",
-    "@kbn/management-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/i18n-react",
     "@kbn/analytics",
@@ -48,11 +47,9 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/data-service",
-    "@kbn/react-kibana-context-render",
     "@kbn/search-errors",
     "@kbn/search-response-warnings",
     "@kbn/es-types",
-    "@kbn/code-editor",
     "@kbn/core-test-helpers-model-versions",
     "@kbn/react-kibana-mount",
     "@kbn/search-types",
@@ -71,11 +68,9 @@
     "@kbn/apm-utils",
     "@kbn/std",
     "@kbn/core-elasticsearch-server",
-    "@kbn/css-utils",
-    "@kbn/shared-ux-utility",
     "@kbn/date-range-picker-presets-common",
     "@kbn/zod",
-    "@kbn/licensing-plugin"
+    "@kbn/licensing-plugin",
   ],
   "exclude": ["target/**/*"]
 }

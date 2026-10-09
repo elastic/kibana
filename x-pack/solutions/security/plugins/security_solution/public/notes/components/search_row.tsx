@@ -12,7 +12,6 @@ import {
   EuiFlexItem,
   EuiSearchBar,
   EuiSelect,
-  Query,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux-v7';
@@ -54,7 +53,8 @@ export const SearchRow = React.memo(() => {
   const notesAssociatedFilter = useSelector(selectNotesTableAssociatedFilter);
 
   const onQueryChange = useCallback(
-    ({ queryText }: { queryText: string }) => {
+    ({ queryText, error }: { queryText: string; error: Error | null }) => {
+      if (error) return;
       dispatch(userSearchedNotes(queryText.trim()));
     },
     [dispatch]
@@ -70,7 +70,7 @@ export const SearchRow = React.memo(() => {
   return (
     <EuiFlexGroup gutterSize="m">
       <EuiFlexItem>
-        <EuiSearchBar box={searchBox} onChange={onQueryChange} query={Query.parse(notesSearch)} />
+        <EuiSearchBar box={searchBox} onChange={onQueryChange} defaultQuery={notesSearch} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <CreatedByFilterDropdown />

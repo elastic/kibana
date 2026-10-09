@@ -9,7 +9,7 @@
 import { spawn } from 'child_process';
 import Path from 'path';
 
-const PRE_BUILD_SCRIPT = Path.resolve(__dirname, '../../lifecycle/pre_build.sh');
+const PRE_BUILD_SCRIPT = Path.resolve(process.cwd(), '.buildkite/scripts/lifecycle/pre_build.sh');
 /** Execute pre_build.sh and silence its output */
 export async function runPreBuild() {
   await new Promise<void>((resolve, reject) => {

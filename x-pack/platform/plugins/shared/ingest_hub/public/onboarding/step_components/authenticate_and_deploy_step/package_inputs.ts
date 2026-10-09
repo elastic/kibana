@@ -5,67 +5,139 @@
  * 2.0.
  */
 
+import type { RenderIacTemplateIntegration } from '@kbn/fleet-plugin/public';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import { makeDsView } from '../../aws_service_matrix';
 import type { AuthenticateAndDeployStepState } from '../../onboarding_flow_context';
-import { resolveFieldMeta, toTyped } from '../service_settings_step/field_config';
-import type { ServiceVars } from '../service_settings_step/use_service_settings';
+import type { CredentialVarName, ExistingSecretRefs, SecretRefValue } from './secret_refs';
+import {
+  resolveFieldMeta,
+  shouldDefaultCollectS3Logs,
+  toTyped,
+} from '../service_settings_step/field_config';
+import type {
+  ServiceVars,
+  ServiceDataStreamVars,
+  ServiceInstance,
+} from '../service_settings_step/use_service_settings';
 
-interface PackageInputEntry {
+export interface PackageInputEntry {
   enabled: boolean;
-  vars?: Record<string, string | boolean | string[]>;
   streams: Record<string, { enabled: boolean; vars: Record<string, string | boolean | string[]> }>;
 }
 
 export function getRegionFieldName(
   service: AwsServiceMatrixEntry,
-  activeTransport: string | null
+  activeInput: string | null
 ): string {
   const rc = service.requiredConfig ?? [];
-  if (activeTransport === 'aws-s3' && rc.includes('region')) return 'region';
-  if (activeTransport === 'aws-cloudwatch' && rc.includes('region_name')) return 'region_name';
+  if (activeInput === 'aws-s3' && rc.includes('region')) return 'region';
+  if (activeInput === 'aws-cloudwatch' && rc.includes('region_name')) return 'region_name';
   if (rc.includes('aws_region')) return 'aws_region';
   return '';
 }
 
+/**
+ * Build Fleet stream vars for a single input of a single data stream.
+ * `service` should already be scoped to the DS (via makeDsView) so that
+ * requiredConfig/optionalConfig/varDefsByInput are DS-specific.
+ */
 export function buildStreamVars(
   service: AwsServiceMatrixEntry,
-  serviceVars: ServiceVars,
-  globalRegion: string
+  dsVars: ServiceDataStreamVars,
+  globalRegion: string,
+  activeInput: string
 ): Record<string, string | boolean | string[]> {
   const result: Record<string, string | boolean | string[]> = {};
 
-  for (const [key, value] of Object.entries(serviceVars.vars)) {
-    const meta = resolveFieldMeta(service, key);
-    if (meta) {
-      result[key] = toTyped(value, meta);
-    } else {
+  for (const [key, value] of Object.entries(dsVars.varsByInput[activeInput] ?? {})) {
+    const meta = resolveFieldMeta(service, activeInput, key);
+    if (!meta) {
       result[key] = value;
+      continue;
     }
+    result[key] = toTyped(value, meta);
   }
 
-  // Emit manifest defaults for show_user fields not explicitly set by the user.
-  // This ensures required fields with manifest defaults are sent to Fleet even when
-  // the user never opened the flyout.
+  // An S3 input with a bucket ARN but no explicit toggle must read from the bucket, not SQS.
+  if (shouldDefaultCollectS3Logs(service, activeInput, dsVars.varsByInput[activeInput])) {
+    result.collect_s3_logs = true;
+  }
+
+  // Emit manifest defaults for show_user fields belonging to this input not explicitly set.
   const allShowUserFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
   for (const key of allShowUserFields) {
     if (key in result) continue;
-    const meta = resolveFieldMeta(service, key);
+    const meta = resolveFieldMeta(service, activeInput, key);
     if (!meta) continue;
     const typed = toTyped(undefined, meta);
-    // Only emit when there is an actual manifest default (non-empty string or explicit bool).
-    if (meta.isBool || (typeof typed === 'string' && typed !== '')) {
+    if (
+      meta.isBool ||
+      (typeof typed === 'string' && typed !== '') ||
+      (Array.isArray(typed) && typed.length > 0)
+    ) {
       result[key] = typed;
     }
   }
 
-  // Backfill singular region field from globalRegion when not explicitly set
-  const regionField = getRegionFieldName(service, serviceVars.trigger);
+  // Backfill region from globalRegion when not explicitly set — but only when
+  // the manifest actually defines the region field at stream level. Input-level
+  // region vars (e.g. aws_region for guardduty) must not be emitted in streams[].vars;
+  // Fleet rejects them as "not found".
+  const regionField = getRegionFieldName(service, activeInput);
   if (regionField && !result[regionField] && globalRegion) {
-    result[regionField] = globalRegion;
+    const regionMeta = resolveFieldMeta(service, activeInput, regionField);
+    if (regionMeta) {
+      result[regionField] = globalRegion;
+    }
   }
 
   return result;
 }
+
+/** Input types active for one data stream: the user's choice, else the manifest defaults (single-DS → all inputs ON). */
+function resolveActiveInputs(
+  service: AwsServiceMatrixEntry,
+  dsId: string,
+  dsVars: ServiceDataStreamVars
+): string[] {
+  const dsInfo = service.varDefsByDataStream?.[dsId];
+  const isSingleDs = service.dataStreams.length === 1;
+  return dsVars.enabledInputs.length
+    ? dsVars.enabledInputs
+    : isSingleDs
+    ? dsInfo?.inputs ?? service.inputs ?? []
+    : dsInfo?.defaultEnabledInputs?.length
+    ? dsInfo.defaultEnabledInputs
+    : dsInfo?.inputs?.length
+    ? dsInfo.inputs.slice(0, 1)
+    : service.defaultEnabledInputs?.length
+    ? service.defaultEnabledInputs.slice(0, 1)
+    : (service.inputs ?? []).slice(0, 1);
+}
+
+/**
+ * Distinguish "never configured" (key absent → default to all DS) from "explicitly emptied"
+ * (key present with enabledDataStreams: [] → user turned everything off → skip).
+ * Vars are keyed by instance id since duplicates exist.
+ */
+function resolveServiceVars(
+  storedServiceVars: Record<string, ServiceVars>,
+  service: AwsServiceMatrixEntry,
+  instanceId: string = service.id
+): ServiceVars {
+  const rawVars = storedServiceVars[instanceId] ?? storedServiceVars[service.id];
+  if (!rawVars) return { enabledDataStreams: service.dataStreams, varsByDataStream: {} };
+  // Guard against stale session state: filter out dsIds the current service no longer has.
+  // If filtering removes every ID from a non-empty original the user hadn't explicitly cleared,
+  // fall back to service defaults — an empty list is the "intentional opt-out" sentinel.
+  const filtered = rawVars.enabledDataStreams.filter((dsId) => service.dataStreams.includes(dsId));
+  return filtered.length === rawVars.enabledDataStreams.length
+    ? rawVars
+    : { ...rawVars, enabledDataStreams: filtered };
+}
+
+const EMPTY_DS_VARS: Readonly<ServiceDataStreamVars> = { enabledInputs: [], varsByInput: {} };
 
 export function buildPackageInputs(
   services: AwsServiceMatrixEntry[],
@@ -75,39 +147,215 @@ export function buildPackageInputs(
   const inputs: Record<string, PackageInputEntry> = {};
 
   for (const service of services) {
-    const serviceVars: ServiceVars = storedServiceVars[service.id] ?? { trigger: null, vars: {} };
-    const defaultInput = service.inputs?.includes('aws-s3') ? 'aws-s3' : service.inputs?.[0] ?? '';
-    const inputType = serviceVars.trigger ?? defaultInput;
-    if (!inputType) continue;
+    const serviceVars = resolveServiceVars(storedServiceVars, service);
 
-    const inputKey = service.policyTemplate ? `${service.policyTemplate}-${inputType}` : inputType;
-    const streamKey = `${service.packageName}.${service.id}`;
-    const streamVars = buildStreamVars(service, serviceVars, globalRegion);
+    for (const dsId of serviceVars.enabledDataStreams) {
+      const dsVars = serviceVars.varsByDataStream[dsId] ?? EMPTY_DS_VARS;
+      const activeInputs = resolveActiveInputs(service, dsId, dsVars);
 
-    if (!inputs[inputKey]) {
-      inputs[inputKey] = { enabled: true, streams: {} };
+      // Fleet input key: <policyTemplateName>-<inputType>
+      // Use policyTemplate when present (e.g. aws_cloudwatch_input_otel entries where id !== PT name).
+      const ptName = service.policyTemplate ?? service.id;
+      const dsView = makeDsView(service, dsId);
+      // Fleet stream key for input packages: <packageName>.<policyTemplateName>
+      // Fleet synthesizes one data stream per PT with dataset = packageName.ptName
+      // (see getNormalizedDataStreams in Fleet's policy_template.ts). Regular packages use the
+      // actual data stream path instead.
+      // isInputPackage: buildAwsServiceMatrix sets entry.id = pt.name for input-package PTs, so
+      // dsId === service.id iff the service was built from a PT (not a standalone data stream).
+      const isInputPackage = dsId === service.id && !!service.policyTemplate;
+      const streamKey = isInputPackage
+        ? `${service.packageName}.${ptName}`
+        : `${service.packageName}.${dsId}`;
+
+      for (const inputType of activeInputs) {
+        const inputKey = `${ptName}-${inputType}`;
+        const streamVars = buildStreamVars(dsView, dsVars, globalRegion, inputType);
+
+        if (!inputs[inputKey]) {
+          inputs[inputKey] = { enabled: true, streams: {} };
+        }
+        inputs[inputKey].streams[streamKey] = { enabled: true, vars: streamVars };
+      }
     }
-
-    inputs[inputKey].streams[streamKey] = { enabled: true, vars: streamVars };
   }
 
   return inputs;
 }
 
+/**
+ * The integration set a Federated Identity must cover for the instances Deploy will create: one
+ * entry per package, one policy template (`policyTemplate ?? id`) per template — members sharing
+ * a template (original + duplicate, or two services aliasing one manifest template) merge into
+ * one entry with the union of the input types active across their enabled data streams. Takes
+ * deploy-group members and resolves vars per instance exactly like deployGroup, so the template
+ * the user launches grants exactly what Deploy creates.
+ * Sorted by package, template and input so the result is a stable react-query key.
+ */
+export function buildIacIntegrations(
+  members: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }>,
+  storedServiceVars: Record<string, ServiceVars>
+): RenderIacTemplateIntegration[] {
+  const inputsByPackageAndTemplate = new Map<string, Map<string, Set<string>>>();
+
+  for (const { instance, service } of members) {
+    const serviceVars = resolveServiceVars(storedServiceVars, service, instance.instanceId);
+    const activeInputs = new Set<string>();
+    for (const dsId of serviceVars.enabledDataStreams) {
+      const dsVars = serviceVars.varsByDataStream[dsId] ?? EMPTY_DS_VARS;
+      for (const inputType of resolveActiveInputs(service, dsId, dsVars)) {
+        activeInputs.add(inputType);
+      }
+    }
+    if (activeInputs.size === 0) continue;
+
+    const templates =
+      inputsByPackageAndTemplate.get(service.packageName) ?? new Map<string, Set<string>>();
+    inputsByPackageAndTemplate.set(service.packageName, templates);
+    const ptName = service.policyTemplate ?? service.id;
+    const mergedInputs = templates.get(ptName) ?? new Set<string>();
+    templates.set(ptName, mergedInputs);
+    for (const inputType of activeInputs) {
+      mergedInputs.add(inputType);
+    }
+  }
+
+  return [...inputsByPackageAndTemplate.entries()].sort(byKey).map(([name, templates]) => ({
+    name,
+    policyTemplates: [...templates.entries()].sort(byKey).map(([ptName, inputTypes]) => ({
+      name: ptName,
+      enabledInputs: [...inputTypes].sort(),
+    })),
+  }));
+}
+
+/** Code-unit ordering on map-entry keys, so the result never depends on locale collation. */
+function byKey<T>([a]: [string, T], [b]: [string, T]): number {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}
+
+export interface AgentCredentialVars {
+  method: 'static_keys' | 'temporary_keys' | 'shared_credentials' | 'assume_role';
+  /** static_keys / temporary_keys — access key id (non-secret) */
+  access_key_id?: string;
+  /** static_keys / temporary_keys — secret (memory-only, never persisted) */
+  secret_access_key?: string;
+  /** temporary_keys — session token (memory-only, never persisted) */
+  session_token?: string;
+  /** shared_credentials — path to the shared credentials file */
+  shared_credential_file?: string;
+  /** shared_credentials — profile name within the file */
+  credential_profile_name?: string;
+  /** assume_role — role ARN */
+  role_arn?: string;
+}
+
+/**
+ * Builds the package-level vars of a policy body. For a credential var the typed value wins; when
+ * the user kept the stored secret instead (empty value), the policy's existing ref is sent back.
+ * Fleet's agentless PUT is a full replace, so a credential var that is simply left out would have
+ * its stored secret deleted.
+ */
 export function buildPackageVars(
   globalRegion: string,
   staticKeys: AuthenticateAndDeployStepState['staticKeys'],
-  pkgVarNames: Set<string>
-): Record<string, string> | undefined {
-  const vars: Record<string, string> = {};
+  pkgVarNames: Set<string>,
+  agentCredentials?: AgentCredentialVars,
+  existingSecretRefs?: ExistingSecretRefs
+): Record<string, string | SecretRefValue> | undefined {
+  const vars: Record<string, string | SecretRefValue> = {};
   if (globalRegion && pkgVarNames.has('default_region')) vars.default_region = globalRegion;
-  if (staticKeys?.access_key_id && staticKeys?.secret_access_key) {
-    if (pkgVarNames.has('access_key_id')) vars.access_key_id = staticKeys.access_key_id;
-    if (pkgVarNames.has('secret_access_key')) vars.secret_access_key = staticKeys.secret_access_key;
+  // 'region' (distinct from 'default_region') is a package-level var on aws_cloudwatch_input_otel
+  // today; ECS packages use 'default_region'. The pkgVarNames guard ensures it only fires when
+  // the deployed package actually declares it.
+  if (globalRegion && pkgVarNames.has('region')) vars.region = globalRegion;
+
+  // The credentials that have a stored secret are replaced as a set: an access key id only works
+  // with its own secret access key, so a typed value for a stored credential only counts when every
+  // stored credential of the method is replaced. Otherwise the stored ref is kept, and a half-typed
+  // set is never sent next to the ref of the other half. A typed value for a credential with no
+  // stored ref (a package may keep only some of them as secrets) always counts.
+  const setCredentialVars = (typed: Partial<Record<CredentialVarName, string>>) => {
+    const declared = (Object.keys(typed) as CredentialVarName[]).filter((name) =>
+      pkgVarNames.has(name)
+    );
+    const stored = declared.filter((name) => existingSecretRefs?.has(name));
+    const isCompleteReplacement = stored.every((name) => !!typed[name]);
+    for (const name of declared) {
+      const ref = existingSecretRefs?.get(name);
+      const useTyped = !!typed[name] && (!ref || isCompleteReplacement);
+      const value = useTyped ? typed[name] : ref;
+      if (value) vars[name] = value;
+    }
+  };
+
+  if (agentCredentials) {
+    const { method } = agentCredentials;
+    if (method === 'static_keys' || method === 'temporary_keys') {
+      setCredentialVars({
+        access_key_id: agentCredentials.access_key_id,
+        secret_access_key: agentCredentials.secret_access_key,
+        ...(method === 'temporary_keys' ? { session_token: agentCredentials.session_token } : {}),
+      });
+    } else if (method === 'shared_credentials') {
+      if (agentCredentials.shared_credential_file && pkgVarNames.has('shared_credential_file'))
+        vars.shared_credential_file = agentCredentials.shared_credential_file;
+      if (agentCredentials.credential_profile_name && pkgVarNames.has('credential_profile_name'))
+        vars.credential_profile_name = agentCredentials.credential_profile_name;
+    } else if (method === 'assume_role') {
+      if (agentCredentials.role_arn && pkgVarNames.has('role_arn'))
+        vars.role_arn = agentCredentials.role_arn;
+    }
+  } else {
+    // Agentless path: staticKeys is used when no agentCredentials are provided.
+    setCredentialVars({
+      access_key_id: staticKeys?.access_key_id,
+      secret_access_key: staticKeys?.secret_access_key,
+    });
+    // The in-memory static keys have no session token: only a stored one is kept.
+    const sessionTokenRef = existingSecretRefs?.get('session_token');
+    if (sessionTokenRef && pkgVarNames.has('session_token')) vars.session_token = sessionTokenRef;
   }
   return Object.keys(vars).length > 0 ? vars : undefined;
 }
 
 export function getPackageVarNames(pkgInfo: { vars?: Array<{ name: string }> }): Set<string> {
   return new Set((pkgInfo.vars ?? []).map((v) => v.name));
+}
+
+/**
+ * Converts raw serviceVars (string values from session storage) to typed form for SO persistence.
+ * Multi-value fields (e.g. `regions`) are split from comma-separated strings to string arrays so
+ * the SO reflects the exact typed values that would be sent to the Fleet API.
+ */
+export function toSOServiceVars(
+  serviceVars: Record<string, ServiceVars>,
+  servicesMap: Map<string, AwsServiceMatrixEntry>
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [serviceId, vars] of Object.entries(serviceVars)) {
+    const service = servicesMap.get(serviceId);
+    if (!service) {
+      result[serviceId] = vars;
+      continue;
+    }
+    const typedVarsByDataStream: Record<string, unknown> = {};
+    for (const [dsId, dsVars] of Object.entries(vars.varsByDataStream)) {
+      const dsView = makeDsView(service, dsId);
+      const typedVarsByInput: Record<string, Record<string, unknown>> = {};
+      for (const [inputType, inputVars] of Object.entries(dsVars.varsByInput)) {
+        const typedFields: Record<string, unknown> = {};
+        for (const [fieldKey, rawValue] of Object.entries(inputVars)) {
+          const meta = resolveFieldMeta(dsView, inputType, fieldKey);
+          typedFields[fieldKey] = meta ? toTyped(rawValue, meta) : rawValue;
+        }
+        typedVarsByInput[inputType] = typedFields;
+      }
+      typedVarsByDataStream[dsId] = { ...dsVars, varsByInput: typedVarsByInput };
+    }
+    result[serviceId] = { ...vars, varsByDataStream: typedVarsByDataStream };
+  }
+  return result;
 }

@@ -11,7 +11,10 @@ Scout tests for the alerting_v2 plugin, grouped into **namespaces** so CI can sc
 | `rules` | Rule HTTP CRUD, rule-template read APIs, error-envelope contract, matcher-value suggestions | Rules list, builder, Discover flyout | Mostly local-only (`@local-stateful-classic`); the rule-template specs are `tags.deploymentAgnostic` |
 | `action_policies` | Action-policy HTTP CRUD | Policy create/edit and privileges | Local-only |
 | `alerts` | Alert actions, execution history, rule-event field suggestions | Alert episodes, Discover compose, execution-history smoke | Local-only |
-| `engine` | Executor, director, dispatcher, end-to-end, telemetry, implicit index privileges, **rule history** | — | Every `tags.stateful.classic` spec (local **and** cloud). API-only. |
+| `engine` | End-to-end, telemetry, implicit index privileges, SML types access, **rule history** | — | `tags.stateful.classic` (local **and** cloud). API-only. |
+| `engine_director` | Director | — | Split out of `engine` to cut CI wall-time. `tags.stateful.classic`. API-only. |
+| `engine_dispatcher` | Dispatcher | — | Split out of `engine` to cut CI wall-time. `tags.stateful.classic`. API-only. |
+| `engine_executor` | Rule executor | — | Split out of `engine` to cut CI wall-time (heaviest suite). `tags.stateful.classic`. API-only. |
 | `management` | — | `management_required_privileges` | `tags.deploymentAgnostic`. UI-only. |
 
 `common/` is shared utilities and Playwright fixtures. It is **not** a namespace (no `playwright.config.ts`).
@@ -19,7 +22,7 @@ Scout tests for the alerting_v2 plugin, grouped into **namespaces** so CI can sc
 ### Where a new spec goes
 
 - HTTP route for rules / rule templates / action policies / alert actions / execution history → that family's namespace, `api/tests/`.
-- Executor → director → dispatcher pipeline, or anything that polls `.rule-events` / `.alert-actions` with `POLL_TIMEOUT_MS` → `engine`.
+- Rule executor specs → `engine_executor`. Director specs → `engine_director`. Dispatcher specs → `engine_dispatcher`. End-to-end, telemetry, rule-history, and other engine specs that poll `.rule-events` / `.alert-actions` with `POLL_TIMEOUT_MS` → `engine`. (The `engine*` namespaces were split apart to keep each CI config's wall-time down; keep new engine specs in the smallest matching one.)
 - UI for a management page → the matching namespace's `ui/tests/`.
 - Cross-page privilege interstitial → `management`.
 
@@ -30,7 +33,7 @@ manifest lists it.
 
 ### Why `rule_history` lives in `engine`
 
-Rule-change history is a rules concern, but the spec is tagged `tags.stateful.classic`. Config-level scheduling unions every tag in the config, so putting those 8 tests in `rules` would schedule the entire rules CRUD suite on cloud-stateful-classic. Keep it in `engine` until that tag is dropped.
+Rule-change history is a rules concern, but the spec is tagged `tags.stateful.classic`. Config-level scheduling unions every tag in the config, so putting those 8 tests in `rules` would schedule the entire rules CRUD suite on cloud-stateful-classic. Keep it in the `engine*` namespaces (currently `engine`) until that tag is dropped.
 
 ## Layout
 
@@ -44,6 +47,9 @@ test/scout_alerting_v2/
 ├── action_policies/{api,ui}/
 ├── alerts/{api,ui}/
 ├── engine/api/
+├── engine_director/api/
+├── engine_dispatcher/api/
+├── engine_executor/api/
 └── management/ui/
 ```
 

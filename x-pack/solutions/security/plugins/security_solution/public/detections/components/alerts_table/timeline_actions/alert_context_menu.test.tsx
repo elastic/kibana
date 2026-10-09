@@ -55,9 +55,6 @@ const ecsRowData: Ecs = {
 const props = {
   ariaLabel:
     'Select more actions for the alert or event in row 26, with columns 2021-08-12T11:07:10.552Z Malware Prevention Alert high 73  siem-windows-endpoint SYSTEM powershell.exe mimikatz.exe  ',
-  ariaRowindex: 26,
-  columnValues:
-    '2021-08-12T11:07:10.552Z Malware Prevention Alert high 73  siem-windows-endpoint SYSTEM powershell.exe mimikatz.exe  ',
   isRemoteDocument: false,
   ecsRowData,
   refetch: jest.fn(),
@@ -131,8 +128,7 @@ jest.mock('./use_add_to_chat_action', () => ({
 }));
 
 const actionMenuButton = 'timeline-context-menu-button';
-const addToExistingCaseButton = 'add-to-existing-case-action';
-const addToNewCaseButton = 'add-to-new-case-action';
+const addToCaseButton = 'add-to-case-action';
 const markAsOpenButton = 'open-alert-status';
 const markAsAcknowledgedButton = 'acknowledged-alert-status';
 const markAsClosedButton = 'alert-close-context-menu-item';
@@ -191,8 +187,7 @@ describe('Alert table context menu', () => {
 
       fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
-      expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
-      expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
+      expect(wrapper.getByTestId(addToCaseButton)).toBeTruthy();
     });
 
     test('it render AddToCase context menu item if timelineId === TimelineId.detectionsRulesDetailsPage', () => {
@@ -204,8 +199,7 @@ describe('Alert table context menu', () => {
 
       fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
-      expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
-      expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
+      expect(wrapper.getByTestId(addToCaseButton)).toBeTruthy();
     });
 
     test('it render AddToCase context menu item if timelineId === TimelineId.active', () => {
@@ -217,8 +211,7 @@ describe('Alert table context menu', () => {
 
       fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
-      expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
-      expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
+      expect(wrapper.getByTestId(addToCaseButton)).toBeTruthy();
     });
   });
 

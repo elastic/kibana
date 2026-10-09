@@ -13,15 +13,14 @@ import {
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
-  UPDATES_INDEX,
 } from '../../../common/fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
-import { clearEntityStoreIndices, ingestDoc } from '../../../common/fixtures/helpers';
 import {
-  LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
-  LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
-  LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
-} from '../../../../../server/domain/saved_objects';
+  clearInstalledEntityStoreDocuments,
+  ingestDoc,
+  LOGS_TEST_INDEX,
+  resetLogExtractionConfig,
+  updateLogExtractionConfig,
+} from '../../../common/fixtures/helpers';
 
 const FROM_DATE = '2026-06-10T10:00:00Z';
 const TO_DATE = '2026-06-10T11:00:00Z';
@@ -33,12 +32,13 @@ const HOST_TIMESTAMPS = [
   '2026-06-10T10:04:00Z',
   '2026-06-10T10:05:00Z',
 ];
+const CAP_HOST_NAME_PREFIXES = ['cap-defer-host-', 'cap-drop-host-', 'cap-disabled-host-'] as const;
 
 apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, apiClient, kbnClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, esClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -48,27 +48,25 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
       ...credentials.cookieHeader,
       ...INTERNAL_HEADERS,
     };
-
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
-
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(201);
+    await clearInstalledEntityStoreDocuments(esClient);
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(200);
-    await clearEntityStoreIndices(esClient);
+    try {
+      await esClient.deleteByQuery({
+        index: LOGS_TEST_INDEX,
+        refresh: true,
+        ignore_unavailable: true,
+        query: {
+          bool: {
+            should: CAP_HOST_NAME_PREFIXES.map((prefix) => ({ prefix: { 'host.name': prefix } })),
+            minimum_should_match: 1,
+          },
+        },
+      });
+    } finally {
+      await resetLogExtractionConfig({ apiClient, headers: defaultHeaders });
+    }
   });
 
   // Defer: cap fires mid-window — caller uses lastSearchTimestamp to resume
@@ -78,15 +76,13 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
       // Shrink the log-slice page and set a small per-window cap.
       // maxLogsPerPage=1 means each outer loop iteration processes exactly 1 raw log.
       // maxLogsPerWindow=2 causes the cap to fire after 2 entities are extracted.
-      await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+      await updateLogExtractionConfig({
+        apiClient,
         headers: defaultHeaders,
-        responseType: 'json',
-        body: {
-          logExtraction: {
-            maxLogsPerPage: 1,
-            maxLogsPerWindow: 2,
-            maxLogsPerWindowCapBehavior: 'defer',
-          },
+        logExtraction: {
+          maxLogsPerPage: 1,
+          maxLogsPerWindow: 2,
+          maxLogsPerWindowCapBehavior: 'defer',
         },
       });
 
@@ -152,21 +148,11 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
       } finally {
         // Remove ingested docs and restore config to defaults
         await esClient.deleteByQuery({
-          index: UPDATES_INDEX,
+          index: LOGS_TEST_INDEX,
           refresh: true,
           query: { prefix: { 'host.name': 'cap-defer-host-' } },
         });
-        await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
-          headers: defaultHeaders,
-          responseType: 'json',
-          body: {
-            logExtraction: {
-              maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
-              maxLogsPerWindow: LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
-              maxLogsPerWindowCapBehavior: LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
-            },
-          },
-        });
+        await resetLogExtractionConfig({ apiClient, headers: defaultHeaders });
       }
     }
   );
@@ -175,15 +161,13 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
   apiTest(
     'drop — logsCapApplied true, lastSearchTimestamp equals window end',
     async ({ apiClient, esClient }) => {
-      await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+      await updateLogExtractionConfig({
+        apiClient,
         headers: defaultHeaders,
-        responseType: 'json',
-        body: {
-          logExtraction: {
-            maxLogsPerPage: 1,
-            maxLogsPerWindow: 2,
-            maxLogsPerWindowCapBehavior: 'drop',
-          },
+        logExtraction: {
+          maxLogsPerPage: 1,
+          maxLogsPerWindow: 2,
+          maxLogsPerWindowCapBehavior: 'drop',
         },
       });
 
@@ -214,21 +198,11 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
         expect(response.body.lastSearchTimestamp).toBe(TO_DATE);
       } finally {
         await esClient.deleteByQuery({
-          index: UPDATES_INDEX,
+          index: LOGS_TEST_INDEX,
           refresh: true,
           query: { prefix: { 'host.name': 'cap-drop-host-' } },
         });
-        await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
-          headers: defaultHeaders,
-          responseType: 'json',
-          body: {
-            logExtraction: {
-              maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
-              maxLogsPerWindow: LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
-              maxLogsPerWindowCapBehavior: LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
-            },
-          },
-        });
+        await resetLogExtractionConfig({ apiClient, headers: defaultHeaders });
       }
     }
   );
@@ -237,14 +211,12 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
   apiTest(
     'maxLogsPerWindow 0 disables the cap and extracts all docs',
     async ({ apiClient, esClient }) => {
-      await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+      await updateLogExtractionConfig({
+        apiClient,
         headers: defaultHeaders,
-        responseType: 'json',
-        body: {
-          logExtraction: {
-            maxLogsPerPage: 1,
-            maxLogsPerWindow: 0,
-          },
+        logExtraction: {
+          maxLogsPerPage: 1,
+          maxLogsPerWindow: 0,
         },
       });
 
@@ -272,19 +244,14 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
         expect(response.body.logsProcessed).toBe(HOST_TIMESTAMPS.length);
       } finally {
         await esClient.deleteByQuery({
-          index: UPDATES_INDEX,
+          index: LOGS_TEST_INDEX,
           refresh: true,
           query: { prefix: { 'host.name': 'cap-disabled-host-' } },
         });
-        await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        await resetLogExtractionConfig({
+          apiClient,
           headers: defaultHeaders,
-          responseType: 'json',
-          body: {
-            logExtraction: {
-              maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
-              maxLogsPerWindow: LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
-            },
-          },
+          overrides: { additionalIndexPatterns: [] },
         });
       }
     }

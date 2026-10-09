@@ -13,6 +13,7 @@ import { RULE_IDS, SavedObjectsCheckError } from '../../findings';
 import {
   validateAllMappingsInModelVersion,
   validateNewModelVersionSchemas,
+  validateUpdateSchemaContinuity,
   validateModelVersionNumbers,
   validateNoIndexOrEnabledFalseInAllMappings,
   getLatestModelVersion,
@@ -59,6 +60,9 @@ export function validateChangesNewType({ to, registeredType }: ValidateChangesNe
 
   // check that the last modelVersion has schemas and that schemas have both create and forwardCompatibility defined
   validateNewModelVersionSchemas(name, getLatestModelVersion(to));
+
+  // check that once a model version defines an update schema, all later model versions do too
+  validateUpdateSchemaContinuity(name, registeredType);
 
   // validate that all mapping fields are present in the latest model version schema
   validateAllMappingsInModelVersion(name, to, registeredType);

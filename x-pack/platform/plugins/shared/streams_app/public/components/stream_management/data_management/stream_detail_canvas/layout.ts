@@ -7,10 +7,19 @@
 
 import Dagre from '@dagrejs/dagre';
 import type { XYPosition } from '@xyflow/react';
-import { COLUMN_GAP, NODE_HEIGHT_ESTIMATE, NODE_WIDTH_ESTIMATE, ROW_GAP } from './canvas_constants';
+import {
+  COLUMN_GAP,
+  NODE_HEIGHT_BY_TYPE,
+  NODE_HEIGHT_ESTIMATE,
+  NODE_WIDTH_ESTIMATE,
+  ROW_GAP,
+} from './canvas_constants';
 
 interface LayoutNode {
   id: string;
+  type?: string;
+  /** React Flow's measured DOM size, present once the node has been rendered. */
+  measured?: { height?: number };
 }
 
 interface LayoutEdge {
@@ -23,6 +32,9 @@ interface LayoutEdge {
 // keeps the flow on the same tidy grid regardless of each card's real width.
 const RANK_SEPARATION = Math.max(COLUMN_GAP - NODE_WIDTH_ESTIMATE, 0);
 const NODE_SEPARATION = Math.max(ROW_GAP - NODE_HEIGHT_ESTIMATE, 0);
+
+const getNodeHeight = ({ type, measured }: LayoutNode): number =>
+  measured?.height ?? (type ? NODE_HEIGHT_BY_TYPE[type] : undefined) ?? NODE_HEIGHT_ESTIMATE;
 
 /**
  * Dagre assigns each node to a rank by its depth in the flow and minimizes edge
@@ -74,7 +86,7 @@ export const layoutGraph = (nodes: LayoutNode[], edges: LayoutEdge[]): Map<strin
       return;
     }
     minX = Math.min(minX, laidOut.x - NODE_WIDTH_ESTIMATE / 2);
-    minY = Math.min(minY, laidOut.y - NODE_HEIGHT_ESTIMATE / 2);
+    minY = Math.min(minY, laidOut.y - getNodeHeight(node) / 2);
   });
   if (!Number.isFinite(minX)) {
     minX = 0;
@@ -89,15 +101,14 @@ export const layoutGraph = (nodes: LayoutNode[], edges: LayoutEdge[]): Map<strin
     }
     positions.set(node.id, {
       x: Math.round(laidOut.x - NODE_WIDTH_ESTIMATE / 2 - minX),
-      y: Math.round(laidOut.y - NODE_HEIGHT_ESTIMATE / 2 - minY),
+      y: Math.round(laidOut.y - getNodeHeight(node) / 2 - minY),
     });
   });
 
   return positions;
 };
 
-interface PositionedNode {
-  id: string;
+interface PositionedNode extends LayoutNode {
   position: XYPosition;
 }
 

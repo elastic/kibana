@@ -18,6 +18,7 @@ import type {
   InfraTimerangeInput,
   SnapshotCustomMetricInput,
 } from '../../../../../common/http_api';
+import { getInventoryRuleSchema } from '../../../../../common/inventory/get_inventory_rule_schema';
 import type { InfraSource } from '../../../sources';
 import { ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX, createRequest } from './create_request';
 import type { AdditionalContext } from '../../common/utils';
@@ -120,6 +121,7 @@ export const getData = async ({
   afterKey,
   previousNodes = {},
   schema,
+  isPodSchemaSelectorEnabled = false,
 }: {
   esClient: ElasticsearchClient;
   nodeType: InventoryItemType;
@@ -135,7 +137,12 @@ export const getData = async ({
   afterKey?: BucketKey;
   previousNodes?: Response;
   schema?: DataSchemaFormat;
+  isPodSchemaSelectorEnabled?: boolean;
 }): Promise<Response> => {
+  // Resolved once here and passed down, so the search and the additionalContext parsing
+  // below cannot disagree — ECS context comes from `_source`, SemConv from `docvalue_fields`.
+  const effectiveSchema = getInventoryRuleSchema(nodeType, schema, isPodSchemaSelectorEnabled);
+
   const handleResponse = (aggs: ResponseAggregations, previous: Response) => {
     const { nodes } = aggs;
     const nextAfterKey = nodes.after_key;
@@ -146,7 +153,7 @@ export const getData = async ({
         ? createContainerList(bucket.containerContext)
         : undefined;
 
-      const additionalContextSource = getMetadata(bucket, schema);
+      const additionalContextSource = getMetadata(bucket, effectiveSchema);
 
       previous[bucket.key.node] = {
         value: bucket?.[metricId]?.value ?? null,
@@ -173,7 +180,8 @@ export const getData = async ({
         customMetric,
         afterKey: nextAfterKey,
         previousNodes: previous,
-        schema,
+        schema: effectiveSchema,
+        isPodSchemaSelectorEnabled,
       });
     }
     return previous;
@@ -200,7 +208,7 @@ export const getData = async ({
     filterQuery,
     customMetric,
     fieldsExisted,
-    schema
+    effectiveSchema
   );
   logger.trace(() => `Request: ${JSON.stringify(request)}`);
   const body = await esClient.search<undefined, ResponseAggregations>(request);

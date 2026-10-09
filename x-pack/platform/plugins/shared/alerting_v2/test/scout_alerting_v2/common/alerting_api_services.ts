@@ -14,6 +14,7 @@ import type {
 } from '@kbn/scout';
 import {
   getActionPoliciesApiService,
+  getActionPolicySavedObjectService,
   getAlertActionsApiService,
   getAlertActionsEventsService,
   getDispatcherApiService,
@@ -21,11 +22,13 @@ import {
   getRuleChangesHistoryApiService,
   getRuleExecutionsApiService,
   getRulesApiService,
+  getRuleSavedObjectService,
   getRuleTemplatesApiService,
   getTaskManagerService,
   getTelemetryService,
   getWorkflowsApiService,
   type ActionPoliciesApiService,
+  type ActionPolicySavedObjectService,
   type AlertActionsApiService,
   type AlertActionsEventsService,
   type DispatcherApiService,
@@ -33,6 +36,7 @@ import {
   type RuleChangesHistoryApiService,
   type RuleExecutionsApiService,
   type RulesApiService,
+  type RuleSavedObjectService,
   type RuleEventsApiService,
   type RuleTemplatesApiService,
   type TaskManagerService,
@@ -45,12 +49,14 @@ import { getSourceIndexApiService } from './services/source_index_api_service';
 
 export interface AlertingApiServices {
   rules: RulesApiService;
+  ruleSavedObject: RuleSavedObjectService;
   ruleTemplates: RuleTemplatesApiService;
   ruleChangesHistory: RuleChangesHistoryApiService;
   ruleEvents: RuleEventsApiService;
   alertActionsEvents: AlertActionsEventsService;
   alertActions: AlertActionsApiService;
   actionPolicies: ActionPoliciesApiService;
+  actionPolicySavedObject: ActionPolicySavedObjectService;
   maintenanceWindows: MaintenanceWindowsApiService;
   sourceIndex: SourceIndexApiService;
   ruleExecutions: RuleExecutionsApiService;
@@ -83,12 +89,14 @@ export const buildAlertingApiServices = ({
   const taskManager = getTaskManagerService({ kbnClient, log });
   return {
     rules: getRulesApiService({ kbnClient, log }),
+    ruleSavedObject: getRuleSavedObjectService({ esClient, log, config }),
     ruleTemplates: getRuleTemplatesApiService({ kbnClient, log }),
     ruleChangesHistory: getRuleChangesHistoryApiService({ esClient, log, config }),
     ruleEvents: getRuleEventsApiService({ esClient, log }),
     alertActionsEvents: getAlertActionsEventsService({ esClient, log }),
     alertActions: getAlertActionsApiService({ kbnClient, log }),
     actionPolicies: getActionPoliciesApiService({ kbnClient, log }),
+    actionPolicySavedObject: getActionPolicySavedObjectService({ esClient, log, config }),
     maintenanceWindows: getMaintenanceWindowsApiService({ kbnClient, log }),
     sourceIndex: getSourceIndexApiService({ esClient, log }),
     ruleExecutions: getRuleExecutionsApiService({ esClient, log }),

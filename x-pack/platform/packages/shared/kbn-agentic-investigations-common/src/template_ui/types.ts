@@ -1,0 +1,161 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type React from 'react';
+import type { Conversation } from '@kbn/agent-builder-common';
+import type { FlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
+
+/**
+ * Props passed to the `renderAssignees` render prop.
+ *
+ * The render prop is supplied by the consuming plugin at registration time so that
+ * HTTP hooks and Kibana context remain outside the shared package. The slot calls it
+ * with the conversation details it holds, and the plugin wraps the result in its own
+ * `KibanaContextProvider` + `QueryClientProvider`.
+ */
+export interface AssigneesSlotRenderProps {
+  /** Conversation id — used as the mutation target and as the popover data-test-subj. */
+  conversationId: string;
+  /**
+   * `'investigation'` or `'escalation'`. The plugin uses this to pick the right
+   * assignment endpoint and the right capability check.
+   */
+  templateId: string;
+  /** Current full list of assignee user-profile uids. */
+  assigneeUids: readonly string[];
+  /** Current status string from metadata (e.g. `'open'` / `'closed'`). */
+  status?: string;
+  /**
+   * Calls the flyout's internal refetch after a successful mutation, so the header
+   * reflects the server-confirmed state without waiting for the 5 s poll.
+   */
+  refetchConversation?: () => Promise<void>;
+  /** Size of the button icon. */
+  buttonIconSize?: 'xs' | 's';
+}
+
+/**
+ * A render prop that the consuming plugin provides to the slot to render the interactive
+ * assignee picker. When absent the header falls back to a read-only avatar stack.
+ */
+export type RenderAssignees = (props: AssigneesSlotRenderProps) => React.ReactNode;
+
+/**
+ * Props passed to the `renderStatus` render prop.
+ */
+export interface StatusSlotRenderProps {
+  /** Conversation id — used as the mutation target. */
+  conversationId: string;
+  /**
+   * `'investigation'` or `'escalation'`. The plugin uses this to pick the right
+   * status endpoint and the right capability check.
+   */
+  templateId: string;
+  /** Current status string from metadata (e.g. `'open'` / `'closed'`). */
+  status?: string;
+  /**
+   * Calls the flyout's internal refetch after a successful mutation, so the header
+   * reflects the server-confirmed state without waiting for the 5 s poll.
+   */
+  refetchConversation?: () => Promise<void>;
+}
+
+/**
+ * A render prop that the consuming plugin provides to render the interactive status toggle.
+ * When absent, the header falls back to a read-only status badge.
+ */
+export type RenderStatus = (props: StatusSlotRenderProps) => React.ReactNode;
+
+/**
+ * Props passed to the `renderLinkedInvestigations` render prop.
+ *
+ * The render prop is supplied by the consuming plugin at registration time so that HTTP hooks
+ * and Kibana context remain outside the shared package. `openFullscreenConversation` from the
+ * Agent Builder template context is captured at registration and forwarded here as
+ * `onOpenInvestigation`, so the connected component can navigate without importing Agent Builder.
+ */
+export interface LinkedInvestigationsSlotRenderProps {
+  /** Escalation conversation id — the entity whose linked investigations we are showing. */
+  escalationId: string;
+  /**
+   * The ids of linked investigations read from `metadata.linked_investigations` of the current
+   * escalation conversation. Used as a cache-busting input to the fetch query key so that
+   * the 5 s conversation poll triggers a re-fetch when a new investigation is linked.
+   */
+  linkedInvestigationIds: readonly string[];
+  /** Navigates to the investigation's chat page with its details flyout open. */
+  onOpenInvestigation: (args: { conversationId: string; agentId: string }) => void;
+}
+
+/**
+ * A render prop that the consuming plugin provides to the escalation overview slot to render
+ * the connected linked-investigations list. When absent the slot renders nothing.
+ */
+export type RenderLinkedInvestigations = (
+  props: LinkedInvestigationsSlotRenderProps
+) => React.ReactNode;
+
+/**
+ * Props passed to the `renderOverview` render prop: everything the default overview tab reads,
+ * plus the proposed actions content already rendered by `renderProposedActions`.
+ */
+export interface OverviewSlotRenderProps {
+  conversation: Conversation;
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
+  proposedActionsContent?: React.ReactNode;
+  /** The count shown beside the "Proposed actions" heading, from `renderProposedActionsCount`. */
+  proposedActionsCount?: React.ReactNode;
+}
+
+/**
+ * A render prop that replaces the overview tab body, so a plugin can add sections from data it
+ * fetches (subjects, impact, conclusion, trace). It typically renders `OverviewTab` with
+ * `sections`. When absent the tab renders `OverviewTab` from the conversation alone.
+ */
+export type RenderOverview = (props: OverviewSlotRenderProps) => React.ReactNode;
+
+/** Props passed to the `renderLiveState` render prop. */
+export interface LiveStateSlotRenderProps {
+  conversationId: string;
+  /** The severity the conversation carries, for use until fresher data has been read. */
+  severity?: string;
+}
+
+/**
+ * A render prop for the investigation's live state in the header, next to its age: its severity
+ * and whether an agent is working on it now. Supplied by the consuming plugin, because the
+ * running state is not on the conversation and the severity changes while an agent runs. When
+ * supplied, the header leaves the severity badge to it.
+ */
+export type RenderLiveState = (props: LiveStateSlotRenderProps) => React.ReactNode;
+
+/** Props passed to the `renderTitle` render prop. */
+export interface TitleSlotRenderProps {
+  conversationId: string;
+  /** The conversation's title, which Agent Builder generates from the first round. */
+  title: string;
+}
+
+/**
+ * A render prop for the investigation's title in the header. Supplied by the consuming plugin so it
+ * can name an investigation Agent Builder has not titled yet, for example after its first
+ * subject. Renders inside the header's heading, so it should render text.
+ */
+export type RenderTitle = (props: TitleSlotRenderProps) => React.ReactNode;
+
+/** Props passed to the `renderSyncIndicator` render prop. */
+export interface SyncIndicatorSlotRenderProps {
+  /** Escalation conversation id whose attachments are synced while the flyout is open. */
+  escalationId: string;
+}
+
+/**
+ * A render prop that the consuming plugin provides to render the sync indicator beside the
+ * escalation title (a spinner while syncing). It also owns the sync request and its toasts, so
+ * the shared package stays free of HTTP hooks. When absent, the header shows nothing there.
+ */
+export type RenderSyncIndicator = (props: SyncIndicatorSlotRenderProps) => React.ReactNode;
