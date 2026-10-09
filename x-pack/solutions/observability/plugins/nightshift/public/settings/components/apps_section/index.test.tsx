@@ -62,6 +62,10 @@ function setup(canEdit = true) {
   );
 }
 
+// The channel bindings are hidden by default; reveal them via the toggle button.
+const revealChannels = () =>
+  fireEvent.click(screen.getByTestId('streamsSlackAppToggleChannelsButton'));
+
 describe('AppsSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -161,10 +165,11 @@ describe('AppsSection', () => {
 
     setup();
 
-    expect(screen.getByTestId('nightshiftAppsUnavailable')).toHaveTextContent(
+    const appsSection = screen.getByTestId('nightshiftAppsSection');
+    expect(within(appsSection).getByTestId('nightshiftAppsUnavailable')).toHaveTextContent(
       'Apps are unavailable'
     );
-    expect(screen.getByTestId('nightshiftAppsUnavailable')).toHaveTextContent(
+    expect(within(appsSection).getByTestId('nightshiftAppsUnavailable')).toHaveTextContent(
       'Apps require Agent Builder and a configured Relay service.'
     );
   });
@@ -196,6 +201,7 @@ describe('AppsSection', () => {
   it('binds a channel by entering an id and clicking the Bind button', async () => {
     makeBindings([]);
     setup();
+    revealChannels();
 
     const input = await screen.findByTestId('streamsSlackAppChannelIdInput');
     const bindBtn = screen.getByTestId('streamsSlackAppBindChannelButton');
@@ -216,6 +222,7 @@ describe('AppsSection', () => {
   it('shows an Unbind button for a connected channel and opens a confirm modal', async () => {
     makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
     setup();
+    revealChannels();
 
     const btn = await screen.findByTestId('streamsSlackAppUnbindChannelButton');
     expect(btn).toBeInTheDocument();
@@ -268,6 +275,7 @@ describe('AppsSection', () => {
   it('cancel on the unbind confirm modal does not call unbind', async () => {
     makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
     setup();
+    revealChannels();
 
     const btn = await screen.findByTestId('streamsSlackAppUnbindChannelButton');
     fireEvent.click(btn);
@@ -287,6 +295,7 @@ describe('AppsSection', () => {
   it('disables the Bind and Unbind controls when canEdit is false', async () => {
     makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
     setup(false /* canEdit = false */);
+    revealChannels();
 
     const input = await screen.findByTestId('streamsSlackAppChannelIdInput');
     fireEvent.change(input, { target: { value: 'C789' } });
@@ -302,6 +311,7 @@ describe('AppsSection', () => {
       { channel: 'C002', status: 'bound_to_self' },
     ]);
     setup();
+    revealChannels();
 
     expect(await screen.findByText('C001')).toBeInTheDocument();
     expect(screen.getByText('C002')).toBeInTheDocument();
@@ -310,6 +320,7 @@ describe('AppsSection', () => {
   it('hides pagination controls when there is a single page', async () => {
     makeBindings([{ channel: 'C001', status: 'bound_to_self' }] /* no nextCursor */);
     setup();
+    revealChannels();
 
     await screen.findByText('C001');
     expect(screen.queryByTestId('streamsSlackAppChannelsNextPage')).not.toBeInTheDocument();
@@ -319,6 +330,7 @@ describe('AppsSection', () => {
   it('shows pagination controls and steps forward using the relay cursor', async () => {
     makeBindings([{ channel: 'C001', status: 'bound_to_self' }], 'cursor-2');
     setup();
+    revealChannels();
 
     const next = await screen.findByTestId('streamsSlackAppChannelsNextPage');
     expect(screen.getByTestId('streamsSlackAppChannelsPageLabel')).toHaveTextContent('Page 1');
@@ -335,7 +347,7 @@ describe('AppsSection', () => {
     expect(mockUseRelayAppBindings).toHaveBeenLastCalledWith(true, 'cursor-2');
   });
 
-  it('shows the connected workspace and its channels without a toggle', async () => {
+  it('shows the connected workspace label alongside the channels toggle', async () => {
     makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
     mockUseRelayAppConnection.mockReturnValue({
       ...mockUseRelayAppConnection(),
@@ -346,6 +358,7 @@ describe('AppsSection', () => {
     expect(screen.getByTestId('streamsSlackAppWorkspace')).toHaveTextContent(
       'Workspace: Acme Corp (acme-corp.slack.com)'
     );
+    revealChannels();
     expect(await screen.findByTestId('streamsSlackAppChannelIdInput')).toBeInTheDocument();
     expect(screen.getByText('C123')).toBeInTheDocument();
   });

@@ -10,22 +10,20 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiCard,
   EuiConfirmModal,
   EuiDescriptionList,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiIcon,
   EuiLoadingSpinner,
-  EuiPanel,
   EuiSpacer,
-  EuiSplitPanel,
   EuiText,
   EuiTextColor,
-  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import {
@@ -33,6 +31,8 @@ import {
   type RelayAppConnectionStatus,
   type SlackAppWorkspace,
 } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { SettingsSection } from '../settings_section';
 import { useRelayAppConnection } from './use_relay_app_connection';
 import { SlackConnectionBindings } from './slack_connection_bindings';
 
@@ -55,134 +55,100 @@ export function AppsSection({ canEdit }: AppsSectionProps) {
     disconnect,
   } = useRelayAppConnection();
 
-  if (isLoading) {
-    return null;
-  }
-
-  if (hasStatusRequestError) {
-    return (
-      <>
-        <EuiSpacer />
-        <KbnDangerCallout
-          announceOnMount
-          data-test-subj="nightshiftAppsStatusError"
-          title={i18n.translate('xpack.nightshift.settings.apps.statusErrorTitle', {
-            defaultMessage: 'Unable to check app availability',
-          })}
-          text={i18n.translate('xpack.nightshift.settings.apps.statusErrorDescription', {
-            defaultMessage:
-              'Nightshift could not load the current app status. Check the connection and try again.',
-          })}
-          actionProps={{
-            primary: {
-              children: i18n.translate('xpack.nightshift.settings.apps.statusErrorRetry', {
-                defaultMessage: 'Try again',
-              }),
-              iconType: 'refresh',
-              onClick: retryStatusRequest,
-              'data-test-subj': 'nightshiftAppsStatusRetryButton',
-            },
-          }}
-        />
-      </>
-    );
-  }
-
-  if (!available) {
-    return (
-      <>
-        <EuiSpacer />
-        <EuiEmptyPrompt
-          data-test-subj="nightshiftAppsUnavailable"
-          iconType="info"
-          title={
-            <h2>
-              {i18n.translate('xpack.nightshift.settings.apps.unavailableTitle', {
-                defaultMessage: 'Apps are unavailable',
-              })}
-            </h2>
-          }
-          body={
-            <p>
-              {i18n.translate('xpack.nightshift.settings.apps.unavailableDescription', {
-                defaultMessage:
-                  'No Nightshift apps are available in this deployment. Apps require Agent Builder and a configured Relay service.',
-              })}
-            </p>
-          }
-        />
-      </>
-    );
-  }
-
   return (
     <>
       <EuiSpacer />
-      <EuiSplitPanel.Outer hasBorder hasShadow={false} css={{ flexShrink: 0 }}>
-        <EuiSplitPanel.Inner color="subdued">
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.nightshift.settings.apps.sectionTitle', {
-                defaultMessage: 'Apps',
-              })}
-            </h3>
-          </EuiTitle>
-        </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner>
-          <EuiPanel
-            hasBorder
-            hasShadow={false}
-            css={{ maxWidth: 800 }}
-            data-test-subj="streamsSlackAppCard"
-          >
-            <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="logoSlack" size="l" aria-hidden={true} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h4>
-                    {i18n.translate('xpack.nightshift.settings.apps.slackWorkspaceTitle', {
-                      defaultMessage: 'Elastic Slack App',
-                    })}
-                  </h4>
-                </EuiTitle>
-                <EuiText size="s" color="subdued">
-                  {i18n.translate('xpack.nightshift.settings.apps.slackCardDescription', {
-                    defaultMessage:
-                      'Ask @Elastic questions in connected Slack channels and send automation results there.',
-                  })}
-                </EuiText>
-              </EuiFlexItem>
-              {status === RELAY_APP_CONNECTION_STATUS.connected && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="success" iconType="check">
-                    {i18n.translate('xpack.nightshift.settings.apps.slackConnected', {
-                      defaultMessage: 'Connected',
-                    })}
-                  </EuiBadge>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-            <EuiHorizontalRule margin="m" />
-            <SlackCardBody
-              status={status}
-              error={error}
-              workspace={workspace}
-              canEdit={canEdit}
-              isMutating={isMutating}
-              onConnect={connect}
-              onConfirm={confirm}
-              onDisconnect={disconnect}
-            />
-          </EuiPanel>
-        </EuiSplitPanel.Inner>
-      </EuiSplitPanel.Outer>
+      <SettingsSection
+        title={i18n.translate('xpack.nightshift.settings.apps.sectionTitle', {
+          defaultMessage: 'Apps',
+        })}
+        data-test-subj="nightshiftAppsSection"
+      >
+        {isLoading && <EuiLoadingSpinner size="m" />}
+
+        {!isLoading && hasStatusRequestError && (
+          <KbnDangerCallout
+            announceOnMount
+            data-test-subj="nightshiftAppsStatusError"
+            title={i18n.translate('xpack.nightshift.settings.apps.statusErrorTitle', {
+              defaultMessage: 'Unable to check app availability',
+            })}
+            text={i18n.translate('xpack.nightshift.settings.apps.statusErrorDescription', {
+              defaultMessage:
+                'Nightshift could not load the current app status. Check the connection and try again.',
+            })}
+            actionProps={{
+              primary: {
+                children: i18n.translate('xpack.nightshift.settings.apps.statusErrorRetry', {
+                  defaultMessage: 'Try again',
+                }),
+                iconType: 'refresh',
+                onClick: retryStatusRequest,
+                'data-test-subj': 'nightshiftAppsStatusRetryButton',
+              },
+            }}
+          />
+        )}
+
+        {!isLoading && !hasStatusRequestError && !available && (
+          <EuiEmptyPrompt
+            data-test-subj="nightshiftAppsUnavailable"
+            iconType="info"
+            title={
+              <h4>
+                {i18n.translate('xpack.nightshift.settings.apps.unavailableTitle', {
+                  defaultMessage: 'Apps are unavailable',
+                })}
+              </h4>
+            }
+            body={
+              <p>
+                {i18n.translate('xpack.nightshift.settings.apps.unavailableDescription', {
+                  defaultMessage:
+                    'No Nightshift apps are available in this deployment. Apps require Agent Builder and a configured Relay service.',
+                })}
+              </p>
+            }
+          />
+        )}
+
+        {!isLoading && !hasStatusRequestError && available && (
+          <EuiFlexGroup gutterSize="l" wrap>
+            <EuiFlexItem grow={false} css={{ minWidth: 320, maxWidth: 600 }}>
+              <EuiCard
+                display="subdued"
+                textAlign="left"
+                icon={<EuiIcon type="logoSlack" size="xl" aria-hidden={true} />}
+                data-test-subj="streamsSlackAppCard"
+                title={i18n.translate('xpack.nightshift.settings.apps.slackWorkspaceTitle', {
+                  defaultMessage: 'Elastic Slack App',
+                })}
+                description={i18n.translate('xpack.nightshift.settings.apps.slackCardDescription', {
+                  defaultMessage:
+                    'Send Significant Event notifications to Slack and invoke Elastic agents from a channel.',
+                })}
+                footer={
+                  <SlackCardFooter
+                    status={status}
+                    error={error}
+                    workspace={workspace}
+                    canEdit={canEdit}
+                    isMutating={isMutating}
+                    onConnect={connect}
+                    onConfirm={confirm}
+                    onDisconnect={disconnect}
+                  />
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+      </SettingsSection>
     </>
   );
 }
 
-interface SlackCardBodyProps {
+interface SlackCardFooterProps {
   status: RelayAppConnectionStatus;
   error?: string;
   workspace?: SlackAppWorkspace;
@@ -193,7 +159,7 @@ interface SlackCardBodyProps {
   onDisconnect: (tenantKey?: string) => Promise<void>;
 }
 
-function SlackCardBody({
+function SlackCardFooter({
   status,
   error,
   workspace,
@@ -202,7 +168,9 @@ function SlackCardBody({
   onConnect,
   onConfirm,
   onDisconnect,
-}: SlackCardBodyProps) {
+}: SlackCardFooterProps) {
+  const [showChannels, setShowChannels] = useState(false);
+
   if (status === RELAY_APP_CONNECTION_STATUS.pendingConfirmation && workspace) {
     return (
       <ConfirmWorkspaceCallout
@@ -239,6 +207,10 @@ function SlackCardBody({
             onClick={() => onDisconnect()}
             isDisabled={!canEdit || isMutating}
             data-test-subj="streamsSlackAppCancelButton"
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.CANCEL_SLACK_CONNECTION,
+              element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+            })}
           >
             {i18n.translate('xpack.nightshift.settings.apps.slackCancel', {
               defaultMessage: 'Cancel',
@@ -251,27 +223,66 @@ function SlackCardBody({
 
   if (status === RELAY_APP_CONNECTION_STATUS.connected) {
     return (
-      <>
-        <EuiFlexGroup
-          responsive={false}
-          alignItems="center"
-          justifyContent="spaceBetween"
-          gutterSize="s"
-        >
+      <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+        {workspace && (
           <EuiFlexItem grow={false}>
-            {workspace && <WorkspaceLabel workspace={workspace} />}
+            <WorkspaceLabel workspace={workspace} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <DisconnectWorkspaceButton
-              canEdit={canEdit}
-              isMutating={isMutating}
-              onDisconnect={onDisconnect}
-            />
+        )}
+        <EuiFlexItem grow={false} css={{ width: '100%' }}>
+          <EuiFlexGroup
+            responsive={false}
+            alignItems="center"
+            justifyContent="spaceBetween"
+            gutterSize="s"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="success" iconType="check">
+                    {i18n.translate('xpack.nightshift.settings.apps.slackConnected', {
+                      defaultMessage: 'Connected',
+                    })}
+                  </EuiBadge>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <DisconnectWorkspaceButton
+                    canEdit={canEdit}
+                    isMutating={isMutating}
+                    onDisconnect={onDisconnect}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                iconType={showChannels ? 'chevronSingleDown' : 'chevronSingleRight'}
+                onClick={() => setShowChannels((value) => !value)}
+                aria-expanded={showChannels}
+                data-test-subj="streamsSlackAppToggleChannelsButton"
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SLACK_CHANNELS,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                })}
+              >
+                {showChannels
+                  ? i18n.translate('xpack.nightshift.settings.apps.slackHideChannels', {
+                      defaultMessage: 'Hide channels',
+                    })
+                  : i18n.translate('xpack.nightshift.settings.apps.slackShowChannels', {
+                      defaultMessage: 'Show channels',
+                    })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        {showChannels && (
+          <EuiFlexItem grow={false} css={{ width: '100%' }}>
+            <SlackConnectionBindings canEdit={canEdit} />
           </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
-        <SlackConnectionBindings canEdit={canEdit} />
-      </>
+        )}
+      </EuiFlexGroup>
     );
   }
 
@@ -291,6 +302,10 @@ function SlackCardBody({
           isLoading={isMutating}
           isDisabled={!canEdit || isMutating}
           data-test-subj="streamsSlackAppConnectButton"
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.CONNECT_SLACK,
+            element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+          })}
         >
           {i18n.translate('xpack.nightshift.settings.apps.slackConnect', {
             defaultMessage: 'Connect Slack',
@@ -371,7 +386,7 @@ function ConfirmWorkspaceCallout({
   return (
     <KbnWarningCallout
       size="s"
-      css={{ maxWidth: '50%', minWidth: 360 }}
+      css={{ width: '100%' }}
       data-test-subj="streamsSlackAppConfirmWorkspace"
       title={i18n.translate('xpack.nightshift.settings.apps.slackConfirmWorkspaceTitle', {
         defaultMessage: 'Is this the right workspace?',
@@ -436,6 +451,10 @@ function DisconnectWorkspaceButton({
         isLoading={isMutating}
         isDisabled={!canEdit || isMutating}
         data-test-subj="streamsSlackAppDisconnectButton"
+        {...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.DISCONNECT_SLACK,
+          element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+        })}
       >
         {i18n.translate('xpack.nightshift.settings.apps.slackDisconnect', {
           defaultMessage: 'Disconnect workspace',

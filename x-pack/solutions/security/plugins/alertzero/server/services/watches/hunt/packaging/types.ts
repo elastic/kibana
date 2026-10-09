@@ -6,7 +6,10 @@
  */
 
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
-import type { PackageReportMintPayload } from '../../../../../common/step_types/package_report';
+import type {
+  PackageReportBehavior,
+  PackageReportMintPayload,
+} from '../../../../../common/step_types/package_report';
 
 /** One host observed on the current-run SSE, with enrollment resolution applied. */
 export interface CurrentRunHost {
@@ -59,6 +62,50 @@ export interface HuntEvidenceSummary {
   tier2Confirmed: HuntEvidenceTechnique[];
 }
 
+/** Whether the query a coverage KI carries matched anything in the hunt window. */
+export type EsqlStatus = 'executed_hit' | 'executed_no_rows' | 'executed_inconclusive';
+
+/** One Tier 2 behavior that executed, normalized from the coordinator result or an SSE. */
+export interface CoverageBehavior {
+  techniqueId: string;
+  techniqueName?: string;
+  title?: string;
+  /** Report quote the behavior was derived from; only the coordinator result carries it. */
+  evidenceQuote?: string;
+  confidence: number;
+  severity?: string;
+  validatedEsql: string;
+  rowCount: number;
+  hit: boolean;
+  /** Why a `hit: false` execution is not evidence of absence (rows it could not evaluate). */
+  inconclusiveReason?: string;
+}
+
+/** The coordinator result packaging is handed because a clean run leaves no SSE to read it from. */
+export interface CoordinatorInputs {
+  /** The coordinator's report-intent datasets: where a rule for this report would query. */
+  reportIntentTargets?: string[];
+  behaviors?: PackageReportBehavior[];
+}
+
+/** What one current-run SSE contributes to a coverage subject. */
+export interface CurrentRunFinding {
+  title: string;
+  /** `hypothesis_tested`, absent when it is the generic "evaluated report" fallback. */
+  hypothesis?: string;
+  severity: string;
+  corroboratedTechniqueId?: string;
+  /** Source event refs only; alert refs never feed coverage `data_sources`. */
+  eventRefs: Array<{ index: string; techniqueId?: string }>;
+  /** Tier 1 `per_index` hit indices, the complete list `eventRefs` samples from. */
+  tier1Indices: string[];
+  behaviors: CoverageBehavior[];
+  window?: { from: string; to: string };
+  evidenceLines: string[];
+  hosts: string[];
+  users: string[];
+}
+
 /**
  * Staged current-run Investigation state packaging reads. Scoped by `runId`;
  * never accumulated attachments from prior runs.
@@ -76,6 +123,19 @@ export interface CurrentRunState {
   evidenceLines: string[];
   /** Technique ids from current-run SKIs (`type: technique`), proposed or corroborated. */
   techniques: string[];
+  /** One entry per current-run SSE, with the pieces coverage subjects are derived from. */
+  findings: CurrentRunFinding[];
+  /** Technique id to display name, from SSE behaviors and technique SKIs (`T1078.004 (Cloud Accounts)`). */
+  techniqueNames: Record<string, string>;
+  /** Distinct `user.name` entities across current-run SSEs. */
+  users: string[];
+  /** Hunt window of the first current-run SSE that names one. */
+  window?: { from: string; to: string };
+  /**
+   * Highest current-run SSE `severity` (critical > high > medium > low), or undefined when
+   * there is no current-run SSE at all (the report-scoped clean/no-SSE packaging branch).
+   */
+  severity?: string;
   /**
    * Subset of `techniques` this run actually corroborated (the SSE entry naming it carried
    * `corroborated_technique_id`), as opposed to one merely named on the report-scoped
@@ -116,6 +176,19 @@ export interface CoverageSubject {
   title: string;
   description: string;
   content: string;
+  /** Short threat / finding description; hit prefers SSE, no-hit prefers the threat report. */
+  threatSummary?: string;
+  /** Dataset patterns a rule would query: hit event indices, else report-intent Tier 2 targets. */
+  dataSources: string[];
+  /** Executed Tier 2 query for this subject; omitted when none executed or it exceeds the CE cap. */
+  validatedEsql?: string;
+  esqlStatus?: EsqlStatus;
+  /** Report severity when known, else SSE finding severity; omitted when neither exists. */
+  severity?: string;
+  /** Short packaging-built synopsis, mirroring the run's closure summary. */
+  investigationSummary?: string;
+  /** Explicit hit/clean flag so a consumer does not have to parse prose. */
+  hasConfirmedHit: boolean;
 }
 
 export interface CoverageWriteResult {
