@@ -72,7 +72,7 @@ export const TuningSection = ({
           <p>
             {i18n.translate('xpack.nightshift.settings.tuningInfo', {
               defaultMessage:
-                'Controls how features are discovered and queries are searched. Incorrect values may degrade onboarding quality or cause unexpected behavior.',
+                'These settings control how features are discovered and queries are searched. Incorrect values may degrade onboarding quality or cause unexpected behavior.',
             })}
           </p>
         }
