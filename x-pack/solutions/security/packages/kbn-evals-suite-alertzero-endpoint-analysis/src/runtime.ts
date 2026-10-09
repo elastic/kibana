@@ -23,8 +23,12 @@ import {
   ALERTZERO_WORKER_URL_TEMPLATE,
   API_VERSIONS,
   INTERNAL_API_ACCESS,
+  SECURITY_ROLE_API_VERSION,
   SECURITY_SERVICE_ACCOUNT_URL,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  WORKER_ROLE_DEFINITIONS,
+  buildSecurityRoleUrl,
+  type WorkerRolePayload,
 } from '@kbn/alertzero-common';
 import {
   analysisWorkflowId,
@@ -56,7 +60,36 @@ const proposalHeaders = {
 export class AlertZeroRuntime {
   readonly executionIds = new Set<string>();
   constructor(public readonly fetch: HttpHandler) {}
+  /**
+   * Each Worker installs per space as `${workerWorkflowId}-${spaceId}` (see
+   * `resolveWorkflowDocumentId` in the workflows management service), so the bare
+   * registration id does not address an installed worker document. Resolved from
+   * GET /internal/alertzero/workers, which reports the actual document id.
+   */
+  private workerDocumentId: string | undefined;
+  private async requireWorkerDocumentId(): Promise<string> {
+    if (this.workerDocumentId) return this.workerDocumentId;
+    const response = await this.fetch<{
+      workers?: Array<{ id: string; workflowId?: string | null }>;
+    }>(ALERTZERO_WORKERS_URL, {
+      headers: {
+        'elastic-api-version': API_VERSIONS.internal.v1,
+        'kbn-xsrf': 'true',
+        'x-elastic-internal-origin': INTERNAL_API_ACCESS,
+      },
+    });
+    const worker = response.workers?.find((entry) => entry.id === workerWorkflowId);
+    if (!worker?.workflowId) {
+      throw new Error(`Worker ${workerWorkflowId} has no installed workflow document`);
+    }
+    this.workerDocumentId = worker.workflowId;
+    return worker.workflowId;
+  }
   async run(workflowId: string, inputs: Record<string, unknown>) {
+    // Workers are per-space managed documents: run the suffixed document id, not the
+    // registration id (a 404 on the latter is what the buildkite 1425 failure showed).
+    const target =
+      workflowId === workerWorkflowId ? await this.requireWorkerDocumentId() : workflowId;
     const result = await this.fetch<{ workflowExecutionId: string }>(
       workflowId === workerWorkflowId
         ? '/api/workflows/test'
@@ -64,7 +97,9 @@ export class AlertZeroRuntime {
       {
         method: 'POST',
         headers: workflowHeaders,
-        body: JSON.stringify(workflowId === workerWorkflowId ? { workflowId, inputs } : { inputs }),
+        body: JSON.stringify(
+          workflowId === workerWorkflowId ? { workflowId: target, inputs } : { inputs }
+        ),
       }
     );
     this.executionIds.add(result.workflowExecutionId);
@@ -129,7 +164,7 @@ export class AlertZeroRuntime {
     }
   }
   async assertInstalled() {
-    for (const id of [workerWorkflowId, analysisWorkflowId, proposalWorkflowId, gateWorkflowId]) {
+    for (const id of [analysisWorkflowId, proposalWorkflowId, gateWorkflowId]) {
       const workflow = await this.fetch<{ id: string; valid: boolean }>(
         `/api/workflows/workflow/${encodeURIComponent(id)}`,
         { headers: workflowHeaders }
@@ -137,6 +172,15 @@ export class AlertZeroRuntime {
       if (workflow.id !== id || !workflow.valid)
         throw new Error(`Required production workflow unavailable: ${id}`);
     }
+    // The Worker is a per-space managed document (`${workerWorkflowId}-${spaceId}`), not a
+    // global workflow: read it via the workers API and assert on the suffixed document id.
+    const documentId = await this.requireWorkerDocumentId();
+    const workflow = await this.fetch<{ id: string; valid: boolean }>(
+      `/api/workflows/workflow/${encodeURIComponent(documentId)}`,
+      { headers: workflowHeaders }
+    );
+    if (workflow.id !== documentId || !workflow.valid)
+      throw new Error(`Required worker workflow unavailable: ${documentId}`);
   }
 
   /**
@@ -209,10 +253,7 @@ interface ServiceAccountEntry {
   assumable: boolean;
 }
 
-const SERVICE_ACCOUNT_ROLE_NAME = 'alertzero_endpoint_analysis';
-const SECURITY_ROLE_API_VERSION = '2023-10-31' as const;
-const buildSecurityRoleUrl = (roleName: string) =>
-  `/api/security/role/${encodeURIComponent(roleName)}`;
+const SERVICE_ACCOUNT_ROLE_NAME = 'alertzero_endpoint_analysis_eval';
 
 const isConflict = (error: unknown) =>
   typeof error === 'object' &&
@@ -249,17 +290,14 @@ const ensureWorkerServiceAccount = async (
   const existing = accounts.find((account) => account.name === SERVICE_ACCOUNT_ROLE_NAME);
   if (existing) return existing.id;
 
-  try {
-    await fetch(buildSecurityRoleUrl(SERVICE_ACCOUNT_ROLE_NAME), {
-      method: 'PUT',
-      headers: { 'elastic-api-version': SECURITY_ROLE_API_VERSION, 'kbn-xsrf': 'true' },
-      query: { createOnly: true },
-      body: JSON.stringify(WORKER_ROLE),
-    });
-  } catch (error) {
-    // Created concurrently, or already present from a previous run.
-    if (!isConflict(error)) throw error;
-  }
+  await fetch(buildSecurityRoleUrl(SERVICE_ACCOUNT_ROLE_NAME), {
+    method: 'PUT',
+    headers: { 'elastic-api-version': SECURITY_ROLE_API_VERSION, 'kbn-xsrf': 'true' },
+    // No createOnly: unlike production's onboarding path, the eval OWNS this role, so it
+    // is PUT unconditionally — a stale definition from an earlier run is overwritten
+    // rather than silently winning the collision.
+    body: JSON.stringify(WORKER_ROLE),
+  });
   try {
     const created = await fetch<{ id: string }>(SECURITY_SERVICE_ACCOUNT_URL, {
       method: 'POST',
@@ -287,65 +325,19 @@ const ensureWorkerServiceAccount = async (
 };
 
 /**
- * The prebuilt `alertzero_endpoint_analysis` role, mirroring the production definition in
- * `x-pack/solutions/security/plugins/alertzero/common/worker_roles.ts`. Duplicated here
- * because that module is plugin-internal: it lives in the alertzero plugin's `common/`
- * tree, which this eval package does not (and should not) depend on. When the role
- * definitions move into `@kbn/alertzero-common`, import from there instead.
+ * The production `alertzero_endpoint_analysis` prebuilt role from `@kbn/alertzero-common`
+ * (`WORKER_ROLE_DEFINITIONS`), plus the single documented eval delta: read access to the
+ * backing indices of the AI indexes this suite seeds (`ai-index-idx-alertzero-eval-*`).
+ * The worker executes as the eval service account and must read the fixture it sweeps.
  */
-const WORKER_ROLE = {
-  description: 'Privileges for the AlertZero Endpoint analysis worker. Created by AlertZero.',
-  elasticsearch: {
-    cluster: ['monitor_inference'],
-    indices: [
-      {
-        names: [
-          'apm-*-transaction*',
-          'auditbeat-*',
-          'endgame-*',
-          'filebeat-*',
-          'logs-*',
-          'packetbeat-*',
-          'traces-apm*',
-          'winlogbeat-*',
-        ],
-        privileges: ['read'],
-      },
-      { names: ['.alerts-security.alerts-default'], privileges: ['read'] },
-      { names: ['.alerts-security.attack.discovery.alerts-default'], privileges: ['read'] },
-      {
-        // Backing index of the AI index the eval seeds (`ai-index-idx-alertzero-eval-<id>`).
-        // The worker executes as this service account and must read the fixture it sweeps.
-        names: ['ai-index-idx-alertzero-eval-*'],
-        privileges: ['read', 'view_index_metadata'],
-      },
-      {
-        names: [
-          'logs-endpoint.events.process-*',
-          'logs-endpoint.events.network-*',
-          'logs-endpoint.events.file-*',
-          'logs-endpoint.events.registry-*',
-        ],
-        privileges: ['read', 'view_index_metadata'],
-      },
-    ],
-    run_as: [],
-  },
-  kibana: [
-    {
-      spaces: ['*'],
-      base: [],
-      feature: {
-        siemV5: [
-          'minimal_read',
-          'host_isolation_all',
-          'process_operations_all',
-          'actions_log_management_read',
-        ],
-      },
-    },
-  ],
-} as const;
+const WORKER_ROLE: WorkerRolePayload = structuredClone(
+  WORKER_ROLE_DEFINITIONS[SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID].role
+);
+WORKER_ROLE.description = `${WORKER_ROLE.description} Eval variant.`;
+WORKER_ROLE.elasticsearch.indices.push({
+  names: ['ai-index-idx-alertzero-eval-*'],
+  privileges: ['read', 'view_index_metadata'],
+});
 
 const AI_INDEX_ROUTE = '/api/context_engine/ai_index';
 const ATTACK_DISCOVERY_ADHOC_INDEX = '.adhoc.alerts-security.attack.discovery.alerts-default';

@@ -7,7 +7,10 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
-import { ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
+import {
+  ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID,
+  WORKER_ROLE_DEFINITIONS,
+} from '@kbn/alertzero-common';
 import {
   AlertZeroRuntime,
   pinAgenticConnector,
@@ -104,7 +107,9 @@ describe('AlertZeroRuntime.installWorker', () => {
   it('leaves an already-enabled worker enabled', async () => {
     const fetch = createFetch((path, options) => {
       if (path === '/internal/security/service_account' && !options?.method) {
-        return { serviceAccounts: [{ id: 'sa-existing', name: 'alertzero_endpoint_analysis' }] };
+        return {
+          serviceAccounts: [{ id: 'sa-existing', name: 'alertzero_endpoint_analysis_eval' }],
+        };
       }
       if (path === '/internal/alertzero/workers' && !options?.method) {
         return { workers: [{ id: WORKER, enabled: true }], canModifyWorkers: true };
@@ -132,7 +137,9 @@ describe('AlertZeroRuntime.installWorker', () => {
     // PATCH is rejected as a conflict by the workers service.
     const fetch = createFetch((path, options) => {
       if (path === '/internal/security/service_account' && !options?.method) {
-        return { serviceAccounts: [{ id: 'sa-existing', name: 'alertzero_endpoint_analysis' }] };
+        return {
+          serviceAccounts: [{ id: 'sa-existing', name: 'alertzero_endpoint_analysis_eval' }],
+        };
       }
       if (path === '/internal/alertzero/workers' && !options?.method) {
         return {
@@ -177,11 +184,118 @@ describe('AlertZeroRuntime.installWorker', () => {
         String(path).startsWith('/api/security/role/') && options?.method === 'PUT'
     );
     expect(rolePut).toBeDefined();
+    const [rolePath, roleOptions] = rolePut!;
+    // Eval-specific role name: a createOnly PUT against the production role name would
+    // silently lose the eval grant whenever that role already exists.
+    expect(rolePath).toBe('/api/security/role/alertzero_endpoint_analysis_eval');
+    expect((roleOptions as { query?: unknown }).query).toBeUndefined();
     const role = JSON.parse((rolePut![1] as { body: string }).body);
     const patterns = role.elasticsearch.indices.flatMap(
       (entry: { names: string[] }) => entry.names
     );
     expect(patterns).toContain('ai-index-idx-alertzero-eval-*');
+  });
+
+  it('grants exactly the production endpoint-analysis role plus the documented AI index delta', async () => {
+    // B2 parity: everything the production `alertzero_endpoint_analysis` role grants must
+    // be granted by the eval role, or the eval exercises a worker with different powers
+    // than production. The only allowed difference is the eval's seeded-AI-index pattern.
+    const fetch = createFetch((path, options) => {
+      if (path === '/internal/security/service_account' && !options?.method) {
+        return { serviceAccounts: [], nextPage: undefined };
+      }
+      if (path === '/internal/security/service_account' && options?.method === 'POST') {
+        return { id: 'sa-eval-1' };
+      }
+      return {};
+    });
+    await new AlertZeroRuntime(fetch).installWorker(WORKER);
+
+    const rolePut = fetch.mock.calls.find(
+      ([path, options]) =>
+        String(path).startsWith('/api/security/role/') && options?.method === 'PUT'
+    );
+    expect(rolePut).toBeDefined();
+    const evalRole = JSON.parse((rolePut![1] as { body: string }).body);
+    const production = structuredClone(WORKER_ROLE_DEFINITIONS[WORKER].role) as typeof evalRole;
+    const normalize = (role: typeof evalRole) => ({
+      ...role,
+      description: undefined,
+      elasticsearch: {
+        ...role.elasticsearch,
+        indices: role.elasticsearch.indices
+          .filter(
+            (entry: { names: string[] }) => !entry.names.includes('ai-index-idx-alertzero-eval-*')
+          )
+          .map((entry: { names: string[]; privileges: string[] }) => ({
+            names: [...entry.names].sort(),
+            privileges: [...entry.privileges].sort(),
+          }))
+          .sort((a: { names: string[] }, b: { names: string[] }) =>
+            a.names.join(',').localeCompare(b.names.join(','))
+          ),
+      },
+      kibana: role.kibana,
+    });
+    expect(normalize(evalRole)).toEqual(normalize(production));
+  });
+});
+
+describe('AlertZeroRuntime worker document id', () => {
+  const WORKER = 'system-security-forensics-endpoint-analysis';
+  const DOCUMENT_ID = `${WORKER}-default`;
+
+  it('runs the per-space suffixed workflow id, not the bare registration id', async () => {
+    // Workers install per space as `${workerId}-${spaceId}` (workers_service passes
+    // workflowIdSuffix: spaceId); the bare id 404s on the workflow run API.
+    const fetch = createFetch((path) => {
+      if (path === '/internal/alertzero/workers') {
+        return { workers: [{ id: WORKER, workflowId: DOCUMENT_ID }] };
+      }
+      return { workflowExecutionId: 'exec-1' };
+    });
+    const runtime = new AlertZeroRuntime(fetch);
+    await runtime.run(WORKER, {});
+
+    const runCall = fetch.mock.calls.find(([path]) => path === '/api/workflows/test');
+    expect(runCall).toBeDefined();
+    expect(JSON.parse((runCall![1] as { body: string }).body)).toMatchObject({
+      workflowId: DOCUMENT_ID,
+    });
+  });
+
+  it('asserts the suffixed workflow document is installed and valid', async () => {
+    const fetch = createFetch((path) => {
+      if (path === '/internal/alertzero/workers') {
+        return { workers: [{ id: WORKER, workflowId: DOCUMENT_ID }] };
+      }
+      if (path.startsWith('/api/workflows/workflow/')) {
+        return { id: decodeURIComponent(path.split('/').pop()!), valid: true };
+      }
+      return {};
+    });
+    const runtime = new AlertZeroRuntime(fetch);
+    await expect(runtime.assertInstalled()).resolves.toBeUndefined();
+
+    const reads = fetch.mock.calls
+      .map(([path]) => String(path))
+      .filter((path) => path.startsWith('/api/workflows/workflow/'));
+    expect(reads).toContain(`/api/workflows/workflow/${DOCUMENT_ID}`);
+    expect(reads).not.toContain(`/api/workflows/workflow/${WORKER}`);
+  });
+
+  it('fails assertInstalled when the worker has no installed document', async () => {
+    const fetch = createFetch((path) => {
+      if (path === '/internal/alertzero/workers') {
+        return { workers: [{ id: WORKER, workflowId: null }] };
+      }
+      if (path.startsWith('/api/workflows/workflow/')) {
+        return { id: decodeURIComponent(path.split('/').pop()!), valid: true };
+      }
+      return {};
+    });
+    const runtime = new AlertZeroRuntime(fetch);
+    await expect(runtime.assertInstalled()).rejects.toThrow(/no installed workflow document/);
   });
 });
 
