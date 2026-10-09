@@ -24,7 +24,8 @@ import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../common/doc_links';
 
 const illustrationStyles = ({ euiTheme }: UseEuiTheme) => ({
-  inlineSize: euiTheme.base * 8,
+  inlineSize: euiTheme.base * 15,
+  margin: '0 auto',
 });
 
 interface EisSelfManagedEmptyPromptProps {
@@ -36,13 +37,7 @@ export const EisSelfManagedEmptyPrompt = ({ onConnectCluster }: EisSelfManagedEm
     layout="horizontal"
     color="plain"
     data-test-subj="eisSelfManagedEmptyPrompt"
-    icon={
-      <EuiFlexGroup justifyContent="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIllustration type={genai} alt="" fullWidth={false} css={illustrationStyles} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    }
+    icon={<EuiIllustration type={genai} alt="" css={illustrationStyles} />}
     title={
       <h2>
         {i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.selfManagedEmpty.title', {
