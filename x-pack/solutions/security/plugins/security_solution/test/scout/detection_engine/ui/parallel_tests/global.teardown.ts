@@ -20,6 +20,12 @@ import {
 globalTeardownHook(
   `Remove synthetic MITRE entities (version ${SEEDED_MITRE_FRAMEWORK_VERSION})`,
   async ({ esClient, config, log }) => {
+    // Nothing is seeded on serverless, see global.setup.ts.
+    if (config.serverless) {
+      log.info('[managed-mitre teardown] Skipping on serverless');
+      return;
+    }
+
     log.info(
       `[managed-mitre teardown] Deleting framework_version ${SEEDED_MITRE_FRAMEWORK_VERSION} entities from ${SEEDED_MITRE_INDEX}`
     );
