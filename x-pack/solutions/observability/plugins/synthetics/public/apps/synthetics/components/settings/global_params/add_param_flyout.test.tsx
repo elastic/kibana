@@ -55,7 +55,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
     services: {
       application: {
         capabilities: {
-          uptime: { save: true, show: true, configureSettings: true },
+          uptime: { save: true, show: true, configureSettings: true, canManageParams: true },
         },
       },
     },

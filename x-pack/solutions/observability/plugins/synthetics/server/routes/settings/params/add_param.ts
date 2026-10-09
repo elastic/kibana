@@ -23,6 +23,7 @@ import type {
 } from '../../../../common/runtime_types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { PARAMS_WRITE_API } from '../../../feature';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
 export const ParamsObjectSchema = z.strictObject({
@@ -44,6 +45,7 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       body: z.union([ParamsObjectSchema, z.array(ParamsObjectSchema).max(MAX_PARAM_BULK_SIZE)]),
     },
   },
+  requiredPrivileges: [PARAMS_WRITE_API],
   handler: async ({ request, response, server, savedObjectsClient }) => {
     try {
       const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
