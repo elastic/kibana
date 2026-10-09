@@ -94,21 +94,6 @@ def _match_payload(match: IssueMatch) -> dict:
     }
 
 
-def _issue_matches(payload: object) -> list:
-    entries = payload.get("matches", []) if isinstance(payload, dict) else []
-    return [
-        IssueMatch(
-            int(entry["number"]),
-            entry["state"],
-            str(entry.get("title", "")),
-            str(entry.get("body", "") or ""),
-        )
-        for entry in entries
-    ]
-
-
-
-
 def _cmd_decide(args: argparse.Namespace) -> int:
     path = decide_write_path(parse_search_results(_read_json(args.matches)))
     return _emit(
@@ -237,7 +222,9 @@ def _cmd_from_findings(args: argparse.Namespace) -> int:
         )
     except ValueError as error:
         return _fail(str(error), EXIT_ASK)
-    return _emit({"finding": finding})
+    if args.out:
+        Path(args.out).write_text(json.dumps(finding), encoding="utf-8")
+    return _emit(finding)
 
 
 def _cmd_check_pack(args: argparse.Namespace) -> int:
@@ -259,6 +246,7 @@ def _cmd_check_draft(args: argparse.Namespace) -> int:
         return _fail("finding and config must be JSON objects")
     body = _read_text(args.body)
     labels = [name.strip() for name in (args.labels or "").split(",") if name.strip()]
+    labels.extend(str(name).strip() for name in (args.label or []) if str(name).strip())
     gaps = check_draft(
         body=body,
         title=_optional(args.title),
@@ -266,6 +254,7 @@ def _cmd_check_draft(args: argparse.Namespace) -> int:
         config=config,
         labels=labels or None,
         wip_ok=bool(args.wip_ok),
+        sensitive_ok=bool(args.sensitive_ok),
     )
     return _emit(
         {"fileable": not gaps, "gaps": gaps},
@@ -306,7 +295,10 @@ def _cmd_scan_sensitive(args: argparse.Namespace) -> int:
 def _cmd_render_body(args: argparse.Namespace) -> int:
     finding = _read_json(args.finding)
     config = _read_json(args.config) if args.config else {}
-    return _emit({"body": render_bug_body(finding, config)})
+    body = render_bug_body(finding, config)
+    if args.out:
+        Path(args.out).write_text(body, encoding="utf-8")
+    return _emit({"body": body})
 
 
 def _cmd_write(args: argparse.Namespace) -> int:
@@ -334,7 +326,12 @@ def _cmd_write(args: argparse.Namespace) -> int:
     except CreateFailed as error:
         return _fail(str(error))
     except PartialWrite as error:
-        return _fail(str(error))
+        payload = {"error": str(error), "number": error.number}
+        if error.url:
+            payload["url"] = error.url
+        json.dump(payload, sys.stderr)
+        sys.stderr.write("\n")
+        return EXIT_FAIL
     except (RuntimeError, ValueError) as error:
         return _fail(str(error))
     url = result["url"]
@@ -354,7 +351,10 @@ def _cmd_upload(args: argparse.Namespace) -> int:
     if auth.get("returncode") or not token:
         detail = str(auth.get("stderr") or "").strip() or "no token on stdout"
         return _fail(f"`gh auth token` failed: {detail}")
-    result = upload_evidence(repo=args.repo, files=args.file, token=token)
+    try:
+        result = upload_evidence(repo=args.repo, files=args.file, token=token)
+    except RuntimeError as error:
+        return _fail(str(error))
     return _emit(
         {
             "uploaded": [{"path": path, "url": url} for path, url in result.uploaded],
@@ -390,7 +390,11 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    decide = subparsers.add_parser("decide", help="Pick create / comment / reopen_comment / ask")
+    decide = subparsers.add_parser(
+        "decide",
+        help="create if no matches, otherwise ask (human picks create / comment / reopen)",
+        description="create if no matches, otherwise ask (human picks create / comment / reopen)",
+    )
     decide.add_argument(
         "--matches",
         required=True,
@@ -454,6 +458,9 @@ def _build_parser() -> argparse.ArgumentParser:
     from_findings.add_argument("--jsonl", required=True)
     from_findings.add_argument("--index", type=int, default=None)
     from_findings.add_argument("--title", default=None)
+    from_findings.add_argument(
+        "--out", default=None, help="Write the bare finding JSON to this path"
+    )
     from_findings.set_defaults(handler=_cmd_from_findings)
 
     check = subparsers.add_parser(
@@ -476,9 +483,20 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Comma-separated labels that will be applied on create",
     )
     draft.add_argument(
+        "--label",
+        action="append",
+        default=[],
+        help="Repeatable label, same as write --label",
+    )
+    draft.add_argument(
         "--wip-ok",
         action="store_true",
         help="Human said file anyway after a draft/WIP or known-limitation hit",
+    )
+    draft.add_argument(
+        "--sensitive-ok",
+        action="store_true",
+        help="Human confirmed flagged Cases UI text / similar is not a customer ID",
     )
     draft.set_defaults(handler=_cmd_check_draft)
 
@@ -503,6 +521,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     render.add_argument("--finding", required=True, help="Finding JSON path, or - for stdin")
     render.add_argument("--config", default=None, help="Session config JSON path")
+    render.add_argument("--out", default=None, help="Write the rendered markdown to this path")
     render.set_defaults(handler=_cmd_render_body)
 
     write = subparsers.add_parser("write", help="Run the agreed `gh` write")
@@ -541,7 +560,14 @@ def main(argv: list | None = None) -> int:
     args = _build_parser().parse_args(argv)
     try:
         return args.handler(args)
-    except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
+    except (
+        OSError,
+        json.JSONDecodeError,
+        KeyError,
+        TypeError,
+        ValueError,
+        RuntimeError,
+    ) as error:
         return _fail(f"{type(error).__name__}: {error}")
 
 

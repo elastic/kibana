@@ -3,6 +3,10 @@
   Consumers: file-bug, bug-validator.
   Updates go through a reviewed PR (CODEOWNERS: @elastic/security-engineering-productivity).
   Team-assignment content also needs the owning @elastic/security-* team.
+  AUTHORITATIVE INSTRUCTION CONTEXT — review as carefully as a skill SKILL.md.
+  file-bug parses the Team Label and Common Page Routes tables by heading
+  and column order; renaming a heading or reordering columns silently
+  breaks team inference (it returns ask, with no error).
 -->
 
 # Security domain knowledge

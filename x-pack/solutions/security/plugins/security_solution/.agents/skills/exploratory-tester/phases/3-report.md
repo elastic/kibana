@@ -224,7 +224,7 @@ again without `--dry-run` to restore and clean up for real.
 
 After Step 3e, if the report has findings that are not in Known / Suppressed, ask:
 
-> "Do you want any of these findings filed as Kibana issues? Name the titles, finding numbers, or say the L1s."
+> "Do you want any of these findings filed as Kibana issues? Name the titles, finding numbers, or say all confirmed bugs."
 
 Skip the question when the report has no such findings. If they say no or do not name anything, stop. "Yes" without names is not enough — ask which ones, then stop the turn.
 

@@ -809,9 +809,13 @@ def pack_gaps(finding: dict, config: dict) -> list[str]:
     evidence = _evidence_lines(finding)
     session_dir = _session_dir(config, environment)
     gaps: list[str] = []
-    if not _version_text(finding, config):
+    version = _version_text(finding, config)
+    if not version:
         gaps.append("version")
-    elif infer_release_label(finding, config).status == "ask":
+    elif (
+        not _is_unknown_value(version)
+        and infer_release_label(finding, config).status == "ask"
+    ):
         gaps.append("release")
     if not _numbered_steps(finding):
         gaps.append("steps")
@@ -873,6 +877,16 @@ def _needs_quoted_error(finding: dict, evidence: list[str]) -> bool:
 
 _HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.S)
 _EMPTY_STEP_RE = re.compile(r"^\d+\.\s*$")
+_NUMBERED_STEP_CONTENT_RE = re.compile(r"^\d+\.\s+(\S.*)$")
+_BODY_PACK_FIELDS = (
+    ("version", _HEADING_VERSION),
+    ("current_behavior", _HEADING_CURRENT),
+    ("expected_behavior", _HEADING_EXPECTED),
+    ("feature_flags", _HEADING_FEATURE_FLAGS),
+    ("deployment", _HEADING_DEPLOYMENT),
+    ("role", _HEADING_ROLE),
+    ("spaces", _HEADING_SPACES),
+)
 _REQUIRED_BODY_SECTIONS = (
     ("body_describe", _HEADING_DESCRIBE),
     ("body_version", _HEADING_VERSION),
@@ -914,6 +928,38 @@ def _body_section_gaps(body: str) -> list[str]:
     ]
 
 
+def _steps_from_body(text: str) -> list[str]:
+    steps: list[str] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        match = _NUMBERED_STEP_CONTENT_RE.match(stripped)
+        if match:
+            steps.append(match.group(1).strip())
+        elif stripped and not _EMPTY_STEP_RE.match(stripped):
+            steps.append(stripped)
+    return steps
+
+
+def _finding_with_body_answers(finding: dict, body: str) -> dict:
+    """Prefer filled template headings over stale or empty finding JSON."""
+    merged = dict(finding)
+    for key, heading in _BODY_PACK_FIELDS:
+        content = _section_content(body, heading)
+        if _body_section_filled(heading, content):
+            merged[key] = content
+    steps = _section_content(body, _HEADING_STEPS)
+    if _body_section_filled(_HEADING_STEPS, steps):
+        parsed = _steps_from_body(steps)
+        if parsed:
+            merged["steps_followed"] = parsed
+    console = _section_content(body, _HEADING_CONSOLE)
+    if _body_section_filled(_HEADING_CONSOLE, console):
+        evidence = list(merged["evidence"]) if isinstance(merged.get("evidence"), list) else []
+        evidence.append(f"{_CONSOLE_PREFIX} {console}")
+        merged["evidence"] = evidence
+    return merged
+
+
 def with_filed_stamp(body: str) -> str:
     text = body.rstrip()
     if FILED_VIA in _visible_text(text):
@@ -951,8 +997,10 @@ def check_draft(
     config: dict,
     labels: list | None = None,
     wip_ok: bool = False,
+    sensitive_ok: bool = False,
 ) -> list[str]:
-    gaps = list(pack_gaps(finding, config))
+    merged = _finding_with_body_answers(finding, body)
+    gaps = list(pack_gaps(merged, config))
     if title is not None:
         if len(title) > MAX_TITLE_LEN or not _TITLE_FORMAT_RE.match(title):
             gaps.append("title")
@@ -967,9 +1015,10 @@ def check_draft(
     if is_tester_finding(finding, config) and title is not None:
         if TESTER_SOURCE_LABEL not in [str(label) for label in (labels or [])]:
             gaps.append("tester_label")
-    gaps.extend(f"sensitive:{hit}" for hit in scan_sensitive(body, json.dumps(finding)))
-    if not wip_ok and not finding.get("file_despite_wip"):
-        gaps.extend(scan_wip(body, json.dumps(finding)))
+    if not sensitive_ok:
+        gaps.extend(f"sensitive:{hit}" for hit in scan_sensitive(body, json.dumps(merged)))
+    if not wip_ok and not merged.get("file_despite_wip"):
+        gaps.extend(scan_wip(body, json.dumps(merged)))
     return gaps
 
 
@@ -1107,6 +1156,12 @@ def _probe_duration_seconds(src: Path, runner: CommandRunner) -> float | None:
     return duration if duration > 0 else None
 
 
+def _ffmpeg_codecs(dest: Path) -> tuple[str, str]:
+    if dest.suffix.lower() == ".webm":
+        return "libvpx-vp9", "libopus"
+    return "libx264", "aac"
+
+
 def compress_video(src: Path, dest: Path, run: CommandRunner | None = None) -> None:
     """Re-encode `src` into `dest` under the GitHub asset size limit."""
     runner = _run_checked if run is None else run
@@ -1116,6 +1171,7 @@ def compress_video(src: Path, dest: Path, run: CommandRunner | None = None) -> N
         video_bps = max(
             80_000, int((_TARGET_ASSET_BYTES * 8) / duration) - _AUDIO_BITRATE
         )
+    vcodec, acodec = _ffmpeg_codecs(dest)
     runner(
         [
             "ffmpeg",
@@ -1123,9 +1179,9 @@ def compress_video(src: Path, dest: Path, run: CommandRunner | None = None) -> N
             "-i",
             str(src),
             "-vcodec",
-            "libx264",
+            vcodec,
             "-acodec",
-            "aac",
+            acodec,
             "-b:v",
             str(video_bps),
             "-maxrate",
@@ -1151,13 +1207,39 @@ def _asset_url_from_payload(payload: dict) -> str | None:
     return None
 
 
-def _default_http_post(url: str, headers: dict, file_path: Path) -> dict:
-    """Binary-POST `file_path` to GitHub user-attachments with `curl`."""
-    argv = ["curl", "-s", "-X", "POST", "-w", "\n%{http_code}"]
-    for key, value in headers.items():
-        argv += ["-H", f"{key}: {value}"]
-    argv += ["--data-binary", f"@{file_path}", url]
-    completed = subprocess.run(argv, capture_output=True, text=True, check=False)
+def _curl_config(headers: dict) -> str:
+    return "".join(f'header = "{key}: {value}"\n' for key, value in headers.items())
+
+
+def _default_http_post(
+    url: str,
+    headers: dict,
+    file_path: Path,
+    run: CommandRunner | None = None,
+) -> dict:
+    """Binary-POST `file_path` to GitHub user-attachments with `curl`.
+
+    Headers go through `curl -K -` so the bearer token is not on argv.
+    `uploads.github.com/user-attachments/assets` is not a documented GitHub
+    API and can change without notice.
+    """
+    runner = subprocess.run if run is None else run
+    argv = [
+        "curl",
+        "-s",
+        "-X",
+        "POST",
+        "-w",
+        "\n%{http_code}",
+        "-K",
+        "-",
+        "--data-binary",
+        f"@{file_path}",
+        url,
+    ]
+    completed = runner(
+        argv, input=_curl_config(headers), capture_output=True, text=True, check=False
+    )
     if completed.returncode != 0:
         raise UploadError(completed.stderr.strip() or "curl failed", 0)
     body, _, code = completed.stdout.rpartition("\n")
@@ -1193,23 +1275,44 @@ def _rejected_reason(status: int, *, after_compress: bool = False) -> str:
     return f"GitHub rejected the file {stage} (status {status})"
 
 
+def _asset_upload_url(path: Path, repository_id: int) -> str:
+    return _ASSET_URL.format(
+        name=quote(path.name, safe=""),
+        content_type=quote(_mime_for(path), safe=""),
+        repository_id=repository_id,
+    )
+
+
+def _asset_upload_headers(token: str, path: Path) -> dict:
+    return {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/json",
+        "Content-Type": _mime_for(path),
+    }
+
+
 def _retry_compressed(
     path: Path,
-    url: str,
-    headers: dict,
+    token: str,
+    repository_id: int,
     http_post: HttpPost,
     compress_video_fn: CompressVideo,
 ) -> tuple[bool, str, str]:
     workdir = Path(tempfile.mkdtemp(prefix="file_bug_compress_"))
     try:
-        dest = workdir / path.name
+        dest = workdir / f"{path.stem}.mp4"
         try:
             compress_video_fn(path, dest)
         except (OSError, subprocess.SubprocessError) as error:
             return False, "", f"compress failed before the retry ({error})"
         if dest.exists() and dest.stat().st_size > _MAX_ASSET_BYTES:
             return False, "", "compressed video still exceeds 10MB"
-        ok, status, asset_url = _post(http_post, url, headers, dest)
+        ok, status, asset_url = _post(
+            http_post,
+            _asset_upload_url(dest, repository_id),
+            _asset_upload_headers(token, dest),
+            dest,
+        )
         if ok:
             return True, asset_url or "", ""
         return False, "", _rejected_reason(status, after_compress=True)
@@ -1309,17 +1412,8 @@ def upload_evidence(
     leftovers: list[tuple[str, str]] = []
     for file_path in files:
         path = Path(file_path)
-        mime = _mime_for(path)
-        url = _ASSET_URL.format(
-            name=quote(path.name, safe=""),
-            content_type=quote(mime, safe=""),
-            repository_id=repo_id,
-        )
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Accept": "application/json",
-            "Content-Type": mime,
-        }
+        url = _asset_upload_url(path, repo_id)
+        headers = _asset_upload_headers(token, path)
         ok, status, asset_url = _post(http_post, url, headers, path)
         if ok:
             uploaded.append((str(path), asset_url or ""))
@@ -1328,7 +1422,7 @@ def upload_evidence(
             leftovers.append((str(path), _rejected_reason(status)))
             continue
         ok, asset_url, reason = _retry_compressed(
-            path, url, headers, http_post, compress_video_fn
+            path, token, repo_id, http_post, compress_video_fn
         )
         if ok:
             uploaded.append((str(path), asset_url))
@@ -1347,11 +1441,14 @@ class CreateFailed(Exception):
 
 
 class PartialWrite(Exception):
-    """Raised when reopen succeeded but the follow-up comment failed."""
+    """Raised when part of a write succeeded (reopen, comment, or labels)."""
 
-    def __init__(self, message: str, *, number: int) -> None:
+    def __init__(
+        self, message: str, *, number: int, url: str | None = None
+    ) -> None:
         super().__init__(message)
         self.number = number
+        self.url = url
 
 
 def _default_run_gh(argv: list) -> dict:
@@ -1533,9 +1630,22 @@ def write_github(
                 )
             extras = [name for name in labels if name == TESTER_SOURCE_LABEL]
             if extras:
-                _gh_add_labels(
-                    repo=repo, number=number, labels=extras, run_gh=run_gh
-                )
+                try:
+                    _gh_add_labels(
+                        repo=repo, number=number, labels=extras, run_gh=run_gh
+                    )
+                except RuntimeError as error:
+                    raise PartialWrite(
+                        f"commented #{number} ({url}) but adding labels failed: {error}",
+                        number=number,
+                        url=url,
+                    ) from error
     finally:
         shutil.rmtree(workdir, ignore_errors=True)
     return {"url": url, "labels": labels}
+
+
+if __name__ == "__main__":
+    raise SystemExit(
+        "file_bug.py is the library. Run scripts/file-bug.py <cmd> instead."
+    )

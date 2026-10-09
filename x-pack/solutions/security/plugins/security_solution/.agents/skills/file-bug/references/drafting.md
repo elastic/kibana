@@ -1,6 +1,6 @@
 # Drafting a Security bug (load while collecting)
 
-Field rules live here once. `check-pack`, `check-draft`, `infer-deployment`, `format-title`, and `scan-sensitive` are the source of truth — if prose and a script disagree, trust the script. On create (`--title`), `check-draft` also requires a visible stamp and filled Describe / Version / Steps / Current / Expected sections in the body, not only a complete finding JSON. Comment / reopen omit `--title`.
+Field rules live here once. `SKILL.md` is the procedure; this file is the field rules. `check-pack`, `check-draft`, `infer-deployment`, `format-title`, and `scan-sensitive` are the source of truth — if prose and a script disagree, trust the script. On create (`--title`), `check-draft` also requires a visible stamp and filled Describe / Version / Steps / Current / Expected sections in the body. Filled template headings (Version, Feature flags, Deployment, Role, Spaces, Steps, Current, Expected) count as pack answers even when the finding JSON does not mirror them. Comment / reopen omit `--title`.
 
 Repo: `elastic/kibana`. Body: this skill's `templates/bug-report.md` (not `.github/ISSUE_TEMPLATE/Bug_report.md`). Follow `.agents/skills/kbn-github` (explicit confirm, then `gh`).
 
@@ -28,7 +28,7 @@ Use the template headings. **Version** (stack). **Original install method** when
 
 **Title** (new issues): `[<team name>] [Bug] <short symptom>`. Run `format-title` after you have a `Team:*` label (human or `infer-team`). If inference is `ask`, ask the human before create. Do not invent a team. If `format-title` exits 2, the symptom is too long — ask the human to shorten it. Do not file a clipped title.
 
-**Release label:** run `infer-release`. A concrete stack version (`9.6.0`, `v9.6.0`, `9.6.0 (notes…)`) becomes `v9.6.0`. If the version is `Unknown`, a PR build, `main`, or otherwise not `X.Y` / `X.Y.Z`, ask. Do not invent a `v*` label. Create also always gets `bug` and `triage_needed`. GitHub Type is Bug (`write` sets `--type Bug`).
+**Release label:** run `infer-release`. A concrete stack version (`9.6.0`, `v9.6.0`, `9.6.0 (notes…)`) becomes `v9.6.0`. `Unknown` is not a release gap — omit the `v*` label. A PR build, `main`, or other unparseable concrete version still asks. Do not invent a `v*` label. Create also always gets `bug` and `triage_needed`. GitHub Type is Bug (`write` sets `--type Bug`).
 
 **Feature flags:** exact flag id, on/off, and **how to enable it**. If confirmed default/GA, write `No feature flag (default/GA)`.
 
@@ -75,11 +75,11 @@ Do not assume every session is local Scout. Read `config.json` / the session URL
 
 ## Thin pack
 
-A pack is **thin** when `check-pack` exits 2. `Unknown` counts as answered. Run environment-setup questions on a thin pack.
+A pack is **thin** when `check-pack` exits 2. `Unknown` counts as answered, including `version: Unknown` (no `release` gap — do not invent a `v*` label). A concrete version that is not `X.Y` / `X.Y.Z` still asks for release. Run environment-setup questions on a thin pack.
 
 ## Sanitize
 
-Before draft-and-stop, run `scan-sensitive` on the finding and draft. Flag emails, `SDH…` / case IDs, NDA, “customer name/id”. Strip or ask to strip anything not needed to repro. Cases product language (`Opening case 12345`, `Cases table`) will flag — confirm and keep when it is UI text, not a customer ID. Default repo stays `elastic/kibana`. If they say the content is sensitive / NDA, **stop** and ask whether to file in `elastic/security-team` instead — do not switch silently.
+Before draft-and-stop, run `scan-sensitive` on the finding and draft. Flag emails, `SDH…` / case IDs, NDA, “customer name/id”. Strip or ask to strip anything not needed to repro. Cases product language (`Opening case 12345`, `Cases table`) will flag — confirm and keep when it is UI text, not a customer ID, then `check-draft --sensitive-ok`. Default repo stays `elastic/kibana`. If they say the content is sensitive / NDA, **stop** and ask whether to file in `elastic/security-team` instead — do not switch silently.
 
 ## Environment setup questions
 
@@ -104,7 +104,7 @@ Given a recording and stills:
 
 ## Path B pack (collect steps live in SKILL.md)
 
-`from-findings` sets `source: exploratory-tester` — keep it. After answers, **edit the draft markdown** (do not throw away media mapping). Re-run `render-body` only if you update the JSON and want a clean rebuild.
+`from-findings` sets `source: exploratory-tester` — keep it. After answers, **edit the draft markdown** (do not throw away media mapping). `check-draft` reads those headings; you do not have to copy the answers back into the JSON. Re-run `render-body` only if you update the JSON and want a clean rebuild.
 
 ## Existing `#N`
 

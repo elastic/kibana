@@ -143,6 +143,10 @@ When sections are missing: infer from free-form text, check [Elastic Security do
 5. Verify feature still documented (see `x-pack/solutions/security/plugins/security_solution/.agents/references/security-domain-knowledge.md` → Documentation Reference)
 6. **Space-awareness** (if bug mentions spaces): check saved object `namespaceType`, raw `esClient` usage, index naming
 
+**When to check docs:** "Expected behavior" says TBD; feature behavior unclear; potential redesign; permission/privilege bug; old bug (filed against an earlier version).
+
+**Flag-gated bugs:** A bug against a flag whose default is `false` affects fewer users. A graduated flag (removed, feature always-on) may have changed the described behavior. See Feature Flags in the shared domain-knowledge file.
+
 **Flag graduation check:**
 ```bash
 git log --oneline -20 -- '**/experimental_features.ts'

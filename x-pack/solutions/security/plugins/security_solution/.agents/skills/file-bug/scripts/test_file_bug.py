@@ -18,6 +18,7 @@ from file_bug import (  # noqa: E402
     PartialWrite,
     TESTER_SOURCE_LABEL,
     TitleTooLong,
+    _default_http_post,
     check_draft,
     compress_video,
     decide_write_path,
@@ -562,6 +563,23 @@ class PackGapsTest(unittest.TestCase):
         self.assertNotIn("steps", gaps)
         self.assertNotIn("role", gaps)
 
+    def test_unknown_version_is_not_a_release_gap(self):
+        gaps = pack_gaps(
+            {
+                "version": "Unknown",
+                "current_behavior": "Table shows 0 entities",
+                "expected_behavior": "Table lists entities",
+                "steps_followed": ["click"],
+                "feature_flags": "Unknown",
+                "deployment": "Unknown",
+                "role": "Unknown",
+                "spaces": "Unknown",
+            },
+            {},
+        )
+        self.assertNotIn("version", gaps)
+        self.assertNotIn("release", gaps)
+
     def test_unknown_is_not_a_gap(self):
         gaps = pack_gaps(
             {
@@ -761,6 +779,86 @@ class CheckDraftTest(unittest.TestCase):
             wip_ok=True,
         )
         self.assertNotIn("wip_or_limitation", gaps)
+
+    def test_cases_ui_text_clears_with_sensitive_ok(self):
+        finding = {
+            "current_behavior": 'Toast: "TypeError: cannot read map"',
+            "expected_behavior": "Table lists entities",
+            "steps_followed": ["Open Entity Analytics"],
+            "feature_flags": "Unknown",
+            "deployment": "Unknown",
+            "role": "Unknown",
+            "spaces": "Unknown",
+        }
+        body = render_bug_body(finding, {"kibana_version": "9.3.0"})
+        body += "\nOpening case 12345 from the Cases table.\n"
+        gaps = check_draft(
+            body=body,
+            title="[Entity Analytics] [Bug] Risk table empty",
+            finding=finding,
+            config={"kibana_version": "9.3.0"},
+            labels=["bug", "triage_needed"],
+        )
+        self.assertIn("sensitive:case_id", gaps)
+        gaps = check_draft(
+            body=body,
+            title="[Entity Analytics] [Bug] Risk table empty",
+            finding=finding,
+            config={"kibana_version": "9.3.0"},
+            labels=["bug", "triage_needed"],
+            sensitive_ok=True,
+        )
+        self.assertNotIn("sensitive:case_id", gaps)
+
+    def test_filled_markdown_does_not_need_mirrored_json(self):
+        body = (
+            "**Describe the bug:**\nRisk table empty\n\n"
+            "**Version:**\n9.6.0\n\n"
+            "**Feature flags:**\nNo feature flag (default/GA)\n\n"
+            "**Deployment:**\nECH\n\n"
+            "**Role required to reproduce:**\nnone\n\n"
+            "**Spaces:**\ndefault\n\n"
+            "**Steps to reproduce:**\n1. Open Entity Analytics\n\n"
+            "**Current behaviour (with screenshots and recordings):**\n"
+            'Toast: "TypeError: cannot read map"\n\n'
+            "**Expected behavior:**\nTable lists entities\n\n"
+            f"{FILED_VIA}\n"
+        )
+        gaps = check_draft(
+            body=body,
+            title="[Entity Analytics] [Bug] Risk table empty",
+            finding={},
+            config={},
+            labels=["bug", "triage_needed"],
+        )
+        self.assertEqual(gaps, [])
+
+    def test_markdown_edit_clears_stale_json_pack_gaps(self):
+        body = (
+            "**Describe the bug:**\nRisk table empty\n\n"
+            "**Version:**\n9.6.0\n\n"
+            "**Feature flags:**\nNo feature flag (default/GA)\n\n"
+            "**Deployment:**\nECH\n\n"
+            "**Role required to reproduce:**\nnone\n\n"
+            "**Spaces:**\ndefault\n\n"
+            "**Steps to reproduce:**\n1. Open Entity Analytics\n\n"
+            "**Current behaviour (with screenshots and recordings):**\n"
+            'Toast: "TypeError: cannot read map"\n\n'
+            "**Expected behavior:**\nTable lists entities\n\n"
+            f"{FILED_VIA}\n"
+        )
+        gaps = check_draft(
+            body=body,
+            title="[Entity Analytics] [Bug] Risk table empty",
+            finding={
+                "current_behavior": "an error appears",
+                "expected_behavior": "works",
+                "steps_followed": [],
+            },
+            config={},
+            labels=["bug", "triage_needed"],
+        )
+        self.assertEqual(gaps, [])
 
     def test_complete_json_empty_body_is_not_fileable(self):
         finding = {
@@ -1041,6 +1139,87 @@ class UploadEvidenceTest(unittest.TestCase):
         ffmpeg = next(argv for argv in seen if argv and argv[0] == "ffmpeg")
         self.assertNotIn("-fs", ffmpeg)
         self.assertIn("-b:v", ffmpeg)
+        self.assertIn("libx264", ffmpeg)
+
+    def test_compress_video_webm_uses_webm_codecs(self):
+        seen = []
+
+        def run(argv, **kwargs):
+            seen.append(argv)
+            class R:
+                returncode = 0
+            return R()
+
+        with TemporaryDirectory() as tmp:
+            src = Path(tmp) / "in.webm"
+            dest = Path(tmp) / "out.webm"
+            src.write_bytes(b"x")
+            compress_video(src, dest, run)
+        ffmpeg = next(argv for argv in seen if argv and argv[0] == "ffmpeg")
+        self.assertIn("libvpx-vp9", ffmpeg)
+        self.assertIn("libopus", ffmpeg)
+        self.assertNotIn("libx264", ffmpeg)
+        self.assertNotIn("aac", ffmpeg)
+
+    def test_oversized_webm_retry_uploads_mp4(self):
+        posts = []
+
+        def http_post(url, headers, file_path):
+            posts.append((url, headers.get("Content-Type"), file_path.suffix))
+            if file_path.suffix.lower() == ".webm":
+                return {"ok": False, "status": 413, "url": None}
+            return {"ok": True, "status": 201, "url": "https://img/v.mp4"}
+
+        dests = []
+
+        def compress(src, dest, run=None):
+            dests.append(dest)
+            dest.write_bytes(b"small")
+
+        with TemporaryDirectory() as tmp:
+            video = Path(tmp) / "flow.webm"
+            video.write_bytes(b"huge")
+            result = upload_evidence(
+                repo="elastic/kibana",
+                files=[video],
+                token="t",
+                repository_id=1,
+                http_post=http_post,
+                compress_video_fn=compress,
+            )
+        self.assertEqual(dests[0].suffix, ".mp4")
+        self.assertEqual(posts[1][1], "video/mp4")
+        self.assertIn("content_type=video%2Fmp4", posts[1][0])
+        self.assertIn("name=flow.mp4", posts[1][0])
+        self.assertEqual(len(result.uploaded), 1)
+        self.assertEqual(result.leftovers, ())
+
+    def test_http_post_passes_headers_on_stdin(self):
+        seen = {}
+
+        def run(argv, **kwargs):
+            seen["argv"] = argv
+            seen["input"] = kwargs.get("input")
+            class R:
+                returncode = 0
+                stdout = '{"url":"https://img/a"}\n201'
+                stderr = ""
+            return R()
+
+        with TemporaryDirectory() as tmp:
+            path = Path(tmp) / "shot.png"
+            path.write_bytes(b"png")
+            result = _default_http_post(
+                "https://uploads.github.com/x",
+                {"Authorization": "Bearer secret-token", "Accept": "application/json"},
+                path,
+                run=run,
+            )
+        self.assertIn("-K", seen["argv"])
+        self.assertIn("-", seen["argv"])
+        self.assertNotIn("Bearer secret-token", " ".join(seen["argv"]))
+        self.assertIn("Bearer secret-token", seen["input"])
+        self.assertTrue(result["ok"])
 
 
 class WriteGithubTest(unittest.TestCase):
@@ -1185,6 +1364,31 @@ class WriteGithubTest(unittest.TestCase):
         self.assertEqual(calls[1][0:4], ["gh", "issue", "edit", "1"])
         self.assertIn("--add-label", calls[1])
         self.assertIn(TESTER_SOURCE_LABEL, calls[1])
+
+    def test_comment_url_kept_when_tester_label_fails(self):
+        comment_url = "https://github.com/elastic/kibana/issues/1#issuecomment-9"
+
+        def run_gh(argv):
+            if argv[1:3] == ["issue", "comment"]:
+                return {"returncode": 0, "stdout": comment_url, "stderr": ""}
+            if argv[1:3] == ["issue", "edit"]:
+                return {"returncode": 1, "stdout": "", "stderr": "label missing"}
+            return {"returncode": 0, "stdout": "", "stderr": ""}
+
+        with self.assertRaises(PartialWrite) as raised:
+            write_github(
+                action="comment",
+                repo="elastic/kibana",
+                title=None,
+                body="evidence",
+                labels=[],
+                number=1,
+                finding={"source": "exploratory-tester"},
+                run_gh=run_gh,
+            )
+        self.assertEqual(raised.exception.number, 1)
+        self.assertEqual(raised.exception.url, comment_url)
+        self.assertIn(comment_url, str(raised.exception))
 
     def test_comment_failure_is_not_retried(self):
         calls = []
@@ -1371,13 +1575,39 @@ class FileBugCliTest(unittest.TestCase):
         )
         with TemporaryDirectory() as tmp:
             path = Path(tmp) / "findings.jsonl"
+            out = Path(tmp) / "finding.json"
             path.write_text(jsonl, encoding="utf-8")
-            result = run_cli("from-findings", "--jsonl", str(path), "--title", "Named")
-        self.assertEqual(result.returncode, 0)
-        self.assertEqual(json.loads(result.stdout)["finding"]["title"], "Named")
-        self.assertEqual(
-            json.loads(result.stdout)["finding"]["source"], "exploratory-tester"
-        )
+            result = run_cli(
+                "from-findings",
+                "--jsonl",
+                str(path),
+                "--title",
+                "Named",
+                "--out",
+                str(out),
+            )
+            payload = json.loads(result.stdout)
+            self.assertEqual(result.returncode, 0)
+            self.assertEqual(payload["title"], "Named")
+            self.assertEqual(payload["source"], "exploratory-tester")
+            self.assertNotIn("finding", payload)
+            self.assertEqual(json.loads(out.read_text(encoding="utf-8"))["title"], "Named")
+
+    def test_render_body_writes_out(self):
+        with TemporaryDirectory() as tmp:
+            out = Path(tmp) / "body.md"
+            result = run_cli(
+                "render-body",
+                "--finding",
+                str(FIXTURES / "finding.json"),
+                "--config",
+                str(FIXTURES / "session-config.json"),
+                "--out",
+                str(out),
+            )
+            self.assertEqual(result.returncode, 0)
+            self.assertIn("**Steps to reproduce:**", out.read_text(encoding="utf-8"))
+            self.assertIn("**Steps to reproduce:**", json.loads(result.stdout)["body"])
 
     def test_check_pack_cli_exits_2_when_thin(self):
         result = run_cli(
@@ -1428,6 +1658,116 @@ class FileBugCliTest(unittest.TestCase):
             )
         self.assertEqual(result.returncode, 2)
         self.assertIn("stamp", json.loads(result.stdout)["gaps"])
+
+    def test_check_draft_cli_accepts_repeated_label(self):
+        finding = {
+            "current_behavior": 'Toast: "TypeError: cannot read map"',
+            "expected_behavior": "Table lists entities",
+            "steps_followed": ["click"],
+            "feature_flags": "Unknown",
+            "deployment": "Unknown",
+            "role": "Unknown",
+            "spaces": "Unknown",
+        }
+        body = (
+            "**Describe the bug:**\nRisk table empty\n\n"
+            "**Version:**\n9.3.0\n\n"
+            "**Feature flags:**\nUnknown\n\n"
+            "**Deployment:**\nUnknown\n\n"
+            "**Role required to reproduce:**\nUnknown\n\n"
+            "**Spaces:**\nUnknown\n\n"
+            "**Steps to reproduce:**\n1. click\n\n"
+            "**Current behaviour (with screenshots and recordings):**\n"
+            'Toast: "TypeError: cannot read map"\n\n'
+            "**Expected behavior:**\nTable lists entities\n\n"
+            f"{FILED_VIA}\n"
+        )
+        with TemporaryDirectory() as tmp:
+            finding_path = Path(tmp) / "finding.json"
+            body_path = Path(tmp) / "body.md"
+            finding_path.write_text(json.dumps(finding), encoding="utf-8")
+            body_path.write_text(body, encoding="utf-8")
+            result = run_cli(
+                "check-draft",
+                "--finding",
+                str(finding_path),
+                "--body",
+                str(body_path),
+                "--title",
+                "[Entity Analytics] [Bug] Risk table empty",
+                "--label",
+                "bug",
+                "--label",
+                "triage_needed",
+            )
+        self.assertEqual(result.returncode, 0)
+
+    def test_check_draft_cli_sensitive_ok(self):
+        finding = {
+            "title": "Risk table empty",
+            "current_behavior": 'Toast: "TypeError: cannot read map"',
+            "expected_behavior": "Table lists entities",
+            "steps_followed": ["click"],
+            "feature_flags": "Unknown",
+            "deployment": "Unknown",
+            "role": "Unknown",
+            "spaces": "Unknown",
+        }
+        with TemporaryDirectory() as tmp:
+            finding_path = Path(tmp) / "finding.json"
+            body_path = Path(tmp) / "body.md"
+            finding_path.write_text(json.dumps(finding), encoding="utf-8")
+            body_path.write_text(
+                render_bug_body(finding, {"kibana_version": "9.3.0"})
+                + "\nOpening case 12345.\n",
+                encoding="utf-8",
+            )
+            blocked = run_cli(
+                "check-draft",
+                "--finding",
+                str(finding_path),
+                "--body",
+                str(body_path),
+                "--title",
+                "[Entity Analytics] [Bug] Risk table empty",
+                "--label",
+                "bug",
+                "--label",
+                "triage_needed",
+            )
+            allowed = run_cli(
+                "check-draft",
+                "--finding",
+                str(finding_path),
+                "--body",
+                str(body_path),
+                "--title",
+                "[Entity Analytics] [Bug] Risk table empty",
+                "--label",
+                "bug",
+                "--label",
+                "triage_needed",
+                "--sensitive-ok",
+            )
+        self.assertEqual(blocked.returncode, 2)
+        self.assertIn("sensitive:case_id", json.loads(blocked.stdout)["gaps"])
+        self.assertEqual(allowed.returncode, 0)
+
+    def test_file_bug_library_is_not_a_cli(self):
+        result = subprocess.run(
+            [sys.executable, str(CLI.parent / "file_bug.py")],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("file-bug.py", result.stderr)
+
+    def test_decide_help_describes_create_or_ask(self):
+        result = run_cli("decide", "--help")
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("create if no matches", result.stdout)
+        self.assertNotIn("reopen_comment / ask", result.stdout)
 
     def test_format_title_cli_rejects_vague(self):
         result = run_cli(
@@ -1578,7 +1918,7 @@ class SkillProtocolTest(unittest.TestCase):
     def test_frontmatter(self):
         self.assertIn("name: file-bug", self.skill)
         self.assertIn("disable-model-invocation: true", self.skill)
-        self.assertIn("Use when the user says", self.skill)
+        self.assertIn("Use when the user asks", self.skill)
         self.assertIn("references/drafting.md", self.skill)
 
     def test_write_uses_embedded_body(self):
