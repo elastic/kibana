@@ -29,7 +29,7 @@
 
 import type { monaco as monacoEditor } from '@kbn/monaco';
 import {
-  initializeCodeEditorThemes,
+  initializeRegisteredLanguagesTheme,
   initializeSupportedLanguages,
   monaco,
   HoverParticipantRegistry,
@@ -279,7 +279,7 @@ export function MonacoEditor({
   };
 
   useEffect(() => {
-    initializeCodeEditorThemes(euiTheme);
+    initializeRegisteredLanguagesTheme(euiTheme);
   }, [euiTheme]);
 
   const initMonaco = () => {

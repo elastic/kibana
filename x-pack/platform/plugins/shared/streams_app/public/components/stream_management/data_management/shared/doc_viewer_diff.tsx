@@ -12,7 +12,7 @@ import { flattenObjectNestedLast } from '@kbn/object-utils';
 import {
   CODE_EDITOR_DEFAULT_THEME_ID,
   XJsonLang,
-  initializeCodeEditorThemes,
+  initializeRegisteredLanguagesTheme,
   monaco,
 } from '@kbn/monaco';
 import { useEuiTheme } from '@elastic/eui';
@@ -146,7 +146,7 @@ function JsonDiffViewer({ hit, decreaseAvailableHeightBy }: DocViewRenderProps) 
   }, [originalValue, newValue, editorHeight]);
 
   useEffect(() => {
-    initializeCodeEditorThemes(euiTheme);
+    initializeRegisteredLanguagesTheme(euiTheme);
 
     // apply the updated theme so the diff editor reflects the current color mode
     monaco.editor.setTheme(CODE_EDITOR_DEFAULT_THEME_ID);

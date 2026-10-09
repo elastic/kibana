@@ -23,7 +23,6 @@ import {
 } from '../../../hooks/use_workflows_monaco_theme';
 
 const READ_ONLY_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
-  theme: WORKFLOWS_MONACO_EDITOR_THEME,
   readOnly: true,
   domReadOnly: true,
   contextmenu: false,
@@ -156,6 +155,7 @@ export const WorkflowYamlPreview = React.memo<WorkflowYamlPreviewProps>(
           value={yaml}
           height={height}
           options={READ_ONLY_OPTIONS}
+          themeOverride={WORKFLOWS_MONACO_EDITOR_THEME}
           editorDidMount={handleEditorDidMount}
           onChange={noop}
           dataTestSubj={dataTestSubj}
