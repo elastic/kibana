@@ -26,7 +26,6 @@ import {
   forceLogExtraction,
   getStatus,
   installAllEntityTypes,
-  installEntityStoreSuiteWithKbnClient,
   LOGS_TEST_INDEX,
   setupLogsTestDataStream,
   startAllEntityTypes,
@@ -326,23 +325,15 @@ apiTest.describe('Entity Store dual-process union equivalence', { tag: ENTITY_ST
     await bulkIndex(esClient, [...dualProcessCorpus, ...runOrderCorpus, ...samplingCorpus]);
   });
 
-  apiTest.afterAll(async ({ apiClient, apiServices, esClient, kbnClient }) => {
-    try {
-      await uninstallAllEntityTypes(apiClient, publicHeaders).catch(() => {});
-      await waitForStoreNotInstalled(apiClient, publicHeaders);
-      await clearEntityStoreIndices(esClient);
-      await teardownLogsTestDataStream(esClient);
-      // `null` removes the override, see per_process_config.spec.ts.
-      await apiServices.core.settings({
-        'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: null },
-      });
-    } finally {
-      // This spec uninstalls the shared suite install so it can assert a fresh
-      // install. Put that install back before the rest of the logs suite runs.
-      await installEntityStoreSuiteWithKbnClient({ kbnClient });
-      const start = await startAllEntityTypes(apiClient, publicHeaders);
-      expect(start.statusCode).toBe(200);
-    }
+  apiTest.afterAll(async ({ apiClient, apiServices, esClient }) => {
+    await uninstallAllEntityTypes(apiClient, publicHeaders).catch(() => {});
+    await waitForStoreNotInstalled(apiClient, publicHeaders);
+    await clearEntityStoreIndices(esClient);
+    await teardownLogsTestDataStream(esClient);
+    // `null` removes the override, see per_process_config.spec.ts.
+    await apiServices.core.settings({
+      'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: null },
+    });
   });
 
   apiTest(
