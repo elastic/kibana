@@ -231,8 +231,11 @@
       "defaults": {
         "workerId": "system-security-floor-alert-triage",
         "autonomy": "manual",
+        "scheduleInterval": "10m",
         "extras": {
-          "autoCloseConfidenceScoreMinThreshold": 0.85
+          "autoCloseConfidenceScoreMinThreshold": 0.85,
+          "budgetPerHour": 300,
+          "lookbackHours": 24
         }
       },
       "schema": {
@@ -251,6 +254,12 @@
               "supervised"
             ]
           },
+          "scheduleInterval": {
+            "kind": "leaf",
+            "type": "string",
+            "maxLength": 6,
+            "pattern": "^[1-9][0-9]*[mhd]$"
+          },
           "extras": {
             "kind": "object",
             "fields": {
@@ -259,10 +268,24 @@
                 "type": "number",
                 "minimum": 0,
                 "maximum": 1
+              },
+              "budgetPerHour": {
+                "kind": "leaf",
+                "type": "integer",
+                "minimum": 10,
+                "maximum": 5000
+              },
+              "lookbackHours": {
+                "kind": "leaf",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 168
               }
             },
             "required": [
-              "autoCloseConfidenceScoreMinThreshold"
+              "autoCloseConfidenceScoreMinThreshold",
+              "budgetPerHour",
+              "lookbackHours"
             ],
             "additionalProperties": false
           },
@@ -276,6 +299,7 @@
         "required": [
           "autonomy",
           "extras",
+          "scheduleInterval",
           "workerId"
         ],
         "additionalProperties": false

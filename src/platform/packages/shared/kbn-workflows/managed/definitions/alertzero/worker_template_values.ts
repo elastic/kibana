@@ -137,6 +137,8 @@ export const renderHuntWorkerYaml = (yaml: string, values: HuntWorkerTemplateVal
 export interface AlertTriageWorkerTemplateValues extends CommonWorkerTemplateValues {
   extras: {
     autoCloseConfidenceScoreMinThreshold: number;
+    budgetPerHour: number;
+    lookbackHours: number;
   };
 }
 
