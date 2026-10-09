@@ -106,6 +106,99 @@ apiTest.describe('Create snooze series action API', { tag: '@local-stateful-clas
     }
   );
 
+  apiTest(
+    'precondition: repeating the expiry in effect returns 409 and writes no second action',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'snooze-repeat-rule';
+      const groupHash = buildGroupHash('snooze-repeat-group');
+      const snoozedUntil = '2099-01-01T00:00:00.000Z';
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          alert: { id: 'snooze-repeat-episode', status: 'active' },
+        }),
+      ]);
+
+      const firstResponse = await apiClient.post(getSnoozeSeriesActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: { snoozed_until: snoozedUntil },
+      });
+      expect(firstResponse).toHaveStatusCode(204);
+
+      const response = await apiClient.post(getSnoozeSeriesActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: { snoozed_until: snoozedUntil },
+      });
+      expect(response).toHaveStatusCode(409);
+      expect(response.body.code).toBe('ALERT_ACTION_NO_OP');
+      expect(response.body.details).toStrictEqual({ group_hash: groupHash, action_type: 'snooze' });
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['snooze'],
+      });
+      expect(actions).toHaveLength(1);
+    }
+  );
+
+  apiTest(
+    'precondition: repeating an indefinite snooze returns 409',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'snooze-repeat-indefinite-rule';
+      const groupHash = buildGroupHash('snooze-repeat-indefinite-group');
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          alert: { id: 'snooze-repeat-indefinite-episode', status: 'active' },
+        }),
+      ]);
+
+      const firstResponse = await apiClient.post(getSnoozeSeriesActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: {},
+      });
+      expect(firstResponse).toHaveStatusCode(204);
+
+      const response = await apiClient.post(getSnoozeSeriesActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: {},
+      });
+      expect(response).toHaveStatusCode(409);
+      expect(response.body.code).toBe('ALERT_ACTION_NO_OP');
+    }
+  );
+
+  apiTest(
+    'precondition: changing the expiry in effect returns 204',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'snooze-extend-rule';
+      const groupHash = buildGroupHash('snooze-extend-group');
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          alert: { id: 'snooze-extend-episode', status: 'active' },
+        }),
+      ]);
+
+      for (const snoozedUntil of ['2099-01-01T00:00:00.000Z', '2099-06-01T00:00:00.000Z']) {
+        const response = await apiClient.post(getSnoozeSeriesActionUrl(groupHash), {
+          headers: writerHeaders,
+          body: { snoozed_until: snoozedUntil },
+        });
+        expect(response).toHaveStatusCode(204);
+      }
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['snooze'],
+      });
+      expect(actions).toHaveLength(2);
+    }
+  );
+
   apiTest('schema: rejects snoozed_until that is not ISO 8601 with 400', async ({ apiClient }) => {
     const response = await apiClient.post(getSnoozeSeriesActionUrl(buildGroupHash('any-group')), {
       headers: writerHeaders,

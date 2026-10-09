@@ -14,6 +14,8 @@ import {
   getAlertSeriesNotFoundMessage,
   getAssigneeUnchangedMessage,
   getEpisodeNotLatestMessage,
+  getSeriesAlreadySnoozedMessage,
+  getSeriesNotSnoozedMessage,
   getTagsUnchangedMessage,
 } from '../../lib/errors/alert_error_messages';
 import { invalidResponseExample } from '../oas_utils';
@@ -48,6 +50,38 @@ export const ALERT_SERIES_NOT_FOUND_RESPONSE: OasExampleEntry = {
     message: getAlertSeriesNotFoundMessage(SAMPLE_GROUP_HASH),
     details: {
       group_hash: SAMPLE_GROUP_HASH,
+    },
+  } satisfies ErrorResponse,
+};
+
+export const SAMPLE_SNOOZED_UNTIL = '2026-01-16T12:00:00.000Z';
+
+/** Shared 409 body for `_snooze` with the expiry of the snooze already in effect. */
+export const ALERT_SERIES_ALREADY_SNOOZED_RESPONSE: OasExampleEntry = {
+  name: 'alertSeriesAlreadySnoozed',
+  summary: 'The series is already snoozed until the requested time',
+  value: {
+    code: ALERTING_ERROR_CODES.ALERT_ACTION_NO_OP,
+    error: 'Conflict',
+    message: getSeriesAlreadySnoozedMessage(SAMPLE_GROUP_HASH, SAMPLE_SNOOZED_UNTIL),
+    details: {
+      group_hash: SAMPLE_GROUP_HASH,
+      action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+    },
+  } satisfies ErrorResponse,
+};
+
+/** Shared 409 body for `_unsnooze` on a series with no snooze in effect. */
+export const ALERT_SERIES_NOT_SNOOZED_RESPONSE: OasExampleEntry = {
+  name: 'alertSeriesNotSnoozed',
+  summary: 'The series is not snoozed, so the request would change nothing',
+  value: {
+    code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
+    error: 'Conflict',
+    message: getSeriesNotSnoozedMessage(SAMPLE_GROUP_HASH),
+    details: {
+      group_hash: SAMPLE_GROUP_HASH,
+      action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
     },
   } satisfies ErrorResponse,
 };

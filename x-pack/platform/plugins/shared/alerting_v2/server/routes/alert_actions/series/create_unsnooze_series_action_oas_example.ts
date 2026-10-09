@@ -10,6 +10,7 @@ import type { AlertingOasOperationObject } from '../../oas_types';
 import { buildOasOperation } from '../../oas_utils';
 import {
   ALERT_SERIES_NOT_FOUND_RESPONSE,
+  ALERT_SERIES_NOT_SNOOZED_RESPONSE,
   INVALID_SERIES_ACTION_PARAMS_RESPONSE,
 } from '../alert_oas_shared_examples';
 
@@ -25,5 +26,6 @@ export const createUnsnoozeSeriesActionOasExamples = (): AlertingOasOperationObj
     responses: {
       400: INVALID_SERIES_ACTION_PARAMS_RESPONSE,
       404: ALERT_SERIES_NOT_FOUND_RESPONSE,
+      409: ALERT_SERIES_NOT_SNOOZED_RESPONSE,
     },
   });

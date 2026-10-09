@@ -36,3 +36,14 @@ export const getAssigneeUnchangedMessage = (
 
 export const getTagsUnchangedMessage = (episodeId: string): string =>
   `[${episodeId}] already has these tags.`;
+
+export const getSeriesAlreadySnoozedMessage = (
+  groupHash: string,
+  snoozedUntil: string | null
+): string =>
+  snoozedUntil == null
+    ? `[${groupHash}] is already snoozed indefinitely.`
+    : `[${groupHash}] is already snoozed until [${snoozedUntil}].`;
+
+export const getSeriesNotSnoozedMessage = (groupHash: string): string =>
+  `[${groupHash}] is not snoozed.`;

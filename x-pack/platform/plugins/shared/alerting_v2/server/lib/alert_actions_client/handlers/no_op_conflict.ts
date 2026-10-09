@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { AlertEpisodeActionType } from '@kbn/alerting-v2-schemas';
+import { SERIES_ALERT_ACTION_TYPES, type AlertEpisodeActionType } from '@kbn/alerting-v2-schemas';
 import type { AlertingV2ErrorCode } from '../../errors/error_codes';
 import type { AlertEventRecord } from '../types';
 
@@ -19,12 +19,16 @@ interface NoOpConflictParams {
   details?: Record<string, unknown>;
 }
 
+const isSeriesActionType = (actionType: AlertEpisodeActionType): boolean =>
+  SERIES_ALERT_ACTION_TYPES.some((seriesActionType) => seriesActionType === actionType);
+
 /**
  * The 409 every preconditioned alert action raises when the write it was
  * asked for would not change the alert's state. Returned rather than thrown
  * so the call site reads as a `throw`, and so the single path (which lets it
  * reach the route) and the bulk path (which records it in `errors[]`) see one
- * error shape.
+ * error shape. Series-scoped actions target the series as a whole, so their
+ * `details` carry no `alert_id`.
  */
 export const noOpConflict = ({
   code,
@@ -37,7 +41,7 @@ export const noOpConflict = ({
     code,
     details: {
       group_hash: alertEvent.group_hash,
-      alert_id: alertEvent.episode_id,
+      ...(isSeriesActionType(actionType) ? {} : { alert_id: alertEvent.episode_id }),
       action_type: actionType,
       ...details,
     },
