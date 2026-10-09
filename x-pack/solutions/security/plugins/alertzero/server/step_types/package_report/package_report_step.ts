@@ -12,6 +12,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { packageReportStepCommonDefinition } from '../../../common/step_types/package_report';
 import type { ActionsService } from '../../services/actions/actions_service';
 import type { HuntServices } from '../../services/watches/hunt/types';
+import { createOpenProposalChecker } from '../../services/watches/hunt/packaging/check_open_proposals';
 import { createExistingProposalsCounter } from '../../services/watches/hunt/packaging/check_existing_proposals';
 import { makeRehydrateProcessSelectors } from '../../services/watches/hunt/packaging/rehydrate_process_selectors';
 import {
@@ -133,6 +134,13 @@ export const getPackageReportStepDefinition = ({
           logger,
         });
 
+        const hasOpenProposal = createOpenProposalChecker({
+          proposalsService: getHuntServices().getProposalsService(),
+          spaceId,
+          request,
+          logger,
+        });
+
         const output = await runPackageReport({
           spaceId,
           reportId: input.reportId,
@@ -154,6 +162,7 @@ export const getPackageReportStepDefinition = ({
             rehydrateProcessSelectors,
             countExistingProposals,
             getEsReportContextClient,
+            hasOpenProposal,
           },
         });
 

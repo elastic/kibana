@@ -55,6 +55,15 @@ type MintSuppression = Extract<PackageReportOutput, { status: 'packaged' }>['min
  */
 export type CountExistingProposals = (investigationConversationId: string) => Promise<number>;
 
+/**
+ * Whether the Investigation has a Proposal still open (`pending` or `executing`), i.e. one an
+ * analyst or an in-flight action still depends on. Deliberately narrower than
+ * {@link CountExistingProposals}: a settled Proposal is no reason to hold a clean-run dismissal.
+ */
+export type HasOpenProposal = (investigationConversationId: string) => Promise<boolean>;
+
+type DismissHold = Extract<PackageReportOutput, { status: 'packaged' }>['dismissHold'];
+
 export interface RunPackageReportDeps {
   listRespondActions: ListRespondActions;
   writeCoverageKis: WriteCoverageKis;
@@ -71,7 +80,31 @@ export interface RunPackageReportDeps {
    * erroring (see `loadReportHuntContext`'s doc comment).
    */
   getEsReportContextClient?: () => EsReportContextClient;
+  hasOpenProposal: HasOpenProposal;
 }
+
+/**
+ * Decides whether a clean-run dismissal may proceed. `decidePackageReport` is pure and cannot do
+ * this lookup, so it lives here. Fails closed: if the lookup throws, the Investigation stays open.
+ *
+ * Closes the steady-state case only, not the create window: the packaging workflow dispatches
+ * each gate with `workflow.executeAsync` and releases its concurrency slot before any gate has
+ * actually created its Proposal (see `hunt_package_report.yaml`'s concurrency comment, which
+ * describes the same gap for the mint-side lookup). A clean run that lands in that window sees no
+ * open Proposal and still dismisses, stranding the decision the Proposal is about to carry.
+ * Closing it for good needs atomic dedup on the Proposals side, the same follow-up as the mint
+ * guard (elastic/security-team#19822); do not read this guard as having closed the invariant.
+ */
+const resolveDismissHold = async (
+  hasOpenProposal: HasOpenProposal,
+  investigationConversationId: string
+): Promise<DismissHold> => {
+  try {
+    return (await hasOpenProposal(investigationConversationId)) ? 'open_proposal' : 'none';
+  } catch {
+    return 'check_failed';
+  }
+};
 
 /**
  * The settlement barrier threshold each gate checks before closing the Investigation
@@ -192,7 +225,6 @@ export const runPackageReport = async ({
             reportId,
           })
         : undefined;
-      const closureSummary = `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`;
       const subjects = deriveCleanCoverageSubjects({
         spaceId,
         reportId,
@@ -206,14 +238,26 @@ export const runPackageReport = async ({
         investigationConversationId,
       });
       const coverage = await deps.writeCoverageKis(subjects);
+      const dismissHold = await resolveDismissHold(
+        deps.hasOpenProposal,
+        investigationConversationId
+      );
       return {
         status: 'packaged',
         coverage,
         proposals: [],
         proposalBullets: [],
         omittedProposalCount: 0,
-        dismiss: true,
-        closureSummary,
+        dismiss: dismissHold === 'none',
+        dismissHold,
+        closureSummary:
+          dismissHold === 'none'
+            ? `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`
+            : `Hunt for report ${reportId} found no confirmed hits. Leaving the Investigation open: ${
+                dismissHold === 'open_proposal'
+                  ? 'it still has a pending or executing Proposal from an earlier run.'
+                  : 'could not verify whether it has an open Proposal.'
+              }`,
         expectedProposalCount: 0,
         mintSuppression: 'none',
       };
@@ -269,6 +313,10 @@ export const runPackageReport = async ({
   });
   const coverage = await deps.writeCoverageKis(subjects);
 
+  const dismissHold: DismissHold = decided.dismiss
+    ? await resolveDismissHold(deps.hasOpenProposal, investigationConversationId)
+    : 'none';
+
   // Only a run that would otherwise mint something needs the lookup: a dismissal (no confirmed
   // hit) has no proposals to suppress, and `decidePackageReport` never returns `dismiss: false`
   // with an empty `proposals` (the analyst-recommendation fallback always fills it).
@@ -318,7 +366,8 @@ export const runPackageReport = async ({
     // Investigations on rerun"'s own goal of keeping a possibly-new finding visible rather than
     // silently closed; elastic/security-team#19822 (phase 3) resolves it as a side effect of real
     // per-finding dedup, not as a standalone fix.
-    dismiss: decided.dismiss,
+    dismiss: decided.dismiss && dismissHold === 'none',
+    dismissHold,
     closureSummary: decided.closureSummary,
     expectedProposalCount,
     mintSuppression,
