@@ -254,7 +254,7 @@ describe('isValidJsonSchema', () => {
     expect(isValidJsonSchema(schema)).toBe(true);
   });
 
-  it('should reject additionalProperties as a nested schema (only boolean is supported)', () => {
+  it('should accept additionalProperties as a nested schema (typed maps)', () => {
     const schema = {
       type: 'object',
       properties: {
@@ -264,7 +264,14 @@ describe('isValidJsonSchema', () => {
         type: 'string',
       },
     };
-    expect(isValidJsonSchema(schema)).toBe(false);
+    expect(isValidJsonSchema(schema)).toBe(true);
+  });
+
+  it('should accept a map-only property with no type and no properties', () => {
+    const schema = {
+      additionalProperties: { type: 'string' },
+    };
+    expect(isValidJsonSchema(schema)).toBe(true);
   });
 
   it('should validate schema with const (constant value)', () => {

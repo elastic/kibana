@@ -23,10 +23,11 @@ import type {
   ListRuleChangeHistoryResponse,
   RuleChangeHistoryDetail,
   RuleResponse,
+  UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
 import {
   COMMON_HEADERS,
-  INTERNAL_RULE_API_PATH,
+  INTERNAL_CHANGE_HISTORY_RULES_API_PATH,
   POLL_INTERVAL_MS,
   POLL_TIMEOUT_MS,
   RULE_API_PATH,
@@ -44,6 +45,7 @@ export interface RuleApiSpaceOptions {
 export interface RulesApiService {
   create: (data: CreateRuleData, options?: RuleApiSpaceOptions) => Promise<RuleResponse>;
   upsert: (id: string, data: CreateRuleData) => Promise<RuleResponse>;
+  update: (id: string, data: UpdateRuleData) => Promise<RuleResponse>;
   get: (id: string) => Promise<RuleResponse>;
   find: (query?: FindRulesRequest) => Promise<FindRulesResponse>;
   delete: (id: string) => Promise<void>;
@@ -129,6 +131,17 @@ export const getRulesApiService = ({
       measurePerformanceAsync(log, 'rules.upsert', async () => {
         const response = await kbnClient.request<RuleResponse>({
           method: 'PUT',
+          path: `${RULE_API_PATH}/${encodeURIComponent(id)}`,
+          headers: COMMON_HEADERS,
+          body: data,
+        });
+        return response.data;
+      }),
+
+    update: (id, data) =>
+      measurePerformanceAsync(log, 'rules.update', async () => {
+        const response = await kbnClient.request<RuleResponse>({
+          method: 'PATCH',
           path: `${RULE_API_PATH}/${encodeURIComponent(id)}`,
           headers: COMMON_HEADERS,
           body: data,
@@ -261,18 +274,17 @@ export const getRulesApiService = ({
       measurePerformanceAsync(log, 'rules.listChangeHistory', async () => {
         const response = await kbnClient.request<ListRuleChangeHistoryResponse>({
           method: 'GET',
-          path: `${INTERNAL_RULE_API_PATH}/${encodeURIComponent(id)}/history`,
-          query: stripUndefined(query),
+          path: INTERNAL_CHANGE_HISTORY_RULES_API_PATH,
+          query: { rule_id: id, ...stripUndefined(query) },
         });
         return response.data;
       }),
-    getChangeHistoryEvent: (id, eventId) =>
+    getChangeHistoryEvent: (id, changeId) =>
       measurePerformanceAsync(log, 'rules.getChangeHistoryEvent', async () => {
         const response = await kbnClient.request<RuleChangeHistoryDetail>({
           method: 'GET',
-          path: `${INTERNAL_RULE_API_PATH}/${encodeURIComponent(id)}/history/${encodeURIComponent(
-            eventId
-          )}`,
+          path: `${INTERNAL_CHANGE_HISTORY_RULES_API_PATH}/${encodeURIComponent(changeId)}`,
+          query: { rule_id: id },
         });
         return response.data;
       }),

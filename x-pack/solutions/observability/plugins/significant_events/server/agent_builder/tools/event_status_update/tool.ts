@@ -11,10 +11,12 @@ import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-b
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { significantEventSchema } from '@kbn/significant-events-schema';
+import { lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../../routes/types';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { updateEventStatusToolHandler } from './handler';
@@ -22,10 +24,22 @@ import { updateEventStatusToolHandler } from './handler';
 export const SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID =
   platformSignificantEventsTools.updateEventStatus;
 
-const eventStatusUpdateSchema = significantEventSchema.pick({
-  status: true,
-  event_uuid: true,
-});
+const eventStatusUpdateSchema = lazySchema(() =>
+  significantEventSchema
+    .pick({
+      status: true,
+      event_id: true,
+      assessment_note: true,
+    })
+    .extend({
+      event_id: significantEventSchema.shape.event_id.describe(
+        'The event_id of the existing significant event to update.'
+      ),
+      assessment_note: significantEventSchema.shape.assessment_note.describe(
+        'Optional short reason for the change, for example why the event recovered or was a false alarm.'
+      ),
+    })
+);
 
 export function createEventStatusUpdateTool({
   getScopedClients,
@@ -34,7 +48,7 @@ export function createEventStatusUpdateTool({
   telemetry,
 }: {
   getScopedClients: GetScopedClients;
-  server: StreamsServer;
+  server: SignificantEventsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
 }): StaticToolRegistration<typeof eventStatusUpdateSchema> {
@@ -43,7 +57,8 @@ export function createEventStatusUpdateTool({
     type: ToolType.builtin,
     description: dedent`
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventStatusUpdate.description', {
-        defaultMessage: 'Update the status of an existing significant event.',
+        defaultMessage:
+          'Set an existing significant event to `active` or `inactive`. assessment_note is optional. Returns `updated: 0, ignored: 1` when no change was written, either because no event matches the id or because it already has that status.',
       })}
     `,
     annotations: {
@@ -59,18 +74,25 @@ export function createEventStatusUpdateTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, licensing } = await getScopedClients({ request });
+        const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } =
+          await getScopedClients({
+            request,
+          });
         await assertSignificantEventsAccess({ server, licensing });
+        await assertCanManageSignificantEvents({ request, server });
 
         const data = await updateEventStatusToolHandler({
-          eventClient: await getEventClient(),
-          eventUuid: toolParams.event_uuid,
+          eventSearchClient: await getEventSearchClient(),
+          eventId: toolParams.event_id,
           status: toolParams.status,
+          assessmentNote: toolParams.assessment_note,
+          alertEventsClient: await getAlertEventsClient(),
+          emitTrigger,
         });
 
         telemetry.trackAgentToolEventStatusUpdate({
           success: true,
-          event_uuid: toolParams.event_uuid,
+          event_id: toolParams.event_id,
           status: toolParams.status,
         });
 
@@ -80,7 +102,7 @@ export function createEventStatusUpdateTool({
         logger.error(`Error running event_status_update: ${message}`);
         telemetry.trackAgentToolEventStatusUpdate({
           success: false,
-          event_uuid: toolParams.event_uuid,
+          event_id: toolParams.event_id,
           status: toolParams.status,
           error_message: message,
         });

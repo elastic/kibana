@@ -52,15 +52,7 @@ import { toApiFieldSettings } from '../../../../transforms/columns/field_setting
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
-const COMMON_STATE_IGNORE_PATHS = [
-  'savedObjectId', // panel-level SO reference, not part of LensAttributes
-  'state.visualization.title', // removed by-value nested title
-  // TODO: check missing properties striped out in transforms
-  'state.datasourceStates.formBased.layers.*.indexPatternId',
-  'state.datasourceStates.formBased.currentIndexPatternId',
-  // Will be unskipped after the fix for https://github.com/elastic/kibana/issues/283574
-  'state.datasourceStates.formBased.layers.*.columns.*.params.orderAgg.params.sortField',
-];
+const COMMON_STATE_IGNORE_PATHS = [];
 
 export const DEFAULT_LAYER_ID = 'layer_0';
 
@@ -468,7 +460,12 @@ const normalizeReferences = <T extends LensAttributes>(
           (filterRefNames.has(reference.name) || reference.name.startsWith('filter-index-pattern-'))
         );
       })
-      // ignore current index pattern reference
+      // `indexpattern-datasource-current-indexpattern` is not read by name. The 7.10 migration
+      // and by-value builders emit it. `extractReferences` and the transform do not.
+      // `getUsedDataViews` and the XY first-`index-pattern` fallback use the id. On every
+      // integration panel this reference is first and the next one has the same id, so dropping
+      // it changes neither.`toAPIFormat` does not apply that annotation fallback.
+      // The editor always writes `xy-visualization-layer-*`, so it is not reproducible from the UI.
       .filter((reference) => {
         return !(
           reference.type === 'index-pattern' &&
@@ -794,16 +791,16 @@ const isLastValueColumn = (col: GenericIndexPatternColumn): col is LastValueInde
   col.operationType === 'last_value';
 
 /**
- * Default a missing/`null` `params.showArrayValues` to `true` on `last_value` columns on the ORIGINAL
- * side to match the 8.2.0 saved-object migration `commonSetLastValueShowArrayValues`
- * (`server/migrations/common_migrations.ts`) that coerces any non-boolean `showArrayValues` to `true` at load.
+ * Default a missing/`null` `params.showArrayValues` to `false` on `last_value` columns on the ORIGINAL
+ * side to match the `?? false` fallback in `fromLastValueLensStateToAPI`
+ * (`config_builder/transforms/columns/last_value.ts`).
  */
 const normalizeLastValueShowArrayValues = (col: GenericIndexPatternColumn): void => {
   if (!isLastValueColumn(col)) {
     return;
   }
   if (col.params.showArrayValues == null) {
-    col.params.showArrayValues = true;
+    col.params.showArrayValues = false;
   }
 };
 
@@ -1213,6 +1210,23 @@ export const getCommonNormalizer = <T extends LensAttributes>(
       delete attributes.type;
     }
 
+    // 'savedObjectId' is the twin of 'type': a legacy by-reference pointer that old library saves baked
+    // into the stored attributes and unlink copied into by-value panels. It is not part of LensAttributes,
+    // is never read at runtime (the link lives on the panel-level ref_id), and is dropped by toAPIFormat.
+    if ('savedObjectId' in attributes) {
+      delete attributes.savedObjectId;
+    }
+
+    // 'state.visualization.title' is a legacy default the XY/heatmap `initialize()` wrote for freshly
+    // created charts ('Empty XY chart' / 'Empty Heatmap chart'). It is untyped (absent from the
+    // visualization state types) and never read at render: the displayed title comes from the panel-level
+    // title when set, otherwise the document `attributes.title` (`defaultTitle$`) — never from
+    // `state.visualization.title`. It is dropped by toAPIFormat.
+    const { visualization } = attributes.state;
+    if (isRecord(visualization) && 'title' in visualization) {
+      delete visualization.title;
+    }
+
     // Canonicalize filters and collect (in a single pass) the reference names they consumed, so the
     // matching (now-inlined) filter reference entries can be dropped from `references` below.
     const filterRefNames = normalizeFilters(attributes.state.filters, attributes.references);
@@ -1364,6 +1378,15 @@ export const getCommonNormalizer = <T extends LensAttributes>(
             // apply defaults
             layer.sampling = layer.sampling ?? LENS_SAMPLING_DEFAULT_VALUE;
 
+            // `indexPatternId` is a runtime-only `FormBasedLayer` field, omitted from
+            // `FormBasedPersistedState`, that leaked into by-value panels.
+            // - `extractReferences` moves it onto the `indexpattern-datasource-layer-*` reference.
+            // - `resolveDataViewId` prefers the same reference and falls back to this inline id
+            //   only when the reference is absent.
+            if ('indexPatternId' in layer) {
+              delete layer.indexPatternId;
+            }
+
             // remove empty incompleteColumns
             if (Object.keys(layer.incompleteColumns ?? {}).length === 0) {
               delete layer.incompleteColumns;
@@ -1472,6 +1495,13 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               }
             }
           }
+
+          // `currentIndexPatternId` is a runtime-only `FormBasedPrivateState` field that leaked into
+          // by-value panels. `loadInitialState` recomputes it. The transform never emits it.
+          if ('currentIndexPatternId' in ds) {
+            delete ds.currentIndexPatternId;
+          }
+
           return ds;
         }
       ),

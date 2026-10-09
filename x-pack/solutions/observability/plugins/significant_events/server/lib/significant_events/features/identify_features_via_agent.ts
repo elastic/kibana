@@ -18,21 +18,24 @@ import {
   isToolCallEvent,
   isToolResultEvent,
 } from '@kbn/agent-builder-common';
-import {
-  SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-} from '@kbn/significant-events-schema';
 import type { BaseFeature, IgnoredFeature } from '@kbn/significant-events-schema';
 import {
+  NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
+  NIGHTSHIFT_USAGE_PARENT_ID,
+  NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
+  NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
+} from '@kbn/nightshift-shared';
+import {
   EMPTY_TOKENS,
+  buildFeatureIdentificationUserMessage,
+  parseFinalizedFeatures,
+  type RawFinalizeFeaturesParams,
   type InferenceDocument,
   type ExcludedFeatureSummary,
   type PreviouslyIdentifiedFeature,
 } from '@kbn/nightshift-ai';
 import { FEATURE_IDENTIFICATION_AGENT_ID } from '../../../agent_builder/agents/feature_identification';
 import { FINALIZE_FEATURES_TOOL_ID } from '../../../agent_builder/skills/feature_identification';
-import { parseFinalizedFeatures, type RawFinalizeFeaturesParams } from './parse_finalized_features';
-import { buildFeatureIdentificationUserMessage } from './build_user_message';
 import { chatTokenCountFromModelUsage } from './chat_token_count';
 
 export interface ExecuteFeatureIdentificationAgentOptions {
@@ -44,6 +47,7 @@ export interface ExecuteFeatureIdentificationAgentOptions {
   excludedFeatures?: ExcludedFeatureSummary[];
   previouslyIdentifiedFeatures?: PreviouslyIdentifiedFeature[];
   knownFeatureIds?: string;
+  interactionId: string;
   signal?: AbortSignal;
   logger: Logger;
 }
@@ -57,6 +61,7 @@ export async function executeFeatureIdentificationAgent({
   excludedFeatures,
   previouslyIdentifiedFeatures = [],
   knownFeatureIds = '',
+  interactionId,
   signal,
   logger,
 }: ExecuteFeatureIdentificationAgentOptions): Promise<{
@@ -79,7 +84,7 @@ export async function executeFeatureIdentificationAgent({
   const conversation = await conversationClient.create({
     agentId: FEATURE_IDENTIFICATION_AGENT_ID,
     title: `Feature identification: ${streamName}`.slice(0, CONVERSATION_TITLE_MAX_LENGTH),
-    accessControl: { access_mode: ConversationAccessControlMode.Private },
+    accessControl: { access_mode: ConversationAccessControlMode.Public },
   });
 
   const { events$ } = await agentBuilder.execution.executeAgent({
@@ -94,8 +99,11 @@ export async function executeFeatureIdentificationAgent({
       storeConversation: true,
       nextInput: { message: userMessage },
       telemetryMetadata: {
-        pluginId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-        aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+        pluginId: NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
+        aggregateBy: NIGHTSHIFT_USAGE_PARENT_ID,
+        productSolution: NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
+        productFeature: NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
+        interactionId,
       },
     },
   });

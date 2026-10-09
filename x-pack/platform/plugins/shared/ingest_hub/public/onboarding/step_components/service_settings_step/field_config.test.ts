@@ -6,6 +6,8 @@
  */
 
 import {
+  getMissingSourceGroup,
+  shouldDefaultCollectS3Logs,
   getRegionFieldName,
   getRequiredTextFields,
   getFlyoutFields,
@@ -160,6 +162,14 @@ describe('toTyped / toDraft', () => {
     expect(toTyped('true', boolMeta)).toBe(true);
   });
 
+  it('toTyped: bool typed true → true (SO resume path: stored boolean passes through)', () => {
+    expect(toTyped(true, boolMeta)).toBe(true);
+  });
+
+  it('toTyped: bool typed false → false (SO resume path: stored boolean passes through)', () => {
+    expect(toTyped(false, boolMeta)).toBe(false);
+  });
+
   it('toTyped: bool string "false" → false', () => {
     expect(toTyped('false', boolMeta)).toBe(false);
   });
@@ -279,5 +289,115 @@ describe('getFlyoutFields', () => {
       },
     });
     expect(getFlyoutFields(service, 'aws-s3')).toContain('queue_url');
+  });
+});
+
+describe('getMissingSourceGroup', () => {
+  const opt = (name: string) => makeVarDef(name, 'text', { required: false });
+  const agentView = makeService({
+    ecfSettings: { requiredConfig: [], dataStreams: [], inputs: [], defaultEnabledInputs: [] },
+    varDefsByInput: {
+      'aws-s3': {
+        bucket_arn: opt('bucket_arn'),
+        access_point_arn: opt('access_point_arn'),
+        queue_url: opt('queue_url'),
+      },
+      'aws-cloudwatch': {
+        log_group_arn: opt('log_group_arn'),
+        log_group_name: opt('log_group_name'),
+        log_group_name_prefix: opt('log_group_name_prefix'),
+      },
+    },
+  });
+
+  it.each([
+    ['aws-s3', ['bucket_arn', 'access_point_arn', 'queue_url'], 'queue_url'],
+    [
+      'aws-cloudwatch',
+      ['log_group_arn', 'log_group_name', 'log_group_name_prefix'],
+      'log_group_name',
+    ],
+  ])('%s: reports the group while none is filled, and nothing once one is', (input, group, alt) => {
+    expect(getMissingSourceGroup(agentView, input, {})).toEqual(group);
+    expect(getMissingSourceGroup(agentView, input, { [group[0]]: '' })).toEqual(group);
+    expect(getMissingSourceGroup(agentView, input, { [group[0]]: [] })).toEqual(group);
+    expect(getMissingSourceGroup(agentView, input, { [group[0]]: ['arn:x'] })).toBeUndefined();
+    expect(getMissingSourceGroup(agentView, input, { [alt]: 'value' })).toBeUndefined();
+  });
+
+  it('does not apply to the ECF view, to non ECF-capable services or to other inputs', () => {
+    expect(
+      getMissingSourceGroup({ ...agentView, settingsScope: 'ecf' }, 'aws-s3', {})
+    ).toBeUndefined();
+    expect(
+      getMissingSourceGroup({ ...agentView, ecfSettings: undefined }, 'aws-s3', {})
+    ).toBeUndefined();
+    expect(getMissingSourceGroup(agentView, 'httpjson', {})).toBeUndefined();
+  });
+});
+
+describe('S3 collection mode (collect_s3_logs)', () => {
+  const opt = (name: string) => makeVarDef(name, 'text', { required: false });
+  const s3Defs = {
+    collect_s3_logs: makeVarDef('collect_s3_logs', 'bool', { default: false }),
+    bucket_arn: opt('bucket_arn'),
+    access_point_arn: opt('access_point_arn'),
+    queue_url: opt('queue_url'),
+  };
+  const agentView = makeService({
+    ecfSettings: { requiredConfig: [], dataStreams: [], inputs: [], defaultEnabledInputs: [] },
+    varDefsByInput: { 'aws-s3': s3Defs },
+  });
+
+  describe('shouldDefaultCollectS3Logs', () => {
+    it.each(['bucket_arn', 'access_point_arn'])('turns the toggle on for a %s alone', (name) => {
+      expect(shouldDefaultCollectS3Logs(agentView, 'aws-s3', { [name]: 'arn:x' })).toBe(true);
+      expect(shouldDefaultCollectS3Logs(agentView, 'aws-s3', { [name]: ['arn:x'] })).toBe(true);
+    });
+
+    it('leaves the toggle alone without an ARN, with only a queue URL, or once the user chose', () => {
+      expect(shouldDefaultCollectS3Logs(agentView, 'aws-s3', {})).toBe(false);
+      expect(shouldDefaultCollectS3Logs(agentView, 'aws-s3', { queue_url: 'https://q' })).toBe(
+        false
+      );
+      expect(
+        shouldDefaultCollectS3Logs(agentView, 'aws-s3', {
+          bucket_arn: 'arn:x',
+          collect_s3_logs: 'false',
+        })
+      ).toBe(false);
+    });
+  });
+
+  describe('getMissingSourceGroup follows the collection mode', () => {
+    it('with the toggle on, needs a bucket or access-point ARN, not a queue URL', () => {
+      const vars = { collect_s3_logs: 'true', queue_url: 'https://q' };
+      expect(getMissingSourceGroup(agentView, 'aws-s3', vars)).toEqual([
+        'bucket_arn',
+        'access_point_arn',
+      ]);
+      expect(
+        getMissingSourceGroup(agentView, 'aws-s3', { collect_s3_logs: true, access_point_arn: 'x' })
+      ).toBeUndefined();
+    });
+
+    it('with the toggle off, needs a queue URL, not an ARN', () => {
+      expect(
+        getMissingSourceGroup(agentView, 'aws-s3', { collect_s3_logs: 'false', bucket_arn: 'x' })
+      ).toEqual(['queue_url']);
+      expect(
+        getMissingSourceGroup(agentView, 'aws-s3', { collect_s3_logs: 'false', queue_url: 'q' })
+      ).toBeUndefined();
+    });
+
+    it('with the toggle unset, accepts either kind of source and reports the whole group otherwise', () => {
+      expect(getMissingSourceGroup(agentView, 'aws-s3', { queue_url: 'q' })).toBeUndefined();
+      expect(getMissingSourceGroup(agentView, 'aws-s3', { access_point_arn: 'x' })).toBeUndefined();
+      expect(getMissingSourceGroup(agentView, 'aws-s3', {})).toEqual([
+        'bucket_arn',
+        'access_point_arn',
+        'queue_url',
+      ]);
+    });
   });
 });

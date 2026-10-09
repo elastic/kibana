@@ -19,18 +19,18 @@ export type SignificantEventsAppTab =
   | 'detections'
   | 'significant_events'
   | 'cortex'
-  | 'settings';
+  | 'decision_trees';
 
 /**
- * Mirrors the query params of the `/{tab}` route one-to-one so every state of the
- * Significant Events app is addressable through the locator.
+ * Builds locations for Significant Events management tabs.
  */
 export interface SignificantEventsAppLocatorParams extends SerializableRecord {
   tab?: SignificantEventsAppTab;
   rangeFrom?: string;
   rangeTo?: string;
   search?: string;
-  status?: string;
+  status?: string | string[];
+  severity?: string | string[];
   type?: string | string[];
   subtype?: string | string[];
   stream?: string | string[];
@@ -40,6 +40,12 @@ export interface SignificantEventsAppLocatorParams extends SerializableRecord {
 }
 
 export type SignificantEventsAppLocator = LocatorPublic<SignificantEventsAppLocatorParams>;
+
+/**
+ * List filters whose empty selection is meaningful: the significant events tab encodes "nothing
+ * selected" as `key=` (see `useSignificantEventsUrlState`), while an absent key means the default.
+ */
+const EXPLICIT_EMPTY_PARAMS = new Set<string>(['status', 'severity']);
 
 export class SignificantEventsAppLocatorDefinition
   implements LocatorDefinition<SignificantEventsAppLocatorParams>
@@ -53,6 +59,12 @@ export class SignificantEventsAppLocatorDefinition
     const searchParams = new URLSearchParams();
     for (const [key, value] of Object.entries(query)) {
       if (value == null) {
+        continue;
+      }
+      if (Array.isArray(value) && value.length === 0) {
+        if (EXPLICIT_EMPTY_PARAMS.has(key)) {
+          searchParams.append(key, '');
+        }
         continue;
       }
       // Repeated keys for array values, matching the io-ts codecs of the route.

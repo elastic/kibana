@@ -10,6 +10,7 @@
 import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { expect } from '..';
+import { euiSelectors } from '../eui_components';
 
 const IN_TABLE_SEARCH_BUTTON_TEST_SUBJ = 'startInTableSearchButton';
 const IN_TABLE_SEARCH_INPUT_TEST_SUBJ = 'inTableSearchInput';
@@ -20,6 +21,12 @@ const IN_TABLE_SEARCH_HIGHLIGHT_CLASS_NAME = 'dataGridInTableSearch__match';
 export type DataGridDensity = 'Compact' | 'Normal' | 'Expanded';
 export type DataGridRowHeight = 'Auto' | 'Custom';
 export type DataGridComparisonDiffMode = 'Full value' | 'By character' | 'By word' | 'By line';
+export type DataGridDocumentsDisplayMode = 'Table' | 'JSON';
+
+const DOCUMENTS_DISPLAY_MODE_TEST_SUBJS: Readonly<Record<DataGridDocumentsDisplayMode, string>> = {
+  Table: 'unifiedDataTableViewModeSettings_viewMode_table',
+  JSON: 'unifiedDataTableViewModeSettings_viewMode_json',
+};
 
 export class DataGrid {
   constructor(private readonly page: ScoutPage) {}
@@ -31,8 +38,9 @@ export class DataGrid {
   }
 
   private async readHeaderLabels(scope: Locator, limit: number): Promise<string[]> {
+    const headerCell = euiSelectors.dataGrid.HEADER_CELL_SELECTOR;
     const headerCellContent = scope.locator(
-      '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
+      `${headerCell}:not(${headerCell}--controlColumn) ${headerCell}__content`
     );
 
     const labels = await headerCellContent.allInnerTexts();
@@ -118,9 +126,26 @@ export class DataGrid {
 
   async expandCell({ rowIndex, columnId }: { rowIndex: number; columnId: string }) {
     const cell = this.getCell(rowIndex, columnId);
-    await cell.hover();
-    await cell.locator('[data-test-subj="euiDataGridCellExpandButton"]').click();
-    await this.page.testSubj.waitForSelector('euiDataGridExpansionPopover', { state: 'visible' });
+    const expansionPopover = this.page.testSubj.locator('euiDataGridExpansionPopover');
+    // The popover is portaled and not tied to a cell, so close one left open by an earlier
+    // action; any popover seen below is then this cell's.
+    if (await expansionPopover.isVisible()) {
+      await this.page.keyboard.press('Escape');
+      await expect(expansionPopover).toBeHidden();
+    }
+    const expandButton = cell.locator('[data-test-subj="euiDataGridCellExpandButton"]');
+    // A refetch can remount the cell (e.g. a grid embedded in a dashboard). The remounted
+    // node gets no mouseenter under a stationary cursor, so its expand button stays hidden
+    // and a pending click waits on a detached element; a remount right after the click takes
+    // the popover with it. Re-hover and re-click until the popover is open. A click that times
+    // out on actionability was never dispatched, and an open popover is never clicked again
+    // (the expand button toggles it), so retrying is safe.
+    await expect(async () => {
+      if (await expansionPopover.isVisible()) return;
+      await cell.hover();
+      await expandButton.click({ timeout: 2_000 });
+      await expect(expansionPopover).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 20_000 });
   }
 
   async filterCell({
@@ -209,6 +234,13 @@ export class DataGrid {
     await selectedButton.waitFor({ state: 'visible' });
 
     return (await selectedButton.innerText()).trim() as DataGridDensity;
+  }
+
+  async getCurrentDocumentsDisplayMode(): Promise<DataGridDocumentsDisplayMode> {
+    const jsonButton = this.page.getByTestId(DOCUMENTS_DISPLAY_MODE_TEST_SUBJS.JSON);
+    await jsonButton.waitFor({ state: 'visible' });
+
+    return (await jsonButton.getAttribute('aria-pressed')) === 'true' ? 'JSON' : 'Table';
   }
 
   getPageButton(pageIndex: number): Locator {
@@ -329,6 +361,18 @@ export class DataGrid {
     return this.page.testSubj.locator(IN_TABLE_SEARCH_COUNTER_TEST_SUBJ);
   }
 
+  /**
+   * Returns the tree row of a field in a JSON view cell, e.g. `machine.os` for `{ machine: { os } }`.
+   */
+  getJsonTreeItem(rowIndex: number, fieldPath: string): Locator {
+    // Mirrors the JSON tree viewer's node ids, which prefix every key with its length
+    const nodeId = fieldPath
+      .split('.')
+      .reduce((id, key) => `${id}/${key.length}:${key}`, 'json-viewer');
+
+    return this.getCell(rowIndex, '_source').getByTestId(`jsonTreeViewerRow-${nodeId}`);
+  }
+
   async getNumberOfSelectedRows(): Promise<number> {
     const selectedRowsMenu = this.page.testSubj.locator('unifiedDataTableSelectionBtn');
     const hasSelectedRows = await selectedRowsMenu
@@ -345,7 +389,9 @@ export class DataGrid {
 
   async getNumberOfSelectedRowsOnCurrentPage(): Promise<number> {
     return this.page
-      .locator('.euiDataGridRow [data-gridcell-column-id="select"] input[type="checkbox"]:checked')
+      .locator(
+        `${euiSelectors.dataGrid.ROW_SELECTOR} [data-gridcell-column-id="select"] input[type="checkbox"]:checked`
+      )
       .count();
   }
 
@@ -641,6 +687,13 @@ export class DataGrid {
 
     await buttonGroup.waitFor({ state: 'visible' });
     await buttonGroup.locator(`[data-text="${newValue}"]`).click();
+  }
+
+  async setDocumentsDisplayMode(newValue: DataGridDocumentsDisplayMode) {
+    await this.openGridDisplaySettings();
+    await this.page.testSubj.click(DOCUMENTS_DISPLAY_MODE_TEST_SUBJS[newValue]);
+    // Switching the mode remounts the grid, which closes the display settings popover
+    await this.getExpandedDisplaySelectorButton().waitFor({ state: 'hidden' });
   }
 
   async setRowHeight(newValue: DataGridRowHeight, scope: 'row' | 'header' = 'row') {

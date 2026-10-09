@@ -231,4 +231,23 @@ describe('buildExportResultsQuery', () => {
       expect(JSON.stringify((dsl.query as any).bool.filter)).not.toContain('space_id');
     });
   });
+
+  describe('actionId binding', () => {
+    it('adds an action_id term when actionId is set', () => {
+      const dsl = buildExportResultsQuery({ ...baseOptions, actionId: 'test-action' });
+
+      expect((dsl.query as any).bool.filter).toContainEqual({
+        term: { action_id: 'test-action' },
+      });
+    });
+
+    it('adds no action_id term when actionId is unset', () => {
+      const dsl = buildExportResultsQuery({
+        ...baseOptions,
+        baseFilter: 'schedule_id: "s" AND osquery_meta.schedule_execution_count: 1',
+      });
+
+      expect(JSON.stringify((dsl.query as any).bool.filter)).not.toContain('"term"');
+    });
+  });
 });

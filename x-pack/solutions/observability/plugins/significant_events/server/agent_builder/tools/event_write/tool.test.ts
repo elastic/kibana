@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import type { RunContextStackEntry } from '@kbn/agent-builder-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
+import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '../../agents/discovery/discovery';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import { BulkWriteError, MAX_BULK_WRITE_ITEMS } from '../bulk_write';
 import { eventsWriteBulkHandler } from './handler';
@@ -18,17 +21,21 @@ jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
 }));
 
+jest.mock('../../../routes/utils/assert_can_manage_significant_events', () => ({
+  assertCanManageSignificantEvents: jest.fn(),
+}));
+
 jest.mock('./handler', () => ({
   eventsWriteBulkHandler: jest.fn(),
 }));
 
 const input = {
   event_id: 'event-1',
-  status: 'open' as const,
+  status: 'active' as const,
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
-  severity: '60-high' as const,
+  severity: 'high' as const,
   confidence: 0.8,
 };
 
@@ -36,13 +43,14 @@ const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
 
 const createTool = (telemetry: { trackAgentToolEventsWrite: jest.Mock }) => {
   const getScopedClients = jest.fn().mockResolvedValue({
-    getEventClient: jest.fn().mockReturnValue({}),
+    getEventSearchClient: jest.fn().mockReturnValue({}),
     getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
+    getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
     licensing: {},
   });
   return createEventsWriteTool({
     getScopedClients: getScopedClients as unknown as GetScopedClients,
-    server: {} as StreamsServer,
+    server: {} as SignificantEventsServer,
     logger: loggingSystemMock.createLogger(),
     telemetry: telemetry as never,
   });
@@ -53,6 +61,7 @@ describe('events_write tool', () => {
     jest.clearAllMocks();
     getFeatures.mockResolvedValue({ hits: [] });
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    (assertCanManageSignificantEvents as jest.Mock).mockResolvedValue(undefined);
   });
 
   it('enforces the batch bounds', () => {
@@ -132,7 +141,7 @@ describe('events_write tool', () => {
       },
     });
 
-    it('rejects a new open 60-high item whose grounded signals lack a confirms verdict', () => {
+    it('rejects a new active high item whose grounded signals lack a confirms verdict', () => {
       const { event_id: _omitted, ...newEventInput } = input;
       const result = eventsWriteSchema.safeParse({
         items: [{ ...newEventInput, signals: [signalWith('inconclusive')] }],
@@ -143,7 +152,7 @@ describe('events_write tool', () => {
       }
     });
 
-    it('accepts an open 60-high continuation (event_id present) with only inconclusive grounded signals', () => {
+    it('accepts an active high continuation (event_id present) with only inconclusive grounded signals', () => {
       expect(
         eventsWriteSchema.safeParse({
           items: [{ ...input, signals: [signalWith('inconclusive')] }],
@@ -151,7 +160,7 @@ describe('events_write tool', () => {
       ).toBe(true);
     });
 
-    it('accepts an open 60-high item backed by a confirms signal', () => {
+    it('accepts an active high item backed by a confirms signal', () => {
       expect(
         eventsWriteSchema.safeParse({
           items: [{ ...input, signals: [signalWith('confirms')] }],
@@ -159,12 +168,10 @@ describe('events_write tool', () => {
       ).toBe(true);
     });
 
-    it('accepts an open 40-medium item with only inconclusive grounded signals', () => {
+    it('accepts an active medium item with only inconclusive grounded signals', () => {
       expect(
         eventsWriteSchema.safeParse({
-          items: [
-            { ...input, severity: '40-medium' as const, signals: [signalWith('inconclusive')] },
-          ],
+          items: [{ ...input, severity: 'medium' as const, signals: [signalWith('inconclusive')] }],
         }).success
       ).toBe(true);
     });
@@ -191,7 +198,7 @@ describe('events_write tool', () => {
       }
     });
 
-    it('accepts an open 60-high item whose only grounded signal is off_topic (observed-error path)', () => {
+    it('accepts an active high item whose only grounded signal is off_topic (observed-error path)', () => {
       expect(
         eventsWriteSchema.safeParse({
           items: [{ ...input, signals: [signalWith('off_topic')] }],
@@ -199,7 +206,7 @@ describe('events_write tool', () => {
       ).toBe(true);
     });
 
-    it('accepts an open 60-high item whose signals carry no evidence (quiet rules)', () => {
+    it('accepts an active high item whose signals carry no evidence (quiet rules)', () => {
       const quiet = {
         type: 'detection' as const,
         stream_name: 'logs.test',
@@ -226,9 +233,9 @@ describe('events_write tool', () => {
     expect(result.items[0].event_id).toBeUndefined();
   });
 
-  it('accepts 40-medium for known-ongoing events', () => {
+  it('accepts medium for known-ongoing events', () => {
     const result = eventsWriteSchema.safeParse({
-      items: [{ ...input, severity: '40-medium' }],
+      items: [{ ...input, severity: 'medium' }],
     });
 
     expect(result.success).toBe(true);
@@ -240,6 +247,49 @@ describe('events_write tool', () => {
       false
     );
   });
+
+  it.each<{
+    label: string;
+    stack: RunContextStackEntry[];
+    expected: boolean;
+  }>([
+    {
+      label: 'the discovery agent',
+      stack: [{ type: 'agent', agentId: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID }],
+      expected: true,
+    },
+    {
+      label: 'a different agent',
+      stack: [{ type: 'agent', agentId: 'another-agent' }],
+      expected: false,
+    },
+    { label: 'no agent', stack: [], expected: false },
+  ])(
+    'sets rejectUnknownEventIds from trusted run context for $label',
+    async ({ stack, expected }) => {
+      (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+        {
+          index: 0,
+          event_uuid: 'uuid-1',
+          event_id: 'event-1',
+          status: 'open',
+          written: true,
+        },
+      ]);
+      const context = createMockToolContext();
+      context.runContext.stack = stack;
+
+      await invokeHandler(
+        createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+        { source: 'discovery', items: [input] },
+        context
+      );
+
+      expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+        expect.objectContaining({ source: 'discovery', rejectUnknownEventIds: expected })
+      );
+    }
+  );
 
   it('enriches causal features from their Knowledge Indicators', async () => {
     getFeatures.mockImplementation((_streams, options) => {
@@ -289,7 +339,7 @@ describe('events_write tool', () => {
                 stream_name: 'logs.test',
               },
               {
-                feature_id: 'other-feature-uuid',
+                feature_id: 'other-api',
                 name: 'Other API',
                 stream_name: 'logs.test',
               },
@@ -309,23 +359,42 @@ describe('events_write tool', () => {
     );
 
     expect(getFeatures).toHaveBeenCalledWith(['logs.test'], {
-      featureIds: ['checkout-api', 'other-feature-uuid'],
+      featureIds: ['checkout-api', 'other-api'],
       includeExcluded: true,
       includeExpired: true,
     });
-    expect(eventsWriteBulkHandler).toHaveBeenCalledWith({
-      eventClient: {},
-      source: 'discovery',
-      inputs: [
-        expect.objectContaining({
-          causal_features: [
-            expect.objectContaining({ type: 'entity', subtype: 'service' }),
-            expect.objectContaining({ type: 'technology', subtype: 'web_server' }),
-          ],
-          blast_radius: [expect.objectContaining({ type: 'entity', subtype: 'service' })],
-        }),
-      ],
-    });
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventSearchClient: {},
+        source: 'discovery',
+        inputs: [
+          expect.objectContaining({
+            causal_features: [
+              expect.objectContaining({
+                feature_id: 'checkout-api',
+                type: 'entity',
+                subtype: 'service',
+              }),
+              expect.objectContaining({
+                feature_id: 'other-api',
+                type: 'technology',
+                subtype: 'web_server',
+              }),
+            ],
+            blast_radius: [
+              expect.objectContaining({
+                feature_id: 'checkout-api',
+                type: 'entity',
+                subtype: 'service',
+              }),
+            ],
+          }),
+        ],
+      })
+    );
+    expect(assertCanManageSignificantEvents).toHaveBeenCalledWith(
+      expect.objectContaining({ request: expect.anything() })
+    );
   });
 
   it('disambiguates stream-less causal features using the event streams', async () => {
@@ -367,7 +436,7 @@ describe('events_write tool', () => {
 
     expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
       expect.objectContaining({
-        eventClient: {},
+        eventSearchClient: {},
         inputs: [
           expect.objectContaining({
             causal_features: [
@@ -394,7 +463,7 @@ describe('events_write tool', () => {
 
     expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
       expect.objectContaining({
-        eventClient: {},
+        eventSearchClient: {},
         inputs: [expect.objectContaining({ causal_features: causalFeatures })],
       })
     );

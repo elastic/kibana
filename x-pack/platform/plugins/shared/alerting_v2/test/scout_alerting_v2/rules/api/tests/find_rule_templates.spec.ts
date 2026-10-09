@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { DEPLOYMENTS_WITH_ALERTING_V2 } from '../../../common/constants';
 import {
   ALERTING_V2_RULES_READ_ROLE,
   apiTest,
@@ -27,7 +27,7 @@ const getTemplateNames = (items: Array<{ rule: { metadata: { name: string } } }>
  * Rule templates are installed by Fleet packages, so the specs seed the saved
  * objects directly rather than going through a write API.
  */
-apiTest.describe('Find rule templates API', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('Find rule templates API', { tag: DEPLOYMENTS_WITH_ALERTING_V2 }, () => {
   let adminHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {
@@ -200,6 +200,32 @@ apiTest.describe('Find rule templates API', { tag: tags.deploymentAgnostic }, ()
 
       expect(response).toHaveStatusCode(200);
       expect(getTemplateNames(response.body.items)).toStrictEqual(['a-template', 'b-template']);
+    }
+  );
+
+  apiTest(
+    'tags: should exclude templates carrying excluded tags',
+    async ({ apiClient, apiServices }) => {
+      const templates = [
+        { name: 'production-template', tags: ['production'] },
+        { name: 'deprecated-production-template', tags: ['production', 'deprecated'] },
+        { name: 'development-template', tags: ['development'] },
+      ];
+
+      for (const { name, tags: templateTags } of templates) {
+        await apiServices.alertingV2.ruleTemplates.create({
+          id: name,
+          attributes: buildRuleTemplateData({ metadata: { name, tags: templateTags } }),
+        });
+      }
+
+      const response = await apiClient.get(
+        getFindRuleTemplatesUrl({ tags: 'production', excluded_tags: 'deprecated' }),
+        { headers: adminHeaders }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      expect(getTemplateNames(response.body.items)).toStrictEqual(['production-template']);
     }
   );
 

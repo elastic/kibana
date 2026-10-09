@@ -13,6 +13,7 @@ import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { type SignificantEventsWorkflowStatusResult } from '@kbn/significant-events-schema';
 import { installDiscoveryAgents } from '../../agent_builder/agents/discovery';
+import { StatusError } from '../errors/status_error';
 import { WorkflowExecutionService } from './workflow_execution_service';
 
 export interface SignificantEventsDiscoveryRunParams {
@@ -20,6 +21,10 @@ export interface SignificantEventsDiscoveryRunParams {
   spaceId: string;
   /** Ensures the discovery agent profile exists in `spaceId` before a new run. */
   agentBuilder?: AgentBuilderPluginStart;
+  /** Optional strict connector override supplied by the caller. */
+  connectorId?: string;
+  /** Resolves the override or code-owned default to a validated canonical connector ID. */
+  resolveModel: (requestedId?: string) => Promise<string>;
 }
 
 /**
@@ -38,14 +43,33 @@ export class SignificantEventsDiscoveryClient {
     });
   }
 
-  async run({ request, spaceId, agentBuilder }: SignificantEventsDiscoveryRunParams): Promise<{
+  async run({
+    request,
+    spaceId,
+    agentBuilder,
+    connectorId,
+    resolveModel,
+  }: SignificantEventsDiscoveryRunParams): Promise<{
     executionId: string;
     isNew: boolean;
   }> {
-    const lastExecution = await this.workflowExecutionService.getLastExecution(spaceId);
+    // Resolve an explicit model first so an unknown or blocked id is reported even when another
+    // discovery execution is active. Preserve the existing no-override behavior by returning an
+    // active run before resolving the default.
+    const requestedConnectorId = connectorId?.trim() || undefined;
+    const explicitConnectorId =
+      requestedConnectorId !== undefined ? await resolveModel(requestedConnectorId) : undefined;
+    const lastExecution = await this.workflowExecutionService.getLastExecution(spaceId, request);
     if (lastExecution && !isTerminalStatus(lastExecution.status)) {
+      if (requestedConnectorId !== undefined) {
+        throw new StatusError(
+          'A Significant Events discovery run is already active. Wait for it to finish or cancel it before starting another run with an explicit model.',
+          409
+        );
+      }
       return { executionId: lastExecution.id, isNew: false };
     }
+    const resolvedConnectorId = explicitConnectorId ?? (await resolveModel());
 
     // Just-in-time install for manual runs and any space that never went through
     // scheduled-discovery enablement. Idempotent — does not overwrite user edits.
@@ -56,6 +80,7 @@ export class SignificantEventsDiscoveryClient {
 
     const executionId = await this.workflowExecutionService.execute({
       executionSpaceId: spaceId,
+      inputs: { connector_id: resolvedConnectorId },
       request,
     });
     return { executionId, isNew: true };
@@ -73,9 +98,11 @@ export class SignificantEventsDiscoveryClient {
 
   async getStatus({
     spaceId,
+    request,
   }: {
     spaceId: string;
+    request: KibanaRequest;
   }): Promise<SignificantEventsWorkflowStatusResult> {
-    return this.workflowExecutionService.getStatus({ spaceId });
+    return this.workflowExecutionService.getStatus({ spaceId, request });
   }
 }

@@ -61,6 +61,11 @@ const PIN_ACTION_CSS = css`
       opacity: 1;
     }
   }
+  /* the pin action is hidden with opacity, which keeps it in the tab order:
+     reveal it on keyboard focus so it has a visible focus indicator */
+  .flyout_table__pinAction:focus-visible {
+    opacity: 1;
+  }
 `;
 
 export interface TableTabState {

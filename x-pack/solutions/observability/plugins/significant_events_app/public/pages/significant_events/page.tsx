@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiLoadingElastic, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import React, { useCallback, useEffect, useMemo } from 'react';
+import { SIGNIFICANT_EVENTS_TAB } from '../../../common';
 import { useKibana } from '../../hooks/use_kibana';
+import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import { getFormattedError } from '../../util/errors';
+import type { FeatureAvailability } from '../../util/feature_availability';
 import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
 import { useSignificantEventsAppRouter } from '../../hooks/use_significant_events_app_router';
 import { useSignificantEventsAvailability } from '../../hooks/use_significant_events_availability';
@@ -21,6 +24,7 @@ import { RedirectTo } from '../../components/redirect_to';
 import { SignificantEventsNotEnabledPrompt } from '../../components/not_enabled_prompt';
 import {
   SignificantEventsAppHeader,
+  SignificantEventsAppLoading,
   SignificantEventsAppPageTemplate,
 } from '../../components/page_template';
 import {
@@ -31,9 +35,12 @@ import { SignificantEventsPageProvider } from './context/significant_events_page
 import { ONBOARDING_FAILURE_TITLE } from './components/streams_view/translations';
 import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
-import { SettingsTab } from './components/settings/tab';
 import { CortexTab } from './components/cortex/tab';
 import { useCortexEnabled } from './components/cortex/use_cortex';
+import { DecisionTreesTab } from './components/decision_trees/tab';
+import { MemoryTab } from './components/memory/tab';
+import { useDecisionTreesEnabled } from './components/decision_trees/use_decision_trees';
+import { useMemoryEnabled } from './components/memory/use_memory';
 import { DetectionsTab } from './components/detections_tab';
 import { SignificantEventsTab } from './components/significant_events_tab';
 import { RunLimitsBanner } from './components/run_limits_banner';
@@ -43,9 +50,10 @@ const significantEventsTabs = [
   'knowledge_indicators',
   'queries',
   'detections',
-  'significant_events',
+  SIGNIFICANT_EVENTS_TAB,
   'cortex',
-  'settings',
+  'decision_trees',
+  'memory',
 ] as const;
 type SignificantEventsTabId = (typeof significantEventsTabs)[number];
 
@@ -70,17 +78,30 @@ export function SignificantEventsPage() {
     },
   } = useKibana();
 
-  const { canShow, canManage, canConfigure } = getNightshiftCapabilities(nightshift);
+  const { canShow, canManageAndConfigure } = getNightshiftCapabilities(nightshift);
+  const { isDeveloperMode } = useDeveloperMode();
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
-  const isCortexEnabled = useCortexEnabled();
+  const cortexAvailability = useCortexEnabled();
+  const decisionTreesAvailability = useDecisionTreesEnabled();
+  const memoryAvailability = useMemoryEnabled();
+  const isCortexEnabled = cortexAvailability.isEnabled;
+  const isDecisionTreesEnabled = decisionTreesAvailability.isEnabled;
+  const isMemoryEnabled = memoryAvailability.isEnabled;
+
+  // A gated tab reads "off" until its query answers, so wait for the URL tab's own gate
+  // before redirecting; Detections is synchronous and needs no gate.
+  const availabilityGateByTab: Partial<Record<SignificantEventsTabId, FeatureAvailability>> = {
+    cortex: cortexAvailability,
+    memory: memoryAvailability,
+    decision_trees: decisionTreesAvailability,
+  };
   const {
     isBlocked,
     isLoading: isMaintenanceStatusLoading,
     isError: isMaintenanceStatusError,
     status: maintenanceStatus,
   } = useBlocksNewActivity();
-  const showMaintenanceBanners = tab !== 'settings';
 
   const onOnboardingFailed = useCallback(
     (error: string) => {
@@ -98,20 +119,32 @@ export function SignificantEventsPage() {
   const nightshiftLabel = i18n.translate('xpack.significantEventsApp.nightshiftButtonLabel', {
     defaultMessage: 'Nightshift',
   });
+  const settingsLabel = i18n.translate('xpack.significantEventsApp.settingsPage.title', {
+    defaultMessage: 'Settings',
+  });
+  const nightshiftHref = getUrlForApp(NIGHTSHIFT_APP_ID);
+  const settingsHref = getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/settings' });
+  const detectionSettingsHref = getUrlForApp(NIGHTSHIFT_APP_ID, {
+    path: '/settings/detections',
+  });
 
-  const menu = useMemo<AppHeaderMenu>(
-    () => ({
-      items: [
-        {
-          id: 'nightshift',
-          order: 1,
-          label: nightshiftLabel,
-          iconType: 'moon',
-          href: getUrlForApp(NIGHTSHIFT_APP_ID),
-        },
-      ],
-    }),
-    [getUrlForApp, nightshiftLabel]
+  const menu = useMemo<AppHeaderMenu | undefined>(
+    () =>
+      canManageAndConfigure
+        ? {
+            items: [
+              {
+                id: 'settings',
+                order: 1,
+                label: settingsLabel,
+                iconType: 'gear',
+                href: settingsHref,
+                testId: 'nightshiftSettingsLink',
+              },
+            ],
+          }
+        : undefined,
+    [canManageAndConfigure, settingsHref, settingsLabel]
   );
 
   useEffect(() => {
@@ -158,14 +191,15 @@ export function SignificantEventsPage() {
         }),
         href: router.link('/{tab}', { path: { tab: 'detections' } }),
         isSelected: tab === 'detections',
+        badge: { iconType: 'code' },
       },
       {
-        id: 'significant_events',
+        id: SIGNIFICANT_EVENTS_TAB,
         label: i18n.translate('xpack.significantEventsApp.significantEventsTab', {
           defaultMessage: 'Significant Events',
         }),
-        href: router.link('/{tab}', { path: { tab: 'significant_events' } }),
-        isSelected: tab === 'significant_events',
+        href: router.link('/{tab}', { path: { tab: SIGNIFICANT_EVENTS_TAB } }),
+        isSelected: tab === SIGNIFICANT_EVENTS_TAB,
       },
       ...(isCortexEnabled
         ? [
@@ -179,29 +213,44 @@ export function SignificantEventsPage() {
             },
           ]
         : []),
-      {
-        id: 'settings',
-        label: i18n.translate('xpack.significantEventsApp.settingsTab', {
-          defaultMessage: 'Settings',
-        }),
-        href: router.link('/{tab}', { path: { tab: 'settings' } }),
-        isSelected: tab === 'settings',
-      },
+      ...(isMemoryEnabled
+        ? [
+            {
+              id: 'memory',
+              label: i18n.translate('xpack.significantEventsApp.memoryTab', {
+                defaultMessage: 'Memory',
+              }),
+              href: router.link('/{tab}', { path: { tab: 'memory' } }),
+              isSelected: tab === 'memory',
+            },
+          ]
+        : []),
+      ...(isDecisionTreesEnabled
+        ? [
+            {
+              id: 'decision_trees',
+              label: i18n.translate('xpack.significantEventsApp.decisionTreesTab', {
+                defaultMessage: 'Decision Trees',
+              }),
+              href: router.link('/{tab}', { path: { tab: 'decision_trees' } }),
+              isSelected: tab === 'decision_trees',
+            },
+          ]
+        : []),
     ],
-    [tab, router, isCortexEnabled]
+    [tab, router, isCortexEnabled, isMemoryEnabled, isDecisionTreesEnabled]
   );
   const tabs = useMemo(
-    () => allTabs.filter((item) => item.id !== 'settings' || canConfigure),
-    [allTabs, canConfigure]
+    () => allTabs.filter((item) => item.id !== 'detections' || isDeveloperMode),
+    [allTabs, isDeveloperMode]
   );
 
   if (isAvailabilityLoading) {
-    return <EuiLoadingElastic size="xxl" />;
+    return <SignificantEventsAppLoading />;
   }
 
   if (!availability || !availability.available) {
-    const reason =
-      availability && !availability.available ? availability.reason : ('unknown' as const);
+    const reason = availability?.reason ?? 'unknown';
     return (
       <SignificantEventsAppPageTemplate.Body grow>
         <SignificantEventsNotEnabledPrompt reason={reason} />
@@ -209,9 +258,12 @@ export function SignificantEventsPage() {
     );
   }
 
-  // Legacy alias from an earlier tab name; keep until bookmarks are gone.
   if (tab === 'discoveries') {
-    return <RedirectTo path="/{tab}" params={{ path: { tab: 'significant_events' } }} />;
+    return <RedirectTo path="/{tab}" params={{ path: { tab: SIGNIFICANT_EVENTS_TAB } }} />;
+  }
+
+  if (availabilityGateByTab[tab as SignificantEventsTabId]?.isLoading) {
+    return <SignificantEventsAppLoading />;
   }
 
   if (!isValidSignificantEventsTab(tab) || !tabs.some((item) => item.id === tab)) {
@@ -220,10 +272,15 @@ export function SignificantEventsPage() {
 
   return (
     <>
-      <SignificantEventsAppHeader title={pageTitle} menu={menu} tabs={tabs} />
+      <SignificantEventsAppHeader
+        title={pageTitle}
+        back={{ href: nightshiftHref, label: nightshiftLabel }}
+        menu={menu}
+        tabs={tabs}
+      />
       <SignificantEventsPageProvider>
         <SignificantEventsAppPageTemplate.Body grow>
-          {showMaintenanceBanners && isMaintenanceStatusLoading && (
+          {isMaintenanceStatusLoading && (
             <>
               <EuiCallOut
                 announceOnMount
@@ -243,7 +300,7 @@ export function SignificantEventsPage() {
               <EuiSpacer />
             </>
           )}
-          {showMaintenanceBanners && isMaintenanceStatusError && (
+          {isMaintenanceStatusError && (
             <>
               <EuiCallOut
                 announceOnMount
@@ -260,9 +317,9 @@ export function SignificantEventsPage() {
                       'Manual triggers stay disabled until status can be loaded. Open Settings to retry, or refresh the page.',
                   })}
                 </p>
-                {canManage && canConfigure && (
+                {canManageAndConfigure && (
                   <EuiButton
-                    href={router.link('/{tab}', { path: { tab: 'settings' } })}
+                    href={detectionSettingsHref}
                     color="danger"
                     size="s"
                     data-test-subj="significantEventsStatusErrorBannerSettingsLink"
@@ -276,7 +333,7 @@ export function SignificantEventsPage() {
               <EuiSpacer />
             </>
           )}
-          {showMaintenanceBanners && isBlocked && (
+          {isBlocked && (
             <>
               <EuiCallOut
                 announceOnMount
@@ -288,7 +345,7 @@ export function SignificantEventsPage() {
                 })}
               >
                 <p>
-                  {canManage && canConfigure
+                  {canManageAndConfigure
                     ? i18n.translate('xpack.significantEventsApp.pausedBannerBody', {
                         defaultMessage:
                           'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
@@ -306,9 +363,9 @@ export function SignificantEventsPage() {
                     })}
                   </p>
                 )}
-                {canManage && canConfigure && (
+                {canManageAndConfigure && (
                   <EuiButton
-                    href={router.link('/{tab}', { path: { tab: 'settings' } })}
+                    href={detectionSettingsHref}
                     color="warning"
                     size="s"
                     data-test-subj="significantEventsPausedBannerSettingsLink"
@@ -322,7 +379,7 @@ export function SignificantEventsPage() {
               <EuiSpacer />
             </>
           )}
-          {showMaintenanceBanners && <RunLimitsBanner />}
+          <RunLimitsBanner />
           {canShow && (
             <KiGenerationProvider onFailed={onOnboardingFailed}>
               {tab === 'streams' && <StreamsView />}
@@ -331,9 +388,10 @@ export function SignificantEventsPage() {
             </KiGenerationProvider>
           )}
           {tab === 'detections' && <DetectionsTab />}
-          {tab === 'significant_events' && <SignificantEventsTab />}
+          {tab === SIGNIFICANT_EVENTS_TAB && <SignificantEventsTab />}
           {tab === 'cortex' && isCortexEnabled && <CortexTab />}
-          {tab === 'settings' && canConfigure && <SettingsTab />}
+          {tab === 'decision_trees' && isDecisionTreesEnabled && <DecisionTreesTab />}
+          {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
         </SignificantEventsAppPageTemplate.Body>
       </SignificantEventsPageProvider>
     </>

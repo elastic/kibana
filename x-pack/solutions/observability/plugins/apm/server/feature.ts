@@ -37,7 +37,7 @@ export const APM_FEATURE: KibanaFeatureConfig = {
   privileges: {
     all: {
       app: [APM_SERVER_FEATURE_ID, 'ux', 'kibana'],
-      api: [APM_SERVER_FEATURE_ID, 'apm_write', 'rac'],
+      api: [APM_SERVER_FEATURE_ID, 'apm_write', 'rac', 'bulkGetUserProfiles'],
       catalogue: [APM_SERVER_FEATURE_ID],
       savedObject: {
         all: [],
@@ -61,7 +61,7 @@ export const APM_FEATURE: KibanaFeatureConfig = {
     },
     read: {
       app: [APM_SERVER_FEATURE_ID, 'ux', 'kibana'],
-      api: [APM_SERVER_FEATURE_ID, 'rac'],
+      api: [APM_SERVER_FEATURE_ID, 'rac', 'bulkGetUserProfiles'],
       catalogue: [APM_SERVER_FEATURE_ID],
       savedObject: {
         all: [],
