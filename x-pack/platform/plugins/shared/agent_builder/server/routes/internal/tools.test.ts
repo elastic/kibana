@@ -41,6 +41,7 @@ describe('registerInternalToolsRoutes - _list_connectors', () => {
       actionTypeId: MCP_CONNECTOR_ID,
       isPreconfigured: false,
     },
+    { id: 'conn-slack', name: 'Slack', actionTypeId: '.slack', isPreconfigured: false },
   ];
 
   beforeEach(() => {
@@ -109,5 +110,13 @@ describe('registerInternalToolsRoutes - _list_connectors', () => {
     };
 
     expect(result.body.connectors.map((c) => c.actionTypeId)).toEqual(['.github']);
+  });
+
+  it('does not return a non-MCP, AB-incompatible type even when explicitly requested', async () => {
+    const result = (await handler(mockCtx, makeRequest({ type: '.slack' }), mockResponse)) as {
+      body: { connectors: Array<{ actionTypeId: string }> };
+    };
+
+    expect(result.body.connectors).toEqual([]);
   });
 });
