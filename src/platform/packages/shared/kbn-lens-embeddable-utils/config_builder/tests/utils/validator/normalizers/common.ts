@@ -52,7 +52,7 @@ import { toApiFieldSettings } from '../../../../transforms/columns/field_setting
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
-const COMMON_STATE_IGNORE_PATHS = [];
+const COMMON_STATE_IGNORE_PATHS: string[] = [];
 
 export const DEFAULT_LAYER_ID = 'layer_0';
 
