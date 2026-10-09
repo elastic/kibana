@@ -13530,8 +13530,6 @@ paths:
                           tags:
                             - production
                             - infra
-                          template:
-                            id: host-cpu-high
                         no_data:
                           strategy: keep_last
                         query:
@@ -13719,8 +13717,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      template:
-                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -13937,8 +13933,6 @@ paths:
                           tags:
                             - production
                             - infra
-                          template:
-                            id: host-cpu-high
                         no_data:
                           strategy: keep_last
                         query:
@@ -13977,8 +13971,6 @@ paths:
                           tags:
                             - production
                             - infra
-                          template:
-                            id: host-cpu-high
                         no_data:
                           strategy: keep_last
                         query:
@@ -14496,8 +14488,6 @@ paths:
                           tags:
                             - production
                             - infra
-                          template:
-                            id: host-cpu-high
                         no_data:
                           strategy: keep_last
                         query:
@@ -15574,8 +15564,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      template:
-                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -15796,8 +15784,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      template:
-                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -15846,8 +15832,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      template:
-                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -16016,8 +16000,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      template:
-                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -16204,8 +16186,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      template:
-                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -153553,18 +153533,20 @@ components:
           properties:
             builder:
               additionalProperties: false
-              description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
+              description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL; send `null` on PATCH to clear it.
               type: object
               properties:
                 type:
                   description: Rule builder type.
                   maxLength: 64
+                  minLength: 1
                   type: string
               required:
                 - type
             description:
-              description: Human-readable description of the rule.
+              description: Human-readable description of the rule. Omit to leave it unset; send `null` on PATCH to clear it. An empty string is rejected.
               maxLength: 1024
+              minLength: 1
               type: string
             name:
               description: Rule name (must be unique within the space).
