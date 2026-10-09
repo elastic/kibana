@@ -4103,8 +4103,8 @@ importers:
         specifier: 2.6.2
         version: 2.6.2
       handlebars:
-        specifier: 4.7.9
-        version: 4.7.9
+        specifier: 4.7.10
+        version: 4.7.10
       he:
         specifier: 1.2.0
         version: 1.2.0
@@ -18720,8 +18720,8 @@ packages:
   handle-thing@2.0.1:
     resolution: {integrity: sha512-9Qn4yBxelxoh2Ow62nP+Ka/kMnOXRi8BXnRaUwezLNhqelnN49xKz4F/dPP8OYLxLxq6JDtZb2i9XznUQbNPTg==}
 
-  handlebars@4.7.9:
-    resolution: {integrity: sha512-4E71E0rpOaQuJR2A3xDZ+GM1HyWYv1clR58tC8emQNeQe3RH7MAzSbat+V0wG78LQBo6m6bzSG/L4pBuCsgnUQ==}
+  handlebars@4.7.10:
+    resolution: {integrity: sha512-P5VJMVM7qgBn6vjXMw8WG9uVI+ncf2pi72j4de4yz5ZULLj2RGqLYaKOYGsgyrViQ0tePOVlN1tDCCXXtFqXKg==}
     engines: {node: '>=0.4.7'}
     hasBin: true
 
@@ -27427,7 +27427,7 @@ snapshots:
       base64url: 3.0.1
       commander: 12.1.0
       find-my-way-ts: 0.1.6
-      handlebars: 4.7.9
+      handlebars: 4.7.10
       prettier: 2.8.8
 
   '@elastic/request-crypto@2.0.4':
@@ -28874,7 +28874,7 @@ snapshots:
       '@langchain/core': 1.2.3(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.21.3)(zod@4.3.6))(ws@8.21.3)
       '@langchain/openai': 1.5.5(@aws-sdk/credential-provider-node@3.972.70)(@langchain/core@1.2.3(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.21.3)(zod@4.3.6))(ws@8.21.3))(@smithy/signature-v4@5.7.3)(ws@8.21.3)
       '@langchain/textsplitters': 1.0.1(@langchain/core@1.2.3(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.219.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.21.3)(zod@4.3.6))(ws@8.21.3))
-      handlebars: 4.7.9
+      handlebars: 4.7.10
       js-yaml: 5.4.1
       jsonpointer: 5.0.1
       openapi-types: 12.1.3
@@ -33545,7 +33545,7 @@ snapshots:
       dotenv: 17.4.2
       find-up: 8.0.0
       graphql: 16.13.2
-      handlebars: 4.7.9
+      handlebars: 4.7.10
       lodash-es: 4.18.1
       ora: 9.4.1
       p-retry: 7.1.1
@@ -37251,7 +37251,7 @@ snapshots:
 
   handle-thing@2.0.1: {}
 
-  handlebars@4.7.9:
+  handlebars@4.7.10:
     dependencies:
       minimist: 1.2.8
       neo-async: 2.6.2
