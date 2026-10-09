@@ -17,7 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiPanelProps } from '@elastic/eui';
-import { AiButton } from '@kbn/shared-ux-ai-components';
+import { AiButtonEmpty } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
 import type {
   AttentionAssessment,
@@ -26,6 +26,7 @@ import type {
 } from '../../../../../common/entity_analytics/executive_brief/types';
 import { TEST_IDS } from '../test_ids';
 import { buildNextStep, getTopArea } from '../utils/triage_prompts';
+import { buildTrendSummary } from '../utils/trend_summary';
 import type { BriefForTriage } from './attention_area_rows';
 import { useAttentionActions } from './attention_area_rows';
 import { useIsPrintMode } from './brief_context';
@@ -72,11 +73,6 @@ export const ATTENTION_LEVEL_DISPLAY: Record<AttentionLevel, LevelDisplay> = {
 
 export const UNAVAILABLE_LABEL = 'Assessment unavailable for this brief — regenerate';
 
-export const TREND_TEXT: Record<'more' | 'less', string> = {
-  more: '▲ more activity than last period',
-  less: '▼ less activity than last period',
-};
-
 interface AttentionVerdictProps {
   /** Undefined for briefs generated before the assessment existed. */
   assessment?: AssessmentLike;
@@ -106,7 +102,9 @@ export const AttentionVerdict: React.FC<AttentionVerdictProps> = ({
   const { euiTheme } = useEuiTheme();
   const isPrintMode = useIsPrintMode();
   const display = assessment ? ATTENTION_LEVEL_DISPLAY[assessment.level] : undefined;
-  const trend = assessment?.trend;
+  const trendSummary = snapshot
+    ? buildTrendSummary(snapshot.glance.needsAttention, snapshot.timeRange.range)
+    : undefined;
   return (
     <EuiPanel
       color={display?.panelColor ?? 'subdued'}
@@ -137,15 +135,16 @@ export const AttentionVerdict: React.FC<AttentionVerdictProps> = ({
             </h4>
           </EuiTitle>
         </EuiFlexItem>
-        {trend === 'more' || trend === 'less' ? (
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued" data-test-subj="executiveBriefAttentionTrend">
-              {TREND_TEXT[trend]}
-            </EuiText>
-          </EuiFlexItem>
-        ) : null}
       </EuiFlexGroup>
       {children}
+      {trendSummary ? (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued" data-test-subj="executiveBriefAttentionTrend">
+            {`${trendSummary.prefix}: ${trendSummary.changes.map(({ text }) => text).join(' · ')}`}
+          </EuiText>
+        </>
+      ) : null}
       {assessment && snapshot && assessment.level !== 'clear' ? (
         <VerdictNextStep
           assessment={assessment}
@@ -178,37 +177,42 @@ const VerdictNextStep: React.FC<VerdictNextStepProps> = ({
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween" wrap>
+        <EuiFlexItem grow>
           <EuiText size="s" data-test-subj="executiveBriefNextStep">
             <strong>{'Next step: '}</strong>
             {buildNextStep(topArea, snapshot)}
           </EuiText>
         </EuiFlexItem>
         {showActions ? (
-          <>
-            {actions.canTriage ? (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              {actions.canTriage ? (
+                <EuiFlexItem grow={false}>
+                  <AiButtonEmpty
+                    size="s"
+                    iconType="productAgent"
+                    onClick={() => actions.triage(topArea)}
+                    data-test-subj="executiveBriefVerdictTriage"
+                  >
+                    {isWatch ? 'Review with AI Agent' : 'Triage with AI Agent'}
+                  </AiButtonEmpty>
+                </EuiFlexItem>
+              ) : null}
               <EuiFlexItem grow={false}>
-                <AiButton
+                <EuiButtonEmpty
                   size="s"
-                  iconType="productAgent"
-                  onClick={() => actions.triage(topArea)}
-                  data-test-subj="executiveBriefVerdictTriage"
+                  color="text"
+                  iconType="chevronSingleRight"
+                  iconSide="right"
+                  onClick={() => actions.view(topArea)}
+                  data-test-subj="executiveBriefVerdictView"
                 >
-                  {isWatch ? 'Review with AI Agent' : 'Triage with AI Agent'}
-                </AiButton>
+                  {isWatch ? 'View' : VIEW_LABELS[topArea.id]}
+                </EuiButtonEmpty>
               </EuiFlexItem>
-            ) : null}
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                onClick={() => actions.view(topArea)}
-                data-test-subj="executiveBriefVerdictView"
-              >
-                {isWatch ? 'View' : VIEW_LABELS[topArea.id]}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
     </>

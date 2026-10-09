@@ -24,7 +24,6 @@ import {
   STAGE_LABEL,
   STARTING_LABEL,
   formatElapsed,
-  getExpectationCopy,
   getStepStates,
 } from './steps';
 import { useElapsedMs } from './use_elapsed';
@@ -43,7 +42,6 @@ export interface BriefLoadingProps {
 export const BriefLoading: React.FC<BriefLoadingProps> = ({ job }) => {
   const { euiTheme } = useEuiTheme();
   const stage = job?.stage;
-  const isTemplate = job?.params.generator === 'template';
   const elapsedMs = useElapsedMs(job?.startedAt ?? job?.createdAt, true);
   const states = getStepStates(stage);
 
@@ -85,7 +83,7 @@ export const BriefLoading: React.FC<BriefLoadingProps> = ({ job }) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" color="subdued" data-test-subj={BRIEF_LOADING_TEST_IDS.timer}>
-          <p>{`${formatElapsed(elapsedMs)} · ${getExpectationCopy(isTemplate)}`}</p>
+          <p>{formatElapsed(elapsedMs)}</p>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

@@ -53,6 +53,3 @@ export const formatElapsed = (elapsedMs: number): string => {
   const seconds = String(totalSeconds % 60).padStart(2, '0');
   return `${minutes}:${seconds}`;
 };
-
-export const getExpectationCopy = (isTemplate: boolean): string =>
-  isTemplate ? 'usually a few seconds' : 'usually about 30 seconds';

@@ -81,24 +81,14 @@ describe('BriefLoading', () => {
     beforeEach(() => jest.useFakeTimers());
     afterEach(() => jest.useRealTimers());
 
-    it('shows and updates the elapsed time with AI copy', () => {
+    it('shows and updates the elapsed time only', () => {
       const startedAt = new Date(Date.now() - 12_000).toISOString();
       render(<BriefLoading job={makeJob('generate', {}, startedAt)} />);
-      expect(screen.getByTestId(BRIEF_LOADING_TEST_IDS.timer)).toHaveTextContent(
-        '0:12 · usually about 30 seconds'
-      );
+      expect(screen.getByTestId(BRIEF_LOADING_TEST_IDS.timer)).toHaveTextContent(/^0:12$/);
       act(() => {
         jest.advanceTimersByTime(3000);
       });
       expect(screen.getByTestId(BRIEF_LOADING_TEST_IDS.timer)).toHaveTextContent('0:15');
-    });
-
-    it('uses template copy for the template generator', () => {
-      render(<BriefLoading job={makeJob('snapshot', { generator: 'template' })} />);
-      expect(screen.getByTestId(BRIEF_LOADING_TEST_IDS.timer)).toHaveTextContent(
-        'usually a few seconds'
-      );
-      expect(screen.getByTestId(BRIEF_LOADING_TEST_IDS.timer)).not.toHaveTextContent('30 seconds');
     });
   });
 

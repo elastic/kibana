@@ -9,11 +9,8 @@ import type {
   ExecutiveBriefJob,
 } from '../../../../../common/entity_analytics/executive_brief/types';
 import { STATUS_LABELS, areaFullName, sortAreas } from '../components/attention_area_rows';
-import {
-  ATTENTION_LEVEL_DISPLAY,
-  TREND_TEXT,
-  UNAVAILABLE_LABEL,
-} from '../components/attention_verdict';
+import { ATTENTION_LEVEL_DISPLAY, UNAVAILABLE_LABEL } from '../components/attention_verdict';
+import { formatTrendSummary, buildTrendSummary } from './trend_summary';
 import { getEntityByEuid, getStoryline, getTacticName } from './resolve_evidence';
 
 /** Plain-English markdown rendering of a succeeded job, used by "Copy as markdown". */
@@ -37,14 +34,9 @@ export const briefToMarkdown = (job: ExecutiveBriefJob): string => {
   lines.push('## At a glance', '');
   const { assessment } = snapshot.glance;
   if (assessment) {
-    const trend =
-      assessment.trend === 'more' || assessment.trend === 'less'
-        ? TREND_TEXT[assessment.trend]
-        : '';
-    lines.push(
-      `**${ATTENTION_LEVEL_DISPLAY[assessment.level].label}**${trend ? ` (${trend})` : ''}`,
-      ''
-    );
+    const summary = buildTrendSummary(snapshot.glance.needsAttention, snapshot.timeRange.range);
+    lines.push(`**${ATTENTION_LEVEL_DISPLAY[assessment.level].label}**`, '');
+    if (summary) lines.push(formatTrendSummary(summary), '');
   } else {
     lines.push(`**${UNAVAILABLE_LABEL}**`, '');
   }

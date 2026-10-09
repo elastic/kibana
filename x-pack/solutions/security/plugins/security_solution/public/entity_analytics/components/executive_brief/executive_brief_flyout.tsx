@@ -303,10 +303,7 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
                 <p>
                   {`Priority threats, blind spots and recommended decisions for the ${TIME_RANGE_LABEL[
                     timeRange
-                  ].toLowerCase()}. `}
-                  {selection.generator === 'inference'
-                    ? 'Takes about 30 seconds.'
-                    : 'Uses the template generator (no AI); takes a few seconds.'}
+                  ].toLowerCase()}.`}
                 </p>
               }
               actions={

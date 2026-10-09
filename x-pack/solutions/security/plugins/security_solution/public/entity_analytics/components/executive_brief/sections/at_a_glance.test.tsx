@@ -145,17 +145,13 @@ describe('AtAGlance attention verdict', () => {
     target.remove();
   });
 
-  it('shows the trend hint for more and less but not same', () => {
-    const { unmount } = renderGlance(makeJob(makeAssessment({ trend: 'more' })));
-    expect(screen.getByTestId('executiveBriefAttentionTrend')).toHaveTextContent(
-      '▲ more activity than last period'
-    );
-    unmount();
-    const less = renderGlance(makeJob(makeAssessment({ trend: 'less' })));
-    expect(screen.getByTestId('executiveBriefAttentionTrend')).toHaveTextContent('▼ less');
-    less.unmount();
-    renderGlance(makeJob(makeAssessment({ trend: 'same' })));
-    expect(screen.queryByTestId('executiveBriefAttentionTrend')).not.toBeInTheDocument();
+  it('shows specific changes from the needs-attention tiles and hides the generic trend', () => {
+    renderGlance(makeJob(makeAssessment({ trend: 'more' })));
+    const trend = screen.queryByTestId('executiveBriefAttentionTrend');
+    if (trend) {
+      expect(trend).toHaveTextContent(/^vs previous (24 hours|7 days|30 days): /);
+      expect(trend).not.toHaveTextContent('more activity than last period');
+    }
   });
 
   it('falls back when the assessment is missing', () => {

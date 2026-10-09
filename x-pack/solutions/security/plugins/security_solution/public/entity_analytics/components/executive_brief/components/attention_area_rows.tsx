@@ -7,7 +7,7 @@
 import React, { useCallback } from 'react';
 import {
   EuiBadge,
-  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -15,7 +15,6 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { AiButtonIcon } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
 import type {
   AttentionArea,
@@ -176,6 +175,9 @@ const AttentionAreaRow: React.FC<AttentionAreaRowProps> = ({ area, actions }) =>
       css={css`
         padding: ${euiTheme.size.s} ${euiTheme.size.m};
         border-top: ${euiTheme.border.thin};
+        &:hover .executiveBriefRowActions {
+          opacity: 1;
+        }
       `}
     >
       <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
@@ -212,31 +214,45 @@ const AttentionAreaRow: React.FC<AttentionAreaRowProps> = ({ area, actions }) =>
         </EuiFlexItem>
         {showActions ? (
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={() => actions.view(area)}
-                  aria-label={`View ${areaFullName(area.id)}`}
-                  data-test-subj={`executiveBriefAreaView-${area.id}`}
-                >
-                  {'View'}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
+            <EuiFlexGroup
+              gutterSize="xs"
+              alignItems="center"
+              responsive={false}
+              css={css`
+                opacity: 0.55;
+                transition: opacity ${euiTheme.animation.fast} ease-in;
+                &:focus-within {
+                  opacity: 1;
+                }
+              `}
+              className="executiveBriefRowActions"
+            >
               {actions.canTriage ? (
                 <EuiFlexItem grow={false}>
-                  <AiButtonIcon
-                    size="xs"
-                    iconType="productAgent"
-                    variant="empty"
-                    withToolTip
-                    toolTipContent={TRIAGE_LABEL}
-                    aria-label={`${TRIAGE_LABEL}: ${AREA_NAMES[area.id]}`}
-                    onClick={() => actions.triage(area)}
-                    data-test-subj={`executiveBriefAreaTriage-${area.id}`}
-                  />
+                  <EuiToolTip content={TRIAGE_LABEL} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      size="xs"
+                      iconType="sparkles"
+                      color="text"
+                      aria-label={`${TRIAGE_LABEL}: ${AREA_NAMES[area.id]}`}
+                      onClick={() => actions.triage(area)}
+                      data-test-subj={`executiveBriefAreaTriage-${area.id}`}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               ) : null}
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content="View details" disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    size="xs"
+                    iconType="chevronSingleRight"
+                    color="text"
+                    onClick={() => actions.view(area)}
+                    aria-label={`View ${areaFullName(area.id)}`}
+                    data-test-subj={`executiveBriefAreaView-${area.id}`}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         ) : null}
