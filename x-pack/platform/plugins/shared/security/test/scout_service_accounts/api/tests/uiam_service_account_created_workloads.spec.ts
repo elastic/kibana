@@ -32,7 +32,7 @@ interface RuleResponse {
 }
 
 interface ExecutionLog {
-  data: Array<{ status: string; num_active_alerts: number }>;
+  data: Array<{ status: string }>;
 }
 
 /** The credentials a workload's saved object holds. Both values are encrypted at rest. */
@@ -83,17 +83,34 @@ apiTest.describe(
       [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_GATEWAY_SHARED_SECRET,
     });
 
-    /** Reads the credentials a rule or task saved object holds, straight from its index. */
+    /**
+     * Reads the credentials a rule or task saved object holds, straight from its index. Task
+     * Manager doesn't refresh its index when it schedules a task, so this waits for the document.
+     */
     const getStoredCredentials = async (
       type: 'alert' | 'task',
       id: string
     ): Promise<StoredCredentials> => {
-      const { hits } = await systemEsClient.search<Record<string, StoredCredentials>>(
-        { index: '.kibana*', query: { ids: { values: [`${type}:${id}`] } } },
-        { headers: SYSTEM_INDICES_HEADERS }
-      );
-      expect(hits.hits).toHaveLength(1);
-      const { apiKey, uiamApiKey } = hits.hits[0]._source?.[type] ?? {};
+      let stored: StoredCredentials | undefined;
+      await expect
+        .poll(
+          async () => {
+            // Task Manager's index is hidden, so the wildcard has to expand to hidden indices too.
+            const { hits } = await systemEsClient.search<Record<string, StoredCredentials>>(
+              {
+                index: '.kibana*',
+                expand_wildcards: 'all',
+                query: { ids: { values: [`${type}:${id}`] } },
+              },
+              { headers: SYSTEM_INDICES_HEADERS }
+            );
+            stored = hits.hits[0]?._source?.[type];
+            return hits.hits.length;
+          },
+          { timeout: 10_000, message: `No saved object for ${type} ${id}` }
+        )
+        .toBe(1);
+      const { apiKey, uiamApiKey } = stored ?? {};
       return { apiKey, uiamApiKey };
     };
 
@@ -103,8 +120,10 @@ apiTest.describe(
     };
 
     /**
-     * Runs the rule now and returns its first successful run. The index holds one document, so a
-     * run that could read it reports one active alert.
+     * Runs the rule now and waits for a successful run. The rule holds no Elasticsearch key, so a
+     * run only succeeds when its UIAM key authenticates. It doesn't check the alert count: the
+     * local serverless stack can't resolve linked projects, so the rule finds nothing whoever
+     * created it.
      */
     const runRule = async (
       kbnClient: KbnClient,
@@ -113,7 +132,6 @@ apiTest.describe(
     ) => {
       const dateStart = new Date().toISOString();
       await runSoon(ruleId);
-      let runs: ExecutionLog['data'] = [];
       await expect
         .poll(
           async () => {
@@ -122,13 +140,11 @@ apiTest.describe(
               path: `/internal/alerting/rule/${ruleId}/_execution_log`,
               query: { date_start: dateStart, per_page: 10 },
             });
-            runs = data.data;
-            return runs.map(({ status }) => status);
+            return data.data.map(({ status }) => status);
           },
           { timeout: 120_000, intervals: [2_000], message: `Rule ${ruleId} did not run` }
         )
         .toContain('success');
-      return runs.find(({ status }) => status === 'success');
     };
 
     apiTest.beforeAll(async ({ esClient, config }) => {
@@ -192,9 +208,7 @@ apiTest.describe(
         expect(rule.api_key_owner).toBe(accountId);
         expectUiamKeyOnly(await getStoredCredentials('alert', rule.id));
 
-        expect(await runRule(kbnClient, apiServices.alerting.rules.runSoon, rule.id)).toMatchObject(
-          { num_active_alerts: 1 }
-        );
+        await runRule(kbnClient, apiServices.alerting.rules.runSoon, rule.id);
 
         // The rule keeps its own key after the account that created it is gone.
         const deleted = await apiClient.delete(`${serviceAccountPath(accountId)}?force=true`, {
@@ -202,9 +216,7 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(deleted).toHaveStatusCode(200);
-        expect(await runRule(kbnClient, apiServices.alerting.rules.runSoon, rule.id)).toMatchObject(
-          { num_active_alerts: 1 }
-        );
+        await runRule(kbnClient, apiServices.alerting.rules.runSoon, rule.id);
       }
     );
 
@@ -251,9 +263,7 @@ apiTest.describe(
         expect(body.api_key_owner).toBe(accountId);
         expectUiamKeyOnly(await getStoredCredentials('alert', body.id));
 
-        expect(await runRule(kbnClient, apiServices.alerting.rules.runSoon, body.id)).toMatchObject(
-          { num_active_alerts: 1 }
-        );
+        await runRule(kbnClient, apiServices.alerting.rules.runSoon, body.id);
       }
     );
 
