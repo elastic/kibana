@@ -12,26 +12,6 @@
 // "areas" entries must each be one of @kbn/code-owners CODE_OWNER_AREAS.
 [
   {
-    "id": "actionable-obs",
-    "name": "Obs UX: Actionable Obs",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/actionable-obs-team",
-      "label": "Team:actionable-obs"
-    },
-    "responsibilities": [
-      "Observability Alerts",
-      "SLOs",
-      "Observability Cases",
-      "Exploratory view",
-      "Synthetics",
-      "Uptime",
-      "User Experience Dashboard"
-    ]
-  },
-  {
     "id": "apm-ui",
     "name": "Apm Ui",
     "github": {
@@ -101,6 +81,16 @@
     ],
     "github": {
       "team": "elastic/context-eng"
+    }
+  },
+  {
+    "id": "alertzero-common-layer",
+    "name": "AlertZero Common Layer",
+    "areas": [
+      "security"
+    ],
+    "github": {
+      "team": "elastic/alertzero-common-layer"
     }
   },
   {
@@ -497,6 +487,18 @@
     }
   },
   {
+    "id": "nightshift",
+    "name": "Nightshift",
+    "areas": ["observability"],
+    "github": {
+      "team": "elastic/nightshift",
+      "label": "Team:nightshift"
+    },
+    "responsibilities": [
+      "Nightshift"
+    ]
+  },
+  {
     "id": "nightshift-context-and-research",
     "name": "Nightshift Context & Research",
     "areas": [
@@ -651,32 +653,6 @@
       "Service maps",
       "APM data access"
     ]
-  },
-  {
-    "id": "obs-signals-ai-o11y",
-    "name": "Obs Signals AI O11y",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/obs-signals-ai-o11y",
-      "label": "Team:obs-signals-ai-o11y"
-    },
-    "responsibilities": [
-      "GenAI tab",
-      "AI observability"
-    ]
-  },
-  {
-    "id": "obs-ux-management-team",
-    "name": "Obs Ux Management Team",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/obs-ux-management-team",
-      "label": "Team:obs-ux-management"
-    }
   },
   {
     "id": "observability-bi",

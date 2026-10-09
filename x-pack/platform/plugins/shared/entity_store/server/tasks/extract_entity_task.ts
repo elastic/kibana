@@ -132,6 +132,13 @@ async function bootstrapNonPriorityTask({
       return;
     }
 
+    // The non-priority process has its own lifecycle. `PUT /internal/security/entity_store/stop`
+    // with `process: nonPriority` removes only that task, so a tick of the still-running priority
+    // task must not schedule it again.
+    if (descriptor.nonPriorityStatus === ENGINE_STATUS.STOPPED) {
+      return;
+    }
+
     const { frequency } = getMergedConfig(
       entityType,
       globalOverrides,

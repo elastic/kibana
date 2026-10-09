@@ -6,6 +6,7 @@
  */
 
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
+import { useObservedServiceDetails } from './observed_service_details';
 import { TestProviders } from '../../../../common/mock';
 import { renderHook, act } from '@testing-library/react';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
@@ -68,5 +69,43 @@ describe('useUserDetails', () => {
     act(() => rerender());
     expect(mockUseSearchStrategy).toHaveBeenCalledTimes(2);
     expect(mockUseSearchStrategy.mock.calls[1][0].abort).toEqual(true);
+  });
+});
+
+describe('useObservedServiceDetails', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseSearchStrategy.mockReturnValue({
+      loading: false,
+      result: { serviceDetails: {} },
+      search: mockSearch,
+      refetch: jest.fn(),
+      inspect: {},
+    });
+  });
+
+  it('labels the search with the entity details flyout execution context', () => {
+    renderHook(
+      () =>
+        useObservedServiceDetails({
+          endDate: defaultProps.endDate,
+          startDate: defaultProps.startDate,
+          indexNames: defaultProps.indexNames,
+          serviceName: 'my-service',
+        }),
+      { wrapper: TestProviders }
+    );
+
+    expect(mockUseSearchStrategy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:entity_details_flyout',
+            id: 'service_observed_details',
+          },
+        },
+      })
+    );
   });
 });

@@ -67,7 +67,7 @@ export const CANCEL = i18n.translate('xpack.alertingV2.episodesUi.tagsAction.can
 export const RESOLVE_ACTION_REASON = i18n.translate(
   'xpack.alertingV2.episodesUi.resolveAction.reason',
   {
-    defaultMessage: 'Updated from episodes actions UI',
+    defaultMessage: 'Updated from alerts actions UI',
   }
 );
 
@@ -77,7 +77,7 @@ export const BULK_ERROR_TOAST = i18n.translate('xpack.alertingV2Episodes.actions
 
 export const getBulkSuccessToast = (processed: number): string =>
   i18n.translate('xpack.alertingV2Episodes.actions.bulkSuccessToast', {
-    defaultMessage: '{processed, plural, one {# episode} other {# episodes}} updated successfully.',
+    defaultMessage: '{processed, plural, one {# alert} other {# alerts}} updated successfully.',
     values: { processed },
   });
 
@@ -91,7 +91,7 @@ export const BULK_NO_CHANGES_TOAST = i18n.translate(
 export const getBulkPartialSuccessToast = (processed: number, total: number): string =>
   i18n.translate('xpack.alertingV2Episodes.actions.bulkPartialSuccessToast', {
     defaultMessage:
-      '{processed} of {total} {total, plural, one {episode} other {episodes}} updated successfully.',
+      '{processed} of {total} {total, plural, one {alert} other {alerts}} updated successfully.',
     values: { processed, total },
   });
 
