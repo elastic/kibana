@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomBytes } from 'crypto';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
@@ -15,6 +16,7 @@ import {
   bulkIndex,
   scriptsDataDir,
 } from './indexing';
+import { getStatusCode } from './type_guards';
 
 /**
  * Correlates a Technology Watch pack's cloud/SaaS telemetry to a Fleet-enrolled endpoint so
@@ -47,30 +49,56 @@ const PROCESS_MAPPING_PATH = scriptsDataDir('episodes', 'attacks', 'mapping.json
  */
 const SYSTEM_INDICES_ROLE = 'data-generator-system-indices';
 const SYSTEM_INDICES_USER = 'data-generator-system-indices';
-const SYSTEM_INDICES_PASSWORD = 'data-generator-system-indices-changeme';
 
-const ensureSystemIndicesUser = async (esClient: Client): Promise<void> => {
-  await esClient.security.putRole({
-    name: SYSTEM_INDICES_ROLE,
-    indices: [{ names: [AGENTS_INDEX], privileges: ['all'], allow_restricted_indices: true }],
-  });
-  await esClient.security.putUser({
-    username: SYSTEM_INDICES_USER,
-    password: SYSTEM_INDICES_PASSWORD,
-    roles: [SYSTEM_INDICES_ROLE],
-  });
-};
+type SystemIndicesAuth = { headers: { authorization: string } };
 
 /**
- * `TransportRequestOptions` has no `auth` override in this client version, so the
- * per-request identity swap goes through a manual Basic-auth header instead.
+ * Creates a short-lived native role/user with restricted-index write access, then returns
+ * Basic-auth headers. Password is random per call and the account is deleted in
+ * `releaseSystemIndicesUser` so nothing with a checked-in credential is left behind.
+ * Returns null when security management APIs are unavailable (Serverless / API-key-only).
  */
-const systemIndicesAuth = {
-  headers: {
-    authorization: `Basic ${Buffer.from(
-      `${SYSTEM_INDICES_USER}:${SYSTEM_INDICES_PASSWORD}`
-    ).toString('base64')}`,
-  },
+const acquireSystemIndicesAuth = async (
+  esClient: Client,
+  log: ToolingLog
+): Promise<SystemIndicesAuth | null> => {
+  const password = `dg-${randomBytes(24).toString('hex')}`;
+  try {
+    await esClient.security.putRole({
+      name: SYSTEM_INDICES_ROLE,
+      indices: [{ names: [AGENTS_INDEX], privileges: ['all'], allow_restricted_indices: true }],
+    });
+    await esClient.security.putUser({
+      username: SYSTEM_INDICES_USER,
+      password,
+      roles: [SYSTEM_INDICES_ROLE],
+    });
+  } catch (e) {
+    const status = getStatusCode(e);
+    log.warning(
+      `Pack host correlation: cannot create restricted-index user ` +
+        `(status ${status ?? 'unknown'}). Skipping .fleet-agents seed ` +
+        `(Serverless / API-key runs without security-management privileges). ` +
+        `Process telemetry still seeds when configured. Detail: ${String(e)}`
+    );
+    return null;
+  }
+  return {
+    headers: {
+      authorization: `Basic ${Buffer.from(`${SYSTEM_INDICES_USER}:${password}`).toString('base64')}`,
+    },
+  };
+};
+
+const releaseSystemIndicesUser = async (esClient: Client, log: ToolingLog): Promise<void> => {
+  try {
+    await esClient.security.deleteUser({ username: SYSTEM_INDICES_USER }, { ignore: [404] });
+    await esClient.security.deleteRole({ name: SYSTEM_INDICES_ROLE }, { ignore: [404] });
+  } catch (e) {
+    log.warning(
+      `Pack host correlation: failed to remove temporary restricted-index user/role: ${String(e)}`
+    );
+  }
 };
 
 export interface PackHostCorrelationProcessNode {
@@ -379,35 +407,51 @@ export const buildProcessDoc = (
 });
 
 /**
- * Anchor timestamp for the process burst: 3 days before `endMs`, well inside the
- * historic hunt window and close enough to "now" to read as recent in a live demo.
+ * Anchor timestamp for the process burst. Prefer 3 days before `endMs` (recent in a
+ * live demo, still inside a typical historic hunt window). When the generate window is
+ * shorter than that, clamp into `[startMs, endMs)` so time-bounded hunts still see the fixtures.
  */
-const resolveAnchorMs = (endMs: number): number => endMs - 3 * 24 * 60 * 60 * 1000;
+export const resolveProcessAnchorMs = (startMs: number, endMs: number): number => {
+  if (endMs <= startMs) {
+    throw new Error(`Invalid host-correlation window: endMs (${endMs}) must be after startMs (${startMs})`);
+  }
+  const preferred = endMs - 3 * 24 * 60 * 60 * 1000;
+  if (preferred >= startMs) return preferred;
+  return startMs + Math.floor((endMs - startMs) / 2);
+};
 
 export const seedPackHostCorrelation = async ({
   esClient,
   log,
+  startMs,
   endMs,
   config,
 }: {
   esClient: Client;
   log: ToolingLog;
+  startMs: number;
   endMs: number;
   config: PackHostCorrelationConfig;
 }): Promise<void> => {
-  await ensureSystemIndicesUser(esClient);
-  await esClient.index(
-    {
-      index: AGENTS_INDEX,
-      id: config.agentId,
-      document: buildFleetAgentDoc(config),
-      refresh: true,
-    },
-    systemIndicesAuth
-  );
-  log.info(
-    `${config.packId} host correlation: seeded Fleet agent ${config.agentId} for host ${config.hostName}`
-  );
+  const auth = await acquireSystemIndicesAuth(esClient, log);
+  if (auth) {
+    try {
+      await esClient.index(
+        {
+          index: AGENTS_INDEX,
+          id: config.agentId,
+          document: buildFleetAgentDoc(config),
+          refresh: true,
+        },
+        auth
+      );
+      log.info(
+        `${config.packId} host correlation: seeded Fleet agent ${config.agentId} for host ${config.hostName}`
+      );
+    } finally {
+      await releaseSystemIndicesUser(esClient, log);
+    }
+  }
 
   if (!config.processTree || config.processTree.length === 0) {
     return;
@@ -416,7 +460,7 @@ export const seedPackHostCorrelation = async ({
   const index = episodeIndexNames({ episodeId: config.episodeId, endMs }).endpointEvents;
   await ensureIndex({ esClient, index, mappingPath: PROCESS_MAPPING_PATH, log });
 
-  const anchorMs = resolveAnchorMs(endMs);
+  const anchorMs = resolveProcessAnchorMs(startMs, endMs);
   const docs = config.processTree.map((node) => buildProcessDoc(config, node, anchorMs));
   await bulkIndex({ esClient, index, docs, log });
   await esClient.indices.refresh({ index });
@@ -438,16 +482,24 @@ export const cleanPackHostCorrelation = async ({
   endMs: number;
   config: PackHostCorrelationConfig;
 }): Promise<void> => {
-  try {
-    await ensureSystemIndicesUser(esClient);
-    await esClient.delete(
-      { index: AGENTS_INDEX, id: config.agentId },
-      { ...systemIndicesAuth, ignore: [404] }
-    );
-    log.info(`--clean: deleted ${config.packId} host correlation Fleet agent (if present).`);
-  } catch (e) {
+  const auth = await acquireSystemIndicesAuth(esClient, log);
+  if (auth) {
+    try {
+      await esClient.delete(
+        { index: AGENTS_INDEX, id: config.agentId },
+        { ...auth, ignore: [404] }
+      );
+      log.info(`--clean: deleted ${config.packId} host correlation Fleet agent (if present).`);
+    } catch (e) {
+      log.warning(
+        `--clean: failed to delete ${config.packId} host correlation Fleet agent: ${String(e)}`
+      );
+    } finally {
+      await releaseSystemIndicesUser(esClient, log);
+    }
+  } else {
     log.warning(
-      `--clean: failed to delete ${config.packId} host correlation Fleet agent: ${String(e)}`
+      `--clean: skipped ${config.packId} Fleet agent delete (no restricted-index credentials).`
     );
   }
 

@@ -119,19 +119,22 @@ describe('episodes fixtures', () => {
 });
 
 describe('stampEpisodeCloudAccountIds', () => {
-  it('stamps cloud.account.id onto ep1 docs', () => {
-    const doc: Record<string, unknown> = { host: { name: 'h' } };
+  it('pins WIN-ANALYST01 and cloud.account.id onto ep1 docs for the DC2 join', () => {
+    const doc: Record<string, unknown> = { host: { name: 'other-host' }, user: { name: 'u' } };
     stampEpisodeCloudAccountIds(doc, 'ep1');
     expect(doc.cloud).toEqual({ account: { id: '123456789012' } });
+    expect(doc.host).toMatchObject({ name: 'WIN-ANALYST01', hostname: 'WIN-ANALYST01' });
+    expect(doc.user).toEqual({ name: 'u' });
   });
 
   it('leaves docs from other episodes untouched', () => {
     const doc: Record<string, unknown> = { host: { name: 'h' } };
     stampEpisodeCloudAccountIds(doc, 'ep2');
     expect(doc.cloud).toBeUndefined();
+    expect(doc.host).toEqual({ name: 'h' });
   });
 
-  it('preserves existing cloud fields and other host/user fields', () => {
+  it('preserves existing cloud fields while re-pinning the join host', () => {
     const doc: Record<string, unknown> = {
       host: { name: 'WIN-ANALYST01' },
       user: { name: 'dev-user' },
@@ -143,7 +146,7 @@ describe('stampEpisodeCloudAccountIds', () => {
       region: 'us-east-1',
       account: { id: '123456789012' },
     });
-    expect(doc.host).toEqual({ name: 'WIN-ANALYST01' });
+    expect(doc.host).toMatchObject({ name: 'WIN-ANALYST01' });
     expect(doc.user).toEqual({ name: 'dev-user' });
   });
 
@@ -153,5 +156,6 @@ describe('stampEpisodeCloudAccountIds', () => {
     };
     stampEpisodeCloudAccountIds(doc, 'ep1');
     expect(doc.cloud).toEqual({ provider: 'aws', account: { id: '123456789012' } });
+    expect(doc.host).toMatchObject({ name: 'WIN-ANALYST01' });
   });
 });

@@ -1164,7 +1164,13 @@ export const cli = () => {
         for (const packId of packIds) {
           const hostCorrelationConfig = PACK_HOST_CORRELATION_CONFIGS[packId];
           if (hostCorrelationConfig) {
-            await seedPackHostCorrelation({ esClient, log, endMs, config: hostCorrelationConfig });
+            await seedPackHostCorrelation({
+              esClient,
+              log,
+              startMs,
+              endMs,
+              config: hostCorrelationConfig,
+            });
           }
         }
 

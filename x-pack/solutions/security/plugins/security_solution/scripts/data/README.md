@@ -44,7 +44,7 @@ Each pack has `events.ndjson`, matching `hunts.ts`, and `provenance.json`.
 
 **Not included in this MVP:** FortiGate and Exchange (no scenarios in that app to port yet). Revisit when they exist.
 
-Packs land in **`logs-<dataset>-default` data streams** (e.g. `logs-okta.system-default`), the shape a Fleet integration produces, so `_resolve/index` and Hunt Watch discovery see them as integration data. Each pack gets a composable template (`data-generator-pack-<dataset>`, priority 250, `data_stream: {}`, composed of `logs@mappings`, `logs@settings`, `ecs@mappings`) and bulk writes use `create`. `--clean` deletes the data stream, then the template, then any dotted `logs-<dataset>.<YYYY.MM.DD>` or `logs-generator.*` indices left by older runs.
+Packs land in **`logs-<dataset>-default` data streams** (e.g. `logs-okta.system-default`), the shape a Fleet integration produces, so `_resolve/index` and Hunt Watch discovery see them as integration data. Each pack gets a composable template (`data-generator-pack-<dataset>`, priority 250, `data_stream: {}`, composed of `logs@mappings`, `logs@settings`, `ecs@mappings`) and bulk writes use `create`. `--clean` deletes the data stream, then the template, then any dotted `logs-<dataset>.<YYYY.MM.DD>` or `logs-generator.*` indices left by older runs. Use `--clean` on dedicated demo/dev clusters only: it wipes the whole integration-shaped stream, not just tagged generator docs.
 
 Light fidelity check: docs index cleanly, pack hunts fire in preview (logged; noisy on unexpected 0), provenance says `authored` + pinned integration/version.
 

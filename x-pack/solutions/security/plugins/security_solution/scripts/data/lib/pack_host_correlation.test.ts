@@ -9,6 +9,7 @@ import {
   buildFleetAgentDoc,
   buildProcessDoc,
   PACK_HOST_CORRELATION_CONFIGS,
+  resolveProcessAnchorMs,
 } from './pack_host_correlation';
 
 describe('aws-iam host correlation config', () => {
@@ -95,6 +96,24 @@ describe('okta host correlation config', () => {
         process: { entity_id: node.entityId, parent: { name: node.parent?.name } },
       });
     }
+  });
+});
+
+describe('resolveProcessAnchorMs', () => {
+  const day = 24 * 60 * 60 * 1000;
+
+  it('prefers three days before endMs when the window is long enough', () => {
+    const endMs = Date.parse('2026-07-21T00:00:00.000Z');
+    const startMs = endMs - 30 * day;
+    expect(resolveProcessAnchorMs(startMs, endMs)).toBe(endMs - 3 * day);
+  });
+
+  it('clamps into the requested window when the window is shorter than three days', () => {
+    const endMs = Date.parse('2026-07-21T00:00:00.000Z');
+    const startMs = endMs - day;
+    expect(resolveProcessAnchorMs(startMs, endMs)).toBe(startMs + Math.floor(day / 2));
+    expect(resolveProcessAnchorMs(startMs, endMs)).toBeGreaterThanOrEqual(startMs);
+    expect(resolveProcessAnchorMs(startMs, endMs)).toBeLessThan(endMs);
   });
 });
 
