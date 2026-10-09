@@ -40,9 +40,10 @@ const CLOSED_DECIDED_WITHIN_HOURS = 72;
 /**
  * Breaks every tie the timestamps leave, so a row cannot move between two offset
  * pages and be shown twice or skipped. Unique per live proposal: `create` roots a
- * chain at its own id, `revise` numbers it, and the one other pair that shares both
- * — an original and its clone — never appear together, since both queues exclude
- * superseded records.
+ * chain at its own id, `revise` numbers it. An original and its clone share both,
+ * and can now sit together in the closed queue (a failed original stays visible
+ * after being replaced); the `createdAt` that precedes this in the closed sort
+ * separates them, since the clone is created later.
  */
 const TIEBREAKER: SortCombinations[] = [
   { rootProposalId: { order: 'asc' } },
@@ -94,7 +95,10 @@ export class ConversationProposalsService {
         // The index is shared with every other solution's proposals, and only
         // this filter keeps theirs out of an AlertZero queue.
         origin: ALERTZERO_PROPOSAL_ORIGIN,
-        excludeSuperseded: true,
+        // Superseded records stay: a failed action is replaced by a retry, and the
+        // failed attempt is the one that was decided. Undecided superseded records
+        // (revisions) carry no `decidedAt`, so the window above already drops them.
+        excludeSuperseded: false,
         excludeExpired: false,
         size,
         from,

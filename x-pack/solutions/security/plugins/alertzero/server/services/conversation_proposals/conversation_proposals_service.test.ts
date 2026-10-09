@@ -449,7 +449,7 @@ describe('ConversationProposalsService', () => {
       expect(proposalsService.list).toHaveBeenCalledWith(
         expect.objectContaining({
           decidedWithinHours: 72,
-          excludeSuperseded: true,
+          excludeSuperseded: false,
           size: 25,
           from: 0,
         }),
