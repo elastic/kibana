@@ -51,7 +51,7 @@ export const EvidenceChip: React.FC<{ id: EvidenceId }> = ({ id }) => {
       return isNewFlyoutEnabled ? (
         <EuiBadge
           color="hollow"
-          iconType="securitySignal"
+          iconType="securitySignalDetected"
           onClick={() => openRuleFlyout({ ruleId: entry.ruleId, title: entry.name })}
           onClickAriaLabel={`Open rule ${entry.name}`}
           data-test-subj="executiveBriefRuleChip"
@@ -59,7 +59,7 @@ export const EvidenceChip: React.FC<{ id: EvidenceId }> = ({ id }) => {
           {entry.name}
         </EuiBadge>
       ) : (
-        <EuiBadge color="hollow" iconType="securitySignal">
+        <EuiBadge color="hollow" iconType="securitySignalDetected">
           {entry.name}
         </EuiBadge>
       );
@@ -71,7 +71,7 @@ export const EvidenceChip: React.FC<{ id: EvidenceId }> = ({ id }) => {
       );
     case 'lead':
       return (
-        <EuiBadge color="hollow" iconType="lightbulb">
+        <EuiBadge color="hollow" iconType="bulb">
           {entry.title}
         </EuiBadge>
       );
@@ -86,14 +86,14 @@ export const EvidenceChip: React.FC<{ id: EvidenceId }> = ({ id }) => {
       );
     case 'tactic':
       return (
-        <EuiBadge color="hollow" iconType="crosshairs">
+        <EuiBadge color="hollow" iconType="crosshair">
           {getTacticName(snapshot, entry.tacticId)}
         </EuiBadge>
       );
     case 'gap': {
       const gap = snapshot.blindSpots.gaps.find(({ signal }) => signal === entry.signal);
       return (
-        <EuiBadge color="hollow" iconType="eyeClosed">
+        <EuiBadge color="hollow" iconType="eyeSlash">
           {gap?.title ?? id}
         </EuiBadge>
       );

@@ -223,7 +223,7 @@ export const StorylineCard: React.FC<StorylineCardProps> = ({
           {isNewFlyoutEnabled && focal && (
             <EuiButtonEmpty
               size="xs"
-              iconType="popout"
+              iconType="external"
               onClick={openGraphView}
               data-test-subj="executiveBriefOpenGraph"
             >
