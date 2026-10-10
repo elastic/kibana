@@ -355,6 +355,20 @@ describe('retainMonitors', () => {
     expect(httpClient.supportsRetain(location.id)).toBe(true);
   });
 
+  it('returns only the monitors an internal error lists, and still logs the error', async () => {
+    const logger = loggerMock.create();
+    rejectWith(500, {
+      status: 500,
+      reason: 'failed to sync monitors',
+      failed_monitors: [{ id: 'http-monitor', message: 'malformed cached configuration' }],
+    });
+
+    const failedIds = await retain(createClient(logger));
+
+    expect(failedIds).toEqual(['http-monitor']);
+    expect(logger.error).toHaveBeenCalled();
+  });
+
   describe('against a service without the endpoint', () => {
     it.each([404, 405])('treats a %s without failed monitors as unsupported', async (status) => {
       const logger = loggerMock.create();

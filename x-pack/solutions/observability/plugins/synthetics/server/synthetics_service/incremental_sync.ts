@@ -41,6 +41,7 @@ export interface SyncFingerprintInputs {
   kibanaUrl?: string;
   esHosts: string[];
   apiKeyId: string;
+  serviceLocationIds: string[];
   /** See {@link getParamsVersion}. */
   paramsVersion: string;
   maintenanceWindows: Array<{ id: string; updatedAt: string }>;
@@ -53,18 +54,23 @@ export interface SyncFingerprintInputs {
  */
 export const getSyncFingerprint = ({
   maintenanceWindows,
+  serviceLocationIds,
   ...inputs
 }: SyncFingerprintInputs): string =>
   createHash('sha256')
     .update(
       JSON.stringify({
         ...inputs,
+        serviceLocationIds: [...serviceLocationIds].sort(),
         maintenanceWindows: [...maintenanceWindows].sort((a, b) => a.id.localeCompare(b.id)),
       })
     )
     .digest('hex');
 
-/** The number of global params and the time the latest one was saved, without decrypting them. */
+/**
+ * Digest of when each global param was last saved, without decrypting them. Covers every param
+ * rather than only the latest save, which a node with a clock behind another's would not move.
+ */
 export const getParamsVersion = async (soClient: ISavedObjectsRepository): Promise<string> => {
   const finder = soClient.createPointInTimeFinder({
     type: syntheticsParamType,
@@ -73,19 +79,15 @@ export const getParamsVersion = async (soClient: ISavedObjectsRepository): Promi
     fields: ['key'],
   });
 
-  let count = 0;
-  let latestUpdatedAt = '';
+  const versions: string[] = [];
   for await (const { saved_objects: params } of finder.find()) {
-    for (const { updated_at: updatedAt } of params) {
-      count++;
-      if (updatedAt && updatedAt > latestUpdatedAt) {
-        latestUpdatedAt = updatedAt;
-      }
+    for (const { id, updated_at: updatedAt } of params) {
+      versions.push(`${id}:${updatedAt ?? ''}`);
     }
   }
   await finder.close();
 
-  return `${count}:${latestUpdatedAt}`;
+  return createHash('sha256').update(versions.sort().join('\n')).digest('hex');
 };
 
 export const needsFullSync = ({
@@ -98,7 +100,12 @@ export const needsFullSync = ({
   now: number;
 }): boolean => {
   const { lastSyncedAt, lastFullSyncAt, syncFingerprint } = state;
-  if (!lastSyncedAt || !lastFullSyncAt || syncFingerprint !== fingerprint) {
+  if (
+    !lastSyncedAt ||
+    Number.isNaN(Date.parse(lastSyncedAt)) ||
+    !lastFullSyncAt ||
+    syncFingerprint !== fingerprint
+  ) {
     return true;
   }
   // an unparsable timestamp is NaN, which is never less than the interval

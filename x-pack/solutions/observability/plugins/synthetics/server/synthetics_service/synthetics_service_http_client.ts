@@ -252,8 +252,12 @@ export class SyntheticsServiceHttpClient {
       const status = axiosError.response?.status;
       const failedMonitors = axiosError.response?.data?.failed_monitors;
 
-      // Some monitors were not cached; the rest of the batch was retained.
-      if (status === 404 && Array.isArray(failedMonitors)) {
+      // The rest of the batch was retained. The service lists failures on a 404 when monitors were
+      // not cached, and on a 500 when any of them failed for another reason.
+      if (Array.isArray(failedMonitors)) {
+        if (status !== 404) {
+          this.logServiceError(axiosError, location.url, 'PUT', failedMonitors.length);
+        }
         this.retainUnsupportedSince.delete(location.id);
         this.logger.debug(
           `${failedMonitors.length} of ${ids.length} monitors were not retained by service location ${location.id}`

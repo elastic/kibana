@@ -494,6 +494,7 @@ export class ServiceManagedLocations {
         kibanaUrl: this.server.basePath.publicBaseUrl,
         esHosts: hosts,
         apiKeyId: apiKey.split(':')[0],
+        serviceLocationIds: this.locations.map(({ id }) => id),
         paramsVersion,
         maintenanceWindows: maintenanceWindows.map(({ id, updatedAt }) => ({ id, updatedAt })),
       });

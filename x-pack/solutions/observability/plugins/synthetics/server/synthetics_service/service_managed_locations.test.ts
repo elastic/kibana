@@ -505,16 +505,24 @@ describe('ServiceManagedLocations', () => {
       );
 
       const encryptedClient = {
-        getDecryptedAsInternalUser: jest.fn(async (type: string, id: string) => {
-          const monitor = byId[id];
-          if (monitor instanceof Error) {
-            throw monitor;
+        getDecryptedAsInternalUser: jest.fn(
+          async (type: string, id: string, options?: { namespace?: string }) => {
+            // the saved objects repository refuses to read from all spaces at once
+            if (options?.namespace === ALL_SPACES_ID) {
+              throw SavedObjectsErrorHelpers.createBadRequestError(
+                '"options.namespace" cannot be "*"'
+              );
+            }
+            const monitor = byId[id];
+            if (monitor instanceof Error) {
+              throw monitor;
+            }
+            if (!monitor) {
+              throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+            }
+            return monitor;
           }
-          if (!monitor) {
-            throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-          }
-          return monitor;
-        }),
+        ),
         createPointInTimeFinderDecryptedAsInternalUser: jest.fn().mockImplementation(() => ({
           close: jest.fn(async () => {}),
           find: async function* find() {
@@ -744,6 +752,68 @@ describe('ServiceManagedLocations', () => {
         );
         expect(state.lastSyncedAt).toBe('2026-10-05T12:05:00.000Z');
       });
+
+      it('only sends the monitors an internal error lists in full, as the rest were retained', async () => {
+        const service = getService();
+        const state = await syncOnce(service);
+        mockStores({
+          unchanged: [monitorSO('still-cached'), monitorSO('corrupt')],
+          byId: {
+            'so-still-cached': monitorSO('still-cached'),
+            'so-corrupt': monitorSO('corrupt'),
+          },
+        });
+        mockServiceResponses({
+          retain: failure(500, {
+            status: 500,
+            reason: 'failed to sync monitors',
+            failed_monitors: [{ id: 'corrupt', message: 'malformed cached configuration' }],
+          }),
+        });
+
+        await service.syncAllMonitors(ALL_SPACES_ID, state);
+
+        expect(idsOf(requests().synced)).toEqual(['corrupt']);
+      });
+
+      it('reads each not retained legacy monitor sharing an id with one in another space', async () => {
+        const service = getService();
+        const state = await syncOnce(service);
+        const inSpace = (namespace: string) => ({
+          ...monitorSO('copied'),
+          type: 'synthetics-monitor',
+          namespaces: [namespace],
+        });
+        const { encryptedClient } = mockStores({
+          unchanged: [inSpace('default'), inSpace('space-b')],
+          byId: { 'so-copied': inSpace('default') },
+        });
+        mockServiceResponses({ retain: notFound(['copied']) });
+
+        await service.syncAllMonitors(ALL_SPACES_ID, state);
+
+        expect(encryptedClient.getDecryptedAsInternalUser.mock.calls).toEqual([
+          ['synthetics-monitor', 'so-copied', { namespace: 'default' }],
+          ['synthetics-monitor', 'so-copied', { namespace: 'space-b' }],
+        ]);
+      });
+
+      it.each([[['*']], [['*', 'my-space']]])(
+        'sends a monitor shared to all spaces (%j) in full when the service did not retain it',
+        async (namespaces) => {
+          const service = getService();
+          const state = await syncOnce(service);
+          jest.setSystemTime(new Date('2026-10-05T12:05:00.000Z'));
+          const shared = { ...monitorSO('shared'), namespaces };
+          mockStores({ unchanged: [shared], byId: { 'so-shared': shared } });
+          mockServiceResponses({ retain: notFound(['shared']) });
+
+          await service.syncAllMonitors(ALL_SPACES_ID, state);
+
+          expect(idsOf(requests().synced)).toEqual(['shared']);
+          expect(state.lastSyncedAt).toBe('2026-10-05T12:05:00.000Z');
+        }
+      );
 
       it('skips monitors that were deleted after they were listed, and still records the sync', async () => {
         const service = getService();
@@ -1094,6 +1164,17 @@ describe('ServiceManagedLocations', () => {
         (service.getOutput as jest.Mock).mockResolvedValue({
           output: { hosts: ['es'], api_key: 'rotated:key' },
         });
+
+        await expectFullSync(service, state, { changed: [monitorSO('a'), monitorSO('b')] });
+      });
+
+      it('a service location was added or went away', async () => {
+        const { service } = getMockedService(2);
+        (getMaintenanceWindows as jest.Mock).mockResolvedValue([]);
+        const state = await syncOnce(service);
+        // edits made while it is gone are not sent to it, so it must not retain stale copies later
+        service.locations = service.locations.slice(0, 1);
+        service.httpClient.locations = service.httpClient.locations.slice(0, 1);
 
         await expectFullSync(service, state, { changed: [monitorSO('a'), monitorSO('b')] });
       });

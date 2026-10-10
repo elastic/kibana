@@ -24,6 +24,7 @@ const inputs: SyncFingerprintInputs = {
   kibanaUrl: 'https://kibana.example.com',
   esHosts: ['https://es.example.com:443'],
   apiKeyId: 'key-id',
+  serviceLocationIds: ['us_central', 'europe_west'],
   paramsVersion: '2:2026-10-01T10:00:00.000Z',
   maintenanceWindows: [
     { id: 'mw-1', updatedAt: '2026-09-01T10:00:00.000Z' },
@@ -32,11 +33,12 @@ const inputs: SyncFingerprintInputs = {
 };
 
 describe('getSyncFingerprint', () => {
-  it('is the same for the same inputs, whatever the order of the maintenance windows', () => {
+  it('is the same for the same inputs, whatever the order of the maintenance windows and locations', () => {
     expect(getSyncFingerprint(inputs)).toBe(
       getSyncFingerprint({
         ...inputs,
         maintenanceWindows: [...inputs.maintenanceWindows].reverse(),
+        serviceLocationIds: [...inputs.serviceLocationIds].reverse(),
       })
     );
   });
@@ -48,6 +50,8 @@ describe('getSyncFingerprint', () => {
     ['the Kibana url', { kibanaUrl: 'https://other.example.com' }],
     ['the Elasticsearch hosts', { esHosts: ['https://other-es.example.com:443'] }],
     ['the API key', { apiKeyId: 'rotated-key-id' }],
+    ['a service location being added', { serviceLocationIds: ['us_central', 'europe_west', 'x'] }],
+    ['a service location going away', { serviceLocationIds: ['us_central'] }],
     ['a param being added', { paramsVersion: '3:2026-10-02T10:00:00.000Z' }],
     ['a param being edited', { paramsVersion: '2:2026-10-02T10:00:00.000Z' }],
     ['a param being removed', { paramsVersion: '1:2026-10-01T10:00:00.000Z' }],
@@ -86,6 +90,7 @@ describe('needsFullSync', () => {
     ['the fingerprint differs', { ...state, syncFingerprint: 'another' }],
     ['the fingerprint was never recorded', { ...state, syncFingerprint: undefined }],
     ['the last full sync is unreadable', { ...state, lastFullSyncAt: 'yesterday-ish' }],
+    ['the last sync is unreadable', { ...state, lastSyncedAt: 'a moment ago' }],
   ])('is true when %s', (_, changedState) => {
     expect(needsFullSync({ state: changedState, fingerprint, now })).toBe(true);
   });
@@ -126,7 +131,7 @@ describe('changed monitors', () => {
 });
 
 describe('getParamsVersion', () => {
-  const mockParams = (pages: Array<Array<{ updated_at?: string }>>) => {
+  const mockParams = (pages: Array<Array<{ id?: string; updated_at?: string }>>) => {
     const soClient = savedObjectsRepositoryMock.create();
     const close = jest.fn().mockResolvedValue(undefined);
     soClient.createPointInTimeFinder.mockReturnValue({
@@ -140,14 +145,52 @@ describe('getParamsVersion', () => {
     return { soClient, close };
   };
 
-  it('counts the params and reports the latest time one was saved', async () => {
-    const { soClient, close } = mockParams([
-      [{ updated_at: '2026-10-01T10:00:00.000Z' }, { updated_at: '2026-10-03T10:00:00.000Z' }],
-      [{ updated_at: '2026-10-02T10:00:00.000Z' }],
-    ]);
+  it.each<[string, Array<{ id: string; updated_at: string }>]>([
+    ['a param is added', [{ id: 'c', updated_at: '2026-10-04T10:00:00.000Z' }]],
+    ['a param is removed', []],
+  ])('changes when %s, and closes its finder', async (_, extra) => {
+    const params = [
+      { id: 'a', updated_at: '2026-10-01T10:00:00.000Z' },
+      { id: 'b', updated_at: '2026-10-03T10:00:00.000Z' },
+    ];
+    const current = mockParams([params]);
+    const changed = mockParams([extra.length ? [...params, ...extra] : params.slice(1)]);
 
-    await expect(getParamsVersion(soClient)).resolves.toBe('3:2026-10-03T10:00:00.000Z');
-    expect(close).toHaveBeenCalled();
+    expect(await getParamsVersion(changed.soClient)).not.toBe(
+      await getParamsVersion(current.soClient)
+    );
+    expect(current.close).toHaveBeenCalled();
+  });
+
+  it('changes when a param other than the latest saved one is edited', async () => {
+    // a Kibana node with a clock behind the one that saved `b` edits `a`
+    const before = await getParamsVersion(
+      mockParams([
+        [
+          { id: 'a', updated_at: '2026-10-01T10:00:00.000Z' },
+          { id: 'b', updated_at: '2026-10-03T10:00:00.000Z' },
+        ],
+      ]).soClient
+    );
+    const after = await getParamsVersion(
+      mockParams([
+        [
+          { id: 'a', updated_at: '2026-10-02T10:00:00.000Z' },
+          { id: 'b', updated_at: '2026-10-03T10:00:00.000Z' },
+        ],
+      ]).soClient
+    );
+
+    expect(after).not.toBe(before);
+  });
+
+  it('does not depend on the order the params are read in', async () => {
+    const a = { id: 'a', updated_at: '2026-10-01T10:00:00.000Z' };
+    const b = { id: 'b', updated_at: '2026-10-03T10:00:00.000Z' };
+
+    expect(await getParamsVersion(mockParams([[a], [b]]).soClient)).toBe(
+      await getParamsVersion(mockParams([[b, a]]).soClient)
+    );
   });
 
   it('reads the params of every space without their values', async () => {
@@ -165,8 +208,8 @@ describe('getParamsVersion', () => {
   });
 
   it('is stable when there are no params', async () => {
-    const { soClient } = mockParams([[]]);
-
-    await expect(getParamsVersion(soClient)).resolves.toBe('0:');
+    expect(await getParamsVersion(mockParams([[]]).soClient)).toBe(
+      await getParamsVersion(mockParams([]).soClient)
+    );
   });
 });

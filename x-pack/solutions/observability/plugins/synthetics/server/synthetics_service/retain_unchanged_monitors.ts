@@ -64,7 +64,13 @@ export const retainUnchangedMonitors = async ({
   locations: ServiceLocations;
   logger: Logger;
 }): Promise<RetainableMonitor[]> => {
+  // Legacy monitors belong to a single space, so their saved object ids are only unique per space.
   const notRetained = new Map<string, RetainableMonitor>();
+  const markNotRetained = (monitor: RetainableMonitor) =>
+    notRetained.set(
+      `${monitor.savedObjectType}:${monitor.namespace}:${monitor.savedObjectId}`,
+      monitor
+    );
   const candidatesByLocation = new Map<string, RetainableMonitor[]>();
   let retainedCount = 0;
 
@@ -88,7 +94,7 @@ export const retainUnchangedMonitors = async ({
     retainedCount += candidates.length - failedIds.size;
     candidates.forEach((candidate) => {
       if (failedIds.has(candidate.id)) {
-        notRetained.set(candidate.savedObjectId, candidate);
+        markNotRetained(candidate);
       }
     });
   };
@@ -132,20 +138,21 @@ export const retainUnchangedMonitors = async ({
         type,
         savedObjectId: monitor.id,
         savedObjectType: monitor.type,
-        namespace: monitor.namespaces?.[0],
+        // A monitor can't be read from all spaces at once; one shared everywhere is readable from
+        // the default space.
+        namespace: monitor.namespaces?.find((namespace) => namespace !== ALL_SPACES_ID),
       };
 
       // Without both there is nothing to look the monitor up by at the service.
       if (!id || !type) {
-        notRetained.set(monitor.id, candidate);
+        markNotRetained(candidate);
         continue;
       }
 
       serviceLocations.forEach(({ id: locationId }) => {
-        candidatesByLocation.set(locationId, [
-          ...(candidatesByLocation.get(locationId) ?? []),
-          candidate,
-        ]);
+        const candidates = candidatesByLocation.get(locationId) ?? [];
+        candidates.push(candidate);
+        candidatesByLocation.set(locationId, candidates);
       });
     }
 
