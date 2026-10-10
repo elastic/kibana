@@ -35,7 +35,6 @@ const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
         paletteId: 'neutral',
         colorIndex: 2
       },
-      touched: false,
     },
   ],
   paletteId: EUIPalette.id,

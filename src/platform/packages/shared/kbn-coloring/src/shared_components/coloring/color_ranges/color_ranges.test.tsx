@@ -79,7 +79,7 @@ describe('Color Ranges', () => {
       { color: '#ccc', start: 80, end: 90 },
       { color: '#ccc', start: 90, end: 100 },
     ];
-    const component = renderColorRanges({ ...props, paletteConfiguration: { maxSteps: 5 } });
+    const component = renderColorRanges({ ...props, maxSteps: 5 });
 
     expect(pageObjects.getAddColorRangeButton(component).prop('disabled')).toBe(true);
   });

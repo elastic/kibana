@@ -24,16 +24,18 @@ export interface AssignmentBase<R extends ColorRule | RuleOthers, C extends Colo
    */
   color: C;
   /**
-   * Specify if the color was changed from the original one
+   * @deprecated No longer written or read. Older saved objects may still carry it.
+   * Custom colors are now detected from the color itself (see `hasCustomColors`).
    */
-  touched: boolean;
+  touched?: boolean;
 }
 
 export type ColorStep = (CategoricalColor | ColorCode) & {
   /**
-   * A flag to know when assignment has been edited since last saved
+   * @deprecated No longer written or read. Older saved objects may still carry it.
+   * Custom colors are detected from the color itself (see `hasCustomColors`).
    */
-  touched: boolean;
+  touched?: boolean;
 };
 
 export interface CategoricalColorMode {

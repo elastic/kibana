@@ -52,15 +52,7 @@ import { toApiFieldSettings } from '../../../../transforms/columns/field_setting
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
-const COMMON_STATE_IGNORE_PATHS = [
-  // TODO: check missing/different properties on colorMapping
-  'state.visualization.columns.*.colorMapping.assignments.*.touched', // dropped at state -> API and only applied from API -> State, hardcoded to false by transform
-  'state.visualization.columns.*.colorMapping.specialAssignments.*.touched',
-  'state.visualization.layers.*.colorMapping.assignments.*.touched',
-  'state.visualization.layers.*.colorMapping.specialAssignments.*.touched',
-  'state.visualization.layers.*.colorMapping.colorMode.steps.*.touched',
-  'state.visualization.colorMapping.colorMode.steps.*.touched',
-];
+const COMMON_STATE_IGNORE_PATHS: string[] = [];
 
 export const DEFAULT_LAYER_ID = 'layer_0';
 
@@ -1579,15 +1571,21 @@ function clearUnusedNamedPaletteParams(palette: PaletteOutput<CustomPaletteParam
  *
  * This need to address:
  * - named palettes: `palette id`, `continuity`, and `rangeType` are compared strictly (see
- *   `normalizeNamedPaletteParams`); the throwaway stops/colorStops/bounds are dropped.
+ *   `normalizeNamedPaletteParams`); the throwaway stops/colorStops/bounds are dropped, and
+ *   `steps` is reconstructed from the chart's `defaultBandCount`.
  * - custom palettes: mirror the transform's continuity-driven open/closed encoding (open above
  *   nulls `rangeMax` and the last multi-stop; open below nulls `rangeMin`), set the last
- *   multi-stop to the effective `rangeMax` when closed, and default missing `rangeType` /
- *   `params.name` the transform always derives.
+ *   multi-stop to the effective `rangeMax` when closed, drop the unread `steps`, and
+ *   default missing `rangeType` / `params.name` the transform always derives.
+ *
+ * For every palette the unread `maxSteps` (editor-only) and `progression` (deprecated) are
+ * dropped, and `reverse` is reset to `false` because the stored stops already carry the color
+ * order.
  */
 export function getPaletteNormalizer<T extends LensAttributes>(
   palettePath: string,
-  isSingleValuePalette?: (attributes: T) => boolean
+  isSingleValuePalette?: (attributes: T) => boolean,
+  defaultBandCount?: number
 ): NormalizerConfig<T> {
   return {
     original: (attributes: T) => {
@@ -1601,6 +1599,14 @@ export function getPaletteNormalizer<T extends LensAttributes>(
 
       palettes.forEach((palette) => {
         if (!palette.params) return;
+
+        // `maxSteps` is now editor-only state
+        delete palette.params.maxSteps;
+        // `progression` is deprecated and has no reader
+        delete palette.params.progression;
+        // Render never applies `reverse` (the stops carry the color order), and the transform
+        // always writes `false`
+        palette.params.reverse = false;
 
         const rangeMin = getRangeValue(palette.params.rangeMin);
         const rangeMax = getRangeValue(palette.params.rangeMax);
@@ -1617,6 +1623,13 @@ export function getPaletteNormalizer<T extends LensAttributes>(
           palette.name = canonicalName;
           palette.params.name = canonicalName;
           palette.params.rangeType = useNumericRange ? 'number' : 'percent';
+          // A named palette renders from its id and `steps` alone. Its stops are
+          // recomputed on every render. Users can't set `steps` directly: any edit to the color
+          // ranges (add, remove, recolor, move) turns the palette into `custom`. So a stored
+          // `steps` that differs from the chart default was inherited from an older default
+          // (e.g. gauges saved when it was 3). The API's `distributed_palette` has no band count,
+          // so API→SO writes the chart default and that difference is an accepted loss.
+          palette.params.steps = defaultBandCount;
           clearUnusedNamedPaletteParams(palette);
           return;
         }
@@ -1644,6 +1657,10 @@ export function getPaletteNormalizer<T extends LensAttributes>(
           }
         }
 
+        // A custom palette renders from its stops, so a stored `steps` is editor residue with no
+        // reader. The transform omits it.
+        delete palette.params.steps;
+
         if (!palette.params.rangeType) {
           palette.params.rangeType = 'percent';
         }
@@ -1656,12 +1673,6 @@ export function getPaletteNormalizer<T extends LensAttributes>(
 
       return attributes;
     },
-    ignore: [
-      'maxSteps', // often omitted in original
-      'progression', // deprecated but defaults to 'fixed'
-      'reverse', // typically unused or omitted
-      'steps', // count of steps in original is not right
-    ].map((param) => `${palettePath}.params.${param}`),
   };
 }
 
@@ -1672,6 +1683,8 @@ export function getPaletteNormalizer<T extends LensAttributes>(
  * - `match` with `matchEntireWord: true` becomes a `raw` rule.
  * - `match` with `matchEntireWord: false`, `regex`, and `range` rules are
  *   runtime-dead (`getKey` returns `null`) and are stripped.
+ *
+ * Also deletes the deprecated `touched` flag, which no reader uses and the transform no longer emits.
  */
 export function getColorMappingNormalizer<T extends LensAttributes>(
   colorMappingPath: string
@@ -1682,6 +1695,8 @@ export function getColorMappingNormalizer<T extends LensAttributes>(
 
       configs.forEach((config) => {
         for (const assignment of config.assignments) {
+          // Custom color assignments are now detected at runtime from the color itself (see `hasCustomColors`).
+          delete assignment.touched;
           assignment.rules = assignment.rules.flatMap((rule): ColorMapping.ColorRule[] => {
             if (rule.type === 'raw') return [rule];
             if (rule.type === 'match' && rule.matchEntireWord === true) {
@@ -1690,6 +1705,16 @@ export function getColorMappingNormalizer<T extends LensAttributes>(
             }
             return [];
           });
+        }
+        for (const specialAssignment of config.specialAssignments ?? []) {
+          // Custom color assignments are now detected at runtime from the color itself (see `hasCustomColors`).
+          delete specialAssignment.touched;
+        }
+        if (config.colorMode?.type === 'gradient') {
+          for (const step of config.colorMode.steps) {
+            // Custom color assignments are now detected at runtime from the color itself (see `hasCustomColors`).
+            delete step.touched;
+          }
         }
       });
 

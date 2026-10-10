@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CustomPaletteParams, PaletteOutput } from '../../palettes';
 import { getColorStops, mergePaletteParams, updateRangeType, changeColorPalette } from './utils';
 
 import { getPaletteRegistry } from './mocks/palettes_registry';
@@ -417,6 +418,69 @@ describe('changeColorPalette', () => {
           },
         ],
       },
+    });
+  });
+
+  describe('defaultBandCount', () => {
+    const customPalette: PaletteOutput<CustomPaletteParams> = {
+      type: 'palette',
+      name: 'custom',
+      params: {
+        name: 'custom',
+        rangeType: 'percent',
+        steps: 2,
+        colorStops: [
+          { color: 'green', stop: 0 },
+          { color: 'red', stop: 50 },
+        ],
+      },
+    };
+
+    it('applies the default band count when switching to a named palette', () => {
+      const result = changeColorPalette(
+        { type: 'palette', name: 'default' },
+        customPalette,
+        paletteRegistry,
+        { min: 0, max: 100 },
+        false,
+        4
+      );
+      expect(result.params?.steps).toBe(4);
+    });
+
+    it('applies the default band count when switching between named palettes', () => {
+      const result = changeColorPalette(
+        { type: 'palette', name: 'default' },
+        { type: 'palette', name: 'mocked', params: { name: 'mocked', steps: 3 } },
+        paletteRegistry,
+        { min: 0, max: 100 },
+        false,
+        4
+      );
+      expect(result.params?.steps).toBe(4);
+    });
+
+    it('keeps the previous steps when switching to a custom palette', () => {
+      const result = changeColorPalette(
+        { type: 'palette', name: 'custom' },
+        { type: 'palette', name: 'mocked', params: { name: 'mocked', steps: 3 } },
+        paletteRegistry,
+        { min: 0, max: 100 },
+        false,
+        4
+      );
+      expect(result.params?.steps).toBe(3);
+    });
+
+    it('inherits the previous steps when no default band count is given', () => {
+      const result = changeColorPalette(
+        { type: 'palette', name: 'default' },
+        customPalette,
+        paletteRegistry,
+        { min: 0, max: 100 },
+        false
+      );
+      expect(result.params?.steps).toBe(2);
     });
   });
 });

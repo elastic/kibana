@@ -6,12 +6,13 @@
  */
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
 import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
-import { CustomizablePalette, applyPaletteParams } from '@kbn/coloring';
+import { CustomizablePalette, DEFAULT_COLOR_STEPS, applyPaletteParams } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ColorMode } from '@kbn/charts-plugin/common';
 import { css } from '@emotion/react';
 import type { LegacyMetricState, VisualizationDimensionEditorProps } from '@kbn/lens-common';
+import { LENS_LEGACY_METRIC_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
 import { getLegacyMetricDataBounds } from '@kbn/expression-legacy-metric-vis-plugin/public';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { PalettePanelContainer } from '../../shared_components';
@@ -139,6 +140,8 @@ export function MetricDimensionEditor(
               palettes={props.paletteService}
               activePalette={activePalette}
               dataBounds={currentMinMax}
+              maxSteps={DEFAULT_COLOR_STEPS}
+              defaultBandCount={LENS_LEGACY_METRIC_DEFAULT_COLOR_STEPS}
               setPalette={(newPalette) => {
                 setState({
                   ...state,

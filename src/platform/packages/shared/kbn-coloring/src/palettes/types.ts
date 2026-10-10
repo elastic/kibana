@@ -152,6 +152,11 @@ export interface CustomPaletteParams {
   /** lower bounds of color stops ranges */
   colorStops?: ColorStop[];
   steps?: number;
+  /**
+   * @deprecated Editor-only cap on how many color ranges the custom palette UI allows. It is not
+   * read at render time and is not part of the API. The cap is now supplied to
+   * `CustomizablePalette`/`ColorRanges` via the `maxSteps` prop instead of this persisted field.
+   */
   maxSteps?: number;
 }
 

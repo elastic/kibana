@@ -36,6 +36,9 @@ export interface CustomizablePaletteProps {
   showRangeTypeSelector?: boolean;
   disableSwitchingContinuity?: boolean;
   showExtraActions?: boolean;
+  maxSteps?: number;
+  /** Band count applied when switching to a named palette. Defaults to inheriting the current `steps`. */
+  defaultBandCount?: number;
 }
 
 function shouldSyncPaletteState(
@@ -61,6 +64,8 @@ export const CustomizablePalette = ({
   showExtraActions = true,
   showRangeTypeSelector = true,
   disableSwitchingContinuity = false,
+  maxSteps,
+  defaultBandCount,
 }: CustomizablePaletteProps) => {
   const idPrefix = useMemo(() => htmlIdGenerator()(), []);
   const colorRangesToShow = useMemo(() => {
@@ -145,17 +150,25 @@ export const CustomizablePalette = ({
                 localState.activePalette,
                 palettes,
                 dataBounds,
-                disableSwitchingContinuity
+                disableSwitchingContinuity,
+                defaultBandCount
               );
               dispatch({
                 type: 'changeColorPalette',
-                payload: { palette: newPalette, dataBounds, palettes, disableSwitchingContinuity },
+                payload: {
+                  palette: newPalette,
+                  dataBounds,
+                  palettes,
+                  disableSwitchingContinuity,
+                  defaultBandCount,
+                },
               });
               setPalette(resolvedPalette);
             }
           }}
           showCustomPalette
           showDynamicColorOnly
+          defaultBandCount={defaultBandCount}
         />
       </EuiFormRow>
       {showRangeTypeSelector && (
@@ -243,6 +256,7 @@ export const CustomizablePalette = ({
             paletteConfiguration={localState.activePalette?.params}
             colorRanges={localState.colorRanges}
             dispatch={dispatch}
+            maxSteps={maxSteps}
           />
         </ColorRangesContext.Provider>
       </EuiFormRow>

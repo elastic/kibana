@@ -10,12 +10,18 @@ import { EuiFormRow, EuiSwitch, EuiIcon } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
-import { CustomizablePalette, CUSTOM_PALETTE, applyPaletteParams } from '@kbn/coloring';
+import {
+  CustomizablePalette,
+  CUSTOM_PALETTE,
+  DEFAULT_COLOR_STEPS,
+  applyPaletteParams,
+} from '@kbn/coloring';
 import { GaugeTicksPositions, GaugeColorModes } from '@kbn/expression-gauge-plugin/common';
 import { getMaxValue, getMinValue } from '@kbn/expression-gauge-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import { css } from '@emotion/react';
 import type { VisualizationDimensionEditorProps } from '@kbn/lens-common';
+import { LENS_GAUGE_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { PalettePanelContainer } from '../../shared_components';
 import type { GaugeVisualizationState } from './constants';
@@ -132,6 +138,8 @@ export function GaugeDimensionEditor(
                 palettes={props.paletteService}
                 activePalette={activePalette}
                 dataBounds={currentMinMax}
+                maxSteps={DEFAULT_COLOR_STEPS}
+                defaultBandCount={LENS_GAUGE_DEFAULT_COLOR_STEPS}
                 setPalette={(newPalette) => {
                   // if the new palette is not custom, replace the rangeMin with the artificial one
                   if (
