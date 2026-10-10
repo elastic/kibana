@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignalImpact, Severity, SignificantEvent } from '@kbn/significant-events-schema';
+import type { Severity, SignificantEvent } from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import type { CompactBulkError } from '../bulk_write';
 import {
@@ -17,7 +17,6 @@ import {
   preserveStableNarrative,
 } from './episode_context';
 import { lockSeverityForCompletedInvestigation, type EventsWriteSource } from './severity_lock';
-import { computeSeverity, deriveEventImpact } from './compute_severity';
 import type { BulkResults, EventsWriteInput, EventsWriteResult, WriteCandidate } from './types';
 
 interface EventFacts
@@ -27,40 +26,59 @@ interface EventFacts
   latestEvent: SignificantEvent | undefined;
   episodeContext: ReturnType<typeof mergeEpisodeContext>;
   frozenNarrative: ReturnType<typeof preserveStableNarrative>;
-  impact: SignalImpact;
 }
 
 /**
- * Returns true when the latest stored version for this event_id has the same computed severity
- * and status as the candidate, the same worst impact (the fact the tier derives from), and the
- * candidate introduces no new detection rules — indicating this snapshot would produce a
- * pure-churn duplicate.
+ * Returns true when the latest stored version for this event_id has the same severity and status
+ * as the candidate and the candidate introduces no new detection rules — indicating this snapshot
+ * would produce a pure-churn duplicate. `severity` is the tier this write would store, after the
+ * investigation lock.
  */
 export const shouldSkipAsNoOp = ({
   latestEvent,
   candidate,
   priorDocs,
-  computedSeverity,
-  mergedImpact,
+  severity,
 }: {
   latestEvent: SignificantEvent | undefined;
   candidate: WriteCandidate;
   priorDocs: SignificantEvent[];
-  computedSeverity: Severity;
-  mergedImpact: SignalImpact;
+  severity: Severity;
 }): boolean => {
   if (latestEvent === undefined) return false;
 
   const knownRuleUuids = extractRuleUuidsFromEvents([...priorDocs, latestEvent]);
   const addsRule = addsNewDetectionRules(extractRuleUuids(candidate.input.signals), knownRuleUuids);
-  const stored = deriveEventImpact(latestEvent.signals);
 
   return (
-    latestEvent.status === candidate.input.status &&
-    latestEvent.severity === computedSeverity &&
-    mergedImpact === stored.impact &&
-    !addsRule
+    latestEvent.status === candidate.input.status && latestEvent.severity === severity && !addsRule
   );
+};
+
+/**
+ * The agent decides the tier under the `severity` field contract; the writer stores it. An inactive
+ * event is `low`, and a signal-less write (chat create) keeps its explicit severity, or `low` when
+ * it gave none.
+ */
+const decideSeverity = ({
+  proposed,
+  status,
+  signals,
+}: {
+  proposed: Severity | undefined;
+  status: SignificantEvent['status'];
+  signals: SignificantEvent['signals'];
+}): Severity => {
+  if (status === 'inactive') {
+    return 'low';
+  }
+  if ((signals ?? []).length === 0) {
+    return proposed ?? 'low';
+  }
+  if (proposed === undefined) {
+    throw new Error('events_write: an event with signals needs a proposed severity.');
+  }
+  return proposed;
 };
 
 /** Full history for remaining continuation writes (lineage merge). */
@@ -93,9 +111,9 @@ export const fetchPriorDocsByEventId = async ({
 
 /**
  * Merges this candidate's signals and topology with its prior versions (continuation only), then
- * computes its severity from that merged member-union — the facts shared by the no-op check and
- * the final document, computed once per candidate so neither recomputes nor disagrees with the
- * other.
+ * takes the agent's proposed severity, floors an inactive event to low and applies the
+ * investigation lock — the facts shared by the no-op check and the final document, derived once per
+ * candidate so the two cannot disagree.
  */
 export const computeEventFacts = ({
   candidate,
@@ -131,23 +149,10 @@ export const computeEventFacts = ({
   // Discovery assigns the final status directly; persist caller-supplied status for all write modes.
   const status = candidate.input.status;
 
-  const { impact, severityScore } = deriveEventImpact(signals);
-
-  // Floor to 'low' on inactive.
-  const severityFromSignals =
-    status === 'inactive'
-      ? 'low'
-      : computeSeverity({
-          impact,
-          severityScore,
-        });
-  // A signal-less write (chat create) keeps its explicit severity; signal-bearing writes always compute.
-  const explicitSeverity = (signals ?? []).length === 0 ? candidate.input.severity : undefined;
-  const computedSeverity = explicitSeverity ?? severityFromSignals;
   const severity = lockSeverityForCompletedInvestigation({
     source,
     latestEvent,
-    computedSeverity,
+    proposedSeverity: decideSeverity({ proposed: candidate.input.severity, status, signals }),
     proposedStatus: status,
     proposedSignals: candidate.input.signals,
   });
@@ -169,7 +174,6 @@ export const computeEventFacts = ({
     episodeContext,
     status,
     severity,
-    impact,
     frozenNarrative,
     confidence: episodeContext.confidence,
   };
@@ -191,7 +195,6 @@ export const buildPendingWrite = ({
     episodeContext,
     status,
     severity,
-    impact,
     frozenNarrative,
     confidence,
   } = facts;
@@ -201,7 +204,6 @@ export const buildPendingWrite = ({
     status,
     narrativePreserved: frozenNarrative?.narrativePreserved,
     severity,
-    impact,
     document: {
       ...rest,
       ...(frozenNarrative
@@ -236,32 +238,29 @@ export const applyWriteOutcomes = ({
   errors: Array<CompactBulkError | undefined>;
   results: BulkResults;
 }): void => {
-  pendingWrites.forEach(
-    ({ candidate, status, narrativePreserved, severity, impact }, responseIndex) => {
-      const error = errors[responseIndex];
-      if (error) {
-        results[candidate.index] = {
-          index: candidate.index,
-          event_id: candidate.eventId,
-          status,
-          written: false,
-          reason: 'bulk_error',
-          error,
-        };
-        return;
-      }
-      const result: EventsWriteResult = {
+  pendingWrites.forEach(({ candidate, status, narrativePreserved, severity }, responseIndex) => {
+    const error = errors[responseIndex];
+    if (error) {
+      results[candidate.index] = {
         index: candidate.index,
         event_id: candidate.eventId,
         status,
-        written: true,
-        severity,
-        impact,
+        written: false,
+        reason: 'bulk_error',
+        error,
       };
-      if (narrativePreserved) {
-        result.narrative_preserved = true;
-      }
-      results[candidate.index] = result;
+      return;
     }
-  );
+    const result: EventsWriteResult = {
+      index: candidate.index,
+      event_id: candidate.eventId,
+      status,
+      written: true,
+      severity,
+    };
+    if (narrativePreserved) {
+      result.narrative_preserved = true;
+    }
+    results[candidate.index] = result;
+  });
 };

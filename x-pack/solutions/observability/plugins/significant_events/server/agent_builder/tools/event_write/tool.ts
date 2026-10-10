@@ -49,6 +49,7 @@ export const eventsWriteItemSchema = lazySchema(() =>
       title: true,
       symptom_hypothesis: true,
       summary: true,
+      severity: true,
       confidence: true,
       assessment_note: true,
       signals: true,
@@ -183,14 +184,10 @@ const enrichCausalFeatures = async (
   }
 
   try {
-    // `featureIds` matches slug-style references and `id` matches uuid-style references.
+    // Stored docs keep the derived uuid in their root `id`, so `id` matches uuid-style
+    // references and `featureIds` (feature.slug) matches slug-style ones.
     const references = [...causalFeatures, ...blastRadiusEntries];
-    const dependencyEnds = blastRadiusEntries.flatMap((entry) =>
-      entry.type === 'dependency' ? [entry.source, entry.target] : []
-    );
-    const featureIds = [
-      ...new Set([...references.map(({ feature_id: featureId }) => featureId), ...dependencyEnds]),
-    ];
+    const featureIds = [...new Set(references.map(({ feature_id: featureId }) => featureId))];
     const streamNames = [
       ...new Set([
         ...items.flatMap(({ stream_names: names }) => names),
@@ -237,155 +234,30 @@ const enrichCausalFeatures = async (
       return (scoped.length === 1 ? scoped : matches.length === 1 ? matches : [])[0];
     };
 
-    // An entry whose feature_id resolves to no stored indicator is dropped, so presence in the stored event
-    // is the deterministic "this KI exists" gate. Dropped ids are logged for the eval trail.
-    return items.map((item) => {
-      const dropped: string[] = [];
-      const unresolvedEnds = new Set<string>();
-      const resolvedCausalFeatures = item.causal_features?.flatMap((causalFeature) => {
+    return items.map((item) => ({
+      ...item,
+      causal_features: item.causal_features?.map((causalFeature) => {
         const feature = resolveFeature(
           causalFeature.feature_id,
           causalFeature.stream_name,
           item.stream_names
         );
-        if (!feature) {
-          dropped.push(causalFeature.feature_id);
-          return [];
-        }
-        return [
-          {
-            ...causalFeature,
-            feature_id: feature.id,
-            type: feature.type,
-            subtype: feature.subtype,
-          },
-        ];
-      });
-      // The end of a dependency is an entity, so it resolves without the edge's own stream (an
-      // edge can cross streams) and never to another dependency. An end that resolves to no entity
-      // is kept verbatim and logged: it matches no entity Knowledge Indicator, so it cannot be
-      // traced back to one.
-      const resolveEnd = (end: string): string => {
-        const resolved = resolveFeature(end, undefined, item.stream_names);
-        if (resolved === undefined || resolved.type === 'dependency') {
-          unresolvedEnds.add(end);
-          return end;
-        }
-        return resolved.id;
-      };
+        return feature
+          ? { ...causalFeature, type: feature.type, subtype: feature.subtype }
+          : causalFeature;
+      }),
       // Blast radius rows carry their own row-shape discriminator in `type`; only the
       // indicator's subtype is enriched.
-      const blastRadius = item.blast_radius?.flatMap((entry) => {
+      blast_radius: item.blast_radius?.map((entry) => {
         const feature = resolveFeature(entry.feature_id, entry.stream_name, item.stream_names);
-        if (!feature) {
-          dropped.push(entry.feature_id);
-          return [];
-        }
-        const ends =
-          entry.type === 'dependency'
-            ? { source: resolveEnd(entry.source), target: resolveEnd(entry.target) }
-            : {};
-        return [{ ...entry, ...ends, feature_id: feature.id, subtype: feature.subtype }];
-      });
-      if (unresolvedEnds.size > 0) {
-        logger.warn(
-          `events_write: kept ${
-            unresolvedEnds.size
-          } dependency ends that resolve to no stored entity Knowledge Indicator, so they join no entity: ${[
-            ...unresolvedEnds,
-          ].join(', ')}`
-        );
-      }
-      if (dropped.length > 0) {
-        logger.warn(
-          `events_write: dropped ${
-            dropped.length
-          } topology entries with no stored Knowledge Indicator: ${dropped.join(', ')}`
-        );
-      }
-      return {
-        ...item,
-        causal_features: resolvedCausalFeatures,
-        blast_radius: blastRadius,
-      };
-    });
+        return feature ? { ...entry, subtype: feature.subtype } : entry;
+      }),
+    }));
   } catch (error) {
-    // Fail loudly: writing topology unchecked would store unverified KI references.
     const message = error instanceof Error ? error.message : 'Unknown error';
-    throw new Error(
-      `events_write: could not resolve topology against Knowledge Indicators: ${message}`
-    );
-  }
-};
-
-/**
- * Stamps each detection signal's `metadata.severity_score` from the query Knowledge Indicator
- * backing its rule. The score is a severity-policy input, so it is read from the KI store rather
- * than trusted from the caller: a value the agent supplied is replaced, and a rule with no backing
- * KI carries none.
- */
-const resolveSignalSeverityScores = async (
-  items: EventsWriteParams['items'],
-  getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient>,
-  logger: Logger
-): Promise<EventsWriteParams['items']> => {
-  const detectionSignals = items.flatMap(({ signals = [] }) =>
-    signals.flatMap((signal) => (signal.type === 'detection' ? [signal] : []))
-  );
-  if (detectionSignals.length === 0) {
+    logger.warn(`Failed to enrich causal features; writing them unenriched: ${message}`);
     return items;
   }
-
-  const ruleIds = [...new Set(detectionSignals.map(({ metadata }) => metadata.rule_uuid))];
-  const streamNames = [
-    ...new Set([
-      ...items.flatMap(({ stream_names: names }) => names),
-      ...detectionSignals.map(({ stream_name: streamName }) => streamName),
-    ]),
-  ];
-
-  let scoreByRuleId: Map<string, number>;
-  try {
-    const kiClient = await getKnowledgeIndicatorClient();
-    const links = await kiClient.getQueryLinks(streamNames, { ruleIds, includeExpired: true });
-    scoreByRuleId = new Map(
-      links.flatMap(({ rule_id: ruleId, query }) =>
-        query.severity_score !== undefined ? [[ruleId, query.severity_score] as const] : []
-      )
-    );
-  } catch (error) {
-    // Fail loudly: a silently missing score would quietly cap every outage at `high`.
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    throw new Error(
-      `events_write: could not resolve severity_score against Knowledge Indicators: ${message}`
-    );
-  }
-
-  const unbacked = ruleIds.filter((ruleId) => !scoreByRuleId.has(ruleId));
-  if (unbacked.length > 0) {
-    logger.warn(
-      `events_write: ${
-        unbacked.length
-      } detection rules have no scored query Knowledge Indicator; their signals carry no severity_score: ${unbacked.join(
-        ', '
-      )}`
-    );
-  }
-
-  return items.map((item) => ({
-    ...item,
-    signals: item.signals?.map((signal) =>
-      signal.type === 'detection'
-        ? {
-            ...signal,
-            metadata: {
-              ...signal.metadata,
-              severity_score: scoreByRuleId.get(signal.metadata.rule_uuid),
-            },
-          }
-        : signal
-    ),
-  }));
 };
 
 export function createEventsWriteTool({
@@ -415,11 +287,12 @@ export function createEventsWriteTool({
       Discovery calls must set top-level \`source\` to \`"discovery"\`.
 
       **With event_id**: append a version to an existing event with the supplied status.
-      Signals and topology are merged with prior versions, and severity is computed from that
-      merged set — it is not an input field. No-op if the computed severity and status are
-      unchanged (written: false, reason: unchanged_outcome). For Discovery writes, a completed
-      investigation makes the stored severity authoritative over the newly computed one. It is
-      preserved unless Discovery marks the event inactive, reactivates an inactive event, or
+      Signals and topology are merged with prior versions. \`severity\` is your verdict under its
+      field contract, decided from the merged confirming signals; the writer stores it as given
+      (an inactive event is low) and returns the stored tier. No-op if the stored severity and
+      status are unchanged (written: false, reason: unchanged_outcome). For Discovery writes, a
+      completed investigation makes the stored severity authoritative over the newly proposed
+      one. It is preserved unless Discovery marks the event inactive, reactivates an inactive event, or
       submits a confirmed rule UUID absent from the current event. When no new rule UUIDs are
       introduced, title and symptom_hypothesis are frozen to the stored values and
       narrative_preserved: true is returned.
@@ -455,8 +328,8 @@ export function createEventsWriteTool({
         });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
-        const items = await resolveSignalSeverityScores(
-          await enrichCausalFeatures(toolParams.items, getKnowledgeIndicatorClient, logger),
+        const items = await enrichCausalFeatures(
+          toolParams.items,
           getKnowledgeIndicatorClient,
           logger
         );
@@ -489,7 +362,7 @@ export function createEventsWriteTool({
                 written: result.written,
                 stream_names: input.stream_names,
                 error_message: isBulkError ? result.error.reason : undefined,
-                ...(result.written ? { severity: result.severity, impact: result.impact } : {}),
+                ...(result.written ? { severity: result.severity } : {}),
               }),
           });
         });

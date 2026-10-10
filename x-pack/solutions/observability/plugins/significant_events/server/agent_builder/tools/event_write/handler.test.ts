@@ -295,14 +295,13 @@ describe('eventsWriteHandler', () => {
           p_value: 0.01,
         },
       };
-      // ruleOne has no `impact`, so the merged signal set computes to 'low' regardless of the
-      // input.severity — match the stored fixture to that so the no-op path, not
-      // an escalation write, is what's under test here.
-      const latest = makeStoredEvent('checkout-stable', { severity: 'low' });
+      // ruleOne is a confirms signal without an impact; the proposed 'high' stands, so match the
+      // stored fixture to it and the no-op path, not an escalation write, is what's under test.
+      const latest = makeStoredEvent('checkout-stable', { severity: 'high' });
       const eventClient = makeEventSearchClient({
         findByEventId: jest.fn().mockResolvedValue({
           hits: [
-            makeStoredEvent('checkout-stable', { signals: [ruleOne], severity: 'low' }),
+            makeStoredEvent('checkout-stable', { signals: [ruleOne], severity: 'high' }),
             latest,
           ],
         }),
@@ -408,7 +407,6 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     stream_name: 'logs.checkout',
     description: 'High Latency',
     verdict: 'confirms',
-    impact: 'degraded',
     metadata: {
       detection_id: `det-${ruleUuid}`,
       rule_uuid: ruleUuid,
@@ -562,40 +560,54 @@ describe('eventsWriteBulkHandler — continuation status', () => {
   );
 });
 
-describe('eventsWriteBulkHandler — severity floor on inactive', () => {
-  it('floors an otherwise-critical computed severity to low when status is inactive', async () => {
-    const exposureSignal: SignalEntry = {
-      type: 'detection',
-      stream_name: 'logs.checkout',
-      description: 'Found: credentials exposed in logs. Impact: active exposure.',
-      verdict: 'confirms',
-      impact: 'exposed',
-      metadata: {
-        detection_id: 'det-exposure',
-        rule_uuid: 'rule-exposure',
-        change_point_type: 'spike',
-        p_value: 0.01,
-      },
-    } as SignalEntry;
+describe('eventsWriteBulkHandler — agent-proposed severity', () => {
+  const failingSignal = (ruleUuid: string): SignalEntry => ({
+    type: 'detection',
+    stream_name: 'logs.checkout',
+    description: `Found: ${ruleUuid} failing. Impact: requests blocked.`,
+    verdict: 'confirms',
+    metadata: {
+      detection_id: `det-${ruleUuid}`,
+      rule_uuid: ruleUuid,
+      change_point_type: 'spike',
+      p_value: 0.01,
+    },
+  });
 
-    const eventClient = makeEventSearchClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
-    });
-
-    const results = await eventsWriteBulkHandler({
-      eventSearchClient: eventClient,
+  const write = (input: Partial<EventsWriteInput>) =>
+    eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient({
+        findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
+      }),
       alertEventsClient,
-      inputs: [
-        {
-          ...baseInput,
-          status: 'inactive',
-          signals: [exposureSignal],
-        },
-      ],
+      inputs: [{ ...baseInput, ...input }],
     });
 
-    expect(results[0]).toMatchObject({ written: true, status: 'inactive' });
+  it.each(['critical', 'high', 'medium', 'low'] as const)(
+    'stores a proposed %s',
+    async (severity) => {
+      const [result] = await write({ severity, signals: [failingSignal('rule-1')] });
+
+      expect(result).toMatchObject({ written: true, severity });
+      expect(writtenDocs()[0].severity).toBe(severity);
+    }
+  );
+
+  it('floors an inactive event to low', async () => {
+    const [result] = await write({
+      status: 'inactive',
+      severity: 'critical',
+      signals: [failingSignal('rule-1')],
+    });
+
+    expect(result).toMatchObject({ written: true, status: 'inactive', severity: 'low' });
     expect(writtenDocs()[0].severity).toBe('low');
+  });
+
+  it('refuses an event with signals but no proposed severity, instead of guessing one', async () => {
+    await expect(
+      write({ severity: undefined, signals: [failingSignal('rule-1')] })
+    ).rejects.toThrow('needs a proposed severity');
   });
 });
 
@@ -613,7 +625,6 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
     stream_name: 'logs.checkout',
     description: `Signal for ${ruleUuid}`,
     verdict,
-    impact: 'degraded',
     metadata: {
       detection_id: `detection-${ruleUuid}`,
       rule_uuid: ruleUuid,
@@ -682,14 +693,7 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
       findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
     });
 
-    const newConfirmedRule: SignalEntry = {
-      ...makeDetectionSignal('rule-2'),
-      impact: 'blocked',
-      metadata: {
-        ...makeDetectionSignal('rule-2').metadata,
-        severity_score: 90,
-      },
-    };
+    const newConfirmedRule = makeDetectionSignal('rule-2');
 
     await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
@@ -699,6 +703,7 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
         {
           ...baseInput,
           event_id: stored.event_id,
+          severity: 'critical',
           signals: [newConfirmedRule],
         },
       ],
@@ -732,7 +737,6 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
     stream_name: 'logs.app',
     description: `Signal for ${ruleUuid}`,
     verdict: 'confirms',
-    impact: 'degraded',
     metadata: {
       detection_id: `det-${ruleUuid}`,
       rule_uuid: ruleUuid,
@@ -758,7 +762,8 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
     // Use a severity that differs from makeStoredEvent's 'high' default so the no-op guard
     // (shouldSkipAsNoOp) does not suppress writes in tests that are verifying the gate, not the
     // no-op. Tests specifically exercising the no-op interaction override this via `overrides`.
-    severity: 'critical',
+    // A tier the evidence supports, so validation leaves it as proposed.
+    severity: 'medium',
     event_id: eventId,
     signals: [makeDetectionSignal('rule-eis-auth')],
     causal_features: [],

@@ -7,11 +7,7 @@
 
 import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
 import type { StreamType } from '@kbn/streams-schema';
-import type {
-  SignalImpact,
-  Severity,
-  SignificantEventStatus,
-} from '@kbn/significant-events-schema';
+import type { Severity, SignificantEventStatus } from '@kbn/significant-events-schema';
 
 interface KnowledgeIndicatorQueriesGeneratedProps {
   count: number;
@@ -163,8 +159,6 @@ interface AgentToolEventWriteProps {
   error_message?: string;
   /** Tier actually stored. Present only when written is true. */
   severity?: Severity;
-  /** The event's worst signal impact. Present only when written is true. */
-  impact?: SignalImpact;
 }
 
 interface AgentToolEventSearchProps {

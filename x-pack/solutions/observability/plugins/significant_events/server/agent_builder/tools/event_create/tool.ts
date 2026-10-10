@@ -10,7 +10,11 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { significantEventSchema, severitySchema } from '@kbn/significant-events-schema';
+import {
+  SEVERITY_CONTRACT_RULE,
+  significantEventSchema,
+  severitySchema,
+} from '@kbn/significant-events-schema';
 import { lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
@@ -34,14 +38,9 @@ const createEventSchema = lazySchema(() =>
       stream_names: true,
     })
     .extend({
-      severity: severitySchema.optional().describe(dedent`
-          Severity tier, stored as given. Omit to leave it computed (low until signals are attached).
-          critical = site-wide outage, or confirmed active exposure of PII, credentials, or secrets.
-          high = a core operation fails or is blocked on the verified path, or is broadly degraded.
-          medium = minor confirmed degradation with limited reach, or unconfirmed whether the operation fails.
-          low = recovery, noise, false alarm, or non-issue.
-          When uncertain, choose the lower tier.
-        `),
+      severity: severitySchema
+        .optional()
+        .describe(`${SEVERITY_CONTRACT_RULE}\n\nOmit to store "low".`),
     })
 );
 

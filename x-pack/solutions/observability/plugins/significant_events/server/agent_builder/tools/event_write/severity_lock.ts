@@ -30,18 +30,18 @@ const hasNewConfirmedRule = (
  * Preserves an investigated event's current severity unless Discovery supplies an unlock —
  * resolving the event, reactivating it, or confirming a new rule.
  *
- * This is a deliberate post-policy override stage, not part of the severity policy itself
+ * This is a deliberate override of the agent's proposed severity, applied after it is decided.
  */
 export const lockSeverityForCompletedInvestigation = ({
   source,
   latestEvent,
-  computedSeverity,
+  proposedSeverity,
   proposedStatus,
   proposedSignals,
 }: {
   source?: EventsWriteSource;
   latestEvent?: SignificantEvent;
-  computedSeverity: Severity;
+  proposedSeverity: Severity;
   proposedStatus: SignificantEventStatus;
   proposedSignals?: SignificantEvent['signals'];
 }): Severity => {
@@ -50,13 +50,13 @@ export const lockSeverityForCompletedInvestigation = ({
     latestEvent === undefined ||
     !hasCompletedInvestigation(latestEvent)
   ) {
-    return computedSeverity;
+    return proposedSeverity;
   }
 
   const isResolution = proposedStatus === 'inactive';
   const isReactivation = latestEvent.status === 'inactive' && proposedStatus === 'active';
 
   return isResolution || isReactivation || hasNewConfirmedRule(proposedSignals, latestEvent)
-    ? computedSeverity
+    ? proposedSeverity
     : latestEvent.severity;
 };

@@ -127,9 +127,8 @@ export async function eventsWriteBulkHandler({
     }
     return true;
   });
-  // Facts (merged signals/topology, computed-then-locked severity) are derived once per candidate
-  // here, so the no-op check below and the final document agree on the same severity — neither
-  // recomputes it.
+  // Facts (merged signals/topology, proposed-then-locked severity) are derived once per candidate
+  // here, so the no-op check below and the final document agree on the same severity.
   const factsByCandidate = knownCandidates.map((candidate) =>
     computeEventFacts({ candidate, timestamp, latestByEventId, priorDocsByEventId, source })
   );
@@ -141,8 +140,7 @@ export async function eventsWriteBulkHandler({
         latestEvent: latestByEventId.get(candidate.eventId),
         candidate,
         priorDocs: priorDocsByEventId.get(candidate.eventId) ?? [],
-        computedSeverity: facts.severity,
-        mergedImpact: facts.impact,
+        severity: facts.severity,
       })
     ) {
       results[candidate.index] = {

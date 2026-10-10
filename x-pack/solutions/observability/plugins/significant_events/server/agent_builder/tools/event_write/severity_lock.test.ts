@@ -51,7 +51,7 @@ const lock = (
   lockSeverityForCompletedInvestigation({
     source: 'discovery',
     latestEvent: makeEvent(),
-    computedSeverity: 'high',
+    proposedSeverity: 'high',
     proposedStatus: 'active',
     proposedSignals: [detectionSignal('rule-1')],
     ...overrides,
@@ -81,8 +81,8 @@ describe('lockSeverityForCompletedInvestigation', () => {
 
   it.each(['high', 'low'] as const)(
     'preserves the current severity when Discovery computes %s for a known rule',
-    (computedSeverity) => {
-      expect(lock({ computedSeverity })).toBe('medium');
+    (proposedSeverity) => {
+      expect(lock({ proposedSeverity })).toBe('medium');
     }
   );
 
@@ -113,7 +113,7 @@ describe('lockSeverityForCompletedInvestigation', () => {
     expect(
       lock({
         latestEvent: newTip,
-        computedSeverity: 'critical',
+        proposedSeverity: 'critical',
         proposedSignals: [newRule],
       })
     ).toBe('high');
