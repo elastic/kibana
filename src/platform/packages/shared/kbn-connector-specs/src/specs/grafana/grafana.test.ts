@@ -199,7 +199,7 @@ describe('Grafana', () => {
       expect(mockClient.post).toHaveBeenCalledWith(
         'https://acme.grafana.net/api/alertmanager/grafana/api/v2/silences',
         {
-          matchers: [{ name: 'alertname', value: 'HighCPU' }],
+          matchers: [{ name: 'alertname', value: 'HighCPU', isRegex: false }],
           startsAt: '2026-01-01T00:00:00Z',
           endsAt: '2026-01-01T02:00:00Z',
           comment: 'Maintenance window',

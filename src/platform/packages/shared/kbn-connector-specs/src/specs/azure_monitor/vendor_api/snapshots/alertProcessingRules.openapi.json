@@ -1,0 +1,511 @@
+{
+  "components": {
+    "schemas": {
+      "Action": {
+        "discriminator": {
+          "propertyName": "actionType"
+        },
+        "properties": {
+          "actionType": {
+            "$ref": "#/components/schemas/ActionType"
+          }
+        },
+        "required": [
+          "actionType"
+        ],
+        "type": "object"
+      },
+      "ActionType": {
+        "enum": [
+          "AddActionGroups",
+          "RemoveAllActionGroups"
+        ],
+        "type": "string"
+      },
+      "AlertProcessingRule": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TrackedResource"
+          }
+        ],
+        "properties": {
+          "properties": {
+            "$ref": "#/components/schemas/AlertProcessingRuleProperties"
+          }
+        },
+        "type": "object"
+      },
+      "AlertProcessingRuleProperties": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/Action"
+            },
+            "type": "array"
+          },
+          "conditions": {
+            "items": {
+              "$ref": "#/components/schemas/Condition"
+            },
+            "type": "array"
+          },
+          "description": {
+            "type": "string"
+          },
+          "enabled": {
+            "default": true,
+            "type": "boolean"
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/Schedule"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "scopes",
+          "actions"
+        ],
+        "type": "object"
+      },
+      "Condition": {
+        "properties": {
+          "field": {
+            "$ref": "#/components/schemas/Field"
+          },
+          "operator": {
+            "$ref": "#/components/schemas/Operator"
+          },
+          "values": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorResponseBody"
+          }
+        },
+        "type": "object"
+      },
+      "ErrorResponseBody": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "details": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorResponseBody"
+            },
+            "type": "array"
+          },
+          "message": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Field": {
+        "enum": [
+          "Severity",
+          "MonitorService",
+          "MonitorCondition",
+          "SignalType",
+          "TargetResourceType",
+          "TargetResource",
+          "TargetResourceGroup",
+          "AlertRuleId",
+          "AlertRuleName",
+          "Description",
+          "AlertContext"
+        ],
+        "type": "string"
+      },
+      "Operator": {
+        "enum": [
+          "Equals",
+          "NotEquals",
+          "Contains",
+          "DoesNotContain"
+        ],
+        "type": "string"
+      },
+      "PatchObject": {
+        "properties": {
+          "properties": {
+            "$ref": "#/components/schemas/PatchProperties"
+          },
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "PatchProperties": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "Recurrence": {
+        "discriminator": {
+          "propertyName": "recurrenceType"
+        },
+        "properties": {
+          "endTime": {
+            "type": "string"
+          },
+          "recurrenceType": {
+            "$ref": "#/components/schemas/RecurrenceType"
+          },
+          "startTime": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "recurrenceType"
+        ],
+        "type": "object"
+      },
+      "RecurrenceType": {
+        "enum": [
+          "Daily",
+          "Weekly",
+          "Monthly"
+        ],
+        "type": "string"
+      },
+      "Schedule": {
+        "properties": {
+          "effectiveFrom": {
+            "pattern": "^(?:(\\d{4}-\\d{2}-\\d{2})T(\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?))$",
+            "type": "string"
+          },
+          "effectiveUntil": {
+            "pattern": "^(?:(\\d{4}-\\d{2}-\\d{2})T(\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?))$",
+            "type": "string"
+          },
+          "recurrences": {
+            "items": {
+              "$ref": "#/components/schemas/Recurrence"
+            },
+            "type": "array"
+          },
+          "timeZone": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TrackedResource": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/v3_types_Resource"
+          }
+        ],
+        "properties": {
+          "location": {
+            "type": "string"
+          },
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "location"
+        ],
+        "title": "Tracked Resource",
+        "type": "object"
+      },
+      "systemData": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "createdByType": {
+            "enum": [
+              "User",
+              "Application",
+              "ManagedIdentity",
+              "Key"
+            ],
+            "type": "string"
+          },
+          "lastModifiedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastModifiedBy": {
+            "type": "string"
+          },
+          "lastModifiedByType": {
+            "enum": [
+              "User",
+              "Application",
+              "ManagedIdentity",
+              "Key"
+            ],
+            "type": "string"
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "v3_types_Resource": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "systemData": {
+            "$ref": "#/components/schemas/systemData",
+            "readOnly": true,
+            "type": "object"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "title": "Resource",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "azure_auth": {
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
+            "scopes": {
+              "user_impersonation": "impersonate your user account"
+            }
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Azure Alerts Management Service Resource Provider"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AlertsManagement/actionRules/{alertProcessingRuleName}": {
+      "patch": {
+        "operationId": "AlertProcessingRules_Update",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alertProcessingRuleName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchObject"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertProcessingRule"
+                }
+              }
+            },
+            "headers": {
+              "x-ms-request-id": {
+                "schema": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "AlertProcessingRules_CreateOrUpdate",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alertProcessingRuleName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertProcessingRule"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertProcessingRule"
+                }
+              }
+            },
+            "headers": {
+              "x-ms-request-id": {
+                "schema": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertProcessingRule"
+                }
+              }
+            },
+            "headers": {
+              "x-ms-request-id": {
+                "schema": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "azure_auth": [
+        "user_impersonation"
+      ]
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://management.azure.com"
+    }
+  ]
+}

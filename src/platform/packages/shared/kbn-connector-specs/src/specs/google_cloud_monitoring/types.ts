@@ -489,10 +489,10 @@ export const ListServiceLevelObjectivesInputSchema = lazySchema(() =>
       .optional()
       .describe('Filter expression restricting which SLOs are returned.'),
     view: z
-      .enum(['DEFAULT', 'EXPLICIT'])
+      .enum(['FULL', 'EXPLICIT'])
       .optional()
       .describe(
-        'Use "EXPLICIT" to expand basic SLIs into their full request-based definition; "DEFAULT" returns each SLO as originally defined.'
+        'Use "EXPLICIT" to expand basic SLIs into their full request-based definition; "FULL" returns each SLO as originally defined.'
       ),
     pageSize: pageSize(1000, 50),
     pageToken: pageToken(),
