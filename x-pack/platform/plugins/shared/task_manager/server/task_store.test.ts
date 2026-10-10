@@ -3892,6 +3892,146 @@ describe('TaskStore', () => {
     });
   });
 
+  describe('getVerifiedCredential', () => {
+    const encryptionError = new Error('Unable to decrypt attribute "encryptedCredential"');
+    const isEncryptionError = (error: Error) => error === encryptionError;
+
+    const createStore = (canEncryptSavedObjects: boolean) =>
+      new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        canEncryptSavedObjects,
+        getIsSecurityEnabled: () => true,
+        executionContext: mockExecutionContextStart,
+        apiKeyStrategy: new EsApiKeyStrategy(),
+      });
+
+    let store: TaskStore;
+
+    beforeEach(() => {
+      store = createStore(true);
+      store.registerEncryptedSavedObjectsClient(esoClient, isEncryptionError);
+    });
+
+    const mockDecryptedTask = (attributes: Record<string, unknown>) =>
+      esoClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+        id: 'id',
+        type: 'task',
+        attributes,
+        references: [],
+        version: '123',
+      });
+
+    test('returns the credential of the decrypted task', async () => {
+      mockDecryptedTask({ credential: serviceAccountCredential, encryptedCredential: 'canary' });
+
+      await expect(store.getVerifiedCredential('id')).resolves.toEqual(
+        asOk(serviceAccountCredential)
+      );
+
+      expect(esoClient.getDecryptedAsInternalUser).toHaveBeenCalledWith('task', 'id');
+    });
+
+    test('returns an error without pushing it to errors$ when decryption fails', async () => {
+      const errors = jest.fn();
+      const subscription = store.errors$.subscribe(errors);
+      esoClient.getDecryptedAsInternalUser.mockRejectedValueOnce(encryptionError);
+
+      await expect(store.getVerifiedCredential('id')).resolves.toEqual(
+        asErr(
+          new Error(
+            'Task credential failed its integrity check: Unable to decrypt attribute "encryptedCredential"'
+          )
+        )
+      );
+
+      subscription.unsubscribe();
+      expect(errors).not.toHaveBeenCalled();
+    });
+
+    test.each([
+      ['credential', { encryptedCredential: 'canary' }],
+      ['encryptedCredential', { credential: serviceAccountCredential }],
+    ])('returns an error when the task has no %s', async (_description, attributes) => {
+      mockDecryptedTask(attributes);
+
+      await expect(store.getVerifiedCredential('id')).resolves.toEqual(
+        asErr(new Error('Task credential failed its integrity check: the credential is incomplete'))
+      );
+    });
+
+    test('throws a not found error without pushing it to errors$', async () => {
+      const errors = jest.fn();
+      const subscription = store.errors$.subscribe(errors);
+      esoClient.getDecryptedAsInternalUser.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'id')
+      );
+
+      await expect(store.getVerifiedCredential('id')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+
+      subscription.unsubscribe();
+      expect(errors).not.toHaveBeenCalled();
+    });
+
+    test('pushes any other error to errors$', async () => {
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      esoClient.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Failure'));
+
+      await expect(store.getVerifiedCredential('id')).rejects.toThrow('Failure');
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+
+    test.each([
+      [
+        'saved objects cannot be encrypted',
+        () => {
+          const unableToEncryptStore = createStore(false);
+          unableToEncryptStore.registerEncryptedSavedObjectsClient(esoClient, isEncryptionError);
+          return unableToEncryptStore;
+        },
+      ],
+      [
+        'the client was registered without the encryption error predicate',
+        () => {
+          const noPredicateStore = createStore(true);
+          noPredicateStore.registerEncryptedSavedObjectsClient(esoClient);
+          return noPredicateStore;
+        },
+      ],
+      ['the client was not registered', () => createStore(true)],
+    ])('throws without reading the task when %s', async (_description, getStore) => {
+      await expect(getStore().getVerifiedCredential('id')).rejects.toThrow(
+        'Unable to verify the task credential because the Encrypted Saved Objects plugin has not been registered or is missing encryption key.'
+      );
+
+      expect(esoClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    test('keeps the encryption error predicate when the client is registered again without one', async () => {
+      store.registerEncryptedSavedObjectsClient(esoClient);
+      esoClient.getDecryptedAsInternalUser.mockRejectedValueOnce(encryptionError);
+
+      await expect(store.getVerifiedCredential('id')).resolves.toEqual(
+        asErr(
+          new Error(
+            'Task credential failed its integrity check: Unable to decrypt attribute "encryptedCredential"'
+          )
+        )
+      );
+    });
+  });
+
   describe('bulkGet', () => {
     let store: TaskStore;
 

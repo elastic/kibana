@@ -18,6 +18,7 @@ const WORKLOAD_TYPE = 'task_manager_test';
 const TASK_MANAGER_INDEX = '.kibana_task_manager';
 const TASK_PATH = '/internal/task_manager_service_accounts_test/tasks/{id}';
 const BULK_SCHEDULE_PATH = '/internal/task_manager_service_accounts_test/bulk_schedule';
+const WORKLOAD_PATH = '/internal/task_manager_service_accounts_test/workloads/{workloadId}';
 
 const authz = {
   enabled: false,
@@ -36,14 +37,15 @@ const runAsSchema = schema.object({
   ]),
 });
 
-// Tasks are disabled so they're never claimed.
-const getTestTask = (id: string) => ({
+// Tasks are disabled unless asked otherwise, so they're never claimed.
+const getTestTask = (id: string, enabled = false, runAt?: Date) => ({
   id,
   taskType: TASK_TYPE,
   params: {},
   state: {},
-  enabled: false,
+  enabled,
   schedule: { interval: '1h' },
+  ...(runAt ? { runAt } : {}),
 });
 
 interface SetupDependencies {
@@ -79,7 +81,27 @@ export class TaskManagerServiceAccountsTestPlugin
             return coreStart.security.serviceAccounts.withScopedRequestForWorkload(params, fn);
           },
         },
-        createTaskRunner: () => ({ run: async () => {} }),
+        // Records who the run was authenticated as.
+        createTaskRunner: ({ runAs }) => ({
+          run: async () => {
+            if (!runAs) {
+              throw new Error('The task has no service account to run as');
+            }
+            return runAs.withScopedRequest(async (request) => {
+              const [coreStart] = await core.getStartServices();
+              const { username, authentication_realm: realm } = await coreStart.elasticsearch.client
+                .asScoped(request)
+                .asCurrentUser.security.authenticate();
+              return {
+                state: {
+                  username,
+                  realm: realm.name,
+                  principal: coreStart.security.authc.getPrincipal(request),
+                },
+              };
+            });
+          },
+        }),
       },
     });
 
@@ -92,13 +114,18 @@ export class TaskManagerServiceAccountsTestPlugin
         security: { authz },
         validate: {
           params: taskParamsSchema,
-          body: schema.object({ runAs: schema.maybe(runAsSchema) }),
+          body: schema.object({
+            runAs: schema.maybe(runAsSchema),
+            enabled: schema.boolean({ defaultValue: false }),
+            // ISO date; lets an enabled task be changed before its first run.
+            runAt: schema.maybe(schema.string({ maxLength: 64 })),
+          }),
         },
       },
       async (_context, request, response) => {
         const [, { taskManager: taskManagerStart }] = await core.getStartServices();
-        const { runAs } = request.body;
-        const task = getTestTask(request.params.id);
+        const { runAs, enabled, runAt } = request.body;
+        const task = getTestTask(request.params.id, enabled, runAt ? new Date(runAt) : undefined);
         const { id } = runAs
           ? await taskManagerStart.schedule({ ...task, runAs })
           : await taskManagerStart.schedule(task, { request });
@@ -193,6 +220,41 @@ export class TaskManagerServiceAccountsTestPlugin
           }
           throw error;
         }
+      }
+    );
+
+    // Binding and unbinding check the caller's `manage_security` privilege themselves.
+    router.post(
+      {
+        path: WORKLOAD_PATH,
+        options: { access: 'internal' },
+        security: { authz },
+        validate: {
+          params: schema.object({ workloadId: taskIdSchema }),
+          body: schema.oneOf([
+            schema.object({
+              operation: schema.literal('bind'),
+              serviceAccountId: schema.string({ minLength: 1, maxLength: 1024 }),
+            }),
+            schema.object({ operation: schema.literal('unbind') }),
+          ]),
+        },
+      },
+      async (_context, request, response) => {
+        const [coreStart] = await core.getStartServices();
+        const { serviceAccounts } = coreStart.security;
+        const workload = { workloadType: WORKLOAD_TYPE, workloadId: request.params.workloadId };
+        const { body } = request;
+        if (body.operation === 'bind') {
+          const binding = await serviceAccounts.bindWorkload(request, {
+            ...workload,
+            serviceAccountId: body.serviceAccountId,
+          });
+          return response.ok({ body: binding });
+        }
+        return response.ok({
+          body: { deleted: await serviceAccounts.unbindWorkload(request, workload) },
+        });
       }
     );
 

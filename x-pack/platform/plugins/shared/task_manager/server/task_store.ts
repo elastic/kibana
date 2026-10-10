@@ -202,6 +202,7 @@ export class TaskStore {
 
   private esClient: ElasticsearchClient;
   private esoClient?: EncryptedSavedObjectsClient;
+  private isEncryptionError?: (error: Error) => boolean;
   private definitions: TaskTypeDictionary;
   private savedObjectsRepository: ISavedObjectsRepository;
   private savedObjectsService: SavedObjectsServiceStart;
@@ -272,8 +273,15 @@ export class TaskStore {
     });
   }
 
-  public registerEncryptedSavedObjectsClient(client: EncryptedSavedObjectsClient) {
+  public registerEncryptedSavedObjectsClient(
+    client: EncryptedSavedObjectsClient,
+    isEncryptionError?: (error: Error) => boolean
+  ) {
     this.esoClient = client;
+    // More than one plugin registers the client, and not all of them pass the predicate.
+    if (isEncryptionError) {
+      this.isEncryptionError = isEncryptionError;
+    }
   }
 
   public getEncryptedSavedObjectsClient(): EncryptedSavedObjectsClient | undefined {
@@ -1421,6 +1429,55 @@ export class TaskStore {
       }
       throw e;
     }
+  }
+
+  /**
+   * Gets a task's credential by decrypting the task, which fails if the credential was changed
+   * after the task was created. Resolves to an error when that integrity check fails, and throws
+   * for any other failure.
+   *
+   * @param {string} id
+   * @returns {Promise<Result<TaskCredential, Error>>}
+   */
+  public async getVerifiedCredential(id: string): Promise<Result<TaskCredential, Error>> {
+    return this.executionContextRunner.run(() => this._getVerifiedCredential(id), {
+      id: 'get-verified-credential',
+    });
+  }
+
+  private async _getVerifiedCredential(id: string): Promise<Result<TaskCredential, Error>> {
+    const { esoClient, isEncryptionError } = this;
+    // Without these, a decryption failure can't be told apart from an outage.
+    if (!esoClient || !isEncryptionError || !this.canEncryptSo()) {
+      throw new Error(
+        'Unable to verify the task credential because the Encrypted Saved Objects plugin has not been registered or is missing encryption key.'
+      );
+    }
+
+    let attributes: SerializedConcreteTaskInstance;
+    try {
+      ({ attributes } = await esoClient.getDecryptedAsInternalUser<SerializedConcreteTaskInstance>(
+        TASK_SO_NAME,
+        id
+      ));
+    } catch (e) {
+      if (isEncryptionError(e)) {
+        return asErr(new Error(`Task credential failed its integrity check: ${e.message}`));
+      }
+      if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        this.errors$.next(e);
+      }
+      throw e;
+    }
+
+    // Decryption checks the credential only when there is an encryptedCredential to decrypt.
+    const { credential, encryptedCredential } = attributes;
+    if (!credential || !encryptedCredential) {
+      return asErr(
+        new Error('Task credential failed its integrity check: the credential is incomplete')
+      );
+    }
+    return asOk(credential);
   }
 
   /**
