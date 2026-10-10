@@ -18,6 +18,8 @@ import { SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION } from '@kbn/data-plugin/common/c
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
+  // Migration recommendation: DELETE (no replacement needed)
+  // The route returns a hardcoded list, so a test adds no value. Delete the `it.skip` test too.
   describe('Script Languages API', function getLanguages() {
     it('should return 200 with an array of languages', () =>
       supertest

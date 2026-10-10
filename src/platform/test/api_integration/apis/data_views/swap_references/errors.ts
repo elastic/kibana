@@ -16,6 +16,8 @@ import { dataViewConfig } from '../constants';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
+  // Migration recommendation: ALREADY COVERED - DELETE
+  // Covered by src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/swap_references_errors.spec.ts
   describe('errors', () => {
     it('returns 404 error on non-existing index_pattern', async () => {
       const id = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;

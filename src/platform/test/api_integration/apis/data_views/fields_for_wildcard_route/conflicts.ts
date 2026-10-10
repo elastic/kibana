@@ -20,6 +20,9 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
+  // Migration recommendation: ALREADY COVERED - DELETE
+  // Covered by Scout:
+  // src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/conflicts.spec.ts
   describe('conflicts', () => {
     before(() =>
       esArchiver.load(

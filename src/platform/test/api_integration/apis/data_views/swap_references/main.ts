@@ -24,6 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
   const PREVIEW_PATH = `${DATA_VIEW_SWAP_REFERENCES_PATH}/_preview`;
   let dataViewId = '';
 
+  // Migration recommendation: ALREADY COVERED - DELETE
+  // Covered by src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/swap_references_{main,limit}.spec.ts
   describe('main', () => {
     const kibanaServer = getService('kibanaServer');
     before(async () => {

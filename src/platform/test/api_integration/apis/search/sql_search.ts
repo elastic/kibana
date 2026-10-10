@@ -20,6 +20,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   const sqlQuery = `SELECT index, bytes FROM "logstash-*" ORDER BY "@timestamp" DESC`;
 
+  // Migration recommendation: MIGRATE TO SCOUT (API)
+  // Needs a real ES SQL async search; no Scout coverage of the `sql` strategy. SQL is not supported on serverless
+  // (see the removed `sql_search` in serverless `search_oss/index.ts`): tag `tags.stateful.classic`.
+  // Target: src/platform/plugins/shared/data/test/scout/api/tests/search/sql_search.spec.ts
   describe('SQL search', () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();

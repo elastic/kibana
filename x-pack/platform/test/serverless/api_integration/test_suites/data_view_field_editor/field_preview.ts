@@ -49,6 +49,11 @@ export default function ({ getService }: FtrProviderContext) {
     await es.indices.delete({ index: INDEX_NAME }, { ignore: [404] });
   };
 
+  // Migration recommendation: MIXED. See individual tests.
+  // Serverless copy of apis/data_view_field_editor/field_preview.ts: merge into the same Scout API
+  // test (`tags.deploymentAgnostic`). The plugin has no `test/scout/api` yet, so scaffold it first
+  // (`node scripts/scout generate`). The route has authz disabled and relies on Elasticsearch
+  // privileges, so the Scout role needs read access to the index (the FTR copies use admin).
   describe('Field preview', function () {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
@@ -59,6 +64,9 @@ export default function ({ getService }: FtrProviderContext) {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
+    // Migration recommendation: MIGRATE TO SCOUT (API)
+    // Runs real painless scripts against an index; needs real ES.
+    // Target: src/platform/plugins/shared/data_view_field_editor/test/scout/api/tests/field_preview.spec.ts (new)
     describe('should return the script value', () => {
       const tests = [
         {
@@ -108,6 +116,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    // Migration recommendation: REPLACE WITH UNIT/JEST
+    // The 400s only exercise the route's schema validation. The schema is private to field_preview.ts, so
+    // mock the versioned router (precedent: discover `register_sanitize_route.test.ts`).
+    // Target: src/platform/plugins/shared/data_view_field_editor/server/routes/field_preview.test.ts (new)
     describe('payload validation', () => {
       it('should require a script', async () => {
         await supertestWithoutAuth
@@ -155,6 +167,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    // Migration recommendation: MIGRATE TO SCOUT (API)
+    // Pins ES's cast error wording parsed by `getErrorCodeFromErrorReason`; needs real ES.
+    // Target: src/platform/plugins/shared/data_view_field_editor/test/scout/api/tests/field_preview.spec.ts (new)
     describe('Error messages', () => {
       // As ES does not return error codes we will add a test to make sure its error message string
       // does not change overtime as we rely on it to extract our own error code.
