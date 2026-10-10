@@ -35,8 +35,8 @@ export const postAttachmentRoute = createCasesRoute<
     body: createIoTsRouteValidation(UnifiedAttachmentPayloadRt),
   },
   routerOptions: {
-    // TODO(security-team#15572): flip to 'public' once this API is ready to ship.
-    access: 'internal',
+    access: 'public',
+    availability: { stability: 'tech_preview', since: '9.6.0' },
     summary: `Create a case attachment`,
     tags: ['oas-tag:cases'],
     description: 'Creates a single unified attachment (e.g. a comment or an alert).',

@@ -1,0 +1,175 @@
+get:
+  summary: Get a case attachment
+  operationId: getCaseAttachmentDefaultSpace
+  description: >
+    Returns a single attachment from a case.
+    You must have `read` privileges for the **Cases** feature in the
+    **Management**, **Observability**, or **Security** section of the Kibana
+    feature privileges, depending on the owner of the case.
+  x-state: Technical preview
+  tags:
+    - cases
+  parameters:
+    - $ref: '../components/parameters/case_id.yaml'
+    - $ref: '../components/parameters/attachment_id.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/unified_attachment_response.yaml'
+          examples:
+            getAttachmentResponse:
+              $ref: '../components/examples/get_unified_attachment_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'
+    '403':
+      description: The user does not have the required privileges for the attachment owner.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response403:
+              $ref: '../components/examples/response_403.yaml'
+    '404':
+      description: The attachment was not found in the case.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response404:
+              $ref: '../components/examples/response_404.yaml'
+
+put:
+  summary: Replace a case attachment
+  operationId: replaceCaseAttachmentDefaultSpace
+  description: >
+    Fully replaces an attachment. You cannot change the attachment type or owner.
+    You must have `all` privileges for the **Cases** feature in the
+    **Management**, **Observability**, or **Security** section of the Kibana
+    feature privileges, depending on the owner of the case.
+  x-state: Technical preview
+  tags:
+    - cases
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - $ref: '../components/parameters/case_id.yaml'
+    - $ref: '../components/parameters/attachment_id.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/unified_attachment_put_request.yaml'
+        examples:
+          replaceAttachmentRequest:
+            $ref: '../components/examples/update_unified_attachment_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call. Returns the replaced attachment.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/unified_attachment_response.yaml'
+          examples:
+            replaceAttachmentResponse:
+              $ref: '../components/examples/get_unified_attachment_response.yaml'
+    '400':
+      description: >
+        The request body is invalid, or it changes the attachment type or owner.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response400:
+              $ref: '../components/examples/response_400_invalid_attachment.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'
+    '403':
+      description: The user does not have the required privileges for the attachment owner.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response403:
+              $ref: '../components/examples/response_403.yaml'
+    '404':
+      description: The attachment was not found in the case.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response404:
+              $ref: '../components/examples/response_404.yaml'
+    '409':
+      description: The attachment changed since you read it. Get the latest version and retry.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+
+delete:
+  summary: Delete a case attachment
+  operationId: deleteCaseAttachmentDefaultSpace
+  description: >
+    Deletes a single attachment from a case.
+    You must have `all` privileges for the **Cases** feature in the
+    **Management**, **Observability**, or **Security** section of the Kibana
+    feature privileges, depending on the owner of the case.
+  x-state: Technical preview
+  tags:
+    - cases
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - $ref: '../components/parameters/case_id.yaml'
+    - $ref: '../components/parameters/attachment_id.yaml'
+  responses:
+    '204':
+      description: Indicates a successful call.
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'
+    '403':
+      description: The user does not have the required privileges for the attachment owner.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response403:
+              $ref: '../components/examples/response_403.yaml'
+    '404':
+      description: The attachment was not found in the case.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response404:
+              $ref: '../components/examples/response_404.yaml'
