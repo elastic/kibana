@@ -29,9 +29,10 @@ export const resolveDiscoverGridImplementation = (
 
 export const getDiscoverGridImplementation = (
   storage: Storage,
-  consumer = 'discover'
+  consumer = 'discover',
+  fallback: DiscoverGridImplementation = DEFAULT_DISCOVER_GRID_IMPLEMENTATION
 ): DiscoverGridImplementation => {
-  return resolveDiscoverGridImplementation(storage.get(getStorageKey(consumer)));
+  return resolveDiscoverGridImplementation(storage.get(getStorageKey(consumer)), fallback);
 };
 
 export const setDiscoverGridImplementation = (

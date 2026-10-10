@@ -28,6 +28,7 @@ import {
   resolveDiscoverGridImplementation,
   type DiscoverGridImplementation,
 } from '../../components/discover_grid/discover_grid_implementation';
+import { useDefaultDiscoverGridImplementation } from '../../components/discover_grid/use_discover_grid_implementation';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
@@ -76,7 +77,11 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   } = props;
   const { euiTheme } = useEuiTheme();
   const setExpandedDoc = props.setExpandedDoc ?? noopSetExpandedDoc;
-  const gridImplementation = resolveDiscoverGridImplementation(props.gridImplementation);
+  const defaultGridImplementation = useDefaultDiscoverGridImplementation();
+  const gridImplementation = resolveDiscoverGridImplementation(
+    props.gridImplementation,
+    defaultGridImplementation
+  );
 
   const renderDocumentView = useCallback(
     (

@@ -9,15 +9,26 @@
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useCallback, useState } from 'react';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 import {
   getDiscoverGridImplementation,
   setDiscoverGridImplementation,
   type DiscoverGridImplementation,
 } from './discover_grid_implementation';
 
+/** Returns the default grid implementation, configurable via the `discover.gridImplementation` feature flag. */
+export const useDefaultDiscoverGridImplementation = (): DiscoverGridImplementation => {
+  const { discoverFeatureFlags } = useDiscoverServices();
+  const [defaultImplementation] = useState(() =>
+    discoverFeatureFlags.getDefaultGridImplementation()
+  );
+  return defaultImplementation;
+};
+
 export const useDiscoverGridImplementation = (storage: Storage, consumer = 'discover') => {
+  const defaultImplementation = useDefaultDiscoverGridImplementation();
   const [implementation, setImplementation] = useState<DiscoverGridImplementation>(() =>
-    getDiscoverGridImplementation(storage, consumer)
+    getDiscoverGridImplementation(storage, consumer, defaultImplementation)
   );
 
   const onChangeImplementation = useCallback(
