@@ -12,8 +12,8 @@ import type { DiscoveryEvaluator } from '../types';
 import { createExecuteEsqlGroundingEvaluator } from '../common/esql_grounding';
 import { createDiscoveryToolUsageEvaluator } from './tool_usage/tool_usage';
 import {
+  createSeverityCalibrationEvaluator,
   createConfidenceCalibrationEvaluator,
-  createImpactCalibrationEvaluator,
 } from '../common/scores_calibration';
 import {
   createEvidenceDescriptionEvaluator,
@@ -73,7 +73,7 @@ export const createDiscoveryEvaluators = (
     createEvidenceDescriptionEvaluator({ criteriaFn }),
     createNarrativeFieldsEvaluator({ criteriaFn }),
     createSignalEvidenceConsistencyEvaluator({ criteriaFn }),
-    createImpactCalibrationEvaluator({ criteriaFn }),
+    createSeverityCalibrationEvaluator({ criteriaFn }),
     createConfidenceCalibrationEvaluator({ criteriaFn }),
   ];
 };
