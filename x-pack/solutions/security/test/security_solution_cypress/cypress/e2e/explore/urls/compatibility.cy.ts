@@ -11,10 +11,8 @@ import { visit } from '../../../tasks/navigation';
 import { ALERTS_URL, CREATE_RULE_URL } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import { ABSOLUTE_DATE_RANGE } from '../../../urls/state';
-import {
-  DATE_PICKER_START_DATE_POPOVER_BUTTON,
-  GET_DATE_PICKER_END_DATE_POPOVER_BUTTON,
-} from '../../../screens/date_picker';
+import { GLOBAL_FILTERS_CONTAINER } from '../../../screens/date_picker';
+import { expectDateRangeToBe } from '../../../tasks/date_picker';
 import { ruleDetailsUrl } from '../../../urls/rule_details';
 import { ruleEditUrl } from '../../../urls/rule_edit';
 
@@ -32,8 +30,7 @@ const ABSOLUTE_DATE = {
 
 const RULE_ID = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
 
-// FLAKY: https://github.com/elastic/kibana/issues/181008
-describe.skip('URL compatibility', { tags: ['@ess', '@skipInServerless'] }, () => {
+describe('URL compatibility', { tags: ['@ess', '@skipInServerless'] }, () => {
   beforeEach(() => {
     login();
   });
@@ -63,9 +60,9 @@ describe.skip('URL compatibility', { tags: ['@ess', '@skipInServerless'] }, () =
     cy.url().should('include', ruleDetailsUrl(RULE_ID));
   });
 
-  it('Redirects to rule details alerts tab from old Detections rule details URL', () => {
+  it('Redirects to rule details overview tab from old Detections rule details URL', () => {
     visit(legacyRuleDetailsUrl(RULE_ID));
-    cy.url().should('include', ruleDetailsUrl(RULE_ID, 'alerts'));
+    cy.url().should('include', ruleDetailsUrl(RULE_ID, 'overview'));
   });
 
   it('Redirects to rule edit from old Detections rule edit URL', () => {
@@ -75,15 +72,9 @@ describe.skip('URL compatibility', { tags: ['@ess', '@skipInServerless'] }, () =
 
   it('sets the global start and end dates from the url with timestamps', () => {
     visit(ABSOLUTE_DATE_RANGE.urlWithTimestamps);
-    cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).should(
-      'have.attr',
-      'title',
-      ABSOLUTE_DATE.startTime
-    );
-    cy.get(GET_DATE_PICKER_END_DATE_POPOVER_BUTTON()).should(
-      'have.attr',
-      'title',
-      ABSOLUTE_DATE.endTime
-    );
+    expectDateRangeToBe(GLOBAL_FILTERS_CONTAINER, {
+      start: ABSOLUTE_DATE.startTime,
+      end: ABSOLUTE_DATE.endTime,
+    });
   });
 });
