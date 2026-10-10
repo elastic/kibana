@@ -33,6 +33,8 @@ const SPACE_SETTINGS_TAB_TEST_SUBJ = 'settings-tab-space-settings';
 
 const globalSettings = new Set<string>([
   settings.ALERTING_V2_ENABLED_SETTING_ID,
+  settings.DATA_FEDERATION_ENABLED_SETTING_ID,
+  settings.CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
   settings.XPACK_CUSTOM_BRANDING_LOGO_ID,
   settings.XPACK_CUSTOM_BRANDING_FAVICON_PNG_ID,
   settings.XPACK_CUSTOM_BRANDING_FAVICON_SVG_ID,
@@ -100,7 +102,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           continue;
         }
         it('renders ' + settingId + ' edit field', async () => {
-          expect(await testSubjects.exists(getFieldTestSubj(settingId))).to.be(true);
+          await testSubjects.existOrFail(getFieldTestSubj(settingId), { timeout: 5000 });
         });
       }
     });
@@ -121,7 +123,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         }
 
         it('renders ' + settingId + ' edit field', async () => {
-          expect(await testSubjects.exists(getFieldTestSubj(settingId))).to.be(true);
+          await testSubjects.existOrFail(getFieldTestSubj(settingId), { timeout: 5000 });
         });
       }
     });
@@ -149,7 +151,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('allows resetting a setting to its default value', async () => {
         const fieldTestSubj = 'management-settings-editField-' + settings.CSV_QUOTE_VALUES_ID;
         const resetLinkTestSubj = 'management-settings-resetField-' + settings.CSV_QUOTE_VALUES_ID;
-        expect(await testSubjects.exists(resetLinkTestSubj)).to.be(true);
+        await testSubjects.existOrFail(resetLinkTestSubj, { timeout: 5000 });
         await testSubjects.click(resetLinkTestSubj);
 
         await retry.waitFor('reset link to be hidden', async () => {
@@ -176,7 +178,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Save changes
         await testSubjects.click(SAVE_BUTTON_TEST_SUBJ);
 
-        expect(await testSubjects.exists(PAGE_RELOAD_BUTTON_TEST_SUBJ)).to.be(true);
+        await testSubjects.existOrFail(PAGE_RELOAD_BUTTON_TEST_SUBJ, { timeout: 5000 });
         await testSubjects.click(PAGE_RELOAD_BUTTON_TEST_SUBJ);
         await pageObjects.common.sleep(2000);
 

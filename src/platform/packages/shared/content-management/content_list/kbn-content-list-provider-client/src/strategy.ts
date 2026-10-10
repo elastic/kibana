@@ -109,7 +109,8 @@ const getSortableProperty = (obj: object | undefined, key: string): string | num
  *
  * Handles the nested `attributes` structure and provides a fallback chain:
  * 1. Known fields (`title`, `description`, `updatedAt`, `createdAt`).
- * 2. Top-level item fields (`id`, `type`, etc.).
+ * 2. Top-level string or number properties (`id`, `type`, and decorator-added
+ *    values such as `accessedAt`).
  * 3. Custom attributes (`status`, `priority`, etc.).
  *
  * Returns `null` for missing values so the sorting logic can push them to the end.
@@ -140,11 +141,64 @@ const getUserContentFieldValue = (
 };
 
 /**
- * Sorts items by a specified field.
+ * Resolves the sortable value of `field` for an item.
+ *
+ * A custom `getValue` result is authoritative, including `null`, which means
+ * "no value" and sorts last. Only `undefined` (or no `getValue`) falls through
+ * to the built-in resolver.
+ */
+const getSortValue = (
+  item: UserContentCommonSchema,
+  field: string,
+  customSorts: ContentListSortFieldMap
+): string | number | null => {
+  const customValue = customSorts[field]?.getValue?.(item);
+  return customValue !== undefined ? customValue : getUserContentFieldValue(item, field);
+};
+
+/**
+ * Compares two items on a single field. Values that are `null` sort last
+ * regardless of direction, and two `null` values compare equal.
+ */
+const compareByField = (
+  a: UserContentCommonSchema,
+  b: UserContentCommonSchema,
+  field: string,
+  direction: 'asc' | 'desc',
+  customSorts: ContentListSortFieldMap
+): number => {
+  const aValue = getSortValue(a, field, customSorts);
+  const bValue = getSortValue(b, field, customSorts);
+  if (aValue === null && bValue === null) {
+    return 0;
+  }
+  if (aValue === null) {
+    return 1;
+  }
+  if (bValue === null) {
+    return -1;
+  }
+  if (typeof aValue === 'string' && typeof bValue === 'string') {
+    const comparison = aValue.localeCompare(bValue);
+    return direction === 'asc' ? comparison : -comparison;
+  }
+  if (aValue < bValue) {
+    return direction === 'asc' ? -1 : 1;
+  }
+  if (aValue > bValue) {
+    return direction === 'asc' ? 1 : -1;
+  }
+  return 0;
+};
+
+/**
+ * Sorts items by a specified field, applying the field's `fallbackSort`
+ * (if any) when the primary comparison is equal.
  *
  * @param items - The items to sort.
  * @param field - The field name to sort by.
  * @param direction - Sort direction ('asc' or 'desc').
+ * @param customSorts - Registered custom sort fields.
  * @returns A new sorted array (does not mutate the original).
  */
 const sortItems = (
@@ -153,33 +207,13 @@ const sortItems = (
   direction: 'asc' | 'desc',
   customSorts: ContentListSortFieldMap = {}
 ): UserContentCommonSchema[] => {
+  const fallbackSort = customSorts[field]?.fallbackSort;
   return [...items].sort((a, b) => {
-    const customSort = customSorts[field];
-    const aValue = customSort?.getValue?.(a) ?? getUserContentFieldValue(a, field);
-    const bValue = customSort?.getValue?.(b) ?? getUserContentFieldValue(b, field);
-
-    if (aValue === null && bValue === null) {
-      return 0;
+    const primary = compareByField(a, b, field, direction, customSorts);
+    if (primary !== 0 || !fallbackSort) {
+      return primary;
     }
-    if (aValue === null) {
-      return 1;
-    }
-    if (bValue === null) {
-      return -1;
-    }
-
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
-      const comparison = aValue.localeCompare(bValue);
-      return direction === 'asc' ? comparison : -comparison;
-    }
-
-    if (aValue < bValue) {
-      return direction === 'asc' ? -1 : 1;
-    }
-    if (aValue > bValue) {
-      return direction === 'asc' ? 1 : -1;
-    }
-    return 0;
+    return compareByField(a, b, fallbackSort.field, fallbackSort.direction, customSorts);
   });
 };
 

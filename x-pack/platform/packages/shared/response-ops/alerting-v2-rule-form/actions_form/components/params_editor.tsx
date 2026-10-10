@@ -26,24 +26,27 @@ interface ParamsEditorProps {
   value: string;
   onChange: (next: string) => void;
   height?: string | number;
+  errors?: string[];
 }
 
-export const ParamsEditor = ({ value, onChange, height = 200 }: ParamsEditorProps) => (
+export const ParamsEditor = ({ value, onChange, height = 200, errors = [] }: ParamsEditorProps) => (
   <EuiFormRow
     label={i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.params.label', {
       defaultMessage: 'Parameters',
     })}
     helpText={i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.params.helpText', {
       defaultMessage:
-        'Use {syntax} to reference dispatcher payload values such as {policyId}, {groupKey}, or {episodes}.',
+        'Use {syntax} to reference dispatcher payload values such as {policyId}, {groupKey}, or {alerts}.',
       values: {
         syntax: '{{ ... }}',
         policyId: '{{ inputs.payload.policyId }}',
         groupKey: '{{ inputs.payload.groupKey }}',
-        episodes: '{{ inputs.payload.episodes }}',
+        alerts: '{{ inputs.payload.alerts }}',
       },
     })}
     fullWidth
+    isInvalid={errors.length > 0}
+    error={errors}
   >
     <CodeEditor
       languageId="yaml"

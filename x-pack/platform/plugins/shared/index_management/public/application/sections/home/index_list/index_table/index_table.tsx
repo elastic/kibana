@@ -398,7 +398,8 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
   setURLParam(paramName: string, value: string | boolean) {
     const { location, history } = this.props;
     const { pathname, search } = location;
-    const params: Record<string, string | string[] | boolean | null | undefined> = qs.parse(search);
+    const params: Record<string, string | Array<string | null> | boolean | null | undefined> =
+      qs.parse(search);
     if (value) {
       params[paramName] = value;
     } else {
@@ -433,7 +434,6 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
             },
           })}
         />
-        <EuiSpacer />
       </>
     );
   }
@@ -446,6 +446,7 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
 
     return (
       <>
+        <EuiSpacer />
         <KbnWarningCallout
           data-test-subj="indicesEnrichmentErrorCallout"
           title={i18n.translate('xpack.idxMgmt.indexTable.enrichmentErrorTitle', {
@@ -461,7 +462,6 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
             />
           }
         />
-        <EuiSpacer size="m" />
       </>
     );
   }

@@ -220,8 +220,6 @@ dependsOn:
   - '@kbn/data-stream-adapter'
   - '@kbn/core-lifecycle-server'
   - '@kbn/core-user-profile-common'
-  - '@kbn/core-user-profile-server'
-  - '@kbn/core-user-profile-server-mocks'
   - '@kbn/langchain'
   - '@kbn/discover-shared-plugin'
   - '@kbn/react-hooks'
@@ -275,8 +273,11 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/agent-builder-browser'
+  - '@kbn/agentic-investigations-common'
+  - '@kbn/agentic-investigations-plugin'
   - '@kbn/mitre-attack-plugin'
   - '@kbn/security-mitre-attack-common'
+  - '@kbn/security-mitre-attack-server'
   - '@kbn/lazy-object'
   - '@kbn/ai-assistant-common'
   - '@kbn/product-doc-common'
@@ -294,6 +295,8 @@ dependsOn:
   - '@kbn/anonymization-plugin'
   - '@kbn/anonymization-common'
   - '@kbn/workflows-extensions'
+  - '@kbn/alertzero-common'
+  - '@kbn/alertzero-plugin'
   - '@kbn/shared-ux-ai-components'
   - '@kbn/shared-ux-markdown'
   - '@kbn/controls-schemas'
@@ -301,6 +304,7 @@ dependsOn:
   - '@kbn/evals-plugin'
   - '@kbn/shared-ux-column-presets'
   - '@kbn/core-overlays-browser'
+  - '@kbn/flyout-template'
   - '@kbn/workflows-management-plugin'
   - '@kbn/core-application-browser-mocks'
   - '@kbn/date-range-picker'
@@ -311,9 +315,14 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/shared-ux-utility'
   - '@kbn/app-header'
+  - '@kbn/app-menu'
   - '@kbn/core-execution-context-common'
   - '@kbn/code-editor'
   - '@kbn/code-editor-mock'
+  - '@kbn/test-es-server'
+  - '@kbn/core-user-profile-server-mocks'
+  - '@kbn/core-user-profile-server'
+  - '@kbn/core-security-server'
 tags:
   - plugin
   - prod
@@ -328,10 +337,10 @@ fileGroups:
     - test/scout/**/*
     - test/scout_ai_value_report/**/*
     - test/scout_cps_local/**/*
-    - test/scout_managed_mitre/**/*
+    - test/scout_edr_real_fleet/**/*
     - test/scout_es_max_response_size/**/*
     - test/scout_security_attacks_alignment/**/*
-    - test/scout_threat_intel/**/*
+    - test/scout_alertzero/**/*
     - common/**/*.json
     - server/**/*.json
     - scripts/**/*.json

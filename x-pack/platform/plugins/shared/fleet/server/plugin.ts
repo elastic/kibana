@@ -172,6 +172,10 @@ import {
   registerVerifyPermissionsTask,
   scheduleVerifyPermissionsTask,
 } from './tasks/agentless/verify_permissions_task';
+import {
+  registerIacUpgradeCheckTask,
+  scheduleIacUpgradeCheckTask,
+} from './tasks/iac_upgrade_check_task';
 import { registerReindexIntegrationKnowledgeTask } from './tasks/reindex_integration_knowledge_task';
 import { registerSyncNamespaceTemplatesTask } from './tasks/sync_namespace_templates_task';
 import { registerSyncIlmPolicyTask } from './tasks/sync_ilm_policy_task';
@@ -212,6 +216,7 @@ export interface FleetAppContext {
   data: DataPluginStart;
   encryptedSavedObjectsStart?: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
+  isFipsEnabled: boolean;
   securityCoreStart: SecurityServiceStart;
   securitySetup: SecurityPluginSetup;
   securityStart: SecurityPluginStart;
@@ -359,6 +364,7 @@ export class FleetPlugin
   private fleetPolicyRevisionsCleanupTask?: FleetPolicyRevisionsCleanupTask;
   private versionSpecificPolicyAssignmentTask?: VersionSpecificPolicyAssignmentTask;
 
+  private isFipsEnabled: boolean = false;
   private agentService?: AgentService;
   private packageService?: PackageService;
   private packagePolicyService?: PackagePolicyService;
@@ -387,6 +393,7 @@ export class FleetPlugin
     this.encryptedSavedObjectsSetup = deps.encryptedSavedObjects;
     this.cloud = deps.cloud;
     this.securitySetup = deps.security;
+    this.isFipsEnabled = core.security.fips.isEnabled();
     const config = this.configInitialValue;
 
     core.status.set(this.fleetStatus$.asObservable());
@@ -714,6 +721,7 @@ export class FleetPlugin
     registerAgentlessDeploymentSyncTask(deps.taskManager, this.configInitialValue);
     registerVerifyPermissionsTask(deps.taskManager);
     registerVerifierPolicyCleanupTask(deps.taskManager);
+    registerIacUpgradeCheckTask(deps.taskManager);
     registerReindexIntegrationKnowledgeTask(deps.taskManager);
     registerSyncNamespaceTemplatesTask(deps.taskManager);
     registerSyncIlmPolicyTask(deps.taskManager);
@@ -822,6 +830,7 @@ export class FleetPlugin
       data: plugins.data,
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
+      isFipsEnabled: this.isFipsEnabled,
       securityCoreStart: core.security,
       securitySetup: this.securitySetup,
       securityStart: plugins.security,
@@ -886,6 +895,7 @@ export class FleetPlugin
     ).catch(() => {});
     scheduleVerifyPermissionsTask(plugins.taskManager).catch(() => {});
     scheduleVerifierPolicyCleanupTask(plugins.taskManager).catch((error) => {});
+    scheduleIacUpgradeCheckTask(plugins.taskManager).catch(() => {});
     this.fleetPolicyRevisionsCleanupTask
       ?.start({ taskManager: plugins.taskManager })
       .catch(() => {});

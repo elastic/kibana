@@ -30,9 +30,47 @@ export type FlakyTestClassification = z.infer<typeof FlakyTestClassificationSche
 export const FlakyTestSampleFailureSchema = z.object({
   message: z.string(),
   buildUrl: z.optional(z.string()),
+  /** Buildkite job the failure happened in; `<buildUrl>#<jobId>` opens its log. */
+  jobId: z.optional(z.string()),
+  /** Label of the Buildkite step, e.g. `FTR Configs #21` or `Scout Lane #3 - stateful-classic / default`. */
+  stepLabel: z.optional(z.string()),
   timestamp: z.coerce.date(),
 });
 export type FlakyTestSampleFailure = z.infer<typeof FlakyTestSampleFailureSchema>;
+
+/** Failed attempts with one error on one pipeline. */
+export const FlakyTestErrorPipelineSchema = z.object({
+  pipeline: z.string(),
+  failuresCount: z.int(),
+});
+
+/**
+ * One distinct error of a test over the window, across every pipeline and branch, not just the
+ * report scope. Errors are told apart by the first three lines of their message with ids, URLs
+ * and numbers normalised away, so a diff that differs only in a count is one error.
+ */
+export const FlakyTestErrorSchema = z.object({
+  /** The normalised head the failures were grouped on; lets a consumer merge errors across tests. */
+  key: z.string(),
+  /** The newest failure's message, in full. */
+  message: z.string(),
+  /** Failed attempts with this error. */
+  failuresCount: z.int(),
+  /** Distinct builds those attempts ran in. */
+  buildsCount: z.int(),
+  /** Most failures first. */
+  byPipeline: z.array(FlakyTestErrorPipelineSchema),
+  /** Distinct branches, sorted; pull request builds record the head ref as `owner:branch`. */
+  branches: z.array(z.string()),
+  /** Distinct target modes, sorted (`unknown` for frameworks without a Scout target). */
+  targets: z.array(z.string()),
+  firstFailedAt: z.coerce.date(),
+  lastFailedAt: z.coerce.date(),
+  /** The newest failure's build and Buildkite job; `<url>#<jobId>` opens the job's log. */
+  lastFailedBuildUrl: z.optional(z.string()),
+  lastFailedJobId: z.optional(z.string()),
+});
+export type FlakyTestError = z.infer<typeof FlakyTestErrorSchema>;
 
 /**
  * Most recent run of the test on one branch within the report window, regardless of result.
@@ -43,6 +81,8 @@ export const FlakyTestBranchLatestRunSchema = z.object({
   status: z.string(),
   timestamp: z.coerce.date(),
   buildUrl: z.optional(z.string()),
+  /** Buildkite job of that run; `<buildUrl>#<jobId>` opens its log. */
+  jobId: z.optional(z.string()),
 });
 export type FlakyTestBranchLatestRun = z.infer<typeof FlakyTestBranchLatestRunSchema>;
 
@@ -61,11 +101,37 @@ export const FlakyTestBranchStatsSchema = z.object({
   buildFailRate: z.number(),
   /** Absent when the test never failed on this branch. */
   lastFailedAt: z.optional(z.coerce.date()),
+  /** The build of that failure and its Buildkite job; `<url>#<jobId>` opens the job's log. */
+  lastFailedBuildUrl: z.optional(z.string()),
+  lastFailedJobId: z.optional(z.string()),
   /** Most recent execution, i.e. run that was not skipped; absent when every run was skipped. */
   latestExecutionAt: z.optional(z.coerce.date()),
   latestRun: z.optional(FlakyTestBranchLatestRunSchema),
+  /** Every setup (pipeline, config, target) that ran the test on this branch skipped it last. */
+  skipped: z.optional(z.boolean()),
 });
 export type FlakyTestBranchStats = z.infer<typeof FlakyTestBranchStatsSchema>;
+
+/**
+ * Build counts of one test on one Scout test target, any branch. Only Scout (Playwright) runs
+ * record a target; Jest, FTR and Cypress runs report the mode `unknown`.
+ */
+export const FlakyTestTargetStatsSchema = z.object({
+  /** `<arch>-<domain>`, e.g. `stateful-classic` or `serverless-security_complete`. */
+  mode: z.string(),
+  /** Where the target ran: `local` or `cloud`. */
+  type: z.string(),
+  builds: z.int(),
+  failedBuilds: z.int(),
+  /** `failedBuilds / builds` on this target. */
+  buildFailRate: z.number(),
+  /** Absent when the test never failed on this target. */
+  lastFailedAt: z.optional(z.coerce.date()),
+  /** The build of that failure and its Buildkite job; `<url>#<jobId>` opens the job's log. */
+  lastFailedBuildUrl: z.optional(z.string()),
+  lastFailedJobId: z.optional(z.string()),
+});
+export type FlakyTestTargetStats = z.infer<typeof FlakyTestTargetStatsSchema>;
 
 /**
  * The branch that qualified a test: the one with the highest build failure rate among the
@@ -93,6 +159,11 @@ export const FlakyTestEntrySchema = z.object({
   suiteTitle: z.optional(z.string()),
   filePath: z.string(),
   configPath: z.optional(z.string()),
+  /**
+   * What the config runs: `ui-test`, `api-test`, `unit-test`, `unit-integration-test` or
+   * `unknown`. Absent in reports written before the field existed.
+   */
+  configCategory: z.optional(z.string()),
   owners: z.array(z.string()),
   areas: z.array(z.string()),
   /** Executions that were not skipped. */
@@ -113,6 +184,11 @@ export const FlakyTestEntrySchema = z.object({
   failedBranches: z.int(),
   /** Per-branch breakdown of `builds` / `failedBuilds`, most failed builds first. */
   byBranch: z.array(FlakyTestBranchStatsSchema),
+  /**
+   * Per-target breakdown of `builds` / `failedBuilds`, most failed builds first. Defaults so
+   * that reports written before the field existed still parse.
+   */
+  byTarget: z.array(FlakyTestTargetStatsSchema).default([]),
   firstFailedAt: z.coerce.date(),
   lastFailedAt: z.coerce.date(),
   /**
@@ -123,6 +199,11 @@ export const FlakyTestEntrySchema = z.object({
   /** Absent only if the test emitted no execution events in the window (should not happen). */
   latestRun: z.optional(FlakyTestLatestRunSchema),
   sampleFailures: z.array(FlakyTestSampleFailureSchema),
+  /**
+   * The test's distinct errors over the window, most failures first. Defaults so that reports
+   * written before the field existed still parse.
+   */
+  errors: z.array(FlakyTestErrorSchema).default([]),
 });
 export type FlakyTestEntry = z.infer<typeof FlakyTestEntrySchema>;
 
@@ -135,9 +216,18 @@ export const FlakyTestPipelineStatsSchema = z.object({
   buildFailRate: z.number(),
   /** Distinct branches with at least one failed execution. */
   failedBranches: z.int(),
+  /**
+   * Names of those branches, sorted; pull request builds record the head ref as `owner:branch`.
+   * Absent in reports written before the field existed.
+   */
+  failedBranchNames: z.optional(z.array(z.string())),
   lastFailedAt: z.optional(z.coerce.date()),
-  /** The most recent build with a failure, when its number was recorded. */
+  /** The most recent build with a failure. */
   lastFailedBuildUrl: z.optional(z.string()),
+  /** Buildkite job of that failure; `<lastFailedBuildUrl>#<lastFailedJobId>` opens its log. */
+  lastFailedJobId: z.optional(z.string()),
+  /** Label of the Buildkite step that failure ran in. */
+  lastFailedStepLabel: z.optional(z.string()),
 });
 export type FlakyTestPipelineStats = z.infer<typeof FlakyTestPipelineStatsSchema>;
 

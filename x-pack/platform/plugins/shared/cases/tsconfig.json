@@ -43,6 +43,7 @@
     "@kbn/rule-data-utils",
     "@kbn/std",
     "@kbn/test-jest-helpers",
+    "@kbn/test-eui-helpers",
     "@kbn/config-schema",
     "@kbn/task-manager-plugin",
     "@kbn/usage-collection-plugin",
@@ -103,8 +104,10 @@
     "@kbn/securitysolution-es-utils",
     "@kbn/response-ops-retry-service",
     "@kbn/openapi-generator",
+    "@kbn/deeplinks-workflows",
     "@kbn/workflows-extensions",
     "@kbn/workflows",
+    "@kbn/workflows-ui",
     "@kbn/workflows-management-plugin",
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-common",
@@ -125,6 +128,7 @@
     "@kbn/ai-assistant-common",
     "@kbn/management-settings-ids",
     "@kbn/core-http-common",
+    "@kbn/workflows-ui",
   ],
   "exclude": ["target/**/*"]
 }

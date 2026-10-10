@@ -32,10 +32,10 @@ import { listRuleExecutionsOasExamples } from './list_rule_executions_oas_exampl
 
 export const toListRuleExecutionsArgs = ({
   rule_ids: ruleIds,
-  outcome: outcomes,
-  from,
-  to,
-  sort,
+  outcomes,
+  from: from,
+  to: to,
+  sort_field: sortField,
   sort_order: sortOrder,
   page,
   per_page: perPage,
@@ -47,7 +47,7 @@ export const toListRuleExecutionsArgs = ({
     outcomes,
     from,
     to,
-    sort: sort === 'started_at' ? 'startedAt' : sort,
+    sortField: sortField === 'started_at' ? 'startedAt' : 'duration',
     sortOrder,
     page,
     perPage,
@@ -70,14 +70,16 @@ const toRuleExecutionView = ({
   assertAllFieldsMapped(restTimings);
   return {
     id,
-    rule,
+    rule: { id: rule.id, version: rule.version ?? undefined },
     space_id: spaceId,
     started_at: startedAt,
     ended_at: endedAt,
-    timings: { duration, scheduled_delay: scheduledDelay },
+    timings: { duration_ms: duration, scheduled_delay_ms: scheduledDelay },
     outcome,
-    reason,
-    error: error && { message: error.message, stack_trace: error.stackTrace },
+    reason: reason ?? undefined,
+    error: error
+      ? { message: error.message, stack_trace: error.stackTrace ?? undefined }
+      : undefined,
   };
 };
 

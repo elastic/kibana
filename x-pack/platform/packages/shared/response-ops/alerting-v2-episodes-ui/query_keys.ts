@@ -25,7 +25,8 @@ export const queryKeys = {
     filterState?: EpisodesFilterState,
     sortState?: EpisodesSortState,
     timeRange?: { from: string; to: string } | null,
-    additionalSourceId?: string
+    additionalSourceId?: string,
+    queryV2Source?: boolean
   ) =>
     [
       ...queryKeys.listAll(),
@@ -35,6 +36,7 @@ export const queryKeys = {
       sortState,
       timeRange,
       additionalSourceId,
+      queryV2Source,
     ] as const,
   episodeAll: () => [...queryKeys.all, 'episode'] as const,
   episode: (spaceId: string, episodeId: string) =>
@@ -85,21 +87,26 @@ export const queryKeys = {
   tagOptions: (
     spaceId: string,
     timeRange?: { from: string; to: string } | null,
-    additionalSourceId?: string
-  ) => [...queryKeys.tagOptionsAll(), spaceId, timeRange, additionalSourceId] as const,
+    additionalSourceId?: string,
+    queryV2Source?: boolean
+  ) =>
+    [...queryKeys.tagOptionsAll(), spaceId, timeRange, additionalSourceId, queryV2Source] as const,
   tagSuggestionsAll: () => [...queryKeys.all, 'tag-suggestions'] as const,
   tagSuggestions: (spaceId: string) => [...queryKeys.tagSuggestionsAll(), spaceId] as const,
   assigneeSuggestions: (searchTerm: string) =>
     [...queryKeys.all, 'assignee-suggestions', searchTerm] as const,
   bulkGetProfiles: (uids: string[]) => [...queryKeys.all, 'bulk-get-profiles', ...uids] as const,
   fetchRule: (id: string) => [...queryKeys.all, 'fetch-rule', id] as const,
+  fetchSourceRule: (sourceId: string, id: string) =>
+    [...queryKeys.all, 'fetch-source-rule', sourceId, id] as const,
   histogramAll: () => [...queryKeys.all, 'histogram'] as const,
   histogram: (
     spaceId: string | undefined,
     filterState: EpisodesFilterState,
     timeRange: TimeRange | undefined,
     breakdownField: string | undefined,
-    additionalSourceId?: string
+    additionalSourceId?: string,
+    queryV2Source?: boolean
   ) =>
     [
       ...queryKeys.histogramAll(),
@@ -108,6 +115,7 @@ export const queryKeys = {
       timeRange,
       breakdownField,
       additionalSourceId,
+      queryV2Source,
     ] as const,
   currentUserProfile: () => [...queryKeys.all, 'current-user-profile'] as const,
   kpisAll: () => [...queryKeys.all, 'kpis'] as const,
@@ -116,7 +124,8 @@ export const queryKeys = {
     filterState?: EpisodesFilterState,
     timeRange?: { from: string; to: string } | null,
     currentUserUid?: string,
-    additionalSourceId?: string
+    additionalSourceId?: string,
+    queryV2Source?: boolean
   ) =>
     [
       ...queryKeys.kpisAll(),
@@ -125,5 +134,6 @@ export const queryKeys = {
       timeRange,
       currentUserUid,
       additionalSourceId,
+      queryV2Source,
     ] as const,
 };

@@ -7,7 +7,7 @@
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { sortBy } from 'lodash';
-import { NO_ASSIGNEES_VALUE } from '../all_cases/assignees_filter';
+import { NO_ASSIGNEES_VALUE } from '../all_cases/components/assignees_filter';
 import type { CurrentUserProfile } from '../types';
 import { UNKNOWN } from './translations';
 import type { AssigneesFilteringSelection, UserInfoWithAvatar } from './types';

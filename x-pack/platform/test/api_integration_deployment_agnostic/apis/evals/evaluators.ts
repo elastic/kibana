@@ -9,10 +9,13 @@ import expect from '@kbn/expect';
 import {
   EVALS_EVALUATORS_URL,
   EVALS_EVALUATOR_URL,
+  EVALS_TEST_EVALUATOR_URL,
+  EVALS_TRACE_EVIDENCE_URL,
   EVALS_VALIDATE_URL,
   type CreateEvaluatorResponse,
   type DeleteEvaluatorResponse,
   type GetEvaluatorResponse,
+  type GetTraceEvidenceResponse,
   type ListEvaluatorsResponse,
   type LlmJudgeConfig,
   type UpdateEvaluatorResponse,
@@ -20,10 +23,11 @@ import {
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { SupertestWithRoleScopeType } from '../../services';
 import { getEvalsApiClientForRole } from './helpers/api_client';
-import { uniqueSuffix } from './helpers/fixtures';
+import { seedTrace, uniqueSuffix, uniqueTraceId } from './helpers/fixtures';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const es = getService('es');
   const spaces = getService('spaces');
 
   let adminClient: SupertestWithRoleScopeType;
@@ -31,6 +35,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   const evaluatorPath = (name: string) =>
     EVALS_EVALUATOR_URL.replace('{name}', encodeURIComponent(name));
+  const traceEvidencePath = (traceId: string) =>
+    EVALS_TRACE_EVIDENCE_URL.replace('{traceId}', encodeURIComponent(traceId));
 
   const judge: LlmJudgeConfig = {
     prompt: 'Response: {{{agent_response}}}\nRate its professional tone.',
@@ -66,6 +72,98 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await viewerClient.get(EVALS_EVALUATORS_URL).expect(200);
     });
 
+    describe('trace evidence', () => {
+      const traceId = uniqueTraceId();
+      const traceIndex = `traces-evals-evidence-ftr-${suffix}`;
+
+      before(async () => {
+        await seedTrace(es, traceIndex, traceId, [
+          {
+            spanId: 'span-1',
+            name: 'root span',
+            timestamp: '2024-01-01T00:00:00.000Z',
+            durationNanos: 5_000_000,
+            attributes: {
+              'elastic.inference.span.kind': 'LLM',
+              'gen_ai.input.messages': JSON.stringify([
+                {
+                  role: 'user',
+                  parts: [{ type: 'text', content: 'What is the service status?' }],
+                },
+              ]),
+              'gen_ai.output.messages': JSON.stringify([
+                {
+                  role: 'assistant',
+                  parts: [{ type: 'text', content: 'The service is healthy.' }],
+                },
+              ]),
+            },
+          },
+          {
+            spanId: 'span-2',
+            parentSpanId: 'span-1',
+            name: 'tool span',
+            timestamp: '2024-01-01T00:00:00.002Z',
+            durationNanos: 1_000_000,
+            attributes: {
+              'elastic.inference.span.kind': 'TOOL',
+              'gen_ai.tool.call.id': 'call-1',
+              'gen_ai.tool.name': 'health_check',
+              'gen_ai.tool.call.arguments': '{"service":"evals-ftr"}',
+              'gen_ai.tool.call.result': '{"status":"healthy"}',
+            },
+          },
+        ]);
+      });
+
+      after(async () => {
+        await es.indices.delete({ index: traceIndex }).catch(() => {
+          // best-effort cleanup
+        });
+      });
+
+      it('returns normalized evidence using automatic profile detection', async () => {
+        const { body } = await adminClient.get(traceEvidencePath(traceId)).expect(200);
+
+        const result = body as GetTraceEvidenceResponse;
+        expect(result.status).to.be('resolved');
+        if (result.status !== 'resolved') {
+          throw new Error(`Expected resolved evidence, received ${result.status}`);
+        }
+
+        expect(result).not.to.have.property('best_effort');
+        expect(result.profile).to.be('elastic-inference');
+        expect(result.evidence).to.eql({
+          input: { message: 'What is the service status?' },
+          response: { message: 'The service is healthy.' },
+          steps: [
+            {
+              tool_call_id: 'call-1',
+              tool_id: 'health_check',
+              arguments: { service: 'evals-ftr' },
+              result: { status: 'healthy' },
+            },
+          ],
+        });
+      });
+
+      it('allows a viewer to wait for complete normalized evidence', async () => {
+        const { body } = await viewerClient
+          .get(traceEvidencePath(traceId))
+          .query({ profile: 'elastic-inference', wait: 'complete' })
+          .expect(200);
+
+        const result = body as GetTraceEvidenceResponse;
+        expect(result.status).to.be('resolved');
+        if (result.status !== 'resolved') {
+          throw new Error(`Expected resolved evidence, received ${result.status}`);
+        }
+
+        expect(result).not.to.have.property('best_effort');
+        expect(result.profile).to.be('elastic-inference');
+      });
+    });
+
     describe('CRUD', () => {
       const name = `ftr-tone-${suffix}`;
       let exists = false;
@@ -76,6 +174,75 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             // best-effort cleanup
           });
         }
+      });
+
+      it('validates draft evaluator tests without persisting them', async () => {
+        const draftName = `draft-${suffix}`;
+
+        await adminClient
+          .post(EVALS_TEST_EVALUATOR_URL)
+          .send({
+            definition: {
+              name: draftName,
+              description: 'Unsaved evaluator',
+              judge: { ...judge, prompt: '{{{undeclared_reference}}}' },
+            },
+            connector_id: 'missing-connector',
+            subject: { traces: [{ trace_id: '1234567890abcdef1234567890abcdef' }] },
+          })
+          .expect(400);
+
+        await adminClient.get(evaluatorPath(draftName)).expect(404);
+      });
+
+      it('validates evaluator test execution inputs at the API boundary', async () => {
+        const definition = {
+          name: `draft-input-${suffix}`,
+          description: 'Unsaved evaluator',
+          judge,
+        };
+
+        await adminClient
+          .post(EVALS_TEST_EVALUATOR_URL)
+          .send({
+            definition,
+            connector_id: 'missing-connector',
+            subject: { traces: [{ trace_id: 'not-a-trace' }] },
+          })
+          .expect(400);
+        await adminClient
+          .post(EVALS_TEST_EVALUATOR_URL)
+          .send({
+            definition,
+            subject: { traces: [{ trace_id: '1234567890abcdef1234567890abcdef' }] },
+          })
+          .expect(400);
+        await adminClient
+          .post(EVALS_TEST_EVALUATOR_URL)
+          .send({
+            definition,
+            connector_id: 'missing-connector',
+            subject: {
+              traces: [{ trace_id: '1234567890abcdef1234567890abcdef' }],
+              instrumentation: { profile: 'unsupported' },
+            },
+          })
+          .expect(400);
+      });
+
+      it('requires manage_evals to test a draft', async () => {
+        await viewerClient
+          .post(EVALS_TEST_EVALUATOR_URL)
+          .send({
+            definition: {
+              name: `viewer-draft-${suffix}`,
+              description: 'Unsaved evaluator',
+              judge,
+            },
+            connector_id: 'missing-connector',
+            subject: { traces: [{ trace_id: '1234567890abcdef1234567890abcdef' }] },
+          })
+          .expect(403);
       });
 
       it('rejects a definition without a system prompt', async () => {
@@ -117,8 +284,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await adminClient
           .put(evaluatorPath('correctness'))
           .send({ description: 'Changed' })
-          .expect(400);
-        await adminClient.delete(evaluatorPath('correctness')).expect(400);
+          .expect(409);
+        await adminClient.delete(evaluatorPath('correctness')).expect(409);
       });
 
       it('creates a user-defined evaluator with manage_evals', async () => {
@@ -186,14 +353,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
       });
 
-      it('writes a new minor version without replacing the old one', async () => {
+      it('writes a new version without replacing the old one', async () => {
         const { body } = await adminClient
           .put(evaluatorPath(name))
           .send({ description: 'Updated tone evaluator' })
           .expect(200);
         const updated = body as UpdateEvaluatorResponse;
 
-        expect(updated.evaluator.version).to.eql('1.1.0');
+        // A patch: the description is not shown to the judge, so scores still compare.
+        expect(updated.evaluator.version).to.eql('1.0.1');
         expect(updated.evaluator.description).to.eql('Updated tone evaluator');
 
         const { body: oldBody } = await adminClient
@@ -202,11 +370,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(200);
         const oldVersion = oldBody as GetEvaluatorResponse;
         expect(oldVersion.evaluator.description).to.eql('Initial tone evaluator');
-        expect(oldVersion.evaluator.versions).to.eql(['1.1.0', '1.0.0']);
+        expect(oldVersion.evaluator.versions).to.eql(['1.0.1', '1.0.0']);
       });
 
       it('rejects an update with no changes', async () => {
         await adminClient.put(evaluatorPath(name)).send({}).expect(400);
+      });
+
+      it('refuses an edit made from a version that has since been superseded', async () => {
+        const { body } = await adminClient
+          .put(evaluatorPath(name))
+          .send({ description: 'Stale tone evaluator', base_version: '1.0.0' })
+          .expect(409);
+        expect(body.message).to.contain('changed to version 1.0.1');
+
+        const { body: latestBody } = await adminClient.get(evaluatorPath(name)).expect(200);
+        expect((latestBody as GetEvaluatorResponse).evaluator.version).to.eql('1.0.1');
       });
 
       it('lists the latest persisted version alongside built-ins', async () => {
@@ -214,7 +393,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = body as ListEvaluatorsResponse;
         const found = response.evaluators.find((evaluator) => evaluator.name === name);
 
-        expect(found?.version).to.eql('1.1.0');
+        expect(found?.version).to.eql('1.0.1');
         expect(found?.origin).to.eql('user_defined');
       });
 
@@ -235,7 +414,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await adminClient.get(evaluatorPath(name)).query({ version: '1.0.0' }).expect(404);
         const { body: latestBody } = await adminClient.get(evaluatorPath(name)).expect(200);
-        expect((latestBody as GetEvaluatorResponse).evaluator.version).to.eql('1.1.0');
+        expect((latestBody as GetEvaluatorResponse).evaluator.version).to.eql('1.0.1');
       });
 
       it('deletes every remaining version', async () => {
@@ -243,6 +422,86 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect((body as DeleteEvaluatorResponse).deleted).to.eql(1);
         await adminClient.get(evaluatorPath(name)).expect(404);
         exists = false;
+      });
+    });
+
+    describe('score direction', () => {
+      const name = `ftr-direction-${suffix}`;
+      const mixedJudge: LlmJudgeConfig = {
+        ...judge,
+        output: {
+          scores: [
+            { name: 'grounded', type: 'number' },
+            { name: 'hallucination', type: 'number', direction: 'minimize' },
+          ],
+        },
+      };
+
+      after(async () => {
+        await adminClient.delete(evaluatorPath(name)).catch(() => {
+          // best-effort cleanup
+        });
+      });
+
+      it('rejects a direction outside maximize, minimize, and neutral', async () => {
+        await adminClient
+          .post(EVALS_EVALUATORS_URL)
+          .send({
+            name: `bad-direction-${suffix}`,
+            description: 'Invalid evaluator',
+            judge: {
+              ...judge,
+              output: { scores: [{ name: 'tone', type: 'number', direction: 'upward' }] },
+            },
+          })
+          .expect(400);
+      });
+
+      it('stores a direction per score', async () => {
+        const { body } = await adminClient
+          .post(EVALS_EVALUATORS_URL)
+          .send({ name, description: 'Mixed-direction evaluator', judge: mixedJudge })
+          .expect(200);
+
+        expect((body as CreateEvaluatorResponse).evaluator.judge).to.eql(mixedJudge);
+      });
+
+      it('writes no version when a score without a direction is saved as maximize', async () => {
+        const { body } = await adminClient
+          .put(evaluatorPath(name))
+          .send({
+            judge: {
+              ...mixedJudge,
+              output: {
+                scores: [
+                  { name: 'grounded', type: 'number', direction: 'maximize' },
+                  { name: 'hallucination', type: 'number', direction: 'minimize' },
+                ],
+              },
+            },
+          })
+          .expect(200);
+
+        expect((body as UpdateEvaluatorResponse).evaluator.version).to.eql('1.0.0');
+      });
+
+      it('takes a major when a score changes direction', async () => {
+        const { body } = await adminClient
+          .put(evaluatorPath(name))
+          .send({
+            judge: {
+              ...mixedJudge,
+              output: {
+                scores: [
+                  { name: 'grounded', type: 'number', direction: 'neutral' },
+                  { name: 'hallucination', type: 'number', direction: 'minimize' },
+                ],
+              },
+            },
+          })
+          .expect(200);
+
+        expect((body as UpdateEvaluatorResponse).evaluator.version).to.eql('2.0.0');
       });
     });
 

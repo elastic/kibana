@@ -35,9 +35,9 @@ describe('registerAlertingAdvancedSettings', () => {
     );
   });
 
-  it('registers the global setting in the Alerting V2 category', () => {
+  it('registers the global setting in the Alerting category', () => {
     expect(alertingGlobalAdvancedSettings[ALERTING_V2_ENABLED_SETTING_ID]).toEqual(
-      expect.objectContaining({ category: ['alertingV2'] })
+      expect.objectContaining({ category: ['alerting'] })
     );
   });
 });

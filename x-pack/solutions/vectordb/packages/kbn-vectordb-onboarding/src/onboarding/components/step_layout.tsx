@@ -73,7 +73,7 @@ export const StepLayout = ({
         <EuiFlexGroup gutterSize="l" alignItems="flexStart">
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h1>{title}</h1>
+              <h1 data-test-subj={`vectordbWizardStepTitle-${path}-${step}`}>{title}</h1>
             </EuiTitle>
             <EuiSpacer size="s" />
             <EuiText size="m" color="subdued" grow={false}>

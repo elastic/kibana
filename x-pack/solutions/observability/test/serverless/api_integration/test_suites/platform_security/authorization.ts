@@ -8,6 +8,13 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
+const ALERTING_V2_FEATURE_IDS = [
+  'alerting_v2_rules',
+  'alerting_v2_alerts',
+  'alerting_v2_action_policies',
+  'alerting_v2_execution_history',
+];
+
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
 
@@ -62,6 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:apm",
                 "api:apm_write",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "api:apm_settings_write",
                 "app:apm",
                 "app:ux",
@@ -701,6 +709,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:apm",
                 "api:apm_write",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "app:apm",
                 "app:ux",
                 "app:kibana",
@@ -1337,6 +1346,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "login:",
                 "api:apm",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "app:apm",
                 "app:ux",
                 "app:kibana",
@@ -1652,6 +1662,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "login:",
                 "api:apm",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "app:apm",
                 "app:ux",
                 "app:kibana",
@@ -6102,6 +6113,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "login:",
                 "api:infra",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "app:infra",
                 "app:metrics",
                 "app:kibana",
@@ -6900,6 +6912,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "login:",
                 "api:infra",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "app:infra",
                 "app:metrics",
                 "app:kibana",
@@ -7698,6 +7711,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "login:",
                 "api:infra",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "app:infra",
                 "app:metrics",
                 "app:kibana",
@@ -8083,6 +8097,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "login:",
                 "api:infra",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "app:infra",
                 "app:metrics",
                 "app:kibana",
@@ -9566,6 +9581,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:uptime-write",
                 "api:lists-all",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "api:private-location-write",
                 "app:uptime",
                 "app:kibana",
@@ -11359,6 +11375,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:uptime-write",
                 "api:lists-all",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "app:uptime",
                 "app:kibana",
                 "app:synthetics",
@@ -12349,6 +12366,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:uptime-read",
                 "api:lists-read",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "app:uptime",
                 "app:kibana",
                 "app:synthetics",
@@ -12820,6 +12838,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:uptime-read",
                 "api:lists-read",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "app:uptime",
                 "app:kibana",
                 "app:synthetics",
@@ -13289,6 +13308,19 @@ export default function ({ getService }: FtrProviderContext) {
             },
           }
         `);
+      });
+
+      it('exposes alerting v2 feature privileges', async () => {
+        const { body } = await supertestWithoutAuth
+          .get('/api/security/privileges')
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(adminCredentials)
+          .expect(200);
+
+        const featureIds = Object.keys(body.features);
+        for (const featureId of ALERTING_V2_FEATURE_IDS) {
+          expect(featureIds).to.contain(featureId);
+        }
       });
     });
   });

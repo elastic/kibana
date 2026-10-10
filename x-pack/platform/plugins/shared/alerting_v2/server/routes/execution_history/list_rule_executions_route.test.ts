@@ -16,10 +16,10 @@ describe('toListRuleExecutionsArgs', () => {
     expect(
       toListRuleExecutionsArgs({
         rule_ids: ['rule-1'],
-        outcome: ['success'],
+        outcomes: ['success'],
         from: '2026-01-01T00:00:00.000Z',
         to: '2026-01-02T00:00:00.000Z',
-        sort: 'started_at',
+        sort_field: 'started_at',
         sort_order: 'asc',
         page: 2,
         per_page: 25,
@@ -29,7 +29,7 @@ describe('toListRuleExecutionsArgs', () => {
       outcomes: ['success'],
       from: '2026-01-01T00:00:00.000Z',
       to: '2026-01-02T00:00:00.000Z',
-      sort: 'startedAt',
+      sortField: 'startedAt',
       sortOrder: 'asc',
       page: 2,
       perPage: 25,
@@ -60,10 +60,8 @@ describe('toListRuleExecutionsResponse', () => {
             space_id: 'default',
             started_at: '2026-01-01T00:00:00.000Z',
             ended_at: '2026-01-01T00:00:01.500Z',
-            timings: { duration: 1500, scheduled_delay: 250 },
+            timings: { duration_ms: 1500, scheduled_delay_ms: 250 },
             outcome: 'success',
-            reason: null,
-            error: null,
           },
         ],
         total: 1,
@@ -73,7 +71,7 @@ describe('toListRuleExecutionsResponse', () => {
     );
   });
 
-  it('maps the nested error stack trace and keeps a null error null', () => {
+  it('maps the nested error stack trace', () => {
     const [mapped] = toListRuleExecutionsResponse({
       items: [{ ...item, outcome: 'failure', error: { message: 'boom', stackTrace: 'at x' } }],
       total: 1,
@@ -82,6 +80,19 @@ describe('toListRuleExecutionsResponse', () => {
     }).items;
 
     expect(mapped.error).toEqual({ message: 'boom', stack_trace: 'at x' });
+  });
+
+  it('omits the fields the domain model leaves null', () => {
+    const [mapped] = toListRuleExecutionsResponse({
+      items: [{ ...item, rule: { id: 'rule-1', version: null } }],
+      total: 1,
+      page: 1,
+      perPage: 10,
+    }).items;
+
+    expect(mapped.reason).toBeUndefined();
+    expect(mapped.error).toBeUndefined();
+    expect(mapped.rule.version).toBeUndefined();
   });
 
   it('returns an empty items array untouched', () => {
