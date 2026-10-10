@@ -11,6 +11,7 @@ import { navigateToCasesApp } from '@kbn/test-suites-xpack-platform/serverless/s
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const owner = SECURITY_SOLUTION_OWNER;
+const legacyCustomFieldsStorageKey = `${owner}.cases.showLegacyCustomFields`;
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const common = getPageObject('common');
@@ -23,26 +24,43 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const find = getService('find');
   const comboBox = getService('comboBox');
+  const browser = getService('browser');
 
-  // Failing: See https://github.com/elastic/kibana/issues/251532
-  describe.skip('Configure Case', function () {
+  const waitForConfigurationSaved = async () => {
+    await retry.try(async () => {
+      expect(await toasts.getTitleByIndex(1)).to.be('Settings successfully updated');
+    });
+    await toasts.dismissAll();
+    await header.waitUntilLoadingHasFinished();
+  };
+
+  describe('Configure Case', function () {
+    let previousLegacyCustomFieldsVisibility: string | null | undefined;
+
     before(async () => {
       await svlCommonPage.loginAsAdmin();
       await navigateToCasesApp(getPageObject, getService, owner);
 
-      await retry.waitFor('configure-case-button exist', async () => {
-        return await testSubjects.exists('configure-case-button');
-      });
+      previousLegacyCustomFieldsVisibility = await browser.getLocalStorageItem(
+        legacyCustomFieldsStorageKey
+      );
+      await cases.common.showLegacyCustomFields(owner);
 
-      await common.clickAndValidate('configure-case-button', 'case-configure-title');
+      await cases.navigation.clickHeaderMenuItem('configure-case-button');
+      await testSubjects.existOrFail('cases-settings-panel');
       await header.waitUntilLoadingHasFinished();
-
-      await retry.waitFor('case-configure-title exist', async () => {
-        return await testSubjects.exists('case-configure-title');
-      });
     });
 
     after(async () => {
+      if (previousLegacyCustomFieldsVisibility === null) {
+        await browser.removeLocalStorageItem(legacyCustomFieldsStorageKey);
+      } else if (previousLegacyCustomFieldsVisibility !== undefined) {
+        await browser.setLocalStorageItem(
+          legacyCustomFieldsStorageKey,
+          previousLegacyCustomFieldsVisibility
+        );
+      }
+
       await svlCases.api.deleteAllCaseItems();
     });
 
@@ -53,9 +71,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('change closure option successfully', async () => {
         await cases.common.selectClosureOption('close-by-pushing');
-        const toast = await toasts.getElementByIndex(1);
-        expect(await toast.getVisibleText()).to.be('Settings successfully updated');
-        await toasts.dismissAll();
+        await waitForConfigurationSaved();
       });
     });
 
@@ -69,7 +85,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('opens and closes the connectors flyout correctly', async () => {
         await common.clickAndValidate('add-new-connector', 'euiFlyoutCloseButton');
         await testSubjects.click('euiFlyoutCloseButton');
-        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+        await testSubjects.missingOrFail('euiFlyoutCloseButton');
       });
     });
 
@@ -80,14 +96,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.setValue('custom-field-label-input', 'Summary');
 
-        await testSubjects.setCheckbox('text-custom-field-required-wrapper', 'check');
+        await testSubjects.setCheckbox('text-custom-field-required', 'check');
+        expect(await testSubjects.isChecked('text-custom-field-required')).to.be(true);
 
         await testSubjects.click('common-flyout-save');
-        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+        await testSubjects.missingOrFail('common-flyout');
+        await waitForConfigurationSaved();
 
         await testSubjects.existOrFail('custom-fields-list');
 
-        expect(await testSubjects.getVisibleText('custom-fields-list')).to.be('Summary\nText');
+        expect(await testSubjects.getVisibleText('custom-fields-list')).to.be(
+          'Summary\nText\nRequired'
+        );
       });
 
       it('edits a custom field', async () => {
@@ -101,11 +121,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await input.type('!!!');
 
         await testSubjects.click('common-flyout-save');
-        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+        await testSubjects.missingOrFail('common-flyout');
+        await waitForConfigurationSaved();
 
         await testSubjects.existOrFail('custom-fields-list');
 
-        expect(await testSubjects.getVisibleText('custom-fields-list')).to.be('Summary!!!\nText');
+        expect(await testSubjects.getVisibleText('custom-fields-list')).to.be(
+          'Summary!!!\nText\nRequired'
+        );
       });
 
       it('deletes a custom field', async () => {
@@ -117,6 +140,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('confirm-delete-modal');
 
         await testSubjects.click('confirmModalConfirmButton');
+        await waitForConfigurationSaved();
 
         await testSubjects.missingOrFail('custom-fields-list');
       });
@@ -143,7 +167,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.create.setCategory('new');
 
         await testSubjects.click('common-flyout-save');
-        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+        await testSubjects.missingOrFail('common-flyout');
+        await waitForConfigurationSaved();
 
         await retry.waitFor('templates-list', async () => {
           return await testSubjects.exists('templates-list');
@@ -174,7 +199,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.create.setCategory('new!');
 
         await testSubjects.click('common-flyout-save');
-        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+        await testSubjects.missingOrFail('common-flyout');
+        await waitForConfigurationSaved();
 
         await retry.waitFor('templates-list', async () => {
           return await testSubjects.exists('templates-list');
@@ -194,8 +220,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('confirm-delete-modal');
 
         await testSubjects.click('confirmModalConfirmButton');
+        await waitForConfigurationSaved();
 
-        await testSubjects.missingOrFail('template-list');
+        await testSubjects.missingOrFail('templates-list');
       });
     });
   });
