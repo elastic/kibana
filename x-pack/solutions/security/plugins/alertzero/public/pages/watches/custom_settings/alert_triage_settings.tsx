@@ -10,9 +10,9 @@ import {
   ALERT_TRIAGE_DEFAULT_EXTRAS,
   AlertTriageWorkerExtras,
   BUDGET_PER_HOUR_MAX,
-  BUDGET_PER_HOUR_MIN,
   LOOKBACK_HOURS_MAX,
   LOOKBACK_HOURS_MIN,
+  getMinBudgetPerHour,
   type WorkerSettings,
 } from '@kbn/alertzero-common';
 import { MinimumConfidenceScoreField } from '../components/minimum_confidence_score_field';
@@ -37,6 +37,7 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
   onExtrasChange,
 }) => {
   const extras = readAlertTriageExtras(settings);
+  const minBudgetPerHour = getMinBudgetPerHour(settings.scheduleInterval);
 
   return (
     <>
@@ -55,12 +56,12 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
       </SettingRow>
       <SettingRow
         label={i18n.BUDGET_PER_HOUR_LABEL}
-        labelHelp={i18n.BUDGET_PER_HOUR_HELP_TEXT}
+        labelHelp={i18n.getBudgetPerHourHelpText(minBudgetPerHour)}
         data-test-subj="alertZeroBudgetPerHourRow"
       >
         <BoundedNumberField
           value={extras.budgetPerHour}
-          min={BUDGET_PER_HOUR_MIN}
+          min={minBudgetPerHour}
           max={BUDGET_PER_HOUR_MAX}
           ariaLabel={i18n.BUDGET_PER_HOUR_ARIA_LABEL}
           testSubj="alertZeroBudgetPerHour"

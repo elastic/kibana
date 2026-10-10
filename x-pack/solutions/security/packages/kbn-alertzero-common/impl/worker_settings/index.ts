@@ -72,6 +72,7 @@ export {
 export {
   applyWorkerSettingsWrite,
   diffWorkerSettings,
+  formatCrossFieldIssues,
   formatWorkerSettingsIssues,
   touchesWorkerSettings,
 } from './contract';
@@ -99,6 +100,9 @@ export {
   BUDGET_PER_HOUR_DEFAULT,
   BUDGET_PER_HOUR_MAX,
   BUDGET_PER_HOUR_MIN,
+  TRIAGE_ALERT_COST,
+  TRIAGE_BATCH_OVERHEAD_COST,
+  getMinBudgetPerHour,
   LOOKBACK_HOURS_DEFAULT,
   LOOKBACK_HOURS_MAX,
   LOOKBACK_HOURS_MIN,
