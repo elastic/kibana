@@ -420,6 +420,25 @@ describe('find', () => {
         });
       });
 
+      it('passes a sort list to getSearchDsl', async () => {
+        const sort = [
+          { field: 'updated_at', order: 'desc' as const },
+          { field: '_shard_doc', order: 'asc' as const },
+        ];
+        const relevantOpts: SavedObjectsFindOptions = {
+          type: [type],
+          namespaces: [namespace],
+          sort,
+        };
+
+        await findSuccess(client, repository, relevantOpts, namespace);
+        expect(mockGetSearchDsl).toHaveBeenCalledWith(
+          mappings,
+          registry,
+          expect.objectContaining({ sort, type: [type] })
+        );
+      });
+
       it(`accepts pit`, async () => {
         const relevantOpts: SavedObjectsFindOptions = {
           ...commonOptions,

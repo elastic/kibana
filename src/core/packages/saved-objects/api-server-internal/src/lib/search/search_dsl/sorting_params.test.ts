@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getSortingParams } from './sorting_params';
+import { getSortingParams, MAX_FIND_SORT_FIELDS } from './sorting_params';
 
 const MAPPINGS = {
   properties: {
@@ -245,6 +245,153 @@ describe('searchDsl/getSortParams', () => {
       expect(getSortingParams(MAPPINGS, 'saved', undefined, undefined, { id: 'abc123' })).toEqual({
         sort: ['_shard_doc'],
       });
+    });
+  });
+
+  describe('sort array', () => {
+    it('sorts by several fields and uses _shard_doc as a tiebreaker inside a point in time', () => {
+      expect(
+        getSortingParams(MAPPINGS, 'saved', undefined, undefined, { id: 'abc123' }, [
+          { field: 'title', order: 'desc' },
+          { field: '_shard_doc', order: 'asc' },
+        ])
+      ).toEqual({
+        sort: [
+          {
+            'saved.title': {
+              order: 'desc',
+              unmapped_type: 'text',
+            },
+          },
+          {
+            _shard_doc: {
+              order: 'asc',
+            },
+          },
+        ],
+      });
+    });
+
+    it('resolves each field on its own when sorting multiple types', () => {
+      expect(
+        getSortingParams(MAPPINGS, ['saved', 'pending'], undefined, undefined, undefined, [
+          { field: 'type', order: 'asc' },
+          { field: '_score', order: 'desc' },
+        ])
+      ).toEqual({
+        sort: [
+          {
+            type: {
+              order: 'asc',
+              unmapped_type: 'text',
+            },
+          },
+          {
+            _score: {
+              order: 'desc',
+            },
+          },
+        ],
+      });
+    });
+
+    it('matches a single sortField when the list has one entry', () => {
+      expect(
+        getSortingParams(MAPPINGS, 'saved', undefined, undefined, undefined, [
+          { field: 'title', order: 'desc' },
+        ])
+      ).toEqual(getSortingParams(MAPPINGS, 'saved', 'title', 'desc'));
+    });
+
+    it('treats an empty list as no sort', () => {
+      expect(getSortingParams(MAPPINGS, 'saved', undefined, undefined, undefined, [])).toEqual({});
+      expect(
+        getSortingParams(MAPPINGS, 'saved', undefined, undefined, { id: 'abc123' }, [])
+      ).toEqual({
+        sort: ['_shard_doc'],
+      });
+    });
+
+    it('rejects a tiebreaker that is not a root field when sorting multiple types', () => {
+      expect(() =>
+        getSortingParams(MAPPINGS, ['saved', 'pending'], undefined, undefined, undefined, [
+          { field: 'type', order: 'asc' },
+          { field: 'title', order: 'asc' },
+        ])
+      ).toThrowError(/Unable to sort multiple types by field title/);
+    });
+
+    it('rejects an unknown field in the list', () => {
+      expect(() =>
+        getSortingParams(MAPPINGS, 'saved', undefined, undefined, undefined, [
+          { field: 'title', order: 'asc' },
+          { field: 'missing', order: 'asc' },
+        ])
+      ).toThrowError(/Unknown sort field missing/);
+    });
+
+    it('rejects a duplicate field', () => {
+      expect(() =>
+        getSortingParams(MAPPINGS, 'saved', undefined, undefined, undefined, [
+          { field: 'title', order: 'asc' },
+          { field: 'title', order: 'desc' },
+        ])
+      ).toThrowError(/Duplicate sort field title/);
+    });
+
+    it('rejects an empty field name', () => {
+      expect(() =>
+        getSortingParams(MAPPINGS, 'saved', undefined, undefined, undefined, [
+          { field: '', order: 'asc' },
+        ])
+      ).toThrowError(/non-empty field/);
+    });
+
+    it('rejects more than the maximum number of fields', () => {
+      const overLimit = Array.from({ length: MAX_FIND_SORT_FIELDS + 1 }, (_, index) => ({
+        field: `field_${index}`,
+        order: 'asc' as const,
+      }));
+
+      expect(() =>
+        getSortingParams(MAPPINGS, 'saved', undefined, undefined, undefined, overLimit)
+      ).toThrowError(new RegExp(`more than ${MAX_FIND_SORT_FIELDS} fields`));
+    });
+
+    it('rejects combining sort with sortField or sortOrder', () => {
+      expect(() =>
+        getSortingParams(MAPPINGS, 'saved', 'title', undefined, undefined, [
+          { field: 'type', order: 'asc' },
+        ])
+      ).toThrowError(/cannot be combined with sortField or sortOrder/);
+      expect(() =>
+        getSortingParams(MAPPINGS, 'saved', undefined, 'desc', undefined, [
+          { field: 'type', order: 'asc' },
+        ])
+      ).toThrowError(/cannot be combined with sortField or sortOrder/);
+    });
+
+    it('rejects _id because Elasticsearch disables fielddata on it', () => {
+      expect(() =>
+        getSortingParams(MAPPINGS, 'saved', undefined, undefined, { id: 'abc123' }, [
+          { field: 'title', order: 'desc' },
+          { field: '_id', order: 'asc' },
+        ])
+      ).toThrowError(/Cannot sort by _id/);
+      expect(() => getSortingParams(MAPPINGS, 'saved', '_id', 'asc')).toThrowError(
+        /Cannot sort by _id/
+      );
+    });
+
+    it('rejects _shard_doc unless a point in time is open', () => {
+      expect(() =>
+        getSortingParams(MAPPINGS, 'saved', undefined, undefined, undefined, [
+          { field: '_shard_doc', order: 'asc' },
+        ])
+      ).toThrowError(/_shard_doc requires a point in time/);
+      expect(() => getSortingParams(MAPPINGS, 'saved', '_shard_doc', 'asc')).toThrowError(
+        /_shard_doc requires a point in time/
+      );
     });
   });
 });

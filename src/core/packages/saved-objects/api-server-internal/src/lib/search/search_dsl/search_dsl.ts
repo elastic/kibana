@@ -10,7 +10,10 @@
 import Boom from '@hapi/boom';
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { SavedObjectsPitParams } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsFindSort,
+  SavedObjectsPitParams,
+} from '@kbn/core-saved-objects-api-server';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
@@ -29,6 +32,7 @@ interface GetSearchDslOptions {
   searchAfter?: estypes.SortResults;
   sortField?: string;
   sortOrder?: estypes.SortOrder;
+  sort?: SavedObjectsFindSort[];
   namespaces?: string[];
   pit?: SavedObjectsPitParams;
   typeToNamespacesMap?: Map<string, string[] | undefined>;
@@ -53,6 +57,7 @@ export function getSearchDsl(
     searchAfter,
     sortField,
     sortOrder,
+    sort,
     namespaces,
     pit,
     typeToNamespacesMap,
@@ -65,6 +70,10 @@ export function getSearchDsl(
 
   if (!type) {
     throw Boom.notAcceptable('type must be specified');
+  }
+
+  if (sort?.length && (sortField || sortOrder)) {
+    throw Boom.badRequest('sort cannot be combined with sortField or sortOrder');
   }
 
   if (sortOrder && !sortField) {
@@ -88,7 +97,7 @@ export function getSearchDsl(
       kueryNode,
       mappings,
     }),
-    ...getSortingParams(mappings, type, sortField, sortOrder, pit),
+    ...getSortingParams(mappings, type, sortField, sortOrder, pit, sort),
     ...(pit ? getPitParams(pit) : {}),
     search_after: searchAfter,
   };

@@ -380,6 +380,7 @@ export type {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,
+  SavedObjectsFindSort,
   SavedObjectsPitParams,
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
