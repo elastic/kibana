@@ -8,9 +8,9 @@
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import { DEFAULT_TIME_FIELD, getDateFieldNames } from '../shared/date_fields';
 import type { DatasetTimeRange } from './select_time_range';
 
-const DEFAULT_TIME_FIELD = '@timestamp';
 /** Shared log prefix for the default-time-range step. */
 export const LOG_PREFIX = '[default-time-range]';
 
@@ -26,15 +26,13 @@ const indexHasTimestamp = async (
   esClient: IScopedClusterClient,
   index: string,
   projectRouting?: string
-): Promise<boolean> => {
-  const response = await esClient.asCurrentUser.fieldCaps({
-    index,
-    fields: DEFAULT_TIME_FIELD,
-    include_unmapped: false,
-    project_routing: projectRouting,
-  });
-  return Boolean(response.fields?.[DEFAULT_TIME_FIELD]);
-};
+): Promise<boolean> =>
+  (
+    await getDateFieldNames(esClient.asCurrentUser, index, {
+      fields: DEFAULT_TIME_FIELD,
+      projectRouting,
+    })
+  ).includes(DEFAULT_TIME_FIELD);
 
 /**
  * Resolve the time field used for the default time range.

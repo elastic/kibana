@@ -8,6 +8,7 @@
 import type { VisualizationDatasetExample } from '../../../src/evaluate_dataset';
 import { ECOMMERCE_EXAMPLES } from './ecommerce';
 import { VISUALIZATION_EDIT_EXAMPLES } from './edits';
+import { FLIGHTS_EXAMPLES } from './flights';
 import { HOST_METRICS_EXAMPLES } from './host_metrics';
 import { LOGS_EXAMPLES } from './logs';
 import { VISUALIZATION_REFUSAL_EXAMPLES } from './negatives';
@@ -19,6 +20,7 @@ export { VISUALIZATION_REFUSAL_EXAMPLES, VISUALIZATION_EDIT_EXAMPLES };
 export const VISUALIZATION_CREATION_EXAMPLES: VisualizationDatasetExample[] = [
   ...LOGS_EXAMPLES,
   ...ECOMMERCE_EXAMPLES,
+  ...FLIGHTS_EXAMPLES,
   ...HOST_METRICS_EXAMPLES,
   ...VEGA_EXAMPLES,
 ];
