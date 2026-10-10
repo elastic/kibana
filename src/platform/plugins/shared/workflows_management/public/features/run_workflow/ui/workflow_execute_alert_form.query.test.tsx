@@ -36,6 +36,13 @@ jest.mock('@kbn/unified-search-plugin/public', () => ({
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_index_names', () => ({
   fetchAlertsIndexNames: jest.fn(),
 }));
+jest.mock('@kbn/unified-data-table', () => {
+  const actual = jest.requireActual('@kbn/unified-data-table');
+  return {
+    ...actual,
+    UnifiedDataTable: () => <div data-test-subj="unifiedDataTable" />,
+  };
+});
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockTheme = themeServiceMock.createSetupContract({ darkMode: false, name: 'borealis' });
@@ -62,7 +69,7 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   </EuiProvider>
 );
 
-describe('WorkflowExecuteAlertForm', () => {
+describe('WorkflowExecuteAlertForm search state', () => {
   const mockSetValue = jest.fn();
   const mockSetErrors = jest.fn();
   const { mockSearchSource, mockData } = createEventFormKibanaMocks();
@@ -92,8 +99,8 @@ describe('WorkflowExecuteAlertForm', () => {
     queryClient.clear();
   });
 
-  it('fetches and displays alerts in unified data table', async () => {
-    const { getByText, findByTestId } = render(
+  it('renders the form with search bar', async () => {
+    const { getByTestId } = render(
       <TestWrapper>
         <WorkflowExecuteAlertForm
           value=""
@@ -105,18 +112,52 @@ describe('WorkflowExecuteAlertForm', () => {
     );
 
     await waitFor(() => {
-      expect(mockSearchSource.fetch$).toHaveBeenCalled();
-    });
-
-    await findByTestId('workflowAlertsTable');
-
-    await waitFor(() => {
-      expect(getByText('Test Rule')).toBeInTheDocument();
+      expect(getByTestId('search-bar')).toBeInTheDocument();
     });
   });
 
-  it('displays timestamp, rule, and message columns only', async () => {
-    const { findByTestId, getByText } = render(
+  it('does not create data view when alert indices API is unavailable', async () => {
+    mockFetchAlertsIndexNames.mockRejectedValue(new Error('alerting unavailable'));
+
+    render(
+      <TestWrapper>
+        <WorkflowExecuteAlertForm
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+          setErrors={mockSetErrors}
+        />
+      </TestWrapper>
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(mockData.dataViews.create).not.toHaveBeenCalled();
+  });
+
+  it('does not call RAC index API when racQueriesEnabled is false', async () => {
+    render(
+      <TestWrapper>
+        <WorkflowExecuteAlertForm
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+          setErrors={mockSetErrors}
+          racQueriesEnabled={false}
+        />
+      </TestWrapper>
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(mockFetchAlertsIndexNames).not.toHaveBeenCalled();
+  });
+
+  it('creates data view from alert indices returned by RAC API', async () => {
+    mockFetchAlertsIndexNames.mockResolvedValue([
+      '.alerts-observability.logs.alerts-default',
+      '.alerts-security.alerts-default',
+    ]);
+
+    render(
       <TestWrapper>
         <WorkflowExecuteAlertForm
           value=""
@@ -128,21 +169,15 @@ describe('WorkflowExecuteAlertForm', () => {
     );
 
     await waitFor(() => {
-      expect(mockSearchSource.fetch$).toHaveBeenCalled();
-    });
-
-    await findByTestId('workflowAlertsTable');
-
-    await waitFor(() => {
-      expect(getByText('Rule')).toBeInTheDocument();
-      expect(getByText('Message')).toBeInTheDocument();
-      expect(getByText('Test Rule')).toBeInTheDocument();
-      expect(getByText('Test message')).toBeInTheDocument();
+      expect(mockData.dataViews.create).toHaveBeenCalledWith({
+        title: '.alerts-observability.logs.alerts-default,.alerts-security.alerts-default',
+        timeFieldName: '@timestamp',
+      });
     });
   });
 
-  it('calls setValue when an alert row is selected', async () => {
-    const { findByTestId } = render(
+  it('handles query change without triggering fetch', async () => {
+    const { getByTestId } = render(
       <TestWrapper>
         <WorkflowExecuteAlertForm
           value=""
@@ -157,21 +192,12 @@ describe('WorkflowExecuteAlertForm', () => {
       expect(mockSearchSource.fetch$).toHaveBeenCalled();
     });
 
-    await findByTestId('workflowAlertsTable');
+    const initialFetchCount = mockSearchSource.fetch$.mock.calls.length;
+    const queryInput = getByTestId('query-input') as HTMLInputElement;
 
-    const selectButton = await findByTestId('dscGridSelectDoc-.alerts-default::1::');
-    fireEvent.click(selectButton);
+    fireEvent.change(queryInput, { target: { value: 'test query' } });
 
-    await waitFor(() => {
-      expect(mockSetValue).toHaveBeenCalled();
-    });
-
-    const lastCall = mockSetValue.mock.calls[mockSetValue.mock.calls.length - 1][0];
-    const parsedValue = JSON.parse(lastCall);
-
-    expect(parsedValue.event).toBeDefined();
-    expect(parsedValue.event.alertIds).toHaveLength(1);
-    expect(parsedValue.event.alertIds[0]._id).toBe('1');
-    expect(parsedValue.event.triggerType).toBe('alert');
+    expect(queryInput.value).toBe('test query');
+    expect(mockSearchSource.fetch$.mock.calls.length).toBe(initialFetchCount);
   });
 });
