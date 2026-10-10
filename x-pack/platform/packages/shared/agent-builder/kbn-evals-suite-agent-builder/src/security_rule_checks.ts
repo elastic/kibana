@@ -60,6 +60,8 @@ const STATEMENT_SPLIT = /[.;\n]+/;
 /** How close a denial has to be to a rule name to be about that rule ("unlike X", "X does not cover"). */
 const NEGATION_WINDOW = 30;
 const NEGATION_CUE = /\b(?:not|never|unlike|without|cannot|neither|nor|none)\b|n['’]t/;
+/** Sub-clause boundaries inside a statement: a negation cue never reaches across one. */
+const CLAUSE_BREAK = /[,:—–]|\b(?:but|while|whereas|although|though|and|or)\b/;
 /** Language that credits a rule with covering the behaviour under discussion. */
 const COVERAGE_CREDIT =
   /\b(?:covers?|covering rule|matching rule|matches?|detects?|catches|flags)\b/;
@@ -95,9 +97,11 @@ interface Span {
  * A cue is about a name it sits right beside: inside the same statement and within
  * `NEGATION_WINDOW` of it ("unlike X", "X does not cover this"). When two rules are named in one
  * statement, the text between them is shared, so a cue in it lies within both windows. It
- * belongs to the nearer name only, with ties going to the later name, which is how a preposition
- * ("unlike X", "without X") reads. Without ownership one cue denies both names: "<a> covers
- * this, unlike <b>" would deny `<a>` along with `<b>` and leave the verdict with no rule at all.
+ * belongs only to a name in its own sub-clause, so no `CLAUSE_BREAK` may stand between the
+ * cue and the name: in "<a> covers this, unlike <b>" the `unlike` is about `<b>`, and in "<a>
+ * does not, but <b> does cover this" the `not` is about `<a>`. If both names qualify, the nearer
+ * one owns the cue and a tie goes to the later name. Without ownership one cue denies both
+ * names, and the verdict is left with no rule, or with the wrong one.
  */
 const deniedMentions = (haystack: string, mentions: Span[], statement: Statement): boolean[] => {
   const denied = mentions.map(() => false);
@@ -109,20 +113,21 @@ const deniedMentions = (haystack: string, mentions: Span[], statement: Statement
     let owner = -1;
     let ownerGap = Infinity;
     mentions.forEach((mention, index) => {
-      let gap: number;
+      let between: string;
       if (cueEnd <= mention.at) {
         if (mention.at - cueStart > NEGATION_WINDOW) return;
-        gap = mention.at - cueEnd;
+        between = haystack.slice(cueEnd, mention.at);
       } else if (cueStart >= mention.end) {
         if (cueEnd - mention.end > NEGATION_WINDOW) return;
-        gap = cueStart - mention.end;
+        between = haystack.slice(mention.end, cueStart);
       } else {
         return; // the cue is part of the rule's own name
       }
+      if (CLAUSE_BREAK.test(between)) return;
       // Mentions are in reading order, so `<=` hands a tie to the later name.
-      if (gap <= ownerGap) {
+      if (between.length <= ownerGap) {
         owner = index;
-        ownerGap = gap;
+        ownerGap = between.length;
       }
     });
     if (owner !== -1) denied[owner] = true;

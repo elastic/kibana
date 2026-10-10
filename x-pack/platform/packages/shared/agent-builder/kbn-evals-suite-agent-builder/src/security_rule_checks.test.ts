@@ -126,6 +126,24 @@ describe('ruleJustifyingVerdict', () => {
     ).toBe(OFFICE_CMD);
   });
 
+  it('keeps a trailing denial on its own clause across a "but" contrast', () => {
+    // `not` is equally far from both names; the clause break pins it to the rule it follows.
+    expect(
+      ruleJustifyingVerdict(
+        `covered_enabled: ${OFFICE_CMD} does not, but ${POWERSHELL} does cover this`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBe(POWERSHELL);
+    expect(
+      ruleJustifyingVerdict(
+        `covered_enabled: ${POWERSHELL} does not, but ${OFFICE_CMD} does cover this`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBe(OFFICE_CMD);
+  });
+
   it('still credits the sibling when a short contrast denies the expected rule', () => {
     expect(
       ruleJustifyingVerdict(
