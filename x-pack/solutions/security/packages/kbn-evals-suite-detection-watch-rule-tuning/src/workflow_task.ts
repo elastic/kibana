@@ -378,12 +378,19 @@ const cancelStaleExecutions = async ({
   fetch,
   log,
   pollIntervalMs,
+  extraWorkflowIds = [],
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
   pollIntervalMs: number;
+  /** Further workflows to drain first, e.g. the per-space worker that dispatches the sweep. */
+  extraWorkflowIds?: string[];
 }): Promise<void> => {
-  for (const workflowId of [RULE_TUNING_WORKER_WORKFLOW_ID, RULE_TUNING_REVIEW_WORKFLOW_ID]) {
+  for (const workflowId of [
+    ...extraWorkflowIds,
+    RULE_TUNING_WORKER_WORKFLOW_ID,
+    RULE_TUNING_REVIEW_WORKFLOW_ID,
+  ]) {
     const stale = await listActiveExecutions(fetch, workflowId);
     if ((stale.results ?? []).length > 0) {
       // Route cancels ALL active executions of this workflow (no body needed).
@@ -408,6 +415,67 @@ export const findDispatchedSweepId = (dispatcher: WorkflowExecutionDto): string 
 };
 
 /**
+ * Enabling the per-space worker schedules its interval task, and Task Manager makes an
+ * interval task's first run due immediately, so a scheduled tick of the worker fires right
+ * after the bind and dispatches a second global sweep. That sweep harvests the seeded rule too
+ * and holds the review concurrency group, so the harness's own review child can be SKIPPED or a
+ * second child can appear.
+ *
+ * Wait for that tick to show up (the worker workflow lists it with `triggeredBy: scheduled`),
+ * then cancel it and everything it started, so the manual run below owns the stack. Throws if
+ * the tick never appears: carrying on would leave a window where it lands mid-run.
+ */
+export const drainBindTick = async ({
+  fetch,
+  log,
+  workerWorkflowId,
+  pollIntervalMs,
+  since,
+  timeoutMs = 60_000,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  workerWorkflowId: string;
+  pollIntervalMs: number;
+  /** Epoch ms taken before the bind; earlier scheduled executions are not the bind's tick. */
+  since: number;
+  timeoutMs?: number;
+}): Promise<void> => {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const { results = [] } = (await fetch(
+      `/api/workflows/workflow/${workerWorkflowId}/executions`,
+      {
+        method: 'GET',
+        version: WORKFLOWS_API_VERSION,
+        headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+        query: { statuses: [...TerminalExecutionStatuses, ...NonTerminalExecutionStatuses] },
+      }
+    )) as unknown as WorkflowExecutionListDto;
+    if (
+      results.some(
+        (execution) =>
+          execution.triggeredBy === 'scheduled' && Date.parse(execution.startedAt) >= since
+      )
+    ) {
+      log.info(`Draining the scheduled tick that enabling ${workerWorkflowId} fired`);
+      await cancelStaleExecutions({
+        fetch,
+        log,
+        pollIntervalMs,
+        extraWorkflowIds: [workerWorkflowId],
+      });
+      return;
+    }
+    await sleep(pollIntervalMs);
+  }
+  throw new Error(
+    `Enabling ${workerWorkflowId} fired no scheduled tick within ${timeoutMs}ms, so a late one ` +
+      `could still race the manual sweep`
+  );
+};
+
+/**
  * Start the worker sweep through the service-account-bound per-space worker. The global sweep
  * has no `run_as` of its own and its `run_review` children use `run-as-mode: inherit`
  * (#296409), so POSTing the sweep directly fails every review with "Service account
@@ -415,7 +483,7 @@ export const findDispatchedSweepId = (dispatcher: WorkflowExecutionDto): string 
  * `min_fp_count: 2` (the schema floor: a 1-alert group returns `alert_ids` as a scalar and
  * fails the review's array input) through its extras settings.
  */
-const startWorkerSweep = async ({
+export const startWorkerSweep = async ({
   fetch,
   log,
   pollIntervalMs,
@@ -424,7 +492,11 @@ const startWorkerSweep = async ({
   log: ToolingLog;
   pollIntervalMs: number;
 }): Promise<{ workflowExecutionId: string; startedAt: number }> => {
-  const workerWorkflowId = await bindRuleTuningWorker(fetch);
+  const bindStartedAt = Date.now();
+  const { workflowId: workerWorkflowId, enabledByBind } = await bindRuleTuningWorker(fetch);
+  if (enabledByBind) {
+    await drainBindTick({ fetch, log, workerWorkflowId, pollIntervalMs, since: bindStartedAt });
+  }
   const startedAt = Date.now();
   const { workflowExecutionId: dispatcherId } = (await fetch(
     `/api/workflows/workflow/${workerWorkflowId}/run`,

@@ -84,8 +84,19 @@ const ensureAccount = async (fetch: HttpHandler): Promise<string> => {
   return created.id;
 };
 
+export interface BoundWorker {
+  workflowId: string;
+  /**
+   * True when this bind flipped the worker from disabled to enabled. Enabling schedules the
+   * worker's interval task, and Task Manager makes an interval task's first run due
+   * immediately (`getFirstRunAt` returns now) whatever `scheduleInterval` is, so a scheduled
+   * tick fires right after the bind and dispatches its own global sweep.
+   */
+  enabledByBind: boolean;
+}
+
 /** Bind the per-space entry point; the global sweep can only inherit from this worker. */
-export const bindRuleTuningWorker = async (fetch: HttpHandler): Promise<string> => {
+export const bindRuleTuningWorker = async (fetch: HttpHandler): Promise<BoundWorker> => {
   const { workers } = await fetch<{ workers: Worker[] }>(WORKERS_URL, {
     ...INTERNAL_OPTIONS,
     method: 'GET',
@@ -93,6 +104,7 @@ export const bindRuleTuningWorker = async (fetch: HttpHandler): Promise<string> 
   const worker = workers.find(({ id }) => id === RULE_TUNING_WORKER_ID);
   if (!worker) throw new Error(`Worker ${RULE_TUNING_WORKER_ID} is absent from the catalog`);
   const serviceAccountId = worker.settings.serviceAccountId ?? (await ensureAccount(fetch));
+  const wasEnabled = worker.enabled;
   await fetch(`${WORKERS_URL}/${RULE_TUNING_WORKER_ID}`, {
     ...INTERNAL_OPTIONS,
     method: 'PATCH',
@@ -102,7 +114,8 @@ export const bindRuleTuningWorker = async (fetch: HttpHandler): Promise<string> 
       settings: {
         serviceAccountId,
         autonomy: 'assisted',
-        // This isolated eval stack is driven manually, not by a concurrent scheduled sweep.
+        // Only pushes the second scheduled tick out of the run. The first one fires on enable
+        // regardless (see BoundWorker.enabledByBind) and the harness drains it.
         scheduleInterval: '999d',
         extras: { analysisWindowDays: 7, fpCountThreshold: 2, fpRateThresholdPct: 50 },
       },
@@ -130,5 +143,5 @@ export const bindRuleTuningWorker = async (fetch: HttpHandler): Promise<string> 
   if (workflow.definition?.settings?.run_as !== serviceAccountId) {
     throw new Error(`Worker ${bound.workflowId} has no matching settings.run_as after binding`);
   }
-  return bound.workflowId;
+  return { workflowId: bound.workflowId, enabledByBind: !wasEnabled };
 };
