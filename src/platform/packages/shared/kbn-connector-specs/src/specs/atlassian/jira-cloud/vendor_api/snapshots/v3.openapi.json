@@ -1,0 +1,4209 @@
+{
+  "components": {
+    "schemas": {
+      "ApplicationRole": {
+        "additionalProperties": false,
+        "properties": {
+          "defaultGroups": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "defaultGroupsDetails": {
+            "items": {
+              "$ref": "#/components/schemas/GroupName"
+            },
+            "type": "array"
+          },
+          "defined": {
+            "type": "boolean"
+          },
+          "groupDetails": {
+            "items": {
+              "$ref": "#/components/schemas/GroupName"
+            },
+            "type": "array"
+          },
+          "groups": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "hasUnlimitedSeats": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "numberOfSeats": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "platform": {
+            "type": "boolean"
+          },
+          "remainingSeats": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "selectedByDefault": {
+            "type": "boolean"
+          },
+          "userCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "userCountDescription": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Attachment": {
+        "additionalProperties": true,
+        "properties": {
+          "author": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserDetails"
+              }
+            ],
+            "readOnly": true
+          },
+          "content": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "created": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "filename": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "mimeType": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "self": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "size": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "thumbnail": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AvatarUrlsBean": {
+        "additionalProperties": false,
+        "properties": {
+          "16x16": {
+            "format": "uri",
+            "type": "string"
+          },
+          "24x24": {
+            "format": "uri",
+            "type": "string"
+          },
+          "32x32": {
+            "format": "uri",
+            "type": "string"
+          },
+          "48x48": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ChangeDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "field": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "fieldId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "fieldtype": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "from": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "fromString": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "to": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "toString": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Changelog": {
+        "additionalProperties": false,
+        "properties": {
+          "author": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserDetails"
+              }
+            ],
+            "readOnly": true
+          },
+          "created": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "historyMetadata": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/HistoryMetadata"
+              }
+            ],
+            "readOnly": true
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ChangeDetails"
+            },
+            "readOnly": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Comment": {
+        "additionalProperties": true,
+        "properties": {
+          "author": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserDetails"
+              }
+            ],
+            "readOnly": true
+          },
+          "body": {},
+          "created": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "jsdAuthorCanSeeRequest": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "jsdPublic": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "properties": {
+            "items": {
+              "$ref": "#/components/schemas/EntityProperty"
+            },
+            "type": "array"
+          },
+          "renderedBody": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "self": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "updateAuthor": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserDetails"
+              }
+            ],
+            "readOnly": true
+          },
+          "updated": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "visibility": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Visibility"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "CreatedIssue": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "key": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "self": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "transition": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NestedResponse"
+              }
+            ],
+            "readOnly": true
+          },
+          "watchers": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NestedResponse"
+              }
+            ],
+            "readOnly": true
+          }
+        },
+        "type": "object"
+      },
+      "EntityProperty": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {}
+        },
+        "type": "object"
+      },
+      "ErrorCollection": {
+        "additionalProperties": false,
+        "properties": {
+          "errorMessages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "errors": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "status": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ExpandPrioritySchemePage": {
+        "additionalProperties": true,
+        "properties": {
+          "maxResults": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "startAt": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "FieldCreateMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "allowedValues": {
+            "items": {
+              "readOnly": true
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "autoCompleteUrl": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "configuration": {
+            "additionalProperties": {
+              "readOnly": true
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "defaultValue": {
+            "readOnly": true
+          },
+          "fieldId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "hasDefaultValue": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "key": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "operations": {
+            "items": {
+              "readOnly": true,
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "required": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JsonTypeBean"
+              }
+            ],
+            "readOnly": true
+          }
+        },
+        "required": [
+          "fieldId",
+          "key",
+          "name",
+          "operations",
+          "required",
+          "schema"
+        ],
+        "type": "object",
+        "xml": {
+          "name": "availableField"
+        }
+      },
+      "FieldMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "allowedValues": {
+            "items": {
+              "readOnly": true
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "autoCompleteUrl": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "configuration": {
+            "additionalProperties": {
+              "readOnly": true
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "defaultValue": {
+            "readOnly": true
+          },
+          "hasDefaultValue": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "key": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "operations": {
+            "items": {
+              "readOnly": true,
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "required": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JsonTypeBean"
+              }
+            ],
+            "readOnly": true
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "operations",
+          "required",
+          "schema"
+        ],
+        "type": "object",
+        "xml": {
+          "name": "availableField"
+        }
+      },
+      "FieldUpdateOperation": {
+        "additionalProperties": false,
+        "properties": {
+          "add": {},
+          "copy": {},
+          "edit": {},
+          "remove": {},
+          "set": {}
+        },
+        "type": "object"
+      },
+      "Fields": {
+        "additionalProperties": false,
+        "properties": {
+          "assignee": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserDetails"
+              }
+            ],
+            "readOnly": true
+          },
+          "issueType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IssueTypeDetails"
+              }
+            ],
+            "readOnly": true
+          },
+          "issuetype": {
+            "$ref": "#/components/schemas/IssueTypeDetails"
+          },
+          "priority": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Priority"
+              }
+            ],
+            "readOnly": true
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/StatusDetails"
+              }
+            ],
+            "readOnly": true
+          },
+          "summary": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "timetracking": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TimeTrackingDetails"
+              }
+            ],
+            "readOnly": true
+          }
+        },
+        "type": "object"
+      },
+      "GroupName": {
+        "additionalProperties": false,
+        "properties": {
+          "groupId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "self": {
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Hierarchy": {
+        "additionalProperties": false,
+        "properties": {
+          "baseLevelId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "levels": {
+            "items": {
+              "$ref": "#/components/schemas/SimplifiedHierarchyLevel"
+            },
+            "readOnly": true,
+            "type": "array"
+          }
+        },
+        "type": "object",
+        "xml": {
+          "name": "hierarchy"
+        }
+      },
+      "HistoryMetadata": {
+        "additionalProperties": true,
+        "properties": {
+          "activityDescription": {
+            "type": "string"
+          },
+          "activityDescriptionKey": {
+            "type": "string"
+          },
+          "actor": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/HistoryMetadataParticipant"
+              }
+            ]
+          },
+          "cause": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/HistoryMetadataParticipant"
+              }
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "descriptionKey": {
+            "type": "string"
+          },
+          "emailDescription": {
+            "type": "string"
+          },
+          "emailDescriptionKey": {
+            "type": "string"
+          },
+          "extraData": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "generator": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/HistoryMetadataParticipant"
+              }
+            ]
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HistoryMetadataParticipant": {
+        "additionalProperties": true,
+        "properties": {
+          "avatarUrl": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "displayNameKey": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IncludedFields": {
+        "additionalProperties": false,
+        "properties": {
+          "actuallyIncluded": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "excluded": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "included": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "type": "object"
+      },
+      "IssueBean": {
+        "additionalProperties": false,
+        "properties": {
+          "changelog": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PageOfChangelogs"
+              }
+            ],
+            "readOnly": true
+          },
+          "editmeta": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IssueUpdateMetadata"
+              }
+            ],
+            "readOnly": true
+          },
+          "expand": {
+            "readOnly": true,
+            "type": "string",
+            "xml": {
+              "attribute": true
+            }
+          },
+          "fields": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "fieldsToInclude": {
+            "$ref": "#/components/schemas/IncludedFields"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "key": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "names": {
+            "additionalProperties": {
+              "readOnly": true,
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "operations": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Operations"
+              }
+            ],
+            "readOnly": true
+          },
+          "properties": {
+            "additionalProperties": {
+              "readOnly": true
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "renderedFields": {
+            "additionalProperties": {
+              "readOnly": true
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "schema": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/JsonTypeBean"
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "self": {
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "transitions": {
+            "items": {
+              "$ref": "#/components/schemas/IssueTransition"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "versionedRepresentations": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "readOnly": true
+              },
+              "readOnly": true,
+              "type": "object"
+            },
+            "readOnly": true,
+            "type": "object"
+          }
+        },
+        "type": "object",
+        "xml": {
+          "name": "issue"
+        }
+      },
+      "IssueLinkType": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "inward": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "outward": {
+            "type": "string"
+          },
+          "self": {
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IssueTransition": {
+        "additionalProperties": true,
+        "properties": {
+          "expand": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "fields": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FieldMetadata"
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "hasScreen": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "isAvailable": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "isConditional": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "isGlobal": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "isInitial": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "looped": {
+            "type": "boolean"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "to": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/StatusDetails"
+              }
+            ],
+            "readOnly": true
+          }
+        },
+        "type": "object"
+      },
+      "IssueTypeDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "avatarId": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "description": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "entityId": {
+            "format": "uuid",
+            "readOnly": true,
+            "type": "string"
+          },
+          "hierarchyLevel": {
+            "format": "int32",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "iconUrl": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "scope": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Scope"
+              }
+            ],
+            "readOnly": true
+          },
+          "self": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "subtask": {
+            "readOnly": true,
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "IssueTypeIssueCreateMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "avatarId": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "description": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "entityId": {
+            "format": "uuid",
+            "readOnly": true,
+            "type": "string"
+          },
+          "expand": {
+            "readOnly": true,
+            "type": "string",
+            "xml": {
+              "attribute": true
+            }
+          },
+          "fields": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FieldMetadata"
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "hierarchyLevel": {
+            "format": "int32",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "iconUrl": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "scope": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Scope"
+              }
+            ],
+            "readOnly": true
+          },
+          "self": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "subtask": {
+            "readOnly": true,
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "IssueUpdateDetails": {
+        "additionalProperties": true,
+        "properties": {
+          "fields": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "historyMetadata": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/HistoryMetadata"
+              }
+            ]
+          },
+          "properties": {
+            "items": {
+              "$ref": "#/components/schemas/EntityProperty"
+            },
+            "type": "array"
+          },
+          "transition": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IssueTransition"
+              }
+            ]
+          },
+          "update": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/FieldUpdateOperation"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "IssueUpdateMetadata": {
+        "properties": {
+          "fields": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FieldMetadata"
+            },
+            "readOnly": true,
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "JsonTypeBean": {
+        "additionalProperties": false,
+        "properties": {
+          "configuration": {
+            "additionalProperties": {
+              "readOnly": true
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "custom": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "customId": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "items": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "system": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "LinkGroup": {
+        "additionalProperties": false,
+        "properties": {
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/LinkGroup"
+            },
+            "type": "array"
+          },
+          "header": {
+            "$ref": "#/components/schemas/SimpleLink"
+          },
+          "id": {
+            "type": "string"
+          },
+          "links": {
+            "items": {
+              "$ref": "#/components/schemas/SimpleLink"
+            },
+            "type": "array"
+          },
+          "styleClass": {
+            "type": "string"
+          },
+          "weight": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LinkIssueRequestJsonBean": {
+        "additionalProperties": false,
+        "properties": {
+          "comment": {
+            "$ref": "#/components/schemas/Comment"
+          },
+          "inwardIssue": {
+            "$ref": "#/components/schemas/LinkedIssue"
+          },
+          "outwardIssue": {
+            "$ref": "#/components/schemas/LinkedIssue"
+          },
+          "type": {
+            "$ref": "#/components/schemas/IssueLinkType"
+          }
+        },
+        "required": [
+          "inwardIssue",
+          "outwardIssue",
+          "type"
+        ],
+        "type": "object"
+      },
+      "LinkedIssue": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Fields"
+              }
+            ],
+            "readOnly": true
+          },
+          "id": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "self": {
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ListWrapperCallbackApplicationRole": {
+        "additionalProperties": false,
+        "type": "object"
+      },
+      "ListWrapperCallbackGroupName": {
+        "additionalProperties": false,
+        "type": "object"
+      },
+      "MultipartFile": {
+        "additionalProperties": false,
+        "properties": {
+          "bytes": {
+            "items": {
+              "format": "byte",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "empty": {
+            "type": "boolean"
+          },
+          "inputStream": {
+            "type": "object"
+          },
+          "name": {
+            "type": "string"
+          },
+          "originalFilename": {
+            "type": "string"
+          },
+          "resource": {
+            "$ref": "#/components/schemas/Resource"
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "NestedResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "errorCollection": {
+            "$ref": "#/components/schemas/ErrorCollection"
+          },
+          "status": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "warningCollection": {
+            "$ref": "#/components/schemas/WarningCollection"
+          }
+        },
+        "type": "object"
+      },
+      "Operations": {
+        "additionalProperties": true,
+        "properties": {
+          "linkGroups": {
+            "items": {
+              "$ref": "#/components/schemas/LinkGroup"
+            },
+            "readOnly": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PageBeanProject": {
+        "additionalProperties": false,
+        "properties": {
+          "isLast": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "maxResults": {
+            "format": "int32",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "nextPage": {
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "self": {
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "startAt": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/Project"
+            },
+            "readOnly": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PageOfChangelogs": {
+        "additionalProperties": false,
+        "properties": {
+          "histories": {
+            "items": {
+              "$ref": "#/components/schemas/Changelog"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "maxResults": {
+            "format": "int32",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "startAt": {
+            "format": "int32",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "readOnly": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PageOfCreateMetaIssueTypeWithField": {
+        "additionalProperties": true,
+        "properties": {
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/FieldCreateMetadata"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "maxResults": {
+            "format": "int32",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/FieldCreateMetadata"
+            },
+            "type": "array"
+          },
+          "startAt": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PageOfCreateMetaIssueTypes": {
+        "additionalProperties": true,
+        "properties": {
+          "createMetaIssueType": {
+            "items": {
+              "$ref": "#/components/schemas/IssueTypeIssueCreateMetadata"
+            },
+            "type": "array",
+            "writeOnly": true
+          },
+          "issueTypes": {
+            "items": {
+              "$ref": "#/components/schemas/IssueTypeIssueCreateMetadata"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "maxResults": {
+            "format": "int32",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "startAt": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "Priority": {
+        "additionalProperties": true,
+        "properties": {
+          "avatarId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "description": {
+            "type": "string"
+          },
+          "iconUrl": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "isDefault": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "schemes": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ExpandPrioritySchemePage"
+              }
+            ]
+          },
+          "self": {
+            "type": "string"
+          },
+          "statusColor": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Project": {
+        "additionalProperties": false,
+        "properties": {
+          "archived": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "archivedBy": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ],
+            "readOnly": true
+          },
+          "archivedDate": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "assigneeType": {
+            "enum": [
+              "PROJECT_LEAD",
+              "UNASSIGNED"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "avatarUrls": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AvatarUrlsBean"
+              }
+            ],
+            "readOnly": true
+          },
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectComponent"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "deleted": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "deletedBy": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ],
+            "readOnly": true
+          },
+          "deletedDate": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "description": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "expand": {
+            "readOnly": true,
+            "type": "string",
+            "xml": {
+              "attribute": true
+            }
+          },
+          "favourite": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "insight": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectInsight"
+              }
+            ],
+            "readOnly": true
+          },
+          "isPrivate": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "issueTypeHierarchy": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Hierarchy"
+              }
+            ],
+            "readOnly": true
+          },
+          "issueTypes": {
+            "items": {
+              "$ref": "#/components/schemas/IssueTypeDetails"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "key": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "landingPageInfo": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectLandingPageInfo"
+              }
+            ],
+            "readOnly": true
+          },
+          "lead": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ],
+            "readOnly": true
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "permissions": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectPermissions"
+              }
+            ],
+            "readOnly": true
+          },
+          "projectCategory": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectCategory"
+              }
+            ],
+            "readOnly": true
+          },
+          "projectTypeKey": {
+            "enum": [
+              "software",
+              "service_desk",
+              "business",
+              "product_discovery"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "properties": {
+            "additionalProperties": {
+              "readOnly": true
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "retentionTillDate": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "roles": {
+            "additionalProperties": {
+              "format": "uri",
+              "readOnly": true,
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "self": {
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "simplified": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "style": {
+            "enum": [
+              "classic",
+              "next-gen"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "url": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "uuid": {
+            "format": "uuid",
+            "readOnly": true,
+            "type": "string"
+          },
+          "versions": {
+            "items": {
+              "$ref": "#/components/schemas/Version"
+            },
+            "readOnly": true,
+            "type": "array"
+          }
+        },
+        "type": "object",
+        "xml": {
+          "name": "project"
+        }
+      },
+      "ProjectCategory": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "self": {
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProjectComponent": {
+        "additionalProperties": false,
+        "properties": {
+          "ari": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "assignee": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ],
+            "readOnly": true
+          },
+          "assigneeType": {
+            "enum": [
+              "PROJECT_DEFAULT",
+              "COMPONENT_LEAD",
+              "PROJECT_LEAD",
+              "UNASSIGNED"
+            ],
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "isAssigneeTypeValid": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "lead": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ],
+            "readOnly": true
+          },
+          "leadAccountId": {
+            "maxLength": 128,
+            "type": "string",
+            "writeOnly": true
+          },
+          "leadUserName": {
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "readOnly": true,
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "name": {
+            "type": "string"
+          },
+          "project": {
+            "type": "string"
+          },
+          "projectId": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "realAssignee": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ],
+            "readOnly": true
+          },
+          "realAssigneeType": {
+            "enum": [
+              "PROJECT_DEFAULT",
+              "COMPONENT_LEAD",
+              "PROJECT_LEAD",
+              "UNASSIGNED"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "self": {
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "xml": {
+          "name": "component"
+        }
+      },
+      "ProjectDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "avatarUrls": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AvatarUrlsBean"
+              }
+            ],
+            "readOnly": true
+          },
+          "id": {
+            "type": "string"
+          },
+          "key": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "projectCategory": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UpdatedProjectCategory"
+              }
+            ],
+            "readOnly": true
+          },
+          "projectTypeKey": {
+            "enum": [
+              "software",
+              "service_desk",
+              "business",
+              "product_discovery"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "self": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "simplified": {
+            "readOnly": true,
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ProjectInsight": {
+        "additionalProperties": false,
+        "properties": {
+          "lastIssueUpdateTime": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "totalIssueCount": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ProjectLandingPageInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "attributes": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "boardId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "boardName": {
+            "type": "string"
+          },
+          "projectKey": {
+            "type": "string"
+          },
+          "projectType": {
+            "type": "string"
+          },
+          "queueCategory": {
+            "type": "string"
+          },
+          "queueId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "queueName": {
+            "type": "string"
+          },
+          "simpleBoard": {
+            "type": "boolean"
+          },
+          "simplified": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProjectPermissions": {
+        "additionalProperties": false,
+        "properties": {
+          "canEdit": {
+            "readOnly": true,
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "Resource": {
+        "additionalProperties": false,
+        "properties": {
+          "contentAsByteArray": {
+            "items": {
+              "format": "byte",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "description": {
+            "type": "string"
+          },
+          "file": {
+            "format": "binary",
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "inputStream": {
+            "type": "object"
+          },
+          "open": {
+            "type": "boolean"
+          },
+          "readable": {
+            "type": "boolean"
+          },
+          "uri": {
+            "format": "uri",
+            "type": "string"
+          },
+          "url": {
+            "format": "url",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Scope": {
+        "additionalProperties": true,
+        "properties": {
+          "project": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectDetails"
+              }
+            ],
+            "readOnly": true
+          },
+          "type": {
+            "enum": [
+              "PROJECT",
+              "TEMPLATE"
+            ],
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SearchAndReconcileRequestBean": {
+        "additionalProperties": false,
+        "properties": {
+          "expand": {
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "fieldsByKeys": {
+            "type": "boolean"
+          },
+          "includeArchivedProjects": {
+            "type": "boolean"
+          },
+          "jql": {
+            "type": "string"
+          },
+          "maxResults": {
+            "default": 50,
+            "format": "int32",
+            "type": "integer"
+          },
+          "nextPageToken": {
+            "type": "string"
+          },
+          "properties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reconcileIssues": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SearchAndReconcileResults": {
+        "additionalProperties": false,
+        "properties": {
+          "isLast": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/IssueBean"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "names": {
+            "additionalProperties": {
+              "readOnly": true,
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "nextPageToken": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "schema": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/JsonTypeBean"
+            },
+            "readOnly": true,
+            "type": "object"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/SearchWarning"
+            },
+            "readOnly": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SearchWarning": {
+        "additionalProperties": false,
+        "properties": {
+          "details": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SearchWarningLimitDetails"
+              }
+            ]
+          },
+          "message": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SearchWarningLimitDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "actual": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "arguments": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "clause": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "limit": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SimpleLink": {
+        "additionalProperties": false,
+        "properties": {
+          "href": {
+            "type": "string"
+          },
+          "iconClass": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "styleClass": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "weight": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object",
+        "xml": {
+          "name": "link"
+        }
+      },
+      "SimpleListWrapperApplicationRole": {
+        "additionalProperties": false,
+        "properties": {
+          "callback": {
+            "$ref": "#/components/schemas/ListWrapperCallbackApplicationRole"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ApplicationRole"
+            },
+            "type": "array"
+          },
+          "max-results": {
+            "format": "int32",
+            "type": "integer",
+            "xml": {
+              "attribute": true,
+              "name": "max-results"
+            }
+          },
+          "pagingCallback": {
+            "$ref": "#/components/schemas/ListWrapperCallbackApplicationRole"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer",
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "type": "object",
+        "xml": {
+          "name": "list"
+        }
+      },
+      "SimpleListWrapperGroupName": {
+        "additionalProperties": false,
+        "properties": {
+          "callback": {
+            "$ref": "#/components/schemas/ListWrapperCallbackGroupName"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/GroupName"
+            },
+            "type": "array"
+          },
+          "max-results": {
+            "format": "int32",
+            "type": "integer",
+            "xml": {
+              "attribute": true,
+              "name": "max-results"
+            }
+          },
+          "pagingCallback": {
+            "$ref": "#/components/schemas/ListWrapperCallbackGroupName"
+          },
+          "size": {
+            "format": "int32",
+            "type": "integer",
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "type": "object",
+        "xml": {
+          "name": "list"
+        }
+      },
+      "SimplifiedHierarchyLevel": {
+        "additionalProperties": false,
+        "properties": {
+          "aboveLevelId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "belowLevelId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "externalUuid": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "hierarchyLevelNumber": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "issueTypeIds": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "level": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectConfigurationId": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "StatusCategory": {
+        "additionalProperties": true,
+        "properties": {
+          "colorName": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "key": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "self": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StatusDetails": {
+        "additionalProperties": true,
+        "properties": {
+          "description": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "iconUrl": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "scope": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Scope"
+              }
+            ],
+            "readOnly": true
+          },
+          "self": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "statusCategory": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/StatusCategory"
+              }
+            ],
+            "readOnly": true
+          }
+        },
+        "type": "object"
+      },
+      "StringList": {
+        "additionalProperties": false,
+        "type": "object"
+      },
+      "TimeTrackingDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "originalEstimate": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "originalEstimateSeconds": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "remainingEstimate": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "remainingEstimateSeconds": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "timeSpent": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "timeSpentSeconds": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "Transitions": {
+        "additionalProperties": false,
+        "properties": {
+          "expand": {
+            "readOnly": true,
+            "type": "string",
+            "xml": {
+              "attribute": true
+            }
+          },
+          "transitions": {
+            "items": {
+              "$ref": "#/components/schemas/IssueTransition"
+            },
+            "readOnly": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "UpdatedProjectCategory": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "self": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "User": {
+        "additionalProperties": false,
+        "properties": {
+          "accountId": {
+            "maxLength": 128,
+            "type": "string"
+          },
+          "accountType": {
+            "enum": [
+              "atlassian",
+              "app",
+              "customer",
+              "unknown"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "active": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "appType": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "applicationRoles": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SimpleListWrapperApplicationRole"
+              }
+            ],
+            "readOnly": true
+          },
+          "avatarUrls": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AvatarUrlsBean"
+              }
+            ],
+            "readOnly": true
+          },
+          "displayName": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "emailAddress": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "expand": {
+            "readOnly": true,
+            "type": "string",
+            "xml": {
+              "attribute": true
+            }
+          },
+          "groups": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SimpleListWrapperGroupName"
+              }
+            ],
+            "readOnly": true
+          },
+          "guest": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "locale": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "self": {
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "timeZone": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "xml": {
+          "name": "user"
+        }
+      },
+      "UserDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "accountId": {
+            "maxLength": 128,
+            "type": "string"
+          },
+          "accountType": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "active": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "avatarUrls": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AvatarUrlsBean"
+              }
+            ],
+            "readOnly": true
+          },
+          "displayName": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "emailAddress": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "key": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "self": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "timeZone": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Version": {
+        "additionalProperties": false,
+        "properties": {
+          "approvers": {
+            "items": {
+              "$ref": "#/components/schemas/VersionApprover"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "driver": {
+            "type": "string"
+          },
+          "expand": {
+            "type": "string",
+            "xml": {
+              "attribute": true
+            }
+          },
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "issuesStatusForFixVersion": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VersionIssuesStatus"
+              }
+            ],
+            "readOnly": true
+          },
+          "moveUnfixedIssuesTo": {
+            "format": "uri",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "operations": {
+            "items": {
+              "$ref": "#/components/schemas/SimpleLink"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "overdue": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "project": {
+            "type": "string"
+          },
+          "projectId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "releaseDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "released": {
+            "type": "boolean"
+          },
+          "self": {
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "startDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "userReleaseDate": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "userStartDate": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "xml": {
+          "name": "version"
+        }
+      },
+      "VersionApprover": {
+        "additionalProperties": true,
+        "properties": {
+          "accountId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "declineReason": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "description": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "status": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VersionIssuesStatus": {
+        "additionalProperties": true,
+        "properties": {
+          "done": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "inProgress": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "toDo": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "unmapped": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "Visibility": {
+        "additionalProperties": true,
+        "properties": {
+          "identifier": {
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "group",
+              "role"
+            ],
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WarningCollection": {
+        "additionalProperties": false,
+        "properties": {
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "OAuth2": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://auth.atlassian.com/authorize",
+            "scopes": {
+              "delete:async-task:jira": "Delete asynchronous task.",
+              "delete:attachment:jira": "Delete issue attachments.",
+              "delete:avatar:jira": "Delete system and custom avatars.",
+              "delete:comment.property:jira": "Delete issue comment properties.",
+              "delete:comment:jira": "Delete issue comments.",
+              "delete:dashboard.property:jira": "Delete dashboard properties.",
+              "delete:dashboard:jira": "Delete dashboards.",
+              "delete:field-configuration-scheme:jira": "Delete field configuration schemes.",
+              "delete:field-configuration:jira": "Delete field configurations.",
+              "delete:field.option:jira": "Delete field options.",
+              "delete:field:jira": "Delete fields.",
+              "delete:filter.column:jira": "Delete filter columns.",
+              "delete:filter:jira": "Delete filters.",
+              "delete:group:jira": "Delete user groups.",
+              "delete:issue-link-type:jira": "Delete issue link types.",
+              "delete:issue-link:jira": "Delete issue links.",
+              "delete:issue-type-scheme:jira": "Delete issue type schemes.",
+              "delete:issue-type-screen-scheme:jira": "Delete issue type screen schemes.",
+              "delete:issue-type.property:jira": "Delete issue type properties.",
+              "delete:issue-type:jira": "Delete issue types.",
+              "delete:issue-worklog.property:jira": "Delete issue worklog properties.",
+              "delete:issue-worklog:jira": "Delete issue worklogs.",
+              "delete:issue.property:jira": "Delete issue properties.",
+              "delete:issue.remote-link:jira": "Delete issue remote links.",
+              "delete:issue:jira": "Delete issues.",
+              "delete:permission-scheme:jira": "Delete permission schemes.",
+              "delete:permission:jira": "Delete permissions.",
+              "delete:project-category:jira": "Delete project categories.",
+              "delete:project-role:jira": "Delete project roles.",
+              "delete:project-version:jira": "Delete project versions.",
+              "delete:project.avatar:jira": "Delete project avatars.",
+              "delete:project.component:jira": "Delete project components.",
+              "delete:project.property:jira": "Delete project properties.",
+              "delete:project:jira": "Delete projects and their details, such as issue types, project lead, and avatars.",
+              "delete:screen-scheme:jira": "Delete screen schemes.",
+              "delete:screen-tab:jira": "Delete screen tabs.",
+              "delete:screen:jira": "Delete screens.",
+              "delete:screenable-field:jira": "Delete screenable fields.",
+              "delete:user-configuration:jira": "Delete user configurations.",
+              "delete:user.property:jira": "Delete user properties.",
+              "delete:webhook:jira": "Delete webhooks.",
+              "delete:workflow-scheme:jira": "Delete workflow schemes.",
+              "delete:workflow.property:jira": "Delete workflow properties.",
+              "delete:workflow:jira": "Delete workflows.",
+              "manage:jira-configuration": "Configure Jira settings that require the Jira administrators permission, for example, create projects and custom fields, view workflows, manage issue link types.",
+              "manage:jira-project": "Create and edit project settings and create new project-level objects, for example, versions, components.",
+              "manage:jira-webhook": "Manage Jira webhooks. Enables an OAuth app to register and unregister dynamic webhooks in Jira. It also provides for fetching of registered webhooks.",
+              "read:app-data:jira": "Read app data.",
+              "read:application-role:jira": "View application roles.",
+              "read:attachment:jira": "View issue attachments.",
+              "read:audit-log:jira": "View audit logs.",
+              "read:avatar:jira": "View system and custom avatars.",
+              "read:bulk-job:jira": "View bulk jobs and their results.",
+              "read:comment.property:jira": "View issue comment properties.",
+              "read:comment:jira": "View issue comments.",
+              "read:custom-field-contextual-configuration:jira": "Read custom field contextual configurations.",
+              "read:dashboard.property:jira": "View dashboard properties.",
+              "read:dashboard:jira": "View dashboards.",
+              "read:email-address:jira": "View email addresses of all users regardless of the user's profile visibility settings.",
+              "read:field-configuration-scheme:jira": "View field configuration schemes.",
+              "read:field-configuration:jira": "Read field configurations.",
+              "read:field.default-value:jira": "View field default values.",
+              "read:field.option:jira": "View field options.",
+              "read:field.options:jira": "Read field options.",
+              "read:field:jira": "View fields.",
+              "read:filter.column:jira": "View filter columns.",
+              "read:filter.default-share-scope:jira": "View filter default share scopes.",
+              "read:filter:jira": "View filters.",
+              "read:group:jira": "View user groups.",
+              "read:instance-configuration:jira": "View instance configurations.",
+              "read:issue-details:jira": "View issue details.",
+              "read:issue-event:jira": "Read issue events.",
+              "read:issue-field-values:jira": "View issue field valueses.",
+              "read:issue-link-type:jira": "View issue link types.",
+              "read:issue-link:jira": "View issue links.",
+              "read:issue-meta:jira": "View issue meta.",
+              "read:issue-security-level:jira": "View issue security levels.",
+              "read:issue-security-scheme:jira": "View issue security schemes.",
+              "read:issue-status:jira": "View issue statuses.",
+              "read:issue-type-hierarchy:jira": "Read issue type hierarchies.",
+              "read:issue-type-scheme:jira": "View issue type schemes.",
+              "read:issue-type-screen-scheme:jira": "View issue type screen schemes.",
+              "read:issue-type.property:jira": "View issue type properties.",
+              "read:issue-type:jira": "View issue types.",
+              "read:issue-worklog.property:jira": "View issue worklog properties.",
+              "read:issue-worklog:jira": "View issue worklogs.",
+              "read:issue.changelog:jira": "View issue changelogs.",
+              "read:issue.property:jira": "View issue properties.",
+              "read:issue.remote-link:jira": "View issue remote links.",
+              "read:issue.time-tracking:jira": "View issue time trackings.",
+              "read:issue.transition:jira": "View issue transitions.",
+              "read:issue.vote:jira": "View issue votes.",
+              "read:issue.votes:jira": "View issue voteses.",
+              "read:issue.watcher:jira": "View issue watchers.",
+              "read:issue:jira": "View issues.",
+              "read:jira-expressions:jira": "View jira expressions.",
+              "read:jira-user": "View user information in Jira that you have access to, including usernames, email addresses, and avatars.",
+              "read:jira-work": "Read project and issue data. Search for issues and objects associated with issues (such as attachments and worklogs).",
+              "read:jql:jira": "View JQL.",
+              "read:label:jira": "View labels.",
+              "read:license:jira": "View licenses.",
+              "read:notification-scheme:jira": "View notification schemes.",
+              "read:permission-scheme:jira": "View permission schemes.",
+              "read:permission:jira": "View permissions.",
+              "read:priority:jira": "View priorities.",
+              "read:project-category:jira": "View project categories.",
+              "read:project-role:jira": "View project roles.",
+              "read:project-type:jira": "View project types.",
+              "read:project-version:jira": "View project versions.",
+              "read:project.avatar:jira": "Read project avatars.",
+              "read:project.component:jira": "View project components.",
+              "read:project.email:jira": "View project emails.",
+              "read:project.feature:jira": "Read project features.",
+              "read:project.property:jira": "View project properties.",
+              "read:project:jira": "View projects.",
+              "read:resolution:jira": "View resolutions.",
+              "read:role:jira": "View roles.",
+              "read:screen-field:jira": "View screen fields.",
+              "read:screen-scheme:jira": "View screen schemes.",
+              "read:screen-tab:jira": "View screen tabs.",
+              "read:screen:jira": "View screens.",
+              "read:screenable-field:jira": "View screenable fields.",
+              "read:status:jira": "View statuses.",
+              "read:user-configuration:jira": "View user configurations.",
+              "read:user.columns:jira": "View user columnses.",
+              "read:user.property:jira": "View user properties.",
+              "read:user:jira": "View users.",
+              "read:webhook:jira": "View webhooks.",
+              "read:workflow-scheme:jira": "View workflow schemes.",
+              "read:workflow.property:jira": "View workflow properties.",
+              "read:workflow:jira": "View workflows.",
+              "send:notification:jira": "Send notifications.",
+              "validate:jql:jira": "Validate JQL.",
+              "write:app-data:jira": "Write app data.",
+              "write:attachment:jira": "Create and update issue attachments.",
+              "write:avatar:jira": "Create and update system and custom avatars.",
+              "write:bulk-job:jira": "Create and manage bulk jobs, including uploads, retries, and cancellation.",
+              "write:comment.property:jira": "Create and update issue comment properties.",
+              "write:comment:jira": "Create and update issue comments.",
+              "write:custom-field-contextual-configuration:jira": "Save custom field contextual configurations.",
+              "write:dashboard.property:jira": "Create and update dashboard properties.",
+              "write:dashboard:jira": "Create and update dashboards.",
+              "write:field-configuration-scheme:jira": "Create and update field configuration schemes.",
+              "write:field-configuration:jira": "Save field configurations.",
+              "write:field.default-value:jira": "Create and update field default values.",
+              "write:field.option:jira": "Create and update field options.",
+              "write:field:jira": "Create and update fields.",
+              "write:filter.column:jira": "Create and update filter columns.",
+              "write:filter.default-share-scope:jira": "Create and update filter default share scopes.",
+              "write:filter:jira": "Create and update filters.",
+              "write:group:jira": "Create and update user groups.",
+              "write:instance-configuration:jira": "Create and update instance configurations.",
+              "write:issue-link-type:jira": "Create and update issue link types.",
+              "write:issue-link:jira": "Create and update issue links.",
+              "write:issue-type-scheme:jira": "Create and update issue type schemes.",
+              "write:issue-type-screen-scheme:jira": "Create and update issue type screen schemes.",
+              "write:issue-type.property:jira": "Create and update issue type properties.",
+              "write:issue-type:jira": "Create and update issue types.",
+              "write:issue-worklog.property:jira": "Create and update issue worklog properties.",
+              "write:issue-worklog:jira": "Create and update issue worklogs.",
+              "write:issue.property:jira": "Create and update issue properties.",
+              "write:issue.remote-link:jira": "Create and update issue remote links.",
+              "write:issue.time-tracking:jira": "Create and update issue time trackings.",
+              "write:issue.vote:jira": "Create and update issue votes.",
+              "write:issue.watcher:jira": "Create and update issue watchers.",
+              "write:issue:jira": "Create and update issues.",
+              "write:jira-work": "Create and edit issues in Jira, post comments, create worklogs, and delete issues.",
+              "write:permission-scheme:jira": "Create and update permission schemes.",
+              "write:permission:jira": "Create and update permissions.",
+              "write:project-category:jira": "Create and update project categories.",
+              "write:project-role:jira": "Create and update project roles.",
+              "write:project-version:jira": "Create and update project versions.",
+              "write:project.avatar:jira": "Create and update project avatars.",
+              "write:project.component:jira": "Create and update project components.",
+              "write:project.email:jira": "Create and update project emails.",
+              "write:project.feature:jira": "Save project features.",
+              "write:project.property:jira": "Create and update project properties.",
+              "write:project:jira": "Create and update projects.",
+              "write:screen-scheme:jira": "Create and update screen schemes.",
+              "write:screen-tab:jira": "Create and update screen tabs.",
+              "write:screen:jira": "Create and update screens.",
+              "write:screenable-field:jira": "Create and update screenable fields.",
+              "write:user-configuration:jira": "Create and update user configurations.",
+              "write:user.property:jira": "Create and update user properties.",
+              "write:webhook:jira": "Create and update webhooks.",
+              "write:workflow-scheme:jira": "Create and update workflow schemes.",
+              "write:workflow.property:jira": "Create and update workflow properties.",
+              "write:workflow:jira": "Create and update workflows."
+            },
+            "tokenUrl": "https://auth.atlassian.com/oauth/token"
+          }
+        },
+        "type": "oauth2"
+      },
+      "basicAuth": {
+        "scheme": "basic",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "The Jira Cloud platform REST API"
+  },
+  "openapi": "3.0.1",
+  "paths": {
+    "/rest/api/3/attachment/content/{id}": {
+      "get": {
+        "deprecated": false,
+        "operationId": "getAttachmentContent",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "redirect",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "206": {},
+          "303": {},
+          "400": {},
+          "401": {},
+          "403": {},
+          "404": {},
+          "416": {}
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "OAuth2": [
+              "read:jira-work"
+            ]
+          },
+          {}
+        ]
+      }
+    },
+    "/rest/api/3/issue": {
+      "post": {
+        "deprecated": false,
+        "operationId": "createIssue",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "updateHistory",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IssueUpdateDetails"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedIssue"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorCollection"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorCollection"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorCollection"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorCollection"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "OAuth2": [
+              "write:jira-work"
+            ]
+          },
+          {}
+        ]
+      }
+    },
+    "/rest/api/3/issue/createmeta/{projectIdOrKey}/issuetypes": {
+      "get": {
+        "deprecated": false,
+        "operationId": "getCreateIssueMetaIssueTypes",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectIdOrKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "startAt",
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxResults",
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "maximum": 200,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageOfCreateMetaIssueTypes"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {}
+            }
+          },
+          "401": {}
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "OAuth2": [
+              "read:jira-work"
+            ]
+          },
+          {}
+        ]
+      }
+    },
+    "/rest/api/3/issue/createmeta/{projectIdOrKey}/issuetypes/{issueTypeId}": {
+      "get": {
+        "deprecated": false,
+        "operationId": "getCreateIssueMetaIssueTypeId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectIdOrKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "issueTypeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "startAt",
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxResults",
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "maximum": 200,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageOfCreateMetaIssueTypeWithField"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {}
+            }
+          },
+          "401": {}
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "OAuth2": [
+              "read:jira-work"
+            ]
+          },
+          {}
+        ]
+      }
+    },
+    "/rest/api/3/issue/{issueIdOrKey}": {
+      "delete": {
+        "deprecated": false,
+        "operationId": "deleteIssue",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "issueIdOrKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deleteSubtasks",
+            "schema": {
+              "default": "false",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {},
+          "400": {},
+          "401": {},
+          "403": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "OAuth2": [
+              "write:jira-work"
+            ]
+          },
+          {}
+        ]
+      },
+      "get": {
+        "deprecated": false,
+        "operationId": "getIssue",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "issueIdOrKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "items": {
+                "default": "*all",
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fieldsByKeys",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "properties",
+            "schema": {
+              "items": {
+                "default": "null",
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "updateHistory",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "failFast",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssueBean"
+                }
+              }
+            }
+          },
+          "401": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "OAuth2": [
+              "read:jira-work"
+            ]
+          },
+          {}
+        ]
+      },
+      "put": {
+        "deprecated": false,
+        "operationId": "editIssue",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "issueIdOrKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "notifyUsers",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "overrideScreenSecurity",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "overrideEditableFlag",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "returnIssue",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IssueUpdateDetails"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "204": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {},
+          "401": {},
+          "403": {},
+          "404": {},
+          "409": {},
+          "422": {}
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "OAuth2": [
+              "write:jira-work"
+            ]
+          },
+          {}
+        ]
+      }
+    },
+    "/rest/api/3/issue/{issueIdOrKey}/assignee": {
+      "put": {
+        "deprecated": false,
+        "operationId": "assignIssue",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "issueIdOrKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {},
+          "403": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "OAuth2": [
+              "write:jira-work"
+            ]
+          },
+          {}
+        ]
+      }
+    },
+    "/rest/api/3/issue/{issueIdOrKey}/attachments": {
+      "post": {
+        "deprecated": false,
+        "operationId": "addAttachment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "issueIdOrKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/MultipartFile"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Attachment"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "403": {},
+          "404": {},
+          "413": {}
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "OAuth2": [
+              "write:jira-work"
+            ]
+          },
+          {}
+        ]
+      }
+    },
+    "/rest/api/3/issue/{issueIdOrKey}/comment": {
+      "post": {
+        "deprecated": false,
+        "operationId": "addComment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "issueIdOrKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Comment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comment"
+                }
+              }
+            }
+          },
+          "400": {},
+          "401": {},
+          "404": {},
+          "413": {}
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "OAuth2": [
+              "write:jira-work"
+            ]
+          },
+          {}
+        ]
+      }
+    },
+    "/rest/api/3/issue/{issueIdOrKey}/transitions": {
+      "get": {
+        "deprecated": false,
+        "operationId": "getTransitions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "issueIdOrKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "transitionId",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skipRemoteOnlyCondition",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "includeUnavailableTransitions",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sortByOpsBarAndStatus",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Transitions"
+                }
+              }
+            }
+          },
+          "401": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "OAuth2": [
+              "read:jira-work"
+            ]
+          },
+          {}
+        ]
+      },
+      "post": {
+        "deprecated": false,
+        "operationId": "doTransition",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "issueIdOrKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IssueUpdateDetails"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {},
+          "401": {},
+          "404": {},
+          "409": {},
+          "413": {},
+          "422": {}
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "OAuth2": [
+              "write:jira-work"
+            ]
+          },
+          {}
+        ]
+      }
+    },
+    "/rest/api/3/issue/{issueIdOrKey}/watchers": {
+      "delete": {
+        "deprecated": false,
+        "operationId": "removeWatcher",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "issueIdOrKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "username",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "accountId",
+            "schema": {
+              "maxLength": 128,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {},
+          "400": {},
+          "401": {},
+          "403": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "OAuth2": [
+              "write:jira-work"
+            ]
+          },
+          {}
+        ]
+      },
+      "post": {
+        "deprecated": false,
+        "operationId": "addWatcher",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "issueIdOrKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {},
+          "401": {},
+          "403": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "OAuth2": [
+              "write:jira-work"
+            ]
+          },
+          {}
+        ]
+      }
+    },
+    "/rest/api/3/issueLink": {
+      "post": {
+        "deprecated": false,
+        "operationId": "linkIssues",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkIssueRequestJsonBean"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {},
+          "401": {},
+          "404": {},
+          "413": {}
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "OAuth2": [
+              "write:jira-work"
+            ]
+          },
+          {}
+        ]
+      }
+    },
+    "/rest/api/3/project/search": {
+      "get": {
+        "deprecated": false,
+        "operationId": "searchProjects",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "startAt",
+            "schema": {
+              "default": 0,
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxResults",
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "schema": {
+              "default": "key",
+              "enum": [
+                "category",
+                "-category",
+                "+category",
+                "key",
+                "-key",
+                "+key",
+                "name",
+                "-name",
+                "+name",
+                "owner",
+                "-owner",
+                "+owner",
+                "issueCount",
+                "-issueCount",
+                "+issueCount",
+                "lastIssueUpdatedDate",
+                "-lastIssueUpdatedDate",
+                "+lastIssueUpdatedDate",
+                "archivedDate",
+                "+archivedDate",
+                "-archivedDate",
+                "deletedDate",
+                "+deletedDate",
+                "-deletedDate"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "schema": {
+              "items": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "type": "array",
+              "uniqueItems": true
+            }
+          },
+          {
+            "in": "query",
+            "name": "keys",
+            "schema": {
+              "items": {
+                "default": "",
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            }
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "typeKey",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "categoryId",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "action",
+            "schema": {
+              "default": "view",
+              "enum": [
+                "view",
+                "browse",
+                "edit",
+                "create"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "items": {
+                "default": "live",
+                "enum": [
+                  "live",
+                  "archived",
+                  "deleted"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "properties",
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/StringList"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "propertyQuery",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageBeanProject"
+                }
+              }
+            }
+          },
+          "400": {},
+          "401": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "OAuth2": [
+              "read:jira-work"
+            ]
+          },
+          {}
+        ]
+      }
+    },
+    "/rest/api/3/project/{projectIdOrKey}": {
+      "get": {
+        "deprecated": false,
+        "operationId": "getProject",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectIdOrKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expand",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "properties",
+            "schema": {
+              "items": {
+                "default": "",
+                "type": "string"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "401": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "OAuth2": [
+              "read:jira-work"
+            ]
+          },
+          {}
+        ]
+      }
+    },
+    "/rest/api/3/search/jql": {
+      "post": {
+        "deprecated": false,
+        "operationId": "searchAndReconsileIssuesUsingJqlPost",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchAndReconcileRequestBean"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchAndReconcileResults"
+                }
+              }
+            }
+          },
+          "400": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "OAuth2": [
+              "read:jira-work"
+            ]
+          },
+          {}
+        ]
+      }
+    },
+    "/rest/api/3/user/search": {
+      "get": {
+        "deprecated": false,
+        "operationId": "findUsers",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "username",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "accountId",
+            "schema": {
+              "maxLength": 128,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "startAt",
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxResults",
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "property",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "400": {},
+          "401": {},
+          "429": {}
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "OAuth2": [
+              "read:jira-user"
+            ]
+          },
+          {}
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://your-domain.atlassian.net"
+    }
+  ]
+}

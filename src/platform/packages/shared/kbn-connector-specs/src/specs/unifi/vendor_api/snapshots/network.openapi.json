@@ -1,0 +1,1889 @@
+{
+  "components": {
+    "schemas": {
+      "Access point feature overview": {},
+      "Adopted device details": {
+        "properties": {
+          "adoptedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "configurationId": {
+            "type": "string"
+          },
+          "features": {
+            "$ref": "#/components/schemas/Device features"
+          },
+          "firmwareUpdatable": {
+            "type": "boolean"
+          },
+          "firmwareVersion": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "interfaces": {
+            "$ref": "#/components/schemas/Device physical interfaces"
+          },
+          "ipAddress": {
+            "type": "string"
+          },
+          "macAddress": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "provisionedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "ONLINE",
+              "OFFLINE",
+              "PENDING_ADOPTION",
+              "UPDATING",
+              "GETTING_READY",
+              "ADOPTING",
+              "DELETING",
+              "CONNECTION_INTERRUPTED",
+              "ISOLATED",
+              "U5G_INCORRECT_TOPOLOGY"
+            ],
+            "type": "string"
+          },
+          "supported": {
+            "type": "boolean"
+          },
+          "uplink": {
+            "$ref": "#/components/schemas/Device uplink interface overview"
+          }
+        },
+        "required": [
+          "configurationId",
+          "features",
+          "firmwareUpdatable",
+          "id",
+          "interfaces",
+          "ipAddress",
+          "macAddress",
+          "model",
+          "name",
+          "state",
+          "supported"
+        ],
+        "type": "object"
+      },
+      "Adopted device overview": {
+        "properties": {
+          "features": {
+            "items": {
+              "enum": [
+                "switching",
+                "accessPoint",
+                "gateway"
+              ],
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "firmwareUpdatable": {
+            "type": "boolean"
+          },
+          "firmwareVersion": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "interfaces": {
+            "items": {
+              "enum": [
+                "ports",
+                "radios"
+              ],
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "ipAddress": {
+            "type": "string"
+          },
+          "macAddress": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "ONLINE",
+              "OFFLINE",
+              "PENDING_ADOPTION",
+              "UPDATING",
+              "GETTING_READY",
+              "ADOPTING",
+              "DELETING",
+              "CONNECTION_INTERRUPTED",
+              "ISOLATED",
+              "U5G_INCORRECT_TOPOLOGY"
+            ],
+            "type": "string"
+          },
+          "supported": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "features",
+          "firmwareUpdatable",
+          "id",
+          "interfaces",
+          "ipAddress",
+          "macAddress",
+          "model",
+          "name",
+          "state",
+          "supported"
+        ],
+        "type": "object"
+      },
+      "Adopted device overview page": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/Adopted device overview"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "offset": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count",
+          "data",
+          "limit",
+          "offset",
+          "totalCount"
+        ],
+        "type": "object"
+      },
+      "Application info": {
+        "properties": {
+          "applicationVersion": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "applicationVersion"
+        ],
+        "type": "object"
+      },
+      "Client access overview": {},
+      "Client action request": {
+        "discriminator": {
+          "mapping": {
+            "AUTHORIZE_GUEST_ACCESS": "#/components/schemas/Guest access authorization request",
+            "UNAUTHORIZE_GUEST_ACCESS": "#/components/schemas/Guest access unauthorization request"
+          },
+          "propertyName": "action"
+        },
+        "properties": {
+          "action": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
+      "Client action response": {
+        "discriminator": {
+          "mapping": {
+            "AUTHORIZE_GUEST_ACCESS": "#/components/schemas/Guest access authorization response",
+            "UNAUTHORIZE_GUEST_ACCESS": "#/components/schemas/Guest access unauthorization response"
+          },
+          "propertyName": "action"
+        },
+        "properties": {
+          "action": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
+      "Client details": {
+        "discriminator": {
+          "mapping": {
+            "TELEPORT": "#/components/schemas/Teleport client (connection) details",
+            "VPN": "#/components/schemas/VPN client (connection) details",
+            "WIRED": "#/components/schemas/Wired client details",
+            "WIRELESS": "#/components/schemas/Wireless client details"
+          },
+          "propertyName": "type"
+        },
+        "properties": {
+          "access": {},
+          "connectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ipAddress": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "access",
+          "id",
+          "name",
+          "type"
+        ],
+        "type": "object"
+      },
+      "Client overview": {
+        "discriminator": {
+          "mapping": {
+            "TELEPORT": "#/components/schemas/Teleport client (connection) overview",
+            "VPN": "#/components/schemas/VPN client (connection) overview",
+            "WIRED": "#/components/schemas/Wired client overview",
+            "WIRELESS": "#/components/schemas/Wireless client overview"
+          },
+          "propertyName": "type"
+        },
+        "properties": {
+          "access": {
+            "$ref": "#/components/schemas/Client access overview"
+          },
+          "connectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ipAddress": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "access",
+          "id",
+          "name",
+          "type"
+        ],
+        "type": "object"
+      },
+      "Client overview page": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/Client overview"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "offset": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count",
+          "data",
+          "limit",
+          "offset",
+          "totalCount"
+        ],
+        "type": "object"
+      },
+      "Device action request": {
+        "discriminator": {
+          "mapping": {
+            "RESTART": "#/components/schemas/Device restart request"
+          },
+          "propertyName": "action"
+        },
+        "properties": {
+          "action": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
+      "Device features": {
+        "properties": {
+          "accessPoint": {
+            "$ref": "#/components/schemas/Access point feature overview"
+          },
+          "switching": {
+            "$ref": "#/components/schemas/Switching feature overview"
+          }
+        },
+        "type": "object"
+      },
+      "Device physical interfaces": {
+        "properties": {
+          "ports": {
+            "items": {
+              "$ref": "#/components/schemas/Port overview"
+            },
+            "type": "array"
+          },
+          "radios": {
+            "items": {
+              "$ref": "#/components/schemas/Wireless radio overview"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Device uplink interface overview": {
+        "properties": {
+          "deviceId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "deviceId"
+        ],
+        "type": "object"
+      },
+      "Entity metadata": {
+        "discriminator": {
+          "mapping": {
+            "DERIVED": "#/components/schemas/Derived entity metadata",
+            "ORCHESTRATED": "#/components/schemas/Orchestrated entity metadata",
+            "SYSTEM_DEFINED": "#/components/schemas/System defined entity metadata",
+            "USER_DEFINED": "#/components/schemas/User defined entity metadata"
+          },
+          "propertyName": "origin"
+        },
+        "properties": {
+          "origin": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "origin"
+        ]
+      },
+      "Firewall policy": {
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/Firewall policy action"
+          },
+          "connectionStateFilter": {
+            "items": {
+              "enum": [
+                "NEW",
+                "INVALID",
+                "ESTABLISHED",
+                "RELATED"
+              ],
+              "type": "string"
+            },
+            "maxItems": 2147483647,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "description": {
+            "type": "string"
+          },
+          "destination": {
+            "$ref": "#/components/schemas/Firewall policy destination"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "index": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ipProtocolScope": {
+            "$ref": "#/components/schemas/Firewall policy IP protocol scope"
+          },
+          "ipsecFilter": {
+            "enum": [
+              "MATCH_ENCRYPTED",
+              "MATCH_NOT_ENCRYPTED"
+            ],
+            "type": "string"
+          },
+          "loggingEnabled": {
+            "type": "boolean"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/User or system defined or derived entity metadata"
+          },
+          "name": {
+            "type": "string"
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/Firewall schedule"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Firewall policy source"
+          }
+        },
+        "required": [
+          "action",
+          "destination",
+          "enabled",
+          "id",
+          "index",
+          "ipProtocolScope",
+          "loggingEnabled",
+          "metadata",
+          "name",
+          "source"
+        ],
+        "type": "object"
+      },
+      "Firewall policy IP protocol scope": {
+        "discriminator": {
+          "mapping": {
+            "IPV4": "#/components/schemas/IntegrationFirewallPolicyIpv4ProtocolScopeDto",
+            "IPV4_AND_IPV6": "#/components/schemas/IntegrationFirewallPolicyIpv4AndIpv6ProtocolScopeDto",
+            "IPV6": "#/components/schemas/IntegrationFirewallPolicyIpv6ProtocolScopeDto"
+          },
+          "propertyName": "ipVersion"
+        },
+        "properties": {
+          "ipVersion": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ipVersion"
+        ]
+      },
+      "Firewall policy action": {
+        "discriminator": {
+          "mapping": {
+            "ALLOW": "#/components/schemas/IntegrationFirewallPolicyActionAllowDto",
+            "BLOCK": "#/components/schemas/IntegrationFirewallPolicyActionBlockDto",
+            "REJECT": "#/components/schemas/IntegrationFirewallPolicyActionRejectDto"
+          },
+          "propertyName": "type"
+        },
+        "properties": {
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "Firewall policy destination": {
+        "properties": {
+          "trafficFilter": {
+            "$ref": "#/components/schemas/Firewall policy destination traffic filter"
+          },
+          "zoneId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "zoneId"
+        ],
+        "type": "object"
+      },
+      "Firewall policy destination traffic filter": {
+        "discriminator": {
+          "mapping": {
+            "APPLICATION": "#/components/schemas/IntegrationFirewallPolicyDestinationApplicationFilterDto",
+            "APPLICATION_CATEGORY": "#/components/schemas/IntegrationFirewallPolicyDestinationApplicationCategoryFilterDto",
+            "DOMAIN": "#/components/schemas/IntegrationFirewallPolicyDestinationDomainFilterDto",
+            "IPV6_IID": "#/components/schemas/IntegrationFirewallPolicyDestinationIpv6IidFilterDto",
+            "IP_ADDRESS": "#/components/schemas/IntegrationFirewallPolicyDestinationIpAddressFilterDto",
+            "NETWORK": "#/components/schemas/IntegrationFirewallPolicyDestinationNetworkFilterDto",
+            "PORT": "#/components/schemas/IntegrationFirewallPolicyDestinationPortFilterDto",
+            "REGION": "#/components/schemas/IntegrationFirewallPolicyDestinationRegionFilterDto",
+            "SITE_TO_SITE_VPN_TUNNEL": "#/components/schemas/IntegrationFirewallPolicyDestinationSiteToSiteVpnTunnelFilterDto",
+            "VPN_SERVER": "#/components/schemas/IntegrationFirewallPolicyDestinationVpnServerFilterDto"
+          },
+          "propertyName": "type"
+        },
+        "properties": {
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "Firewall policy page": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/Firewall policy"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "offset": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count",
+          "data",
+          "limit",
+          "offset",
+          "totalCount"
+        ],
+        "type": "object"
+      },
+      "Firewall policy source": {
+        "properties": {
+          "trafficFilter": {
+            "$ref": "#/components/schemas/Firewall policy source traffic filter"
+          },
+          "zoneId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "zoneId"
+        ],
+        "type": "object"
+      },
+      "Firewall policy source traffic filter": {
+        "discriminator": {
+          "mapping": {
+            "IPV6_IID": "#/components/schemas/IntegrationFirewallPolicySourceIpv6IidFilterDto",
+            "IP_ADDRESS": "#/components/schemas/IntegrationFirewallPolicySourceIpAddressFilterDto",
+            "MAC_ADDRESS": "#/components/schemas/IntegrationFirewallPolicySourceMacAddressFilterDto",
+            "NETWORK": "#/components/schemas/IntegrationFirewallPolicySourceNetworkFilterDto",
+            "PORT": "#/components/schemas/IntegrationFirewallPolicySourcePortFilterDto",
+            "REGION": "#/components/schemas/IntegrationFirewallPolicySourceRegionFilterDto",
+            "SITE_TO_SITE_VPN_TUNNEL": "#/components/schemas/IntegrationFirewallPolicySourceSiteToSiteVpnTunnelFilterDto",
+            "VPN_SERVER": "#/components/schemas/IntegrationFirewallPolicySourceVpnServerFilterDto"
+          },
+          "propertyName": "type"
+        },
+        "properties": {
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "Firewall schedule": {
+        "discriminator": {
+          "mapping": {
+            "CUSTOM": "#/components/schemas/IntegrationFirewallScheduleCustomDto",
+            "EVERY_DAY": "#/components/schemas/IntegrationFirewallScheduleEveryDayDto",
+            "EVERY_WEEK": "#/components/schemas/IntegrationFirewallScheduleEveryWeekDto",
+            "ONE_TIME_ONLY": "#/components/schemas/IntegrationFirewallScheduleOneTimeOnlyDto"
+          },
+          "propertyName": "mode"
+        },
+        "properties": {
+          "mode": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "IntegrationLocalLagLocalDto": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/User defined entity metadata"
+          },
+          "portIdxs": {
+            "items": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "metadata",
+          "portIdxs"
+        ],
+        "type": "object"
+      },
+      "Latest statistics for a device": {
+        "properties": {
+          "cpuUtilizationPct": {
+            "format": "double",
+            "type": "number"
+          },
+          "interfaces": {
+            "$ref": "#/components/schemas/Latest statistics for device interfaces"
+          },
+          "lastHeartbeatAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "loadAverage15Min": {
+            "format": "double",
+            "type": "number"
+          },
+          "loadAverage1Min": {
+            "format": "double",
+            "type": "number"
+          },
+          "loadAverage5Min": {
+            "format": "double",
+            "type": "number"
+          },
+          "memoryUtilizationPct": {
+            "format": "double",
+            "type": "number"
+          },
+          "nextHeartbeatAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "uplink": {
+            "$ref": "#/components/schemas/Latest statistics for a device uplink interface"
+          },
+          "uptimeSec": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "interfaces"
+        ],
+        "type": "object"
+      },
+      "Latest statistics for a device uplink interface": {
+        "properties": {
+          "rxRateBps": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "txRateBps": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "Latest statistics for device interfaces": {
+        "properties": {
+          "radios": {
+            "items": {
+              "$ref": "#/components/schemas/Latest statistics for wireless radio"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Latest statistics for wireless radio": {
+        "properties": {
+          "frequencyGHz": {
+            "enum": [
+              2.4,
+              5,
+              6,
+              60
+            ],
+            "type": "number"
+          },
+          "txRetriesPct": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "frequencyGHz"
+        ],
+        "type": "object"
+      },
+      "Network overview": {
+        "discriminator": {
+          "mapping": {
+            "GATEWAY": "#/components/schemas/Gateway managed network overview",
+            "SWITCH": "#/components/schemas/Switch managed network overview",
+            "UNMANAGED": "#/components/schemas/Unmanaged network overview"
+          },
+          "propertyName": "management"
+        },
+        "properties": {
+          "default": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "management": {
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/User or system defined or orchestrated entity metadata"
+          },
+          "name": {
+            "type": "string"
+          },
+          "vlanId": {
+            "format": "int32",
+            "maximum": 4009,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "default",
+          "enabled",
+          "id",
+          "management",
+          "metadata",
+          "name",
+          "vlanId"
+        ],
+        "type": "object"
+      },
+      "Network overview page": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/Network overview"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "offset": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count",
+          "data",
+          "limit",
+          "offset",
+          "totalCount"
+        ],
+        "type": "object"
+      },
+      "Port PoE overview": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "standard": {
+            "enum": [
+              "802.3af",
+              "802.3at",
+              "802.3bt"
+            ],
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "UP",
+              "DOWN",
+              "LIMITED",
+              "UNKNOWN"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "1",
+              "2",
+              "3",
+              "4"
+            ],
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "enabled",
+          "standard",
+          "state",
+          "type"
+        ],
+        "type": "object"
+      },
+      "Port action request": {
+        "discriminator": {
+          "mapping": {
+            "POWER_CYCLE": "#/components/schemas/Port PoE power-cycle request"
+          },
+          "propertyName": "action"
+        },
+        "properties": {
+          "action": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
+      "Port overview": {
+        "properties": {
+          "connector": {
+            "enum": [
+              "RJ45",
+              "SFP",
+              "SFPPLUS",
+              "SFP28",
+              "QSFP28"
+            ],
+            "type": "string"
+          },
+          "idx": {
+            "format": "int32",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "maxSpeedMbps": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "poe": {
+            "$ref": "#/components/schemas/Port PoE overview"
+          },
+          "speedMbps": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "state": {
+            "enum": [
+              "UP",
+              "DOWN",
+              "UNKNOWN"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "connector",
+          "idx",
+          "maxSpeedMbps",
+          "state"
+        ],
+        "type": "object"
+      },
+      "Site overview": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "internalReference": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "internalReference",
+          "name"
+        ],
+        "type": "object"
+      },
+      "Site overview page": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/Site overview"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "offset": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count",
+          "data",
+          "limit",
+          "offset",
+          "totalCount"
+        ],
+        "type": "object"
+      },
+      "Site-to-site VPN tunnel metadata": {
+        "discriminator": {
+          "mapping": {
+            "DERIVED": "#/components/schemas/IntegrationDerivedSiteToSiteTunnelMetadata",
+            "USER_DEFINED": "#/components/schemas/User defined entity metadata"
+          },
+          "propertyName": "origin"
+        },
+        "properties": {
+          "origin": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "origin"
+        ]
+      },
+      "Switching feature overview": {
+        "properties": {
+          "lags": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationLocalLagLocalDto"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "lags"
+        ],
+        "type": "object"
+      },
+      "User defined entity metadata": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Entity metadata"
+          },
+          {
+            "$ref": "#/components/schemas/User or system defined entity metadata"
+          },
+          {
+            "$ref": "#/components/schemas/User defined or derived entity metadata"
+          },
+          {
+            "$ref": "#/components/schemas/User or system defined or orchestrated entity metadata"
+          },
+          {
+            "$ref": "#/components/schemas/User or orchestrated entity metadata"
+          },
+          {
+            "$ref": "#/components/schemas/User or derived or orchestrated entity metadata"
+          },
+          {
+            "$ref": "#/components/schemas/Site-to-site VPN tunnel metadata"
+          }
+        ]
+      },
+      "User defined or derived entity metadata": {
+        "discriminator": {
+          "mapping": {
+            "DERIVED": "#/components/schemas/Derived entity metadata",
+            "USER_DEFINED": "#/components/schemas/User defined entity metadata"
+          },
+          "propertyName": "origin"
+        },
+        "properties": {
+          "origin": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "origin"
+        ]
+      },
+      "User or derived or orchestrated entity metadata": {
+        "discriminator": {
+          "mapping": {
+            "DERIVED": "#/components/schemas/Derived entity metadata",
+            "ORCHESTRATED": "#/components/schemas/Orchestrated entity metadata",
+            "USER_DEFINED": "#/components/schemas/User defined entity metadata"
+          },
+          "propertyName": "origin"
+        },
+        "properties": {
+          "origin": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "origin"
+        ]
+      },
+      "User or orchestrated entity metadata": {
+        "discriminator": {
+          "mapping": {
+            "ORCHESTRATED": "#/components/schemas/Orchestrated entity metadata",
+            "USER_DEFINED": "#/components/schemas/User defined entity metadata"
+          },
+          "propertyName": "origin"
+        },
+        "properties": {
+          "origin": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "origin"
+        ]
+      },
+      "User or system defined entity metadata": {
+        "discriminator": {
+          "mapping": {
+            "SYSTEM_DEFINED": "#/components/schemas/System defined entity metadata",
+            "USER_DEFINED": "#/components/schemas/User defined entity metadata"
+          },
+          "propertyName": "origin"
+        },
+        "properties": {
+          "origin": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "origin"
+        ]
+      },
+      "User or system defined or derived entity metadata": {
+        "discriminator": {
+          "mapping": {
+            "DERIVED": "#/components/schemas/Derived entity metadata",
+            "SYSTEM_DEFINED": "#/components/schemas/System defined entity metadata",
+            "USER_DEFINED": "#/components/schemas/User defined entity metadata"
+          },
+          "propertyName": "origin"
+        },
+        "properties": {
+          "origin": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "origin"
+        ]
+      },
+      "User or system defined or orchestrated entity metadata": {
+        "discriminator": {
+          "mapping": {
+            "ORCHESTRATED": "#/components/schemas/Orchestrated entity metadata",
+            "SYSTEM_DEFINED": "#/components/schemas/System defined entity metadata",
+            "USER_DEFINED": "#/components/schemas/User defined entity metadata"
+          },
+          "propertyName": "origin"
+        },
+        "properties": {
+          "origin": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "origin"
+        ]
+      },
+      "WAN overview": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
+      "WAN overview page": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/WAN overview"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "offset": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count",
+          "data",
+          "limit",
+          "offset",
+          "totalCount"
+        ],
+        "type": "object"
+      },
+      "Wireless radio overview": {
+        "properties": {
+          "channel": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "channelWidthMHz": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "frequencyGHz": {
+            "enum": [
+              2.4,
+              5,
+              6,
+              60
+            ],
+            "type": "number"
+          },
+          "wlanStandard": {
+            "enum": [
+              "802.11a",
+              "802.11b",
+              "802.11g",
+              "802.11n",
+              "802.11ac",
+              "802.11ax",
+              "802.11be"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelWidthMHz",
+          "frequencyGHz",
+          "wlanStandard"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "UniFi Network API"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/v1/info": {
+      "get": {
+        "operationId": "getInfo",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Application info"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sites": {
+      "get": {
+        "operationId": "getSiteOverviewPage",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "format": "int32",
+              "maximum": 200,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Site overview page"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sites/{siteId}/clients": {
+      "get": {
+        "operationId": "getConnectedClientOverviewPage",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "format": "int32",
+              "maximum": 200,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "siteId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Client overview page"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sites/{siteId}/clients/{clientId}": {
+      "get": {
+        "operationId": "getConnectedClientDetails",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "clientId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "siteId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Client details"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sites/{siteId}/clients/{clientId}/actions": {
+      "post": {
+        "operationId": "executeConnectedClientAction",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "clientId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "siteId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Client action request"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Client action response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sites/{siteId}/devices": {
+      "get": {
+        "operationId": "getAdoptedDeviceOverviewPage",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "format": "int32",
+              "maximum": 200,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "siteId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Adopted device overview page"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sites/{siteId}/devices/{deviceId}": {
+      "get": {
+        "operationId": "getAdoptedDeviceDetails",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "siteId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "deviceId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Adopted device details"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sites/{siteId}/devices/{deviceId}/actions": {
+      "post": {
+        "operationId": "executeAdoptedDeviceAction",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "siteId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "deviceId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Device action request"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {}
+        }
+      }
+    },
+    "/v1/sites/{siteId}/devices/{deviceId}/interfaces/ports/{portIdx}/actions": {
+      "post": {
+        "operationId": "executePortAction",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portIdx",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "siteId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "deviceId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Port action request"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {}
+        }
+      }
+    },
+    "/v1/sites/{siteId}/devices/{deviceId}/statistics/latest": {
+      "get": {
+        "operationId": "getAdoptedDeviceLatestStatistics",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "siteId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "deviceId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Latest statistics for a device"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sites/{siteId}/firewall/policies": {
+      "get": {
+        "operationId": "getFirewallPolicies",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "format": "int32",
+              "maximum": 200,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "siteId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Firewall policy page"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sites/{siteId}/networks": {
+      "get": {
+        "operationId": "getNetworksOverviewPage",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "format": "int32",
+              "maximum": 200,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "siteId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Network overview page"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sites/{siteId}/wans": {
+      "get": {
+        "operationId": "getWansOverviewPage",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "format": "int32",
+              "maximum": 200,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "siteId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WAN overview page"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.ui.com/v1/connector/consoles/{consoleId}/proxy/network/integration",
+      "variables": {
+        "consoleId": {
+          "default": "942A6FF664C0000000000964970E0000000009E710560000000068A9873F:9999999999"
+        }
+      }
+    },
+    {
+      "url": "https://{consoleIP}/proxy/network/integration",
+      "variables": {
+        "consoleIP": {
+          "default": "192.168.0.1"
+        }
+      }
+    }
+  ]
+}

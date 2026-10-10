@@ -1,0 +1,62 @@
+{
+  "operations": {
+    "downloadFile": [
+      {
+        "method": "get",
+        "path": "/files/{fileId}",
+        "source": "v3"
+      }
+    ],
+    "getFileMetadata": [
+      {
+        "method": "get",
+        "path": "/files/{fileId}",
+        "source": "v3"
+      }
+    ],
+    "listFiles": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "pageSize"
+          },
+          "response": {
+            "itemsPath": "files",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/files",
+        "source": "v3"
+      }
+    ],
+    "searchFiles": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "pageSize"
+          },
+          "response": {
+            "itemsPath": "files",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/files",
+        "source": "v3"
+      }
+    ]
+  },
+  "sources": {
+    "v3": {
+      "apiVersion": "v3",
+      "fetchedAt": "2026-10-07T20:20:44.886Z",
+      "format": "discovery",
+      "url": "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"
+    }
+  }
+}

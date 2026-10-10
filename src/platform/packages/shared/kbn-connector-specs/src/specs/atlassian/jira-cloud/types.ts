@@ -9,6 +9,12 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+/** Atlassian account IDs are at most 128 characters (`User.accountId` in the Jira REST API v3 spec). */
+export const ACCOUNT_ID_MAX_LENGTH = 128;
+
+/** `GET /rest/api/3/project/search` returns at most 100 projects per page. */
+export const PROJECTS_MAX_RESULTS = 100;
+
 // =============================================================================
 // Action input schemas & inferred types
 // =============================================================================
@@ -56,6 +62,8 @@ export const GetProjectsInputSchema = lazySchema(() =>
   z.object({
     maxResults: z
       .number()
+      .int()
+      .max(PROJECTS_MAX_RESULTS)
       .optional()
       .describe('Maximum number of projects to return (default determined by Jira API)'),
     startAt: z
@@ -101,7 +109,7 @@ export const SearchUsersInputSchema = lazySchema(() =>
       .describe("User's username or email address for exact lookup"),
     accountId: z
       .string()
-      .max(200)
+      .max(ACCOUNT_ID_MAX_LENGTH)
       .optional()
       .describe("User's Atlassian account ID for exact lookup (e.g., 5b10ac8d82e05b22cc7d4ef5)"),
     startAt: z
@@ -158,7 +166,7 @@ export const CreateIssueInputSchema = lazySchema(() =>
       .describe('Labels to apply. Labels cannot contain spaces.'),
     assigneeAccountId: z
       .string()
-      .max(200)
+      .max(ACCOUNT_ID_MAX_LENGTH)
       .optional()
       .describe(
         'Atlassian account ID of the assignee. Use searchUsers to resolve a name or email to an accountId.'
@@ -198,7 +206,7 @@ export const UpdateIssueInputSchema = lazySchema(() =>
         .describe('Replacement label set. Replaces all existing labels.'),
       assigneeAccountId: z
         .string()
-        .max(200)
+        .max(ACCOUNT_ID_MAX_LENGTH)
         .nullable()
         .optional()
         .describe(
@@ -306,7 +314,7 @@ export const AssignIssueInputSchema = lazySchema(() =>
       .describe('Issue key (e.g. PROJ-123) or numeric issue ID to assign.'),
     accountId: z
       .string()
-      .max(200)
+      .max(ACCOUNT_ID_MAX_LENGTH)
       .nullable()
       .describe(
         'Atlassian account ID of the new assignee. ' +
@@ -393,7 +401,7 @@ export const AddWatcherInputSchema = lazySchema(() =>
       .describe('Issue key (e.g. PROJ-123) or numeric issue ID to add a watcher to.'),
     accountId: z
       .string()
-      .max(200)
+      .max(ACCOUNT_ID_MAX_LENGTH)
       .describe(
         'Atlassian account ID of the user to add as a watcher. ' +
           'Use searchUsers to resolve a name or email to an accountId.'
@@ -408,7 +416,10 @@ export const RemoveWatcherInputSchema = lazySchema(() =>
       .string()
       .max(200)
       .describe('Issue key (e.g. PROJ-123) or numeric issue ID to remove a watcher from.'),
-    accountId: z.string().max(200).describe('Atlassian account ID of the watcher to remove.'),
+    accountId: z
+      .string()
+      .max(ACCOUNT_ID_MAX_LENGTH)
+      .describe('Atlassian account ID of the watcher to remove.'),
   })
 );
 export type RemoveWatcherInput = z.infer<typeof RemoveWatcherInputSchema>;

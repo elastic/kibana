@@ -1,0 +1,148 @@
+overlay: 1.0.0
+info:
+  title: Microsoft Graph v1.0 corrections for SharePoint Online
+  version: 1.0.0
+actions:
+  - target: $.components.schemas['microsoft.graph.searchRequest','microsoft.graph.searchQuery'].required[?@ == '@odata.type']
+    description: >-
+      The OpenAPI converter marks @odata.type required on every type because it is the
+      discriminator (https://github.com/microsoft/OpenAPI.NET.OData/issues/243), but Graph only
+      needs it for a derived type sent where a base type is expected; Microsoft's SDKs stopped
+      sending it by default (https://github.com/microsoftgraph/msgraph-sdk-php/issues/1006).
+      The request examples omit it on the searchRequest and searchQuery of
+      https://learn.microsoft.com/en-us/graph/api/search-query?view=graph-rest-1.0.
+    remove: true
+
+  - target: $.paths['/sites'].get.parameters
+    description: >-
+      https://learn.microsoft.com/en-us/graph/api/site-search?view=graph-rest-1.0 documents
+      GET /sites?search={query}, a plain `search` query parameter the spec omits (it only has
+      OData's $search).
+    update:
+      - name: search
+        in: query
+        schema:
+          type: string
+
+  - target: $.paths
+    description: >-
+      Documented forms of operations the spec lacks or spells differently:
+      GET /sites/getAllSites (https://learn.microsoft.com/en-us/graph/api/site-getallsites?view=graph-rest-1.0),
+      which the spec only has as /sites/getAllSites() and is copied from it;
+      GET /drives/{drive-id}/root:/{path-relative-to-root}:/children
+      (https://learn.microsoft.com/en-us/graph/api/driveitem-list-children?view=graph-rest-1.0) and
+      the children of a drive's root folder, which that page shows as /me/drive/root/children and
+      https://learn.microsoft.com/en-us/graph/api/resources/drive?view=graph-rest-1.0 lists for
+      any drive ("List children of the root folder of a drive"), both copied from
+      /drives/{drive-id}/items/{driveItem-id}/children.
+    update:
+      /sites/getAllSites:
+        get:
+          operationId: sites.getAllSites
+          parameters:
+            - $ref: '#/components/parameters/top'
+            - $ref: '#/components/parameters/skip'
+            - $ref: '#/components/parameters/search'
+            - $ref: '#/components/parameters/filter'
+            - $ref: '#/components/parameters/count'
+            - &select
+              name: $select
+              in: query
+              style: form
+              explode: false
+              schema:
+                uniqueItems: true
+                type: array
+                items:
+                  type: string
+            - &orderby
+              name: $orderby
+              in: query
+              style: form
+              explode: false
+              schema:
+                uniqueItems: true
+                type: array
+                items:
+                  type: string
+            - &expand
+              name: $expand
+              in: query
+              style: form
+              explode: false
+              schema:
+                uniqueItems: true
+                type: array
+                items:
+                  type: string
+          responses:
+            2XX:
+              content:
+                application/json:
+                  schema:
+                    title: Collection of site
+                    type: object
+                    allOf:
+                      - $ref: '#/components/schemas/BaseCollectionPaginationCountResponse'
+                      - type: object
+                        properties:
+                          value:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/microsoft.graph.site'
+            4XX: &error
+              $ref: '#/components/responses/error'
+            5XX: *error
+          x-ms-pageable: &pageable
+            nextLinkName: '@odata.nextLink'
+            operationName: listMore
+      /drives/{drive-id}/root/children:
+        get:
+          operationId: drives.root.ListChildren
+          parameters: &childrenParameters
+            - $ref: '#/components/parameters/top'
+            - $ref: '#/components/parameters/skip'
+            - $ref: '#/components/parameters/search'
+            - $ref: '#/components/parameters/filter'
+            - $ref: '#/components/parameters/count'
+            - *orderby
+            - *select
+            - *expand
+          responses: &childrenResponses
+            2XX:
+              content:
+                application/json:
+                  schema:
+                    title: Collection of driveItem
+                    type: object
+                    allOf:
+                      - $ref: '#/components/schemas/BaseCollectionPaginationCountResponse'
+                      - type: object
+                        properties:
+                          value:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/microsoft.graph.driveItem'
+            4XX: *error
+            5XX: *error
+          x-ms-pageable: *pageable
+        parameters:
+          - &driveId
+            name: drive-id
+            in: path
+            required: true
+            schema:
+              type: string
+      /drives/{drive-id}/root:/{path}:/children:
+        get:
+          operationId: drives.root.path.ListChildren
+          parameters: *childrenParameters
+          responses: *childrenResponses
+          x-ms-pageable: *pageable
+        parameters:
+          - *driveId
+          - name: path
+            in: path
+            required: true
+            schema:
+              type: string

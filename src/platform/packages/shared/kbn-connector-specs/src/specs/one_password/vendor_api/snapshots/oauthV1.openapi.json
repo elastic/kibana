@@ -1,0 +1,8 @@
+{
+  "info": {
+    "title": "OAuth API"
+  },
+  "openapi": "3.1.0",
+  "paths": {},
+  "security": []
+}

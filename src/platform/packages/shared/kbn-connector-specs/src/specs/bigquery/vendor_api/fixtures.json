@@ -1,0 +1,6 @@
+{
+  "runQuery": {
+    "input": { "query": "SELECT 1 AS ok" },
+    "queries": [{ "source": "v2", "method": "POST", "path": "/projects/{projectsId}/queries" }]
+  }
+}
