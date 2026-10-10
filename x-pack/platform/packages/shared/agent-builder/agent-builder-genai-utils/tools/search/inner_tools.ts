@@ -103,6 +103,7 @@ export const naturalLanguageSearchToolName = 'natural_language_search';
 export const createNaturalLanguageSearchTool = ({
   model,
   esClient,
+  internalEsClient,
   events,
   logger,
   rowLimit,
@@ -112,6 +113,7 @@ export const createNaturalLanguageSearchTool = ({
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
+  internalEsClient?: ElasticsearchClient;
   events: ToolEventEmitter;
   logger: Logger;
   rowLimit?: number;
@@ -131,6 +133,7 @@ export const createNaturalLanguageSearchTool = ({
             target: index,
             model,
             esClient,
+            internalEsClient,
             events,
             logger,
             rowLimit,

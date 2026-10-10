@@ -49,6 +49,7 @@
     "@kbn/es-types",
     "@kbn/core-elasticsearch-server",
     "@kbn/controls-constants",
+    "@kbn/logging-mocks",
   ],
   "exclude": [
     "target/**/*",

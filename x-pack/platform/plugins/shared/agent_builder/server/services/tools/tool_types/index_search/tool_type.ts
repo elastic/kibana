@@ -69,6 +69,7 @@ export const getIndexSearchToolType = (
               rowLimit,
               customInstructions,
               esClient: esClient.asCurrentUser,
+              internalEsClient: esClient.asInternalUser,
               model: await modelProvider.getDefaultModel(),
               events,
               logger,

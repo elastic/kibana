@@ -86,6 +86,7 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
         timeRange,
         model,
         esClient: esClient.asCurrentUser,
+        internalEsClient: esClient.asInternalUser,
         logger,
         events,
       });
