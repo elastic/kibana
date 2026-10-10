@@ -114,7 +114,8 @@ export class CsvESQLGenerator {
 
     // Builds _tstart/_tend params (from the potentially forceNow-updated time range) and
     // user-defined variable params
-    const timeFieldName = parseTimeFieldFromESQLQuery(esqlQuery);
+    // A query can use ?_tstart/?_tend without naming a field (e.g. TBUCKET), so fall back to the job's time field
+    const timeFieldName = parseTimeFieldFromESQLQuery(esqlQuery) ?? this.job.timeFieldName;
     let timeRange;
     if (timeFieldName && currentFilters) {
       ({ timeRange } = extractTimeRange(currentFilters, timeFieldName));
