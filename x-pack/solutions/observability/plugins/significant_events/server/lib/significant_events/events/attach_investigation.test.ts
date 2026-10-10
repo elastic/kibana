@@ -46,6 +46,46 @@ const getWritten = (alertEventsClient: {
   alertEventsClient.createAlertEvent.mock.calls[0][0].data;
 
 describe('attachInvestigationToEvent', () => {
+  it('rebuilds from the fresh head when another writer appended before the write', async () => {
+    const stale = createEvent();
+    const fresh = createEvent({ '@timestamp': '2026-01-01T00:05:00.000Z', status: 'recovering' });
+    const { client, alertEventsClient } = createClients();
+    client.findLatestByEventId
+      .mockResolvedValueOnce(stale) // read
+      .mockResolvedValueOnce(fresh) // pre-write head check: moved
+      .mockResolvedValueOnce(fresh) // retry read
+      .mockResolvedValueOnce(fresh); // retry head check: stable
+
+    const result = await attachInvestigationToEvent({
+      eventSearchClient: client as never,
+      alertEventsClient: alertEventsClient as never,
+      eventId: 'agent-event-1',
+      investigation: createInvestigation(),
+    });
+
+    expect(result.updated).toBe(1);
+    expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
+    expect(alertEventsClient.createAlertEvent.mock.calls[0][0].alert_status).toBe('recovering');
+  });
+
+  it('fails loudly when the head keeps moving', async () => {
+    const { client, alertEventsClient } = createClients();
+    let n = 0;
+    client.findLatestByEventId.mockImplementation(async () =>
+      createEvent({ '@timestamp': `2026-01-01T00:00:${String(n++).padStart(2, '0')}.000Z` })
+    );
+
+    await expect(
+      attachInvestigationToEvent({
+        eventSearchClient: client as never,
+        alertEventsClient: alertEventsClient as never,
+        eventId: 'agent-event-1',
+        investigation: createInvestigation(),
+      })
+    ).rejects.toThrow('kept changing');
+    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+  });
+
   it('appends a new investigation entry and creates a new event version', async () => {
     const existing = createEvent();
     const { client, alertEventsClient } = createClients(existing);
