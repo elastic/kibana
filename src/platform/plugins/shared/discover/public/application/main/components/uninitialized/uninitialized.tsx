@@ -7,26 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiButton,
-  EuiDescriptionList,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiTextColor,
-  EuiTitle,
-  euiFontSize,
-  useEuiTheme,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
-import { esqlKeyboardShortcuts } from '@kbn/esql-editor';
+import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { getRecommendedQueriesTemplates } from '@kbn/esql-language';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useCurrentDataView } from '../../state_management/redux';
+import {
+  internalStateActions,
+  useCurrentDataView,
+  useCurrentTabAction,
+  useInternalStateDispatch,
+} from '../../state_management/redux';
+import { RecommendedQueries } from './recommended_queries';
 import { useCurrentTabMenuActions } from '../../hooks/use_current_tab_menu_actions';
 
 interface Props {
@@ -40,9 +32,25 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
     currentDataView,
     switchToEsqlMetric: 'esql:uninitialized_query_in_esql_clicked',
   });
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
-  const shortcutsLabelId = useGeneratedHtmlId();
+  const dispatch = useInternalStateDispatch();
+  const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
+
+  // The new ES|QL tab inherits the data view of the previous tab, which gives us a source.
+  const indexPattern = currentDataView?.getIndexPattern();
+  const timeField = currentDataView?.timeFieldName;
+  const recommendedQueries = useMemo(
+    () =>
+      indexPattern
+        ? getRecommendedQueriesTemplates({ fromCommand: `FROM ${indexPattern}`, timeField })
+        : [],
+    [indexPattern, timeField]
+  );
+  const onRunQuery = useCallback(
+    (query: string) => {
+      dispatch(updateESQLQuery({ queryOrUpdater: query }));
+    },
+    [dispatch, updateESQLQuery]
+  );
 
   const startSearchingPrompt = (
     <EuiEmptyPrompt
@@ -106,56 +114,7 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
 
   return (
     <div data-test-subj="discoverUninitialized">
-      <EuiTitle size="xxs">
-        <h3 id={shortcutsLabelId} data-test-subj="discoverUninitializedKeyboardShortcuts">
-          <EuiTextColor color="subdued">
-            <FormattedMessage
-              id="discover.uninitialized.editorKeyboardShortcutsTitle"
-              defaultMessage="Editor keyboard shortcuts"
-            />
-          </EuiTextColor>
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiText size="xs" color="subdued">
-        <EuiDescriptionList
-          aria-labelledby={shortcutsLabelId}
-          type="column"
-          columnWidths={['auto', 'auto']}
-          columnGutterSize="m"
-          rowGutterSize="s"
-          compressed
-          titleProps={{
-            css: css`
-              font-weight: ${euiTheme.font.weight.regular};
-            `,
-          }}
-          descriptionProps={{
-            css: css`
-              font-weight: ${euiTheme.font.weight.regular};
-            `,
-          }}
-          listItems={esqlKeyboardShortcuts.map(({ keys, label }) => ({
-            title: label,
-            description: keys.map((key, index) => (
-              <Fragment key={`${key}-${index}`}>
-                {index > 0 ? ' ' : null}
-                <kbd
-                  css={css`
-                    font-size: ${euiFontSize(euiThemeContext, 's').fontSize};
-                    font-weight: ${euiTheme.font.weight.medium};
-                    line-height: 1;
-                    padding-block: ${euiTheme.size.xxs};
-                    padding-inline: ${euiTheme.size.xs};
-                  `}
-                >
-                  {key}
-                </kbd>
-              </Fragment>
-            )),
-          }))}
-        />
-      </EuiText>
+      <RecommendedQueries queries={recommendedQueries} onRunQuery={onRunQuery} />
     </div>
   );
 };

@@ -224,18 +224,7 @@ describe('Discover topnav component', () => {
     expect(capturedTopNavMenu?.primaryActionItem).toBeUndefined();
   });
 
-  test.each([
-    {
-      description: 'closes query history for an uninitialized ES|QL tab',
-      fetchStatus: FetchStatus.UNINITIALIZED,
-      expectedIsHistoryOpen: false,
-    },
-    {
-      description: 'keeps manually opened query history for an initialized tab',
-      fetchStatus: FetchStatus.COMPLETE,
-      expectedIsHistoryOpen: true,
-    },
-  ])('$description', async ({ fetchStatus, expectedIsHistoryOpen }) => {
+  test('keeps the query history state when submitting a query', async () => {
     const user = userEvent.setup();
     const { toolkit, props } = await setup();
     const tabId = toolkit.getCurrentTab().id;
@@ -250,12 +239,11 @@ describe('Discover topnav component', () => {
         esqlEditorUiState: { isHistoryOpen: true },
       })
     );
-    toolkit.getCurrentTabDataStateContainer().data$.main$.next({ fetchStatus });
 
     renderTestComponent({ toolkit, props });
     await user.click(screen.getByTestId('mock-query-submit'));
 
-    expect(toolkit.getCurrentTab().uiState.esqlEditor?.isHistoryOpen).toBe(expectedIsHistoryOpen);
+    expect(toolkit.getCurrentTab().uiState.esqlEditor?.isHistoryOpen).toBe(true);
   });
 
   test('disables submit when the ES|QL editor is empty after a search', async () => {

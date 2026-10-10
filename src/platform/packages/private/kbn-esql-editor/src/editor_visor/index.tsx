@@ -24,10 +24,12 @@ import { useNlGeneration } from './use_nl_generation';
 import {
   searchPlaceholder,
   nlPlaceholder,
+  nlEmptyEditorPlaceholder,
   generatingLabel,
   stopLabel,
   aiModeTooltip,
   kqlModeLabel,
+  kqlModeNoSourceTooltip,
   visorModeLegend,
   enterHintFilterLabel,
   enterHintGenerateLabel,
@@ -81,16 +83,21 @@ function AskAiButton({
 
 function VisorModeToggle({
   isKqlMode,
+  isKqlDisabled,
   onModeChange,
   styles,
 }: {
   isKqlMode: boolean;
+  isKqlDisabled: boolean;
   onModeChange: (mode: VisorMode) => void;
   styles: VisorStyles;
 }) {
   return (
     <div role="group" aria-label={visorModeLegend} css={styles.modeToggle}>
-      <EuiToolTip content={kqlModeLabel} disableScreenReaderOutput>
+      <EuiToolTip
+        content={isKqlDisabled ? kqlModeNoSourceTooltip : kqlModeLabel}
+        disableScreenReaderOutput
+      >
         <EuiButtonIcon
           iconType="magnify"
           size="xs"
@@ -100,6 +107,7 @@ function VisorModeToggle({
           aria-label={kqlModeLabel}
           aria-pressed={isKqlMode}
           isSelected={isKqlMode}
+          isDisabled={isKqlDisabled}
           onClick={() => onModeChange(VisorMode.KQL)}
           data-test-subj="esqlVisorModeKql"
           css={[styles.modeIconButton, isKqlMode && styles.modeIconButtonActive]}
@@ -117,6 +125,7 @@ function VisorModeToggle({
 function VisorLayout({
   showModeToggle,
   isKqlMode,
+  isKqlDisabled,
   onModeChange,
   styles,
   isVisible,
@@ -124,6 +133,7 @@ function VisorLayout({
 }: {
   showModeToggle: boolean;
   isKqlMode: boolean;
+  isKqlDisabled: boolean;
   onModeChange: (mode: VisorMode) => void;
   styles: VisorStyles;
   isVisible: boolean;
@@ -136,7 +146,12 @@ function VisorLayout({
       {...(!isVisible && { inert: '' })}
     >
       {showModeToggle && (
-        <VisorModeToggle isKqlMode={isKqlMode} onModeChange={onModeChange} styles={styles} />
+        <VisorModeToggle
+          isKqlMode={isKqlMode}
+          isKqlDisabled={isKqlDisabled}
+          onModeChange={onModeChange}
+          styles={styles}
+        />
       )}
       {children}
     </div>
@@ -335,7 +350,10 @@ export function QuickSearchVisor({
     };
   }, [isVisible, isKqlFocused, query, pickerProjectRouting, data.dataViews, core.http]);
 
-  const isKqlMode = visorMode === VisorMode.KQL;
+  // KQL needs a source from the editor, so AI is the only usable mode while the editor has none.
+  const hasNoSource = !getIndexPatternFromESQLQuery(query);
+  const isKqlDisabled = hasNoSource && showAskAiButton;
+  const isKqlMode = !isKqlDisabled && visorMode === VisorMode.KQL;
   const styles = visorStyles(euiThemeContext, Boolean(isInline), isVisible);
 
   if (!KQLComponent) {
@@ -347,6 +365,7 @@ export function QuickSearchVisor({
       <VisorLayout
         showModeToggle={showAskAiButton}
         isKqlMode
+        isKqlDisabled={isKqlDisabled}
         onModeChange={onVisorModeChange}
         styles={styles}
         isVisible={isVisible}
@@ -384,6 +403,7 @@ export function QuickSearchVisor({
     <VisorLayout
       showModeToggle={showAskAiButton}
       isKqlMode={false}
+      isKqlDisabled={isKqlDisabled}
       onModeChange={onVisorModeChange}
       styles={styles}
       isVisible={isVisible}
@@ -391,7 +411,7 @@ export function QuickSearchVisor({
       <div css={styles.inputSlot}>
         <NLInput
           value={nlValue}
-          placeholder={nlPlaceholder}
+          placeholder={hasNoSource ? nlEmptyEditorPlaceholder : nlPlaceholder}
           disabled={isNlLoading}
           onChange={setNlValue}
           onSubmit={onNlSubmit}

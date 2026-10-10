@@ -80,6 +80,7 @@
     "@kbn/calculate-width-from-char-count",
     "@kbn/deeplinks-observability",
     "@kbn/esql-utils",
+    "@kbn/esql-language",
     "@kbn/data-source",
     "@kbn/managed-content-badge",
     "@kbn/deeplinks-analytics",

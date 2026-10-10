@@ -17,6 +17,13 @@ export const nlPlaceholder = i18n.translate('esqlEditor.visor.nlPlaceholder', {
   defaultMessage: 'Describe your query in natural language',
 });
 
+export const nlEmptyEditorPlaceholder = i18n.translate(
+  'esqlEditor.visor.nlEmptyEditorPlaceholder',
+  {
+    defaultMessage: "Describe what you're looking for",
+  }
+);
+
 export const generatingLabel = i18n.translate('esqlEditor.visor.generatingLabel', {
   defaultMessage: 'Generating...',
 });
@@ -31,6 +38,10 @@ export const aiModeTooltip = i18n.translate('esqlEditor.visor.aiModeTooltip', {
 
 export const kqlModeLabel = i18n.translate('esqlEditor.visor.kqlModeLabel', {
   defaultMessage: 'Filter your data',
+});
+
+export const kqlModeNoSourceTooltip = i18n.translate('esqlEditor.visor.kqlModeNoSourceTooltip', {
+  defaultMessage: 'Add a source with FROM to filter using KQL',
 });
 
 export const visorModeLegend = i18n.translate('esqlEditor.visor.modeLegend', {

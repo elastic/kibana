@@ -249,13 +249,6 @@ export const updateTabs: InternalStateThunkActionCreator<
           ...tab.globalState,
           refreshInterval: { ...currentRefreshInterval, pause: true },
         };
-        tab.uiState = {
-          ...tab.uiState,
-          esqlEditor: {
-            ...tab.uiState.esqlEditor,
-            isHistoryOpen: true,
-          },
-        };
 
         if (!currentQuery || !currentDataView) {
           return tab;

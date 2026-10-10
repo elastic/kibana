@@ -46,7 +46,6 @@ import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { QuerySource } from '@kbn/esql-types';
 import { DEFAULT_HISTOGRAM_BAR_TARGET } from '@kbn/data-service';
-import { isMac } from '@kbn/shared-ux-utility';
 import { useLookupIndexCommand } from './lookup_join';
 import { useCommentToEsql, useGhostLineHint, useVisorNlToEsql } from './comment_to_esql';
 import { useSuggestFix } from './suggest_fix/use_suggest_fix';
@@ -54,6 +53,7 @@ import { useEditorAiStyle } from './editor_ai.styles';
 import { useFieldsBrowser } from './resource_browser/use_fields_browser';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
+import { getEditorPlaceholder } from './get_editor_placeholder';
 import { getTrimmedQuery } from './history_local_storage';
 import { useEsqlEditorActions } from './hooks/use_esql_editor_actions';
 import { useNlToEsqlCheck } from './hooks/use_nl_to_esql_check';
@@ -142,6 +142,7 @@ const ESQLEditorInternal = function ESQLEditor({
   dataErrorsControl,
   mergeExternalMessages,
   hideQuickSearch,
+  hasExternalVisor,
   queryStats,
   enableResourceBrowser = false,
   enableCreateView = false,
@@ -606,6 +607,7 @@ const ESQLEditorInternal = function ESQLEditor({
   });
 
   const isNlToEsqlEnabled = useNlToEsqlCheck();
+  const placeholder = getEditorPlaceholder({ hasExternalVisor, isNlToEsqlEnabled });
 
   const onUpdateAndSubmitQueryRef = useRef(onUpdateAndSubmitQuery);
   onUpdateAndSubmitQueryRef.current = onUpdateAndSubmitQuery;
@@ -812,17 +814,7 @@ const ESQLEditorInternal = function ESQLEditor({
                 languageId={ESQL_LANG_ID}
                 classNameCss={getEditorOverwrites(theme)}
                 value={code}
-                placeholder={
-                  isNlToEsqlEnabled
-                    ? i18n.translate('esqlEditor.placeholder', {
-                        defaultMessage:
-                          "Start typing ES|QL, or describe what you're looking for in a // comment, then press {commandKey}+J to generate the query",
-                        values: { commandKey: isMac ? '⌘' : 'Ctrl' },
-                      })
-                    : i18n.translate('esqlEditor.placeholder.basic', {
-                        defaultMessage: 'Start typing ES|QL',
-                      })
-                }
+                placeholder={placeholder}
                 options={codeEditorOptions}
                 width="100%"
                 suggestionProvider={suggestionProvider}

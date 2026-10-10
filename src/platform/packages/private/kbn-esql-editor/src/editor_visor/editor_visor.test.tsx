@@ -279,6 +279,14 @@ describe('Quick search visor', () => {
     expect(queryByTestId('esqlVisorKQLSubmit')).not.toBeInTheDocument();
   });
 
+  it('should stay in KQL mode when the editor has no source and AI is unavailable', async () => {
+    const { queryByTestId } = renderWithI18n(renderESQLVisor({ ...props, query: '' }));
+    await waitFor(() => {
+      expect(kqlMock.QueryStringInput).toHaveBeenCalled();
+    });
+    expect(queryByTestId('esqlVisorNLQueryInput')).not.toBeInTheDocument();
+  });
+
   it('should not show a mode selector', async () => {
     const { queryByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
     await act(async () => {});
@@ -461,6 +469,46 @@ describe('Quick search visor', () => {
 
       await waitFor(() => expect(getByTestId('esqlVisorStopGeneration')).toBeInTheDocument());
       expect(getByRole('button', { name: 'Stop' })).toBe(getByTestId('esqlVisorStopGeneration'));
+    });
+
+    it('should default to AI mode with a dedicated placeholder when the editor has no source', async () => {
+      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props, query: '' }));
+      await waitFor(() => {
+        expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
+      });
+      expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'false');
+      expect(getByTestId('esqlVisorNLQueryInput')).toHaveAttribute(
+        'placeholder',
+        "Describe what you're looking for"
+      );
+    });
+
+    it('should stay in AI mode and enable KQL once the editor has a source', async () => {
+      const { getByTestId, rerender } = renderWithI18n(
+        renderWithEnterprise({ ...props, query: '' })
+      );
+      await waitFor(() => {
+        expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
+      });
+      rerender(renderWithEnterprise({ ...props, query: 'FROM test_index' }));
+      await waitFor(() => {
+        expect(getByTestId('esqlVisorModeKql')).toBeEnabled();
+      });
+      expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    it('should disable the KQL mode button when the editor has no source', async () => {
+      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props, query: '' }));
+      await waitFor(() => {
+        expect(getByTestId('esqlVisorModeKql')).toBeDisabled();
+      });
+    });
+
+    it('should enable the KQL mode button once the editor has a source', async () => {
+      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props }));
+      await waitFor(() => {
+        expect(getByTestId('esqlVisorModeKql')).toBeEnabled();
+      });
     });
 
     it('should return to KQL mode when the KQL mode button is clicked', async () => {

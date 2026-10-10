@@ -356,36 +356,14 @@ export const DiscoverTopNav = ({
           disabledReason: emptyEsqlQueryDisabledTooltip,
         }
       : showDatePicker;
-  const esqlEditorInitialState = useMemo(
-    () =>
-      isUninitializedEsqlTab
-        ? {
-            ...esqlEditorUiState,
-            isHistoryOpen: esqlEditorUiState?.isHistoryOpen ?? true,
-          }
-        : esqlEditorUiState,
-    [esqlEditorUiState, isUninitializedEsqlTab]
-  );
   const onQuerySubmit = useCallback(
     (payload: { dateRange: TimeRange; query?: AggregateQuery | Query }, isUpdate?: boolean) => {
       if (isEmptyEsqlQuery(payload.query)) {
         return;
       }
-      if (isUninitializedEsqlTab) {
-        onEsqlEditorInitialStateChange({
-          ...esqlEditorUiState,
-          isHistoryOpen: false,
-        });
-      }
       dispatch(onQuerySubmitAction({ payload, isUpdate }));
     },
-    [
-      dispatch,
-      esqlEditorUiState,
-      isUninitializedEsqlTab,
-      onEsqlEditorInitialStateChange,
-      onQuerySubmitAction,
-    ]
+    [dispatch, onQuerySubmitAction]
   );
 
   const textBasedLanguageModeErrors = useMemo(
@@ -458,7 +436,7 @@ export const DiscoverTopNav = ({
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
         draft={searchDraftUiState}
         onDraftChange={onSearchDraftChange}
-        esqlEditorInitialState={esqlEditorInitialState}
+        esqlEditorInitialState={esqlEditorUiState}
         onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
         esqlVariablesConfig={
           isEsqlMode
