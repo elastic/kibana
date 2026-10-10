@@ -9,8 +9,10 @@ import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { useFlyoutV2UrlWriter } from './flyout_v2_url_writer';
 import { FLYOUT_V2_URL_PARAM } from './flyout_v2_url_param';
+import { docViewerFlyoutChain } from './flyout_v2_doc_viewer_chain';
 import { documentFlyoutHistoryKey } from '../constants/flyout_history';
 
 // ---------------------------------------------------------------------------
@@ -29,8 +31,10 @@ const renderWriter = (
   return { result, history };
 };
 
-const getParam = (history: ReturnType<typeof createMemoryHistory>, key = FLYOUT_V2_URL_PARAM) =>
-  new URLSearchParams(history.location.search).get(key);
+const getParam = (
+  history: ReturnType<typeof createMemoryHistory>,
+  key: string = FLYOUT_V2_URL_PARAM
+) => new URLSearchParams(history.location.search).get(key);
 
 const docDescriptor = (id: string) =>
   ({ kind: 'document' as const, documentId: id, indexName: 'idx' } as const);
@@ -322,6 +326,134 @@ describe('useFlyoutV2UrlWriter', () => {
           wrapper,
         });
       }).not.toThrow();
+    });
+  });
+
+  describe('readRootDescriptor', () => {
+    it('returns the root descriptor from the URL', () => {
+      const { result } = renderWriter();
+
+      act(() => {
+        result.current.writeOnOpen(analyzerDescriptor('doc-1'));
+        result.current.writeOnOpen(docDescriptor('doc-2'), 'inherit');
+      });
+
+      expect(result.current.readRootDescriptor()).toEqual(analyzerDescriptor('doc-1'));
+    });
+
+    it('returns null when nothing is open', () => {
+      const { result } = renderWriter(createMemoryHistory(), 'flyoutV2RootTest');
+
+      expect(result.current.readRootDescriptor()).toBeNull();
+    });
+  });
+
+  describe('for the doc viewer history key', () => {
+    // Distinct param key so the module-scoped generation tracking does not leak across tests.
+    const docViewerParamKey = 'flyoutV2DocViewerTest';
+
+    const renderDocViewerWriter = (history = createMemoryHistory()) => {
+      const wrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
+        React.createElement(Router, { history }, children as React.ReactElement);
+      const { result } = renderHook(
+        () => useFlyoutV2UrlWriter(docViewerParamKey, DOC_VIEWER_FLYOUT_HISTORY_KEY),
+        { wrapper }
+      );
+      return { result, history };
+    };
+
+    beforeEach(() => {
+      docViewerFlyoutChain.stack = [];
+      docViewerFlyoutChain.report = undefined;
+    });
+
+    it('writes to the doc viewer chain instead of the URL', () => {
+      const report = jest.fn();
+      docViewerFlyoutChain.report = report;
+      const { result, history } = renderDocViewerWriter();
+
+      act(() => {
+        result.current.writeOnOpen(docDescriptor('doc-1'));
+      });
+
+      expect(docViewerFlyoutChain.stack).toEqual([docDescriptor('doc-1')]);
+      expect(report).toHaveBeenCalledWith([docDescriptor('doc-1')]);
+      expect(getParam(history, docViewerParamKey)).toBeNull();
+    });
+
+    it('reads the current root from the chain for inherit opens', () => {
+      docViewerFlyoutChain.stack = [analyzerDescriptor('doc-1')];
+      const { result } = renderDocViewerWriter();
+
+      act(() => {
+        result.current.writeOnOpen(docDescriptor('doc-2'), 'inherit');
+      });
+
+      expect(docViewerFlyoutChain.stack).toEqual([
+        analyzerDescriptor('doc-1'),
+        docDescriptor('doc-2'),
+      ]);
+    });
+
+    it('keeps the parent when a child closes', () => {
+      const { result } = renderDocViewerWriter();
+
+      let onClose!: () => void;
+      act(() => {
+        result.current.writeOnOpen(analyzerDescriptor('doc-1'));
+        const parent = result.current.readRootDescriptor();
+        result.current.writeOnOpen(docDescriptor('doc-2'), 'inherit');
+        onClose = result.current.buildOnClose(parent);
+      });
+
+      expect(result.current.readRootDescriptor()).toEqual(analyzerDescriptor('doc-1'));
+
+      act(() => {
+        onClose();
+      });
+
+      expect(docViewerFlyoutChain.stack).toEqual([analyzerDescriptor('doc-1')]);
+    });
+
+    it('clears the chain when the last flyout closes', () => {
+      const { result } = renderDocViewerWriter();
+
+      let onClose!: () => void;
+      act(() => {
+        result.current.writeOnOpen(docDescriptor('doc-1'));
+        onClose = result.current.buildOnClose(null);
+      });
+      act(() => {
+        onClose();
+      });
+
+      expect(docViewerFlyoutChain.stack).toEqual([]);
+    });
+
+    it('writes to the chain even when history is not usable', () => {
+      const wrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
+        children as React.ReactElement;
+      const { result } = renderHook(
+        () => useFlyoutV2UrlWriter(docViewerParamKey, DOC_VIEWER_FLYOUT_HISTORY_KEY),
+        { wrapper }
+      );
+
+      act(() => {
+        result.current.writeOnOpen(docDescriptor('doc-1'));
+      });
+
+      expect(docViewerFlyoutChain.stack).toEqual([docDescriptor('doc-1')]);
+    });
+
+    it('does not change how the Security history key writes to the URL', () => {
+      const { result, history } = renderWriter(createMemoryHistory(), docViewerParamKey);
+
+      act(() => {
+        result.current.writeOnOpen(docDescriptor('doc-1'));
+      });
+
+      expect(getParam(history, docViewerParamKey)).not.toBeNull();
+      expect(docViewerFlyoutChain.stack).toEqual([]);
     });
   });
 });

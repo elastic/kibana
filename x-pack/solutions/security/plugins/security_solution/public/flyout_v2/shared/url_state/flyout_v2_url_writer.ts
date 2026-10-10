@@ -7,11 +7,13 @@
 
 import { useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { encode } from '@kbn/rison';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { FlyoutDescriptor, FlyoutV2UrlParamValue } from './flyout_v2_url_param';
 import { decodeFlyoutV2UrlParam } from './flyout_v2_url_param';
 import { markFlyoutV2UrlWrite } from './flyout_v2_url_write_guard';
+import { docViewerFlyoutChain, writeDocViewerFlyoutChain } from './flyout_v2_doc_viewer_chain';
 
 // ---------------------------------------------------------------------------
 // Generation tracking (cascade-close guard)
@@ -76,6 +78,11 @@ export interface FlyoutUrlWriter {
    * the write goes through even though this generation is no longer the most recent one.
    */
   buildOnClose: (fallback: FlyoutDescriptor | null) => () => void;
+  /**
+   * The root (index 0) descriptor of the current chain, or `null`. Reads the same storage the
+   * writer writes to, so callers computing a child's close fallback never read the URL directly.
+   */
+  readRootDescriptor: () => FlyoutDescriptor | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -93,18 +100,16 @@ export interface FlyoutUrlWriter {
  * exposes it for use by the restore hook (T-003). Writes use `history.replace` (never `push`)
  * to avoid creating extra Back/Forward stops.
  *
+ * Flyouts of the doc viewer history group (Discover) never touch the URL: their chain is kept in
+ * `docViewerFlyoutChain`, which Discover persists through the doc view's state.
+ *
  * Degrades to a no-op when `history` lacks `location`/`replace` (many unit tests pass a
- * minimal history object).
+ * minimal history object), except for the doc viewer history group.
  */
-export const useFlyoutV2UrlWriter = (
-  urlParamKey: string,
-  // historyKey is not used internally for URL writes but is part of the contract: callers
-  // instantiate one writer per context (page vs. Timeline) and pass the matching historyKey
-  // so the restore hook (T-003) can identify which EUI flyout chain to restore into.
-  _historyKey: symbol
-): FlyoutUrlWriter => {
+export const useFlyoutV2UrlWriter = (urlParamKey: string, historyKey: symbol): FlyoutUrlWriter => {
   const history = useHistory();
   const hasUsableHistory = !!history?.location && typeof history.replace === 'function';
+  const isDocViewerChain = historyKey === DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
   // createKbnUrlStateStorage is the Kibana-standard URL state layer used by the legacy
   // expandable-flyout package. We create it here (a) for consistency with that pattern,
@@ -123,17 +128,23 @@ export const useFlyoutV2UrlWriter = (
   // Reads the current URL stack, preferring the pending (unflushed) value in urlStorage
   // so 'inherit' appends are consistent even when urlStorage has buffered an update.
   const readCurrentStack = useCallback((): FlyoutV2UrlParamValue => {
+    if (isDocViewerChain) return docViewerFlyoutChain.stack;
+    if (!hasUsableHistory) return [];
     const pending = urlStorage?.get<FlyoutV2UrlParamValue>(urlParamKey);
     if (pending) return pending;
     const raw = new URLSearchParams(history.location.search).get(urlParamKey);
     return decodeFlyoutV2UrlParam(raw) ?? [];
-  }, [urlStorage, urlParamKey, history]);
+  }, [isDocViewerChain, hasUsableHistory, urlStorage, urlParamKey, history]);
 
   // Writes directly via history.replace so the URL update is synchronous.
   // Using history.replace (not push) means no extra Back/Forward stops are created.
   // Mark before replace so useFlyoutV2RestoreFromUrl's history listener ignores self-writes.
   const writeToUrl = useCallback(
     (stack: FlyoutV2UrlParamValue | null) => {
+      if (isDocViewerChain) {
+        writeDocViewerFlyoutChain(stack);
+        return;
+      }
       if (!hasUsableHistory) return;
       const params = new URLSearchParams(history.location.search);
       if (stack && stack.length > 0) {
@@ -145,12 +156,14 @@ export const useFlyoutV2UrlWriter = (
       markFlyoutV2UrlWrite(urlParamKey);
       history.replace({ ...history.location, search: serialized ? `?${serialized}` : '' });
     },
-    [hasUsableHistory, history, urlParamKey]
+    [isDocViewerChain, hasUsableHistory, history, urlParamKey]
   );
+
+  const canWrite = hasUsableHistory || isDocViewerChain;
 
   const writeOnOpen = useCallback(
     (descriptor: FlyoutDescriptor, mode: 'start' | 'inherit' = 'start') => {
-      if (!hasUsableHistory) return;
+      if (!canWrite) return;
       const generation = (writeGenerations[urlParamKey] ?? 0) + 1;
       writeGenerations[urlParamKey] = generation;
 
@@ -171,12 +184,12 @@ export const useFlyoutV2UrlWriter = (
         openGenerationStacks[urlParamKey] = [generation];
       }
     },
-    [hasUsableHistory, urlParamKey, readCurrentStack, writeToUrl]
+    [canWrite, urlParamKey, readCurrentStack, writeToUrl]
   );
 
   const buildOnClose = useCallback(
     (fallback: FlyoutDescriptor | null): (() => void) => {
-      if (!hasUsableHistory) return () => {};
+      if (!canWrite) return () => {};
       const ownGeneration = writeGenerations[urlParamKey] ?? 0;
       return () => {
         const stack = openGenerationStacks[urlParamKey] ?? [];
@@ -191,8 +204,16 @@ export const useFlyoutV2UrlWriter = (
         writeToUrl(fallback ? [fallback] : null);
       };
     },
-    [hasUsableHistory, urlParamKey, writeToUrl]
+    [canWrite, urlParamKey, writeToUrl]
   );
 
-  return useMemo(() => ({ writeOnOpen, buildOnClose }), [writeOnOpen, buildOnClose]);
+  const readRootDescriptor = useCallback(
+    (): FlyoutDescriptor | null => (canWrite ? readCurrentStack()[0] ?? null : null),
+    [canWrite, readCurrentStack]
+  );
+
+  return useMemo(
+    () => ({ writeOnOpen, buildOnClose, readRootDescriptor }),
+    [writeOnOpen, buildOnClose, readRootDescriptor]
+  );
 };

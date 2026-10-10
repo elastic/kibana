@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFunction, isEqual } from 'lodash';
+import { isFunction, isEqual, omit } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataSource } from '@kbn/data-source';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DocViewerShareableState } from '@kbn/unified-doc-viewer';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import {
@@ -37,6 +38,7 @@ import {
   ExpandedDocLinkability,
   getExpandedDocLinkability,
   getExpandedDocRef,
+  matchesExpandedDocRef,
 } from '../../../utils/expanded_doc';
 import { DEFAULT_EXPANDED_DOC_OWNER } from '../constants';
 import { isEqualState } from '../../utils/state_comparators';
@@ -89,7 +91,11 @@ const mergeAppState = (
   { tabId, appState }: AppStatePayload
 ) => {
   const currentAppState = selectTab(currentState, tabId).appState;
-  const mergedAppState = { ...currentAppState, ...appState };
+  const nextAppState = { ...currentAppState, ...appState };
+  // The shareable doc viewer state is only restorable alongside an expanded document reference.
+  const mergedAppState: DiscoverAppState = nextAppState.expandedDoc
+    ? nextAppState
+    : omit(nextAppState, 'docViewerState');
   return { mergedAppState, hasStateChanges: !isEqualState(currentAppState, mergedAppState) };
 };
 
@@ -154,7 +160,51 @@ export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload
       return;
     }
 
-    dispatch(updateAppState({ tabId, appState: { expandedDoc: nextExpandedDocRef } }));
+    // Compare identities rather than references, since a shared link may omit the routing.
+    const isSameDocument = Boolean(
+      expandedDoc &&
+        appState.expandedDoc &&
+        matchesExpandedDocRef(expandedDoc, appState.expandedDoc)
+    );
+
+    dispatch(
+      updateAppState({
+        tabId,
+        appState: {
+          expandedDoc: nextExpandedDocRef,
+          // The shareable doc viewer state belongs to the document it was captured for.
+          ...(isSameDocument ? {} : { docViewerState: undefined }),
+        },
+      })
+    );
+  };
+
+type DocViewerShareableStatePayload = TabActionPayload<{
+  docViewerState: DocViewerShareableState | undefined;
+}>;
+
+/**
+ * Synchronizes the shareable doc viewer state to the URL, only while a linkable document is expanded.
+ * Replaces URL history rather than pushing, so frequent in-flyout changes (tab or nested navigation)
+ * do not flood the browser back stack.
+ */
+export const setDocViewerShareableState: InternalStateThunkActionCreator<
+  [DocViewerShareableStatePayload]
+> = (payload) =>
+  function setDocViewerShareableStateThunkFn(dispatch, getState) {
+    const { tabId, docViewerState } = payload;
+    const { appState } = selectTab(getState(), tabId);
+
+    // The state is only restorable alongside a shared document reference.
+    const nextDocViewerState = appState.expandedDoc ? docViewerState : undefined;
+
+    if (isEqual(appState.docViewerState, nextDocViewerState)) {
+      return;
+    }
+
+    dispatch(
+      updateAppStateAndReplaceUrl({ tabId, appState: { docViewerState: nextDocViewerState } })
+    );
   };
 
 /**
