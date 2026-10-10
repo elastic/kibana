@@ -299,6 +299,8 @@ export const ESQLDataCascadeLeafCell = React.memo(
           isPaginationEnabled={false}
           showFullScreenButton={false}
           toolbarLeftSide={documentCountLabel}
+          initialState={initialGridState}
+          onInitialStateChange={onInitialStateChange}
         />
       );
     }
