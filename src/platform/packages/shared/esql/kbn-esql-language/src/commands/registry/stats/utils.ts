@@ -9,6 +9,7 @@
 import type {
   ESQLAstAllCommands,
   ESQLAstItem,
+  ESQLAstQueryExpression,
   ESQLCommand,
   ESQLCommandOption,
   ESQLFunction,
@@ -24,6 +25,7 @@ import {
   isLiteral,
   isAssignment,
   isColumn,
+  Parser,
   Walker,
 } from '@elastic/esql';
 import { commaCompleteItem, newLineCompleteItem, pipeCompleteItem } from '../complete_items';
@@ -31,15 +33,25 @@ import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import type {
   ESQLColumnData,
   ESQLUserDefinedColumn,
+  GetColumnsByTypeFn,
+  ICommandCallbacks,
+  ICommandContext,
   ISuggestionItem,
   UnmappedFieldsStrategy,
 } from '../types';
 import { getExpressionType } from '../../definitions/utils/expressions';
-import { getFunctionDefinition } from '../../definitions/utils/functions';
+import { buildColumnSuggestions, getFunctionDefinition } from '../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../definitions/types';
 import { ReplacementRangeStrategyKind } from '../../../language/autocomplete/utils/prefix_range';
 import { endsWithComma, endsWithWhitespace } from '../../definitions/utils/regex';
 import { getColumnName } from '../../definitions/utils/columns';
+import {
+  findAstPosition,
+  getBracketsToClose,
+  removeAutocompleteMarkers,
+} from '../../definitions/utils/ast';
+import { EDITOR_MARKER } from '../../definitions/constants';
+import { NOT_SUGGESTED_TYPES } from '../../../query_columns_service';
 
 /**
  * Position of the caret in the sort command:
@@ -291,4 +303,116 @@ export const getColumnsDefinedInByClause = (
   }
 
   return assignments;
+};
+
+/**
+ * Wraps a column retriever so the BY-clause columns are suggested alongside the input
+ * columns, filtered by the requested type and shadowing input fields of the same name.
+ */
+const suggestWithByColumns =
+  (
+    getByType: GetColumnsByTypeFn,
+    byColumns: Map<string, ESQLUserDefinedColumn>
+  ): GetColumnsByTypeFn =>
+  async (expectedType = 'any', ignored = [], options) => {
+    const baseSuggestions = await getByType(expectedType, ignored, options);
+    const requestedTypes = Array.isArray(expectedType) ? expectedType : [expectedType];
+
+    const matchingColumns = [...byColumns.values()].filter(
+      (column) =>
+        !ignored.includes(column.name) &&
+        (requestedTypes[0] === 'any' || requestedTypes.includes(column.type)) &&
+        !NOT_SUGGESTED_TYPES.includes(column.type)
+    );
+
+    // The base suggestions already carry the fields browser, so avoid building a second one.
+    const byColumnSuggestions = buildColumnSuggestions(matchingColumns, [], {
+      ...options,
+      isFieldsBrowserEnabled: false,
+    });
+
+    // BY columns shadow input fields of the same name, so drop the shadowed base suggestions.
+    const byColumnNames = new Set(matchingColumns.map((column) => column.name));
+    return [
+      ...byColumnSuggestions,
+      ...baseSuggestions.filter((suggestion) => !byColumnNames.has(suggestion.label)),
+    ];
+  };
+
+const statsWithByAtCursor = (
+  root: ESQLAstQueryExpression,
+  cursorPosition: number
+): ESQLCommand | undefined => {
+  const { command } = findAstPosition(root, cursorPosition);
+  return command?.type === 'command' && isStatsCommand(command) && command.args.some(isByOption)
+    ? command
+    : undefined;
+};
+
+/**
+ * The query is parsed only up to the cursor, so a BY clause typed after the cursor is missing
+ * from the command. Recover the stats command together with its BY clause: the full query usually
+ * parses with the BY clause intact, but an incomplete expression at the cursor (e.g. an empty
+ * WHERE or an unclosed function call) can swallow it. In that case, complete the expression with an
+ * editor marker and close the brackets left open at the cursor so the BY clause parses as its own
+ * option instead of being pulled inside the unterminated expression. Returns undefined when there
+ * is nothing meaningful after the cursor or no BY clause is found.
+ */
+const getCommandAtCursor = (query: string, cursorPosition: number): ESQLCommand | undefined => {
+  const afterCursor = query.slice(cursorPosition);
+  if (!afterCursor.trim()) {
+    return undefined;
+  }
+
+  const fromFullQuery = statsWithByAtCursor(Parser.parse(query).root, cursorPosition);
+  if (fromFullQuery) {
+    return fromFullQuery;
+  }
+
+  const beforeCursor = `${query.slice(0, cursorPosition)} ${EDITOR_MARKER} `;
+  const corrected = `${beforeCursor}${getBracketsToClose(beforeCursor).join('')}${afterCursor}`;
+  const root = removeAutocompleteMarkers(Parser.parse(corrected).root);
+  return statsWithByAtCursor(root, cursorPosition);
+};
+
+/**
+ * Returns the context and callbacks used to autocomplete the aggregation expressions and the
+ * per-aggregation WHERE clause: the columns defined in the BY clause are overlaid so they
+ * resolve correctly and are offered as suggestions. Leaves the BY clause scope untouched.
+ */
+export const getAggregationScope = (
+  fullQuery: string,
+  cursorPosition: number,
+  command: ESQLAstAllCommands,
+  context?: ICommandContext,
+  callbacks?: ICommandCallbacks
+): { context?: ICommandContext; callbacks?: ICommandCallbacks } => {
+  if (!context || !isStatsCommand(command)) {
+    return { context, callbacks };
+  }
+
+  const byColumns = getColumnsDefinedInByClause(
+    // The command param is built from the query up to the cursor, so a BY clause typed after the cursor is missing,
+    // We need to parse the full text again.
+    getCommandAtCursor(fullQuery, cursorPosition) ?? command,
+    context.columns,
+    fullQuery,
+    context.unmappedFieldsStrategy
+  );
+
+  if (byColumns.size === 0) {
+    return { context, callbacks };
+  }
+
+  const scopedContext: ICommandContext = {
+    ...context,
+    columns: new Map([...context.columns, ...byColumns]),
+  };
+
+  const getByType = callbacks?.getByType;
+  const scopedCallbacks: ICommandCallbacks | undefined = getByType
+    ? { ...callbacks, getByType: suggestWithByColumns(getByType, byColumns) }
+    : callbacks;
+
+  return { context: scopedContext, callbacks: scopedCallbacks };
 };
