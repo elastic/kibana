@@ -23,8 +23,16 @@ import { formatFieldValueReact } from '@kbn/discover-utils';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { isEqual } from 'lodash';
 import {
+  COMPARISON_ADDED_SEGMENT_CLASS,
+  COMPARISON_BASE_CELL_CLASS,
+  COMPARISON_DIFF_CELL_CLASS,
+  COMPARISON_MATCH_CELL_CLASS,
+  COMPARISON_REMOVED_SEGMENT_CLASS,
+  COMPARISON_SEGMENT_CLASS,
+  DATA_TABLE_CELL_VALUE_CLASS,
   calculateDiff,
   formatDiffValue,
+  useComparisonCss,
   type CompareDocumentsProps,
   type DocMap,
   type DocumentDiffMode,
@@ -168,6 +176,7 @@ export const TanStackComparisonTable = ({
                 )}
               </EuiFlexGroup>
             ),
+            // Same markup and class names as UnifiedDataTable's comparison cells, styled by `useComparisonCss`.
             cell: ({ row }) => {
               const { fieldName } = row.original;
               const value = doc.flattened[fieldName];
@@ -177,63 +186,44 @@ export const TanStackComparisonTable = ({
                 fieldName,
                 columnMeta: columnsMeta?.[fieldName],
               });
-              const activeDiffMode = showDiff && docIndex > 0 ? diffMode : undefined;
-              const basicColor =
-                activeDiffMode === 'basic'
-                  ? isEqual(baseValue, value)
-                    ? euiTheme.colors.textSuccess
-                    : euiTheme.colors.textDanger
-                  : undefined;
-              const content =
-                activeDiffMode && activeDiffMode !== 'basic'
-                  ? calculateDiff({
-                      diffMode: activeDiffMode,
-                      baseValue,
-                      comparisonValue: value,
-                    }).map((change, index) => {
-                      const Segment = activeDiffMode === 'lines' ? 'div' : 'span';
-                      return (
-                        <Segment
-                          key={index}
-                          css={{
-                            backgroundColor: change.added
-                              ? euiTheme.colors.backgroundBaseSuccess
-                              : change.removed
-                              ? euiTheme.colors.backgroundBaseDanger
-                              : undefined,
-                            color: change.added
-                              ? euiTheme.colors.textSuccess
-                              : change.removed
-                              ? euiTheme.colors.textDanger
-                              : undefined,
-                            textDecoration:
-                              showDiffDecorations && activeDiffMode !== 'lines'
-                                ? change.added
-                                  ? 'underline'
-                                  : change.removed
-                                  ? 'line-through'
-                                  : undefined
-                                : undefined,
-                          }}
-                        >
-                          {showDiffDecorations && activeDiffMode === 'lines'
-                            ? change.added
-                              ? '+ '
-                              : change.removed
-                              ? '- '
-                              : undefined
-                            : undefined}
-                          {change.value || '-'}
-                        </Segment>
-                      );
-                    })
-                  : activeDiffMode === undefined &&
-                    showDiff &&
-                    docIndex === 0 &&
-                    diffMode !== 'basic'
-                  ? formatDiffValue(value, false).value || '-'
-                  : formatFieldValueReact({ value, hit: doc.raw, fieldFormats, dataView, field });
-              return <span css={{ color: basicColor, whiteSpace: 'pre-wrap' }}>{content}</span>;
+              const activeDiffMode = showDiff ? diffMode : undefined;
+              if (!activeDiffMode || activeDiffMode === 'basic') {
+                return (
+                  <span className={DATA_TABLE_CELL_VALUE_CLASS}>
+                    {formatFieldValueReact({ value, hit: doc.raw, fieldFormats, dataView, field })}
+                  </span>
+                );
+              }
+              if (docIndex === 0) {
+                return (
+                  <span className={DATA_TABLE_CELL_VALUE_CLASS}>
+                    {formatDiffValue(value, false).value || '-'}
+                  </span>
+                );
+              }
+              const SegmentTag = activeDiffMode === 'lines' ? 'div' : 'span';
+              return (
+                <span className={DATA_TABLE_CELL_VALUE_CLASS}>
+                  {calculateDiff({
+                    diffMode: activeDiffMode,
+                    baseValue,
+                    comparisonValue: value,
+                  }).map((change, index) => (
+                    <SegmentTag
+                      key={index}
+                      className={[
+                        COMPARISON_SEGMENT_CLASS,
+                        change.added && COMPARISON_ADDED_SEGMENT_CLASS,
+                        change.removed && COMPARISON_REMOVED_SEGMENT_CLASS,
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                    >
+                      {change.value || '-'}
+                    </SegmentTag>
+                  ))}
+                </span>
+              );
             },
           },
         ];
@@ -245,12 +235,10 @@ export const TanStackComparisonTable = ({
       dataView,
       diffMode,
       docMap,
-      euiTheme.colors,
       fieldFormats,
       replaceSelectedDocs,
       selectedDocIds,
       showDiff,
-      showDiffDecorations,
     ]
   );
   const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() });
@@ -262,13 +250,25 @@ export const TanStackComparisonTable = ({
     overscan: 5,
   });
   const border = `${euiTheme.border.width.thin} solid ${euiTheme.components.dataGridBorderColor}`;
+  const comparisonCss = useComparisonCss({
+    diffMode: showDiff ? diffMode : undefined,
+    showDiffDecorations,
+  });
+  const getCellClassName = (docId: string, fieldName: string) => {
+    if (docId === selectedDocIds[0]) return COMPARISON_BASE_CELL_CLASS;
+    if (!showDiff || diffMode !== 'basic') return undefined;
+    return isEqual(baseDoc?.flattened[fieldName], docMap.get(docId)?.doc.flattened[fieldName])
+      ? COMPARISON_MATCH_CELL_CLASS
+      : COMPARISON_DIFF_CELL_CLASS;
+  };
 
   return (
     <div
       ref={scrollRef}
-      role="table"
+      role="grid"
       aria-labelledby={ariaLabelledBy}
-      css={{ flex: 1, overflow: 'auto', minHeight: 0 }}
+      aria-rowcount={tableRows.length}
+      css={[{ flex: 1, overflow: 'auto', minHeight: 0 }, comparisonCss]}
     >
       <div css={{ width: table.getTotalSize(), minWidth: '100%' }}>
         <div
@@ -293,7 +293,9 @@ export const TanStackComparisonTable = ({
                     border,
                   }}
                 >
-                  {flexRender(header.column.columnDef.header, header.getContext())}
+                  <span data-test-subj="dataGridHeaderCellTitle">
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </span>
                 </div>
               ))}
             </div>
@@ -308,6 +310,8 @@ export const TanStackComparisonTable = ({
                 role="row"
                 ref={virtualizer.measureElement}
                 data-index={virtualRow.index}
+                data-grid-row-index={virtualRow.index}
+                data-grid-visible-row-index={virtualRow.index}
                 css={{
                   display: 'flex',
                   position: 'absolute',
@@ -319,7 +323,12 @@ export const TanStackComparisonTable = ({
                 {row.getVisibleCells().map((cell, cellIndex) => (
                   <div
                     key={cell.id}
-                    role="cell"
+                    role="gridcell"
+                    className={
+                      cellIndex > 0
+                        ? getCellClassName(cell.column.id, row.original.fieldName)
+                        : undefined
+                    }
                     css={{
                       width: cell.column.getSize(),
                       flexShrink: 0,
@@ -327,8 +336,6 @@ export const TanStackComparisonTable = ({
                       borderBottom: border,
                       borderRight: border,
                       overflowWrap: 'anywhere',
-                      backgroundColor:
-                        cellIndex === 1 ? euiTheme.colors.backgroundBaseSubdued : undefined,
                     }}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

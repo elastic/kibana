@@ -261,6 +261,12 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     },
   }),
 
+  // Anchor row of the surrounding documents view, same color as UnifiedDataTable.
+  anchorRow: css({
+    '& .unifiedDataTable__cell--highlight, & .unifiedDataTable__cell--highlight.tsg-pinnedCell': {
+      backgroundColor: euiTheme.colors.backgroundBaseWarning,
+    },
+  }),
   selectedRow: css({
     backgroundColor: euiTheme.components.dataGridRowBackgroundSelect,
     '&:hover': {
@@ -298,7 +304,7 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: normal;
+    white-space: var(--tsg-body-white-space, normal);
     word-break: break-word;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: var(--tsg-body-max-lines, 1);
@@ -662,6 +668,14 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
   }),
 
   // -- Full screen mode --
+  noResults: css({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+    padding: euiTheme.size.l,
+  }),
+
   fullScreen: css({
     position: 'fixed',
     inset: 0,

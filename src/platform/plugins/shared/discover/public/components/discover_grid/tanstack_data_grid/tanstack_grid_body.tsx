@@ -33,6 +33,10 @@ const VirtualRow = React.memo(
     {
       row: Row<DataTableRecord>;
       rowIndex: number;
+      /** Offset of the current page, so `data-grid-row-index` matches UnifiedDataTable. */
+      rowIndexOffset: number;
+      /** Only used to re-render memoized rows when cell renderers change (e.g. JSON mode settings). */
+      columnDefs: unknown;
       isExpanded: boolean;
       isSelected: boolean;
       indicatorColor: string | undefined;
@@ -51,6 +55,7 @@ const VirtualRow = React.memo(
     {
       row,
       rowIndex,
+      rowIndexOffset,
       isExpanded,
       isSelected,
       indicatorColor,
@@ -71,11 +76,14 @@ const VirtualRow = React.memo(
       <div
         ref={ref}
         data-index={rowIndex}
+        data-grid-row-index={rowIndexOffset + rowIndex}
+        data-grid-visible-row-index={rowIndex}
         css={[
           styles.row,
           isAutoHeight && styles.rowAutoHeight,
           isExpanded && styles.rowExpanded,
           isSelected && styles.selectedRow,
+          row.original.isAnchor && styles.anchorRow,
           indicatorColor && styles.rowWithIndicator,
         ]}
         style={{
@@ -95,6 +103,13 @@ const VirtualRow = React.memo(
             <VirtualCell
               key={cell.id}
               cell={cell}
+              gridCellAttributes={{
+                'data-test-subj': 'dataGridRowCell',
+                'data-gridcell-column-id': cell.column.id,
+                'data-gridcell-column-index': colIdx,
+                'data-gridcell-row-index': rowIndexOffset + rowIndex,
+                'data-gridcell-visible-row-index': rowIndex,
+              }}
               styles={styles}
               isFocused={focusedColIndex === colIdx}
               isAutoHeight={isAutoHeight}
@@ -122,6 +137,9 @@ interface TanStackGridBodyProps {
   header: React.ReactNode;
   overlay: React.ReactNode;
   tableRows: Array<Row<DataTableRecord>>;
+  /** Absolute index of the first row on the current page. */
+  rowIndexOffset: number;
+  columnDefs: unknown;
   rowHeight: number;
   isAutoRowHeight: boolean;
   scrollKey: string;
@@ -150,6 +168,8 @@ export const TanStackGridBody = React.memo(function TanStackGridBody({
   header,
   overlay,
   tableRows,
+  rowIndexOffset,
+  columnDefs,
   rowHeight,
   isAutoRowHeight,
   scrollKey,
@@ -201,6 +221,7 @@ export const TanStackGridBody = React.memo(function TanStackGridBody({
     <div
       ref={scrollRef}
       css={styles.scrollContainer}
+      data-test-subj="euiDataGridBody"
       role="grid"
       aria-rowcount={tableRows.length + 1}
       aria-colcount={colCount}
@@ -229,6 +250,8 @@ export const TanStackGridBody = React.memo(function TanStackGridBody({
                 ref={isAutoRowHeight ? rowVirtualizer.measureElement : undefined}
                 row={row}
                 rowIndex={index}
+                rowIndexOffset={rowIndexOffset}
+                columnDefs={columnDefs}
                 isExpanded={expandedDocId === record.id}
                 isSelected={selectedRows.has(record.id)}
                 indicatorColor={getRowIndicator?.(record, euiTheme)?.color}

@@ -9,7 +9,12 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { flexRender, type Cell } from '@tanstack/react-table';
-import { keys } from '@elastic/eui';
+import { keys, useEuiTheme } from '@elastic/eui';
+import {
+  HIGHLIGHT_CLASS_NAME as IN_TABLE_SEARCH_HIGHLIGHT_CLASS_NAME,
+  InTableSearchHighlightsWrapper,
+  getInTableSearchHighlightColors,
+} from '@kbn/data-grid-in-table-search';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { SOURCE_COLUMN, type UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { SELECT_COL_WIDTH, type getTanStackDataGridStyles } from './tanstack_data_grid.styles';
@@ -39,7 +44,11 @@ const HighlightedText = React.memo(
     while (idx !== -1) {
       if (idx > cursor) parts.push(text.slice(cursor, idx));
       parts.push(
-        <mark key={idx} css={isActive ? styles.searchHighlightActive : styles.searchHighlight}>
+        <mark
+          key={idx}
+          className={IN_TABLE_SEARCH_HIGHLIGHT_CLASS_NAME}
+          css={isActive ? styles.searchHighlightActive : styles.searchHighlight}
+        >
           {text.slice(idx, idx + term.length)}
         </mark>
       );
@@ -51,10 +60,41 @@ const HighlightedText = React.memo(
   }
 );
 
+/** Test attributes shared with UnifiedDataTable cells, so test helpers work with both grids. */
+export interface GridCellAttributes {
+  'data-test-subj': string;
+  'data-gridcell-column-id': string;
+  'data-gridcell-column-index': number;
+  'data-gridcell-row-index': number;
+  'data-gridcell-visible-row-index': number;
+}
+
+/** Highlights in-table search matches in the rendered summary, like UnifiedDataTable does. */
+const SummaryCellHighlights = ({
+  findTerm,
+  children,
+}: {
+  findTerm: string;
+  children: React.ReactNode;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const { highlightColor, highlightBackgroundColor } = getInTableSearchHighlightColors(euiTheme);
+  return (
+    <InTableSearchHighlightsWrapper
+      inTableSearchTerm={findTerm}
+      highlightColor={highlightColor}
+      highlightBackgroundColor={highlightBackgroundColor}
+    >
+      {children}
+    </InTableSearchHighlightsWrapper>
+  );
+};
+
 // ── Virtual cell with cell actions, popover, and focus support ──
 export const VirtualCell = React.memo(
   ({
     cell,
+    gridCellAttributes,
     styles,
     isFocused,
     isAutoHeight,
@@ -66,6 +106,7 @@ export const VirtualCell = React.memo(
     isRowSelected,
   }: {
     cell: Cell<DataTableRecord, unknown>;
+    gridCellAttributes: GridCellAttributes;
     styles: ReturnType<typeof getTanStackDataGridStyles>;
     isFocused: boolean;
     isAutoHeight?: boolean;
@@ -104,11 +145,16 @@ export const VirtualCell = React.memo(
     const isPinned = Boolean(pinned);
     const isLastLeftPinned = pinned === 'left' && cell.column.getIsLastColumn('left');
     const pinStyle = getColumnPinningStyle(cell.column);
+    // Same anchor-row class as UnifiedDataTable (surrounding documents view).
+    const getCellClassName = (...classNames: Array<string | false>) =>
+      [...classNames, cell.row.original.isAnchor && 'unifiedDataTable__cell--highlight']
+        .filter(Boolean)
+        .join(' ') || undefined;
 
     if (isControl || isSelect) {
       return (
         <div
-          className={isPinned ? 'tsg-pinnedCell' : undefined}
+          className={getCellClassName(isPinned && 'tsg-pinnedCell')}
           css={[
             isSelect ? styles.selectCell : styles.controlCell,
             isLastLeftPinned && styles.pinnedCellShadow,
@@ -120,6 +166,7 @@ export const VirtualCell = React.memo(
             ...pinStyle,
           }}
           role="gridcell"
+          {...gridCellAttributes}
           aria-selected={isSelect ? isRowSelected : undefined}
         >
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -144,6 +191,8 @@ export const VirtualCell = React.memo(
             .join('\n');
           setPopoverState({
             fieldName: SOURCE_COLUMN,
+            rowIndex: gridCellAttributes['data-gridcell-row-index'],
+            canFilter: false,
             value: summaryText,
             formattedValue: summaryText,
             cellElement: cellEl,
@@ -154,7 +203,7 @@ export const VirtualCell = React.memo(
 
       return (
         <div
-          className={isPinned ? 'tsg-pinnedCell' : undefined}
+          className={getCellClassName(isPinned && 'tsg-pinnedCell')}
           css={[
             styles.summaryCell,
             styles.expandableCell,
@@ -163,6 +212,7 @@ export const VirtualCell = React.memo(
             isFocused && styles.focusedCell,
           ]}
           role="gridcell"
+          {...gridCellAttributes}
           style={columnStyle}
           tabIndex={0}
           onClick={(e) => openSummaryPopover(e.currentTarget)}
@@ -174,13 +224,20 @@ export const VirtualCell = React.memo(
           }}
         >
           <div css={isAutoHeight ? styles.summaryCellContentAuto : styles.summaryCellContent}>
-            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            {findTerm ? (
+              <SummaryCellHighlights findTerm={findTerm}>
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </SummaryCellHighlights>
+            ) : (
+              flexRender(cell.column.columnDef.cell, cell.getContext())
+            )}
           </div>
         </div>
       );
     }
 
     const fieldName = meta?.fieldName;
+    const cellOnFilter = meta?.canFilter === false ? undefined : onFilter;
     const value = cell.getValue();
     const getFormattedValue = () => meta?.formatValue?.(value) ?? formatCellValue(value);
     // Text formatting is only needed for highlighting and actions; skip it for idle cells.
@@ -190,8 +247,10 @@ export const VirtualCell = React.memo(
       if (fieldName && setPopoverState) {
         setPopoverState({
           fieldName,
+          rowIndex: gridCellAttributes['data-gridcell-row-index'],
           value,
           formattedValue: formatted ?? getFormattedValue(),
+          canFilter: Boolean(cellOnFilter),
           cellElement: cellEl,
           cellWidth: cellEl.offsetWidth,
         });
@@ -201,14 +260,10 @@ export const VirtualCell = React.memo(
     return (
       <div
         ref={cellRef}
-        className={
-          [
-            isPinned ? 'tsg-pinnedCell' : undefined,
-            actionsDismissed ? 'tsg-actionsDismissed' : undefined,
-          ]
-            .filter(Boolean)
-            .join(' ') || undefined
-        }
+        className={getCellClassName(
+          isPinned && 'tsg-pinnedCell',
+          actionsDismissed && 'tsg-actionsDismissed'
+        )}
         css={[
           styles.cell,
           styles.cellWithActions,
@@ -219,6 +274,7 @@ export const VirtualCell = React.memo(
         ]}
         style={columnStyle}
         role="gridcell"
+        {...gridCellAttributes}
         tabIndex={0}
         onMouseLeave={(event) => {
           const next = event.relatedTarget;
@@ -265,16 +321,19 @@ export const VirtualCell = React.memo(
             meta?.isTimestamp && styles.timestampCell,
           ]}
         >
-          {findTerm && formatted !== undefined ? (
-            <HighlightedText
-              text={formatted}
-              term={findTerm}
-              isActive={isActiveMatch}
-              styles={styles}
-            />
-          ) : (
-            flexRender(cell.column.columnDef.cell, cell.getContext())
-          )}
+          {/* Same value node class as UnifiedDataTable cells. */}
+          <span className="unifiedDataTable__cellValue">
+            {findTerm && formatted !== undefined ? (
+              <HighlightedText
+                text={formatted}
+                term={findTerm}
+                isActive={isActiveMatch}
+                styles={styles}
+              />
+            ) : (
+              flexRender(cell.column.columnDef.cell, cell.getContext())
+            )}
+          </span>
         </div>
         {fieldName && formatted !== undefined && (
           <CellActions
@@ -282,7 +341,7 @@ export const VirtualCell = React.memo(
             fieldName={fieldName}
             value={value}
             formattedValue={formatted}
-            onFilter={onFilter}
+            onFilter={cellOnFilter}
             onExpand={openCellPopover}
             onDismiss={dismissActions}
             anchorCellRef={cellRef}

@@ -53,13 +53,13 @@ it('renders selected documents with TanStack and can change the comparison base'
     />
   );
 
-  expect(screen.getByRole('table')).toBeInTheDocument();
+  expect(screen.getByRole('grid')).toBeInTheDocument();
   expect(screen.getByTestId('unifiedDataTableComparisonFieldName')).toHaveTextContent('bytes');
-  expect(screen.getAllByRole('cell')).toHaveLength(3);
+  expect(screen.getAllByRole('gridcell')).toHaveLength(3);
 
   await userEvent.click(screen.getByTestId('unifiedDataTableComparisonSettings'));
   await userEvent.click(screen.getByTestId('unifiedDataTableDiffMode-chars'));
-  expect(screen.getAllByRole('cell')[2]).toHaveTextContent('1200');
+  expect(screen.getAllByRole('gridcell')[2]).toHaveTextContent('1200');
 
   await userEvent.click(screen.getByRole('button', { name: 'Pin for comparison' }));
   expect(replaceSelectedDocs).toHaveBeenCalledWith([docs[1].id, docs[0].id]);

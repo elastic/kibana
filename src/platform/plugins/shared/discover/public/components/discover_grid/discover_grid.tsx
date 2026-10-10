@@ -31,7 +31,10 @@ import {
   resolveDiscoverGridImplementation,
   type DiscoverGridImplementation,
 } from './discover_grid_implementation';
-import { useDiscoverGridImplementation } from './use_discover_grid_implementation';
+import {
+  useDefaultDiscoverGridImplementation,
+  useDiscoverGridImplementation,
+} from './use_discover_grid_implementation';
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
@@ -45,6 +48,11 @@ export interface DiscoverGridProps extends UnifiedDataTableProps {
    * Shared toolbar trailing slot. Currently consumed by TanStack as `toolbarTrailingControl`.
    */
   toolbarTrailingControl?: ReactNode;
+  /**
+   * Shared toolbar bottom slot (callouts, loading indicator). Currently consumed by TanStack as
+   * `toolbarBottomSection`; UnifiedDataTable receives it via `renderCustomToolbar`.
+   */
+  toolbarBottomSection?: ReactNode;
   /**
    * App-state grid implementation. Used when `onChangeGridImplementation` is provided
    * so the choice is stored in Discover URL state instead of local storage.
@@ -68,6 +76,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     onFullScreenChange,
     toolbarLeftSide,
     toolbarTrailingControl,
+    toolbarBottomSection,
     gridImplementation,
     onChangeGridImplementation,
     ...props
@@ -77,8 +86,9 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       implementation: storedGridImplementation,
       onChangeImplementation: onChangeStoredGridImplementation,
     } = useDiscoverGridImplementation(services.storage);
+    const defaultGridImplementation = useDefaultDiscoverGridImplementation();
     const resolvedGridImplementation = onChangeGridImplementation
-      ? resolveDiscoverGridImplementation(gridImplementation)
+      ? resolveDiscoverGridImplementation(gridImplementation, defaultGridImplementation)
       : storedGridImplementation;
     const usesUnifiedDataTable = resolvedGridImplementation === 'unified';
     const toggleImplementation = useCallback(() => {
@@ -241,6 +251,13 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
           services={services}
           toolbarLeftSide={toolbarLeftSide}
           toolbarTrailingControl={toolbarTrailingControl}
+          toolbarBottomSection={toolbarBottomSection}
+          maxDocFieldsDisplayed={props.maxDocFieldsDisplayed}
+          hideFilteringOnComputedColumns={props.hideFilteringOnComputedColumns}
+          initialState={props.initialState}
+          onInitialStateChange={props.onInitialStateChange}
+          cellActionsTriggerId={props.cellActionsTriggerId}
+          cellActionsMetadata={props.cellActionsMetadata}
           showKeyboardShortcuts={props.showKeyboardShortcuts}
           showMultiFields={props.showMultiFields}
           ariaLabelledBy={props.ariaLabelledBy}

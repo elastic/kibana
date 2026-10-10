@@ -59,6 +59,7 @@
     "@kbn/ebt-click",
     "@kbn/unified-field-list",
     "@kbn/cell-actions",
+    "@kbn/data-grid-in-table-search",
     "@kbn/shared-ux-utility",
     "@kbn/discover-utils",
     "@kbn/search-response-warnings",

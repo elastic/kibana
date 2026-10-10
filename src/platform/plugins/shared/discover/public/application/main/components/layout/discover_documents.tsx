@@ -481,19 +481,24 @@ function DiscoverDocumentsComponent({
 
   const approximationApplied = documentState.approximationApplied;
 
+  const toolbarBottomSection = useMemo(
+    () => (
+      <>
+        {callouts}
+        {loadingIndicator}
+      </>
+    ),
+    [callouts, loadingIndicator]
+  );
+
   const renderCustomToolbarWithElements = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
         saveToDashboardButton,
         leftSide: isDataGridFullScreen ? undefined : renderViewModeToggle(),
-        bottomSection: (
-          <>
-            {callouts}
-            {loadingIndicator}
-          </>
-        ),
+        bottomSection: toolbarBottomSection,
       }),
-    [renderViewModeToggle, callouts, loadingIndicator, isDataGridFullScreen, saveToDashboardButton]
+    [renderViewModeToggle, toolbarBottomSection, isDataGridFullScreen, saveToDashboardButton]
   );
 
   const [expandedDoc$] = useState(() => new BehaviorSubject(expandedDoc));
@@ -666,6 +671,7 @@ function DiscoverDocumentsComponent({
             renderCustomToolbar={renderCustomToolbarWithElements}
             toolbarLeftSide={isDataGridFullScreen ? undefined : renderViewModeToggle()}
             toolbarTrailingControl={saveToDashboardButton}
+            toolbarBottomSection={toolbarBottomSection}
             services={services}
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}

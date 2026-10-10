@@ -67,14 +67,58 @@ const wrapAction = (
   },
 });
 
+// Same schema-based sort labels as EuiDataGrid, so the column menu reads the same in both grids.
+const getSortLabels = (columnSchema: string): { asc: string; desc: string } => {
+  switch (columnSchema) {
+    case 'datetime':
+      return {
+        asc: i18n.translate('discover.grid.tanStack.sortOldNewButtonLabel', {
+          defaultMessage: 'Sort Old-New',
+        }),
+        desc: i18n.translate('discover.grid.tanStack.sortNewOldButtonLabel', {
+          defaultMessage: 'Sort New-Old',
+        }),
+      };
+    case 'numeric':
+      return {
+        asc: i18n.translate('discover.grid.tanStack.sortLowHighButtonLabel', {
+          defaultMessage: 'Sort Low-High',
+        }),
+        desc: i18n.translate('discover.grid.tanStack.sortHighLowButtonLabel', {
+          defaultMessage: 'Sort High-Low',
+        }),
+      };
+    case 'boolean':
+      return {
+        asc: i18n.translate('discover.grid.tanStack.sortFalseTrueButtonLabel', {
+          defaultMessage: 'Sort False-True',
+        }),
+        desc: i18n.translate('discover.grid.tanStack.sortTrueFalseButtonLabel', {
+          defaultMessage: 'Sort True-False',
+        }),
+      };
+    default:
+      return {
+        asc: i18n.translate('discover.grid.tanStack.sortAscendingButtonLabel', {
+          defaultMessage: 'Sort A-Z',
+        }),
+        desc: i18n.translate('discover.grid.tanStack.sortDescendingButtonLabel', {
+          defaultMessage: 'Sort Z-A',
+        }),
+      };
+  }
+};
+
 const buildSortActions = ({
   columnId,
+  columnSchema,
   sort,
   onSort,
   columnIsSortable,
   onActionComplete,
 }: {
   columnId: string;
+  columnSchema: string;
   sort: SortOrder[];
   onSort?: (sort: SortOrder[]) => void;
   columnIsSortable: boolean;
@@ -103,23 +147,20 @@ const buildSortActions = ({
     onSort([...sort, [columnId, direction]]);
   };
 
+  const sortLabels = getSortLabels(columnSchema);
   const ascLabel =
     currentDirection === 'asc'
       ? i18n.translate('discover.grid.tanStack.unsortAscendingButtonLabel', {
           defaultMessage: 'Unsort ascending',
         })
-      : i18n.translate('discover.grid.tanStack.sortAscendingButtonLabel', {
-          defaultMessage: 'Sort A → Z',
-        });
+      : sortLabels.asc;
 
   const descLabel =
     currentDirection === 'desc'
       ? i18n.translate('discover.grid.tanStack.unsortDescendingButtonLabel', {
           defaultMessage: 'Unsort descending',
         })
-      : i18n.translate('discover.grid.tanStack.sortDescendingButtonLabel', {
-          defaultMessage: 'Sort Z → A',
-        });
+      : sortLabels.desc;
 
   return [
     wrapAction(
@@ -257,6 +298,7 @@ export const buildTanStackColumnHeaderActionGroups = ({
     groups,
     buildSortActions({
       columnId,
+      columnSchema,
       sort,
       onSort,
       columnIsSortable,
@@ -447,21 +489,21 @@ export const TanStackColumnHeaderActions = React.memo(
           panelPaddingSize="s"
           offset={7}
           anchorPosition="downLeft"
-          button={
-            <span aria-hidden data-test-subj={`dataGridHeaderCellActionButton-${columnId}`} />
-          }
+          button={<span aria-hidden />}
           isOpen={isOpen}
           closePopover={closePopover}
         >
-          {actionGroups.map((groupItems, groupIndex) => (
-            <React.Fragment key={groupIndex}>
-              {groupIndex > 0 && <EuiHorizontalRule margin="xs" size="full" />}
-              <EuiListGroup
-                listItems={groupItems}
-                data-test-subj={`dataGridHeaderCellActionGroup-${columnId}-${groupIndex}`}
-              />
-            </React.Fragment>
-          ))}
+          <div data-test-subj={`dataGridHeaderCellActionGroup-${columnId}`}>
+            {actionGroups.map((groupItems, groupIndex) => (
+              <React.Fragment key={groupIndex}>
+                {groupIndex > 0 && <EuiHorizontalRule margin="xs" size="full" />}
+                <EuiListGroup
+                  listItems={groupItems}
+                  data-test-subj={`dataGridHeaderCellActionGroup-${columnId}-${groupIndex}`}
+                />
+              </React.Fragment>
+            ))}
+          </div>
         </EuiPopover>
       );
     }

@@ -54,6 +54,7 @@ export const TanStackHeaderCellText = React.memo(
       <span
         ref={textRef}
         css={[styles.headerCellText, multiline && styles.headerCellTextMultiline]}
+        data-test-subj="dataGridHeaderCellTitle"
       >
         {text}
       </span>
