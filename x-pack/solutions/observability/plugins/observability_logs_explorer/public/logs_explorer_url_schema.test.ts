@@ -13,8 +13,9 @@ import {
   hydrateDataSourceSelection,
   getDiscoverColumnsWithFallbackFieldsFromDisplayOptions,
   getDiscoverFiltersFromState,
+  getControlOptionsFromControlsState,
 } from './logs_explorer_url_schema';
-import type { DisplayOptions, ControlOptions } from './logs_explorer_schema_types';
+import type { DisplayOptions, ControlOptions, ControlsState } from './logs_explorer_schema_types';
 import type { TimeRange, RefreshInterval, Query } from '@kbn/data-plugin/common/types';
 import { ALL_LOGS_DATA_VIEW_ID } from '@kbn/discover-utils/src/data_types';
 
@@ -293,6 +294,60 @@ describe('logs_explorer_url_schema', () => {
     it('should handle undefined display options', () => {
       const result = getDiscoverColumnsWithFallbackFieldsFromDisplayOptions(undefined);
       expect(result).toEqual(undefined);
+    });
+  });
+
+  describe('getControlOptionsFromControlsState', () => {
+    it('should map the namespace control to the data_stream.namespace key', () => {
+      const namespace = {
+        mode: 'include' as const,
+        selection: { type: 'options' as const, selectedOptions: ['staging'] },
+      };
+
+      expect(getControlOptionsFromControlsState({ namespace })).toEqual({
+        'data_stream.namespace': namespace,
+      });
+    });
+
+    it('should preserve exclude mode and exists selection', () => {
+      const namespace = {
+        mode: 'exclude' as const,
+        selection: { type: 'exists' as const },
+      };
+
+      expect(getControlOptionsFromControlsState({ namespace })).toEqual({
+        'data_stream.namespace': namespace,
+      });
+    });
+
+    it('should return undefined when controls are undefined', () => {
+      expect(getControlOptionsFromControlsState(undefined)).toBeUndefined();
+    });
+
+    it('should return undefined when namespace is missing', () => {
+      expect(getControlOptionsFromControlsState({})).toBeUndefined();
+    });
+
+    it('should return undefined when namespace has no selection', () => {
+      const controls = { namespace: { mode: 'include' } } as unknown as ControlsState;
+
+      expect(getControlOptionsFromControlsState(controls)).toBeUndefined();
+    });
+
+    it('should return undefined when an options selection has no selectedOptions array', () => {
+      const controls = {
+        namespace: { mode: 'include', selection: { type: 'options' } },
+      } as unknown as ControlsState;
+
+      expect(getControlOptionsFromControlsState(controls)).toBeUndefined();
+    });
+
+    it('should return undefined for an unknown selection type', () => {
+      const controls = {
+        namespace: { mode: 'include', selection: { type: 'unknown' } },
+      } as unknown as ControlsState;
+
+      expect(getControlOptionsFromControlsState(controls)).toBeUndefined();
     });
   });
 
