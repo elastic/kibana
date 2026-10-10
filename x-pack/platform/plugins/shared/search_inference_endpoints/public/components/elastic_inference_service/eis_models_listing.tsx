@@ -23,6 +23,8 @@ import { EisNoModelsPrompt } from './eis_no_models_prompt';
 import { ModelTypeFilterPart, ModelFamilyFilterPart } from './eis_model_filters';
 import { RegionFilterPart } from './region_filter';
 import { EisTable } from './eis_table';
+import { EisModelsResultsSummary } from './eis_models_results_summary';
+import { EisModelsSortMenu } from './eis_models_sort_menu';
 
 export type EisViewMode = 'card' | 'table';
 
@@ -35,6 +37,7 @@ interface EisModelsListingProps {
   hasBlockedModels: boolean;
   viewMode: EisViewMode;
   onViewModeChange: (viewMode: EisViewMode) => void;
+  catalogTotal: number;
 }
 
 const VIEW_MODE_OPTIONS: EisViewModeOption[] = [
@@ -66,55 +69,78 @@ export const EisModelsListing = ({
   hasBlockedModels,
   viewMode,
   onViewModeChange,
+  catalogTotal,
 }: EisModelsListingProps) => {
   const { isTourOpen, dismissTour, hideTour } = useDisplayOptionsTour(hasBlockedModels);
 
   return (
     <ContentList emptyState={<EisNoModelsPrompt />}>
-      <EuiFlexGroup alignItems="flexStart" gutterSize="s">
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false}>
+            <EuiFlexItem>
+              <ContentListToolbar>
+                <ContentListToolbar.Filters>
+                  <ModelTypeFilterPart />
+                  <ModelFamilyFilterPart />
+                  <RegionFilterPart />
+                </ContentListToolbar.Filters>
+              </ContentListToolbar>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonGroup
+                legend={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.viewMode', {
+                  defaultMessage: 'View mode',
+                })}
+                options={VIEW_MODE_OPTIONS}
+                idSelected={viewMode}
+                onChange={(id) => {
+                  if (isEisViewMode(id)) {
+                    onViewModeChange(id);
+                  }
+                }}
+                buttonSize="m"
+                isIconOnly
+                data-test-subj="eisModelsViewModeSelector"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <DisplayOptions
+                value={displayOptions}
+                onApply={onApplyDisplayOptions}
+                onOpen={hideTour}
+                isTourOpen={isTourOpen}
+                onDismissTour={dismissTour}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        {viewMode === 'card' && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              gutterSize="s"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EisModelsResultsSummary catalogTotal={catalogTotal} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EisModelsSortMenu />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
-          <ContentListToolbar>
-            <ContentListToolbar.Filters>
-              <ModelTypeFilterPart />
-              <ModelFamilyFilterPart />
-              <RegionFilterPart />
-            </ContentListToolbar.Filters>
-          </ContentListToolbar>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            legend={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.viewMode', {
-              defaultMessage: 'View mode',
-            })}
-            options={VIEW_MODE_OPTIONS}
-            idSelected={viewMode}
-            onChange={(id) => {
-              if (isEisViewMode(id)) {
-                onViewModeChange(id);
-              }
-            }}
-            // `m` is form-control height, matching the toolbar's search box and filter buttons.
-            buttonSize="m"
-            isIconOnly
-            data-test-subj="eisModelsViewModeSelector"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <DisplayOptions
-            value={displayOptions}
-            onApply={onApplyDisplayOptions}
-            onOpen={hideTour}
-            isTourOpen={isTourOpen}
-            onDismissTour={dismissTour}
-          />
+          {viewMode === 'table' ? (
+            <EisTable {...{ onViewModelDetails }} />
+          ) : (
+            <EisCardGrid {...{ onViewModelDetails }} />
+          )}
+          {viewMode === 'table' && <ContentListFooter />}
         </EuiFlexItem>
       </EuiFlexGroup>
-      {viewMode === 'table' ? (
-        <EisTable {...{ onViewModelDetails }} />
-      ) : (
-        <EisCardGrid {...{ onViewModelDetails }} />
-      )}
-      {viewMode === 'table' && <ContentListFooter />}
     </ContentList>
   );
 };
