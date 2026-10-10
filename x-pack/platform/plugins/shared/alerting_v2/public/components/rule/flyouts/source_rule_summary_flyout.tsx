@@ -230,6 +230,14 @@ export const SourceRuleSummaryFlyout = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="hollow" data-test-subj="classicRulesBadge">
+                        {i18n.translate(
+                          'xpack.alertingV2.sourceRuleSummaryFlyout.classicRulesBadge',
+                          { defaultMessage: 'Classic rules' }
+                        )}
+                      </EuiBadge>
+                    </EuiFlexItem>
                     {statusBadge ? <EuiFlexItem grow={false}>{statusBadge}</EuiFlexItem> : null}
                     <TagsOverflowBadgeRow
                       tags={tags}

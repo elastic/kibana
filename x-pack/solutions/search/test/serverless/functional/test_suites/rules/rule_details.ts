@@ -28,6 +28,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const retry = getService('retry');
   const toasts = getService('toasts');
+
+  async function readRuleEnabledBadge() {
+    if (await testSubjects.exists('ruleEnabledBadge')) {
+      return await testSubjects.getVisibleText('ruleEnabledBadge');
+    }
+    await testSubjects.click('appHeaderBadgesOverflow');
+    const text = await testSubjects.getVisibleText('ruleEnabledBadge');
+    await testSubjects.click('appHeaderBadgesOverflow');
+    return text;
+  }
   const alertingApi = getService('alertingApi');
 
   const openFirstRule = async (ruleName: string) => {
@@ -141,9 +151,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('should disable the rule', async () => {
-        const statusBadge = await testSubjects.find('ruleEnabledBadge');
         await retry.try(async () => {
-          expect(await statusBadge.getVisibleText()).toEqual('Enabled');
+          expect(await readRuleEnabledBadge()).toEqual('Enabled');
         });
 
         await testSubjects.click('ruleEnabledSwitch');
@@ -151,14 +160,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await (await testSubjects.find('confirmModalConfirmButton')).click();
 
         await retry.tryForTime(30 * 1000, async () => {
-          expect(await statusBadge.getVisibleText()).toEqual('Disabled');
+          expect(await readRuleEnabledBadge()).toEqual('Disabled');
         });
       });
 
       it('should allow you to snooze a disabled rule', async () => {
-        const statusBadge = await testSubjects.find('ruleEnabledBadge');
-
-        expect(await statusBadge.getVisibleText()).toEqual('Disabled');
+        expect(await readRuleEnabledBadge()).toEqual('Disabled');
 
         let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
         await snoozeBadge.click();
@@ -179,14 +186,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('should reenable a disabled the rule', async () => {
-        const statusBadge = await testSubjects.find('ruleEnabledBadge');
-
-        expect(await statusBadge.getVisibleText()).toEqual('Disabled');
+        expect(await readRuleEnabledBadge()).toEqual('Disabled');
 
         await testSubjects.click('ruleEnabledSwitch');
 
         await retry.try(async () => {
-          expect(await statusBadge.getVisibleText()).toEqual('Enabled');
+          expect(await readRuleEnabledBadge()).toEqual('Enabled');
         });
       });
 
