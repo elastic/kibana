@@ -168,14 +168,32 @@ export const fetchTriageAlerts = async (
   return [...unclaimed, ...claimed];
 };
 
+/** The tags route returns Elasticsearch's update-by-query response, which can be a 200 with gaps. */
+interface UpdateByQueryResult {
+  timed_out?: boolean;
+  failures?: unknown[];
+}
+
+/**
+ * Throws unless the whole update was applied: a claim or release that was only partly stored would
+ * otherwise be reported as done, and the next sweep could plan the same alerts again.
+ */
 export const tagAlerts =
   ({ callKibanaApi }: KibanaApi): SweepPorts['tagAlerts'] =>
   async ({ alertIds, add, remove }) => {
-    await callKibanaApi({
+    const { body } = await callKibanaApi<UpdateByQueryResult>({
       method: 'POST',
       path: SIGNALS_TAGS_PATH,
       body: { ids: alertIds, tags: { tags_to_add: add, tags_to_remove: remove } },
     });
+    const failureCount = body.failures?.length ?? 0;
+    if (body.timed_out === true || failureCount > 0) {
+      throw new Error(
+        `Tagging ${alertIds.length} alert(s) was not fully applied (timed_out: ${
+          body.timed_out === true
+        }, failures: ${failureCount})`
+      );
+    }
   };
 
 /** One count query, no writes: open alerts older than the look-back that were never triaged. */
