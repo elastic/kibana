@@ -159,24 +159,25 @@ describe('ActionPolicyFormFlyout', () => {
   });
 
   it('forwards the raw form state (not a payload) to onSave so the host can build it', async () => {
-    const user = userEvent.setup({ delay: null });
     const onSave = jest.fn();
 
     renderFlyout({ onClose: jest.fn(), onSave });
 
-    await user.type(screen.getByTestId(TEST_SUBJ.nameInput), 'Policy from test');
-    await user.tab();
-    await user.type(screen.getByTestId(TEST_SUBJ.descriptionInput), 'Description from test');
-    await user.tab();
+    fireEvent.change(screen.getByTestId(TEST_SUBJ.nameInput), {
+      target: { value: 'Policy from test' },
+    });
+    fireEvent.change(screen.getByTestId(TEST_SUBJ.descriptionInput), {
+      target: { value: 'Description from test' },
+    });
 
     // Select a workflow destination (required field)
     const destinationsCombo = screen.getByTestId('destinationsInput');
-    await user.click(within(destinationsCombo).getByRole('combobox'));
-    await user.click(await screen.findByRole('option', { name: 'Test Workflow' }));
+    fireEvent.click(within(destinationsCombo).getByRole('combobox'));
+    fireEvent.click(await screen.findByRole('option', { name: 'Test Workflow' }));
 
     const saveButton = screen.getByTestId(TEST_SUBJ.submitButton);
-    await waitFor(() => expect(saveButton).toBeEnabled());
-    await user.click(saveButton);
+    expect(saveButton).toBeEnabled();
+    fireEvent.click(saveButton);
 
     await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
     expect(onSave).toHaveBeenCalledWith({
@@ -194,20 +195,20 @@ describe('ActionPolicyFormFlyout', () => {
   });
 
   it('forwards inline "simple workflow" drafts to onSave instead of dropping them', async () => {
-    const user = userEvent.setup({ delay: null });
     const onSave = jest.fn();
 
     renderFlyout({ onClose: jest.fn(), onSave });
 
-    await user.type(screen.getByTestId(TEST_SUBJ.nameInput), 'Inline policy');
-    await user.tab();
+    fireEvent.change(screen.getByTestId(TEST_SUBJ.nameInput), {
+      target: { value: 'Inline policy' },
+    });
 
     // Add an inline Slack workflow draft (no existing destination selected).
-    await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+    fireEvent.click(screen.getByTestId('simpleWorkflowAdd-slack'));
 
     const saveButton = screen.getByTestId(TEST_SUBJ.submitButton);
-    await waitFor(() => expect(saveButton).toBeEnabled());
-    await user.click(saveButton);
+    expect(saveButton).toBeEnabled();
+    fireEvent.click(saveButton);
 
     await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
     expect(onSave).toHaveBeenCalledWith(
