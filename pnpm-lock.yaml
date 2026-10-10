@@ -6512,6 +6512,9 @@ importers:
       enzyme-to-json:
         specifier: 3.6.2
         version: 3.6.2(enzyme@3.11.0)
+      esbuild:
+        specifier: 0.28.1
+        version: 0.28.1
       eslint:
         specifier: 8.57.0
         version: 8.57.0(supports-color@10.2.2)
