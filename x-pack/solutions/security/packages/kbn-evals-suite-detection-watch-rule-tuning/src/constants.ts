@@ -203,6 +203,9 @@ export const DETECTION_ENGINE_INDEX_API_PATH = '/api/detection_engine/index';
  */
 export const WORKER_OUTPUT_STEP_ID = 'emit_result';
 
+/** The bound per-space worker's async dispatch step (detection_rule_tuning.yaml). */
+export const WORKER_DISPATCH_STEP_ID = 'run_rule_tuning';
+
 /**
  * The worker's harvest step (`elasticsearch.esql.query`). It runs with
  * `on-failure: continue`, so a query failure leaves the sweep `completed` with

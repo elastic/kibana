@@ -20,11 +20,13 @@ import {
   ALERTS_INDEX,
   RULE_TUNING_WORKER_WORKFLOW_ID,
   RULE_TUNING_REVIEW_WORKFLOW_ID,
+  WORKER_DISPATCH_STEP_ID,
   WORKER_HARVEST_STEP_ID,
   WORKER_OUTPUT_STEP_ID,
   WORKFLOWS_API_VERSION,
   type ChangeType,
 } from './constants';
+import { bindRuleTuningWorker } from './worker_identity';
 
 /**
  * The `ai.agent` step (diagnose_rule) whose structured output we grade. Matched on
@@ -398,33 +400,60 @@ const cancelStaleExecutions = async ({
   }
 };
 
+/** The sweep execution id the bound worker's `run_rule_tuning` executeAsync step emitted. */
+export const findDispatchedSweepId = (dispatcher: WorkflowExecutionDto): string | undefined => {
+  const step = dispatcher.stepExecutions?.find((s) => s.stepId === WORKER_DISPATCH_STEP_ID);
+  const id = (step?.output as { executionId?: unknown } | null | undefined)?.executionId;
+  return typeof id === 'string' ? id : undefined;
+};
+
 /**
- * Start the worker sweep. `min_fp_count: 2` is the schema floor (a 1-alert group returns
- * `alert_ids` as a scalar and fails the review's array input); 2 keeps every seeded cluster
- * harvested. The old `concurrency_key` input belonged to the unified workflow and has no
- * post-split meaning.
+ * Start the worker sweep through the service-account-bound per-space worker. The global sweep
+ * has no `run_as` of its own and its `run_review` children use `run-as-mode: inherit`
+ * (#296409), so POSTing the sweep directly fails every review with "Service account
+ * inheritance requires a parent executing as a service account". The bound worker passes
+ * `min_fp_count: 2` (the schema floor: a 1-alert group returns `alert_ids` as a scalar and
+ * fails the review's array input) through its extras settings.
  */
 const startWorkerSweep = async ({
   fetch,
   log,
+  pollIntervalMs,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
+  pollIntervalMs: number;
 }): Promise<{ workflowExecutionId: string; startedAt: number }> => {
+  const workerWorkflowId = await bindRuleTuningWorker(fetch);
   const startedAt = Date.now();
-  const { workflowExecutionId } = (await fetch(
-    `/api/workflows/workflow/${RULE_TUNING_WORKER_WORKFLOW_ID}/run`,
+  const { workflowExecutionId: dispatcherId } = (await fetch(
+    `/api/workflows/workflow/${workerWorkflowId}/run`,
     {
       method: 'POST',
       version: WORKFLOWS_API_VERSION,
       headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-      body: JSON.stringify({
-        inputs: { min_fp_count: 2 },
-      }),
+      body: JSON.stringify({ inputs: {} }),
     }
   )) as { workflowExecutionId: string };
-  log.info(`Started rule-tuning worker execution ${workflowExecutionId}`);
-  return { workflowExecutionId, startedAt };
+  log.info(`Started bound rule-tuning worker execution ${dispatcherId}`);
+
+  const deadline = startedAt + 60_000;
+  while (Date.now() < deadline) {
+    const dispatcher = await getExecution(fetch, dispatcherId);
+    const workflowExecutionId = findDispatchedSweepId(dispatcher);
+    if (workflowExecutionId) {
+      log.info(`Bound worker dispatched rule-tuning sweep execution ${workflowExecutionId}`);
+      return { workflowExecutionId, startedAt };
+    }
+    if (isTerminal(dispatcher.status)) {
+      throw new Error(
+        `Bound rule-tuning worker ${dispatcherId} ended ${dispatcher.status} without dispatching ` +
+          `the sweep: ${dispatcher.error ? JSON.stringify(dispatcher.error) : 'no error recorded'}`
+      );
+    }
+    await sleep(pollIntervalMs);
+  }
+  throw new Error(`Bound rule-tuning worker ${dispatcherId} did not dispatch the sweep in 60s`);
 };
 
 /**
@@ -588,7 +617,11 @@ export const runRuleTuningWorkflow = async ({
   pollIntervalMs?: number;
 }): Promise<RuleTuningVerdict> => {
   await cancelStaleExecutions({ fetch, log, pollIntervalMs });
-  const { workflowExecutionId, startedAt } = await startWorkerSweep({ fetch, log });
+  const { workflowExecutionId, startedAt } = await startWorkerSweep({
+    fetch,
+    log,
+    pollIntervalMs,
+  });
 
   const deadline = Date.now() + maxWaitMs;
   let worker: WorkflowExecutionDto | undefined;
@@ -721,7 +754,11 @@ export const runRuleTuningToApprovalGate = async ({
   pollIntervalMs?: number;
 }): Promise<RuleTuningApprovalRequest> => {
   await cancelStaleExecutions({ fetch, log, pollIntervalMs });
-  const { workflowExecutionId, startedAt } = await startWorkerSweep({ fetch, log });
+  const { workflowExecutionId, startedAt } = await startWorkerSweep({
+    fetch,
+    log,
+    pollIntervalMs,
+  });
 
   const deadline = Date.now() + maxWaitMs;
   let lastReviewStatus: ExecutionStatus | undefined;
