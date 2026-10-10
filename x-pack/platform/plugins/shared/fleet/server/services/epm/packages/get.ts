@@ -70,6 +70,7 @@ import {
 import { appContextService } from '../..';
 import { dataStreamService } from '../../data_streams';
 import * as Registry from '../registry';
+import { withGroupPackagesFixture } from '../registry/group_packages_fixture';
 import type { PackageAsset } from '../archive/storage';
 import { getEsPackage } from '../archive/storage';
 import { normalizeKuery } from '../../saved_object';
@@ -126,7 +127,11 @@ export async function getPackages(
     prerelease = false,
   } = options;
 
-  const registryItems = await Registry.fetchList({ category, prerelease }).then((items) => {
+  const registryItems = await Registry.fetchList({ category, prerelease }).then((rawItems) => {
+    // PROTOTYPE: to use real registry groups, drop this line (groups are detected by `schemas`).
+    const items = appContextService.getExperimentalFeatures().groupPackagesFixture
+      ? withGroupPackagesFixture(rawItems)
+      : rawItems;
     return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }, { id: item.name })
     );

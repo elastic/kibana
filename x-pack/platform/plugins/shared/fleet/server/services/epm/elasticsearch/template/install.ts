@@ -656,7 +656,7 @@ export function prepareTemplate({
   const validFields = processFields(fields);
 
   const mappings = generateMappings(validFields, isIndexModeTimeSeries);
-  const templateName = generateTemplateName(dataStream);
+  const templateName = generateTemplateName(dataStream, isOtelInputType);
   const templateIndexPattern = generateTemplateIndexPattern(dataStream, isOtelInputType);
   const templatePriority = getTemplatePriority(dataStream);
 
