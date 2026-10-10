@@ -13,13 +13,10 @@ import {
   EuiPanel,
   EuiProgress,
   EuiLoadingSpinner,
-  EuiIcon,
   EuiSpacer,
   useEuiTheme,
-  tint,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { PanelText } from '../../../../common/components/panel_text';
 import { useStopSiemMigration } from '../../hooks/use_stop_siem_migration';
 import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
@@ -63,58 +60,65 @@ export const MigrationProgressPanel = React.memo(function MigrationProgressPanel
   const progressBarTestId = `${migrationType}MigrationProgressBar`;
 
   return (
-    <EuiPanel data-test-subj={panelTestId} hasShadow={false} hasBorder paddingSize="m">
-      <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+    <EuiPanel
+      data-test-subj={panelTestId}
+      hasShadow={false}
+      hasBorder
+      paddingSize="m"
+      css={{
+        backgroundColor: euiTheme.colors.backgroundBasePrimary,
+        borderColor: euiTheme.colors.borderBasePrimary,
+      }}
+    >
+      <EuiFlexGroup direction="row" alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="xs">
+          <MigrationPanelTitle migrationStats={migrationStats} migrationType={migrationType} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="row" alignItems="center" gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false}>
-              <MigrationPanelTitle migrationStats={migrationStats} migrationType={migrationType} />
+              <EuiButtonEmpty
+                size="s"
+                flush="both"
+                isLoading={isStopping}
+                onClick={onStopMigration}
+                data-test-subj="stopMigrationButton"
+              >
+                {isStopping ? MIGRATION_STOPPING_BUTTON : MIGRATION_STOP_BUTTON}
+              </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText size="s">{MIGRATION_PROGRESS_DESCRIPTION(items.total)}</EuiText>
+              <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <PanelText size="s" subdued data-test-subj={descriptionTestId}>
+                    {preparing ? MIGRATION_PREPARING : MIGRATION_TRANSLATING}
+                  </PanelText>
+                </EuiFlexItem>
+                {!isStopping && (
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="s" data-test-subj={spinnerTestId} />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="stop"
-            isLoading={isStopping}
-            onClick={onStopMigration}
-            data-test-subj="stopMigrationButton"
-          >
-            {isStopping ? MIGRATION_STOPPING_BUTTON : MIGRATION_STOP_BUTTON}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup direction="row" justifyContent="flexStart" alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiIcon size="m" type={AssistantIcon} aria-hidden={true} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <PanelText size="s" subdued data-test-subj={descriptionTestId}>
-            {preparing ? MIGRATION_PREPARING : MIGRATION_TRANSLATING}
-          </PanelText>
-        </EuiFlexItem>
-        {!isStopping && (
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="s" data-test-subj={spinnerTestId} />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiText size="s">{MIGRATION_PROGRESS_DESCRIPTION(items.total)}</EuiText>
       {!preparing && (
         <>
+          <EuiSpacer size="m" />
           <EuiProgress
             value={progressValue}
-            valueText={`${Math.floor(progressValue)}%`}
             max={100}
-            color={tint(euiTheme.colors.success, 0.25)}
+            color="success"
             data-test-subj={progressBarTestId}
           />
-          <EuiSpacer size="xs" />
-          <MigrationsReadMore migrationType={migrationType} />
         </>
       )}
+      <EuiSpacer size="s" />
+      <MigrationsReadMore migrationType={migrationType} />
     </EuiPanel>
   );
 });

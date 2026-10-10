@@ -54,7 +54,7 @@ export const DELETE_MIGRATION_DESCRIPTION = i18n.translate(
 // Progress panel translations
 export const MIGRATION_PROGRESS_DESCRIPTION = (totalItems: number) =>
   i18n.translate('xpack.securitySolution.siemMigrations.panels.progress.description', {
-    defaultMessage: `Processing migration of {totalItems} items.`,
+    defaultMessage: `Processing migration of {totalItems} items. The table view will show once the translations are complete.`,
     values: { totalItems },
   });
 
@@ -65,7 +65,7 @@ export const MIGRATION_PREPARING = i18n.translate(
 
 export const MIGRATION_TRANSLATING = i18n.translate(
   'xpack.securitySolution.siemMigrations.panels.progress.translating',
-  { defaultMessage: `Translating items` }
+  { defaultMessage: `Translating...` }
 );
 
 export const MIGRATION_STOP_BUTTON = i18n.translate(
