@@ -1,3 +1,4 @@
 # Kibana review guidance
 
 - When reviewing authorization and data isolation, treat Kibana Spaces isolation and Saved Objects security as explicit security boundaries.
+- When a PR adds or changes a public HTTP API (a route with `access: 'public'`, its `summary` or `description`, `options.availability`, `deprecated`, `meta.description` or `meta.availability`, Zod `.describe()` or `.meta()`, `oasOperationObject` examples, or OpenAPI YAML under `docs/openapi`, `common/api`, `*.schema.yaml`, or `oas_docs`), read the `api-docs-review` skill before reviewing those files. Every new or changed public endpoint or property needs availability and version information; report it when missing. Route summaries, descriptions, and schema descriptions are published verbatim as the API reference, so wording findings from that skill are documentation defects, not style preferences.

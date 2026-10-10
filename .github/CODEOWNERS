@@ -3877,6 +3877,10 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 # Kibana accessibility
 /.agents/skills/accessibility/** @elastic/kibana-accessibility
 
+# Docs: API docs review and changelog entries
+/.agents/skills/api-docs-review/** @elastic/ski-docs
+/.agents/skills/changelog-entry/** @elastic/ski-docs
+
 # No owner - generated files covered by CI checks
 **/moon.yml
 
