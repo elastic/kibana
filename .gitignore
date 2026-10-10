@@ -213,6 +213,9 @@ ftr_run_order.json
 .cursor/tmp/
 .agents/tmp/
 
+# Local symlink to the shared prep-for-prod skill in design-elastic
+.agents/skills/prep-for-prod
+
 # Parallel step internal working notes (kept locally, not committed)
 src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_gaps.md
 src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_red_flags.md
