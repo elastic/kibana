@@ -417,7 +417,7 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
       if (legend.layout !== 'list') legend.maxLines ??= 1;
       // shouldTruncate is not preserved through list layouts
       if (legend.layout === 'list') delete legend.shouldTruncate;
-      // "auto" is not a valid XYLegendSize in the API schema — the round-trip drops it
+      // An omitted size on a left/right legend defaults to "auto", so strip it before comparing
       if (legend.legendSize === 'auto') delete legend.legendSize;
     }
 

@@ -154,6 +154,10 @@ export interface LegendSettingsProps<LegendStats extends LegendValue = XYLegendV
    * (We're trying to get people to stop using it so it can eventually be removed.)
    */
   showAutoLegendSizeOption: boolean;
+  /**
+   * Legend size used when no size is set. Defaults to `DEFAULT_LEGEND_SIZE`.
+   */
+  defaultLegendSize?: LegendSize;
   titlePlaceholder?: string;
   legendTitle?: string;
   isTitleVisible?: boolean;
@@ -292,6 +296,7 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
   layout,
   onLayoutChange,
   showAutoLegendSizeOption,
+  defaultLegendSize,
   titlePlaceholder,
 }: LegendSettingsProps<LegendStats>) {
   const isLegendNotHidden = mode !== 'hide';
@@ -388,6 +393,7 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
                 !position || position === Position.Left || position === Position.Right
               }
               showAutoOption={showAutoLegendSizeOption}
+              defaultLegendSize={defaultLegendSize}
             />
           )}
           {location && (

@@ -53,6 +53,26 @@ describe('legend size settings', () => {
     expect(onSizeChange).toHaveBeenNthCalledWith(2, undefined);
   });
 
+  describe('with auto as the default size', () => {
+    it('shows "Auto" when no size is set', () => {
+      renderLegendSizeSettings({ showAutoOption: true, defaultLegendSize: LegendSize.AUTO });
+      expect(screen.getByRole('button')).toHaveTextContent('Auto');
+    });
+
+    it('saves Medium explicitly and Auto as unset', async () => {
+      const onSizeChange = jest.fn();
+      renderLegendSizeSettings({
+        showAutoOption: true,
+        defaultLegendSize: LegendSize.AUTO,
+        onLegendSizeChange: onSizeChange,
+      });
+      await chooseOption('Medium');
+      await chooseOption('Auto');
+      expect(onSizeChange).toHaveBeenNthCalledWith(1, LegendSize.MEDIUM);
+      expect(onSizeChange).toHaveBeenNthCalledWith(2, undefined);
+    });
+  });
+
   it('hides "auto" option if visualization not using it', async () => {
     renderLegendSizeSettings({ showAutoOption: true });
     await openSelect();
