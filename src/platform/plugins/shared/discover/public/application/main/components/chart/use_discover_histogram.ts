@@ -62,7 +62,7 @@ const TAB_ATTRIBUTE_TO_TRIGGER_CHART_FETCH: Array<keyof UnifiedHistogramFetchPar
 
 /**
  * A new source for the same dataset (revert → setDataView) is not a source change.
- * Classic compares `id`. ES|QL compares `datasetKey`, because `id` is a query hash
+ * Classic compares `id`. ES|QL compares `datasetId`, because `id` is a query hash
  * and changes when the query text changes even if FROM, time field, and project
  * routing stay the same.
  */
