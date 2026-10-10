@@ -24,7 +24,7 @@ import { updateIndexMappings } from './update_index_mappings';
 import { updateIndexMappingsWaitForTask } from './update_index_mappings_wait_for_task';
 import { model } from '../model';
 import type { RetryableEsClientError } from '../../actions';
-import type { TaskCompletedWithRetriableError } from '../../../actions/wait_for_task';
+import type { TaskCompletedWithRetriableError, TaskNotFound } from '../../../actions/wait_for_task';
 import type { FatalState } from '../../../state';
 
 describe('Stage: updateIndexMappings', () => {
@@ -38,6 +38,11 @@ describe('Stage: updateIndexMappings', () => {
   const taskCompletedWithRetriableError: TaskCompletedWithRetriableError = {
     type: 'task_completed_with_retriable_error' as const,
     message: 'search_phase_execution_exception',
+  };
+
+  const lostTask: TaskNotFound = {
+    type: 'task_not_found' as const,
+    message: "task [abc:1] isn't running and hasn't stored its results",
   };
 
   const createState = (
@@ -130,6 +135,41 @@ describe('Stage: updateIndexMappings', () => {
         }),
       ]),
     });
+  });
+
+  it('UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> UPDATE_INDEX_MAPPINGS when the task was lost', () => {
+    const state = createWaitState();
+    const res: StateActionResponse<'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK'> = Either.left(lostTask);
+
+    const newState = updateIndexMappingsWaitForTask(state, res, context);
+
+    expect(newState).toEqual({
+      ...state,
+      controlState: 'UPDATE_INDEX_MAPPINGS',
+      retryCount: 1,
+      skipRetryReset: true,
+      retryDelay: expect.any(Number),
+      logs: expect.arrayContaining([
+        expect.objectContaining({
+          level: 'error',
+          message: `Action failed with '${lostTask.message}'. Retrying attempt 1 in 2 seconds.`,
+        }),
+      ]),
+    });
+  });
+
+  it('UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> FATAL when a lost task exceeds the retry count', () => {
+    const state = createWaitState({
+      retryCount: context.maxRetryAttempts,
+    });
+    const res: StateActionResponse<'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK'> = Either.left(lostTask);
+
+    const newState = updateIndexMappingsWaitForTask(state, res, context) as unknown as FatalState;
+
+    expect(newState.controlState).toEqual('FATAL');
+    expect(newState.reason).toBe(
+      `Unable to complete the UPDATE_INDEX_MAPPINGS step after ${context.maxRetryAttempts} attempts, terminating. The last failure message was: ${lostTask.message}`
+    );
   });
 
   it('UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> FATAL in case of  task_completed_with_retriable_error when exceeding retry count', () => {
