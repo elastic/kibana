@@ -108,6 +108,30 @@ describe('AlertTriageSettings', () => {
     }
   );
 
+  it('raises the least budget with a shorter schedule, since each run must fund a batch', () => {
+    const onExtrasChange = jest.fn();
+    render(
+      <AlertTriageSettings
+        worker={alertTriage}
+        settings={{ ...alertTriage.settings, scheduleInterval: '5m' }}
+        onExtrasChange={onExtrasChange}
+      />
+    );
+    const field = screen.getByTestId('alertZeroBudgetPerHour');
+
+    // 50 is valid on the 15 minute schedule (least 24) but one run of 5 minutes would get 4 units.
+    fireEvent.change(field, { target: { value: '50' } });
+    fireEvent.blur(field);
+
+    expect(onExtrasChange).not.toHaveBeenCalled();
+    expect(field).toHaveValue(SAVED_EXTRAS.budgetPerHour);
+
+    fireEvent.change(field, { target: { value: '72' } });
+    fireEvent.blur(field);
+
+    expect(onExtrasChange).toHaveBeenCalledWith({ ...SAVED_EXTRAS, budgetPerHour: 72 });
+  });
+
   it('falls back to the defaults when extras are missing', () => {
     render(
       <AlertTriageSettings

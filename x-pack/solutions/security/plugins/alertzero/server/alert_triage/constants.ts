@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { TRIAGE_ALERT_COST, TRIAGE_BATCH_OVERHEAD_COST } from '@kbn/alertzero-common';
+
 /** Largest number of alerts one batch analyses. */
 export const BATCH_ALERT_CAP = 100;
 
@@ -20,11 +22,14 @@ export const IN_FLIGHT_CEILING = 40;
 /** Cluster-wide `workflow:run` delay above which the sweep starts nothing. */
 export const TM_DELAY_LIMIT_MS = 120_000;
 
-/** Cost units a batch costs before its first alert (Investigation, analysis hop, review). */
-export const BATCH_OVERHEAD_COST = 5;
+/**
+ * Cost units a batch costs before its first alert (Investigation, analysis hop, review). Defined
+ * with the settings, which reject a budget that cannot fund a batch.
+ */
+export const BATCH_OVERHEAD_COST = TRIAGE_BATCH_OVERHEAD_COST;
 
 /** Cost units each alert in a batch adds. */
-export const ALERT_COST = 1;
+export const ALERT_COST = TRIAGE_ALERT_COST;
 
 /** Alerts per tag update, so one bulk call never exceeds the alert index's term limits. */
 export const TAG_CHUNK_SIZE = 500;

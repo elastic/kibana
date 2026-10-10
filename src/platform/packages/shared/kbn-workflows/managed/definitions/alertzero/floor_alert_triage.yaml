@@ -181,7 +181,8 @@ steps:
 
   # ---------------------------------------------------------------------------
   # 5. Report the sweep. `skip_reason` is `none`, `tm_behind`, `tm_unknown`,
-  #    `live_batches_unreadable`, `in_flight_ceiling` or `nothing_pending`.
+  #    `live_batches_unreadable`, `in_flight_ceiling`, `budget_too_small` or
+  #    `nothing_pending`.
   # ---------------------------------------------------------------------------
   - name: emit_result
     type: workflow.output

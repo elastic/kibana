@@ -13,12 +13,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  BUDGET_PER_HOUR_MAX,
-  BUDGET_PER_HOUR_MIN,
-  LOOKBACK_HOURS_MAX,
-  LOOKBACK_HOURS_MIN,
-} from '@kbn/alertzero-common';
+import { BUDGET_PER_HOUR_MAX, LOOKBACK_HOURS_MAX, LOOKBACK_HOURS_MIN } from '@kbn/alertzero-common';
 
 /* -------------------------------------------------------------------------- */
 /* Header                                                                     */
@@ -385,14 +380,12 @@ export const BUDGET_PER_HOUR_LABEL = i18n.translate(
   { defaultMessage: 'Triage budget per hour' }
 );
 
-export const BUDGET_PER_HOUR_HELP_TEXT = i18n.translate(
-  'xpack.alertzero.watches.settings.alertTriage.budgetPerHourHelpText',
-  {
+export const getBudgetPerHourHelpText = (min: number): string =>
+  i18n.translate('xpack.alertzero.watches.settings.alertTriage.budgetPerHourHelpText', {
     defaultMessage:
-      'How much triage work the worker plans each hour, in cost units. A batch of alerts costs a fixed overhead plus a cost per alert, so a larger budget triages more alerts and uses more model capacity. Each run gets its share of the hourly budget, so changing the schedule does not change the total: a shorter schedule runs more often with smaller runs, and only raising this budget triages more alerts per hour. Between {min} and {max}.',
-    values: { min: BUDGET_PER_HOUR_MIN, max: BUDGET_PER_HOUR_MAX },
-  }
-);
+      'How much triage work the worker plans each hour, in cost units. A batch of alerts costs a fixed overhead plus a cost per alert, so a larger budget triages more alerts and uses more model capacity. Each run gets its share of the hourly budget, so changing the schedule does not change the total: a shorter schedule runs more often with smaller runs, and only raising this budget triages more alerts per hour. Between {min} and {max}; the minimum depends on the schedule, because each run needs enough budget to fund at least one batch.',
+    values: { min, max: BUDGET_PER_HOUR_MAX },
+  });
 
 export const BUDGET_PER_HOUR_ARIA_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.alertTriage.budgetPerHourAriaLabel',
