@@ -43,6 +43,9 @@ jest.mock('@kbn/core-di-browser', () => {
       if (token === ActualUserCapabilities) {
         return new ActualUserCapabilities({ capabilities: mockCapabilities });
       }
+      if (token === 'notifications') {
+        return { tours: { isEnabled: () => true } };
+      }
       return {};
     },
     CoreStart: (key: string) => key,
@@ -297,6 +300,7 @@ describe('AlertsListPage', () => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     expect(lastCall?.columns).toEqual([
       'episode.status',
+      'alerting_source',
       'severity',
       '@timestamp',
       'rule.id',
@@ -754,12 +758,16 @@ describe('AlertsListPage fetch errors', () => {
     await waitFor(() => {
       expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'classic alerts failed' }),
-        expect.objectContaining({ title: 'Failed to fetch alerts for v1 alerts' })
+        expect.objectContaining({
+          title: 'Failed to fetch alerts for Classic Alerting',
+        })
       );
     });
     expect(screen.queryByText('Unable to load some alerts')).not.toBeInTheDocument();
     expect(screen.queryByTestId('alertingV2EpisodesListFetchError')).not.toBeInTheDocument();
-    expect(screen.queryByText('Failed to fetch alerts for v1 alerts')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Failed to fetch alerts for Classic Alerting')
+    ).not.toBeInTheDocument();
   });
 
   it.each([403, 503])('does not toast when classic alerts return %s', async (status) => {
@@ -789,7 +797,9 @@ describe('AlertsListPage fetch errors', () => {
     await waitFor(() => {
       expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'v2 episodes failed' }),
-        expect.objectContaining({ title: 'Failed to fetch alerts for v2 alerts' })
+        expect.objectContaining({
+          title: 'Failed to fetch alerts for Universal Alerting',
+        })
       );
     });
     expect(screen.queryByText('Unable to load some alerts')).not.toBeInTheDocument();

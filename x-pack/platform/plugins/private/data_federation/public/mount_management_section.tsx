@@ -27,23 +27,19 @@ export const mountManagementSection = (
   { element, history }: ManagementAppMountParams,
   {
     cloudInfo,
-    isCloudEnabled = false,
     share,
     usageCollection,
     featureFlags: {
-      enableFederatedIdentityAuth: enableFederatedIdentityAuthConfig = false,
       enableGoogleCloudStorageDataSourceType = false,
       enableAzureDataSourceType = false,
     } = {},
   }: {
     cloudInfo?: FederatedIdentityClusterInfo;
-    isCloudEnabled?: boolean;
     share?: SharePluginStart;
     usageCollection?: UsageCollectionStart;
     featureFlags?: FederatedDataFeatureFlags;
   }
 ) => {
-  const enableFederatedIdentityAuth = isCloudEnabled && enableFederatedIdentityAuthConfig;
   const services: DataFederationKibanaServices = {
     dataSourcesClient: new DataSourcesClient(coreStart.http),
     datasetsClient: new DatasetsClient(coreStart.http),
@@ -52,7 +48,6 @@ export const mountManagementSection = (
     discoverLocator: getDiscoverLocator(coreStart.application.capabilities, share),
     cloudInfo,
     featureFlags: {
-      enableFederatedIdentityAuth,
       enableGoogleCloudStorageDataSourceType,
       enableAzureDataSourceType,
     },

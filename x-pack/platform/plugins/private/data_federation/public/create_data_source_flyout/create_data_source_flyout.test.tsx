@@ -79,7 +79,7 @@ const renderFederatedS3EditFlyout = (onSave: jest.Mock) => {
     datasetsClient: createDatasetsClientMock(),
     toasts: createToastsMock(),
     docLinks: createDocLinksMock(),
-    featureFlags: { enableFederatedIdentityAuth: true },
+    featureFlags: {},
     cloudInfo: {
       jwtIssuer: 'https://issuer.example.com',
       deploymentId: 'deployment:abc123',
@@ -95,6 +95,29 @@ const renderFederatedS3EditFlyout = (onSave: jest.Mock) => {
           onSave={onSave}
           existingDataSourceNames={[]}
           initialDataSource={federatedS3DataSource}
+        />
+      </KibanaContextProvider>
+    </EuiProvider>
+  );
+};
+
+const renderCreateFlyout = (cloudInfo?: DataFederationKibanaServices['cloudInfo']) => {
+  const services: DataFederationKibanaServices = {
+    dataSourcesClient: createClientMock(),
+    datasetsClient: createDatasetsClientMock(),
+    toasts: createToastsMock(),
+    docLinks: createDocLinksMock(),
+    featureFlags: {},
+    cloudInfo,
+  };
+
+  return render(
+    <EuiProvider>
+      <KibanaContextProvider services={services}>
+        <CreateDataSourceFlyout
+          onClose={jest.fn()}
+          onSave={jest.fn().mockResolvedValue(null)}
+          existingDataSourceNames={[]}
         />
       </KibanaContextProvider>
     </EuiProvider>
@@ -145,6 +168,49 @@ describe('CreateDataSourceFlyout', () => {
       const { reportUiCounter } = renderFlyout(existingDataSource);
 
       expect(reportUiCounter).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('in create mode', () => {
+    it('offers and selects federated identity when an issuer is present', async () => {
+      const { getByTestId, queryByTestId, findAllByRole, getByRole } = renderCreateFlyout({
+        jwtIssuer: 'https://issuer.example.com',
+        deploymentId: 'deployment:abc123',
+        isServerless: false,
+      });
+
+      expect(
+        getByTestId('createDataSourceFlyoutAuthenticationLearnMore-federated_identity')
+      ).toBeInTheDocument();
+      expect(getByTestId('createDataSourceFlyoutS3FederatedRoleArn')).toBeInTheDocument();
+      expect(queryByTestId('createDataSourceFlyoutS3AccessKey')).not.toBeInTheDocument();
+
+      fireEvent.click(getByTestId('createDataSourceFlyoutAuthentication'));
+
+      expect(await findAllByRole('option')).toHaveLength(3);
+      expect(
+        getByRole('option', {
+          name: new RegExp(authenticationStrings.federatedIdentityLabel),
+          selected: true,
+        })
+      ).toBeInTheDocument();
+    });
+
+    it('hides federated identity when no issuer is present', async () => {
+      const { getByTestId, queryByTestId, findAllByRole, queryByRole } = renderCreateFlyout();
+
+      expect(
+        getByTestId('createDataSourceFlyoutAuthenticationLearnMore-access_and_secret_keys')
+      ).toBeInTheDocument();
+      expect(getByTestId('createDataSourceFlyoutS3AccessKey')).toBeInTheDocument();
+      expect(queryByTestId('createDataSourceFlyoutS3FederatedRoleArn')).not.toBeInTheDocument();
+
+      fireEvent.click(getByTestId('createDataSourceFlyoutAuthentication'));
+
+      expect(await findAllByRole('option')).toHaveLength(2);
+      expect(
+        queryByRole('option', { name: new RegExp(authenticationStrings.federatedIdentityLabel) })
+      ).not.toBeInTheDocument();
     });
   });
 

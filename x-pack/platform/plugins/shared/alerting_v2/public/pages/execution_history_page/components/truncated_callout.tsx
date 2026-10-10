@@ -15,19 +15,18 @@ type MatchedType = 'policies' | 'rules';
 interface Props {
   searchParam?: string;
   data?: {
-    search_matches: SearchMatchCounts | null;
+    search_matches?: SearchMatchCounts;
   };
 }
 
 export const TruncatedCallout = ({ data, searchParam }: Props) => {
-  const searchMatches = data?.search_matches ?? null;
-  const matchedTypes: MatchedType[] =
-    searchMatches !== null
-      ? (['policies', 'rules'] as const).filter((t) => searchMatches[t] > 0)
-      : [];
+  const searchMatches = data?.search_matches;
+  const matchedTypes: MatchedType[] = searchMatches
+    ? (['policies', 'rules'] as const).filter((t) => searchMatches[t] > 0)
+    : [];
   const showSearchTruncatedCallout =
     searchParam !== undefined &&
-    searchMatches !== null &&
+    searchMatches !== undefined &&
     searchMatches.is_truncated &&
     matchedTypes.length > 0;
 

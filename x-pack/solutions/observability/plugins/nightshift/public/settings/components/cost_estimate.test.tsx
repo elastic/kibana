@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { focusEuiToolTipTrigger } from '@elastic/eui/lib/test/rtl';
 import { I18nProvider } from '@kbn/i18n-react';
-import { BehaviorSubject, Subject } from 'rxjs';
 import type {
   BudgetGroupCost,
   CostCaveat,
@@ -17,13 +17,11 @@ import type {
   PeriodCost,
   RunQuotasResponse,
 } from '@kbn/significant-events-plugin/common';
-import { GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING } from '@kbn/management-settings-ids';
-import { useKibana } from '../../hooks/use_kibana';
 import { useSignificantEventsCost } from '../hooks/use_significant_events_cost';
 import { useRunQuotas } from '../hooks/use_significant_events_run_quotas';
 import { CostEstimate } from './cost_estimate';
+import type { TokenTrackingForm } from './use_token_tracking_form';
 
-jest.mock('../../hooks/use_kibana');
 jest.mock('../hooks/use_significant_events_cost');
 jest.mock('../hooks/use_significant_events_run_quotas');
 jest.mock('@elastic/eui', () => {
@@ -82,7 +80,6 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseSignificantEventsCost = useSignificantEventsCost as jest.MockedFunction<
   typeof useSignificantEventsCost
 >;
@@ -90,10 +87,10 @@ const mockUseRunQuotas = useRunQuotas as jest.MockedFunction<typeof useRunQuotas
 
 const refreshCost = jest.fn();
 const retryCost = jest.fn();
-const setUiSetting = jest.fn();
-const installTokenUsageDashboard = jest.fn();
-const addDanger = jest.fn();
-const addWarning = jest.fn();
+const updateTokenTracking = jest.fn();
+const cancelTokenTracking = jest.fn();
+const saveTokenTracking = jest.fn();
+let tokenTracking: TokenTrackingForm;
 
 const quotasResponse = (canManage: boolean): RunQuotasResponse => ({
   enabled: true,
@@ -163,45 +160,22 @@ const costResponse = (overrides: Partial<CostResponse> = {}): CostResponse => ({
   ...overrides,
 });
 
-const setTracking = (enabled: boolean, canSaveAdvancedSettings = true) => {
-  const tracking$ = new BehaviorSubject(enabled);
-  const updateErrors$ = new Subject<Error>();
-  setUiSetting.mockImplementation(async (key: string, value: boolean) => {
-    if (key === GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING) {
-      tracking$.next(value);
-    }
-    return true;
-  });
-  installTokenUsageDashboard.mockResolvedValue({ installed: true });
-  mockUseKibana.mockReturnValue({
-    services: {
-      application: {
-        capabilities: {
-          advancedSettings: {
-            save: canSaveAdvancedSettings,
-          },
-        },
-      },
-      settings: {
-        client: {
-          get: jest.fn().mockReturnValue(enabled),
-          get$: jest.fn().mockReturnValue(tracking$),
-          getUpdateErrors$: jest.fn().mockReturnValue(updateErrors$),
-          set: setUiSetting,
-        },
-      },
-      http: {
-        post: installTokenUsageDashboard,
-      },
-      notifications: {
-        toasts: {
-          addDanger,
-          addWarning,
-        },
-      },
-    },
-  } as never);
-  return { tracking$, updateErrors$ };
+const setTracking = (
+  enabled: boolean,
+  canEdit = true,
+  overrides: Partial<TokenTrackingForm> = {}
+) => {
+  tokenTracking = {
+    enabled,
+    savedEnabled: enabled,
+    canEdit,
+    isDirty: false,
+    isSaving: false,
+    updateEnabled: updateTokenTracking,
+    cancel: cancelTokenTracking,
+    save: saveTokenTracking,
+    ...overrides,
+  };
 };
 
 const setCost = (value: Partial<ReturnType<typeof useSignificantEventsCost>> = {}) => {
@@ -219,7 +193,7 @@ const setCost = (value: Partial<ReturnType<typeof useSignificantEventsCost>> = {
 const renderCost = () =>
   render(
     <I18nProvider>
-      <CostEstimate />
+      <CostEstimate tokenTracking={tokenTracking} />
     </I18nProvider>
   );
 
@@ -228,8 +202,7 @@ describe('CostEstimate', () => {
     jest.clearAllMocks();
     refreshCost.mockReset().mockResolvedValue(undefined);
     retryCost.mockReset().mockResolvedValue(undefined);
-    setUiSetting.mockReset();
-    installTokenUsageDashboard.mockReset();
+    saveTokenTracking.mockResolvedValue('saved');
     mockUseRunQuotas.mockReturnValue({
       data: quotasResponse(true),
       isLoading: false,
@@ -278,20 +251,8 @@ describe('CostEstimate', () => {
     expect(screen.getByTestId('nightshiftCostHeadline')).toBeVisible();
   });
 
-  it('shows deployment-wide partial costs and an enable action when this space is disabled', async () => {
+  it('stages token tracking changes without saving immediately', () => {
     setTracking(false);
-    refreshCost.mockImplementationOnce(async () => {
-      setCost({
-        data: costResponse({
-          caveats: ALWAYS_CAVEATS.filter((caveat) => caveat !== 'tracking_not_all_spaces'),
-          trackingCoverage: {
-            status: 'full',
-            enabledSpaceCount: 2,
-            totalSpaceCount: 2,
-          },
-        }),
-      });
-    });
     renderCost();
     expect(screen.queryByTestId('nightshiftTokenTrackingCoverage')).not.toBeInTheDocument();
     expect(screen.getByTestId('nightshiftCostHeadline')).toBeInTheDocument();
@@ -301,15 +262,8 @@ describe('CostEstimate', () => {
 
     fireEvent.click(trackingSwitch);
 
-    await waitFor(() => {
-      expect(setUiSetting).toHaveBeenCalledWith(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING, true);
-      expect(installTokenUsageDashboard).toHaveBeenCalledWith(
-        '/internal/gen_ai_settings/install_token_usage_dashboard'
-      );
-      expect(refreshCost).toHaveBeenCalled();
-    });
-    expect(screen.getByTestId('nightshiftTokenTrackingSwitch')).toBeChecked();
-    expect(screen.queryByTestId('nightshiftTrackingCoverageCallout')).not.toBeInTheDocument();
+    expect(updateTokenTracking).toHaveBeenCalledWith(true);
+    expect(refreshCost).not.toHaveBeenCalled();
   });
 
   it('disables the tracking switch without Advanced Settings save permission', () => {
@@ -319,61 +273,11 @@ describe('CostEstimate', () => {
     expect(trackingSwitch).toBeDisabled();
     const tooltipAnchor = screen.getByTestId('nightshiftEnableTokenTrackingTooltipAnchor');
     expect(tooltipAnchor).toHaveAttribute('tabindex', '0');
-    fireEvent.focus(tooltipAnchor);
+    const restoreFocus = focusEuiToolTipTrigger(tooltipAnchor);
     expect(screen.getByRole('tooltip')).toHaveTextContent(
       'You need permission to save Advanced Settings before you can enable token tracking.'
     );
-  });
-
-  it('disables token tracking without reinstalling the dashboard', async () => {
-    renderCost();
-
-    fireEvent.click(screen.getByTestId('nightshiftTokenTrackingSwitch'));
-
-    await waitFor(() => {
-      expect(setUiSetting).toHaveBeenCalledWith(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING, false);
-      expect(screen.getByTestId('nightshiftTokenTrackingSwitch')).not.toBeChecked();
-    });
-    expect(installTokenUsageDashboard).not.toHaveBeenCalled();
-    expect(refreshCost).toHaveBeenCalled();
-  });
-
-  it('surfaces the setting update error and keeps the enable action available', async () => {
-    const { updateErrors$ } = setTracking(false);
-    setUiSetting.mockImplementation(async () => {
-      updateErrors$.next(new Error('save rejected'));
-      return false;
-    });
-    renderCost();
-    fireEvent.click(screen.getByTestId('nightshiftTokenTrackingSwitch'));
-
-    await waitFor(() => {
-      expect(addDanger).toHaveBeenCalledWith({
-        title: 'Unable to enable token tracking',
-        text: 'save rejected',
-      });
-      expect(screen.getByTestId('nightshiftTokenTrackingSwitch')).toBeEnabled();
-      expect(screen.getByTestId('nightshiftTokenTrackingSwitch')).not.toBeChecked();
-    });
-    expect(installTokenUsageDashboard).not.toHaveBeenCalled();
-    expect(refreshCost).not.toHaveBeenCalled();
-  });
-
-  it('keeps tracking enabled when dashboard installation fails', async () => {
-    setTracking(false);
-    installTokenUsageDashboard.mockRejectedValue(new Error('dashboard unavailable'));
-    renderCost();
-    fireEvent.click(screen.getByTestId('nightshiftTokenTrackingSwitch'));
-
-    await waitFor(() => {
-      expect(addWarning).toHaveBeenCalledWith({
-        title: 'Token tracking was enabled, but the token usage dashboard could not be installed',
-        text: 'dashboard unavailable',
-      });
-      expect(refreshCost).toHaveBeenCalled();
-      expect(screen.getByTestId('nightshiftTokenTrackingSwitch')).toBeChecked();
-    });
-    expect(addDanger).not.toHaveBeenCalled();
+    restoreFocus();
   });
 
   it('shows cross-space token tracking coverage', () => {
@@ -383,10 +287,6 @@ describe('CostEstimate', () => {
     );
     expect(screen.getByTestId('nightshiftTrackingCoverageCallout')).toHaveTextContent(
       'This deployment-wide estimate includes all Significant Events calls recorded during the selected period.'
-    );
-    expect(mockUseKibana().services.settings.client.get).toHaveBeenCalledWith(
-      GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
-      false
     );
   });
 
@@ -406,7 +306,7 @@ describe('CostEstimate', () => {
     expect(screen.getByTestId('nightshiftCostHeadline')).toBeInTheDocument();
   });
 
-  it('reveals global costs after enabling tracking from zero coverage', async () => {
+  it('refreshes costs after unified save changes the stored tracking setting', async () => {
     setTracking(false);
     setCost({
       data: costResponse({
@@ -417,26 +317,21 @@ describe('CostEstimate', () => {
         },
       }),
     });
-    refreshCost.mockImplementationOnce(async () => {
-      setCost({
-        data: costResponse({
-          trackingCoverage: {
-            status: 'partial',
-            enabledSpaceCount: 1,
-            totalSpaceCount: 2,
-          },
-        }),
-      });
-    });
-    renderCost();
+    const { rerender } = renderCost();
     expect(screen.getByTestId('nightshiftTokenTrackingSwitch')).not.toBeChecked();
     expect(screen.queryByTestId('nightshiftCostHeadline')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('nightshiftTokenTrackingSwitch'));
-    await waitFor(() => {
-      expect(screen.getByTestId('nightshiftCostHeadline')).toBeVisible();
-    });
-    expect(screen.getByTestId('nightshiftTokenTrackingSwitch')).toBeChecked();
+    expect(refreshCost).not.toHaveBeenCalled();
+
+    setTracking(true);
+    rerender(
+      <I18nProvider>
+        <CostEstimate tokenTracking={tokenTracking} />
+      </I18nProvider>
+    );
+
+    await waitFor(() => expect(refreshCost).toHaveBeenCalledTimes(1));
   });
 
   it('shows recorded global costs when coverage cannot be determined', () => {
@@ -601,7 +496,7 @@ describe('CostEstimate', () => {
     await waitFor(() => expect(retryCost).toHaveBeenCalled());
     rerender(
       <I18nProvider>
-        <CostEstimate />
+        <CostEstimate tokenTracking={tokenTracking} />
       </I18nProvider>
     );
     expect(screen.queryByText('Cost estimate unavailable')).not.toBeInTheDocument();
@@ -643,7 +538,7 @@ describe('CostEstimate', () => {
     expect(retryCost).not.toHaveBeenCalled();
     rerender(
       <I18nProvider>
-        <CostEstimate />
+        <CostEstimate tokenTracking={tokenTracking} />
       </I18nProvider>
     );
     expect(screen.queryByText('Unable to refresh cost estimate')).not.toBeInTheDocument();
@@ -707,7 +602,7 @@ describe('CostEstimate', () => {
     });
     rerender(
       <I18nProvider>
-        <CostEstimate />
+        <CostEstimate tokenTracking={tokenTracking} />
       </I18nProvider>
     );
     expect(screen.getByTestId('nightshiftCostDetails')).toHaveTextContent(

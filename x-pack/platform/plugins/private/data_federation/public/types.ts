@@ -33,7 +33,6 @@ export interface StartDependencies {
 export interface DataFederationPluginStart {}
 
 export interface FederatedDataFeatureFlags {
-  enableFederatedIdentityAuth?: boolean;
   enableGoogleCloudStorageDataSourceType?: boolean;
   enableAzureDataSourceType?: boolean;
 }

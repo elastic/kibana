@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/289418
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: Fix false validation errors for Liquid dynamic keys in workflow property paths
-description: Fixes the Workflows editor incorrectly flagging valid Liquid map lookups as invalid when the key is a variable, such as `{{ inputs.payload.rules[ep.rule_id].name }}`. Those expressions already ran correctly; the editor no longer shows a false error.
