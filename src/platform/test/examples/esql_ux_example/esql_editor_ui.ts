@@ -11,6 +11,11 @@ import expect from '@kbn/expect';
 import { Key } from 'selenium-webdriver';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
+/**
+ * Migration recommendation: MIXED. See individual tests. Most are already covered by Jest in
+ * kbn-esql-editor; keep a single Scout smoke test for the error flow in the ES|QL / Discover suite.
+ */
+
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -24,6 +29,11 @@ export default function ({ getService }: FtrProviderContext) {
       await esql.setEsqlEditorQuery('');
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO JEST, then DELETE. Add an RTL test for the button
+     * (QueryWrapComponent) and a use_query_actions test for onPrettifyQuery; only the CMD+I keybinding
+     * is covered today (custom_editor_commands.test.ts).
+     */
     it('should prettify query when clicking the format button', async () => {
       await esql.setEsqlEditorQuery(
         'FROM logstash-* | WHERE bytes > 200 | STATS count = COUNT(*) BY geo.dest'
@@ -37,6 +47,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: DELETE. Covered by editor_visor.test.tsx ("should submit a KQL filter
+     * using indexes from the editor query").
+     */
     it('should search with visor using the editor query source', async () => {
       await esql.setEsqlEditorQuery('FROM logstash-*');
       await esql.toggleQuickSearchVisor(true);
@@ -56,6 +70,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: DELETE. Covered by custom_editor_commands.test.ts ("calls onQuerySubmit
+     * on CMD+Enter ..."). The callout asserted here is only example plugin state.
+     */
     it('should submit query with Ctrl+Enter keyboard shortcut', async () => {
       await esql.setEsqlEditorQuery('FROM logstash-* | LIMIT 10');
 
@@ -69,6 +87,14 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT (single smoke test, together with the validation test
+     * below). Jest covers errors and the popover but mocks validate; keep one end-to-end check with the real
+     * validator.
+     *
+     * Goal: src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts
+     * (extend the existing "Discover ES|QL editor" suite).
+     */
     it('should show error details when clicking error button in footer', async () => {
       await esql.setEsqlEditorQuery('FROM logstash-* | WHERE wrong_field');
 
@@ -86,6 +112,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: DELETE. Query validity is covered by the kbn-esql-language validation
+     * tests; Jest mocks validate, so fold one invalid -> fixed transition into the Scout smoke test above.
+     */
     it('should update validation when modifying query', async () => {
       // Step 1: Build a complete query
       await esql.setEsqlEditorQuery('FROM logstash-* | WHERE bytes > 100 | STATS count = COUNT(*)');
