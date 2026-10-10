@@ -6,7 +6,7 @@
  */
 
 import { type QueryFunctionContext, useQuery, useQueryClient } from '@kbn/react-query';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect } from 'react';
 import { filterIntegrations } from '../utils/filter_integrations';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -35,8 +35,6 @@ const queryKey = ['integrations-threat-intel'];
  * We cancel the query in case it's taking too long to not block the Indicators page for the user.
  */
 export const useIntegrations = ({ enabled }: { enabled: boolean }) => {
-  const timeoutRef = useRef<number>();
-
   const { http } = useKibana().services;
 
   // retrieving the list of integrations from the fleet plugin's endpoint
@@ -55,21 +53,25 @@ export const useIntegrations = ({ enabled }: { enabled: boolean }) => {
   });
 
   const queryClient = useQueryClient();
+  const { fetchStatus } = query;
 
   useEffect(() => {
-    // cancel slow integrations call to unblock the UI
-    timeoutRef.current = setTimeout(() => {
-      queryClient.cancelQueries(queryKey);
-    }, INTEGRATIONS_CALL_TIMEOUT) as unknown as number;
+    // the query stays disabled until the indicators count has resolved, so the timeout can only be
+    // armed once the request is in flight: cancelling a query that has not started yet is a no-op
+    // that leaves the actual call unbounded
+    if (fetchStatus !== 'fetching') {
+      return;
+    }
 
-    return () => {
-      if (!timeoutRef.current) {
-        return;
-      }
+    // cancel slow integrations call to unblock the UI. `revert: false` is what makes the
+    // cancellation terminal: the default reverts the query to its pre-fetch loading state, with
+    // nothing left to settle it, and the page would wait on it forever
+    const timeoutId = setTimeout(() => {
+      queryClient.cancelQueries({ queryKey }, { revert: false });
+    }, INTEGRATIONS_CALL_TIMEOUT);
 
-      clearTimeout(timeoutRef.current);
-    };
-  }, [queryClient]);
+    return () => clearTimeout(timeoutId);
+  }, [fetchStatus, queryClient]);
 
   return query;
 };
