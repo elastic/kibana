@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Logger } from '@kbn/core/server';
 import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
@@ -102,7 +103,8 @@ export class WorkflowExecutionState {
 
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,
-    private workflowExecutionRepository: WorkflowExecutionRepository
+    private workflowExecutionRepository: WorkflowExecutionRepository,
+    private logger?: Logger
   ) {
     this.workflowExecution = initialWorkflowExecution;
   }
@@ -316,13 +318,26 @@ export class WorkflowExecutionState {
    * The execution doc can be cancelled outside of this state (cancel API, concurrency manager).
    * Pulls only the cancel fields and merges them in memory without marking the doc dirty, so
    * concurrent in-memory updates are never overwritten by an older persisted snapshot.
+   * Best-effort: a failed read is logged and execution continues.
    */
   private async refreshCancelState(): Promise<void> {
     const { id, spaceId } = this.workflowExecution;
-    const cancelState = await this.workflowExecutionRepository.getWorkflowExecutionCancelState(
-      id,
-      spaceId
-    );
+    let cancelState: Awaited<
+      ReturnType<WorkflowExecutionRepository['getWorkflowExecutionCancelState']>
+    >;
+    try {
+      cancelState = await this.workflowExecutionRepository.getWorkflowExecutionCancelState(
+        id,
+        spaceId
+      );
+    } catch (error) {
+      this.logger?.warn(
+        `Failed to check workflow cancellation status - continuing execution: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return;
+    }
     if (!cancelState?.cancelRequested) {
       return;
     }
