@@ -17,8 +17,8 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
  * enabled. `xpack.alertzero.enabled` defaults to `false` so it is set explicitly below. Service
  * accounts are off by default too, and alertzero installs its managed workflows only when they
  * are enabled, so `serviceAccountsServerArgs` is equally load-bearing. The
- * suite touches no `/internal/alertzero/*` route, so the per-space
- * `securitySolution:enableAlertZero` setting does not need an override. The workflow's ai.agent
+ * suite binds the Rule Coverage worker through `/internal/alertzero/workers`, so the per-space
+ * `securitySolution:enableAlertZero` setting is overridden on. The workflow's ai.agent
  * step additionally requires the Workflows UI and agent settings.
  *
  * `agenticInvestigations` and `proposals` are both **required** plugins of alertzero and both
@@ -39,6 +39,7 @@ export const servers: ScoutServerConfig = {
       ...evalsTracingConfig.kbnTestServer.serverArgs,
       ...serviceAccountsServerArgs,
       '--xpack.alertzero.enabled=true',
+      '--uiSettings.overrides.securitySolution:enableAlertZero=true',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',
       '--xpack.securitySolution.enableExperimental=["rulePreviewAttachmentEnabled"]',

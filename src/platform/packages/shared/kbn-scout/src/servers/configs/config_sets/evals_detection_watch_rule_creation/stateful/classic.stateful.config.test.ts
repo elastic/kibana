@@ -42,6 +42,10 @@ describe('evals_detection_watch_rule_creation config set', () => {
         'required plugin of alertzero, defaults false; dropping it cascade-disables alertzero',
       ],
       [
+        '--uiSettings.overrides.securitySolution:enableAlertZero=true',
+        'worker list and PATCH routes return 404 while AlertZero is off in the space',
+      ],
+      [
         '--xpack.proposals.enabled=true',
         'required plugin of alertzero, defaults false; dropping it cascade-disables alertzero',
       ],

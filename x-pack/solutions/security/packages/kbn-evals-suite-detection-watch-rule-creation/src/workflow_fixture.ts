@@ -22,6 +22,7 @@ import {
   INFERENCE_SETTINGS_API_VERSION,
   INFERENCE_SETTINGS_ROUTE,
   RULE_CREATION_INFERENCE_FEATURE_ID,
+  COVERAGE_CHECK_INFERENCE_FEATURE_ID,
 } from './constants';
 
 // The model connector (used by the workflow's ai.agent step) is not checked here — if it is
@@ -192,9 +193,14 @@ export const bindModelUnderTest = async ({
   );
   const previous = data.features;
   log.info(
-    `Binding ${RULE_CREATION_INFERENCE_FEATURE_ID} to the model under test: ${connector.id}`
+    `Binding ${RULE_CREATION_INFERENCE_FEATURE_ID} and ${COVERAGE_CHECK_INFERENCE_FEATURE_ID} to the model under test: ${connector.id}`
   );
-  await write(mergeFeatureOverride(previous, RULE_CREATION_INFERENCE_FEATURE_ID, connector.id));
+  await write(
+    [RULE_CREATION_INFERENCE_FEATURE_ID, COVERAGE_CHECK_INFERENCE_FEATURE_ID].reduce(
+      (features, featureId) => mergeFeatureOverride(features, featureId, connector.id),
+      previous
+    )
+  );
   return async () => {
     await write(previous);
   };

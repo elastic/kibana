@@ -42,6 +42,8 @@ export const INVESTIGATION_INPUT = 'investigation_id';
  * @kbn/alertzero-common, which a test package cannot depend on.
  */
 export const RULE_CREATION_INFERENCE_FEATURE_ID = 'alertzero_reasoning';
+/** Feature the coverage review's `coverage_check` ai.agent step resolves its connector from. */
+export const COVERAGE_CHECK_INFERENCE_FEATURE_ID = 'alertzero_fast';
 export const INFERENCE_SETTINGS_ROUTE = '/internal/search_inference_endpoints/settings';
 export const INFERENCE_SETTINGS_API_VERSION = '1';
 

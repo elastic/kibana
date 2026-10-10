@@ -5,11 +5,22 @@
  * 2.0.
  */
 
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { ExecutionStatus } from '@kbn/workflows';
 import { PROPOSAL_APPROVE_URL, PROPOSAL_DISMISS_URL } from '@kbn/proposals-common';
+import { CoverageChain } from './coverage_chain';
 import { RuleCreationClient } from './rule_creation_client';
+
+jest.mock('./coverage_chain');
+const esClient = {} as EsClient;
+beforeEach(() => {
+  jest.mocked(CoverageChain.prototype.start).mockResolvedValue({
+    workflowExecutionId: 'exec-1',
+    investigationId: 'investigation',
+  });
+});
 
 const log = { info: jest.fn(), debug: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
 
@@ -57,20 +68,36 @@ const gatedStack = () => {
 const fast = { pollIntervalMs: 1, maxWaitMs: 2_000 };
 
 describe('RuleCreationClient proposal gate', () => {
-  it('creates an investigation and passes it to the workflow as investigation_id', async () => {
-    const { fetch, calls } = gatedStack();
-    const result = await new RuleCreationClient(fetch, log).run({ input: INPUT, ...fast });
+  it('fails on workflow errors instead of passing an empty draft to evaluators', async () => {
+    const fetch = jest.fn(async () => ({
+      status: ExecutionStatus.FAILED,
+      error: {
+        message: 'Service account inheritance requires a parent executing as a service account.',
+      },
+    })) as unknown as HttpHandler;
+    await expect(
+      new RuleCreationClient(fetch, log, esClient).run({ input: INPUT, ...fast })
+    ).rejects.toThrow('Service account inheritance requires a parent');
+  });
 
-    const created = calls.find((c) => c.url === '/api/agent_builder/conversations');
-    const run = calls.find((c) => c.url.endsWith('/run'));
-    const conversationId = JSON.parse(created!.body!).conversation_id;
-    expect(JSON.parse(run!.body!).inputs.investigation_id).toBe(conversationId);
-    expect(result.investigationId).toBe(conversationId);
+  it('uses the creation child and investigation opened by the production coverage chain', async () => {
+    const { fetch, calls } = gatedStack();
+    const result = await new RuleCreationClient(fetch, log, esClient).run({
+      input: INPUT,
+      ...fast,
+    });
+    expect(CoverageChain.prototype.start).toHaveBeenCalledWith(INPUT, expect.any(Number), 1);
+    expect(result.investigationId).toBe('investigation');
+    expect(result.workflowExecutionId).toBe('exec-1');
+    expect(calls.some((call) => call.url.endsWith('/run'))).toBe(false);
   });
 
   it('reports pendingApproval with the proposal id while the run is parked on the gate', async () => {
     const { fetch, calls } = gatedStack();
-    const result = await new RuleCreationClient(fetch, log).run({ input: INPUT, ...fast });
+    const result = await new RuleCreationClient(fetch, log, esClient).run({
+      input: INPUT,
+      ...fast,
+    });
 
     expect(result.pendingApproval).toBe(true);
     expect(result.proposalId).toBe('prop-1');
@@ -83,7 +110,7 @@ describe('RuleCreationClient proposal gate', () => {
 
   it('approves through the proposals approve route and waits for completion', async () => {
     const { fetch, calls } = gatedStack();
-    const client = new RuleCreationClient(fetch, log);
+    const client = new RuleCreationClient(fetch, log, esClient);
     const result = await client.run({ input: INPUT, ...fast });
 
     const execution = await client.respond({
@@ -99,7 +126,7 @@ describe('RuleCreationClient proposal gate', () => {
 
   it('dismisses through the proposals dismiss route when rejecting', async () => {
     const { fetch, calls } = gatedStack();
-    const client = new RuleCreationClient(fetch, log);
+    const client = new RuleCreationClient(fetch, log, esClient);
     const result = await client.run({ input: INPUT, ...fast });
 
     await client.respond({
@@ -116,7 +143,7 @@ describe('RuleCreationClient proposal gate', () => {
 
   it('deletes the investigations it created on cleanup', async () => {
     const { fetch, calls } = gatedStack();
-    const client = new RuleCreationClient(fetch, log);
+    const client = new RuleCreationClient(fetch, log, esClient);
     const result = await client.run({ input: INPUT, ...fast });
     await client.cancelPending();
 

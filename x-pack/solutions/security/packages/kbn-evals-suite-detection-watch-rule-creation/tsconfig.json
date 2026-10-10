@@ -17,6 +17,7 @@
     "@kbn/zod",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",
-    "@kbn/proposals-common"
+    "@kbn/proposals-common",
+    "@kbn/alertzero-plugin"
   ]
 }

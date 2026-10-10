@@ -155,7 +155,7 @@ describe('assertDraftRanOnModel', () => {
 describe('bindModelUnderTest', () => {
   const log = { info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
 
-  it('overrides only the reasoning feature and restores the previous settings', async () => {
+  it('binds both coverage and creation features and restores the previous settings', async () => {
     const previous = [
       { feature_id: 'agent_builder', endpoints: [{ id: 'keep' }] },
       { feature_id: RULE_CREATION_INFERENCE_FEATURE_ID, endpoints: [{ id: 'default' }] },
@@ -174,6 +174,7 @@ describe('bindModelUnderTest', () => {
     expect(JSON.parse(calls[1].body!).features).toEqual([
       { feature_id: 'agent_builder', endpoints: [{ id: 'keep' }] },
       { feature_id: RULE_CREATION_INFERENCE_FEATURE_ID, endpoints: [{ id: 'model-under-test' }] },
+      { feature_id: 'alertzero_fast', endpoints: [{ id: 'model-under-test' }] },
     ]);
 
     await restore();

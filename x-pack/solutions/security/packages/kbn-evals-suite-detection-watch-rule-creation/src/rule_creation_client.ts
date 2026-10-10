@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { z } from '@kbn/zod';
@@ -21,13 +21,8 @@ import {
   type ListProposalsResponse,
   type Proposal,
 } from '@kbn/proposals-common';
-import {
-  AGENT_BUILDER_API_VERSION,
-  DRAFT_STEP_ID,
-  INVESTIGATION_INPUT,
-  RULE_CREATION_WORKFLOW_ID,
-  WORKFLOWS_API_VERSION,
-} from './constants';
+import { CoverageChain } from './coverage_chain';
+import { AGENT_BUILDER_API_VERSION, DRAFT_STEP_ID, WORKFLOWS_API_VERSION } from './constants';
 import { draftRuleSchema, type DraftRule } from './types';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -109,7 +104,16 @@ export class RuleCreationClient {
   private readonly pendingExecutionIds: string[] = [];
   private readonly investigationIds: string[] = [];
 
-  constructor(private readonly fetch: HttpHandler, private readonly log: ToolingLog) {}
+  private readonly chain: CoverageChain;
+  private runQueue: Promise<void> = Promise.resolve();
+
+  constructor(
+    private readonly fetch: HttpHandler,
+    private readonly log: ToolingLog,
+    esClient: EsClient
+  ) {
+    this.chain = new CoverageChain(fetch, esClient);
+  }
 
   private async getExecution(workflowExecutionId: string): Promise<WorkflowExecutionDto> {
     return this.fetch<WorkflowExecutionDto>(`/api/workflows/executions/${workflowExecutionId}`, {
@@ -130,25 +134,18 @@ export class RuleCreationClient {
     return proposals[0];
   }
 
-  /**
-   * Opens the investigation the workflow records its proposal on. The workflow requires one
-   * (`investigation_id`), and a production caller (coverage review) always opens it first.
-   * Public: the proposal gate reads it under the worker's own identity, not the basic-auth user.
-   */
-  private async createInvestigation(title: string): Promise<string> {
-    const conversationId = uuidv4();
-    await this.fetch('/api/agent_builder/conversations', {
-      method: 'POST',
-      version: AGENT_BUILDER_API_VERSION,
-      headers: { 'elastic-api-version': AGENT_BUILDER_API_VERSION },
-      body: JSON.stringify({
-        conversation_id: conversationId,
-        title,
-        access_control: { access_mode: 'public', entries: [] },
-      }),
-    });
-    this.investigationIds.push(conversationId);
-    return conversationId;
+  run(options: {
+    input: RuleCreationInput;
+    maxWaitMs?: number;
+    pollIntervalMs?: number;
+  }): Promise<RuleCreationResult> {
+    // The production sweep is concurrency-limited; parallel examples would harvest each other.
+    const result = this.runQueue.then(() => this.runThroughCoverage(options));
+    this.runQueue = result.then(
+      () => undefined,
+      () => undefined
+    );
+    return result;
   }
 
   /**
@@ -157,7 +154,7 @@ export class RuleCreationClient {
    * WAITING_FOR_CHILD, so that status alone does not mean the gate was reached: the run is
    * only at the gate once a pending proposal exists on its investigation.
    */
-  async run({
+  private async runThroughCoverage({
     input,
     maxWaitMs = 10 * 60_000,
     pollIntervalMs = 5_000,
@@ -166,26 +163,18 @@ export class RuleCreationClient {
     maxWaitMs?: number;
     pollIntervalMs?: number;
   }): Promise<RuleCreationResult> {
-    const investigationId = await this.createInvestigation(
-      `Rule creation eval: ${input.technique}`
+    const deadline = Date.now() + maxWaitMs;
+    const { workflowExecutionId, investigationId } = await this.chain.start(
+      input,
+      deadline,
+      pollIntervalMs
     );
-
-    const { workflowExecutionId } = await this.fetch<{ workflowExecutionId: string }>(
-      `/api/workflows/workflow/${RULE_CREATION_WORKFLOW_ID}/run`,
-      {
-        method: 'POST',
-        version: WORKFLOWS_API_VERSION,
-        headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-        body: JSON.stringify({ inputs: { ...input, [INVESTIGATION_INPUT]: investigationId } }),
-      }
-    );
+    this.investigationIds.push(investigationId);
 
     this.log.info(
       `Started rule-creation workflow execution ${workflowExecutionId} on investigation ${investigationId}`
     );
     this.pendingExecutionIds.push(workflowExecutionId);
-
-    const deadline = Date.now() + maxWaitMs;
     let execution: WorkflowExecutionDto | undefined;
     let proposal: Proposal | undefined;
     while (Date.now() < deadline) {
@@ -201,6 +190,16 @@ export class RuleCreationClient {
       throw new Error(`No execution state returned while polling ${workflowExecutionId}`);
     }
 
+    if (
+      execution.status === ExecutionStatus.FAILED ||
+      execution.status === ExecutionStatus.SKIPPED
+    ) {
+      throw new Error(
+        `Rule creation ${workflowExecutionId} ended ${execution.status}: ${JSON.stringify(
+          execution.error
+        )}`
+      );
+    }
     if (!proposal && !TerminalExecutionStatuses.includes(execution.status)) {
       this.log.warning(
         `Workflow ${workflowExecutionId} neither finished nor reached the proposal gate within ${maxWaitMs}ms (last status: ${execution.status})`
@@ -286,6 +285,7 @@ export class RuleCreationClient {
    * investigations it opened.
    */
   async cancelPending(): Promise<void> {
+    await this.chain.cleanup();
     await Promise.allSettled(
       this.pendingExecutionIds.map((id) =>
         this.fetch(`/api/workflows/executions/${encodeURIComponent(id)}/cancel`, {
