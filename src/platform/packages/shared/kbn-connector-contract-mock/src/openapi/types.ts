@@ -18,6 +18,8 @@ export type SchemaDialect = 'openapi-3.0' | 'draft-2020-12';
 export interface ContractSpec {
   readonly document: OpenApiDocument;
   readonly dialect: SchemaDialect;
+  /** The spec's name, when the mock was given named specs. */
+  readonly source?: string;
 }
 
 /**
@@ -36,13 +38,15 @@ export interface LocatedSchema {
   readonly schema: SpecSchema;
 }
 
+/** A way a request or response breaks the contract, e.g. `query.limit` failing `maximum`. */
+export interface Violation {
+  readonly path: readonly string[];
+  readonly code: string;
+  readonly message: string;
+}
+
 /** `querystring` (OpenAPI 3.2) describes the whole query string as one `content` value. */
 export type ParameterLocation = 'path' | 'query' | 'querystring' | 'header' | 'cookie';
-
-export interface MediaTypeContent {
-  readonly mediaType: string;
-  readonly schema?: SpecSchema;
-}
 
 export interface OperationParameter {
   readonly name: string;
@@ -54,6 +58,15 @@ export interface OperationParameter {
   readonly schema?: SpecSchema;
   /** The single media type of a parameter described by `content` instead of `schema`. */
   readonly content?: MediaTypeContent;
+  /** A path parameter whose value may span segments, as Azure's `x-ms-skip-url-encoding` marks. */
+  readonly multiSegment?: true;
+}
+
+export interface MediaTypeContent {
+  readonly mediaType: string;
+  readonly schema?: SpecSchema;
+  /** The media type's `example`, then the values of its `examples`. */
+  readonly examples: readonly unknown[];
 }
 
 export interface OperationHeader {
@@ -84,6 +97,21 @@ export interface OperationServer {
   readonly variables: Readonly<Record<string, ServerVariable>>;
 }
 
+/** Where a security scheme expects its credential. */
+export type Credential =
+  | { readonly in: 'header' | 'query' | 'cookie'; readonly name: string }
+  /** An `Authorization` header with this scheme, such as `basic` or `bearer` (lowercase). */
+  | { readonly in: 'authorization'; readonly scheme: string };
+
+export interface SecurityScheme {
+  readonly name: string;
+  /** Undefined for schemes that can't be checked on a request, such as `mutualTLS`. */
+  readonly credential?: Credential;
+}
+
+/** Schemes that must all be satisfied; an empty list allows anonymous requests. */
+export type SecurityRequirement = readonly SecurityScheme[];
+
 export interface ContractOperation {
   /** The `operationId`, or `METHOD /path` when the spec declares none. */
   readonly id: string;
@@ -94,5 +122,7 @@ export interface ContractOperation {
   readonly parameters: readonly OperationParameter[];
   readonly requestBody?: OperationRequestBody;
   readonly responses: readonly OperationResponse[];
+  /** Alternative requirements, one of which a request must satisfy; empty when there are none. */
+  readonly security: readonly SecurityRequirement[];
   readonly spec: ContractSpec;
 }

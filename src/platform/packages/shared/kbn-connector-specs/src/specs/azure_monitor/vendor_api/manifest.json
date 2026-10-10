@@ -1,0 +1,258 @@
+{
+  "operations": {
+    "changeAlertState": [
+      {
+        "method": "post",
+        "path": "/{scope}/providers/Microsoft.AlertsManagement/alerts/{alertId}/changestate",
+        "source": "alertsManagement"
+      }
+    ],
+    "createOrUpdateAlertProcessingRule": [
+      {
+        "method": "put",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AlertsManagement/actionRules/{alertProcessingRuleName}",
+        "source": "alertProcessingRules"
+      }
+    ],
+    "getAlert": [
+      {
+        "method": "get",
+        "path": "/{scope}/providers/Microsoft.AlertsManagement/alerts/{alertId}",
+        "source": "alertsManagement"
+      }
+    ],
+    "getAlertHistory": [
+      {
+        "method": "get",
+        "path": "/{scope}/providers/Microsoft.AlertsManagement/alerts/{alertId}/history",
+        "source": "alertsManagement"
+      }
+    ],
+    "getAlertSummary": [
+      {
+        "method": "get",
+        "path": "/{scope}/providers/Microsoft.AlertsManagement/alertsSummary",
+        "source": "alertsManagement"
+      }
+    ],
+    "getMetricAlertRule": [
+      {
+        "method": "get",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}",
+        "source": "metricAlerts"
+      }
+    ],
+    "getMetricAlertStatus": [
+      {
+        "method": "get",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}/status",
+        "source": "metricAlerts"
+      }
+    ],
+    "listActionGroups": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/actionGroups",
+        "source": "actionGroups"
+      }
+    ],
+    "listActivityLogAlerts": [
+      {
+        "method": "get",
+        "pagination": {
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "nextLink"
+          },
+          "style": "next_url"
+        },
+        "path": "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/activityLogAlerts",
+        "source": "activityLogAlerts"
+      }
+    ],
+    "listAlerts": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "ctoken"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "nextLink"
+          },
+          "style": "next_url"
+        },
+        "path": "/{scope}/providers/Microsoft.AlertsManagement/alerts",
+        "source": "alertsManagement"
+      }
+    ],
+    "listMetricAlertRules": [
+      {
+        "method": "get",
+        "pagination": {
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "nextLink"
+          },
+          "style": "next_url"
+        },
+        "path": "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/metricAlerts",
+        "source": "metricAlerts"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "nextLink"
+          },
+          "style": "next_url"
+        },
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts",
+        "source": "metricAlerts"
+      }
+    ],
+    "listScheduledQueryRules": [
+      {
+        "method": "get",
+        "pagination": {
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "nextLink"
+          },
+          "style": "next_url"
+        },
+        "path": "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/scheduledQueryRules",
+        "source": "scheduledQueryRules"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "nextLink"
+          },
+          "style": "next_url"
+        },
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/scheduledQueryRules",
+        "source": "scheduledQueryRules"
+      }
+    ],
+    "queryActivityLog": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "$skipToken"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "nextLink"
+          },
+          "style": "next_url"
+        },
+        "path": "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/eventtypes/management/values",
+        "source": "activityLogs"
+      }
+    ],
+    "queryMetrics": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/{resourceUri}/providers/Microsoft.Insights/metrics",
+        "source": "metrics"
+      }
+    ],
+    "runLogQuery": [],
+    "setAlertProcessingRuleEnabled": [
+      {
+        "method": "patch",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AlertsManagement/actionRules/{alertProcessingRuleName}",
+        "source": "alertProcessingRules"
+      }
+    ],
+    "setMetricAlertRuleEnabled": [
+      {
+        "method": "patch",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}",
+        "source": "metricAlerts"
+      }
+    ],
+    "setScheduledQueryRuleEnabled": [
+      {
+        "method": "patch",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/scheduledQueryRules/{ruleName}",
+        "source": "scheduledQueryRules"
+      }
+    ]
+  },
+  "sources": {
+    "actionGroups": {
+      "apiVersion": "2021-09-01",
+      "fetchedAt": "2026-10-07T20:19:42.493Z",
+      "format": "swagger",
+      "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/monitor/resource-manager/Microsoft.Insights/Insights/stable/2021-09-01/actionGroups_API.json"
+    },
+    "activityLogAlerts": {
+      "apiVersion": "2020-10-01",
+      "fetchedAt": "2026-10-07T20:19:42.491Z",
+      "format": "swagger",
+      "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/monitor/resource-manager/Microsoft.Insights/Insights/stable/2020-10-01/activityLogAlerts_API.json"
+    },
+    "activityLogs": {
+      "apiVersion": "2015-04-01",
+      "fetchedAt": "2026-10-07T20:19:42.491Z",
+      "format": "swagger",
+      "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/monitor/resource-manager/Microsoft.Insights/Insights/stable/2015-04-01/activityLogs_API.json"
+    },
+    "alertProcessingRules": {
+      "apiVersion": "2021-08-08",
+      "fetchedAt": "2026-10-07T20:19:42.490Z",
+      "format": "swagger",
+      "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/alertsmanagement/resource-manager/Microsoft.AlertsManagement/AlertProcessingRules/stable/2021-08-08/AlertProcessingRules.json"
+    },
+    "alertsManagement": {
+      "apiVersion": "2019-03-01",
+      "fetchedAt": "2026-10-07T20:58:09.584Z",
+      "format": "swagger",
+      "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/alertsmanagement/resource-manager/Microsoft.AlertsManagement/AlertsManagement/stable/2019-03-01/AlertsManagement.json"
+    },
+    "logAnalyticsQuery": {
+      "apiVersion": "v1",
+      "fetchedAt": "2026-10-07T20:19:42.493Z",
+      "format": "swagger",
+      "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/monitor/data-plane/OperationalInsights/stable/v1/OperationalInsights.json"
+    },
+    "metricAlerts": {
+      "apiVersion": "2024-03-01-preview",
+      "fetchedAt": "2026-10-07T20:19:42.492Z",
+      "format": "swagger",
+      "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/monitor/resource-manager/Microsoft.Insights/Insights/preview/2024-03-01-preview/metricAlert.json"
+    },
+    "metrics": {
+      "apiVersion": "2023-10-01",
+      "fetchedAt": "2026-10-07T21:03:31.649Z",
+      "format": "swagger",
+      "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/monitor/resource-manager/Microsoft.Insights/Insights/stable/2023-10-01/metrics_API.json"
+    },
+    "scheduledQueryRules": {
+      "apiVersion": "2021-08-01",
+      "fetchedAt": "2026-10-07T20:19:42.493Z",
+      "format": "swagger",
+      "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/monitor/resource-manager/Microsoft.Insights/Insights/stable/2021-08-01/scheduledQueryRule_API.json"
+    }
+  },
+  "unmatched": {
+    "runLogQuery": [
+      {
+        "method": "post",
+        "path": "/",
+        "reason": "The handler exchanges the client credentials for a Log Analytics token at secrets.tokenUrl, which the contract mock does not serve, and the Log Analytics spec uses x-ms-parameterized-host, so it has no matchable paths (https://github.com/elastic/kibana/issues/296286)"
+      }
+    ]
+  }
+}

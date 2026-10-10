@@ -1,0 +1,67 @@
+{
+  "operations": {
+    "getAnalysisResults": [
+      {
+        "method": "get",
+        "path": "/analyses/{id}",
+        "source": "v3"
+      },
+      {
+        "method": "get",
+        "path": "/domains/{domain}",
+        "source": "v3"
+      },
+      {
+        "method": "get",
+        "path": "/files/{id}",
+        "source": "v3"
+      },
+      {
+        "method": "get",
+        "path": "/ip_addresses/{ip}",
+        "source": "v3"
+      },
+      {
+        "method": "get",
+        "path": "/urls/{id}",
+        "source": "v3"
+      }
+    ],
+    "getIpReport": [
+      {
+        "method": "get",
+        "path": "/ip_addresses/{ip}",
+        "source": "v3"
+      }
+    ],
+    "scanFileHash": [
+      {
+        "method": "get",
+        "path": "/files/{id}",
+        "source": "v3"
+      }
+    ],
+    "scanUrl": [
+      {
+        "method": "post",
+        "path": "/urls",
+        "source": "v3"
+      }
+    ],
+    "submitFile": [
+      {
+        "method": "post",
+        "path": "/files",
+        "source": "v3"
+      }
+    ]
+  },
+  "sources": {
+    "v3": {
+      "apiVersion": "3.0",
+      "fetchedAt": "2026-10-07T20:20:28.815Z",
+      "format": "openapi",
+      "url": "https://storage.googleapis.com/gtidocresources/guides/GTI_API_v3_openapi_spec_10022025.json"
+    }
+  }
+}

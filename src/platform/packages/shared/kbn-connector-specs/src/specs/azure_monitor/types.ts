@@ -103,6 +103,7 @@ const DAYS_OF_WEEK_VALUES = [
   'Friday',
   'Saturday',
 ] as const;
+export const MAX_RESOURCE_GROUP_NAME_LENGTH = 90;
 const ISO_DATETIME_NO_TZ_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?$/;
 
 // =============================================================================
@@ -319,7 +320,7 @@ export const QueryMetricsInputSchema = lazySchema(() =>
       .min(1)
       .max(1000)
       .regex(
-        /^\/subscriptions\//,
+        /^\/subscriptions\/[^/]+(\/resourceGroups\/[^/]+)?\/providers\/[^/]+(\/[^/]+\/[^/]+)+$/i,
         'Must be a full ARM resource ID starting with "/subscriptions/".'
       )
       .describe(
@@ -439,7 +440,7 @@ export const QueryActivityLogInputSchema = lazySchema(() =>
         ),
       resourceGroupName: z
         .string()
-        .max(200)
+        .max(MAX_RESOURCE_GROUP_NAME_LENGTH)
         .optional()
         .describe(
           'Scope results to a single resource group by name. Cannot be combined with resourceId.'
@@ -475,7 +476,7 @@ export const ListMetricAlertRulesInputSchema = lazySchema(() =>
   z.object({
     resourceGroupName: z
       .string()
-      .max(200)
+      .max(MAX_RESOURCE_GROUP_NAME_LENGTH)
       .optional()
       .describe(
         'Limit results to a single resource group. Omit to list every metric alert rule in the subscription.'
@@ -489,7 +490,7 @@ export const GetMetricAlertRuleInputSchema = lazySchema(() =>
     resourceGroupName: z
       .string()
       .min(1)
-      .max(200)
+      .max(MAX_RESOURCE_GROUP_NAME_LENGTH)
       .describe('Resource group containing the metric alert rule.'),
     ruleName: z
       .string()
@@ -505,7 +506,7 @@ export const SetMetricAlertRuleEnabledInputSchema = lazySchema(() =>
     resourceGroupName: z
       .string()
       .min(1)
-      .max(200)
+      .max(MAX_RESOURCE_GROUP_NAME_LENGTH)
       .describe('Resource group containing the metric alert rule.'),
     ruleName: z
       .string()
@@ -631,7 +632,7 @@ export const CreateOrUpdateAlertProcessingRuleInputSchema = lazySchema(() =>
       resourceGroupName: z
         .string()
         .min(1)
-        .max(200)
+        .max(MAX_RESOURCE_GROUP_NAME_LENGTH)
         .describe('Resource group to create (or update) the alert processing rule in.'),
       ruleName: z
         .string()
@@ -699,7 +700,7 @@ export const SetAlertProcessingRuleEnabledInputSchema = lazySchema(() =>
     resourceGroupName: z
       .string()
       .min(1)
-      .max(200)
+      .max(MAX_RESOURCE_GROUP_NAME_LENGTH)
       .describe('Resource group containing the alert processing rule.'),
     ruleName: z.string().min(1).max(260).describe('Name of the alert processing rule to toggle.'),
     enabled: z.boolean().describe('true to enable the rule, false to disable it.'),
@@ -717,7 +718,7 @@ export const ListScheduledQueryRulesInputSchema = lazySchema(() =>
   z.object({
     resourceGroupName: z
       .string()
-      .max(200)
+      .max(MAX_RESOURCE_GROUP_NAME_LENGTH)
       .optional()
       .describe(
         'Limit results to a single resource group. Omit to list every scheduled query rule in the subscription.'
@@ -731,7 +732,7 @@ export const SetScheduledQueryRuleEnabledInputSchema = lazySchema(() =>
     resourceGroupName: z
       .string()
       .min(1)
-      .max(200)
+      .max(MAX_RESOURCE_GROUP_NAME_LENGTH)
       .describe('Resource group containing the scheduled query rule.'),
     ruleName: z
       .string()
