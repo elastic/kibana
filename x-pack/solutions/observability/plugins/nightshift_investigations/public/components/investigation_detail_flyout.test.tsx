@@ -6,12 +6,21 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationState } from '@kbn/significant-events-schema';
 import type { GetInvestigationResponse } from '../../common';
+import type { InvestigationVisualiserFlyoutProps } from './decision_tree/investigation_visualiser_flyout';
 import { InvestigationDetailFlyout } from './investigation_detail_flyout';
+
+jest.mock('./decision_tree/investigation_visualiser_flyout', () => ({
+  InvestigationVisualiserFlyout: ({ trigger, state }: InvestigationVisualiserFlyoutProps) => (
+    <div data-test-subj="mockInvestigationVisualiserFlyout">
+      {`${state.hypotheses.length} hypotheses for ${trigger.name}`}
+    </div>
+  ),
+}));
 
 const investigation = (
   overrides: Partial<GetInvestigationResponse> = {}
@@ -59,7 +68,7 @@ describe('InvestigationDetailFlyout', () => {
     });
 
     expect(screen.getByText('Checking the checkout latency spike')).toBeInTheDocument();
-    expect(screen.getByText('Connection pool exhaustion')).toBeInTheDocument();
+    expect(screen.getByText('1 hypothesis analyzed')).toBeInTheDocument();
   });
 
   it('holds back a mid-run conclusion, which is still a draft', () => {
@@ -87,6 +96,52 @@ describe('InvestigationDetailFlyout', () => {
     });
 
     expect(screen.getByText('The pool size change caused the spike')).toBeInTheDocument();
+  });
+
+  it('does not show a chart under the conclusion', () => {
+    const chart = {
+      type: 'line' as const,
+      title: 'Active connections',
+      x_axis: { type: 'time' as const },
+      y_axis: {},
+      series: [{ name: 'checkout', points: [{ x: '2026-09-15T12:00:00.000Z', y: 10 }] }],
+    };
+    renderFlyout({
+      inv: investigation({
+        status: 'completed',
+        completed_at: '2026-09-15T12:10:00.000Z',
+        hypotheses: [
+          { candidate: 'DNS failure', confidence: 0.2, status: 'dismissed' },
+          {
+            candidate: 'Pool exhaustion',
+            confidence: 0.9,
+            status: 'confirmed',
+            evidence: [{ description: 'Pool saturated at 12:02', chart }],
+          },
+        ],
+        conclusion: 'The pool size change caused the spike',
+      }),
+    });
+
+    expect(screen.queryByTestId('investigationOutputConclusionChart')).not.toBeInTheDocument();
+  });
+
+  it('offers all hypotheses between the conclusion and the proposed actions', () => {
+    renderFlyout({
+      inv: investigation({
+        status: 'completed',
+        completed_at: '2026-09-15T12:10:00.000Z',
+        hypotheses: [{ candidate: 'Pool exhaustion', confidence: 0.9, status: 'confirmed' }],
+        conclusion: 'The pool size change caused the spike',
+        recommendations: [{ title: 'Raise the pool size', confidence: 0.8 }],
+      }),
+    });
+
+    const conclusion = screen.getByTestId('investigationOutputConclusion');
+    const card = screen.getByTestId('nightshiftInvestigationDecisionTreeButton');
+    const actions = screen.getByTestId('investigationOutputRecommendations');
+    expect(conclusion.compareDocumentPosition(card)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(card.compareDocumentPosition(actions)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   it('keeps the persisted result when a late snapshot arrives after completion', () => {
@@ -178,9 +233,39 @@ describe('InvestigationDetailFlyout', () => {
       'Failed order placements per 5 minutes.'
     );
     expect(screen.getByText('Conclusion')).toBeInTheDocument();
-    expect(screen.getByText('Investigation')).toBeInTheDocument();
+    expect(screen.getByText('View Hypothesis Tree')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftInvestigationDetailFlyoutSeverity')).toHaveTextContent(
       'High'
     );
+  });
+
+  it('replaces the hypothesis list with a card that opens the visualiser', async () => {
+    renderFlyout({
+      inv: investigation({
+        status: 'completed',
+        completed_at: '2026-09-15T12:10:00.000Z',
+        hypotheses: [
+          { candidate: 'Connection pool exhaustion', confidence: 0.9, status: 'confirmed' },
+          { candidate: 'DNS failure', confidence: 0.1, status: 'dismissed' },
+        ],
+      }),
+    });
+
+    expect(screen.queryByTestId('investigationOutputHypothesis')).not.toBeInTheDocument();
+    expect(screen.getByText('2 hypotheses analyzed')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationDecisionTreeButton'));
+
+    expect(await screen.findByTestId('mockInvestigationVisualiserFlyout')).toHaveTextContent(
+      '2 hypotheses for Checkout latency spike'
+    );
+  });
+
+  it('does not offer the visualiser before any hypothesis exists', () => {
+    renderFlyout({ inv: investigation() });
+
+    expect(
+      screen.queryByTestId('nightshiftInvestigationDecisionTreeButton')
+    ).not.toBeInTheDocument();
   });
 });

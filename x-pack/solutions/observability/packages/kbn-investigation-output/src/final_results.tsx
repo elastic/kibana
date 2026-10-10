@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiMarkdownFormat,
   EuiModal,
   EuiModalBody,
@@ -136,6 +137,65 @@ const RecommendationRow: React.FC<{
   );
 };
 
+/** Markdown cut to `maxLines` with an ellipsis, plus an Expand/Collapse link when it overflows. */
+const ClampedMarkdown: React.FC<{ text: string; maxLines: number }> = ({ text, maxLines }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const textRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const element = textRef.current;
+    if (!element || isExpanded) {
+      return;
+    }
+    const measure = () => setIsOverflowing(element.scrollHeight - element.clientHeight > 1);
+    measure();
+    if (typeof ResizeObserver === 'undefined') {
+      return;
+    }
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [isExpanded, text]);
+
+  return (
+    <>
+      <div
+        ref={textRef}
+        data-test-subj="investigationOutputConclusionText"
+        css={
+          !isExpanded &&
+          css`
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: ${maxLines};
+            overflow: hidden;
+          `
+        }
+      >
+        <EuiMarkdownFormat textSize="s">{text}</EuiMarkdownFormat>
+      </div>
+      {(isOverflowing || isExpanded) && (
+        <EuiText size="s">
+          <EuiLink
+            onClick={() => setIsExpanded((expanded) => !expanded)}
+            aria-expanded={isExpanded}
+            data-test-subj="investigationOutputConclusionToggle"
+          >
+            {isExpanded
+              ? i18n.translate('xpack.investigationOutput.collapseConclusion', {
+                  defaultMessage: 'Collapse',
+                })
+              : i18n.translate('xpack.investigationOutput.expandConclusion', {
+                  defaultMessage: 'Expand',
+                })}
+          </EuiLink>
+        </EuiText>
+      )}
+    </>
+  );
+};
+
 /**
  * The agent's own prose `conclusion`, followed by its `recommendations` as a section. Renders
  * `null` when the investigation reported neither. The caller decides
@@ -145,7 +205,11 @@ export const FinalResults: React.FC<{
   state: InvestigationState;
   /** Put a "Conclusion" heading above the conclusion, for layouts where every section is titled. */
   showConclusionTitle?: boolean;
-}> = ({ state, showConclusionTitle = false }) => {
+  /** Rendered between the conclusion and the proposed actions. */
+  afterConclusion?: React.ReactNode;
+  /** Truncate the conclusion text to this many lines, with a toggle to read it all. */
+  conclusionMaxLines?: number;
+}> = ({ state, showConclusionTitle = false, afterConclusion, conclusionMaxLines }) => {
   const { conclusion, recommendations } = state;
   const [selectedRecommendation, setSelectedRecommendation] =
     useState<InvestigationRecommendation>();
@@ -153,7 +217,7 @@ export const FinalResults: React.FC<{
   const selectedDescription = selectedRecommendation?.description;
   const selectedCode = selectedRecommendation?.code;
 
-  if (!hasVisibleText(conclusion) && !recommendations?.length) {
+  if (!hasVisibleText(conclusion) && !recommendations?.length && !afterConclusion) {
     return null;
   }
 
@@ -175,9 +239,15 @@ export const FinalResults: React.FC<{
               <EuiSpacer size="s" />
             </>
           )}
-          <EuiMarkdownFormat textSize="s">{conclusion}</EuiMarkdownFormat>
+          {conclusionMaxLines ? (
+            <ClampedMarkdown text={conclusion} maxLines={conclusionMaxLines} />
+          ) : (
+            <EuiMarkdownFormat textSize="s">{conclusion}</EuiMarkdownFormat>
+          )}
         </EuiFlexItem>
       )}
+
+      {afterConclusion && <EuiFlexItem grow={false}>{afterConclusion}</EuiFlexItem>}
 
       {recommendations && recommendations.length > 0 && (
         <EuiFlexItem grow={false}>

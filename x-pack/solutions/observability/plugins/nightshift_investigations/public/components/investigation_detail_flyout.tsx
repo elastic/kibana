@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import type { ComponentProps } from 'react';
 import {
   EuiBadge,
@@ -23,7 +23,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FinalResults, HypothesisRow, ImpactSection } from '@kbn/investigation-output';
+import { FinalResults, ImpactSection } from '@kbn/investigation-output';
 import type {
   InvestigationImpact,
   InvestigationState,
@@ -35,6 +35,15 @@ import {
 } from '../../common';
 import { InvestigationRunStatusBadge } from './investigation_run_status_badge';
 import { formatDate, formatDuration } from './utils';
+import type { DecisionTreeTrigger } from './decision_tree/build_decision_graph';
+import { DecisionTreeCard } from './decision_tree/decision_tree_card';
+
+const LazyInvestigationVisualiserFlyout = React.lazy(async () => {
+  const { InvestigationVisualiserFlyout } = await import(
+    './decision_tree/investigation_visualiser_flyout'
+  );
+  return { default: InvestigationVisualiserFlyout };
+});
 
 /**
  * Bridges `GetInvestigationResponse` (where `summary` and `hypotheses` are optional —
@@ -104,6 +113,12 @@ const isInvestigationRunning = (inv: GetInvestigationResponse): boolean =>
 const hasSubjectWorthShowing = (inv: GetInvestigationResponse): boolean =>
   !(inv.subject.type === 'manual' && inv.subject.id === DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID);
 
+/** The title is seeded from the trigger, so it names the trigger when the subject carries no summary. */
+const toDecisionTreeTrigger = (inv: GetInvestigationResponse): DecisionTreeTrigger => ({
+  type: inv.subject.type,
+  name: inv.subject.summary?.trim() || inv.title,
+});
+
 export interface InvestigationDetailFlyoutProps {
   investigation: GetInvestigationResponse | null;
   isLoading: boolean;
@@ -143,6 +158,21 @@ export function InvestigationDetailFlyout({
         defaultMessage: 'Loading…',
       });
 
+  const invState = useMemo(
+    () => (investigation ? toInvestigationState(investigation, progress) : undefined),
+    [investigation, progress]
+  );
+  const trigger = useMemo(
+    () => (investigation ? toDecisionTreeTrigger(investigation) : undefined),
+    [investigation]
+  );
+  const isRunning = investigation ? isInvestigationRunning(investigation) : false;
+  // One history group per flyout instance, so the visualiser's Back returns to this flyout.
+  const [historyKey] = useState(() => Symbol('nightshiftInvestigationDetailFlyout'));
+  const [isVisualiserOpen, setIsVisualiserOpen] = useState(false);
+  const openVisualiser = useCallback(() => setIsVisualiserOpen(true), []);
+  const closeVisualiser = useCallback(() => setIsVisualiserOpen(false), []);
+
   const renderBody = () => {
     if (isLoading && !investigation) {
       return (
@@ -167,14 +197,19 @@ export function InvestigationDetailFlyout({
       );
     }
 
-    if (!investigation) {
+    if (!investigation || !invState) {
       return null;
     }
 
-    const invState = toInvestigationState(investigation, progress);
-    const isRunning = isInvestigationRunning(investigation);
     const hasFindings = Boolean(invState.summary) || invState.hypotheses.length > 0;
     const hasSubject = hasSubjectWorthShowing(investigation);
+    const decisionTreeCard = invState.hypotheses.length > 0 && (
+      <DecisionTreeCard
+        hypothesisCount={invState.hypotheses.length}
+        isRunning={isRunning}
+        onOpen={openVisualiser}
+      />
+    );
 
     return (
       <>
@@ -232,28 +267,21 @@ export function InvestigationDetailFlyout({
         )}
 
         {/* A mid-run conclusion is still a draft, so it is held back until the run ends. */}
-        {!isRunning && (
+        {isRunning ? (
+          decisionTreeCard && (
+            <>
+              {decisionTreeCard}
+              <EuiSpacer size="l" />
+            </>
+          )
+        ) : (
           <>
-            <FinalResults state={invState} showConclusionTitle />
-            <EuiSpacer size="l" />
-          </>
-        )}
-
-        {invState.hypotheses.length > 0 && (
-          <>
-            <SectionTitle>
-              {i18n.translate('xpack.nightshiftInvestigations.flyout.investigationTraceTitle', {
-                defaultMessage: 'Investigation',
-              })}
-            </SectionTitle>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-              {invState.hypotheses.map((hypothesis, index) => (
-                <EuiFlexItem key={`${hypothesis.candidate}-${index}`}>
-                  <HypothesisRow hypothesis={hypothesis} />
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
+            <FinalResults
+              state={invState}
+              showConclusionTitle
+              conclusionMaxLines={4}
+              afterConclusion={decisionTreeCard}
+            />
             <EuiSpacer size="l" />
           </>
         )}
@@ -347,46 +375,60 @@ export function InvestigationDetailFlyout({
   };
 
   return (
-    <EuiFlyout
-      aria-label={primaryText}
-      data-test-subj="nightshiftInvestigationDetailFlyout"
-      flyoutMenuProps={flyoutMenuProps}
-      onClickCapture={onClickCapture}
-      onClose={onClose}
-      resizable
-      session="start"
-      size="s"
-      type="push"
-    >
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
-          <h2>{primaryText}</h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        {investigation && (
-          <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <InvestigationRunStatusBadge status={investigation.status} />
-            </EuiFlexItem>
-            {investigation.severity && (
+    <>
+      <EuiFlyout
+        aria-label={primaryText}
+        data-test-subj="nightshiftInvestigationDetailFlyout"
+        flyoutMenuProps={flyoutMenuProps}
+        onClickCapture={onClickCapture}
+        onClose={onClose}
+        resizable
+        session="start"
+        historyKey={historyKey}
+        size="s"
+        type="push"
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="s">
+            <h2>{primaryText}</h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          {investigation && (
+            <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
               <EuiFlexItem grow={false}>
-                <EuiBadge
-                  color={SEVERITY_BADGES[investigation.severity].color}
-                  data-test-subj="nightshiftInvestigationDetailFlyoutSeverity"
-                >
-                  {SEVERITY_BADGES[investigation.severity].label}
-                </EuiBadge>
+                <InvestigationRunStatusBadge status={investigation.status} />
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        )}
-        <EuiSpacer size="s" />
-        <EuiText color="subdued" size="xs">
-          {investigation ? formatDate(investigation.created_at) : ''}
-        </EuiText>
-      </EuiFlyoutHeader>
+              {investigation.severity && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge
+                    color={SEVERITY_BADGES[investigation.severity].color}
+                    data-test-subj="nightshiftInvestigationDetailFlyoutSeverity"
+                  >
+                    {SEVERITY_BADGES[investigation.severity].label}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          )}
+          <EuiSpacer size="s" />
+          <EuiText color="subdued" size="xs">
+            {investigation ? formatDate(investigation.created_at) : ''}
+          </EuiText>
+        </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>{renderBody()}</EuiFlyoutBody>
-    </EuiFlyout>
+        <EuiFlyoutBody>{renderBody()}</EuiFlyoutBody>
+      </EuiFlyout>
+      {isVisualiserOpen && trigger && invState && (
+        <Suspense fallback={null}>
+          <LazyInvestigationVisualiserFlyout
+            trigger={trigger}
+            state={invState}
+            isRunning={isRunning}
+            historyKey={historyKey}
+            onClose={closeVisualiser}
+          />
+        </Suspense>
+      )}
+    </>
   );
 }
