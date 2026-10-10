@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
+import type { Logger } from '@kbn/logging';
 import type { ToolCall, ToolOptions, UnvalidatedToolCall } from '@kbn/inference-common';
 import { ToolChoiceType } from '@kbn/inference-common';
 import type { ToolCallOfToolOptions } from '@kbn/inference-common';
@@ -14,65 +15,24 @@ import {
   createToolNotFoundError,
   createToolValidationError,
 } from '../../common/chat_complete/errors';
-
-type JsonObject = Record<string, unknown>;
-
-const isJsonObject = (value: unknown): value is JsonObject =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
-const expectsStructuredValue = (schema: JsonObject): boolean => {
-  const { type } = schema;
-  const types = Array.isArray(type) ? type : [type];
-  return types.includes('object') || types.includes('array');
-};
-
-/**
- * Models sometimes send an object or array argument as a JSON string. Following the schema, parses
- * such strings back into the structure the schema asks for and leaves every other value as it is.
- */
-const parseJsonEncodedValues = (value: unknown, schema: unknown): unknown => {
-  if (!isJsonObject(schema)) return value;
-
-  if (typeof value === 'string' && expectsStructuredValue(schema)) {
-    try {
-      const parsed: unknown = JSON.parse(value);
-      if (typeof parsed === 'object' && parsed !== null) {
-        return parseJsonEncodedValues(parsed, schema);
-      }
-    } catch (error) {
-      return value;
-    }
-    return value;
-  }
-
-  if (Array.isArray(value)) {
-    return value.map((item) => parseJsonEncodedValues(item, schema.items));
-  }
-
-  if (isJsonObject(value) && isJsonObject(schema.properties)) {
-    const properties = schema.properties;
-    return Object.fromEntries(
-      Object.entries(value).map(([key, item]) => [
-        key,
-        parseJsonEncodedValues(item, properties[key]),
-      ])
-    );
-  }
-
-  return value;
-};
+import { repairJsonEncodedArguments } from './repair_json_encoded_arguments';
 
 export function validateToolCalls<TToolOptions extends ToolOptions>({
   toolCalls,
   toolChoice,
   tools,
-}: TToolOptions & { toolCalls: UnvalidatedToolCall[] }): ToolCallOfToolOptions<TToolOptions>[];
+  logger,
+}: TToolOptions & {
+  toolCalls: UnvalidatedToolCall[];
+  logger: Pick<Logger, 'debug'>;
+}): ToolCallOfToolOptions<TToolOptions>[];
 
 export function validateToolCalls({
   toolCalls,
   toolChoice,
   tools,
-}: ToolOptions & { toolCalls: UnvalidatedToolCall[] }): ToolCall[] {
+  logger,
+}: ToolOptions & { toolCalls: UnvalidatedToolCall[]; logger: Pick<Logger, 'debug'> }): ToolCall[] {
   if (toolCalls.length && toolChoice === ToolChoiceType.none) {
     throw createToolValidationError(
       `tool_choice was "none" but ${toolCalls
@@ -113,13 +73,17 @@ export function validateToolCalls({
       if (zodSchema) {
         const firstAttempt = zodSchema.safeParse(serializedArguments);
         if (!firstAttempt.success) {
-          // Only values that failed validation are repaired, so valid arguments are never changed.
-          const repaired = parseJsonEncodedValues(serializedArguments, toolSchema);
-          const secondAttempt = zodSchema.safeParse(repaired);
-          if (!secondAttempt.success) {
+          const repair = repairJsonEncodedArguments(serializedArguments, zodSchema);
+          if (!repair) {
             throw firstAttempt.error;
           }
-          serializedArguments = repaired as Record<string, unknown>;
+          logger.debug(
+            () =>
+              `Repaired JSON-encoded arguments of ${toolCall.function.name} (${
+                toolCall.toolCallId
+              }) at: ${repair.repairedPaths.join(', ')}`
+          );
+          serializedArguments = repair.repaired as Record<string, unknown>;
         }
       }
     } catch (error) {
