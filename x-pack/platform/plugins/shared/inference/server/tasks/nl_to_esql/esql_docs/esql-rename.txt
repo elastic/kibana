@@ -1,29 +1,30 @@
 # RENAME
 
-The RENAME command changes the names of one or more columns. If a column with the new name already exists, it will be replaced by the renamed column. Renaming multiple columns in a single RENAME command is equivalent to using multiple sequential RENAME commands.
+The `RENAME` processing command renames one or more columns. If a column with the new name already exists, it is replaced by the renamed column.
 
 ## Syntax
 
 `RENAME old_name1 AS new_name1[, ..., old_nameN AS new_nameN]`
 
-The following syntax is also supported:
+The following syntax is also supported Elastic Stack: Generally available since 9.1:
+
 `RENAME new_name1 = old_name1[, ..., new_nameN = old_nameN]`
 
-Both syntax options can be used interchangeably, but it is recommended to stick to one for consistency and readability.
+Both syntax options can be used interchangeably, but using one consistently improves readability.
 
 ### Parameters
 
-#### old_nameX
+#### `old_nameX`
 
-The name of the column you want to rename.
+The name of a column you want to rename.
 
-#### new_nameX
+#### `new_nameX`
 
-The new name for the column. If the new name conflicts with an existing column, the existing column is dropped. If multiple columns are renamed to the same name, all but the rightmost column with the same new name are dropped.
+The new name of the column. If it conflicts with an existing column name, the existing column is dropped. If multiple columns are renamed to the same name, all but the rightmost column with the same new name are dropped.
 
 ## Examples
 
-Renames the `still_hired` column to `employed` after selecting specific columns.
+Rename the `still_hired` column to `employed` while keeping only the employee name and hiring status columns:
 
 ```esql
 FROM employees
@@ -31,7 +32,7 @@ FROM employees
 | RENAME  still_hired AS employed
 ```
 
-Renames `first_name` to `fn` and `last_name` to `ln` in a single command after keeping only those columns.
+Rename `first_name` to `fn` and `last_name` to `ln` in one command:
 
 ```esql
 FROM employees
@@ -39,7 +40,7 @@ FROM employees
 | RENAME first_name AS fn, last_name AS ln
 ```
 
-Renames `first_name` to `fn` and then `last_name` to `ln` using two separate RENAME commands after keeping only those columns.
+Rename `first_name` and `last_name` with sequential `RENAME` commands:
 
 ```esql
 FROM employees

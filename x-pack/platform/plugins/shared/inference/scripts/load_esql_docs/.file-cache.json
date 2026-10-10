@@ -1,150 +1,150 @@
 {
   "reference/query-languages/esql/commands/change-point.md": {
-    "hash": "4a7237a13331be19d90acf33178e2241a176bf8068a6b8878d8b250b91cccfd3",
+    "hash": "3739f340ebab00dd2bc9ccf83e9ea13ac2e3b71c4b616c9da5ff1286ae9812bd",
     "outputFiles": [
       "esql-change-point.txt"
     ]
   },
   "reference/query-languages/esql/commands/completion.md": {
-    "hash": "f152594fbea7017b3a2212e969c7d3d02df580eb1ad9c79393eea8adf3c92310",
+    "hash": "fdddadf587f9d18fbc222c4dd133c1e6b45b7d403bd081957d87a4fc0fb944f0",
     "outputFiles": [
       "esql-completion.txt"
     ]
   },
   "reference/query-languages/esql/commands/dissect.md": {
-    "hash": "3b5cc29cfd116169c740944e5c99996e070c0bacb70146851905015389acdc9a",
+    "hash": "2baf1ae15a0e4615e1acd680953ac25a97f9a3fd262edabefb6a2f03fb1462bb",
     "outputFiles": [
       "esql-dissect.txt"
     ]
   },
   "reference/query-languages/esql/commands/drop.md": {
-    "hash": "ff48d8f4922883065da25eb61508e799e44a734565f9662ae1eff9fe84ca41d5",
+    "hash": "fa11f9559838a2aedeea4b1d8e45ccee14116b7d0deaa1f96e25a1e2fffbea5f",
     "outputFiles": [
       "esql-drop.txt"
     ]
   },
   "reference/query-languages/esql/commands/enrich.md": {
-    "hash": "c2df5c20077572cb9a7aaedd498da22381d56d7f14e64248cc2f769a1c4f9a4f",
+    "hash": "767cdb2972b7cd3d235997cb484687dfb64ea6d4f77ee712a5144315f21c827c",
     "outputFiles": [
       "esql-enrich.txt"
     ]
   },
   "reference/query-languages/esql/commands/eval.md": {
-    "hash": "ad199b0fb20bb4f758c1a96fdf953ef749d6d60be3260e36cf4eeca0e05ce494",
+    "hash": "ba5cf8f9451758d14e734dfa3be7316a8a1d546ca15021e3e21ba7d4d728f602",
     "outputFiles": [
       "esql-eval.txt"
     ]
   },
   "reference/query-languages/esql/commands/fork.md": {
-    "hash": "ca0d355e98351581a4254feadc43731ae792993df9f90fd953240aff067e0011",
+    "hash": "ebef71c7366a73c24bcb47491cb3a3a09c883cb727157949274fd62d834beb30",
     "outputFiles": [
       "esql-fork.txt"
     ]
   },
   "reference/query-languages/esql/commands/from.md": {
-    "hash": "bfb32e1166c447af787bfa817780a2839b2bdb349e9461919a9680d237106555",
+    "hash": "d25a4b80acc1dabe6b09eca48eebeef15becb96fde765d9c1aef49a319f3a79d",
     "outputFiles": [
       "esql-from.txt"
     ]
   },
   "reference/query-languages/esql/commands/fuse.md": {
-    "hash": "13f8ddfdfc8924ed72e23d36ac9e88b33dd3bc9b893a19dae4b0ec389f7640e0",
+    "hash": "b3cac878d86a762b9229ce78b7af49bbea22a0da65778ff34af6aea3f1c33b21",
     "outputFiles": [
       "esql-fuse.txt"
     ]
   },
   "reference/query-languages/esql/commands/grok.md": {
-    "hash": "6a2437ba920a8fd92d4d02e4b5579016a7365343ff2b6c179327137c2eb1fc18",
+    "hash": "aec6b0695c19ade46891b0d539df57af5aede164404ca2f5843eb3d99e0e7304",
     "outputFiles": [
       "esql-grok.txt"
     ]
   },
   "reference/query-languages/esql/commands/inlinestats-by.md": {
-    "hash": "ec7c4c13f45025b1df65e929f1343f9ae371525bf155f1d5e1459532d1e6210c",
+    "hash": "7a3a6a4fea8c3d0c089942ec7e6a516c63cb1e6386f3ef839a431881d328b6cc",
     "outputFiles": [
       "esql-inlinestats-by.txt"
     ]
   },
   "reference/query-languages/esql/commands/keep.md": {
-    "hash": "3c51a210f2a3b8b5b5343f1c8d7365bfd5f88d4640302169d0cd246d9fc6a973",
+    "hash": "593cf0d95159fc7b1abd6f26189c3f02a6bcc32ece19af9ac8241166df96707b",
     "outputFiles": [
       "esql-keep.txt"
     ]
   },
   "reference/query-languages/esql/commands/limit.md": {
-    "hash": "b012be5cd7a08bf4f5c71449db2b3b04021854d0d0a60d06cc7e40bfbe2456a0",
+    "hash": "acc611e5ff3e36d0b93fc277b884eac09ff2144852b583ae5928a9315f298d7d",
     "outputFiles": [
       "esql-limit.txt"
     ]
   },
   "reference/query-languages/esql/commands/lookup-join.md": {
-    "hash": "27afb8c0fb310ee5fb5fc0bdd82ef7819af1d12bd45dfebe53c15228e715e81a",
+    "hash": "bafcb3914c7d4f4ca2de790d2f0d91855e64cca5c66ac9dc9367a1503dd6e674",
     "outputFiles": [
       "esql-lookup-join.txt"
     ]
   },
   "reference/query-languages/esql/commands/mv_expand.md": {
-    "hash": "2bbd5ab9eda464a6c6f66b4972744d79db665741cb4776ba59a1b5b4031609b1",
+    "hash": "ae01dee502a0a4772683f9660107857f807e83d96149befa6f138ddcf5a1d373",
     "outputFiles": [
       "esql-mv_expand.txt"
     ]
   },
   "reference/query-languages/esql/commands/promql.md": {
-    "hash": "43b0464beac1a890bb9d92d6d8eaa043048a3798706d9354f490b02e8206f8d1",
+    "hash": "abaff5a7ada7101034f3d8859f94288a508a7fe96e924c8bee3222d632f5964c",
     "outputFiles": [
       "esql-promql.txt"
     ]
   },
   "reference/query-languages/esql/commands/rename.md": {
-    "hash": "b0d8944225b190becb69d54ac4ba99bd557aa4048b68b96e4212083af31c0bc0",
+    "hash": "69effd2e5342d046e9025b2b7cf034f607e21af355a1bfc6580cf48b449f0fe9",
     "outputFiles": [
       "esql-rename.txt"
     ]
   },
   "reference/query-languages/esql/commands/rerank.md": {
-    "hash": "fdcdcaf21ed4e2d74127d42c03f82abcdf5a7783012322fc24e6d354418f1b4b",
+    "hash": "f5210c8c2eab4d8439592ef964f1eeb638d7cccfb9849cf134db54e12ea2e854",
     "outputFiles": [
       "esql-rerank.txt"
     ]
   },
   "reference/query-languages/esql/commands/row.md": {
-    "hash": "da1989e5ec8fe3926c95100a5d3bea1d206e3a70997171e1a61e3c81918fbab7",
+    "hash": "c7fbe6643f2de1f9ae4620f0090a050610a63118d21700eb9d1256df71dd0d3d",
     "outputFiles": [
       "esql-row.txt"
     ]
   },
   "reference/query-languages/esql/commands/sample.md": {
-    "hash": "f25978957feb4ca18a9e809fe6fade065d224712b79249c0d046a053ecba3e12",
+    "hash": "9f8de92eec47dc343ae0f58b0e408227b2e1dcc197818438964ea1786edb84ab",
     "outputFiles": [
       "esql-sample.txt"
     ]
   },
   "reference/query-languages/esql/commands/show.md": {
-    "hash": "7a2537c9889f642e2313f784ac750d64400f41ceff148d15323c9a1e8a172603",
+    "hash": "5d18755615f30ed711d70a5a4dcc05e5db391e91fcfc801d82ce390c8b1ffb52",
     "outputFiles": [
       "esql-show.txt"
     ]
   },
   "reference/query-languages/esql/commands/sort.md": {
-    "hash": "727fdc967f247eff3907ecbdb6f8ef0c3e9113a16cbd6d22c6d734386fa440fc",
+    "hash": "4292a32bcf21dcffe4459bc87478b661c43e952f485d2c5bd3084290bf35c4dd",
     "outputFiles": [
       "esql-sort.txt"
     ]
   },
   "reference/query-languages/esql/commands/stats-by.md": {
-    "hash": "23950849b85e6cfdcd7c033e1824c9d46388c90d84fb4e9096401c54159740eb",
+    "hash": "fdefd8e19a07b4962dfdd8d74735f97612f899a1e93d37e7b932c888db90d1ad",
     "outputFiles": [
       "esql-stats-by.txt"
     ]
   },
   "reference/query-languages/esql/commands/ts.md": {
-    "hash": "12dd414dbc515ca408cc280a73e6e8293fc12c1eb3d86f6728edb0149b18521f",
+    "hash": "aa5d23ce57c04fd85ce6abca5f133bdcd517019232177bcadd6868e7214fff78",
     "outputFiles": [
       "esql-ts.txt"
     ]
   },
   "reference/query-languages/esql/commands/where.md": {
-    "hash": "8c44f37502efcf9819f5dfe7296450da18d03c85c60fb4c99861008e60fc0c20",
+    "hash": "fe58692db58594b2f3eee313e61dd08a2e0a43eca0a3c99dba6515db986e8e4f",
     "outputFiles": [
       "esql-where.txt"
     ]
@@ -963,5 +963,83 @@
         "hash": "1837356a110115f060a2899800758305383b3d5765ddeed6194699d4c39b88b9"
       }
     }
+  },
+  "reference/query-languages/esql/commands/dedup.md": {
+    "hash": "1bdfc5f2d41668fcb61a641d3dab3857b58fb14fccba70767cf728954a7cc9ab",
+    "outputFiles": [
+      "esql-dedup.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/dense-vector.md": {
+    "hash": "fc5d103c1e86bd724e475ceb34111dc19a8d5167a12b580f9fe30e996faa97d9",
+    "outputFiles": [
+      "esql-dense-vector.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/highlight.md": {
+    "hash": "b694b3167d9d36692a1c85560129d1f0ac7e5f9d394e083ed35eb9b83360d1d8",
+    "outputFiles": [
+      "esql-highlight.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/ip-location.md": {
+    "hash": "4afbaae00a3fa2e6c9e1b46c583f244861f486253c00bc074639ad5821d8290f",
+    "outputFiles": [
+      "esql-ip-location.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/metrics-info.md": {
+    "hash": "b1a5c219d80fc9a08a19fd2536bfdb117779fcc6a0be478fde283fefaf8f3e32",
+    "outputFiles": [
+      "esql-metrics-info.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/mmr.md": {
+    "hash": "512ce0c1a19fb7f87c3fdc8902d8ec234d11867d01245198f3c9f83bd8f3cf9c",
+    "outputFiles": [
+      "esql-mmr.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/processing-commands.md": {
+    "hash": "05965a3bf9e43b9aac58ba487eebac1e4f3b0ea8696490d40c55915ff719dfe0",
+    "outputFiles": [
+      "esql-processing-commands.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/registered-domain.md": {
+    "hash": "8d8cdc1f1d0e8b1f5d04e4bd7418cd3f04218ed102245b8f28c6c602fd5d29d1",
+    "outputFiles": [
+      "esql-registered-domain.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/source-commands.md": {
+    "hash": "cb4c0d9d071b1406b4e625186cf023c20ea5a5c4cda095620f2be0bc1610946d",
+    "outputFiles": [
+      "esql-source-commands.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/ts-info.md": {
+    "hash": "2e0cc7b1b4aae7a102fa13b380b4e05837ed5d6108c32b6338583f9a1a264c81",
+    "outputFiles": [
+      "esql-ts-info.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/ts_collapse.md": {
+    "hash": "14d41c41a1a2ec60d401350b8f482324c889c67a1356bd4662a6f1b78fd0da75",
+    "outputFiles": [
+      "esql-ts_collapse.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/uri-parts.md": {
+    "hash": "f30c5b9c256e2519fc42104f96fa0696509c1a75ab75206864e892c182a32c10",
+    "outputFiles": [
+      "esql-uri-parts.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/user-agent.md": {
+    "hash": "ea3f2d36964f186f06b3a7bfb34f1001e22bb430fb76eb2d029921d5133a82da",
+    "outputFiles": [
+      "esql-user-agent.txt"
+    ]
   }
 }

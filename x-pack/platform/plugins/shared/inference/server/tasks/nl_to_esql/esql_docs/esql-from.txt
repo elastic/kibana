@@ -1,53 +1,79 @@
 # FROM
 
-The FROM command returns a table containing data from a data stream, index, or alias. Each row in the resulting table represents a document, and each column corresponds to a field that can be accessed by its name. By default, queries without an explicit LIMIT use an implicit limit of 1000 rows.
+The `FROM` source command returns a table with data from an index, data stream, alias, view, or subquery. Each row in the resulting table represents a document, and each column corresponds to a field.
+
+`FROM` supports subqueries, which are complete queries wrapped in parentheses. Each subquery starts with a source command followed by zero or more piped processing commands.
 
 ## Syntax
 
 `FROM index_pattern [METADATA fields]`
 
+`FROM index_pattern [, (FROM index_pattern [METADATA fields] [| processing_commands])]* [METADATA fields]`
+
+`FROM (FROM index_pattern [METADATA fields] [| processing_commands]) [, (FROM index_pattern [METADATA fields] [| processing_commands])]* [METADATA fields]`
+
 ### Parameters
 
-#### index_pattern
+#### `index_pattern`
 
-A list of indices, data streams, or aliases. Wildcards and date math are supported.
+A list of indices, data streams, aliases, or views. Supports wildcards and date math.
 
-#### fields
+#### `fields`
 
-A comma-separated list of metadata fields to retrieve. This parameter is optional.
+Optional.
+
+A comma-separated list of metadata fields to retrieve.
 
 ## Examples
 
-Returns all documents from the `employees` index.
+Query the `employees` index.
+
 ```esql
 FROM employees
 ```
 
-Retrieves documents from today's index using date math in the index name.
+Use date math to query today’s log index.
+
 ```esql
 FROM <logs-{now/d}>
 ```
 
-Fetches documents from multiple data streams, indices, or aliases using a comma-separated list or wildcards.
+Query multiple indices with a comma-separated list and a wildcard.
+
 ```esql
 FROM employees-00001,other-employees-*
 ```
 
-Queries data streams and indices located on remote clusters using the specified cluster and target format.
+Query data streams and indices on remote clusters.
+
 ```esql
 FROM cluster_one:employees-00001,cluster_two:other-employees-*
 ```
 
-Retrieves documents from the `employees` index and includes the `_id` metadata field.
+Query across the origin serverless project and all linked projects.
+
+Use the optional `METADATA` directive to include the `_id` metadata field.
+
 ```esql
 FROM employees METADATA _id
 ```
 
-Accesses indices with special characters in their names by escaping them with double or triple double quotes.
+Escape index names that contain special characters with double quotes or triple double quotes.
+
 ```esql
 FROM "this=that", """this[that"""
 ```
 
+Combine a regular index pattern with a subquery.
+
+```esql
+FROM
+    employees,
+    (FROM sample_data | WHERE client_ip == "172.21.3.15")
+```
+
 ## Limitations
 
-By default, a query without an explicit LIMIT uses an implicit limit of 1000 rows. For example, `FROM employees` is executed as `FROM employees | LIMIT 1000`.
+For time series data, use the `TS` source command instead of `FROM`. `TS` enables time series aggregation functions and is optimized for processing time series indices.
+
+A query without an explicit `LIMIT` uses an implicit limit of 1000 rows. This applies to `FROM` commands.

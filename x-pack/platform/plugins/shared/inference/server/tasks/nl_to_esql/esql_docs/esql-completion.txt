@@ -1,20 +1,28 @@
 # COMPLETION
 
-The COMPLETION command provides an interface for text generation tasks using a Large Language Model (LLM). It enables you to send prompts and context to an LLM directly within your queries, supporting a wide range of tasks such as question answering, summarization, translation, content rewriting, and creative generation. Each row processed by the COMPLETION command generates a separate API call to the LLM endpoint.
+The `COMPLETION` command sends prompts and context to a Large Language Model (LLM) to perform text generation tasks, such as question answering, summarization, translation, content rewriting, and creative generation.
 
 ## Syntax
 
-For version 9.2.0 and above:
+Elastic Cloud Serverless and Elastic Stack 9.5+:
+
+`COMPLETION [column =] prompt WITH { "inference_id" : "my_inference_endpoint" [, "timeout" : "<timeout_duration>"] }`
+
+Elastic Stack 9.3-9.4 and 9.2 preview:
+
 `COMPLETION [column =] prompt WITH { "inference_id" : "my_inference_endpoint" }`
 
-For version 9.1.x only:
+Elastic Stack 9.1 preview:
+
 `COMPLETION [column =] prompt WITH my_inference_endpoint`
 
 ### Parameters
 
 #### column
 
-Optional. The name of the output column that will contain the LLM's response. If not specified, the results are stored in a column named `completion`. If the specified column already exists, it will be overwritten.
+Optional.
+
+The name of the output column containing the LLM's response. If not specified, the results are stored in a column named `completion`. If the specified column already exists, it is overwritten with the new results.
 
 #### prompt
 
@@ -22,11 +30,17 @@ The input text or expression used to prompt the LLM. This can be a string litera
 
 #### my_inference_endpoint
 
-The ID of the inference endpoint to use for the task. The endpoint must be configured with the `completion` task type.
+The ID of the inference endpoint to use for the task. The inference endpoint must be configured with the `completion` task type.
+
+#### timeout_duration
+
+Optional. Available in Elastic Stack 9.5+ and Elastic Cloud Serverless.
+
+Timeout for the inference request, for example, `"30s"` or `"1m"`. If not specified, the default inference timeout applies. Use this to set a per-call timeout independent of the inference task timeout.
 
 ## Examples
 
-Generate a response to the question "What is Elasticsearch?" and store the result in the `completion` column.
+Use the default `completion` output column for an LLM response:
 
 ```esql
 ROW question = "What is Elasticsearch?"
@@ -34,7 +48,10 @@ ROW question = "What is Elasticsearch?"
 | KEEP question, completion
 ```
 
-Generate a response to the question "What is Elasticsearch?" and store the result in the `answer` column.
+question:keyword | completion:keyword
+What is Elasticsearch? | A distributed search and analytics engine
+
+Assign the LLM response to the `answer` output column:
 
 ```esql
 ROW question = "What is Elasticsearch?"
@@ -42,7 +59,10 @@ ROW question = "What is Elasticsearch?"
 | KEEP question, answer
 ```
 
-Generate a summary for each of the top 10 highest-rated movies using a custom prompt and store the result in the `summary` column.
+question:keyword | answer:keyword
+What is Elasticsearch? | A distributed search and analytics engine
+
+Build movie summarization prompts from document fields:
 
 ```esql
 FROM movies
@@ -58,9 +78,52 @@ FROM movies
 | KEEP title, summary, rating
 ```
 
+title:keyword | summary:keyword | rating:double
+The Shawshank Redemption | A tale of hope and redemption in prison. | 9.3
+The Godfather | A mafia family's rise and fall. | 9.2
+The Dark Knight | Batman battles the Joker in Gotham. | 9.0
+Pulp Fiction | Interconnected crime stories with dark humor. | 8.9
+Fight Club | A man starts an underground fight club. | 8.8
+Inception | A thief steals secrets through dreams. | 8.8
+The Matrix | A hacker discovers reality is a simulation. | 8.7
+Parasite | Class conflict between two families. | 8.6
+Interstellar | A team explores space to save humanity. | 8.6
+The Prestige | Rival magicians engage in dangerous competition. | 8.5
+
+Set a per-call timeout for the inference request:
+
+```esql
+COMPLETION answer = question WITH { "inference_id": "my_inference_endpoint", "timeout": "1m" }
+```
+
 ## Limitations
 
-- Every row processed by the COMPLETION command generates a separate API call to the LLM endpoint, which may result in high consumption and costs.
-- Starting in version 9.3.0, processing is automatically limited to 100 rows by default to prevent accidental high consumption. This limit can be adjusted or the command can be disabled via cluster settings.
-- COMPLETION commands may time out when processing large datasets or complex prompts. The default timeout is 10 minutes, and increasing it depends on your deployment type.
-- To use this command, you must deploy your LLM model as an inference endpoint with the `completion` task type.
+Every row processed by the `COMPLETION` command generates a separate API call to the LLM endpoint.
+
+In Elastic Stack 9.3+ and Elastic Cloud Serverless, `COMPLETION` automatically limits processing to 100 rows by default to prevent accidental high consumption and costs. This limit is applied before the command executes. To process more rows, adjust the cluster setting:
+
+```
+PUT _cluster/settings
+{
+  "persistent": {
+    "esql.command.completion.limit": 500
+  }
+}
+```
+
+You can also disable the command entirely:
+
+```
+PUT _cluster/settings
+{
+  "persistent": {
+    "esql.command.completion.enabled": false
+  }
+}
+```
+
+In Elastic Stack 9.1-9.2 preview, test with small datasets before running on production data or in automated workflows to avoid unexpected costs. Filter rows before applying `COMPLETION`, validate row counts with `STATS count = COUNT(*)`, test with `LIMIT`, and monitor LLM API usage.
+
+The inference endpoint must be deployed in Elasticsearch with the `completion` task type. In a cross-cluster query, `COMPLETION` runs on the cluster that receives the query, so the inference endpoint must exist on that cluster even when the documents come from a remote cluster.
+
+`COMPLETION` commands may time out when processing large datasets or complex prompts. The default timeout is 120 seconds in Elastic Stack 9.5+ and Elastic Cloud Serverless. In Elastic Stack 9.3-9.4 and 9.1-9.2 preview, the timeout is 30 seconds by default.
