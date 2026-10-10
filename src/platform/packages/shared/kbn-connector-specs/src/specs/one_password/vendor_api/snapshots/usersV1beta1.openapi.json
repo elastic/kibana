@@ -1,0 +1,260 @@
+{
+  "components": {
+    "schemas": {
+      "user.v1beta1.ListUsersResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "next_page_token": {
+            "title": "next_page_token",
+            "type": "string"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/user.v1beta1.User"
+            },
+            "title": "results",
+            "type": "array"
+          }
+        },
+        "title": "ListUsersResponse",
+        "type": "object"
+      },
+      "user.v1beta1.User": {
+        "additionalProperties": false,
+        "properties": {
+          "create_time": {
+            "format": "date-time",
+            "readOnly": true,
+            "title": "create_time",
+            "type": "string"
+          },
+          "display_name": {
+            "readOnly": true,
+            "title": "display_name",
+            "type": "string"
+          },
+          "email": {
+            "readOnly": true,
+            "title": "email",
+            "type": "string"
+          },
+          "id": {
+            "readOnly": true,
+            "title": "id",
+            "type": "string"
+          },
+          "path": {
+            "readOnly": true,
+            "title": "path",
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/user.v1beta1.User.State",
+            "readOnly": true,
+            "title": "state"
+          }
+        },
+        "title": "User",
+        "type": "object"
+      },
+      "user.v1beta1.User.State": {
+        "enum": [
+          "STATE_UNSPECIFIED",
+          "ACTIVE",
+          "SUSPENDED"
+        ],
+        "title": "State",
+        "type": "string"
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "1Password API"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/v1beta1/accounts/{account}/users": {
+      "get": {
+        "operationId": "ListUsers",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "title": "filter",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "max_page_size",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "title": "max_page_size",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_token",
+            "required": false,
+            "schema": {
+              "title": "page_token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user.v1beta1.ListUsersResponse"
+                }
+              }
+            }
+          },
+          "401": {},
+          "403": {},
+          "404": {},
+          "500": {}
+        }
+      }
+    },
+    "/v1beta1/accounts/{account}/users/{user}": {
+      "get": {
+        "operationId": "GetUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user.v1beta1.User"
+                }
+              }
+            }
+          },
+          "401": {},
+          "403": {},
+          "404": {},
+          "500": {}
+        }
+      }
+    },
+    "/v1beta1/accounts/{account}/users/{user}:reactivate": {
+      "post": {
+        "operationId": ":ReactivateUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user.v1beta1.User"
+                }
+              }
+            }
+          },
+          "401": {},
+          "403": {},
+          "404": {},
+          "500": {}
+        }
+      }
+    },
+    "/v1beta1/accounts/{account}/users/{user}:suspend": {
+      "post": {
+        "operationId": ":SuspendUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user.v1beta1.User"
+                }
+              }
+            }
+          },
+          "401": {},
+          "403": {},
+          "404": {},
+          "500": {}
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ]
+}

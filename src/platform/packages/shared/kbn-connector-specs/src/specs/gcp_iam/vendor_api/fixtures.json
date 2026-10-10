@@ -1,0 +1,59 @@
+{
+  "getIamPolicy": {
+    "queries": [
+      {
+        "source": "cloudresourcemanagerV1",
+        "method": "POST",
+        "path": "/v1/organizations/{organizationsId}:getIamPolicy"
+      },
+      {
+        "source": "cloudresourcemanagerV1",
+        "method": "POST",
+        "path": "/v1/projects/{resource}:getIamPolicy"
+      },
+      {
+        "source": "cloudresourcemanagerV2",
+        "method": "POST",
+        "path": "/v2/folders/{foldersId}:getIamPolicy"
+      },
+      {
+        "source": "iamV1",
+        "method": "POST",
+        "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}:getIamPolicy"
+      }
+    ]
+  },
+  "queryGrantableRoles": {
+    "queries": [
+      {
+        "source": "iamV1",
+        "method": "POST",
+        "path": "/v1/roles:queryGrantableRoles"
+      }
+    ]
+  },
+  "testIamPermissions": {
+    "queries": [
+      {
+        "source": "cloudresourcemanagerV1",
+        "method": "POST",
+        "path": "/v1/organizations/{organizationsId}:testIamPermissions"
+      },
+      {
+        "source": "cloudresourcemanagerV1",
+        "method": "POST",
+        "path": "/v1/projects/{resource}:testIamPermissions"
+      },
+      {
+        "source": "cloudresourcemanagerV2",
+        "method": "POST",
+        "path": "/v2/folders/{foldersId}:testIamPermissions"
+      },
+      {
+        "source": "iamV1",
+        "method": "POST",
+        "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}:testIamPermissions"
+      }
+    ]
+  }
+}

@@ -43,10 +43,10 @@ export const SentryListIssuesInputSchema = lazySchema(() =>
       .optional()
       .describe('Filter to a single environment, e.g. "production".'),
     sort: z
-      .enum(['date', 'new', 'priority', 'freq', 'user'])
+      .enum(['date', 'new', 'trends', 'freq', 'user', 'recommended'])
       .optional()
       .describe(
-        'Sort order: date (last seen), new (first seen), priority, freq (event count), user (user count).'
+        'Sort order: date (last seen), new (first seen), trends, freq (event count), user (user count), recommended.'
       ),
     cursor: z
       .string()
@@ -178,9 +178,8 @@ export const SentryGetEventInputSchema = lazySchema(() =>
       .describe('The project slug the event belongs to.'),
     eventId: z
       .string()
-      .min(1)
-      .max(MAX_ID_LENGTH)
-      .describe('The Sentry event ID, returned by listIssueEvents.'),
+      .regex(/^[0-9a-f]{32}$/)
+      .describe('The 32-character hexadecimal Sentry event ID, returned by listIssueEvents.'),
   })
 );
 export type SentryGetEventInput = z.infer<typeof SentryGetEventInputSchema>;
@@ -194,10 +193,10 @@ export const SentryBulkUpdateIssuesInputSchema = lazySchema(() =>
         .max(MAX_SLUG_LENGTH)
         .describe('The project slug the issues belong to.'),
       issueIds: z
-        .array(z.string().max(MAX_ID_LENGTH))
+        .array(z.string().max(MAX_ID_LENGTH).regex(/^\d+$/))
         .min(1)
         .max(100)
-        .describe('Issue IDs to update in one call (1-100).'),
+        .describe('Numeric issue IDs to update in one call (1-100).'),
       status: z
         .enum(['resolved', 'resolvedInNextRelease', 'unresolved', 'ignored'])
         .optional()

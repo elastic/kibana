@@ -14,6 +14,8 @@ const MAX_TAG_LENGTH = 200;
 const MAX_TAGS = 50;
 const MAX_TITLE_LENGTH = 500;
 const MAX_TEXT_LENGTH = 10000;
+const MAX_EVENT_TEXT_LENGTH = 4000;
+const MAX_AGGREGATION_KEY_LENGTH = 100;
 const MAX_ID_LENGTH = 128;
 const MAX_SCOPE_LENGTH = 500;
 const MAX_MONITOR_NAME_LENGTH = 500;
@@ -341,7 +343,11 @@ export const PostEventInputSchema = lazySchema(() =>
       .min(1)
       .max(MAX_TITLE_LENGTH)
       .describe('Event title shown in the Datadog Events Explorer.'),
-    text: z.string().min(1).max(MAX_TEXT_LENGTH).describe('Event body text. Supports markdown.'),
+    text: z
+      .string()
+      .min(1)
+      .max(MAX_EVENT_TEXT_LENGTH)
+      .describe('Event body text. Supports markdown.'),
     tags: tagsSchema
       .optional()
       .describe('Optional tags for the event. Example: ["env:prod", "source:kibana"].'),
@@ -351,7 +357,7 @@ export const PostEventInputSchema = lazySchema(() =>
       .describe('Event alert type that controls the icon/color. Defaults to "info".'),
     aggregationKey: z
       .string()
-      .max(200)
+      .max(MAX_AGGREGATION_KEY_LENGTH)
       .optional()
       .describe('Optional key used to aggregate related events in the stream.'),
     dateHappened: z

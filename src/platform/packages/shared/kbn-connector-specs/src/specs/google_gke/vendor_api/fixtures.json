@@ -1,0 +1,96 @@
+{
+  "cancelOperation": {
+    "input": {
+      "location": "us-central1"
+    }
+  },
+  "createCluster": {
+    "input": {
+      "location": "us-central1"
+    }
+  },
+  "createNodePool": {
+    "input": {
+      "location": "us-central1"
+    }
+  },
+  "deleteCluster": {
+    "input": {
+      "location": "us-central1",
+      "clusterId": "my-cluster",
+      "confirmClusterId": "my-cluster"
+    }
+  },
+  "deleteNodePool": {
+    "input": {
+      "location": "us-central1"
+    }
+  },
+  "getCluster": {
+    "input": {
+      "location": "us-central1"
+    }
+  },
+  "getNodePool": {
+    "input": {
+      "location": "us-central1"
+    }
+  },
+  "getOperation": {
+    "input": {
+      "location": "us-central1"
+    }
+  },
+  "getServerConfig": {
+    "input": {
+      "location": "us-central1"
+    }
+  },
+  "listNodePools": {
+    "input": {
+      "location": "us-central1"
+    }
+  },
+  "rollbackNodePoolUpgrade": {
+    "input": {
+      "location": "us-central1"
+    }
+  },
+  "setBinaryAuthorization": {
+    "input": {
+      "location": "us-central1"
+    }
+  },
+  "setMasterAuthorizedNetworks": {
+    "input": {
+      "location": "us-central1"
+    }
+  },
+  "setNetworkPolicy": {
+    "input": {
+      "location": "us-central1"
+    }
+  },
+  "setNodePoolAutoscaling": {
+    "input": {
+      "location": "us-central1",
+      "minNodeCount": 1,
+      "maxNodeCount": 3
+    }
+  },
+  "setNodePoolManagement": {
+    "input": {
+      "location": "us-central1"
+    }
+  },
+  "setNodePoolSize": {
+    "input": {
+      "location": "us-central1"
+    }
+  },
+  "updateCluster": {
+    "input": {
+      "location": "us-central1"
+    }
+  }
+}

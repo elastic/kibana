@@ -1,0 +1,2453 @@
+{
+  "components": {
+    "headers": {
+      "X-Export-Module-Used": {
+        "schema": {
+          "enum": [
+            "json",
+            "xml",
+            "csv",
+            "text",
+            "download",
+            "stix",
+            "stix2",
+            "stix-json",
+            "attack",
+            "attack-sightings",
+            "cache",
+            "count",
+            "hashes",
+            "netfilter",
+            "opendata",
+            "openioc",
+            "rpz",
+            "snort",
+            "suricata",
+            "yara",
+            "yara-json"
+          ],
+          "type": "string"
+        }
+      },
+      "X-Response-Format": {
+        "schema": {
+          "enum": [
+            "json",
+            "xml",
+            "csv",
+            "text",
+            "download",
+            "stix",
+            "stix2",
+            "stix-json",
+            "attack",
+            "attack-sightings",
+            "cache",
+            "count",
+            "hashes",
+            "netfilter",
+            "opendata",
+            "openioc",
+            "rpz",
+            "snort",
+            "suricata",
+            "yara",
+            "yara-json"
+          ],
+          "type": "string"
+        }
+      },
+      "X-Result-Count": {
+        "schema": {
+          "type": "integer"
+        }
+      }
+    },
+    "parameters": {
+      "eventIdParameter": {
+        "in": "path",
+        "name": "eventId",
+        "required": true,
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/EventId"
+            },
+            {
+              "$ref": "#/components/schemas/UUID"
+            }
+          ]
+        }
+      }
+    },
+    "requestBodies": {
+      "AddAttributeRequest": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AttributeNoId"
+            }
+          }
+        },
+        "required": true
+      },
+      "AddEventRequest": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/EventNoId"
+            }
+          }
+        },
+        "required": true
+      },
+      "AddSightingsRequest": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "filters": {
+                  "$ref": "#/components/schemas/AttributeRestSearchFilter"
+                },
+                "timestamp": {
+                  "$ref": "#/components/schemas/NullableTimestamp"
+                },
+                "values": {
+                  "items": {
+                    "$ref": "#/components/schemas/AttributeValue"
+                  },
+                  "type": "array"
+                }
+              },
+              "type": "object"
+            }
+          }
+        }
+      },
+      "RestSearchAttributesRequest": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AttributeRestSearchFilter"
+            }
+          }
+        },
+        "required": true
+      },
+      "RestSearchEventsRequest": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "attackGalaxy": {
+                  "$ref": "#/components/schemas/AttackGalaxyRestSearchFilter"
+                },
+                "category": {
+                  "$ref": "#/components/schemas/AttributeCategory"
+                },
+                "date": {
+                  "$ref": "#/components/schemas/DateRestSearchFilter"
+                },
+                "deleted": {
+                  "$ref": "#/components/schemas/SoftDeletedFlagValuesToInclude"
+                },
+                "enforceWarninglist": {
+                  "$ref": "#/components/schemas/EnforceWarninglistRestSearchFilter"
+                },
+                "event_tags": {
+                  "$ref": "#/components/schemas/TagsRestSearchFilter"
+                },
+                "eventid": {
+                  "$ref": "#/components/schemas/EventId"
+                },
+                "excludeLocalTags": {
+                  "$ref": "#/components/schemas/ExcludeLocalTagsRestSearchFilter"
+                },
+                "extended": {
+                  "$ref": "#/components/schemas/ExtendedRestSearchFlag"
+                },
+                "extending": {
+                  "$ref": "#/components/schemas/ExtendingRestSearchFlag"
+                },
+                "from": {
+                  "$ref": "#/components/schemas/DateRestSearchFilter"
+                },
+                "headerless": {
+                  "$ref": "#/components/schemas/HeaderlessRestSearchFlag"
+                },
+                "includeContext": {
+                  "$ref": "#/components/schemas/IncludeContextRestSearchFlag"
+                },
+                "includeSightingdb": {
+                  "$ref": "#/components/schemas/IncludeSightingDbRestSearchFlag"
+                },
+                "includeWarninglistHits": {
+                  "$ref": "#/components/schemas/IncludeWarninglistHitsRestSearchFlag"
+                },
+                "last": {
+                  "$ref": "#/components/schemas/LastRestSearchFilter"
+                },
+                "limit": {
+                  "$ref": "#/components/schemas/LimitSearchFilter"
+                },
+                "metadata": {
+                  "$ref": "#/components/schemas/MetadataRestSearchFilter"
+                },
+                "object_relation": {
+                  "$ref": "#/components/schemas/ObjectRelationRestSearchFilter"
+                },
+                "org": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/OrganisationId"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OrganisationName"
+                    }
+                  ]
+                },
+                "page": {
+                  "$ref": "#/components/schemas/PageSearchFilter"
+                },
+                "publish_timestamp": {
+                  "$ref": "#/components/schemas/Timestamp"
+                },
+                "published": {
+                  "$ref": "#/components/schemas/PublishedFlag"
+                },
+                "requested_attributes": {
+                  "$ref": "#/components/schemas/RequestedAttributesRestSearchFilter"
+                },
+                "returnFormat": {
+                  "$ref": "#/components/schemas/EventsRestSearchReturnFormat"
+                },
+                "searchall": {
+                  "$ref": "#/components/schemas/SearchAllRestSearchFilter"
+                },
+                "sgReferenceOnly": {
+                  "type": "boolean"
+                },
+                "sharinggroup": {
+                  "$ref": "#/components/schemas/SharingGroupIDRestSearchFilter"
+                },
+                "tag": {
+                  "$ref": "#/components/schemas/TagName"
+                },
+                "tags": {
+                  "$ref": "#/components/schemas/TagsRestSearchFilter"
+                },
+                "threat_level_id": {
+                  "$ref": "#/components/schemas/ThreatLevelId"
+                },
+                "timestamp": {
+                  "$ref": "#/components/schemas/Timestamp"
+                },
+                "to": {
+                  "$ref": "#/components/schemas/DateRestSearchFilter"
+                },
+                "to_ids": {
+                  "$ref": "#/components/schemas/ToIDS"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/AttributeType"
+                },
+                "uuid": {
+                  "$ref": "#/components/schemas/UUID"
+                },
+                "value": {
+                  "$ref": "#/components/schemas/AttributeValue"
+                },
+                "withAttachments": {
+                  "$ref": "#/components/schemas/WithAttachmentsRestSearchFilter"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "required": true
+      },
+      "WarninglistCheckValuesRequest": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "AddEventResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/EditedEvent"
+            }
+          }
+        }
+      },
+      "ApiErrorResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "AttributeResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "Attribute": {
+                  "$ref": "#/components/schemas/Attribute"
+                }
+              },
+              "type": "object"
+            }
+          }
+        }
+      },
+      "AttributesRestSearchResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "response": {
+                  "properties": {
+                    "Attribute": {
+                      "$ref": "#/components/schemas/AttributeRestSearchList"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "headers": {
+          "X-Export-Module-Used": {
+            "$ref": "#/components/headers/X-Export-Module-Used"
+          },
+          "X-Response-Format": {
+            "$ref": "#/components/headers/X-Response-Format"
+          },
+          "X-Result-Count": {
+            "$ref": "#/components/headers/X-Result-Count"
+          }
+        }
+      },
+      "EventsRestSearchResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "response": {
+                  "$ref": "#/components/schemas/EventRestSearchList"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "headers": {
+          "X-Export-Module-Used": {
+            "$ref": "#/components/headers/X-Export-Module-Used"
+          },
+          "X-Response-Format": {
+            "$ref": "#/components/headers/X-Response-Format"
+          },
+          "X-Result-Count": {
+            "$ref": "#/components/headers/X-Result-Count"
+          }
+        }
+      },
+      "ExtendedEventResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "Event": {
+                  "$ref": "#/components/schemas/ExtendedEvent"
+                }
+              },
+              "type": "object"
+            }
+          }
+        }
+      },
+      "NotFoundApiErrorResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/NotFoundApiError"
+            }
+          }
+        }
+      },
+      "PublishEventResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "pattern": "^\\d+$",
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        }
+      },
+      "SightingResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Sighting"
+            }
+          }
+        }
+      },
+      "UnauthorizedApiErrorResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/UnauthorizedApiError"
+            }
+          }
+        }
+      },
+      "WarninglistMatchListResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "AnalysisLevelId": {
+        "enum": [
+          "0",
+          "1",
+          "2"
+        ],
+        "type": "string"
+      },
+      "ApiError": {
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "message",
+          "url"
+        ],
+        "type": "object"
+      },
+      "AttackGalaxyRestSearchFilter": {
+        "nullable": true,
+        "type": "string"
+      },
+      "Attribute": {
+        "allOf": [
+          {
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/AttributeId"
+              }
+            },
+            "type": "object"
+          },
+          {
+            "$ref": "#/components/schemas/AttributeNoId"
+          }
+        ]
+      },
+      "AttributeAttachment": {
+        "format": "byte",
+        "type": "string"
+      },
+      "AttributeCategory": {
+        "enum": [
+          "Internal reference",
+          "Targeting data",
+          "Antivirus detection",
+          "Payload delivery",
+          "Artifacts dropped",
+          "Payload installation",
+          "Persistence mechanism",
+          "Network activity",
+          "Payload type",
+          "Attribution",
+          "External analysis",
+          "Financial fraud",
+          "Support Tool",
+          "Social network",
+          "Person",
+          "Other"
+        ],
+        "maxLength": 255,
+        "type": "string"
+      },
+      "AttributeComment": {
+        "maxLength": 65535,
+        "type": "string"
+      },
+      "AttributeId": {
+        "maxLength": 10,
+        "pattern": "^\\d+$",
+        "type": "string"
+      },
+      "AttributeList": {
+        "items": {
+          "$ref": "#/components/schemas/Attribute"
+        },
+        "type": "array"
+      },
+      "AttributeNoId": {
+        "properties": {
+          "Galaxy": {
+            "items": {
+              "$ref": "#/components/schemas/Galaxy"
+            },
+            "type": "array"
+          },
+          "Tag": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "type": "array"
+          },
+          "category": {
+            "$ref": "#/components/schemas/AttributeCategory"
+          },
+          "comment": {
+            "$ref": "#/components/schemas/AttributeComment"
+          },
+          "deleted": {
+            "$ref": "#/components/schemas/SoftDeletedFlag"
+          },
+          "disable_correlation": {
+            "$ref": "#/components/schemas/DisableCorrelationFlag"
+          },
+          "distribution": {
+            "$ref": "#/components/schemas/DistributionLevelId"
+          },
+          "event_id": {
+            "$ref": "#/components/schemas/EventId"
+          },
+          "first_seen": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NullableMicroTimestamp"
+              },
+              {
+                "format": "date-time",
+                "type": "string"
+              }
+            ]
+          },
+          "last_seen": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NullableMicroTimestamp"
+              },
+              {
+                "format": "date-time",
+                "type": "string"
+              }
+            ]
+          },
+          "object_id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "object_relation": {
+            "$ref": "#/components/schemas/NullableObjectRelation"
+          },
+          "sharing_group_id": {
+            "$ref": "#/components/schemas/SharingGroupId"
+          },
+          "timestamp": {
+            "$ref": "#/components/schemas/NullableTimestamp"
+          },
+          "to_ids": {
+            "$ref": "#/components/schemas/ToIDS"
+          },
+          "type": {
+            "$ref": "#/components/schemas/AttributeType"
+          },
+          "uuid": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "value": {
+            "$ref": "#/components/schemas/AttributeValue"
+          }
+        },
+        "type": "object"
+      },
+      "AttributeRestSearchFilter": {
+        "properties": {
+          "attackGalaxy": {
+            "$ref": "#/components/schemas/AttackGalaxyRestSearchFilter"
+          },
+          "attribute_timestamp": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "category": {
+            "$ref": "#/components/schemas/AttributeCategory"
+          },
+          "decayingModel": {
+            "$ref": "#/components/schemas/DecayingModelRestSearchFilter"
+          },
+          "deleted": {
+            "$ref": "#/components/schemas/SoftDeletedFlagValuesToInclude"
+          },
+          "enforceWarninglist": {
+            "$ref": "#/components/schemas/EnforceWarninglistRestSearchFilter"
+          },
+          "event_timestamp": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "eventid": {
+            "$ref": "#/components/schemas/EventId"
+          },
+          "eventinfo": {
+            "type": "string"
+          },
+          "excludeDecayed": {
+            "$ref": "#/components/schemas/ExcludeDecayedRestSearchFlag"
+          },
+          "first_seen": {
+            "type": "string"
+          },
+          "from": {
+            "$ref": "#/components/schemas/DateRestSearchFilter"
+          },
+          "headerless": {
+            "$ref": "#/components/schemas/HeaderlessRestSearchFlag"
+          },
+          "includeContext": {
+            "$ref": "#/components/schemas/IncludeContextRestSearchFlag"
+          },
+          "includeCorrelations": {
+            "$ref": "#/components/schemas/IncludeCorrelationsRestSearchFlag"
+          },
+          "includeDecayScore": {
+            "$ref": "#/components/schemas/IncludeDecayScoreRestSearchFlag"
+          },
+          "includeEventTags": {
+            "$ref": "#/components/schemas/IncludeEventTagsRestSearchFlag"
+          },
+          "includeEventUuid": {
+            "$ref": "#/components/schemas/IncludeEventUUIDRestSearchFlag"
+          },
+          "includeFullModel": {
+            "$ref": "#/components/schemas/IncludeFullModelRestSearchFlag"
+          },
+          "includeProposals": {
+            "$ref": "#/components/schemas/IncludeProposalsRestSearchFlag"
+          },
+          "includeSightings": {
+            "$ref": "#/components/schemas/IncludeSightingDbRestSearchFlag"
+          },
+          "includeWarninglistHits": {
+            "$ref": "#/components/schemas/IncludeWarninglistHitsRestSearchFlag"
+          },
+          "last": {
+            "$ref": "#/components/schemas/LastRestSearchFilter"
+          },
+          "last_seen": {
+            "type": "string"
+          },
+          "limit": {
+            "$ref": "#/components/schemas/LimitSearchFilter"
+          },
+          "modelOverrides": {
+            "$ref": "#/components/schemas/ModelOverridesRestSearchFilter"
+          },
+          "object_relation": {
+            "$ref": "#/components/schemas/ObjectRelationRestSearchFilter"
+          },
+          "org": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OrganisationId"
+              },
+              {
+                "$ref": "#/components/schemas/OrganisationName"
+              }
+            ]
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageSearchFilter"
+          },
+          "publish_timestamp": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "published": {
+            "$ref": "#/components/schemas/PublishedFlag"
+          },
+          "requested_attributes": {
+            "$ref": "#/components/schemas/RequestedAttributesRestSearchFilter"
+          },
+          "returnFormat": {
+            "$ref": "#/components/schemas/AttributesRestSearchReturnFormat"
+          },
+          "score": {
+            "$ref": "#/components/schemas/DecayingModelScoreRestSearchFilter"
+          },
+          "searchall": {
+            "$ref": "#/components/schemas/SearchAllRestSearchFilter"
+          },
+          "sharinggroup": {
+            "$ref": "#/components/schemas/SharingGroupIDRestSearchFilter"
+          },
+          "tags": {
+            "$ref": "#/components/schemas/TagsRestSearchFilter"
+          },
+          "threat_level_id": {
+            "$ref": "#/components/schemas/ThreatLevelId"
+          },
+          "timestamp": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "to": {
+            "$ref": "#/components/schemas/DateRestSearchFilter"
+          },
+          "to_ids": {
+            "$ref": "#/components/schemas/ToIDSRestSearchFlag"
+          },
+          "type": {
+            "$ref": "#/components/schemas/AttributeType"
+          },
+          "uuid": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "value": {
+            "$ref": "#/components/schemas/AttributeValue"
+          },
+          "value1": {
+            "$ref": "#/components/schemas/AttributeValue"
+          },
+          "value2": {
+            "$ref": "#/components/schemas/AttributeValue"
+          },
+          "withAttachments": {
+            "$ref": "#/components/schemas/WithAttachmentsRestSearchFilter"
+          }
+        },
+        "type": "object"
+      },
+      "AttributeRestSearchList": {
+        "items": {
+          "$ref": "#/components/schemas/AttributeRestSearchListItem"
+        },
+        "type": "array"
+      },
+      "AttributeRestSearchListItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ExtendedAttribute"
+          },
+          {
+            "properties": {
+              "Event": {
+                "$ref": "#/components/schemas/Event"
+              },
+              "Object": {
+                "$ref": "#/components/schemas/Object"
+              },
+              "Tag": {
+                "$ref": "#/components/schemas/TagList"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "AttributeType": {
+        "enum": [
+          "md5",
+          "sha1",
+          "sha256",
+          "filename",
+          "pdb",
+          "filename|md5",
+          "filename|sha1",
+          "filename|sha256",
+          "ip-src",
+          "ip-dst",
+          "hostname",
+          "domain",
+          "domain|ip",
+          "email",
+          "email-src",
+          "eppn",
+          "email-dst",
+          "email-subject",
+          "email-attachment",
+          "email-body",
+          "float",
+          "git-commit-id",
+          "url",
+          "http-method",
+          "user-agent",
+          "ja3-fingerprint-md5",
+          "jarm-fingerprint",
+          "favicon-mmh3",
+          "hassh-md5",
+          "hasshserver-md5",
+          "regkey",
+          "regkey|value",
+          "AS",
+          "snort",
+          "suricata",
+          "bro",
+          "zeek",
+          "community-id",
+          "pattern-in-file",
+          "pattern-in-traffic",
+          "pattern-in-memory",
+          "pattern-filename",
+          "pgp-public-key",
+          "pgp-private-key",
+          "yara",
+          "stix2-pattern",
+          "sigma",
+          "gene",
+          "kusto-query",
+          "mime-type",
+          "identity-card-number",
+          "cookie",
+          "vulnerability",
+          "cpe",
+          "weakness",
+          "attachment",
+          "malware-sample",
+          "link",
+          "comment",
+          "text",
+          "hex",
+          "other",
+          "named pipe",
+          "mutex",
+          "process-state",
+          "target-user",
+          "target-email",
+          "target-machine",
+          "target-org",
+          "target-location",
+          "target-external",
+          "btc",
+          "dash",
+          "xmr",
+          "iban",
+          "bic",
+          "bank-account-nr",
+          "aba-rtn",
+          "bin",
+          "cc-number",
+          "prtn",
+          "phone-number",
+          "threat-actor",
+          "campaign-name",
+          "campaign-id",
+          "malware-type",
+          "uri",
+          "authentihash",
+          "vhash",
+          "ssdeep",
+          "imphash",
+          "telfhash",
+          "pehash",
+          "impfuzzy",
+          "sha224",
+          "sha384",
+          "sha512",
+          "sha512/224",
+          "sha512/256",
+          "sha3-224",
+          "sha3-256",
+          "sha3-384",
+          "sha3-512",
+          "tlsh",
+          "cdhash",
+          "filename|authentihash",
+          "filename|vhash",
+          "filename|ssdeep",
+          "filename|imphash",
+          "filename|impfuzzy",
+          "filename|pehash",
+          "filename|sha224",
+          "filename|sha384",
+          "filename|sha512",
+          "filename|sha512/224",
+          "filename|sha512/256",
+          "filename|sha3-224",
+          "filename|sha3-256",
+          "filename|sha3-384",
+          "filename|sha3-512",
+          "filename|tlsh",
+          "windows-scheduled-task",
+          "windows-service-name",
+          "windows-service-displayname",
+          "whois-registrant-email",
+          "whois-registrant-phone",
+          "whois-registrant-name",
+          "whois-registrant-org",
+          "whois-registrar",
+          "whois-creation-date",
+          "x509-fingerprint-sha1",
+          "x509-fingerprint-md5",
+          "x509-fingerprint-sha256",
+          "dns-soa-email",
+          "size-in-bytes",
+          "counter",
+          "datetime",
+          "port",
+          "ip-dst|port",
+          "ip-src|port",
+          "hostname|port",
+          "mac-address",
+          "mac-eui-64",
+          "email-dst-display-name",
+          "email-src-display-name",
+          "email-header",
+          "email-reply-to",
+          "email-x-mailer",
+          "email-mime-boundary",
+          "email-thread-index",
+          "email-message-id",
+          "github-username",
+          "github-repository",
+          "github-organisation",
+          "jabber-id",
+          "twitter-id",
+          "dkim",
+          "dkim-signature",
+          "first-name",
+          "middle-name",
+          "last-name",
+          "full-name",
+          "date-of-birth",
+          "place-of-birth",
+          "gender",
+          "passport-number",
+          "passport-country",
+          "passport-expiration",
+          "redress-number",
+          "nationality",
+          "visa-number",
+          "issue-date-of-the-visa",
+          "primary-residence",
+          "country-of-residence",
+          "special-service-request",
+          "frequent-flyer-number",
+          "travel-details",
+          "payment-details",
+          "place-port-of-original-embarkation",
+          "place-port-of-clearance",
+          "place-port-of-onward-foreign-destination",
+          "passenger-name-record-locator-number",
+          "mobile-application-id",
+          "chrome-extension-id",
+          "edge-extension-id",
+          "cortex",
+          "boolean",
+          "anonymised"
+        ],
+        "maxLength": 100,
+        "type": "string"
+      },
+      "AttributeValue": {
+        "maxLength": 131071,
+        "type": "string"
+      },
+      "AttributesRestSearchReturnFormat": {
+        "enum": [
+          "json",
+          "xml",
+          "csv",
+          "text",
+          "stix",
+          "stix2",
+          "stix-json",
+          "hashes",
+          "cache",
+          "count",
+          "netfilter",
+          "opendata",
+          "openioc",
+          "rpz",
+          "snort",
+          "suricata",
+          "text",
+          "yara",
+          "yara-json"
+        ],
+        "type": "string"
+      },
+      "DateRestSearchFilter": {
+        "nullable": true,
+        "type": "string"
+      },
+      "DecayScore": {
+        "properties": {
+          "DecayingModel": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DecayingModel"
+              },
+              {
+                "$ref": "#/components/schemas/FullDecayingModel"
+              }
+            ]
+          },
+          "base_score": {
+            "format": "float",
+            "type": "number"
+          },
+          "decayed": {
+            "type": "boolean"
+          },
+          "score": {
+            "format": "float",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "DecayScoreList": {
+        "items": {
+          "$ref": "#/components/schemas/DecayScore"
+        },
+        "type": "array"
+      },
+      "DecayingModel": {
+        "properties": {
+          "id": {
+            "maxLength": 10,
+            "pattern": "^\\d+$",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 255,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DecayingModelParameters": {
+        "properties": {
+          "base_score_config": {
+            "type": "object"
+          },
+          "decay_speed": {
+            "format": "float",
+            "type": "number"
+          },
+          "default_base_score": {
+            "format": "float",
+            "type": "number"
+          },
+          "lifetime": {
+            "format": "float",
+            "type": "number"
+          },
+          "threshold": {
+            "format": "float",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "DecayingModelRestSearchFilter": {
+        "type": "string"
+      },
+      "DecayingModelScoreRestSearchFilter": {
+        "type": "string"
+      },
+      "DisableCorrelationFlag": {
+        "default": false,
+        "type": "boolean"
+      },
+      "DistributionLevelId": {
+        "enum": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+        ],
+        "type": "string"
+      },
+      "EditedEvent": {
+        "properties": {
+          "Event": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ExtendedEvent"
+              },
+              {
+                "properties": {
+                  "EventReport": {
+                    "items": {
+                      "$ref": "#/components/schemas/EventReport"
+                    },
+                    "type": "array"
+                  },
+                  "Galaxy": {
+                    "items": {
+                      "$ref": "#/components/schemas/Galaxy"
+                    },
+                    "type": "array"
+                  },
+                  "Object": {
+                    "items": {
+                      "$ref": "#/components/schemas/Object"
+                    },
+                    "type": "array"
+                  },
+                  "Tag": {
+                    "items": {
+                      "$ref": "#/components/schemas/Tag"
+                    },
+                    "type": "array"
+                  },
+                  "event_creator_email": {
+                    "format": "email",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "EnforceWarninglistRestSearchFilter": {
+        "nullable": true,
+        "type": "boolean"
+      },
+      "Event": {
+        "allOf": [
+          {
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/EventId"
+              }
+            },
+            "type": "object"
+          },
+          {
+            "$ref": "#/components/schemas/EventNoId"
+          }
+        ]
+      },
+      "EventAttributeCount": {
+        "pattern": "^\\d+$",
+        "type": "string"
+      },
+      "EventId": {
+        "maxLength": 10,
+        "pattern": "^\\d+$",
+        "type": "string"
+      },
+      "EventInfo": {
+        "maxLength": 65535,
+        "type": "string"
+      },
+      "EventNoId": {
+        "properties": {
+          "analysis": {
+            "$ref": "#/components/schemas/AnalysisLevelId"
+          },
+          "attribute_count": {
+            "$ref": "#/components/schemas/EventAttributeCount"
+          },
+          "date": {
+            "type": "string"
+          },
+          "disable_correlation": {
+            "$ref": "#/components/schemas/DisableCorrelationFlag"
+          },
+          "distribution": {
+            "$ref": "#/components/schemas/DistributionLevelId"
+          },
+          "event_creator_email": {
+            "format": "email",
+            "type": "string"
+          },
+          "extends_uuid": {
+            "$ref": "#/components/schemas/ExtendsUUID"
+          },
+          "info": {
+            "$ref": "#/components/schemas/EventInfo"
+          },
+          "locked": {
+            "$ref": "#/components/schemas/IsLocked"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/OrganisationId"
+          },
+          "orgc_id": {
+            "$ref": "#/components/schemas/OrganisationId"
+          },
+          "proposal_email_lock": {
+            "$ref": "#/components/schemas/EventProposalEmailLock"
+          },
+          "publish_timestamp": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "published": {
+            "$ref": "#/components/schemas/PublishedFlag"
+          },
+          "sharing_group_id": {
+            "$ref": "#/components/schemas/SharingGroupId"
+          },
+          "sighting_timestamp": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "threat_level_id": {
+            "$ref": "#/components/schemas/ThreatLevelId"
+          },
+          "timestamp": {
+            "$ref": "#/components/schemas/NullableTimestamp"
+          },
+          "uuid": {
+            "$ref": "#/components/schemas/UUID"
+          }
+        },
+        "type": "object"
+      },
+      "EventOrganisation": {
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/OrganisationId"
+          },
+          "name": {
+            "$ref": "#/components/schemas/OrganisationName"
+          },
+          "uuid": {
+            "$ref": "#/components/schemas/UUID"
+          }
+        },
+        "type": "object"
+      },
+      "EventProposalEmailLock": {
+        "type": "boolean"
+      },
+      "EventReport": {
+        "allOf": [
+          {
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/EventReportId"
+              }
+            },
+            "type": "object"
+          },
+          {
+            "$ref": "#/components/schemas/EventReportNoId"
+          }
+        ]
+      },
+      "EventReportId": {
+        "maxLength": 10,
+        "pattern": "^\\d+$",
+        "type": "string"
+      },
+      "EventReportName": {
+        "maxLength": 65535,
+        "type": "string"
+      },
+      "EventReportNoId": {
+        "properties": {
+          "content": {
+            "$ref": "#/components/schemas/EventReportValue"
+          },
+          "deleted": {
+            "$ref": "#/components/schemas/SoftDeletedFlag"
+          },
+          "distribution": {
+            "$ref": "#/components/schemas/DistributionLevelId"
+          },
+          "event_id": {
+            "$ref": "#/components/schemas/EventId"
+          },
+          "name": {
+            "$ref": "#/components/schemas/EventReportName"
+          },
+          "sharing_group_id": {
+            "$ref": "#/components/schemas/SharingGroupId"
+          },
+          "timestamp": {
+            "$ref": "#/components/schemas/NullableTimestamp"
+          },
+          "uuid": {
+            "$ref": "#/components/schemas/UUID"
+          }
+        },
+        "type": "object"
+      },
+      "EventReportValue": {
+        "type": "string"
+      },
+      "EventRestSearchList": {
+        "items": {
+          "properties": {
+            "Event": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ExtendedEvent"
+                },
+                {
+                  "$ref": "#/components/schemas/SlimEvent"
+                }
+              ],
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "EventsRestSearchReturnFormat": {
+        "enum": [
+          "json",
+          "xml",
+          "csv",
+          "text",
+          "stix",
+          "stix2",
+          "stix-json",
+          "attack",
+          "attack-sightings",
+          "cache",
+          "count",
+          "hashes",
+          "netfilter",
+          "opendata",
+          "openioc",
+          "rpz",
+          "snort",
+          "suricata",
+          "yara",
+          "yara-json"
+        ],
+        "type": "string"
+      },
+      "ExcludeDecayedRestSearchFlag": {
+        "default": false,
+        "type": "boolean"
+      },
+      "ExcludeLocalTagsRestSearchFilter": {
+        "nullable": true,
+        "type": "boolean"
+      },
+      "ExtendedAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Attribute"
+          },
+          {
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/AttributeAttachment"
+              },
+              "decay_score": {
+                "$ref": "#/components/schemas/DecayScoreList"
+              },
+              "event_uuid": {
+                "$ref": "#/components/schemas/UUID"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "ExtendedEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Event"
+          },
+          {
+            "properties": {
+              "Attribute": {
+                "$ref": "#/components/schemas/AttributeList"
+              },
+              "EventReport": {
+                "items": {
+                  "$ref": "#/components/schemas/EventReport"
+                },
+                "type": "array"
+              },
+              "Feed": {
+                "$ref": "#/components/schemas/Feed"
+              },
+              "Galaxy": {
+                "items": {
+                  "$ref": "#/components/schemas/Galaxy"
+                },
+                "type": "array"
+              },
+              "Object": {
+                "items": {
+                  "$ref": "#/components/schemas/Object"
+                },
+                "type": "array"
+              },
+              "Org": {
+                "$ref": "#/components/schemas/EventOrganisation"
+              },
+              "Orgc": {
+                "$ref": "#/components/schemas/EventOrganisation"
+              },
+              "RelatedEvent": {
+                "items": {
+                  "properties": {
+                    "Event": {
+                      "$ref": "#/components/schemas/ExtendedEvent"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "ShadowAttribute": {
+                "$ref": "#/components/schemas/AttributeList"
+              },
+              "Tag": {
+                "$ref": "#/components/schemas/TagList"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "ExtendedRestSearchFlag": {
+        "type": "boolean"
+      },
+      "ExtendingRestSearchFlag": {
+        "type": "boolean"
+      },
+      "ExtendsUUID": {
+        "maxLength": 36,
+        "nullable": true,
+        "type": "string"
+      },
+      "Feed": {
+        "allOf": [
+          {
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/FeedId"
+              }
+            },
+            "type": "object"
+          },
+          {
+            "$ref": "#/components/schemas/FeedNoId"
+          }
+        ]
+      },
+      "FeedCacheTimestamp": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          {
+            "type": "boolean"
+          }
+        ],
+        "nullable": true
+      },
+      "FeedCachingEnabledFlag": {
+        "type": "boolean"
+      },
+      "FeedDeleteLocalFileFlag": {
+        "type": "boolean"
+      },
+      "FeedDeltaMergeFlag": {
+        "type": "boolean"
+      },
+      "FeedEnabledFlag": {
+        "type": "boolean"
+      },
+      "FeedFixedEvent": {
+        "type": "boolean"
+      },
+      "FeedForceToIDSFlag": {
+        "type": "boolean"
+      },
+      "FeedHeaders": {
+        "nullable": true,
+        "type": "string"
+      },
+      "FeedId": {
+        "maxLength": 10,
+        "pattern": "^\\d+$",
+        "type": "string"
+      },
+      "FeedInputSource": {
+        "enum": [
+          "local",
+          "network"
+        ],
+        "type": "string"
+      },
+      "FeedLookupVisibleFlag": {
+        "type": "boolean"
+      },
+      "FeedName": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "FeedNoId": {
+        "properties": {
+          "cache_timestamp": {
+            "$ref": "#/components/schemas/FeedCacheTimestamp"
+          },
+          "caching_enabled": {
+            "$ref": "#/components/schemas/FeedCachingEnabledFlag"
+          },
+          "default": {
+            "$ref": "#/components/schemas/IsDefault"
+          },
+          "delete_local_file": {
+            "$ref": "#/components/schemas/FeedDeleteLocalFileFlag"
+          },
+          "delta_merge": {
+            "$ref": "#/components/schemas/FeedDeltaMergeFlag"
+          },
+          "distribution": {
+            "$ref": "#/components/schemas/DistributionLevelId"
+          },
+          "enabled": {
+            "$ref": "#/components/schemas/FeedEnabledFlag"
+          },
+          "event_id": {
+            "$ref": "#/components/schemas/EventId"
+          },
+          "fixed_event": {
+            "$ref": "#/components/schemas/FeedFixedEvent"
+          },
+          "force_to_ids": {
+            "$ref": "#/components/schemas/FeedForceToIDSFlag"
+          },
+          "headers": {
+            "$ref": "#/components/schemas/FeedHeaders"
+          },
+          "input_source": {
+            "$ref": "#/components/schemas/FeedInputSource"
+          },
+          "lookup_visible": {
+            "$ref": "#/components/schemas/FeedLookupVisibleFlag"
+          },
+          "name": {
+            "$ref": "#/components/schemas/FeedName"
+          },
+          "orgc_id": {
+            "$ref": "#/components/schemas/OrganisationId"
+          },
+          "override_ids": {
+            "$ref": "#/components/schemas/FeedOverrideIDSFlag"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/FeedProvider"
+          },
+          "publish": {
+            "$ref": "#/components/schemas/PublishedFlag"
+          },
+          "rules": {
+            "$ref": "#/components/schemas/FeedRules"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/FeedSettings"
+          },
+          "sharing_group_id": {
+            "$ref": "#/components/schemas/SharingGroupId"
+          },
+          "source_format": {
+            "$ref": "#/components/schemas/FeedSourceFormat"
+          },
+          "tag_id": {
+            "$ref": "#/components/schemas/TagId"
+          },
+          "url": {
+            "$ref": "#/components/schemas/FeedUrl"
+          }
+        },
+        "type": "object"
+      },
+      "FeedOverrideIDSFlag": {
+        "type": "boolean"
+      },
+      "FeedProvider": {
+        "type": "string"
+      },
+      "FeedRules": {
+        "nullable": true,
+        "type": "string"
+      },
+      "FeedSettings": {
+        "nullable": true,
+        "type": "string"
+      },
+      "FeedSourceFormat": {
+        "enum": [
+          "1",
+          "csv",
+          "freetext",
+          "misp"
+        ],
+        "type": "string"
+      },
+      "FeedUrl": {
+        "type": "string"
+      },
+      "FullDecayingModel": {
+        "properties": {
+          "all_orgs": {
+            "type": "boolean"
+          },
+          "attribute_types": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeType"
+            },
+            "type": "array"
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "description": {
+            "maxLength": 65535,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "formula": {
+            "enum": [
+              "Polynomial"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "maxLength": 10,
+            "pattern": "^\\d+$",
+            "type": "string"
+          },
+          "isEditable": {
+            "type": "boolean"
+          },
+          "name": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/OrganisationId"
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/DecayingModelParameters"
+          },
+          "ref": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "uuid": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Galaxy": {
+        "properties": {
+          "description": {
+            "$ref": "#/components/schemas/GalaxyDescription"
+          },
+          "icon": {
+            "$ref": "#/components/schemas/Icon"
+          },
+          "id": {
+            "$ref": "#/components/schemas/GalaxyId"
+          },
+          "kill_chain_order": {
+            "nullable": true,
+            "type": "object"
+          },
+          "name": {
+            "$ref": "#/components/schemas/GalaxyName"
+          },
+          "namespace": {
+            "$ref": "#/components/schemas/GalaxyNamespace"
+          },
+          "type": {
+            "$ref": "#/components/schemas/GalaxyType"
+          },
+          "uuid": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "version": {
+            "$ref": "#/components/schemas/GalaxyVersion"
+          }
+        },
+        "type": "object"
+      },
+      "GalaxyDescription": {
+        "maxLength": 65535,
+        "type": "string"
+      },
+      "GalaxyId": {
+        "maxLength": 10,
+        "pattern": "^\\d+$",
+        "type": "string"
+      },
+      "GalaxyName": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "GalaxyNamespace": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "GalaxyType": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "GalaxyVersion": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "HeaderlessRestSearchFlag": {
+        "nullable": true,
+        "type": "boolean"
+      },
+      "HideTagFlag": {
+        "default": false,
+        "type": "boolean"
+      },
+      "Icon": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "IncludeContextRestSearchFlag": {
+        "nullable": true,
+        "type": "boolean"
+      },
+      "IncludeCorrelationsRestSearchFlag": {
+        "nullable": true,
+        "type": "boolean"
+      },
+      "IncludeDecayScoreRestSearchFlag": {
+        "default": false,
+        "type": "boolean"
+      },
+      "IncludeEventTagsRestSearchFlag": {
+        "default": false,
+        "type": "boolean"
+      },
+      "IncludeEventUUIDRestSearchFlag": {
+        "default": false,
+        "type": "boolean"
+      },
+      "IncludeFullModelRestSearchFlag": {
+        "default": false,
+        "type": "boolean"
+      },
+      "IncludeProposalsRestSearchFlag": {
+        "default": false,
+        "type": "boolean"
+      },
+      "IncludeSightingDbRestSearchFlag": {
+        "nullable": true,
+        "type": "boolean"
+      },
+      "IncludeWarninglistHitsRestSearchFlag": {
+        "nullable": true,
+        "type": "boolean"
+      },
+      "IsCustomGalaxy": {
+        "default": true,
+        "type": "boolean"
+      },
+      "IsDefault": {
+        "type": "boolean"
+      },
+      "IsExportable": {
+        "default": true,
+        "type": "boolean"
+      },
+      "IsGalaxy": {
+        "default": true,
+        "type": "boolean"
+      },
+      "IsInherited": {
+        "default": 1,
+        "format": "int32",
+        "type": "integer"
+      },
+      "IsLocked": {
+        "type": "boolean"
+      },
+      "LastRestSearchFilter": {
+        "nullable": true,
+        "oneOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          }
+        ]
+      },
+      "LimitSearchFilter": {
+        "format": "int32",
+        "minimum": 0,
+        "nullable": true,
+        "type": "integer"
+      },
+      "MetadataRestSearchFilter": {
+        "nullable": true,
+        "type": "boolean"
+      },
+      "ModelOverridesRestSearchFilter": {
+        "$ref": "#/components/schemas/DecayingModelParameters"
+      },
+      "NotFoundApiError": {
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "message",
+          "url"
+        ],
+        "type": "object"
+      },
+      "NullableMicroTimestamp": {
+        "default": null,
+        "nullable": true,
+        "pattern": "^\\d+$|^$",
+        "type": "string"
+      },
+      "NullableObjectRelation": {
+        "maxLength": 255,
+        "nullable": true,
+        "type": "string"
+      },
+      "NullableTimestamp": {
+        "default": "0",
+        "nullable": true,
+        "pattern": "^\\d+$|^$",
+        "type": "string"
+      },
+      "Object": {
+        "properties": {
+          "Attribute": {
+            "items": {
+              "$ref": "#/components/schemas/Attribute"
+            },
+            "type": "array"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "deleted": {
+            "type": "boolean"
+          },
+          "description": {
+            "$ref": "#/components/schemas/ObjectDescription"
+          },
+          "distribution": {
+            "$ref": "#/components/schemas/DistributionLevelId"
+          },
+          "event_id": {
+            "$ref": "#/components/schemas/EventId"
+          },
+          "first_seen": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NullableMicroTimestamp"
+              },
+              {
+                "format": "date-time",
+                "type": "string"
+              }
+            ]
+          },
+          "id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "last_seen": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NullableMicroTimestamp"
+              },
+              {
+                "format": "date-time",
+                "type": "string"
+              }
+            ]
+          },
+          "meta-category": {
+            "$ref": "#/components/schemas/ObjectMetaCategory"
+          },
+          "name": {
+            "$ref": "#/components/schemas/ObjectName"
+          },
+          "sharing_group_id": {
+            "$ref": "#/components/schemas/SharingGroupId"
+          },
+          "template_uuid": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "template_version": {
+            "$ref": "#/components/schemas/ObjectTemplateVersion"
+          },
+          "timestamp": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "uuid": {
+            "$ref": "#/components/schemas/UUID"
+          }
+        },
+        "type": "object"
+      },
+      "ObjectDescription": {
+        "type": "string"
+      },
+      "ObjectId": {
+        "maxLength": 10,
+        "pattern": "^\\d+$",
+        "type": "string"
+      },
+      "ObjectMetaCategory": {
+        "type": "string"
+      },
+      "ObjectName": {
+        "maxLength": 131071,
+        "type": "string"
+      },
+      "ObjectRelationRestSearchFilter": {
+        "nullable": true,
+        "type": "string"
+      },
+      "ObjectTemplateVersion": {
+        "pattern": "^\\d+$",
+        "type": "string"
+      },
+      "OrganisationId": {
+        "maxLength": 10,
+        "pattern": "^\\d+$",
+        "type": "string"
+      },
+      "OrganisationName": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "PageSearchFilter": {
+        "format": "int32",
+        "minimum": 1,
+        "nullable": true,
+        "type": "integer"
+      },
+      "PublishedFlag": {
+        "default": false,
+        "type": "boolean"
+      },
+      "RequestedAttributesRestSearchFilter": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "SearchAllRestSearchFilter": {
+        "type": "string"
+      },
+      "SharingGroupIDRestSearchFilter": {
+        "items": {
+          "type": "string"
+        },
+        "nullable": true
+      },
+      "SharingGroupId": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/SharingGroupIntId"
+          },
+          {
+            "$ref": "#/components/schemas/SharingGroupUuidId"
+          }
+        ]
+      },
+      "SharingGroupIntId": {
+        "maxLength": 10,
+        "nullable": true,
+        "pattern": "^\\d+$|^$",
+        "type": "string"
+      },
+      "SharingGroupUuidId": {
+        "format": "uuid",
+        "nullable": true,
+        "type": "string"
+      },
+      "Sighting": {
+        "properties": {
+          "Organisation": {
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/OrganisationId"
+              },
+              "name": {
+                "$ref": "#/components/schemas/OrganisationName"
+              },
+              "uuid": {
+                "$ref": "#/components/schemas/UUID"
+              }
+            },
+            "type": "object"
+          },
+          "attribute_id": {
+            "$ref": "#/components/schemas/AttributeId"
+          },
+          "attribute_uuid": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "date_sighting": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "event_id": {
+            "$ref": "#/components/schemas/EventId"
+          },
+          "id": {
+            "$ref": "#/components/schemas/SightingId"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/OrganisationId"
+          },
+          "source": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "uuid": {
+            "$ref": "#/components/schemas/UUID"
+          }
+        },
+        "type": "object"
+      },
+      "SightingId": {
+        "maxLength": 10,
+        "pattern": "^\\d+$",
+        "type": "string"
+      },
+      "SlimEvent": {
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/EventId"
+          },
+          "orgc_uuid": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "published": {
+            "$ref": "#/components/schemas/PublishedFlag"
+          },
+          "sighting_timestamp": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "timestamp": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "uuid": {
+            "$ref": "#/components/schemas/UUID"
+          }
+        },
+        "required": [
+          "id",
+          "timestamp",
+          "sighting_timestamp",
+          "published",
+          "uuid"
+        ],
+        "type": "object"
+      },
+      "SoftDeletedFlag": {
+        "default": false,
+        "type": "boolean"
+      },
+      "SoftDeletedFlagValuesToInclude": {
+        "default": false,
+        "type": "boolean"
+      },
+      "Tag": {
+        "allOf": [
+          {
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/TagId"
+              }
+            },
+            "type": "object"
+          },
+          {
+            "$ref": "#/components/schemas/TagNoId"
+          }
+        ]
+      },
+      "TagColour": {
+        "maxLength": 7,
+        "type": "string"
+      },
+      "TagId": {
+        "maxLength": 10,
+        "pattern": "^\\d+$",
+        "type": "string"
+      },
+      "TagList": {
+        "items": {
+          "$ref": "#/components/schemas/Tag"
+        },
+        "type": "array"
+      },
+      "TagName": {
+        "maxLength": 255,
+        "type": "string"
+      },
+      "TagNoId": {
+        "properties": {
+          "colour": {
+            "$ref": "#/components/schemas/TagColour"
+          },
+          "exportable": {
+            "$ref": "#/components/schemas/IsExportable"
+          },
+          "hide_tag": {
+            "$ref": "#/components/schemas/HideTagFlag"
+          },
+          "inherited": {
+            "$ref": "#/components/schemas/IsInherited"
+          },
+          "is_custom_galaxy": {
+            "$ref": "#/components/schemas/IsCustomGalaxy"
+          },
+          "is_galaxy": {
+            "$ref": "#/components/schemas/IsGalaxy"
+          },
+          "name": {
+            "$ref": "#/components/schemas/TagName"
+          },
+          "numerical_value": {
+            "$ref": "#/components/schemas/TagNumericalValue"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/OrganisationId"
+          },
+          "user_id": {
+            "$ref": "#/components/schemas/UserId"
+          }
+        },
+        "type": "object"
+      },
+      "TagNumericalValue": {
+        "nullable": true,
+        "pattern": "^\\d+$",
+        "type": "string"
+      },
+      "TagsRestSearchFilter": {
+        "items": {
+          "type": "string"
+        },
+        "nullable": true,
+        "type": "array"
+      },
+      "ThreatLevelId": {
+        "enum": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "type": "string"
+      },
+      "Timestamp": {
+        "default": "0",
+        "pattern": "^\\d+$",
+        "type": "string"
+      },
+      "ToIDS": {
+        "default": true,
+        "type": "boolean"
+      },
+      "ToIDSRestSearchFlag": {
+        "nullable": true,
+        "type": "boolean"
+      },
+      "UUID": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "UnauthorizedApiError": {
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "message",
+          "url"
+        ],
+        "type": "object"
+      },
+      "UserId": {
+        "maxLength": 10,
+        "pattern": "^\\d+$",
+        "type": "string"
+      },
+      "WithAttachmentsRestSearchFilter": {
+        "default": false,
+        "type": "boolean"
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "MISP Automation API"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/attributes/add/{eventId}": {
+      "post": {
+        "operationId": "addAttribute",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/eventIdParameter"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/AddAttributeRequest"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AttributeResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/UnauthorizedApiErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ApiErrorResponse"
+          }
+        }
+      }
+    },
+    "/attributes/restSearch": {
+      "post": {
+        "operationId": "restSearchAttributes",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/RestSearchAttributesRequest"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AttributesRestSearchResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/UnauthorizedApiErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ApiErrorResponse"
+          }
+        }
+      }
+    },
+    "/events/add": {
+      "post": {
+        "operationId": "addEvent",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/AddEventRequest"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AddEventResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/UnauthorizedApiErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ApiErrorResponse"
+          }
+        }
+      }
+    },
+    "/events/publish/{eventId}": {
+      "post": {
+        "operationId": "publishEvent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/eventIdParameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PublishEventResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/UnauthorizedApiErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ApiErrorResponse"
+          }
+        }
+      }
+    },
+    "/events/restSearch": {
+      "post": {
+        "operationId": "restSearchEvents",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/RestSearchEventsRequest"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/EventsRestSearchResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/UnauthorizedApiErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ApiErrorResponse"
+          }
+        }
+      }
+    },
+    "/events/view/{eventId}": {
+      "get": {
+        "operationId": "getEventById",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/eventIdParameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ExtendedEventResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/UnauthorizedApiErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ApiErrorResponse"
+          }
+        }
+      }
+    },
+    "/sightings/add": {
+      "post": {
+        "operationId": "addSightingByValue",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/AddSightingsRequest"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SightingResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/UnauthorizedApiErrorResponse"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundApiErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ApiErrorResponse"
+          }
+        }
+      }
+    },
+    "/warninglists/checkValue": {
+      "post": {
+        "operationId": "checkValueWarninglistsMatches",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/WarninglistCheckValuesRequest"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/WarninglistMatchListResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/UnauthorizedApiErrorResponse"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundApiErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ApiErrorResponse"
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://misp.local"
+    }
+  ]
+}

@@ -1,0 +1,1337 @@
+{
+  "components": {
+    "schemas": {
+      "ArrowRecordBatch": {
+        "properties": {
+          "serializedRecordBatch": {
+            "format": "byte",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ArrowSchema": {
+        "properties": {
+          "serializedSchema": {
+            "format": "byte",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ArrowSerializationOptions": {
+        "properties": {
+          "bufferCompression": {
+            "enum": [
+              "COMPRESSION_UNSPECIFIED",
+              "LZ4_FRAME",
+              "ZSTD"
+            ],
+            "type": "string"
+          },
+          "picosTimestampPrecision": {
+            "enum": [
+              "PICOS_TIMESTAMP_PRECISION_UNSPECIFIED",
+              "TIMESTAMP_PRECISION_MICROS",
+              "TIMESTAMP_PRECISION_NANOS",
+              "TIMESTAMP_PRECISION_PICOS"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ConnectionProperty": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DataFormatOptions": {
+        "properties": {
+          "timestampOutputFormat": {
+            "enum": [
+              "TIMESTAMP_OUTPUT_FORMAT_UNSPECIFIED",
+              "FLOAT64",
+              "INT64",
+              "ISO8601_STRING"
+            ],
+            "type": "string"
+          },
+          "useInt64Timestamp": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "DataPolicyList": {
+        "properties": {
+          "dataPolicies": {
+            "items": {
+              "$ref": "#/components/schemas/DataPolicyOption"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DataPolicyOption": {
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DatasetList": {
+        "properties": {
+          "datasets": {
+            "items": {
+              "properties": {
+                "catalogSource": {
+                  "readOnly": true,
+                  "type": "string"
+                },
+                "datasetReference": {
+                  "$ref": "#/components/schemas/DatasetReference"
+                },
+                "externalDatasetReference": {
+                  "$ref": "#/components/schemas/ExternalDatasetReference"
+                },
+                "friendlyName": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "labels": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                },
+                "location": {
+                  "type": "string"
+                },
+                "type": {
+                  "readOnly": true,
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "etag": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "kind": {
+            "default": "bigquery#datasetList",
+            "readOnly": true,
+            "type": "string"
+          },
+          "nextPageToken": {
+            "type": "string"
+          },
+          "unreachable": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DatasetReference": {
+        "properties": {
+          "datasetId": {
+            "type": "string"
+          },
+          "projectId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DmlStatistics": {
+        "properties": {
+          "deletedRowCount": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "string"
+          },
+          "dmlMode": {
+            "enum": [
+              "DML_MODE_UNSPECIFIED",
+              "COARSE_GRAINED_DML",
+              "FINE_GRAINED_DML"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "fineGrainedDmlUnusedReason": {
+            "enum": [
+              "FINE_GRAINED_DML_UNUSED_REASON_UNSPECIFIED",
+              "MAX_PARTITION_SIZE_EXCEEDED",
+              "TABLE_NOT_ENROLLED",
+              "DML_IN_MULTI_STATEMENT_TRANSACTION"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "insertedRowCount": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "string"
+          },
+          "updatedRowCount": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EncryptionConfiguration": {
+        "properties": {
+          "kmsKeyName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ErrorProto": {
+        "properties": {
+          "debugInfo": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExternalDatasetReference": {
+        "properties": {
+          "connection": {
+            "type": "string"
+          },
+          "externalSource": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ForeignTypeInfo": {
+        "properties": {
+          "typeSystem": {
+            "enum": [
+              "TYPE_SYSTEM_UNSPECIFIED",
+              "HIVE"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GeneratedColumn": {
+        "properties": {
+          "generatedExpressionInfo": {
+            "$ref": "#/components/schemas/GeneratedExpressionInfo"
+          },
+          "generatedMode": {
+            "enum": [
+              "GENERATED_MODE_UNSPECIFIED",
+              "GENERATED_ALWAYS",
+              "GENERATED_BY_DEFAULT"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GeneratedExpressionInfo": {
+        "properties": {
+          "asynchronous": {
+            "type": "boolean"
+          },
+          "generationExpression": {
+            "type": "string"
+          },
+          "stored": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "GetQueryResultsResponse": {
+        "properties": {
+          "cacheHit": {
+            "type": "boolean"
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorProto"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "jobComplete": {
+            "type": "boolean"
+          },
+          "jobReference": {
+            "$ref": "#/components/schemas/JobReference"
+          },
+          "kind": {
+            "default": "bigquery#getQueryResultsResponse",
+            "type": "string"
+          },
+          "numDmlAffectedRows": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "string"
+          },
+          "pageToken": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/TableRow"
+            },
+            "type": "array"
+          },
+          "schema": {
+            "$ref": "#/components/schemas/TableSchema"
+          },
+          "totalBytesProcessed": {
+            "format": "int64",
+            "type": "string"
+          },
+          "totalRows": {
+            "format": "uint64",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "JobCreationReason": {
+        "properties": {
+          "code": {
+            "enum": [
+              "CODE_UNSPECIFIED",
+              "REQUESTED",
+              "LONG_RUNNING",
+              "LARGE_RESULTS",
+              "OTHER"
+            ],
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "JobReference": {
+        "properties": {
+          "jobId": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "projectId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "QueryParameter": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "parameterType": {
+            "$ref": "#/components/schemas/QueryParameterType"
+          },
+          "parameterValue": {
+            "$ref": "#/components/schemas/QueryParameterValue"
+          }
+        },
+        "type": "object"
+      },
+      "QueryParameterType": {
+        "properties": {
+          "arrayType": {
+            "$ref": "#/components/schemas/QueryParameterType"
+          },
+          "rangeElementType": {
+            "$ref": "#/components/schemas/QueryParameterType"
+          },
+          "structTypes": {
+            "items": {
+              "properties": {
+                "description": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/QueryParameterType"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "timestampPrecision": {
+            "default": "6",
+            "format": "int64",
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "QueryParameterValue": {
+        "properties": {
+          "arrayValues": {
+            "items": {
+              "$ref": "#/components/schemas/QueryParameterValue"
+            },
+            "type": "array"
+          },
+          "rangeValue": {
+            "$ref": "#/components/schemas/RangeValue"
+          },
+          "structValues": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/QueryParameterValue"
+            },
+            "type": "object"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "QueryRequest": {
+        "properties": {
+          "arrowSerializationOptions": {
+            "$ref": "#/components/schemas/ArrowSerializationOptions"
+          },
+          "connectionProperties": {
+            "items": {
+              "$ref": "#/components/schemas/ConnectionProperty"
+            },
+            "type": "array"
+          },
+          "continuous": {
+            "type": "boolean"
+          },
+          "createSession": {
+            "type": "boolean"
+          },
+          "defaultDataset": {
+            "$ref": "#/components/schemas/DatasetReference"
+          },
+          "destinationEncryptionConfiguration": {
+            "$ref": "#/components/schemas/EncryptionConfiguration"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "formatOptions": {
+            "$ref": "#/components/schemas/DataFormatOptions"
+          },
+          "jobCreationMode": {
+            "enum": [
+              "JOB_CREATION_MODE_UNSPECIFIED",
+              "JOB_CREATION_REQUIRED",
+              "JOB_CREATION_OPTIONAL"
+            ],
+            "type": "string"
+          },
+          "jobTimeoutMs": {
+            "format": "int64",
+            "type": "string"
+          },
+          "kind": {
+            "default": "bigquery#queryRequest",
+            "type": "string"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "location": {
+            "type": "string"
+          },
+          "maxResults": {
+            "format": "uint32",
+            "type": "integer"
+          },
+          "maxSlots": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maximumBytesBilled": {
+            "format": "int64",
+            "type": "string"
+          },
+          "parameterMode": {
+            "type": "string"
+          },
+          "preserveNulls": {
+            "deprecated": true,
+            "type": "boolean"
+          },
+          "query": {
+            "type": "string"
+          },
+          "queryParameters": {
+            "items": {
+              "$ref": "#/components/schemas/QueryParameter"
+            },
+            "type": "array"
+          },
+          "queryResultsFormat": {
+            "enum": [
+              "QUERY_RESULTS_FORMAT_UNSPECIFIED",
+              "STRUCT_ENCODING",
+              "ARROW"
+            ],
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "reservation": {
+            "type": "string"
+          },
+          "secureContext": {
+            "$ref": "#/components/schemas/SecureContext"
+          },
+          "timeoutMs": {
+            "format": "uint32",
+            "type": "integer"
+          },
+          "useLegacySql": {
+            "default": "true",
+            "type": "boolean"
+          },
+          "useQueryCache": {
+            "default": "true",
+            "type": "boolean"
+          },
+          "writeIncrementalResults": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "QueryResponse": {
+        "properties": {
+          "arrowRecordBatch": {
+            "$ref": "#/components/schemas/ArrowRecordBatch"
+          },
+          "arrowSchema": {
+            "$ref": "#/components/schemas/ArrowSchema"
+          },
+          "cacheHit": {
+            "type": "boolean"
+          },
+          "creationTime": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "string"
+          },
+          "dmlStats": {
+            "$ref": "#/components/schemas/DmlStatistics"
+          },
+          "endTime": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "string"
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorProto"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "jobComplete": {
+            "type": "boolean"
+          },
+          "jobCreationReason": {
+            "$ref": "#/components/schemas/JobCreationReason"
+          },
+          "jobReference": {
+            "$ref": "#/components/schemas/JobReference"
+          },
+          "kind": {
+            "default": "bigquery#queryResponse",
+            "type": "string"
+          },
+          "location": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "numDmlAffectedRows": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "string"
+          },
+          "pageRowCount": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "string"
+          },
+          "pageToken": {
+            "type": "string"
+          },
+          "queryId": {
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/TableRow"
+            },
+            "type": "array"
+          },
+          "schema": {
+            "$ref": "#/components/schemas/TableSchema"
+          },
+          "sessionInfo": {
+            "$ref": "#/components/schemas/SessionInfo"
+          },
+          "startTime": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "string"
+          },
+          "statementType": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "totalBytesBilled": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "string"
+          },
+          "totalBytesProcessed": {
+            "format": "int64",
+            "type": "string"
+          },
+          "totalRows": {
+            "format": "uint64",
+            "type": "string"
+          },
+          "totalSlotMs": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RangeValue": {
+        "properties": {
+          "end": {
+            "$ref": "#/components/schemas/QueryParameterValue"
+          },
+          "start": {
+            "$ref": "#/components/schemas/QueryParameterValue"
+          }
+        },
+        "type": "object"
+      },
+      "SecureContext": {
+        "properties": {
+          "secureParameterEntries": {
+            "additionalProperties": {},
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "SessionInfo": {
+        "properties": {
+          "sessionId": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TableCell": {
+        "properties": {
+          "v": {}
+        },
+        "type": "object"
+      },
+      "TableFieldSchema": {
+        "properties": {
+          "categories": {
+            "properties": {
+              "names": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "collation": {
+            "type": "string"
+          },
+          "dataGovernanceTagsInfo": {
+            "properties": {
+              "dataGovernanceTags": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "dataPolicies": {
+            "items": {
+              "$ref": "#/components/schemas/DataPolicyOption"
+            },
+            "type": "array"
+          },
+          "dataPolicyList": {
+            "$ref": "#/components/schemas/DataPolicyList"
+          },
+          "defaultValueExpression": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/TableFieldSchema"
+            },
+            "type": "array"
+          },
+          "foreignTypeDefinition": {
+            "type": "string"
+          },
+          "generatedColumn": {
+            "$ref": "#/components/schemas/GeneratedColumn"
+          },
+          "maxLength": {
+            "format": "int64",
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "policyTags": {
+            "properties": {
+              "names": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "precision": {
+            "format": "int64",
+            "type": "string"
+          },
+          "rangeElementType": {
+            "properties": {
+              "type": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "roundingMode": {
+            "enum": [
+              "ROUNDING_MODE_UNSPECIFIED",
+              "ROUND_HALF_AWAY_FROM_ZERO",
+              "ROUND_HALF_EVEN"
+            ],
+            "type": "string"
+          },
+          "scale": {
+            "format": "int64",
+            "type": "string"
+          },
+          "timestampPrecision": {
+            "default": "6",
+            "format": "int64",
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TableRow": {
+        "properties": {
+          "f": {
+            "items": {
+              "$ref": "#/components/schemas/TableCell"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TableSchema": {
+        "properties": {
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/TableFieldSchema"
+            },
+            "type": "array"
+          },
+          "foreignTypeInfo": {
+            "$ref": "#/components/schemas/ForeignTypeInfo"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "Oauth2": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://accounts.google.com/o/oauth2/auth",
+            "scopes": {
+              "https://www.googleapis.com/auth/bigquery": "View and manage your data in Google BigQuery and see the email address for your Google Account",
+              "https://www.googleapis.com/auth/bigquery.insertdata": "Insert data into Google BigQuery",
+              "https://www.googleapis.com/auth/cloud-platform": "See, edit, configure, and delete your Google Cloud data and see the email address for your Google Account.",
+              "https://www.googleapis.com/auth/cloud-platform.read-only": "View your data across Google Cloud services and see the email address of your Google Account",
+              "https://www.googleapis.com/auth/devstorage.full_control": "Manage your data and permissions in Cloud Storage and see the email address for your Google Account",
+              "https://www.googleapis.com/auth/devstorage.read_only": "View your data in Google Cloud Storage",
+              "https://www.googleapis.com/auth/devstorage.read_write": "Manage your data in Cloud Storage and see the email address of your Google Account"
+            },
+            "tokenUrl": "https://oauth2.googleapis.com/token"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "BigQuery API"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/projects/{projectsId}/datasets": {
+      "get": {
+        "operationId": "bigquery.datasets.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "all",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxResults",
+            "schema": {
+              "format": "uint32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetList"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/bigquery",
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/cloud-platform.read-only"
+            ]
+          }
+        ]
+      }
+    },
+    "/projects/{projectsId}/queries": {
+      "post": {
+        "operationId": "bigquery.jobs.query",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/bigquery",
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/cloud-platform.read-only"
+            ]
+          }
+        ]
+      }
+    },
+    "/projects/{projectsId}/queries/{queriesId}": {
+      "get": {
+        "operationId": "bigquery.jobs.getQueryResults",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "queriesId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timeoutMs",
+            "schema": {
+              "format": "uint32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "startIndex",
+            "schema": {
+              "format": "uint64",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "location",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "formatOptions.useInt64Timestamp",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "formatOptions.timestampOutputFormat",
+            "schema": {
+              "enum": [
+                "TIMESTAMP_OUTPUT_FORMAT_UNSPECIFIED",
+                "FLOAT64",
+                "INT64",
+                "ISO8601_STRING"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxResults",
+            "schema": {
+              "format": "uint32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetQueryResultsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/bigquery",
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/cloud-platform.read-only"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://bigquery.googleapis.com/bigquery/v2"
+    }
+  ]
+}

@@ -11,7 +11,7 @@ import type { AxiosInstance } from 'axios';
 import type { ActionContext } from '../../connector_spec';
 import { OnePasswordConnector } from './one_password';
 
-const BASE_URL = 'https://api.1password.com/v1';
+const BASE_URL = 'https://api.1password.com/v1beta1';
 const ACCOUNT_UUID = 'ACCT-UUID-1234';
 
 describe('OnePasswordConnector', () => {
@@ -54,7 +54,7 @@ describe('OnePasswordConnector', () => {
 
       expect(authDef.type).toBe('oauth_client_credentials');
       expect(authDef.defaults).toEqual({
-        tokenUrl: `${BASE_URL}/oauth/token`,
+        tokenUrl: `${BASE_URL}/users/oauth2/token`,
         scope: 'openid',
         tokenEndpointAuthMethod: 'client_secret_basic',
       });
@@ -136,8 +136,8 @@ describe('OnePasswordConnector', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/accounts/${ACCOUNT_UUID}/users`, {
         params: {
-          maxPageSize: 10,
-          pageToken: 'CAIQAg',
+          max_page_size: 10,
+          page_token: 'CAIQAg',
         },
       });
     });
@@ -264,7 +264,7 @@ describe('OnePasswordConnector', () => {
       const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/accounts/${ACCOUNT_UUID}/users`, {
-        params: { maxPageSize: 1 },
+        params: { max_page_size: 1 },
       });
       expect(mockContext.log.debug).toHaveBeenCalledWith('1Password test handler');
       expect(result).toEqual({});

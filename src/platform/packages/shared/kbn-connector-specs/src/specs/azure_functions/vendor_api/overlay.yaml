@@ -1,0 +1,53 @@
+overlay: 1.0.0
+info:
+  title: Azure App Service (Microsoft.Web) API corrections
+  version: 1.0.0
+actions:
+  - target: $.paths.*.*.parameters[?@.name == 'resourceGroupName'].schema
+    description: >-
+      The pattern `^[-\w\._\(\)]+[^\.]$` requires at least two characters, while
+      https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules#microsoftresources
+      gives resource group names a length of 1-90 ("Can't end with period").
+    update:
+      pattern: ^[-\w\._\(\)]*[^\.]$
+
+  - target: $.components.schemas['WebAppCollection','FunctionEnvelopeCollection'].properties.nextLink
+    description: >-
+      nextLink is an absolute URL, as
+      https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#collections-include-nextlink-for-more-results
+      requires ("a nextLink field with an absolute URL"), e.g.
+      `https://management.azure.com/subscriptions/.../providers/Microsoft.Web/sites?api-version=2022-03-01&%24skiptoken=...`
+      in https://github.com/Azure/azure-sdk-for-java/issues/32553.
+    update:
+      format: uri
+
+  - target: $.paths['/subscriptions/{subscriptionId}/providers/Microsoft.Web/sites'].get.parameters
+    description: >-
+      x-ms-pageable; the nextLink repeats the request with a `$skiptoken` query parameter the spec
+      doesn't declare, as logged in https://github.com/Azure/azure-sdk-for-java/issues/32553.
+    update:
+      - in: query
+        name: $skiptoken
+        required: false
+        schema:
+          type: string
+  - target: $.paths['/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites'].get.parameters
+    description: >-
+      x-ms-pageable; Microsoft.Web/sites nextLinks carry `$skiptoken`, as logged in
+      https://github.com/Azure/azure-sdk-for-java/issues/32553.
+    update:
+      - in: query
+        name: $skiptoken
+        required: false
+        schema:
+          type: string
+  - target: $.paths['/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/functions'].get.parameters
+    description: >-
+      x-ms-pageable; Microsoft.Web nextLinks carry `$skiptoken`, as logged for sites in
+      https://github.com/Azure/azure-sdk-for-java/issues/32553.
+    update:
+      - in: query
+        name: $skiptoken
+        required: false
+        schema:
+          type: string
