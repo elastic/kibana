@@ -9,10 +9,18 @@
 
 import type { Method, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
+import { execFile } from 'node:child_process';
+import Path from 'node:path';
+import { promisify } from 'node:util';
+
+import { getKibanaDir } from '../get_kibana_dir.ts';
+
+const execFileAsync = promisify(execFile);
 
 export interface CiStatsClientConfig {
   baseUrl?: string;
   token?: string;
+  authType?: 'token' | 'buildkite_oidc';
 }
 
 export interface CiStatsBuild {
@@ -68,15 +76,54 @@ interface RequestOptions {
 export class CiStatsClient {
   private readonly baseUrl: string;
   private readonly defaultHeaders: Record<string, string>;
+  private readonly authType: 'token' | 'buildkite_oidc';
+  private oidcAuthorization?: Promise<string>;
+  private oidcRefreshAt = 0;
 
   constructor(config: CiStatsClientConfig = {}) {
-    const CI_STATS_HOST = config.baseUrl ?? process.env.CI_STATS_HOST;
+    const baseUrl = config.baseUrl ?? process.env.CI_STATS_API_URL ?? process.env.CI_STATS_HOST;
     const CI_STATS_TOKEN = config.token ?? process.env.CI_STATS_TOKEN;
+    const authType = config.authType ?? process.env.CI_STATS_AUTH_TYPE ?? 'token';
+    if (authType !== 'token' && authType !== 'buildkite_oidc') {
+      throw new Error('Invalid CI Stats authentication type');
+    }
 
-    this.baseUrl = `https://${CI_STATS_HOST}`;
+    this.baseUrl =
+      baseUrl?.startsWith('https://') || baseUrl?.startsWith('http://')
+        ? baseUrl
+        : `https://${baseUrl}`;
+    this.authType = authType;
     this.defaultHeaders = {
       Authorization: `token ${CI_STATS_TOKEN}`,
     };
+  }
+
+  private async getHeaders(): Promise<Record<string, string>> {
+    if (this.authType === 'token') {
+      return this.defaultHeaders;
+    }
+
+    if (!this.oidcAuthorization || Date.now() >= this.oidcRefreshAt) {
+      this.oidcRefreshAt = Date.now() + 240_000;
+      this.oidcAuthorization = execFileAsync(
+        'bash',
+        [Path.resolve(getKibanaDir(), '.buildkite/scripts/common/ci_stats_oidc_token.sh')],
+        { timeout: 30_000, env: process.env }
+      )
+        .then(({ stdout }) => {
+          const token = stdout.trim();
+          if (!token) {
+            throw new Error('CI Stats OIDC token response was empty');
+          }
+          return `Bearer ${token}`;
+        })
+        .catch((error) => {
+          this.oidcAuthorization = undefined;
+          throw error;
+        });
+    }
+
+    return { Authorization: await this.oidcAuthorization };
   }
 
   createBuild = async () => {
@@ -197,12 +244,10 @@ export class CiStatsClient {
     console.log('requesting test group run order from ci-stats:');
     console.log(JSON.stringify(body, null, 2));
 
-    const resp = await axios.request<TestGroupRunOrderResponse>({
+    const resp = await this.request<TestGroupRunOrderResponse>({
       method: 'POST',
-      baseURL: this.baseUrl,
-      headers: this.defaultHeaders,
-      url: '/v2/_pick_test_group_run_order',
-      data: body,
+      path: '/v2/_pick_test_group_run_order',
+      body,
     });
 
     return resp.data;
@@ -220,10 +265,16 @@ export class CiStatsClient {
           url: path,
           params,
           data: body,
-          headers: this.defaultHeaders,
+          headers: await this.getHeaders(),
+          allowAbsoluteUrls: false,
         });
       } catch (error) {
-        console.error('CI Stats request error:', error?.response?.data?.message);
+        console.error('CI Stats request error:', error?.response?.data?.message ?? error?.message);
+
+        if (error?.response?.status === 401) {
+          // the broker rejected the token, so mint a new one for the next attempt
+          this.oidcAuthorization = undefined;
+        }
 
         if (attempt < maxAttempts) {
           const sec = attempt * 3;

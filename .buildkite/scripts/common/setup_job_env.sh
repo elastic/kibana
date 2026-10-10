@@ -74,29 +74,7 @@ EOF
   fi
 }
 
-# Setup CI Stats
-{
-  CI_STATS_BUILD_ID="$(buildkite-agent meta-data get ci_stats_build_id --default '')"
-  export CI_STATS_BUILD_ID
-
-  CI_STATS_TOKEN="$(vault_get kibana_ci_stats api_token)"
-  export CI_STATS_TOKEN
-
-  CI_STATS_HOST="$(vault_get kibana_ci_stats api_host)"
-  export CI_STATS_HOST
-
-  if [[ "$CI_STATS_BUILD_ID" ]]; then
-    echo "CI Stats Build ID: $CI_STATS_BUILD_ID"
-
-    KIBANA_CI_STATS_CONFIG=$(jq -n \
-      --arg buildId "$CI_STATS_BUILD_ID" \
-      --arg apiUrl "https://$CI_STATS_HOST" \
-      --arg apiToken "$CI_STATS_TOKEN" \
-      '{buildId: $buildId, apiUrl: $apiUrl, apiToken: $apiToken}' \
-    )
-    export KIBANA_CI_STATS_CONFIG
-  fi
-}
+source .buildkite/scripts/common/setup_ci_stats.sh
 
 # Set up misc keys
 {
