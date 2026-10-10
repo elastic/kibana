@@ -108,6 +108,14 @@ export const strings = {
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.searchButton', {
       defaultMessage: 'Search',
     }),
+  getSearchAgainAriaLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.searchAgainAriaLabel', {
+      defaultMessage: 'Search again',
+    }),
+  getSearchWithUpdatedQueryAriaLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.searchWithUpdatedQueryAriaLabel', {
+      defaultMessage: 'Search with updated query',
+    }),
   getDisabledDatePickerLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.datePicker.disabledLabel', {
       defaultMessage: 'All time',
@@ -1114,8 +1122,15 @@ export const QueryBarTopRow = React.memo(
 
     const getSubmitButtonProps = () => {
       if (shouldRenderESQLUi) {
-        const label = strings.getSearchButtonLabel();
-        return { icon: undefined, text: label, ariaLabel: label, color: 'primary' as const };
+        return {
+          icon: undefined,
+          text: strings.getSearchButtonLabel(),
+          ariaLabel: props.isDirty
+            ? strings.getSearchWithUpdatedQueryAriaLabel()
+            : strings.getSearchAgainAriaLabel(),
+          color: 'primary' as const,
+          fill: Boolean(props.isDirty),
+        };
       }
 
       if (props.isDirty) {
@@ -1124,6 +1139,7 @@ export const QueryBarTopRow = React.memo(
           text: strings.getUpdateButtonLabel(),
           ariaLabel: strings.getNeedsUpdatingLabel(),
           color: 'success' as const,
+          fill: false,
         };
       }
 
@@ -1132,6 +1148,7 @@ export const QueryBarTopRow = React.memo(
         text: strings.getRefreshButtonLabel(),
         ariaLabel: strings.getRefreshQueryLabel(),
         color: 'primary' as const,
+        fill: false,
       };
     };
 
@@ -1145,16 +1162,21 @@ export const QueryBarTopRow = React.memo(
         text: buttonText,
         ariaLabel: buttonAriaLabel,
         color: buttonColor,
+        fill: buttonFill,
       } = getSubmitButtonProps();
       const submitTooltip = buttonAriaLabel;
       const splitButton = (
-        <EuiSplitButton color={buttonColor} size="s">
+        <EuiSplitButton color={buttonColor} fill={buttonFill} size="s">
           <EuiSplitButton.ActionPrimary
             iconType={buttonIcon}
             isLoading={props.isLoading}
             isDisabled={isSubmitDisabled}
             onClick={onClickSubmitButton}
             aria-label={buttonAriaLabel}
+            tooltipProps={{
+              content: submitTooltip,
+              disableScreenReaderOutput: true,
+            }}
             data-test-subj="querySubmitButton"
           >
             {buttonText}
@@ -1186,7 +1208,7 @@ export const QueryBarTopRow = React.memo(
           onClick={onClickSubmitButton}
           size="s"
           color={buttonColor}
-          fill={false}
+          fill={buttonFill}
           needsUpdate={props.isDirty}
           data-test-subj="querySubmitButton"
           toolTipProps={{
