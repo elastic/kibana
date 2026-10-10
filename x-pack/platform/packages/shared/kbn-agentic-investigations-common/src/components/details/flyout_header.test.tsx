@@ -17,8 +17,7 @@ const investigation: Investigation = {
   title: 'Suspicious login',
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
-  watch_id: 'watch-1',
-  watch_execution_id: 'exec-1',
+  worker_execution_ids: ['exec-1'],
   recordId: 'CASE-1',
   assignee: undefined,
   pendingProposalCount: 0,
@@ -33,6 +32,17 @@ describe('ConversationDetailsFlyoutHeader', () => {
       <ConversationDetailsFlyoutHeader investigation={investigation} />
     );
     expect(screen.getByText('Suspicious login')).toBeInTheDocument();
+  });
+
+  it('renders a custom titleNode in place of the title when provided', () => {
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutHeader
+        investigation={investigation}
+        titleNode={<span>Checkout latency</span>}
+      />
+    );
+    expect(screen.getByRole('heading', { name: 'Checkout latency' })).toBeInTheDocument();
+    expect(screen.queryByText('Suspicious login')).not.toBeInTheDocument();
   });
 
   it('renders a custom statusNode when provided', () => {

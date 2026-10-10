@@ -22,8 +22,8 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/calculate-auto'
   - '@kbn/charts-plugin'
+  - '@kbn/charts-theme'
   - '@kbn/cloud-plugin'
-  - '@kbn/code-editor'
   - '@kbn/core'
   - '@kbn/cps'
   - '@kbn/cps-utils'
@@ -61,7 +61,6 @@ dependsOn:
   - '@kbn/unified-search-plugin'
   - '@kbn/utility-types'
   - '@kbn/ui-callout'
-  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod

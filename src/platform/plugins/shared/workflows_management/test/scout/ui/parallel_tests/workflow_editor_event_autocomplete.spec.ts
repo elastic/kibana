@@ -41,12 +41,12 @@ test.describe(
       await expect(suggestWidget).toBeVisible();
 
       // spaceId should be present
-      await expect(suggestWidget.getByRole('option', { name: 'spaceId' })).toBeVisible();
+      await expect(pageObjects.workflowEditor.getYamlEditorSuggestionItem('spaceId')).toBeVisible();
 
       // Alert-specific properties should NOT be present
-      await expect(suggestWidget.getByRole('option', { name: 'alerts' })).toBeHidden();
-      await expect(suggestWidget.getByRole('option', { name: 'rule' })).toBeHidden();
-      await expect(suggestWidget.getByRole('option', { name: 'params' })).toBeHidden();
+      await expect(pageObjects.workflowEditor.getYamlEditorSuggestionItem('alerts')).toBeHidden();
+      await expect(pageObjects.workflowEditor.getYamlEditorSuggestionItem('rule')).toBeHidden();
+      await expect(pageObjects.workflowEditor.getYamlEditorSuggestionItem('params')).toBeHidden();
     });
 
     test('alert trigger: event.* should suggest alerts, rule, params, and spaceId', async ({
@@ -62,10 +62,10 @@ test.describe(
       await expect(suggestWidget).toBeVisible();
 
       // All event properties should be present for alert trigger
-      await expect(suggestWidget.getByRole('option', { name: 'spaceId' })).toBeVisible();
-      await expect(suggestWidget.getByRole('option', { name: 'alerts' })).toBeVisible();
-      await expect(suggestWidget.getByRole('option', { name: 'rule' })).toBeVisible();
-      await expect(suggestWidget.getByRole('option', { name: 'params' })).toBeVisible();
+      await expect(pageObjects.workflowEditor.getYamlEditorSuggestionItem('spaceId')).toBeVisible();
+      await expect(pageObjects.workflowEditor.getYamlEditorSuggestionItem('alerts')).toBeVisible();
+      await expect(pageObjects.workflowEditor.getYamlEditorSuggestionItem('rule')).toBeVisible();
+      await expect(pageObjects.workflowEditor.getYamlEditorSuggestionItem('params')).toBeVisible();
     });
   }
 );
