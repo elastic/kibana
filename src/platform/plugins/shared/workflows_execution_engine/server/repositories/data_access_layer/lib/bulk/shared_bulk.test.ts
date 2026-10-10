@@ -235,7 +235,7 @@ describe('sharedBulk', () => {
         {
           _id: 'a',
           _index: INDEX,
-          _source: { includes: ['status'] },
+          _source: { includes: ['status', 'deleted'] },
         },
       ],
     });
