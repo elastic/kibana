@@ -37,8 +37,53 @@ move the auto-inserted entry there manually and re-check alphabetical order with
 ## Research the Vendor API Before Writing Any Code
 
 Do this **before** writing schemas or handlers, not after. Every action that mutates data or requires a
-specific auth scope has a real, documented API behavior — do not assume REST conventions apply. For each
-action you plan to implement, find the vendor's official API reference and confirm:
+specific auth scope has a real, documented API behavior — do not assume REST conventions apply.
+
+### Start from the vendor's spec
+
+First find the vendor's own OpenAPI 3, Swagger 2.0 or Google API Discovery document, and write down its
+URL and the API version it describes (`info.version`). Prefer a URL the vendor publishes and keeps
+current (its docs host or its own GitHub repository) over a community mirror. A connector that calls
+several API versions or products gets one source per spec (`v1`, `v2`). The connector is checked against
+exactly these documents later (see "Record the vendor API contract" in the skill), so writing it against
+them from the start avoids most of what recording would otherwise report. If the vendor publishes none,
+note that too: the connector then needs an exemption with a reason, and the docs are the only source.
+
+Then read the spec through the script, which loads it the way recording does, rather than reading the
+raw file (Microsoft Graph's is 44 MB). Name the scaffolded connector, so the source is declared once:
+
+```bash
+# Find the operations behind the actions you plan; adds v1 to the connector's vendor_api/manifest.json
+node scripts/connector_vendor_api --inspect --connector <id> --source v1=https://…/openapi.json --grep 'issues'
+# Describe each operation an action will call; the manifest's sources are used from now on
+node scripts/connector_vendor_api --inspect --connector <id> \
+  --operation 'POST /repos/{owner}/{repo}/issues' --operation issues/list-for-repo
+```
+
+The fetched spec is kept in `data/connector_vendor_api` (not committed), so later inspections and
+recording use the same document even if the vendor publishes from a moving branch. Pass `--refresh` to
+fetch it again.
+
+For each operation the description gives the servers (with regional variables), the security schemes
+and scopes it requires, every parameter with its location (`path`, `query`, `header`) and effective
+`style`/`explode`, the request body schema, the success response schema and the `pagination` descriptor
+recording would propose. Take from it, for each action:
+
+- the HTTP method and path, and which inputs go in the path, the query string, a header or the body;
+- how array query parameters are encoded: `form` with `explode: true` is `?id=1&id=2` (axios's default
+  is `id[]=1&id[]=2`, which needs a `paramsSerializer`), `explode: false` is `?id=1,2`;
+- the zod input schema: required fields, types, `enum` values, `pattern` for identifiers, and every
+  `maxLength`/`maximum`/`maxItems` as a `.max()` no looser than the vendor's;
+- the output fields the handler reads, from the success response schema;
+- the auth types and scopes, from `security`.
+
+A spec is often silent or wrong where the docs aren't, so the checklist below still applies; the spec
+answers part of it up front. Where the vendor's docs page contradicts its spec, follow the docs and
+record the difference as an overlay action with the docs URL as evidence.
+
+### Checklist
+
+For each action you plan to implement, find the vendor's official API reference and confirm:
 
 - **Update semantics**: does the endpoint support partial updates (`PATCH`, or a `PUT` that merges), or
   does it fully replace the resource (a `PUT` that 400s if you omit any required field)? If it's
@@ -122,6 +167,10 @@ action you plan to implement, find the vendor's official API reference and confi
   GraphQL field selection). If required and omitted, relationship fields the output schema promises will
   come back `null`/empty even though the API call itself succeeds with a 200 — this is easy to miss because
   nothing errors, the data is just quietly missing.
+
+- **Limits stated only in prose**: note every limit the docs state in text but the spec doesn't encode
+  ("max 100 items", "up to 500 characters"), with the docs URL. Each one becomes a `.max()` in the
+  input schema and an overlay action, so the contract test checks the connector against it.
 
 Cross-reference this research against the fields you're about to add `.describe()` text for — the
 description should state the *verified* format/constraint, not an assumed one.

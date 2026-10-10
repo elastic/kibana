@@ -20,12 +20,16 @@ Start with the deterministic checks and report every failure for the connector u
 
 ```bash
 node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_quality_contract.test.ts
+node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_vendor_api_contract.test.ts
 ```
 
 They cover the docs page location, the availability statement and workflow claims on the docs page,
 internal wording in the docs page,
 navigation links, action and parameter descriptions, and `.max()` bounds on input strings and arrays.
-The checklist below is for what a test cannot judge: whether those descriptions and limits are *right*.
+The vendor API contract test covers whether the connector's `vendor_api/` artifacts are current, and
+whether any action sends a request its vendor spec rejects, including at every schema bound and enum value.
+The checklist below is for what a test cannot judge: whether those descriptions and limits are *right*,
+and whether the vendor API artifacts are trustworthy.
 
 **If the connector is MCP-native**, apply the MCP-specific checks in
 [reference/mcp-connectors.md](reference/mcp-connectors.md) in addition to the items below.
@@ -111,6 +115,44 @@ The checklist below is for what a test cannot judge: whether those descriptions 
   use `callToolJson(ctx, 'tool_name', args)`. File download or binary actions must use
   `callToolContent(ctx, 'tool_name', args)`. Using `callToolJson` on a binary response corrupts data;
   using `callToolContent` on a JSON response forces callers to parse raw content. Flag any mismatch.
+
+### Vendor API Artifacts
+
+The contract test only checks the connector against what `vendor_api/` says the vendor accepts. Every
+correction in that folder relaxes or reshapes the check, so review each one as you would a code change.
+See "Vendor API artifacts" in the package README for the formats.
+
+- **Source choice** (`manifest.json` `sources`): each URL is the vendor's own spec, from its docs host or
+  its own repository, not a community mirror or a copy committed elsewhere; and it describes the API
+  version the connector calls (compare `apiVersion` and the server URLs with the connector's base URL).
+  A connector calling two API versions or products has a source per spec. For Google APIs, the source is
+  the Discovery document (`…/$discovery/rest?version=v1`).
+- **Exemptions** (`vendor_api_exemptions.json`): only a connector added in this PR may get one, and the
+  reason must name why no spec can be recorded (no public spec, a database wire protocol, an MCP server).
+  "Artifacts not recorded yet" is not a reason for a new connector.
+- **Overlay actions** (`overlay.yaml`): each action has a `description` with its evidence, a docs URL and
+  what it says, or what the real API did during live testing. Flag an action without one. Be most
+  skeptical of actions that *loosen* the spec (remove a `maxLength` or `enum`, make a required field
+  optional, widen a type, add a parameter): that is exactly what makes a connector bug pass the contract
+  test. Prefer narrow targets (one path and method) over wildcards like `$.paths.*.*` unless the evidence
+  covers every operation.
+- **Unmatched requests** (`manifest.json` `unmatched`): each `reason` links the vendor's docs for the
+  endpoint, or a follow-up issue. Check the request isn't a connector bug (a typo in the path, a wrong API
+  version prefix): compare it with the vendor's docs. If the docs document the endpoint, an overlay action
+  adding it is better than an `unmatched` entry, as the contract test then checks the request too.
+- **Pagination** (`manifest.json` `pagination`): for each descriptor, check the vendor's docs for the page
+  selector parameter, the page size parameter, where the next cursor or link sits and what marks the
+  last page. The contract mock pages according to the descriptor, so a wrong one hides a pagination bug.
+  `"none"` needs the docs to say the operation returns everything at once. The `## Validated` section
+  should say page 2 was fetched for each paging list action.
+- **Fixtures** (`fixtures.json`): every `queries` entry claims an operation changes no vendor state; check
+  the vendor's docs agree, or the `read` scope is wrong. `input` and `responses` should only supply what
+  generated values can't, such as an ID in the vendor's format.
+- **Schema bounds**: a `.max()` tightened to make the contract test pass should match the vendor's
+  documented limit, and the action's `.describe()` text should state the same limit.
+- **Snapshot and manifest diffs**: on a PR that changes the connector, operations added to or removed
+  from `manifest.json` should match the handler changes. A snapshot diff means the vendor's spec changed
+  (`--refresh`); check whether the connector needs to follow.
 
 ### Vendor API Correctness
 
@@ -388,6 +430,7 @@ Report documentation issues alongside code issues.
 
 ### PR Description
 
+- **`## Actions` section**: Present and complete; see "Chosen set" under Tool Design.
 - **`## Validated` table**: The PR description must include a `## Validated` section with a table
   listing every action the spec exposes (plus the connectivity `test` handler, if present) and whether
   it's been observed working — see
@@ -400,6 +443,9 @@ Report documentation issues alongside code issues.
   tool). Flag a row whose scenario describes calling the vendor API directly (`curl`, the vendor CLI, a
   REST client): the original AKS PR marked `runCommand` as passing on that basis while the connector sent
   a body Azure rejected on every call.
+  The section should also report the vendor API contract: the sources and API versions recorded
+  against, the contract test result, and each overlay action and `unmatched` entry with its evidence.
+  Flag a PR that adds `vendor_api/` corrections without listing them there.
 - **Labels**: The PR must have both `release_note:feature` and `Feature:Actions/ConnectorTypes` applied
   (check with `gh pr view <number> --json labels`). Flag if either is missing.
 
@@ -520,6 +566,12 @@ Report documentation issues alongside code issues.
 
 ### Tool Design
 
+- **Chosen set**: The PR description's `## Actions` section (format in
+  `create-connector/reference/pr-validation-table.md`) lists each action with its vendor operation and
+  the question it answers, says whether the user confirmed the set, and gives a reason for each notable
+  operation left out. Flag a PR without it, an action that answers no question a user would ask, a
+  destructive or admin action exposed as a tool without a reason, and a set marked unconfirmed (it needs
+  the user's sign-off before merge). The checks below then judge the set itself.
 - **Discovery / metadata tools**: The tool set should include at least one tool that helps an agent orient itself —
   e.g. `who_am_i`, `get_current_user`, `list_projects`, `get_table_schema`, `list_spaces`. Without these, an agent
   must guess IDs or structure before it can call other tools. Flag if the set has no discovery/metadata tooling.
