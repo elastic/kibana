@@ -1,0 +1,92 @@
+{
+  "sha1": "c3afb54e0f01dff837e14906af6c16f0242255b9",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "7059439f41fbd5c-3ad3b8245a78adb",
+      "title": "Endpoint artifact changes on a live host creating and deleting a global trusted application bumps the applied revision",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/artifact_policy_revision.spec.ts",
+        "line": 128,
+        "column": 12
+      }
+    },
+    {
+      "id": "520d757d08531dc-111d588549633d2",
+      "title": "Endpoint generated alerts promotes an alert from a live Endpoint to a Detection Engine alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/endpoint_generated_alerts.spec.ts",
+        "line": 41,
+        "column": 12
+      }
+    },
+    {
+      "id": "32f9031f33f06c1-61763fca4703a67",
+      "title": "Real agent host isolation isolates an enrolled host and then releases it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/host_isolation.spec.ts",
+        "line": 152,
+        "column": 12
+      }
+    },
+    {
+      "id": "97fadb0346da893-06eac818f501d2b",
+      "title": "Real agent process response actions live agent lists Endpoint and completes kill and suspend",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/process_operations.spec.ts",
+        "line": 138,
+        "column": 12
+      }
+    },
+    {
+      "id": "4d1aa265acceb65-199e7f5aa53a3c4",
+      "title": "Real agent scan response action returns ra_scan_success_done for an existing file",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/scan_action.spec.ts",
+        "line": 145,
+        "column": 10
+      }
+    },
+    {
+      "id": "4d1aa265acceb65-766ef6a3bbdbdf0",
+      "title": "Real agent scan response action returns ra_scan_error_not-found for a missing path",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/scan_action.spec.ts",
+        "line": 166,
+        "column": 10
+      }
+    }
+  ]
+}
