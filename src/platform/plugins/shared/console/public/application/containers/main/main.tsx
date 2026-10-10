@@ -17,7 +17,6 @@ import {
   EuiToolTip,
   useEuiTour,
   EuiButtonEmpty,
-  EuiHorizontalRule,
   EuiScreenReaderOnly,
   useEuiTheme,
   useEuiOverflowScroll,
@@ -109,6 +108,7 @@ const useStyles = (isEmbeddable: boolean) => {
     scrollablePanelWithBackground: css`
       ${useEuiOverflowScroll('y', false)}
       background-color: ${euiTheme.colors.body};
+      border-radius: ${euiTheme.border.radius.inline};
     `,
   };
 };
@@ -252,8 +252,13 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
       <EuiScreenReaderOnly>
         <h1>{MAIN_PANEL_LABELS.consolePageHeading}</h1>
       </EuiScreenReaderOnly>
-      <EuiSplitPanel.Outer grow={true} borderRadius={isEmbeddable ? 'none' : 'm'}>
-        <EuiSplitPanel.Inner grow={false} css={styles.consoleTabs}>
+      <EuiSplitPanel.Outer
+        grow={true}
+        borderRadius={isEmbeddable ? 'none' : 'm'}
+        hasShadow={false}
+        hasBorder={true}
+      >
+        <EuiSplitPanel.Inner grow={false} paddingSize="s" css={styles.consoleTabs}>
           <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem>
               <TopNavMenu
@@ -352,7 +357,6 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
             )}
           </EuiFlexGroup>
         </EuiSplitPanel.Inner>
-        <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner
           paddingSize="none"
           css={styles.scrollablePanelWithBackground}
@@ -368,7 +372,6 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
           {currentTab === HISTORY_TAB_ID && <History />}
           {currentTab === CONFIG_TAB_ID && <Config />}
         </EuiSplitPanel.Inner>
-        <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner
           paddingSize="xs"
           grow={false}
