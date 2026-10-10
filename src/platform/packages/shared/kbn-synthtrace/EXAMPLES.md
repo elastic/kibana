@@ -894,6 +894,30 @@ Generates data for testing agent configuration.
 node scripts/synthtrace agent_config --live
 ```
 
+#### `universal_profiling`
+
+Generates profiling data in the Universal Profiling (ECS) schema for hosts (`up-host-N`) that each run a Java service, a Python service, a native service and kernel workers, whose stacks are described as call trees in the scenario. Sets up the Universal Profiling resources through Kibana if needed. Re-runs only add new events; `--clean` deletes the Universal Profiling documents but keeps the setup. Stateful only.
+
+**Usage:**
+
+```sh
+node scripts/synthtrace universal_profiling --live --scenarioOpts.hosts=3 --scenarioOpts.samplesPerSecond=20
+```
+
+`samplesPerSecond` is per host. The agent samples each CPU core 20 times per second.
+
+#### `otel_profiling`
+
+Generates profiling data in the OTel schema, as written by the Elasticsearch exporter of the OpenTelemetry Collector, into the `profiling-*.otel-default` data streams. Its hosts (`otel-host-N`) each run a Go service, a Node.js service, a .NET service and kernel softirq threads, so that its data is easy to tell apart from the `universal_profiling` data in the UI. Elasticsearch installs their templates, so no setup is needed, and its `_profiling` APIs read them with `"schema": "otel"`. `--clean` deletes all the `profiling-*.otel-default` data streams, including data from real collectors.
+
+**Usage:**
+
+```sh
+node scripts/synthtrace otel_profiling --live --scenarioOpts.hosts=3 --scenarioOpts.samplesPerSecond=20 --scenarioOpts.executableIds=hex
+```
+
+`executableIds` is `hex` (default) or `base64url`. The exporter keys executables by their hex file ID, like `hex` does, but Elasticsearch looks them up by base64url, so executable names only resolve with `base64url`.
+
 ### SRE Incident Scenarios
 
 Located in `sre_incidents/` directory:
