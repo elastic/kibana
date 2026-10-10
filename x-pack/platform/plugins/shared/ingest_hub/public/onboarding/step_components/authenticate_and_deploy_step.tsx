@@ -161,12 +161,22 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // Step 3 directly via the horizontal step indicator without clicking Next in Step 2.
   const ecfInstances = useMemo(() => {
     const stored = serviceSettings?.instances;
-    if (stored && stored.length > 0) return stored;
-    return selectedServiceIds.flatMap((id) => {
-      const service = awsServicesMap?.get(id);
-      if (!service?.showInUI) return [];
-      return [{ instanceId: id, serviceId: id, name: service.name, isDuplicate: false }];
-    });
+    // Filter against selectedServiceIds: Step 2 reconciles on mount but may not be mounted here,
+    // so raw session storage can still contain instances for services removed in Step 1.
+    const valid = stored?.filter((inst) => selectedServiceIds.includes(inst.serviceId)) ?? [];
+    // Also merge in services added after the last Step 2 visit so staleness is detected when
+    // the user adds a service while already on Step 3.
+    const storedIds = new Set(valid.map((inst) => inst.serviceId));
+    const merged = [
+      ...valid,
+      ...selectedServiceIds.flatMap((id) => {
+        if (storedIds.has(id)) return [];
+        const service = awsServicesMap?.get(id);
+        if (!service?.showInUI) return [];
+        return [{ instanceId: id, serviceId: id, name: service.name, isDuplicate: false }];
+      }),
+    ];
+    return merged;
   }, [serviceSettings?.instances, selectedServiceIds, awsServicesMap]);
 
   // ── Settings collected for ECF vs. the selected method ───────────────────────
@@ -371,14 +381,21 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       .map((family) => {
         const version = ecfSectionProps.stackVersions[family];
         if (!version) return null;
+        const stackArn = ecfSectionProps.stackArns[family];
         return {
           family,
           stackName: ecfSectionProps.stackNames[family] || defaultNames[family],
           templateVersion: version,
+          ...(stackArn ? { stackArn } : {}),
         };
       })
       .filter((s): s is NonNullable<typeof s> => s !== null);
-  }, [ecfSectionProps.launchedFamilies, ecfSectionProps.stackVersions, ecfSectionProps.stackNames]);
+  }, [
+    ecfSectionProps.launchedFamilies,
+    ecfSectionProps.stackVersions,
+    ecfSectionProps.stackNames,
+    ecfSectionProps.stackArns,
+  ]);
 
   const ecfStacksUnchanged = useMemo(
     () =>
