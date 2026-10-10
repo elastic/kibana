@@ -437,8 +437,8 @@ function buildRange(
 ): TimeRange {
   const startType = dateStringToType(start);
   const endType = dateStringToType(end);
-  // Anchor both bounds to the same instant
-  const forceNow = new Date();
+  // Anchor both bounds to the same instant, truncated to the last whole second
+  const forceNow = moment().startOf('second').toDate();
   const range: TimeRange = {
     value: text,
     start,

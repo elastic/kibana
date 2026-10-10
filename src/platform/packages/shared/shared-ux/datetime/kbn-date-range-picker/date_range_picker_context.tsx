@@ -234,7 +234,7 @@ export function DateRangePickerProvider({
     [timeRange, transformOptions]
   );
   const displayFullFormattedText = useMemo(
-    () => timeRangeToFullFormattedText(timeRange, { ...transformOptions, timePrecision: 'ms' }),
+    () => timeRangeToFullFormattedText(timeRange, { ...transformOptions, timePrecision: 's' }),
     [timeRange, transformOptions]
   );
   const isRounded = hasRoundedOffset(timeRange);
