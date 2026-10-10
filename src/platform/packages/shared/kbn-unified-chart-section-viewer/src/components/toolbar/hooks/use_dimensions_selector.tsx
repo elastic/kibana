@@ -138,11 +138,11 @@ export const useDimensionsSelector = ({
     }, DEBOUNCE_TIME);
   }, [singleSelection]);
 
+  // Flush rather than cancel: the host swaps the whole toolbar out for a
+  // loading/error state, which would otherwise discard a pending selection.
   useEffect(() => {
     return () => {
-      if (debouncedOnChange) {
-        debouncedOnChange.cancel();
-      }
+      debouncedOnChange?.flush();
     };
   }, [debouncedOnChange]);
 
