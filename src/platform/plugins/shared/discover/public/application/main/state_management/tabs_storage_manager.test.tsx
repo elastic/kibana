@@ -1080,12 +1080,19 @@ describe('TabsStorageManager', () => {
       hasUnsavedChanges: false,
       appState: { ...mockTab1.appState, savedQuery: 'saved-query-id', breakdownField: 'host' },
     };
+    const profileState = {
+      testProfileState: { persistentValue: 'persistent', urlValue: 'url' },
+    };
     services.storage.set(TABS_LOCAL_STORAGE_KEY, {
       userId: mockUserId,
       spaceId: mockSpaceId,
       discoverSessionId: session.id,
       openTabs: [
-        { ...toStoredTab(cleanTab), internalState: { searchSessionId: 'search-session-id' } },
+        {
+          ...toStoredTab(cleanTab),
+          internalState: { searchSessionId: 'search-session-id' },
+          profileState,
+        },
       ],
       closedTabs: [],
     });
@@ -1107,6 +1114,7 @@ describe('TabsStorageManager', () => {
       tabType: savedTab.tabTypeState?.type,
       searchSessionId: 'search-session-id',
     });
+    expect(restored.allTabs[0].profileState).toEqual(profileState);
   });
 
   it('should load persisted tabs when persisted discover session id differs from stored session id', () => {

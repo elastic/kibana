@@ -8,11 +8,21 @@
  */
 
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { createMemoryHistory } from 'history';
+import {
+  createProfileStateRegistry,
+  METRICS_STATE_DEF,
+} from '../../../../../common/context_awareness';
+import { APP_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../common/constants';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { getPersistedTabMock, getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
 import { TabInitializationStatus, type TabState } from '../redux/types';
-import { selectTabHasUnsavedChangesForPersistence } from './restore_clean_tabs';
+import {
+  selectTabHasUnsavedChangesForPersistence,
+  updateUrlStateForRestoredTab,
+} from './restore_clean_tabs';
 
 describe('selectTabHasUnsavedChangesForPersistence', () => {
   it.each<{
@@ -88,5 +98,64 @@ describe('selectTabHasUnsavedChangesForPersistence', () => {
     expect(
       selectTabHasUnsavedChangesForPersistence(internalState.getState(), 'missing-tab')
     ).toBeUndefined();
+  });
+});
+
+describe('updateUrlStateForRestoredTab', () => {
+  const previousTab = getTabStateMock({
+    id: 'tab',
+    hasUnsavedChanges: false,
+    appState: { columns: ['message'] },
+    profileState: { metricsState: { sortDirection: 'desc' } },
+  });
+  const restoredTab = {
+    ...previousTab,
+    appState: { columns: ['host.name'] },
+    profileState: { metricsState: { gaugeAggregation: 'max', sortDirection: 'desc' } },
+  };
+  const sharedProfileState = { metricsState: { gaugeAggregation: 'min', sortDirection: 'desc' } };
+
+  it.each([
+    {
+      name: 'updates a matching Metrics URL, preserving local sorting',
+      profileState: { metricsState: { gaugeAggregation: 'avg', sortDirection: 'desc' } },
+      expectedAppState: restoredTab.appState,
+      expectedProfileState: {
+        metricsState: {
+          ...METRICS_STATE_DEF.defaultState,
+          gaugeAggregation: 'max',
+          sortDirection: 'desc',
+        },
+      },
+    },
+    {
+      name: 'preserves a shared link with different Metrics settings',
+      profileState: sharedProfileState,
+      expectedAppState: previousTab.appState,
+      expectedProfileState: sharedProfileState,
+    },
+    {
+      name: 'updates the app URL without restoring an inactive profile to the URL',
+      profileState: undefined,
+      expectedAppState: restoredTab.appState,
+      expectedProfileState: null,
+    },
+  ])('$name', async ({ profileState, expectedAppState, expectedProfileState }) => {
+    const urlStateStorage = createKbnUrlStateStorage({
+      history: createMemoryHistory(),
+      useHash: false,
+    });
+    await urlStateStorage.set(APP_STATE_URL_KEY, previousTab.appState);
+    await urlStateStorage.set(PROFILE_STATE_URL_KEY, profileState);
+
+    await updateUrlStateForRestoredTab({
+      previousTab,
+      restoredTab,
+      urlStateStorage,
+      profileStateRegistry: createProfileStateRegistry(),
+    });
+
+    expect(urlStateStorage.get(APP_STATE_URL_KEY)).toEqual(expectedAppState);
+    expect(urlStateStorage.get(PROFILE_STATE_URL_KEY)).toEqual(expectedProfileState);
   });
 });

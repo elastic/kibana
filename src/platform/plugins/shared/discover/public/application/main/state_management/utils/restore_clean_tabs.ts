@@ -16,7 +16,7 @@
  * local content.
  */
 
-import { isEqual, isUndefined, omit, omitBy } from 'lodash';
+import { isEqual, isUndefined, omit, omitBy, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -86,28 +86,21 @@ const restoreUnmodifiedSavedTab = ({
   // changes, so they stay local. Fields it defines replace the local ones, even when unset.
   const restoredTab = fromSavedObjectTabToTabState({
     tab: savedTab,
+    existingTab: tab,
     profileStateRegistry,
     initialAppState: fromSavedObjectTabToAppState({ tab: savedTab, localAppState: tab.appState }),
   });
 
   return {
-    ...tab,
     ...restoredTab,
     // The search session falls back to running the query when the saved content no longer matches
     initialInternalState: {
       ...restoredTab.initialInternalState,
       searchSessionId: tab.initialInternalState?.searchSessionId,
     },
-    profileState: profileStateRegistry.mergeState(
-      profileStateRegistry.pickStateByType({
-        profileStateMap: tab.profileState,
-        stateTypes: [ProfileStateType.Url],
-      }),
-      restoredTab.profileState
-    ),
     globalState: {
       ...tab.globalState,
-      ...(savedTab.timeRestore ? restoredTab.globalState : {}),
+      ...restoredTab.globalState,
     },
   };
 };
@@ -156,11 +149,15 @@ const isUrlStateFromTab = ({
         omitBy(globalState, isUndefined),
         omitBy({ time, refreshInterval, filters }, isUndefined)
       )) &&
-    isEqual(profileUrlState(profileState ?? undefined), profileUrlState(tab.profileState))
+    // Only active profiles are written to the URL; inactive profiles can remain in the draft.
+    isEqual(
+      profileUrlState(profileState ?? undefined),
+      profileUrlState(pick(tab.profileState, Object.keys(profileState ?? {})))
+    )
   );
 };
 
-/** Updates a clean saved tab's matching URL with its restored app state, preserving local-only fields. */
+/** Updates a clean saved tab's matching URL with its restored state, preserving local-only fields. */
 export const updateUrlStateForRestoredTab = async ({
   previousTab,
   restoredTab,
@@ -177,12 +174,13 @@ export const updateUrlStateForRestoredTab = async ({
   }
 
   const globalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
+  const profileState = urlStateStorage.get<ProfileStateMap>(PROFILE_STATE_URL_KEY);
   if (
     !isUrlStateFromTab({
       tab: previousTab,
       appState: urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
       globalState,
-      profileState: urlStateStorage.get<ProfileStateMap>(PROFILE_STATE_URL_KEY),
+      profileState,
       profileStateRegistry,
     })
   ) {
@@ -190,6 +188,17 @@ export const updateUrlStateForRestoredTab = async ({
   }
 
   const updates = [urlStateStorage.set(APP_STATE_URL_KEY, restoredTab.appState, { replace: true })];
+  if (profileState) {
+    const restoredProfileState = profileStateRegistry.pickStateByType({
+      profileStateMap: pick(restoredTab.profileState, Object.keys(profileState)),
+      stateTypes: [ProfileStateType.Url],
+      defaultsHandling: 'expand',
+    });
+    updates.push(
+      urlStateStorage.set(PROFILE_STATE_URL_KEY, restoredProfileState, { replace: true })
+    );
+  }
+
   if (restoredTab.attributes.timeRestore) {
     updates.push(
       urlStateStorage.set(
