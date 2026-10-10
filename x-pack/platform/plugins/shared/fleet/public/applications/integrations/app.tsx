@@ -72,6 +72,7 @@ export const IntegrationsAppContext: React.FC<{
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  mountElement?: HTMLElement;
   /** For testing purposes only */
   routerHistory?: History<any>; // TODO remove
   fleetStatus?: FleetStatusProviderProps;
@@ -86,6 +87,7 @@ export const IntegrationsAppContext: React.FC<{
     extensions,
     setHeaderActionMenu,
     fleetStatus,
+    mountElement,
   }) => {
     const XXL_BREAKPOINT = 1600;
     const isDarkMode = useObservable(
@@ -98,6 +100,7 @@ export const IntegrationsAppContext: React.FC<{
       <KibanaRenderContextProvider
         {...startServices}
         theme={startServices.theme}
+        mountElement={mountElement}
         modify={{
           breakpoint: {
             xxl: XXL_BREAKPOINT,

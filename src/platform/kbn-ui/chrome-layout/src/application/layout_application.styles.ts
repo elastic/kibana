@@ -9,6 +9,7 @@
 
 import { css } from '@emotion/react';
 import {
+  euiBreakpointContainer,
   euiOverflowScroll,
   euiShadow,
   highContrastModeStyles,
@@ -35,12 +36,17 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
       margin-bottom: ${layoutVar('application.marginBottom')};
       margin-right: ${layoutVar('application.marginRight')};
       // Grid items default to min-width/min-height: auto; without 0 the wrapper would grow with
-      // the content (e.g. push flyout padding) instead of constraining the scroll container.
+      // the content instead of constraining the scroll container.
+      // Push flyouts pad this wrapper (it's the EuiFlyout container), so breakpoints react to them.
       min-width: 0;
       min-height: 0;
 
       z-index: ${layoutLevels.content};
       position: relative;
+
+      // EUI breakpoints follow this wrapper when EuiProvider breakpointContainer is set. As a container,
+      // it's the containing block for fixed descendants. It doesn't scroll, so they don't scroll away with the content.
+      ${euiBreakpointContainer(useEuiTheme)}
 
       // Only apply distinguished background styling for framed appearance
       ${isFramedAppearance &&

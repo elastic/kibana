@@ -113,7 +113,10 @@ export class RenderingService implements IRenderingService {
   }
 
   // Memoized context wrapper component to prevent recreation on each addContext call
-  private readonly ContextWrapper = React.memo<{ children: React.ReactNode }>(({ children }) => {
+  private readonly ContextWrapper = React.memo<{
+    children: React.ReactNode;
+    mountElement?: HTMLElement;
+  }>(({ children, mountElement }) => {
     /**
      * The dependencies are captured using BehaviorSubject, because we assume that Kibana plugins' start
      * methods could be called before the CoreStart services are completely settled internally. If this
@@ -136,6 +139,7 @@ export class RenderingService implements IRenderingService {
         authc={deps.authc}
         coreEnv={deps.coreEnv}
         chrome={deps.chrome}
+        mountElement={mountElement}
       >
         {children}
       </KibanaRenderContextProvider>
@@ -145,8 +149,11 @@ export class RenderingService implements IRenderingService {
   /**
    * @public
    */
-  public addContext(element: React.ReactNode): React.ReactElement<string> {
+  public addContext(
+    element: React.ReactNode,
+    options?: { mountElement?: HTMLElement }
+  ): React.ReactElement<string> {
     const { ContextWrapper } = this;
-    return <ContextWrapper>{element}</ContextWrapper>;
+    return <ContextWrapper mountElement={options?.mountElement}>{element}</ContextWrapper>;
   }
 }

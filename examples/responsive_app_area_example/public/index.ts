@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type React from 'react';
+import { ResponsiveAppAreaExamplePlugin } from './plugin';
 
-export interface RenderingService {
-  addContext: (
-    element: React.ReactNode,
-    options?: {
-      /** Element the React root is mounted in. EUI breakpoint hooks measure its nearest breakpoint container. Without it, they follow the window. */
-      mountElement?: HTMLElement;
-    }
-  ) => React.ReactElement;
+export function plugin() {
+  return new ResponsiveAppAreaExamplePlugin();
 }

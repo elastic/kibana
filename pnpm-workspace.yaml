@@ -226,6 +226,7 @@ packages:
   - 'examples/preboot_example'
   - 'examples/resizable_layout_examples'
   - 'examples/response_stream'
+  - 'examples/responsive_app_area_example'
   - 'examples/routing_example'
   - 'examples/saved_objects'
   - 'examples/screenshot_mode_example'
