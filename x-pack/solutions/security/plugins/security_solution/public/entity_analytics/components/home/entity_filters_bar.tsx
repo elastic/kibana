@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { FormattedCount } from '../../../common/components/formatted_number';
 import { MultiselectFilter } from '../../../common/components/multiselect_filter';
-import { WatchlistFilter } from './watchlist_filter';
+import { EntityFiltersBarWatchlist } from './entity_filters_bar_watchlist';
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import { SEVERITY_UI_SORT_ORDER } from '../../common/utils';
 import type { EntityRiskLevels } from '../../../../common/api/entity_analytics/common';
@@ -255,7 +255,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
       </FilterEntry>
 
       <FilterEntry>
-        <WatchlistFilter
+        <EntityFiltersBarWatchlist
           title={FILTER_TITLES.watchlist}
           items={watchlistOptions.map((o) => o.id)}
           selectedItems={filters.watchlists}

@@ -30,7 +30,7 @@ interface WatchlistOption {
   checked?: FilterChecked;
 }
 
-interface WatchlistFilterProps {
+interface EntityFiltersBarWatchlistProps {
   title: string;
   items: string[];
   selectedItems: string[];
@@ -40,7 +40,7 @@ interface WatchlistFilterProps {
   spaceId: string | undefined;
 }
 
-export const WatchlistFilter: React.FC<WatchlistFilterProps> = ({
+export const EntityFiltersBarWatchlist: React.FC<EntityFiltersBarWatchlistProps> = ({
   title,
   items,
   selectedItems,
