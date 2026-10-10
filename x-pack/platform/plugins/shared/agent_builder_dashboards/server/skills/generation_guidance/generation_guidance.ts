@@ -13,7 +13,7 @@ import {
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
 import { dashboardDesignGuidancePrompt } from './design';
-import { enhanceGuidancePrompt } from './enhance_guidance';
+import { ENHANCE_GUIDANCE_PATH, enhanceGuidanceReference } from './enhance_guidance';
 
 const chartTypeSelectionGuidance = getChartTypeSelectionPromptContent();
 
@@ -21,7 +21,9 @@ const guidance = `## Dashboard Operations
 
 The ${dashboardTools.generateDashboard} tool builds the resulting dashboard from the current dashboard (if any) plus an ordered \`operations\` array. This section describes the \`operations\` vocabulary; see the environment workflow below for how the current dashboard is referenced and how the result is surfaced.
 
-${enhanceGuidancePrompt}
+## Improving an Existing Dashboard (Enhance)
+
+When asked to enhance, improve, or clean up an existing dashboard, read \`${ENHANCE_GUIDANCE_PATH}\` with \`read_file\` before inspecting the dashboard or calling any other tool. Follow that file. It takes precedence over the create-dashboard guidance in this skill. Do not enhance without reading it.
 
 ## Using Dashboard Operations
 
@@ -145,4 +147,5 @@ Controls query the index directly, so columns created in ES|QL (\`DISSECT\`, \`G
  */
 export const dashboardGeneration: DashboardGuidanceModule = {
   guidance,
+  referencedContent: [enhanceGuidanceReference],
 };

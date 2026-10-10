@@ -237,7 +237,6 @@ overrides:
   baseline-browser-mapping: 2.9.14
   cheerio: 1.0.0-rc.12
   chokidar: 3.5.3
-  d3-scale>d3-color: npm:@elastic/kibana-d3-color@2.0.1
   dompurify: 3.4.14
   esbuild: 0.28.1
   fast-xml-parser: 5.5.7
@@ -266,6 +265,8 @@ overrides:
   '@elastic/pretty-printer': 4.29.0
   '@emnapi/core': 1.11.1
   '@emnapi/runtime': 1.11.1
+  '@paulirish/trace_engine>legacy-javascript': 0.0.3
+  '@paulirish/trace_engine>third-party-web': 0.30.0
   '@redux-saga/core': 1.3.0
   '@redux-saga/types': 1.2.1
   '@types/babel__traverse': 7.20.6
@@ -283,6 +284,7 @@ overrides:
   colorette: 2.0.20
   concaveman: 1.2.0
   d3-format@3: 3.1.0
+  d3-interpolate@2.0.1>d3-color: npm:@elastic/kibana-d3-color@2.0.1
   dom-accessibility-api@^0.5.9: 0.5.13
   eslint-module-utils: 2.8.0
   focus-lock: 0.11.6
@@ -380,6 +382,9 @@ importers:
       '@elastic/datemath':
         specifier: 5.0.3
         version: 5.0.3(moment@2.31.0)
+      '@elastic/distillate':
+        specifier: 0.2.0
+        version: 0.2.0
       '@elastic/ebt':
         specifier: 1.4.1
         version: 1.4.1
@@ -407,6 +412,12 @@ importers:
       '@elastic/filesaver':
         specifier: 1.1.2
         version: 1.1.2
+      '@elastic/isomer-runtime':
+        specifier: 0.2.0
+        version: 0.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)
+      '@elastic/isomer-sdk':
+        specifier: 0.2.0
+        version: 0.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)
       '@elastic/kibana-d3-color':
         specifier: 2.0.1
         version: 2.0.1
@@ -450,8 +461,8 @@ importers:
         specifier: 1.24.2
         version: 1.24.2(@elastic/elasticsearch@8.19.2(supports-color@10.2.2))(supports-color@10.2.2)
       '@elastic/statistics':
-        specifier: 0.0.2
-        version: 0.0.2
+        specifier: 0.0.3
+        version: 0.0.3
       '@emotion/cache':
         specifier: 11.14.0
         version: 11.14.0
@@ -596,6 +607,12 @@ importers:
       '@kbn/agentic-investigations-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/agentic_investigations
+      '@kbn/ai-anonymization-common':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/ai-infra/ai-anonymization-common
+      '@kbn/ai-anonymization-server':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/ai-infra/ai-anonymization-server
       '@kbn/ai-assistant':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-ai-assistant
@@ -2297,6 +2314,9 @@ importers:
       '@kbn/gen-ai-streaming-response-example-plugin':
         specifier: workspace:*
         version: link:x-pack/examples/gen_ai_streaming_response_example
+      '@kbn/genai-common':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-genai-common
       '@kbn/generate-csv':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-generate-csv
@@ -2477,6 +2497,12 @@ importers:
       '@kbn/ipynb':
         specifier: workspace:*
         version: link:x-pack/solutions/search/packages/kbn-ipynb
+      '@kbn/isomer':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/isomer/isomer
+      '@kbn/isomer-theme':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/isomer/isomer-theme
       '@kbn/item-buffer':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-item-buffer
@@ -3764,6 +3790,9 @@ importers:
       '@kbn/task-manager-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/task_manager
+      '@kbn/task-manager-service-accounts-test-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/test/task_manager/plugins/service_accounts
       '@kbn/telemetry':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-telemetry
@@ -4134,11 +4163,11 @@ importers:
         specifier: 4.10.4
         version: 4.10.4
       '@launchdarkly/node-server-sdk':
-        specifier: 9.13.6
-        version: 9.13.6(supports-color@10.2.2)
+        specifier: 9.13.7
+        version: 9.13.7(supports-color@10.2.2)
       '@launchdarkly/openfeature-node-server':
-        specifier: 2.0.5
-        version: 2.0.5(@launchdarkly/node-server-sdk@9.13.6(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+        specifier: 2.0.6
+        version: 2.0.6(@launchdarkly/node-server-sdk@9.13.7(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@loaders.gl/core':
         specifier: 3.4.7
         version: 3.4.7
@@ -4164,8 +4193,8 @@ importers:
         specifier: 1.3.1
         version: 1.3.1
       '@modelcontextprotocol/sdk':
-        specifier: 1.29.0
-        version: 1.29.0(@cfworker/json-schema@4.1.1)(supports-color@10.2.2)(zod@4.4.3)
+        specifier: 1.31.0
+        version: 1.31.0(@cfworker/json-schema@4.1.1)(supports-color@10.2.2)(zod@4.4.3)
       '@moonrepo/cli':
         specifier: 2.4.6
         version: 2.4.6
@@ -4497,8 +4526,8 @@ importers:
         specifier: 17.0.2
         version: 17.0.2
       handlebars:
-        specifier: 4.7.9
-        version: 4.7.9
+        specifier: 4.7.10
+        version: 4.7.10
       he:
         specifier: 1.2.0
         version: 1.2.0
@@ -5058,6 +5087,9 @@ importers:
       '@elastic/eui-test-helpers':
         specifier: 2.0.0
         version: 2.0.0(@playwright/test@1.63.0)
+      '@elastic/eui-theme-common':
+        specifier: 10.1.0
+        version: 10.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@elastic/makelogs':
         specifier: 6.1.1
         version: 6.1.1
@@ -8122,6 +8154,8 @@ importers:
 
   src/platform/packages/shared/kbn-ftr-llm-proxy: {}
 
+  src/platform/packages/shared/kbn-genai-common: {}
+
   src/platform/packages/shared/kbn-grok-ui: {}
 
   src/platform/packages/shared/kbn-grouping: {}
@@ -8984,6 +9018,10 @@ importers:
 
   x-pack/platform/packages/shared/ai-assistant/icon: {}
 
+  x-pack/platform/packages/shared/ai-infra/ai-anonymization-common: {}
+
+  x-pack/platform/packages/shared/ai-infra/ai-anonymization-server: {}
+
   x-pack/platform/packages/shared/ai-infra/anonymization-common: {}
 
   x-pack/platform/packages/shared/ai-infra/anonymization-ui: {}
@@ -9015,6 +9053,10 @@ importers:
   x-pack/platform/packages/shared/index-management/index_management_shared_types: {}
 
   x-pack/platform/packages/shared/ingest-pipelines: {}
+
+  x-pack/platform/packages/shared/isomer/isomer: {}
+
+  x-pack/platform/packages/shared/isomer/isomer-theme: {}
 
   x-pack/platform/packages/shared/kbn-agentic-investigations-common: {}
 
@@ -9553,6 +9595,8 @@ importers:
   x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin: {}
 
   x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin: {}
+
+  x-pack/platform/test/task_manager/plugins/service_accounts: {}
 
   x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin: {}
 
@@ -11027,6 +11071,10 @@ packages:
     peerDependencies:
       moment: ^2.24.0
 
+  '@elastic/distillate@0.2.0':
+    resolution: {integrity: sha512-MT6/KONPeYj/y+v16KjzjY8t7DozXFrEVykJrd7YOFPnJOxZCPtVMe+jtQxl0niWfHnoMn9Rbgy1t+bwh5HrnQ==}
+    engines: {node: '>=20'}
+
   '@elastic/ebt@1.4.1':
     resolution: {integrity: sha512-8kvqG4cU/+V0CvJcXH9Bh0jyHmqvmVwhsOiGW0ZS1ylHMMgVP95186W3quL8luivoAg7PNIUj69OsV2OjLDmwg==}
 
@@ -11130,6 +11178,25 @@ packages:
   '@elastic/filesaver@1.1.2':
     resolution: {integrity: sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==}
 
+  '@elastic/isomer-runtime@0.2.0':
+    resolution: {integrity: sha512-7zq59s2I+4TNdMXZanIvbSjtmqed0kK4jCC2NK2y/hgotLtRVaq02UG4IJqXdZtthmwVyV/UX7x/ymDRfTTl8A==}
+    engines: {node: '>=22.13.0'}
+    peerDependencies:
+      react: '>=18 <20'
+      react-dom: '>=18 <20'
+      zod: 4.4.3
+
+  '@elastic/isomer-sdk@0.2.0':
+    resolution: {integrity: sha512-xXtu094TQq9tU5MhTxajpT3SvWD5+bqeNF4WC2nac+HaW2ndcHLqZMpVXcPlFWYn7ntlbyVyuJ6M9vjAGHxuFA==}
+    engines: {node: '>=22.13.0'}
+    peerDependencies:
+      react: '>=18 <20'
+      react-dom: '>=18 <20'
+      zod: 4.4.3
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+
   '@elastic/kibana-d3-color@2.0.1':
     resolution: {integrity: sha512-YZ8hV2bWNyYi833Yj3UWczmTxdHzmo/Xc2IVkNXr/ZqtkrTDlTLysCyJm7SfAt9iBy6EVRGWTn8cPz8QOY6Ixw==}
 
@@ -11208,8 +11275,8 @@ packages:
   '@elastic/search-ui@1.24.2':
     resolution: {integrity: sha512-fQ/BGEbh4EvX+IWw89xiSUXD3p3iDvZPA46WCHwH+jfEtKiC9P+274UiR32POI3znaWfZElxm9kIyNioVGin0Q==}
 
-  '@elastic/statistics@0.0.2':
-    resolution: {integrity: sha512-KYhGGyP6/ddcfPzGjExy3V8S1dB0ZTOZqg8YL2/8R7uYKvgUFfq2tanv4NoEY9l+4gtcbFAkVnyx2/dWoJhn+A==}
+  '@elastic/statistics@0.0.3':
+    resolution: {integrity: sha512-UjND5cw1sykkutO3pAlF6rz1ayXKQr16SyaxiW/H6AAyi21zsfoy2GS+Z3FjLCcKCFuPKR5mkEwtVPcClzNWkQ==}
     engines: {node: '>=22'}
 
   '@elastic/transport@8.11.0':
@@ -12507,25 +12574,25 @@ packages:
   '@launchdarkly/js-client-sdk@4.10.4':
     resolution: {integrity: sha512-n1gvH/Or8/M2bR2HNqyLKrZ7x7lJOQx7WOaWnSibqf9hmtauE169HgtbtdMoUA9s22Z5MvSmNF6eBCJbetHlKA==}
 
-  '@launchdarkly/js-sdk-common@2.26.0':
-    resolution: {integrity: sha512-udqKKgDhRpvprMh53GtK2hSdIJvhs9mUNseAyyyEBcLc5ftNxAZeZbWfKvmyuckS7Qt7rznIHHSSiwm2yYW4+g==}
+  '@launchdarkly/js-sdk-common@2.26.1':
+    resolution: {integrity: sha512-FY4gKzlU5bL44+EgUtP9E9uMBpa7aYgAJ+y0zKRTlf5HPd84XW4zy9vPPeLkCYIfgIn/KoxO3g+9o08qcLvcrw==}
 
   '@launchdarkly/js-sdk-common@2.27.0':
     resolution: {integrity: sha512-Av+eVK5QXQ41leDGi1JS+rzOGvz4ViRgVw8P8vg9h6Q+IwP4UkW/swA7ZU6+05k4cUs9LuGUg8oW+mR7weCVFg==}
 
-  '@launchdarkly/js-server-sdk-common@2.21.4':
-    resolution: {integrity: sha512-SMrbPsjA95SM8s9Tnj85hJZ0Di7H8j3Ma32CCT1rUJhqAUetcDofkPtgePaba44p8H+F1ToHN1mXUuM8fbY1bQ==}
+  '@launchdarkly/js-server-sdk-common@2.21.5':
+    resolution: {integrity: sha512-4hKdGulMc6ZRiyVjxCEjXdA3/Syg2cJdtRdfhLaMQuWHe6Cc2obmM8afW7AIsFwpeWjvmHagoBewl9uV1N6CSw==}
 
-  '@launchdarkly/node-server-sdk@9.13.6':
-    resolution: {integrity: sha512-2kGql7mXJKRndqK8m+++j+C9lk48KK9dRf03BlBo9/Ml7sVtgWSwBkX4vgZH/CvvReeXToaDsnv5Wxx2VDM6fg==}
+  '@launchdarkly/node-server-sdk@9.13.7':
+    resolution: {integrity: sha512-GBzQbkpJVORjRd8AHbrTO3eTrQkOj+nEUQydvjU50TcqlD6/z43X9zqKYc9pBR2uD4nmmRlbART4K7gWBRQtkQ==}
 
-  '@launchdarkly/openfeature-js-server-common@2.0.1':
-    resolution: {integrity: sha512-yedZLnp339OaRen9cB0zHju3PyQXz9Nb16N2sjzroRvHUvB8qMmc6EwnlSSg1HWDlLNalsRJWxFrWJ2N1BwBFg==}
+  '@launchdarkly/openfeature-js-server-common@2.0.2':
+    resolution: {integrity: sha512-DPEhBA4vBkBc8yBEnwuEDF+KzZKfOvsdJaKmrtumxOVKPZxqieBxXEvXQH5e9AgglqyoSW9k4ggSwwkotSfD7g==}
     peerDependencies:
       '@openfeature/server-sdk': ^1.16.0
 
-  '@launchdarkly/openfeature-node-server@2.0.5':
-    resolution: {integrity: sha512-6Q29bQ2WYFFF51LE0Pg1fswCNCAPDbPH95HCI0ntqcwU4wY0+VZgsKJ+oNg7sOQIZlS4vzKlHqPqjC2tfcauqQ==}
+  '@launchdarkly/openfeature-node-server@2.0.6':
+    resolution: {integrity: sha512-npkcV+ZCboKzTWY9HXZyIohJoqjPhfRCcHkU3aUhH3sPb3rv6c6ZVnYPk7EzgwTx2ipgkLVomCk7fY7ObnfrDA==}
     engines: {node: '>=20'}
     peerDependencies:
       '@launchdarkly/node-server-sdk': ^9.0.0
@@ -12674,8 +12741,8 @@ packages:
   '@mixmark-io/domino@2.2.0':
     resolution: {integrity: sha512-Y28PR25bHXUg88kCV7nivXrP2Nj2RueZ3/l/jdx6J9f8J4nsEGcgX0Qe6lt7Pa+J79+kPiJU3LguR6O/6zrLOw==}
 
-  '@modelcontextprotocol/sdk@1.29.0':
-    resolution: {integrity: sha512-zo37mZA9hJWpULgkRpowewez1y6ML5GsXJPY8FI0tBBCd77HEvza4jDqRKOXgHNn867PVGCyTdzqpz0izu5ZjQ==}
+  '@modelcontextprotocol/sdk@1.31.0':
+    resolution: {integrity: sha512-UvTMgnNlnIBO/22ob2RcVGDlcvOslQs8T59+FTGdA0L27a39fdGF/EDETNtDVK4DZGpwomlsYpRdA8UXcVL/pw==}
     engines: {node: '>=18'}
     peerDependencies:
       '@cfworker/json-schema': ^4.1.1
@@ -17778,9 +17845,6 @@ packages:
   d3-collection@1.0.7:
     resolution: {integrity: sha512-ii0/r5f4sjKNTfh84Di+DpztYwqKhEyUlKoPrzUFfeSkWxjW49xU2QzO9qrPrNkpdI0XJkfzvmTu8V2Zylln6A==}
 
-  d3-color@2.0.0:
-    resolution: {integrity: sha512-SPXi0TSKPD4g9tw0NMZFnR95XVgUZiBH+uUTqQuDu1OsE2zomHU7ho0FISciaPvosimixwHFl3WHLGabv6dDgQ==}
-
   d3-color@3.1.0:
     resolution: {integrity: sha512-zg/chbXyeBtMQ1LbD/WSoW2DpC3I0mpmPdW+ynRTj/x2DAWYrIY7qeZIHidozwV24m4iavr15lNwIwLxRmOxhA==}
     engines: {node: '>=12'}
@@ -19543,8 +19607,8 @@ packages:
   handle-thing@2.0.1:
     resolution: {integrity: sha512-9Qn4yBxelxoh2Ow62nP+Ka/kMnOXRi8BXnRaUwezLNhqelnN49xKz4F/dPP8OYLxLxq6JDtZb2i9XznUQbNPTg==}
 
-  handlebars@4.7.9:
-    resolution: {integrity: sha512-4E71E0rpOaQuJR2A3xDZ+GM1HyWYv1clR58tC8emQNeQe3RH7MAzSbat+V0wG78LQBo6m6bzSG/L4pBuCsgnUQ==}
+  handlebars@4.7.10:
+    resolution: {integrity: sha512-P5VJMVM7qgBn6vjXMw8WG9uVI+ncf2pi72j4de4yz5ZULLj2RGqLYaKOYGsgyrViQ0tePOVlN1tDCCXXtFqXKg==}
     engines: {node: '>=0.4.7'}
     hasBin: true
 
@@ -25195,8 +25259,8 @@ packages:
     resolution: {integrity: sha512-hdF5ZgjTqgAntKkklYw0R03MG2x/bSzTtkxmIRw/sTNV8YXsCJ1tfLAX23lhxhHJlEf3CRCOCGGWw3vI3GaSPw==}
     engines: {node: '>=18'}
 
-  traverse@0.6.11:
-    resolution: {integrity: sha512-vxXDZg8/+p3gblxB6BhhG5yWVn1kGRlaL8O78UDXc3wRnPizB5g83dcvWV1jpDMIPnjZjOFuxlMmE82XJ4407w==}
+  traverse@0.6.14:
+    resolution: {integrity: sha512-CYRAVGfnSSe+4Wlof62oUH6y9fGwo0NNS84hMq76MTZtwXQU7Oqna9SgWfrCGj5JPUtHQudnIEt1BP7PInPkPQ==}
     engines: {node: '>= 0.4'}
 
   tree-dump@1.1.0:
@@ -25377,8 +25441,8 @@ packages:
   typed-query-selector@2.12.3:
     resolution: {integrity: sha512-/dtuMZyutHLlrxWhhC1uib00ELUr2dZ8C9B8YzZYsJmeE3V56OxRblrSM2UaF142pcMtak7ehZ6+poWGeehNIg==}
 
-  typedarray.prototype.slice@1.0.5:
-    resolution: {integrity: sha512-q7QNVDGTdl702bVFiI5eY4l/HkgCM6at9KhcFbgUAzezHFbOVy4+0O/lCjsABEQwbZPravVfBIiBVGo89yzHFg==}
+  typedarray.prototype.slice@1.0.6:
+    resolution: {integrity: sha512-r+7YvGfM5TkTiDQ5EqWi/Z4L4KP3jUI+YCmTtWg1tmTHUw6xladLJqzR2heMaHBIM0TTFLZmn/EkIaEHYs/bIA==}
     engines: {node: '>= 0.4'}
 
   typedarray@0.0.7:
@@ -28022,6 +28086,10 @@ snapshots:
       moment: 2.31.0
       tslib: 1.14.1
 
+  '@elastic/distillate@0.2.0':
+    dependencies:
+      stylis: 4.4.0
+
   '@elastic/ebt@1.4.1':
     dependencies:
       '@babel/runtime': 7.29.7
@@ -28213,6 +28281,29 @@ snapshots:
 
   '@elastic/filesaver@1.1.2': {}
 
+  '@elastic/isomer-runtime@0.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)':
+    dependencies:
+      '@elastic/isomer-sdk': 0.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      zod: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
+
+  '@elastic/isomer-sdk@0.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.4.3)':
+    dependencies:
+      acorn: 8.18.0
+      mdast-util-from-markdown: 2.0.3(supports-color@10.2.2)
+      mdast-util-gfm: 3.1.0(supports-color@10.2.2)
+      mdast-util-to-markdown: 2.1.3
+      micromark-extension-gfm: 3.0.0
+      react: 18.2.0
+      zod: 4.4.3
+    optionalDependencies:
+      react-dom: 18.2.0(react@18.2.0)
+    transitivePeerDependencies:
+      - supports-color
+
   '@elastic/kibana-d3-color@2.0.1': {}
 
   '@elastic/makelogs@6.1.1':
@@ -28346,7 +28437,7 @@ snapshots:
       base64url: 3.0.1
       commander: 12.1.0
       find-my-way-ts: 0.1.6
-      handlebars: 4.7.9
+      handlebars: 4.7.10
       prettier: 2.8.8
 
   '@elastic/request-crypto@2.0.4':
@@ -28386,7 +28477,7 @@ snapshots:
       history: 4.9.0
       qs: 6.16.0
 
-  '@elastic/statistics@0.0.2':
+  '@elastic/statistics@0.0.3':
     dependencies:
       simple-statistics: 7.12.1
 
@@ -29813,7 +29904,7 @@ snapshots:
       '@langchain/core': 1.2.3(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.4.3))(ws@8.22.0)
       '@langchain/openai': 1.5.5(@aws-sdk/credential-provider-node@3.972.70)(@langchain/core@1.2.3(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.4.3))(ws@8.22.0))(@smithy/signature-v4@5.7.4)(ws@8.22.0)
       '@langchain/textsplitters': 1.0.1(@langchain/core@1.2.3(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.4.3))(ws@8.22.0))
-      handlebars: 4.7.9
+      handlebars: 4.7.10
       js-yaml: 5.4.2
       jsonpointer: 5.0.1
       openapi-types: 12.1.3
@@ -29926,32 +30017,32 @@ snapshots:
     dependencies:
       '@launchdarkly/js-client-sdk-common': 1.32.2
 
-  '@launchdarkly/js-sdk-common@2.26.0': {}
+  '@launchdarkly/js-sdk-common@2.26.1': {}
 
   '@launchdarkly/js-sdk-common@2.27.0': {}
 
-  '@launchdarkly/js-server-sdk-common@2.21.4':
+  '@launchdarkly/js-server-sdk-common@2.21.5':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.26.0
+      '@launchdarkly/js-sdk-common': 2.26.1
       semver: 7.5.4
 
-  '@launchdarkly/node-server-sdk@9.13.6(supports-color@10.2.2)':
+  '@launchdarkly/node-server-sdk@9.13.7(supports-color@10.2.2)':
     dependencies:
-      '@launchdarkly/js-server-sdk-common': 2.21.4
+      '@launchdarkly/js-server-sdk-common': 2.21.5
       https-proxy-agent: 7.0.6(supports-color@10.2.2)
       launchdarkly-eventsource: 2.2.0
     transitivePeerDependencies:
       - supports-color
 
-  '@launchdarkly/openfeature-js-server-common@2.0.1(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-js-server-common@2.0.2(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.26.0
+      '@launchdarkly/js-sdk-common': 2.26.1
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
-  '@launchdarkly/openfeature-node-server@2.0.5(@launchdarkly/node-server-sdk@9.13.6(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-node-server@2.0.6(@launchdarkly/node-server-sdk@9.13.7(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/node-server-sdk': 9.13.6(supports-color@10.2.2)
-      '@launchdarkly/openfeature-js-server-common': 2.0.1(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+      '@launchdarkly/node-server-sdk': 9.13.7(supports-color@10.2.2)
+      '@launchdarkly/openfeature-js-server-common': 2.0.2(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
   '@leichtgewicht/ip-codec@2.0.5': {}
@@ -30035,7 +30126,7 @@ snapshots:
       '@mapbox/extent': 0.4.0
       '@mapbox/geojson-coords': 0.0.2
       rw: 0.1.4
-      traverse: 0.6.11
+      traverse: 0.6.14
 
   '@mapbox/geojson-normalize@0.0.1': {}
 
@@ -30115,7 +30206,7 @@ snapshots:
 
   '@mixmark-io/domino@2.2.0': {}
 
-  '@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(supports-color@10.2.2)(zod@4.4.3)':
+  '@modelcontextprotocol/sdk@1.31.0(@cfworker/json-schema@4.1.1)(supports-color@10.2.2)(zod@4.4.3)':
     dependencies:
       '@hono/node-server': 1.19.17(hono@4.13.12)
       ajv: 8.20.0
@@ -34365,7 +34456,7 @@ snapshots:
       dotenv: 17.4.2
       find-up: 8.0.0
       graphql: 16.14.2
-      handlebars: 4.7.9
+      handlebars: 4.7.10
       lodash-es: 4.18.1
       ora: 9.4.1
       p-retry: 8.0.1
@@ -35690,8 +35781,6 @@ snapshots:
 
   d3-collection@1.0.7: {}
 
-  d3-color@2.0.0: {}
-
   d3-color@3.1.0: {}
 
   d3-delaunay@6.0.4:
@@ -35739,7 +35828,7 @@ snapshots:
 
   d3-interpolate@2.0.1:
     dependencies:
-      d3-color: 2.0.0
+      d3-color: '@elastic/kibana-d3-color@2.0.1'
 
   d3-interpolate@3.0.1:
     dependencies:
@@ -37935,7 +38024,7 @@ snapshots:
 
   handle-thing@2.0.1: {}
 
-  handlebars@4.7.9:
+  handlebars@4.7.10:
     dependencies:
       minimist: 1.2.8
       neo-async: 2.6.2
@@ -44794,10 +44883,12 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
-  traverse@0.6.11:
+  traverse@0.6.14:
     dependencies:
+      define-data-property: 1.1.4
+      es-to-primitive: 1.3.4
       gopd: 1.2.0
-      typedarray.prototype.slice: 1.0.5
+      typedarray.prototype.slice: 1.0.6
       which-typed-array: 1.1.24
 
   tree-dump@1.1.0(tslib@2.8.1):
@@ -44968,7 +45059,7 @@ snapshots:
 
   typed-query-selector@2.12.3: {}
 
-  typedarray.prototype.slice@1.0.5:
+  typedarray.prototype.slice@1.0.6:
     dependencies:
       call-bind: 1.0.9
       define-properties: 1.2.1

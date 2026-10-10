@@ -8,14 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const CONVERSATION_CARD_LABELS = Object.freeze({
-  templateTypes: {
-    investigation: i18n.translate('xpack.alertzero.conversationCard.templateTypes.investigation', {
-      defaultMessage: 'Investigation',
-    }),
-    incident: i18n.translate('xpack.alertzero.conversationCard.templateTypes.incident', {
-      defaultMessage: 'Incident',
-    }),
-  },
   watchedBy: i18n.translate('xpack.alertzero.conversationCard.watchedBy', {
     defaultMessage: 'Watched by',
   }),

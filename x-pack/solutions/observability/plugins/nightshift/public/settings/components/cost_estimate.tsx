@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import React, { useEffect, useRef } from 'react';
 import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING } from '@kbn/management-settings-ids';
-import { useKibana } from '../../hooks/use_kibana';
 import { useSignificantEventsCost } from '../hooks/use_significant_events_cost';
 import { useRunQuotas } from '../hooks/use_significant_events_run_quotas';
 import { getFormattedError } from '../utils/errors';
@@ -22,82 +19,24 @@ import {
   TrackingCoverageCallout,
 } from './cost_estimate_details';
 import { SettingsSectionRow } from './settings_section';
+import type { TokenTrackingForm } from './use_token_tracking_form';
 
-const INSTALL_TOKEN_USAGE_DASHBOARD_URL = '/internal/gen_ai_settings/install_token_usage_dashboard';
-
-export const CostEstimate = () => {
+export const CostEstimate = ({ tokenTracking }: { tokenTracking: TokenTrackingForm }) => {
   const quotas = useRunQuotas();
-  const [isUpdatingTracking, setIsUpdatingTracking] = useState(false);
-  const core = useKibana().services;
-  const settingsClient = core.settings.client;
-  const tracking$ = useMemo(
-    () => settingsClient.get$<boolean>(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING, false),
-    [settingsClient]
-  );
-  const trackingEnabled = useObservable(
-    tracking$,
-    settingsClient.get<boolean>(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING, false)
-  );
   const canManage = quotas.data?.canManage === true;
-  const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
   const cost = useSignificantEventsCost({
     enabled: canManage && !quotas.isError,
   });
+  const { refreshCost } = cost;
+  const previousSavedTracking = useRef(tokenTracking.savedEnabled);
 
-  const updateTokenTracking = async (enabled: boolean): Promise<void> => {
-    setIsUpdatingTracking(true);
-    let updateError: Error | undefined;
-    const updateErrorSubscription = settingsClient.getUpdateErrors$().subscribe((error) => {
-      updateError = error;
-    });
-
-    try {
-      const wasSaved = await settingsClient.set(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING, enabled);
-      if (!wasSaved) {
-        throw (
-          updateError ??
-          new Error(
-            i18n.translate(
-              'xpack.nightshift.settings.costEstimate.enableTrackingFailedErrorMessage',
-              { defaultMessage: 'The token tracking setting could not be saved.' }
-            )
-          )
-        );
-      }
-
-      if (enabled) {
-        try {
-          await core.http.post(INSTALL_TOKEN_USAGE_DASHBOARD_URL);
-        } catch (error) {
-          core.notifications.toasts.addWarning({
-            title: i18n.translate(
-              'xpack.nightshift.settings.costEstimate.installDashboardFailedTitle',
-              {
-                defaultMessage:
-                  'Token tracking was enabled, but the token usage dashboard could not be installed',
-              }
-            ),
-            text: getFormattedError(error).message,
-          });
-        }
-      }
-      await cost.refreshCost();
-    } catch (error) {
-      core.notifications.toasts.addDanger({
-        title: enabled
-          ? i18n.translate('xpack.nightshift.settings.costEstimate.enableTrackingFailedTitle', {
-              defaultMessage: 'Unable to enable token tracking',
-            })
-          : i18n.translate('xpack.nightshift.settings.costEstimate.disableTrackingFailedTitle', {
-              defaultMessage: 'Unable to disable token tracking',
-            }),
-        text: getFormattedError(error).message,
-      });
-    } finally {
-      updateErrorSubscription.unsubscribe();
-      setIsUpdatingTracking(false);
+  useEffect(() => {
+    if (previousSavedTracking.current === tokenTracking.savedEnabled) {
+      return;
     }
-  };
+    previousSavedTracking.current = tokenTracking.savedEnabled;
+    void refreshCost();
+  }, [refreshCost, tokenTracking.savedEnabled]);
 
   if (quotas.isError || quotas.data == null || !canManage) {
     return null;
@@ -194,10 +133,10 @@ export const CostEstimate = () => {
       data-test-subj="nightshiftCostSection"
     >
       <TokenTrackingSwitch
-        checked={trackingEnabled}
-        canSaveAdvancedSettings={canSaveAdvancedSettings}
-        isUpdatingTracking={isUpdatingTracking}
-        onChange={(enabled) => void updateTokenTracking(enabled)}
+        checked={tokenTracking.enabled}
+        canSaveAdvancedSettings={tokenTracking.canEdit}
+        isUpdatingTracking={tokenTracking.isSaving}
+        onChange={tokenTracking.updateEnabled}
       />
       {body && <EuiSpacer size="m" />}
       {body}
