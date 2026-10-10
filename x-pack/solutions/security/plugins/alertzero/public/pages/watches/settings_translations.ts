@@ -389,7 +389,7 @@ export const BUDGET_PER_HOUR_HELP_TEXT = i18n.translate(
   'xpack.alertzero.watches.settings.alertTriage.budgetPerHourHelpText',
   {
     defaultMessage:
-      'How much triage work the worker plans each hour, in cost units. A batch of alerts costs a fixed overhead plus a cost per alert, so a larger budget triages more alerts and uses more model capacity. Each run gets its share of the hourly budget, so changing the schedule does not change the total. Between {min} and {max}.',
+      'How much triage work the worker plans each hour, in cost units. A batch of alerts costs a fixed overhead plus a cost per alert, so a larger budget triages more alerts and uses more model capacity. Each run gets its share of the hourly budget, so changing the schedule does not change the total: a shorter schedule runs more often with smaller runs, and only raising this budget triages more alerts per hour. Between {min} and {max}.',
     values: { min: BUDGET_PER_HOUR_MIN, max: BUDGET_PER_HOUR_MAX },
   }
 );
