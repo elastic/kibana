@@ -136,7 +136,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         afterEach(async () => {
-          await filterBar.removeAllFilters();
+          const filtersCount = await filterBar.getFilterCount();
+          if (filtersCount > 0) {
+            await filterBar.removeAllFilters();
+          }
         });
 
         it('should render different data in response to filter change', async function () {
