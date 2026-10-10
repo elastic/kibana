@@ -114,7 +114,7 @@ describe('CSV Export Search Cursor', () => {
         },
         expect.objectContaining({
           strategy: 'es',
-          transport: { maxRetries: 0, requestTimeout: '10m' },
+          transport: { maxRetries: 1, requestTimeout: '10m' },
         })
       );
     });
@@ -179,7 +179,7 @@ describe('CSV Export Search Cursor', () => {
         {
           abortSignal: expect.any(AbortSignal),
           strategy: 'es',
-          transport: { maxRetries: 0, requestTimeout: '10m' },
+          transport: { maxRetries: 1, requestTimeout: '10m' },
         }
       );
     });
