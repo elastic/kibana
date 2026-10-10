@@ -27,6 +27,8 @@ export interface UserSettings {
   darkMode: DarkModeValue | undefined;
   locale: string | undefined;
   rememberSelectedSpace: boolean;
+  /** Experimental per-user opt-in for the browser translation patch. Defaults to false. */
+  installTranslationResilience: boolean;
 }
 
 /**
@@ -55,6 +57,7 @@ export class UserSettingsService {
         darkMode: getUserSettingDarkMode(userSettings),
         locale: getUserSettingLocale(userSettings),
         rememberSelectedSpace: getUserSettingRememberSelectedSpace(userSettings),
+        installTranslationResilience: userSettings.installTranslationResilience === true,
       };
     };
 

@@ -10,14 +10,18 @@ import React, { type FC, type PropsWithChildren } from 'react';
 
 import { EuiProvider } from '@elastic/eui';
 
+import { getAvailableLocales } from '@kbn/i18n';
+
 import { LanguageModal } from './language_modal';
 import { useLanguage } from './use_language_hook';
+import { useTranslationResilience } from './use_translation_resilience_hook';
 
 const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <EuiProvider>{children}</EuiProvider>
 );
 
 jest.mock('./use_language_hook');
+jest.mock('./use_translation_resilience_hook');
 
 jest.mock('@kbn/i18n', () => {
   const original = jest.requireActual('@kbn/i18n');
@@ -47,6 +51,13 @@ describe('LanguageModal', () => {
       isLoading: false,
       isVisible: true,
       onChange: onChangeMock,
+    });
+    (useTranslationResilience as jest.Mock).mockReturnValue({
+      value: false,
+      initialValue: false,
+      isLoading: false,
+      isVisible: true,
+      onChange: jest.fn(),
     });
   });
 
@@ -131,5 +142,14 @@ describe('LanguageModal', () => {
 
     expect(reportEventMock).not.toHaveBeenCalled();
     expect(closeModal).toHaveBeenCalled();
+  });
+
+  it('keeps the compatibility switch when no locales are configured', () => {
+    (getAvailableLocales as jest.Mock).mockReturnValueOnce([]);
+
+    const { getByTestId, queryByTestId } = renderModal();
+
+    expect(queryByTestId('languageSelect')).not.toBeInTheDocument();
+    expect(getByTestId('translationResilienceSwitch')).toBeInTheDocument();
   });
 });

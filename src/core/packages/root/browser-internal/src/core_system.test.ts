@@ -253,6 +253,14 @@ describe('#setup()', () => {
     expect(MockAnalyticsService.setup).toHaveBeenCalledTimes(1);
   });
 
+  it('calls i18n#setup() with the analytics contract', async () => {
+    await setupCore();
+    expect(MockI18nService.setup).toHaveBeenCalledTimes(1);
+    expect(MockI18nService.setup).toHaveBeenCalledWith({
+      analytics: MockAnalyticsService.setup.mock.results[0].value,
+    });
+  });
+
   it('calls application#setup()', async () => {
     await setupCore();
     expect(MockApplicationService.setup).toHaveBeenCalledTimes(1);

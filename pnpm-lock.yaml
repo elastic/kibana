@@ -4915,6 +4915,9 @@ importers:
       tar:
         specifier: 7.5.22
         version: 7.5.22
+      translation-resilience:
+        specifier: 0.5.0
+        version: 0.5.0
       ts-easing:
         specifier: 0.2.0
         version: 0.2.0
@@ -25249,6 +25252,9 @@ packages:
     resolution: {integrity: sha512-hdF5ZgjTqgAntKkklYw0R03MG2x/bSzTtkxmIRw/sTNV8YXsCJ1tfLAX23lhxhHJlEf3CRCOCGGWw3vI3GaSPw==}
     engines: {node: '>=18'}
 
+  translation-resilience@0.5.0:
+    resolution: {integrity: sha512-LKlyikRXOqeVQwFiiIJnQ6SFCll/2Rsl6a19F7Mpp/QdC3+s8LV/J1Ar+oeAJOgFWCvUCfD8JcJCLsYrsbvNmw==}
+
   traverse@0.6.14:
     resolution: {integrity: sha512-CYRAVGfnSSe+4Wlof62oUH6y9fGwo0NNS84hMq76MTZtwXQU7Oqna9SgWfrCGj5JPUtHQudnIEt1BP7PInPkPQ==}
     engines: {node: '>= 0.4'}
@@ -44872,6 +44878,8 @@ snapshots:
   tr46@5.1.1:
     dependencies:
       punycode: 2.3.1
+
+  translation-resilience@0.5.0: {}
 
   traverse@0.6.14:
     dependencies:

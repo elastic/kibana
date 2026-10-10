@@ -105,3 +105,14 @@ i18n.allowLocaleCookie: false
 #    Users see i18n.defaultLocale until they choose a language themselves:
 i18n.detectBrowserLocale: false
 ```
+
+## Browser translation
+
+Chrome and Microsoft Edge can move text nodes when they translate a page using their built-in browser translation option, which can make parts of {{kib}} unresponsive.
+
+{applies_to}`serverless: experimental` {applies_to}`stack: experimental 9.6+` If you encounter this issue, a compatibility option exists in {{kib}}. The location of this option depends on how you sign in:
+
+- When signing in using an {{ecloud}} account, open **Profile** and turn on **Browser translation compatibility** in the Language section.
+- When signing in to {{kib}} using a different method, for example with a username and password or on a self-managed deployment, open the user menu, choose **Language**, and turn on the option.
+
+Reload {{kib}} after saving. The option stays inactive until the browser translates the page.

@@ -33,6 +33,8 @@ jest.mock('@kbn/i18n-react', () => {
 
 import React from 'react';
 
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+
 import { I18nService } from './i18n_service';
 
 afterEach(() => {
@@ -47,5 +49,48 @@ describe('#start()', () => {
     const i18n = i18nService.start();
 
     expect(render(<i18n.Context>content</i18n.Context>).container.innerHTML).toMatchSnapshot();
+  });
+});
+
+describe('#setup()', () => {
+  afterEach(() => {
+    window.__kbnInstallTranslationResilience__ = false;
+    delete window.__kbnTranslationsTelemetryEmitter__;
+  });
+
+  it('does not register telemetry when translation resilience is disabled', () => {
+    window.__kbnInstallTranslationResilience__ = false;
+    const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
+
+    new I18nService().setup({ analytics });
+
+    expect(analytics.registerEventType).not.toHaveBeenCalled();
+    expect(window.__kbnTranslationsTelemetryEmitter__).toBeUndefined();
+  });
+
+  it('registers the translation-resilience event and reports messages when enabled', () => {
+    window.__kbnInstallTranslationResilience__ = true;
+    const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
+
+    new I18nService().setup({ analytics });
+
+    expect(analytics.registerEventType).toHaveBeenCalledWith({
+      eventType: 'translation-resilience',
+      schema: {
+        message: {
+          type: 'text',
+          _meta: {
+            description:
+              'Message from the translation resilience script. It will let us know when the translation resilience script is loaded and used.',
+          },
+        },
+      },
+    });
+
+    window.__kbnTranslationsTelemetryEmitter__?.('armed');
+
+    expect(analytics.reportEvent).toHaveBeenCalledWith('translation-resilience', {
+      message: 'armed',
+    });
   });
 });

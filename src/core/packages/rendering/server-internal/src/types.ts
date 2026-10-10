@@ -37,6 +37,7 @@ export interface RenderingMetadata {
   uiPublicUrl: string;
   bootstrapScriptUrl: string;
   locale: string;
+  installTranslationResilience: boolean;
   themeVersion: ThemeVersion;
   darkMode: DarkModeValue;
   stylesheetPaths: string[];

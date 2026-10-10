@@ -247,6 +247,7 @@ export class CoreSystem {
       // able to render any errors.
       const injectedMetadata = this.injectedMetadata.setup();
       const analytics = this.analytics.setup({ injectedMetadata });
+      this.i18n.setup({ analytics });
       const theme = this.theme.setup({ injectedMetadata });
 
       this.fatalErrorsSetup = this.fatalErrors.setup({

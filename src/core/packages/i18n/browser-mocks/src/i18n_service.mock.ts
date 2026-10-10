@@ -25,6 +25,7 @@ type I18nServiceContract = PublicMethodsOf<I18nService>;
 const createMock = () => {
   const mocked: jest.Mocked<I18nServiceContract> = lazyObject({
     getContext: jest.fn().mockReturnValue(createStartContractMock()),
+    setup: jest.fn(),
     start: jest.fn().mockReturnValue(createStartContractMock()),
     stop: jest.fn(),
   });

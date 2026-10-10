@@ -945,6 +945,41 @@ describe('RenderingService', () => {
         );
       });
     });
+
+    describe('installTranslationResilience', () => {
+      let uiSettings: {
+        client: ReturnType<typeof uiSettingsServiceMock.createClient>;
+        globalClient: ReturnType<typeof uiSettingsServiceMock.createClient>;
+      };
+
+      beforeEach(() => {
+        uiSettings = {
+          client: uiSettingsServiceMock.createClient(),
+          globalClient: uiSettingsServiceMock.createClient(),
+        };
+      });
+
+      afterEach(() => {
+        mockRenderingSetupDeps.userSettings.getUserSettings.mockReset();
+      });
+
+      it.each([true, false])(
+        'embeds installTranslationResilience: %s in the bootstrap tag',
+        async (installTranslationResilience) => {
+          mockRenderingSetupDeps.userSettings.getUserSettings.mockResolvedValue({
+            installTranslationResilience,
+          } as UserSettings);
+          await service.preboot(mockRenderingPrebootDeps);
+          const { render } = await service.setup(mockRenderingSetupDeps);
+
+          const { body: content } = await render(createKibanaRequest(), uiSettings);
+          const dom = load(content);
+          const data = JSON.parse(dom('kbn-translation-resilience').attr('data') ?? '{}');
+
+          expect(data).toEqual({ installTranslationResilience });
+        }
+      );
+    });
   });
 
   describe('start()', () => {
