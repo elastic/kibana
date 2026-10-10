@@ -126,6 +126,35 @@ describe('ruleJustifyingVerdict', () => {
     ).toBe(OFFICE_CMD);
   });
 
+  it('keeps a same-subject denial on its rule across a conjunction', () => {
+    // The subject of "does not cover this" is the Office rule, though "but" splits the clause.
+    expect(
+      ruleJustifyingVerdict(
+        `covered_enabled: ${OFFICE_CMD} is enabled, but does not cover this. ${POWERSHELL} covers this.`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBe(POWERSHELL);
+  });
+
+  it.each([
+    `covered_enabled: **${OFFICE_CMD}** covers this, unlike **${POWERSHELL}**.`,
+    `covered_enabled: ${OFFICE_CMD} covers this behaviour, not ${POWERSHELL}.`,
+    `covered_enabled: ${OFFICE_CMD} covers it, which is not covered by ${POWERSHELL}.`,
+  ])('denies the rule a cue takes as its object: %s', (answer) => {
+    expect(ruleJustifyingVerdict(answer, 'covered_enabled', SIBLING_RULES)).toBe(OFFICE_CMD);
+  });
+
+  it('keeps a cue in a lead-in clause that names no rule off the rule after it', () => {
+    expect(
+      ruleJustifyingVerdict(
+        `covered_enabled: unlike the default config, ${OFFICE_CMD} covers this.`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBe(OFFICE_CMD);
+  });
+
   it('keeps a trailing denial on its own clause across a "but" contrast', () => {
     // `not` is equally far from both names; the clause break pins it to the rule it follows.
     expect(

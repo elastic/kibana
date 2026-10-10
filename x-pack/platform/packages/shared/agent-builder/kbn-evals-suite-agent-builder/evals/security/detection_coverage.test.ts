@@ -117,6 +117,15 @@ describe('detection coverage near-miss evals', () => {
     ).rejects.toThrow();
   });
 
+  it('rejects an answer whose Office rule "is enabled, but does not cover this"', async () => {
+    await expect(
+      runVerdictTest(
+        nearMissNames[0],
+        `covered_enabled: ${COVERAGE_RULE_NAMES.officeCmd} is enabled, but does not cover this. ${COVERAGE_RULE_NAMES.powershell} covers this.`
+      )
+    ).rejects.toThrow();
+  });
+
   it('rejects an answer that credits the PowerShell sibling while naming the Office rule', async () => {
     await expect(
       runVerdictTest(

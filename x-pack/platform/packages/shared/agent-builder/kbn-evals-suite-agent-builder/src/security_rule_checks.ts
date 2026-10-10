@@ -62,6 +62,9 @@ const NEGATION_WINDOW = 30;
 const NEGATION_CUE = /\b(?:not|never|unlike|without|cannot|neither|nor|none)\b|n['’]t/;
 /** Sub-clause boundaries inside a statement: a negation cue never reaches across one. */
 const CLAUSE_BREAK = /[,:—–]|\b(?:but|while|whereas|although|though|and|or)\b/;
+/** Text between a cue and the rule it takes as object: markup, an article, or a passive "by". */
+const DIRECT_OBJECT =
+  /^[\s*_`"'(]*(?:(?:covered|detected|caught|flagged|matched)\s+by\s+)?(?:the\s+)?[\s*_`"'(]*$/;
 /** Language that credits a rule with covering the behaviour under discussion. */
 const COVERAGE_CREDIT =
   /\b(?:covers?|covering rule|matching rule|matches?|detects?|catches|flags)\b/;
@@ -94,14 +97,17 @@ interface Span {
 /**
  * Which rule mentions in one statement a negation cue denies.
  *
- * A cue is about a name it sits right beside: inside the same statement and within
- * `NEGATION_WINDOW` of it ("unlike X", "X does not cover this"). When two rules are named in one
- * statement, the text between them is shared, so a cue in it lies within both windows. It
- * belongs only to a name in its own sub-clause, so no `CLAUSE_BREAK` may stand between the
- * cue and the name: in "<a> covers this, unlike <b>" the `unlike` is about `<b>`, and in "<a>
- * does not, but <b> does cover this" the `not` is about `<a>`. If both names qualify, the nearer
- * one owns the cue and a tie goes to the later name. Without ownership one cue denies both
- * names, and the verdict is left with no rule, or with the wrong one.
+ * A cue negates one thing, so it must not deny every rule named within `NEGATION_WINDOW` of
+ * it: in "<a> covers this, unlike <b>" that would deny `<a>` too and leave the verdict with no
+ * rule, or with the wrong one. The cue's target is read in grammatical order:
+ *
+ * 1. Its object, when a rule follows it directly ("unlike X", "not **X**", "without the X",
+ *    "not covered by X").
+ * 2. Otherwise the subject of its clause: the nearest rule named before it within the window.
+ *    The subject carries across a conjunction, so "<a> is enabled, but does not cover this" and
+ *    "<a> does not, but <b> does cover this" both deny `<a>`.
+ * 3. Otherwise a rule after it in its own sub-clause; a `CLAUSE_BREAK` in between means the
+ *    cue belongs to a clause that names no rule.
  */
 const deniedMentions = (haystack: string, mentions: Span[], statement: Statement): boolean[] => {
   const denied = mentions.map(() => false);
@@ -110,26 +116,24 @@ const deniedMentions = (haystack: string, mentions: Span[], statement: Statement
   for (let match = cues.exec(text); match; match = cues.exec(text)) {
     const cueStart = statement.start + match.index;
     const cueEnd = cueStart + match[0].length;
+    const following = mentions.findIndex((mention) => mention.at >= cueEnd);
+    const preceding = mentions.reduce(
+      (found, mention, index) => (mention.end <= cueStart ? index : found),
+      -1
+    );
+    const afterCue = following === -1 ? '' : haystack.slice(cueEnd, mentions[following].at);
     let owner = -1;
-    let ownerGap = Infinity;
-    mentions.forEach((mention, index) => {
-      let between: string;
-      if (cueEnd <= mention.at) {
-        if (mention.at - cueStart > NEGATION_WINDOW) return;
-        between = haystack.slice(cueEnd, mention.at);
-      } else if (cueStart >= mention.end) {
-        if (cueEnd - mention.end > NEGATION_WINDOW) return;
-        between = haystack.slice(mention.end, cueStart);
-      } else {
-        return; // the cue is part of the rule's own name
-      }
-      if (CLAUSE_BREAK.test(between)) return;
-      // Mentions are in reading order, so `<=` hands a tie to the later name.
-      if (between.length <= ownerGap) {
-        owner = index;
-        ownerGap = between.length;
-      }
-    });
+    if (following !== -1 && DIRECT_OBJECT.test(afterCue)) {
+      owner = following;
+    } else if (preceding !== -1 && cueEnd - mentions[preceding].end <= NEGATION_WINDOW) {
+      owner = preceding;
+    } else if (
+      following !== -1 &&
+      mentions[following].at - cueStart <= NEGATION_WINDOW &&
+      !CLAUSE_BREAK.test(afterCue)
+    ) {
+      owner = following;
+    }
     if (owner !== -1) denied[owner] = true;
   }
   return denied;
