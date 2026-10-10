@@ -371,7 +371,15 @@ export const MINIMUM_CONFIDENCE_SCORE_HELP_TEXT = i18n.translate(
   'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreHelpText',
   {
     defaultMessage:
-      'False positive alerts must meet or exceed this confidence score to be surfaced for review or auto-closed. Alerts below the threshold are still tagged with the verdict but require no action. Lower values surface more alerts; higher values are more conservative.',
+      'Lowest confidence at which a false positive is surfaced for review or auto-closed.',
+  }
+);
+
+export const MINIMUM_CONFIDENCE_SCORE_DETAIL_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreDetailText',
+  {
+    defaultMessage:
+      'Alerts below the threshold are still tagged with the verdict but require no action. Lower values surface more alerts; higher values are more conservative.',
   }
 );
 
@@ -380,10 +388,15 @@ export const BUDGET_PER_HOUR_LABEL = i18n.translate(
   { defaultMessage: 'Triage budget per hour' }
 );
 
-export const getBudgetPerHourHelpText = (min: number): string =>
-  i18n.translate('xpack.alertzero.watches.settings.alertTriage.budgetPerHourHelpText', {
+export const BUDGET_PER_HOUR_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.budgetPerHourHelpText',
+  { defaultMessage: 'How much triage work the worker plans each hour, in cost units.' }
+);
+
+export const getBudgetPerHourDetailText = (min: number): string =>
+  i18n.translate('xpack.alertzero.watches.settings.alertTriage.budgetPerHourDetailText', {
     defaultMessage:
-      'How much triage work the worker plans each hour, in cost units. A batch of alerts costs a fixed overhead plus a cost per alert, so a larger budget triages more alerts and uses more model capacity. Each run gets its share of the hourly budget, so changing the schedule does not change the total: a shorter schedule runs more often with smaller runs, and only raising this budget triages more alerts per hour. Between {min} and {max}; the minimum depends on the schedule, because each run needs enough budget to fund at least one batch.',
+      'A batch of alerts costs a fixed overhead plus a cost per alert, so a larger budget triages more alerts and uses more model capacity. The budget is split across runs: a shorter schedule means smaller, more frequent runs, and only raising the budget triages more alerts per hour. Between {min} and {max}; the minimum rises with a shorter schedule so each run can fund at least one batch.',
     values: { min, max: BUDGET_PER_HOUR_MAX },
   });
 
@@ -399,9 +412,13 @@ export const LOOKBACK_HOURS_LABEL = i18n.translate(
 
 export const LOOKBACK_HOURS_HELP_TEXT = i18n.translate(
   'xpack.alertzero.watches.settings.alertTriage.lookbackHoursHelpText',
+  { defaultMessage: 'How many hours back each run looks for alerts to triage.' }
+);
+
+export const LOOKBACK_HOURS_DETAIL_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.lookbackHoursDetailText',
   {
-    defaultMessage:
-      'How many hours back each run looks for alerts to triage. Alerts older than this are not triaged. Between {min} and {max}.',
+    defaultMessage: 'Alerts older than this are not triaged. Between {min} and {max}.',
     values: { min: LOOKBACK_HOURS_MIN, max: LOOKBACK_HOURS_MAX },
   }
 );
