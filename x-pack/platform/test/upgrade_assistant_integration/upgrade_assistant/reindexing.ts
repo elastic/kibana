@@ -21,6 +21,16 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const retry = getService('retry');
+
+  const getLifecycleDateMillis = async (index: string) =>
+    retry.try(async () => {
+      const { indices } = await es.ilm.explainLifecycle({ index });
+      const explain = indices[index];
+      const lifecycleDate = explain.managed ? explain.lifecycle_date_millis : undefined;
+      expect(lifecycleDate).to.be.a('number');
+      return lifecycleDate;
+    });
 
   // Utility function that keeps polling API until reindex operation has completed or failed.
   const waitForReindexToComplete = async (indexName: string) => {
@@ -212,6 +222,98 @@ export default function ({ getService }: FtrProviderContext) {
       await es.indices.delete({
         index: lastState.newIndexName,
       });
+    });
+
+    it('should preserve the ILM lifecycle date of the original index', async () => {
+      const indexName = 'ilm-managed-data';
+      const policyName = 'ua-reindex-ilm-policy';
+
+      await es.ilm.putLifecycle({
+        name: policyName,
+        policy: { phases: { hot: { actions: {} } } },
+      });
+      await es.indices.create({
+        index: indexName,
+        settings: { 'index.lifecycle.name': policyName },
+      });
+      const originalLifecycleDate = await getLifecycleDateMillis(indexName);
+
+      await supertest
+        .post(`/api/upgrade_assistant/reindex/${indexName}`)
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      const lastState = await waitForReindexToComplete(indexName);
+      expect(lastState.errorMessage).to.equal(null);
+      expect(lastState.status).to.equal(ReindexStatus.completed);
+
+      const { newIndexName } = lastState;
+      expect(await getLifecycleDateMillis(newIndexName)).to.equal(originalLifecycleDate);
+
+      // Cleanup
+      await es.indices.delete({ index: newIndexName });
+      await es.ilm.deleteLifecycle({ name: policyName });
+    });
+
+    it('should reindex an ILM-managed index whose write-blocking phase is already due', async () => {
+      const indexName = 'ilm-readonly-data';
+      const policyName = 'ua-reindex-ilm-readonly-policy';
+      const sixtyDaysAgo = Date.now() - 60 * 24 * 60 * 60 * 1000;
+
+      await es.ilm.putLifecycle({
+        name: policyName,
+        policy: {
+          phases: {
+            hot: { actions: {} },
+            warm: { min_age: '30d', actions: { readonly: {} } },
+          },
+        },
+      });
+      await es.indices.create({
+        index: indexName,
+        settings: {
+          'index.lifecycle.name': policyName,
+          'index.lifecycle.origination_date': sixtyDaysAgo,
+        },
+      });
+      await es.bulk({
+        index: indexName,
+        refresh: true,
+        operations: [{ index: {} }, { foo: 'bar' }, { index: {} }, { foo: 'baz' }],
+      });
+      // Run due ILM phases right away so they would overlap with the reindex
+      await es.cluster.putSettings({ persistent: { 'indices.lifecycle.poll_interval': '1s' } });
+
+      let newIndexName: string | undefined;
+      try {
+        await supertest
+          .post(`/api/upgrade_assistant/reindex/${indexName}`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        const lastState = await waitForReindexToComplete(indexName);
+        newIndexName = lastState.newIndexName;
+        expect(lastState.errorMessage).to.equal(null);
+        expect(lastState.status).to.equal(ReindexStatus.completed);
+        expect((await es.count({ index: lastState.newIndexName })).count).to.be(2);
+
+        // ILM resumes on the new index once the reindex is done
+        await retry.try(async () => {
+          const { indices } = await es.ilm.explainLifecycle({ index: lastState.newIndexName });
+          const explain = indices[lastState.newIndexName];
+          expect(explain.managed).to.be(true);
+          expect(explain.managed && explain.skip).to.be(false);
+          expect(explain.managed && explain.phase).to.be('warm');
+        });
+      } finally {
+        await es.cluster.putSettings({ persistent: { 'indices.lifecycle.poll_interval': null } });
+        // Deleting the new index first also removes the alias, so the original name can be cleaned up if left over
+        if (newIndexName) {
+          await es.indices.delete({ index: newIndexName, ignore_unavailable: true });
+        }
+        await es.indices.delete({ index: indexName, ignore_unavailable: true });
+        await es.ilm.deleteLifecycle({ name: policyName });
+      }
     });
 
     it('shows reindex and read-only warnings', async () => {
