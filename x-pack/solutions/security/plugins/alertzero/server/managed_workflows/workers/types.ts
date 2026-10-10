@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import type { UpdateWorkerRequestBody, WorkerSettings } from '@kbn/alertzero-common';
+import type { WorkerSettings, WorkerSettingsWrite } from '@kbn/alertzero-common';
 import type { ManagedWorkflowTemplateValues } from '@kbn/workflows/managed';
 
-export type WorkerSettingsPatch = Pick<
-  UpdateWorkerRequestBody,
-  'autonomyLevel' | 'scheduleInterval'
->;
-
 export interface WorkerSettingsRegistration {
+  /** Template values for a fresh per-space install. */
   createDefaultValues(): ManagedWorkflowTemplateValues;
-  migrate(values: Record<string, unknown>): {
-    values: ManagedWorkflowTemplateValues;
-    migrated: boolean;
-  };
+  /**
+   * Composes the patched settings and validates them against the Worker's complete schema.
+   * `invalid` carries the issues, each naming its field.
+   */
   applyPatch(
     values: ManagedWorkflowTemplateValues,
-    patch: WorkerSettingsPatch
-  ): { values: ManagedWorkflowTemplateValues } | { rejected: string };
-  /** Return the raw projection; the registry test guards against API schema stripping. */
+    patch: WorkerSettingsWrite
+  ): { values: ManagedWorkflowTemplateValues } | { invalid: string };
+  /**
+   * Parses persisted template values into complete settings, after the same upgrade the Worker's
+   * renderer applies. Throws when a present value does not match the current shape.
+   */
   toSettings(values: ManagedWorkflowTemplateValues): WorkerSettings;
 }

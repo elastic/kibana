@@ -76,7 +76,7 @@ describe('NumberFormat', () => {
 
   test('null input', () => {
     const formatter = new NumberFormat({}, getConfig);
-    expect(formatter.convertToText(null)).toMatchInlineSnapshot(`"${NULL_LABEL}"`);
+    expect(formatter.convertToText(null)).toBe(NULL_LABEL);
     expectReactElementWithNull(formatter.convertToReact(null));
   });
 

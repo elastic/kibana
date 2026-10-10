@@ -1,5 +1,5 @@
 {
-  "sha1": "8eaaf97166ada62351965bd2ef164d786f02b7a4",
+  "sha1": "830dd8bb3ff66650bc97bbc2f7f03f5d02073264",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -10,12 +10,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policies_crud.spec.ts",
-        "line": 42,
-        "column": 44
+        "line": 46,
+        "column": 24
       }
     },
     {
@@ -23,13 +23,12 @@
       "title": "Action Policies - create and edit edits an existing policy without dropping untouched fields",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policies_crud.spec.ts",
-        "line": 87,
-        "column": 41
+        "line": 96,
+        "column": 26
       }
     },
     {
@@ -41,8 +40,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policies_privileges.spec.ts",
-        "line": 36,
-        "column": 23
+        "line": 37,
+        "column": 7
       }
     },
     {
@@ -54,8 +53,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policies_privileges.spec.ts",
-        "line": 46,
-        "column": 47
+        "line": 48,
+        "column": 13
       }
     },
     {
@@ -67,7 +66,33 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policies_privileges.spec.ts",
-        "line": 64,
+        "line": 65,
+        "column": 13
+      }
+    },
+    {
+      "id": "3e64621cea81372-624163cd0374a5d",
+      "title": "Action Policies - affected rules navigates from the details flyout to the affected rules and back",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policy_affected_rules.spec.ts",
+        "line": 45,
+        "column": 23
+      }
+    },
+    {
+      "id": "3e64621cea81372-3f409768cd06e1b",
+      "title": "Action Policies - affected rules hides the link from users who cannot read rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policy_affected_rules.spec.ts",
+        "line": 79,
         "column": 11
       }
     }

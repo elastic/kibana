@@ -37,6 +37,7 @@ import {
   editRuleRoute,
   createRuleFromTemplateRoute,
 } from '@kbn/rule-data-utils';
+import type { LocatorHost } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { CasesService } from '@kbn/response-ops-alerts-table/types';
@@ -101,6 +102,8 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   uiActions?: UiActionsStart;
   cps?: CPSPluginStart;
   inspector?: InspectorStart;
+  hideListBackButton?: boolean;
+  host?: LocatorHost;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
@@ -130,7 +133,7 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
 
 export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) => {
   const {
-    actions: { validateEmailAddresses, enabledEmailServices },
+    actions: { validateEmailAddresses, enabledEmailServices, isInboundEventsEnabled },
     application: { navigateToApp },
     isServerless,
   } = useKibana().services;
@@ -138,7 +141,7 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
   return (
     <ConnectorProvider
       value={{
-        services: { validateEmailAddresses, enabledEmailServices },
+        services: { validateEmailAddresses, enabledEmailServices, isInboundEventsEnabled },
         isServerless,
       }}
     >

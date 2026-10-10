@@ -14,9 +14,10 @@ import type {
   ConverseInput,
   ChatAgentEvent,
   AgentConfigurationOverrides,
-  ConversationAction,
   AgentExecutionMode,
+  AutoApprovedApi,
   ChatEvent,
+  ConversationWriteSource,
   ExecutionStatus,
   InteractivityConfig,
   SerializedExecutionError,
@@ -37,6 +38,7 @@ import type {
   SkillsService,
   PluginsService,
   RenderersService,
+  ConversationEventTypesService,
   ToolManager,
   TodoStateManager,
   IFilesystemService,
@@ -49,6 +51,7 @@ import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
 import type { AiIndexResolver } from './ai_index_resolver';
+import type { AgentRegistry } from './registry';
 
 /**
  * Read/write conversation store contract exposed to agent handlers.
@@ -59,7 +62,8 @@ export interface ConversationClient {
   /** Validates, serializes, and merges `updates` into the conversation metadata. */
   patchMetadata(
     conversationId: string,
-    updates: Record<string, unknown>
+    updates: Record<string, unknown>,
+    options: { source: ConversationWriteSource }
   ): Promise<{ changedFields: string[] }>;
 }
 
@@ -96,6 +100,7 @@ export interface ExecuteSubAgentParams {
   parentExecutionId: string;
   prompt: string;
   connectorId?: string;
+  autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
 
@@ -110,11 +115,13 @@ export interface CreateSubAgentParams {
   conversationId: string;
   prompt: string;
   connectorId?: string;
+  autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
 
 /** Parameters for sending a message to an existing persistent sub-agent. */
 export interface SendToSubAgentParams {
+  agentId: string;
   parentExecutionId: string;
   /** Existing child conversation id */
   conversationId: string;
@@ -157,19 +164,60 @@ export interface ExperimentalFeatures {
   aiIndices: boolean;
   /** Whether context-aware skill filtering is enabled */
   relevantSkills: boolean;
-  /** Whether the sub-agent execution feature is enabled */
-  subagents: boolean;
   /** Whether the todo list tool and task-management prompt are enabled */
   todos: boolean;
-  /** Whether external ES|QL datasets are surfaced to data-source tools */
-  datasets: boolean;
-  /** Whether the ask_user_question HITL tool is enabled */
-  askUserQuestion: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
   bash: boolean;
-  /** Whether the HTTP API introspection tools (discover/describe/execute) are enabled */
-  apiTools: boolean;
+  /** Whether the `discover_apis` tool is enabled. */
+  apiDiscovery: boolean;
 }
+
+/**
+ * Kind of environment the Kibana instance runs in.
+ * - `serverless`: Elastic Cloud Serverless
+ * - `ech`: Elastic Cloud Hosted
+ * - `ece`: Elastic Cloud Enterprise
+ * - `self_managed`: on-prem / self-managed
+ */
+export type DeploymentEnvironment = 'serverless' | 'ech' | 'ece' | 'self_managed';
+
+/**
+ * Information about the deployment the agent runs in, surfaced to the agent in its system prompt.
+ */
+export interface DeploymentContext {
+  environment: DeploymentEnvironment;
+  /** Stack version. Not set on serverless. */
+  version?: string;
+  /** Whether Kibana is configured to run without access to the public internet. */
+  airgapped: boolean;
+  /** Serverless project details. Only set on serverless. */
+  serverless?: {
+    /** Project type, e.g. `observability` or `search`. */
+    projectType: string;
+    /** Product tier, for project types that have tiers, e.g. `complete`. */
+    productTier?: string;
+  };
+  /** Solution view of the active space, e.g. `oblt` or `classic`. Not set on serverless. */
+  solution?: string;
+  /** License of the deployment. Not set on serverless. */
+  license?: {
+    type?: string;
+    status?: string;
+  };
+}
+
+/**
+ * How a run relates to its conversation:
+ * - `readWrite`: the run persists what belongs to its conversation (round, metadata, workspace,
+ *   child conversations).
+ * - `readOnly`: the run loaded an existing conversation as context and stores nothing to it
+ *   (ephemeral run). Unrelated to the presentational `read_only` conversation flag.
+ * - `none`: the run stores nothing and its conversation, if any, is a placeholder that is never
+ *   persisted (one-shot run).
+ *
+ * Unrelated to conversation access control: the caller's permissions are checked separately.
+ */
+export type ExecutionConversationAccess = 'readWrite' | 'readOnly' | 'none';
 
 export interface AgentHandlerContext {
   /**
@@ -181,6 +229,10 @@ export interface AgentHandlerContext {
    * Id of the space associated with the request
    */
   spaceId: string;
+  /**
+   * Information about the deployment (environment, version, license...) the agent runs in.
+   */
+  deployment: DeploymentContext;
   /**
    * The resolved connector ID for this execution, if any.
    */
@@ -227,6 +279,13 @@ export interface AgentHandlerContext {
    * runner (treated as no renderers).
    */
   renderers?: RenderersService;
+  /**
+   * Conversation event types service, giving read access to the custom conversation
+   * event types registered in agent builder (used to format stored events for the LLM).
+   * Optional: absent when the context is constructed outside agentBuilder's runner
+   * (custom events are then omitted from the agent context).
+   */
+  conversationEvents?: ConversationEventTypesService;
   /**
    * Skills service to interact with skills.
    */
@@ -308,9 +367,17 @@ export interface AgentHandlerContext {
    */
   parentExecutionId?: string;
   /**
+   * How this run relates to its conversation, see {@link ExecutionConversationAccess}.
+   */
+  conversationAccess: ExecutionConversationAccess;
+  /**
    * Sub-agent executor for spawning child agent executions.
    */
   subAgentExecutor: SubAgentExecutor;
+  /**
+   * Agent registry scoped to the current user
+   */
+  agentRegistry: AgentRegistry;
   /**
    * Conversation store client scoped to the current user. Prefer this over
    * issuing raw ES queries against the conversation index.
@@ -393,10 +460,6 @@ export interface AgentParams {
    * These override the stored agent configuration for this execution only.
    */
   configurationOverrides?: AgentConfigurationOverrides;
-  /**
-   * The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).
-   */
-  action?: ConversationAction;
   /**
    * The execution ID for this run. Used for sub-agent parent tracking.
    */

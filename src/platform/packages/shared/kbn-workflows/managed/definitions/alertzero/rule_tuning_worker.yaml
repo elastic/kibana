@@ -24,6 +24,14 @@ triggers:
   - type: manual
     inputs:
       properties:
+        autonomy_level:
+          type: string
+          enum: [manual, assisted]
+          default: assisted
+          description: >-
+            Detection Watch autonomy level of the dispatching worker, forwarded to
+            every review it launches. "manual" makes each review wait for an analyst
+            before diagnosis.
         min_fp_count:
           type: integer
           # Floor of 2: a single-FP group makes ES|QL return alert_ids as a scalar,
@@ -67,8 +75,10 @@ outputs:
     type: boolean
 consts:
   # Worker settings. Scheduled runs carry no inputs, so every use goes through
-  # `inputs.x | default: consts.x`; a manual run can override any of them.
-  analysis_window_days: 14
+  # `inputs.x | default: consts.x`. The per-space Rule Tuning worker forwards
+  # analysis_window_days, min_fp_count and min_fp_rate_pct from its settings, so
+  # these three are reached only by a manual run that omits them.
+  analysis_window_days: 7
   min_fp_count: 10
   min_fp_rate_pct: 50
   max_rules_per_sweep: 10
@@ -83,6 +93,64 @@ consts:
   no_rows: []
   reviewed_tag: detection-watch:tuning-reviewed
 steps:
+  # Expire pending tuning proposals whose rule was edited or deleted after they
+  # were created, so nobody is asked to approve a change that can't be applied.
+  - name: list_pending_tuning_proposals
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals"
+      headers:
+        elastic-api-version: "1"
+      query:
+        status: pending
+        origin: alertzero
+        category: configure
+        size: 100
+    on-failure:
+      continue: true
+
+  - name: expire_stale_tuning_proposals
+    type: foreach
+    foreach: "${{ steps.list_pending_tuning_proposals.output.proposals | default: consts.no_rows | where: 'actionWorkflowId', 'system-alertzero-action-edit-rule' }}"
+    steps:
+      - name: fetch_proposal_rule
+        type: kibana.request
+        with:
+          method: GET
+          path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ foreach.item.actionInput.id | url_encode }}"
+          headers:
+            elastic-api-version: "2023-10-31"
+        on-failure:
+          continue: true
+
+      - name: expire_deleted_rule_proposal
+        type: proposals.updateProposal
+        if: "${{ steps.fetch_proposal_rule.error != nil and steps.fetch_proposal_rule.error.message contains 'HTTP 404' }}"
+        with:
+          proposalId: "{{ foreach.item.id }}"
+          status: expired
+          rationale: >-
+            The rule was deleted after this proposal was created, so this tuning
+            can't be applied.
+        on-failure:
+          continue: true
+
+      - name: expire_changed_rule_proposal
+        type: proposals.updateProposal
+        if: >-
+          ${{ steps.fetch_proposal_rule.error == nil
+            and foreach.item.actionInput.expected_revision != nil
+            and steps.fetch_proposal_rule.output.revision != foreach.item.actionInput.expected_revision }}
+        with:
+          proposalId: "{{ foreach.item.id }}"
+          status: expired
+          rationale: >-
+            The rule was changed by "{{ steps.fetch_proposal_rule.output.updated_by }}"
+            after this proposal was created, so this tuning can't be applied.
+        on-failure:
+          continue: true
+
   # A review can outlive its sweep (sweep cancelled or failed while the child sits
   # at its gate, or a review started by hand). Its rule would be re-harvested until
   # the gate resolves, wasting one of the max_rules_per_sweep slots on a branch the
@@ -160,8 +228,10 @@ steps:
         | EVAL is_fp = `kibana.alert.workflow_status` == "closed"
             AND `kibana.alert.workflow_reason` == "false_positive"
         | INLINE STATS reviewed_watermark = MAX(@timestamp)
-            WHERE MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
+            WHERE MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}"),
+            latest_revision = MAX(`kibana.alert.rule.revision`)
           BY `kibana.alert.rule.uuid`
+        | WHERE `kibana.alert.rule.revision` == latest_revision
         | EVAL is_unreviewed_fp = is_fp
             AND (reviewed_watermark IS NULL OR @timestamp > reviewed_watermark)
         | EVAL fp_recency_key = CONCAT(DATE_FORMAT("yyyyMMddHHmmssSSS", @timestamp), "|", _id)
@@ -170,7 +240,7 @@ steps:
             fp_count = COUNT(*) WHERE is_unreviewed_fp,
             last_fp_at = MAX(@timestamp) WHERE is_unreviewed_fp,
             recent_keys = TOP(fp_recency_key, {{ consts.max_diagnosis_ids }}, "desc") WHERE is_unreviewed_fp
-          BY `kibana.alert.rule.uuid`
+          BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`
         | WHERE fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}
           AND fp_rate_count * 100 >= total_count * {{ inputs.min_fp_rate_pct | default: consts.min_fp_rate_pct }}
         | SORT fp_count DESC
@@ -179,10 +249,13 @@ steps:
         | EVAL alert_id = SUBSTRING(recent_keys, 19)
         | STATS fp_count = MAX(fp_count),
             last_fp_at = MAX(last_fp_at),
-            alert_ids = VALUES(alert_id)
-          BY `kibana.alert.rule.uuid`
+            alert_ids = VALUES(alert_id),
+            total_count = MAX(total_count),
+            fp_rate_count = MAX(fp_rate_count)
+          BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`
+        | EVAL rule_revision_key = CONCAT(",", `kibana.alert.rule.uuid`, "@", TO_STRING(`kibana.alert.rule.revision`), ",")
         | SORT fp_count DESC
-        | KEEP `kibana.alert.rule.uuid`, fp_count, last_fp_at, alert_ids
+        | KEEP `kibana.alert.rule.uuid`, fp_count, last_fp_at, alert_ids, total_count, fp_rate_count, rule_revision_key
     on-failure:
       continue: true
 
@@ -205,18 +278,16 @@ steps:
     on-failure:
       continue: true
 
-  - name: resolve_enabled_rules
+  - name: resolve_current_revisions
     type: data.set
-    if: "${{ steps.list_enabled_candidates.output.data != null }}"
     with:
-      enabled_rule_ids: "${{ steps.list_enabled_candidates.output.data | map: 'id' | join: ',' | prepend: 'enabled:' }}"
+      rule_revision_keys: ",{% for rule in steps.list_enabled_candidates.output.data %}{{ rule.id }}@{{ rule.revision }},{% endfor %}"
 
-  # Only enabled rules are included in the fan-out.
   - name: resolve_fanout_rows
     type: data.set
     with:
-      enabled_rule_ids: "${{ steps.resolve_enabled_rules.output.enabled_rule_ids }}"
-      rows: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_enabled_rules.output.enabled_rule_ids == null or steps.resolve_enabled_rules.output.enabled_rule_ids contains row[0]' | slice: 0, steps.collect_candidates.output.fanout_limit }}"
+      rule_revision_keys: "${{ steps.resolve_current_revisions.output.rule_revision_keys }}"
+      rows: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_current_revisions.output.rule_revision_keys contains row[6]' | slice: 0, steps.collect_candidates.output.fanout_limit }}"
 
   # One review execution per rule, launched synchronously inside a parallel
   # branch so this sweep joins once every gate has settled. The gate itself cannot
@@ -245,11 +316,15 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-security-rule-tuning-review
+          run-as-mode: inherit
           inputs:
             rule_uuid: "{{ foreach.item.0 }}"
             fp_count: "${{ foreach.item.1 }}"
             last_fp_at: "{{ foreach.item.2 }}"
             alert_ids: "${{ foreach.item.3 }}"
+            total_alert_count: "${{ foreach.item.4 }}"
+            total_fp_count: "${{ foreach.item.5 }}"
+            autonomy_level: "{{ inputs.autonomy_level | default: 'assisted' }}"
             analysis_window_days: "${{ inputs.analysis_window_days | default: consts.analysis_window_days }}"
             preview_invocation_count: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
             parent_run_id: "{{ execution.id }}"
@@ -274,4 +349,5 @@ steps:
       reviews_approved: "${{ steps.summarize_decisions.output.reviews_approved }}"
       reviews_failed: "${{ steps.summarize_decisions.output.reviews_failed }}"
       rules_applied: "${{ steps.summarize_decisions.output.rules_applied }}"
-      harvest_failed: "${{ steps.harvest_fp_alerts_by_rule.error != null }}"
+      # The rule lookup is part of the harvest: without it no rule is reviewed.
+      harvest_failed: "${{ steps.harvest_fp_alerts_by_rule.error != null or steps.list_enabled_candidates.error != null }}"

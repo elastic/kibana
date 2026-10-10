@@ -81,7 +81,7 @@ export class ScoutJestReporter extends BaseReporter {
   }
 
   private getFileOwners(filePath: string): string[] {
-    return getOwningTeamsForPath(filePath, this.codeOwnersEntries);
+    return getOwningTeamsForPath(path.resolve(REPO_ROOT, filePath), this.codeOwnersEntries);
   }
 
   private getOwnerAreas(owners: string[]): CodeOwnerArea[] {

@@ -11,12 +11,12 @@
  * Tests for timepicker and data view switching behavior.
  */
 
-import type { PageObjects } from '@kbn/scout';
-import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverPageObjects } from '../fixtures';
+import { spaceTest } from '../fixtures';
 
 const expectTimePickerState = async (
-  datePicker: PageObjects['datePicker'],
+  datePicker: DiscoverPageObjects['datePicker'],
   expected: 'enabled' | 'disabled'
 ) => {
   await expect(datePicker.getTimePickerControl()).toBeVisible();
@@ -98,7 +98,7 @@ spaceTest.describe('Data view without timefield', { tag: '@local-stateful-classi
       await page.goBack();
       await pageObjects.dataGrid.waitForDocTableRendered();
 
-      await expect(page.testSubj.locator('discover-dataView-switch-link')).toHaveText(
+      await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(
         'without-timefield'
       );
 

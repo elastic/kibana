@@ -73,7 +73,6 @@ describe('findRuleTemplates', () => {
         "/internal/alerting/rule_template/_find",
         Object {
           "query": Object {
-            "default_search_operator": undefined,
             "page": 1,
             "per_page": 10,
             "rule_type_id": undefined,
@@ -101,7 +100,6 @@ describe('findRuleTemplates', () => {
       http,
       page: 1,
       perPage: 20,
-      defaultSearchOperator: 'AND',
       ruleTypeId: 'specific-rule-type',
       tags: ['production', 'critical'],
     });
@@ -118,7 +116,6 @@ describe('findRuleTemplates', () => {
         page: 1,
         per_page: 20,
         search: undefined,
-        default_search_operator: 'AND',
         sort_field: undefined,
         sort_order: undefined,
         rule_type_id: 'specific-rule-type',

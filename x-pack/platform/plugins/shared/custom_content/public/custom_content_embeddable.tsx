@@ -14,7 +14,7 @@ import type {
   HasEditCapabilities,
   PublishesDataViews,
   PublishesDataLoading,
-  PublishesEsqlUsage,
+  PublishesEsql,
   PublishesWritableTimeRange,
 } from '@kbn/presentation-publishing';
 import {
@@ -40,6 +40,7 @@ import {
   combineLatest,
   distinctUntilChanged,
   EMPTY,
+  finalize,
   from,
   map,
   merge,
@@ -47,8 +48,12 @@ import {
   skip,
   switchMap,
 } from 'rxjs';
-import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import {
+  isExecutionTerminalEvent,
+  isToolUiEvent,
+  type ToolUiEvent,
+} from '@kbn/agent-builder-common';
+import type { BrowserChatEvent } from '@kbn/agent-builder-browser';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   readEsqlQuery,
@@ -63,17 +68,22 @@ import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { css } from '@emotion/react';
 import { getServices } from './services';
 import { getTelemetry } from './telemetry';
+import { MAX_PREVIEW_HEIGHT } from '../common/panel_context_attachment';
 import {
-  CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
-  MAX_PREVIEW_HEIGHT,
-} from '../common/panel_context_attachment';
+  CUSTOM_CONTENT_UPDATED_UI_EVENT,
+  type CustomContentUpdatedUiEventData,
+} from '../common/ui_events';
 import {
   buildCustomContentContextAttachment,
   type CustomContentFetchContext,
 } from './utils/chat_integration';
 import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
-import { readPanelContextData } from '../common/read_panel_context_data';
 import type { CustomContentEmbeddableState } from '../server';
+
+const isCustomContentUpdatedUiEvent = (
+  event: BrowserChatEvent
+): event is ToolUiEvent<typeof CUSTOM_CONTENT_UPDATED_UI_EVENT, CustomContentUpdatedUiEventData> =>
+  isToolUiEvent(event, CUSTOM_CONTENT_UPDATED_UI_EVENT);
 
 const panelMeasureCss = css({
   display: 'flex',
@@ -87,7 +97,7 @@ export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState
   HasEditCapabilities &
   PublishesDataViews &
   PublishesDataLoading &
-  PublishesEsqlUsage &
+  PublishesEsql &
   PublishesWritableTimeRange;
 
 export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
@@ -124,7 +134,14 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const esqlQuery$ = new BehaviorSubject<string | undefined>(readEsqlQuery(initialState));
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const previewHtml$ = new BehaviorSubject<string | null>(null);
-    const usesEsql$ = new BehaviorSubject<boolean>(Boolean(readEsqlQuery(initialState)));
+    const isGenerating$ = new BehaviorSubject<boolean>(false);
+    const chatGeneratingCallbacks = {
+      onSubmit: () => isGenerating$.next(true),
+      onClose: () => {
+        if (isGenerating$.getValue()) isGenerating$.next(false);
+      },
+    };
+    const esql$ = new BehaviorSubject<AggregateQuery[]>([]);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const isApproximate$ = new BehaviorSubject<boolean>(false);
     const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
@@ -191,7 +208,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       ...titleManager.api,
       ...timeRangeManager.api,
       serializeState,
-      usesEsql$,
+      esql$,
       approximationApplied$,
       dataViews$,
       dataLoading$,
@@ -237,6 +254,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               closeFlyout();
               agentBuilder.openChat({
                 newConversation: true,
+                ...chatGeneratingCallbacks,
                 attachments: [
                   buildCustomContentContextAttachment({
                     template: draftTemplate,
@@ -320,8 +338,11 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     });
 
     const esqlUsageSubscription = esqlQuery$
-      .pipe(map(Boolean), distinctUntilChanged())
-      .subscribe((usesEsql) => usesEsql$.next(usesEsql));
+      .pipe(
+        map((q) => (q ? [{ esql: q }] : [])),
+        distinctUntilChanged((a, b) => a.length === b.length && a[0]?.esql === b[0]?.esql)
+      )
+      .subscribe(esql$);
 
     // Important for unified search support — KQL bar and filter builder suggestions.
     const dataViewsSubscription = combineLatest([esqlQuery$, projectRouting$])
@@ -367,6 +388,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           esqlVariables,
           previewHtml,
           timeRange,
+          isGenerating,
         ] = useBatchedPublishingSubjects(
           esqlQuery$,
           template$,
@@ -377,7 +399,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           filters$,
           esqlVariables$,
           previewHtml$,
-          effectiveTimeRange$
+          effectiveTimeRange$,
+          isGenerating$
         );
         const [generationVersion, setGenerationVersion] = useState(0);
 
@@ -409,41 +432,41 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
           const sub = agentBuilder.events.ui.activeConversation$
             .pipe(
+              distinctUntilChanged((a, b) => a?.id === b?.id),
               switchMap((conversation) =>
-                conversation?.id ? agentBuilder.events.getChatEvents$(conversation.id) : EMPTY
+                conversation?.id
+                  ? agentBuilder.events.getChatEvents$(conversation.id).pipe(
+                      catchError(() => {
+                        isGenerating$.next(false);
+                        return EMPTY;
+                      }),
+                      finalize(() => {
+                        if (isGenerating$.getValue()) isGenerating$.next(false);
+                      })
+                    )
+                  : EMPTY
               )
             )
             .subscribe((event) => {
-              if (!isRoundCompleteEvent(event)) return;
-
-              // A round can touch several attachments — the dashboard's, and one per custom content
-              // panel. Scan every agent-authored ref instead of only the first, or an unrelated
-              // attachment leading the list would make this panel skip its own update.
-              const agentRefs = event.data.round.input.attachment_refs?.filter(
-                (ref) =>
-                  ref.actor === ATTACHMENT_REF_ACTOR.agent &&
-                  (ref.operation === 'updated' || ref.operation === 'created')
-              );
-              if (!agentRefs?.length) return;
-
-              for (const ref of agentRefs) {
-                const updatedAttachment = event.data.attachments?.find(
-                  (a) =>
-                    a.id === ref.attachment_id && a.type === CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE
-                );
-                if (!updatedAttachment) continue;
-
-                const data = readPanelContextData(updatedAttachment);
-                if (!data || data.embeddable_id !== uuid) continue;
-
-                template$.next(data.panel_template);
-                esqlQuery$.next(data.esql_query);
-                getTelemetry().trackAgentUpdateApplied({
-                  hasEsqlQuery: Boolean(data.esql_query),
-                  templateSizeBytes: data.panel_template.length,
-                });
-                break;
+              if (isExecutionTerminalEvent(event)) {
+                if (isGenerating$.getValue()) isGenerating$.next(false);
+                return;
               }
+
+              if (!isCustomContentUpdatedUiEvent(event)) return;
+
+              const {
+                data: { data },
+              } = event.data;
+              if (data.embeddable_id !== uuid) return;
+
+              template$.next(data.panel_template);
+              esqlQuery$.next(data.esql_query);
+              if (isGenerating$.getValue()) isGenerating$.next(false);
+              getTelemetry().trackAgentUpdateApplied({
+                hasEsqlQuery: Boolean(data.esql_query),
+                templateSizeBytes: data.panel_template.length,
+              });
             });
 
           return () => sub.unsubscribe();
@@ -469,6 +492,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           if (tracksOverlays(parentApi)) parentApi.clearOverlays();
           agentBuilder.openChat({
             newConversation: true,
+            ...chatGeneratingCallbacks,
             attachments: [
               buildCustomContentContextAttachment({
                 template: '',
@@ -502,6 +526,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               esqlVariables={esqlVariables}
               previewHtml={previewHtml}
               isAiAvailable={Boolean(agentBuilder)}
+              isGenerating={isGenerating}
               onLoadingChange={handleLoadingChange}
               setApproximationApplied={setApproximationApplied}
               onGenerateWithChat={handleGenerateWithChat}

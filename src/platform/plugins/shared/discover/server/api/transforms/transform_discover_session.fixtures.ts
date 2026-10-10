@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
 import {
   DataGridDensity,
   DiscoverTabType,
   UnifiedHistogramSuggestionType,
-} from '@kbn/discover-utils';
+} from '@kbn/discover-session-constants';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
-import type { DiscoverSessionApiData } from '../schema';
 
 export const discoverSessionAttributes: DiscoverSessionAttributes = {
   title: 'all_props',
@@ -305,11 +305,9 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       header_row_height: 1,
       density: DataGridDensity.COMPACT,
       documents_display_mode: 'json',
-      json_mode_settings: {
-        hide_nulls: true,
-        wrap_lines: false,
-        default_rendered_nodes: 10,
-      },
+      hide_nulls: true,
+      wrap_lines: false,
+      default_rendered_nodes: 10,
       query: {
         expression: '',
         language: 'kql',
@@ -354,25 +352,20 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       ],
       column_order: [],
       row_height: 1,
-      sample_size: 100,
       rows_per_page: 25,
       header_row_height: 1,
       density: DataGridDensity.COMPACT,
       documents_display_mode: 'json',
-      json_mode_settings: {
-        hide_nulls: true,
-        wrap_lines: false,
-        default_rendered_nodes: 10,
-      },
+      hide_nulls: true,
+      wrap_lines: false,
+      default_rendered_nodes: 10,
       data_source: {
         type: 'esql',
         query: 'FROM logs*,-logstash*,filebeat-* | WHERE ??field_name == ?field_value',
       },
       hide_chart: false,
       hide_table: false,
-      hide_aggregated_preview: false,
       breakdown_field: 'transaction.id',
-      chart_interval: 'h',
       time_range: {
         from: 'now/d',
         to: 'now/d',

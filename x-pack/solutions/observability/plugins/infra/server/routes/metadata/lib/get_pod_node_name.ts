@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { first, get } from 'lodash';
-import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { first } from 'lodash';
+import { findInventoryFields, K8S_NODE_NAME } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import type { InfraSourceConfiguration } from '../../../lib/sources';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
@@ -18,9 +19,11 @@ export const getPodNodeName = async (
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
   nodeType: 'host' | 'pod' | 'container',
-  timeRange: { from: number; to: number }
+  timeRange: { from: number; to: number },
+  schema?: DataSchemaFormat
 ): Promise<string | undefined> => {
-  const fields = findInventoryFields(nodeType);
+  const fields = findInventoryFields(nodeType, schema);
+  const nodeNameField = schema === 'semconv' ? K8S_NODE_NAME : 'kubernetes.node.name';
   const params = {
     allow_no_indices: true,
     ignore_unavailable: true,
@@ -28,13 +31,14 @@ export const getPodNodeName = async (
     index: sourceConfiguration.metricAlias,
     body: {
       size: 1,
-      _source: ['kubernetes.node.name'],
+      _source: false,
+      fields: [nodeNameField],
       sort: [{ [TIMESTAMP_FIELD]: 'desc' }],
       query: {
         bool: {
           filter: [
             { match: { [fields.id]: nodeId } },
-            { exists: { field: `kubernetes.node.name` } },
+            { exists: { field: nodeNameField } },
             {
               range: {
                 [TIMESTAMP_FIELD]: {
@@ -49,12 +53,21 @@ export const getPodNodeName = async (
       },
     },
   };
-  const response = await framework.callWithRequest<
-    { _source: { kubernetes: { node: { name: string } } } },
-    {}
-  >(requestContext, 'search', params);
+  const response = await framework.callWithRequest<{ fields?: PodNodeNameFields }, {}>(
+    requestContext,
+    'search',
+    params
+  );
   const firstHit = first(response.hits.hits);
-  if (firstHit) {
-    return get(firstHit, '_source.kubernetes.node.name');
-  }
+  const nodeNameValues =
+    schema === 'semconv'
+      ? firstHit?.fields?.[K8S_NODE_NAME]
+      : firstHit?.fields?.['kubernetes.node.name'];
+  const nodeName = nodeNameValues?.[0];
+  return typeof nodeName === 'string' ? nodeName : undefined;
 };
+
+interface PodNodeNameFields {
+  'kubernetes.node.name'?: string[];
+  'k8s.node.name'?: string[];
+}

@@ -51,6 +51,36 @@ const createPluginsStart = () => {
   };
 };
 
+describe('Plugin Stack Alerts management registration', () => {
+  it('registers the Alerts page for project side nav only so it stays out of global search', () => {
+    const management = managementPluginMock.createSetupContract();
+    const plugin = new Plugin(
+      coreMock.createPluginInitializerContext({
+        enableExperimental: [],
+        rules: { enabled: false },
+      })
+    );
+
+    plugin.setup(coreMock.createSetup(), {
+      security: securityMock.createSetup(),
+      management,
+      actions: {
+        validateEmailAddresses: jest.fn(),
+        enabledEmailServices: ['*'],
+        isWebhookSslWithPfxEnabled: jest.fn(),
+      } as unknown as ActionsPublicPluginSetup,
+      share: sharePluginMock.createSetupContract(),
+    });
+
+    expect(management.sections.section.insightsAndAlerting.registerApp).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'triggersActionsAlerts',
+        visibleIn: ['projectSideNav'],
+      })
+    );
+  });
+});
+
 describe('Plugin getClassicRulesPage', () => {
   it('returns a React element for the given page props', () => {
     const plugin = new Plugin(

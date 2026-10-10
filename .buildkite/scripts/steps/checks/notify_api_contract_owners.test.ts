@@ -8,10 +8,24 @@
  */
 
 jest.mock('#pipeline-utils', () => ({
+  KIBANA_COMMENT_SIGIL: 'kbn-message-context',
   upsertComment: jest.fn(),
 }));
 
-import { buildCommentBody, type ImpactEntry } from './notify_api_contract_owners.ts';
+import { mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
+import { upsertComment } from '#pipeline-utils';
+import {
+  buildCommentBody,
+  dedupeByChange,
+  GITHUB_COMMENT_MAX_LENGTH,
+  notifyApiContractOwners,
+  postedCommentLength,
+  readImpactReports,
+  RESOLVED_COMMENT_BODY,
+  type ImpactEntry,
+} from './notify_api_contract_owners.ts';
 
 const entry = (overrides: Partial<ImpactEntry> = {}): ImpactEntry => ({
   path: '/api/spaces/space',
@@ -98,11 +112,384 @@ describe('buildCommentBody', () => {
     expect(body).toContain('`/components/schemas/Output/properties/name`');
   });
 
+  it('renders report-only changes in their own non-blocking section', () => {
+    const body = buildCommentBody([
+      entry(),
+      entry({
+        path: '/api/cases/{caseId}/user_actions/_find',
+        reason: 'added a variant to the payload oneOf',
+        oasdiffId: 'response-property-one-of-added',
+        reportOnly: true,
+        policyReason: 'Adding a variant to a response oneOf is additive.',
+      }),
+    ]);
+
+    // the demoted change is stable tier, but must not be counted as gating
+    expect(body).toContain('### Stable (GA) (1)');
+    expect(body).toContain('### Reported only — not blocking merge (1)');
+    expect(body).toContain('- Adding a variant to a response oneOf is additive.');
+    expect(body.indexOf('### Stable (GA)')).toBeLessThan(body.indexOf('### Reported only'));
+  });
+
+  it('posts a report-only comment with no gating section', () => {
+    const body = buildCommentBody([
+      entry({ reportOnly: true, policyReason: 'Additive response variant.' }),
+    ]);
+
+    expect(body).not.toContain('### Stable (GA)');
+    expect(body).toContain('### Reported only — not blocking merge (1)');
+  });
+
   it('includes granular suppression guidance in the what-to-do section', () => {
     const body = buildCommentBody([entry()]);
 
     expect(body).toContain('`oasdiffId`');
     expect(body).toContain('`source`');
     expect(body).toContain('scope the allowlist entry');
+  });
+
+  it('keeps the fix-or-allowlist framing when a gating change exists', () => {
+    const body = buildCommentBody([entry(), entry({ reportOnly: true })]);
+
+    expect(body).toContain('were detected across the public OpenAPI surface');
+    expect(body).toContain('**Fix the breaking change**');
+  });
+
+  it('does not ask for a fix or an allowlist entry when nothing gates', () => {
+    const body = buildCommentBody([
+      entry({ reportOnly: true, policyReason: 'Additive response variant.' }),
+      entry({ path: '/api/exp', tier: 'experimental' }),
+    ]);
+
+    expect(body).toContain('No stable or Technical Preview breaking changes were detected');
+    expect(body).toContain('Nothing here blocks merge');
+    expect(body).not.toContain('were detected across the public OpenAPI surface');
+    expect(body).not.toContain('**Fix the breaking change**');
+    expect(body).not.toContain('allowlist.json');
+  });
+
+  describe('release note guidance', () => {
+    const SENTENCE =
+      "Add a `## Release note` section to the PR description. The release notes script publishes that text as this change's entry in the Breaking changes section of the Kibana release notes, so write it for API users: what changed, how it affects them, and what they need to do.";
+    const LABEL_BULLET =
+      '   - add the `release_note:breaking` PR label (replacing any other `release_note:*` label).';
+    const RELEASE_NOTE_BULLET =
+      '   - add release note text to the PR description, see the Release note section below.';
+    const README_LINK = 'See the [`@kbn/api-contracts` README]';
+    const OPTIONAL_PROMPT = 'Optional: release note describing the change in the PR description';
+
+    it.each([
+      ['stable', entry()],
+      ['tech_preview', entry({ tier: 'tech_preview' })],
+    ])('adds the Release note section for a %s gating change', (_tier, gatingEntry) => {
+      const body = buildCommentBody([gatingEntry]);
+
+      expect(body).toContain(`### Release note\n\n${SENTENCE}\n`);
+    });
+
+    it('groups the allowlist, label and release note under one If intentional step', () => {
+      const body = buildCommentBody([entry()]);
+      const step2 = body.slice(
+        body.indexOf('2. **If intentional**:'),
+        body.indexOf('### Release note')
+      );
+
+      expect(body).toContain('1. **Fix the breaking change**');
+      expect(step2).toContain(
+        '   - add an approved entry to [`packages/kbn-api-contracts/allowlist.json`]'
+      );
+      expect(step2).toContain(LABEL_BULLET);
+      expect(step2).toContain(RELEASE_NOTE_BULLET);
+      expect(step2.indexOf('allowlist.json')).toBeLessThan(step2.indexOf(LABEL_BULLET));
+      expect(step2.indexOf(LABEL_BULLET)).toBeLessThan(step2.indexOf(RELEASE_NOTE_BULLET));
+      expect(body).not.toMatch(/^3\. /m);
+    });
+
+    it('keeps the label out of the Release note section', () => {
+      const body = buildCommentBody([entry()]);
+      const section = body.slice(body.indexOf('### Release note'), body.lastIndexOf(README_LINK));
+
+      expect(section).not.toContain('release_note:breaking');
+      expect(section).not.toContain('label');
+    });
+
+    it('places the Release note section after What to do and the README link last', () => {
+      const body = buildCommentBody([entry()]);
+
+      expect(body.indexOf('### What to do')).toBeLessThan(body.indexOf('### Release note'));
+      expect(body.indexOf('### Release note')).toBeLessThan(body.lastIndexOf(README_LINK));
+      expect(body.indexOf(README_LINK)).toBe(body.lastIndexOf(README_LINK));
+      expect(body.endsWith('for tier definitions and the allowlist workflow.')).toBe(true);
+    });
+
+    it('has no code fence or template heading', () => {
+      const body = buildCommentBody([entry(), entry({ path: '/api/two', tier: 'tech_preview' })]);
+
+      expect(body).not.toContain('```');
+      expect(body).not.toMatch(/^#{1,2} Release note/m);
+      // The heading, the pointer from the If intentional step, and the `## Release note` in the guidance.
+      expect(body.match(/Release note/g)).toHaveLength(3);
+    });
+
+    it('gives an experimental-only comment no Release note section', () => {
+      const body = buildCommentBody([entry({ path: '/api/exp', tier: 'experimental' })]);
+
+      expect(body).not.toContain('### Release note');
+      expect(body).not.toContain('release_note:breaking');
+    });
+
+    it.each([
+      ['experimental', entry({ path: '/api/exp', tier: 'experimental' })],
+      ['report-only', entry({ reportOnly: true, policyReason: 'Additive response variant.' })],
+    ])('gives a %s-only comment the optional prompt once, under What to do', (_kind, change) => {
+      const body = buildCommentBody([change]);
+
+      expect(body).toContain(`### What to do\n\nNothing here blocks merge. ${OPTIONAL_PROMPT}\n`);
+      expect(body.match(/release note/gi)).toHaveLength(1);
+      expect(body).not.toContain('### Release note');
+      expect(body).not.toContain('release_note:breaking');
+    });
+
+    it('leaves the optional prompt out of a gating comment', () => {
+      const body = buildCommentBody([
+        entry(),
+        entry({ path: '/api/exp', tier: 'experimental' }),
+        entry({ path: '/api/add', reportOnly: true, policyReason: 'Additive response variant.' }),
+      ]);
+
+      expect(body).not.toContain(OPTIONAL_PROMPT);
+    });
+
+    it('keeps the rest of the no-gating variant unchanged', () => {
+      const body = buildCommentBody([
+        entry({ reportOnly: true, policyReason: 'Additive response variant.' }),
+        entry({ path: '/api/exp', tier: 'experimental' }),
+      ]);
+
+      expect(body).toContain(
+        `### What to do\n\nNothing here blocks merge. ${OPTIONAL_PROMPT}\n\nSee the [\`@kbn/api-contracts\` README]`
+      );
+      expect(body).toContain('for tier definitions and the rule policy.');
+      expect(body).not.toContain('**If intentional**');
+    });
+
+    describe('allowlisted changes', () => {
+      const approved = entry({ path: '/api/approved', allowlisted: true });
+
+      it.each([
+        ['alone', [approved]],
+        [
+          'with a report-only change',
+          [approved, entry({ reportOnly: true, policyReason: 'Additive response variant.' })],
+        ],
+        [
+          'with an experimental change',
+          [approved, entry({ path: '/api/exp', tier: 'experimental' })],
+        ],
+      ])('keeps the label and Release note section when an approved change is %s', (_, entries) => {
+        const body = buildCommentBody(entries);
+
+        expect(body).toContain('### Approved — not blocking merge (1)');
+        expect(body).toContain('| `/api/approved` `GET` |');
+        expect(body).toContain(
+          '### What to do\n\nNothing here blocks merge. The approved breaking change(s) still ship with this PR, so:\n\n'
+        );
+        expect(body).toContain(LABEL_BULLET.trimStart());
+        expect(body).toContain(RELEASE_NOTE_BULLET.trimStart());
+        expect(body).toContain(`### Release note\n\n${SENTENCE}\n`);
+        expect(body.endsWith('for tier definitions and the allowlist workflow.')).toBe(true);
+        expect(body).not.toContain(OPTIONAL_PROMPT);
+        expect(body).not.toContain('**If intentional**');
+        expect(body).not.toContain('### Stable (GA)');
+      });
+
+      it('lists approved changes after the gating sections and keeps the gating guidance', () => {
+        const body = buildCommentBody([approved, entry({ path: '/api/gating' })]);
+
+        expect(body).toContain('### Stable (GA) (1)');
+        expect(body).toContain('2. **If intentional**:');
+        expect(body.indexOf('### Stable (GA)')).toBeLessThan(body.indexOf('### Approved'));
+        expect(body.indexOf('### Approved')).toBeLessThan(body.indexOf('### What to do'));
+      });
+    });
+  });
+
+  describe('GitHub comment length', () => {
+    const longerThanTheComment = 'x'.repeat(GITHUB_COMMENT_MAX_LENGTH);
+
+    it('posts a short comment unchanged', () => {
+      const body = buildCommentBody([entry()]);
+
+      expect(body).not.toContain('The rest are only in the API contracts CI log');
+      expect(postedCommentLength(body)).toBeLessThanOrEqual(GITHUB_COMMENT_MAX_LENGTH);
+    });
+
+    it('leaves out rows that do not fit and keeps higher-priority rows', () => {
+      const body = buildCommentBody([
+        entry({
+          path: '/api/report-only',
+          reportOnly: true,
+          policyReason: 'Additive.',
+          reason: longerThanTheComment,
+        }),
+        entry({ path: '/api/experimental', tier: 'experimental', reason: longerThanTheComment }),
+        entry({ path: '/api/approved', allowlisted: true }),
+        entry({ path: '/api/tech-preview', tier: 'tech_preview' }),
+        entry({ path: '/api/stable' }),
+      ]);
+
+      expect(postedCommentLength(body)).toBeLessThanOrEqual(GITHUB_COMMENT_MAX_LENGTH);
+      expect(body).toContain('/api/stable');
+      expect(body).toContain('/api/tech-preview');
+      expect(body).toContain('/api/approved');
+      expect(body).toContain('### Release note');
+      expect(body).toContain('Showing 3 of 5 change(s)');
+      expect(body).not.toContain('/api/experimental');
+      expect(body).not.toContain('/api/report-only');
+    });
+
+    it('does not show a lower-priority row after a higher-priority row is left out', () => {
+      const body = buildCommentBody([
+        entry({ path: '/api/stable-huge', reason: longerThanTheComment }),
+        entry({ path: '/api/tech-preview', tier: 'tech_preview' }),
+      ]);
+
+      expect(body).toContain('Showing 0 of 2 change(s)');
+      expect(body).not.toContain('/api/tech-preview');
+    });
+
+    it('keeps the gating guidance when the only row does not fit', () => {
+      const body = buildCommentBody([entry({ path: '/api/huge', reason: longerThanTheComment })]);
+
+      expect(postedCommentLength(body)).toBeLessThanOrEqual(GITHUB_COMMENT_MAX_LENGTH);
+      expect(body).toContain('Showing 0 of 1 change(s)');
+      expect(body).toContain('### Release note');
+      expect(body).toContain('release_note:breaking');
+      expect(body).not.toContain('/api/huge');
+    });
+
+    it('keeps the allowlisted guidance when an approved row does not fit', () => {
+      const body = buildCommentBody([
+        entry({ path: '/api/approved-huge', allowlisted: true, reason: longerThanTheComment }),
+      ]);
+
+      expect(postedCommentLength(body)).toBeLessThanOrEqual(GITHUB_COMMENT_MAX_LENGTH);
+      expect(body).toContain('Showing 0 of 1 change(s)');
+      expect(body).toContain('The approved breaking change(s) still ship with this PR');
+      expect(body).not.toContain('**Fix the breaking change**');
+      expect(body).not.toContain('/api/approved-huge');
+    });
+  });
+});
+
+describe('dedupeByChange', () => {
+  it('collapses the same change from the stack and serverless reports into one row', () => {
+    const change = entry({ oasdiffId: 'request-parameter-removed', reason: "deleted 'simulate'" });
+
+    expect(dedupeByChange([change, { ...change }])).toEqual([change]);
+  });
+
+  it('keeps distinct changes to the same endpoint under the same rule', () => {
+    const first = entry({ oasdiffId: 'request-property-removed', reason: "removed 'name'" });
+    const second = entry({ oasdiffId: 'request-property-removed', reason: "removed 'type'" });
+
+    expect(dedupeByChange([first, second])).toEqual([first, second]);
+  });
+
+  it('keeps kbn: rule changes at different source locations apart', () => {
+    const tightening = entry({
+      oasdiffId: 'kbn:request-additional-properties-tightened',
+      reason: 'Request body schema disallows extra fields',
+    });
+
+    expect(
+      dedupeByChange([
+        { ...tightening, source: '/components/schemas/A' },
+        { ...tightening, source: '/components/schemas/B' },
+      ])
+    ).toHaveLength(2);
+  });
+});
+
+describe('reading reports and posting', () => {
+  let dir: string;
+  const report = (name: string, contents: string): string => {
+    const reportPath = join(dir, name);
+    writeFileSync(reportPath, contents);
+    return reportPath;
+  };
+  const emptyReport = (name: string) => report(name, JSON.stringify({ entries: [] }));
+
+  beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), 'api-contracts-notifier-'));
+    jest.mocked(upsertComment).mockClear();
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true });
+    jest.restoreAllMocks();
+  });
+
+  describe('readImpactReports', () => {
+    it('merges the entries of every report and marks the read complete', () => {
+      const stack = report('stack.json', JSON.stringify({ entries: [entry()] }));
+      const serverless = report(
+        'serverless.json',
+        JSON.stringify({ entries: [entry({ path: '/api/two' })] })
+      );
+
+      expect(readImpactReports([stack, serverless])).toEqual({
+        entries: [entry(), entry({ path: '/api/two' })],
+        complete: true,
+      });
+    });
+
+    it.each([
+      ['missing', () => join(dir, 'missing.json')],
+      ['unparseable', () => report('bad.json', '{ not json')],
+      ['unrecognized', () => report('odd.json', JSON.stringify({ changes: [] }))],
+    ])('marks the read incomplete when a report is %s', (_kind, makePath) => {
+      const result = readImpactReports([emptyReport('stack.json'), makePath()]);
+
+      expect(result).toEqual({ entries: [], complete: false });
+    });
+
+    it('treats no report paths as incomplete', () => {
+      expect(readImpactReports([])).toEqual({ entries: [], complete: false });
+    });
+  });
+
+  describe('notifyApiContractOwners', () => {
+    it('replaces the comment with the full report when there are changes', async () => {
+      await notifyApiContractOwners([
+        report('stack.json', JSON.stringify({ entries: [entry()] })),
+        report('serverless.json', JSON.stringify({ entries: [entry()] })),
+      ]);
+
+      expect(upsertComment).toHaveBeenCalledWith({
+        commentBody: buildCommentBody([entry()]),
+        commentContext: 'api-contracts-breaking',
+        clearPrevious: true,
+      });
+    });
+
+    it('only updates an earlier comment when every check ran clean', async () => {
+      await notifyApiContractOwners([emptyReport('stack.json'), emptyReport('serverless.json')]);
+
+      expect(upsertComment).toHaveBeenCalledWith({
+        commentBody: RESOLVED_COMMENT_BODY,
+        commentContext: 'api-contracts-breaking',
+        clearPrevious: false,
+        createIfMissing: false,
+      });
+    });
+
+    it('leaves the comment alone when a check did not write its report', async () => {
+      await notifyApiContractOwners([emptyReport('stack.json'), join(dir, 'missing.json')]);
+
+      expect(upsertComment).not.toHaveBeenCalled();
+    });
   });
 });

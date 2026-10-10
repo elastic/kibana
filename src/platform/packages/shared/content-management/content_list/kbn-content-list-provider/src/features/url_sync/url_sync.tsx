@@ -17,12 +17,13 @@ import {
   decodeNewShape,
   encodeUrlState,
   getInitialQueryText,
+  getSortDirectionsByFieldFromKey,
   getSortingConfigKey,
-  getSortingUrlConfigFromKey,
   hasNewShapeParams,
   mergeAndStringify,
   parseSearch,
 } from './url_codec';
+import type { SortDirectionsByField, SortState } from '../sorting';
 import type { HydratedUrlState, UrlStateSlices } from './types';
 import { decodeLegacyParams } from './legacy_decoder';
 import { useInRouterContext } from './router_context';
@@ -30,6 +31,11 @@ import { claimUrlSyncSlot, type UrlSyncSlotClaim } from './coordinator';
 
 type ClientStateSlices = Pick<ContentListState, 'queryText' | 'sort'>;
 type Dispatch = React.Dispatch<ContentListAction>;
+
+interface ContentListUrlSyncProps {
+  /** The sort the list opened with (persisted, configured, or default). Must stay stable after mount. */
+  initialSort: SortState;
+}
 
 const warnUnknownUrlValue = (key: string, value: unknown): void => {
   if (process.env.NODE_ENV !== 'production') {
@@ -39,19 +45,17 @@ const warnUnknownUrlValue = (key: string, value: unknown): void => {
 
 const decodeUrlState = (
   search: string,
-  validSortFields: ReadonlySet<string>,
+  sortDirectionsByField: SortDirectionsByField,
   initialSort: ClientStateSlices['sort']
 ): HydratedUrlState => {
   const params = parseSearch(search);
-
   if (hasNewShapeParams(params)) {
-    const newShapeState = decodeNewShape(search, validSortFields, initialSort, (value) =>
+    const newShapeState = decodeNewShape(search, sortDirectionsByField, initialSort, (value) =>
       warnUnknownUrlValue('sort', value)
     );
     return { kind: Object.keys(newShapeState).length > 0 ? 'new' : 'empty', state: newShapeState };
   }
-
-  const legacy = decodeLegacyParams(params, validSortFields, warnUnknownUrlValue);
+  const legacy = decodeLegacyParams(params, sortDirectionsByField, warnUnknownUrlValue);
   if (legacy) {
     return { kind: 'legacy', state: legacy.state, consumed: legacy.consumed };
   }
@@ -112,15 +116,16 @@ const dispatchAllSlices = (
  *
  * @returns The content list URL sync component.
  */
-export const ContentListUrlSync = (): JSX.Element | null => {
+export const ContentListUrlSync = ({
+  initialSort,
+}: ContentListUrlSyncProps): JSX.Element | null => {
   const { features } = useContentListConfig();
   const inRouterContext = useInRouterContext();
 
   if (features.urlSync === false || !inRouterContext) {
     return null;
   }
-
-  return <ContentListUrlSyncSlot />;
+  return <ContentListUrlSyncSlot initialSort={initialSort} />;
 };
 
 /**
@@ -131,7 +136,7 @@ export const ContentListUrlSync = (): JSX.Element | null => {
  * `q`/`sort` keys. See [`coordinator.ts`](./coordinator.ts) for the long-term
  * direction (per-instance URL key namespacing).
  */
-const ContentListUrlSyncSlot = (): JSX.Element | null => {
+const ContentListUrlSyncSlot = ({ initialSort }: ContentListUrlSyncProps): JSX.Element | null => {
   const history = useHistory();
   const { id, queryKeyScope } = useContentListConfig();
   const [claim, setClaim] = useState<UrlSyncSlotClaim | null>(null);
@@ -167,7 +172,7 @@ const ContentListUrlSyncSlot = (): JSX.Element | null => {
     return null;
   }
 
-  return <ContentListUrlSyncInner />;
+  return <ContentListUrlSyncInner initialSort={initialSort} />;
 };
 
 /**
@@ -175,14 +180,14 @@ const ContentListUrlSyncSlot = (): JSX.Element | null => {
  *
  * @returns The inner content list URL sync component.
  */
-const ContentListUrlSyncInner = (): null => {
+const ContentListUrlSyncInner = ({ initialSort }: ContentListUrlSyncProps): null => {
   const history = useHistory();
   const { features } = useContentListConfig();
   const { state, dispatch } = useContentListState();
   const sortingConfigKey = getSortingConfigKey(features.sorting);
   const initialQueryText = getInitialQueryText(features.search);
-  const { initialSort, validSortFields } = useMemo(
-    () => getSortingUrlConfigFromKey(sortingConfigKey),
+  const sortDirectionsByField = useMemo(
+    () => getSortDirectionsByFieldFromKey(sortingConfigKey),
     [sortingConfigKey]
   );
   const [hydrated, setHydrated] = useState(false);
@@ -198,7 +203,7 @@ const ContentListUrlSyncInner = (): null => {
       return;
     }
 
-    const result = decodeUrlState(history.location.search, validSortFields, initialSort);
+    const result = decodeUrlState(history.location.search, sortDirectionsByField, initialSort);
     const expectedState = getExpectedHydratedState(result.state, stateRef.current);
     const expectedSearch = mergeAndStringify(
       history.location.search,
@@ -218,7 +223,7 @@ const ContentListUrlSyncInner = (): null => {
     }
 
     setHydrated(true);
-  }, [dispatch, history, hydrated, initialSort, validSortFields]);
+  }, [dispatch, history, hydrated, initialSort, sortDirectionsByField]);
 
   useEffect(() => {
     if (!hydrated) {
@@ -239,8 +244,11 @@ const ContentListUrlSyncInner = (): null => {
   useEffect(
     () =>
       history.listen((location) => {
-        const decoded = decodeNewShape(location.search, validSortFields, initialSort, (value) =>
-          warnUnknownUrlValue('sort', value)
+        const decoded = decodeNewShape(
+          location.search,
+          sortDirectionsByField,
+          initialSort,
+          (value) => warnUnknownUrlValue('sort', value)
         );
         const resolved = {
           queryText: decoded.queryText ?? initialQueryText,
@@ -252,7 +260,7 @@ const ContentListUrlSyncInner = (): null => {
         );
         dispatchAllSlices(resolved, dispatch, stateRef.current);
       }),
-    [dispatch, history, initialQueryText, initialSort, validSortFields]
+    [dispatch, history, initialQueryText, initialSort, sortDirectionsByField]
   );
 
   return null;

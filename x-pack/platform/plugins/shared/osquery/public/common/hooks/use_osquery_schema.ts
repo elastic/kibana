@@ -27,6 +27,8 @@ const getFallbackOsquerySchema = (): OsqueryTable[] => {
   return fallbackOsquerySchema;
 };
 
+const SCHEMA_STALE_TIME_MS = 5 * 60 * 1000;
+
 export const useOsquerySchema = () => {
   const { http } = useKibana().services;
 
@@ -37,7 +39,10 @@ export const useOsquerySchema = () => {
         version: API_VERSIONS.internal.v1,
       }),
     {
-      staleTime: Infinity,
+      // Finite so installing or upgrading Osquery Manager reaches the version
+      // picker without a page reload. Not shorter: the response carries the full
+      // osquery schema, which every query editor mount would otherwise refetch.
+      staleTime: SCHEMA_STALE_TIME_MS,
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
     }
@@ -60,10 +65,13 @@ export const useOsquerySchema = () => {
     [query.data?.version]
   );
 
+  const pkgVersion = useMemo(() => query.data?.pkgVersion, [query.data?.pkgVersion]);
+
   return {
     data,
     isLoading: query.isLoading,
     isError: query.isError,
     osqueryVersion,
+    pkgVersion,
   };
 };

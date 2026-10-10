@@ -34,9 +34,12 @@ export const toListExecutionHistoryArgs = ({
   per_page: perPage,
   search,
   rule_ids: ruleIds,
-  outcome,
-  episode_ids: episodeIds,
-  start_date: startDate,
+  outcomes,
+  alert_ids: alertIds,
+  from,
+  to,
+  sort_field: sortField,
+  sort_order: sortOrder,
   ...rest
 }: ListPolicyExecutionHistoryRequest): Complete<Omit<ListExecutionHistoryArgs, 'request'>> => {
   assertAllFieldsMapped(rest);
@@ -45,9 +48,12 @@ export const toListExecutionHistoryArgs = ({
     perPage,
     search,
     ruleIds,
-    outcome,
-    episodeIds,
-    startDate,
+    outcomes,
+    alertIds,
+    from,
+    to,
+    sortField,
+    sortOrder,
   };
 };
 
@@ -55,7 +61,7 @@ export const toListExecutionHistoryResponse = ({
   items,
   page,
   perPage,
-  totalEvents,
+  total,
   searchMatches,
   ...rest
 }: ListExecutionHistoryResult): Complete<ListPolicyExecutionHistoryResponse> => {
@@ -64,8 +70,8 @@ export const toListExecutionHistoryResponse = ({
     items,
     page,
     per_page: perPage,
-    total_events: totalEvents,
-    search_matches: searchMatches,
+    total,
+    search_matches: searchMatches ?? undefined,
   };
 };
 
@@ -79,6 +85,7 @@ export class ListActionPolicyExecutionsRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'List action policy executions',
     description:
       'Get a paginated list of dispatcher summary events for action policies in the current space.',
@@ -119,7 +126,7 @@ export class ListActionPolicyExecutionsRoute extends BaseAlertingRoute {
   protected async execute() {
     const result = await this.executionHistoryClient.listExecutionHistory({
       request: this.request,
-      ...toListExecutionHistoryArgs(this.request.query ?? {}),
+      ...toListExecutionHistoryArgs(this.request.query),
     });
 
     return this.ctx.response.ok({ body: toListExecutionHistoryResponse(result) });

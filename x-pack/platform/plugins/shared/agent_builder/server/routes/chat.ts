@@ -15,7 +15,10 @@ import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import {
   agentBuilderDefaultAgentId,
+  CHAT_MESSAGE_MAX_LENGTH,
+  CONVERSATION_ID_MAX_LENGTH,
   createBadRequestError,
+  createInternalError,
   ConversationAccessControlMode,
   ConversationOriginType,
 } from '@kbn/agent-builder-common';
@@ -31,7 +34,11 @@ import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import converseAsyncDescription from './oas/converse_async.text';
 import { buildChatResponseFromEvents } from '../services/execution/utils/chat_response';
-import { getConverseHelpers, type ResolvedExecutionOptions } from './converse_helpers';
+import {
+  filterLegacyApiEvents,
+  getConverseHelpers,
+  type ResolvedExecutionOptions,
+} from './converse_helpers';
 
 export const promptResponseEntrySchema = schema.oneOf([
   schema.object({ allow: schema.boolean() }),
@@ -94,6 +101,7 @@ export const conversePayloadSchema = schema.object({
   ),
   conversation_id: schema.maybe(
     schema.string({
+      maxLength: CONVERSATION_ID_MAX_LENGTH,
       validate: (v) => (uuidValidate(v) ? undefined : 'conversation_id must be a valid UUID'),
       meta: {
         description: 'Optional existing conversation ID to continue a previous conversation.',
@@ -111,6 +119,7 @@ export const conversePayloadSchema = schema.object({
   ),
   input: schema.maybe(
     schema.string({
+      maxLength: CHAT_MESSAGE_MAX_LENGTH,
       meta: { description: 'The user input message to send to the agent.' },
     })
   ),
@@ -205,7 +214,7 @@ export const conversePayloadSchema = schema.object({
       },
       {
         meta: {
-          availability: { stability: 'tech_preview', since: '9.5.0' },
+          availability: { stability: 'stable', since: '9.5.0' },
           description: 'Optional conversation access control. Defaults to private.',
         },
       }
@@ -284,7 +293,8 @@ export const conversePayloadSchema = schema.object({
     schema.oneOf([schema.literal('regenerate')], {
       meta: {
         description:
-          'The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.',
+          'Deprecated and ignored. The "regenerate" action has been removed; the field is still accepted for backward compatibility.',
+        deprecated: true,
       },
     })
   ),
@@ -366,7 +376,7 @@ export function registerChatRoutes({
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  const { validateAction, validateConfigurationOverrides, executeAgent } = getConverseHelpers({
+  const { validateConfigurationOverrides, executeAgent } = getConverseHelpers({
     getInternalServices,
   });
 
@@ -438,7 +448,6 @@ export function registerChatRoutes({
         const payload: ChatRequestBodyPayload = request.body as ChatRequestBodyPayload;
 
         await validateConfigurationOverrides({ payload, request });
-        validateAction(payload);
 
         const { events$: chatEvents$ } = await executeAgent({
           payload,
@@ -488,7 +497,6 @@ export function registerChatRoutes({
         const payload: ChatRequestBodyPayload = request.body as ChatRequestBodyPayload;
 
         await validateConfigurationOverrides({ payload, request });
-        validateAction(payload);
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
@@ -501,10 +509,12 @@ export function registerChatRoutes({
           executionService,
         });
 
+        const legacyEvents$ = chatEvents$.pipe(filterLegacyApiEvents());
+
         return response.ok({
           headers: getSSEResponseHeaders(),
           body: observableIntoEventSourceStream(
-            chatEvents$ as unknown as Observable<ServerSentEvent>,
+            legacyEvents$ as unknown as Observable<ServerSentEvent>,
             {
               signal: abortController.signal,
               flushThrottleMs: 100,
@@ -549,20 +559,24 @@ export function registerChatRoutes({
         }
 
         await validateConfigurationOverrides({ payload, request });
-        validateAction(payload);
 
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
 
-        const { executionId } = await executeAgent({
+        const { executionId, conversationId } = await executeAgent({
           payload,
           request,
           executionService,
           executionOptions: resolveExecutionOptions(payload, spaceId),
         });
 
+        if (!conversationId) {
+          throw createInternalError('Chat execution did not resolve a conversation');
+        }
+
         return response.accepted<ChatCallbackAcceptedResponse>({
           body: {
             execution_id: executionId,
+            conversation_id: conversationId,
           },
         });
       })

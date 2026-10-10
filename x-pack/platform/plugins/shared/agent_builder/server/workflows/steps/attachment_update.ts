@@ -13,20 +13,12 @@ import {
 } from '../../../common/workflows/steps/attachment_update';
 import type { AttachmentStepDeps } from '../attachment_registry';
 
-export const updateAttachmentStepDefinition = ({
-  getAttachmentClient,
-  isExperimentalEnabled,
-}: AttachmentStepDeps) =>
+export const updateAttachmentStepDefinition = ({ getAttachmentClient }: AttachmentStepDeps) =>
   createServerStepDefinition({
     ...updateAttachmentStepCommonDefinition,
     handler: async (context: StepHandlerContext) => {
       try {
         const request = context.contextManager.getFakeRequest();
-        if (!(await isExperimentalEnabled(request))) {
-          return {
-            error: new Error('Attachment steps require experimental features to be enabled'),
-          };
-        }
         const client = await getAttachmentClient(request);
         const input = context.input as UpdateAttachmentStepInput;
 
@@ -35,6 +27,7 @@ export const updateAttachmentStepDefinition = ({
           attachmentId: input.attachment_id,
           data: input.data,
           description: input.description,
+          render_inline: input.render_inline,
         });
 
         return {

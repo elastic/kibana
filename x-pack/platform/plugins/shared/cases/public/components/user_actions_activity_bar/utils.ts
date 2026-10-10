@@ -8,19 +8,16 @@
 import type { UserActivityParams } from './types';
 
 /**
- * Whether any of the type/author/search filters are applied. Derived from
- * the applied `params`, not in-progress UI input.
+ * True when type, author, search, or source is applied. Uses committed params.
  */
 export const hasActiveUserActivityFilter = (params: UserActivityParams): boolean =>
-  Boolean(params.type !== 'all' || params.authors?.length || params.search);
+  Boolean(
+    params.type !== 'all' || params.authors?.length || params.search || params.sources?.length
+  );
 
 /**
- * Whether `search` and/or `authors` are applied (deliberately excludes
- * `type`). Used by `useLastPage` and `useInfiniteFindCaseUserActions` to
- * decide if `userActionsStats` (unfiltered totals) can compute a separate
- * last page. Both call sites must agree, or pagination will disagree on
- * where results end.
+ * True when search, authors, or sources are set. Excludes type so stats can still page.
  */
-export const hasSearchOrAuthorFilter = (
-  params: Pick<UserActivityParams, 'search' | 'authors'>
-): boolean => Boolean(params.search || params.authors?.length);
+export const hasNonTypeActivityFilter = (
+  params: Pick<UserActivityParams, 'search' | 'authors' | 'sources'>
+): boolean => Boolean(params.search || params.authors?.length || params.sources?.length);

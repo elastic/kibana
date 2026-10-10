@@ -111,6 +111,8 @@ export {
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_STARTED,
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_SUCCEEDED,
   ATTACK_DISCOVERY_EVENT_PROVIDER,
+  ATTACK_DISCOVERY_EVENT_SERVICE_ACCOUNT_TAG,
+  getAttackDiscoveryEventOwnerFilter,
   writeAttackDiscoveryEvent,
 } from './impl/attack_discovery/persistence/event_logging';
 export type { EventLogRefresher } from './impl/attack_discovery/persistence/event_logging';

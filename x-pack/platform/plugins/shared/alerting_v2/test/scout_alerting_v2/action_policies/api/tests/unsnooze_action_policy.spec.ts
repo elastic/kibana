@@ -16,10 +16,8 @@ import {
   getUnsnoozeActionPolicyUrl,
   NO_ACCESS_ROLE,
   testData,
+  getSnoozeDate,
 } from '../fixtures';
-
-export const getSnoozeDate = (offsetMs: number = 86_400_000): string =>
-  new Date(Date.now() + offsetMs).toISOString();
 
 apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
@@ -41,7 +39,7 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
   });
 
   apiTest(
-    'unsnooze: unsnoozes a snoozed policy and returns snoozed_until=null',
+    'unsnooze: unsnoozes a snoozed policy and omits snoozed_until',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'test-unsnooze' })
@@ -54,7 +52,7 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.id).toBe(created.id);
-      expect(response.body.snoozed_until).toBeNull();
+      expect(response.body.snoozed_until).toBeUndefined();
       expect(response.body.enabled).toBe(true);
     }
   );
@@ -66,7 +64,8 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
         buildCreateActionPolicyData({ name: 'test-unsnooze-disabled' })
       );
       await apiServices.alertingV2.actionPolicies.snooze(created.id, getSnoozeDate());
-      const disabled = await apiServices.alertingV2.actionPolicies.disable(created.id);
+      const { snoozed_until: _snoozedUntil, ...disabled } =
+        await apiServices.alertingV2.actionPolicies.disable(created.id);
 
       const response = await apiClient.post(getUnsnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
@@ -75,20 +74,17 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({
         ...disabled,
-        snoozed_until: null,
         updated_at: response.body.updated_at,
         updated_by: response.body.updated_by,
-        version: response.body.version,
       });
       expect(Date.parse(response.body.updated_at)).toBeGreaterThanOrEqual(
         Date.parse(disabled.updated_at)
       );
-      expect(response.body.version).not.toBe(disabled.version);
     }
   );
 
   apiTest(
-    'idempotency: unsnoozing an already-unsnoozed policy returns snoozed_until=null',
+    'idempotency: unsnoozing an already-unsnoozed policy leaves snoozed_until absent',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'test-unsnooze-noop' })
@@ -99,7 +95,7 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.snoozed_until).toBeNull();
+      expect(response.body.snoozed_until).toBeUndefined();
     }
   );
 
@@ -137,7 +133,7 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.snoozed_until).toBeNull();
+      expect(response.body.snoozed_until).toBeUndefined();
     }
   );
 

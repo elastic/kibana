@@ -9,11 +9,14 @@ import type {
   BulkByIdsParams,
   BulkByQueryParams,
   BulkByQueryResult,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
   BulkResponse,
   CreateRuleData,
   DryRunResponse,
   FindRulesResponse,
   FindRulesSortField,
+  PolicyMatcher,
   RuleResponse,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
@@ -25,6 +28,8 @@ export type {
   BulkByIdsParams,
   BulkByQueryParams,
   BulkByQueryResult,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
   BulkResponse,
   CreateRuleData,
   DryRunResponse,
@@ -47,7 +52,11 @@ export interface RotationCandidate {
 
 export interface CreateRuleParams {
   data: CreateRuleData;
-  options?: { id?: string };
+  options?: {
+    id?: string;
+    /** The rule template this rule is created from. */
+    template?: { id: string };
+  };
 }
 
 export interface FindRulesArgs {
@@ -59,8 +68,13 @@ export interface FindRulesArgs {
   sortOrder?: 'asc' | 'desc';
 }
 
+export interface FindMatchingRulesArgs {
+  matcher?: PolicyMatcher | null;
+  page?: number;
+  perPage?: number;
+}
+
 export interface UpdateRuleParams {
   id: string;
   data: UpdateRuleData;
-  options?: { version?: string };
 }

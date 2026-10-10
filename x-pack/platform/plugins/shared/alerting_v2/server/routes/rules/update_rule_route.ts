@@ -12,8 +12,8 @@ import type { z } from '@kbn/zod/v4';
 import {
   errorResponseSchema,
   ruleResponseSchema,
-  updateRuleBodySchema,
-  type UpdateRuleBody,
+  updateRuleDataSchema,
+  type UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -21,7 +21,10 @@ import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
-import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import {
+  INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+  RULE_PATCH_SEMANTICS_DESCRIPTION,
+} from '../route_descriptions';
 import {
   RULE_NOT_FOUND_DESCRIPTION,
   RULE_VERSION_CONFLICT_DESCRIPTION,
@@ -38,12 +41,14 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Update a rule',
+    description: RULE_PATCH_SEMANTICS_DESCRIPTION,
     oasOperationObject: updateRuleOasExamples,
   } as const;
   static schemas = {
     request: {
-      body: updateRuleBodySchema,
+      body: updateRuleDataSchema,
       params: ruleIdParamsSchema,
     },
     response: {
@@ -74,7 +79,7 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
     private readonly request: KibanaRequest<
       z.infer<typeof ruleIdParamsSchema>,
       unknown,
-      UpdateRuleBody
+      UpdateRuleData
     >,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {
@@ -82,12 +87,9 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { version, ...data } = this.request.body;
-
     const updated = await this.rulesClient.updateRule({
       id: this.request.params.id,
-      data,
-      options: { version },
+      data: this.request.body,
     });
 
     return this.ctx.response.ok({ body: updated });

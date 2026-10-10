@@ -14,6 +14,30 @@ export function getRuleExecutorTaskId({ ruleId, spaceId }: { ruleId: string; spa
   return `${ALERTING_RULE_EXECUTOR_TASK_TYPE}:${spaceId}:${ruleId}`;
 }
 
+export function buildRuleExecutorTaskInstance({
+  ruleId,
+  spaceId,
+  schedule,
+}: {
+  ruleId: string;
+  spaceId: string;
+  schedule: IntervalSchedule;
+}) {
+  return {
+    id: getRuleExecutorTaskId({ ruleId, spaceId }),
+    taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
+    schedule,
+    // Wire params stay as string; branded at task-run entry.
+    params: {
+      ruleId,
+      spaceId,
+    },
+    state: {},
+    scope: ['alerting'],
+    enabled: true as const,
+  };
+}
+
 export async function ensureRuleExecutorTaskScheduled({
   services: { taskManager },
   input: { ruleId, spaceId, schedule, request },
@@ -28,24 +52,31 @@ export async function ensureRuleExecutorTaskScheduled({
     request: KibanaRequest;
   };
 }) {
-  const id = getRuleExecutorTaskId({ ruleId, spaceId });
+  const taskInstance = buildRuleExecutorTaskInstance({ ruleId, spaceId, schedule });
 
-  await taskManager.ensureScheduled(
-    {
-      id,
-      taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
-      schedule,
-      // Wire params stay as string; branded at task-run entry.
-      params: {
-        ruleId,
-        spaceId,
-      },
-      state: {},
-      scope: ['alerting'],
-      enabled: true,
-    },
+  await taskManager.ensureScheduled(taskInstance, { request, cloneApiKey: true });
+
+  return { id: taskInstance.id };
+}
+
+export async function bulkScheduleRuleExecutorTasks({
+  services: { taskManager },
+  input: { items, request },
+}: {
+  services: {
+    taskManager: TaskManagerStartContract;
+  };
+  input: {
+    items: Array<{ ruleId: string; spaceId: string; schedule: IntervalSchedule }>;
+    request: KibanaRequest;
+  };
+}) {
+  if (items.length === 0) {
+    return [];
+  }
+
+  return taskManager.bulkSchedule(
+    items.map((item) => buildRuleExecutorTaskInstance(item)),
     { request, cloneApiKey: true }
   );
-
-  return { id };
 }

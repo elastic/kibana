@@ -15,7 +15,7 @@ import { CreateCaseForm } from './form';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../common/navigation';
 import { CasesPageBody } from '../app/cases_page_body';
-import { CreateCaseAppHeader } from '../cases_redesign/create/components/create_case_app_header';
+import { CreateCaseAppHeader } from './components/create_case_app_header';
 
 export const CommonUseField = getUseField({ component: Field });
 

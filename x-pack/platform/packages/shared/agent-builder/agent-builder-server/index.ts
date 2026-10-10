@@ -69,6 +69,7 @@ export type {
 export {
   getToolResultId,
   createErrorResult,
+  createNonInteractiveDeclinedResult,
   createOtherResult,
   isToolResultId,
   isToolHandlerStandardReturn,
@@ -76,6 +77,7 @@ export {
 export type {
   AgentHandlerParams,
   AgentHandlerContext,
+  ExecutionConversationAccess,
   AgentHandlerReturn,
   AgentHandlerFn,
   RunAgentFn,
@@ -87,6 +89,8 @@ export type {
   AgentEventEmitterFn,
   RunAgentOnEventFn,
   ExperimentalFeatures,
+  DeploymentContext,
+  DeploymentEnvironment,
   SubAgentExecutor,
   SubAgentExecution,
   ConversationClient,
@@ -131,6 +135,8 @@ export type {
   ExecuteAgentResult,
   FindExecutionsFilter,
   FindExecutionsOptions,
+  AbortExecutionOptions,
+  AbortExecutionResult,
   AgentExecutionService,
 } from './execution';
 export type {
@@ -143,6 +149,14 @@ export type {
 export type { SkillRegistry } from './skills';
 export type { RendererTypeDefinition } from './renderers';
 export type {
+  ConversationEventTypeDefinition,
+  ConversationEventPayloadOf,
+  ConversationEventOf,
+  ConversationEventFormatContext,
+  ConversationEventRepresentation,
+  TextConversationEventRepresentation,
+} from './conversation_events';
+export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
   TopSnippetsConfig,
@@ -150,6 +164,7 @@ export type {
   ToolsStart,
   AttachmentsSetup,
   RenderersSetup,
+  ConversationEventsSetup,
   SkillsSetup,
   SkillsStart,
   AgentsSetup,
@@ -158,6 +173,8 @@ export type {
   PluginsSetup,
   PluginsStart,
   RuntimeStart,
+  ConversationsSetup,
+  ConversationUpdatedOptIn,
   ConversationsStart,
   ConversationTemplatesSetup,
   ConversationTemplatesStart,
@@ -165,14 +182,24 @@ export type {
 } from './plugin_contract';
 export type {
   AttachmentPublicClient,
+  AttachmentWriteAccess,
   ListAttachmentsResult,
   CreateAttachmentArgs,
   GetAttachmentArgs,
   UpdateAttachmentArgs,
   DeleteAttachmentArgs,
   ListAttachmentsArgs,
+  BulkCreateAttachmentInput,
+  BulkCreateAttachmentError,
+  BulkCreateAttachmentsResult,
+  BulkCreateAttachmentsArgs,
 } from './attachments';
-export type { ConversationPublicClient, ConversationCreatePublicRequest } from './conversations';
+export type {
+  ConversationPublicClient,
+  ConversationCreatePublicRequest,
+  ConversationUpdatePublicRequest,
+  ConversationAddEventsRequest,
+} from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
 export type {
   AvailabilityContext,
@@ -180,3 +207,9 @@ export type {
   AvailabilityHandler,
   AvailabilityConfig,
 } from './availability';
+export type {
+  ConnectorSummary,
+  ConnectorSubActionDetail,
+  ConnectorDetail,
+} from './agent_connectors';
+export { listAgentConnectors, getAgentConnectorDetail } from './agent_connectors';

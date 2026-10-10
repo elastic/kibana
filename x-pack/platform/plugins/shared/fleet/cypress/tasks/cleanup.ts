@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import {
+  DEFAULT_DOWNLOAD_SOURCE_ID,
+  DEFAULT_DOWNLOAD_SOURCE_NAME,
+  DEFAULT_DOWNLOAD_SOURCE_URI,
+} from '@kbn/fleet-plugin/common/constants';
+
 import { request } from './common';
 
 export function cleanupAgentPolicies(spaceId?: string) {
@@ -39,14 +45,30 @@ export function unenrollAgent() {
 
 export function cleanupDownloadSources() {
   request({ url: '/api/fleet/agent_download_sources' }).then((response: any) => {
-    response.body.items
-      .filter((ds: any) => !ds.is_default)
-      .forEach((ds: any) => {
+    response.body.items.forEach((ds: any) => {
+      if (!ds.is_default) {
         request({
           method: 'DELETE',
           url: `/api/fleet/agent_download_sources/${ds.id}`,
         });
-      });
+        return;
+      }
+
+      // The default download source cannot be deleted, so restore its name and
+      // host instead: a test that edits them would otherwise leak into the next
+      // run of the same spec.
+      if (ds.id === DEFAULT_DOWNLOAD_SOURCE_ID && !ds.is_preconfigured) {
+        request({
+          method: 'PUT',
+          url: `/api/fleet/agent_download_sources/${ds.id}`,
+          body: {
+            name: DEFAULT_DOWNLOAD_SOURCE_NAME,
+            host: DEFAULT_DOWNLOAD_SOURCE_URI,
+            is_default: true,
+          },
+        });
+      }
+    });
   });
 }
 

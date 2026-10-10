@@ -8,6 +8,8 @@
  */
 
 import { ExistenceFetchStatus } from '@kbn/unified-field-list';
+import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import { createMockDataViewsService } from '@kbn/data-source/src/__mocks__/data_views_service.mock';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import {
   createTabItem,
@@ -38,8 +40,12 @@ describe('InternalStateStore', () => {
       store: toolkit.internalState,
       runtimeStateManager: toolkit.runtimeStateManager,
       initializeSingleTab: toolkit.initializeSingleTab,
+      services: toolkit.services,
     };
   };
+
+  const registerEsqlSource = (source: EsqlSource) =>
+    registerEsqlSourceInDataViewsCache(createMockDataViewsService(), source);
 
   it('should set data view', async () => {
     const { store, runtimeStateManager } = await setup();
@@ -83,6 +89,58 @@ describe('InternalStateStore', () => {
     store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
 
     expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+  });
+
+  it('should not clear expandedDoc when ES|QL DataView id changes but the dataset is the same', async () => {
+    const { store } = await setup();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const descSource = await EsqlSource.create({
+      query: 'FROM logstash-* | SORT @timestamp DESC',
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+    });
+    const ascSource = await EsqlSource.create({
+      query: 'FROM logstash-* | SORT @timestamp ASC',
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+    });
+    const esqlDataView = await registerEsqlSource(descSource);
+    await registerEsqlSource(ascSource);
+    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, esqlDataView);
+
+    store.dispatch(internalStateActions.setDataSource({ tabId, dataSource: descSource }));
+    store.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: mockDoc }));
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+
+    store.dispatch(internalStateActions.setDataSource({ tabId, dataSource: ascSource }));
+
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+  });
+
+  it('should clear expandedDoc when ES|QL DataView index pattern changes', async () => {
+    const { store } = await setup();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const logsSource = await EsqlSource.create({
+      query: 'FROM logstash-*',
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+    });
+    const metricsSource = await EsqlSource.create({
+      query: 'FROM metrics-*',
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+    });
+    const esqlDataView = await registerEsqlSource(logsSource);
+    await registerEsqlSource(metricsSource);
+    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, esqlDataView);
+
+    store.dispatch(internalStateActions.setDataSource({ tabId, dataSource: logsSource }));
+    store.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: mockDoc }));
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+
+    store.dispatch(internalStateActions.setDataSource({ tabId, dataSource: metricsSource }));
+
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
   });
 
   it('should append a new tab to the tabs list', async () => {
@@ -445,6 +503,9 @@ describe('InternalStateStore', () => {
     expect(tabsState.allIds).toHaveLength(3);
     expect(tabsState.byId[items[0].id].uiState).toMatchInlineSnapshot(`
       Object {
+        "esqlEditor": Object {
+          "isHistoryOpen": true,
+        },
         "fieldList": Object {
           "nameFilter": "field0",
         },
@@ -453,6 +514,9 @@ describe('InternalStateStore', () => {
     `);
     expect(tabsState.byId[items[1].id].uiState).toMatchInlineSnapshot(`
       Object {
+        "esqlEditor": Object {
+          "isHistoryOpen": true,
+        },
         "fieldList": Object {
           "nameFilter": "field1",
         },
@@ -472,6 +536,9 @@ describe('InternalStateStore', () => {
     `);
     expect(tabsState.byId[items[2].id].uiState).toMatchInlineSnapshot(`
       Object {
+        "esqlEditor": Object {
+          "isHistoryOpen": true,
+        },
         "fieldList": Object {
           "nameFilter": "field2",
         },
@@ -500,6 +567,38 @@ describe('InternalStateStore', () => {
     expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
     expect(selectTab(store.getState(), tabId).expandedDocOwner).toBe('test-grid');
     expect(selectTab(store.getState(), tabId).initialDocViewerTabId).toBe('Table');
+  });
+
+  it('should set expandedDocCascadePath for cascade owned flyouts', async () => {
+    const { store } = await setup();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
+    const expandedDocCascadePath = {
+      nodePath: ['extension'],
+      nodePathMap: { extension: 'png' },
+    };
+
+    store.dispatch(
+      internalStateActions.setExpandedDoc({
+        tabId,
+        expandedDoc: mockDoc,
+        expandedDocOwner: 'nested-grid',
+        expandedDocCascadePath,
+      })
+    );
+
+    expect(selectTab(store.getState(), tabId).expandedDocCascadePath).toEqual(
+      expandedDocCascadePath
+    );
+
+    store.dispatch(
+      internalStateActions.setExpandedDoc({
+        tabId,
+        expandedDoc: undefined,
+      })
+    );
+
+    expect(selectTab(store.getState(), tabId).expandedDocCascadePath).toBeUndefined();
   });
 
   it('should default expandedDocOwner to the main grid when not provided', async () => {
@@ -646,6 +745,7 @@ describe('InternalStateStore', () => {
 
     expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
     expect(selectTab(store.getState(), tabId).expandedDocOwner).toBeUndefined();
+    expect(selectTab(store.getState(), tabId).expandedDocCascadePath).toBeUndefined();
     expect(selectTab(store.getState(), tabId).renderDocumentViewMeta).toBeUndefined();
     expect(selectTab(store.getState(), tabId).initialDocViewerTabId).toBeUndefined();
   });

@@ -6,22 +6,13 @@
  */
 
 /**
- * Copy for the per-watch settings page.
+ * Copy for the per-Worker settings page.
  *
- * The API carries ids only, so every autonomy level, select option, approval gate, run outcome and
- * per-watch intro resolves to a message here. Keep the id maps in step with the managed watch
- * catalog in `@kbn/alertzero-common`.
+ * The API carries ids only, so every autonomy level resolves to a message here.
+ * Keep AUTONOMY_LEVEL_NAMES in step with WATCH_AUTONOMY_LEVELS.
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  SYSTEM_SECURITY_WATCH_DARK_ID,
-  SYSTEM_SECURITY_WATCH_DEEP_ID,
-  SYSTEM_SECURITY_WATCH_DETECTION_ID,
-  SYSTEM_SECURITY_WATCH_FLOOR_ID,
-  SYSTEM_SECURITY_WATCH_OFFICER_ID,
-  type WorkerScheduleUnit,
-} from '@kbn/alertzero-common';
 
 /* -------------------------------------------------------------------------- */
 /* Header                                                                     */
@@ -35,6 +26,209 @@ export const ENABLED_SWITCH_LABEL = i18n.translate(
 );
 
 /* -------------------------------------------------------------------------- */
+/* Threat intel supply (Hunt Watch)                                           */
+/* -------------------------------------------------------------------------- */
+
+export const THREAT_INTEL_SUPPLY_SECTION_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.sectionTitle',
+  { defaultMessage: 'Threat intel supply' }
+);
+
+export const THREAT_INTEL_SUPPLY_SECTION_SUBTITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.sectionSubtitle',
+  {
+    defaultMessage:
+      'These workflows feed Hunt Watch. Ingest and enrich are shared across all spaces.',
+  }
+);
+
+export const THREAT_INTEL_SUPPLY_INGEST_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.ingestLabel',
+  { defaultMessage: 'Ingest' }
+);
+
+export const THREAT_INTEL_SUPPLY_ENRICH_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.enrichLabel',
+  { defaultMessage: 'Enrich' }
+);
+
+export const THREAT_INTEL_SUPPLY_ATTRIBUTE_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.attributeLabel',
+  { defaultMessage: 'Attribute alerts to reports' }
+);
+
+export const THREAT_INTEL_SUPPLY_SCOPE_DEPLOYMENT = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.scopeDeployment',
+  { defaultMessage: 'Deployment' }
+);
+
+export const THREAT_INTEL_SUPPLY_SCOPE_SPACE = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.scopeSpace',
+  { defaultMessage: 'This space' }
+);
+
+export const THREAT_INTEL_SUPPLY_ON = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.on',
+  { defaultMessage: 'On' }
+);
+
+export const THREAT_INTEL_SUPPLY_OFF = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.off',
+  { defaultMessage: 'Off' }
+);
+
+export const THREAT_INTEL_SUPPLY_IN_USE_ELSEWHERE = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.inUseElsewhere',
+  { defaultMessage: 'In use in other spaces' }
+);
+
+export const THREAT_INTEL_SUPPLY_RESTORE_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.restoreLabel',
+  { defaultMessage: 'Restore threat intel supply' }
+);
+
+export const THREAT_INTEL_SUPPLY_DRIFT_MESSAGE = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.driftMessage',
+  {
+    defaultMessage:
+      'Hunt Watch is on, but one or more threat intel supply workflows are off. Restore supply, or turn Hunt off.',
+  }
+);
+
+export const THREAT_INTEL_SUPPLY_HARD_GATE_EMBEDDING = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.hardGateEmbedding',
+  {
+    defaultMessage:
+      'Hunt Watch needs Machine Learning embedding support for threat intel report supply. Finish ML and threat intel setup before turning Hunt on.',
+  }
+);
+
+export const THREAT_INTEL_SUPPLY_HARD_GATE_BLOCKED = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.hardGateBlocked',
+  {
+    defaultMessage:
+      'Threat intel reports are not ready in this deployment. Finish threat intel bootstrap before turning Hunt on.',
+  }
+);
+
+export const THREAT_INTEL_SUPPLY_STATUS_ERROR = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.statusError',
+  {
+    defaultMessage:
+      'Unable to check threat intel supply readiness. Retry later, or refresh the page before turning Hunt on.',
+  }
+);
+
+export const VIEW_EXECUTIONS = i18n.translate('xpack.alertzero.watches.settings.viewExecutions', {
+  defaultMessage: 'View executions',
+});
+
+export const viewExecutionsAriaLabel = (workerName: string) =>
+  i18n.translate('xpack.alertzero.watches.settings.viewExecutionsAriaLabel', {
+    defaultMessage: 'View executions for {workerName}',
+    values: { workerName },
+  });
+
+export const workerWarningAriaLabel = (workerName: string): string =>
+  i18n.translate('xpack.alertzero.watches.settings.workerWarningAriaLabel', {
+    defaultMessage: 'Warnings for {workerName}',
+    values: { workerName },
+  });
+
+export const READ_ONLY_CALLOUT_MESSAGE = i18n.translate(
+  'xpack.alertzero.watches.settings.readOnlyCalloutMessage',
+  {
+    defaultMessage:
+      'You have read-only access to Watch settings. Ask an administrator for the required privilege.',
+  }
+);
+
+export const READ_ONLY_TOOLTIP = i18n.translate(
+  'xpack.alertzero.watches.settings.readOnlyTooltip',
+  {
+    defaultMessage: 'Read-only access',
+  }
+);
+
+/** Shown instead of navigating when managed workflows are hidden in this space. */
+export const MANAGED_WORKFLOWS_DISABLED_POPOVER_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowsDisabledPopoverTitle',
+  { defaultMessage: 'Managed workflows are turned off' }
+);
+
+export const MANAGED_WORKFLOWS_DISABLED_BODY = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowsDisabledBody',
+  {
+    defaultMessage:
+      'Execution history lives in Managed workflows, which is turned off for this space.',
+  }
+);
+
+export const MANAGED_WORKFLOWS_DISABLED_DISMISS = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowsDisabledDismiss',
+  { defaultMessage: 'Not now' }
+);
+
+export const MANAGED_WORKFLOWS_DISABLED_OPEN_SETTINGS = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowsDisabledOpenSettings',
+  { defaultMessage: 'Open Advanced Settings' }
+);
+
+/** Read-only spaces get no popover, so the requirement is stated on the link itself. */
+export const MANAGED_WORKFLOWS_REQUIRED_TOOLTIP = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowsRequiredTooltip',
+  {
+    defaultMessage: 'Requires Managed workflows. Ask an admin to enable it in Advanced Settings.',
+  }
+);
+
+export const MANAGED_WORKFLOW_EXECUTIONS_PERMISSION_TOOLTIP = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowExecutionsPermissionTooltip',
+  { defaultMessage: 'Requires permission to view managed workflow executions.' }
+);
+
+export const SAVE_WATCH_SETTINGS = i18n.translate(
+  'xpack.alertzero.watches.settings.saveWatchSettings',
+  { defaultMessage: 'Save' }
+);
+
+export const DISCARD_WATCH_SETTINGS = i18n.translate(
+  'xpack.alertzero.watches.settings.discardWatchSettings',
+  { defaultMessage: 'Discard' }
+);
+
+export const WORKER_SETTINGS_SAVE_ERROR = i18n.translate(
+  'xpack.alertzero.watches.settings.worker.saveError',
+  { defaultMessage: 'Could not save this Worker. Other saved changes were kept.' }
+);
+
+export const WATCH_SETTINGS_INVALID = i18n.translate(
+  'xpack.alertzero.watches.settings.invalidDrafts',
+  { defaultMessage: 'Fix invalid settings before saving.' }
+);
+
+/* -------------------------------------------------------------------------- */
+/* Models                                                                     */
+/* -------------------------------------------------------------------------- */
+
+export const FEATURE_SETTINGS_LINK = i18n.translate(
+  'xpack.alertzero.watches.settings.featureSettingsLink',
+  { defaultMessage: 'Feature settings' }
+);
+
+export const MODELS_LABEL = i18n.translate('xpack.alertzero.watches.settings.models.label', {
+  defaultMessage: 'Models',
+});
+
+export const NO_MODEL_REASON_PLAIN = i18n.translate(
+  'xpack.alertzero.watches.settings.worker.blockingReason.noModelPlain',
+  {
+    defaultMessage:
+      'Some AI-powered steps in this Worker may not be configured. Check Feature settings below.',
+  }
+);
+
+/* -------------------------------------------------------------------------- */
 /* Section headings                                                           */
 /* -------------------------------------------------------------------------- */
 
@@ -43,87 +237,9 @@ export const AUTONOMY_SECTION_TITLE = i18n.translate(
   { defaultMessage: 'Autonomy' }
 );
 
-export const AUTONOMY_SECTION_SUBTITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.autonomy.sectionSubtitle',
-  { defaultMessage: 'applies to this worker only' }
-);
-
-export const TRIGGERS_SECTION_TITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.triggers.sectionTitle',
-  { defaultMessage: 'Triggers' }
-);
-
-export const TRIGGERS_SECTION_SUBTITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.triggers.sectionSubtitle',
-  { defaultMessage: 'owned by the Watch Orchestrator' }
-);
-
-export const SCOPE_SECTION_TITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.scope.sectionTitle',
-  {
-    defaultMessage: 'Scope & routing',
-  }
-);
-
-export const SCOPE_SECTION_SUBTITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.scope.sectionSubtitle',
-  { defaultMessage: 'what it may read, where work lands' }
-);
-
-export const WORKERS_SECTION_TITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.workers.sectionTitle',
-  { defaultMessage: 'Workers' }
-);
-
-export const WORKERS_SECTION_SUBTITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.workers.sectionSubtitle',
-  { defaultMessage: 'Workers tagged as this Watch' }
-);
-
-export const WORKER_SECTION_SUBTITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.worker.sectionSubtitle',
-  { defaultMessage: 'applies to this worker only' }
-);
-
 export const WORKER_SETTINGS_UNAVAILABLE = i18n.translate(
   'xpack.alertzero.watches.settings.worker.unavailable',
   { defaultMessage: 'Settings could not be read; reload and try again' }
-);
-
-export const SKILLS_SECTION_TITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.skills.sectionTitle',
-  { defaultMessage: 'Skills' }
-);
-
-export const SKILLS_SECTION_SUBTITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.skills.sectionSubtitle',
-  { defaultMessage: 'what this Worker can use' }
-);
-
-export const SKILLS_VIEW_ALL = i18n.translate('xpack.alertzero.watches.settings.skills.viewAll', {
-  defaultMessage: 'View all skills',
-});
-
-export const GATES_SECTION_TITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.gates.sectionTitle',
-  {
-    defaultMessage: 'Approval gates',
-  }
-);
-
-export const GATES_SECTION_SUBTITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.gates.sectionSubtitle',
-  { defaultMessage: 'humans stay in control of consequential changes' }
-);
-
-export const LEDGER_SECTION_TITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.ledger.sectionTitle',
-  { defaultMessage: 'Recent runs' }
-);
-
-export const LEDGER_SECTION_SUBTITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.ledger.sectionSubtitle',
-  { defaultMessage: 'ledger for this Watch' }
 );
 
 /* -------------------------------------------------------------------------- */
@@ -142,546 +258,118 @@ export const AUTONOMY_LEVEL_NAMES: Record<string, string> = {
   }),
 };
 
-export const AUTONOMY_LEVEL_DESCRIPTIONS: Record<string, string> = {
-  manual: i18n.translate('xpack.alertzero.watches.settings.autonomy.manual.description', {
-    defaultMessage:
-      'Nothing runs on its own. This Worker drafts proposals and every one of them waits for your review.',
-  }),
-  assisted: i18n.translate('xpack.alertzero.watches.settings.autonomy.assisted.description', {
-    defaultMessage:
-      'Routine, reversible steps run on their own. Anything consequential is staged and waits for approval.',
-  }),
-  supervised: i18n.translate('xpack.alertzero.watches.settings.autonomy.supervised.description', {
-    defaultMessage:
-      'This Worker acts within its allow-list and tells you afterwards. Consequential actions still gate.',
-  }),
-};
-
 export const autonomyLevelName = (levelId: string): string =>
   AUTONOMY_LEVEL_NAMES[levelId] ?? levelId;
 
-export const AUTONOMY_RANGE_ARIA_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.autonomy.rangeAriaLabel',
+export const AUTONOMY_ACTOR_WORKER = i18n.translate(
+  'xpack.alertzero.watches.settings.autonomy.actor.worker',
+  { defaultMessage: 'Worker' }
+);
+
+export const AUTONOMY_ACTOR_YOU = i18n.translate(
+  'xpack.alertzero.watches.settings.autonomy.actor.you',
+  { defaultMessage: 'You' }
+);
+
+export const AUTONOMY_RADIOGROUP_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.autonomy.radiogroupAriaLabel',
   { defaultMessage: 'Autonomy level' }
 );
 
 /* -------------------------------------------------------------------------- */
-/* Schedule interval                                                          */
+/* Trigger row and Workers empty state                                        */
 /* -------------------------------------------------------------------------- */
 
-export const SCHEDULE_INTERVAL_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.scheduleInterval.label',
-  { defaultMessage: 'Run every' }
+export const scheduleUnitDays = (amount: number) =>
+  i18n.translate('xpack.alertzero.watches.settings.trigger.unit.days', {
+    defaultMessage: '{amount, plural, one {day} other {days}}',
+    values: { amount },
+  });
+
+export const scheduleUnitHours = (amount: number) =>
+  i18n.translate('xpack.alertzero.watches.settings.trigger.unit.hours', {
+    defaultMessage: '{amount, plural, one {hour} other {hours}}',
+    values: { amount },
+  });
+
+export const scheduleUnitMinutes = (amount: number) =>
+  i18n.translate('xpack.alertzero.watches.settings.trigger.unit.minutes', {
+    defaultMessage: '{amount, plural, one {minute} other {minutes}}',
+    values: { amount },
+  });
+
+export const TRIGGER_AMOUNT_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.amountAriaLabel',
+  { defaultMessage: 'Interval amount' }
 );
 
-export const SCHEDULE_INTERVAL_HELP_TEXT = i18n.translate(
-  'xpack.alertzero.watches.settings.scheduleInterval.helpText',
+export const TRIGGER_EVERY = i18n.translate('xpack.alertzero.watches.settings.trigger.every', {
+  defaultMessage: 'Every',
+});
+
+export const TRIGGER_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.helpText',
   { defaultMessage: 'How often this Worker runs. Applies to this Worker only.' }
 );
 
-export const SCHEDULE_INTERVAL_NUMBER_ARIA_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.scheduleInterval.numberAriaLabel',
-  { defaultMessage: 'Schedule interval' }
-);
-
-export const SCHEDULE_INTERVAL_UNIT_ARIA_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.scheduleInterval.unitAriaLabel',
-  { defaultMessage: 'Schedule interval unit' }
-);
-
-const SCHEDULE_UNIT_MINUTE = (intervalValue: string) =>
-  i18n.translate('xpack.alertzero.watches.settings.scheduleInterval.unit.minute', {
-    defaultMessage: '{intervalValue, plural, one {minute} other {minutes}}',
-    values: { intervalValue },
-  });
-
-const SCHEDULE_UNIT_HOUR = (intervalValue: string) =>
-  i18n.translate('xpack.alertzero.watches.settings.scheduleInterval.unit.hour', {
-    defaultMessage: '{intervalValue, plural, one {hour} other {hours}}',
-    values: { intervalValue },
-  });
-
-const SCHEDULE_UNIT_DAY = (intervalValue: string) =>
-  i18n.translate('xpack.alertzero.watches.settings.scheduleInterval.unit.day', {
-    defaultMessage: '{intervalValue, plural, one {day} other {days}}',
-    values: { intervalValue },
-  });
-
-/** Pluralised unit label, matching how the Attack Discovery schedule form reads its unit select. */
-export const scheduleUnitLabel = (unit: WorkerScheduleUnit, intervalValue: number): string => {
-  const value = String(intervalValue);
-  switch (unit) {
-    case 'm':
-      return SCHEDULE_UNIT_MINUTE(value);
-    case 'h':
-      return SCHEDULE_UNIT_HOUR(value);
-    case 'd':
-      return SCHEDULE_UNIT_DAY(value);
-  }
-};
-
-/* -------------------------------------------------------------------------- */
-/* Triggers                                                                   */
-/* -------------------------------------------------------------------------- */
-
-export const AD_SHARED_CALLOUT_TITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.triggers.adSharedTitle',
-  { defaultMessage: 'Shared with Attack Discovery' }
-);
-
-export const AD_SHARED_CALLOUT_BODY = i18n.translate(
-  'xpack.alertzero.watches.settings.triggers.adSharedBody',
+export const TRIGGER_HELP_READ_ONLY_4H = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.helpTextReadOnly4h',
   {
     defaultMessage:
-      'The Attack Discovery schedule below is the same configuration as the existing Attack Discovery UI — same flyout, API, and backing data.',
+      'Hunt Watch runs every 4 hours on a fixed schedule. The interval cannot be changed.',
   }
 );
 
-export const AD_SCHEDULE_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.triggers.adScheduleLabel',
-  { defaultMessage: 'Attack Discovery schedule' }
+export const TRIGGER_LABEL = i18n.translate('xpack.alertzero.watches.settings.trigger.label', {
+  defaultMessage: 'Trigger',
+});
+
+export const TRIGGER_UNIT_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.unitAriaLabel',
+  { defaultMessage: 'Interval unit' }
 );
 
-export const SCHEDULE_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.triggers.scheduleLabel',
+export const WORKERS_EMPTY_BODY = i18n.translate(
+  'xpack.alertzero.watches.settings.workers.empty.body',
   {
-    defaultMessage: 'Schedule',
+    defaultMessage: 'This Watch has no Workers yet.',
   }
 );
 
-export const SCHEDULE_HELP = i18n.translate(
-  'xpack.alertzero.watches.settings.triggers.scheduleHelp',
+export const WORKERS_EMPTY_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.workers.empty.title',
   {
-    defaultMessage: 'How often the Orchestrator looks for new work.',
+    defaultMessage: 'No Workers in this Watch',
   }
 );
-
-export const MANUAL_RUN_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.triggers.manualRunLabel',
-  { defaultMessage: 'Manual run' }
-);
-
-export const MANUAL_RUN_SWITCH_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.triggers.manualRunSwitchLabel',
-  { defaultMessage: 'Allow manual run' }
-);
-
-export const MANUAL_RUN_HELP = i18n.translate(
-  'xpack.alertzero.watches.settings.triggers.manualRunHelp',
-  {
-    defaultMessage: 'Lets an analyst start a run outside the schedule.',
-  }
-);
-
-export const SCHEDULE_OPTION_LABELS: Record<string, string> = {
-  'every-5m': i18n.translate('xpack.alertzero.watches.settings.schedule.every5m', {
-    defaultMessage: 'Every 5 minutes',
-  }),
-  'every-15m': i18n.translate('xpack.alertzero.watches.settings.schedule.every15m', {
-    defaultMessage: 'Every 15 minutes',
-  }),
-  'every-30m': i18n.translate('xpack.alertzero.watches.settings.schedule.every30m', {
-    defaultMessage: 'Every 30 minutes',
-  }),
-  hourly: i18n.translate('xpack.alertzero.watches.settings.schedule.hourly', {
-    defaultMessage: 'Every hour',
-  }),
-};
 
 /* -------------------------------------------------------------------------- */
-/* Scope & routing                                                            */
+/* Workers section (Watch detail)                                             */
 /* -------------------------------------------------------------------------- */
 
-export const DATA_SOURCES_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.scope.dataSources',
-  {
-    defaultMessage: 'Allowed data sources',
-  }
+export const WORKERS_SECTION_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.workers.sectionTitle',
+  { defaultMessage: 'Workers' }
 );
 
-export const DATA_SOURCES_HELP = i18n.translate(
-  'xpack.alertzero.watches.settings.scope.dataSourcesHelp',
-  {
-    defaultMessage: 'What this Watch may read while it works.',
-  }
+export const WORKERS_SECTION_SUBTITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.workers.sectionSubtitle',
+  { defaultMessage: 'Workers tagged as this Watch' }
 );
-
-export const ASSIGNEE_QUEUE_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.scope.assigneeQueue',
-  { defaultMessage: 'Default assignee queue' }
-);
-
-export const ASSIGNEE_QUEUE_HELP = i18n.translate(
-  'xpack.alertzero.watches.settings.scope.assigneeQueueHelp',
-  { defaultMessage: 'Where proposals land for review.' }
-);
-
-export const ESCALATION_CONTACT_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.scope.escalationContact',
-  { defaultMessage: 'Escalation contact' }
-);
-
-export const ESCALATION_CONTACT_HELP = i18n.translate(
-  'xpack.alertzero.watches.settings.scope.escalationContactHelp',
-  { defaultMessage: 'Who is paged when something cannot wait for the queue.' }
-);
-
-export const DATA_BOUNDARIES_TITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.scope.dataBoundaries',
-  { defaultMessage: 'Data boundaries' }
-);
-
-export const DATA_SOURCE_OPTION_LABELS: Record<string, string> = {
-  'alerts-only': i18n.translate('xpack.alertzero.watches.settings.dataSources.alertsOnly', {
-    defaultMessage: 'Alerts',
-  }),
-  'alerts-entities': i18n.translate('xpack.alertzero.watches.settings.dataSources.alertsEntities', {
-    defaultMessage: 'Alerts, entities',
-  }),
-  'alerts-entities-timelines': i18n.translate(
-    'xpack.alertzero.watches.settings.dataSources.alertsEntitiesTimelines',
-    { defaultMessage: 'Alerts, entities, timelines' }
-  ),
-  'alerts-entities-timelines-edr': i18n.translate(
-    'xpack.alertzero.watches.settings.dataSources.alertsEntitiesTimelinesEdr',
-    { defaultMessage: 'Alerts, entities, timelines, EDR telemetry' }
-  ),
-};
-
-export const ASSIGNEE_QUEUE_OPTION_LABELS: Record<string, string> = {
-  unassigned: i18n.translate('xpack.alertzero.watches.settings.assigneeQueue.unassigned', {
-    defaultMessage: 'Unassigned',
-  }),
-  'tier-1-alert-triage': i18n.translate('xpack.alertzero.watches.settings.assigneeQueue.tier1', {
-    defaultMessage: 'Tier 1 — Alert triage',
-  }),
-  'tier-2-escalations': i18n.translate('xpack.alertzero.watches.settings.assigneeQueue.tier2', {
-    defaultMessage: 'Tier 2 — Escalations',
-  }),
-  'detection-engineering': i18n.translate(
-    'xpack.alertzero.watches.settings.assigneeQueue.detectionEngineering',
-    { defaultMessage: 'Detection engineering' }
-  ),
-  'threat-hunting': i18n.translate('xpack.alertzero.watches.settings.assigneeQueue.threatHunting', {
-    defaultMessage: 'Threat hunting',
-  }),
-};
-
-export const ESCALATION_CONTACT_OPTION_LABELS: Record<string, string> = {
-  none: i18n.translate('xpack.alertzero.watches.settings.escalationContact.none', {
-    defaultMessage: 'None',
-  }),
-  'soc-lead-on-call': i18n.translate('xpack.alertzero.watches.settings.escalationContact.socLead', {
-    defaultMessage: 'SOC lead on-call',
-  }),
-  'ir-on-call': i18n.translate('xpack.alertzero.watches.settings.escalationContact.irOnCall', {
-    defaultMessage: 'IR on-call',
-  }),
-  'detection-lead': i18n.translate(
-    'xpack.alertzero.watches.settings.escalationContact.detectionLead',
-    {
-      defaultMessage: 'Detection lead',
-    }
-  ),
-};
 
 /* -------------------------------------------------------------------------- */
-/* Workers & skills sections                                                  */
+/* Alert Triage Worker extras                                                 */
 /* -------------------------------------------------------------------------- */
 
-export const SKILL_DEPENDENCIES_CALLOUT_TITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.skills.dependenciesTitle',
-  { defaultMessage: 'Skill dependencies' }
+export const MINIMUM_CONFIDENCE_SCORE_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreLabel',
+  { defaultMessage: 'Minimum confidence score' }
 );
 
-export const SKILL_DEPENDENCIES_CALLOUT_BODY = i18n.translate(
-  'xpack.alertzero.watches.settings.skills.dependenciesBody',
+export const MINIMUM_CONFIDENCE_SCORE_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreHelpText',
   {
     defaultMessage:
-      'Disabling a skill that a Worker depends on will degrade or disable that Worker.',
+      'False positive alerts must meet or exceed this confidence score to be surfaced for review or auto-closed. Alerts below the threshold are still tagged with the verdict but require no action. Lower values surface more alerts; higher values are more conservative.',
   }
 );
-
-export const COL_WORKER = i18n.translate('xpack.alertzero.watches.settings.col.worker', {
-  defaultMessage: 'Worker',
-});
-
-export const COL_SKILL = i18n.translate('xpack.alertzero.watches.settings.col.skill', {
-  defaultMessage: 'Skill',
-});
-
-export const COL_DESCRIPTION = i18n.translate('xpack.alertzero.watches.settings.col.description', {
-  defaultMessage: 'Description',
-});
-
-export const COL_ENABLED = i18n.translate('xpack.alertzero.watches.settings.col.enabled', {
-  defaultMessage: 'Enabled',
-});
-
-export const STATUS_ENABLED = i18n.translate('xpack.alertzero.watches.settings.status.enabled', {
-  defaultMessage: 'enabled',
-});
-
-export const STATUS_DISABLED = i18n.translate('xpack.alertzero.watches.settings.status.disabled', {
-  defaultMessage: 'disabled',
-});
-
-export const STATUS_PAUSED = i18n.translate('xpack.alertzero.watches.settings.status.paused', {
-  defaultMessage: 'paused',
-});
-
-export const STATUS_UNAVAILABLE = i18n.translate(
-  'xpack.alertzero.watches.settings.status.unavailable',
-  {
-    defaultMessage: 'unavailable',
-  }
-);
-
-export const STATUS_DISABLED_GLOBALLY = i18n.translate(
-  'xpack.alertzero.watches.settings.status.disabledGlobally',
-  { defaultMessage: 'disabled for every Watch' }
-);
-
-export const lastRunStatus = (relativeTime: string) =>
-  i18n.translate('xpack.alertzero.watches.settings.status.lastRun', {
-    defaultMessage: 'last run {relativeTime}',
-    values: { relativeTime },
-  });
-
-export const degradedStatus = (reason: string) =>
-  i18n.translate('xpack.alertzero.watches.settings.status.degraded', {
-    defaultMessage: 'degraded — {reason}',
-    values: { reason },
-  });
-
-export const STATUS_DEGRADED = i18n.translate(
-  'xpack.alertzero.watches.settings.status.degradedPlain',
-  {
-    defaultMessage: 'degraded',
-  }
-);
-
-/* -------------------------------------------------------------------------- */
-/* Approval gates                                                             */
-/* -------------------------------------------------------------------------- */
-
-export const COL_ACTION_TYPE = i18n.translate(
-  'xpack.alertzero.watches.settings.gates.col.actionType',
-  {
-    defaultMessage: 'Action type',
-  }
-);
-
-export const COL_REQUIRES_APPROVAL = i18n.translate(
-  'xpack.alertzero.watches.settings.gates.col.requiresApproval',
-  { defaultMessage: 'Requires approval' }
-);
-
-export const COL_APPROVER_ROLE = i18n.translate(
-  'xpack.alertzero.watches.settings.gates.col.approverRole',
-  { defaultMessage: 'Approver role' }
-);
-
-export const GATE_NAMES: Record<string, string> = {
-  'host-isolation': i18n.translate('xpack.alertzero.watches.settings.gates.hostIsolation.name', {
-    defaultMessage: 'Host isolation',
-  }),
-  'detection-rule-change': i18n.translate(
-    'xpack.alertzero.watches.settings.gates.detectionRuleChange.name',
-    { defaultMessage: 'Detection rule change' }
-  ),
-  'new-detection-rule': i18n.translate(
-    'xpack.alertzero.watches.settings.gates.newDetectionRule.name',
-    {
-      defaultMessage: 'New detection rule',
-    }
-  ),
-  'hunt-execution': i18n.translate('xpack.alertzero.watches.settings.gates.huntExecution.name', {
-    defaultMessage: 'Hunt execution',
-  }),
-  'evidence-only-investigation': i18n.translate(
-    'xpack.alertzero.watches.settings.gates.evidenceOnly.name',
-    { defaultMessage: 'Evidence-only investigation' }
-  ),
-};
-
-export const GATE_QUALIFIERS: Record<string, string> = {
-  'host-isolation': i18n.translate(
-    'xpack.alertzero.watches.settings.gates.hostIsolation.qualifier',
-    {
-      defaultMessage: 'Elastic Defend response',
-    }
-  ),
-  'detection-rule-change': i18n.translate(
-    'xpack.alertzero.watches.settings.gates.detectionRuleChange.qualifier',
-    { defaultMessage: 'tuning / suppression / exception' }
-  ),
-  'new-detection-rule': i18n.translate(
-    'xpack.alertzero.watches.settings.gates.newDetectionRule.qualifier',
-    { defaultMessage: 'ships monitor-only until validated' }
-  ),
-  'hunt-execution': i18n.translate(
-    'xpack.alertzero.watches.settings.gates.huntExecution.qualifier',
-    {
-      defaultMessage: 'scoped query against telemetry',
-    }
-  ),
-  'evidence-only-investigation': i18n.translate(
-    'xpack.alertzero.watches.settings.gates.evidenceOnly.qualifier',
-    { defaultMessage: 'no side effects' }
-  ),
-};
-
-export const APPROVAL_REQUIREMENT_LABELS: Record<string, string> = {
-  always: i18n.translate('xpack.alertzero.watches.settings.gates.requirement.always', {
-    defaultMessage: 'Always',
-  }),
-  'high-impact': i18n.translate('xpack.alertzero.watches.settings.gates.requirement.highImpact', {
-    defaultMessage: 'High-impact only',
-  }),
-  'in-scope': i18n.translate('xpack.alertzero.watches.settings.gates.requirement.inScope', {
-    defaultMessage: 'Runs in scope',
-  }),
-};
-
-export const APPROVER_ROLE_LABELS: Record<string, string> = {
-  'incident-lead': i18n.translate('xpack.alertzero.watches.settings.gates.role.incidentLead', {
-    defaultMessage: 'Incident lead',
-  }),
-  'detection-engineer': i18n.translate(
-    'xpack.alertzero.watches.settings.gates.role.detectionEngineer',
-    {
-      defaultMessage: 'Detection engineer',
-    }
-  ),
-  'threat-hunter': i18n.translate('xpack.alertzero.watches.settings.gates.role.threatHunter', {
-    defaultMessage: 'Threat hunter',
-  }),
-  'soc-lead': i18n.translate('xpack.alertzero.watches.settings.gates.role.socLead', {
-    defaultMessage: 'SOC lead',
-  }),
-};
-
-export const AUDIT_TRAIL_CALLOUT_TITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.gates.auditTrailTitle',
-  { defaultMessage: 'Audit trail' }
-);
-
-export const AUDIT_TRAIL_CALLOUT_BODY = i18n.translate(
-  'xpack.alertzero.watches.settings.gates.auditTrailBody',
-  {
-    defaultMessage:
-      'Every approved action creates an Action Result — target, approver, output, and rollback notes — for the audit trail.',
-  }
-);
-
-export const requirementSelectAriaLabel = (gateName: string) =>
-  i18n.translate('xpack.alertzero.watches.settings.gates.requirementAriaLabel', {
-    defaultMessage: 'Approval requirement for {gateName}',
-    values: { gateName },
-  });
-
-export const approverSelectAriaLabel = (gateName: string) =>
-  i18n.translate('xpack.alertzero.watches.settings.gates.approverAriaLabel', {
-    defaultMessage: 'Approver role for {gateName}',
-    values: { gateName },
-  });
-
-/* -------------------------------------------------------------------------- */
-/* Run ledger                                                                 */
-/* -------------------------------------------------------------------------- */
-
-export const COL_TIME = i18n.translate('xpack.alertzero.watches.settings.ledger.col.time', {
-  defaultMessage: 'Time',
-});
-
-export const COL_WORKFLOW = i18n.translate('xpack.alertzero.watches.settings.ledger.col.workflow', {
-  defaultMessage: 'Workflow',
-});
-
-export const COL_ACTION = i18n.translate('xpack.alertzero.watches.settings.ledger.col.action', {
-  defaultMessage: 'Action',
-});
-
-export const COL_EVENT = i18n.translate('xpack.alertzero.watches.settings.ledger.col.event', {
-  defaultMessage: 'Event',
-});
-
-export const COL_OUTCOME = i18n.translate('xpack.alertzero.watches.settings.ledger.col.outcome', {
-  defaultMessage: 'Outcome',
-});
-
-export const NO_LEDGER_ENTRIES = i18n.translate('xpack.alertzero.watches.settings.ledger.empty', {
-  defaultMessage: 'No runs recorded for this Watch yet.',
-});
-
-export const RUN_ACTION_LABELS: Record<string, string> = {
-  read: i18n.translate('xpack.alertzero.watches.settings.ledger.action.read', {
-    defaultMessage: 'Read',
-  }),
-  draft: i18n.translate('xpack.alertzero.watches.settings.ledger.action.draft', {
-    defaultMessage: 'Draft',
-  }),
-  gated: i18n.translate('xpack.alertzero.watches.settings.ledger.action.gated', {
-    defaultMessage: 'Gated',
-  }),
-  auto: i18n.translate('xpack.alertzero.watches.settings.ledger.action.auto', {
-    defaultMessage: 'Auto',
-  }),
-};
-
-export const RUN_OUTCOME_LABELS: Record<string, string> = {
-  'awaiting-review': i18n.translate(
-    'xpack.alertzero.watches.settings.ledger.outcome.awaitingReview',
-    {
-      defaultMessage: 'Awaiting review',
-    }
-  ),
-  accepted: i18n.translate('xpack.alertzero.watches.settings.ledger.outcome.accepted', {
-    defaultMessage: 'Accepted',
-  }),
-  dismissed: i18n.translate('xpack.alertzero.watches.settings.ledger.outcome.dismissed', {
-    defaultMessage: 'Dismissed',
-  }),
-  executed: i18n.translate('xpack.alertzero.watches.settings.ledger.outcome.executed', {
-    defaultMessage: 'Executed',
-  }),
-  completed: i18n.translate('xpack.alertzero.watches.settings.ledger.outcome.completed', {
-    defaultMessage: 'Completed',
-  }),
-};
-
-/* -------------------------------------------------------------------------- */
-/* Per-watch intro                                                            */
-/* -------------------------------------------------------------------------- */
-
-const WATCH_INTROS: Record<string, string> = {
-  [SYSTEM_SECURITY_WATCH_FLOOR_ID]: i18n.translate('xpack.alertzero.watches.settings.intro.floor', {
-    defaultMessage:
-      'Groups the Workers that reduce alert volume and route what still needs a person. Settings below belong to each Worker, not to this Watch.',
-  }),
-  [SYSTEM_SECURITY_WATCH_OFFICER_ID]: i18n.translate(
-    'xpack.alertzero.watches.settings.intro.officer',
-    {
-      defaultMessage:
-        'Watch grouping for investigation hand-off. No Workers are attached yet. Settings, when added, will belong to each Worker, not to this Watch.',
-    }
-  ),
-  [SYSTEM_SECURITY_WATCH_DARK_ID]: i18n.translate('xpack.alertzero.watches.settings.intro.dark', {
-    defaultMessage:
-      'Groups the Continuous Threat Hunt Worker. Findings arrive as reviewable evidence. Settings below belong to that Worker, not to this Watch.',
-  }),
-  [SYSTEM_SECURITY_WATCH_DEEP_ID]: i18n.translate('xpack.alertzero.watches.settings.intro.deep', {
-    defaultMessage:
-      'Watch grouping for specialist analysis. No Workers are attached yet. Settings, when added, will belong to each Worker, not to this Watch.',
-  }),
-  [SYSTEM_SECURITY_WATCH_DETECTION_ID]: i18n.translate(
-    'xpack.alertzero.watches.settings.intro.detection',
-    {
-      defaultMessage:
-        'Groups the Rule Tuning and Rule Creation Workers. Settings below belong to each Worker, not to this Watch.',
-    }
-  ),
-};
-
-export const watchIntro = (watchId: string): string | undefined => WATCH_INTROS[watchId];

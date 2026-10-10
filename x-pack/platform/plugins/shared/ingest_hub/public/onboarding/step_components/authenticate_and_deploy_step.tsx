@@ -5,27 +5,38 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-
 import { useOnboardingFlow } from '../onboarding_flow_context';
+import { isAgentBasedOnly } from '../aws_service_matrix';
+import type { AwsServiceMatrixEntry, DeploymentMethod } from '../aws_service_matrix';
 import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
+import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';
+import { getIncompleteInstances } from './service_settings_step/use_service_settings';
 import { useDeploy, toSOServiceVars } from './authenticate_and_deploy_step/use_deploy';
+import { useOnboardingDriftDetection } from './authenticate_and_deploy_step/use_onboarding_drift_detection';
+import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
+import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
 import { useOnboardingSO } from './authenticate_and_deploy_step/use_onboarding_so';
 import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section';
+import { useAwsIdentityFederationEnabled } from '../use_aws_identity_federation_enabled';
+import { useIsSelfManaged } from '../use_is_self_managed';
 import {
   ECF_UNIFIED_STACK_NAME,
   ECF_OTEL_STACK_NAME,
@@ -46,18 +57,76 @@ interface AuthenticateAndDeployStepProps {
   onBack?: () => void;
 }
 
+/** Stable module-level array so the prop identity doesn't change on every render. */
+const SELF_MANAGED_DEPLOYMENT_METHODS: DeploymentMethod[] = ['agent_based'];
+
 export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAndDeployStepProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
+  // Self-managed offers agent-based only — the agentless (managed_integration) and ECF paths
+  // depend on cloud-only infrastructure. The MI and ECF sections below already gate on
+  // isAgentBased, so pinning the method here is enough to hide them.
+  const isSelfManaged = useIsSelfManaged();
   const {
     servicesStep,
     awsServicesMap,
     deploymentMethod,
     setDeploymentMethod,
+    serviceSettingsMethod,
+    authenticateAndDeployStep,
+    agentBasedDeployment: agentBasedDeploymentFromFlow,
     detectAndReviewStep,
     updateDetectAndReviewStep,
+    removeDeployInstances,
+    refetchAwsServiceMatrix,
   } = useOnboardingFlow();
   const { selectedServiceIds, dataFormat } = servicesStep;
   const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
+
+  // Lock the deployment method toggle once any service has been deployed, or while cleanup is still
+  // pending. Computed early so the auto-switch effect can respect it.
+  const isMethodLocked =
+    Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).length > 0 ||
+    Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0 ||
+    (detectAndReviewStep.ecfStacks?.length ?? 0) > 0;
+
+  // ── Agent-based-only detection ────────────────────────────────────────────────
+  const agentBasedOnlyServices = useMemo((): AwsServiceMatrixEntry[] => {
+    if (!awsServicesMap || selectedServiceIds.length === 0) return [];
+    return selectedServiceIds
+      .map((id) => awsServicesMap.get(id))
+      .filter((s): s is AwsServiceMatrixEntry => !!s && isAgentBasedOnly(s));
+  }, [selectedServiceIds, awsServicesMap]);
+
+  // Any agent-based-only service in the selection forces agent-based mode for all — lock the card.
+  const allAgentBasedOnly = agentBasedOnlyServices.length > 0;
+
+  // True while any selected service's manifest is still in-flight (not yet loaded or errored).
+  const hasUnloadedSelectedManifests = selectedServiceIds.some((id) => {
+    const entry = awsServicesMap?.get(id);
+    return entry && !entry.isManifestLoaded && !entry.isManifestError;
+  });
+
+  // True when any selected service's manifest query has failed — blocks Next and surfaces a retry.
+  const hasSelectedManifestError = selectedServiceIds.some(
+    (id) => awsServicesMap?.get(id)?.isManifestError === true
+  );
+
+  const isAgentBased = deploymentMethod === 'agent_based';
+
+  // Track whether the current agent_based selection was auto-forced by this effect so that
+  // removing the last agent-only service resets the method rather than leaving it stuck.
+  const wasAutoForced = useRef(false);
+  useEffect(() => {
+    if (allAgentBasedOnly && deploymentMethod !== 'agent_based' && !isMethodLocked) {
+      wasAutoForced.current = true;
+      setDeploymentMethod('agent_based');
+    } else if (!allAgentBasedOnly && wasAutoForced.current && !isMethodLocked) {
+      wasAutoForced.current = false;
+      // Self-managed has no agentless path, so deselecting the last agent-only service must not
+      // push the session back to 'managed_integration'.
+      setDeploymentMethod(isSelfManaged ? 'agent_based' : 'managed_integration');
+    }
+  }, [allAgentBasedOnly, deploymentMethod, setDeploymentMethod, isMethodLocked, isSelfManaged]);
 
   // ── Service settings (region + vars) ─────────────────────────────────────────
   // Read from session storage so ECF URLs can be pre-filled without re-entering data.
@@ -66,6 +135,23 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     DEFAULT_SERVICE_SETTINGS
   );
   const { globalRegion, serviceVars } = serviceSettings ?? DEFAULT_SERVICE_SETTINGS;
+
+  // ── Drift detection ───────────────────────────────────────────────────────────
+  const { onboardingDeploymentId, policyIdsByInstance } = detectAndReviewStep;
+  const { connectorId } = authenticateAndDeployStep ?? {};
+  const isDirty = detectAndReviewStep.isDirty ?? false;
+  const { driftSettled, driftCheckError, retryDriftCheck, handleReplaceFormDirtyChange } =
+    useOnboardingDriftDetection({
+      onboardingDeploymentId,
+      policyIdsByInstance,
+      awsServicesMap,
+      deploymentMethod,
+      connectorId,
+      agentBasedDeployment: agentBasedDeploymentFromFlow,
+      serviceSettings,
+      isDirty,
+      updateDetectAndReviewStep,
+    });
 
   const otlpEndpoint = services.cloud?.managedOtlp?.url;
 
@@ -83,17 +169,78 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     });
   }, [serviceSettings?.instances, selectedServiceIds, awsServicesMap]);
 
+  // ── Settings collected for ECF vs. the selected method ───────────────────────
+  // Step 2 collects only the trigger ARN for services ECF can deploy. Under agent-based those
+  // services need the package's own vars, so what Step 2 showed is out of date. `awsServicesMap`
+  // already carries the agent-based view here, so the required set below is the agent-based one.
+  const ecfCapableServiceIds = useMemo(
+    () =>
+      new Set(
+        selectedServiceIds.filter((id) => {
+          const entry = awsServicesMap?.get(id);
+          return !!entry?.ecfSettings && !entry.ecfOnly;
+        })
+      ),
+    [selectedServiceIds, awsServicesMap]
+  );
+  const settingsOutOfDateServiceNames = useMemo(
+    () =>
+      isAgentBased && serviceSettingsMethod !== 'agent_based'
+        ? [...ecfCapableServiceIds].map((id) => awsServicesMap?.get(id)?.name ?? id)
+        : [],
+    [isAgentBased, serviceSettingsMethod, ecfCapableServiceIds, awsServicesMap]
+  );
+  // Checked under both methods: `awsServicesMap` carries the view for the selected one, so a user
+  // who switches back from agent-based to managed is also stopped when the stored settings have no
+  // source ECF can route (e.g. WAF with only CloudWatch enabled).
+  const incompleteSettingsInstances = useMemo(
+    () =>
+      getIncompleteInstances(
+        ecfInstances.filter((inst) => ecfCapableServiceIds.has(inst.serviceId)),
+        serviceVars,
+        awsServicesMap
+      ),
+    [ecfInstances, ecfCapableServiceIds, serviceVars, awsServicesMap]
+  );
+  const incompleteSettingsCount = incompleteSettingsInstances.length;
+  // Name the services that need attention: the incomplete ones while Next is blocked, otherwise
+  // the ones whose settings were collected under the previous method.
+  const calloutServiceNames =
+    incompleteSettingsCount > 0
+      ? [...new Set(incompleteSettingsInstances.map((inst) => inst.name))]
+      : settingsOutOfDateServiceNames;
+  // Warning while required agent-based settings are missing (Next is blocked), info otherwise.
+  const SettingsChangedCallout = incompleteSettingsCount > 0 ? KbnWarningCallout : KbnInfoCallout;
+  const showSettingsChangedCallout =
+    settingsOutOfDateServiceNames.length > 0 || incompleteSettingsCount > 0;
+
   // ── Managed Integrations ──────────────────────────────────────────────────────
-  const { handleDeploy, isDeploying, failedInstances, isAlreadyDeployed } = useDeploy({
+  const {
+    handleDeploy,
+    isDeploying,
+    failedInstances,
+    isAlreadyDeployed,
+    deployGroups,
+    isCleanupOnly,
+    storedSecretFields,
+    isStoredSecretsLoading,
+  } = useDeploy({
     onContinue: () => {},
   });
   const [deployAttempted, setDeployAttempted] = useState(false);
-  const isMiDone =
-    isAlreadyDeployed || (deployAttempted && !isDeploying && failedInstances.length === 0);
-  // hasFailed is NOT gated on deployAttempted: if the hook is seeded with persisted failures on
-  // remount (after navigating Back/Next), the callout and Retry must still appear even though no
-  // deploy was attempted in this component lifetime.
+  // hasFailed not gated on deployAttempted: persisted failures on Back/Next remount must still
+  // show the callout even without a new deploy attempt.
   const hasFailed = !isDeploying && failedInstances.length > 0;
+  // hasFailed checked in isAlreadyDeployed: a partial dirty-redeploy (one PUT fails) leaves
+  // failedInstances set — reverting settings clears isDirty but failedInstances persists.
+  const isMiDone =
+    driftSettled &&
+    // The already-deployed arm must check !isDeploying and failedInstances independently:
+    // !hasFailed collapses to (isDeploying || failedInstances.length === 0), so when Retry
+    // starts isDeploying=true makes !hasFailed true and isMiDone flips true mid-retry, enabling
+    // Next before the Retry PUT has finished.
+    ((isAlreadyDeployed && !isDirty && !isDeploying && failedInstances.length === 0) ||
+      (deployAttempted && !isDeploying && failedInstances.length === 0 && !isDirty));
 
   const handleDeployClick = useCallback(() => {
     setDeployAttempted(true);
@@ -106,26 +253,89 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   const miServiceIds = useMemo(
     () =>
-      selectedServiceIds.filter((id) =>
-        awsServicesMap?.get(id)?.deploymentMethods.some((dm) => dm.method === 'managed_integration')
-      ),
-    [selectedServiceIds, awsServicesMap]
+      isAgentBased
+        ? [] // suppress MI section in agent-based mode
+        : selectedServiceIds.filter((id) =>
+            awsServicesMap
+              ?.get(id)
+              ?.deploymentMethods.some((dm) => dm.method === 'managed_integration')
+          ),
+    [isAgentBased, selectedServiceIds, awsServicesMap]
   );
 
+  // ── Agent-based ─────────────────────────────────────────────────────────────
+  const {
+    targets: agentTargets,
+    isDeploying: isAgentDeploying,
+    failedInstances: agentFailedInstances,
+    isAlreadyDeployed: isAgentAlreadyDeployed,
+    handleDeploy: handleAgentDeploy,
+    setAgentCredentials,
+    secretSourcePolicyId,
+  } = useAgentBasedDeploy();
+
+  const [agentDeployAttempted, setAgentDeployAttempted] = useState(false);
+  const [isAgentNextReady, setIsAgentNextReady] = useState(false);
+  // isDirty is checked in both branches so that Next doesn't short-circuit when drift has been
+  // detected on an already-deployed agent setup — the dirty-redeploy path in useAgentBasedDeploy
+  // must run before navigation is allowed. driftSettled gates both for the same reason as isMiDone.
+  const isAgentDone =
+    driftSettled &&
+    ((isAgentAlreadyDeployed && !isDirty) ||
+      (agentDeployAttempted && !isAgentDeploying && agentFailedInstances.length === 0 && !isDirty));
+  // Gated on agentDeployAttempted (unlike MI): failedInstances is shared with MI, so an
+  // un-gated check would surface stale MI failures as agent-based errors.
+  const agentHasFailed =
+    agentDeployAttempted && !isAgentDeploying && agentFailedInstances.length > 0;
+
+  const handleAgentDeployClick = useCallback(
+    (instanceIds?: string[]) => {
+      setAgentDeployAttempted(true);
+      if (instanceIds && instanceIds.length > 0) {
+        handleAgentDeploy(instanceIds);
+      } else {
+        handleAgentDeploy();
+      }
+    },
+    [handleAgentDeploy]
+  );
+
+  // Used by handleNext to await the deploy result and decide whether to navigate.
+  const handleAgentDeployForNext = useCallback(async (): Promise<{ failed: boolean }> => {
+    setAgentDeployAttempted(true);
+    return handleAgentDeploy();
+  }, [handleAgentDeploy]);
+
+  const isAwsIdentityFederationEnabled = useAwsIdentityFederationEnabled();
   const showIdentityFederation = useMemo(() => {
+    if (!isAwsIdentityFederationEnabled) return false;
     if (miServiceIds.length === 0) return true;
     return miServiceIds.every(
       (id) => awsServicesMap?.get(id)?.identityFederationSupported !== false
     );
-  }, [miServiceIds, awsServicesMap]);
+  }, [isAwsIdentityFederationEnabled, miServiceIds, awsServicesMap]);
+
+  // The Federated Identity template must cover exactly the instances Deploy will create as
+  // managed integrations, duplicates included.
+  const iacIntegrations = useMemo(
+    () =>
+      buildIacIntegrations(
+        deployGroups.flatMap((group) => group.members),
+        serviceVars
+      ),
+    [deployGroups, serviceVars]
+  );
 
   // ── Elastic Cloud Forwarder ───────────────────────────────────────────────────
+  // ECF is suppressed in agent-based mode — agent-based services are deployed via the agent policy,
+  // not via CloudFormation. Passing an empty instance list makes useEcfDeployment return
+  // hasAnyEcf=false so the section is hidden and Next is not gated on ECF completion.
   const {
     hasAnyEcf,
     isDone: isEcfDone,
     sectionProps: ecfSectionProps,
   } = useEcfDeployment({
-    instances: ecfInstances,
+    instances: isAgentBased ? [] : ecfInstances,
     serviceVars,
     globalRegion,
     otlpEndpoint,
@@ -135,13 +345,29 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // ── ECF-only SO persistence ───────────────────────────────────────────────────
   const [isSavingSO, setIsSavingSO] = useState(false);
 
-  const handleNext = useCallback(async () => {
+  // Defined before handleNext so they can be referenced in the callback and dependency array.
+  const showMiSection = !isAgentBased && miServiceIds.length > 0;
+  const showAgentSection = isAgentBased && agentTargets.length > 0;
+
+  // True when at least one agent target's service declares configurable vars (e.g. credential
+  // vars). False for services with no vars, so the credential form is skipped and the user
+  // isn't blocked on entering credentials that would be discarded anyway.
+  const requiresCredentials = useMemo(
+    () =>
+      agentTargets.some((group) =>
+        group.members.some(({ service }) => service.varDefsByInput !== undefined)
+      ),
+    [agentTargets]
+  );
+
+  // ── ECF stack metadata helpers ────────────────────────────────────────────────
+  const ecfStacks = useMemo(() => {
     const defaultNames: Record<string, string> = {
       unified: ECF_UNIFIED_STACK_NAME,
       otel: ECF_OTEL_STACK_NAME,
       crowdstrike: ECF_CROWDSTRIKE_STACK_NAME,
     };
-    const ecfStacks = ecfSectionProps.launchedFamilies
+    return ecfSectionProps.launchedFamilies
       .map((family) => {
         const version = ecfSectionProps.stackVersions[family];
         if (!version) return null;
@@ -152,100 +378,487 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         };
       })
       .filter((s): s is NonNullable<typeof s> => s !== null);
+  }, [ecfSectionProps.launchedFamilies, ecfSectionProps.stackVersions, ecfSectionProps.stackNames]);
 
-    const ecfStacksUnchanged =
+  const ecfStacksUnchanged = useMemo(
+    () =>
       detectAndReviewStep.ecfStacks !== undefined &&
-      JSON.stringify(ecfStacks) === JSON.stringify(detectAndReviewStep.ecfStacks);
+      JSON.stringify(ecfStacks) === JSON.stringify(detectAndReviewStep.ecfStacks),
+    [ecfStacks, detectAndReviewStep.ecfStacks]
+  );
 
-    // ECF-only: handleDeploy never runs, so create the SO here then navigate.
-    if (miServiceIds.length === 0 && hasAnyEcf) {
-      setIsSavingSO(true);
-      // Reuse an existing deployment id (user clicked Back then Next again) rather
-      // than creating a second SO and orphaning the first.
-      const existingId = detectAndReviewStep.onboardingDeploymentId;
-      const deploymentId =
-        existingId ??
-        (await createDeployment({
-          provider: 'aws',
-          mechanisms: ['ecf'],
-          services: selectedServiceIds,
-          serviceVars: toSOServiceVars(serviceVars, awsServicesMap ?? new Map()) as Record<
-            string,
-            Record<string, unknown>
-          >,
-          globalRegion,
-          dataFormat,
-        }));
+  // ── handleNext sub-handlers ───────────────────────────────────────────────────
 
+  // ECF-only: handleDeploy never runs for new deploys; create the SO here then navigate.
+  const handleEcfOnlyNext = useCallback(async () => {
+    setIsSavingSO(true);
+    // Reuse an existing deployment id (user clicked Back then Next again) rather than creating
+    // a second SO and orphaning the first.
+    const existingId = detectAndReviewStep.onboardingDeploymentId;
+    const deploymentId =
+      existingId ??
+      (await createDeployment({
+        provider: 'aws',
+        mechanisms: ['ecf'],
+        services: selectedServiceIds,
+        serviceVars: toSOServiceVars(serviceVars, awsServicesMap ?? new Map()) as Record<
+          string,
+          Record<string, unknown>
+        >,
+        globalRegion,
+        dataFormat,
+      }));
+    if (deploymentId) {
+      // Always include mechanisms when updating — if reusing an existing MI deployment SO
+      // (existingId), this transitions it from ['managed_integration'] to ['ecf'].
+      // Clear connectorId and authMethod: those are MI-only fields and must not persist after
+      // the transition, otherwise getByConnectorId still returns this deployment for the old
+      // connector even though it no longer uses managed integrations.
+      // This write is load-bearing — failure leaves the SO advertising the wrong mechanism
+      // and an orphaned connector reference, so we must confirm it before navigating.
+      const writeSucceeded = await updateDeployment(deploymentId, {
+        mechanisms: ['ecf'],
+        connectorId: null,
+        authMethod: null,
+        // Always mark succeeded — the deployment is ECF-only now regardless of whether the
+        // stack metadata changed. Without this, a formerly-failed MI+ECF SO that had MI removed
+        // would remain 'failed' even though ECF stacks are in place.
+        status: 'succeeded',
+        // Always replace services — when reusing an existing SO (existingId set, e.g. the sole
+        // MI service failed before policy creation and the user then switches to ECF), the SO
+        // still holds the old MI service list. Without this, reopening the deployment URL
+        // restores the wrong service selection.
+        services: selectedServiceIds,
+        ...(!ecfStacksUnchanged ? { ecfStacks } : {}),
+      });
       setIsSavingSO(false);
-      // Navigate first so onContinue uses the current history.location (not the stale closure
-      // location). persistDeploymentId then replaces the already-navigated URL to add ?deploymentId=,
-      // mirroring the order in useDeploy's handleDeploy for the managed-integration path.
-      onContinue();
-      if (deploymentId) {
-        if (!ecfStacksUnchanged) {
-          await updateDeployment(deploymentId, { status: 'succeeded', ecfStacks });
-          updateDetectAndReviewStep({ ecfStacks });
-        }
+      if (!writeSucceeded) {
+        // Persist the new SO's ID before returning so a retry can update the same record
+        // instead of creating another orphaned deployment. For MI→ECF (existingId set) the ID
+        // is already in the URL from the previous deploy, so only fresh ECF needs this.
         if (!existingId) persistDeploymentId(deploymentId);
+        return;
       }
-      return;
+      if (!ecfStacksUnchanged) updateDetectAndReviewStep({ ecfStacks });
+    } else {
+      setIsSavingSO(false);
     }
-
-    // Mixed (MI + ECF): SO was created by handleDeploy with both mechanisms; update ecfStacks now.
-    if (hasAnyEcf && detectAndReviewStep.onboardingDeploymentId) {
-      onContinue();
-      if (!ecfStacksUnchanged) {
-        await updateDeployment(detectAndReviewStep.onboardingDeploymentId, { ecfStacks });
-        updateDetectAndReviewStep({ ecfStacks });
-      }
-      return;
-    }
-
     onContinue();
+    // persistDeploymentId after navigate: onContinue pushes a stale location snapshot, so
+    // calling persistDeploymentId before it would replace step 3's URL. Calling it after
+    // replaces the already-navigated step 4 URL instead, matching the MI deploy path.
+    if (deploymentId && !existingId) persistDeploymentId(deploymentId);
   }, [
-    miServiceIds.length,
-    hasAnyEcf,
-    ecfSectionProps,
+    ecfStacks,
+    ecfStacksUnchanged,
+    detectAndReviewStep.onboardingDeploymentId,
     selectedServiceIds,
     serviceVars,
     awsServicesMap,
     globalRegion,
     dataFormat,
-    detectAndReviewStep.onboardingDeploymentId,
-    detectAndReviewStep.ecfStacks,
+    onContinue,
     createDeployment,
     updateDeployment,
-    persistDeploymentId,
     updateDetectAndReviewStep,
+    persistDeploymentId,
+  ]);
+
+  // Mixed (MI + ECF): SO was created by handleDeploy with both mechanisms; update ecfStacks now.
+  const handleMixedEcfNext = useCallback(async () => {
+    onContinue();
+    if (!ecfStacksUnchanged && detectAndReviewStep.onboardingDeploymentId) {
+      await updateDeployment(detectAndReviewStep.onboardingDeploymentId, { ecfStacks });
+      updateDetectAndReviewStep({ ecfStacks });
+    }
+    // A previously-failed service that was deselected from Step 1 never acquired a policy ID,
+    // so policyIdsByInstance has no stale entry — it can slip through isAlreadyDeployed and
+    // reach this ECF branch without being reconciled. Best-effort: navigation already happened.
+    const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
+    const staleFailedIds = failedInstances.filter((id) => !activeInstanceIds.has(id));
+    if (staleFailedIds.length > 0) {
+      let reconcileWriteSucceeded = true;
+      if (detectAndReviewStep.onboardingDeploymentId) {
+        const remainingFailed = failedInstances.filter((id) => !staleFailedIds.includes(id));
+        reconcileWriteSucceeded = await updateDeployment(
+          detectAndReviewStep.onboardingDeploymentId,
+          {
+            services: selectedServiceIds,
+            status: remainingFailed.length === 0 ? 'succeeded' : 'failed',
+          }
+        );
+      }
+      // Only clear local state when the SO write is confirmed — a failed write leaves the
+      // deselected service in the SO; retaining it locally keeps session and SO consistent.
+      if (reconcileWriteSucceeded) removeDeployInstances(staleFailedIds);
+    }
+  }, [
+    ecfStacks,
+    ecfStacksUnchanged,
+    detectAndReviewStep.onboardingDeploymentId,
+    deployGroups,
+    failedInstances,
+    selectedServiceIds,
+    removeDeployInstances,
+    onContinue,
+    updateDeployment,
+    updateDetectAndReviewStep,
+  ]);
+
+  // MI / MI+ECF fallthrough: reconcile stale failed instances then navigate.
+  // A previously-failed service that was deselected from Step 1 never acquired a policy ID,
+  // so policyIdsByInstance has no stale entry and isAlreadyDeployed returns true. Without this
+  // reconciliation the SO services list and local failedInstances retain the removed service.
+  const handleMiNext = useCallback(async () => {
+    const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
+    const staleFailedIds = failedInstances.filter((id) => !activeInstanceIds.has(id));
+    if (staleFailedIds.length > 0) {
+      if (detectAndReviewStep.onboardingDeploymentId) {
+        const remainingFailed = failedInstances.filter((id) => !staleFailedIds.includes(id));
+        const writeSucceeded = await updateDeployment(detectAndReviewStep.onboardingDeploymentId, {
+          services: selectedServiceIds,
+          status: remainingFailed.length === 0 ? 'succeeded' : 'failed',
+        });
+        // Keep local state intact if the SO write failed — the step stays actionable for retry.
+        if (!writeSucceeded) return;
+      }
+      // removeDeployInstances replaces the full serviceStatuses map (vs updateDetectAndReviewStep
+      // which merges), so it actually deletes the stale error chip for the deselected service.
+      // It also removes from failedInstances and deployErrors in the same write.
+      // Called after the SO write is confirmed so a failed write leaves state intact for retry.
+      removeDeployInstances(staleFailedIds);
+    }
+    onContinue();
+  }, [
+    deployGroups,
+    failedInstances,
+    removeDeployInstances,
+    detectAndReviewStep.onboardingDeploymentId,
+    selectedServiceIds,
+    updateDeployment,
+    onContinue,
+  ]);
+
+  const handleNext = useCallback(async () => {
+    // If MI services were previously deployed but are no longer selected (e.g. user switched to
+    // ECF-only), stale MI policies need cleanup. handleDeploy detects live-stale entries and runs
+    // cleanup even when no new MI targets exist. onContinue is a no-op here so it won't navigate —
+    // cleanup completes before the rest of handleNext continues.
+    // !isAgentBased: agent-based policyIdsByInstance holds package policy IDs, not MI policies —
+    // calling the MI deploy in agent-based mode would POST to /managed_integrations incorrectly.
+    // awsServicesMap must be loaded before comparing active instance IDs — on resume,
+    // policyIdsByInstance is hydrated before the matrix is available, so miServiceIds and
+    // deployGroups are temporarily empty; treating every mapped instance as stale while the
+    // matrix loads would delete still-selected Fleet policies.
+    const hasStaleMiPolicies =
+      !isAgentBased &&
+      awsServicesMap !== undefined &&
+      (Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).length > 0 ||
+        Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0);
+    let miCleanupFailed = false;
+    if (hasStaleMiPolicies && miServiceIds.length === 0) {
+      // Lock the Next button while cleanup runs — showMiSection is false here so isNextDisabled
+      // does not consume the MI isDeploying state, leaving Next clickable without this guard.
+      setIsSavingSO(true);
+      try {
+        ({ cleanupFailed: miCleanupFailed } = await handleDeploy());
+      } finally {
+        setIsSavingSO(false);
+      }
+    }
+    // Do not proceed with the ECF-only transition until stale MI policies are fully cleaned up.
+    // handleDeploy catches individual Fleet failures internally; without this guard, a partial
+    // cleanup would still navigate and write mechanisms: ['ecf'], leaving active MI policies behind.
+    if (miCleanupFailed) return;
+
+    if (miServiceIds.length === 0 && hasAnyEcf) return handleEcfOnlyNext();
+    if (hasAnyEcf && detectAndReviewStep.onboardingDeploymentId) return handleMixedEcfNext();
+
+    // Agent-based: deploy on Next, then navigate only if succeeded.
+    if (showAgentSection) {
+      // Short-circuit if already deployed (e.g. user went Back then Next again) to avoid
+      // creating duplicate package policies on the same agent policy.
+      if (isAgentDone) {
+        onContinue();
+        return;
+      }
+      const result = await handleAgentDeployForNext();
+      if (result.failed) {
+        // Deploy failed — stay on step 3, error callout is already shown by the section.
+        return;
+      }
+      onContinue();
+      return;
+    }
+
+    return handleMiNext();
+  }, [
+    isAgentBased,
+    miServiceIds.length,
+    hasAnyEcf,
+    showAgentSection,
+    isAgentDone,
+    handleEcfOnlyNext,
+    handleMixedEcfNext,
+    handleMiNext,
+    handleAgentDeployForNext,
+    handleDeploy,
+    awsServicesMap,
+    detectAndReviewStep.policyIdsByInstance,
+    detectAndReviewStep.pendingCleanupPolicyIds,
+    detectAndReviewStep.onboardingDeploymentId,
     onContinue,
   ]);
 
   // ── Next button gating ────────────────────────────────────────────────────────
   // Disabled until every active deployment section reports done.
+  // Agent enrolment is non-blocking, but the deploy itself now happens here on Next.
+  // The section stays visible with the error callout if deploy fails.
   const isNextDisabled =
-    (miServiceIds.length > 0 && !isMiDone) || (hasAnyEcf && !isEcfDone) || isSavingSO;
+    hasUnloadedSelectedManifests ||
+    hasSelectedManifestError ||
+    (showMiSection && !isMiDone) ||
+    (hasAnyEcf && !isEcfDone) ||
+    isSavingSO ||
+    incompleteSettingsCount > 0 ||
+    (showAgentSection && isAgentDeploying) ||
+    (showAgentSection && !isAgentDone && !(driftSettled && isAgentNextReady));
 
   return (
     <div data-test-subj="onboardingStep-authenticate-and-deploy">
-      <DeploymentMethodCard selectedMethod={deploymentMethod} onChange={setDeploymentMethod} />
+      <DeploymentMethodCard
+        selectedMethod={deploymentMethod}
+        onChange={setDeploymentMethod}
+        availableMethods={isSelfManaged ? SELF_MANAGED_DEPLOYMENT_METHODS : undefined}
+        locked={isSelfManaged || (allAgentBasedOnly && !isMethodLocked)}
+        disabled={isMethodLocked}
+      />
 
-      {miServiceIds.length > 0 && <EuiHorizontalRule margin="l" />}
+      {hasSelectedManifestError && (
+        <>
+          <EuiHorizontalRule margin="l" />
+          <KbnDangerCallout
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.manifestErrorCallout.title"
+                defaultMessage="Could not load service details"
+              />
+            }
+            text={
+              <p>
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.manifestErrorCallout.body"
+                  defaultMessage="One or more integration packages could not be loaded. Retry to continue."
+                />
+              </p>
+            }
+            actionProps={{
+              primary: {
+                children: i18n.translate(
+                  'xpack.ingestHub.authenticateAndDeployStep.manifestErrorCallout.retryButton',
+                  { defaultMessage: 'Retry' }
+                ),
+                onClick: refetchAwsServiceMatrix,
+                'data-test-subj': 'authenticateAndDeployStep-manifestRetryButton',
+              },
+            }}
+            data-test-subj="authenticateAndDeployStep-manifestErrorCallout"
+          />
+        </>
+      )}
 
-      {miServiceIds.length > 0 && (
+      {isAgentBased && allAgentBasedOnly && (
+        <>
+          <EuiHorizontalRule margin="l" />
+          <KbnInfoCallout
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.agentBasedOnlyCallout.title"
+                defaultMessage="Self-managed Elastic Agent required"
+              />
+            }
+            text={
+              <p>
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.agentBasedOnlyCallout.body"
+                  defaultMessage="After completing this step, enroll an Elastic Agent that has access to your AWS environment to start collecting data."
+                />
+              </p>
+            }
+            data-test-subj="authenticateAndDeployStep-agentBasedOnlyCallout"
+          />
+        </>
+      )}
+
+      {showSettingsChangedCallout && (
+        <>
+          <EuiHorizontalRule margin="l" />
+          <SettingsChangedCallout
+            announceOnMount
+            title={
+              incompleteSettingsCount > 0 && !isAgentBased ? (
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.settingsIncompleteCallout.title"
+                  defaultMessage="Service settings are incomplete"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.settingsChangedCallout.title"
+                  defaultMessage="Service settings have changed"
+                />
+              )
+            }
+            data-test-subj="authenticateAndDeployStep-settingsChangedCallout"
+            text={
+              <p>
+                {incompleteSettingsCount > 0 && !isAgentBased ? (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.settingsIncompleteCallout.body"
+                    defaultMessage="Managed deployments need a supported source for each service. Complete the required settings in Service Settings for {services} to continue."
+                    values={{ services: calloutServiceNames.join(', ') }}
+                  />
+                ) : incompleteSettingsCount > 0 ? (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.settingsChangedCallout.incompleteBody"
+                    defaultMessage="Agent-based deployments require more settings than managed deployments. Complete the required settings in Service Settings for {services} to continue."
+                    values={{ services: calloutServiceNames.join(', ') }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.settingsChangedCallout.body"
+                    defaultMessage="Agent-based deployments use different settings than managed deployments. Review the settings in Service Settings for {services}."
+                    values={{ services: calloutServiceNames.join(', ') }}
+                  />
+                )}
+              </p>
+            }
+            actionProps={
+              onBack
+                ? {
+                    primary: {
+                      children: i18n.translate(
+                        'xpack.ingestHub.authenticateAndDeployStep.settingsChangedCallout.backButton',
+                        { defaultMessage: 'Review service settings' }
+                      ),
+                      onClick: onBack,
+                      'data-test-subj': 'authenticateAndDeployStep-settingsChangedBackButton',
+                    },
+                  }
+                : undefined
+            }
+          />
+        </>
+      )}
+
+      {showMiSection && <EuiHorizontalRule margin="l" />}
+
+      {driftCheckError && (
+        <>
+          <KbnWarningCallout
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.title"
+                defaultMessage="Could not check for settings changes"
+              />
+            }
+            text={
+              <p>
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.body"
+                  defaultMessage="Unable to reach the deployment record. Check your connection and try again."
+                />
+              </p>
+            }
+            actionProps={{
+              primary: {
+                children: i18n.translate(
+                  'xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.retryButton',
+                  { defaultMessage: 'Retry' }
+                ),
+                onClick: retryDriftCheck,
+                'data-test-subj': 'authenticateAndDeployStep-driftCheckRetryButton',
+              },
+            }}
+            data-test-subj="authenticateAndDeployStep-driftCheckErrorCallout"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      {(showMiSection || showAgentSection) &&
+        isDirty &&
+        (deployGroups.length > 0 || agentTargets.length > 0) && (
+          <>
+            <EuiCallOut
+              announceOnMount
+              title={
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.title"
+                  defaultMessage="Settings changed since last deployment"
+                />
+              }
+              color="warning"
+              iconType="warning"
+              data-test-subj="authenticateAndDeployStep-driftCallout"
+            >
+              {showAgentSection ? (
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.bodyAgentBased"
+                  defaultMessage="Settings have changed since last deployment. Click Next to apply the updated configuration."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.body"
+                  defaultMessage="Settings have changed since last deployment. Click Deploy to apply the updated configuration."
+                />
+              )}
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
+
+      {showMiSection && (
         <ManagedIntegrationsSection
           serviceCount={miServiceIds.length}
           showIdentityFederation={showIdentityFederation}
+          iacIntegrations={iacIntegrations}
           onDeploy={handleDeployClick}
           isDeploying={isDeploying}
           isDone={isMiDone}
           hasFailed={hasFailed}
+          isCleanupOnly={isCleanupOnly}
+          storedSecretFields={storedSecretFields}
+          isStoredSecretsLoading={isStoredSecretsLoading}
+          isDirty={isDirty}
+          onReplaceFormDirtyChange={handleReplaceFormDirtyChange}
         />
       )}
 
-      {hasAnyEcf && <EuiHorizontalRule margin="l" />}
+      {showAgentSection && <EuiHorizontalRule margin="l" />}
 
-      {hasAnyEcf && <EcfDeploymentSection {...ecfSectionProps} />}
+      {showAgentSection && (
+        <AgentBasedSection
+          serviceCount={agentTargets.reduce((sum, g) => sum + g.instanceIds.length, 0)}
+          onDeploy={handleAgentDeployClick}
+          onCredentialsChange={setAgentCredentials}
+          secretSourcePolicyId={secretSourcePolicyId}
+          onStoredCredentialsReplacedChange={handleReplaceFormDirtyChange}
+          onNextReadyChange={setIsAgentNextReady}
+          isDeploying={isAgentDeploying}
+          isDone={isAgentDone}
+          hasFailed={agentHasFailed}
+          failedInstances={agentFailedInstances}
+          deployErrors={detectAndReviewStep.deployErrors}
+          requiresCredentials={requiresCredentials}
+        />
+      )}
+
+      {hasAnyEcf && !isAgentBased && <EuiHorizontalRule margin="l" />}
+
+      {hasAnyEcf && !isAgentBased && <EcfDeploymentSection {...ecfSectionProps} />}
 
       <EuiSpacer size="l" />
 
@@ -265,7 +878,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
             fill
             onClick={handleNext}
             isDisabled={isNextDisabled}
-            isLoading={isSavingSO}
+            isLoading={hasUnloadedSelectedManifests || isSavingSO || isAgentDeploying}
             data-test-subj="authenticateAndDeployStep-nextButton"
           >
             <FormattedMessage
