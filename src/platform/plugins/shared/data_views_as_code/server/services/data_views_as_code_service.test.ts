@@ -169,6 +169,8 @@ describe('DataViewsAsCodeService', () => {
           page: undefined,
           perPage: undefined,
           search: undefined,
+          sortField: 'updated_at',
+          sortOrder: 'desc',
         })
       );
       expect(result).toEqual({

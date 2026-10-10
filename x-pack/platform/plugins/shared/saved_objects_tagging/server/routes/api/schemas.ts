@@ -9,6 +9,7 @@ import { z } from '@kbn/zod';
 import {
   asCodeMetaSchema,
   asCodePaginationParamsSchema,
+  asCodeSortQuerySchema,
   asCodePaginationResponseMetaSchema,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
@@ -20,6 +21,7 @@ export const tagsSearchRequestQuerySchema = z
         'Filters results by `name` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
     }),
     ...asCodePaginationParamsSchema.shape,
+    sort: asCodeSortQuerySchema,
   })
   .strict();
 
