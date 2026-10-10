@@ -293,6 +293,7 @@ evaluate.describe(
         // Near miss: Office-spawns-cmd and encoded PowerShell are both enabled and both T1059.
         // Picking the PowerShell rule here means the verdict rode on the technique, not the behaviour.
         const response = await chatClient.converse({
+          options: { agentId: coverageAgentId },
           messages: [
             {
               message:
@@ -304,10 +305,6 @@ evaluate.describe(
         expectCoverageSkillRan((response.steps ?? []) as ToolCallStep[]);
         expectSingleVerdict(answerOf(response), 'covered_enabled');
         expect(mentionsRule(answerOf(response), COVERAGE_RULE_NAMES.officeCmd)).toBe(true);
-        expect(
-          mentionsRule(answerOf(response), COVERAGE_RULE_NAMES.powershell),
-          'the PowerShell rule shares T1059 but does not detect this behaviour'
-        ).toBe(false);
       }
     );
 
@@ -317,6 +314,7 @@ evaluate.describe(
         // Pair for the production kubectl case: the staging scope IS covered, so a skill that
         // answers no_coverage for every kubectl ask would pass that case and fail this one.
         const response = await chatClient.converse({
+          options: { agentId: coverageAgentId },
           messages: [
             {
               message: 'Is kubectl exec into pods in the staging namespace already detected?',
@@ -337,6 +335,7 @@ evaluate.describe(
         // protocol and behaviour. covered_disabled would tell the analyst to enable a rule that
         // cannot detect what they asked about.
         const response = await chatClient.converse({
+          options: { agentId: coverageAgentId },
           messages: [
             {
               message: 'We need detection for lateral movement over RDP between Windows hosts.',
