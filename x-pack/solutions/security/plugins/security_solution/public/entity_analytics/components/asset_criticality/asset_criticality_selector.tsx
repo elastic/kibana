@@ -9,7 +9,7 @@ import type { EuiSuperSelectOption } from '@elastic/eui';
 
 import {
   EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
   EuiSpacer,
   useEuiFontSize,
   EuiButtonIcon,
@@ -247,6 +247,7 @@ const AssetCriticalityAccordionComponent: React.FC<Props> = ({
         initialIsOpen
         id="asset-criticality-selector"
         buttonContent={<AssetCriticalityTitle />}
+        extraAction={<AssetCriticalityInfoTip />}
         buttonProps={{
           css: css`
             color: ${euiTheme.colors.primary};
@@ -262,31 +263,33 @@ const AssetCriticalityAccordionComponent: React.FC<Props> = ({
 };
 
 export const AssetCriticalityTitle = () => (
-  <EuiToolTip
+  <EuiTitle size="xs">
+    <h3>
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.assetCriticality.accordionTitle"
+        defaultMessage="Asset Criticality"
+      />
+    </h3>
+  </EuiTitle>
+);
+
+const AssetCriticalityInfoTip = () => (
+  <EuiIconTip
+    type="info"
+    color="subdued"
     position="top"
+    aria-label={i18n.translate(
+      'xpack.securitySolution.entityAnalytics.assetCriticality.accordionTooltipAriaLabel',
+      { defaultMessage: 'About asset criticality' }
+    )}
+    iconProps={{ 'data-test-subj': 'asset-criticality-info-tooltip' }}
     content={
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.assetCriticality.accordionTooltip"
         defaultMessage="You can now categorize entities based on your organization's sensitivity and business risk. The classification tiers can be used to prioritize alert triage and investigation tasks. If the entity risk score maintainer is enabled, the asset classification tier will dynamically impact the entity risk."
       />
     }
-  >
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xs">
-          <h3>
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.assetCriticality.accordionTitle"
-              defaultMessage="Asset Criticality"
-            />
-          </h3>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="info" color="subdued" aria-hidden={true} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiToolTip>
+  />
 );
 
 export interface AssetCriticalityModalProps {

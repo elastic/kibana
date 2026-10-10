@@ -60,6 +60,24 @@ describe('anomaly_scores', () => {
     expect(wrapper.find('[data-test-subj="anomaly-description-list"]').exists()).toEqual(false);
   });
 
+  test('renders the popover trigger as a labelled button', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AnomalyScoreComponent
+          startDate={startDate}
+          endDate={endDate}
+          score={anomalies.anomalies[0]}
+          interval="day"
+          narrowDateRange={narrowDateRange}
+          jobName={'job-1'}
+        />
+      </TestProviders>
+    );
+    const button = wrapper.find('button[data-test-subj="anomaly-score-popover-button"]');
+    expect(button.exists()).toEqual(true);
+    expect(button.prop('aria-label')).toEqual('View anomaly score details for job-1');
+  });
+
   test('show a popover on a mouse click', async () => {
     const wrapper = mount(
       <TestProviders>
@@ -73,7 +91,7 @@ describe('anomaly_scores', () => {
         />
       </TestProviders>
     );
-    wrapper.find('[data-test-subj="anomaly-score-popover"]').first().simulate('click');
+    wrapper.find('[data-test-subj="anomaly-score-popover-button"]').first().simulate('click');
     await waitFor(() => wrapper.update());
     expect(wrapper.find('[data-test-subj="anomaly-description-list"]').exists()).toEqual(true);
   });
