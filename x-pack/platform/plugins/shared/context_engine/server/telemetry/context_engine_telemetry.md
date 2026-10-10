@@ -2,6 +2,8 @@
 
 The Context Engine plugin reports event-based telemetry (EBT) for Knowledge Indicator (KI) writes and verification runs. `ContextEngineAnalyticsService` (`analytics_service.ts`) owns event type registration through `core.analytics.registerEventType` and all reporting.
 
+A `context_engine` usage collector (`usage_collector.ts`) reports a daily snapshot of AI index and KI counts.
+
 ## Privacy rules
 
 - KI free text is never reported. No `title`, `description`, `content`, `tags`, or `attributes` values appear in any payload.
@@ -16,7 +18,9 @@ The Context Engine plugin reports event-based telemetry (EBT) for Knowledge Indi
 
 ## Gating
 
-All reporting is gated on the `contextEngine:enabled` advanced setting. KI workflow steps fail before any write happens, so no event fires when the setting is off.
+All event reporting is gated on the `contextEngine:enabled` advanced setting. KI workflow steps fail before any write happens, so no event fires when the setting is off.
+
+The usage collector runs regardless of the setting.
 
 ## Events
 
@@ -55,10 +59,28 @@ A cancelled workflow run reports `outcome: aborted` instead of `failure`, keyed 
 | `ai_index_id` | The AI index the KI belongs to, when provided by the caller. |
 | `error_type` | As in KI write events. Present only on `failure`. |
 
+## Usage collector
+
+The collector reads up to 10,000 entries from `.contextengine-ai-indices` across all spaces as the internal user.
+
+- A managed entry's `dest` comes from its code registration.
+- Each distinct `dest` is counted once; a `dest` shared with a managed entry counts toward `kis.managed`.
+- Index patterns are skipped, and a missing or unreadable `dest` counts 0 KIs.
+
+KI counts use the latest revision of each KI, the same collapse the KI list applies.
+
+| Field | Description |
+|---|---|
+| `ai_indices.user` | Number of user-created AI indices across all spaces. |
+| `ai_indices.managed` | Number of managed AI index entries across all spaces, one per space the managed AI index is bootstrapped in. |
+| `kis.user.active` / `kis.managed.active` | KIs whose lifecycle status is `active` or unset and whose `expires_at` is unset or in the future. |
+| `kis.user.expired` / `kis.managed.expired` | KIs that are not deleted and whose `expires_at` has passed. |
+| `kis.user.deleted` / `kis.managed.deleted` | KIs whose lifecycle status is `deleted`. |
+
 ## Logs
 
 - KI writes and write failures log at `debug` from the `plugins.contextEngine.context_steps` logger. Log lines carry the KI document id and the AI index id.
 
 - Every verification run logs at `debug` from the same logger: a pass logs the verifier count, a failed verification logs the failing verifier ids, an errored or aborted run logs its outcome. Reasons appear only in the step output.
 
-- Telemetry reporting failures log at `debug` from the `plugins.contextEngine.telemetry` logger.
+- Telemetry reporting failures, and usage collector failures to count KIs in a `dest`, log at `debug` from the `plugins.contextEngine.telemetry` logger.

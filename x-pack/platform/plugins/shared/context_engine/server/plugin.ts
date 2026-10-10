@@ -49,7 +49,7 @@ import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from '
 import { createVerifyKiStepDefinition } from './step_types/verify_ki_step';
 import { createVerifyKi } from './step_types/verify_ki';
 import { registerStepDefinitions } from './step_types';
-import { ContextEngineAnalyticsService } from './telemetry';
+import { ContextEngineAnalyticsService, registerContextEngineUsageCollector } from './telemetry';
 import { isContextEngineEnabledInSpace } from './utils/is_context_engine_enabled_in_space';
 import { resolveSpaceId } from './utils/resolve_space_id';
 
@@ -105,6 +105,16 @@ export class ContextEnginePlugin
     );
     this.analyticsService.registerContextEngineEventTypes();
     const analyticsService = this.analyticsService;
+
+    registerContextEngineUsageCollector({
+      usageCollection: setupDeps.usageCollection,
+      getEsClient: async () => {
+        const [coreStart] = await coreSetup.getStartServices();
+        return coreStart.elasticsearch.client.asInternalUser;
+      },
+      getManagedDest: (id) => this.aiIndexRegistry.get(id)?.dest,
+      logger: this.logger.get('telemetry'),
+    });
 
     const checkApiPrivileges = async (
       request: KibanaRequest,

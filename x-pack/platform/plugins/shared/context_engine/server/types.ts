@@ -10,6 +10,7 @@ import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -70,6 +71,7 @@ export interface ContextEngineSetupDependencies {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   /** Optional in the manifest; without it a feedback analysis schedule cannot be enabled. */
   workflowsManagement?: { management: WorkflowEnablementApi };
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface ContextEngineStartDependencies {
