@@ -46,7 +46,7 @@ test.describe(
   () => {
     useOnboardingFeatureFlag();
 
-    test('the second service is created with the first policy secret refs, not typed keys', async ({
+    test('the second service joins the first policy and keeps its secret refs, not typed keys', async ({
       browserAuth,
       page,
     }) => {
@@ -58,6 +58,7 @@ test.describe(
       );
 
       const created: Array<Record<string, any>> = [];
+      const updated: Array<Record<string, any>> = [];
       let so: Record<string, unknown> = {};
       await page.route(
         (url) => /\/api\/fleet\/managed_integrations$/.test(url.pathname),
@@ -73,8 +74,11 @@ test.describe(
       // Policies hold both keys as secret refs once created.
       await page.route(
         (url) => /\/api\/fleet\/managed_integrations\/policy-\d+$/.test(url.pathname),
-        (route) =>
-          route.fulfill(
+        (route) => {
+          if (route.request().method() === 'PUT') {
+            updated.push(JSON.parse(route.request().postData() ?? '{}'));
+          }
+          return route.fulfill(
             fulfillJson({
               item: {
                 name: 'policy',
@@ -84,7 +88,8 @@ test.describe(
                 vars: { access_key_id: ACCESS_KEY_REF, secret_access_key: SECRET_KEY_REF },
               },
             })
-          )
+          );
+        }
       );
       await page.route(
         (url) => /\/api\/fleet\/cloud_onboarding_deployments(\/[^/]+)?$/.test(url.pathname),
@@ -142,10 +147,18 @@ test.describe(
 
       await expect(deployButton).toBeEnabled();
       await deployButton.click();
-      await expect.poll(() => created.length).toBe(2);
+      // Same package: the first policy is updated with both services, no second one is created.
+      await expect(
+        page.testSubj.locator('managedIntegrationsSection').getByText('Done')
+      ).toBeVisible();
+      expect(updated).toHaveLength(1);
+      expect(created).toHaveLength(1);
 
-      expect(created[1].vars.access_key_id).toStrictEqual(ACCESS_KEY_REF);
-      expect(created[1].vars.secret_access_key).toStrictEqual(SECRET_KEY_REF);
+      expect(updated[0].vars.access_key_id).toStrictEqual(ACCESS_KEY_REF);
+      expect(updated[0].vars.secret_access_key).toStrictEqual(SECRET_KEY_REF);
+      // Both services are enabled in the one policy; a disabled stub would not be a deployed service.
+      expect(updated[0].inputs['elb-aws-s3'].enabled).toBe(true);
+      expect(updated[0].inputs['guardduty-aws-s3'].enabled).toBe(true);
     });
   }
 );

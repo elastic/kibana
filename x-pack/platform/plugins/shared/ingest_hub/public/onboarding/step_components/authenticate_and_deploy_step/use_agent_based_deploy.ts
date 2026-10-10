@@ -34,6 +34,13 @@ import {
 import type { ExistingSecretRefs } from './secret_refs';
 import { runWithSharedSecrets } from './shared_secrets';
 import {
+  collectPolicyUpdateResults,
+  mergePolicyUpdateResults,
+  splitPendingPolicyUpdates,
+  addedInstanceIdsByPolicy,
+  planPolicyUpdates,
+} from './plan_policy_updates';
+import {
   buildLiveStalePolicyIds,
   buildEffectivePendingCleanup,
   pickSecretSourcePolicyId,
@@ -194,8 +201,24 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       const globalRegion = serviceSettings?.globalRegion ?? '';
       const storedServiceVars = serviceSettings?.serviceVars ?? {};
       const { dataFormat } = servicesStep;
+      const targetPolicyIds =
+        agentHostsMode === 'existing'
+          ? selectedAgentPolicyIds ?? []
+          : agentPolicyId
+          ? [agentPolicyId]
+          : selectedAgentPolicyIds ?? [];
 
       try {
+        // A group whose package already has a package policy joins it (PUT) instead of creating a
+        // second one. A new agent policy recreates every package policy, so nothing is reused.
+        const { createGroups, policyUpdates } = isNewPolicyDeploy
+          ? { createGroups: targetsToDeploy, policyUpdates: [] }
+          : planPolicyUpdates(
+              targetsToDeploy,
+              targets,
+              detectAndReviewStep.policyIdsByInstance ?? {}
+            );
+
         // New package policies reuse the keys the user kept from an already deployed one. Read
         // before cleanup, from a policy cleanup keeps: deleting the policy that holds a secret
         // deletes the secret, so refs read from it would dangle.
@@ -210,7 +233,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           !!typedCreds.secret_access_key &&
           (typedCreds.method !== 'temporary_keys' || !!typedCreds.session_token);
         const keptSecretRefs =
-          keysMethod && !isTyped
+          keysMethod && !isTyped && createGroups.length > 0
             ? filterSecretRefsForMethod(
                 await fetchPackagePolicySecretRefs(
                   pickSecretSourcePolicyId(
@@ -232,6 +255,18 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           creds: AgentCredentialVars | undefined,
           refs: ExistingSecretRefs
         ) => creds && withoutCoveredCredentials(creds, refs);
+
+        // Refs of the secret this run stored for typed keys (a cleanup, dirty or add-service update):
+        // every policy written afterwards uses it instead of storing them again.
+        let storedSharedRefs: ExistingSecretRefs | undefined;
+        // A policy is written once per run, by the first phase that reaches it (cleanup, dirty
+        // update, or the policy update below). Every write is built from the current settings and
+        // covers the surviving members plus the added ones, so later phases skip it.
+        const updatedPolicyIdsThisRun = new Set<string>();
+        const addedByPolicy = addedInstanceIdsByPolicy(
+          policyUpdates,
+          detectAndReviewStep.policyIdsByInstance ?? {}
+        );
 
         const baseOpts = {
           namespace: DEFAULT_NAMESPACE,
@@ -262,10 +297,20 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             namespace: DEFAULT_NAMESPACE,
             authenticateAndDeployStep,
             servicesMap: servicesMap ?? new Map(),
-            // Cleanup never changes agent-policy selection; keep the policy's current policy_ids.
-            selectedAgentPolicyIds: [],
+            // Keep the policy's current policy_ids, unless this run also applies a changed agent
+            // policy selection: the update here is then the only write the policy gets.
+            selectedAgentPolicyIds:
+              (detectAndReviewStep.isDirty ?? false) &&
+              !isNewPolicyDeploy &&
+              detectAndReviewStep.isPolicySelectionDirty
+                ? targetPolicyIds
+                : [],
             agentCredentials: credentials,
+            hasTypedSecrets: hasTypedKeys,
+            addedInstanceIdsByPolicy: addedByPolicy,
           });
+          storedSharedRefs = cleanupOps.sharedRefs;
+          cleanupOps.toUpdate.forEach(({ policyId }) => updatedPolicyIdsThisRun.add(policyId));
           // Only prune successfully cleaned instances — failures stay in pendingCleanupPolicyIds.
           const succeededIds = new Set([
             ...cleanupOps.toDelete,
@@ -281,6 +326,30 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           updateDetectAndReviewStep({ pendingCleanupPolicyIds: remainingPending });
         }
 
+        // Updates one package policy to cover the given instances. `shared` holds the refs of a
+        // secret an earlier update stored for the typed keys; those keys are then not sent again.
+        const updatePolicyWithRefs = (
+          policyId: string,
+          ids: string[],
+          shared: ExistingSecretRefs | undefined
+        ) =>
+          updateAgentBasedPolicy(policyId, ids, {
+            instances: serviceSettings?.instances ?? [],
+            storedServiceVars,
+            globalRegion,
+            namespace: DEFAULT_NAMESPACE,
+            authenticateAndDeployStep: shared
+              ? { ...authenticateAndDeployStep, existingSecretRefs: shared }
+              : authenticateAndDeployStep,
+            servicesMap: servicesMap ?? new Map(),
+            // Only override policy_ids when the selection drifted; otherwise a var-only redeploy
+            // would detach agent policies attached outside the wizard.
+            selectedAgentPolicyIds: detectAndReviewStep.isPolicySelectionDirty
+              ? targetPolicyIds
+              : [],
+            agentCredentials: shared ? withoutCoveredSecrets(credentials, shared) : credentials,
+          });
+
         // Update deployed policies with current settings (isDirty). Runs before new targets so
         // add-service+edit updates existing policies in the same run. Skipped on isNewPolicyDeploy
         // (covers both the initial new-policy switch and Retry of a failed creation) — updating
@@ -288,12 +357,6 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         // agents if the replacement creation fails again.
         let dirtyUpdateApplied = false;
         if ((detectAndReviewStep.isDirty ?? false) && !isNewPolicyDeploy) {
-          const targetPolicyIds =
-            agentHostsMode === 'existing'
-              ? selectedAgentPolicyIds ?? []
-              : agentPolicyId
-              ? [agentPolicyId]
-              : selectedAgentPolicyIds ?? [];
           // Active instances only — exclude cleanedLiveStale and deselected instances.
           const byPolicy = new Map<string, string[]>();
           for (const [instanceId, policyId] of Object.entries(
@@ -304,44 +367,29 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             if (!byPolicy.has(policyId)) byPolicy.set(policyId, []);
             byPolicy.get(policyId)!.push(instanceId);
           }
-          if (byPolicy.size > 0) {
+          for (const [policyId, ids] of Object.entries(addedByPolicy)) {
+            byPolicy.get(policyId)?.push(...ids);
+          }
+          const dirtyItems = [...byPolicy.entries()].filter(
+            ([policyId]) => !updatedPolicyIdsThisRun.has(policyId)
+          );
+          if (dirtyItems.length > 0) {
             // Typed keys become new Fleet secrets: store them once on the first package policy
             // and have the others (and this run's new ones) use that secret.
             const { results: redeployResults, sharedRefs } = await runWithSharedSecrets({
-              items: [...byPolicy.entries()],
+              items: dirtyItems,
               hasTypedSecrets: hasTypedKeys,
+              initialRefs: storedSharedRefs,
               // An update can delete the secret it replaced: finish one before starting the next.
               sequential: true,
               run: ([policyId, instanceIdsForPolicy], shared) =>
-                updateAgentBasedPolicy(policyId, instanceIdsForPolicy, {
-                  instances: serviceSettings?.instances ?? [],
-                  storedServiceVars,
-                  globalRegion,
-                  namespace: DEFAULT_NAMESPACE,
-                  authenticateAndDeployStep: shared
-                    ? { ...authenticateAndDeployStep, existingSecretRefs: shared }
-                    : authenticateAndDeployStep,
-                  servicesMap: servicesMap ?? new Map(),
-                  // Only override policy_ids when the selection drifted; otherwise a var-only redeploy
-                  // would detach agent policies attached outside the wizard.
-                  selectedAgentPolicyIds: detectAndReviewStep.isPolicySelectionDirty
-                    ? targetPolicyIds
-                    : [],
-                  agentCredentials: shared
-                    ? withoutCoveredSecrets(credentials, shared)
-                    : credentials,
-                }),
+                updatePolicyWithRefs(policyId, instanceIdsForPolicy, shared),
               getPolicyId: ([policyId]) => policyId,
               fetchRefs: fetchPackagePolicySecretRefs,
             });
-            if (sharedRefs) {
-              baseOpts.authenticateAndDeployStep = {
-                ...authenticateAndDeployStep,
-                existingSecretRefs: sharedRefs,
-              };
-              baseOpts.agentCredentials = withoutCoveredSecrets(credentials, sharedRefs);
-            }
-            redeployResults.forEach((result) => {
+            storedSharedRefs = sharedRefs ?? storedSharedRefs;
+            redeployResults.forEach((result, i) => {
+              if (result.status === 'fulfilled') updatedPolicyIdsThisRun.add(dirtyItems[i][0]);
               if (result.status === 'rejected') {
                 // eslint-disable-next-line no-console
                 console.error(
@@ -368,6 +416,12 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                 isDeploying: false,
                 failedInstances: allActiveIds,
                 deployErrors: Object.fromEntries(allActiveIds.map((id) => [id, errorMsg])),
+                // Added instances whose policy was written before another one failed stay tracked.
+                policyIdsByInstance: Object.fromEntries(
+                  Object.entries(addedByPolicy)
+                    .filter(([policyId]) => updatedPolicyIdsThisRun.has(policyId))
+                    .flatMap(([policyId, ids]) => ids.map((id) => [id, policyId]))
+                ),
               });
               return { failed: true };
             }
@@ -489,6 +543,42 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           if (onboardingDeploymentId) persistDeploymentId(onboardingDeploymentId);
         }
 
+        // Services joining an existing package policy. Policies a cleanup or dirty update already
+        // wrote this run took the new services with them.
+        const policyUpdateSplit = splitPendingPolicyUpdates(policyUpdates, updatedPolicyIdsThisRun);
+        const { results: attemptedPolicyUpdateResults, sharedRefs: policyUpdateRefs } =
+          await runWithSharedSecrets({
+            items: policyUpdateSplit.pending,
+            hasTypedSecrets: hasTypedKeys,
+            initialRefs: storedSharedRefs,
+            // An update can delete the secret it replaced: finish one before starting the next.
+            sequential: true,
+            run: ({ policyId, memberInstanceIds }, shared) =>
+              updatePolicyWithRefs(policyId, memberInstanceIds, shared),
+            getPolicyId: ({ policyId }) => policyId,
+            fetchRefs: fetchPackagePolicySecretRefs,
+          });
+        storedSharedRefs = policyUpdateRefs ?? storedSharedRefs;
+        attemptedPolicyUpdateResults.forEach((result) => {
+          if (result.status === 'rejected') {
+            // eslint-disable-next-line no-console
+            console.error('Failed to add service to agent-based package policy:', result.reason);
+          }
+        });
+        const policyUpdateResults = mergePolicyUpdateResults(
+          policyUpdateSplit,
+          attemptedPolicyUpdateResults
+        );
+        const updated = collectPolicyUpdateResults(policyUpdates, policyUpdateResults);
+        // New package policies use the secret the updates above stored, not another one.
+        if (storedSharedRefs) {
+          baseOpts.authenticateAndDeployStep = {
+            ...authenticateAndDeployStep,
+            existingSecretRefs: storedSharedRefs,
+          };
+          baseOpts.agentCredentials = withoutCoveredSecrets(credentials, storedSharedRefs);
+        }
+
         let policyIdsByInstance: Record<string, string> = {};
         let failed: string[] = [];
         let errorsByInstance: Record<string, string> = {};
@@ -498,16 +588,13 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         // - agentPolicyId is already set: the flyout created the policy on a previous attempt
         //   (including the very first Next click when the flyout ran), so we target the existing
         //   policy to avoid creating a second one (double-creation guard applies on retry too).
-        if (agentHostsMode === 'existing' || agentPolicyId) {
-          const targetPolicyIds =
-            agentHostsMode === 'existing'
-              ? selectedAgentPolicyIds ?? []
-              : agentPolicyId
-              ? [agentPolicyId]
-              : selectedAgentPolicyIds ?? [];
+        if (createGroups.length === 0) {
+          // Everything joined an existing package policy; no new one is created.
+          resolvedAgentPolicyIds = targetPolicyIds;
+        } else if (agentHostsMode === 'existing' || agentPolicyId) {
           resolvedAgentPolicyIds = targetPolicyIds;
 
-          const result = await deployToExistingAgentPolicies(targetsToDeploy, {
+          const result = await deployToExistingAgentPolicies(createGroups, {
             ...baseOpts,
             selectedAgentPolicyIds: targetPolicyIds,
           });
@@ -519,7 +606,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           try {
             const agentPolicyName =
               agentBasedDeployment.agentPolicyName || (await buildAgentPolicyName());
-            const result = await deployNewAgentPolicy(targetsToDeploy, {
+            const result = await deployNewAgentPolicy(createGroups, {
               ...baseOpts,
               agentPolicyName,
               withSysMonitoring: agentBasedDeployment.withSysMonitoring ?? true,
@@ -536,10 +623,26 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             // extractErrorMessage, not String(err): Fleet rejects with an IHttpFetchError whose
             // server detail is in body.message, so String() would render "[object Object]".
             const msg = extractErrorMessage(err);
-            failed = targetsToDeploy.flatMap((g) => g.instanceIds);
+            failed = createGroups.flatMap((g) => g.instanceIds);
             errorsByInstance = Object.fromEntries(failed.map((id) => [id, msg]));
           }
         }
+        // A failed update leaves the members already deployed on the policy deployed: only the
+        // instances being added (or the ones this Retry asked for) fail.
+        const failedByPolicyUpdate = updated.failedInstances.filter(
+          (id) =>
+            !(id in (detectAndReviewStep.policyIdsByInstance ?? {})) || instanceIds?.includes(id)
+        );
+        policyIdsByInstance = { ...policyIdsByInstance, ...updated.policyIdsByInstance };
+        failed = [...failed, ...failedByPolicyUpdate];
+        errorsByInstance = {
+          ...errorsByInstance,
+          ...Object.fromEntries(
+            Object.entries(updated.errorsByInstance).filter(([id]) =>
+              failedByPolicyUpdate.includes(id)
+            )
+          ),
+        };
 
         const allTargetIds = targetsToDeploy.flatMap((g) => g.instanceIds);
         const statuses = buildAgentBasedInstanceStatuses(targetsToDeploy, failed);

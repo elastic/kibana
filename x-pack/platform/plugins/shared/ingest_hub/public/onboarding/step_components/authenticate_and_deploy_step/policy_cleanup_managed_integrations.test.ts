@@ -350,3 +350,103 @@ describe('updateManagedIntegrationsPolicy — payload shape', () => {
     expect(payload.cloud_connector?.cloud_connector_id).not.toBe('original-session-connector');
   });
 });
+
+describe('cleanupManagedIntegrationsPolicies — typed keys', () => {
+  const vpcflow = makeService('vpcflow');
+  const refs = {
+    access_key_id: { isSecretRef: true, id: 'ref-akid' },
+    secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+  };
+
+  it('stores typed keys once and has the other updated policies use that secret', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: {
+        item: {
+          version: '2.5.0',
+          vars: [{ name: 'access_key_id' }, { name: 'secret_access_key' }],
+          policy_templates: [],
+        },
+      },
+    });
+    const gets: Record<string, number> = {};
+    mockGetAgentlessPolicy.mockImplementation(async (policyId: string) => {
+      gets[policyId] = (gets[policyId] ?? 0) + 1;
+      // The first read is the update's own; later reads see the secret the first PUT stored.
+      return {
+        item: {
+          name: policyId,
+          package: { version: '2.5.0' },
+          ...(gets[policyId] > 1 ? { vars: refs } : {}),
+        },
+      };
+    });
+
+    const ops = await cleanupManagedIntegrationsPolicies({
+      ...BASE_OPTS,
+      authenticateAndDeployStep: {
+        staticKeys: { access_key_id: 'AKID', secret_access_key: 'SECRET' },
+      } as never,
+      instances: [makeInstance('inst-b', 'vpcflow'), makeInstance('inst-d', 'vpcflow')],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1', 'inst-c': 'policy-2' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1', 'inst-d': 'policy-2' },
+    });
+
+    expect(mockUpdateAgentless).toHaveBeenCalledTimes(2);
+    expect(mockUpdateAgentless.mock.calls[0][1].vars).toEqual({
+      access_key_id: 'AKID',
+      secret_access_key: 'SECRET',
+    });
+    expect(mockUpdateAgentless.mock.calls[1][1].vars).toEqual(refs);
+    expect(ops.toUpdate).toHaveLength(2);
+    expect(ops.sharedRefs?.get('secret_access_key')).toEqual(refs.secret_access_key);
+  });
+
+  it('does not read refs back when no keys were typed', async () => {
+    const ops = await cleanupManagedIntegrationsPolicies({
+      ...BASE_OPTS,
+      instances: [makeInstance('inst-b', 'vpcflow')],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+    });
+
+    // Only the update's own metadata read.
+    expect(mockGetAgentlessPolicy).toHaveBeenCalledTimes(1);
+    expect(ops.sharedRefs).toBeUndefined();
+  });
+});
+
+describe('cleanupManagedIntegrationsPolicies — one write per policy', () => {
+  const vpcflow = makeService('vpcflow');
+  const common = {
+    ...BASE_OPTS,
+    instances: [makeInstance('inst-b', 'vpcflow'), makeInstance('inst-new', 'vpcflow')],
+    servicesMap: new Map([['vpcflow', vpcflow]]),
+    pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+    currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+  };
+
+  it('writes the surviving members plus the instances joining the policy', async () => {
+    const ops = await cleanupManagedIntegrationsPolicies({
+      ...common,
+      addedInstanceIdsByPolicy: { 'policy-1': ['inst-new'] },
+    });
+
+    expect(mockUpdateAgentless).toHaveBeenCalledTimes(1);
+    const { inputs } = mockUpdateAgentless.mock.calls[0][1];
+    expect(Object.keys(inputs)).toContain('vpcflow-aws-s3');
+    // The instance that survives is reported on its own; the joining one is not "surviving".
+    expect(ops.toUpdate).toEqual([{ policyId: 'policy-1', survivingInstanceIds: ['inst-b'] }]);
+  });
+
+  it('counts a policy written earlier in the run as updated without writing it again', async () => {
+    const ops = await cleanupManagedIntegrationsPolicies({
+      ...common,
+      alreadyUpdatedPolicyIds: new Set(['policy-1']),
+    });
+
+    expect(mockUpdateAgentless).not.toHaveBeenCalled();
+    expect(ops.toUpdate).toEqual([{ policyId: 'policy-1', survivingInstanceIds: ['inst-b'] }]);
+  });
+});
