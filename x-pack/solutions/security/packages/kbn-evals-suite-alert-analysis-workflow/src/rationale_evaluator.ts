@@ -52,7 +52,15 @@ export const createRationaleQualityEvaluator = (
           metadata: { missingRationale: true },
         };
       }
-      return inner.evaluate(args);
+      // The example input is only `{ alertId }`, so without the alert the grounding criterion
+      // ("does not invent alert fields...") counts every grounded detail as invented. Hand the
+      // judge the analysed alert as part of the input.
+      const { alertData, ...gradedOutput } = verdict;
+      return inner.evaluate({
+        ...args,
+        input: { ...(args.input as Record<string, unknown>), alertData },
+        output: gradedOutput,
+      });
     },
   };
 };

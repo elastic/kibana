@@ -200,13 +200,16 @@ evaluate.describe(
               });
 
               try {
-                return await runAlertAnalysisWorkflow({
+                const verdict = await runAlertAnalysisWorkflow({
                   fetch,
                   log,
                   traceEsClient,
                   alertId: uniqueAlertId,
                   alertIndex,
                 });
+                // The example input is only `{ alertId }`; surface the seeded document so the
+                // rationale judge can check the grounding criterion against the real alert.
+                return { ...verdict, alertData: document };
               } finally {
                 await esClient
                   .delete({ index: alertIndex, id: uniqueAlertId, refresh: true })
