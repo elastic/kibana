@@ -27,6 +27,7 @@
 export const WORKER_IDS = {
   alertTriage: 'system-security-floor-alert-triage',
   attackDiscovery: 'system-security-floor-attack-discovery',
+  ruleTuning: 'system-security-detection-rule-tuning',
 } as const;
 
 export const WORKFLOW_IDS = {

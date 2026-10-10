@@ -172,6 +172,7 @@ describe('setupWorkerChainHarness / teardownWorkerChainHarness', () => {
     expect(stack.accounts.map((a) => a.name).sort()).toEqual([
       'alertzero_alert_triage',
       'alertzero_attack_discovery',
+      'alertzero_rule_tuning',
     ]);
     expect(Object.keys(state.workerServiceAccounts).sort()).toEqual(
       Object.values(WORKER_IDS).slice().sort()
@@ -179,6 +180,7 @@ describe('setupWorkerChainHarness / teardownWorkerChainHarness', () => {
     expect(state.snapshots.map((s) => s.workerId)).toEqual([
       WORKER_IDS.alertTriage,
       WORKER_IDS.attackDiscovery,
+      WORKER_IDS.ruleTuning,
     ]);
   });
 
@@ -187,6 +189,7 @@ describe('setupWorkerChainHarness / teardownWorkerChainHarness', () => {
       existingAccounts: [
         { id: 'sa-t', name: 'alertzero_alert_triage', enabled: true, assumable: true },
         { id: 'sa-a', name: 'alertzero_attack_discovery', enabled: true, assumable: true },
+        { id: 'sa-r', name: 'alertzero_rule_tuning', enabled: true, assumable: true },
       ],
     });
     const state = createHarnessState();
@@ -211,7 +214,11 @@ describe('setupWorkerChainHarness / teardownWorkerChainHarness', () => {
       pinnedServiceAccountId: 'sa-pinned',
     });
     expect(stack.calls.some((c) => c.includes(SA_URL))).toBe(false);
-    expect(Object.values(state.workerServiceAccounts)).toEqual(['sa-pinned', 'sa-pinned']);
+    expect(Object.values(state.workerServiceAccounts)).toEqual([
+      'sa-pinned',
+      'sa-pinned',
+      'sa-pinned',
+    ]);
   });
 
   it('fails loudly with the cause when the per-space workflow is not installed', async () => {

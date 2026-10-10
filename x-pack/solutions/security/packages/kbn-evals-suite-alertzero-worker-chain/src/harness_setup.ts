@@ -79,6 +79,7 @@ export const setupWorkerChainHarness = async ({
   const plan = [
     [WORKER_IDS.alertTriage, 'supervised'],
     [WORKER_IDS.attackDiscovery, 'manual'],
+    [WORKER_IDS.ruleTuning, 'assisted'],
   ] as const;
   for (const [workerId, autonomy] of plan) {
     // Pushed before the write: a failed write is still restored.

@@ -10,3 +10,4 @@ export * from './worker_settings';
 export * from './chain_runner';
 export * from './safety_evaluators';
 export * from './consistency';
+export * from './rule_tuning_fixture';

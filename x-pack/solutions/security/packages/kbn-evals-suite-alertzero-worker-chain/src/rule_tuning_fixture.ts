@@ -11,6 +11,7 @@ import type { EsClient } from '@kbn/scout';
 import { buildFpTpExampleWorld } from '@kbn/evals-suite-attack-discovery-fp-tp/src/scenarios';
 import { seedFixture, type FpTpWorld } from '@kbn/evals-suite-attack-discovery-fp-tp/src/world';
 import { kbnRequestFromFetch } from '@kbn/evals-suite-attack-discovery-fp-tp/src/kbn_request';
+import type { ChainScenario } from './chain_runner';
 import { runRuleTuningScenario, type RuleTuningScenarioInput } from './rule_tuning_scenario';
 import { spacePath, type KbnRequestContext } from './worker_settings';
 
@@ -97,11 +98,21 @@ export const runSeededRuleTuningScenario = async ({
       world,
     });
     cleanup = seeded.cleanup;
-    return await runRuleTuningScenario(worker, operator, {
+    const scenario: ChainScenario = {
+      key: `rule-tuning-${family}-${input.autonomy}`,
+      workerChain: ['rule-tuning'],
+      declaredAutonomy: { 'rule-tuning': input.autonomy },
+      alerts: seeded.seededWorld.alerts.map(({ id }) => ({ id })),
+      rule: { id: ruleId, name: `Rule Tuning TP control ${suffix}` },
+      tpRuleIds: [ruleId],
+      goldVerdict: 'true_positive',
+    };
+    const record = await runRuleTuningScenario(worker, operator, {
       ...input,
-      ruleId,
-      alertIds: seeded.seededWorld.alerts.map(({ id }) => id),
+      ruleId: scenario.rule.id,
+      alertIds: scenario.alerts.map(({ id }) => id),
     });
+    return { ...record, scenarioKey: scenario.key, tpRuleIds: scenario.tpRuleIds };
   } finally {
     try {
       await cleanup?.();
