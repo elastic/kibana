@@ -47,7 +47,9 @@ const testConfig: Parameters<typeof createConfigService>[0] = {
   server: {
     name: kibanaName,
     securityResponseHeaders: {
-      // reflects default config
+      // reflects default config, except for permissionsPolicy, which is disabled here so these
+      // tests do not have to restate the whole policy. See the suite at the end of this file for
+      // coverage of the generated header.
       strictTransportSecurity: null,
       xContentTypeOptions: 'nosniff',
       referrerPolicy: 'strict-origin-when-cross-origin',
@@ -730,5 +732,94 @@ describe('core lifecycle handlers with no strict client version check', () => {
     expect(message).toMatch(
       /^Client build \(123\) is older than this Kibana server build \(1234\)/
     );
+  });
+});
+
+describe('Permissions-Policy header', () => {
+  const testRoute = '/permissions_policy/test/route';
+  const defaultPolicy =
+    'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()';
+
+  let server: HttpService;
+  let innerServer: HttpServerSetup['server'];
+
+  const startServer = async (config: Parameters<typeof createConfigService>[0]) => {
+    server = createInternalHttpService({
+      configService: createConfigService(config),
+      logger: loggerMock.create(),
+    });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
+    const serverSetup = await server.setup(setupDeps);
+    innerServer = serverSetup.server;
+    serverSetup
+      .createRouter('/')
+      .get(
+        { path: testRoute, validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => res.ok({ body: 'ok' })
+      );
+    await server.start();
+  };
+
+  afterEach(async () => {
+    await server.stop();
+  });
+
+  it('sends the built-in policy when nothing is configured', async () => {
+    await startServer({ server: { securityResponseHeaders: {} as any } });
+    const { header } = await supertest(innerServer.listener).get(testRoute).expect(200);
+    expect(header['permissions-policy']).toEqual(defaultPolicy);
+  });
+
+  it('adds per-directive configuration to the built-in policy', async () => {
+    await startServer({
+      server: { securityResponseHeaders: {} as any },
+      permissionsPolicy: { camera: ['self', 'https://example.com'] },
+    });
+    const { header } = await supertest(innerServer.listener).get(testRoute).expect(200);
+    expect(header['permissions-policy']).toEqual(
+      'camera=(self "https://example.com"), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()'
+    );
+  });
+
+  it('attaches the report-to parameter to every directive', async () => {
+    await startServer({
+      server: { securityResponseHeaders: {} as any },
+      permissionsPolicy: { report_to: ['violations-endpoint'] },
+    });
+    const { header } = await supertest(innerServer.listener).get(testRoute).expect(200);
+    expect(header['permissions-policy']).toEqual(
+      defaultPolicy
+        .split(', ')
+        .map((directive) => `${directive};report-to=violations-endpoint`)
+        .join(', ')
+    );
+  });
+
+  it('uses the deprecated wholesale policy verbatim when it is set', async () => {
+    await startServer({
+      server: { securityResponseHeaders: { permissionsPolicy: 'microphone=()' } as any },
+    });
+    const { header } = await supertest(innerServer.listener).get(testRoute).expect(200);
+    expect(header['permissions-policy']).toEqual('microphone=()');
+  });
+
+  it('sends no header when the deprecated policy is set to null', async () => {
+    await startServer({
+      server: { securityResponseHeaders: { permissionsPolicy: null } as any },
+    });
+    const { header } = await supertest(innerServer.listener).get(testRoute).expect(200);
+    expect(header['permissions-policy']).toBeUndefined();
+  });
+
+  it('refuses to start when the deprecated policy is combined with a directive', async () => {
+    await expect(
+      startServer({
+        server: { securityResponseHeaders: { permissionsPolicy: 'microphone=()' } as any },
+        permissionsPolicy: { camera: ['self'] },
+      })
+    ).rejects.toThrow(/cannot be used together with/);
   });
 });

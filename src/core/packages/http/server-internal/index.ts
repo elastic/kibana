@@ -28,9 +28,17 @@ export {
   type ExternalUrlConfigType,
 } from './src/external_url';
 
-export type { PermissionsPolicyConfigType } from './src/permissions_policy';
+export type {
+  PermissionsPolicyConfigType,
+  PermissionsPolicyDirectiveName,
+} from './src/permissions_policy';
 
-export { permissionsPolicyConfig } from './src/permissions_policy';
+export {
+  permissionsPolicyConfig,
+  permissionsPolicyDirectiveSettings,
+  PermissionsPolicyDirectives,
+  defaultRules as defaultPermissionsPolicyRules,
+} from './src/permissions_policy';
 
 export { createCookieSessionStorageFactory } from './src/cookie_session_storage';
 

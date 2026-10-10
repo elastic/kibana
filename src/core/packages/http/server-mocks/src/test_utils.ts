@@ -24,8 +24,10 @@ import {
   type HttpConfigType,
   type ExternalUrlConfigType,
   type CspConfigType,
+  type PermissionsPolicyConfigType,
   HttpService,
   config,
+  permissionsPolicyConfig,
 } from '@kbn/core-http-server-internal';
 import { lazyObject } from '@kbn/lazy-object';
 
@@ -38,10 +40,12 @@ export const createConfigService = ({
   server,
   externalUrl,
   csp,
+  permissionsPolicy,
 }: Partial<{
   server: Partial<HttpConfigType>;
   externalUrl: Partial<ExternalUrlConfigType>;
   csp: Partial<CspConfigType>;
+  permissionsPolicy: Partial<PermissionsPolicyConfigType>;
 }> = {}) => {
   const configService = configServiceMock.create();
   configService.atPath.mockImplementation((path) => {
@@ -65,7 +69,9 @@ export const createConfigService = ({
               disableProtection: true,
               allowlist: [],
             },
-            securityResponseHeaders: {},
+            // `null` disables the header. This mock deliberately emits no security response
+            // headers; an absent `permissionsPolicy` would now build Kibana's default policy.
+            securityResponseHeaders: { permissionsPolicy: null },
             customResponseHeaders: {},
             requestId: {
               allowFromAnyIp: true,
@@ -100,7 +106,8 @@ export const createConfigService = ({
     }
     if (path === 'permissionsPolicy') {
       return new BehaviorSubject({
-        report_to: [],
+        ...permissionsPolicyConfig.schema.validate({}),
+        ...permissionsPolicy,
       });
     }
     if (path === 'pricing') {
