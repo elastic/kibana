@@ -15,12 +15,11 @@ import type { PluginPackage } from '@kbn/repo-packages';
 import { readPackageMap, Package } from '@kbn/repo-packages';
 import { findUsedNodeModules } from '@kbn/find-used-node-modules';
 
-/** Finds the production dependency graph and its direct manifest entries. */
 export async function findUsedDependencies(
-  listedPkgDependencies: Record<string, string>,
-  repoRoot: string,
+  listedPkgDependencies: any,
+  repoRoot: any,
   plugins: PluginPackage[]
-): Promise<{ dependencies: Record<string, string>; usedDependencyNames: ReadonlySet<string> }> {
+) {
   const resolver = ImportResolver.create(
     repoRoot,
     Array.from(readPackageMap().values()).flatMap((repoRel) => {
@@ -81,5 +80,5 @@ export async function findUsedDependencies(
     }
   }
 
-  return { dependencies: neededDeps, usedDependencyNames: new Set(usedDeps) };
+  return neededDeps;
 }

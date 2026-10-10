@@ -24,7 +24,6 @@ export function getLocalFileDependencyPaths(
 ): string[] {
   const workspace = parse(workspaceYaml) as {
     overrides?: Record<string, string>;
-    patchedDependencies?: Record<string, string>;
   };
   const specifiers = [
     ...Object.values(pkg.dependencies ?? {}),
@@ -34,19 +33,19 @@ export function getLocalFileDependencyPaths(
     ...Object.values(workspace.overrides ?? {}),
   ];
 
-  const localFiles = specifiers.flatMap((specifier) =>
-    typeof specifier === 'string' && specifier.startsWith('file:')
-      ? [toRepoRelativePath(specifier.slice('file:'.length), specifier)]
-      : []
-  );
-  const patchFiles = Object.values(workspace.patchedDependencies ?? {}).map((path) =>
-    toRepoRelativePath(path, path)
-  );
-
-  return [...new Set([...localFiles, ...patchFiles])];
+  return [
+    ...new Set(
+      specifiers.flatMap((specifier) =>
+        typeof specifier === 'string' && specifier.startsWith('file:')
+          ? [toRepoRelativePath(specifier)]
+          : []
+      )
+    ),
+  ];
 }
 
-function toRepoRelativePath(dependencyPath: string, specifier: string): string {
+function toRepoRelativePath(specifier: string): string {
+  const dependencyPath = specifier.slice('file:'.length);
   const normalized = Path.normalize(dependencyPath);
   if (
     !dependencyPath ||
