@@ -3879,6 +3879,8 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 # No owner - generated files covered by CI checks
 **/moon.yml
+# Only the workflow step schema sync PR changes these (auto-approved), feature PRs never do
+/src/platform/packages/private/kbn-workflow-step-schema-cli/generated/
 
 # Operations (last-match override)
 /src/platform/test/package @elastic/kibana-operations

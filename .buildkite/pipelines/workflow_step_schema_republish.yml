@@ -1,0 +1,9 @@
+steps:
+  - command: .buildkite/scripts/steps/workflow_step_schema/republish_schema.sh
+    label: 'Republish workflow step schema from this commit'
+    timeout_in_minutes: 15
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2

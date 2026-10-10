@@ -21,10 +21,12 @@ import {
 import {
   fetchComposedSchema,
   fetchConnectorTypes,
+  fetchStepDefinitionHashes,
   fetchStepDefinitionIds,
   fetchTriggerDefinitionIds,
   type KibanaConnection,
 } from '../src/fetch';
+import { checkStepApprovals, formatStepApprovalFailure } from '../src/step_approval';
 import { transformToStrict, transformToTemplate } from '../src/template_transform';
 import { extractStepTypes, extractTriggerTypes } from '../src/introspect';
 import { checkCompleteness } from '../src/completeness';
@@ -47,6 +49,14 @@ const OUTPUT_DIR = Path.resolve(
   process.env.WORKFLOW_SCHEMA_OUTPUT_DIR ??
     Path.join(REPO_ROOT, 'src/platform/packages/private/kbn-workflow-step-schema-cli/generated')
 );
+
+// Per-step approved `definitionHash` files, owned by workflows-eng. Mismatches are
+// written to WORKFLOW_STEP_APPROVAL_REPORT (when set) instead of failing the test, so
+// the codegen script's boot retries are not spent on a deterministic failure and the
+// script decides whether to enforce them for the current build type.
+const APPROVED_STEP_DEFINITIONS_DIR_RELATIVE =
+  'src/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_step_definitions';
+const APPROVAL_REPORT_PATH = process.env.WORKFLOW_STEP_APPROVAL_REPORT;
 
 // Poll the *non-latching* step-definitions route, not `/api/workflows/schema`.
 // The schema route freezes the registered-step cache on the first 200 it returns;
@@ -246,5 +256,18 @@ describe('workflow step schema generation', () => {
     writeIndex(bundleDir, manifest);
 
     log.success(`Wrote workflow step schema artifact to ${bundleDir}`);
+
+    const approvals = checkStepApprovals({
+      steps: await fetchStepDefinitionHashes(connection, log),
+      approvalsDir: Path.join(REPO_ROOT, APPROVED_STEP_DEFINITIONS_DIR_RELATIVE),
+      approvalsDirRelative: APPROVED_STEP_DEFINITIONS_DIR_RELATIVE,
+    });
+    if (approvals.issues.length > 0) {
+      const message = formatStepApprovalFailure(approvals);
+      log.warning(message);
+      if (APPROVAL_REPORT_PATH) {
+        Fs.writeFileSync(APPROVAL_REPORT_PATH, `${message}\n`);
+      }
+    }
   });
 });

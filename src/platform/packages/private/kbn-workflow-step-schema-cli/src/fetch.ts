@@ -10,6 +10,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { KIBANA_API_VERSION } from './constants';
+import type { RegisteredStepHash } from './step_approval';
 import type { JsonObject, JsonValue } from './types';
 
 export interface KibanaConnection {
@@ -174,6 +175,32 @@ export const fetchStepDefinitionIds = async (
   );
   const body = await kibanaGet(connection, '/internal/workflows_extensions/step_definitions');
   return extractDefinitionIds(body.steps);
+};
+
+/**
+ * Fetch the registered step definitions with their `definitionHash` from the
+ * internal `workflows_extensions` route. Used by the step approval check.
+ */
+export const fetchStepDefinitionHashes = async (
+  connection: KibanaConnection,
+  log: ToolingLog
+): Promise<RegisteredStepHash[]> => {
+  log.info(
+    'Fetching registered step definition hashes (GET /internal/workflows_extensions/step_definitions)'
+  );
+  const body = await kibanaGet(connection, '/internal/workflows_extensions/step_definitions');
+  if (!Array.isArray(body.steps)) {
+    return [];
+  }
+  return body.steps.flatMap((entry) =>
+    entry !== null &&
+    typeof entry === 'object' &&
+    !Array.isArray(entry) &&
+    typeof entry.id === 'string' &&
+    typeof entry.definitionHash === 'string'
+      ? [{ id: entry.id, definitionHash: entry.definitionHash }]
+      : []
+  );
 };
 
 /** Fetch the ids of registered trigger definitions from the internal route. */
