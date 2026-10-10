@@ -12,14 +12,12 @@ import { RISK_ENGINE_CLEANUP_URL, APP_ID, API_VERSIONS } from '../../../../../co
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskEngineAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
-import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 import type { CleanUpRiskEngineResponse } from '../../../../../common/api/entity_analytics';
-import { withEntityStoreV2Disabled } from './utils';
+import { deleteSavedObjects } from '../utils/saved_object_configuration';
 
 export const riskEngineCleanupRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
-  isEntityAnalyticsEntityStoreV2Enabled: boolean
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .delete({
@@ -33,83 +31,83 @@ export const riskEngineCleanupRoute = (
     })
     .addVersion(
       { version: API_VERSIONS.public.v1, validate: {} },
-      withEntityStoreV2Disabled(
-        isEntityAnalyticsEntityStoreV2Enabled,
-        withRiskEnginePrivilegeCheck(
-          getStartServices,
-          async (
-            context,
-            request,
-            response
-          ): Promise<IKibanaResponse<CleanUpRiskEngineResponse>> => {
-            const siemResponse = buildSiemResponse(response);
-            const securitySolution = await context.securitySolution;
+      withRiskEnginePrivilegeCheck(
+        getStartServices,
+        async (context, request, response): Promise<IKibanaResponse<CleanUpRiskEngineResponse>> => {
+          const siemResponse = buildSiemResponse(response);
+          const securitySolution = await context.securitySolution;
+          const core = await context.core;
+          const namespace = securitySolution.getSpaceId();
+          const esClient = core.elasticsearch.client.asInternalUser;
+          const errors: Error[] = [];
+          const addError = (error: unknown) => {
+            errors.push(error instanceof Error ? error : new Error(String(error)));
+          };
 
-            const [_, { taskManager }] = await getStartServices();
-            const riskEngineClient = securitySolution.getRiskEngineDataClient();
-            const riskScoreDataClient = securitySolution.getRiskScoreDataClient();
+          securitySolution.getAuditLogger()?.log({
+            message: 'User attempted to clean up risk score resources',
+            event: {
+              action: RiskEngineAuditActions.RISK_ENGINE_REMOVE_TASK,
+              category: AUDIT_CATEGORY.DATABASE,
+              type: AUDIT_TYPE.DELETION,
+              outcome: AUDIT_OUTCOME.UNKNOWN,
+            },
+          });
 
-            if (!taskManager) {
-              securitySolution.getAuditLogger()?.log({
-                message:
-                  'User attempted to perform a cleanup of risk engine, but the Kibana Task Manager was unavailable',
-                event: {
-                  action: RiskEngineAuditActions.RISK_ENGINE_REMOVE_TASK,
-                  category: AUDIT_CATEGORY.DATABASE,
-                  type: AUDIT_TYPE.DELETION,
-                  outcome: AUDIT_OUTCOME.FAILURE,
+          try {
+            await deleteSavedObjects({
+              savedObjectsClient: core.savedObjects.client,
+              namespace,
+            }).catch(addError);
+
+            const riskScoreErrors = await securitySolution.getRiskScoreDataClient().tearDown();
+            errors.push(...riskScoreErrors);
+
+            const alias = `risk-score.risk-score-${namespace}`;
+            await esClient
+              .delete(
+                {
+                  index: '.kibana_task_manager',
+                  id: `task:risk-score:${namespace}`,
+                  refresh: true,
                 },
-                error: {
-                  message:
-                    'User attempted to perform a cleanup of risk engine, but the Kibana Task Manager was unavailable',
-                },
-              });
+                { ignore: [404] }
+              )
+              .catch(addError);
+            await esClient.indices.delete({ index: alias }, { ignore: [404] }).catch(addError);
+            await esClient.ingest
+              .deletePipeline(
+                { id: `entity_analytics_create_eventIngest_from_timestamp-pipeline-${namespace}` },
+                { ignore: [404] }
+              )
+              .catch(addError);
 
-              return siemResponse.error({
-                statusCode: 400,
-                body: TASK_MANAGER_UNAVAILABLE_ERROR,
-              });
-            }
-
-            try {
-              const errors = await riskEngineClient.tearDown({
-                taskManager,
-                riskScoreDataClient,
-              });
-              if (errors && errors.length > 0) {
-                return siemResponse.error({
-                  statusCode: errors.some((error) =>
-                    error.message.includes('Risk engine is disabled or deleted already.')
-                  )
-                    ? 400
-                    : 500,
-                  body: {
-                    cleanup_successful: false,
-                    errors: errors.map((error, seq) => ({
-                      seq: seq + 1,
-                      error: error.toString(),
-                    })),
-                  },
-                  bypassErrorFormat: true,
-                });
-              } else {
-                return response.ok({ body: { cleanup_successful: true } });
-              }
-            } catch (error) {
+            if (errors.length > 0) {
               return siemResponse.error({
                 statusCode: 500,
                 body: {
                   cleanup_successful: false,
-                  errors: {
-                    seq: 1,
-                    error: JSON.stringify(error),
-                  },
+                  errors: errors.map((error, seq) => ({
+                    seq: seq + 1,
+                    error: error.message,
+                  })),
                 },
                 bypassErrorFormat: true,
               });
             }
+
+            return response.ok({ body: { cleanup_successful: true } });
+          } catch (error) {
+            return siemResponse.error({
+              statusCode: 500,
+              body: {
+                cleanup_successful: false,
+                errors: [{ seq: 1, error: error instanceof Error ? error.message : String(error) }],
+              },
+              bypassErrorFormat: true,
+            });
           }
-        )
+        }
       )
     );
 };

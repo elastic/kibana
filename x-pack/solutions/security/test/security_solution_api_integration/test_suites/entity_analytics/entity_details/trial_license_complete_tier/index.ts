@@ -7,8 +7,9 @@
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
+export default function (_context: FtrProviderContext) {
   describe('Entity analytics - Entity details', function () {
-    loadTestFile(require.resolve('./highlights'));
+    // V1 highlights called the removed risk-engine init route. Coverage lives in
+    // risk_score_maintainer/highlights_v2.ts.
   });
 }
