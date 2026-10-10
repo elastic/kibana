@@ -162,6 +162,12 @@ export interface LastNotifiedRecord {
   alert_status?: string;
 }
 
+export interface AlreadyNotifiedRecord {
+  action_group_id: ActionGroupId;
+  alert_id: string;
+  notified_through: string;
+}
+
 export interface LastNotifiedInfo {
   lastNotified: Date;
   alertStatus?: string;
@@ -208,6 +214,8 @@ export interface DispatcherPipelineState {
   readonly policies?: PolicyCatalog;
   readonly matched?: MatchedPair[];
   readonly groups?: ActionGroup[];
+  /** Alerts of each group already delivered by an earlier tick; recorded as `fire`, never dispatched again. */
+  readonly alreadyNotified?: ActionGroup[];
   /** Delivery decision: groups eligible to dispatch now vs groups held back. */
   readonly plan?: DispatchPlan;
   /** Dispatch results: workflow executions per group and failed attempts. */

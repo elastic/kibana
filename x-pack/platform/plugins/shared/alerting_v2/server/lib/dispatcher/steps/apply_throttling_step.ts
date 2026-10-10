@@ -38,6 +38,7 @@ export class ApplyThrottlingStep implements DispatcherStep {
   ): Promise<DispatcherStepOutput> {
     const {
       groups = [],
+      alreadyNotified = [],
       policies = PolicyCatalog.empty(),
       triage = AlertTriage.empty(),
       input,
@@ -47,7 +48,9 @@ export class ApplyThrottlingStep implements DispatcherStep {
     if (groups.length === 0) {
       return {
         type: 'continue',
-        data: { plan: DispatchPlan.of({ toDispatch: [], throttled: [], dispatchable }) },
+        data: {
+          plan: DispatchPlan.of({ toDispatch: [], throttled: [], alreadyNotified, dispatchable }),
+        },
       };
     }
 
@@ -65,7 +68,9 @@ export class ApplyThrottlingStep implements DispatcherStep {
 
     return {
       type: 'continue',
-      data: { plan: DispatchPlan.of({ toDispatch: dispatch, throttled, dispatchable }) },
+      data: {
+        plan: DispatchPlan.of({ toDispatch: dispatch, throttled, alreadyNotified, dispatchable }),
+      },
     };
   }
 

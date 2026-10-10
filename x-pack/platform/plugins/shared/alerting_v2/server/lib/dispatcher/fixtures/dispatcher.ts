@@ -10,6 +10,7 @@ import type {
   Alert,
   AlertSuppressionRow,
   LastNotifiedRecord,
+  AlreadyNotifiedRecord,
   SeriesSuppressionRow,
 } from '../types';
 
@@ -113,5 +114,18 @@ export const createLastNotifiedTimestampsResponse = (
       { name: 'alert_status', type: 'keyword' },
     ],
     values: records.map((r) => [r.action_group_id, r.last_notified, r.alert_status ?? null]),
+  };
+};
+
+export const createAlreadyNotifiedResponse = (
+  records: AlreadyNotifiedRecord[] = []
+): EsqlQueryResponse => {
+  return {
+    columns: [
+      { name: 'action_group_id', type: 'keyword' },
+      { name: 'alert_id', type: 'keyword' },
+      { name: 'notified_through', type: 'date' },
+    ],
+    values: records.map((r) => [r.action_group_id, r.alert_id, r.notified_through]),
   };
 };

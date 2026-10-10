@@ -206,7 +206,8 @@ describe('StoreActionsStep', () => {
       action_type: 'notified',
       rule_id: 'rule-1',
       group_hash: 'hash-1',
-      last_series_event_timestamp: mockDate.toISOString(),
+      alert_id: 'alert-1',
+      last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
       action_group_id: 'group-1',
       source: 'internal',
       reason: 'notified by policy policy-1',
@@ -592,13 +593,85 @@ describe('StoreActionsStep', () => {
     expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
 
     const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
-    expect(callArgs.docs).toHaveLength(3);
+    expect(callArgs.docs).toHaveLength(4);
     expect(callArgs.docs[0].action_type).toBe('fire');
     expect(callArgs.docs[0].group_hash).toBe('hash-1');
     expect(callArgs.docs[1].action_type).toBe('fire');
     expect(callArgs.docs[1].group_hash).toBe('hash-2');
-    expect(callArgs.docs[2].action_type).toBe('notified');
-    expect(callArgs.docs[2].group_hash).toBe('hash-1');
+    expect(callArgs.docs[2]).toMatchObject({
+      action_type: 'notified',
+      action_group_id: 'group-1',
+      alert_id: 'ep-1',
+      group_hash: 'hash-1',
+    });
+    expect(callArgs.docs[3]).toMatchObject({
+      action_type: 'notified',
+      action_group_id: 'group-1',
+      alert_id: 'ep-2',
+      group_hash: 'hash-2',
+    });
+  });
+
+  describe('notified commits from DispatchStep', () => {
+    const alert = createAlert({
+      alert_id: 'alert-1',
+      group_hash: 'hash-1',
+      last_event_timestamp: '2026-01-22T07:00:00.000Z',
+    });
+
+    it('writes notified only for dispatched groups DispatchStep did not commit', async () => {
+      const mockService = createMockStorageServiceContract();
+      const step = new StoreActionsStep(mockService);
+
+      const state = createDispatcherPipelineState({
+        dispatch: [
+          createActionGroup({ id: 'committed', policyId: 'policy-1', alerts: [alert] }),
+          createActionGroup({ id: 'uncommitted', policyId: 'policy-1', alerts: [alert] }),
+        ],
+        committedGroupIds: new Set(['committed']),
+      });
+
+      await step.execute(state, logger);
+
+      const { docs } = mockService.bulkIndexDocs.mock.calls[0][0];
+      const notifiedGroupIds = docs
+        .filter((doc: Record<string, unknown>) => doc.action_type === 'notified')
+        .map((doc: Record<string, unknown>) => doc.action_group_id);
+      expect(notifiedGroupIds).toEqual(['uncommitted']);
+      expect(
+        docs.filter((doc: Record<string, unknown>) => doc.action_type === 'fire')
+      ).toHaveLength(2);
+    });
+
+    it('records already-notified alerts as fire without dispatching or notifying again', async () => {
+      const mockService = createMockStorageServiceContract();
+      const step = new StoreActionsStep(mockService);
+
+      const state = createDispatcherPipelineState({
+        planAlreadyNotified: [
+          createActionGroup({ id: 'group-1', policyId: 'policy-1', alerts: [alert] }),
+        ],
+      });
+
+      const result = await step.execute(state, logger);
+
+      expect(result).toEqual({ type: 'continue', data: { recordedAlerts: 1 } });
+      expect(mockService.bulkIndexDocs).toHaveBeenCalledWith({
+        index: ALERT_ACTIONS_DATA_STREAM,
+        docs: [
+          {
+            group_hash: 'hash-1',
+            last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
+            actor: { type: 'internal' },
+            action_type: 'fire',
+            rule_id: 'rule-1',
+            source: 'internal',
+            reason: 'already notified by policy policy-1',
+            space_id: 'default',
+          },
+        ],
+      });
+    });
   });
 
   describe('space_id resolution', () => {

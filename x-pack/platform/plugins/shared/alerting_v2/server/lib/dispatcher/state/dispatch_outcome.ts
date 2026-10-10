@@ -13,19 +13,21 @@ import type {
 } from '../types';
 
 const NO_EXECUTIONS: readonly string[] = [];
+const NO_COMMITTED_GROUPS: ReadonlySet<ActionGroupId> = new Set();
 
 /**
  * What actually happened during dispatch (DispatchStep): workflow execution ids
  * per successfully scheduled group, plus every failed (group, destination) attempt.
  */
 export class DispatchOutcome {
-  private static readonly EMPTY = new DispatchOutcome([], new Map());
+  private static readonly EMPTY = new DispatchOutcome([], new Map(), NO_COMMITTED_GROUPS);
 
   private readonly failedWorkflowsByGroup: ReadonlyMap<ActionGroupId, ReadonlySet<string>>;
 
   private constructor(
     public readonly failures: readonly DispatchFailure[],
-    private readonly executionsByGroup: ReadonlyMap<ActionGroupId, readonly string[]>
+    private readonly executionsByGroup: ReadonlyMap<ActionGroupId, readonly string[]>,
+    private readonly committedGroupIds: ReadonlySet<ActionGroupId>
   ) {
     this.failedWorkflowsByGroup = indexFailedWorkflows(failures);
   }
@@ -33,11 +35,14 @@ export class DispatchOutcome {
   public static of({
     executionsByGroup,
     failures,
+    committedGroupIds = NO_COMMITTED_GROUPS,
   }: {
     executionsByGroup: ReadonlyMap<ActionGroupId, readonly string[]>;
     failures: readonly DispatchFailure[];
+    /** Groups whose `notified` records DispatchStep already wrote. */
+    committedGroupIds?: ReadonlySet<ActionGroupId>;
   }): DispatchOutcome {
-    return new DispatchOutcome(failures, executionsByGroup);
+    return new DispatchOutcome(failures, executionsByGroup, committedGroupIds);
   }
 
   public static empty(): DispatchOutcome {
@@ -47,6 +52,10 @@ export class DispatchOutcome {
   /** Number of groups with at least one scheduled workflow execution. */
   public get scheduledGroupCount(): number {
     return this.executionsByGroup.size;
+  }
+
+  public isCommitted(groupId: ActionGroupId): boolean {
+    return this.committedGroupIds.has(groupId);
   }
 
   public executionIdsFor(groupId: ActionGroupId): readonly string[] {

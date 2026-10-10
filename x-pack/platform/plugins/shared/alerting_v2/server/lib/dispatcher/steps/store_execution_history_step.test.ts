@@ -19,7 +19,8 @@ import {
   createStepLogger,
 } from '../fixtures/test_utils';
 import type { ActionPolicy, ActionPolicyId, DispatchFailure, Rule, RuleId } from '../types';
-import { StoreExecutionHistoryStep } from './store_execution_history_step';
+import { emitDispatchedSummaries, StoreExecutionHistoryStep } from './store_execution_history_step';
+import { DispatchOutcome, RuleCatalog } from '../state';
 import { DISPATCH_FAILURE_REASONS } from './constants';
 
 const logger = createStepLogger();
@@ -901,5 +902,45 @@ describe('StoreExecutionHistoryStep', () => {
       expect(event?.kibana?.space_ids).toEqual(['my-space']);
       expect(event?.kibana?.saved_objects).toEqual([]);
     });
+  });
+});
+
+describe('emitDispatchedSummaries', () => {
+  it('emits dispatched summaries for the given groups only', () => {
+    const { eventLogService, mockEventLogger } = createEventLogService();
+    const committed = createActionGroup({
+      id: 'group-1',
+      policyId: 'policy-1',
+      alerts: [createAlert({ rule_id: 'rule-a', alert_id: 'ep-1' })],
+      destinations: [{ type: 'workflow', id: 'wf-a' }],
+    });
+
+    emitDispatchedSummaries({
+      eventLogService,
+      groups: [committed],
+      outcome: DispatchOutcome.of({
+        executionsByGroup: new Map([
+          ['group-1', ['exec-a']],
+          ['group-2', ['exec-b']],
+        ]),
+        failures: [],
+      }),
+      rules: RuleCatalog.empty(),
+      timestamp: '2026-01-22T08:00:00.000Z',
+      executionUuid: 'tick-1',
+    });
+
+    expect(mockEventLogger.logEvent).toHaveBeenCalledTimes(1);
+    const [[event]] = mockEventLogger.logEvent.mock.calls;
+    expect(event?.['@timestamp']).toBe('2026-01-22T08:00:00.000Z');
+    expect(event?.event?.action).toBe('dispatched');
+    expect(event?.kibana?.alerting_v2?.dispatcher).toEqual(
+      expect.objectContaining({
+        alert_ids: ['ep-1'],
+        action_group_ids: ['group-1'],
+        workflow_execution_ids: ['exec-a'],
+        execution: { uuid: 'tick-1' },
+      })
+    );
   });
 });

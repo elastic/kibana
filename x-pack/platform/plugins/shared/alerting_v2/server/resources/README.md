@@ -128,7 +128,7 @@ These actions are written by `StoreActionsStep` to record what the dispatcher de
 | Action type | Written by | Meaning |
 | --- | --- | --- |
 | `fire` | Dispatcher | This episode was eligible for dispatch in the current run. |
-| `notified` | Dispatcher | A notification group was actually scheduled/sent. This is group-level history used for throttling. |
+| `notified` | Dispatcher | A notification group was actually scheduled/sent. Written once per (`action_group_id`, `alert_id`) right after the dispatch chunk, with `last_series_event_timestamp` set to the alert's event time. Used for throttling and to skip content an aborted tick already delivered. Records written before this carry no `alert_id`. |
 | `suppress` | Dispatcher | The episode was intentionally not fired in this run, for example because suppression logic or throttling held it back. |
 | `unmatched` | Dispatcher | The episode stayed dispatchable but matched no enabled notification policy. |
 
@@ -137,7 +137,7 @@ These actions are written by `StoreActionsStep` to record what the dispatcher de
 The dispatcher records both per-episode and per-group outcomes:
 
 - `fire` means an individual episode reached the dispatch stage
-- `notified` means a notification group was actually sent and is the durable record later throttling queries look at
+- `notified` means a notification group was actually sent and is the durable record later throttling queries look at; because it is written per alert of the group as soon as the workflows are scheduled, it also tells a later tick which alerts a group already delivered when the earlier tick aborted before recording `fire`
 
 That distinction is why `.alert-actions` stores both episode-scoped and notification-group-scoped fields.
 
