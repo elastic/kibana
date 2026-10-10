@@ -11,12 +11,18 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { ChatCompleteCacheControl, InferenceConnector } from '@kbn/inference-common';
 import { ChatCompletionErrorCode, InferenceTaskError } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { ConversationRoundStepType, type ConversationRoundStep } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStepType,
+  createInjectedContextStep,
+  type ConversationRoundStep,
+} from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { createAgentGraph } from './graph';
+import type { CycleHookRuntime } from './cycle_hooks/cycle_hook_runtime';
+import { stepUpdates } from './step_state';
 import type { PromptFactory } from './prompts';
 import { RunTracker, type ToolExecutionBuffer } from './run_tracker';
 import type { StateType } from './state';
@@ -48,12 +54,14 @@ const createTestGraph = ({
   sessionId,
   cacheControl,
   toolExecutionBuffer,
+  cycleHooks,
 }: {
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
   sessionId?: string;
   cacheControl?: ChatCompleteCacheControl;
   toolExecutionBuffer?: ToolExecutionBuffer;
+  cycleHooks?: CycleHookRuntime;
 } = {}) => {
   const researchInvoke = jest.fn();
   const structuredInvoke = jest.fn();
@@ -100,6 +108,7 @@ const createTestGraph = ({
     sessionId,
     cacheControl,
     toolExecutionBuffer,
+    cycleHooks,
     contextManagement: {
       connector: { connectorId: 'test-connector' } as InferenceConnector,
       resultStore: createToolResultStoreMock(),
@@ -630,5 +639,116 @@ describe('createAgentGraph', () => {
       });
       expect(researchInvoke).toHaveBeenCalledTimes(1);
     });
+  });
+});
+
+describe('createAgentGraph cycle hooks', () => {
+  const note = createInjectedContextStep({ hook_id: 'memory', text: 'remember this' });
+
+  it('folds the dispatched rows into the prompt and the steps, and keeps them through a retry', async () => {
+    const dispatch = jest
+      .fn()
+      .mockResolvedValueOnce([stepUpdates.append(note)])
+      .mockResolvedValue([]);
+    const cycleHooks = { dispatch } as unknown as CycleHookRuntime;
+    const { graph, researchInvoke, promptFactory } = createTestGraph({ cycleHooks });
+    researchInvoke
+      .mockResolvedValueOnce(new AIMessage({ content: '' }))
+      .mockResolvedValueOnce(new AIMessage({ content: 'the answer' }));
+
+    const result = await graph.invoke({ cycleLimit: 10 });
+
+    expect(dispatch).toHaveBeenNthCalledWith(1, {
+      cycle: 0,
+      attempt: 0,
+      steps: [],
+      summary: undefined,
+    });
+    // the empty response bumps the cycle and the attempt; the note is already in the state
+    expect(dispatch).toHaveBeenNthCalledWith(2, {
+      cycle: 1,
+      attempt: 1,
+      steps: [note],
+      summary: undefined,
+    });
+    expect(promptFactory.getMainPrompt).toHaveBeenNthCalledWith(1, {
+      run: expect.objectContaining({ steps: [note] }),
+    });
+    expect(promptFactory.getMainPrompt).toHaveBeenNthCalledWith(2, {
+      run: expect.objectContaining({ steps: [note] }),
+    });
+    expect(result.steps).toEqual([note]);
+    expect(result.finalAnswer).toBe('the answer');
+  });
+
+  it('keeps the rows dispatched before a context-length error for the compacted retry', async () => {
+    const dispatch = jest
+      .fn()
+      .mockResolvedValueOnce([stepUpdates.append(note)])
+      .mockResolvedValue([]);
+    const cycleHooks = { dispatch } as unknown as CycleHookRuntime;
+    const { graph, researchInvoke } = createTestGraph({ cycleHooks });
+    const summary = {
+      summarized_up_to: { round_id: 'round-0', tool_call_id: 'x1' },
+      summarized_round_count: 0,
+      created_at: 't',
+      token_count: 1,
+      structured_data: {},
+    };
+    compactContextMock.mockResolvedValue({
+      summary,
+      tokensBefore: 100,
+      tokensAfter: 10,
+      summarizedCycleCount: 1,
+    });
+    researchInvoke
+      .mockRejectedValueOnce(
+        new InferenceTaskError(ChatCompletionErrorCode.ContextLengthExceededError, 'too long', {})
+      )
+      .mockResolvedValueOnce(new AIMessage({ content: 'the answer' }));
+
+    const result = await graph.invoke({ cycleLimit: 10 }, { recursionLimit: 30 });
+
+    // the retry sees the note, the compaction step the node appended, and the new summary
+    expect(dispatch).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        cycle: 0,
+        attempt: 1,
+        steps: [note, expect.objectContaining({ type: ConversationRoundStepType.compaction })],
+        summary,
+      })
+    );
+    expect(result.steps[0]).toEqual(note);
+    expect(result.finalAnswer).toBe('the answer');
+  });
+
+  it('commits the dispatched rows before the model call, so a fatal research error keeps them', async () => {
+    const graphName = 'cycle-hooks-fatal-graph';
+    const tracker = new RunTracker({ graphName });
+    const dispatch = jest
+      .fn()
+      .mockResolvedValueOnce([stepUpdates.append(note)])
+      .mockResolvedValue([]);
+    const cycleHooks = { dispatch } as unknown as CycleHookRuntime;
+    const { graph, researchInvoke } = createTestGraph({ cycleHooks, toolExecutionBuffer: tracker });
+    researchInvoke.mockRejectedValueOnce(new Error('fatal'));
+    tracker.seed({ steps: [] });
+
+    const stream = graph.streamEvents(
+      { cycleLimit: 5 },
+      { version: 'v2', streamMode: 'values', runName: graphName, recursionLimit: 50 }
+    );
+    await expect(
+      (async () => {
+        for await (const event of stream) {
+          tracker.observeGraphEvent(event);
+        }
+      })()
+    ).rejects.toThrow('fatal');
+
+    // the note landed in its own super-step, so the last streamed state and the projection have it
+    expect(tracker.latestState().steps).toEqual([note]);
+    expect(tracker.executionProjection()).toEqual([note]);
   });
 });

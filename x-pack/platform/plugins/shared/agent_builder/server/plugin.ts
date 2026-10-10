@@ -309,6 +309,7 @@ export class AgentBuilderPlugin
       },
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
+        registerCycleHook: serviceSetups.hooks.registerCycleHook.bind(serviceSetups.hooks),
       },
       skills: {
         register: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),

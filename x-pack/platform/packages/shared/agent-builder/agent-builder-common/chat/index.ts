@@ -115,6 +115,10 @@ export {
   type SubstitutionStepData,
   createSubstitutionStep,
   isSubstitutionStep,
+  type InjectedContextStep,
+  type InjectedContextStepData,
+  createInjectedContextStep,
+  isInjectedContextStep,
 } from './conversation';
 export {
   ChatEventType,

@@ -132,12 +132,15 @@ describe('historyView', () => {
     const timeline = timelineFromRounds([{ id: 'a', input: input('first') }]);
     const view = historyView(conversationOf(timeline), '2026-01-01T00:00:00.000Z');
     expect(view.entries).toHaveLength(1);
+    expect(view.events).toEqual(timeline);
     expect(view.input).toEqual(input('next'));
     expect(view.inputTimestamp).toBe('2026-01-01T00:00:00.000Z');
   });
 
+  const historyBeforePause = () => timelineFromRounds([{ id: 'a', input: input('first') }]);
+
   const pausedTimeline = (paused: TimelineEvent[] = pausedRoundTimeline('p', ['c1'])) => [
-    ...timelineFromRounds([{ id: 'a', input: input('first') }]),
+    ...historyBeforePause(),
     ...(eventsForContext(eventsNativeConversation(paused)).map((event) =>
       event.type === TimelineEventType.userMessage
         ? { ...event, data: { ...event.data, attachments: [] } }
@@ -150,11 +153,14 @@ describe('historyView', () => {
     expect(view.entries.map((entry) => (isTimelineRound(entry) ? entry.id : 'message'))).toEqual([
       'a',
     ]);
+    expect(view.events).toEqual(historyBeforePause());
     expect(view.input).toEqual(expect.objectContaining({ message: 'hello p' }));
   });
 
   it('keeps a paused round the run does not resume, with its unreturned calls interrupted', () => {
-    const view = historyView(conversationOf(pausedTimeline()), '2026-01-01T00:00:00.000Z');
+    const timeline = pausedTimeline();
+    const view = historyView(conversationOf(timeline), '2026-01-01T00:00:00.000Z');
+    expect(view.events).toEqual(timeline);
     const rounds = view.entries.filter(isTimelineRound);
     expect(rounds.map((round) => round.id)).toEqual(['a', 'p']);
     expect(rounds[1].steps).toEqual([
