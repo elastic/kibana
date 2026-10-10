@@ -9,10 +9,10 @@ import type { SolutionView } from '@kbn/spaces-plugin/common';
 import { getCapabilityMessagesForSolution } from './capability_messages';
 
 describe('getCapabilityMessagesForSolution', () => {
-  it('returns four messages for each Space Solution View', () => {
+  it('returns the expected number of messages for each Space Solution View', () => {
     expect(getCapabilityMessagesForSolution('classic')).toHaveLength(4);
     expect(getCapabilityMessagesForSolution('oblt')).toHaveLength(4);
-    expect(getCapabilityMessagesForSolution('security')).toHaveLength(4);
+    expect(getCapabilityMessagesForSolution('security')).toHaveLength(6);
     expect(getCapabilityMessagesForSolution('es')).toHaveLength(4);
     expect(getCapabilityMessagesForSolution('vectordb')).toHaveLength(4);
     expect(getCapabilityMessagesForSolution('workplaceai')).toHaveLength(4);
