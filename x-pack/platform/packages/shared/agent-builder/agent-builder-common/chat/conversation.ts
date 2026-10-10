@@ -516,16 +516,6 @@ export interface ConversationRoundFeedback {
   comment?: string;
   /** ISO timestamp when the feedback was (most recently) submitted */
   submitted_at: string;
-  /**
-   * Connector ID from the round's model_usage at submission time.
-   * Present whenever model_usage is available on the round.
-   */
-  connector_id?: string;
-  /**
-   * Model identifier. Only populated when the LLM provider returns the model
-   * in its response — many connectors omit it.
-   */
-  model?: string;
 }
 
 /**
@@ -563,8 +553,6 @@ export interface ConversationRound {
   trace_id?: string | string[];
   /** Runtime configuration overrides that were applied to this round */
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
-  /** User feedback for this round, if submitted. */
-  feedback?: ConversationRoundFeedback;
   /**
    * Set when the round's last execution ended without an outcome (failed or aborted). The round
    * is `completed` with an empty `response.message`; the steps completed before the interruption
@@ -762,6 +750,8 @@ export interface Conversation {
   events?: ConversationEvent[];
   /** Schema version of the stored events. */
   schema_version?: number;
+  /** Per-execution feedback submitted by the user. Keyed by execution id. */
+  feedback?: Record<string, ConversationRoundFeedback>;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';

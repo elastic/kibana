@@ -119,6 +119,7 @@ export const fromEsWithoutRounds = (
           },
         }
       : {}),
+    ...(document._source.feedback ? { feedback: document._source.feedback } : {}),
     ...(document._source.metadata ? { metadata: document._source.metadata } : {}),
     ...(document._source.template_id ? { template_id: document._source.template_id } : {}),
     ...(document._source.template_version !== undefined
@@ -278,7 +279,7 @@ export const fromEs = (document: Document, user: CurrentUser): NormalizedConvers
   };
 
   const events =
-    isEventsNative && storedEvents && storedEvents.length > 0
+    isEventsNative && storedEvents != null && storedEvents.length > 0
       ? storedEvents
       : roundsToEvents(conversation);
 
@@ -433,6 +434,9 @@ export const toEs = (
           events: conversation.events ?? [],
           schema_version: conversation.schema_version,
         }
+      : {}),
+    ...(conversation.feedback && Object.keys(conversation.feedback).length > 0
+      ? { feedback: conversation.feedback }
       : {}),
     // Cast metadata to storage type — the flattened mapping requires string | string[].
     // Deserialized domain values (boolean, number) only exist on read; writes always
