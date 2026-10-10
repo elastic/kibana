@@ -14,10 +14,13 @@
       "dashboard",
       "dashboardMarkdown",
       "data",
+      "embeddable",
+      "inference",
       "agentBuilderSml",
       "share",
       "uiActions",
       "unifiedSearch"
-    ]
+    ],
+    "optionalPlugins": ["fleet"]
   }
 }

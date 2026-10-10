@@ -10,8 +10,12 @@ import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
   ENHANCE_DASHBOARD_ACTION_ID,
 } from '@kbn/dashboard-plugin/public';
+import { ADD_AI_INSIGHTS_ACTION_ID } from '../common/ai_insights/constants';
 import { AgentBuilderDashboardsPlugin } from './plugin';
-import type { AgentBuilderDashboardsPluginPublicStartDependencies } from './types';
+import type {
+  AgentBuilderDashboardsPluginPublicSetupDependencies,
+  AgentBuilderDashboardsPluginPublicStartDependencies,
+} from './types';
 
 jest.mock('./attachment_types', () => ({
   registerDashboardAttachmentUiDefinition: jest.fn(() => jest.fn()),
@@ -23,6 +27,8 @@ jest.mock('./attachment_types', () => ({
 
 describe('AgentBuilderDashboardsPlugin', () => {
   const registerActionAsync = jest.fn();
+  const attachAction = jest.fn();
+  const registerEmbeddablePublicDefinition = jest.fn();
   const openChat = jest.fn();
 
   const createCoreStart = (showAgentBuilder: boolean) =>
@@ -52,19 +58,39 @@ describe('AgentBuilderDashboardsPlugin', () => {
       },
       uiActions: {
         registerActionAsync,
+        attachAction,
       },
     } as unknown as AgentBuilderDashboardsPluginPublicStartDependencies);
 
   beforeEach(() => {
     registerActionAsync.mockClear();
+    attachAction.mockClear();
+    registerEmbeddablePublicDefinition.mockClear();
     openChat.mockClear();
   });
 
-  it('registers the lazy chat and enhance actions when Agent Builder is available', async () => {
+  it('registers the AI insights embeddable in setup', () => {
+    const plugin = new AgentBuilderDashboardsPlugin({} as PluginInitializerContext);
+    plugin.setup({} as never, {
+      embeddable: { registerEmbeddablePublicDefinition },
+    } as unknown as AgentBuilderDashboardsPluginPublicSetupDependencies);
+
+    expect(registerEmbeddablePublicDefinition).toHaveBeenCalledWith(
+      'ai_insights',
+      expect.any(Function)
+    );
+  });
+
+  it('registers add-panel action and chat entry points when Agent Builder is available', async () => {
     const plugin = new AgentBuilderDashboardsPlugin({} as PluginInitializerContext);
 
     plugin.start(createCoreStart(true), createStartDependencies());
 
+    expect(registerActionAsync).toHaveBeenCalledWith(
+      ADD_AI_INSIGHTS_ACTION_ID,
+      expect.any(Function)
+    );
+    expect(attachAction).toHaveBeenCalled();
     expect(registerActionAsync).toHaveBeenCalledWith(
       OPEN_DASHBOARD_CHAT_ACTION_ID,
       expect.any(Function)
@@ -74,7 +100,10 @@ describe('AgentBuilderDashboardsPlugin', () => {
       expect.any(Function)
     );
 
-    const openChatAction = await registerActionAsync.mock.calls[0][1]();
+    const openChatFactory = registerActionAsync.mock.calls.find(
+      ([id]) => id === OPEN_DASHBOARD_CHAT_ACTION_ID
+    )?.[1];
+    const openChatAction = await openChatFactory();
     expect(openChatAction.id).toBe(OPEN_DASHBOARD_CHAT_ACTION_ID);
 
     await openChatAction.execute({
@@ -83,11 +112,18 @@ describe('AgentBuilderDashboardsPlugin', () => {
     expect(openChat).toHaveBeenCalled();
   });
 
-  it('does not register dashboard Chat entry points without Agent Builder capabilities', () => {
+  it('still registers the AI insights add-panel action without Agent Builder capabilities', () => {
     const plugin = new AgentBuilderDashboardsPlugin({} as PluginInitializerContext);
 
     plugin.start(createCoreStart(false), createStartDependencies());
 
-    expect(registerActionAsync).not.toHaveBeenCalled();
+    expect(registerActionAsync).toHaveBeenCalledWith(
+      ADD_AI_INSIGHTS_ACTION_ID,
+      expect.any(Function)
+    );
+    expect(registerActionAsync).not.toHaveBeenCalledWith(
+      OPEN_DASHBOARD_CHAT_ACTION_ID,
+      expect.any(Function)
+    );
   });
 });
