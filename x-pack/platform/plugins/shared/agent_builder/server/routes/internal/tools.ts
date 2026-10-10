@@ -514,9 +514,18 @@ export function registerInternalToolsRoutes({
       const compatibleTypeIds = new Set(compatibleTypes.map((t) => t.id));
       const { type } = request.query;
 
-      const filteredConnectors = allConnectors
-        .filter((connector) => compatibleTypeIds.has(connector.actionTypeId))
-        .filter((connector) => (type ? connector.actionTypeId === type : true));
+      // MCP v1 isn't Agent Builder-compatible (it can't be used as a generic tool), but
+      // the MCP server management UI still needs to list its own connectors by exact
+      // type; any other explicit type request must still be AB-compatible.
+      const filteredConnectors = allConnectors.filter((connector) => {
+        if (type !== undefined) {
+          return (
+            connector.actionTypeId === type &&
+            (type === MCP_CONNECTOR_ID || compatibleTypeIds.has(type))
+          );
+        }
+        return compatibleTypeIds.has(connector.actionTypeId);
+      });
 
       // Check OAuth authorization status for per-user connectors.
       // Batch query user_connector_token saved objects to determine which
