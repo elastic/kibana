@@ -92,6 +92,22 @@ describe('detection coverage near-miss evals', () => {
     );
   });
 
+  it('accepts an accurate short contrast that names both rules in one clause', async () => {
+    await runVerdictTest(
+      nearMissNames[0],
+      `covered_enabled: ${COVERAGE_RULE_NAMES.officeCmd} covers this, unlike ${COVERAGE_RULE_NAMES.powershell}.`
+    );
+  });
+
+  it('rejects the inverse short contrast that credits the PowerShell sibling', async () => {
+    await expect(
+      runVerdictTest(
+        nearMissNames[0],
+        `covered_enabled: ${COVERAGE_RULE_NAMES.powershell} covers this, unlike ${COVERAGE_RULE_NAMES.officeCmd}.`
+      )
+    ).rejects.toThrow();
+  });
+
   it('rejects an answer that credits the PowerShell sibling while naming the Office rule', async () => {
     await expect(
       runVerdictTest(

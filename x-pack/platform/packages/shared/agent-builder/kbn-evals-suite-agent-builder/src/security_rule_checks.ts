@@ -84,6 +84,52 @@ const statementsOf = (answer: string): Statement[] => {
 const statementAt = (statements: Statement[], index: number): number =>
   statements.findIndex((statement) => statement.start <= index && index < statement.end);
 
+interface Span {
+  at: number;
+  end: number;
+}
+
+/**
+ * Which rule mentions in one statement a negation cue denies.
+ *
+ * A cue is about a name it sits right beside: inside the same statement and within
+ * `NEGATION_WINDOW` of it ("unlike X", "X does not cover this"). When two rules are named in one
+ * statement, the text between them is shared, so a cue in it lies within both windows. It
+ * belongs to the nearer name only, with ties going to the later name, which is how a preposition
+ * ("unlike X", "without X") reads. Without ownership one cue denies both names: "<a> covers
+ * this, unlike <b>" would deny `<a>` along with `<b>` and leave the verdict with no rule at all.
+ */
+const deniedMentions = (haystack: string, mentions: Span[], statement: Statement): boolean[] => {
+  const denied = mentions.map(() => false);
+  const cues = new RegExp(NEGATION_CUE, 'g');
+  const text = haystack.slice(statement.start, statement.end);
+  for (let match = cues.exec(text); match; match = cues.exec(text)) {
+    const cueStart = statement.start + match.index;
+    const cueEnd = cueStart + match[0].length;
+    let owner = -1;
+    let ownerGap = Infinity;
+    mentions.forEach((mention, index) => {
+      let gap: number;
+      if (cueEnd <= mention.at) {
+        if (mention.at - cueStart > NEGATION_WINDOW) return;
+        gap = mention.at - cueEnd;
+      } else if (cueStart >= mention.end) {
+        if (cueEnd - mention.end > NEGATION_WINDOW) return;
+        gap = cueStart - mention.end;
+      } else {
+        return; // the cue is part of the rule's own name
+      }
+      // Mentions are in reading order, so `<=` hands a tie to the later name.
+      if (gap <= ownerGap) {
+        owner = index;
+        ownerGap = gap;
+      }
+    });
+    if (owner !== -1) denied[owner] = true;
+  }
+  return denied;
+};
+
 /**
  * The rule a verdict leans on.
  *
@@ -127,24 +173,25 @@ export const ruleJustifyingVerdict = (
     })
     .sort((a, b) => a.at - b.at);
 
-  const scored = mentions.map((mention) => {
-    const statementIndex = statementAt(statements, mention.at);
+  const statementIndexes = mentions.map((mention) => statementAt(statements, mention.at));
+  const denied = new Map<(typeof mentions)[number], boolean>();
+  new Set(statementIndexes).forEach((statementIndex) => {
+    const inStatement = mentions.filter((_, index) => statementIndexes[index] === statementIndex);
+    deniedMentions(haystack, inStatement, statements[statementIndex]).forEach((isDenied, index) =>
+      denied.set(inStatement[index], isDenied)
+    );
+  });
+
+  const scored = mentions.map((mention, index) => {
+    const statementIndex = statementIndexes[index];
     const statement = statements[statementIndex];
     // Credit language may introduce the rule ("the covering rule is X") or follow it
-    // ("X covers this"), and both live in the rule's own clause. A denial is narrower: only
-    // text right beside the name is about that name ("unlike X", "X does not cover this").
-    const denialBefore = haystack.slice(
-      Math.max(statement.start, mention.at - NEGATION_WINDOW),
-      mention.at
-    );
-    const denialAfter = haystack.slice(
-      mention.end,
-      Math.min(mention.end + NEGATION_WINDOW, statement.end)
-    );
+    // ("X covers this"), and both live in the rule's own clause. A denial is narrower: only a
+    // cue right beside the name, and nearer to it than to any other rule, is about that name.
     return {
       ...mention,
       statementIndex,
-      denied: NEGATION_CUE.test(denialBefore) || NEGATION_CUE.test(denialAfter),
+      denied: denied.get(mention) ?? false,
       credited: COVERAGE_CREDIT.test(haystack.slice(statement.start, statement.end)),
     };
   });

@@ -108,6 +108,41 @@ describe('ruleJustifyingVerdict', () => {
     ).toBe(OFFICE_CMD);
   });
 
+  it('scopes a short contrast to the rule it modifies, not both adjacent names', () => {
+    // "unlike" sits within NEGATION_WINDOW of both names; it denies only the one it introduces.
+    expect(
+      ruleJustifyingVerdict(
+        `covered_enabled: ${OFFICE_CMD} covers this, unlike ${POWERSHELL}.`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBe(OFFICE_CMD);
+    expect(
+      ruleJustifyingVerdict(
+        `covered_enabled: unlike ${POWERSHELL}, ${OFFICE_CMD} covers this.`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBe(OFFICE_CMD);
+  });
+
+  it('still credits the sibling when a short contrast denies the expected rule', () => {
+    expect(
+      ruleJustifyingVerdict(
+        `covered_enabled: ${POWERSHELL} covers this, unlike ${OFFICE_CMD}.`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBe(POWERSHELL);
+    expect(
+      ruleJustifyingVerdict(
+        `covered_enabled: ${POWERSHELL} covers this, ${OFFICE_CMD} does not.`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBe(POWERSHELL);
+  });
+
   it('reads the credit from the neighbouring line when the verdict stands alone', () => {
     expect(
       ruleJustifyingVerdict(
