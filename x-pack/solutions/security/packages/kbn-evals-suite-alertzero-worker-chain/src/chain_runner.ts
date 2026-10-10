@@ -23,12 +23,14 @@ import type {
 import {
   ACTION_IDS,
   DEFAULT_POLL_INTERVAL_MS,
+  GENERATION_FAILED_HOP_STATUS,
   HOP_TIMEOUTS_MS,
   PARKED_HOP_STATUS,
   PROPOSALS_API_VERSION,
   PROPOSALS_URL,
   PUBLIC_API_VERSION,
   WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN,
+  WORKER_CHAIN_MAX_TRIAGE_RUNS_PER_CHAIN,
   WORKER_IDS,
   WORKFLOW_IDS,
 } from './constants';
@@ -76,6 +78,37 @@ const fetchSeededAlerts = async (
         : []
     ),
   };
+};
+
+interface SeededAlert {
+  _id: string;
+  _index: string;
+  _source: Record<string, unknown>;
+}
+
+const asNonEmptyString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0 ? value : undefined;
+
+/**
+ * Splits alerts into one group per `kibana.alert.rule.uuid`, in first-seen order. An alert
+ * without a rule uuid joins the scenario's own rule. Alert Analysis refuses a caller batch
+ * that spans rules, and the product's rule trigger never produces one.
+ */
+export const groupAlertsByRule = (
+  alerts: SeededAlert[],
+  fallbackRule: { id: string; name: string }
+): Array<{ rule: { id: string; name: string }; alerts: SeededAlert[] }> => {
+  const groups = new Map<string, { rule: { id: string; name: string }; alerts: SeededAlert[] }>();
+  for (const alert of alerts) {
+    const id = asNonEmptyString(alert._source['kibana.alert.rule.uuid']) ?? fallbackRule.id;
+    const name =
+      asNonEmptyString(alert._source['kibana.alert.rule.name']) ??
+      (id === fallbackRule.id ? fallbackRule.name : id);
+    const group = groups.get(id) ?? { rule: { id, name }, alerts: [] };
+    group.alerts.push(alert);
+    groups.set(id, group);
+  }
+  return [...groups.values()];
 };
 
 const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatuses.includes(status);
@@ -408,13 +441,19 @@ const REVIEW_DISPATCH_STEP_ID = 'run_review';
 const collectReviewExecutionIds = async (
   ctx: KbnRequestContext,
   floorExecutionId: string
-): Promise<Array<{ reviewId: string; runnerExecutionId: string }>> => {
+): Promise<{
+  reviews: Array<{ reviewId: string; runnerExecutionId: string }>;
+  generationFailures: string[];
+}> => {
   const children = await listChildExecutions(ctx, floorExecutionId);
   const reviews: Array<{ reviewId: string; runnerExecutionId: string }> = [];
+  const generationFailures: string[] = [];
   for (const runner of children.filter(
     (child) => child.workflowId === WORKFLOW_IDS.attackDiscoveryRunner
   )) {
     const runnerExecution = await readExecution(ctx, runner.executionId).catch(() => undefined);
+    const generationFailure = readGenerationFailure(runnerExecution);
+    if (generationFailure !== undefined) generationFailures.push(generationFailure);
     for (const step of runnerExecution?.stepExecutions ?? []) {
       const reviewId = (step.output as { executionId?: unknown } | undefined)?.executionId;
       const isDispatch =
@@ -426,7 +465,32 @@ const collectReviewExecutionIds = async (
       }
     }
   }
-  return reviews;
+  return { reviews, generationFailures };
+};
+
+/** The runner step that runs batched generation (attack_discovery_runner.yaml). */
+const GENERATION_STEP_ID = 'run_generation';
+
+/**
+ * The runner ends `completed` even when every generation batch failed (the batched child
+ * reports it only as `batches_failed` / `batch_errors` on its output, e.g. "Attack
+ * Discovery workflows are not enabled for this space"). Without this read such a run
+ * scores as a clean chain with zero discoveries and zero reviews.
+ */
+const readGenerationFailure = (execution: WorkflowExecutionDto | undefined): string | undefined => {
+  const output = stepOutput(execution, GENERATION_STEP_ID) as
+    | { batches_failed?: unknown; batch_errors?: unknown }
+    | undefined;
+  if (output === undefined || output === null) return undefined;
+  const failed = Number(output.batches_failed);
+  const errors = Array.isArray(output.batch_errors) ? output.batch_errors : [];
+  if (!(failed > 0) && errors.length === 0) return undefined;
+  const messages = errors
+    .map((error) => (error as { message?: unknown } | undefined)?.message)
+    .filter((message): message is string => typeof message === 'string');
+  return `${failed > 0 ? failed : errors.length} generation batch(es) failed${
+    messages.length > 0 ? `: ${messages.join('; ')}` : ''
+  }`;
 };
 
 /**
@@ -628,67 +692,91 @@ const runChainUnserialized = async ({
           'The triage workflow requires full alert documents (F1); the seed must index them first.'
       );
     }
-    const inputs =
-      triageTrigger === 'manual-event'
-        ? {
-            // The manual trigger declares no inputs, but the engine accepts an
-            // event payload shaped like the alert trigger's (verified in
-            // workflows_management_api.test.ts:2330). N3 records which path ran.
-            // F1: alertIds ({_id,_index}), not expanded docs — the run route's
-            // preprocessing expands them the way the product's own trigger
-            // would, through the rule type's formatAlert + expandFlattenedAlert.
-            event: {
-              triggerType: 'alert',
-              rule: { id: scenario.rule.id, name: scenario.rule.name },
-              alertIds: seededAlerts.fetched.map(({ _id, _index }) => ({ _id, _index })),
-            },
-          }
-        : { alertIds: seededAlerts.fetched.map(({ _id }) => _id) };
-    const executionId = await runWorkflow(ctx, triageWorkflowId, inputs);
-    log.info(`floor_alert_triage started: execution ${executionId}`);
-    const { status, overrun } = await waitForTerminal(
-      ctx,
-      log,
-      executionId,
-      'floor_alert_triage',
-      timeouts.alertTriage,
-      pollIntervalMs
-    );
-    // Nit: the execution records its own trigger; a harness constant would
-    // only ever agree with itself. Fallback only when the field is unreadable.
-    const triageExecution = await readExecution(ctx, executionId).catch(() => undefined);
-    const concurrencyCancel = concurrencyCancellation(triageExecution);
-    if (concurrencyCancel !== undefined) {
-      markInterference(
-        `floor_alert_triage cancelled by the product's concurrency limit: ${concurrencyCancel}`
+    // The workflow anchors all enrichment on the first alert's rule and rejects a caller
+    // batch spanning rules (alert_analysis_workflow.yaml reject_multi_rule_caller_alerts).
+    // The product's detection-rule trigger fires once per rule execution, so every run
+    // carries one rule's alerts: group the same way and fire one triage run per rule.
+    const ruleGroups = groupAlertsByRule(seededAlerts.fetched, scenario.rule);
+    if (ruleGroups.length > WORKER_CHAIN_MAX_TRIAGE_RUNS_PER_CHAIN) {
+      throw new Error(
+        `Scenario "${scenario.key}": alerts span ${ruleGroups.length} rules; the per-chain ` +
+          `timeout bound covers ${WORKER_CHAIN_MAX_TRIAGE_RUNS_PER_CHAIN} triage runs ` +
+          '(WORKER_CHAIN_MAX_TRIAGE_RUNS_PER_CHAIN).'
       );
     }
-    log.info(
-      `floor_alert_triage finished: execution ${executionId} status ${overrun ? 'timeout' : status}`
-    );
-    const triggeredBy =
-      asTriageTrigger(triageExecution?.triggeredBy) ??
-      (triageTrigger === 'manual-event' ? 'manual' : 'alert');
-    record(
-      'floor_alert_triage',
-      triageWorkflowId,
-      executionId,
-      overrun ? 'timeout' : status,
-      triggeredBy,
-      triageAutonomy
-    );
-    if (overrun) markInterference('floor_alert_triage overran its per-hop timeout');
+    for (const group of ruleGroups) {
+      const inputs =
+        triageTrigger === 'manual-event'
+          ? {
+              // The manual trigger declares no inputs, but the engine accepts an
+              // event payload shaped like the alert trigger's (verified in
+              // workflows_management_api.test.ts:2330). N3 records which path ran.
+              // F1: alertIds ({_id,_index}), not expanded docs — the run route's
+              // preprocessing expands them the way the product's own trigger
+              // would, through the rule type's formatAlert + expandFlattenedAlert.
+              event: {
+                triggerType: 'alert',
+                rule: { id: group.rule.id, name: group.rule.name },
+                alertIds: group.alerts.map(({ _id, _index }) => ({ _id, _index })),
+              },
+            }
+          : { alertIds: group.alerts.map(({ _id }) => _id) };
+      const executionId = await runWorkflow(ctx, triageWorkflowId, inputs);
+      log.info(
+        `floor_alert_triage started: execution ${executionId} (rule ${group.rule.id}, ${group.alerts.length} alert(s))`
+      );
+      const { status, overrun } = await waitForTerminal(
+        ctx,
+        log,
+        executionId,
+        'floor_alert_triage',
+        timeouts.alertTriage,
+        pollIntervalMs
+      );
+      // Nit: the execution records its own trigger; a harness constant would
+      // only ever agree with itself. Fallback only when the field is unreadable.
+      const triageExecution = await readExecution(ctx, executionId).catch(() => undefined);
+      const concurrencyCancel = concurrencyCancellation(triageExecution);
+      if (concurrencyCancel !== undefined) {
+        markInterference(
+          `floor_alert_triage cancelled by the product's concurrency limit: ${concurrencyCancel}`
+        );
+      }
+      log.info(
+        `floor_alert_triage finished: execution ${executionId} status ${
+          overrun ? 'timeout' : status
+        }`
+      );
+      const triggeredBy =
+        asTriageTrigger(triageExecution?.triggeredBy) ??
+        (triageTrigger === 'manual-event' ? 'manual' : 'alert');
+      record(
+        'floor_alert_triage',
+        triageWorkflowId,
+        executionId,
+        overrun ? 'timeout' : status,
+        triggeredBy,
+        triageAutonomy
+      );
+      if (overrun) markInterference('floor_alert_triage overran its per-hop timeout');
 
-    // B7/R3: the Investigation id is the create_investigation step's output —
-    // the triage workflow declares no top-level outputs carrying it. The DTO
-    // field is `stepExecutions` (WorkflowExecutionDto), not `steps`.
-    const stepExecutions = triageExecution?.stepExecutions ?? [];
-    const createdConversationId = (
-      stepExecutions.find((s) => s.stepId === 'create_investigation')?.output as
-        | { conversation_id?: unknown }
-        | undefined
-    )?.conversation_id;
-    if (typeof createdConversationId === 'string') investigationId = createdConversationId;
+      // B7/R3: the Investigation id is the create_investigation step's output —
+      // the triage workflow declares no top-level outputs carrying it. The DTO
+      // field is `stepExecutions` (WorkflowExecutionDto), not `steps`.
+      const stepExecutions = triageExecution?.stepExecutions ?? [];
+      const createdConversationId = (
+        stepExecutions.find((s) => s.stepId === 'create_investigation')?.output as
+          | { conversation_id?: unknown }
+          | undefined
+      )?.conversation_id;
+      if (typeof createdConversationId === 'string') {
+        // The first run's Investigation is the primary one; later runs' are read and
+        // graded like the AD reviews' (own Investigation, own proposals).
+        if (investigationId === undefined) investigationId = createdConversationId;
+        else
+          reviewInvestigations.push({ id: createdConversationId, runnerExecutionId: executionId });
+      }
+    }
   }
 
   if (scenario.workerChain.includes('attack-discovery')) {
@@ -731,11 +819,28 @@ const runChainUnserialized = async ({
       }`
     );
     const triggeredBy = asTriageTrigger(adExecution?.triggeredBy) ?? 'manual';
+    // Read the runner before recording the hop: a runner that ended `completed` after its
+    // generation batches failed must not grade as a clean hop.
+    const { reviews: dispatchedReviews, generationFailures } = await collectReviewExecutionIds(
+      ctx,
+      executionId
+    );
+    const adHopStatus =
+      !overrun && status === ExecutionStatus.COMPLETED && generationFailures.length > 0
+        ? GENERATION_FAILED_HOP_STATUS
+        : overrun
+        ? 'timeout'
+        : status;
+    if (adHopStatus === GENERATION_FAILED_HOP_STATUS) {
+      log.warning(
+        `floor_attack_discovery completed but generation failed: ${generationFailures.join(' | ')}`
+      );
+    }
     record(
       'floor_attack_discovery',
       adWorkflowId,
       executionId,
-      overrun ? 'timeout' : status,
+      adHopStatus,
       triggeredBy,
       adAutonomy
     );
@@ -745,7 +850,6 @@ const runChainUnserialized = async ({
     // product — never scenario.goldVerdict. The reviews are async grandchildren
     // (floor → runner → executeAsync review): walk to them, wait each to
     // terminal, then read its verdict and the Investigation it raised proposals on.
-    const dispatchedReviews = await collectReviewExecutionIds(ctx, executionId);
     log.info(
       `attack_discovery reviews: ${dispatchedReviews.map((r) => r.reviewId).join(', ') || 'none'}`
     );

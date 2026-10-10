@@ -35,6 +35,7 @@ import {
   WORKER_CHAIN_EXPERIMENT_CONCURRENCY,
   WORKER_CHAIN_MAX_CHAIN_MS,
   WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN,
+  WORKER_CHAIN_MAX_TRIAGE_RUNS_PER_CHAIN,
   WORKER_IDS,
   WORKFLOW_IDS,
 } from './constants';
@@ -106,11 +107,12 @@ describe('B2: serial experiment isolation', () => {
   it('the per-chain bound covers N reviews and one proposal wait per source', () => {
     const n = WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN;
     expect(n).toBeGreaterThan(1);
+    const m = WORKER_CHAIN_MAX_TRIAGE_RUNS_PER_CHAIN;
     expect(WORKER_CHAIN_MAX_CHAIN_MS).toBe(
-      HOP_TIMEOUTS_MS.alertTriage +
+      m * HOP_TIMEOUTS_MS.alertTriage +
         HOP_TIMEOUTS_MS.attackDiscoveryRunner +
         n * HOP_TIMEOUTS_MS.attackDiscoveryReview +
-        (n + 1) * HOP_TIMEOUTS_MS.perActionProposal
+        (n + m) * HOP_TIMEOUTS_MS.perActionProposal
     );
   });
 });

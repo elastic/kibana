@@ -103,6 +103,13 @@ export const HOP_TIMEOUTS_MS = {
 export const PARKED_HOP_STATUS = 'parked';
 
 /**
+ * Hop status for an AD run whose workflow ended `completed` while every generation batch
+ * failed (the batched child reports that only as `batches_failed` / `batch_errors`).
+ * Not a reached outcome: ChainTerminal scores it 0.
+ */
+export const GENERATION_FAILED_HOP_STATUS = 'generation_failed';
+
+/**
  * Experiment concurrency for the worker-chain spec. The AD worker scans the
  * whole space, so one example's AD hop and reviews would pick up another
  * example's seeded alerts; seeding and cleanup therefore cannot overlap
@@ -152,16 +159,25 @@ export const WORKER_CHAIN_SUBSETS: Readonly<Record<string, readonly string[]>> =
 export const WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN = 3;
 
 /**
- * Upper bound of one serial chain at the per-hop caps: triage + AD runner +
- * N reviews + one proposal wait per proposal source (N reviews + the triage
- * Investigation), N = WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN. The Playwright
- * timeout is selected examples x EVAL_REPETITIONS x this bound.
+ * Alert Analysis accepts one rule's alerts per run, so the triage hop fires once per
+ * rule in the seeded alerts (as the product's rule trigger does). The authored FP/TP
+ * worlds seed one rule per alert stage, so the bound is the stage count.
+ */
+export const WORKER_CHAIN_MAX_TRIAGE_RUNS_PER_CHAIN = 4;
+
+/**
+ * Upper bound of one serial chain at the per-hop caps: M triage runs + AD runner +
+ * N reviews + one proposal wait per proposal source (N reviews + M triage
+ * Investigations), M = WORKER_CHAIN_MAX_TRIAGE_RUNS_PER_CHAIN, N =
+ * WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN. The Playwright timeout is selected examples x
+ * EVAL_REPETITIONS x this bound.
  */
 export const WORKER_CHAIN_MAX_CHAIN_MS =
-  HOP_TIMEOUTS_MS.alertTriage +
+  WORKER_CHAIN_MAX_TRIAGE_RUNS_PER_CHAIN * HOP_TIMEOUTS_MS.alertTriage +
   HOP_TIMEOUTS_MS.attackDiscoveryRunner +
   WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN * HOP_TIMEOUTS_MS.attackDiscoveryReview +
-  (WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN + 1) * HOP_TIMEOUTS_MS.perActionProposal;
+  (WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN + WORKER_CHAIN_MAX_TRIAGE_RUNS_PER_CHAIN) *
+    HOP_TIMEOUTS_MS.perActionProposal;
 
 /**
  * Contract marker carried by every ExecutionIdArray result. The per-attack
