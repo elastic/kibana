@@ -29,6 +29,8 @@ const REQUIRED_SERVER_ARGS = [
   '--xpack.inbox.enabled=true',
   '--uiSettings.overrides.workflows:ui:enabled=true',
   '--uiSettings.overrides.workflows:aiAgent:enabled=true',
+  // The suite calls /internal/alertzero/workers, which 404s while this per-space setting is off.
+  '--uiSettings.overrides.securitySolution:enableAlertZero=true',
 ];
 
 describe('evals_detection_watch_rule_tuning Scout config set', () => {

@@ -22,6 +22,11 @@ import { servers as ruleCreationConfig } from '../../evals_detection_watch_rule_
  * refuses to start a plugin whose required plugins are disabled), the managed tuning workflows
  * are never installed, and every test 404s on `Workflow not found`.
  *
+ * `securitySolution:enableAlertZero` is overridden on too: unlike rule-creation, this suite calls
+ * `/internal/alertzero/workers` (list + PATCH, to bind the service account), and every alertzero
+ * route is wrapped in `withAlertZeroEnabled`, which 404s while that per-space setting is off
+ * (its default). The override covers every space, including per-space worker cells.
+ *
  * `investigateRuleSkill` gates registration of the `investigate-rule` Agent Builder skill (default
  * off). The review workflow's diagnose step is told to call `investigate-rule.get_alerts_by_ids`,
  * so without the flag the tool does not exist, the model can never call it, and Tool Routing reads
@@ -29,6 +34,7 @@ import { servers as ruleCreationConfig } from '../../evals_detection_watch_rule_
  */
 const ENABLE_EXPERIMENTAL_PREFIX = '--xpack.securitySolution.enableExperimental=';
 const REQUIRED_EXPERIMENTAL_FEATURES = ['investigateRuleSkill'];
+const ENABLE_ALERTZERO_ARG = '--uiSettings.overrides.securitySolution:enableAlertZero=true';
 
 const inheritedArgs = ruleCreationConfig.kbnTestServer.serverArgs;
 const inheritedExperimental = inheritedArgs
@@ -47,6 +53,7 @@ export const servers: ScoutServerConfig = {
           arg !== '--xpack.agenticInvestigations.enabled=true'
       ),
       '--xpack.agenticInvestigations.enabled=true',
+      ENABLE_ALERTZERO_ARG,
       `${ENABLE_EXPERIMENTAL_PREFIX}${JSON.stringify([
         ...new Set([...inheritedExperimental, ...REQUIRED_EXPERIMENTAL_FEATURES]),
       ])}`,
