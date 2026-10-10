@@ -39,7 +39,7 @@ const OVERLAY_VIEWPORT = { width: 800, height: 1200 };
  * fails loudly on the violation rather than silently losing coverage.
  */
 const FIELDS_GRID_SCROLL_CONTAINER =
-  '[data-test-subj="UnifiedDocViewerTableGrid"] .euiDataGrid__virtualized';
+  '[data-test-subj="UnifiedDocViewerTableGrid"] .euiDataGrid__virtualized, [data-test-subj="UnifiedDocViewerTableGrid"][role="grid"]';
 
 const FLYOUT_TEST_SUBJ = '[data-test-subj="docViewerFlyout"]';
 

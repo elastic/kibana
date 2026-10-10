@@ -131,8 +131,9 @@ export class ContextPage {
   }
 
   async getAnchorRowData(): Promise<string[]> {
+    // Cell test attributes shared by EuiDataGrid and Discover's TanStack grid, excluding control columns.
     const anchorCellSelector =
-      '.euiDataGridRowCell.unifiedDataTable__cell--highlight:not(.euiDataGridRowCell--controlColumn)';
+      '[data-test-subj="dataGridRowCell"].unifiedDataTable__cell--highlight:not(.euiDataGridRowCell--controlColumn):not([data-gridcell-column-id="select"]):not([data-gridcell-column-id="actions"])';
     await this.page
       .locator(`${anchorCellSelector} >> nth=0`)
       .waitFor({ state: 'visible', timeout: CONTEXT_LOAD_TIMEOUT });

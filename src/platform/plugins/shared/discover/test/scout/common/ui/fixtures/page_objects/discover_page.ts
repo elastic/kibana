@@ -424,7 +424,7 @@ export class DiscoverPage extends DiscoverApp {
   }
 
   getSearchTermHighlights(): Locator {
-    return this.page.testSubj.locator('docTable').locator('mark');
+    return this.page.testSubj.locator('discoverDocTable').locator('mark');
   }
 
   async getDocTableField(index: number): Promise<string> {
@@ -438,8 +438,9 @@ export class DiscoverPage extends DiscoverApp {
 
   getDocHeaderLabels(): Locator {
     const headerCell = euiSelectors.dataGrid.HEADER_CELL_SELECTOR;
+    // EuiDataGrid header content, or the column title of Discover's TanStack grid.
     return this.page.locator(
-      `${headerCell}:not(${headerCell}--controlColumn) ${headerCell}__content`
+      `${headerCell}:not(${headerCell}--controlColumn) ${headerCell}__content, [data-test-subj="dataGridHeaderCellTitle"]`
     );
   }
 
@@ -454,9 +455,10 @@ export class DiscoverPage extends DiscoverApp {
    * When `isAnchorRow` is true, only the highlighted anchor row (context view) is returned.
    */
   async getDataGridRows(options?: { isAnchorRow?: boolean }): Promise<string[][]> {
+    // Cell test attributes shared by EuiDataGrid and Discover's TanStack grid.
     const cellSelector = options?.isAnchorRow
-      ? '.euiDataGridRowCell.unifiedDataTable__cell--highlight'
-      : '.euiDataGridRowCell';
+      ? '[data-test-subj="dataGridRowCell"].unifiedDataTable__cell--highlight'
+      : '[data-test-subj="dataGridRowCell"]';
 
     await this.page.locator(`${cellSelector} >> nth=0`).waitFor({
       state: 'visible',
@@ -476,7 +478,10 @@ export class DiscoverPage extends DiscoverApp {
           rows[rowIdx] = [];
           prevVisibleRowIndex = visibleRowIndex;
         }
-        if (!cell.classList.contains('euiDataGridRowCell--controlColumn')) {
+        const isControlColumn =
+          cell.classList.contains('euiDataGridRowCell--controlColumn') ||
+          ['select', 'actions'].includes(cell.getAttribute('data-gridcell-column-id') ?? '');
+        if (!isControlColumn) {
           const content =
             cell.querySelector<HTMLElement>('.euiDataGridRowCell__content') ??
             (cell as HTMLElement);
@@ -536,7 +541,10 @@ export class DiscoverPage extends DiscoverApp {
     const docTable = this.page.testSubj.locator('discoverDocTable');
     await expect(docTable).toBeVisible();
 
-    const grid = docTable.locator('.euiDataGrid__virtualized');
+    // EuiDataGrid's scroll container, or the TanStack grid body (which scrolls itself).
+    const grid = docTable.locator(
+      '.euiDataGrid__virtualized, [data-test-subj="euiDataGridBody"]:not(.euiDataGrid__content)'
+    );
     await grid.evaluate((el) => el.scrollTo(0, 0));
 
     for (let i = 0; i < MAX_SCROLL_STEPS; i++) {

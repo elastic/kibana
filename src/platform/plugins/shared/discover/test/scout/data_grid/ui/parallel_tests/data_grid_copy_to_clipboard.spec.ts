@@ -26,12 +26,12 @@ type DataGridPage = PageObjects['dataGrid'];
 
 const clickCopyColumnName = async (page: ScoutPage, dataGrid: DataGridPage, field: string) => {
   await dataGrid.openColumnMenuByField(field);
-  await page.getByRole('button', { name: 'Copy name' }).click();
+  await page.testSubj.click('gridCopyColumnNameToClipBoardButton');
 };
 
 const clickCopyColumnValues = async (page: ScoutPage, dataGrid: DataGridPage, field: string) => {
   await dataGrid.openColumnMenuByField(field);
-  await page.getByRole('button', { name: 'Copy column' }).click();
+  await page.testSubj.click('gridCopyColumnValuesToClipBoardButton');
 };
 
 const expectSingleToastThenDismiss = async (page: ScoutPage) => {

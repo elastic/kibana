@@ -35,6 +35,26 @@ interface SelectOptions {
   renderMoreRows?: boolean;
 }
 
+// Selectors shared by EuiDataGrid and Discover's TanStack grid. EUI class selectors are kept in the
+// unions so the service keeps working for plain EuiDataGrid instances outside of Discover.
+const DOC_TABLE_TEST_SUBJ = 'discoverDocTable';
+const ROW_SELECTOR = '[data-grid-row-index]';
+const ROW_CELL_SELECTOR = '[data-test-subj="dataGridRowCell"]';
+const HEADER_CELL_SELECTOR = '[data-test-subj="dataGridHeader"] [role="columnheader"]';
+const HEADER_CELL_CONTENT_SELECTOR =
+  '.euiDataGridHeaderCell__content, [data-test-subj="dataGridHeaderCellTitle"]';
+const CONTROL_COLUMN_IDS = ['select', 'actions'];
+const CONTROL_HEADER_CELL_SELECTOR = [
+  '.euiDataGridHeaderCell--controlColumn',
+  ...CONTROL_COLUMN_IDS.map((id) => `${HEADER_CELL_SELECTOR}[data-gridcell-column-id="${id}"]`),
+].join(', ');
+const DATA_HEADER_CELL_FILTER = [
+  ':not(.euiDataGridHeaderCell--controlColumn)',
+  ...CONTROL_COLUMN_IDS.map((id) => `:not([data-gridcell-column-id="${id}"])`),
+].join('');
+const SCROLL_CONTAINER_SELECTOR =
+  '.euiDataGrid__virtualized, [data-test-subj="euiDataGridBody"]:not(.euiDataGrid__content)';
+
 export class DataGridService extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -68,7 +88,7 @@ export class DataGridService extends FtrService {
     cellDataTestSubj: string
   ): Promise<string[][]> {
     const $ = await element.parseDomContent();
-    const columnNumber = $('.euiDataGridHeaderCell').length;
+    const columnNumber = $('[role="columnheader"]').length;
     const cells = $.findTestSubjects('dataGridRowCell')
       .toArray()
       .map((cell) =>
@@ -87,10 +107,10 @@ export class DataGridService extends FtrService {
    */
   public getHeaderText(parsedDomContent: CustomCheerioStatic) {
     const $ = parsedDomContent;
-    return $('.euiDataGridHeaderCell')
+    return $('[role="columnheader"]')
       .toArray()
       .map((cell) => {
-        const content = $(cell).find('.euiDataGridHeaderCell__content');
+        const content = $(cell).find(HEADER_CELL_CONTENT_SELECTOR);
         if (content.length) {
           return content.text();
         } else {
@@ -149,6 +169,10 @@ export class DataGridService extends FtrService {
     return { originalWidth, newWidth: (await header.getSize()).width };
   }
 
+  private async isEuiDataGridCell(cell: WebElementWrapper) {
+    return await cell.elementHasClass('euiDataGridRowCell');
+  }
+
   private getCellElementSelector(rowIndex: number = 0, columnIndex: number = 0) {
     return `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${columnIndex}"][data-gridcell-visible-row-index="${rowIndex}"]`;
   }
@@ -163,8 +187,7 @@ export class DataGridService extends FtrService {
   }
 
   public async getControlColumnsCount() {
-    const controlsHeaderSelector = '.euiDataGridHeaderCell--controlColumn';
-    return (await this.find.allByCssSelector(controlsHeaderSelector)).length;
+    return (await this.find.allByCssSelector(CONTROL_HEADER_CELL_SELECTOR)).length;
   }
 
   public async getCellElementExcludingControlColumns(
@@ -199,7 +222,13 @@ export class DataGridService extends FtrService {
         : await this.getCellElement(rowIndex, columnIndex);
       await cell.moveMouseTo();
       await cell.click();
-      actionButton = await cell.findByTestSubject(selector);
+      // EuiDataGrid shows cell actions inside the hovered cell. Discover's TanStack grid opens the
+      // cell popover on click, which holds the same actions.
+      actionButton = (await this.isEuiDataGridCell(cell))
+        ? await cell.findByTestSubject(selector)
+        : await (
+            await this.testSubjects.find('euiDataGridExpansionPopover')
+          ).findByTestSubject(selector);
       if (!actionButton) {
         throw new Error(`Unable to find cell action button ${selector}`);
       }
@@ -217,6 +246,18 @@ export class DataGridService extends FtrService {
     rowIndex: number = 0,
     { columnIndex = 0, columnName }: { columnIndex?: number; columnName?: string }
   ) {
+    const cell = columnName
+      ? await this.getCellElementByColumnName(rowIndex, columnName)
+      : await this.getCellElement(rowIndex, columnIndex);
+    if (!(await this.isEuiDataGridCell(cell))) {
+      // Discover's TanStack grid opens the cell popover on click.
+      await cell.moveMouseTo();
+      await cell.click();
+      await this.retry.waitFor('popover to be opened', async () => {
+        return await this.testSubjects.exists('euiDataGridExpansionPopover');
+      });
+      return;
+    }
     const actionButton = await this.getCellActionButton(
       rowIndex,
       { columnIndex, columnName },
@@ -337,8 +378,8 @@ export class DataGridService extends FtrService {
 
   public async getFields(options?: SelectOptions) {
     const selector = options?.isAnchorRow
-      ? '.euiDataGridRowCell.unifiedDataTable__cell--highlight'
-      : '.euiDataGridRowCell';
+      ? `${ROW_CELL_SELECTOR}.unifiedDataTable__cell--highlight`
+      : ROW_CELL_SELECTOR;
     const cells = await this.find.allByCssSelector(selector);
 
     const rows: string[][] = [];
@@ -351,20 +392,23 @@ export class DataGridService extends FtrService {
         rows[rowIdx] = [];
         prevVisibleRowIndex = visibleRowIndex;
       }
-      if (!(await cell.elementHasClass('euiDataGridRowCell--controlColumn'))) {
+      const isControlColumn =
+        (await cell.elementHasClass('euiDataGridRowCell--controlColumn')) ||
+        CONTROL_COLUMN_IDS.includes((await cell.getAttribute('data-gridcell-column-id')) ?? '');
+      if (!isControlColumn) {
         rows[rowIdx].push(await cell.getVisibleText());
       }
     }
     return rows;
   }
 
-  public async getTable(selector: string = 'docTable') {
+  public async getTable(selector: string = DOC_TABLE_TEST_SUBJ) {
     return await this.testSubjects.find(selector);
   }
 
   public async getBodyRows(
     options?: SelectOptions,
-    selector: string = 'docTable'
+    selector: string = DOC_TABLE_TEST_SUBJ
   ): Promise<WebElementWrapper[][]> {
     return this.getDocTableRows(options, selector);
   }
@@ -375,8 +419,8 @@ export class DataGridService extends FtrService {
       await this.testSubjects.click('dataGridFullScreenButton');
     }
 
-    const table = await this.getTable('docTable');
-    const rows = await table.findAllByCssSelector('.euiDataGridRow');
+    const table = await this.getTable(DOC_TABLE_TEST_SUBJ);
+    const rows = await table.findAllByCssSelector(ROW_SELECTOR);
 
     const rowsText = [];
     for (const row of rows) {
@@ -393,7 +437,7 @@ export class DataGridService extends FtrService {
   /**
    * Returns an array of rows (which are array of cells)
    */
-  public async getDocTableRows(options?: SelectOptions, selector: string = 'docTable') {
+  public async getDocTableRows(options?: SelectOptions, selector: string = DOC_TABLE_TEST_SUBJ) {
     // open full screen mode
     if (options?.renderMoreRows) {
       await this.testSubjects.click('dataGridFullScreenButton');
@@ -406,14 +450,14 @@ export class DataGridService extends FtrService {
     }
 
     const cellSelector = options?.isAnchorRow
-      ? '.euiDataGridRowCell.unifiedDataTable__cell--highlight'
-      : '.euiDataGridRowCell';
+      ? `${ROW_CELL_SELECTOR}.unifiedDataTable__cell--highlight`
+      : ROW_CELL_SELECTOR;
     const cells = await table.findAllByCssSelector(cellSelector);
 
     const rows: WebElementWrapper[][] = [];
     let rowIdx = -1;
     for (const cell of cells) {
-      if (await cell.elementHasClass('euiDataGridRowCell--firstColumn')) {
+      if ((await cell.getAttribute('data-gridcell-column-index')) === '0') {
         rowIdx++;
         rows[rowIdx] = [];
       }
@@ -432,7 +476,7 @@ export class DataGridService extends FtrService {
    */
   public async getRow(
     options: SelectOptions,
-    selector: string = 'docTable'
+    selector: string = DOC_TABLE_TEST_SUBJ
   ): Promise<WebElementWrapper[]> {
     return (await this.getBodyRows(options, selector))[options.rowIndex || 0];
   }
@@ -452,9 +496,7 @@ export class DataGridService extends FtrService {
     await this.retry.try(async () => {
       toggle = await this.find.byCssSelector(
         `${
-          options.isAnchorRow
-            ? ''
-            : `.euiDataGridRow[data-grid-visible-row-index="${options.rowIndex || 0}"] `
+          options.isAnchorRow ? '' : `[data-grid-visible-row-index="${options.rowIndex || 0}"] `
         }[data-test-subj="${testSubj}"]`
       );
     });
@@ -526,7 +568,7 @@ export class DataGridService extends FtrService {
   }
 
   public async getHeaderFields(): Promise<string[]> {
-    const result = await this.find.allByCssSelector('.euiDataGridHeaderCell__content');
+    const result = await this.find.allByCssSelector(HEADER_CELL_CONTENT_SELECTOR);
 
     const textArr = [];
     for (const cell of result) {
@@ -537,7 +579,7 @@ export class DataGridService extends FtrService {
   }
 
   public async getControlColumnHeaderFields(): Promise<string[]> {
-    const result = await this.find.allByCssSelector('.euiDataGridHeaderCell--controlColumn');
+    const result = await this.find.allByCssSelector(CONTROL_HEADER_CELL_SELECTOR);
 
     const textArr = [];
     for (const cell of result) {
@@ -573,10 +615,12 @@ export class DataGridService extends FtrService {
       await this.openColMenuByField(field);
     } else {
       const columns = await this.find.allByCssSelector(
-        '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn)'
+        `${HEADER_CELL_SELECTOR}${DATA_HEADER_CELL_FILTER}`
       );
       await columns[0].moveMouseTo();
-      await this.find.clickByCssSelector('.euiDataGridHeaderCell__button');
+      await this.find.clickByCssSelector(
+        '.euiDataGridHeaderCell__button, [data-test-subj^="dataGridHeaderCellActionButton-"]'
+      );
     }
   }
 
@@ -612,12 +656,12 @@ export class DataGridService extends FtrService {
 
   public async clickCopyColumnValues(field: string) {
     await this.openColMenuByField(field);
-    await this.find.clickByButtonText('Copy column');
+    await this.testSubjects.click('gridCopyColumnValuesToClipBoardButton');
   }
 
   public async clickCopyColumnName(field: string) {
     await this.openColMenuByField(field);
-    await this.find.clickByButtonText('Copy name');
+    await this.testSubjects.click('gridCopyColumnNameToClipBoardButton');
   }
 
   public async clickEditField(field: string) {
@@ -798,7 +842,7 @@ export class DataGridService extends FtrService {
 
   public async selectRow(rowIndex: number, { pressShiftKey }: { pressShiftKey?: boolean } = {}) {
     const checkbox = await this.find.byCssSelector(
-      `.euiDataGridRow[data-grid-visible-row-index="${rowIndex}"] [data-gridcell-column-id="select"] .euiCheckbox__input`
+      `[data-grid-visible-row-index="${rowIndex}"] [data-gridcell-column-id="select"] .euiCheckbox__input`
     );
 
     if (pressShiftKey) {
@@ -822,7 +866,7 @@ export class DataGridService extends FtrService {
 
   public async getNumberOfSelectedRowsOnCurrentPage() {
     const selectedRows = await this.find.allByCssSelector(
-      '.euiDataGridRow [data-gridcell-column-id="select"] .euiCheckbox__input:checked'
+      `${ROW_SELECTOR} [data-gridcell-column-id="select"] .euiCheckbox__input:checked`
     );
     return selectedRows.length;
   }
@@ -1054,14 +1098,14 @@ export class DataGridService extends FtrService {
     let lastRowIndex = -1;
 
     while (true) {
-      const rows = await this.find.allByCssSelector('.euiDataGridRow');
+      const rows = await this.find.allByCssSelector(ROW_SELECTOR);
       const lastRow = rows[rows.length - 1];
       const currentLastRowIndex = parseInt(
         (await lastRow.getAttribute('data-grid-row-index')) as string,
         10
       );
 
-      const container = await this.find.byCssSelector('.euiDataGrid__virtualized');
+      const container = await this.find.byCssSelector(SCROLL_CONTAINER_SELECTOR);
 
       if (currentLastRowIndex === lastRowIndex) {
         break; // Exit if no further scrolling is possible
@@ -1082,7 +1126,7 @@ export class DataGridService extends FtrService {
   }
 
   public async getScrollPosition() {
-    const container = await this.find.byCssSelector('.euiDataGrid__virtualized');
+    const container = await this.find.byCssSelector(SCROLL_CONTAINER_SELECTOR);
     const scrollTop = await this.browser.execute(
       'return arguments[0].scrollTop',
       container._webElement

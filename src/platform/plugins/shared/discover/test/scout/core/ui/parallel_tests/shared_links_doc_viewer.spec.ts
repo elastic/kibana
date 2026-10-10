@@ -206,10 +206,12 @@ spaceTest.describe('Discover shared links - doc viewer', { tag: '@local-stateful
       const [firstRowId] = await discover.getCascadeLayoutVisibleRowIds();
       await discover.toggleCascadeLayoutRow(firstRowId);
 
-      // The cascade renders leaf rows through a custom grid body, so the flat-grid row locator
-      // does not apply; open the first leaf document's flyout from that body directly.
+      // The cascade renders leaf rows through a custom grid body (EuiDataGrid) or a TanStack grid,
+      // so the flat-grid row locator does not apply; open the first leaf document's flyout directly.
       await page
-        .locator('[data-test-subj="discoverCascadeCustomDataGridBody"] [data-index="0"]')
+        .locator(
+          '[data-test-subj="discoverCascadeCustomDataGridBody"] [data-index="0"], [data-test-subj="discoverDocTable"] [data-grid-row-index="0"]'
+        )
         .locator('[data-test-subj="docTableExpandToggleColumn"]')
         .click();
       await docViewer.waitForFlyoutOpen();

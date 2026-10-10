@@ -48,7 +48,10 @@ const firstRowTimestampCell = (page: ScoutPage) =>
   page.locator('[data-grid-visible-row-index="0"] [data-gridcell-column-id="@timestamp"]');
 
 const getColumnTitles = async (page: ScoutPage): Promise<string[]> => {
-  const titles = await page.locator('.euiDataGridHeaderCell__content').allInnerTexts();
+  const titles = await page
+    // EuiDataGrid header content, or the column title of Discover's TanStack grid.
+    .locator('.euiDataGridHeaderCell__content, [data-test-subj="dataGridHeaderCellTitle"]')
+    .allInnerTexts();
 
   return titles.map((title) => title.trim());
 };
