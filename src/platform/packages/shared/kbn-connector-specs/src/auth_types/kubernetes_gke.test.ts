@@ -43,6 +43,7 @@ const mockContext = {
   getCustomHostSettings: jest.fn(),
   logger: { debug: jest.fn(), warn: jest.fn() },
   sslSettings: {},
+  fetch: jest.fn(),
 } as unknown as AuthContext;
 
 describe('KubernetesGkeAuth', () => {
@@ -73,7 +74,8 @@ describe('KubernetesGkeAuth', () => {
     expect(mockGetGcpAccessToken).toHaveBeenCalledWith(
       'gke-sa@my-project.iam.gserviceaccount.com',
       expect.stringContaining('BEGIN PRIVATE KEY'),
-      'https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/userinfo.email'
+      'https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/userinfo.email',
+      mockContext.fetch
     );
   });
 
