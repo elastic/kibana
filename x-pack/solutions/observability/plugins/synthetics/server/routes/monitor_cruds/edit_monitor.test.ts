@@ -215,7 +215,7 @@ describe('editSyntheticsMonitorRoute', () => {
 
     const { routeContext } = getRouteContextMock();
     routeContext.request = {
-      params: { monitorId },
+      params: { id: monitorId },
       query: {},
       body: { [ConfigKey.KIBANA_SPACES]: ['space-a'] },
     } as any;
@@ -268,7 +268,7 @@ describe('editSyntheticsMonitorRoute', () => {
       );
 
       const { routeContext } = getRouteContextMock();
-      routeContext.request = { params: { monitorId }, query: {}, body } as any;
+      routeContext.request = { params: { id: monitorId }, query: {}, body } as any;
       routeContext.spaceId = 'default';
       routeContext.response = {
         badRequest: jest.fn((r) => r),

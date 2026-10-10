@@ -13,7 +13,7 @@ export interface IndexSizeEntry {
 export enum SYNTHETICS_API_URLS {
   // public apis
   SYNTHETICS_MONITORS = '/api/synthetics/monitors',
-  GET_SYNTHETICS_MONITOR = '/api/synthetics/monitors/{monitorId}',
+  GET_SYNTHETICS_MONITOR = '/api/synthetics/monitors/{id}',
   SYNTHETICS_MONITORS_BULK_CREATE = '/api/synthetics/monitors/_bulk_create',
   SYNTHETICS_MONITORS_BULK_UPDATE = '/api/synthetics/monitors/_bulk_update',
   PRIVATE_LOCATIONS = `/api/synthetics/private_locations`,
