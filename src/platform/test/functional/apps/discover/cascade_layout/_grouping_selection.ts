@@ -25,6 +25,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const retry = getService('retry');
 
+  const getNewTabQuery = async () =>
+    retry.try(async () => {
+      const query = await monacoEditor.getCodeEditorValue();
+      if (!query) {
+        throw new Error('New Discover tab query is not ready');
+      }
+      return query;
+    });
+
   describe('grouping selection', function () {
     it('does not show the grouping selector for ESQL queries that exceed the configured suggested group limit', async () => {
       await discover.selectTextBaseLang();
@@ -181,9 +190,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.click('dscCascadeRowContextActionOpenInNewTab');
 
           expect(await unifiedTabs.getNumberOfTabs()).to.be(tabCount + 1);
+          await discover.waitUntilTabIsLoaded();
           expect(await discover.isShowingCascadeLayout()).to.be(false);
 
-          const newTabQuery = await monacoEditor.getCodeEditorValue();
+          const newTabQuery = await getNewTabQuery();
           expect(newTabQuery).not.to.be(statsQuery);
 
           // assert new tab query contains the correct match query for the categorize function in the new tab
@@ -239,15 +249,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.click('dscCascadeRowContextActionOpenInNewTab');
 
           expect(await unifiedTabs.getNumberOfTabs()).to.be(tabCount + 1);
+          await discover.waitUntilTabIsLoaded();
           expect(await discover.isShowingCascadeLayout()).to.be(false);
 
-          const newTabQuery = await monacoEditor.getCodeEditorValue();
+          const newTabQuery = await getNewTabQuery();
           expect(newTabQuery).not.to.be(statsQueryWithCategorize);
 
           // assert new tab query contains the correct match query for the categorize function in the new tab
           expect(
-            /FROM logstash-\* \| WHERE MATCH\(@message, .*, \{"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"\}\)/.test(
-              newTabQuery
+            /FROM logstash-\*\s*\|\s*WHERE MATCH\(@message, .*, \{"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"\}\)/.test(
+              newTabQuery.replace(/\s+/g, ' ')
             )
           ).to.be(true);
         });

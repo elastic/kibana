@@ -18,6 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
+  const retry = getService('retry');
 
   describe('Table', function describeIndexTests() {
     before(async () => {
@@ -42,7 +43,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should show the "Edit Visualization in Lens" menu item', async () => {
-      expect(await visualize.hasNavigateToLensButton()).to.eql(true);
+      await retry.waitFor('Edit Visualization in Lens button', () =>
+        visualize.hasNavigateToLensButton()
+      );
     });
 
     it('should convert aggregation with params', async () => {
