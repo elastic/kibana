@@ -136,10 +136,10 @@ const threatReportsTemplate = {
                 tier_basis: { type: 'keyword' as const },
                 // Port from socket extraction (v17): ip:port / domain:port → integer.
                 port: { type: 'integer' as const },
-                // Per-IOC nearest-ref URL from Maltrail trail files (v19). The promote_threat_indicators
+                // Per-IOC nearest-ref URL from indicator-list files (v19). The promote_threat_indicators
                 // task copies this into sources[].reference for the indicators companion index.
                 reference: { type: 'keyword' as const, ignore_above: FEED_TEXT_IGNORE_ABOVE },
-                // Index of the Maltrail block this IOC belongs to (v19). Used by the sync task
+                // Index of the indicator-list block this IOC belongs to (v19). Used by the sync task
                 // to associate each IOC with its source reference URL.
                 block_index: { type: 'integer' as const },
                 // Semantic review did not run (batch/overflow budget). Heuristic tier is kept
@@ -1611,11 +1611,11 @@ const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
   { path: 'extracted.iocs.tier' },
   { path: 'extracted.iocs.port' },
   { path: 'extracted.iocs.deferred_unreviewed' },
-  // v19 writes `reference` and `block_index` (Maltrail chunking) in one putMapping, so
+  // v19 writes `reference` and `block_index` (indicator-list chunking) in one putMapping, so
   // this leaf is checked on its own: a failed v19 followed by a successful v26
   // keyword-bounds putMapping re-adds `reference` but not `block_index`, so verifying
-  // `reference` alone would pass while `dynamic: strict` rejects Maltrail reports that
-  // carry `block_index`. Maltrail ships enabled by default, so this is a live path.
+  // `reference` alone would pass while `dynamic: strict` rejects historical indicator-list
+  // reports that carry `block_index`.
   { path: 'extracted.iocs.block_index' },
   { path: 'lineage.content_scrubbed_at' },
   // v30: attribution/feedback merged into evidence, object -> nested. Not

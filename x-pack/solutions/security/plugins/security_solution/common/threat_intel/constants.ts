@@ -70,27 +70,14 @@ export const GLOBAL_SPACE_ID = '*' as const;
  */
 export const MAX_URL_LENGTH = 2048;
 
-export const FETCH_ADAPTER_TYPES = ['rss', 'text_indicator_list', 'kev'] as const;
+export const FETCH_ADAPTER_TYPES = ['rss'] as const;
 export type FetchAdapterType = (typeof FETCH_ADAPTER_TYPES)[number];
 
 /**
  * Stable document ids for the fixed, code-authoritative source catalog. Keep in
  * sync with `DEFAULT_SOURCES` in server setup seeding.
  */
-export const APPROVED_CATALOG_SOURCE_IDS = [
-  'kev:cisa-known-exploited-vulnerabilities',
-  'vendor_api:elastic-security-labs',
-  'rss:mandiant-research',
-  'rss:unit42',
-  'rss:talos',
-  'rss:crowdstrike',
-  'rss:cisa-alerts',
-  'text_indicator_list:maltrail-cobaltstrike',
-  'rss:aws-security',
-  'rss:aws-security-bulletins',
-  'rss:fortiguard-advisories',
-  'rss:fortiguard-threat-signal',
-] as const;
+export const APPROVED_CATALOG_SOURCE_IDS = ['vendor_api:elastic-security-labs'] as const;
 
 export const APPROVED_SOURCE_IDS: ReadonlySet<string> = new Set(APPROVED_CATALOG_SOURCE_IDS);
 

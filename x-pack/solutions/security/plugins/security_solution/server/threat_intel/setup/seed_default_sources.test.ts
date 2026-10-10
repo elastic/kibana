@@ -74,40 +74,17 @@ const run = async ({
 };
 
 describe('DEFAULT_SOURCES approved catalog', () => {
-  const ENABLED_ENDPOINTS: Record<string, string> = {
-    'kev:cisa-known-exploited-vulnerabilities':
-      'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json',
+  const APPROVED_ENDPOINTS: Record<string, string> = {
     'vendor_api:elastic-security-labs': 'https://www.elastic.co/security-labs/rss/feed.xml',
-    'rss:mandiant-research': 'https://cloudblog.withgoogle.com/topics/threat-intelligence/rss/',
-    'rss:unit42': 'https://unit42.paloaltonetworks.com/feed/',
-    'rss:talos': 'https://blog.talosintelligence.com/rss/',
-    'rss:crowdstrike': 'https://www.crowdstrike.com/blog/feed/',
-    'rss:cisa-alerts': 'https://www.cisa.gov/cybersecurity-advisories/all.xml',
-    'text_indicator_list:maltrail-cobaltstrike':
-      'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt',
   };
 
-  const DISABLED_ENDPOINTS: Record<string, string> = {
-    'rss:aws-security': 'https://aws.amazon.com/blogs/security/feed/',
-    'rss:aws-security-bulletins': 'https://aws.amazon.com/security/security-bulletins/rss/feed/',
-    'rss:fortiguard-advisories': 'https://filestore.fortinet.com/fortiguard/rss/ir.xml',
-    'rss:fortiguard-threat-signal':
-      'https://filestore.fortinet.com/fortiguard/rss/threatsignal.xml',
-  };
-
-  it('contains only the twelve approved source IDs and URLs', () => {
-    expect(CATALOG_SOURCE_URLS).toEqual({
-      ...ENABLED_ENDPOINTS,
-      ...DISABLED_ENDPOINTS,
-    });
+  it('contains only the Elastic Security Labs source ID and URL', () => {
+    expect(CATALOG_SOURCE_URLS).toEqual(APPROVED_ENDPOINTS);
   });
 
-  it('ships exactly eight sources enabled', () => {
-    expect(DEFAULT_SOURCES.filter(({ enabled }) => enabled)).toHaveLength(8);
-  });
-
-  it('ships exactly four sources disabled', () => {
-    expect(DEFAULT_SOURCES.filter(({ enabled }) => !enabled)).toHaveLength(4);
+  it('ships exactly one source enabled', () => {
+    expect(DEFAULT_SOURCES).toHaveLength(1);
+    expect(DEFAULT_SOURCES[0].enabled).toBe(true);
   });
 
   it('dispatches Elastic Security Labs through the RSS adapter while preserving its stable ID', () => {

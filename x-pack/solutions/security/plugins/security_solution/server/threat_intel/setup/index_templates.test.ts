@@ -540,7 +540,7 @@ describe('index_templates — mapping coverage guard', () => {
     expect(reportsTemplate).not.toContain('data_stream:');
   });
 
-  it('extracted.iocs includes reference and block_index fields (v19 maltrail adapter fields)', () => {
+  it('extracted.iocs includes historical reference and block_index fields', () => {
     // `reference` also carries an `ignore_above`, so match the declaration prefix.
     expect(src).toContain("reference: { type: 'keyword' as const");
     expect(src).toContain("block_index: { type: 'integer' as const }");
@@ -786,7 +786,7 @@ describe('index_templates — post-migration schema check', () => {
 
   // v19 writes `reference` and `block_index` in one putMapping, but a failed v19 then a
   // successful v26 keyword-bounds putMapping re-adds `reference` without `block_index`,
-  // so checking `reference` alone passed while strict rejected Maltrail reports.
+  // so checking `reference` alone passed while strict rejected indicator-list reports.
   it('fails when the v19 leaf extracted.iocs.block_index is missing', async () => {
     const mappings = fullyMigratedReportMappings();
     delete (mappings.properties.extracted.properties.iocs.properties as Record<string, unknown>)
