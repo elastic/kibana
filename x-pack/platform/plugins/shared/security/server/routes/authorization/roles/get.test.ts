@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 
+import type { BuildFlavor } from '@kbn/config';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
@@ -25,8 +26,10 @@ interface TestOptions {
   name?: string;
   licenseCheckResult?: LicenseCheck;
   apiResponse?: () => unknown;
-  asserts: { statusCode: number; result?: Record<string, any> };
+  queryResponse?: () => unknown;
+  asserts: { statusCode: number; result?: Record<string, any> | string };
   query?: Record<string, unknown>;
+  buildFlavor?: BuildFlavor;
 }
 
 const features: KibanaFeature[] = [
@@ -145,10 +148,19 @@ const features: KibanaFeature[] = [
 describe('GET role', () => {
   const getRoleTest = (
     description: string,
-    { name, licenseCheckResult = { state: 'valid' }, apiResponse, asserts, query }: TestOptions
+    {
+      name,
+      licenseCheckResult = { state: 'valid' },
+      apiResponse,
+      queryResponse,
+      asserts,
+      query,
+      buildFlavor = 'traditional',
+    }: TestOptions
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+      mockRouteDefinitionParams.buildFlavor = buildFlavor;
       const versionedRouterMock = mockRouteDefinitionParams.router
         .versioned as MockedVersionedRouter;
       mockRouteDefinitionParams.authz.applicationName = application;
@@ -165,10 +177,12 @@ describe('GET role', () => {
         licensing: mockLicensingContext,
       });
 
+      const { getRole, queryRole } = mockCoreContext.elasticsearch.client.asCurrentUser.security;
       if (apiResponse) {
-        mockCoreContext.elasticsearch.client.asCurrentUser.security.getRole.mockResponseImplementation(
-          (() => ({ body: apiResponse() })) as any
-        );
+        getRole.mockResponseImplementation((() => ({ body: apiResponse() })) as any);
+      }
+      if (queryResponse) {
+        queryRole.mockResponseImplementation(() => ({ body: queryResponse() } as any));
       }
 
       defineGetRolesRoutes(mockRouteDefinitionParams);
@@ -190,9 +204,13 @@ describe('GET role', () => {
       expect(response.payload).toEqual(asserts.result);
 
       if (apiResponse) {
-        expect(
-          mockCoreContext.elasticsearch.client.asCurrentUser.security.getRole
-        ).toHaveBeenCalledWith({ name });
+        expect(getRole).toHaveBeenCalledWith({ name });
+      }
+      if (queryResponse) {
+        expect(getRole).not.toHaveBeenCalled();
+        expect(queryRole).toHaveBeenCalledWith({ query: { term: { name } }, size: 1 });
+      } else {
+        expect(queryRole).not.toHaveBeenCalled();
       }
 
       expect(mockLicensingContext.license.check).toHaveBeenCalledWith('security', 'basic');
@@ -292,6 +310,36 @@ describe('GET role', () => {
           _unrecognized_applications: [],
         },
       },
+    });
+
+    describe('serverless', () => {
+      getRoleTest(`reads a predefined role with the Query Role API`, {
+        name: '_alertzero_alert_triage',
+        buildFlavor: 'serverless',
+        queryResponse: () => ({
+          total: 1,
+          count: 1,
+          roles: [{ name: '_alertzero_alert_triage', metadata: { _reserved: true } }],
+        }),
+        asserts: {
+          statusCode: 200,
+          result: {
+            name: '_alertzero_alert_triage',
+            metadata: { _reserved: true },
+            elasticsearch: { cluster: [], indices: [], run_as: [] },
+            kibana: [],
+            _transform_error: [],
+            _unrecognized_applications: [],
+          },
+        },
+      });
+
+      getRoleTest(`returns 404 when the Query Role API finds no role`, {
+        name: 'missing_role',
+        buildFlavor: 'serverless',
+        queryResponse: () => ({ total: 0, count: 0, roles: [] }),
+        asserts: { statusCode: 404, result: 'Not Found' },
+      });
     });
 
     describe('global', () => {
