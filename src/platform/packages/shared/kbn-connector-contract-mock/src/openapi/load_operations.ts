@@ -124,6 +124,9 @@ export const loadOperations = (source: OpenApiDocument): ContractOperation[] => 
           explode,
           schema: toSchema(value, resolved),
           content,
+          ...(value.in === 'path' && value['x-ms-skip-url-encoding'] === true
+            ? { multiSegment: true as const }
+            : {}),
         },
       ];
     });
