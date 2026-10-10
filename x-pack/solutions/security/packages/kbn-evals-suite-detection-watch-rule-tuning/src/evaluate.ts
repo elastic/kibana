@@ -6,6 +6,7 @@
  */
 
 import { evaluate as base, selectEvaluators, tags } from '@kbn/evals';
+import type { EsClient } from '@kbn/scout';
 import type { ConnectorPinClient } from './model_attribution';
 import { pinWorkflowConnector } from './model_attribution';
 
@@ -28,7 +29,19 @@ import { pinWorkflowConnector } from './model_attribution';
  * Everything else (executorClient, inferenceClient, connector, evaluators, log)
  * comes from the base fixture unchanged.
  */
-export const evaluate = base.extend<{}, { pinnedWorkflowConnector: string }>({
+export const evaluate = base.extend<
+  {},
+  { pinnedWorkflowConnector: string; traceEsClient: EsClient }
+>({
+  // Agent Builder child spans are exported to local ES via ElasticsearchOtlpExporter,
+  // not to the golden cluster TRACING_ES_URL points at.
+  traceEsClient: [
+    async ({ esClient, log }, use) => {
+      log.info('[traceEsClient] using local Scout ES for agent-builder traces');
+      await use(esClient);
+    },
+    { scope: 'worker' },
+  ],
   pinnedWorkflowConnector: [
     async ({ kbnClient, connector, log }, use) => {
       const pinned = await pinWorkflowConnector({

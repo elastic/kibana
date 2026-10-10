@@ -167,6 +167,45 @@ const nonTerminalQuery = { statuses: [...NonTerminalExecutionStatuses] };
 export const isAwaitingApproval = (status: ExecutionStatus): boolean =>
   status === ExecutionStatus.WAITING_FOR_INPUT || status === ExecutionStatus.WAITING;
 
+/** The `create_investigation` conversation a review owns; joins the review to its proposals. */
+const readInvestigationConversationId = (
+  stepExecutions: WorkflowStepExecutionDto[]
+): string | undefined => {
+  const investigation = stepExecutions.find((s) => s.stepId === 'create_investigation');
+  return (investigation?.output as { conversation_id?: string } | null | undefined)
+    ?.conversation_id;
+};
+
+const listPendingProposals = async (
+  fetch: HttpHandler,
+  conversationId: string
+): Promise<Array<{ id: string }>> =>
+  (
+    (await fetch(`/internal/proposals`, {
+      method: 'GET',
+      headers: { 'elastic-api-version': '1' },
+      query: { conversationId, status: 'pending' },
+    })) as { proposals?: Array<{ id: string }> }
+  ).proposals ?? [];
+
+/**
+ * Nested proposal gates leave the review waiting_for_child, as do unrelated running children.
+ * Only a pending proposal in this review's conversation makes that status approval-ready.
+ */
+export const isReviewAtApprovalGate = async ({
+  fetch,
+  review,
+}: {
+  fetch: HttpHandler;
+  review: Pick<WorkflowExecutionDto, 'status' | 'stepExecutions'>;
+}): Promise<boolean> => {
+  if (isAwaitingApproval(review.status)) return true;
+  if (review.status !== ExecutionStatus.WAITING_FOR_CHILD) return false;
+  const conversationId = readInvestigationConversationId(review.stepExecutions ?? []);
+  if (!conversationId) return false;
+  return (await listPendingProposals(fetch, conversationId)).length > 0;
+};
+
 /**
  * True for the 409 the resume route returns when an execution has reached `waiting_for_input`
  * but its waiting STEP row is not queryable yet.
@@ -280,7 +319,7 @@ const getExecution = async (
  * Post-#294745 the review no longer parks on its own waitForApproval step: its
  * `propose_tuning` arm executes `system-create-alertzero-proposal`, and THAT
  * workflow parks on the proposals plugin's human gate. The review child surfaces
- * it as `waiting_for_input` exactly like before, but an external
+ * it as `waiting_for_child`, but an external
  * `/api/workflows/executions/<id>/resume` with `{ approved }` is now REJECTED by
  * `check_decide_privileges_step` (the responder would be the workflow runner,
  * not a human). The analyst path is the proposals routes — so the harness takes
@@ -313,9 +352,7 @@ const decideReviewProposal = async ({
   approved: boolean;
   pollIntervalMs: number;
 }): Promise<boolean> => {
-  const investigation = stepExecutions.find((s) => s.stepId === 'create_investigation');
-  const conversationId = (investigation?.output as { conversation_id?: string } | null | undefined)
-    ?.conversation_id;
+  const conversationId = readInvestigationConversationId(stepExecutions);
   if (!conversationId) {
     throw new Error(
       `Review execution ${executionId} is waiting but carries no create_investigation ` +
@@ -324,14 +361,7 @@ const decideReviewProposal = async ({
     );
   }
 
-  const listPending = async (): Promise<Array<{ id: string }>> =>
-    (
-      (await fetch(`/internal/proposals`, {
-        method: 'GET',
-        headers: { 'elastic-api-version': '1' },
-        query: { conversationId, status: 'pending' },
-      })) as { proposals?: Array<{ id: string }> }
-    ).proposals ?? [];
+  const listPending = () => listPendingProposals(fetch, conversationId);
 
   let proposals = await listPending();
   if (proposals.length === 0) {
@@ -710,18 +740,24 @@ export const runRuleTuningWorkflow = async ({
     // gate — approve, don't leave parked.
     const activeReviews = await listActiveExecutions(fetch, RULE_TUNING_REVIEW_WORKFLOW_ID);
     for (const review of activeReviews.results ?? []) {
-      if (!approvedReviews.has(review.id) && isAwaitingApproval(review.status)) {
+      if (
+        !approvedReviews.has(review.id) &&
+        (isAwaitingApproval(review.status) || review.status === ExecutionStatus.WAITING_FOR_CHILD)
+      ) {
         // Step executions carry the create_investigation conversation_id the
         // proposals join below needs.
         const withSteps = await getExecution(fetch, review.id);
-        const decided = await decideReviewProposal({
-          fetch,
-          log,
-          stepExecutions: withSteps.stepExecutions ?? [],
-          executionId: review.id,
-          approved: true,
-          pollIntervalMs,
-        });
+        const atGate = await isReviewAtApprovalGate({ fetch, review: withSteps });
+        const decided = atGate
+          ? await decideReviewProposal({
+              fetch,
+              log,
+              stepExecutions: withSteps.stepExecutions ?? [],
+              executionId: review.id,
+              approved: true,
+              pollIntervalMs,
+            })
+          : false;
         if (decided) approvedReviews.add(review.id);
       }
     }
@@ -875,7 +911,7 @@ export const runRuleTuningToApprovalGate = async ({
       const review = await getExecution(fetch, child.id);
       lastReviewStatus = review.status;
 
-      if (isAwaitingApproval(review.status)) {
+      if (await isReviewAtApprovalGate({ fetch, review })) {
         const proposal = readProposalOrThrow(review);
         log.info(
           `Review execution ${review.id} is parked on its approval gate ` +
