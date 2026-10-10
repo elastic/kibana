@@ -9,7 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { ConnectorContractUnion } from '../..';
-import { generateYamlSchemaFromConnectors } from '../..';
+import { generateYamlSchemaFromConnectors, getWorkflowJsonSchema } from '../..';
 
 const BASE_WORKFLOW = {
   name: 'test',
@@ -18,6 +18,20 @@ const BASE_WORKFLOW = {
 
 // Failing: See https://github.com/elastic/kibana/issues/271451
 describe.skip('generateYamlSchemaFromConnectors', () => {
+  it('generates identical JSON schemas regardless of trigger order', () => {
+    const triggers = ['cases.updated', 'slack.message', 'slack.reaction'];
+    const reversedTriggers = triggers.toReversed();
+    const originalOrder = [...reversedTriggers];
+    const schema = getWorkflowJsonSchema(generateYamlSchemaFromConnectors([], triggers));
+    const reversedSchema = getWorkflowJsonSchema(
+      generateYamlSchemaFromConnectors([], reversedTriggers)
+    );
+
+    expect(schema).not.toBeNull();
+    expect(reversedSchema).toEqual(schema);
+    expect(reversedTriggers).toEqual(originalOrder);
+  });
+
   describe('strict mode', () => {
     it('should generate a valid YAML schema from connectors', () => {
       const connectors: ConnectorContractUnion[] = [
