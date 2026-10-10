@@ -52,6 +52,69 @@ export const COLUMN_DIFF = i18n.translate('xpack.evals.compareExperiments.column
   defaultMessage: 'Diff',
 });
 
+export const COLUMN_TEST = i18n.translate('xpack.evals.compareExperiments.columns.test', {
+  defaultMessage: 'Test',
+});
+
+export const TEST_LABEL_PAIRED_T = i18n.translate(
+  'xpack.evals.compareExperiments.testLabel.pairedT',
+  { defaultMessage: 't-test' }
+);
+
+export const TEST_LABEL_WILCOXON = i18n.translate(
+  'xpack.evals.compareExperiments.testLabel.wilcoxon',
+  { defaultMessage: 'Wilcoxon' }
+);
+
+export const TEST_LABEL_MCNEMAR = i18n.translate(
+  'xpack.evals.compareExperiments.testLabel.mcnemar',
+  { defaultMessage: 'McNemar' }
+);
+
+export const METRIC_TYPE_LABEL_BINARY = i18n.translate(
+  'xpack.evals.compareExperiments.metricType.binary',
+  { defaultMessage: 'pass/fail scores' }
+);
+
+export const METRIC_TYPE_LABEL_CONTINUOUS_BOUNDED = i18n.translate(
+  'xpack.evals.compareExperiments.metricType.continuousBounded',
+  { defaultMessage: 'scores in [0, 1]' }
+);
+
+export const METRIC_TYPE_LABEL_CONTINUOUS_UNBOUNDED = i18n.translate(
+  'xpack.evals.compareExperiments.metricType.continuousUnbounded',
+  { defaultMessage: 'unbounded scores' }
+);
+
+export const METRIC_TYPE_LABEL_COUNT = i18n.translate(
+  'xpack.evals.compareExperiments.metricType.count',
+  { defaultMessage: 'counts' }
+);
+
+export const METRIC_TYPE_LABEL_ORDINAL = i18n.translate(
+  'xpack.evals.compareExperiments.metricType.ordinal',
+  { defaultMessage: 'ordinal scale' }
+);
+
+export const getTestTooltip = (testLabel: string, metricTypeLabel: string, method?: string) =>
+  method
+    ? i18n.translate('xpack.evals.compareExperiments.testTooltipWithMethod', {
+        defaultMessage:
+          '{testLabel} ({method}), chosen because the evaluator produces {metricTypeLabel}',
+        values: { testLabel, method, metricTypeLabel },
+      })
+    : i18n.translate('xpack.evals.compareExperiments.testTooltip', {
+        defaultMessage: '{testLabel}, chosen because the evaluator produces {metricTypeLabel}',
+        values: { testLabel, metricTypeLabel },
+      });
+
+export const getDiscordantPairsHint = (targetOnly: number, baselineOnly: number) =>
+  i18n.translate('xpack.evals.compareExperiments.discordantPairsHint', {
+    defaultMessage:
+      '{targetOnly, plural, one {# example} other {# examples}} score 1 only in target, {baselineOnly, plural, one {# example} other {# examples}} score 1 only in baseline',
+    values: { targetOnly, baselineOnly },
+  });
+
 export const COLUMN_P_VALUE = i18n.translate('xpack.evals.compareExperiments.columns.pValue', {
   defaultMessage: 'p-value',
 });

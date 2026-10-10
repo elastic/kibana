@@ -20,6 +20,7 @@ const baseResult = (
   index_patterns: ['logs-aws.*'],
   tier2_targets: ['logs-aws.*', 'logs-endpoint.events.*'],
   tier2_target_sources: ['report_match', 'actionable'],
+  report_intent_targets: [],
   actionable_indices: ['logs-endpoint.events.*'],
   tier1: {
     tier: 1,

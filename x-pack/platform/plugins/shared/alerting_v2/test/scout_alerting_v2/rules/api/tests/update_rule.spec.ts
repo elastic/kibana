@@ -491,6 +491,25 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
+  // `null` is the only way to clear a description; an empty string names no new value.
+  apiTest(
+    'validation: rejects an empty or blank metadata.description',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-with-blank-description' } })
+      );
+
+      for (const description of ['', '   ']) {
+        const response = await apiClient.patch(getRuleUrl(created.id), {
+          headers: writerHeaders,
+          body: { metadata: { description } },
+        });
+        expect(response).toHaveStatusCode(400);
+        expect(response.body.code).toBe('BAD_REQUEST');
+      }
+    }
+  );
+
   apiTest(
     'validation: should reject body with unknown metadata keys (strict schema)',
     async ({ apiClient, apiServices }) => {
@@ -681,7 +700,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       );
       const response = await apiClient.patch(getRuleUrl(created.id), {
         headers: writerHeaders,
-        body: { query: { base: 'FROM logs-* | STATS count = COUNT(*) BY host.name' } },
+        body: { query: { breach: null } },
       });
       expect(response).toHaveStatusCode(400);
       expect(response.body.code).toBe('INVALID_RULE_QUERY_CONFIG');
@@ -769,11 +788,11 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'builder_type: should reject query change on a builder rule without explicit builder_type clear',
+    'builder: should reject query change on a builder rule without explicit builder clear',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
-          metadata: { name: 'builder-rule', builder_type: 'threshold' },
+          metadata: { name: 'builder-rule', builder: { type: 'threshold' } },
         })
       );
       const response = await apiClient.patch(getRuleUrl(created.id), {
@@ -786,27 +805,231 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.code).toBe('BUILDER_TYPE_NOT_CLEARED');
       // Rule should remain unchanged
       const stored = await apiServices.alertingV2.rules.get(created.id);
-      expect(stored.metadata.builder_type).toBe('threshold');
+      expect(stored.metadata.builder).toStrictEqual({ type: 'threshold' });
     }
   );
 
   apiTest(
-    'builder_type: should allow query change on a builder rule when builder_type is explicitly cleared',
+    'builder: should allow query change on a builder rule when builder is explicitly cleared',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
-          metadata: { name: 'builder-rule-clear', builder_type: 'threshold' },
+          metadata: { name: 'builder-rule-clear', builder: { type: 'threshold' } },
         })
       );
       const response = await apiClient.patch(getRuleUrl(created.id), {
         headers: writerHeaders,
         body: {
           query: { base: 'FROM new-index | LIMIT 1' },
-          metadata: { builder_type: null },
+          metadata: { builder: null },
         },
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.metadata.builder_type).toBeUndefined();
+      expect(response.body.metadata.builder).toBeUndefined();
+    }
+  );
+
+  apiTest(
+    'merge: patches the breach segment and preserves query.base',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'query-leaf-rule' },
+          query: {
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: 'WHERE count >= 10' },
+          },
+        })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { query: { breach: { segment: 'WHERE count >= 20' } } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.query).toStrictEqual({
+        base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+        breach: { segment: 'WHERE count >= 20' },
+      });
+
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.query).toStrictEqual(response.body.query);
+    }
+  );
+
+  apiTest(
+    'merge: clears the breach block with null and preserves query.base',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'query-leaf-clear-rule' },
+          query: {
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: 'WHERE count >= 10' },
+          },
+        })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { query: { breach: null } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.query).toStrictEqual({
+        base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+      });
+    }
+  );
+
+  apiTest(
+    'merge: patches a state_transition phase three levels down and preserves its siblings',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'state-transition-leaf-rule' },
+          state_transition: { pending: { count: 2 }, recovering: { count: 4 } },
+        })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { state_transition: { pending: { timeframe: '10m', operator: 'or' } } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.state_transition).toStrictEqual({
+        pending: { count: 2, timeframe: '10m', operator: 'or' },
+        recovering: { count: 4 },
+      });
+    }
+  );
+
+  apiTest(
+    'merge: replaces the recovery variant wholesale rather than merging it',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'recovery-replace-rule' },
+          query: {
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: 'WHERE count >= 10' },
+          },
+          recovery: { strategy: 'condition', segment: 'WHERE count < 5' },
+        })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { recovery: { strategy: 'no_breach' } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      // A variant object cannot be half-sent, so the old `segment` goes with it.
+      expect(response.body.recovery).toStrictEqual({ strategy: 'no_breach' });
+    }
+  );
+
+  apiTest(
+    'merge: rejects a recovery variant sent without its discriminator',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'recovery-partial-rule' },
+          query: {
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: 'WHERE count >= 10' },
+          },
+          recovery: { strategy: 'condition', segment: 'WHERE count < 5' },
+        })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { recovery: { segment: 'WHERE count < 2' } },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
+
+  apiTest('merge: replaces metadata.tags wholesale', async ({ apiClient, apiServices }) => {
+    const created = await apiServices.alertingV2.rules.create(
+      buildCreateRuleData({
+        metadata: { name: 'tags-replace-rule', tags: ['cpu', 'memory'] },
+      })
+    );
+
+    const response = await apiClient.patch(getRuleUrl(created.id), {
+      headers: writerHeaders,
+      body: { metadata: { tags: ['disk'] } },
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.metadata.tags).toStrictEqual(['disk']);
+    expect(response.body.metadata.name).toBe('tags-replace-rule');
+  });
+
+  apiTest(
+    'merge: rejects a patch whose merged rule is invalid and stores nothing',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'invalid-merge-rule' },
+          state_transition: {
+            pending: { count: 2, timeframe: '5m', operator: 'and' },
+            recovering: { count: 4 },
+          },
+        })
+      );
+
+      // Clearing both thresholds leaves `operator` behind, so `pending` stays configured but gates
+      // nothing, which the merged document has to reject.
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { state_transition: { pending: { count: null, timeframe: null } } },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_RULE_DATA');
+
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.state_transition).toStrictEqual({
+        pending: { count: 2, timeframe: '5m', operator: 'and' },
+        recovering: { count: 4 },
+      });
+    }
+  );
+
+  apiTest(
+    'round trip: the patch response matches a subsequent GET',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'round-trip-rule', description: 'original', tags: ['cpu'] },
+          query: {
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: 'WHERE count >= 10' },
+          },
+          state_transition: { pending: { count: 2 }, recovering: { count: 4 } },
+        })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: {
+          metadata: { description: null },
+          query: { breach: { segment: 'WHERE count >= 30' } },
+          state_transition: { recovering: { count: 1 } },
+        },
+      });
+
+      expect(response).toHaveStatusCode(200);
+
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(response.body).toStrictEqual(stored);
     }
   );
 });

@@ -10,14 +10,20 @@ import type {
   ProcessorContainer,
   RouteEntry,
 } from '../../../../../common/security_integrations/cribl/types';
+import { getRerouteDataset } from './get_reroute_dataset';
 
-export const buildPipelineRequest = (mappings: RouteEntry[]): IngestPipelineRequest => {
+export type IndexPatternsByTemplate = ReadonlyMap<string, readonly string[]>;
+
+export const buildPipelineRequest = (
+  mappings: RouteEntry[],
+  indexPatternsByTemplate: IndexPatternsByTemplate = new Map()
+): IngestPipelineRequest => {
   return {
     _meta: {
       managed: true,
     },
     description: 'Pipeline for routing events from Cribl',
-    processors: buildCriblRoutingProcessors(mappings),
+    processors: buildCriblRoutingProcessors(mappings, indexPatternsByTemplate),
     on_failure: [
       {
         set: {
@@ -29,14 +35,20 @@ export const buildPipelineRequest = (mappings: RouteEntry[]): IngestPipelineRequ
   };
 };
 
-const buildCriblRoutingProcessors = (mappings: RouteEntry[]): ProcessorContainer[] => {
+const buildCriblRoutingProcessors = (
+  mappings: RouteEntry[],
+  indexPatternsByTemplate: IndexPatternsByTemplate
+): ProcessorContainer[] => {
   const processors: ProcessorContainer[] = [];
 
   mappings.forEach(function (mapping) {
-    const [, datasetName] = mapping.datastream.split('-');
+    const { dataset } = getRerouteDataset(
+      mapping.datastream,
+      indexPatternsByTemplate.get(mapping.datastream)
+    );
     processors.push({
       reroute: {
-        dataset: `${datasetName}`,
+        dataset: `${dataset}`,
         if: `ctx['_dataId'] == '${mapping.dataId}'`,
         namespace: [mapping.namespace || 'default'],
       },

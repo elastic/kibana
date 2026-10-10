@@ -21,7 +21,7 @@ import {
   MAX_SYMPTOM_HYPOTHESIS_LENGTH,
   significantEventSchema,
 } from '@kbn/significant-events-schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -40,30 +40,31 @@ import { eventsWriteBulkHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
 
-export const eventsWriteItemSchema = significantEventSchema
-  .pick({
-    event_id: true,
-    status: true,
-    stream_names: true,
-    title: true,
-    symptom_hypothesis: true,
-    summary: true,
-    severity: true,
-    confidence: true,
-    assessment_note: true,
-    signals: true,
-    causal_features: true,
-    blast_radius: true,
-    workflow_execution_id: true,
-    conversation_id: true,
-  })
-  .extend({
-    event_id: z
-      .string()
-      .optional()
-      .transform((v) => (v === '' ? undefined : v))
-      .describe(
-        dedent`
+export const eventsWriteItemSchema = lazySchema(() =>
+  significantEventSchema
+    .pick({
+      event_id: true,
+      status: true,
+      stream_names: true,
+      title: true,
+      symptom_hypothesis: true,
+      summary: true,
+      severity: true,
+      confidence: true,
+      assessment_note: true,
+      signals: true,
+      causal_features: true,
+      blast_radius: true,
+      workflow_execution_id: true,
+      conversation_id: true,
+    })
+    .extend({
+      event_id: z
+        .string()
+        .optional()
+        .transform((v) => (v === '' ? undefined : v))
+        .describe(
+          dedent`
           ID of an existing event to append a new version to (continuation/snapshot mode).
           Never compose, shorten or guess an event_id. For Discovery, copy it
           character-for-character from an active event returned by event_search in this run. The
@@ -77,110 +78,115 @@ export const eventsWriteItemSchema = significantEventSchema
           reason: existing_active_event). Otherwise a new event is created with a generated
           event_id.
         `
-      ),
-  })
-  .partial({ event_id: true })
-  .refine(
-    (item) =>
-      (item.signals ?? []).every((s) => s.description.length <= MAX_SIGNAL_DESCRIPTION_LENGTH),
-    {
-      message: `Signal descriptions must be at most ${MAX_SIGNAL_DESCRIPTION_LENGTH} characters for agent input`,
-    }
-  )
-  .refine(
-    (item) =>
-      item.symptom_hypothesis === undefined ||
-      item.symptom_hypothesis.length <= MAX_SYMPTOM_HYPOTHESIS_LENGTH,
-    {
-      message: `Symptom hypotheses must be at most ${MAX_SYMPTOM_HYPOTHESIS_LENGTH} characters for agent input`,
-    }
-  )
-  .refine((item) => item.summary.length <= MAX_SUMMARY_LENGTH, {
-    message: `Summaries must be at most ${MAX_SUMMARY_LENGTH} characters for agent input`,
-  })
-  .refine(
-    (item) =>
-      item.assessment_note === undefined ||
-      item.assessment_note.length <= MAX_ASSESSMENT_NOTE_LENGTH,
-    {
-      message: `Assessment notes must be at most ${MAX_ASSESSMENT_NOTE_LENGTH} characters for agent input`,
-    }
-  )
-  .superRefine((item, ctx) => {
-    const signals = item.signals ?? [];
-    const grounded = signals.filter((s) => s.evidence != null);
-    const hasConfirms = grounded.some((s) => s.verdict === 'confirms');
-    const hasOffTopicObservedError = grounded.some((s) => s.verdict === 'off_topic');
-    const hasNotChecked = signals.some((s) => s.verdict === 'not_checked');
+        ),
+    })
+    .partial({ event_id: true })
+    .refine(
+      (item) =>
+        (item.signals ?? []).every((s) => s.description.length <= MAX_SIGNAL_DESCRIPTION_LENGTH),
+      {
+        message: `Signal descriptions must be at most ${MAX_SIGNAL_DESCRIPTION_LENGTH} characters for agent input`,
+      }
+    )
+    .refine(
+      (item) =>
+        item.symptom_hypothesis === undefined ||
+        item.symptom_hypothesis.length <= MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+      {
+        message: `Symptom hypotheses must be at most ${MAX_SYMPTOM_HYPOTHESIS_LENGTH} characters for agent input`,
+      }
+    )
+    .refine((item) => item.summary.length <= MAX_SUMMARY_LENGTH, {
+      message: `Summaries must be at most ${MAX_SUMMARY_LENGTH} characters for agent input`,
+    })
+    .refine(
+      (item) =>
+        item.assessment_note === undefined ||
+        item.assessment_note.length <= MAX_ASSESSMENT_NOTE_LENGTH,
+      {
+        message: `Assessment notes must be at most ${MAX_ASSESSMENT_NOTE_LENGTH} characters for agent input`,
+      }
+    )
+    .superRefine((item, ctx) => {
+      const signals = item.signals ?? [];
+      const grounded = signals.filter((s) => s.evidence != null);
+      const hasConfirms = grounded.some((s) => s.verdict === 'confirms');
+      const hasOffTopicObservedError = grounded.some((s) => s.verdict === 'off_topic');
+      const hasNotChecked = signals.some((s) => s.verdict === 'not_checked');
 
-    if (hasConfirms && hasNotChecked) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message:
-          'A confirms item cannot include not_checked signals; emit each not_checked detection as its own inactive item.',
-      });
-    }
-    // Continuations inherit prior severity; this cycle's signals may be
-    // inconclusive (telemetry gap, errored query) without a new confirms.
-    if (
-      item.event_id === undefined &&
-      item.status === 'active' &&
-      (item.severity === 'high' || item.severity === 'critical') &&
-      grounded.length > 0 &&
-      !hasConfirms &&
-      !hasOffTopicObservedError
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message:
-          'An active event at "high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or a non-active status.',
-      });
-    }
-  });
+      if (hasConfirms && hasNotChecked) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            'A confirms item cannot include not_checked signals; emit each not_checked detection as its own inactive item.',
+        });
+      }
+      // Continuations inherit prior severity; this cycle's signals may be
+      // inconclusive (telemetry gap, errored query) without a new confirms.
+      if (
+        item.event_id === undefined &&
+        item.status === 'active' &&
+        (item.severity === 'high' || item.severity === 'critical') &&
+        grounded.length > 0 &&
+        !hasConfirms &&
+        !hasOffTopicObservedError
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            'An active event at "high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or a non-active status.',
+        });
+      }
+    })
+);
 
 const ITEMS_REQUIRED_MESSAGE = 'Pass items as a non-empty array of event objects.';
 
-const eventsWriteItemsSchema = z
-  .array(eventsWriteItemSchema, { error: ITEMS_REQUIRED_MESSAGE })
-  .min(1, { error: ITEMS_REQUIRED_MESSAGE })
-  .max(MAX_BULK_WRITE_ITEMS)
-  .refine(
-    (items) => {
-      const ruleUuids = items.flatMap((item) =>
-        (item.signals ?? [])
-          .filter((signal) => signal.type === 'detection')
-          .map((signal) => signal.metadata?.rule_uuid)
-          .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid))
-      );
-      return new Set(ruleUuids).size === ruleUuids.length;
-    },
-    {
-      message:
-        'Each detection rule UUID may appear exactly once in the complete write, including within a single event item. Correct ownership before the single write; never retry with an empty placeholder.',
-    }
-  )
-  .describe(
-    i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
-      defaultMessage:
-        'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals.',
-    })
-  );
+const eventsWriteItemsSchema = lazySchema(() =>
+  z
+    .array(eventsWriteItemSchema, { error: ITEMS_REQUIRED_MESSAGE })
+    .min(1, { error: ITEMS_REQUIRED_MESSAGE })
+    .max(MAX_BULK_WRITE_ITEMS)
+    .refine(
+      (items) => {
+        const ruleUuids = items.flatMap((item) =>
+          (item.signals ?? [])
+            .filter((signal) => signal.type === 'detection')
+            .map((signal) => signal.metadata?.rule_uuid)
+            .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid))
+        );
+        return new Set(ruleUuids).size === ruleUuids.length;
+      },
+      {
+        message:
+          'Each detection rule UUID may appear exactly once in the complete write, including within a single event item. Correct ownership before the single write; never retry with an empty placeholder.',
+      }
+    )
+    .describe(
+      i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
+        defaultMessage:
+          'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals.',
+      })
+    )
+);
 
-export const eventsWriteSchema = z
-  .object({
-    source: z
-      .literal('discovery')
-      .optional()
-      .describe(
-        'Identifies the caller of this write. Discovery calls must set this to "discovery".'
-      ),
-    items: eventsWriteItemsSchema,
-  })
-  .describe(
-    i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema', {
-      defaultMessage: 'Bulk-write a batch of significant events.',
+export const eventsWriteSchema = lazySchema(() =>
+  z
+    .object({
+      source: z
+        .literal('discovery')
+        .optional()
+        .describe(
+          'Identifies the caller of this write. Discovery calls must set this to "discovery".'
+        ),
+      items: eventsWriteItemsSchema,
     })
-  );
+    .describe(
+      i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema', {
+        defaultMessage: 'Bulk-write a batch of significant events.',
+      })
+    )
+);
 
 export type EventsWriteParams = z.infer<typeof eventsWriteSchema>;
 
@@ -196,8 +202,7 @@ const enrichCausalFeatures = async (
   }
 
   try {
-    // Stored docs keep the derived uuid in their root `id`, so `id` matches uuid-style
-    // references and `featureIds` (feature.slug) matches slug-style ones.
+    // `featureIds` matches slug-style references and `id` matches uuid-style references.
     const references = [...causalFeatures, ...blastRadiusEntries];
     const featureIds = [...new Set(references.map(({ feature_id: featureId }) => featureId))];
     const streamNames = [
@@ -255,14 +260,25 @@ const enrichCausalFeatures = async (
           item.stream_names
         );
         return feature
-          ? { ...causalFeature, type: feature.type, subtype: feature.subtype }
+          ? {
+              ...causalFeature,
+              feature_id: feature.id,
+              type: feature.type,
+              subtype: feature.subtype,
+            }
           : causalFeature;
       }),
       // Blast radius rows carry their own row-shape discriminator in `type`; only the
       // indicator's subtype is enriched.
       blast_radius: item.blast_radius?.map((entry) => {
         const feature = resolveFeature(entry.feature_id, entry.stream_name, item.stream_names);
-        return feature ? { ...entry, subtype: feature.subtype } : entry;
+        return feature
+          ? {
+              ...entry,
+              feature_id: feature.id,
+              subtype: feature.subtype,
+            }
+          : entry;
       }),
     }));
   } catch (error) {

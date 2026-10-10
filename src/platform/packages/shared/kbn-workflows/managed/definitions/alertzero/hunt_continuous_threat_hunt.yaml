@@ -20,8 +20,7 @@ settings:
     key: hunt-continuous-threat-hunt
     strategy: drop
     max: 1
-# Triggers are rendered from autonomy: manual = manual only; assisted/supervised
-# add the schedule.
+# Always scheduled (locked 4h) plus manual with optional reportIds.
 triggers:
 __WORKER_TRIGGERS__
 consts:
@@ -128,6 +127,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-security-hunt-find-or-create-investigation
+          run-as-mode: inherit
           inputs:
             reportId: "{{ foreach.item }}"
             runId: "{{ execution.id }}"
@@ -136,6 +136,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-security-hunt-execute
+          run-as-mode: inherit
           inputs:
             reportId: "{{ foreach.item }}"
             investigationConversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
@@ -149,6 +150,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-security-hunt-package-report
+          run-as-mode: inherit
           inputs:
             reportId: "{{ foreach.item }}"
             investigationConversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
@@ -165,6 +167,11 @@ steps:
             # missing hunt output (the step errored outright) has nothing to compare, so this
             # defaults to 0 -- same as a hunt that genuinely confirmed nothing.
             expectedSseCount: "${{ steps.hunt.output.sse_count | default: 0 }}"
+            # What a clean run cannot leave on an attachment: the datasets the report points
+            # at and the executed behaviors. Packaging derives the coverage KI's `data_sources`
+            # and `validated_esql` from them.
+            reportIntentTargets: "${{ steps.hunt.output.report_intent_targets | compact }}"
+            behaviors: "${{ steps.hunt.output.behaviors | compact }}"
 
       # Outcome derivation: find_or_create failing means no Investigation ever
       # existed, so no conclusion is possible (handled by
@@ -208,6 +215,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-alertzero-journal-note
+          run-as-mode: inherit
           inputs:
             conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
             message: |-

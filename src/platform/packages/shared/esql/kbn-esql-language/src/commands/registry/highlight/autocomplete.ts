@@ -29,11 +29,18 @@ import {
   buildMapValueCompleteItem,
   newLineAndPipeCompleteItems,
 } from '../complete_items';
+import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { buildConstantsDefinitions } from '../../definitions/utils/literals';
 import { suggestFieldsList } from '../../definitions/utils/autocomplete/fields_list';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import { suggestForExpression } from '../../definitions/utils';
+
+/** Matches an ON list made of a lone `*`, which can only be followed by WITH or the end. */
+const LONE_WILDCARD_ON_REGEX = /\bon\s+\*\s*$/i;
+
+/** Matches the first entry of the ON list, still empty or being typed. */
+const FIRST_ON_ENTRY_REGEX = /\bon\s*[^\s,]*$/i;
 
 export const getQueryText = () =>
   i18n.translate('kbn-esql-language.commands.highlight.autocomplete.queryTextPlaceholder', {
@@ -41,6 +48,18 @@ export const getQueryText = () =>
   });
 
 export const getQueryTextSnippet = () => `"$\{0:${getQueryText()}}"`;
+
+const getWildcardFieldsSuggestion = (): ISuggestionItem =>
+  withAutoSuggest({
+    label: '*',
+    text: '*',
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-language.commands.highlight.autocomplete.allFieldsDetail', {
+      defaultMessage: 'All text and keyword fields',
+    }),
+    // Listed before the fields, which are sorted alphabetically within their own category.
+    category: SuggestionCategory.RECOMMENDED_FIELD,
+  });
 
 const PREFIX_VALUE_SNIPPET = `"$\{0:${HIGHLIGHT_DEFAULT_PREFIX}}"`;
 const PREFIX_MODIFIER_SNIPPET = `${HIGHLIGHT_PREFIX_KEYWORD} = ${PREFIX_VALUE_SNIPPET}`;
@@ -134,7 +153,10 @@ const getHighlightMapParameters = (): MapParameters => ({
     type: 'number',
     description: i18n.translate(
       'kbn-esql-language.commands.highlight.autocomplete.noMatchSizeDescription',
-      { defaultMessage: 'Characters to return when there is no match (default: 0)' }
+      {
+        defaultMessage:
+          'Minimum characters to return when there is no match, extended to the next boundary (default: 0)',
+      }
     ),
     suggestions: [buildMapValueCompleteItem('0')],
   },
@@ -142,9 +164,9 @@ const getHighlightMapParameters = (): MapParameters => ({
     type: 'number',
     description: i18n.translate(
       'kbn-esql-language.commands.highlight.autocomplete.maxAnalyzedOffsetDescription',
-      { defaultMessage: 'Maximum character offset to analyze (default: index setting)' }
+      { defaultMessage: 'Maximum character offset to analyze, or -1 to unset (default: -1)' }
     ),
-    suggestions: [],
+    suggestions: [buildMapValueCompleteItem('-1')],
   },
 });
 
@@ -216,8 +238,14 @@ export async function autocomplete(
             { defaultMessage: 'Custom column name prefix (default: highlight_)' }
           ),
           asSnippet: true,
-          category: SuggestionCategory.LANGUAGE_KEYWORD,
+          category: SuggestionCategory.COMMAND_MODIFIER,
         });
+      }
+
+      // Neither the query nor ON is mandatory, so with nothing typed yet the command can already
+      // continue with ON or WITH, or end.
+      if (computed.position === 'empty_expression') {
+        suggestions.push(onCompleteItem, withCompleteItem, ...newLineAndPipeCompleteItems);
       }
 
       // The snippet stands for a whole query expression, so it makes no sense as a function
@@ -243,11 +271,16 @@ export async function autocomplete(
     }
 
     case CaretPosition.ON_KEYWORD: {
-      return [onCompleteItem];
+      return [onCompleteItem, withCompleteItem, ...newLineAndPipeCompleteItems];
     }
 
     case CaretPosition.ON_EXPRESSION: {
-      return suggestFieldsList(
+      // `*` is only valid on its own, so nothing but WITH or the end can follow it.
+      if (LONE_WILDCARD_ON_REGEX.test(innerText)) {
+        return [withCompleteItem, ...newLineAndPipeCompleteItems];
+      }
+
+      const fieldSuggestions = await suggestFieldsList(
         query,
         command,
         highlightCommand.highlightFields ?? [],
@@ -258,9 +291,15 @@ export async function autocomplete(
         {
           afterCompleteSuggestions: [withCompleteItem],
           allowSingleColumnFields: true,
+          // The ON list takes plain fields: no `col0 = ...` assignments.
+          disableNewColumnSuggestion: true,
           preferredExpressionType: ['text', 'keyword'],
         }
       );
+
+      return FIRST_ON_ENTRY_REGEX.test(innerText)
+        ? [getWildcardFieldsSuggestion(), ...fieldSuggestions]
+        : fieldSuggestions;
     }
 
     case CaretPosition.AFTER_WITH_KEYWORD: {
