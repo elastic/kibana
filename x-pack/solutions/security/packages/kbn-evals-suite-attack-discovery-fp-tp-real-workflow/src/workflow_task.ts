@@ -158,7 +158,62 @@ export interface AttackDiscoveryTaskOutput {
   seedingError?: string;
 }
 
+/** Prefix on `seedingError`: the case never reached the model, so it is not a model verdict. */
+export const HARNESS_SEEDING_FAILURE_PREFIX = '[harness seeding failure]';
+
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export interface SeedRetryOptions {
+  /** Total tries including the first. Default 4. */
+  maxAttempts?: number;
+  /** Delay before the 2nd try; doubles each retry. Default 1000ms. */
+  baseDelayMs?: number;
+}
+
+const TRANSIENT_STATUSES = new Set([500, 502, 503, 504]);
+const TRANSIENT_MESSAGE =
+  /no_shard_available_action_exception|unavailable_shards_exception|\b(?:500|502|503|504)\b/i;
+
+const isTransientSeedingError = (err: unknown): boolean => {
+  const status = (err as { status?: unknown } | null)?.status;
+  if (typeof status === 'number') {
+    return TRANSIENT_STATUSES.has(status);
+  }
+  return TRANSIENT_MESSAGE.test(err instanceof Error ? err.message : String(err));
+};
+
+/**
+ * Retries `fn` with exponential backoff on transient 5xx / no-shard errors
+ * (e.g. a fresh `.chat-conversations` index whose primary shard is not yet
+ * allocated). Non-transient errors (4xx) throw immediately; once the budget is
+ * exhausted the last error is rethrown.
+ */
+const withTransientRetry = async <T>(
+  fn: () => Promise<T>,
+  {
+    log,
+    description,
+    maxAttempts = 4,
+    baseDelayMs = 1000,
+  }: SeedRetryOptions & { log: ToolingLog; description: string }
+): Promise<T> => {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (attempt >= maxAttempts || !isTransientSeedingError(err)) {
+        throw err;
+      }
+      const delayMs = baseDelayMs * 2 ** (attempt - 1);
+      log.warning(
+        `Transient failure trying to ${description} (attempt ${attempt}/${maxAttempts}): ${
+          err instanceof Error ? err.message : String(err)
+        }; retrying in ${delayMs}ms`
+      );
+      await sleep(delayMs);
+    }
+  }
+};
 
 /** Never-called fetch for ES-only seeding helpers (see SeedingClients.esClient). */
 const noopFetch = (() => {
@@ -1042,22 +1097,27 @@ export const seedAttackDiscovery = async (
 export const seedInvestigation = async (
   { fetch, log }: SeedingClients,
   attackDiscoveryId: string,
-  title: string
+  title: string,
+  retry: SeedRetryOptions = {}
 ): Promise<string> => {
   const conversationId = deriveInvestigationId(attackDiscoveryId) ?? randomUuid();
-  await fetch('/api/agent_builder/conversations', {
-    method: 'POST',
-    headers: { 'kbn-xsrf': 'true', 'elastic-api-version': '2023-10-31' },
-    body: JSON.stringify({
-      conversation_id: conversationId,
-      title,
-      // The workflow runtime resolves its own internal user via getFakeRequest(),
-      // not the REST caller — a private conversation is unreadable by
-      // `load_investigation` (client.ts get() permission check). Public mode
-      // lets any user with access to the agent read the conversation.
-      access_control: { access_mode: 'public' },
-    }),
-  });
+  await withTransientRetry(
+    () =>
+      fetch('/api/agent_builder/conversations', {
+        method: 'POST',
+        headers: { 'kbn-xsrf': 'true', 'elastic-api-version': '2023-10-31' },
+        body: JSON.stringify({
+          conversation_id: conversationId,
+          title,
+          // The workflow runtime resolves its own internal user via getFakeRequest(),
+          // not the REST caller — a private conversation is unreadable by
+          // `load_investigation` (client.ts get() permission check). Public mode
+          // lets any user with access to the agent read the conversation.
+          access_control: { access_mode: 'public' },
+        }),
+      }),
+    { log, description: `open investigation conversation ${conversationId}`, ...retry }
+  );
   log.info(`Opened investigation conversation ${conversationId} for AD ${attackDiscoveryId}`);
   return conversationId;
 };
@@ -1110,7 +1170,7 @@ export const runAttackDiscoveryWorkflow = async ({
     return {
       executionId: 'not-started',
       executionStatus: 'failed' as ExecutionStatus,
-      seedingError: message,
+      seedingError: `${HARNESS_SEEDING_FAILURE_PREFIX} ${message}`,
     };
   }
 

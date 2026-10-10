@@ -15,6 +15,7 @@ import {
   buildAttackDiscoveryFromPayload,
   copyAttackDiscoveryToAdhocIndex,
   deriveInvestigationId,
+  HARNESS_SEEDING_FAILURE_PREFIX,
   normalizeVerdictLabel,
   readAgentConnectorId,
   readAgentVerdict,
@@ -439,6 +440,60 @@ describe('seedInvestigation', () => {
       /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-8[0-9a-f]{3}-[0-9a-f]{12}$/
     );
   });
+
+  it('retries a transient 500 no_shard_available failure and then succeeds', async () => {
+    let calls = 0;
+    const fetch = (async () => {
+      calls++;
+      if (calls < 3) {
+        throw Object.assign(
+          new Error(
+            '[POST /api/agent_builder/conversations] 500 Internal Server Error -- no_shard_available_action_exception'
+          ),
+          { status: 500 }
+        );
+      }
+      return { id: 'x' };
+    }) as never;
+    const log = mockLog() as unknown as { warning: jest.Mock };
+
+    const conversationId = await seedInvestigation({ fetch, log: log as never }, AD_DOC_ID, 't', {
+      baseDelayMs: 1,
+    });
+
+    expect(calls).toBe(3);
+    expect(conversationId).toBe(deriveInvestigationId(AD_DOC_ID));
+    expect(log.warning).toHaveBeenCalledTimes(2);
+  });
+
+  it('rethrows the last transient error once the retry budget is exhausted', async () => {
+    let calls = 0;
+    const fetch = (async () => {
+      calls++;
+      throw Object.assign(new Error('503 unavailable'), { status: 503 });
+    }) as never;
+
+    await expect(
+      seedInvestigation({ fetch, log: mockLog() }, AD_DOC_ID, 't', {
+        maxAttempts: 3,
+        baseDelayMs: 1,
+      })
+    ).rejects.toThrow('503 unavailable');
+    expect(calls).toBe(3);
+  });
+
+  it('does not retry non-transient (4xx) failures', async () => {
+    let calls = 0;
+    const fetch = (async () => {
+      calls++;
+      throw Object.assign(new Error('403 forbidden'), { status: 403 });
+    }) as never;
+
+    await expect(
+      seedInvestigation({ fetch, log: mockLog() }, AD_DOC_ID, 't', { baseDelayMs: 1 })
+    ).rejects.toThrow('403 forbidden');
+    expect(calls).toBe(1);
+  });
 });
 
 describe('readAgentVerdict', () => {
@@ -661,6 +716,7 @@ describe('runAttackDiscoveryWorkflow (corpus → ids bridge)', () => {
 
     expect(result.executionStatus).toBe('failed');
     expect(result.seedingError).toContain('403 forbidden');
+    expect(result.seedingError).toContain(HARNESS_SEEDING_FAILURE_PREFIX);
     expect(result.verdict).toBeUndefined();
     expect(log.error).toHaveBeenCalled();
   });
