@@ -27,7 +27,9 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     await unmockInferenceEndpoints(page);
   });
 
-  test('opens flyout with model details, task badges, and author', async ({ pageObjects }) => {
+  test('opens flyout with model details, documentation links, and author', async ({
+    pageObjects,
+  }) => {
     const { eisModels } = pageObjects;
 
     await test.step('click a model card to open the flyout', async () => {
@@ -39,9 +41,11 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
       await expect(eisModels.flyout).toContainText('Anthropic Claude Sonnet 3.7');
     });
 
-    await test.step('flyout header shows task type badges', async () => {
-      await expect(eisModels.flyoutTaskBadges).toContainText('chat_completion');
-      await expect(eisModels.flyoutTaskBadges).toContainText('completion');
+    await test.step('flyout shows EIS documentation links', async () => {
+      await expect(eisModels.flyoutCompareModelsLink).toBeVisible();
+      await expect(eisModels.flyoutCompareModelsLink).toHaveText('Compare models');
+      await expect(eisModels.flyoutViewEisDocumentationLink).toBeVisible();
+      await expect(eisModels.flyoutViewEisDocumentationLink).toHaveText('View EIS documentation');
     });
 
     await test.step('flyout body shows model author', async () => {
@@ -139,10 +143,6 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
       await expect(eisModels.flyout).toBeVisible();
     });
 
-    await test.step('flyout header shows the deprecated status badge', async () => {
-      await expect(eisModels.modelStatusBadge('openai-gpt-3.5', 'deprecated')).toBeVisible();
-    });
-
     await test.step('Add endpoint remains enabled for a deprecated (non-EOL) model', async () => {
       await expect(eisModels.flyoutAddEndpointButton).toBeEnabled();
     });
@@ -157,10 +157,6 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
       await eisModels.showEndOfLifeModels();
       await eisModels.modelCard('OpenAI Davinci').click();
       await expect(eisModels.flyout).toBeVisible();
-    });
-
-    await test.step('flyout header shows the EOL status badge', async () => {
-      await expect(eisModels.modelStatusBadge('openai-davinci', 'eol')).toBeVisible();
     });
 
     await test.step('Add endpoint is disabled for an EOL model', async () => {

@@ -7,8 +7,6 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiBadge,
-  EuiBadgeGroup,
   EuiButtonEmpty,
   EuiDescriptionList,
   EuiFlexGroup,
@@ -52,7 +50,6 @@ import { ModelUnavailableCallout } from './model_unavailable_callout';
 import { RegionOptions } from './region_options';
 import type { EisInferenceEndpoint } from '../../../common/types';
 import { EisModelStatus } from '../../types';
-import { ModelStatusBadge } from '../model_status/model_status_badge';
 import { DataRetention } from './data_retention';
 
 export interface ModelDetailFlyoutProps {
@@ -117,16 +114,13 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
     };
   }, [allEndpoints, modelId]);
 
-  const { taskTypeOptions, uniqueTaskTypes } = useMemo(() => {
+  const taskTypeOptions = useMemo(() => {
     const taskTypes = [...new Set(endpoints.map((e) => e.task_type))];
-    return {
-      uniqueTaskTypes: taskTypes,
-      taskTypeOptions: taskTypes.map((tt) => ({
-        value: tt,
-        label: tt,
-        description: TASK_TYPE_DESCRIPTIONS[tt] ?? '',
-      })),
-    };
+    return taskTypes.map((tt) => ({
+      value: tt,
+      label: tt,
+      description: TASK_TYPE_DESCRIPTIONS[tt] ?? '',
+    }));
   }, [endpoints]);
 
   const handleOpenAddModal = useCallback(() => {
@@ -188,24 +182,6 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       }),
       description: <DataRetention metadata={modelMetadata} />,
     },
-    {
-      title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.documentationLabel', {
-        defaultMessage: 'Documentation',
-      }),
-      description: (
-        <EuiLink
-          data-test-subj="searchInferenceEndpointsModelDetailFlyoutViewDocumentationLink"
-          href={docLinks.elasticInferenceService}
-          target="_blank"
-          external
-        >
-          {i18n.translate(
-            'xpack.searchInferenceEndpoints.modelDetailFlyout.viewDocumentationLink',
-            { defaultMessage: 'View documentation' }
-          )}
-        </EuiLink>
-      ),
-    },
   ];
 
   return (
@@ -219,13 +195,6 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
         <EuiTitle size="m">
           <h2 id={flyoutTitleId}>{displayName}</h2>
         </EuiTitle>
-        <EuiSpacer size="xs" />
-        <EuiBadgeGroup data-test-subj="flyoutTaskBadges">
-          <ModelStatusBadge id={modelId} status={modelStatus} metadata={modelMetadata} />
-          {uniqueTaskTypes.map((taskType) => (
-            <EuiBadge key={taskType}>{taskType}</EuiBadge>
-          ))}
-        </EuiBadgeGroup>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -243,6 +212,42 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           data-test-subj="flyoutModelDetails"
         />
         <RegionOptions options={regionOptions} />
+
+        <EuiSpacer size="l" />
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="s"
+          data-test-subj="modelDetailFlyoutDocumentationLinks"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              href={docLinks.elasticInferenceServiceSupportedModels}
+              target="_blank"
+              external
+              data-test-subj="modelDetailFlyoutCompareModelsLink"
+            >
+              {i18n.translate(
+                'xpack.searchInferenceEndpoints.modelDetailFlyout.compareModelsLink',
+                {
+                  defaultMessage: 'Compare models',
+                }
+              )}
+            </EuiLink>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              href={docLinks.elasticInferenceService}
+              target="_blank"
+              external
+              data-test-subj="modelDetailFlyoutViewEisDocumentationLink"
+            >
+              {i18n.translate(
+                'xpack.searchInferenceEndpoints.modelDetailFlyout.viewEisDocumentationLink',
+                { defaultMessage: 'View EIS documentation' }
+              )}
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
         <EuiHorizontalRule margin="xxl" />
 
