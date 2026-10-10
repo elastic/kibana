@@ -23,11 +23,16 @@ import {
 import type { DataTableRecord, SortOrder } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
+import type { Row } from '@tanstack/react-table';
 import { useDiscoverServices } from '../../../../../../hooks/use_discover_services';
 import { getCustomCascadeGridBodyStyle } from './cascade_leaf_component.styles';
 import type { ESQLDataGroupNode } from './types';
 import { useCascadedDocumentsContext } from '../cascaded_documents_provider';
-import { TanStackDataGrid } from '../../../../../../components/discover_grid/tanstack_data_grid/tanstack_data_grid';
+import {
+  TanStackDataGrid,
+  type RowVirtualizer,
+  type UseRowVirtualizer,
+} from '../../../../../../components/discover_grid/tanstack_data_grid';
 import type { DiscoverGridImplementation } from '../../../../../../components/discover_grid/discover_grid_implementation';
 
 interface ESQLDataCascadeLeafCellProps
@@ -158,6 +163,63 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   );
 });
 
+/**
+ * Virtualizes the TanStack grid's rows through the cascade's virtualizer, like
+ * {@link CustomCascadeGridBodyMemoized} does for UnifiedDataTable, so leaf rows scroll and
+ * restore with the cascade instead of in a nested scroll container.
+ */
+const getCascadeRowVirtualizer = ({
+  virtualizerController,
+  cellId,
+  rowIndex,
+}: Pick<ESQLDataCascadeLeafCellProps, 'virtualizerController' | 'cellId' | 'rowIndex'>) =>
+  function useCascadeRowVirtualizer({
+    rows,
+    estimateSize,
+    overscan,
+    scrollElementRef,
+    isFullScreen,
+  }: Parameters<UseRowVirtualizer>[0]): RowVirtualizer {
+    const { virtualizer, handle, isDetached } = useConnectedChildVirtualizer<ESQLDataGroupNode>({
+      controller: virtualizerController,
+      cellId,
+      rowIndex,
+      // The cascade virtualizer only reads the row count and ids.
+      rows: rows as unknown as Array<Row<ESQLDataGroupNode>>,
+      estimatedRowHeight: estimateSize(),
+      overscan,
+      privateScrollElement: scrollElementRef,
+    });
+
+    useLayoutEffect(() => {
+      if (isFullScreen && !isDetached) {
+        handle.detachScrollElement();
+      } else if (!isFullScreen && isDetached) {
+        handle.reattachScrollElement();
+      }
+    }, [isFullScreen, isDetached, handle]);
+
+    const scrollMargin = isDetached ? 0 : virtualizer.measurementsCache[0]?.start ?? 0;
+
+    return useMemo(
+      () => ({
+        getVirtualItems: () => virtualizer.getVirtualItems(),
+        getTotalSize: () => virtualizer.getTotalSize(),
+        measureElement: virtualizer.measureElement,
+        // The cascade virtualizer measures its rows itself.
+        measure: () => {},
+        scrollToIndex: (index) => {
+          const offset = virtualizer.measurementsCache[index]?.start;
+          if (offset !== undefined) {
+            virtualizer.scrollToVirtualizedIndex(offset, {});
+          }
+        },
+        scrollMargin,
+      }),
+      [virtualizer, scrollMargin]
+    );
+  };
+
 export const ESQLDataCascadeLeafCell = React.memo(
   ({
     cellData,
@@ -275,6 +337,11 @@ export const ESQLDataCascadeLeafCell = React.memo(
       [virtualizerController, isCellInFullScreenMode, cellId, cellData, rowIndex]
     );
 
+    const useCascadeRowVirtualizer = useMemo(
+      () => getCascadeRowVirtualizer({ virtualizerController, cellId, rowIndex }),
+      [virtualizerController, cellId, rowIndex]
+    );
+
     if (gridImplementation !== 'unified') {
       return (
         <TanStackDataGrid
@@ -301,6 +368,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
           toolbarLeftSide={documentCountLabel}
           initialState={initialGridState}
           onInitialStateChange={onInitialStateChange}
+          useRowVirtualizer={useCascadeRowVirtualizer}
         />
       );
     }

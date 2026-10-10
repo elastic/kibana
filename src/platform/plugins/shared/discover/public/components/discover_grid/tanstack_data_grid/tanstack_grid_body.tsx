@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { Row } from '@tanstack/react-table';
-import { useVirtualizer, type Virtualizer } from '@tanstack/react-virtual';
+import { useVirtualizer, type VirtualItem } from '@tanstack/react-virtual';
 import { useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
@@ -129,7 +129,60 @@ const VirtualRow = React.memo(
 );
 VirtualRow.displayName = 'VirtualRow';
 
-export type RowVirtualizer = Virtualizer<HTMLDivElement, Element>;
+/** The part of a row virtualizer the grid body uses, so rows can also be virtualized by a parent. */
+export interface RowVirtualizer {
+  getVirtualItems: () => VirtualItem[];
+  getTotalSize: () => number;
+  measureElement: (element: Element | null) => void;
+  measure: () => void;
+  scrollToIndex: (index: number, options?: { align?: 'start' | 'center' | 'end' | 'auto' }) => void;
+  /** Offset of the first row in the scroll element, when rows scroll with a parent element. */
+  scrollMargin: number;
+}
+
+export interface UseRowVirtualizerParams {
+  rows: Array<Row<DataTableRecord>>;
+  estimateSize: () => number;
+  getItemKey: (index: number) => string | number;
+  overscan: number;
+  initialOffset: number;
+  /** The grid body, which scrolls the rows unless a parent element does. */
+  scrollElementRef: React.MutableRefObject<HTMLDivElement | null>;
+  isFullScreen: boolean;
+}
+
+export type UseRowVirtualizer = (params: UseRowVirtualizerParams) => RowVirtualizer;
+
+/** Virtualizes the rows within the grid body itself. */
+export const useGridBodyRowVirtualizer: UseRowVirtualizer = ({
+  rows,
+  estimateSize,
+  getItemKey,
+  overscan,
+  initialOffset,
+  scrollElementRef,
+}) => {
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => scrollElementRef.current,
+    estimateSize,
+    overscan,
+    initialOffset,
+    getItemKey,
+  });
+  // The virtualizer instance is stable; methods read its current state.
+  return useMemo(
+    () => ({
+      getVirtualItems: () => virtualizer.getVirtualItems(),
+      getTotalSize: () => virtualizer.getTotalSize(),
+      measureElement: virtualizer.measureElement,
+      measure: () => virtualizer.measure(),
+      scrollToIndex: (index, options) => virtualizer.scrollToIndex(index, options),
+      scrollMargin: 0,
+    }),
+    [virtualizer]
+  );
+};
 
 interface TanStackGridBodyProps {
   scrollRef: React.MutableRefObject<HTMLDivElement | null>;
@@ -156,6 +209,8 @@ interface TanStackGridBodyProps {
   getColumnStyle: TanStackColumnLayout['getColumnStyle'];
   colCount: number;
   onKeyDown: (event: React.KeyboardEvent) => void;
+  useRowVirtualizer: UseRowVirtualizer;
+  isFullScreen: boolean;
 }
 
 /**
@@ -186,6 +241,8 @@ export const TanStackGridBody = React.memo(function TanStackGridBody({
   getColumnStyle,
   colCount,
   onKeyDown,
+  useRowVirtualizer,
+  isFullScreen,
 }: TanStackGridBodyProps) {
   const { euiTheme } = useEuiTheme();
   const estimateSize = useCallback(() => rowHeight, [rowHeight]);
@@ -195,13 +252,14 @@ export const TanStackGridBody = React.memo(function TanStackGridBody({
     [tableRows]
   );
 
-  const rowVirtualizer = useVirtualizer({
-    count: tableRows.length,
-    getScrollElement: () => scrollRef.current,
+  const rowVirtualizer = useRowVirtualizer({
+    rows: tableRows,
     estimateSize,
+    getItemKey,
     overscan: OVERSCAN,
     initialOffset: scrollPositionCache.get(scrollKey) ?? 0,
-    getItemKey,
+    scrollElementRef: scrollRef,
+    isFullScreen,
   });
   virtualizerRef.current = rowVirtualizer;
 
@@ -235,7 +293,9 @@ export const TanStackGridBody = React.memo(function TanStackGridBody({
         <div
           css={styles.virtualInner}
           style={{
-            transform: `translateY(${virtualItems[0]?.start ?? 0}px)`,
+            transform: `translateY(${
+              (virtualItems[0]?.start ?? rowVirtualizer.scrollMargin) - rowVirtualizer.scrollMargin
+            }px)`,
             width: totalWidth,
           }}
         >

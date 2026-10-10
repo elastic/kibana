@@ -8,3 +8,4 @@
  */
 
 export { TanStackDataGrid, type TanStackDataGridProps } from './tanstack_data_grid';
+export type { RowVirtualizer, UseRowVirtualizer } from './tanstack_grid_body';

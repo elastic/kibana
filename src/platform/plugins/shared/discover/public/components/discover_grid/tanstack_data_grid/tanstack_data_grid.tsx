@@ -144,6 +144,8 @@ import {
   scrollPositionCache,
   type FindMatch,
   type RowVirtualizer,
+  type UseRowVirtualizer,
+  useGridBodyRowVirtualizer,
 } from './tanstack_grid_body';
 import type { useDiscoverServices } from '../../../hooks/use_discover_services';
 
@@ -213,6 +215,11 @@ export interface TanStackDataGridProps {
   /** Rendered below the toolbar, like the `bottomSection` of UnifiedDataTable's custom toolbar (callouts, loading indicator). */
   toolbarBottomSection?: React.ReactNode;
   hideFilteringOnComputedColumns?: UnifiedDataTableProps['hideFilteringOnComputedColumns'];
+  /**
+   * Virtualizes the rows, e.g. through a parent virtualizer in the cascade layout. Defaults to
+   * virtualizing within the grid body. Must not change while the grid is mounted.
+   */
+  useRowVirtualizer?: UseRowVirtualizer;
   /** Same as UnifiedDataTable: maximum number of fields shown in the summary column. */
   maxDocFieldsDisplayed?: UnifiedDataTableProps['maxDocFieldsDisplayed'];
   /** Same as UnifiedDataTable: UI actions trigger whose compatible actions are added to the cell popover. */
@@ -899,6 +906,7 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
   toolbarTrailingControl,
   toolbarBottomSection,
   hideFilteringOnComputedColumns,
+  useRowVirtualizer = useGridBodyRowVirtualizer,
   maxDocFieldsDisplayed = DEFAULT_MAX_DOC_FIELDS_DISPLAYED,
   cellActionsTriggerId,
   cellActionsMetadata,
@@ -3014,6 +3022,8 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
           <TanStackGridBody
             scrollRef={parentRef}
             virtualizerRef={virtualizerRef}
+            useRowVirtualizer={useRowVirtualizer}
+            isFullScreen={isFullScreen}
             tableRows={tableRows}
             rowIndexOffset={isMultiPagePagination ? currentPageIndex * currentPageSize : 0}
             columnDefs={tanstackColumns}
