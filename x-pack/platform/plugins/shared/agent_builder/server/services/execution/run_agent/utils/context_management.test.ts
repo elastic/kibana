@@ -368,6 +368,44 @@ describe('compactContext node', () => {
     });
   });
 
+  it('reports the compaction analytics event with correct fields', async () => {
+    compactContextMock.mockResolvedValue(compactionResult());
+    const analyticsService = {
+      reportSkillInvoked: jest.fn(),
+      reportCompactionTriggered: jest.fn(),
+    };
+    const { compactContext: node } = createContextManagementNodes(
+      deps({ analyticsService, agentId: 'my-agent', executionId: 'exec-1' })
+    );
+
+    await node(
+      baseState({ currentCycle: 3, compactionRequest: request({ trigger: 'round_start' }) })
+    );
+
+    expect(analyticsService.reportCompactionTriggered).toHaveBeenCalledWith({
+      agentId: 'my-agent',
+      executionId: 'exec-1',
+      trigger: 'round_start',
+      tokenCountBefore: 90_000,
+      tokenCountAfter: 30_000,
+      summarizedCycleCount: 4,
+      modelId: 'c',
+    });
+  });
+
+  it('does not report analytics when compaction is skipped', async () => {
+    compactContextMock.mockResolvedValue(undefined);
+    const analyticsService = {
+      reportSkillInvoked: jest.fn(),
+      reportCompactionTriggered: jest.fn(),
+    };
+    const { compactContext: node } = createContextManagementNodes(deps({ analyticsService }));
+
+    await node(baseState({ compactionRequest: request() }));
+
+    expect(analyticsService.reportCompactionTriggered).not.toHaveBeenCalled();
+  });
+
   it('allows the summarizer fallback for forced compactions only', async () => {
     compactContextMock.mockResolvedValue(compactionResult());
     const { compactContext: node } = createContextManagementNodes(deps());

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CompactionSummary, ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { CompactionSummary, CompactionTrigger, ConversationRoundStep } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { ToolCallWithReasoning } from '@kbn/agent-builder-genai-utils/langchain';
@@ -20,7 +20,7 @@ export type ResearchOutcome =
 
 /** A compaction decided by `contextManagement`, executed by `compactContext`. */
 export interface CompactionRequest {
-  trigger: 'forced' | 'round_start' | 'proactive';
+  trigger: CompactionTrigger;
   /** Max tokens of completed cycles kept verbatim before the current one. */
   tailCapTokens: number;
   /** Input tokens that motivated the compaction, when known. */
