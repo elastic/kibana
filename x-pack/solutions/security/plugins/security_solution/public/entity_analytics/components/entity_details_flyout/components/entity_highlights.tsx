@@ -44,7 +44,7 @@ import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useHasEntityHighlightsLicense } from '../../../../common/hooks/use_has_entity_highlights_license';
 import { useFetchEntityDetailsHighlights } from '../hooks/use_fetch_entity_details_highlights';
 import { useFetchPersistedAiSummary } from '../hooks/use_fetch_persisted_ai_summary';
-import { useInferenceConnectorAccess } from '../hooks/use_inference_connector_access';
+import { useInferenceConnectorAccess } from '../../../hooks/use_inference_connector_access';
 import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { EntityHighlightsResult } from './entity_highlights_result';
 import type { Entity } from '../../../../../common/api/entity_analytics';

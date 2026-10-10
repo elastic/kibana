@@ -64,7 +64,14 @@ describe('generateLeadsTool', () => {
     inference: {},
     actions: { getActionsClientWithRequest: mockGetActionsClientWithRequest },
   };
-  const mockPipelineCoreStart = { analytics: {} };
+  const mockPipelineCoreStart = {
+    analytics: {},
+    elasticsearch: {
+      client: {
+        asInternalUser: mockEsClient.asInternalUser,
+      },
+    },
+  };
 
   const tool = generateLeadsTool(
     mockCore,
@@ -325,6 +332,7 @@ describe('generateLeadsTool', () => {
           expect.objectContaining({
             spaceId: 'default',
             sourceType: 'adhoc',
+            internalEsClient: mockEsClient.asInternalUser,
           })
         );
       });

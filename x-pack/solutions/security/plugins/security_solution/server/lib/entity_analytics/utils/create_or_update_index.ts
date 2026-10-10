@@ -94,6 +94,13 @@ export const createOrUpdateIndex = async ({
     const error = transformError(err);
     const fullErrorMessage = `Failed to create index: ${options.index}: ${error.message}`;
     logger.error(fullErrorMessage);
+    // Rethrow the original error (with an updated message) rather than a new one, so callers
+    // that classify it by type (e.g. `e.meta?.body?.error?.type`, such as an ES
+    // `security_exception`) keep working instead of seeing a plain `Error` with no `.meta`.
+    if (err instanceof Error) {
+      err.message = fullErrorMessage;
+      throw err;
+    }
     throw new Error(fullErrorMessage);
   }
 };

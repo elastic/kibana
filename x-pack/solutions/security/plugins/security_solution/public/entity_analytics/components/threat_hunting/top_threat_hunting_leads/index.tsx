@@ -31,7 +31,9 @@ import {
 import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import { noop } from 'lodash/fp';
 import { AiButton, AiIcon } from '@kbn/shared-ux-ai-components';
+import type { AIConnector } from '@kbn/inference-connectors';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useInferenceConnectorAccess } from '../../../hooks/use_inference_connector_access';
 import type { HuntingLead } from './types';
 import { GeneratedOnLabel } from './generated_on_label';
 import { LeadCard } from './lead_card';
@@ -57,7 +59,7 @@ interface TopThreatHuntingLeadsProps {
   onHuntInChat: () => void;
   onGenerate: () => void;
   connectorId: string | undefined;
-  hasValidConnector: boolean;
+  availableConnectors: AIConnector[] | undefined;
   onConnectorIdSelected: (id: string) => void;
   isAgentChatExperienceEnabled: boolean;
   hasWritePermissionError?: boolean;
@@ -77,7 +79,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   onHuntInChat,
   onGenerate,
   connectorId,
-  hasValidConnector,
+  availableConnectors,
   onConnectorIdSelected,
   isAgentChatExperienceEnabled,
   hasWritePermissionError,
@@ -115,14 +117,20 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   const { getUrlForApp } = useKibana().services.application;
   const genAiSettingsUrl = getUrlForApp('management', { path: '/ai/genAiSettings' });
 
+  const { canUseSelectedConnector, missingInferencePrivilege } = useInferenceConnectorAccess({
+    connectors: availableConnectors,
+    selectedConnectorId: connectorId ?? '',
+  });
+  const hasValidConnector = !!connectorId && canUseSelectedConnector;
+
   const isAgentChatExperienceDisabled = !isAgentChatExperienceEnabled;
-  const hasNoConnectorSelected = isAgentChatExperienceEnabled && !hasValidConnector;
-  const generateTooltipContent = hasWritePermissionError
-    ? i18n.GENERATE_DISABLED_NO_WRITE_PERMISSION_TOOLTIP
-    : hasNoConnectorSelected
-    ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP
-    : undefined;
-  const isGenerateDisabled = !!hasWritePermissionError || hasNoConnectorSelected;
+  const hasNoUsableConnector = isAgentChatExperienceEnabled && !hasValidConnector;
+  const generateTooltipContent = getGenerateTooltipContent({
+    hasWritePermissionError,
+    hasNoUsableConnector,
+    missingInferencePrivilege,
+  });
+  const isGenerateDisabled = !!hasWritePermissionError || hasNoUsableConnector;
   const renderCount = Math.min(leads.length, visibleCardCount);
   const hasFewLeads = leads.length < visibleCardCount;
   const openGenAiSettingsButton = (
@@ -231,15 +239,13 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   // progress), the whole panel collapses into a single slim banner row
   // instead of the full header + body layout used once leads exist.
   if (leads.length === 0 && (isGenerating || !isLoading)) {
-    const description = isGenerating
-      ? i18n.GENERATING_LEADS_DESCRIPTION
-      : hasGenerated
-      ? i18n.NO_DATA_DESCRIPTION
-      : isAgentChatExperienceDisabled
-      ? i18n.NO_AGENT_CHAT_EXPERIENCE_DESCRIPTION
-      : hasNoConnectorSelected
-      ? i18n.NO_CONNECTOR_SELECTED_DESCRIPTION
-      : i18n.NO_LEADS_DESCRIPTION;
+    const description = getEmptyStateDescription({
+      isGenerating,
+      hasGenerated,
+      isAgentChatExperienceDisabled,
+      hasNoUsableConnector,
+      missingInferencePrivilege,
+    });
 
     const actions = isGenerating ? undefined : isAgentChatExperienceDisabled ? (
       openGenAiSettingsButton
@@ -414,4 +420,54 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
       )}
     </EuiPanel>
   );
+};
+
+const getGenerateTooltipContent = ({
+  hasWritePermissionError,
+  hasNoUsableConnector,
+  missingInferencePrivilege,
+}: {
+  hasWritePermissionError?: boolean;
+  hasNoUsableConnector: boolean;
+  missingInferencePrivilege?: boolean;
+}): string | undefined => {
+  if (hasWritePermissionError) {
+    return i18n.GENERATE_DISABLED_NO_WRITE_PERMISSION_TOOLTIP;
+  }
+  if (hasNoUsableConnector) {
+    return missingInferencePrivilege
+      ? i18n.GENERATE_DISABLED_MISSING_INFERENCE_PRIVILEGE_TOOLTIP
+      : i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP;
+  }
+  return undefined;
+};
+
+const getEmptyStateDescription = ({
+  isGenerating,
+  hasGenerated,
+  isAgentChatExperienceDisabled,
+  hasNoUsableConnector,
+  missingInferencePrivilege,
+}: {
+  isGenerating: boolean;
+  hasGenerated?: boolean;
+  isAgentChatExperienceDisabled: boolean;
+  hasNoUsableConnector: boolean;
+  missingInferencePrivilege?: boolean;
+}): string => {
+  if (isGenerating) {
+    return i18n.GENERATING_LEADS_DESCRIPTION;
+  }
+  if (hasGenerated) {
+    return i18n.NO_DATA_DESCRIPTION;
+  }
+  if (isAgentChatExperienceDisabled) {
+    return i18n.NO_AGENT_CHAT_EXPERIENCE_DESCRIPTION;
+  }
+  if (hasNoUsableConnector) {
+    return missingInferencePrivilege
+      ? i18n.MISSING_INFERENCE_PRIVILEGE_DESCRIPTION
+      : i18n.NO_CONNECTOR_SELECTED_DESCRIPTION;
+  }
+  return i18n.NO_LEADS_DESCRIPTION;
 };

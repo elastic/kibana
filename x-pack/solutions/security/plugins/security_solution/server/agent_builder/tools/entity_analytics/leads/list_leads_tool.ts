@@ -76,7 +76,7 @@ export const listLeadsTool = (
       let errorMessage: string | undefined;
 
       try {
-        const [, { security }] = await core.getStartServices();
+        const [coreCtx, { security }] = await core.getStartServices();
         const privileges = await getUserLeadPrivileges(request, security, spaceId);
         if (!privileges.has_read_permissions) {
           success = false;
@@ -94,8 +94,10 @@ export const listLeadsTool = (
           };
         }
 
+        const internalEsClient = coreCtx.elasticsearch.client.asInternalUser;
         const dataClient = createLeadDataClient({
           esClient: esClient.asCurrentUser,
+          internalEsClient,
           logger,
           spaceId,
         });

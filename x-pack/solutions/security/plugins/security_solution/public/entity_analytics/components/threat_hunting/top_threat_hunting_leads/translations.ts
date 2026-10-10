@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { LEADS_INDEX_PATTERN } from '../../../../../common/entity_analytics/lead_generation/constants';
+import { INFERENCE_CONNECTOR_CLUSTER_PRIVILEGE } from '../../../../../common/inference_connector/constants';
 
 export const TOP_THREAT_HUNTING_LEADS_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.title',
@@ -230,6 +231,23 @@ export const GENERATE_DISABLED_NO_WRITE_PERMISSION_TOOLTIP = i18n.translate(
 export const GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.generateDisabledNoConnectorTooltip',
   { defaultMessage: 'Add a connector in Options to enable lead generation' }
+);
+
+export const GENERATE_DISABLED_MISSING_INFERENCE_PRIVILEGE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.generateDisabledMissingInferencePrivilegeTooltip',
+  {
+    defaultMessage:
+      "You don't have enough privileges to use the selected connector. Elasticsearch cluster privilege {privilege} is required",
+    values: { privilege: INFERENCE_CONNECTOR_CLUSTER_PRIVILEGE },
+  }
+);
+
+export const MISSING_INFERENCE_PRIVILEGE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.missingInferencePrivilegeDescription',
+  {
+    defaultMessage:
+      'Not enough privileges to use the selected connector. Select a different connector to start generating leads',
+  }
 );
 
 export const getStalenessLabel = (staleness: string): string => {

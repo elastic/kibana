@@ -9,9 +9,9 @@ import { useCallback, useMemo } from 'react';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useQuery } from '@kbn/react-query';
 import { InferenceConnectorType } from '@kbn/inference-common';
-import { INFERENCE_CONNECTOR_PRIVILEGES_INTERNAL_URL } from '../../../../../common/inference_connector/constants';
-import { API_VERSIONS } from '../../../../../common/constants';
-import { useKibana } from '../../../../common/lib/kibana';
+import { INFERENCE_CONNECTOR_PRIVILEGES_INTERNAL_URL } from '../../../common/inference_connector/constants';
+import { API_VERSIONS } from '../../../common/constants';
+import { useKibana } from '../../common/lib/kibana';
 
 export const INFERENCE_CONNECTOR_PRIVILEGES_QUERY_KEY = 'inference-connector-privileges';
 
