@@ -68,6 +68,7 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/calculate-auto'
   - '@kbn/core-lifecycle-browser-mocks'
+  - '@kbn/chart-icons'
 tags:
   - shared-common
   - package

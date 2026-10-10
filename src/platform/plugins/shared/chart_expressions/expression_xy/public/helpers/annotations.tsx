@@ -14,6 +14,7 @@ import { EuiFlexGroup, EuiIcon, EuiText, useEuiFontSize, euiTextTruncate } from 
 import { css } from '@emotion/react';
 import chroma from 'chroma-js';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
+import { resolveVisIcon } from '@kbn/chart-icons';
 import type {
   IconPosition,
   ReferenceLineDecorationConfig,
@@ -195,7 +196,7 @@ export const AnnotationIcon = ({
       {...rest}
       color={color}
       data-test-subj="xyVisAnnotationIcon"
-      type={iconConfig.icon || type}
+      type={resolveVisIcon(iconConfig.value)}
       className={iconConfig.shouldRotate ? rotateClassName : undefined}
       css={shouldRotateIcon && styles.rotatedIcon}
     />

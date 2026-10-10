@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiPaletteColorBlind } from '@elastic/eui';
+import type { VisIconType } from '@kbn/chart-icons';
 
 export interface GenericIcon {
   label: string;
@@ -16,7 +17,10 @@ export interface GenericIcon {
   prevName: string;
 }
 
-export const iconChoices: GenericIcon[] = [
+type IconChoice = Omit<GenericIcon, 'id' | 'package'> &
+  ({ package: 'eui'; id: VisIconType } | { package: 'maki'; id: string });
+
+export const iconChoices: IconChoice[] = [
   {
     id: 'folderOpen',
     prevName: 'fa-folder-open-o',
@@ -219,7 +223,7 @@ for (const [alias, canonicalId] of Object.entries(ICON_ID_ALIASES)) {
   }
 }
 
-export const urlTemplateIconChoices: GenericIcon[] = [
+export const urlTemplateIconChoices: IconChoice[] = [
   // Patterns are used to help default icon choices for common field names
   {
     id: 'visLine',
