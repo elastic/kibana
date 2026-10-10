@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
+import { EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import {
   ALERT_TRIAGE_DEFAULT_EXTRAS,
   AlertTriageWorkerExtras,
@@ -27,6 +29,29 @@ const readAlertTriageExtras = (settings: WorkerSettings): AlertTriageWorkerExtra
   return parsed.success ? parsed.data : ALERT_TRIAGE_DEFAULT_EXTRAS;
 };
 
+const DETAIL_MAX_WIDTH_PX = 480;
+
+/** Longer explanation shown under a control, where the wide column has room for it. */
+const SettingDetail: React.FC<{ id: string; children: React.ReactNode }> = ({ id, children }) => (
+  <EuiText
+    size="xs"
+    color="subdued"
+    css={css`
+      max-width: ${DETAIL_MAX_WIDTH_PX}px;
+      margin-top: 8px;
+    `}
+  >
+    <p
+      id={id}
+      css={css`
+        margin: 0;
+      `}
+    >
+      {children}
+    </p>
+  </EuiText>
+);
+
 /**
  * Watch-owned controls for the Alert Triage Worker's extras. Every change hands the complete
  * `extras` object back to the page draft.
@@ -38,6 +63,9 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
 }) => {
   const extras = readAlertTriageExtras(settings);
   const minBudgetPerHour = getMinBudgetPerHour(settings.scheduleInterval);
+  const confidenceDetailId = useGeneratedHtmlId({ prefix: 'alertZeroConfidenceDetail' });
+  const budgetDetailId = useGeneratedHtmlId({ prefix: 'alertZeroBudgetDetail' });
+  const lookbackDetailId = useGeneratedHtmlId({ prefix: 'alertZeroLookbackDetail' });
 
   return (
     <>
@@ -53,10 +81,13 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
             onExtrasChange({ ...extras, autoCloseConfidenceScoreMinThreshold })
           }
         />
+        <SettingDetail id={confidenceDetailId}>
+          {i18n.MINIMUM_CONFIDENCE_SCORE_DETAIL_TEXT}
+        </SettingDetail>
       </SettingRow>
       <SettingRow
         label={i18n.BUDGET_PER_HOUR_LABEL}
-        labelHelp={i18n.getBudgetPerHourHelpText(minBudgetPerHour)}
+        labelHelp={i18n.BUDGET_PER_HOUR_HELP_TEXT}
         data-test-subj="alertZeroBudgetPerHourRow"
       >
         <BoundedNumberField
@@ -64,10 +95,14 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
           min={minBudgetPerHour}
           max={BUDGET_PER_HOUR_MAX}
           ariaLabel={i18n.BUDGET_PER_HOUR_ARIA_LABEL}
+          ariaDescribedBy={budgetDetailId}
           testSubj="alertZeroBudgetPerHour"
           isDisabled={isDisabled}
           onChange={(budgetPerHour) => onExtrasChange({ ...extras, budgetPerHour })}
         />
+        <SettingDetail id={budgetDetailId}>
+          {i18n.getBudgetPerHourDetailText(minBudgetPerHour)}
+        </SettingDetail>
       </SettingRow>
       <SettingRow
         label={i18n.LOOKBACK_HOURS_LABEL}
@@ -79,10 +114,12 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
           min={LOOKBACK_HOURS_MIN}
           max={LOOKBACK_HOURS_MAX}
           ariaLabel={i18n.LOOKBACK_HOURS_ARIA_LABEL}
+          ariaDescribedBy={lookbackDetailId}
           testSubj="alertZeroLookbackHours"
           isDisabled={isDisabled}
           onChange={(lookbackHours) => onExtrasChange({ ...extras, lookbackHours })}
         />
+        <SettingDetail id={lookbackDetailId}>{i18n.LOOKBACK_HOURS_DETAIL_TEXT}</SettingDetail>
       </SettingRow>
     </>
   );
