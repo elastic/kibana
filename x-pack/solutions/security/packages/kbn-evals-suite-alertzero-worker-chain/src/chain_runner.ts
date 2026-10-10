@@ -28,6 +28,7 @@ import {
   PROPOSALS_API_VERSION,
   PROPOSALS_URL,
   PUBLIC_API_VERSION,
+  RULE_TUNING_ACTION_IDS,
   WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN,
   WORKER_IDS,
   WORKFLOW_IDS,
@@ -129,6 +130,8 @@ export interface ChainScenario {
   /** Seeded alerts: id + the host the alert fired on, for the D15 wrong-host check. */
   alerts: Array<{ id: string; hostId?: string }>;
   rule: { id: string; name: string };
+  /** Rule uuids of rules whose alerts the scenario labels TRUE POSITIVE (TPSuppressedByTuning). */
+  tpRuleIds?: string[];
   goldVerdict: 'true_positive' | 'false_positive' | 'inconclusive';
 }
 
@@ -192,6 +195,8 @@ interface ProposalDto {
   decision?: string;
   decidedBy?: unknown;
   conversationId: string;
+  /** What the action runs with; Rule Tuning actions name their target rule here. */
+  actionInput?: unknown;
   /** Decision deadline the product parked the proposal under (R7). */
   expiresAt?: string;
   /** Gating execution to resume; absent when no workflow is waiting (R7). */
@@ -878,6 +883,8 @@ const runChainUnserialized = async ({
           ? 'alert-triage'
           : proposal.actionWorkflowId === ACTION_IDS.handoffToForensics
           ? 'attack-discovery'
+          : RULE_TUNING_ACTION_IDS.has(actionWorkflowId)
+          ? 'rule-tuning'
           : 'endpoint-forensics';
       actions.push({
         actionWorkflowId,
@@ -890,6 +897,7 @@ const runChainUnserialized = async ({
         // worker-decided. The identity is parameterized (G20): the harness
         // records it, the gate compares it.
         decidedBy: proposal.decidedBy,
+        actionInput: proposal.actionInput,
         autonomyContext: {
           worker,
           // B6: applied autonomy read back from the product above.
@@ -919,6 +927,7 @@ const runChainUnserialized = async ({
       reopened: investigation?.reopened ?? false,
     },
     harnessInterference,
+    tpRuleIds: scenario.tpRuleIds,
     reviewInvestigations: reviewInvestigationIds,
   };
 };

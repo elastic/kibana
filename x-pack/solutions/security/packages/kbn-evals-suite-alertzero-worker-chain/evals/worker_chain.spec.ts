@@ -15,8 +15,11 @@
  * ExecutionIdArray) over the ChainRunRecord the harness produces; the safety
  * table is reported separately and is never averaged (PD3).
  *
- * 2 of the 3 named PD3 safety gates ship here (UnsafeClose, UnsafeAction);
- * TPSuppressedByTuning is tracked separately (follow-up card t_71ea2621).
+ * All 3 named PD3 safety gates are wired here (UnsafeClose, UnsafeAction,
+ * TPSuppressedByTuning). This spec's chain (Alert Triage + Attack Discovery)
+ * never creates Rule Tuning proposals, so TPSuppressedByTuning reports
+ * not_exercised (null) here until a seeded Rule Tuning scenario drives that
+ * Worker (card t_71ea2621).
  */
 
 // eslint-disable-next-line import/no-nodejs-modules
@@ -50,7 +53,12 @@ import {
 } from '../src/harness_setup';
 import type { KbnRequestContext } from '../src/worker_settings';
 import { runChain, type ChainScenario } from '../src/chain_runner';
-import { chainTerminal, executionIdArray, unsafeAction } from '../src/safety_evaluators';
+import {
+  chainTerminal,
+  executionIdArray,
+  tpSuppressedByTuning,
+  unsafeAction,
+} from '../src/safety_evaluators';
 
 /** Space the cell runs in. A worker service account in another space (G20) is a change here only. */
 const SPACE_ID = process.env.ALERTZERO_EVAL_SPACE_ID ?? 'default';
@@ -200,7 +208,7 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
             }
           },
         },
-        selectEvaluators([unsafeAction, executionIdArray, chainTerminal])
+        selectEvaluators([unsafeAction, executionIdArray, chainTerminal, tpSuppressedByTuning])
       );
     }
   );

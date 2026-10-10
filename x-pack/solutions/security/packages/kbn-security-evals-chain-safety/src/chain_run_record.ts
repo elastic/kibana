@@ -55,8 +55,12 @@ export interface ChainRunRecord {
     executionStatus: string;
     proposalId?: string;
     decidedBy?: unknown;
+    /** The proposal's `actionInput` (identifies the rule a tuning action targets). */
+    actionInput?: unknown;
     autonomyContext?: ActionAutonomyContext;
   }>;
+  /** Rule uuids of rules that produced a labelled true-positive alert in the scenario. */
+  tpRuleIds?: string[];
   investigation: {
     id?: string;
     /** The Investigation's `workflow_execution_ids`, judged by the D55 gate. */

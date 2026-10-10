@@ -54,7 +54,14 @@ export const ACTION_IDS = {
   killProcess: 'system-alertzero-action-kill-process',
   suspendProcess: 'system-alertzero-action-suspend-process',
   addRuleException: 'system-alertzero-action-add-rule-exception',
+  editRule: 'system-alertzero-action-edit-rule',
 } as const;
+
+/** Rule Tuning's gated actions (rule_tuning_review.yaml:973,1035,1069): attributed to the `rule-tuning` worker. */
+export const RULE_TUNING_ACTION_IDS: ReadonlySet<string> = new Set([
+  ACTION_IDS.addRuleException,
+  ACTION_IDS.editRule,
+]);
 
 export const PUBLIC_API_VERSION = '2023-10-31';
 export const ALERTZERO_API_VERSION = '1';
