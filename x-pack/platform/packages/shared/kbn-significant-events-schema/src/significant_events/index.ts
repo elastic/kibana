@@ -17,16 +17,13 @@ export {
   signalEntrySchema,
   severitySchema,
   SIGNAL_VERDICTS,
-  SIGNAL_IMPACTS,
   SEVERITY_OPTIONS,
   SEVERITY_CONTRACT_RULE,
-  IMPACT_CONTRACT_RULE,
   getSeverityLabel,
   type BlastRadiusEntry,
   type CausalFeature,
   type SignalEntry,
   type SignalVerdict,
-  type SignalImpact,
   type Severity,
 } from './common_schemas';
 export type { KnowledgeIndicator } from '../queries';

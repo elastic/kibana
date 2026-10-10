@@ -212,40 +212,6 @@ export const SIGNAL_VERDICTS = [
 ] as const;
 export type SignalVerdict = (typeof SIGNAL_VERDICTS)[number];
 
-export const SIGNAL_IMPACTS = ['none', 'degraded', 'blocked', 'exposed'] as const;
-export type SignalImpact = (typeof SIGNAL_IMPACTS)[number];
-
-/**
- * Impact field contract — single source of truth for schema `.describe()` and eval judges.
- * This contract only governs what the agent classifies from grounding evidence, not what tier that
- * classification implies; the tier is computed server-side from this value and the KI
- * `severity_score`.
- */
-export const IMPACT_CONTRACT_RULE = dedent`
-    What this signal's \`evidence\` shows about whether the operation succeeded — never from
-    \`p_value\`, \`change_point_type\`, fire count, or this signal's own \`description\` wording.
-
-    - "none": the operation completed normally, or no confirmed impact is shown.
-    - "degraded": the operation succeeded but impaired — elevated latency, a retry that then
-      succeeded, a fallback response, or a partial result.
-    - "blocked": the operation failed to complete — an error status (including a rejected or
-      bad-request reply), an exception, a timeout, or a refused connection. A reply reporting
-      failure is still a failure — whose fault does not change that; attribution belongs in
-      \`symptom_hypothesis\`, not here.
-    - "exposed": confirmed active exposure of PII, PCI DSS, SSN, credentials, secrets, or tokens.
-
-    An internal dependency's error is not itself the operation failing when the system is known to
-    tolerate it via a fallback, backup path, or degraded mode — judge the operation's own outcome,
-    not the dependency's. When a row genuinely doesn't show that outcome either way, the matched
-    query KI's description may break the tie if this signal's own description cites the specific
-    clause the row supports; otherwise default to "degraded". When both "blocked" and
-    "degraded" fit — an error is logged but the row does not establish whether the operation
-    completed — choose "degraded"; "blocked" requires the row to show non-completion.
-
-    Only \`confirms\`, or \`off_topic\` with a concrete non-benign error, may be anything but
-    "none".
-  `;
-
 const signalBaseSchema = lazySchema(() =>
   z.object({
     stream_name: z
@@ -257,9 +223,9 @@ const signalBaseSchema = lazySchema(() =>
       .max(MAX_TEXT_LENGTH)
       .describe(
         dedent`
-      Compact observation account for detection signals — use Found / Impact only. Max ${MAX_SIGNAL_DESCRIPTION_LENGTH} chars; shorten Found before omitting Impact on confirms.
+      What this signal's queries observed and what it affects, in plain prose a reader can act on. Max ${MAX_SIGNAL_DESCRIPTION_LENGTH} chars.
 
-      Found names the concrete row signature and failing target; never say only that rows were returned. Impact names the operation or who is affected, ending with this signal's impact value itself (blocked / degraded / exposed), or exactly "Impact: none." No cause, count, or topology in the clause, and never a word that contradicts the field. The structured verdict carries whether this confirms, refutes, is off-topic, is inconclusive, or was not checked; do not repeat a Verdict label here.
+      Name the concrete row signature and failing target — or, when nothing matched, what was looked for and what was found instead — then who or what is affected, how badly, for how long, and how broadly (the share of the operation, the number and share of parties, regions), using the numbers measured. Say whether the rows show the operation failing, slow, completing, or not settled, and name any sensitive data the rows expose by type. Report only what the queries observed: the verdict is recorded separately, and this text neither states it nor depends on it. Never say only that rows were returned.
 
       Do not name dependency chains, upstream causes, or topology here — use causal_features and blast_radius for that.
       ${NO_RAW_SENSITIVE_VALUES_RULE}
@@ -280,7 +246,6 @@ const signalBaseSchema = lazySchema(() =>
       .describe(
         'ES|QL query verification for this signal. Present when a query was executed to confirm or refute the signal; null when no verification was run.'
       ),
-    impact: z.enum(SIGNAL_IMPACTS).optional().describe(IMPACT_CONTRACT_RULE),
   })
 );
 
@@ -346,26 +311,6 @@ const detectionSignalSchema = lazySchema(() =>
           message: 'A not-checked verdict cannot include query evidence.',
         });
       }
-      // Deterministic guard: only a verdict that means "this row shows something real" may claim
-      // impact. An off-topic signal here means a concrete non-benign observed error (guarded above:
-      // off_topic requires found evidence) — not merely an unrelated finding.
-      if (signal.verdict === 'confirms' && signal.impact === undefined) {
-        context.addIssue({
-          code: 'custom',
-          path: ['impact'],
-          message:
-            'A confirms signal requires an explicit impact. An omitted impact is computed as "none" and would tier the event as low.',
-        });
-      }
-      const canClaimImpact = signal.verdict === 'confirms' || signal.verdict === 'off_topic';
-      if (!canClaimImpact && signal.impact !== undefined && signal.impact !== 'none') {
-        context.addIssue({
-          code: 'custom',
-          path: ['impact'],
-          message:
-            'impact can only be "degraded", "blocked", or "exposed" on a confirms signal, or an off_topic signal with a concrete observed error. Every other verdict must use impact "none" or omit it.',
-        });
-      }
     })
 );
 
@@ -383,8 +328,25 @@ export const SEVERITY_OPTIONS = [
   'low',
 ] as const satisfies readonly AlertEventSeverity[];
 
-export const SEVERITY_CONTRACT_RULE =
-  "Computed severity tier, derived from each signal's impact and the KI severity_score. Never written or inferred by agents.";
+/**
+ * Severity field contract — single source of truth for schema `.describe()`, the discovery agent
+ * and eval judges. It is the ladder the investigation agent applies. Order of `SEVERITY_OPTIONS`
+ * is part of this contract (most-severe first).
+ */
+export const SEVERITY_CONTRACT_RULE = dedent`
+    Severity rates the situation the grounding evidence confirms, whatever triggered the detection. It is the assessing agent's own verdict, decided from the confirming signals and the queries run — never from p_value, change_point_type, alert volume, the rule's severity_score or how alarming the rule looks. A concrete non-benign error in a found off-topic row evidences its own observed-error event; assess it from that row's error signature and impact.
+
+    Decide in order and stop at the first match:
+    - "critical": a global outage affecting all or most customers; several distinct core operations confirmed blocked at once (for example balance, history, and payment together); a mandatory service, job, or platform-critical operation confirmed blocked end-to-end so the component can no longer perform its primary function — unless the block is confined to a single endpoint or lookup path affecting only that one operation, which stays at "high"; or confirmed active exposure of PII, PCI DSS data, SSNs, credentials, secrets, or tokens.
+    - "high": the affected operation fails or is blocked on the verified path, or is broadly degraded, intermittent, or partially failing for a significant subset. A single endpoint or lookup path stays here even when every caller hits it.
+    - "medium": minor confirmed degradation with limited reach, or the evidence never settled whether the operation fails versus only slows.
+    - "low": confirmed recovery, or confirmed absence of impact: noise, a false alarm, or a non-issue, including an internal dependency error the system demonstrably tolerates.
+
+    Rate what the evidence shows, with the numbers measured: how much of the operation fails, how many parties are affected, and whether it is still happening. Evidence that could not be collected (a query that timed out or returned nothing) leaves the question unsettled, and the ladder rates unsettled evidence "medium"; it is never grounds for "low". Weigh scope by what the operations do, not by how many detections fired. A mandatory component is one that the event's blast_radius shows other services depending on; when it shows none, that clause does not apply. A breadth figure that could not be measured does not lower the tier that the confirmed failure gives.
+
+    Tie-break: when two adjacent tiers both match the same evidence, choose the lower only when the evidence leaves genuinely unresolved whether the operation still completes, and never below "medium" on that ground.
+  `;
+
 /** Canonical severity used by storage, APIs, and tools. */
 export const severitySchema = lazySchema(() =>
   alertEventSeveritySchema.exclude(['info']).describe(SEVERITY_CONTRACT_RULE)

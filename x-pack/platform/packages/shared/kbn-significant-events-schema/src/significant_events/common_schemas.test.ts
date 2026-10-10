@@ -84,7 +84,6 @@ describe('signalEntrySchema verdict/evidence consistency', () => {
     expect(
       parseSignal({
         verdict: 'confirms',
-        impact: 'degraded',
         evidence: {
           ...evidence('found'),
           time_range: { from: '2026-07-20T07:00:00.000Z', to: '2026-07-20T08:00:00.000Z' },
@@ -135,89 +134,6 @@ describe('topology classification compatibility', () => {
         name: 'orders-api',
         stream_name: 'logs.orders',
       }).success
-    ).toBe(true);
-  });
-});
-
-describe('signalEntrySchema impact guard', () => {
-  it('omitting impact is valid on non-confirming verdicts', () => {
-    expect(parseSignal({ verdict: 'refutes', evidence: evidence('empty') }).success).toBe(true);
-  });
-
-  it('rejects a confirms signal without an explicit impact', () => {
-    expect(
-      parseSignal({ verdict: 'confirms', evidence: evidence('found'), impact: undefined }).success
-    ).toBe(false);
-  });
-
-  it('accepts impact "none" on every verdict', () => {
-    expect(
-      parseSignal({ verdict: 'refutes', evidence: evidence('empty'), impact: 'none' }).success
-    ).toBe(true);
-    expect(parseSignal({ verdict: 'not_checked', impact: 'none' }).success).toBe(true);
-  });
-
-  it.each(['degraded', 'blocked', 'exposed'] as const)(
-    'rejects impact "%s" on refutes',
-    (impact) => {
-      const result = parseSignal({
-        verdict: 'refutes',
-        evidence: evidence('empty'),
-        impact,
-      });
-      expect(result.success).toBe(false);
-    }
-  );
-
-  it.each(['degraded', 'blocked', 'exposed'] as const)(
-    'rejects impact "%s" on inconclusive',
-    (impact) => {
-      expect(
-        parseSignal({ verdict: 'inconclusive', evidence: evidence('empty'), impact }).success
-      ).toBe(false);
-    }
-  );
-
-  it.each(['degraded', 'blocked', 'exposed'] as const)(
-    'rejects impact "%s" on not_checked',
-    (impact) => {
-      expect(parseSignal({ verdict: 'not_checked', impact }).success).toBe(false);
-    }
-  );
-
-  it('accepts impact "degraded" on confirms', () => {
-    expect(
-      parseSignal({ verdict: 'confirms', evidence: evidence('found'), impact: 'degraded' }).success
-    ).toBe(true);
-  });
-
-  it('accepts impact "degraded" on off_topic with a concrete observed error', () => {
-    expect(
-      parseSignal({ verdict: 'off_topic', evidence: evidence('found'), impact: 'degraded' }).success
-    ).toBe(true);
-  });
-
-  it('accepts impact "exposed" on off_topic with a concrete observed error', () => {
-    expect(
-      parseSignal({ verdict: 'off_topic', evidence: evidence('found'), impact: 'exposed' }).success
-    ).toBe(true);
-  });
-
-  it('accepts impact "blocked" on off_topic with a concrete observed error', () => {
-    expect(
-      parseSignal({ verdict: 'off_topic', evidence: evidence('found'), impact: 'blocked' }).success
-    ).toBe(true);
-  });
-
-  it('accepts impact "exposed" on confirms', () => {
-    expect(
-      parseSignal({ verdict: 'confirms', evidence: evidence('found'), impact: 'exposed' }).success
-    ).toBe(true);
-  });
-
-  it('accepts impact "blocked" on confirms without any extra field', () => {
-    expect(
-      parseSignal({ verdict: 'confirms', evidence: evidence('found'), impact: 'blocked' }).success
     ).toBe(true);
   });
 });
