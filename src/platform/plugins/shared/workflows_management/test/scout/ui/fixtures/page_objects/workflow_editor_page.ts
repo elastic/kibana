@@ -40,7 +40,10 @@ export class WorkflowEditorPage {
   constructor(private readonly page: ScoutPage) {
     this.yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
     this.saveButton = this.page.testSubj.locator('saveWorkflowHeaderButton');
-    this.runButton = this.page.testSubj.locator('workflowBottomBarRunButton');
+    // The bottom bar swaps to an icon-only run button once its container is narrower than 800px.
+    this.runButton = this.page.testSubj
+      .locator('workflowBottomBarRunButton')
+      .or(this.page.testSubj.locator('workflowBottomBarRunButtonCompact'));
     this.validationErrorsAccordion = this.page.testSubj.locator(
       'workflowYamlEditorValidationErrorsList'
     );
@@ -604,7 +607,7 @@ export class WorkflowEditorPage {
   }
 
   async executeWorkflowFromBottomBar(inputs: Record<string, unknown>): Promise<void> {
-    await this.page.testSubj.click('workflowBottomBarRunButton');
+    await this.clickRunButton();
     await this.setExecuteModalInputs(inputs);
     await this.page.testSubj.click('executeWorkflowButton');
   }
