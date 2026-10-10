@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type QueryFunctionContext, useQuery, useQueryClient } from '@kbn/react-query';
-import { useCallback, useEffect, useRef } from 'react';
+import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
+import { useCallback, useEffect, useState } from 'react';
 import { filterIntegrations } from '../utils/filter_integrations';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -32,10 +32,11 @@ const queryKey = ['integrations-threat-intel'];
  * Retrieves integrations from the Fleet plugin endpoint /api/fleet/epm/packages.
  * The integrations are then filtered, and we only keep the installed ones,
  * with category threat_intel and excluding the ti_utils integration.
- * We cancel the query in case it's taking too long to not block the Indicators page for the user.
+ * We stop reporting `isLoading` once the call takes too long, to not block the Indicators page for
+ * the user. The request itself keeps running, so late results still resolve to the real list.
  */
 export const useIntegrations = ({ enabled }: { enabled: boolean }) => {
-  const timeoutRef = useRef<number>();
+  const [hasTimedOut, setHasTimedOut] = useState<boolean>(false);
 
   const { http } = useKibana().services;
 
@@ -54,22 +55,15 @@ export const useIntegrations = ({ enabled }: { enabled: boolean }) => {
     enabled,
   });
 
-  const queryClient = useQueryClient();
-
   useEffect(() => {
-    // cancel slow integrations call to unblock the UI
-    timeoutRef.current = setTimeout(() => {
-      queryClient.cancelQueries(queryKey);
-    }, INTEGRATIONS_CALL_TIMEOUT) as unknown as number;
+    if (!enabled) {
+      return;
+    }
 
-    return () => {
-      if (!timeoutRef.current) {
-        return;
-      }
+    const timeoutId = setTimeout(() => setHasTimedOut(true), INTEGRATIONS_CALL_TIMEOUT);
 
-      clearTimeout(timeoutRef.current);
-    };
-  }, [queryClient]);
+    return () => clearTimeout(timeoutId);
+  }, [enabled]);
 
-  return query;
+  return { ...query, isLoading: query.isLoading && !hasTimedOut };
 };
