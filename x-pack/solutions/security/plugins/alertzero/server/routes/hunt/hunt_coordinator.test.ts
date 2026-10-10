@@ -35,6 +35,7 @@ const coordinatorResult: HuntCoordinatorResult = {
   index_patterns: UNIVERSE,
   tier2_targets: [],
   tier2_target_sources: [],
+  report_intent_targets: [],
   actionable_indices: [],
   tier1: {
     tier: 1,

@@ -1,0 +1,405 @@
+{
+  "acceptedBreakingChanges": [],
+  "shared": {
+    "storedSettings": {
+      "kind": "object",
+      "fields": {
+        "workerId": {
+          "kind": "leaf",
+          "type": "string"
+        },
+        "autonomy": {
+          "kind": "leaf",
+          "type": "string",
+          "enum": [
+            "manual",
+            "assisted",
+            "supervised"
+          ]
+        },
+        "scheduleInterval": {
+          "kind": "leaf",
+          "type": "string",
+          "maxLength": 6,
+          "pattern": "^[1-9][0-9]*[mhd]$"
+        },
+        "serviceAccountId": {
+          "kind": "leaf",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "extras": {
+          "kind": "object",
+          "fields": {},
+          "required": [],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "autonomy",
+        "workerId"
+      ],
+      "additionalProperties": false
+    },
+    "settingsWrite": {
+      "kind": "object",
+      "fields": {
+        "autonomy": {
+          "kind": "leaf",
+          "type": "string",
+          "enum": [
+            "manual",
+            "assisted",
+            "supervised"
+          ]
+        },
+        "scheduleInterval": {
+          "kind": "leaf",
+          "type": "string",
+          "maxLength": 6,
+          "pattern": "^[1-9][0-9]*[mhd]$"
+        },
+        "serviceAccountId": {
+          "kind": "leaf",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "nullable": true
+        },
+        "extras": {
+          "kind": "object",
+          "fields": {},
+          "required": [],
+          "additionalProperties": true
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  "workers": {
+    "system-security-detection-rule-coverage": {
+      "defaults": {
+        "workerId": "system-security-detection-rule-coverage",
+        "autonomy": "manual",
+        "scheduleInterval": "1h",
+        "extras": {
+          "lookbackDays": 14,
+          "maxGapsPerRun": 5
+        }
+      },
+      "schema": {
+        "kind": "object",
+        "fields": {
+          "workerId": {
+            "kind": "leaf",
+            "type": "string",
+            "const": "system-security-detection-rule-coverage"
+          },
+          "autonomy": {
+            "kind": "leaf",
+            "type": "string",
+            "enum": [
+              "manual",
+              "assisted"
+            ]
+          },
+          "scheduleInterval": {
+            "kind": "leaf",
+            "type": "string",
+            "maxLength": 6,
+            "pattern": "^[1-9][0-9]*[mhd]$"
+          },
+          "extras": {
+            "kind": "object",
+            "fields": {
+              "lookbackDays": {
+                "kind": "leaf",
+                "type": "integer",
+                "minimum": 8,
+                "maximum": 90
+              },
+              "maxGapsPerRun": {
+                "kind": "leaf",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 50
+              }
+            },
+            "required": [
+              "lookbackDays",
+              "maxGapsPerRun"
+            ],
+            "additionalProperties": false
+          },
+          "serviceAccountId": {
+            "kind": "leaf",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "required": [
+          "autonomy",
+          "extras",
+          "scheduleInterval",
+          "workerId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "system-security-detection-rule-tuning": {
+      "defaults": {
+        "workerId": "system-security-detection-rule-tuning",
+        "autonomy": "manual",
+        "scheduleInterval": "2h",
+        "extras": {
+          "analysisWindowDays": 7,
+          "fpCountThreshold": 10,
+          "fpRateThresholdPct": 50
+        }
+      },
+      "schema": {
+        "kind": "object",
+        "fields": {
+          "workerId": {
+            "kind": "leaf",
+            "type": "string",
+            "const": "system-security-detection-rule-tuning"
+          },
+          "autonomy": {
+            "kind": "leaf",
+            "type": "string",
+            "enum": [
+              "manual",
+              "assisted"
+            ]
+          },
+          "scheduleInterval": {
+            "kind": "leaf",
+            "type": "string",
+            "maxLength": 6,
+            "pattern": "^[1-9][0-9]*[mhd]$"
+          },
+          "extras": {
+            "kind": "object",
+            "fields": {
+              "analysisWindowDays": {
+                "kind": "leaf",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 30
+              },
+              "fpCountThreshold": {
+                "kind": "leaf",
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 100
+              },
+              "fpRateThresholdPct": {
+                "kind": "leaf",
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              }
+            },
+            "required": [
+              "analysisWindowDays",
+              "fpCountThreshold",
+              "fpRateThresholdPct"
+            ],
+            "additionalProperties": false
+          },
+          "serviceAccountId": {
+            "kind": "leaf",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "required": [
+          "autonomy",
+          "extras",
+          "scheduleInterval",
+          "workerId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "system-security-floor-alert-triage": {
+      "defaults": {
+        "workerId": "system-security-floor-alert-triage",
+        "autonomy": "manual",
+        "extras": {
+          "autoCloseConfidenceScoreMinThreshold": 0.85
+        }
+      },
+      "schema": {
+        "kind": "object",
+        "fields": {
+          "workerId": {
+            "kind": "leaf",
+            "type": "string",
+            "const": "system-security-floor-alert-triage"
+          },
+          "autonomy": {
+            "kind": "leaf",
+            "type": "string",
+            "enum": [
+              "manual",
+              "supervised"
+            ]
+          },
+          "extras": {
+            "kind": "object",
+            "fields": {
+              "autoCloseConfidenceScoreMinThreshold": {
+                "kind": "leaf",
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "required": [
+              "autoCloseConfidenceScoreMinThreshold"
+            ],
+            "additionalProperties": false
+          },
+          "serviceAccountId": {
+            "kind": "leaf",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "required": [
+          "autonomy",
+          "extras",
+          "workerId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "system-security-floor-attack-discovery": {
+      "defaults": {
+        "workerId": "system-security-floor-attack-discovery",
+        "autonomy": "manual",
+        "scheduleInterval": "24h"
+      },
+      "schema": {
+        "kind": "object",
+        "fields": {
+          "workerId": {
+            "kind": "leaf",
+            "type": "string",
+            "const": "system-security-floor-attack-discovery"
+          },
+          "autonomy": {
+            "kind": "leaf",
+            "type": "string",
+            "enum": [
+              "manual",
+              "supervised"
+            ]
+          },
+          "scheduleInterval": {
+            "kind": "leaf",
+            "type": "string",
+            "maxLength": 6,
+            "pattern": "^[1-9][0-9]*[mhd]$"
+          },
+          "serviceAccountId": {
+            "kind": "leaf",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "required": [
+          "autonomy",
+          "scheduleInterval",
+          "workerId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "system-security-forensics-endpoint-analysis": {
+      "defaults": {
+        "workerId": "system-security-forensics-endpoint-analysis",
+        "autonomy": "manual"
+      },
+      "schema": {
+        "kind": "object",
+        "fields": {
+          "workerId": {
+            "kind": "leaf",
+            "type": "string",
+            "const": "system-security-forensics-endpoint-analysis"
+          },
+          "autonomy": {
+            "kind": "leaf",
+            "type": "string",
+            "enum": [
+              "manual",
+              "supervised"
+            ]
+          },
+          "serviceAccountId": {
+            "kind": "leaf",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "required": [
+          "autonomy",
+          "workerId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "system-security-hunt-continuous-threat-hunt": {
+      "defaults": {
+        "workerId": "system-security-hunt-continuous-threat-hunt",
+        "autonomy": "manual",
+        "scheduleInterval": "4h"
+      },
+      "schema": {
+        "kind": "object",
+        "fields": {
+          "workerId": {
+            "kind": "leaf",
+            "type": "string",
+            "const": "system-security-hunt-continuous-threat-hunt"
+          },
+          "autonomy": {
+            "kind": "leaf",
+            "type": "string",
+            "enum": [
+              "manual"
+            ]
+          },
+          "scheduleInterval": {
+            "kind": "leaf",
+            "type": "string",
+            "maxLength": 6,
+            "pattern": "^[1-9][0-9]*[mhd]$"
+          },
+          "serviceAccountId": {
+            "kind": "leaf",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "required": [
+          "autonomy",
+          "scheduleInterval",
+          "workerId"
+        ],
+        "additionalProperties": false
+      }
+    }
+  }
+}

@@ -10,28 +10,14 @@ import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { useActionPolicyForm } from './use_action_policy_form';
 import { DEFAULT_FORM_STATE } from './constants';
 
-jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  isActionValid: (action: {
-    source: 'existing' | 'inline';
-    workflowId?: string | null;
-    connectorId?: string | null;
-    params?: string;
-  }) =>
-    action.source === 'existing'
-      ? Boolean(action.workflowId)
-      : action.connectorId != null && (action.params ?? '').trim() !== '',
-}));
-
 const EXISTING_POLICY: ActionPolicyResponse = {
   id: 'policy-1',
   name: 'Critical production alerts',
   description: 'Routes critical alerts',
   enabled: true,
   matcher: { expression: 'data.severity : "critical"' },
-  group_by: ['host.name', 'service.name'],
-  grouping_mode: 'per_field',
+  grouping: { mode: 'per_field', fields: ['host.name', 'service.name'] },
   throttle: { strategy: 'time_interval', interval: '5m' },
-  snoozed_until: null,
   destinations: [{ type: 'workflow', id: 'workflow-2' }],
   created_by: { profile_uid: 'elastic' },
   created_at: '2026-03-01T10:00:00.000Z',
@@ -96,58 +82,6 @@ describe('useActionPolicyForm', () => {
     });
   });
 
-  describe('submit gating (isSubmitEnabled)', () => {
-    it('is disabled without a name or destination', () => {
-      const { result } = renderHook(() =>
-        useActionPolicyForm({ onSubmitCreate: jest.fn(), onSubmitUpdate: jest.fn() })
-      );
-
-      expect(result.current.isSubmitEnabled).toBe(false);
-    });
-
-    it('is enabled with only a valid inline action and no existing destinations', async () => {
-      const { result } = renderHook(() =>
-        useActionPolicyForm({ onSubmitCreate: jest.fn(), onSubmitUpdate: jest.fn() })
-      );
-
-      await act(async () => {
-        result.current.methods.setValue('name', 'Inline only');
-        result.current.methods.setValue('inlineActions', [
-          {
-            id: 'draft-1',
-            source: 'inline',
-            stepType: 'slack2.sendMessage',
-            connectorId: 'connector-1',
-            params: 'message: hi',
-          },
-        ]);
-      });
-
-      expect(result.current.isSubmitEnabled).toBe(true);
-    });
-
-    it('is disabled when an inline action is incomplete', async () => {
-      const { result } = renderHook(() =>
-        useActionPolicyForm({ onSubmitCreate: jest.fn(), onSubmitUpdate: jest.fn() })
-      );
-
-      await act(async () => {
-        result.current.methods.setValue('name', 'Inline only');
-        result.current.methods.setValue('inlineActions', [
-          {
-            id: 'draft-1',
-            source: 'inline',
-            stepType: 'slack2.sendMessage',
-            connectorId: null,
-            params: 'message: ""',
-          },
-        ]);
-      });
-
-      expect(result.current.isSubmitEnabled).toBe(false);
-    });
-  });
-
   describe('edit mode (with initialValues)', () => {
     it('returns isEditMode as true', () => {
       const { result } = renderHook(() =>
@@ -186,8 +120,8 @@ describe('useActionPolicyForm', () => {
     it('maps default strategy when no throttle is present', () => {
       const policyWithoutThrottle: ActionPolicyResponse = {
         ...EXISTING_POLICY,
-        grouping_mode: null,
-        throttle: null,
+        grouping: undefined,
+        throttle: undefined,
       };
       const { result } = renderHook(() =>
         useActionPolicyForm({

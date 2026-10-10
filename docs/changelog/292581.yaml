@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/292581
-type: feature
-products:
-- product: cloud-serverless
-- product: kibana
-title: Add Alert Triage Worker
-description: 'Adds an off-by-default Alert Triage Worker that classifies detection-rule alert batches, writes an Investigation with an impact summary, and closes false positives through a proposal that an analyst approves, or that is approved automatically at Supervised autonomy.'

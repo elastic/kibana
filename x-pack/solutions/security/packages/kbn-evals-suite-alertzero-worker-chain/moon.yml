@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/security-evals-chain-safety'
   - '@kbn/tooling-log'
   - '@kbn/workflows'
+  - '@kbn/scout'
 tags:
   - functional-tests
   - package

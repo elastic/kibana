@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/ai-assistant-icon'
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/deeplinks-security'
 tags:
   - plugin
   - prod

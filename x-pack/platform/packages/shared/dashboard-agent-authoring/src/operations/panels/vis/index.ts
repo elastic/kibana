@@ -7,8 +7,11 @@
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
+import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
 import type { PanelResolutionRequestBase } from '../../../resolve_panel';
+import { defineRequestPanelKind } from '../panel_kind';
 
 /**
  * Lens and Vega visualization panel requests.
@@ -136,4 +139,20 @@ export const lensEditPanelRequestSchema = visEditPanelRequestBaseSchema.extend({
 /** Edits an existing Vega panel by id. */
 export const vegaEditPanelRequestSchema = visEditPanelRequestBaseSchema.extend({
   renderer: z.literal('vega').describe('The panel is a Vega panel.'),
+});
+
+export const lensPanelKind = defineRequestPanelKind({
+  renderer: 'lens',
+  embeddableType: LENS_EMBEDDABLE_TYPE,
+  label: 'Lens',
+  addInputSchema: lensPanelRequestSchema,
+  editInputSchema: lensEditPanelRequestSchema,
+});
+
+export const vegaPanelKind = defineRequestPanelKind({
+  renderer: 'vega',
+  embeddableType: VEGA_VIS_TYPE,
+  label: 'Vega',
+  addInputSchema: vegaPanelRequestSchema,
+  editInputSchema: vegaEditPanelRequestSchema,
 });
