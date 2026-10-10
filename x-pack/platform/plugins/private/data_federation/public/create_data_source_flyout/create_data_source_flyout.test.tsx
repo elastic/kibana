@@ -18,6 +18,7 @@ import type { DataSource, S3DataSourceWithSecrets } from '../../common/datasourc
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
 import { authenticationStrings } from './create_data_source_flyout_authentication_i18n';
 import type { DataFederationKibanaServices } from '../types';
+import { createServiceRegistry } from '../service_registry/create_service_registry';
 
 const createToastsMock = (): ToastsStart =>
   ({
@@ -76,6 +77,7 @@ const renderFederatedS3EditFlyout = (onSave: jest.Mock) => {
   const services: DataFederationKibanaServices = {
     dataSourcesClient: createClientMock(),
     datasetsClient: createDatasetsClientMock(),
+    serviceRegistry: createServiceRegistry(),
     toasts: createToastsMock(),
     docLinks: createDocLinksMock(),
     featureFlags: {},
@@ -173,6 +175,7 @@ describe('CreateDataSourceFlyout', () => {
     const services: DataFederationKibanaServices = {
       dataSourcesClient: client,
       datasetsClient: createDatasetsClientMock(),
+      serviceRegistry: createServiceRegistry(),
       toasts,
       docLinks: createDocLinksMock(),
       featureFlags: {},
@@ -227,6 +230,7 @@ describe('CreateDataSourceFlyout', () => {
     const services: DataFederationKibanaServices = {
       dataSourcesClient: client,
       datasetsClient: createDatasetsClientMock(),
+      serviceRegistry: createServiceRegistry(),
       toasts,
       docLinks: createDocLinksMock(),
       featureFlags: {},
@@ -270,6 +274,7 @@ describe('CreateDataSourceFlyout', () => {
     const services: DataFederationKibanaServices = {
       dataSourcesClient: createClientMock(),
       datasetsClient: createDatasetsClientMock(),
+      serviceRegistry: createServiceRegistry(),
       toasts: createToastsMock(),
       docLinks: createDocLinksMock(),
       featureFlags: {},
@@ -310,6 +315,7 @@ describe('CreateDataSourceFlyout', () => {
     const services: DataFederationKibanaServices = {
       dataSourcesClient: createClientMock(),
       datasetsClient: createDatasetsClientMock(),
+      serviceRegistry: createServiceRegistry(),
       toasts: createToastsMock(),
       docLinks: createDocLinksMock(),
       featureFlags: {},

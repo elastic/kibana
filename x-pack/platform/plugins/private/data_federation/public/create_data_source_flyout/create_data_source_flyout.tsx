@@ -100,7 +100,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     handleSubmit,
     control,
     reset,
-    unregister,
     formState: { errors },
   } = useForm<CreateDataSourceFlyoutFormValues>({
     defaultValues: formDefaultValues,
@@ -332,7 +331,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
             <CreateDataSourceFlyoutTypeSettingsBlock
               control={control}
               dataSourceType={dataSourceType}
-              unregister={unregister}
             />
           )}
           <EuiHorizontalRule margin="m" />
@@ -352,7 +350,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
             requireGcsCredentials={!isEditMode}
             requireGcsFederatedIdentity={!isEditMode}
             requireAzureCredentials={!isEditMode}
-            unregister={unregister}
           />
         </EuiForm>
       </EuiFlyoutBody>

@@ -14,6 +14,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CreateDataSourceAuthenticationMode } from './create_data_source_flyout_authentication';
 import { CreateDataSourceFlyoutAuthenticationSelect } from './create_data_source_flyout_authentication_select';
 import { authenticationStrings } from './create_data_source_flyout_authentication_i18n';
+import { createServiceRegistry } from '../service_registry/create_service_registry';
 
 const docLinks = {
   links: {
@@ -36,7 +37,7 @@ const renderSelect = ({
 
   const utils = render(
     <EuiProvider>
-      <KibanaContextProvider services={{ docLinks }}>
+      <KibanaContextProvider services={{ docLinks, serviceRegistry: createServiceRegistry() }}>
         <CreateDataSourceFlyoutAuthenticationSelect
           dataSourceType="s3"
           authenticationMode={authenticationMode}
