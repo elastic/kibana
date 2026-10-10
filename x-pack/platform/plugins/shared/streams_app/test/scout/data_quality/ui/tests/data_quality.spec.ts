@@ -253,7 +253,7 @@ test.describe(
       // Click to show failed docs chart
       const failedDocsCard = await waitForFailedDocsCard(page);
       await failedDocsCard.click();
-      await expect(failedDocsCard).toHaveAttribute('aria-pressed', 'true');
+      await expect(failedDocsCard).toHaveAttribute('aria-current', 'true');
     });
 
     test('should show degraded fields table with data', async ({ page }) => {
