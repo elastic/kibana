@@ -4756,13 +4756,13 @@ describe('xy_visualization', () => {
     });
 
     describe('areaFill defaulting', () => {
-      it('applies the solid default when an area layer is introduced', () => {
+      it('applies the default area fill when an area layer is introduced', () => {
         const state = exampleState();
         (state.layers[0] as XYDataLayerConfig).seriesType = 'bar';
         expect(state.areaFill).toBeUndefined();
         const newState = xyVisualization.switchVisualizationType!('area', state);
         expect((newState.layers[0] as XYDataLayerConfig).seriesType).toEqual('area');
-        expect(newState.areaFill).toEqual('solid');
+        expect(newState.areaFill).toEqual('gradient');
       });
 
       it('preserves an existing areaFill when switching area subtypes', () => {

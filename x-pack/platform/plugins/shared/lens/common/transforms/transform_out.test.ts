@@ -6,10 +6,10 @@
  */
 
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
-import type { LensByValueSerializedState } from '@kbn/lens-common';
+import type { LensByValueSerializedState, XYVisualizationState } from '@kbn/lens-common';
 
 import { simpleMetricAttributes } from '@kbn/lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock';
-import { getTransformOut } from './transform_out';
+import { getTransformOut, migrateAttributes } from './transform_out';
 
 interface MetricPanelWithDurationFormat {
   layers?: Array<{ metrics?: Array<{ format?: unknown }> }>;
@@ -198,5 +198,60 @@ describe('getTransformOut', () => {
 
       expect(result.ref_id).toBeUndefined();
     });
+  });
+});
+
+describe('migrateAttributes', () => {
+  const getAreaAttributes = (version?: number) =>
+    ({
+      title: 'Area chart',
+      visualizationType: 'lnsXY',
+      ...(version ? { version } : {}),
+      references: [],
+      state: {
+        datasourceStates: {},
+        filters: [],
+        query: { language: 'kuery', query: '' },
+        visualization: {
+          legend: { isVisible: true, position: 'bottom' },
+          preferredSeriesType: 'area',
+          layers: [
+            {
+              layerId: 'layer',
+              layerType: 'data',
+              seriesType: 'area',
+              accessors: ['y'],
+              xAccessor: 'x',
+            },
+          ],
+        },
+      },
+    } as unknown as LensByValueSerializedState['attributes']);
+
+  const getAreaFill = (attributes: { state: unknown }) =>
+    (attributes.state as { visualization: XYVisualizationState }).visualization.areaFill;
+
+  it.each([undefined, 1, 2])(
+    'migrates a version %s area chart without areaFill to v3 with a solid fill',
+    (version) => {
+      const result = migrateAttributes(getAreaAttributes(version));
+
+      expect(result.version).toBe(3);
+      expect(getAreaFill(result)).toBe('solid');
+    }
+  );
+
+  it('leaves attributes from an unknown future version untouched', () => {
+    const result = migrateAttributes(getAreaAttributes(99));
+
+    expect(result.version).toBe(99);
+    expect(getAreaFill(result)).toBeUndefined();
+  });
+
+  it('keeps an unset areaFill on v3 area charts', () => {
+    const result = migrateAttributes(getAreaAttributes(3));
+
+    expect(result.version).toBe(3);
+    expect(getAreaFill(result)).toBeUndefined();
   });
 });
