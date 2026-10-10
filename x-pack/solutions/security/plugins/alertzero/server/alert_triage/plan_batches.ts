@@ -90,9 +90,11 @@ export const planBatches = ({
   }
 
   const { batches, cost } = allocateBudget({ alerts: candidates, budget, maxBatches });
+  // With candidates and a free slot, no batch means the sweep budget cannot fund even the cheapest
+  // one, so an idle sweep is not mistaken for an empty queue.
   return {
     ...base,
-    skipReason: batches.length === 0 ? 'nothing_pending' : 'none',
+    skipReason: batches.length === 0 ? 'budget_too_small' : 'none',
     batches,
     plannedCost: cost,
   };

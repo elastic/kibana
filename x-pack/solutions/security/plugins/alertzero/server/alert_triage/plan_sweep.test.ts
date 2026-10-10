@@ -17,11 +17,13 @@ const setup = ({
   live = new Set<string>(),
   headroom = OK,
   agedOut = 0,
+  budgetPerHour = 600,
 }: {
   alerts?: TriageAlert[];
   live?: ReadonlySet<string> | 'unreadable';
   headroom?: HeadroomResult;
   agedOut?: number | 'fails';
+  budgetPerHour?: number;
 } = {}) => {
   const tagAlerts = jest.fn().mockResolvedValue(undefined);
   const ports: SweepPorts = {
@@ -37,7 +39,7 @@ const setup = ({
   const run = () =>
     planSweep(ports, {
       now: NOW,
-      budgetPerHour: 600,
+      budgetPerHour,
       intervalMinutes: 10,
       lookbackHours: 24,
       analysisTagPrefix: 'ai-triage',
@@ -136,6 +138,17 @@ describe('planSweep', () => {
       const { run } = setup({ alerts: makeAlerts(3), live });
 
       expect((await run()).skipReason).toBe('in_flight_ceiling');
+    });
+
+    it('budget_too_small when pending alerts exist but a sweep cannot fund one batch, claiming nothing', async () => {
+      // 30 units an hour in 10-minute sweeps is 5 units, one short of the cheapest batch (6).
+      const { run, tagAlerts } = setup({ alerts: makeAlerts(3), budgetPerHour: 30 });
+
+      const plan = await run();
+
+      expect(plan.skipReason).toBe('budget_too_small');
+      expect(plan.numbers.pendingAlerts).toBe(3);
+      expect(tagAlerts).not.toHaveBeenCalled();
     });
 
     it('nothing_pending when no alert needs triage', async () => {

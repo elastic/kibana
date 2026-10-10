@@ -62,6 +62,7 @@ const planSweepOutputSchema = z.object({
     'tm_unknown',
     'live_batches_unreadable',
     'in_flight_ceiling',
+    'budget_too_small',
     'nothing_pending',
   ]),
   batches: z.array(

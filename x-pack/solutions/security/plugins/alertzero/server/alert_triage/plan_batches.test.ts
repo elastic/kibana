@@ -192,13 +192,13 @@ describe('planBatches', () => {
       );
     });
 
-    it('reports nothing_pending when the budget cannot afford even one batch', () => {
+    it('reports budget_too_small, not an empty queue, when the budget cannot fund even one batch', () => {
       const result = plan({
         pending: makeAlerts(3),
         budget: BATCH_OVERHEAD_COST + ALERT_COST - 1,
       });
 
-      expect(result.skipReason).toBe('nothing_pending');
+      expect(result.skipReason).toBe('budget_too_small');
       expect(result.batches).toEqual([]);
       expect(result.plannedCost).toBe(0);
     });
