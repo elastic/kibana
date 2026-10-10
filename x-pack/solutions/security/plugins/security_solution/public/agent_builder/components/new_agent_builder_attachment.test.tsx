@@ -60,6 +60,30 @@ describe('NewAgentBuilderAttachment', () => {
     expect(button).toBeInTheDocument();
   });
 
+  it('renders the productAgent icon by default', () => {
+    render(
+      <TestProviders>
+        <NewAgentBuilderAttachment {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(
+      screen.getByTestId('newAgentBuilderAttachment').querySelector('[data-euiicon-type]')
+    ).toHaveAttribute('data-euiicon-type', 'productAgent');
+  });
+
+  it('renders the provided iconType', () => {
+    render(
+      <TestProviders>
+        <NewAgentBuilderAttachment {...defaultProps} iconType="sparkles" />
+      </TestProviders>
+    );
+
+    expect(
+      screen.getByTestId('newAgentBuilderAttachment').querySelector('[data-euiicon-type]')
+    ).toHaveAttribute('data-euiicon-type', 'sparkles');
+  });
+
   it('calls onClick callback when button is clicked', () => {
     const onClick = jest.fn();
     render(
