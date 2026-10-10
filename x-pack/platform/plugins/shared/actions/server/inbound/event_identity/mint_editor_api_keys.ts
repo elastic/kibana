@@ -36,23 +36,35 @@ const isAuthenticationTypeAPIKey = (
   return authorizationHeader?.scheme.toLowerCase() === 'apikey';
 };
 
+/**
+ * Grants a UIAM API key from the request's credential. Failures are logged and swallowed unless
+ * `required` is set, for callers whose only credential is this key.
+ */
 const grantUiamApiKey = async ({
   request,
   securityService,
   logger,
   name,
+  required = false,
 }: {
   request: KibanaRequest;
   securityService: SecurityServiceStart;
   logger: Logger;
   name: string;
+  required?: boolean;
 }): Promise<GrantAPIKeyResult | undefined> => {
   if (!shouldGrantUiam(securityService)) {
+    if (required) {
+      throw createEventIdentityUiamUnsupportedError();
+    }
     return undefined;
   }
 
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
   if (!authorizationHeader || !isUiamCredential(authorizationHeader)) {
+    if (required) {
+      throw createEventIdentityUiamUnsupportedError();
+    }
     logger.error(
       `Failed to create UIAM API key for connector event identity "${name}": Invalid or missing UIAM credentials`,
       { tags: UIAM_LOGS_CREDENTIALS_TAGS }
@@ -65,10 +77,7 @@ const grantUiamApiKey = async ({
       name: `uiam-${name}`,
     });
     if (!result) {
-      logger.error(`Failed to create UIAM API key for connector event identity "${name}"`, {
-        tags: UIAM_LOGS_GRANT_TAGS,
-      });
-      return undefined;
+      throw new Error(`Failed to create UIAM API key for connector event identity "${name}"`);
     }
     return result;
   } catch (err) {
@@ -80,6 +89,9 @@ const grantUiamApiKey = async ({
         error: { stack_trace: err instanceof Error ? err.stack : undefined },
       }
     );
+    if (required) {
+      throw err;
+    }
     return undefined;
   }
 };
@@ -205,6 +217,19 @@ export const mintConnectorEventIdentity = async ({
   connectorId: string;
 }): Promise<ConnectorEventIdentity> => {
   const name = connectorEventIdentityApiKeyName(connectorId);
+
+  // A UIAM service account gets a UIAM key only. Elasticsearch can't grant a key for it.
+  const principal = securityService.authc.getPrincipal(request);
+  if (principal?.type === 'service_account' && principal.variant === 'uiam') {
+    const uiamResult = await grantUiamApiKey({
+      request,
+      securityService,
+      logger,
+      name,
+      required: true,
+    });
+    return identityFromGrantResults({ uiamResult });
+  }
 
   if (isAuthenticationTypeAPIKey(request, securityService)) {
     return cloneFromRequest({ request, securityService, logger, name });

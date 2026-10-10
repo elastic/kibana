@@ -206,17 +206,31 @@ export class RulesClientFactory {
    * (`apiKeyType === 'uiam'`), a rule saved without one cannot search across projects, so a
    * failed grant fails the rule write instead of degrading silently. Requests without UIAM
    * credentials are always skipped (never sent to UIAM): a UIAM key can never be minted for them.
+   *
+   * Pass `required: true` when the UIAM key is the only credential the rule will get, as for
+   * UIAM service accounts. Every failure then throws, including the cases that are skipped above.
    */
   private async createUiamApiKey(
     request: KibanaRequest,
-    name: string
+    name: string,
+    { required = false }: { required?: boolean } = {}
   ): Promise<GrantAPIKeyResult | undefined> {
     if (!this.shouldGrantUiam) {
+      if (required) {
+        throw new Error(
+          `Failed to create UIAM API key for alerting rule : ${name}: UIAM is not enabled`
+        );
+      }
       return;
     }
-    const uiamKeyIsRequired = this.apiKeyType === ApiKeyType.UIAM;
+    const uiamKeyIsRequired = required || this.apiKeyType === ApiKeyType.UIAM;
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
     if (!authorizationHeader || !isUiamCredential(authorizationHeader)) {
+      if (required) {
+        throw new Error(
+          `Failed to create UIAM API key for alerting rule : ${name}: Invalid or missing UIAM credentials`
+        );
+      }
       // A non-UIAM credential means the caller is not a Cloud user (e.g. an operator), so a
       // UIAM key can never be minted for them; skip the UIAM grant.
       this.logger.error(
@@ -462,6 +476,13 @@ export class RulesClientFactory {
       async createAPIKey(name: string, refresh?: boolean | 'wait_for') {
         if (!securityPluginStart) {
           return { apiKeysEnabled: false };
+        }
+        // A UIAM service account gets a UIAM key only. Elasticsearch can't grant a key for it, and
+        // the rule runs on `uiamApiKey` when there is no Elasticsearch key, whatever `apiKeyType` is.
+        const principal = securityService.authc.getPrincipal(request);
+        if (principal?.type === 'service_account' && principal.variant === 'uiam') {
+          const uiamResult = await factory.createUiamApiKey(request, name, { required: true });
+          return { apiKeysEnabled: true, uiamResult };
         }
         // Create an API key using the new grant API - in this case the Kibana system user is creating the
         // API key for the user, instead of having the user create it themselves, which requires api_key

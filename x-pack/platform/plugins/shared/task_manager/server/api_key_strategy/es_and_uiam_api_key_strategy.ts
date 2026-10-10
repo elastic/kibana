@@ -69,15 +69,15 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     //
     // Invariant: when this flag is true, the same flag must govern invalidation
     // for every credential (ES and UIAM) that this strategy persists on the task.
-    // This is safe today because we only attach a UIAM key when the request is
-    // either UIAM-authenticated (reused as-is) or credential-less (granted anew),
-    // and in both cases `apiKeyCreatedByUser` correctly reflects ownership for
-    // both credentials. If future changes allow the ES and UIAM credentials to
-    // have different ownership (e.g., mint a new UIAM key while reusing a
-    // caller-supplied ES key), this invariant breaks and both fields must become
-    // independent flags on `userScope` (e.g., `esApiKeyCreatedByUser` /
-    // `uiamApiKeyCreatedByUser`) with matching per-credential checks in
-    // `getApiKeyIdsForInvalidation`.
+    // This holds for each path below. A cloned UIAM request and a UIAM service
+    // account both get a single freshly granted UIAM key (flag false). A raw
+    // user-created Cloud key is reused as-is (flag true). The ES path either
+    // reuses the caller's key pair or grants both keys anew. If future changes
+    // allow the ES and UIAM credentials to have different ownership (e.g., mint
+    // a new UIAM key while reusing a caller-supplied ES key), this invariant
+    // breaks and both fields must become independent flags on `userScope` (e.g.,
+    // `esApiKeyCreatedByUser` / `uiamApiKeyCreatedByUser`) with matching
+    // per-credential checks in `getApiKeyIdsForInvalidation`.
     const user = security.authc.getCurrentUser(request);
     const cloneApiKey = shouldCloneApiKeyFromRequest(security, request, opts, user);
     // When cloning, both the ES and UIAM credentials are freshly minted/Task-Manager-owned, so
@@ -108,18 +108,26 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     // `cloneAsInternalUser` hits the native ES clone endpoint, which rejects raw `essu_`
     // credentials. Persist a single freshly granted UIAM key and skip the ES clone path
     // entirely. Non-clone requests keep the existing ES (+ optional UIAM) behavior.
+    //
+    // A UIAM service account takes the same branch, cloned or not. Elasticsearch can't grant a
+    // key for it, so the UIAM key is its only credential and a failed grant fails the request.
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
     const isUiamRequest = !!authorizationHeader && isUiamCredential(authorizationHeader);
-    const cloneUiamRequest = isUiamRequest && cloneApiKey && opts?.onEsKey !== true;
+    const principal = security.authc.getPrincipal(request);
+    const isUiamServiceAccount =
+      principal?.type === 'service_account' && principal.variant === 'uiam';
+    const uiamOnlyRequest =
+      ((isUiamRequest && cloneApiKey) || isUiamServiceAccount) && opts?.onEsKey !== true;
 
-    if (cloneUiamRequest) {
+    if (uiamOnlyRequest) {
       const uiamOnlyKeys = await this.grantUiamApiKeys(
         taskInstances,
         request,
         user,
         apiKeyCreatedByUser,
         isUiamRequest,
-        opts?.onApiKeyCreated
+        opts?.onApiKeyCreated,
+        isUiamServiceAccount
       );
 
       const uiamOnlyResult = new Map<string, ApiKeySOFields>();
@@ -128,7 +136,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
         // Fail loud, matching the ES path (`createApiKey` throws). A missing key here
         // would otherwise schedule a task that can never authenticate at run time.
         if (!uiamKey) {
-          throw new Error(`Failed to grant UIAM API key for cloned task "${task.id}"`);
+          throw new Error(`Failed to grant UIAM API key for task "${task.id}"`);
         }
         uiamOnlyResult.set(task.id!, {
           uiamApiKey: uiamKey.apiKey,
@@ -155,9 +163,8 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
         userUiamResult.set(task.id!, {
           uiamApiKey: credentials.api_key,
           // User-created keys carry no key id. An empty `apiKeyId` satisfies the task SO
-          // schema (required across all model versions) and is already treated as "no id"
-          // by consumers (`classifyTaskForUiamProvisioning` skips it, and invalidation is
-          // skipped entirely for user-created keys). `uiamApiKeyExternal` (from
+          // schema (required across all model versions), and invalidation is skipped
+          // entirely for user-created keys. `uiamApiKeyExternal` (from
           // `toUserScope`) carries UIAM's verdict for the run-time credential treatment.
           userScope: toUserScope(''),
         });
@@ -204,7 +211,8 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     user: AuthenticatedUser | null,
     apiKeyCreatedByUser: boolean,
     isUiamRequest: boolean,
-    onApiKeyCreated?: GrantApiKeysOpts['onApiKeyCreated']
+    onApiKeyCreated?: GrantApiKeysOpts['onApiKeyCreated'],
+    required = false
   ): Promise<Map<string, UiamApiKeyResult>> {
     const uiam = this.security.authc.apiKeys.uiam;
     const uiamKeyByTaskIdMap = new Map<string, UiamApiKeyResult>();
@@ -245,8 +253,9 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     // a task scheduled without one cannot authenticate the way its runs expect, so grant
     // failures surface to the caller instead of degrading silently. Keys granted before a
     // failure are reported through `onApiKeyCreated`, so the caller (task store) marks them
-    // for invalidation when this throws.
-    const uiamKeyIsRequired = this.typeToUse === ApiKeyType.UIAM;
+    // for invalidation when this throws. Callers pass `required` when the UIAM key is the task's
+    // only credential, so the original error (a 4xx for a refused service account) propagates.
+    const uiamKeyIsRequired = required || this.typeToUse === ApiKeyType.UIAM;
 
     for (const taskType of taskTypes) {
       const apiKeyNamePrefix = `TaskManager-UIAM: ${taskType}`;

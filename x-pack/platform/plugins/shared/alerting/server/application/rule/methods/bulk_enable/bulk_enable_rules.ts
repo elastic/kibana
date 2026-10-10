@@ -23,6 +23,7 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { bulkCreateRulesSo } from '../../../../data/rule';
+import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import type { RawRule } from '../../../../types';
 import type { RuleDomain, RuleParams } from '../../types';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
@@ -184,6 +185,8 @@ const bulkEnableRulesWithOCC = async (
   const username = await context.getUserName();
   const profileUid = await context.getProfileUid();
   const rulesToClearFlapping: Array<{ id: string; ruleTypeId: string }> = [];
+  // UIAM keys held by rules that get a new key set below, keyed by rule id
+  const replacedUiamApiKeys = new Map<string, string>();
   let scheduleValidationError = '';
 
   await withSpan(
@@ -253,6 +256,16 @@ const bulkEnableRulesWithOCC = async (
                   refresh: false,
                 })
               : undefined;
+
+            // A rule with only a UIAM key, such as one created by a UIAM service account, no
+            // longer uses that key once it gets a new key set. Invalidate it after the write.
+            if (
+              newApiKeyAttributes &&
+              rule.attributes.uiamApiKey &&
+              !rule.attributes.apiKeyCreatedByUser
+            ) {
+              replacedUiamApiKeys.set(rule.id, rule.attributes.uiamApiKey);
+            }
 
             const updatedAttributes = updateMetaAttributes(context, {
               ...(newApiKeyAttributes
@@ -392,6 +405,17 @@ const bulkEnableRulesWithOCC = async (
       ruleIdsFailedToEnable[rule.id] = true;
     }
   });
+
+  const uiamApiKeysToInvalidate = [...replacedUiamApiKeys.entries()]
+    .filter(([ruleId]) => !ruleIdsFailedToEnable[ruleId])
+    .map(([, uiamApiKey]) => uiamApiKey);
+  if (uiamApiKeysToInvalidate.length > 0) {
+    await bulkMarkApiKeysForInvalidation(
+      { apiKeys: uiamApiKeysToInvalidate },
+      context.logger,
+      context.unsecuredSavedObjectsClient
+    );
+  }
 
   // Remove all failed to enable rule ids and rule type ids
   const ruleIdsToClearFlapping: string[] = [];
