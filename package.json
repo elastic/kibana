@@ -2041,6 +2041,7 @@
     "@rspack/plugin-react-refresh": "2.0.2",
     "@storybook/addon-a11y": "8.6.18",
     "@storybook/addon-actions": "8.6.18",
+    "@storybook/addon-designs": "8.2.1",
     "@storybook/addon-essentials": "8.6.18",
     "@storybook/addon-jest": "8.6.18",
     "@storybook/addon-styling-webpack": "3.0.2",
