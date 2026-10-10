@@ -7,6 +7,7 @@
 
 import type { DefaultEvaluators } from '@kbn/evals';
 import { createRationaleQualityEvaluator } from './rationale_evaluator';
+import { ALERT_ANALYSIS_EVAL_ALERTS } from './synthetic_alerts';
 
 const CRITERIA = ['criterion one', 'criterion two'];
 
@@ -87,5 +88,34 @@ describe('createRationaleQualityEvaluator', () => {
     );
     expect(result.score).toBe(0.75);
     expect(innerEvaluate).toHaveBeenCalledTimes(1);
+  });
+
+  it('gives the criteria judge the analysed alert document alongside the alertId', async () => {
+    // Without the alert the judge only sees `{ alertId }` and fails the "does not invent alert
+    // fields" criterion for every grounded rationale.
+    const malicious = ALERT_ANALYSIS_EVAL_ALERTS.find(
+      (alert) => alert.id === 'aa-eval-tier1-malicious-file'
+    );
+    const { evaluators, innerEvaluate } = makeEvaluators(1);
+    const args = makeArgs({ rationale: 'update_flash.exe was dropped in Downloads' });
+    args.output.alertData = malicious!.doc;
+
+    await createRationaleQualityEvaluator(evaluators, CRITERIA).evaluate(args);
+
+    const judged = innerEvaluate.mock.calls[0][0];
+    expect(judged.input.alertId).toBe('a1');
+    expect(judged.input.alertData['process.name']).toBe('update_flash.exe');
+    expect(judged.input.alertData['file.path']).toContain('Downloads');
+    expect(judged.output.alertData).toBeUndefined();
+    expect(judged.output.rationale).toBe('update_flash.exe was dropped in Downloads');
+  });
+
+  it('keeps the fixture description consistent with the alert document paths', () => {
+    const malicious = ALERT_ANALYSIS_EVAL_ALERTS.find(
+      (alert) => alert.id === 'aa-eval-tier1-malicious-file'
+    );
+    expect(String(malicious!.doc['file.path'])).toContain('Downloads');
+    expect(malicious!.description).toContain('Downloads');
+    expect(malicious!.description).not.toContain('temp path');
   });
 });
