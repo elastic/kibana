@@ -21,11 +21,11 @@ export class SpaceSelectorPageObject extends FtrService {
   }
 
   async clickSpaceCard(spaceId: string) {
-    await this.common.sleep(10000);
-    return await this.retry.try(async () => {
-      this.log.info(`SpaceSelectorPage:clickSpaceCard(${spaceId})`);
-      await this.testSubjects.click(`space-card-${spaceId}`);
-      await this.common.sleep(1000);
+    this.log.info(`SpaceSelectorPage:clickSpaceCard(${spaceId})`);
+    await this.testSubjects.click(`space-card-${spaceId}`);
+    await this.retry.waitForWithTimeout('space navigation to finish', 10000, async () => {
+      const currentUrl = await this.browser.getCurrentUrl();
+      return currentUrl.includes(`/s/${spaceId}/`);
     });
   }
 

@@ -60,6 +60,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'from logstash-*\n  | STATS Count=COUNT(*) BY Pattern=CATEGORIZE(@message)\n | SORT Count DESC'
       );
       await testSubjects.click('querySubmitButton');
+      await discover.waitUntilTabIsLoaded();
       const columns = ['Count', 'Pattern'];
       await unifiedFieldList.clickFieldListItemAdd('Count');
       await unifiedFieldList.clickFieldListItemAdd('Pattern');

@@ -82,14 +82,17 @@ export class WebElementWrapper {
     findFunction: () => Promise<Array<WebElement | WebElementWrapper>>,
     timeout?: number
   ) {
-    if (timeout && timeout !== this.timeout) {
+    const useCustomTimeout = timeout !== undefined && timeout !== this.timeout;
+    if (useCustomTimeout) {
       await this.driver.manage().setTimeouts({ implicit: timeout });
     }
-    const elements = await findFunction();
-    if (timeout && timeout !== this.timeout) {
-      await this.driver.manage().setTimeouts({ implicit: this.timeout });
+    try {
+      return await findFunction();
+    } finally {
+      if (useCustomTimeout) {
+        await this.driver.manage().setTimeouts({ implicit: this.timeout });
+      }
     }
-    return elements;
   }
 
   // Locator is re-found from the document root on retry. Omit it for child finds

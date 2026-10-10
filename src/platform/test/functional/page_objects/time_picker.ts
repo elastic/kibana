@@ -35,6 +35,8 @@ export class TimePickerPageObject extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
 
+  private detectedPickerVariant?: { appPath: string; isNew: boolean };
+
   private readonly quickSelectTimeMenuToggle = this.ctx.getService('menuToggle').create({
     name: 'QuickSelectTime Menu',
     menuTestSubject: 'superDatePickerQuickMenu',
@@ -57,10 +59,15 @@ export class TimePickerPageObject extends FtrService {
 
   /**
    * Detects whether the page is using the new DateRangePicker or the legacy
-   * EuiSuperDatePicker. Not cached because different apps may use different
-   * picker variants within the same test suite.
+   * EuiSuperDatePicker. Cache by app path because different apps may use
+   * different picker variants within the same test suite.
    */
   public async isNewDateRangePicker(): Promise<boolean> {
+    const appPath = new URL(await this.browser.getCurrentUrl()).pathname;
+    if (this.detectedPickerVariant?.appPath === appPath) {
+      return this.detectedPickerVariant.isNew;
+    }
+
     // Wait for the page to settle before detecting, otherwise a stale picker
     // from a previous app may briefly appear during navigation.
     await this.header.awaitGlobalLoadingIndicatorHidden();
@@ -72,6 +79,7 @@ export class TimePickerPageObject extends FtrService {
       throw new Error('Date picker has not rendered');
     }
     const isNew = variant === 'dateRangePickerControlButton';
+    this.detectedPickerVariant = { appPath, isNew };
     this.log.debug(
       `Detected date picker variant: ${isNew ? 'DateRangePicker' : 'EuiSuperDatePicker'}`
     );
@@ -710,7 +718,7 @@ export class TimePickerPageObject extends FtrService {
       }
       await this.closeNewPickerSettingsPanel();
     } else {
-      const refreshConfig = await this.getRefreshConfig(true);
+      const refreshConfig = await this.getRefreshConfigLegacy(true);
       if (!refreshConfig.isPaused) {
         this.log.debug('pause auto refresh');
         await this.testSubjects.click('superDatePickerToggleRefreshButton');

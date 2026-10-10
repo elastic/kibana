@@ -124,7 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(
             await find.existsByCssSelector(
               '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText',
-              500
+              0
             )
           ).to.be(false);
         }
