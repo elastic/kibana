@@ -8,6 +8,8 @@
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { RouterMock } from '@kbn/core-http-router-server-mocks';
+import { RouteValidationError } from '@kbn/core-http-server';
+import type { RouteValidationResultFactory } from '@kbn/core-http-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
@@ -220,10 +222,17 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
       const validateBody = (body: Record<string, unknown>) => {
         const { config } = router.versioned.getRoute('put', ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE)
           .versions['1'];
-        return config.validate.request.body(body, {
-          ok: (value: unknown) => ({ value }),
-          badRequest: (error: unknown) => ({ error }),
-        });
+        const validation =
+          typeof config.validate === 'function' ? config.validate() : config.validate;
+        const validateRequestBody = validation && validation.request?.body;
+        if (typeof validateRequestBody !== 'function') {
+          throw new Error('Expected the PUT route to validate its body with a function');
+        }
+        const resultFactory: RouteValidationResultFactory = {
+          ok: (value) => ({ value }),
+          badRequest: (error, path) => ({ error: new RouteValidationError(error, path) }),
+        };
+        return validateRequestBody(body, resultFactory);
       };
 
       it('accepts the full settings', () => {
