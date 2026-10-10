@@ -597,6 +597,22 @@ describe('FlyoutTemplate Header collapsed prop', () => {
     );
   });
 
+  it('keeps the loading spinner beside the compact title, outside the heading', () => {
+    render(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Compact title" isLoading collapsed />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    const spinner = screen.getByTestId('flyoutHeaderTitleLoading');
+    expect(screen.getByRole('heading', { level: 3, name: 'Compact title' })).not.toContainElement(
+      spinner
+    );
+  });
+
   it('keeps the title tooltip reachable beside the compact title', () => {
     const { container } = render(
       <FlyoutTemplate onClose={noop} session="never">

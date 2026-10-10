@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { useAnomaliesBadgeDescriptor } from '../../../app/service_inventory/service_list/anomalies_badge';
 import { useServiceFlyoutContext } from '../service_flyout_context';
 import { getAlertsBadgeDescriptor } from '../../badge/alerts_badge';
+import { renderAlertsHeaderBadge } from '../../badge/alerts_header_badge';
 import { getSloStatusBadgeDescriptor } from '../../slo_status_badge';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { useServiceBadgesData } from '../hooks/use_service_badges_data';
@@ -107,38 +108,7 @@ export function useServiceBadges(): ReactElement[] {
           : undefined,
     });
 
-    badges.push(
-      descriptor.href ? (
-        <Badge
-          key="alerts"
-          id="alerts"
-          color={descriptor.color}
-          iconType={descriptor.iconType}
-          data-test-subj={descriptor['data-test-subj']}
-          toolTipContent={descriptor.toolTipContent}
-          toolTipPosition="bottom"
-          href={descriptor.href}
-          aria-label={descriptor.ariaLabel}
-          {...descriptor.ebtProps}
-        >
-          {descriptor.label}
-        </Badge>
-      ) : (
-        <Badge
-          key="alerts"
-          id="alerts"
-          color={descriptor.color}
-          iconType={descriptor.iconType}
-          data-test-subj={descriptor['data-test-subj']}
-          toolTipContent={descriptor.toolTipContent}
-          toolTipPosition="bottom"
-          role="img"
-          aria-label={descriptor.ariaLabel}
-        >
-          {descriptor.label}
-        </Badge>
-      )
-    );
+    badges.push(renderAlertsHeaderBadge(descriptor));
   }
 
   if (showDynamicBadges && sloData !== undefined) {
