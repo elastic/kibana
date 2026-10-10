@@ -13,5 +13,9 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/safer-lodash-set",
+    "@kbn/actions-utils",
+    "@kbn/logging-mocks",
+  ]
 }
