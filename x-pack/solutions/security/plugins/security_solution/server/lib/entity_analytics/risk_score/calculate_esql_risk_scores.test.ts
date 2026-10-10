@@ -167,6 +167,31 @@ describe('Calculate risk scores with ESQL', () => {
         )
       ).toThrow('Entity ID contains an unsupported control character');
     });
+
+    it('ranks risk inputs by the numeric risk score in every scoring query', () => {
+      const queries = [
+        getESQL(EntityType.host, { lower: 'abel', upper: 'zuzanna' }, 10000, 3500),
+        getBaseScoreESQL(
+          EntityType.host,
+          { lower: 'host:abel', upper: 'host:zuzanna' },
+          10000,
+          3500,
+          '.alerts-security.alerts-default'
+        ),
+        getResolutionScoreESQLByIds(
+          EntityType.host,
+          ['host:target-a'],
+          10000,
+          3500,
+          '.alerts-security.alerts-default',
+          '.entity_analytics.risk_score.lookup-default'
+        ),
+      ];
+
+      for (const query of queries) {
+        expect(query).toContain('risk_inputs = TOP(risk_score, 10, "desc", input)');
+      }
+    });
   });
 
   describe('stored-EUID fast path', () => {
