@@ -50,20 +50,23 @@ export const Result: React.FC<ResultProps> = ({
   hasDeleteDocumentsPrivilege,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const tooltipText =
-    fields.length <= defaultVisibleFields
-      ? i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.allVisible', {
-          defaultMessage: 'All fields are visible',
-        })
-      : isExpanded
+  const tooltipText = isExpanded
+    ? fields.length > defaultVisibleFields
       ? i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.showFewer', {
           defaultMessage: 'Show {amount} fewer fields',
           values: { amount: fields.length - defaultVisibleFields },
         })
-      : i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.showMore', {
-          defaultMessage: 'Show {amount} more fields',
-          values: { amount: fields.length - defaultVisibleFields },
-        });
+      : i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.collapse', {
+          defaultMessage: 'Collapse fields',
+        })
+    : fields.length > defaultVisibleFields
+    ? i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.showMore', {
+        defaultMessage: 'Show {amount} more fields',
+        values: { amount: fields.length - defaultVisibleFields },
+      })
+    : i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.expand', {
+        defaultMessage: 'Expand fields',
+      });
   const toolTipContent = <>{tooltipText}</>;
 
   const showResultsFields = isExpanded ? fields.length > 0 : defaultVisibleFields > 0;
