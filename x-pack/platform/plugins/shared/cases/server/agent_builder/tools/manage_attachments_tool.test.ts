@@ -23,12 +23,20 @@ const buildMockAttachments = () => ({
   list: jest.fn(),
 });
 
-const buildToolContext = (attachments = buildMockAttachments()): ToolHandlerContext =>
+const buildToolContext = (
+  attachments = buildMockAttachments(),
+  callSource: ToolHandlerContext['callContext']['callSource'] = 'agent'
+): ToolHandlerContext =>
   ({
     request: httpServerMock.createKibanaRequest(),
     spaceId: 'default',
     logger: loggingSystemMock.createLogger(),
     attachments,
+    callContext: {
+      toolId: 'platform.core.cases.manage_attachments',
+      toolCallId: 'call-1',
+      callSource,
+    },
   } as unknown as ToolHandlerContext);
 
 const buildRegistry = (
@@ -67,6 +75,11 @@ describe('manageAttachmentsTool', () => {
       idempotentHint: false,
       openWorldHint: false,
     });
+  });
+
+  it('is exposed over MCP', () => {
+    const tool = buildTool(buildRegistry([]), true);
+    expect(tool.excludeFromMcp).toBeUndefined();
   });
 
   it('does not include get_all in mode enum', () => {
@@ -147,6 +160,34 @@ describe('manageAttachmentsTool', () => {
     const { results } = result as unknown as { results: Array<{ data: Record<string, unknown> }> };
     expect(results[0].data.attachment_ids).toEqual(['att-1']);
   });
+
+  it.each(['mcp', 'user', 'unknown'] as const)(
+    'returns the case without emitting an attachment for %s callers',
+    async (callSource) => {
+      const theCase = { id: 'case-1', title: 'Test Case', owner: 'securitySolution' };
+      casesClient.cases.get.mockResolvedValue(theCase as never);
+      casesClient.attachments.bulkCreate.mockResolvedValue(theCase as never);
+
+      const attachments = buildMockAttachments();
+      const tool = buildTool(buildRegistry([{ id: 'comment', schema: commentSchema }]), true);
+      const result = await tool.handler(
+        {
+          mode: 'add_attachments',
+          case_id: 'case-1',
+          attachments: [{ type: 'comment', data: { content: 'hi' } }],
+        } as never,
+        buildToolContext(attachments, callSource)
+      );
+
+      expect(casesClient.attachments.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(attachments.add).not.toHaveBeenCalled();
+      const { results } = result as unknown as {
+        results: Array<{ data: Record<string, unknown> }>;
+      };
+      expect(results[0].data.case).toEqual(theCase);
+      expect(results[0].data.attachment_ids).toBeUndefined();
+    }
+  );
 });
 
 // ---------------------------------------------------------------------------
