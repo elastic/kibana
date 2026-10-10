@@ -44,7 +44,22 @@ export interface RootContext {
    * The current solution type
    */
   solutionType: SolutionType;
+  /**
+   * Whether solution profiles may resolve in Classic navigation. Set from the
+   * `discover:enableSolutionProfilesInClassic` advanced setting; only meaningful when
+   * `solutionType` is `Default`. Absent is treated as allowed.
+   */
+  allowSolutionProfiles?: boolean;
 }
+
+/**
+ * Whether solution profiles are permitted to resolve for the given root context. Always true outside
+ * Classic navigation; in Classic it honors the `allowSolutionProfiles` flag (absent = allowed).
+ */
+export const areSolutionProfilesAllowed = (
+  rootContext: Pick<RootContext, 'solutionType' | 'allowSolutionProfiles'>
+): boolean =>
+  rootContext.solutionType !== SolutionType.Default || rootContext.allowSolutionProfiles !== false;
 
 export type RootProfileProvider<TProviderContext = {}> = AsyncProfileProvider<
   RootProfile,

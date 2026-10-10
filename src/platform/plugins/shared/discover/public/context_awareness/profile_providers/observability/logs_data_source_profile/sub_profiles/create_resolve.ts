@@ -9,26 +9,52 @@
 
 import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
 import { BehaviorSubject } from 'rxjs';
-import { DataSourceCategory, SolutionType } from '../../../../profiles';
+import { areSolutionProfilesAllowed, DataSourceCategory, SolutionType } from '../../../../profiles';
 import { extractIndexPatternFrom } from '../../../extract_index_pattern_from';
 import type { LogOverviewContext, LogsDataSourceProfileProvider } from '../profile';
 
+export interface CreateResolveOptions {
+  /**
+   * Whether the integration resolves in Classic navigation. Defaults to true; set false for
+   * integrations whose data is also claimed by another solution (e.g. Windows logs are
+   * Security-relevant), so Classic only activates them under explicit Observability navigation.
+   */
+  enabledInClassicNav?: boolean;
+}
+
 export const createResolve = (
-  baseIndexPattern: string
+  baseIndexPattern: string,
+  { enabledInClassicNav = true }: CreateResolveOptions = {}
 ): LogsDataSourceProfileProvider['resolve'] => {
   const testIndexPattern = testPatternAgainstAllowedList([
     createRegExpPatternFrom(baseIndexPattern, 'data'),
   ]);
 
   return (params) => {
-    if (params.rootContext.solutionType !== SolutionType.Observability) {
+    const { solutionType } = params.rootContext;
+    const isSupportedSolutionType =
+      solutionType === SolutionType.Observability ||
+      (enabledInClassicNav && solutionType === SolutionType.Default);
+
+    if (!isSupportedSolutionType || !areSolutionProfilesAllowed(params.rootContext)) {
       return { isMatch: false };
     }
 
-    const indexPattern = extractIndexPatternFrom(params);
+    const matchedIndices = params.dataView?.matchedIndices;
 
-    if (!indexPattern || !testIndexPattern(indexPattern)) {
-      return { isMatch: false };
+    if (matchedIndices && matchedIndices.length > 0) {
+      // Prefer the concrete resolved indices: every one must belong to this integration, so a data
+      // view spanning multiple integrations is never claimed.
+      if (!matchedIndices.every(testIndexPattern)) {
+        return { isMatch: false };
+      }
+    } else {
+      // Fall back to the raw index pattern when the data view has not resolved any indices.
+      const indexPattern = extractIndexPatternFrom(params);
+
+      if (!indexPattern || !testIndexPattern(indexPattern)) {
+        return { isMatch: false };
+      }
     }
 
     return {

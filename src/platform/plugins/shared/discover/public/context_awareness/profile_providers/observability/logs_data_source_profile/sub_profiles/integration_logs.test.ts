@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { createEsqlDataSource } from '../../../../../../common/data_sources';
 import type { RootContext } from '../../../../profiles';
@@ -114,21 +115,26 @@ describe('createIntegrationLogsDataSourceProfileProviders', () => {
   };
 
   describe.each(providers)('$profileId', (provider) => {
-    it('should match a valid index pattern', async () => {
-      const result = await provider.resolve({
+    const resolveWithResolvedIndices = (indexPattern: string) => {
+      const dataView = createStubIndexPattern({ spec: { title: indexPattern } });
+      // A concrete index the pattern resolves to (data views expose these via matchedIndices).
+      dataView.matchedIndices = [indexPattern.replace('-*', '-default')];
+
+      return provider.resolve({
         rootContext: ROOT_CONTEXT,
         dataSource: createEsqlDataSource(),
-        query: { esql: `FROM ${indexPatternMap[provider.profileId].valid}` },
+        query: { esql: `FROM ${indexPattern}` },
+        dataView,
       });
+    };
+
+    it('should match a valid index pattern', async () => {
+      const result = await resolveWithResolvedIndices(indexPatternMap[provider.profileId].valid);
       expect(result).toEqual(RESOLUTION_MATCH);
     });
 
     it('should not match an invalid index pattern', async () => {
-      const result = await provider.resolve({
-        rootContext: ROOT_CONTEXT,
-        dataSource: createEsqlDataSource(),
-        query: { esql: `FROM ${indexPatternMap[provider.profileId].invalid}` },
-      });
+      const result = await resolveWithResolvedIndices(indexPatternMap[provider.profileId].invalid);
       expect(result).toEqual({ isMatch: false });
     });
 
@@ -140,6 +146,60 @@ describe('createIntegrationLogsDataSourceProfileProviders', () => {
       expect(getDefaultAppState?.({ dataView: dataViewWithTimefieldMock })).toEqual({
         columns: expectedColumnsMap[provider.profileId],
       });
+    });
+  });
+
+  describe('Classic navigation (SolutionType.Default)', () => {
+    const resolveInClassic = (
+      profileId: string,
+      indexPattern: string,
+      allowSolutionProfiles?: boolean
+    ) => {
+      const provider = providers.find((candidate) => candidate.profileId === profileId);
+      if (!provider) {
+        throw new Error(`Missing provider ${profileId}`);
+      }
+      const dataView = createStubIndexPattern({ spec: { title: indexPattern } });
+      dataView.matchedIndices = [indexPattern.replace('-*', '-default')];
+
+      return provider.resolve({
+        rootContext: {
+          profileId: 'classic-nav-root-profile',
+          solutionType: SolutionType.Default,
+          allowSolutionProfiles,
+        },
+        dataSource: createEsqlDataSource(),
+        query: { esql: `FROM ${indexPattern}` },
+        dataView,
+      });
+    };
+
+    it('activates an integration that is enabled in Classic', async () => {
+      expect(
+        await resolveInClassic(
+          'observability-nginx-access-logs-data-source-profile',
+          'logs-nginx.access-*'
+        )
+      ).toEqual(RESOLUTION_MATCH);
+    });
+
+    it('does not activate the Windows logs profile, which is Observability-navigation only', async () => {
+      expect(
+        await resolveInClassic(
+          'observability-windows-logs-data-source-profile',
+          'logs-windows.powershell-*'
+        )
+      ).toEqual({ isMatch: false });
+    });
+
+    it('does not activate when solution profiles are disabled in Classic', async () => {
+      expect(
+        await resolveInClassic(
+          'observability-nginx-access-logs-data-source-profile',
+          'logs-nginx.access-*',
+          false
+        )
+      ).toEqual({ isMatch: false });
     });
   });
 });

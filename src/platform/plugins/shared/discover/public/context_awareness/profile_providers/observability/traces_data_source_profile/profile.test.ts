@@ -125,12 +125,36 @@ describe('tracesDataSourceProfileProvider', () => {
     ).toEqual(RESOLUTION_MISMATCH);
   });
 
-  it('should NOT match when the solutionType is NOT Observability', () => {
+  it('should match in Classic but not other solution views', () => {
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        rootContext: {
+          profileId: 'classic-nav-root-profile',
+          solutionType: SolutionType.Default,
+        },
+        dataSource: createDataViewDataSource({ dataViewId: 'other_view_id' }),
+        dataView: { getIndexPattern: () => 'traces-*' } as unknown as DataView,
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MATCH);
     expect(
       tracesDataSourceProfileProvider.resolve({
         rootContext: {
           profileId: 'security-root-profile',
           solutionType: SolutionType.Security,
+        },
+        dataSource: createDataViewDataSource({ dataViewId: 'other_view_id' }),
+        dataView: { getIndexPattern: () => 'traces-*' } as unknown as DataView,
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  it('should NOT match in Classic when solution profiles are disabled', () => {
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        rootContext: {
+          profileId: 'classic-nav-root-profile',
+          solutionType: SolutionType.Default,
+          allowSolutionProfiles: false,
         },
         dataSource: createDataViewDataSource({ dataViewId: 'other_view_id' }),
         dataView: { getIndexPattern: () => 'traces-*' } as unknown as DataView,

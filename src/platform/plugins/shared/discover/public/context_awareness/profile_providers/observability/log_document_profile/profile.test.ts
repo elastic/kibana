@@ -126,7 +126,7 @@ describe('logDocumentProfileProvider', () => {
     ).toEqual(RESOLUTION_MISMATCH);
   });
 
-  it('does not match records when solution type is not Observability', () => {
+  it('matches records in Classic but not other solution views', () => {
     const params: Omit<DocumentProfileProviderParams, 'rootContext'> = {
       dataSourceContext: DATA_SOURCE_CONTEXT,
       record: buildMockRecord('another-index', {
@@ -144,7 +144,7 @@ describe('logDocumentProfileProvider', () => {
         ...params,
         rootContext: { profileId: 'other-data-source-profile', solutionType: SolutionType.Default },
       })
-    ).toEqual(RESOLUTION_MISMATCH);
+    ).toEqual(RESOLUTION_MATCH);
     expect(
       logDocumentProfileProvider.resolve({
         ...params,
@@ -158,6 +158,61 @@ describe('logDocumentProfileProvider', () => {
           profileId: 'other-data-source-profile',
           solutionType: SolutionType.Security,
         },
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  it('in Classic, only matches when the data source is recognized as logs', () => {
+    const record = buildMockRecord('another-index', {
+      'data_stream.type': ['logs'],
+    });
+    const classicRootContext: ContextWithProfileId<RootContext> = {
+      profileId: 'classic-nav-root-profile',
+      solutionType: SolutionType.Default,
+    };
+    const nonLogsDataSourceContext: ContextWithProfileId<DataSourceContext> = {
+      profileId: 'data-source-profile',
+      category: DataSourceCategory.Default,
+    };
+
+    // Claimed only when the logs data source profile set the Logs category (the curated integrations).
+    expect(
+      logDocumentProfileProvider.resolve({
+        rootContext: classicRootContext,
+        dataSourceContext: DATA_SOURCE_CONTEXT,
+        record,
+      })
+    ).toEqual(RESOLUTION_MATCH);
+    expect(
+      logDocumentProfileProvider.resolve({
+        rootContext: classicRootContext,
+        dataSourceContext: nonLogsDataSourceContext,
+        record,
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
+
+    // Observability navigation is unaffected by the data source category.
+    expect(
+      logDocumentProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSourceContext: nonLogsDataSourceContext,
+        record,
+      })
+    ).toEqual(RESOLUTION_MATCH);
+  });
+
+  it('does not match in Classic when solution profiles are disabled', () => {
+    expect(
+      logDocumentProfileProvider.resolve({
+        rootContext: {
+          profileId: 'classic-nav-root-profile',
+          solutionType: SolutionType.Default,
+          allowSolutionProfiles: false,
+        },
+        dataSourceContext: DATA_SOURCE_CONTEXT,
+        record: buildMockRecord('another-index', {
+          'data_stream.type': ['logs'],
+        }),
       })
     ).toEqual(RESOLUTION_MISMATCH);
   });

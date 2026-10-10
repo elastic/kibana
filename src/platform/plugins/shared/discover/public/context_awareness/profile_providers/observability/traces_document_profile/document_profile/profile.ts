@@ -16,7 +16,12 @@ import {
 } from '@kbn/discover-utils';
 import { TRACES_PRODUCT_FEATURE_ID } from '../../../../../../common/constants';
 import type { DocumentProfileProvider } from '../../../../profiles';
-import { DataSourceCategory, DocumentType, SolutionType } from '../../../../profiles';
+import {
+  areSolutionProfilesAllowed,
+  DataSourceCategory,
+  DocumentType,
+  SolutionType,
+} from '../../../../profiles';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import { createGetDocViewer } from './accessors';
 
@@ -43,10 +48,12 @@ export const createObservabilityTracesDocumentProfileProvider = ({
     ),
   },
   resolve: ({ record, rootContext }) => {
-    const isObservabilitySolutionView = rootContext.solutionType === SolutionType.Observability;
-
+    const isSupportedSolution =
+      rootContext.solutionType === SolutionType.Observability ||
+      rootContext.solutionType === SolutionType.Default;
     if (
-      isObservabilitySolutionView &&
+      isSupportedSolution &&
+      areSolutionProfilesAllowed(rootContext) &&
       isTraceDocument(record, apmContextService.tracesService.isTracesIndexPattern)
     ) {
       return {

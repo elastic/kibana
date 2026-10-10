@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ENABLE_SOLUTION_PROFILES_IN_CLASSIC_SETTING } from '@kbn/discover-utils';
 import { SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { getDefaultAdHocDataViews } from './accessors';
@@ -26,6 +27,10 @@ export const createClassicNavRootProfileProvider = (
       isMatch: true,
       context: {
         solutionType: SolutionType.Default,
+        allowSolutionProfiles: services.uiSettings.get<boolean>(
+          ENABLE_SOLUTION_PROFILES_IN_CLASSIC_SETTING,
+          true
+        ),
         allLogsIndexPattern: services.logsContextService.getAllLogsIndexPattern(),
       },
     };

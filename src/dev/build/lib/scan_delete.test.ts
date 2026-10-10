@@ -51,7 +51,7 @@ it('only deletes files/folders matching patterns', async () => {
   expect(readdirSync(resolve(TMP, 'a/b'))).toEqual([]);
 });
 
-it('exludes items matched by negative patterns', async () => {
+it('excludes items matched by negative patterns', async () => {
   await scanDelete(TMP, {
     match: ['**/{bar,c}/**', '!foo/**'],
   });
