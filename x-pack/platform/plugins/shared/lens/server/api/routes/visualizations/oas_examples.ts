@@ -1010,7 +1010,7 @@ const lensUpdateResponseExamples = {
   updateVisualizationResponse: {
     summary: 'Update visualization response',
     description:
-      'The complete updated visualization state after a full replacement. PUT replaces the entire chart configuration - fields omitted from the request are reset to their defaults. `meta.created_at` reflects the update time rather than the original creation time.\n',
+      'The complete updated visualization state after a full replacement. PUT replaces the entire chart configuration - fields omitted from the request are reset to their defaults. `meta.created_at` is the original creation time; `meta.updated_at` is the time of this update.\n',
     value: {
       id: '1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d',
       data: {
@@ -1045,7 +1045,7 @@ const lensUpdateResponseExamples = {
         tags: [],
       },
       meta: {
-        created_at: '2026-04-13T11:00:00.000Z',
+        created_at: '2026-04-13T10:00:00.000Z',
         managed: false,
         updated_at: '2026-04-13T11:00:00.000Z',
         version: 'WzYxLDFd',
