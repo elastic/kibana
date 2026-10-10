@@ -10,13 +10,25 @@ import type {
   MONITOR_CURRENT_EVENT_TYPE,
   MONITOR_ERROR_EVENT_TYPE,
   MONITOR_UPDATE_EVENT_TYPE,
+  PL_REBALANCE_EVENT_TYPE,
+  PL_SHARDING_SNAPSHOT_EVENT_TYPE,
+  PL_SHARDING_STATE_EVENT_TYPE,
 } from './constants';
-import type { MonitorErrorEvent, MonitorUpdateEvent } from './types';
+import type {
+  MonitorErrorEvent,
+  MonitorUpdateEvent,
+  PrivateLocationRebalanceEvent,
+  PrivateLocationShardingSnapshotEvent,
+  PrivateLocationShardingStateEvent,
+} from './types';
 
 export interface SyntheticsEventMap {
   [MONITOR_UPDATE_EVENT_TYPE]: MonitorUpdateEvent;
   [MONITOR_CURRENT_EVENT_TYPE]: MonitorUpdateEvent;
   [MONITOR_ERROR_EVENT_TYPE]: MonitorErrorEvent;
+  [PL_REBALANCE_EVENT_TYPE]: PrivateLocationRebalanceEvent;
+  [PL_SHARDING_SNAPSHOT_EVENT_TYPE]: PrivateLocationShardingSnapshotEvent;
+  [PL_SHARDING_STATE_EVENT_TYPE]: PrivateLocationShardingStateEvent;
 }
 
 /**

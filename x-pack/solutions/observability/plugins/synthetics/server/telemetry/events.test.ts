@@ -10,11 +10,14 @@ import {
   MONITOR_CURRENT_EVENT_TYPE,
   MONITOR_ERROR_EVENT_TYPE,
   MONITOR_UPDATE_EVENT_TYPE,
+  PL_REBALANCE_EVENT_TYPE,
+  PL_SHARDING_SNAPSHOT_EVENT_TYPE,
+  PL_SHARDING_STATE_EVENT_TYPE,
 } from './constants';
 import { registerSyntheticsEventTypes } from './events';
 
 describe('registerSyntheticsEventTypes', () => {
-  it('registers update, current and error event types', () => {
+  it('registers monitor and private location sharding event types', () => {
     const { analytics } = coreMock.createSetup();
 
     registerSyntheticsEventTypes(analytics);
@@ -24,6 +27,9 @@ describe('registerSyntheticsEventTypes', () => {
       MONITOR_UPDATE_EVENT_TYPE,
       MONITOR_CURRENT_EVENT_TYPE,
       MONITOR_ERROR_EVENT_TYPE,
+      PL_REBALANCE_EVENT_TYPE,
+      PL_SHARDING_SNAPSHOT_EVENT_TYPE,
+      PL_SHARDING_STATE_EVENT_TYPE,
     ]);
   });
 });
