@@ -21,6 +21,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataSource } from '@kbn/data-source';
 import { getDataViewFieldFromDataSource } from '@kbn/discover-utils';
 import { SOURCE_COLUMN } from '../utils/columns';
@@ -116,6 +117,7 @@ function buildEuiGridColumn({
   isSummaryOnlyColumn,
   isSortEnabled,
   toastNotifications,
+  uiActions,
   hasEditDataViewPermission,
   valueToStringConverter,
   rowsCount,
@@ -143,6 +145,7 @@ function buildEuiGridColumn({
   isSummaryOnlyColumn: boolean;
   isSortEnabled: boolean;
   toastNotifications: ToastsStart;
+  uiActions?: UiActionsStart;
   hasEditDataViewPermission: () => boolean;
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
@@ -217,7 +220,9 @@ function buildEuiGridColumn({
             documentsDisplayMode,
             onFilter,
             dataGridRef,
-            hideFilteringOnComputedColumns
+            hideFilteringOnComputedColumns,
+            uiActions,
+            dataView
           )
         : EMPTY_CELL_ACTIONS;
 
@@ -394,6 +399,7 @@ export function getEuiGridColumns({
   services: {
     uiSettings: IUiSettingsClient;
     toastNotifications: ToastsStart;
+    uiActions?: UiActionsStart;
   };
   hasEditDataViewPermission: () => boolean;
   valueToStringConverter: ValueToStringConverter;
@@ -425,6 +431,7 @@ export function getEuiGridColumns({
       isSummaryOnlyColumn,
       isSortEnabled,
       toastNotifications: services.toastNotifications,
+      uiActions: services.uiActions,
       hasEditDataViewPermission,
       valueToStringConverter,
       rowsCount,

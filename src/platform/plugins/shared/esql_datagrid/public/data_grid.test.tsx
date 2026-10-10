@@ -14,6 +14,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { EsqlSource } from '@kbn/data-source';
 import DataGrid from './data_grid';
 
@@ -41,6 +42,7 @@ describe('DataGrid', () => {
   const dataView = { toSpec: jest.fn() } as unknown as DataView;
   const core = coreMock.createStart();
   const fieldFormats = fieldFormatsServiceMock.createStartContract();
+  const uiActions = uiActionsPluginMock.createStartContract();
   const query = { esql: 'from foo' };
 
   const column = (name: string): DatatableColumn => ({
@@ -54,6 +56,7 @@ describe('DataGrid', () => {
       <DataGrid
         core={core}
         data={data}
+        uiActions={uiActions}
         fieldFormats={fieldFormats}
         rows={[]}
         dataView={dataView}
@@ -84,6 +87,7 @@ describe('DataGrid', () => {
       <DataGrid
         core={core}
         data={data}
+        uiActions={uiActions}
         fieldFormats={fieldFormats}
         rows={[]}
         dataView={dataView}
@@ -110,6 +114,7 @@ describe('DataGrid', () => {
       <DataGrid
         core={core}
         data={data}
+        uiActions={uiActions}
         fieldFormats={fieldFormats}
         rows={[]}
         dataView={dataView}

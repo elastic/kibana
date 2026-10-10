@@ -70,6 +70,7 @@ import {
 } from '@kbn/data-grid-in-table-search';
 import { useThrottleFn } from '@kbn/react-hooks';
 import { getDataViewFieldFromDataSource } from '@kbn/discover-utils';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import type {
   UnifiedDataTableSettings,
@@ -81,6 +82,7 @@ import type {
   DocMap,
   DocumentsDisplayMode,
   JsonModeSettings,
+  UnifiedDataTableOpenInNewTab,
 } from '../types';
 import {
   getDisplayedColumns,
@@ -216,6 +218,11 @@ interface InternalUnifiedDataTableProps {
    */
   onFilter?: DocViewFilterFn;
   /**
+   * Opens a query in a new Discover tab. When provided (currently Discover only), it is
+   * passed to actions that continue the analysis elsewhere, such as "Find similar values".
+   */
+  onOpenInNewTab?: UnifiedDataTableOpenInNewTab;
+  /**
    * Function triggered when a column is resized by the user, passes `undefined` for auto-width
    */
   onResize?: (colSettings: { columnId: string; width: number | undefined }) => void;
@@ -349,6 +356,7 @@ interface InternalUnifiedDataTableProps {
     uiSettings: IUiSettingsClient;
     dataViewFieldEditor?: DataViewFieldEditorStart;
     toastNotifications: ToastsStart;
+    uiActions?: UiActionsStart;
     storage: Storage;
     data: DataPublicPluginStart;
   };
@@ -577,6 +585,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       dataView,
       loadingState,
       onFilter,
+      onOpenInNewTab,
       onResize,
       onSetColumns,
       onSort,
@@ -651,8 +660,15 @@ const InternalUnifiedDataTable = React.forwardRef<
     ref
   ) => {
     const styles = useMemoCss(componentStyles);
-    const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
-      services;
+    const {
+      fieldFormats,
+      toastNotifications,
+      dataViewFieldEditor,
+      uiSettings,
+      storage,
+      data,
+      uiActions,
+    } = services;
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
     useImperativeHandle(ref, () => dataGridRef.current!);
 
@@ -919,6 +935,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         setExpanded: setExpandedDoc,
         getRowByIndex: (index: number) => displayedRows[index],
         onFilter,
+        onOpenInNewTab,
         hideFilteringOnComputedColumns,
         dataView,
         selectedDocsState,
@@ -938,6 +955,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         displayedRows,
         expandedDoc,
         onFilter,
+        onOpenInNewTab,
         hideFilteringOnComputedColumns,
         setExpandedDoc,
         selectedDocsState,
@@ -1188,6 +1206,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           services: {
             uiSettings,
             toastNotifications,
+            uiActions,
           },
           hasEditDataViewPermission: () =>
             Boolean(dataViewFieldEditor?.userPermissions?.editIndexPattern()),
@@ -1229,6 +1248,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         visibleColumns,
         sortedColumns,
         disableCellActions,
+        uiActions,
         hideFilteringOnComputedColumns,
         documentsDisplayMode,
       ]

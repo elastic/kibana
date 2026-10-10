@@ -18,6 +18,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataSource } from '@kbn/data-source';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 export type { DataGridDensity } from './constants';
 
 /**
@@ -93,3 +94,15 @@ export type CustomBulkActions = Array<
 >;
 
 export type DocMap = Map<string, { doc: DataTableRecord; docIndex: number }>;
+
+/**
+ * Opens a query, with optional filters, in a new Discover tab.
+ */
+export type UnifiedDataTableOpenInNewTab = (params: {
+  query?: Query | AggregateQuery;
+  filters?: Filter[];
+  /** Data view to use for a classic (DSL) query */
+  dataViewId?: string;
+  timeRange?: TimeRange;
+  tabLabel?: string;
+}) => Promise<void>;

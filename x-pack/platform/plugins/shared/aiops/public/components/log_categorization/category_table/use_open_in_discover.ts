@@ -9,20 +9,44 @@ import { useCallback } from 'react';
 
 import moment from 'moment';
 
-import { type QueryMode } from '@kbn/aiops-log-pattern-analysis/get_category_query';
-import type { Filter } from '@kbn/es-query';
+import type { QueryMode } from '@kbn/aiops-log-pattern-analysis/get_category_query';
+import { isOfAggregateQueryType, type Filter } from '@kbn/es-query';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { QueryStringContract, TimefilterContract } from '@kbn/data-plugin/public';
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
+import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import { useDiscoverLinks, createFilter } from '../use_discover_links';
 import type { LogCategorizationAppState } from '../../../application/url_state/log_pattern_analysis';
+import {
+  addWhereToEsqlQuery,
+  buildMatchFilterExpression,
+} from '../reverse_categorization/build_esql_analysis_queries';
 import { getLabels } from './labels';
 
 export interface OpenInDiscover {
   openFunction: (mode: QueryMode, navigateToDiscover: boolean, category?: Category) => void;
   getLabels: (navigateToDiscover: boolean) => ReturnType<typeof getLabels>;
   count: number;
+}
+
+export function onPopulateWhereClause(
+  queryString: QueryStringContract,
+  field: DataViewField,
+  value: string,
+  mode: QueryMode
+) {
+  const query = queryString.getQuery();
+  if (!isOfAggregateQueryType(query)) {
+    return;
+  }
+
+  const filterExpression = buildMatchFilterExpression(field.name, value, mode);
+  const updatedQuery = addWhereToEsqlQuery(query.esql, filterExpression);
+
+  queryString.setQuery({
+    esql: updatedQuery,
+  });
 }
 
 export function useOpenInDiscover(
@@ -36,6 +60,7 @@ export function useOpenInDiscover(
   onClose: () => void = () => {}
 ): OpenInDiscover {
   const { openInDiscoverWithFilter } = useDiscoverLinks();
+  const { data } = useAiopsAppContext();
 
   const openFunction = useCallback(
     (mode: QueryMode, navigateToDiscover: boolean, category?: Category) => {
@@ -45,6 +70,19 @@ export function useOpenInDiscover(
         typeof selectedField !== 'string' &&
         navigateToDiscover === false
       ) {
+        const isEsql = isOfAggregateQueryType(data.query.queryString.getQuery());
+
+        if (isEsql) {
+          onPopulateWhereClause(
+            data.query.queryString,
+            selectedField,
+            selectedCategories[0].key,
+            mode
+          );
+          onClose();
+          return;
+        }
+
         onAddFilter(
           createFilter('', selectedField.name, selectedCategories, mode, category),
           `Patterns - ${selectedField.name}`
@@ -85,6 +123,7 @@ export function useOpenInDiscover(
       dataViewId,
       selectedCategories,
       aiopsListState,
+      data.query.queryString,
       onClose,
     ]
   );

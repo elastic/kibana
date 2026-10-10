@@ -16,6 +16,7 @@ import {
   buildCopyValueButton,
   FilterInBtn,
   FilterOutBtn,
+  ReverseCategorizeBtn,
 } from './default_cell_actions';
 import { dataTableContextMock } from '../../__mocks__/table_context';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -23,6 +24,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { servicesMock } from '../../__mocks__/services';
 import { UnifiedDataTableContext } from '../table_context';
 
@@ -223,6 +225,45 @@ describe('Default cell actions ', () => {
     expect(execCommandMock).toHaveBeenCalledWith('copy');
     expect(servicesMock.toastNotifications.addInfo).toHaveBeenCalledWith({
       title: 'Copied to clipboard',
+    });
+  });
+
+  describe('ReverseCategorizeBtn', () => {
+    it('passes the Discover openInNewTab callback in the trigger context', async () => {
+      const executeTriggerActions = jest.fn();
+      const onOpenInNewTab = jest.fn();
+      const textField = {
+        name: 'message',
+        esTypes: ['text'],
+      } as unknown as DataViewField;
+
+      renderWithI18n(
+        <UnifiedDataTableContext.Provider
+          value={{
+            ...dataTableContextMock,
+            dataView: { ...dataTableContextMock.dataView, isTimeBased: () => true } as never,
+            getRowByIndex: () =>
+              buildDataTableRecord(
+                { _index: 'i', _id: '0', _source: { message: 'hi' } },
+                dataViewMock
+              ),
+            onOpenInNewTab,
+          }}
+        >
+          <ReverseCategorizeBtn
+            cellActionProps={createCellActionProps({ columnId: 'message' })}
+            field={textField}
+            uiActions={{ executeTriggerActions } as unknown as UiActionsStart}
+          />
+        </UnifiedDataTableContext.Provider>
+      );
+
+      await userEvent.click(screen.getByTestId('reverseCategorizeButton'));
+
+      expect(executeTriggerActions).toHaveBeenCalledWith(
+        'REVERSE_CATEGORIZE_FIELD_TRIGGER',
+        expect.objectContaining({ field: textField, openInNewTab: onOpenInNewTab })
+      );
     });
   });
 
