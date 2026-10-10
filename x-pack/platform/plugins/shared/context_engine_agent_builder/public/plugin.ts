@@ -42,6 +42,7 @@ export class ContextEngineAgentBuilderPlugin
       suggestAutomation: createSuggestAutomationProvider({
         agentBuilder,
         application: core.application,
+        settings: core.settings,
       }),
     });
 

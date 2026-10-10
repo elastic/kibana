@@ -9,6 +9,7 @@ import { ChatEventType, ToolResultType } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { GetAiIndexResponse } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
+import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../common/agent_builder_attachments';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../common/agent_builder_tools';
@@ -44,6 +45,7 @@ const createProvider = ({
   hasWorkflowsReadPrivilege = true,
   hasWorkflowsCreatePrivilege = true,
   hasWorkflowsExecutePrivilege = true,
+  feedbackLoopEnabled = false,
 }: {
   hasAgentBuilder?: boolean;
   hasAgentBuilderPrivilege?: boolean;
@@ -51,6 +53,7 @@ const createProvider = ({
   hasWorkflowsReadPrivilege?: boolean;
   hasWorkflowsCreatePrivilege?: boolean;
   hasWorkflowsExecutePrivilege?: boolean;
+  feedbackLoopEnabled?: boolean;
 } = {}) => {
   const openChat = jest.fn();
   const activeConversation$ = new BehaviorSubject<{ id?: string } | null>({
@@ -72,7 +75,8 @@ const createProvider = ({
       } as unknown as AgentBuilderPluginStart)
     : undefined;
 
-  const application = coreMock.createStart().application;
+  const coreStart = coreMock.createStart();
+  const application = coreStart.application;
   application.capabilities = {
     ...application.capabilities,
     agentBuilder: { show: hasAgentBuilderPrivilege },
@@ -83,8 +87,18 @@ const createProvider = ({
       executeWorkflow: hasWorkflowsExecutePrivilege,
     },
   };
+  coreStart.settings.globalClient.get.mockImplementation((key: string) => {
+    if (key === CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID) {
+      return feedbackLoopEnabled;
+    }
+    return undefined;
+  });
 
-  const provider = createSuggestAutomationProvider({ agentBuilder, application });
+  const provider = createSuggestAutomationProvider({
+    agentBuilder,
+    application,
+    settings: coreStart.settings,
+  });
 
   return { provider, openChat, chatEvents$, getChatEvents$ };
 };
@@ -195,7 +209,40 @@ describe('createSuggestAutomationProvider', () => {
               sources: aiIndex.sources,
               automations: aiIndex.automations,
               traces: aiIndex.traces,
+              feedbackLoopEnabled: false,
             },
+          }),
+        ],
+      })
+    );
+  });
+
+  it('passes feedbackLoopEnabled: true when the setting is on', () => {
+    const { provider, openChat } = createProvider({ feedbackLoopEnabled: true });
+
+    provider.suggestAutomation({ aiIndex, spaceId: 'default', onSaved: jest.fn() });
+
+    expect(openChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [
+          expect.objectContaining({
+            data: expect.objectContaining({ feedbackLoopEnabled: true }),
+          }),
+        ],
+      })
+    );
+  });
+
+  it('passes feedbackLoopEnabled: false when the setting is off', () => {
+    const { provider, openChat } = createProvider({ feedbackLoopEnabled: false });
+
+    provider.suggestAutomation({ aiIndex, spaceId: 'default', onSaved: jest.fn() });
+
+    expect(openChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [
+          expect.objectContaining({
+            data: expect.objectContaining({ feedbackLoopEnabled: false }),
           }),
         ],
       })

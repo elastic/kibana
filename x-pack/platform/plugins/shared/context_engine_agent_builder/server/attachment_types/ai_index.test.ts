@@ -107,6 +107,23 @@ describe('createAiIndexAttachmentType', () => {
     expect(representation.value).toContain('Sources: esql:FROM tickets');
     expect(representation.value).toContain('Existing automations (workflow ids): wf-1');
     expect(representation.value).toContain('Traces: none configured');
+    expect(representation.value).toContain('feedbackLoopEnabled: false');
+  });
+
+  it('formats feedbackLoopEnabled: true when the setting is on', async () => {
+    const formatted = await attachmentType.format(
+      {
+        id: 'attachment-1',
+        type: attachmentType.id,
+        data: { ...validData, feedbackLoopEnabled: true },
+      },
+      formatContext
+    );
+    const representation = await formatted.getRepresentation?.();
+    if (representation?.type !== 'text') {
+      throw new Error('expected a text representation');
+    }
+    expect(representation.value).toContain('feedbackLoopEnabled: true');
   });
 
   it('validates attachment data with traces including derived query', async () => {
