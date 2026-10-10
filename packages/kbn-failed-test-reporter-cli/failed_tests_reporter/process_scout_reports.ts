@@ -10,19 +10,43 @@
 import fs from 'fs';
 import { escape } from 'he';
 import Path from 'path';
-import { getScoutFailures, type ScoutTestFailureExtended } from './get_scout_failures';
+import {
+  getScoutFailures,
+  type ScoutInfraFailureReason,
+  type ScoutTestFailureExtended,
+} from './get_scout_failures';
 import type { ProcessReportsParams } from './process_reports_types';
 import { createFailureIssue, updateFailureIssue } from './report_failure';
 import { reportFailuresToEs } from './report_failures_to_es';
 
 // Sidecar file written next to the Scout HTML reports so `generateScoutTestFailureArtifacts`
-// can pick up the GitHub issue link and failure count without re-parsing the HTML report.
+// can pick up the GitHub issue link, failure count and infra reason without re-parsing the HTML report.
 export const SCOUT_GITHUB_ISSUES_FILENAME = 'github-issues.json';
 
 export interface ScoutGithubIssueDetails {
-  githubIssue: string;
-  failureCount: number;
+  githubIssue?: string;
+  failureCount?: number;
+  infraReason?: ScoutInfraFailureReason;
 }
+
+const getTrackedBranchesStatus = (failure: ScoutTestFailureExtended): string | undefined => {
+  const { infraReason, githubIssue, failureCount = 0 } = failure;
+
+  if (infraReason) {
+    return `<div class="section alert alert-warning" id="tracked-branches-status"><strong>Likely infrastructure issue (${
+      infraReason.category
+    }), no GitHub issue created</strong>: ${escape(infraReason.message)}</div>`;
+  }
+
+  if (githubIssue) {
+    const issueUrl = escape(githubIssue);
+    const badgeHtml = `<span class="badge rounded-pill bg-danger" id="failure-count">${failureCount}</span>`;
+    const issueLinkHtml = `<a id="github-issue-link" href="${issueUrl}" target="_blank">${issueUrl}</a>`;
+    return `<div class="section" id="tracked-branches-status"><strong>Failures in tracked branches</strong>: ${badgeHtml} ${issueLinkHtml}</div>`;
+  }
+
+  return undefined;
+};
 
 export const updateScoutHtmlReport = ({
   log,
@@ -41,21 +65,16 @@ export const updateScoutHtmlReport = ({
     return;
   }
 
-  const fileContent = fs.readFileSync(htmlReportPath, 'utf-8');
-  const failureCount = failure.failureCount ?? 0;
-  const githubIssue = failure.githubIssue ? escape(failure.githubIssue) : undefined;
-
-  let updatedContent = fileContent;
-  if (githubIssue) {
-    const badgeHtml = `<span class="badge rounded-pill bg-danger" id="failure-count">${failureCount}</span>`;
-    const issueLinkHtml = `<a id="github-issue-link" href="${githubIssue}" target="_blank">${githubIssue}</a>`;
-    const trackedBranchesLine = `<strong>Failures in tracked branches</strong>: ${badgeHtml} ${issueLinkHtml}`;
-
-    updatedContent = updatedContent.replace(
-      /<div[^>]*id="tracked-branches-status"[^>]*>[\s\S]*?<\/div>/,
-      `<div class="section" id="tracked-branches-status">${trackedBranchesLine}</div>`
-    );
+  const trackedBranchesStatus = getTrackedBranchesStatus(failure);
+  if (!trackedBranchesStatus) {
+    return;
   }
+
+  const fileContent = fs.readFileSync(htmlReportPath, 'utf-8');
+  const updatedContent = fileContent.replace(
+    /<div[^>]*id="tracked-branches-status"[^>]*>[\s\S]*?<\/div>/,
+    trackedBranchesStatus
+  );
 
   if (updatedContent === fileContent) {
     return;
@@ -116,8 +135,12 @@ export async function processScoutReports(
     };
 
     for (const failure of failures) {
-      if (failure.likelyIrrelevant) {
-        log.info(`Scout failure is likely irrelevant: ${failure.classname} - ${failure.name}`);
+      if (failure.infraReason) {
+        log.info(
+          `Scout failure is likely an infrastructure issue (${failure.infraReason.category}): ${failure.classname} - ${failure.name}`
+        );
+        githubIssues[failure.id] = { infraReason: failure.infraReason };
+        updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
         continue;
       }
 
