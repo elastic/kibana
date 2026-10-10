@@ -183,6 +183,21 @@ describe('RuleEventsClient', () => {
       expect(hits[0].status).toBe('inactive');
     });
 
+    it('decodes a persisted recovering status instead of coercing it to active', async () => {
+      const row: MockRow = {
+        source: ruleEventSource({ alert: { status: 'recovering' } }),
+        dataJson: JSON.stringify(dataDoc),
+        createdAt: '2026-01-01T00:00:00.000Z',
+      };
+      const { client } = createClient(async (request) =>
+        request.query.includes('STATS total') ? countResponse(1) : sourceResponse([row])
+      );
+
+      const { hits } = await client.findLatestByCurrentStatePaginated({});
+
+      expect(hits[0].status).toBe('recovering');
+    });
+
     it('filters severity on top-level severity, translated from SIGNIFICANT_EVENTS_SEVERITY_MAP', async () => {
       const { client, query } = createClient(async (request) =>
         request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
@@ -274,7 +289,7 @@ describe('RuleEventsClient', () => {
         'WHERE TO_LOWER(FIELD_EXTRACT(data, "title")) LIKE "*checkout*" OR TO_LOWER(FIELD_EXTRACT(data, "summary")) LIKE "*checkout*" OR TO_LOWER(FIELD_EXTRACT(data, "symptom_hypothesis")) LIKE "*checkout*" OR TO_LOWER(FIELD_EXTRACT(data, "event_id")) == TO_LOWER("checkout")',
         // Created before the range ends, and still active or updated after it starts.
         'WHERE created_at <= TO_DATETIME(?overlapToIso)',
-        'WHERE (`alert.status` IN ("active")) OR @timestamp >= TO_DATETIME(?overlapFromIso)',
+        'WHERE (`alert.status` IN ("active", "recovering")) OR @timestamp >= TO_DATETIME(?overlapFromIso)',
         'WHERE `alert.status` IN ("inactive")',
         'EVAL data_json = JSON_EXTRACT(_source, "$.data")',
         'SORT @timestamp DESC, _id ASC',
@@ -331,13 +346,13 @@ describe('RuleEventsClient', () => {
   });
 
   describe('findLatestActive', () => {
-    it('filters alert.status to the active mapping, not the top-level status', async () => {
+    it('filters alert.status to the live statuses (active and recovering), not the top-level status', async () => {
       const { client, query } = createClient(async () => sourceResponse([]));
 
       await client.findLatestActive({});
 
       const q = lastQuery(query);
-      expect(q).toContain('`alert.status` IN ("active")');
+      expect(q).toContain('`alert.status` IN ("active", "recovering")');
       expect(q).not.toContain('status IN ("open")');
     });
 

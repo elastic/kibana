@@ -12,7 +12,7 @@ import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { IRulesManagementClient } from '../../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
 import type { RuleEventsClient } from './rule_events_client';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
-import { updateSignificantEventStatus } from './update_event_status';
+import { applyLifecycleInput } from './lifecycle/lifecycle_controller';
 
 const EVENTS_BATCH_SIZE = 1000;
 const EVENT_STATUS_UPDATE_CONCURRENCY = 10;
@@ -50,7 +50,7 @@ const iterateActiveEventBatches = async function* ({
 
   while (true) {
     const result = await eventSearchClient.findLatestByCurrentStateBatch({
-      status: ['active'],
+      status: ['active', 'recovering'],
       ruleUuids,
       afterGroupHash,
       batchSize: EVENTS_BATCH_SIZE,
@@ -124,10 +124,11 @@ export const cleanupStaleEvents = async ({
     const results = await Promise.all(
       staleEvents.map(({ event }) =>
         updateLimit(() =>
-          updateSignificantEventStatus({
+          applyLifecycleInput({
             eventSearchClient,
             eventId: event.event_id,
-            status: 'inactive',
+            input: { kind: 'rule_deleted' },
+            expectedTimestamp: event['@timestamp'],
             assessmentNote: STALE_EVENT_ASSESSMENT_NOTE,
             alertEventsClient,
             emitTrigger,

@@ -35,11 +35,14 @@ export {
   type SignificantEventResponse,
   type SignificantEventInvestigation,
   type SignificantEventStatus,
+  type SignificantEventManualStatus,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
-  SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
   significantEventInvestigationSchema,
   significantEventSchema,
   significantEventStatusSchema,
+  significantEventManualStatusSchema,
+  SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS,
 } from './events';
 export {
   MAX_SHORT_STRING_LENGTH,

@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import type { SignificantEventStatus } from '@kbn/significant-events-schema';
+import type {
+  SignificantEventManualStatus,
+  SignificantEventStatus,
+} from '@kbn/significant-events-schema';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
-import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
+import { applyLifecycleInput } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
+import { operatorInputFor } from '../../../lib/significant_events/events/lifecycle/lifecycle_state_machine';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 
@@ -21,7 +25,7 @@ export async function updateEventStatusToolHandler({
 }: {
   eventSearchClient: RuleEventsClient;
   eventId: string;
-  status: SignificantEventStatus;
+  status: SignificantEventManualStatus;
   assessmentNote?: string;
   alertEventsClient: AlertEventsClientApi;
   emitTrigger?: TriggerEmitter;
@@ -31,10 +35,10 @@ export async function updateEventStatusToolHandler({
   ignored: number;
   status: SignificantEventStatus;
 }> {
-  const result = await updateSignificantEventStatus({
+  const result = await applyLifecycleInput({
     eventSearchClient,
     eventId,
-    status,
+    input: operatorInputFor(status),
     assessmentNote,
     alertEventsClient,
     emitTrigger,

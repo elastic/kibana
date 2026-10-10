@@ -17,7 +17,7 @@ export { getInvestigationProgressStatusLabel };
 /**
  * Nightshift surfaces two events buckets derived from `@kbn/significant-events-schema`
  * statuses:
- * - Needs action: `active`
+ * - Needs action: `active` and `recovering` (still live until the engine closes it, or an operator does)
  * - Resolved: `inactive`
  *
  * The "Investigating" / "Investigated" badge is derived separately from
@@ -27,6 +27,7 @@ type StatusGroup = 'needsAction' | 'resolved';
 
 const STATUS_GROUP: Record<SignificantEventStatus, StatusGroup> = {
   active: 'needsAction',
+  recovering: 'needsAction',
   inactive: 'resolved',
 };
 

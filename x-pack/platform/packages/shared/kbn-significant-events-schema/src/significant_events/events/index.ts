@@ -20,24 +20,47 @@ import {
 
 export const SIGNIFICANT_EVENT_STATUS_OPTIONS = [
   ALERT_EPISODE_STATUS.ACTIVE,
+  ALERT_EPISODE_STATUS.RECOVERING,
   ALERT_EPISODE_STATUS.INACTIVE,
 ] as const satisfies readonly AlertEpisodeStatus[];
 
-export const significantEventStatusSchema = lazySchema(() =>
-  z.enum(SIGNIFICANT_EVENT_STATUS_OPTIONS).describe(dedent`
-      "${ALERT_EPISODE_STATUS.ACTIVE}" = a current failure, material degradation, or sensitive-data exposure is confirmed or remains plausibly unverified. A mechanism found at an unchanged background rate (rate-flat inconclusive) is verified as not newly elevated — it is not "plausibly unverified" and must not create a new event;
-      "${ALERT_EPISODE_STATUS.INACTIVE}" = the event is no longer active. Record the recovery, false-alarm, benign-change, or other assessment rationale in "assessment_note".
-    `)
-);
+export const significantEventStatusSchema = z.enum(SIGNIFICANT_EVENT_STATUS_OPTIONS)
+  .describe(dedent`
+    "${ALERT_EPISODE_STATUS.ACTIVE}" = a current failure, material degradation, or sensitive-data exposure is confirmed or remains plausibly unverified. A mechanism found at an unchanged background rate (rate-flat inconclusive) is verified as not newly elevated — it is not "plausibly unverified" and must not create a new event;
+    "${ALERT_EPISODE_STATUS.RECOVERING}" = derived, never set by a caller: every member rule is healthy. A breach in any member returns it to "${ALERT_EPISODE_STATUS.ACTIVE}" in the same episode;
+    "${ALERT_EPISODE_STATUS.INACTIVE}" = the event is no longer active. Record the recovery, false-alarm, benign-change, or other assessment rationale in "assessment_note".
+  `);
 
 export type SignificantEventStatus = z.infer<typeof significantEventStatusSchema>;
 
 /**
- * Statuses that represent an unresolved / ongoing event. Deduplication uses this set to find a
- * prior event for the same issue so successive write cycles dedup against it. An inactive issue
- * that recurs should create a fresh event.
+ * Statuses an operator or tool may set by hand. `recovering` is engine-only: Alerting v2 gives
+ * operators `activate` / `deactivate`, and the series' recovering count assumes only the status
+ * reconciliation writes it.
  */
-export const SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS = [ALERT_EPISODE_STATUS.ACTIVE] as const;
+export const SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS = [
+  ALERT_EPISODE_STATUS.ACTIVE,
+  ALERT_EPISODE_STATUS.INACTIVE,
+] as const satisfies readonly AlertEpisodeStatus[];
+
+export type SignificantEventManualStatus = (typeof SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS)[number];
+
+export const significantEventManualStatusSchema = z
+  .enum(SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS)
+  .describe(
+    `"${ALERT_EPISODE_STATUS.ACTIVE}" = a current failure is confirmed or remains plausibly unverified; "${ALERT_EPISODE_STATUS.INACTIVE}" = the event is no longer active (record the rationale in "assessment_note").`
+  );
+
+/**
+ * Statuses that represent an unresolved / ongoing event. Deduplication uses this set to find a
+ * prior event for the same issue so successive write cycles dedup against it — a recovering event
+ * is still the live episode, so a re-firing rule continues it instead of creating a duplicate. An
+ * inactive issue that recurs should create a fresh event.
+ */
+export const SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS = [
+  ALERT_EPISODE_STATUS.ACTIVE,
+  ALERT_EPISODE_STATUS.RECOVERING,
+] as const;
 
 /**
  * One investigation run attached to this significant event.
