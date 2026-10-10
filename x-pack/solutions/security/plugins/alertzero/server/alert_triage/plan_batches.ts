@@ -58,14 +58,20 @@ export const planBatches = ({
     };
   }
 
-  const isLive = (alert: TriageAlert): boolean =>
-    getExecutionIds(alert).some((id) => liveExecutionIds.has(id));
-  const liveRuleIds = new Set(claimed.filter(isLive).map(({ ruleId }) => ruleId));
-  const reclaimed = claimed.filter((alert) => !isLive(alert));
-  const reclaimedInWindow = reclaimed.filter(({ timestamp }) => timestamp >= lookbackCutoff);
+  const liveRuleIds = new Set<string>();
+  const reclaimAlertIds: string[] = [];
+  const reclaimedInWindow: TriageAlert[] = [];
+  for (const alert of claimed) {
+    if (getExecutionIds(alert).some((id) => liveExecutionIds.has(id))) {
+      liveRuleIds.add(alert.ruleId);
+      continue;
+    }
+    reclaimAlertIds.push(alert.id);
+    if (alert.timestamp >= lookbackCutoff) reclaimedInWindow.push(alert);
+  }
 
   const base = {
-    reclaimAlertIds: reclaimed.map(({ id }) => id),
+    reclaimAlertIds,
     liveBatches: liveExecutionIds.size,
     batches: [],
     plannedCost: 0,
