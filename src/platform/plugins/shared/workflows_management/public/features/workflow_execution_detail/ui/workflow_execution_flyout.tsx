@@ -71,6 +71,7 @@ import { selectStepExecutionsTotal } from '../../../entities/workflows/store/wor
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import { insertIntoActiveDataReferenceTarget } from '../../../shared/lib/active_data_reference_insert_target';
 import { appendKeyPath } from '../../../shared/lib/flatten_key_paths';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
@@ -251,6 +252,32 @@ const StepDataSection = ({
           defaultMessage: 'No data',
         });
 
+  const wrapAsReferenceSource = useCallback(
+    (field: string, node: React.ReactNode) => {
+      if (fieldPathPrefix == null) return node;
+      // Drag/click inserts the REFERENCE path token, never the run's literal value.
+      const token = `{{ ${appendKeyPath(fieldPathPrefix, field)} }}`;
+      return (
+        <div
+          draggable
+          data-test-subj={`workflowExecutionOutputField-${field}`}
+          title={token}
+          onDragStart={(e) => {
+            e.dataTransfer.setData('text/plain', token);
+            e.dataTransfer.effectAllowed = 'copy';
+          }}
+          onClick={() => {
+            insertIntoActiveDataReferenceTarget(token);
+          }}
+          css={{ cursor: 'grab', width: '100%', minWidth: 0 }}
+        >
+          {node}
+        </div>
+      );
+    },
+    [fieldPathPrefix]
+  );
+
   const tableColumns = useMemo<Array<EuiBasicTableColumn<StepDataTableRow>>>(
     () => [
       {
@@ -260,69 +287,74 @@ const StepDataSection = ({
         }),
         className: 'workflowStepDataFieldCol',
         width: `${FIELD_COLUMN_MAX_PX}px`,
-        render: (field: string, row) => (
-          <div
-            css={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              minWidth: 0,
-              maxWidth: FIELD_COLUMN_MAX_PX,
-              overflow: 'hidden',
-            }}
-          >
-            <EuiToken
-              iconType={fieldTypeToToken[row.fieldType]}
-              size="xs"
-              css={{ flexShrink: 0, width: '12px', height: '12px', margin: 0 }}
-            />
-            {/* The tooltip anchors are the flex items: the name's must be able to shrink, and the
-                copy button's must not, or a long name pushes the button out of the capped column.
-                The name's anchor is a flex container so the span inside can truncate. */}
-            <EuiToolTip
-              content={field}
-              position="top"
-              anchorProps={{ css: { display: 'flex', minWidth: 0 } }}
+        render: (field: string, row) =>
+          wrapAsReferenceSource(
+            field,
+            <div
+              css={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                minWidth: 0,
+                maxWidth: FIELD_COLUMN_MAX_PX,
+                overflow: 'hidden',
+              }}
             >
-              <span
-                tabIndex={0}
-                css={{
-                  fontSize: '12px',
-                  fontFamily: euiTheme.font.familyCode,
-                  minWidth: 0,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  // Truncate from the left so the leaf segment stays visible.
-                  direction: 'rtl',
-                  textAlign: 'left',
-                }}
-              >
-                <bdi>{field}</bdi>
-              </span>
-            </EuiToolTip>
-            {fieldPathPrefix != null && (isFieldPathCopyable?.(field) ?? true) && (
+              <EuiToken
+                iconType={fieldTypeToToken[row.fieldType]}
+                size="xs"
+                css={{ flexShrink: 0, width: '12px', height: '12px', margin: 0 }}
+              />
+              {/* The tooltip anchors are the flex items: the name's must be able to shrink, and the
+                  copy button's must not, or a long name pushes the button out of the capped column.
+                  The name's anchor is a flex container so the span inside can truncate. */}
               <EuiToolTip
-                content={i18n.translate('workflows.executionFlyout.stepDetail.copyFieldPath', {
-                  defaultMessage: 'Copy field path',
-                })}
-                disableScreenReaderOutput
-                anchorProps={{ css: { flexShrink: 0 } }}
+                content={field}
+                position="top"
+                anchorProps={{ css: { display: 'flex', minWidth: 0 } }}
               >
-                <EuiButtonIcon
-                  iconType="copy"
-                  size="xs"
-                  color="text"
-                  aria-label={i18n.translate('workflows.executionFlyout.stepDetail.copyFieldPath', {
+                <span
+                  tabIndex={0}
+                  css={{
+                    fontSize: '12px',
+                    fontFamily: euiTheme.font.familyCode,
+                    minWidth: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    // Truncate from the left so the leaf segment stays visible.
+                    direction: 'rtl',
+                    textAlign: 'left',
+                  }}
+                >
+                  <bdi>{field}</bdi>
+                </span>
+              </EuiToolTip>
+              {fieldPathPrefix != null && (isFieldPathCopyable?.(field) ?? true) && (
+                <EuiToolTip
+                  content={i18n.translate('workflows.executionFlyout.stepDetail.copyFieldPath', {
                     defaultMessage: 'Copy field path',
                   })}
-                  data-test-subj="workflowExecutionStepDataCopyFieldPath"
-                  onClick={() => copyToClipboard(appendKeyPath(fieldPathPrefix, field))}
-                />
-              </EuiToolTip>
-            )}
-          </div>
-        ),
+                  disableScreenReaderOutput
+                  anchorProps={{ css: { flexShrink: 0 } }}
+                >
+                  <EuiButtonIcon
+                    iconType="copy"
+                    size="xs"
+                    color="text"
+                    aria-label={i18n.translate(
+                      'workflows.executionFlyout.stepDetail.copyFieldPath',
+                      {
+                        defaultMessage: 'Copy field path',
+                      }
+                    )}
+                    data-test-subj="workflowExecutionStepDataCopyFieldPath"
+                    onClick={() => copyToClipboard(appendKeyPath(fieldPathPrefix, field))}
+                  />
+                </EuiToolTip>
+              )}
+            </div>
+          ),
       },
       {
         field: 'value',
@@ -331,10 +363,11 @@ const StepDataSection = ({
         }),
         className: 'workflowStepDataValueCol',
         truncateText: true,
-        render: (value: string) => <StepDataValueCell value={value} />,
+        render: (value: string, row) =>
+          wrapAsReferenceSource(row.field, <StepDataValueCell value={value} />),
       },
     ],
-    [euiTheme.font.familyCode, fieldPathPrefix, isFieldPathCopyable]
+    [euiTheme.font.familyCode, fieldPathPrefix, isFieldPathCopyable, wrapAsReferenceSource]
   );
 
   const onTableChange = useCallback(({ page }: Criteria<StepDataTableRow>) => {

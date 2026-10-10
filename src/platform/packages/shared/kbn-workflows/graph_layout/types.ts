@@ -13,6 +13,12 @@ export type Step = WorkflowYaml['steps'][number];
 
 export const DEFAULT_NODE_STYLE = { width: 300, height: 52 } as const;
 
+// Minimum height for a foreachGroup container when its body is empty.
+// dagLayout preserves caller-provided dimensions for groups with no inner nodes,
+// so this must be large enough to visually distinguish a container from a step.
+// Derived from WORKFLOW_COMPOUND_PADDING (top: 70, bottom: 32) + button area (~38).
+export const FOREACH_GROUP_EMPTY_HEIGHT = 140 as const;
+
 export const FLOW_CONTROL_STEP_TYPES: ReadonlySet<string> = new Set([
   'if',
   'merge',
@@ -40,7 +46,7 @@ export const TRIGGER_STEP_TYPES: ReadonlySet<string> = new Set([
   'document',
 ]);
 
-export type EdgeBranchType = 'then' | 'else' | 'switch';
+export type EdgeBranchType = 'then' | 'else' | 'switch' | 'parallel';
 
 export interface NodeStyle {
   width: number;

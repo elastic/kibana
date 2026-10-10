@@ -25,6 +25,7 @@ import { FieldName } from './field_name';
 import { formatValueAsElement } from './format_value';
 import { inferFieldType } from './infer_field_type';
 import { TableFieldValue } from './table_field_value';
+import { insertIntoActiveDataReferenceTarget } from '../../lib/active_data_reference_insert_target';
 import { appendKeyPath, flattenKeyPaths } from '../../lib/flatten_key_paths';
 import { useGetFormattedDateTime } from '../use_formatted_date';
 
@@ -175,12 +176,43 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
         if (!record) return null;
         const { displayValue, field, fieldType, value } = record;
 
+        // When a path prefix is available, rows are drag/click sources that
+        // insert a templated REFERENCE — never the run's literal value.
+        // A workflow wired to one run's URL (etc.) breaks on every later run.
+        const referenceToken =
+          fieldPathActionsPrefix != null
+            ? `{{ ${appendKeyPath(fieldPathActionsPrefix, field)} }}`
+            : null;
+
+        const wrapAsReferenceSource = (node: React.ReactNode) => {
+          if (referenceToken == null) return node;
+          return (
+            <div
+              draggable
+              data-test-subj={`workflowExecutionOutputField-${field}`}
+              title={referenceToken}
+              onDragStart={(e) => {
+                e.dataTransfer.setData('text/plain', referenceToken);
+                e.dataTransfer.effectAllowed = 'copy';
+              }}
+              onClick={() => {
+                insertIntoActiveDataReferenceTarget(referenceToken);
+              }}
+              css={{ cursor: 'grab', width: '100%', minWidth: 0 }}
+            >
+              {node}
+            </div>
+          );
+        };
+
         if (columnId === 'name') {
-          return <FieldName fieldName={field} fieldType={fieldType} highlight={searchTerm} />;
+          return wrapAsReferenceSource(
+            <FieldName fieldName={field} fieldType={fieldType} highlight={searchTerm} />
+          );
         }
 
         if (columnId === 'value') {
-          return (
+          return wrapAsReferenceSource(
             <TableFieldValue
               formattedValue={displayValue}
               field={field}
@@ -194,7 +226,7 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
 
         return null;
       };
-    }, [filteredRecords, searchTerm]);
+    }, [filteredRecords, searchTerm, fieldPathActionsPrefix]);
 
     const staticDataGridSettings: Pick<
       EuiDataGridProps,

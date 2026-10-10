@@ -8,3 +8,9 @@
  */
 
 export { ActionsMenuPopover } from './ui/actions_menu_popover';
+export { ActionsMenu } from './ui/actions_menu';
+export type {
+  ActionOptionData,
+  ActionsMenuInsertionContext,
+  ActionsMenuPresentation,
+} from './types';

@@ -479,6 +479,45 @@ describe('workflow layout pipeline', () => {
       const sorted = [...triggerNodes].sort((a, b) => centerX(a) - centerX(b));
       expect(sorted[0].id).toContain('manual');
     });
+
+    /**
+     * Regression for an unbalanced T-junction: two triggers feeding one `if`
+     * whose branches are asymmetric (a wide `foreach` container on `true`, an
+     * empty/thin bypass lane on `false`). enforceForkLaneOrder re-centers the
+     * `if` over its branch heads, which pulls it away from the trigger row's
+     * midpoint — the fix must shift the trigger row back under the `if`
+     * (fan-in propagation), not leave it stranded at its original dagre spot.
+     */
+    it('two triggers feeding an asymmetric if stay centered under it (no unbalanced T-junction)', () => {
+      const yaml = minimal({
+        triggers: [{ type: 'manual' }, { type: 'alert' }],
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            steps: [
+              {
+                name: 'wide_loop',
+                type: 'foreach',
+                foreach: 'items',
+                steps: [{ name: 'inner_a', type: 'http' }],
+              },
+            ],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      });
+      const { result, transformed } = runLayout(yaml, 'TB');
+      const triggerIds = new Set(
+        transformed.nodes.filter((n) => n.type === 'trigger').map((n) => n.id)
+      );
+      const triggerNodes = result.nodes.filter((n) => triggerIds.has(n.id));
+      expect(triggerNodes.length).toBe(2);
+      const gate = findNode(result.nodes, 'gate');
+      const triggerRowCenter =
+        (Math.min(...triggerNodes.map(centerX)) + Math.max(...triggerNodes.map(centerX))) / 2;
+      expect(Math.abs(triggerRowCenter - centerX(gate))).toBeLessThanOrEqual(CENTER_TOLERANCE);
+    });
   });
 
   it('throws on a cyclic foreach group graph', () => {
@@ -496,10 +535,50 @@ describe('workflow layout pipeline', () => {
     expect(() => dagLayout(dagNodes, [], dagGroups)).toThrow(/cycle/i);
   });
 
+  it('TB if then-branch sits left of else (matches true→false port order)', () => {
+    const { result } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'x',
+            steps: [{ name: 'yes', type: 'console' }],
+            else: [{ name: 'no', type: 'console' }],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      }),
+      'TB'
+    );
+    const yes = findNode(result.nodes, 'yes');
+    const no = findNode(result.nodes, 'no');
+    expect(yes.x).toBeLessThan(no.x);
+  });
+
+  it('LR if then-branch sits above else (matches true→false port order)', () => {
+    const { result } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'x',
+            steps: [{ name: 'yes', type: 'console' }],
+            else: [{ name: 'no', type: 'console' }],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      }),
+      'LR'
+    );
+    const yes = findNode(result.nodes, 'yes');
+    const no = findNode(result.nodes, 'no');
+    expect(yes.y).toBeLessThan(no.y);
+  });
+
   it('constants match the hook: nodeSep is WORKFLOW_NODE_SEP and rankSep is WORKFLOW_RANK_SEP', () => {
     // Regression guard: if the constants drifted between the hook and the
     // pipeline, layout results would silently differ. The test just asserts
-    // the exported values have the expected numeric meaning (50 / 70) that
+    // the exported values have the expected numeric meaning (50 / 90) that
     // was hard-coded in the original use_workflow_layout.ts.
     expect(WORKFLOW_NODE_SEP).toBe(50);
     expect(WORKFLOW_RANK_SEP).toBe(70);
@@ -680,6 +759,39 @@ describe('spec 02 regression — named fixtures', () => {
     expect(loopNode).toBeDefined();
     expect(elseNode).toBeDefined();
     expect(centerX(loopNode!)).toBeLessThan(centerX(elseNode!));
+  });
+
+  it('main-chain fallback stays right of owner after if-step re-centering', () => {
+    // Regression: pass 1 re-centres the if-step and propagates the delta to the
+    // spine ancestor (owner). The fallback lane node was placed by dagLayout at
+    // owner_dagre_x + nodeSep (350px), but was left unmoved when the owner shifted.
+    // Pass 1c must sync the fallback node so it stays +350px to the right.
+    const { result } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'owner',
+            type: 'http',
+            'on-failure': {
+              fallback: [{ name: 'fallback-step', type: 'http' }],
+            },
+          },
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            steps: [{ name: 'then-step', type: 'http' }],
+            else: [{ name: 'else-step', type: 'http' }],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const ownerNode = result.nodes.find((n) => n.id === 'owner');
+    const fallbackNode = result.nodes.find((n) => n.id === 'fallback-step');
+    expect(ownerNode).toBeDefined();
+    expect(fallbackNode).toBeDefined();
+    // fallback must be to the RIGHT of its owner (not left, not same column).
+    expect(centerX(fallbackNode!)).toBeGreaterThan(centerX(ownerNode!) + 100);
   });
 
   it('owner with fallback and a plain following step share the spine column', () => {
@@ -883,6 +995,75 @@ describe('spec 02 regression — named fixtures', () => {
     // Declaration order: then before else on cross axis.
     expect(centerX(thenNode)).toBeLessThan(centerX(elseNode));
     // No pairwise overlaps.
+    const groupIds = new Set(transformed.foreachGroups.map((g) => g.id));
+    const pairs = findOverlappingPairs(result.nodes, groupIds);
+    expect(pairs).toHaveLength(0);
+  });
+
+  // ── variant G — fallback-of-a-fallback inside a fork branch ────────────────
+  // then-fallback (depth 0) itself has its own on-failure.fallback (depth 1),
+  // and else-step has its own (depth 0) fallback too — the combination that
+  // reproduces the bug (with else-step a plain step, pass 1b's local-obstacle
+  // computation happens to re-derive the same origin pass 1c would have, so
+  // the bug was latent but invisible; giving else-step its own fallback changes
+  // the branch-local obstacles enough that pass 1b and pass 1c disagree).
+  // A since-fixed bug in pass 1c's owner-delta "re-sync" re-derived a bogus
+  // correction for the depth-1 lane (whose owner is itself a lane node, not a
+  // spine node) and dragged it to land exactly on the else branch's column —
+  // invisible to findOverlappingPairs because the colliding nodes sit at
+  // different ranks; it only showed up as the else branch's long merge-edge
+  // cutting through the depth-1 lane's cards.
+  it('variant G (fallback-of-a-fallback inside then): depth-1 lane stays left of else, not just depth-0', () => {
+    const { result, transformed } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            steps: [
+              {
+                name: 'then-step',
+                type: 'http',
+                'on-failure': {
+                  fallback: [
+                    {
+                      name: 'then-fallback',
+                      type: 'http',
+                      'on-failure': {
+                        fallback: [
+                          { name: 'then-fallback-2a', type: 'http' },
+                          { name: 'then-fallback-2b', type: 'http' },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            else: [
+              {
+                name: 'else-step',
+                type: 'http',
+                'on-failure': { fallback: [{ name: 'else-fallback', type: 'http' }] },
+              },
+            ],
+          },
+          { name: 'final-step', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const thenFallback2a = findNode(result.nodes, 'then-fallback-2a');
+    const thenFallback2b = findNode(result.nodes, 'then-fallback-2b');
+    const elseNode = findNode(result.nodes, 'else-step');
+    // The depth-1 lane (fallback-of-a-fallback) must stay left of the else
+    // branch by at least a full node separation, same as the depth-0 lane does.
+    expect(thenFallback2a.x + thenFallback2a.width).toBeLessThanOrEqual(
+      elseNode.x - WORKFLOW_NODE_SEP + CENTER_TOLERANCE
+    );
+    expect(thenFallback2b.x + thenFallback2b.width).toBeLessThanOrEqual(
+      elseNode.x - WORKFLOW_NODE_SEP + CENTER_TOLERANCE
+    );
     const groupIds = new Set(transformed.foreachGroups.map((g) => g.id));
     const pairs = findOverlappingPairs(result.nodes, groupIds);
     expect(pairs).toHaveLength(0);

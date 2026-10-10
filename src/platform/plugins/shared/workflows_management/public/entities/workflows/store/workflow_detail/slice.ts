@@ -39,6 +39,7 @@ export const initialWorkflowsState: WorkflowsResponse = {
 // Initial state
 const initialState: WorkflowDetailState = {
   yamlString: '',
+  baselineYaml: '',
   isYamlSynced: true,
   computed: undefined,
   workflow: undefined,
@@ -92,6 +93,30 @@ const workflowDetailSlice = createSlice({
     },
     setYamlString: (state, action: { payload: string }) => {
       state.yamlString = action.payload;
+    },
+    /**
+     * Applies a canvas edit immediately (no debounce), so gesture-driven inserts/
+     * deletes repaint in one frame. The computation middleware detects this action
+     * and calls `compute()` synchronously. `value` still flows through `yamlString`
+     * so the Monaco editor and undo history (⌘Z) see the change.
+     */
+    applyYamlEdit: (state, action: { payload: string }) => {
+      state.yamlString = action.payload;
+    },
+    /**
+     * Seeds `/create` with YAML and establishes the dirtiness baseline.
+     * Clears any previously loaded workflow so create never compares against it.
+     */
+    seedCreateYaml: (state, action: { payload: string }) => {
+      state.yamlString = action.payload;
+      state.baselineYaml = action.payload;
+      state.workflow = undefined;
+      state.computed = undefined;
+      state.cursorPosition = undefined;
+      state.focusedStepId = undefined;
+      state.focusedTriggerId = undefined;
+      state.highlightedStepId = undefined;
+      state.aiAssisted = false;
     },
     setIsYamlSynced: (state, action: { payload: boolean }) => {
       state.isYamlSynced = action.payload;
@@ -296,6 +321,8 @@ export const {
   setWorkflow,
   updateWorkflow,
   setYamlString,
+  applyYamlEdit,
+  seedCreateYaml,
   setIsYamlSynced,
   setCursorPosition,
   setHighlightedStepId,

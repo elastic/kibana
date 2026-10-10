@@ -226,6 +226,41 @@ describe('computeEdgePath', () => {
       const busY = 100 + FORK_BUS_TRUNK;
       expect(r.path).toContain(String(busY));
     });
+
+    it('switch case targeting a bypass-lane node (hideEndMarker=true) also routes via fork bus', () => {
+      // Empty switch cases produce bypass-lane nodes (hideEndMarker=true). Previously
+      // `!hideEndMarker` suppressed fork-bus for these edges, causing all empty-case
+      // labels to stack at the same (sourceX, sourceY+TB_LABEL_Y_OFFSET) coordinate.
+      const r = computeEdgePath({
+        sourceX: 200,
+        sourceY: 100,
+        targetX: 350,
+        targetY: 280,
+        sourcePosition: Position.Bottom,
+        targetPosition: Position.Top,
+        branchType: 'switch',
+        hideEndMarker: true,
+      });
+      const busY = 100 + FORK_BUS_TRUNK;
+      expect(r.path).toContain(String(busY));
+      // Label must be at targetX (spread per branch), not sourceX (overlapping).
+      expect(r.labelX).toBe(350);
+    });
+
+    it('then-branch targeting a bypass-lane node (empty then, non-empty else) also uses fork bus', () => {
+      const r = computeEdgePath({
+        sourceX: 200,
+        sourceY: 100,
+        targetX: 100,
+        targetY: 250,
+        sourcePosition: Position.Bottom,
+        targetPosition: Position.Top,
+        branchType: 'then',
+        hideEndMarker: true,
+      });
+      const busY = 100 + FORK_BUS_TRUNK;
+      expect(r.path).toContain(String(busY));
+    });
   });
 
   describe('merge-bus routing (isMerge + gap > trunk)', () => {

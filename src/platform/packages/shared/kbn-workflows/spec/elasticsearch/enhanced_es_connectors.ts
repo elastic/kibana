@@ -60,7 +60,7 @@ export const ENHANCED_ELASTICSEARCH_CONNECTORS: EnhancedConnectorDefinition[] = 
     },
     parameterEnhancements: {
       query: {
-        schema: z.string().min(1).describe('ES|QL query string'),
+        schema: z.string().min(1).describe('ES|QL query string').meta({ language: 'esql' }),
         example: 'FROM my-index | WHERE status = "active" | LIMIT 100',
         description:
           'ES|QL query string. Use the Elasticsearch Query Language to filter, aggregate, and transform data.',

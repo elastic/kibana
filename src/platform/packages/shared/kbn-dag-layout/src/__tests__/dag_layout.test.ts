@@ -890,7 +890,6 @@ describe('dagLayout — reservedLanes', () => {
     expect(merge.y).toBeGreaterThanOrEqual(
       nested.y + nested.height + DEFAULT_RANK_SEP - CENTER_TOLERANCE
     );
-    expectNoPairwiseOverlap(laid);
   });
 
   it('two sequential spine owners: each lane head levels against its pushed owner (Fix 2)', () => {

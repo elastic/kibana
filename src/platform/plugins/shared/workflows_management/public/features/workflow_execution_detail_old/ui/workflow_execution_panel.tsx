@@ -126,7 +126,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
             hasShadow={false}
             hasBorder={false}
             borderRadius="none"
-            css={{ overflowY: 'auto' }}
+            css={{ overflowY: 'auto', height: '100%' }}
           >
             {execution && (
               <StepExecutionsTruncatedCallout

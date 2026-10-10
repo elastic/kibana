@@ -152,11 +152,8 @@ export function useWorkflowUrlState() {
     const params = queryString.parse(location.search);
     return {
       tab: (firstString(params.tab) as WorkflowUrlStateTabType) || 'workflow',
-      view:
-        getStoredEditorView() ??
-        (params.view === 'graph' || params.view === 'yaml'
-          ? (params.view as WorkflowEditorView)
-          : 'yaml'),
+      // Visual builder is the default; only `view=yaml` forces the YAML editor.
+      view: getStoredEditorView() ?? (params.view === 'yaml' ? 'yaml' : 'graph'),
       direction:
         getStoredGraphDirection() ??
         (params.direction === 'LR' || params.direction === 'TB'
@@ -354,7 +351,8 @@ export function useWorkflowUrlState() {
     (view: WorkflowEditorView) => {
       setStoredEditorView(view);
       updateUrlState({
-        view,
+        // Omit default (graph) to keep the URL clean
+        view: view === 'graph' ? undefined : view,
         // Clear the flyout selection when switching views
         stepId: undefined,
       });

@@ -64,8 +64,13 @@ function walkStepsWithSlot(
   for (const step of steps) {
     parts.push(`${indent}${slotPrefix}>${step.name}:${step.type}`);
     visitStepChildSlots(step, (slot, children) => {
+      const key = slotKey(slot);
       if (children.length > 0) {
-        walkStepsWithSlot(children, parts, slotKey(slot), depth + 1);
+        walkStepsWithSlot(children, parts, key, depth + 1);
+      } else {
+        // Empty slots (e.g. switch cases with no child steps) must still appear
+        // in the fingerprint so that adding or removing them triggers dagre recompute.
+        parts.push(`${indent}  ${key}:empty`);
       }
     });
   }

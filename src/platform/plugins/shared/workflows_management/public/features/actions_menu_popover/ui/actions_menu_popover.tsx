@@ -30,6 +30,11 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
   jumpToStepEntries,
   onCommandSelected,
   onJumpToStep,
+  insertionContext,
+  disabledTriggerIds,
+  presentation,
+  rootTitle,
+  onClose,
   closePopover,
   isOpen,
 }: ActionsMenuPopoverProps) {
@@ -53,6 +58,11 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
         jumpToStepEntries={jumpToStepEntries}
         onCommandSelected={onCommandSelected}
         onJumpToStep={onJumpToStep}
+        insertionContext={insertionContext}
+        disabledTriggerIds={disabledTriggerIds}
+        presentation={presentation}
+        rootTitle={rootTitle}
+        onClose={onClose ?? closePopover}
       />
     </EuiModal>
   );

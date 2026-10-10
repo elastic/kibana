@@ -7,14 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon, transparentize, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiIcon,
+  EuiPopover,
+  EuiToolTip,
+  transparentize,
+  useEuiShadow,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { Node, NodeProps } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
-import React, { memo } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { deslugifyStepName } from './deslugify_step_name';
-import { resolveExecutionState, resolveNodeColors } from './workflow_graph_node';
-import { getStepFamily, getStepIconType } from '../step_icons';
+import { errorHandleStyle } from './port_geometry';
+import { resolveNodeChipStyle } from './resolve_node_chip_style';
+import { useWorkflowGraphActions } from './workflow_graph_actions_context';
+import { getStepIconType } from '../step_icons';
 
 interface ForeachGroupNodeData extends Record<string, unknown> {
   readonly label: string;
@@ -22,91 +36,235 @@ interface ForeachGroupNodeData extends Record<string, unknown> {
   readonly stepType: string;
   /** Optional execution status threaded through from the canvas. */
   readonly stepExecution?: WorkflowStepExecutionDto;
+  /** True when the container body has at least one inner step (threaded from use_workflow_layout). */
+  readonly hasBodySteps?: boolean;
 }
 
 function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNodeData>>) {
-  const { label, stepType, stepExecution } = node.data;
+  const { label, stepType, stepExecution, hasBodySteps } = node.data;
   const { euiTheme } = useEuiTheme();
-  // Display-only, mirrors workflow_graph_node.tsx: `label` itself must stay
-  // untouched since it's used to key execution status.
+  const actions = useWorkflowGraphActions();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuClusterRef = useRef<HTMLDivElement | null>(null);
+
+  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
+
+  // Close the popover on any pointerdown outside — React Flow's event handling
+  // can swallow the outside-click that EuiPopover normally relies on.
+  useEffect(() => {
+    if (!isMenuOpen) return undefined;
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) {
+        closeMenu();
+        return;
+      }
+      if (menuClusterRef.current?.contains(target)) return;
+      if (target.closest('[data-test-subj="workflowGraphForeachGroupMenuPanel"]')) return;
+      closeMenu();
+    };
+    document.addEventListener('pointerdown', onPointerDown, true);
+    return () => document.removeEventListener('pointerdown', onPointerDown, true);
+  }, [isMenuOpen, closeMenu]);
+
+  const handleAddFirstStep = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      // Stop propagation so the click doesn't bubble into ReactFlow's onNodeClick,
+      // which would select the foreach and open its edit panel instead of the insert menu.
+      e.stopPropagation();
+      if (!actions.edit) return;
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      actions.edit.onInsert(
+        { mode: 'branch', stepName: label, branch: { kind: 'steps' } },
+        { left: rect.left, top: rect.top, width: rect.width, height: rect.height }
+      );
+    },
+    [actions.edit, label]
+  );
+
+  const { colors } = euiTheme;
+  // TODO: switch to xxs when available
+  const nodeShadow = useEuiShadow('xs', { border: 'none' });
   const displayLabel = deslugifyStepName(label);
   const targetHandlePos = node.targetPosition ?? Position.Top;
   const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
 
-  // Reuse the same execution-state + colour pipeline as regular step cards so
-  // the container border and chip colours stay in sync (including CANCELLED
-  // being neutral, matching the step-card behaviour).
-  const family = getStepFamily(stepType, false);
-  const execState = resolveExecutionState(stepExecution?.status);
-  const { chip, cardBorderColor, stepLabelColor } = resolveNodeColors(euiTheme, family, execState);
+  const execStatus = stepExecution?.status;
+  const isSuccess = execStatus === ExecutionStatus.COMPLETED;
+  // CANCELLED stays neutral to match step-card behaviour (status_badge map).
+  const isFailed =
+    execStatus === ExecutionStatus.FAILED || execStatus === ExecutionStatus.TIMED_OUT;
+
+  const chip = resolveNodeChipStyle(euiTheme, stepType, false, { isSuccess, isFailed });
+  const panelBorder = isSuccess
+    ? colors.success
+    : isFailed
+    ? colors.danger
+    : colors.borderBasePlain;
+  const borderRadius = euiTheme.border.radius.small;
+  const iconType = getStepIconType(stepType);
+
+  const menuLabel = i18n.translate('workflowsUi.foreachGroupNode.stepActions', {
+    defaultMessage: 'Step actions',
+  });
+
+  const menuButton = (
+    <EuiToolTip content={menuLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="boxesVertical"
+        size="s"
+        color="text"
+        aria-label={menuLabel}
+        aria-haspopup="menu"
+        aria-expanded={isMenuOpen}
+        onClick={() => setIsMenuOpen((v) => !v)}
+        data-test-subj="workflowGraphForeachGroupMenuButton"
+      />
+    </EuiToolTip>
+  );
 
   return (
     <>
       <Handle type="target" position={targetHandlePos} style={{ opacity: 0 }} />
       <div
-        css={{
-          width: '100%',
-          height: '100%',
-          // Semi-transparent white body (50%) so the canvas dot pattern shows
-          // through softly; token-based so it adapts to dark mode.
-          background: transparentize(euiTheme.colors.backgroundBasePlain, 0.5),
-          border: `1px solid ${cardBorderColor}`,
-          borderRadius: euiTheme.border.radius.medium,
-          position: 'relative',
-          transition: 'border-color 120ms ease',
-        }}
+        css={[
+          {
+            width: '100%',
+            height: '100%',
+            background: transparentize(colors.backgroundBasePlain, 0.5),
+            border: `${euiTheme.border.width.thin} solid ${panelBorder}`,
+            borderRadius,
+            position: 'relative',
+            transition: 'border-color 120ms ease',
+          },
+          nodeShadow,
+        ]}
       >
-        {/* Transparent header row: icon chip + label. The header has no
-            background so the canvas dot pattern remains visible behind it.
-            Sized to match WORKFLOW_COMPOUND_PADDING.top in
-            workflow_layout_pipeline.ts so inner nodes sit just below. */}
         <div
           data-test-subj="workflowGraphForeachGroupHeader"
           css={{
             display: 'flex',
             alignItems: 'center',
-            gap: 12,
-            // Asymmetric: chip sits 12px from the left edge, matching step
-            // cards; right and vertical gutters are symmetric at 8px.
-            padding: '8px 16px 8px 12px',
+            gap: euiTheme.size.s,
+            padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
+            fontFamily: euiTheme.font.family,
+            fontSize: 12,
+            fontWeight: 500,
+            color: colors.textHeading,
+            lineHeight: '24px',
           }}
         >
-          {/* Icon chip — 28×28, matching the step-card chip size. */}
           <div
             data-test-subj="workflowGraphForeachGroupChip"
             css={{
               flex: '0 0 auto',
               width: 28,
               height: 28,
-              background: chip.fill,
+              background: chip.background,
               border: `1px solid ${chip.border}`,
-              borderRadius: euiTheme.border.radius.small,
+              borderRadius,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               transition: 'background 120ms ease, border-color 120ms ease',
             }}
           >
-            <EuiIcon type={getStepIconType(stepType)} size="m" color={chip.icon} aria-hidden />
+            <EuiIcon type={iconType} size="m" color={chip.iconColor} aria-hidden />
           </div>
           <span
             css={{
               flex: '1 1 auto',
-              fontFamily: euiTheme.font.family,
-              fontSize: 12,
-              fontWeight: 500,
-              lineHeight: '24px',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               minWidth: 0,
-              color: stepLabelColor,
             }}
             title={displayLabel}
           >
             {displayLabel}
           </span>
+          {actions.edit && (
+            <div
+              ref={menuClusterRef}
+              css={{ display: 'flex', alignItems: 'center', flex: '0 0 auto' }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
+              role="presentation"
+            >
+              <EuiPopover
+                isOpen={isMenuOpen}
+                closePopover={closeMenu}
+                panelPaddingSize="none"
+                anchorPosition="downRight"
+                aria-label={menuLabel}
+                ownFocus
+                panelProps={{ 'data-test-subj': 'workflowGraphForeachGroupMenuPanel' }}
+                button={menuButton}
+              >
+                <EuiContextMenuPanel
+                  items={[
+                    <EuiContextMenuItem
+                      key="edit"
+                      icon="pencil"
+                      onClick={() => {
+                        closeMenu();
+                        actions.edit?.onEditStep(node.id);
+                      }}
+                      data-test-subj="workflowGraphForeachGroupMenuEdit"
+                    >
+                      {i18n.translate('workflowsUi.foreachGroupNode.editStep', {
+                        defaultMessage: 'Edit step',
+                      })}
+                    </EuiContextMenuItem>,
+                    <EuiContextMenuItem
+                      key="delete"
+                      icon="trash"
+                      css={{ color: euiTheme.colors.textDanger }}
+                      onClick={() => {
+                        closeMenu();
+                        actions.edit?.onDeleteNode(node.id);
+                      }}
+                      data-test-subj="workflowGraphForeachGroupMenuDelete"
+                    >
+                      {i18n.translate('workflowsUi.foreachGroupNode.deleteStep', {
+                        defaultMessage: 'Delete step',
+                      })}
+                    </EuiContextMenuItem>,
+                  ]}
+                />
+              </EuiPopover>
+            </div>
+          )}
         </div>
+        {!hasBodySteps && (
+          <div
+            css={{
+              margin: `0 ${euiTheme.size.m} ${euiTheme.size.m}`,
+              borderRadius: euiTheme.border.radius.small,
+              border: `1px dashed ${euiTheme.colors.borderBaseSubdued}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: 40,
+            }}
+          >
+            {actions.edit && (
+              <EuiButtonIcon
+                iconType="plusCircle"
+                aria-label={i18n.translate('workflowsUi.foreachGroupNode.addFirstStep', {
+                  defaultMessage: 'Add first step in {label}',
+                  values: { label: displayLabel },
+                })}
+                onClick={handleAddFirstStep}
+                size="m"
+                color="text"
+                css={{ opacity: 0.5 }}
+                data-test-subj="workflowGraphForeachGroupAddFirstStep"
+              />
+            )}
+          </div>
+        )}
       </div>
       <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
       {/* Fallback handle — mirrors workflow_graph_node.tsx. Required so failure edges
@@ -115,7 +273,7 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
         type="source"
         id="fallback"
         position={Position.Bottom}
-        style={{ opacity: 0, right: 24, left: 'auto', transform: 'none' }}
+        style={{ opacity: 0, ...errorHandleStyle() }}
       />
     </>
   );

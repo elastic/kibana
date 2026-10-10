@@ -33,6 +33,7 @@ const EMPTY_TRANSFORM: TransformResult = {
   bypassLaneNodes: [],
   nodeRefs: {},
   fallbackLanes: [],
+  forkNodeToJoinId: new Map(),
 };
 
 const HANDLE_SIDE_TO_POSITION: Record<HandleSide, Position> = {
@@ -59,6 +60,8 @@ interface UseWorkflowLayoutParams {
 interface UseWorkflowLayoutResult {
   nodes: Node[];
   edges: Edge[];
+  /** The graph transform the layout was computed from (for edit-mode overlays). */
+  transformed: TransformResult;
 }
 
 /**
@@ -156,10 +159,21 @@ export function useWorkflowLayout({
     ]);
 
     const innerNodeToGroupId = new Map<string, string>();
+    const innerNodeCountByGroupId = new Map<string, number>();
     for (const g of transformed.foreachGroups) {
       for (const n of g.innerNodes) {
         innerNodeToGroupId.set(n.id, g.id);
       }
+      // Bypass and join nodes for forks inside this group must also be parented
+      // so they render inside the container, not at absolute screen coordinates.
+      for (const n of g.bypassLaneNodes) {
+        innerNodeToGroupId.set(n.id, g.id);
+      }
+      // Count only real body nodes, not structural bypass-lane pass-throughs.
+      innerNodeCountByGroupId.set(
+        g.id,
+        g.innerNodes.filter((n) => !allBypassLaneIds.has(n.id)).length
+      );
     }
 
     const allDomainNodes = [
@@ -194,6 +208,7 @@ export function useWorkflowLayout({
     return {
       allBypassLaneIds,
       innerNodeToGroupId,
+      innerNodeCountByGroupId,
       allDomainNodes,
       nodeById,
       allEdges,
@@ -304,7 +319,8 @@ export function useWorkflowLayout({
   }, [stepExecutionMap, scopeIdsByStepId, topologyMeta]);
 
   const derivedNodes = useMemo<Node[]>(() => {
-    const { allBypassLaneIds, innerNodeToGroupId, allDomainNodes } = topologyMeta;
+    const { allBypassLaneIds, innerNodeToGroupId, innerNodeCountByGroupId, allDomainNodes } =
+      topologyMeta;
     const positionedById = new Map(layoutSnapshot.nodes.map((n) => [n.id, n]));
 
     const isHorizontal = direction === 'LR';
@@ -314,7 +330,17 @@ export function useWorkflowLayout({
     const domainNodes = allDomainNodes.map((n) => {
       const pos = positionedById.get(n.id);
       if (!pos) {
-        return { id: n.id, type: n.type, position: { x: 0, y: 0 }, data: n.data };
+        // Node not yet in the layout snapshot (e.g. a new preview inner node
+        // before dagre has run). Preserve parentId so an inner foreach node
+        // renders inside the container rather than at absolute {0,0}.
+        const parentId = innerNodeToGroupId.get(n.id);
+        return {
+          id: n.id,
+          type: n.type,
+          position: { x: 0, y: 0 },
+          data: n.data,
+          ...(parentId ? { parentId, extent: 'parent' as const } : {}),
+        };
       }
 
       // dagLayout returns absolute coordinates. React Flow expects positions
@@ -345,11 +371,24 @@ export function useWorkflowLayout({
         extent: parentId ? ('parent' as const) : undefined,
         width: pos.width,
         height: pos.height,
+        // Preserve `handleBounds` across layout changes by forwarding the
+        // layout-computed dimensions as `measured`. React Flow's `parseHandles`
+        // uses `userNode.measured` to decide whether to keep the existing
+        // `handleBounds` or reset it to `undefined`, which forces a
+        // ResizeObserver round-trip before edges can render. Seeding `measured`
+        // from the dagre layout avoids that timing gap for every non-bypass node.
+        measured: { width: pos.width, height: pos.height },
         targetPosition,
         sourcePosition,
+        // Without `nopan`, panOnDrag swallows clicks on the card so selection
+        // never reaches onNodeClick / the config panel.
+        className: 'nopan',
         data: {
           ...(n.data as Record<string, unknown>),
           stepExecution: exec,
+          ...(n.type === 'foreachGroup'
+            ? { hasBodySteps: (innerNodeCountByGroupId.get(n.id) ?? 0) > 0 }
+            : {}),
         },
       };
     });
@@ -372,22 +411,50 @@ export function useWorkflowLayout({
       } else {
         position = { x: 0, y: 0 };
       }
+      const w = pos?.width ?? 1;
+      const h = pos?.height ?? 1;
       return {
         id,
         type: 'bypassLane',
         position,
         parentId,
         extent: parentId ? ('parent' as const) : undefined,
-        width: pos?.width ?? 1,
-        height: pos?.height ?? 1,
+        width: w,
+        height: h,
         selectable: false,
         style: {
-          width: pos?.width ?? 1,
-          height: pos?.height ?? 1,
+          width: w,
+          height: h,
           pointerEvents: 'none' as const,
         },
         targetPosition,
         sourcePosition,
+        // Provide explicit handles so React Flow can resolve edge endpoints
+        // immediately, without waiting for the ResizeObserver to fire. This
+        // fixes a race where bypass lane nodes — invisible structural nodes
+        // that represent empty branches — never get `handleBounds` set before
+        // EdgeWrapper calls `getEdgePosition`, causing all branch edges to
+        // render as null even when the bypass nodes are already in the DOM.
+        handles: [
+          {
+            type: 'target' as const,
+            position: targetPosition,
+            id: null,
+            x: 0,
+            y: 0,
+            width: w,
+            height: h,
+          },
+          {
+            type: 'source' as const,
+            position: sourcePosition,
+            id: null,
+            x: 0,
+            y: 0,
+            width: w,
+            height: h,
+          },
+        ],
         data: { traversed: branchTraversal.traversedBypassIds.has(id) },
       };
     });
@@ -406,6 +473,10 @@ export function useWorkflowLayout({
     const { allBypassLaneIds, nodeById, allEdges, mergeNodeIds } = topologyMeta;
     const layoutEdgeById = new Map(layoutSnapshot.edges.map((e) => [e.id, e]));
     const { traversedForkEdgeIds, traversedBypassIds } = branchTraversal;
+    // Sources that mount dual `step`/`error` handles (any outgoing failure edge).
+    const nodesWithFailureHandle = new Set(
+      allEdges.filter((e) => e.isFailure).map((e) => e.source)
+    );
 
     const getExec = (nodeId: string): WorkflowStepExecutionDto | undefined => {
       const nodeData = nodeById.get(nodeId)?.data as Record<string, unknown> | undefined;
@@ -438,7 +509,10 @@ export function useWorkflowLayout({
       // plan assumption 8 — step records are created at RUNNING, never SKIPPED);
       // everything else falls back to source-step completion.
       let traversed: boolean;
-      if (e.branchType) {
+      if (e.isFailure) {
+        // An error route only lights up when its fallback step actually ran.
+        traversed = getExec(e.target)?.status !== undefined;
+      } else if (e.branchType) {
         traversed = traversedForkEdgeIds.has(e.id);
       } else if (allBypassLaneIds.has(e.source)) {
         traversed = traversedBypassIds.has(e.source);
@@ -464,19 +538,29 @@ export function useWorkflowLayout({
             : undefined);
         traversed = sourceExec?.status === ExecutionStatus.COMPLETED;
       }
+      let sourceHandle: string | undefined;
+      if (e.isFailure) {
+        sourceHandle = 'fallback';
+      } else if (e.branchType === 'then' || e.branchType === 'else') {
+        sourceHandle = e.branchType;
+      } else if (nodesWithFailureHandle.has(e.source)) {
+        // Owner mounts dual handles (`step` + `error`) once a fallback exists.
+        sourceHandle = 'step';
+      }
       return {
         id: e.id,
         source: e.source,
         target: e.target,
         // Failure edges exit via the dedicated bottom-right handle so React Flow
         // hands computeEdgePath the correct sourceX (right edge, not centre).
-        sourceHandle: isFailure ? 'fallback' : undefined,
+        sourceHandle: isFailure ? 'fallback' : sourceHandle,
         type: 'workflowEdge',
         data: {
           label: e.label,
           traversed,
           points: laid?.points,
           branchType: e.branchType,
+          branchIndex: e.branchIndex,
           isMerge: mergeNodeIds.has(e.target),
           hideEndMarker: allBypassLaneIds.has(e.target),
           isFailure,
@@ -500,5 +584,5 @@ export function useWorkflowLayout({
     syntheticTriggerExecution,
   ]);
 
-  return { nodes: derivedNodes, edges: derivedEdges };
+  return { nodes: derivedNodes, edges: derivedEdges, transformed };
 }

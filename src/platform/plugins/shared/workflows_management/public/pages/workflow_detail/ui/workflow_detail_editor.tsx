@@ -14,23 +14,26 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
+  EuiIcon,
   EuiToolTip,
   useEuiShadow,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { Viewport } from '@xyflow/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
 import { isMac } from '@kbn/shared-ux-utility';
-import { WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID } from '@kbn/workflows';
+import {
+  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
+  WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
+} from '@kbn/workflows';
 import {
   ReactFlowProvider,
   useWorkflowsCapabilities,
   WorkflowDetailBottomBar,
+  WorkflowGraphPocTogglesProvider,
 } from '@kbn/workflows-ui';
 import { useContextOverrideData } from './use_context_override_data';
 import { useRunWorkflowWithConfirmation } from './use_run_workflow_with_confirmation';
@@ -92,14 +95,6 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
   const readOnlyBadgeShadow = useEuiShadow('xl');
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const openActionsRef = useRef<(() => void) | null>(null);
-  // Saved graph viewport — survives the YAML↔graph remount because this
-  // component (which owns the workflow page) stays mounted. Cleared
-  // implicitly when the user navigates to a different workflow because the
-  // whole component unmounts then.
-  const graphViewportRef = useRef<Viewport | undefined>(undefined);
-  const handleGraphViewportChange = useCallback((viewport: Viewport) => {
-    graphViewportRef.current = viewport;
-  }, []);
 
   // "Hide controls menu" toggle (settings popover). When ON the bottom bar
   // auto-collapses to the small pill after 5s; when OFF it stays expanded.
@@ -189,18 +184,27 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
     ]
   );
 
+  const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
+    WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
+  );
   const isExecutionGraphEnabled = useWorkflowsExperimentalUiSetting(
     WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID
   );
 
   const { editorView, setEditorView, graphDirection, setGraphDirection } = useWorkflowUrlState();
-  const showGraph = editorView === 'graph';
+  const showGraph = isVisualEditorEnabled && editorView === 'graph';
+  // Creation state: hide the floating bottom bar until the workflow has
+  // structure or the user is in YAML (reached via "Edit as YAML").
+  const showBottomBar = isVisualEditorEnabled;
 
   const focusedStepId = useSelector(selectFocusedStepId);
   const focusedTriggerId = useSelector(selectFocusedTriggerId);
 
   const handleEditorViewChange = useCallback(
     (next: 'yaml' | 'graph') => {
+      if (!isVisualEditorEnabled) {
+        return;
+      }
       // When switching to graph, focus it on whichever step or trigger block
       // the cursor is currently in — derived entirely from Redux state.
       if (next === 'graph') {
@@ -211,7 +215,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
       }
       setEditorView(next);
     },
-    [dispatch, focusedStepId, focusedTriggerId, setEditorView]
+    [dispatch, focusedStepId, focusedTriggerId, isVisualEditorEnabled, setEditorView]
   );
 
   const openTestModal = useCallback(() => {
@@ -275,8 +279,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
     [runWorkflowTooltipContent, handleRunClickWithUnsavedCheck, runDisabled]
   );
 
-  // Always built; the bar cross-fades visibility based on editorView so the
-  // mount/unmount jump doesn't interrupt the opacity transition.
+  // Shared Actions menu + Documentation controls for both Graph and YAML views.
   const yamlActionsSlot = useMemo(() => {
     const documentationLabel = i18n.translate(
       'workflows.workflowDetailEditor.tools.documentation',
@@ -309,7 +312,21 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
       {
         id: 'documentation',
         content: (
-          <EuiToolTip content={documentationLabel} disableScreenReaderOutput>
+          <EuiToolTip
+            content={
+              <span
+                css={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                {documentationLabel}
+                <EuiIcon type="popout" size="s" aria-hidden />
+              </span>
+            }
+            disableScreenReaderOutput
+          >
             <EuiButtonIcon
               iconType="documentation"
               href={WORKFLOWS_DOCUMENTATION_URL}
@@ -348,105 +365,100 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
     [graphDirection, handleHideControlsMenuChange, hideControlsMenu, isReadOnly, setGraphDirection]
   );
 
-  // Keep the graph mounted for a moment after switching to YAML so the
-  // cross-fade animation can play out before unmounting it.
+  // Mount the graph on first open and keep it alive so YAML↔graph toggles are
+  // instant (no remount / Suspense flash / fade).
   const [renderGraph, setRenderGraph] = useState(showGraph);
   // The floating bottom bar would otherwise cover the validation panel docked under the YAML editor.
   const [validationPanelHeight, setValidationPanelHeight] = useState(0);
   useEffect(() => {
-    if (showGraph) {
-      setRenderGraph(true);
-      return;
-    }
-    const t = setTimeout(() => setRenderGraph(false), GRAPH_FADE_DURATION_MS + 40);
-    return () => clearTimeout(t);
+    if (showGraph) setRenderGraph(true);
   }, [showGraph]);
 
   return (
-    <ReactFlowProvider>
-      <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
-        <EuiFlexItem css={styles.yamlEditor}>
-          {/*
-           * Two peer layers, both absolutely positioned inside the
-           * position:relative yamlEditor flex item:
-           *  - Layer 1 (YAML): always mounted so validation keeps running.
-           *  - Layer 2 (Graph): mounted while renderGraph is true; kept alive
-           *    for GRAPH_FADE_DURATION_MS + 40ms after switching back to YAML so the cross-fade plays out.
-           * The bottom bar floats (position:absolute) and overlays both layers.
-           */}
-          <div
-            css={[styles.editorLayer, showGraph ? styles.layerHidden : styles.layerVisible]}
-            {...(showGraph ? { inert: '' } : {})}
-          >
-            <React.Suspense fallback={<EuiLoadingSpinner />}>
-              <WorkflowYAMLEditor
-                highlightDiff={highlightDiff}
-                onStepRun={handleStepRun}
-                editorRef={editorRef}
-                isActive={!showGraph}
-                hideEditorTools
-                onValidationPanelHeightChange={setValidationPanelHeight}
-                openActionsRef={openActionsRef}
-                onToggleEditorMode={() => handleEditorViewChange(showGraph ? 'yaml' : 'graph')}
-                onAgentProposalHeld={onAgentProposalHeld}
-              />
-            </React.Suspense>
-          </div>
-          {renderGraph && (
-            <div
-              css={[styles.editorLayer, showGraph ? styles.layerVisible : styles.layerHidden]}
-              {...(showGraph ? {} : { inert: '' })}
-            >
-              <React.Suspense fallback={<EuiLoadingSpinner />}>
-                <WorkflowVisualEditor
+    <WorkflowGraphPocTogglesProvider>
+      <ReactFlowProvider>
+        <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
+          <EuiFlexItem css={styles.yamlEditor}>
+            {/*
+             * Two peer layers, both absolutely positioned inside the
+             * position:relative yamlEditor flex item:
+             *  - Layer 1 (YAML): always mounted so validation keeps running.
+             *  - Layer 2 (Graph): mounted after first visit; toggled via visibility.
+             * The bottom bar floats (position:absolute) and overlays both layers.
+             */}
+            <div css={[styles.editorLayer, styles.yamlLayer]} {...(showGraph ? { inert: '' } : {})}>
+              <React.Suspense fallback={null}>
+                <WorkflowYAMLEditor
+                  highlightDiff={highlightDiff}
                   onStepRun={handleStepRun}
-                  direction={graphDirection}
-                  defaultViewport={graphViewportRef.current}
-                  onViewportChange={handleGraphViewportChange}
+                  editorRef={editorRef}
+                  isActive={!showGraph}
+                  hideEditorTools
+                  onValidationPanelHeightChange={setValidationPanelHeight}
+                  openActionsRef={openActionsRef}
+                  onToggleEditorMode={() => handleEditorViewChange(showGraph ? 'yaml' : 'graph')}
+                  onAgentProposalHeld={onAgentProposalHeld}
                 />
               </React.Suspense>
             </div>
-          )}
-          {isReadOnly && (
-            <EuiBadge
-              color="warning"
-              css={[styles.readOnlyBadge, css(readOnlyBadgeShadow)]}
-              data-test-subj="workflowEditorReadOnlyBadge"
-            >
-              {i18n.translate('workflows.workflowDetailEditor.readOnlyBadge', {
-                defaultMessage: 'Read only',
-              })}
-            </EuiBadge>
-          )}
-          <WorkflowDetailBottomBar
-            editorView={editorView}
-            onEditorViewChange={handleEditorViewChange}
-            yamlActionsSlot={yamlActionsSlot}
-            toolsSlot={toolsSlot}
-            testWorkflowButton={testWorkflowButton}
-            testWorkflowButtonCompact={testWorkflowButtonCompact}
-            disableAutoCollapse={!hideControlsMenu}
-            bottomOffset={showGraph ? 0 : validationPanelHeight}
-          />
-        </EuiFlexItem>
-        {isExecutionGraphEnabled && (
-          <EuiFlexItem css={styles.visualEditor}>
-            <React.Suspense fallback={<EuiLoadingSpinner />}>
-              <ExecutionGraph />
-            </React.Suspense>
+            {renderGraph && (
+              <div
+                css={[
+                  styles.editorLayer,
+                  styles.graphLayer,
+                  showGraph ? styles.layerVisible : styles.layerHidden,
+                ]}
+                {...(showGraph ? {} : { inert: '' })}
+              >
+                <React.Suspense fallback={null}>
+                  <WorkflowVisualEditor
+                    onStepRun={handleStepRun}
+                    direction={graphDirection}
+                    editorRef={editorRef}
+                  />
+                </React.Suspense>
+              </div>
+            )}
+            {isReadOnly && (
+              <EuiBadge
+                color="warning"
+                css={[styles.readOnlyBadge, css(readOnlyBadgeShadow)]}
+                data-test-subj="workflowEditorReadOnlyBadge"
+              >
+                {i18n.translate('workflows.workflowDetailEditor.readOnlyBadge', {
+                  defaultMessage: 'Read only',
+                })}
+              </EuiBadge>
+            )}
+            {showBottomBar && (
+              <WorkflowDetailBottomBar
+                editorView={editorView}
+                onEditorViewChange={handleEditorViewChange}
+                yamlActionsSlot={yamlActionsSlot}
+                toolsSlot={toolsSlot}
+                testWorkflowButton={testWorkflowButton}
+                testWorkflowButtonCompact={testWorkflowButtonCompact}
+                disableAutoCollapse={!hideControlsMenu}
+                bottomOffset={showGraph ? 0 : validationPanelHeight}
+              />
+            )}
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+          {isExecutionGraphEnabled && (
+            <EuiFlexItem css={styles.visualEditor}>
+              <React.Suspense fallback={null}>
+                <ExecutionGraph />
+              </React.Suspense>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
 
-      <WorkflowDetailConnectorFlyout editorRef={editorRef} />
-      {runConfirmationModal}
-    </ReactFlowProvider>
+        <WorkflowDetailConnectorFlyout editorRef={editorRef} />
+        {runConfirmationModal}
+      </ReactFlowProvider>
+    </WorkflowGraphPocTogglesProvider>
   );
 });
 WorkflowDetailEditor.displayName = 'WorkflowDetailEditor';
-
-/** Duration of the YAML↔graph cross-fade. Keep in sync with the setTimeout in renderGraph. */
-const GRAPH_FADE_DURATION_MS = 220;
 
 const componentStyles = {
   yamlEditor: css({
@@ -461,16 +473,21 @@ const componentStyles = {
     // display:flex so the YAML editor's internal flex:1 root stretches to fill
     display: 'flex',
     flexDirection: 'column',
-    transition: `opacity ${GRAPH_FADE_DURATION_MS}ms ease, transform ${GRAPH_FADE_DURATION_MS}ms ease`,
   }),
+  yamlLayer: css({
+    zIndex: 0,
+  }),
+  graphLayer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      zIndex: 1,
+      background: euiTheme.colors.backgroundBaseSubdued,
+    }),
   layerVisible: css({
     opacity: 1,
-    transform: 'scale(1)',
     pointerEvents: 'auto',
   }),
   layerHidden: css({
     opacity: 0,
-    transform: 'scale(0.985)',
     pointerEvents: 'none',
   }),
   readOnlyBadge: ({ euiTheme }: UseEuiTheme) =>

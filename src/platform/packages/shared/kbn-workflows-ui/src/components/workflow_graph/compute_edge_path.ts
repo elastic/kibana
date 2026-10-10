@@ -18,7 +18,7 @@ const CORNER_RADIUS = 4;
 // (`if` / `parallel`) bend tight under the source instead of leaving a
 // large gap to the divergence point.
 const TRUNK_LENGTH_FROM_SOURCE = 9;
-const TRUNK_LENGTH_TO_TARGET = 14;
+export const TRUNK_LENGTH_TO_TARGET = 14;
 
 // Vertical offset from the source for branch labels (TB layout). Anchoring
 // labels at a fixed Y instead of the source/target midpoint keeps sibling
@@ -31,13 +31,13 @@ const TB_LABEL_Y_OFFSET = 30;
 // (switch case/default, if-then, if-else). Labels are anchored at a further
 // fixed offset below/right of the bus so all branch labels sit on an aligned
 // row (TB) / column (LR) regardless of sibling node heights.
-const FORK_BUS_TRUNK = 20;
-const FORK_BUS_LABEL_OFFSET = 20;
+export const FORK_BUS_TRUNK = 20;
+export const FORK_BUS_LABEL_OFFSET = 20;
 
 // Merge single-bus routing: distance from the shared horizontal bus (TB) or
 // vertical bus (LR) to the target handle. Mirrors FORK_BUS_TRUNK so the
 // fan-in and fan-out bus trunks are the same length.
-const MERGE_BUS_TRUNK = 20;
+export const MERGE_BUS_TRUNK = 20;
 
 const EPS = 0.5;
 
@@ -58,6 +58,12 @@ export interface ComputeEdgePathInput {
    * waypoints (translated by reconcileEdgePoints) or smooth-step.
    */
   readonly isFailure?: boolean;
+  /**
+   * True when this edge targets a bypass lane node (invisible 1×1 layout helper
+   * for an empty branch). Skips the fork-bus routing so the edge renders as a
+   * straight diagonal rather than a right-angle bus shape.
+   */
+  readonly hideEndMarker?: boolean;
 }
 
 /**
@@ -316,6 +322,7 @@ export const computeEdgePath = ({
   branchType,
   isMerge,
   isFailure,
+  hideEndMarker,
 }: ComputeEdgePathInput): { path: string; labelX: number; labelY: number } => {
   // Single-bus routing for all fork (fan-out) edges: switch case/default,
   // if-then, and if-else. All branch edges of one fork node share the same
@@ -324,7 +331,16 @@ export const computeEdgePath = ({
   // its own target. Labels sit at a fixed offset below the bus (TB) / right of
   // the bus (LR) so all branch labels align on one row/column regardless of
   // how deep each branch target sits.
-  const isForkEdge = branchType === 'switch' || branchType === 'then' || branchType === 'else';
+  //
+  // Bypass-lane targets (hideEndMarker=true, invisible 1×1 nodes for empty
+  // branches) intentionally use the same bus shape so all empty-case stubs
+  // spread out in a proper fan-out — consistent with non-empty branches and
+  // ensures labels at different targetX values sit on an aligned row.
+  const isForkEdge =
+    branchType === 'switch' ||
+    branchType === 'then' ||
+    branchType === 'else' ||
+    branchType === 'parallel';
   // isLR checks both sides: the failure handle is unconditionally Position.Bottom (so that
   // the edge exits the bottom edge in both TB and LR), but spine/fork edges still anchor
   // on the right in LR. The target side is always direction-faithful, so checking it

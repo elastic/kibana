@@ -193,11 +193,12 @@ describe('transformWorkflowToGraph', () => {
         ] as unknown as WorkflowYaml['steps'],
       })
     );
-    const sourcesIntoAfter = r.edges
-      .filter((e) => e.target === 'after')
-      .map((e) => e.source)
-      .sort();
-    expect(sourcesIntoAfter).toEqual(['e2', 't2']);
+    // With join node: branch exits (t2, e2) feed the virtual gate-join node,
+    // which then feeds 'after' as the single source.
+    const sourcesIntoAfter = r.edges.filter((e) => e.target === 'after').map((e) => e.source);
+    expect(sourcesIntoAfter).toEqual(['gate-join']);
+    // forkNodeToJoinId maps gate → gate-join.
+    expect(r.forkNodeToJoinId.get('gate')).toBe('gate-join');
   });
 
   it('renders a bypass lane for the missing else when only the then branch is present', () => {
@@ -215,9 +216,9 @@ describe('transformWorkflowToGraph', () => {
       })
     );
 
-    // A bypass lane node should exist for the missing else lane (not in domain nodes).
-    expect(r.bypassLaneNodes).toHaveLength(1);
-    const bypassId = r.bypassLaneNodes[0].id;
+    // Two bypass lane nodes: the else-bypass lane and the virtual gate-join node.
+    expect(r.bypassLaneNodes).toHaveLength(2);
+    const bypassId = r.bypassLaneNodes.find((n) => n.id !== 'gate-join')!.id;
     expect(r.nodes.find((n) => n.id === bypassId)).toBeUndefined();
 
     // Gate fans out to both the then-branch (t1) and the bypass lane via bus edges.
@@ -233,12 +234,13 @@ describe('transformWorkflowToGraph', () => {
       })
     );
 
-    // Both the then-leaf (t1) and the bypass lane fan-in to 'after'.
-    const sourcesIntoAfter = r.edges
-      .filter((e) => e.target === 'after')
-      .map((e) => e.source)
-      .sort();
-    expect(sourcesIntoAfter).toEqual([bypassId, 't1'].sort());
+    // Branch exits (t1, bypassId) feed the virtual gate-join node; gate-join feeds 'after'.
+    expect(r.edges).toContainEqual(expect.objectContaining({ source: 't1', target: 'gate-join' }));
+    expect(r.edges).toContainEqual(
+      expect.objectContaining({ source: bypassId, target: 'gate-join' })
+    );
+    const sourcesIntoAfter = r.edges.filter((e) => e.target === 'after').map((e) => e.source);
+    expect(sourcesIntoAfter).toEqual(['gate-join']);
 
     // The gate itself no longer connects directly to 'after'.
     expect(r.edges.find((e) => e.source === 'gate' && e.target === 'after')).toBeUndefined();
@@ -259,9 +261,9 @@ describe('transformWorkflowToGraph', () => {
       })
     );
 
-    // A bypass lane node should exist for the missing then lane (not in domain nodes).
-    expect(r.bypassLaneNodes).toHaveLength(1);
-    const bypassId = r.bypassLaneNodes[0].id;
+    // Two bypass lane nodes: the then-bypass lane and the virtual gate-join node.
+    expect(r.bypassLaneNodes).toHaveLength(2);
+    const bypassId = r.bypassLaneNodes.find((n) => n.id !== 'gate-join')!.id;
     expect(r.nodes.find((n) => n.id === bypassId)).toBeUndefined();
 
     // Gate fans out to both the bypass lane (true) and else-branch (e1) via bus edges.
@@ -277,12 +279,13 @@ describe('transformWorkflowToGraph', () => {
       expect.objectContaining({ source: 'gate', target: 'e1', branchType: 'else', label: 'false' })
     );
 
-    // Both the bypass lane and the else-leaf (e1) fan-in to 'after'.
-    const sourcesIntoAfter = r.edges
-      .filter((e) => e.target === 'after')
-      .map((e) => e.source)
-      .sort();
-    expect(sourcesIntoAfter).toEqual([bypassId, 'e1'].sort());
+    // Branch exits (bypassId, e1) feed the virtual gate-join node; gate-join feeds 'after'.
+    expect(r.edges).toContainEqual(
+      expect.objectContaining({ source: bypassId, target: 'gate-join' })
+    );
+    expect(r.edges).toContainEqual(expect.objectContaining({ source: 'e1', target: 'gate-join' }));
+    const sourcesIntoAfter = r.edges.filter((e) => e.target === 'after').map((e) => e.source);
+    expect(sourcesIntoAfter).toEqual(['gate-join']);
 
     // The gate itself no longer connects directly to 'after'.
     expect(r.edges.find((e) => e.source === 'gate' && e.target === 'after')).toBeUndefined();
@@ -344,15 +347,17 @@ describe('transformWorkflowToGraph', () => {
         ] as unknown as WorkflowYaml['steps'],
       })
     );
-    // All branch leaves feed into 'join'.
-    const sourcesIntoJoin = r.edges
-      .filter((e) => e.target === 'join')
+    // Branch leaves (a1, b1, c1) feed the virtual par-join node; par-join feeds 'join'.
+    const sourcesIntoParJoin = r.edges
+      .filter((e) => e.target === 'par-join')
       .map((e) => e.source)
       .sort();
-    expect(sourcesIntoJoin).toEqual(['a1', 'b1', 'c1']);
+    expect(sourcesIntoParJoin).toEqual(['a1', 'b1', 'c1']);
+    const sourcesIntoJoin = r.edges.filter((e) => e.target === 'join').map((e) => e.source);
+    expect(sourcesIntoJoin).toEqual(['par-join']);
   });
 
-  it('falls through via gate id when all parallel branches are empty', () => {
+  it('emits bypass lane nodes for empty parallel branches (one bypass per branch)', () => {
     const r = transformWorkflowToGraph(
       minimal({
         steps: [
@@ -368,13 +373,13 @@ describe('transformWorkflowToGraph', () => {
         ] as unknown as WorkflowYaml['steps'],
       })
     );
-    // Both empty branches fall through via the parallel gate node's id.
-    const sourcesIntoAfter = r.edges
-      .filter((e) => e.target === 'after')
-      .map((e) => e.source)
-      .sort();
-    // deduplicate because both branches fall through via the same gate id
-    expect([...new Set(sourcesIntoAfter)]).toEqual(['par']);
+    // Each empty branch gets a bypass lane node so the labeled edge renders.
+    // The virtual par-join node consolidates all branch exits; only par-join feeds 'after'.
+    const branchBypassIds = r.bypassLaneNodes.filter((n) => n.id !== 'par-join').map((n) => n.id);
+    expect(branchBypassIds).toHaveLength(2);
+    expect(branchBypassIds.every((s) => s.startsWith('par-branch-'))).toBe(true);
+    const sourcesIntoAfter = r.edges.filter((e) => e.target === 'after').map((e) => e.source);
+    expect(sourcesIntoAfter).toEqual(['par-join']);
   });
 
   // ── switch ────────────────────────────────────────────────────────────────
@@ -407,12 +412,9 @@ describe('transformWorkflowToGraph', () => {
     // With a default branch the switch is exhaustive — no plain fall-through edge from gate to 'after'.
     const plainEdgeToAfter = r.edges.find((e) => e.source === 'sw' && e.target === 'after');
     expect(plainEdgeToAfter).toBeUndefined();
-    // All branch leaves connect to 'after'.
-    const sourcesIntoAfter = r.edges
-      .filter((e) => e.target === 'after')
-      .map((e) => e.source)
-      .sort();
-    expect(sourcesIntoAfter).toEqual(['on-error', 'on-success', 'on-unknown']);
+    // Branch leaves connect to the virtual sw-join node; sw-join feeds 'after'.
+    const sourcesIntoAfter = r.edges.filter((e) => e.target === 'after').map((e) => e.source);
+    expect(sourcesIntoAfter).toEqual(['sw-join']);
     // Each case/default edge carries branchType: 'switch' for bus routing.
     expect(r.edges).toContainEqual(
       expect.objectContaining({
@@ -455,9 +457,9 @@ describe('transformWorkflowToGraph', () => {
       })
     );
 
-    // A bypass lane node should exist for the missing default lane (not in domain nodes).
-    expect(r.bypassLaneNodes).toHaveLength(1);
-    const bypassId = r.bypassLaneNodes[0].id;
+    // Two bypass lane nodes: the default-bypass lane and the virtual sw-join node.
+    expect(r.bypassLaneNodes).toHaveLength(2);
+    const bypassId = r.bypassLaneNodes.find((n) => n.id !== 'sw-join')!.id;
     expect(r.nodes.find((n) => n.id === bypassId)).toBeUndefined();
 
     // Gate fans out to the bypass lane via a labeled switch-bus edge.
@@ -473,12 +475,9 @@ describe('transformWorkflowToGraph', () => {
     // No bare fall-through edge from the gate directly to 'after'.
     expect(r.edges.find((e) => e.source === 'sw' && e.target === 'after')).toBeUndefined();
 
-    // Both the case leaf ('on-a') and the bypass lane fan-in to 'after'.
-    const sourcesIntoAfter = r.edges
-      .filter((e) => e.target === 'after')
-      .map((e) => e.source)
-      .sort();
-    expect(sourcesIntoAfter).toEqual(['on-a', bypassId].sort());
+    // Branch exits (on-a, bypassId) feed the virtual sw-join node; sw-join feeds 'after'.
+    const sourcesIntoAfter = r.edges.filter((e) => e.target === 'after').map((e) => e.source);
+    expect(sourcesIntoAfter).toEqual(['sw-join']);
 
     // The labeled case edge is unaffected.
     expect(r.edges).toContainEqual(
@@ -487,6 +486,36 @@ describe('transformWorkflowToGraph', () => {
         target: 'on-a',
         branchType: 'switch',
         label: 'a',
+      })
+    );
+  });
+
+  it('synthesizes labeled bypass lanes for empty switch cases', () => {
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'sw',
+            type: 'switch',
+            expression: '{{ steps.x.output.v }}',
+            cases: [
+              { match: 'draft', steps: [] },
+              { match: 'ready', steps: [{ name: 'on_ready', type: 'http' }] },
+            ],
+          },
+          { name: 'after', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+
+    const fromGate = r.edges.filter((e) => e.source === 'sw');
+    expect(fromGate.map((e) => e.label).sort()).toEqual(['default', 'draft', 'ready']);
+    expect(r.bypassLaneNodes.length).toBeGreaterThanOrEqual(2);
+    expect(r.edges).toContainEqual(
+      expect.objectContaining({
+        source: 'sw',
+        branchType: 'switch',
+        label: 'draft',
       })
     );
   });
@@ -533,12 +562,15 @@ describe('transformWorkflowToGraph', () => {
     );
     // merge node connects to its first inner step
     expect(r.edges).toContainEqual(expect.objectContaining({ source: 'atomic', target: 'm1' }));
-    // the merge node itself (not m2) is the exit point for the next step
+    // the merge node has exactly one out-edge (to the first inner step)
+    const mergeOutEdges = r.edges.filter((e) => e.source === 'atomic');
+    expect(mergeOutEdges).toHaveLength(1);
+    // flow continues from the body's leaves, not from the merge step itself
     const sourcesIntoAfter = r.edges.filter((e) => e.target === 'after').map((e) => e.source);
-    expect(sourcesIntoAfter).toEqual(['atomic']);
+    expect(sourcesIntoAfter).toEqual(['m2']);
   });
 
-  it('falls through via if gate when both branches are empty', () => {
+  it('emits bypass lane nodes for empty if branches (one per branch)', () => {
     const r = transformWorkflowToGraph(
       minimal({
         steps: [
@@ -553,15 +585,14 @@ describe('transformWorkflowToGraph', () => {
         ] as unknown as WorkflowYaml['steps'],
       })
     );
-    const sourcesIntoAfter = r.edges
-      .filter((e) => e.target === 'after')
-      .map((e) => e.source)
-      .sort();
-    // Both empty paths fall through via the gate id (may dedup to one).
-    expect([...new Set(sourcesIntoAfter)]).toEqual(['gate']);
+    // Each empty branch gets a bypass lane node so the labeled edge renders.
+    // The virtual gate-join node consolidates both bypass exits; gate-join feeds 'after'.
+    const sourcesIntoAfter = r.edges.filter((e) => e.target === 'after').map((e) => e.source);
+    expect(sourcesIntoAfter).toEqual(['gate-join']);
+    // All three bypass lane nodes (then-bypass, else-bypass, gate-join) start with 'gate-'.
+    expect(r.bypassLaneNodes.every((n) => n.id.startsWith('gate-'))).toBe(true);
     const edgeIds = r.edges.map((e) => e.id);
     expect(edgeIds.length).toBe(new Set(edgeIds).size);
-    expect(r.edges.filter((e) => e.target === 'after')).toHaveLength(1);
   });
 
   it('emits unique edge ids when all parallel branches are empty', () => {
@@ -582,7 +613,9 @@ describe('transformWorkflowToGraph', () => {
     );
     const edgeIds = r.edges.map((e) => e.id);
     expect(edgeIds.length).toBe(new Set(edgeIds).size);
-    expect(r.edges.filter((e) => e.target === 'after')).toHaveLength(1);
+    // Virtual par-join node consolidates both branch exits; par-join is the single source into 'after'.
+    const sourcesIntoAfter = r.edges.filter((e) => e.target === 'after').map((e) => e.source);
+    expect(sourcesIntoAfter).toEqual(['par-join']);
   });
 });
 
@@ -862,12 +895,19 @@ describe('transformWorkflowToGraph — nodeRefs', () => {
           ] as unknown as WorkflowYaml['steps'],
         })
       );
-      expect(r.bypassLaneNodes).toHaveLength(1);
-      const bypassId = r.bypassLaneNodes[0].id;
+      // Two bypass nodes: the else-bypass lane and the virtual gate-join node.
+      expect(r.bypassLaneNodes).toHaveLength(2);
+      const bypassId = r.bypassLaneNodes.find((n) => n.id !== 'gate-join')!.id;
+      // Branch exits (bye, bypassId) feed gate-join; gate-join is the single source into 'next'.
+      expect(r.edges).toContainEqual(
+        expect.objectContaining({ source: 'bye', target: 'gate-join' })
+      );
+      expect(r.edges).toContainEqual(
+        expect.objectContaining({ source: bypassId, target: 'gate-join' })
+      );
       const fanInEdges = r.edges.filter((e) => e.target === 'next');
-      expect(fanInEdges).toHaveLength(2);
-      expect(fanInEdges.some((e) => e.source === bypassId)).toBe(true);
-      expect(fanInEdges.some((e) => e.source === 'bye')).toBe(true);
+      expect(fanInEdges).toHaveLength(1);
+      expect(fanInEdges[0].source).toBe('gate-join');
     });
 
     it('bypass lane id appears as a fan-in edge source for an else-only if', () => {
@@ -885,12 +925,19 @@ describe('transformWorkflowToGraph — nodeRefs', () => {
           ] as unknown as WorkflowYaml['steps'],
         })
       );
-      expect(r.bypassLaneNodes).toHaveLength(1);
-      const bypassId = r.bypassLaneNodes[0].id;
+      // Two bypass nodes: the then-bypass lane and the virtual gate-join node.
+      expect(r.bypassLaneNodes).toHaveLength(2);
+      const bypassId = r.bypassLaneNodes.find((n) => n.id !== 'gate-join')!.id;
+      // Branch exits (bypassId, bye) feed gate-join; gate-join is the single source into 'next'.
+      expect(r.edges).toContainEqual(
+        expect.objectContaining({ source: bypassId, target: 'gate-join' })
+      );
+      expect(r.edges).toContainEqual(
+        expect.objectContaining({ source: 'bye', target: 'gate-join' })
+      );
       const fanInEdges = r.edges.filter((e) => e.target === 'next');
-      expect(fanInEdges).toHaveLength(2);
-      expect(fanInEdges.some((e) => e.source === bypassId)).toBe(true);
-      expect(fanInEdges.some((e) => e.source === 'bye')).toBe(true);
+      expect(fanInEdges).toHaveLength(1);
+      expect(fanInEdges[0].source).toBe('gate-join');
     });
 
     it('produces no bypass lane nodes for a plain sequential workflow', () => {
@@ -905,7 +952,7 @@ describe('transformWorkflowToGraph — nodeRefs', () => {
       expect(r.bypassLaneNodes).toHaveLength(0);
     });
 
-    it('produces no bypass lane nodes when both if branches are present', () => {
+    it('produces exactly one bypass lane node (the virtual join) when both if branches are present', () => {
       const r = transformWorkflowToGraph(
         minimal({
           steps: [
@@ -920,10 +967,12 @@ describe('transformWorkflowToGraph — nodeRefs', () => {
           ] as unknown as WorkflowYaml['steps'],
         })
       );
-      expect(r.bypassLaneNodes).toHaveLength(0);
+      // Only the virtual gate-join node — no missing-branch bypass lanes.
+      expect(r.bypassLaneNodes).toHaveLength(1);
+      expect(r.bypassLaneNodes[0].id).toBe('gate-join');
     });
 
-    it('produces no bypass lane nodes for a balanced parallel join', () => {
+    it('produces exactly one bypass lane node (the virtual join) for a balanced parallel', () => {
       const r = transformWorkflowToGraph(
         minimal({
           steps: [
@@ -939,7 +988,9 @@ describe('transformWorkflowToGraph — nodeRefs', () => {
           ] as unknown as WorkflowYaml['steps'],
         })
       );
-      expect(r.bypassLaneNodes).toHaveLength(0);
+      // Only the virtual fan-join node — no missing-branch bypass lanes.
+      expect(r.bypassLaneNodes).toHaveLength(1);
+      expect(r.bypassLaneNodes[0].id).toBe('fan-join');
     });
 
     it('does not hoist bypass lane nodes from inside a foreach body to the top level', () => {
@@ -973,10 +1024,10 @@ describe('transformWorkflowToGraph — nodeRefs', () => {
       // The top-level list must be empty — the bypass node belongs to the group.
       expect(r.bypassLaneNodes).toHaveLength(0);
 
-      // The foreach group holds exactly one bypass node for the missing else.
+      // The foreach group holds two bypass nodes: the else-bypass and the virtual gate-join.
       const group = r.foreachGroups.find((g) => g.id === 'loop');
       expect(group).toBeDefined();
-      expect(group!.bypassLaneNodes).toHaveLength(1);
+      expect(group!.bypassLaneNodes).toHaveLength(2);
 
       // All node ids across top-level and group bypass nodes are unique.
       const allBypassIds = [

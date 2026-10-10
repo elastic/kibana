@@ -9,6 +9,7 @@
 
 import YAML, { LineCounter } from 'yaml';
 import type { WorkflowDetailDto } from '@kbn/workflows';
+import { flushWorkflowComputation } from './middleware';
 import { HIGHLIGHTED_STEP_TRIGGER, setCursorPosition, setWorkflow, setYamlString } from './slice';
 import type { ComputedData } from './types';
 import {
@@ -276,6 +277,30 @@ describe('workflowComputationMiddleware', () => {
 
     expect(performComputation).toHaveBeenCalledTimes(1);
     expect(performComputation).toHaveBeenCalledWith('name: third', undefined);
+
+    jest.useRealTimers();
+  });
+
+  it('flushWorkflowComputation runs a pending debounced compute immediately', () => {
+    jest.useFakeTimers();
+
+    const mockComputed: ComputedData = {
+      yamlString: 'name: test',
+      yamlDocument: YAML.parseDocument('name: test'),
+      yamlLineCounter: new LineCounter(),
+      workflowLookup: { steps: {} },
+    };
+    performComputation.mockReturnValue(mockComputed);
+
+    store.dispatch(setYamlString('name: first'));
+    performComputation.mockClear();
+
+    store.dispatch(setYamlString('name: visual-edit'));
+    expect(performComputation).not.toHaveBeenCalled();
+
+    flushWorkflowComputation();
+    expect(performComputation).toHaveBeenCalledTimes(1);
+    expect(performComputation).toHaveBeenCalledWith('name: visual-edit', undefined);
 
     jest.useRealTimers();
   });

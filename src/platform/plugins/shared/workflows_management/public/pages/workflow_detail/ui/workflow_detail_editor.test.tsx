@@ -291,6 +291,7 @@ describe('WorkflowDetailEditor', () => {
     });
 
     it('hides the bottom-bar actions menu on the executions tab', () => {
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
       mockUseWorkflowUrlState.mockReturnValue({
         ...mockUseWorkflowUrlState(),
         activeTab: 'executions',
@@ -351,6 +352,11 @@ describe('WorkflowDetailEditor', () => {
     it('highlights trigger sentinel when focusedTriggerId is set in Redux state', async () => {
       const store = mockStore();
 
+      // Enable the visual editor so handleEditorViewChange runs the graph-focus logic.
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockImplementation(
+        (settingId: string) => settingId === 'workflows:experimentalFeatures'
+      );
+
       // Simulate cursor being inside the triggers block via Redux-derived focusedTriggerId
       mockUseSelector.mockImplementation((selector: any) => {
         if (selector === selectFocusedTriggerId) return HIGHLIGHTED_STEP_TRIGGER;
@@ -376,6 +382,10 @@ describe('WorkflowDetailEditor', () => {
     it('highlights step when focusedStepId is set in Redux state', async () => {
       const store = mockStore();
 
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockImplementation(
+        (settingId: string) => settingId === 'workflows:experimentalFeatures'
+      );
+
       mockUseSelector.mockImplementation((selector: any) => {
         if (selector === selectFocusedTriggerId) return undefined;
         if (selector === selectFocusedStepId) return 'test-step';
@@ -400,6 +410,8 @@ describe('WorkflowDetailEditor', () => {
 
   describe('peer rendering — item 6 (bodyOverride decoupling)', () => {
     it('renders WorkflowYAMLEditor without bodyOverride or hideEditorBody props', async () => {
+      // Enable the visual editor so graph-related props could theoretically be passed
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'workflow',
         editorView: 'yaml', // YAML view
@@ -426,6 +438,7 @@ describe('WorkflowDetailEditor', () => {
     });
 
     it('renders the visual editor and read-only badge in graph view', async () => {
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'workflow',
         editorView: 'graph', // Graph view
@@ -554,13 +567,18 @@ describe('WorkflowDetailEditor', () => {
     const getBottomBarOffset = (getByTestId: (id: string) => HTMLElement) =>
       getComputedStyle(getByTestId('workflowDetailBottomBar')).bottom;
 
+    beforeEach(() => {
+      // The bottom bar only mounts when the visual editor is enabled.
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
+    });
+
     it('floats above the validation panel docked under the YAML editor', () => {
       const { getByTestId } = renderEditor();
-      expect(getBottomBarOffset(getByTestId)).toBe('12px');
+      expect(getBottomBarOffset(getByTestId)).toBe('16px');
 
       fireEvent.click(getByTestId('report-validation-panel-height'));
 
-      expect(getBottomBarOffset(getByTestId)).toBe('60px');
+      expect(getBottomBarOffset(getByTestId)).toBe('64px');
     });
 
     it('ignores the validation panel height in graph view', () => {
@@ -572,7 +590,7 @@ describe('WorkflowDetailEditor', () => {
 
       fireEvent.click(getByTestId('report-validation-panel-height'));
 
-      expect(getBottomBarOffset(getByTestId)).toBe('12px');
+      expect(getBottomBarOffset(getByTestId)).toBe('16px');
     });
   });
 
@@ -597,6 +615,8 @@ describe('WorkflowDetailEditor', () => {
     };
 
     beforeEach(() => {
+      // The bottom bar only mounts when the visual editor is enabled.
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
       localStorage.removeItem(SkipUnsavedRunConfirmationStorageKey);
     });
 
