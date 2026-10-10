@@ -25,7 +25,6 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
-  - is-webpack-built
 fileGroups:
   src:
     - '**/*.ts'
@@ -35,36 +34,4 @@ fileGroups:
     - '!target_vega_sandbox/**/*'
   jest-config:
     - jest.config.js
-tasks:
-  build-webpack:
-    command: pnpm
-    args:
-      - build
-    deps:
-      - ^:build-webpack
-    checks:
-      - check: fingerprint
-        script: cd "${MOON_WORKSPACE_ROOT:-$(git rev-parse --show-toplevel)}" && node scripts/shared_deps_fingerprint.js --moon-project src/platform/packages/private/kbn-vega-sandbox --webpack-config src/platform/packages/private/kbn-vega-sandbox/webpack.config.js
-        hash: stdout
-    inputs:
-      - '@group(src)'
-      - package.json
-      - webpack.config.js
-    outputs:
-      - /target/build/src/platform/packages/private/kbn-vega-sandbox
-  watch-webpack:
-    type: run
-    options:
-      persistent: true
-    command: pnpm
-    args:
-      - build
-      - '--watch'
-    deps:
-      - ^:build-webpack
-    inputs:
-      - '@group(src)'
-      - package.json
-      - webpack.config.js
-    outputs:
-      - /target/build/src/platform/packages/private/kbn-vega-sandbox
+tasks: {}

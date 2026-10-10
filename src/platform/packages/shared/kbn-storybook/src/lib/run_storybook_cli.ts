@@ -13,6 +13,9 @@ import { build } from '@storybook/core-server';
 import type { CLIOptions, BuilderOptions, LoadOptions } from '@storybook/types';
 import type { Flags } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { runSharedBuild } from '@kbn/rspack-optimizer';
+import type { ToolingLog } from '@kbn/tooling-log';
 import * as constants from './constants';
 
 type StorybookCliOptions = CLIOptions & BuilderOptions & LoadOptions & { mode: 'dev' | 'static' };
@@ -38,12 +41,16 @@ export async function buildStorybook({
   configDir,
   name,
   site = false,
+  sharedBundlesPrebuilt = false,
   loglevel = 'info',
+  log,
 }: {
   configDir: string;
   name: string;
   site?: boolean;
+  sharedBundlesPrebuilt?: boolean;
   loglevel?: StorybookCliOptions['loglevel'];
+  log?: ToolingLog;
 }) {
   const config: StorybookCliOptions = {
     configDir,
@@ -60,11 +67,28 @@ export async function buildStorybook({
     process.env.NODE_ENV = 'development';
   }
 
+  const sharedBuild = sharedBundlesPrebuilt
+    ? undefined
+    : await runSharedBuild({
+        repoRoot: REPO_ROOT,
+        dist: site,
+        watch: !site,
+        log,
+      });
+  if (sharedBuild && !sharedBuild.success) {
+    await sharedBuild.close?.();
+    throw new Error(`Shared frontend build failed: ${sharedBuild.errors?.join(', ')}`);
+  }
+
   try {
     // Some transitive deps of addon-docs are ESM and not loading properly
     // See: https://github.com/storybookjs/storybook/issues/29467
     require('fix-esm').require('react-docgen');
+    // in dev mode this resolves once the server is up, so the shared watcher must stay open
     await build(config);
+  } catch (error) {
+    await sharedBuild?.close?.();
+    throw error;
   } finally {
     require('fix-esm').unregister();
   }
@@ -79,7 +103,9 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
         configDir,
         name,
         site: Boolean(flags.site),
+        sharedBundlesPrebuilt: Boolean(flags['shared-bundles-prebuilt']),
         loglevel: getLogLevelFromFlags(flags),
+        log,
       });
 
       // Line is only reached when building the static version
@@ -87,7 +113,7 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
     },
     {
       flags: {
-        boolean: ['site'],
+        boolean: ['site', 'shared-bundles-prebuilt'],
       },
       description: `
         Run the storybook examples for ${name}

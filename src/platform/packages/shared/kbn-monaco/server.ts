@@ -12,6 +12,13 @@ import Fs from 'fs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 
+export {
+  DEFAULT_WORKER_ID,
+  LANG_SPECIFIC_WORKER_IDS,
+  MONACO_WORKER_ENTRIES,
+} from './src/worker_entries';
+export type { LangSpecificWorkerIds, MonacoWorkerId } from './src/worker_entries';
+
 const localBundles = Path.resolve(__dirname, './target_workers');
 const builtBundles = Path.resolve(
   REPO_ROOT,

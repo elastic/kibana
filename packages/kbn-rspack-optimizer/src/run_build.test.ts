@@ -8,12 +8,50 @@
  */
 
 import Path from 'path';
-import { formatSize, IGNORED_WATCH_PATTERNS } from './run_build';
+import { KIBANA_COMPILER } from './config/create_multi_compile_config';
+import { formatSize, IGNORED_WATCH_PATTERNS, sharedCompilersChanged } from './run_build';
 
 const matchesIgnored = (filePath: string) => IGNORED_WATCH_PATTERNS.some((re) => re.test(filePath));
 
 // Build OS-correct absolute-style paths so the same test runs on POSIX and Win32.
 const p = (...segments: string[]) => Path.resolve(Path.sep, ...segments);
+
+describe('sharedCompilersChanged', () => {
+  it('ignores an unchanged shared compiler when only Kibana rebuilt', () => {
+    const previous = new Map<string, string>();
+    sharedCompilersChanged(
+      [
+        { name: 'shared-npm', hash: 'shared-1' },
+        { name: KIBANA_COMPILER, hash: 'kibana-1' },
+      ],
+      previous
+    );
+
+    expect(
+      sharedCompilersChanged(
+        [
+          { name: 'shared-npm', hash: 'shared-1' },
+          { name: KIBANA_COMPILER, hash: 'kibana-2' },
+        ],
+        previous
+      )
+    ).toBe(false);
+  });
+
+  it('reports a shared compiler whose output hash changed', () => {
+    const previous = new Map<string, string>([['shared-npm', 'shared-1']]);
+
+    expect(
+      sharedCompilersChanged(
+        [
+          { name: 'shared-npm', hash: 'shared-2' },
+          { name: KIBANA_COMPILER, hash: 'kibana-1' },
+        ],
+        previous
+      )
+    ).toBe(true);
+  });
+});
 
 describe('formatSize', () => {
   it('formats bytes below 1024 as B', () => {

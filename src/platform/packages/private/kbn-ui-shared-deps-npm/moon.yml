@@ -24,43 +24,11 @@ tags:
   - prod
   - group-platform
   - private
-  - is-webpack-built
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.js'
     - '!**/*.config.js'
+    - '!src/set_public_path.js'
     - '!target/**/*'
-tasks:
-  build-webpack:
-    command: pnpm
-    args:
-      - build
-    deps:
-      - ^:build-webpack
-    checks:
-      - check: fingerprint
-        script: cd "${MOON_WORKSPACE_ROOT:-$(git rev-parse --show-toplevel)}" && node scripts/shared_deps_fingerprint.js --moon-project src/platform/packages/private/kbn-ui-shared-deps-npm --webpack-config src/platform/packages/private/kbn-ui-shared-deps-npm/webpack.config.js
-        hash: stdout
-    inputs:
-      - '@group(src)'
-      - package.json
-      - webpack.config.js
-    outputs:
-      - /target/build/src/platform/packages/private/kbn-ui-shared-deps-npm
-  watch-webpack:
-    type: run
-    options:
-      persistent: true
-    command: pnpm
-    args:
-      - build
-      - '--watch'
-    deps:
-      - ^:build-webpack
-    inputs:
-      - '@group(src)'
-      - package.json
-      - webpack.config.js
-    outputs:
-      - /target/build/src/platform/packages/private/kbn-ui-shared-deps-npm
+tasks: {}

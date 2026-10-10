@@ -47,7 +47,7 @@ else
 fi
 
 echo "--- Bootstrap Kibana"
-# The step only runs Node scripts; skip building the dev-mode shared webpack bundles
+# Node scripts only; skip the moon-cache download.
 export KBN_BOOTSTRAP_NO_PREBUILT=true
 .buildkite/scripts/bootstrap.sh
 

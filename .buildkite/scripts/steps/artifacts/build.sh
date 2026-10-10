@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-# node scripts/build rebuilds the shared webpack bundles without the remote cache
+# Skip the moon-cache download; the distributable build does not use it.
 export KBN_BOOTSTRAP_NO_PREBUILT=true
 
 .buildkite/scripts/bootstrap.sh

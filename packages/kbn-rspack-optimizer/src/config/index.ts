@@ -11,6 +11,10 @@ export {
   createSingleCompileConfig,
   type SingleCompileConfigOptions,
 } from './create_single_compile_config';
+export {
+  createMultiCompileConfig,
+  createSharedCompileConfigs,
+} from './create_multi_compile_config';
 
 export {
   createExternalPluginConfig,
