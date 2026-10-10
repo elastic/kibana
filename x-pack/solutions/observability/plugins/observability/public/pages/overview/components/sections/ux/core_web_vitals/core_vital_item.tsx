@@ -35,6 +35,52 @@ export interface Thresholds {
   bad: string;
 }
 
+/**
+ * Parses a Core Web Vitals value or threshold (e.g. "2.5 s", "450 ms", "0.1")
+ * into a comparable number normalised to a single unit (milliseconds for timings,
+ * the raw value for unitless metrics such as CLS). Returns `null` when the input
+ * cannot be parsed so callers can fall back safely.
+ */
+export function parseCoreVitalValue(input?: string | null): number | null {
+  if (input === undefined || input === null) {
+    return null;
+  }
+  const match = input.trim().match(/^(-?\d+(?:\.\d+)?)\s*(ms|s)?$/i);
+  if (!match) {
+    return null;
+  }
+  const magnitude = Number(match[1]);
+  if (Number.isNaN(magnitude)) {
+    return null;
+  }
+  const unit = match[2]?.toLowerCase();
+  return unit === 's' ? magnitude * 1000 : magnitude;
+}
+
+/**
+ * Returns the status index (0 = good, 1 = needs improvement, 2 = poor) for the
+ * displayed value by comparing it against the metric thresholds, or `null` when
+ * the value or thresholds cannot be parsed.
+ */
+export function getValueStatusIndex(
+  value: string | null | undefined,
+  thresholds: Thresholds
+): number | null {
+  const numericValue = parseCoreVitalValue(value);
+  const goodThreshold = parseCoreVitalValue(thresholds.good);
+  const badThreshold = parseCoreVitalValue(thresholds.bad);
+  if (numericValue === null || goodThreshold === null || badThreshold === null) {
+    return null;
+  }
+  if (numericValue <= goodThreshold) {
+    return 0;
+  }
+  if (numericValue >= badThreshold) {
+    return 2;
+  }
+  return 1;
+}
+
 interface Props {
   title: string;
   value?: string | null;
@@ -95,6 +141,11 @@ export function CoreVitalItem({
   } = useEuiTheme();
 
   const colorsStatus = [colors.textSuccess, colors.textWarning, colors.textDanger];
+  // Colour the stat by the status of the value actually displayed (good/needs
+  // improvement/poor) so it matches the number shown. Fall back to the
+  // user-distribution bucket only when the value cannot be classified.
+  const valueStatusIndex = getValueStatusIndex(value, thresholds);
+  const titleColorIndex = valueStatusIndex ?? biggestValIndex;
   if (!value && !loading) {
     return <EuiCard title={title} isDisabled={true} description={NO_DATA} />;
   }
@@ -113,7 +164,7 @@ export function CoreVitalItem({
           </>
         }
         isLoading={loading}
-        titleColor={colorsStatus[biggestValIndex]}
+        titleColor={colorsStatus[titleColorIndex]}
       />
       <EuiSpacer size="s" />
       <EuiFlexGroup
