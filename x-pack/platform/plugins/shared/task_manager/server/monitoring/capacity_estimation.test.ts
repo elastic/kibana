@@ -6,7 +6,12 @@
  */
 
 import type { CapacityEstimationParams } from './capacity_estimation';
-import { estimateCapacity } from './capacity_estimation';
+import type { HealthStatusLogger } from './capacity_estimation';
+import {
+  createHealthStatusLogger,
+  estimateCapacity,
+  UNHEALTHY_LOG_THROTTLE_MS,
+} from './capacity_estimation';
 import type { RawMonitoringStats } from './monitoring_stats_stream';
 import { HealthStatus } from './monitoring_stats_stream';
 import { mockLogger } from '../test_utils';
@@ -14,15 +19,16 @@ import type { AveragedStat } from './task_run_calculators';
 
 describe('estimateCapacity', () => {
   const logger = mockLogger();
+  let healthStatusLogger: HealthStatusLogger;
 
   beforeEach(() => {
     jest.resetAllMocks();
+    healthStatusLogger = createHealthStatusLogger(logger);
   });
 
   test('estimates the max throughput per minute based on the workload and the assumed kibana instances', async () => {
     expect(
       estimateCapacity(
-        logger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -60,7 +66,8 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1
+        1,
+        healthStatusLogger
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -72,7 +79,6 @@ describe('estimateCapacity', () => {
   test('reduces the available capacity per kibana when average task duration exceeds the poll interval', async () => {
     expect(
       estimateCapacity(
-        logger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -110,7 +116,8 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1
+        1,
+        healthStatusLogger
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -124,7 +131,6 @@ describe('estimateCapacity', () => {
   test('estimates the max throughput per minute when duration by persistence is empty', async () => {
     expect(
       estimateCapacity(
-        logger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -149,7 +155,8 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1
+        1,
+        healthStatusLogger
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -161,7 +168,6 @@ describe('estimateCapacity', () => {
   test('estimates the max throughput per minute based on the workload and the assumed kibana instances when there are tasks that repeat each hour or day', async () => {
     expect(
       estimateCapacity(
-        logger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -199,7 +205,8 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1
+        1,
+        healthStatusLogger
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -211,7 +218,6 @@ describe('estimateCapacity', () => {
   test('estimates the max throughput available when there are no active Kibana', async () => {
     expect(
       estimateCapacity(
-        logger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -250,7 +256,8 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1
+        1,
+        healthStatusLogger
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -262,7 +269,6 @@ describe('estimateCapacity', () => {
   test('estimates the max throughput available to handle the workload when there are multiple active kibana instances', async () => {
     expect(
       estimateCapacity(
-        logger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -300,7 +306,8 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        3
+        3,
+        healthStatusLogger
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 3,
@@ -318,7 +325,6 @@ describe('estimateCapacity', () => {
 
     expect(
       estimateCapacity(
-        logger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -362,7 +368,8 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        2
+        2,
+        healthStatusLogger
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: provisionedKibanaInstances,
@@ -392,7 +399,6 @@ describe('estimateCapacity', () => {
 
     expect(
       estimateCapacity(
-        logger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -436,7 +442,8 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        2
+        2,
+        healthStatusLogger
       ).value
     ).toMatchObject({
       observed: {
@@ -467,7 +474,6 @@ describe('estimateCapacity', () => {
   test('marks estimated capacity as OK state when workload and load suggest capacity is sufficient', async () => {
     expect(
       estimateCapacity(
-        logger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -514,7 +520,8 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1
+        1,
+        healthStatusLogger
       )
     ).toMatchObject({
       status: 'OK',
@@ -529,7 +536,6 @@ describe('estimateCapacity', () => {
   test('marks estimated capacity as Warning state when capacity is insufficient for recent spikes of non-recurring workload, but sufficient for the recurring workload', async () => {
     expect(
       estimateCapacity(
-        logger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -573,7 +579,8 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1
+        1,
+        healthStatusLogger
       )
     ).toMatchObject({
       status: 'OK',
@@ -588,7 +595,6 @@ describe('estimateCapacity', () => {
   test('marks estimated capacity as Error state when workload and load suggest capacity is insufficient', async () => {
     expect(
       estimateCapacity(
-        logger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -632,7 +638,8 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1
+        1,
+        healthStatusLogger
       )
     ).toMatchObject({
       status: 'OK',
@@ -647,7 +654,6 @@ describe('estimateCapacity', () => {
   test('recommmends a 20% increase in kibana when a spike in non-recurring tasks forces recurring task capacity to zero', async () => {
     expect(
       estimateCapacity(
-        logger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -690,7 +696,8 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1
+        1,
+        healthStatusLogger
       )
     ).toMatchObject({
       status: 'OK',
@@ -717,7 +724,6 @@ describe('estimateCapacity', () => {
   test('recommmends a 20% increase in kibana when a spike in non-recurring tasks in a system with insufficient capacity even for recurring tasks', async () => {
     expect(
       estimateCapacity(
-        logger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -760,7 +766,8 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1
+        1,
+        healthStatusLogger
       )
     ).toMatchObject({
       status: 'OK',
@@ -789,7 +796,6 @@ describe('estimateCapacity', () => {
   test("estimates minutes_to_drain_overdue even if there isn't any overdue task", async () => {
     expect(
       estimateCapacity(
-        logger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -828,7 +834,8 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1
+        1,
+        healthStatusLogger
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -840,7 +847,6 @@ describe('estimateCapacity', () => {
     expect(
       () =>
         estimateCapacity(
-          logger,
           mockStats(
             {},
             {},
@@ -848,11 +854,85 @@ describe('estimateCapacity', () => {
               load: {} as AveragedStat,
             }
           ),
-          2
+          2,
+          healthStatusLogger
         ).value.observed
     ).toThrowErrorMatchingInlineSnapshot(
       `"Task manager had an issue calculating capacity estimation. averageLoadPercentage: undefined"`
     );
+  });
+
+  describe('unhealthy log throttling', () => {
+    beforeAll(() => {
+      jest.useFakeTimers();
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
+    const requiredThroughputReason =
+      'Task Manager is unhealthy, the assumedRequiredThroughputPerMinutePerKibana (215) >= capacityPerMinutePerKibana (200)';
+    const recurringThroughputReason =
+      'Task Manager is unhealthy, the assumedAverageRecurringRequiredThroughputPerMinutePerKibana (210) > capacityPerMinutePerKibana (200)';
+
+    const unhealthyStats = (perMinute: number, loadP50: number) =>
+      mockStats(
+        { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
+        {
+          owner_ids: 1,
+          overdue_non_recurring: 0,
+          capacity_requirements: { per_minute: perMinute, per_hour: 0, per_day: 0 },
+        },
+        {
+          load: { p50: loadP50, p90: 100, p95: 100, p99: 100 },
+          execution: {
+            duration: {},
+            duration_by_persistence: {
+              non_recurring: { p50: 400, p90: 500, p95: 1200, p99: 1500 },
+              recurring: { p50: 400, p90: 500, p95: 1200, p99: 1500 },
+            },
+            persistence: { non_recurring: 20, recurring: 80 },
+            result_frequency_percent_as_number: {},
+          },
+        }
+      );
+    const requiredThroughputUnhealthy = () =>
+      estimateCapacity(unhealthyStats(175, 40), 1, healthStatusLogger);
+    const recurringThroughputUnhealthy = () =>
+      estimateCapacity(unhealthyStats(210, 80), 1, healthStatusLogger);
+
+    test('logs a warning on the first unhealthy call', () => {
+      requiredThroughputUnhealthy();
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(requiredThroughputReason);
+    });
+
+    test('falls back to debug for repeated unhealthy calls within the throttle window', () => {
+      requiredThroughputUnhealthy();
+      jest.advanceTimersByTime(UNHEALTHY_LOG_THROTTLE_MS - 1);
+      requiredThroughputUnhealthy();
+
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(requiredThroughputReason);
+    });
+
+    test('logs a warning again once the throttle window has passed', () => {
+      requiredThroughputUnhealthy();
+      jest.advanceTimersByTime(UNHEALTHY_LOG_THROTTLE_MS);
+      requiredThroughputUnhealthy();
+
+      expect(logger.warn).toHaveBeenCalledTimes(2);
+    });
+
+    test('shares the throttle window between both unhealthy reasons', () => {
+      requiredThroughputUnhealthy();
+      recurringThroughputUnhealthy();
+
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(requiredThroughputReason);
+      expect(logger.debug).toHaveBeenCalledWith(recurringThroughputReason);
+    });
   });
 });
 

@@ -21,7 +21,7 @@ import { createBackgroundTaskUtilizationAggregator } from './background_task_uti
 import type { ConfigStat } from './configuration_statistics';
 import { createConfigurationAggregator } from './configuration_statistics';
 import type { TaskManagerConfig } from '../config';
-import type { CapacityEstimationStat } from './capacity_estimation';
+import type { CapacityEstimationStat, HealthStatusLogger } from './capacity_estimation';
 import { withCapacityEstimate } from './capacity_estimation';
 import type { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import type { CreateMonitoringStatsOpts } from '.';
@@ -136,7 +136,8 @@ export function summarizeMonitoringStats(
   logger: Logger,
   { last_update, stats: { runtime, workload, configuration, utilization } }: MonitoringStats,
   config: TaskManagerConfig,
-  assumedKibanaInstances: number
+  assumedKibanaInstances: number,
+  healthStatusLogger: HealthStatusLogger
 ): RawMonitoringStats {
   const summarizedStats = withCapacityEstimate(
     logger,
@@ -166,7 +167,8 @@ export function summarizeMonitoringStats(
           }
         : {}),
     },
-    assumedKibanaInstances
+    assumedKibanaInstances,
+    healthStatusLogger
   );
 
   return {
