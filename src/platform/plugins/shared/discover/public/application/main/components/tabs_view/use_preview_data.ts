@@ -23,6 +23,7 @@ import type {
   TabState,
 } from '../../state_management/redux';
 import {
+  getDataViewOfSource,
   selectTabRuntimeState,
   useInternalStateSelector,
   selectAllTabs,
@@ -142,7 +143,7 @@ const getPreviewTitle = (
     : undefined;
 };
 
-const getPreviewDataObservable = (
+export const getPreviewDataObservable = (
   runtimeStateManager: RuntimeStateManager,
   tabState: TabState | RecentlyClosedTabState,
   savedDataViews: DataViewListItem[]
@@ -176,10 +177,13 @@ const getPreviewDataObservable = (
         });
       }
 
-      return combineLatest([dataStateContainer.data$.main$, tabRuntimeState.currentDataView$]).pipe(
-        map(([{ fetchStatus }, dataView]) => ({
+      return combineLatest([
+        dataStateContainer.data$.main$,
+        tabRuntimeState.currentDataSource$,
+      ]).pipe(
+        map(([{ fetchStatus }, dataSource]) => ({
           fetchStatus,
-          dataViewName: dataView?.name,
+          dataViewName: getDataViewOfSource(dataSource)?.name,
         })),
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
         map(({ fetchStatus, dataViewName }) => {

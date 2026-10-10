@@ -64,9 +64,9 @@ export const DiscoverSessionSaveModalContainer = ({
   const timeRestore = persistedDiscoverSession?.tabs.some((tab) => tab.timeRestore) ?? false;
   const isTimeBased = allTabs.some((tab) => {
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
-    const tabDataView = tabRuntimeState.currentDataView$.getValue();
+    const tabDataSource = tabRuntimeState.currentDataSource$.getValue();
 
-    if (tabDataView) return tabDataView.isTimeBased();
+    if (tabDataSource) return tabDataSource.isTimeBased();
 
     const tabDataViewDetails = getSerializedSearchSourceDataViewDetails(
       tab.initialInternalState?.serializedSearchSource,

@@ -9,7 +9,7 @@
 
 import type { IToasts, ToastsStart } from '@kbn/core/public';
 import type { FilterManager } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import { i18n } from '@kbn/i18n';
 import { useEffect } from 'react';
 import { debounceTime } from 'rxjs';
@@ -29,11 +29,11 @@ const addInvalidFiltersWarn = (toastNotifications: IToasts) => {
 };
 
 export const useFiltersValidation = ({
-  dataView,
+  dataSource,
   filterManager,
   toastNotifications,
 }: {
-  dataView: DataView;
+  dataSource: DataSource;
   filterManager: FilterManager;
   toastNotifications: ToastsStart;
 }) => {
@@ -43,14 +43,14 @@ export const useFiltersValidation = ({
       .pipe(debounceTime(500))
       .subscribe(() => {
         const currentFilters = filterManager.getFilters();
+        const dataViewId = dataSource.kind === 'esql' ? dataSource.datasetId : dataSource.id;
         const areFiltersInvalid =
-          dataView &&
-          !dataView.isPersisted() &&
-          !currentFilters.every((current) => current.meta.index === dataView.id);
+          !dataSource.isPersisted() &&
+          !currentFilters.every((current) => current.meta.index === dataViewId);
         if (areFiltersInvalid) {
           addInvalidFiltersWarn(toastNotifications);
         }
       });
     return () => subscription.unsubscribe();
-  }, [dataView, filterManager, toastNotifications]);
+  }, [dataSource, filterManager, toastNotifications]);
 };

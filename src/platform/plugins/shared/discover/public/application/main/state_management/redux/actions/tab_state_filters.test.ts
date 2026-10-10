@@ -204,7 +204,7 @@ describe('tab_state_filters actions', () => {
     const setQuerySpy = jest.spyOn(services.data.query.queryString, 'setQuery');
     setQuerySpy.mockClear();
 
-    selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.next(undefined);
+    selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$.next(undefined);
 
     internalState.dispatch(
       internalStateActions.addFilter({

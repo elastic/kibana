@@ -20,7 +20,7 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { popularizeField } from '@kbn/unified-data-table';
 import type { TabState } from '../types';
 import type { DiscoverServices } from '../../../../../build_services';
-import { selectTabRuntimeState } from '../runtime_state';
+import { getTabDataView, selectTabRuntimeState } from '../runtime_state';
 import { isCascadedDocumentsVisible } from '../../../components/layout/cascaded_documents';
 import type { InternalStateThunkActionCreator, TabActionPayload } from '../internal_state';
 import { selectTab } from '../selectors';
@@ -159,7 +159,7 @@ export const addFilter: InternalStateThunkActionCreator<
     const { query } = tabState.appState;
 
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-    const dataView = tabRuntimeState.currentDataView$.getValue();
+    const dataView = getTabDataView(tabRuntimeState);
     if (!dataView) {
       return;
     }
