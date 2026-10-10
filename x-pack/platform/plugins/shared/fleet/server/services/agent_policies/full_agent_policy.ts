@@ -35,18 +35,21 @@ import type {
   FullAgentPolicyInput,
   FullAgentPolicyMonitoring,
   FullAgentPolicyOutputPermissions,
+  KafkaOutput,
   PackageInfo,
 } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
 
 import {
   dataTypes,
+  kafkaAuthType,
   kafkaCompressionType,
   OTEL_COLLECTOR_INPUT_TYPE,
   outputType,
   PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
 } from '../../../common/constants';
 import { createManagedBulkOutputMatcher } from '../preconfiguration/outputs';
+import { buildKafkaAuthData, buildKafkaSecrets } from '../outputs/kafka_auth';
 import { getSettingsValuesForAgentPolicy } from '../form_settings';
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
@@ -672,6 +675,14 @@ export function transformOutputToFullPolicyOutput(
 
   const configJs = config_yaml ? parse(config_yaml) : {};
 
+  const outputSecrets =
+    type === outputType.Kafka
+      ? buildKafkaSecrets({
+          auth_type: (output as KafkaOutput).auth_type,
+          secrets: (output as KafkaOutput).secrets,
+        })
+      : secrets;
+
   // build logic to read config_yaml and transform it with the new shipper data
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
   let shipperDiskQueueData = {};
@@ -685,9 +696,11 @@ export function transformOutputToFullPolicyOutput(
       key,
       compression,
       compression_level,
+      auth_type,
       username,
       password,
       sasl,
+      oauth2,
       partition,
       random,
       round_robin,
@@ -730,13 +743,13 @@ export function transformOutputToFullPolicyOutput(
       key,
       compression,
       ...(compression === kafkaCompressionType.Gzip ? { compression_level } : {}),
-      ...(username ? { username } : {}),
-      ...(password ? { password } : {}),
-      ...(sasl ? { sasl } : {}),
+      ...buildKafkaAuthData({ auth_type, username, password, sasl, oauth2 }),
       partition: transformPartition(),
       topic,
       headers: (headers ?? []).filter((item) => item.key !== '' || item.value !== ''),
-      timeout,
+      // the agent runs a Kafka output with OAuth2 in the OTel collector, which does not support
+      // this setting: it would fall back to the Beats runtime, that cannot do OAuth2
+      ...(auth_type === kafkaAuthType.OAuth2 ? {} : { timeout }),
       broker_timeout,
       required_acks,
     };
@@ -772,7 +785,7 @@ export function transformOutputToFullPolicyOutput(
     ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
-    ...(secrets ? { secrets } : {}),
+    ...(outputSecrets ? { secrets: outputSecrets } : {}),
   };
   if (ssl) {
     newOutput.ssl = {

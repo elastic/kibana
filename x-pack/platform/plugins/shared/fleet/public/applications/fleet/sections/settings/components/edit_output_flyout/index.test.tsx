@@ -12,7 +12,12 @@ import type { Output } from '../../../../types';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import { useFleetStatus } from '../../../../../../hooks/use_fleet_status';
 import { ExperimentalFeaturesService } from '../../../../../../services';
-import { useStartServices, sendPutOutput, licenseService } from '../../../../hooks';
+import {
+  useStartServices,
+  useKafkaAuthMethods,
+  sendPutOutput,
+  licenseService,
+} from '../../../../hooks';
 
 import { EditOutputFlyout } from '.';
 
@@ -39,6 +44,7 @@ jest.mock('../../../../hooks', () => {
     ...jest.requireActual('../../../../hooks'),
     useBreadcrumbs: jest.fn(),
     useStartServices: jest.fn(),
+    useKafkaAuthMethods: jest.fn(),
     sendPutOutput: jest.fn(),
   };
 });
@@ -49,6 +55,7 @@ jest.mock('./confirm_update', () => ({
 
 const mockSendPutOutput = sendPutOutput as jest.MockedFunction<typeof sendPutOutput>;
 const mockUseStartServices = useStartServices as jest.Mock;
+const mockUseKafkaAuthMethods = useKafkaAuthMethods as jest.Mock;
 
 const mockedUseFleetStatus = useFleetStatus as jest.MockedFunction<typeof useFleetStatus>;
 
@@ -115,6 +122,8 @@ describe('EditOutputFlyout', () => {
   beforeEach(() => {
     mockStartServices(false);
     jest.clearAllMocks();
+    // the optional authentication methods of the Kafka output are off by default
+    mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: false });
     jest.spyOn(licenseService, 'isEnterprise').mockClear();
 
     mockedUseFleetStatus.mockReturnValue({} as any);
@@ -358,6 +367,512 @@ describe('EditOutputFlyout', () => {
       );
       expect((mockSendPutOutput.mock.calls[0][1] as any).password).toBeUndefined();
     });
+  });
+
+  it('should not render username and password inputs for an authentication method this form cannot edit', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'outputK',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['kafka:443'],
+      topic: 'topic',
+      // an authentication method the form has no inputs for, e.g. set through the API
+      auth_type: 'unsupported_auth' as any,
+      version: '1.0.0',
+      compression: 'none',
+    });
+
+    expect(
+      utils.getByTestId('settingsOutputsFlyout.kafkaAuthenticationManagedElsewhereCallout')
+    ).toBeInTheDocument();
+    expect(utils.queryByTestId('settingsOutputsFlyout.kafkaUsernameInput')).not.toBeInTheDocument();
+    expect(
+      utils.queryByTestId('settingsOutputsFlyout.kafkaPasswordSecretInput')
+    ).not.toBeInTheDocument();
+
+    mockSendPutOutput.mockResolvedValue({ data: {} } as any);
+
+    fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+      target: { value: 'kafka output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await waitFor(() => {
+      // the authentication settings of the output are kept as they are
+      expect(mockSendPutOutput).toHaveBeenCalledWith(
+        'outputK',
+        expect.objectContaining({ auth_type: 'unsupported_auth' })
+      );
+      const payload = mockSendPutOutput.mock.calls[0][1] as any;
+      expect(payload.username).toBeUndefined();
+      expect(payload.password).toBeUndefined();
+      expect(payload.secrets?.password).toBeUndefined();
+    });
+  });
+
+  describe('kafka OAuth2 authentication', () => {
+    const kafkaOutput = {
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'outputK',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['kafka:443'],
+      topic: 'topic',
+      version: '1.0.0',
+      compression: 'none',
+    } as any;
+
+    beforeEach(() => {
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+      mockedUseFleetStatus.mockReturnValue({
+        isLoading: false,
+        isReady: true,
+        isSecretsStorageEnabled: true,
+      } as any);
+      mockSendPutOutput.mockResolvedValue({ data: {} } as any);
+    });
+
+    it('should not offer OAuth2 when the feature flag is off', () => {
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      expect(utils.queryByTestId('kafkaAuthenticationOAuth2RadioButton')).not.toBeInTheDocument();
+    });
+
+    it('should offer OAuth2 when the feature flag is on', () => {
+      mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: true });
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      expect(utils.getByTestId('kafkaAuthenticationOAuth2RadioButton')).toBeInTheDocument();
+    });
+
+    it('should save the OAuth2 settings, the client secret as a secret, and no timeout', async () => {
+      mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: true });
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      fireEvent.click(utils.getByRole('radio', { name: 'OAuth2' }));
+
+      expect(
+        utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2VersionCallout')
+      ).toBeInTheDocument();
+      // the broker timeout is not supported with OAuth2
+      expect(utils.queryByTestId('settingsOutputsFlyout.kafkaBrokerTimeoutInput')).toBeNull();
+
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2ClientIdInput'), {
+        target: { value: 'my-client' },
+      });
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2ClientSecretInput'), {
+        target: { value: 'my-secret' },
+      });
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2TokenUrlInput'), {
+        target: { value: 'https://idp.example.com/oauth2/token' },
+      });
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2EndpointParamName0'), {
+        target: { value: 'audience' },
+      });
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2EndpointParamValue0'), {
+        target: { value: 'kafka' },
+      });
+
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputK',
+          expect.objectContaining({
+            auth_type: 'oauth2',
+            oauth2: {
+              client_id: 'my-client',
+              token_url: 'https://idp.example.com/oauth2/token',
+              endpoint_params: { audience: ['kafka'] },
+            },
+            secrets: { oauth2: { client_secret: 'my-secret' } },
+          })
+        );
+      });
+      const payload = mockSendPutOutput.mock.calls[0][1] as any;
+      expect(payload.timeout).toBeUndefined();
+      expect(payload.username).toBeUndefined();
+      expect(payload.sasl).toBeUndefined();
+    });
+
+    it('should not save the output when the required OAuth2 settings are missing', async () => {
+      mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: true });
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      fireEvent.click(utils.getByRole('radio', { name: 'OAuth2' }));
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2TokenUrlInput'), {
+        target: { value: 'ftp://idp.example.com' },
+      });
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(utils.getByText('Client ID is required')).toBeInTheDocument();
+        expect(utils.getByText('Client secret is required')).toBeInTheDocument();
+        expect(
+          utils.getByText('Token URL must start with http:// or https://')
+        ).toBeInTheDocument();
+      });
+      expect(mockSendPutOutput).not.toHaveBeenCalled();
+    });
+
+    it('should keep the JWT bearer settings of an output when it is saved', async () => {
+      mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: true });
+      const { utils } = renderFlyout({
+        ...kafkaOutput,
+        auth_type: 'oauth2',
+        oauth2: {
+          grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+          client_id: 'my-client',
+          client_certificate_key_file: '/etc/key.pem',
+          token_url: 'https://idp.example.com/oauth2/token',
+          tls: { ca_file: '/etc/ca.pem', insecure_skip_verify: true },
+        },
+        secrets: { oauth2: { client_certificate_key: { id: 'key-secret-id' } } },
+      });
+
+      // a jwt-bearer grant needs a private key, not a client secret
+      expect(utils.queryByTestId('settingsOutputsFlyout.kafkaOAuth2ClientSecretInput')).toBeNull();
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2TlsCaFileInput'), {
+        target: { value: '/etc/other-ca.pem' },
+      });
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputK',
+          expect.objectContaining({
+            auth_type: 'oauth2',
+            oauth2: {
+              grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+              client_id: 'my-client',
+              client_certificate_key_file: '/etc/key.pem',
+              token_url: 'https://idp.example.com/oauth2/token',
+              tls: { ca_file: '/etc/other-ca.pem', insecure_skip_verify: true },
+            },
+            secrets: { oauth2: { client_certificate_key: { id: 'key-secret-id' } } },
+          })
+        );
+      });
+    });
+
+    describe('JWT bearer grant, file paths and TLS settings', () => {
+      const oauth2Fields = {
+        client_id: 'my-client',
+        token_url: 'https://idp.example.com/oauth2/token',
+      };
+      const change = (utils: any, testSubj: string, value: string) =>
+        fireEvent.change(utils.getByTestId(`settingsOutputsFlyout.${testSubj}`), {
+          target: { value },
+        });
+      const save = (utils: any) => fireEvent.click(utils.getByText('Save and apply settings'));
+
+      beforeEach(() => {
+        mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: true });
+      });
+
+      it('should save the JWT bearer grant with its private key as a secret and no client secret', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: oauth2Fields,
+          secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+        });
+
+        fireEvent.click(utils.getByRole('radio', { name: 'JWT bearer' }));
+        // the private key replaces the client secret
+        expect(
+          utils.queryByTestId('settingsOutputsFlyout.kafkaOAuth2ClientSecretInput')
+        ).toBeNull();
+        change(utils, 'kafkaOAuth2ClientCertificateKeyInput', '-----BEGIN PRIVATE KEY-----');
+        change(utils, 'kafkaOAuth2ClientCertificateKeyIdInput', 'key-1');
+        change(utils, 'kafkaOAuth2SignatureAlgorithmInput', 'RS512');
+        change(utils, 'kafkaOAuth2IssInput', 'issuer');
+        change(utils, 'kafkaOAuth2AudienceInput', 'audience');
+        change(utils, 'kafkaOAuth2ClaimsInput', '{"sub": "my-client"}');
+        save(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputK',
+            expect.objectContaining({
+              auth_type: 'oauth2',
+              oauth2: {
+                ...oauth2Fields,
+                grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                client_certificate_key_id: 'key-1',
+                signature_algorithm: 'RS512',
+                iss: 'issuer',
+                audience: 'audience',
+                claims: { sub: 'my-client' },
+              },
+              secrets: { oauth2: { client_certificate_key: '-----BEGIN PRIVATE KEY-----' } },
+            })
+          );
+        });
+      });
+
+      it('should require the private key of the JWT bearer grant, and valid claims', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: { ...oauth2Fields, grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer' },
+        });
+
+        change(utils, 'kafkaOAuth2ClaimsInput', '["not", "an", "object"]');
+        save(utils);
+
+        await waitFor(() => {
+          expect(utils.getByText('Private key is required')).toBeInTheDocument();
+          expect(
+            utils.getByText('The claims must be a JSON object, for example {"sub": "my-client"}')
+          ).toBeInTheDocument();
+        });
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
+      });
+
+      it('should accept the files of the client id and of the private key instead of the values', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: {
+            token_url: oauth2Fields.token_url,
+            grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+          },
+        });
+
+        change(utils, 'kafkaOAuth2ClientIdFileInput', '/etc/client_id');
+        change(utils, 'kafkaOAuth2ClientCertificateKeyFileInput', '/etc/key.pem');
+        save(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputK',
+            expect.objectContaining({
+              oauth2: {
+                token_url: oauth2Fields.token_url,
+                grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                client_id_file: '/etc/client_id',
+                client_certificate_key_file: '/etc/key.pem',
+              },
+            })
+          );
+        });
+        expect((mockSendPutOutput.mock.calls[0][1] as any).secrets).toBeUndefined();
+      });
+
+      it('should accept the files of the client id and of the client secret instead of the values', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: { token_url: oauth2Fields.token_url },
+        });
+
+        change(utils, 'kafkaOAuth2ClientIdFileInput', '/etc/client_id');
+        change(utils, 'kafkaOAuth2ClientSecretFileInput', '/etc/client_secret');
+        save(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputK',
+            expect.objectContaining({
+              oauth2: {
+                token_url: oauth2Fields.token_url,
+                client_id_file: '/etc/client_id',
+                client_secret_file: '/etc/client_secret',
+              },
+            })
+          );
+        });
+      });
+
+      it('should save the TLS settings of the token endpoint', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: oauth2Fields,
+          secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+        });
+
+        change(utils, 'kafkaOAuth2TlsCaFileInput', '/etc/ca.pem');
+        change(utils, 'kafkaOAuth2TlsCertFileInput', '/etc/cert.pem');
+        change(utils, 'kafkaOAuth2TlsKeyFileInput', '/etc/key.pem');
+        change(utils, 'kafkaOAuth2TlsServerNameOverrideInput', 'idp.example.com');
+        change(utils, 'kafkaOAuth2TlsMinVersionInput', '1.2');
+        change(utils, 'kafkaOAuth2TlsMaxVersionInput', '1.3');
+        fireEvent.click(
+          utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2TlsInsecureSkipVerifyInput')
+        );
+        save(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputK',
+            expect.objectContaining({
+              oauth2: {
+                ...oauth2Fields,
+                tls: {
+                  ca_file: '/etc/ca.pem',
+                  cert_file: '/etc/cert.pem',
+                  key_file: '/etc/key.pem',
+                  server_name_override: 'idp.example.com',
+                  min_version: '1.2',
+                  max_version: '1.3',
+                  insecure_skip_verify: true,
+                },
+              },
+              secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+            })
+          );
+        });
+      });
+
+      it('should save the durations in seconds, and keep the ones already set', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: { ...oauth2Fields, timeout: 10 },
+          secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+        });
+
+        expect(
+          (utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2TimeoutInput') as any).value
+        ).toEqual('10');
+        change(utils, 'kafkaOAuth2ExpiryBufferInput', '90.5');
+        save(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputK',
+            expect.objectContaining({
+              oauth2: { ...oauth2Fields, timeout: 10, expiry_buffer: 90.5 },
+            })
+          );
+        });
+      });
+
+      it('should leave a duration out when it is cleared, and not save an invalid one', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: { ...oauth2Fields, timeout: 10 },
+          secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+        });
+
+        change(utils, 'kafkaOAuth2ExpiryBufferInput', '-5');
+        save(utils);
+        await waitFor(() => {
+          expect(
+            utils.getByText('Specify a number of seconds between 0 and 86400')
+          ).toBeInTheDocument();
+        });
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
+
+        change(utils, 'kafkaOAuth2ExpiryBufferInput', '');
+        change(utils, 'kafkaOAuth2TimeoutInput', '');
+        save(utils);
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputK',
+            expect.objectContaining({ oauth2: oauth2Fields })
+          );
+        });
+      });
+
+      it('should drop the settings of the JWT bearer grant when the output goes back to client credentials', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: {
+            ...oauth2Fields,
+            grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+            iss: 'issuer',
+            claims: { sub: 'my-client' },
+          },
+          secrets: { oauth2: { client_certificate_key: { id: 'key-secret-id' } } },
+        });
+
+        fireEvent.click(utils.getByRole('radio', { name: 'Client credentials' }));
+        change(utils, 'kafkaOAuth2ClientSecretInput', 'my-secret');
+        save(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalled();
+        });
+        const payload = mockSendPutOutput.mock.calls[0][1] as any;
+        expect(payload.oauth2).toEqual({
+          ...oauth2Fields,
+          // the grant was set before, so it stays explicit
+          grant_type: 'client_credentials',
+        });
+        expect(payload.secrets).toEqual({ oauth2: { client_secret: 'my-secret' } });
+      });
+    });
+
+    it('should keep the OAuth2 settings of an output when the feature flag is off', async () => {
+      const { utils } = renderFlyout({
+        ...kafkaOutput,
+        auth_type: 'oauth2',
+        oauth2: { client_id: 'my-client', token_url: 'https://idp.example.com/oauth2/token' },
+        secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+      });
+
+      expect(
+        utils.getByTestId('settingsOutputsFlyout.kafkaAuthenticationManagedElsewhereCallout')
+      ).toBeInTheDocument();
+      expect(utils.queryByTestId('settingsOutputsFlyout.kafkaOAuth2ClientIdInput')).toBeNull();
+
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+        target: { value: 'kafka output updated' },
+      });
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputK',
+          expect.objectContaining({
+            auth_type: 'oauth2',
+            oauth2: { client_id: 'my-client', token_url: 'https://idp.example.com/oauth2/token' },
+            secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+          })
+        );
+      });
+    });
+  });
+
+  it('should render the username and password inputs for user_pass authentication', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+
+    const { utils } = renderFlyout({
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'outputK',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['kafka:443'],
+      topic: 'topic',
+      auth_type: 'user_pass',
+      version: '1.0.0',
+      username: 'user',
+      password: 'pass',
+      compression: 'none',
+    });
+
+    expect(utils.getByTestId('settingsOutputsFlyout.kafkaUsernameInput')).toBeInTheDocument();
+    expect(
+      utils.queryByTestId('settingsOutputsFlyout.kafkaAuthenticationManagedElsewhereCallout')
+    ).not.toBeInTheDocument();
   });
 
   it('should populate secret input with plain text value when editing logstash output', async () => {

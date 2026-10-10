@@ -2301,5 +2301,475 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
     });
+
+    describe('Kafka output with OAuth2 authentication', () => {
+      const TOKEN_URL = 'https://idp.example.com/oauth2/token';
+      const createdOutputIds: string[] = [];
+      const createdAgentPolicyIds: string[] = [];
+
+      const oauth2Output = (fields: Record<string, unknown> = {}) => ({
+        name: `Kafka OAuth2 output ${uuidV4()}`,
+        type: 'kafka',
+        hosts: ['test.fr:2000'],
+        auth_type: 'oauth2',
+        topic: 'topic1',
+        oauth2: { client_id: 'my-client', token_url: TOKEN_URL },
+        secrets: { oauth2: { client_secret: 'my-secret' } },
+        ...fields,
+      });
+
+      const createOutput = async (body: Record<string, unknown>, expectedStatus = 200) => {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(body)
+          .expect(expectedStatus);
+        if (res.body.item?.id) {
+          createdOutputIds.push(res.body.item.id);
+        }
+        return res.body;
+      };
+
+      const updateOutput = async (
+        id: string,
+        body: Record<string, unknown>,
+        expectedStatus = 200
+      ) => {
+        const res = await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(body)
+          .expect(expectedStatus);
+        return res.body;
+      };
+
+      const getFullAgentPolicy = async (dataOutputId: string) => {
+        const { item: agentPolicy } = await createAgentPolicy(undefined, dataOutputId);
+        createdAgentPolicyIds.push(agentPolicy.id);
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicy.id}/full`)
+          .expect(200);
+        return { agentPolicyId: agentPolicy.id as string, fullPolicy: body.item };
+      };
+
+      const expectSecretToBeDeleted = async (secretId: string) => {
+        let secretExists = true;
+        try {
+          await getSecretById(secretId);
+        } catch (e) {
+          // not found
+          secretExists = false;
+        }
+        expect(secretExists).to.be(false);
+      };
+
+      beforeEach(async () => {
+        // The OAuth2 authentication needs every Fleet Server on 9.6.0 or later, and the output
+        // secrets storage.
+        await enableOutputSecrets();
+        await clearAgents();
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.6.0');
+      });
+
+      afterEach(async () => {
+        for (const id of createdAgentPolicyIds.splice(0)) {
+          await deleteAgentPolicy(id);
+        }
+        for (const id of createdOutputIds.splice(0)) {
+          await supertest.delete(`/api/fleet/outputs/${id}`).set('kbn-xsrf', 'xxxx');
+        }
+      });
+
+      after(async () => {
+        await clearAgents();
+      });
+
+      it('should create an output, storing the client secret as a secret', async () => {
+        const body = await createOutput(
+          oauth2Output({
+            oauth2: {
+              client_id: 'my-client',
+              token_url: TOKEN_URL,
+              scopes: ['read', 'write'],
+              endpoint_params: { audience: ['kafka'] },
+              timeout: 10,
+              expiry_buffer: 90,
+            },
+          })
+        );
+
+        expect(body.item.auth_type).to.eql('oauth2');
+        expect(body.item.oauth2).to.eql({
+          client_id: 'my-client',
+          token_url: TOKEN_URL,
+          scopes: ['read', 'write'],
+          endpoint_params: { audience: ['kafka'] },
+          timeout: 10,
+          expiry_buffer: 90,
+        });
+        expect(body.item.username).to.be(undefined);
+        expect(body.item.password).to.be(undefined);
+        expect(body.item.sasl).to.be(undefined);
+        // the value of the secret is never returned
+        expect(Object.keys(body.item.secrets.oauth2)).to.eql(['client_secret']);
+        const secretId = body.item.secrets.oauth2.client_secret.id;
+        const secret = await getSecretById(secretId);
+        expect((secret._source as any).value).to.equal('my-secret');
+      });
+
+      it('should give the agent the settings it expects in the agent policy', async () => {
+        const body = await createOutput(
+          oauth2Output({
+            oauth2: {
+              client_id: 'my-client',
+              token_url: TOKEN_URL,
+              scopes: ['read'],
+              endpoint_params: { audience: ['kafka'] },
+              timeout: 10,
+              expiry_buffer: 90,
+            },
+          })
+        );
+        const secretId = body.item.secrets.oauth2.client_secret.id;
+
+        const { fullPolicy } = await getFullAgentPolicy(body.item.id);
+        const output = fullPolicy.outputs[body.item.id];
+
+        expect(output.type).to.eql('kafka');
+        expect(output.sasl).to.eql({ mechanism: 'OAUTHBEARER' });
+        expect(output.auth).to.eql({
+          oauth2client: {
+            client_id: 'my-client',
+            token_url: TOKEN_URL,
+            scopes: ['read'],
+            endpoint_params: { audience: ['kafka'] },
+            // the agent reads the durations as nanoseconds
+            timeout: 10_000_000_000,
+            expiry_buffer: 90_000_000_000,
+          },
+        });
+        // the agent cannot run OAuth2 for an output with a timeout
+        expect(output.timeout).to.be(undefined);
+        expect(output.username).to.be(undefined);
+        // Fleet Server writes the value of the secret where the agent expects the setting
+        expect(output.secrets).to.eql({
+          auth: { oauth2client: { client_secret: { id: secretId } } },
+        });
+        expect(fullPolicy.secret_references).to.eql([{ id: secretId }]);
+      });
+
+      it('should create an output with the JWT bearer grant and its private key as a secret', async () => {
+        const body = await createOutput(
+          oauth2Output({
+            oauth2: {
+              grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+              client_id: 'my-client',
+              token_url: TOKEN_URL,
+              signature_algorithm: 'RS512',
+              iss: 'issuer',
+              audience: 'audience',
+              claims: { sub: 'my-client' },
+            },
+            secrets: { oauth2: { client_certificate_key: 'PRIVATE KEY' } },
+          })
+        );
+
+        expect(Object.keys(body.item.secrets.oauth2)).to.eql(['client_certificate_key']);
+        const secretId = body.item.secrets.oauth2.client_certificate_key.id;
+        const secret = await getSecretById(secretId);
+        expect((secret._source as any).value).to.equal('PRIVATE KEY');
+
+        const { fullPolicy } = await getFullAgentPolicy(body.item.id);
+        const output = fullPolicy.outputs[body.item.id];
+        expect(output.auth.oauth2client).to.eql({
+          grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+          client_id: 'my-client',
+          token_url: TOKEN_URL,
+          signature_algorithm: 'RS512',
+          iss: 'issuer',
+          audience: 'audience',
+          claims: { sub: 'my-client' },
+        });
+        expect(output.secrets).to.eql({
+          auth: { oauth2client: { client_certificate_key: { id: secretId } } },
+        });
+      });
+
+      it('should accept the files of the client id and of the client secret instead of the values', async () => {
+        const body = await createOutput(
+          oauth2Output({
+            oauth2: {
+              client_id_file: '/etc/client_id',
+              client_secret_file: '/etc/client_secret',
+              token_url: TOKEN_URL,
+            },
+            secrets: undefined,
+          })
+        );
+
+        expect(body.item.oauth2.client_id_file).to.eql('/etc/client_id');
+        expect(body.item.secrets?.oauth2).to.be(undefined);
+      });
+
+      describe('Fleet Server version', () => {
+        it('should not create an output when a Fleet Server is below 9.6.0', async () => {
+          await clearAgents();
+          await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.5.0');
+
+          const body = await createOutput(oauth2Output(), 400);
+
+          expect(body.message).to.contain('9.6.0');
+        });
+
+        it('should not switch an output to OAuth2 when a Fleet Server is below 9.6.0', async () => {
+          const created = await createOutput({
+            name: 'Kafka output',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'none',
+            topic: 'topic1',
+          });
+          await clearAgents();
+          await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.5.0');
+
+          const body = await updateOutput(
+            created.item.id,
+            {
+              name: 'Kafka output',
+              type: 'kafka',
+              hosts: ['test.fr:2000'],
+              auth_type: 'oauth2',
+              topic: 'topic1',
+              oauth2: { client_id: 'my-client', token_url: TOKEN_URL },
+              secrets: { oauth2: { client_secret: 'my-secret' } },
+            },
+            400
+          );
+
+          expect(body.message).to.contain('9.6.0');
+        });
+
+        it('should not check the outputs that do not use OAuth2', async () => {
+          await clearAgents();
+          await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.5.0');
+
+          await createOutput({
+            name: 'Kafka output',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'user_pass',
+            username: 'user',
+            password: 'pass',
+            topic: 'topic1',
+          });
+        });
+      });
+
+      describe('validation', () => {
+        it('should require a client secret', async () => {
+          const body = await createOutput(oauth2Output({ secrets: undefined }), 400);
+
+          expect(body.message).to.contain(
+            'secrets.oauth2.client_secret or oauth2.client_secret_file is required'
+          );
+        });
+
+        it('should require a client id', async () => {
+          const body = await createOutput(oauth2Output({ oauth2: { token_url: TOKEN_URL } }), 400);
+
+          expect(body.message).to.contain('oauth2.client_id or oauth2.client_id_file is required');
+        });
+
+        it('should require a token url', async () => {
+          const body = await createOutput(
+            oauth2Output({ oauth2: { client_id: 'my-client' } }),
+            400
+          );
+
+          expect(body.message).to.contain('token_url');
+        });
+
+        it('should require the oauth2 settings', async () => {
+          const body = await createOutput(oauth2Output({ oauth2: undefined }), 400);
+
+          expect(body.message).to.contain('oauth2 is required when auth_type is oauth2');
+        });
+
+        it('should require a private key for the JWT bearer grant', async () => {
+          const body = await createOutput(
+            oauth2Output({
+              oauth2: {
+                grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                client_id: 'my-client',
+                token_url: TOKEN_URL,
+              },
+            }),
+            400
+          );
+
+          expect(body.message).to.contain('client_certificate_key');
+        });
+
+        it('should reject a duration out of range, and an unknown setting', async () => {
+          await createOutput(
+            oauth2Output({ oauth2: { client_id: 'my-client', token_url: TOKEN_URL, timeout: -1 } }),
+            400
+          );
+          await createOutput(
+            oauth2Output({ oauth2: { client_id: 'my-client', token_url: TOKEN_URL, unknown: 1 } }),
+            400
+          );
+        });
+      });
+
+      describe('switching the authentication method', () => {
+        it('should clear the oauth2 settings and delete the secret when the output stops using OAuth2', async () => {
+          const created = await createOutput(oauth2Output());
+          const secretId = created.item.secrets.oauth2.client_secret.id;
+
+          const updated = await updateOutput(created.item.id, {
+            name: created.item.name,
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'ssl',
+            topic: 'topic1',
+          });
+
+          expect(updated.item.auth_type).to.eql('ssl');
+          expect(updated.item.oauth2 ?? null).to.eql(null);
+          expect(updated.item.secrets?.oauth2).to.be(undefined);
+          await expectSecretToBeDeleted(secretId);
+
+          // the agent policy does not point at the deleted secret
+          const { fullPolicy } = await getFullAgentPolicy(created.item.id);
+          expect(fullPolicy.outputs[created.item.id].secrets).to.be(undefined);
+          expect(fullPolicy.secret_references ?? []).to.eql([]);
+        });
+
+        it('should delete the secret of the grant the output stops using', async () => {
+          const created = await createOutput(oauth2Output());
+          const clientSecretId = created.item.secrets.oauth2.client_secret.id;
+
+          const updated = await updateOutput(created.item.id, {
+            name: created.item.name,
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'oauth2',
+            topic: 'topic1',
+            oauth2: {
+              grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+              client_id: 'my-client',
+              token_url: TOKEN_URL,
+            },
+            secrets: { oauth2: { client_certificate_key: 'PRIVATE KEY' } },
+          });
+
+          // only the private key is left
+          expect(Object.keys(updated.item.secrets.oauth2)).to.eql(['client_certificate_key']);
+          await expectSecretToBeDeleted(clientSecretId);
+
+          // the agent policy only points at the private key
+          const keyId = updated.item.secrets.oauth2.client_certificate_key.id;
+          const { fullPolicy } = await getFullAgentPolicy(created.item.id);
+          expect(fullPolicy.outputs[created.item.id].secrets).to.eql({
+            auth: { oauth2client: { client_certificate_key: { id: keyId } } },
+          });
+          expect(fullPolicy.secret_references).to.eql([{ id: keyId }]);
+        });
+
+        it('should switch an output to OAuth2, clearing its credentials', async () => {
+          const created = await createOutput({
+            name: 'Kafka output',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'user_pass',
+            username: 'user',
+            password: 'pass',
+            topic: 'topic1',
+          });
+
+          const updated = await updateOutput(created.item.id, {
+            name: 'Kafka output',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'oauth2',
+            topic: 'topic1',
+            oauth2: { client_id: 'my-client', token_url: TOKEN_URL },
+            secrets: { oauth2: { client_secret: 'my-secret' } },
+          });
+
+          expect(updated.item.auth_type).to.eql('oauth2');
+          expect(updated.item.oauth2).to.eql({ client_id: 'my-client', token_url: TOKEN_URL });
+          expect(updated.item.username ?? null).to.eql(null);
+          expect(updated.item.password ?? null).to.eql(null);
+          const secretId = updated.item.secrets.oauth2.client_secret.id;
+          const secret = await getSecretById(secretId);
+          expect((secret._source as any).value).to.equal('my-secret');
+        });
+
+        it('should keep the saved secret when it is sent back as a reference', async () => {
+          const created = await createOutput(oauth2Output());
+          const secretId = created.item.secrets.oauth2.client_secret.id;
+
+          const updated = await updateOutput(created.item.id, {
+            name: 'Kafka OAuth2 output renamed',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'oauth2',
+            topic: 'topic1',
+            oauth2: { client_id: 'my-client', token_url: TOKEN_URL },
+            secrets: { oauth2: { client_secret: { id: secretId } } },
+          });
+
+          expect(updated.item.name).to.eql('Kafka OAuth2 output renamed');
+          expect(updated.item.secrets.oauth2.client_secret.id).to.eql(secretId);
+          const secret = await getSecretById(secretId);
+          expect((secret._source as any).value).to.equal('my-secret');
+        });
+
+        it('should replace the secret when a new value is sent', async () => {
+          const created = await createOutput(oauth2Output());
+
+          const updated = await updateOutput(created.item.id, {
+            name: created.item.name,
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'oauth2',
+            topic: 'topic1',
+            oauth2: { client_id: 'my-client', token_url: TOKEN_URL },
+            secrets: { oauth2: { client_secret: 'new-secret' } },
+          });
+
+          const secret = await getSecretById(updated.item.secrets.oauth2.client_secret.id);
+          expect((secret._source as any).value).to.equal('new-secret');
+        });
+
+        it('should not keep the oauth2 settings of an output that does not use OAuth2', async () => {
+          const body = await createOutput(
+            oauth2Output({
+              auth_type: 'ssl',
+              oauth2: { client_id: 'my-client', token_url: TOKEN_URL },
+              secrets: { oauth2: { client_secret: 'my-secret' } },
+            })
+          );
+
+          expect(body.item.auth_type).to.eql('ssl');
+          expect(body.item.oauth2).to.be(undefined);
+          expect(body.item.secrets?.oauth2).to.be(undefined);
+        });
+      });
+
+      it('should delete the secrets when the output is deleted', async () => {
+        const created = await createOutput(oauth2Output());
+        const secretId = created.item.secrets.oauth2.client_secret.id;
+
+        await supertest
+          .delete(`/api/fleet/outputs/${created.item.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        await expectSecretToBeDeleted(secretId);
+      });
+    });
   });
 }

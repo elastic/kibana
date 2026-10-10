@@ -11,6 +11,8 @@ import {
   kafkaAuthType,
   kafkaCompressionType,
   kafkaConnectionType,
+  kafkaOAuth2GrantType,
+  kafkaOAuth2SignatureAlgorithm,
   kafkaPartitionType,
   kafkaSaslMechanism,
   kafkaVerificationModes,
@@ -249,6 +251,77 @@ const LogstashUpdateSchema = {
   ),
 };
 
+// 1 day. The agent is given the durations in nanoseconds, so this also keeps them safe integers.
+const MAX_OAUTH2_DURATION_SECONDS = 86400;
+
+/**
+ * Settings of the OAuth2 authentication method, they follow the `oauth2clientauthextension` of the
+ * OpenTelemetry collector. The client secret and the client certificate key are in `secrets`.
+ * The `*_file` settings are paths on the host of the agent.
+ */
+const KafkaOAuth2Schema = schema.object({
+  grant_type: schema.maybe(
+    schema.oneOf([
+      schema.literal(kafkaOAuth2GrantType.ClientCredentials),
+      schema.literal(kafkaOAuth2GrantType.JwtBearer),
+    ])
+  ),
+  client_id: schema.maybe(schema.string()),
+  client_id_file: schema.maybe(schema.string()),
+  client_secret_file: schema.maybe(schema.string()),
+  token_url: schema.string({ minLength: 1 }),
+  scopes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  // url.Values of the agent: every parameter takes a list of values
+  endpoint_params: schema.maybe(
+    schema.recordOf(schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 }))
+  ),
+  tls: schema.maybe(
+    schema.object({
+      ca_file: schema.maybe(schema.string()),
+      cert_file: schema.maybe(schema.string()),
+      key_file: schema.maybe(schema.string()),
+      insecure_skip_verify: schema.maybe(schema.boolean()),
+      server_name_override: schema.maybe(schema.string()),
+      min_version: schema.maybe(schema.string()),
+      max_version: schema.maybe(schema.string()),
+    })
+  ),
+  // in seconds, the agent is given them in nanoseconds
+  timeout: schema.maybe(
+    schema.number({
+      min: 0,
+      max: MAX_OAUTH2_DURATION_SECONDS,
+      meta: {
+        description:
+          'How long, in seconds, a request to the token endpoint can take. There is no limit when it is not set.',
+      },
+    })
+  ),
+  expiry_buffer: schema.maybe(
+    schema.number({
+      min: 0,
+      max: MAX_OAUTH2_DURATION_SECONDS,
+      meta: {
+        description:
+          'How long, in seconds, before a token expires it is refreshed. It is 5 minutes when it is not set.',
+      },
+    })
+  ),
+  // jwt-bearer grant only
+  client_certificate_key_id: schema.maybe(schema.string()),
+  client_certificate_key_file: schema.maybe(schema.string()),
+  signature_algorithm: schema.maybe(
+    schema.oneOf([
+      schema.literal(kafkaOAuth2SignatureAlgorithm.Rs256),
+      schema.literal(kafkaOAuth2SignatureAlgorithm.Rs384),
+      schema.literal(kafkaOAuth2SignatureAlgorithm.Rs512),
+    ])
+  ),
+  iss: schema.maybe(schema.string()),
+  audience: schema.maybe(schema.string()),
+  claims: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+});
+
 export const KafkaSchema = {
   ...BeatsBaseSchema,
   // Kafka does not support proxies. proxy_id is accepted to avoid breaking existing preconfigured
@@ -285,6 +358,7 @@ export const KafkaSchema = {
     schema.literal(kafkaAuthType.Userpass),
     schema.literal(kafkaAuthType.Ssl),
     schema.literal(kafkaAuthType.Kerberos),
+    schema.literal(kafkaAuthType.OAuth2),
   ]),
   connection_type: schema.maybe(
     schema.oneOf([
@@ -308,6 +382,7 @@ export const KafkaSchema = {
       }),
     ])
   ),
+  oauth2: schema.maybe(schema.oneOf([schema.literal(null), KafkaOAuth2Schema])),
   partition: schema.maybe(
     schema.oneOf([
       schema.literal(kafkaPartitionType.Random),
@@ -335,6 +410,12 @@ export const KafkaSchema = {
     schema.object({
       password: schema.maybe(secretRefSchema),
       ssl: schema.maybe(schema.object({ key: secretRefSchema })),
+      oauth2: schema.maybe(
+        schema.object({
+          client_secret: schema.maybe(secretRefSchema),
+          client_certificate_key: schema.maybe(secretRefSchema),
+        })
+      ),
     })
   ),
 };
@@ -355,6 +436,7 @@ const KafkaUpdateSchema = {
       schema.literal(kafkaAuthType.Userpass),
       schema.literal(kafkaAuthType.Ssl),
       schema.literal(kafkaAuthType.Kerberos),
+      schema.literal(kafkaAuthType.OAuth2),
     ])
   ),
 };

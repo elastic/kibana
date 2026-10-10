@@ -11,6 +11,9 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { validateSslPathInput, validateSslPathsCombo } from '../ssl_form_validators';
 export { validateSslPathInput, validateSslPathsCombo };
 
+// 1 day, as in the API
+const MAX_OAUTH2_DURATION_SECONDS = 86400;
+
 const toSecretValidator =
   (validator: (value: string) => string[] | undefined) =>
   (value: string | { id: string } | undefined) => {
@@ -297,6 +300,124 @@ export function validateKafkaPassword(value: string) {
 }
 
 export const validateKafkaPasswordSecret = toSecretValidator(validateKafkaPassword);
+
+export function validateKafkaOAuth2ClientId(value: string) {
+  if (!value || value.trim() === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2ClientIdIsRequired', {
+        defaultMessage: 'Client ID is required',
+      }),
+    ];
+  }
+}
+
+export function validateKafkaOAuth2ClientSecret(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2ClientSecretIsRequired', {
+        defaultMessage: 'Client secret is required',
+      }),
+    ];
+  }
+}
+
+export const validateKafkaOAuth2ClientSecretSecret = toSecretValidator(
+  validateKafkaOAuth2ClientSecret
+);
+
+export function validateKafkaOAuth2ClientCertificateKey(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2ClientCertificateKeyIsRequired', {
+        defaultMessage: 'Private key is required',
+      }),
+    ];
+  }
+}
+
+export const validateKafkaOAuth2ClientCertificateKeySecret = toSecretValidator(
+  validateKafkaOAuth2ClientCertificateKey
+);
+
+/** A duration in seconds: optional, and a number that is not negative. */
+export function validateKafkaOAuth2Seconds(value: string) {
+  if (!value || value.trim() === '') {
+    return;
+  }
+
+  const seconds = Number(value);
+  if (!Number.isFinite(seconds) || seconds < 0 || seconds > MAX_OAUTH2_DURATION_SECONDS) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2SecondsInvalid', {
+        defaultMessage: 'Specify a number of seconds between 0 and {max}',
+        values: { max: MAX_OAUTH2_DURATION_SECONDS },
+      }),
+    ];
+  }
+}
+
+export function validateKafkaOAuth2Claims(value: string) {
+  if (!value || value.trim() === '') {
+    return;
+  }
+
+  try {
+    const claims = JSON.parse(value);
+    if (claims === null || typeof claims !== 'object' || Array.isArray(claims)) {
+      throw new Error('not an object');
+    }
+  } catch (error) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2ClaimsInvalid', {
+        defaultMessage: 'The claims must be a JSON object, for example {example}',
+        values: { example: '{"sub": "my-client"}' },
+      }),
+    ];
+  }
+}
+
+export function validateKafkaOAuth2TokenUrl(value: string) {
+  if (!value || value.trim() === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2TokenUrlIsRequired', {
+        defaultMessage: 'Token URL is required',
+      }),
+    ];
+  }
+
+  try {
+    const url = new URL(value.trim());
+    if (!['http:', 'https:'].includes(url.protocol)) {
+      return [
+        i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2TokenUrlInvalidProtocol', {
+          defaultMessage: 'Token URL must start with http:// or https://',
+        }),
+      ];
+    }
+  } catch (error) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2TokenUrlInvalid', {
+        defaultMessage: 'Invalid URL',
+      }),
+    ];
+  }
+}
+
+export function validateKafkaOAuth2EndpointParams(value: Array<{ key: string; value: string }>) {
+  const errors = value
+    .map((row, index) => ({ row, index }))
+    .filter(({ row }) => (row.key === '') !== (row.value === ''))
+    .map(({ row, index }) => ({
+      message: i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2EndpointParamsError', {
+        defaultMessage: 'Specify both the name and the value of the parameter',
+      }),
+      index,
+      hasKeyError: row.key === '',
+      hasValueError: row.value === '',
+    }));
+
+  return errors.length ? errors : undefined;
+}
 
 export function validateCATrustedFingerPrint(value: string) {
   if (value !== '' && !value.match(/^[a-zA-Z0-9]+$/)) {
