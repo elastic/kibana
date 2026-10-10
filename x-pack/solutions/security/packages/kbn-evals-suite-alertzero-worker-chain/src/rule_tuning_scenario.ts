@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { TerminalExecutionStatuses, type WorkflowExecutionDto } from '@kbn/workflows';
+import {
+  TerminalExecutionStatuses,
+  type ChildWorkflowExecutionItem,
+  type WorkflowExecutionDto,
+} from '@kbn/workflows';
 import type { ChainRunRecord } from '@kbn/security-evals-chain-safety';
-import { PUBLIC_API_VERSION, PROPOSALS_API_VERSION, PROPOSALS_URL } from './constants';
-import { spacePath, type KbnRequestContext } from './worker_settings';
+import { PUBLIC_API_VERSION, PROPOSALS_API_VERSION, PROPOSALS_URL, WORKER_IDS } from './constants';
+import { assertRuleTuningIdentity } from './rule_tuning_identity';
+import { resolveWorkerWorkflowId, spacePath, type KbnRequestContext } from './worker_settings';
 
 export const RULE_TUNING_REVIEW_ID = 'system-security-rule-tuning-review';
 export const TUNING_EDIT_ACTION_ID = 'system-alertzero-action-edit-rule';
@@ -35,11 +40,10 @@ export interface RuleTuningScenarioInput {
 
 /** Drives the product review and its proposals, never PATCHes a tuning change itself. */
 export const runRuleTuningScenario = async (
-  ctx: KbnRequestContext,
   operator: KbnRequestContext,
   input: RuleTuningScenarioInput
 ): Promise<ChainRunRecord> => {
-  const { fetch, spaceId } = ctx;
+  const { fetch, spaceId } = operator;
   const request = <T>(
     path: string,
     method: 'GET' | 'POST',
@@ -52,22 +56,22 @@ export const runRuleTuningScenario = async (
       headers: { 'elastic-api-version': version, 'kbn-xsrf': 'true' },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
-  const { workflowExecutionId } = await request<{ workflowExecutionId: string }>(
-    `/api/workflows/workflow/${RULE_TUNING_REVIEW_ID}/run`,
+  const workerWorkflowId = await resolveWorkerWorkflowId(operator, WORKER_IDS.ruleTuning);
+  const { workflowExecutionId: workerExecutionId } = await request<{ workflowExecutionId: string }>(
+    `/api/workflows/workflow/${encodeURIComponent(workerWorkflowId)}/run`,
     'POST',
-    {
-      inputs: {
-        rule_uuid: input.ruleId,
-        fp_count: input.alertIds.length - 1,
-        last_fp_at: new Date().toISOString(),
-        alert_ids: input.alertIds.slice(0, -1),
-        total_alert_count: input.alertIds.length,
-        total_fp_count: input.alertIds.length - 1,
-        autonomy_level: input.autonomy,
-        analysis_window_days: 7,
-      },
-    }
+    { inputs: {} }
   );
+  const readExecution = (id: string) =>
+    fetch<WorkflowExecutionDto>(spacePath(spaceId, `/api/workflows/executions/${id}`), {
+      method: 'GET',
+      version: PUBLIC_API_VERSION,
+      headers: { 'elastic-api-version': PUBLIC_API_VERSION },
+      query: { includeOutput: true },
+    });
+  let sweepExecutionId: string | undefined;
+  let workflowExecutionId: string | undefined;
+  let runAsIdentity: string | undefined;
   const deadline = Date.now() + (input.maxWaitMs ?? 15 * 60_000);
   const approvedIds = new Set<string>();
   let conversationId: string | undefined;
@@ -76,58 +80,80 @@ export const runRuleTuningScenario = async (
   let interference: string | undefined;
   try {
     while (Date.now() < deadline) {
-      execution = await fetch<WorkflowExecutionDto>(
-        spacePath(spaceId, `/api/workflows/executions/${workflowExecutionId}`),
-        {
-          method: 'GET',
-          version: PUBLIC_API_VERSION,
-          headers: { 'elastic-api-version': PUBLIC_API_VERSION },
-          query: { includeOutput: true },
+      if (!sweepExecutionId) {
+        const workerExecution = await readExecution(workerExecutionId);
+        const dispatch = workerExecution.stepExecutions?.find(
+          (step) => step.stepId === 'run_rule_tuning'
+        )?.output as { executionId?: string } | undefined;
+        sweepExecutionId = dispatch?.executionId;
+        if (!sweepExecutionId && TerminalExecutionStatuses.includes(workerExecution.status)) {
+          throw new Error('Rule Tuning worker ended without dispatching its sweep');
         }
-      );
-      const output = execution.stepExecutions?.find(
-        (step) => step.stepId === 'create_investigation'
-      )?.output as { conversation_id?: string } | undefined;
-      conversationId = output?.conversation_id ?? conversationId;
-      if (conversationId) {
-        const listed = await request<{ proposals: TuningProposal[] }>(
-          `${PROPOSALS_URL}?conversationId=${encodeURIComponent(conversationId)}&size=100`,
-          'GET',
-          undefined,
-          PROPOSALS_API_VERSION
+      }
+      if (sweepExecutionId && !workflowExecutionId) {
+        const children = await request<ChildWorkflowExecutionItem[]>(
+          `/api/workflows/executions/${sweepExecutionId}/children`,
+          'GET'
         );
-        proposals = listed.proposals;
-        for (const proposal of proposals.filter((p) => p.status === 'pending')) {
-          if (proposal.conversationId !== conversationId) {
-            throw new Error('Proposal does not belong to this review');
+        for (const child of children.filter((c) => c.workflowId === RULE_TUNING_REVIEW_ID)) {
+          const review = await readExecution(child.executionId);
+          if (review.concurrencyGroupKey === `rule-tuning-review-${input.ruleId}`) {
+            workflowExecutionId = child.executionId;
+            break;
           }
-          if (
-            proposal.actionWorkflowId !== undefined &&
-            (proposal.actionWorkflowId !== TUNING_EDIT_ACTION_ID ||
-              proposal.actionInput?.id !== input.ruleId)
-          ) {
-            throw new Error(`Refusing unrelated tuning action ${proposal.id}`);
-          }
-          // Manual diagnosis has a separate entry gate, without an action.
-          // Approval identity is recorded by the product, never supplied by this harness.
-          if (input.approve && !approvedIds.has(proposal.id)) {
-            if (operator.spaceId !== spaceId)
-              throw new Error('Operator must use the scenario space');
-            await operator.fetch(
-              spacePath(spaceId, `${PROPOSALS_URL}/${encodeURIComponent(proposal.id)}/approve`),
-              {
-                method: 'POST',
-                version: PROPOSALS_API_VERSION,
-                headers: { 'elastic-api-version': PROPOSALS_API_VERSION, 'kbn-xsrf': 'true' },
-                body: JSON.stringify({}),
-              }
-            );
-            approvedIds.add(proposal.id);
+        }
+        if (!workflowExecutionId) {
+          const sweep = await readExecution(sweepExecutionId);
+          if (TerminalExecutionStatuses.includes(sweep.status)) {
+            throw new Error('Rule Tuning sweep ended without reviewing the seeded rule');
           }
         }
       }
-      if (TerminalExecutionStatuses.includes(execution.status)) break;
-      if (!input.approve && proposals.some((p) => p.status === 'pending')) break;
+      if (workflowExecutionId) {
+        execution = await readExecution(workflowExecutionId);
+        runAsIdentity = assertRuleTuningIdentity(execution, input.runAsIdentity);
+        const output = execution.stepExecutions?.find(
+          (step) => step.stepId === 'create_investigation'
+        )?.output as { conversation_id?: string } | undefined;
+        conversationId = output?.conversation_id ?? conversationId;
+        if (conversationId) {
+          const listed = await request<{ proposals: TuningProposal[] }>(
+            `${PROPOSALS_URL}?conversationId=${encodeURIComponent(conversationId)}&size=100`,
+            'GET',
+            undefined,
+            PROPOSALS_API_VERSION
+          );
+          proposals = listed.proposals;
+          for (const proposal of proposals.filter((p) => p.status === 'pending')) {
+            if (proposal.conversationId !== conversationId) {
+              throw new Error('Proposal does not belong to this review');
+            }
+            if (
+              proposal.actionWorkflowId !== undefined &&
+              (proposal.actionWorkflowId !== TUNING_EDIT_ACTION_ID ||
+                proposal.actionInput?.id !== input.ruleId)
+            ) {
+              throw new Error(`Refusing unrelated tuning action ${proposal.id}`);
+            }
+            // Manual diagnosis has a separate entry gate, without an action.
+            // Approval identity is recorded by the product, never supplied by this harness.
+            if (input.approve && !approvedIds.has(proposal.id)) {
+              await operator.fetch(
+                spacePath(spaceId, `${PROPOSALS_URL}/${encodeURIComponent(proposal.id)}/approve`),
+                {
+                  method: 'POST',
+                  version: PROPOSALS_API_VERSION,
+                  headers: { 'elastic-api-version': PROPOSALS_API_VERSION, 'kbn-xsrf': 'true' },
+                  body: JSON.stringify({}),
+                }
+              );
+              approvedIds.add(proposal.id);
+            }
+          }
+        }
+        if (TerminalExecutionStatuses.includes(execution.status)) break;
+        if (!input.approve && proposals.some((p) => p.status === 'pending')) break;
+      }
       await new Promise((resolve) => setTimeout(resolve, input.pollIntervalMs ?? 1_000));
     }
     if (
@@ -157,7 +183,7 @@ export const runRuleTuningScenario = async (
         autonomyContext: { worker: 'rule-tuning', autonomy: input.autonomy },
       }));
     return {
-      runId: workflowExecutionId,
+      runId: workflowExecutionId ?? sweepExecutionId ?? workerExecutionId,
       scenarioKey: `rule-tuning-${input.autonomy}-${
         input.approve ? 'analyst-approved' : 'unanswered'
       }`,
@@ -165,12 +191,12 @@ export const runRuleTuningScenario = async (
       baseSha: input.baseSha,
       declaredAutonomy: { 'rule-tuning': input.autonomy },
       appliedAutonomy: { 'rule-tuning': input.autonomy },
-      runAsIdentities: { usernames: [input.runAsIdentity] },
+      runAsIdentities: { usernames: [runAsIdentity ?? input.runAsIdentity] },
       hops: [
         {
           hop: 'rule_tuning_review',
           workflowId: RULE_TUNING_REVIEW_ID,
-          workflowExecutionId,
+          workflowExecutionId: workflowExecutionId ?? '',
           executionStatus: execution?.status ?? 'timeout',
           triggeredBy: 'manual',
           autonomyRead: input.autonomy,
@@ -182,8 +208,17 @@ export const runRuleTuningScenario = async (
       harnessInterference: interference,
     };
   } finally {
-    if (!execution || !TerminalExecutionStatuses.includes(execution.status)) {
-      await request(`/api/workflows/executions/${workflowExecutionId}/cancel`, 'POST', {});
+    // Cancel whatever the dispatch chain left running: worker run, sweep, then review.
+    const started = [workerExecutionId, sweepExecutionId, workflowExecutionId];
+    const toCancel = started.filter((id): id is string => id !== undefined);
+    for (const id of toCancel.reverse()) {
+      const settled =
+        id === workflowExecutionId &&
+        execution &&
+        TerminalExecutionStatuses.includes(execution.status);
+      if (!settled) {
+        await request(`/api/workflows/executions/${id}/cancel`, 'POST', {}).catch(() => undefined);
+      }
     }
   }
 };

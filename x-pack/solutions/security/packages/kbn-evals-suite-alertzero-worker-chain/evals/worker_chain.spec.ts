@@ -54,7 +54,6 @@ import {
 import type { KbnRequestContext } from '../src/worker_settings';
 import { runChain, type ChainScenario } from '../src/chain_runner';
 import { runSeededRuleTuningScenario, type TuningFamily } from '../src/rule_tuning_fixture';
-import { withRuleTuningIdentity } from '../src/rule_tuning_identity';
 import {
   chainTerminal,
   executionIdArray,
@@ -238,21 +237,14 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
           ],
           concurrency: WORKER_CHAIN_EXPERIMENT_CONCURRENCY,
           task: async ({ input }) => {
-            const record = await withRuleTuningIdentity({
+            const record = await runSeededRuleTuningScenario({
               operator: ctxOf(fetch),
               esClient,
-              serviceAccountId: harness.workerServiceAccounts[WORKER_IDS.ruleTuning],
-              run: (worker, runAsIdentity) =>
-                runSeededRuleTuningScenario({
-                  worker,
-                  operator: ctxOf(fetch),
-                  esClient,
-                  family: input.family as TuningFamily,
-                  autonomy: 'assisted',
-                  approve: true,
-                  baseSha: asString(process.env.KIBANA_BUILD_SHA) ?? 'unknown',
-                  runAsIdentity,
-                }),
+              family: input.family as TuningFamily,
+              autonomy: 'assisted',
+              approve: true,
+              baseSha: asString(process.env.KIBANA_BUILD_SHA) ?? 'unknown',
+              runAsIdentity: harness.workerServiceAccounts[WORKER_IDS.ruleTuning],
             });
             log.info(`Rule Tuning run ${record.runId}: ${record.actions.length} proposals`);
             return { record };

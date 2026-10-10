@@ -8,7 +8,6 @@
 import type { HttpHandler } from '@kbn/core/public';
 import { WORKER_IDS } from './constants';
 import { runSeededRuleTuningScenario } from './rule_tuning_fixture';
-import { withRuleTuningIdentity } from './rule_tuning_identity';
 
 const mockCases = new Map<string, (fixtures: unknown) => Promise<void>>();
 jest.mock('@kbn/evals-suite-attack-discovery-fp-tp/src/evaluate', () => {
@@ -28,11 +27,6 @@ jest.mock('@kbn/evals-suite-attack-discovery-fp-tp/src/evaluate', () => {
   };
 });
 jest.mock('./rule_tuning_fixture', () => ({ runSeededRuleTuningScenario: jest.fn() }));
-jest.mock('./rule_tuning_identity', () => ({
-  withRuleTuningIdentity: jest.fn(async ({ run }) =>
-    run({ fetch: 'worker-fetch', spaceId: 'default' }, 'namespace/worker')
-  ),
-}));
 jest.mock('./harness_setup', () => ({
   createHarnessState: () => ({
     workerServiceAccounts: { [WORKER_IDS.ruleTuning]: 'namespace/worker' },
@@ -41,7 +35,7 @@ jest.mock('./harness_setup', () => ({
   teardownWorkerChainHarness: jest.fn(),
 }));
 
-it('the registered live spec executes both seeded families with a distinct worker and operator approval', async () => {
+it('the registered live spec drives both seeded families as the operator, never with a worker-SA trigger token', async () => {
   await import('../evals/worker_chain.spec');
   const record = { runId: 'run', actions: [], tpRuleIds: ['seeded-rule'] };
   jest.mocked(runSeededRuleTuningScenario).mockResolvedValue(record as never);
@@ -74,7 +68,6 @@ it('the registered live spec executes both seeded families with a distinct worke
     expect(runSeededRuleTuningScenario).toHaveBeenCalledWith(
       expect.objectContaining({
         family,
-        worker: { fetch: 'worker-fetch', spaceId: 'default' },
         operator: { fetch, spaceId: 'default' },
         esClient,
         runAsIdentity: 'namespace/worker',
@@ -84,9 +77,7 @@ it('the registered live spec executes both seeded families with a distinct worke
       })
     );
   }
-  expect(withRuleTuningIdentity).toHaveBeenCalledWith(
-    expect.objectContaining({ serviceAccountId: 'namespace/worker' })
-  );
+  expect(jest.mocked(runSeededRuleTuningScenario).mock.calls[0][0]).not.toHaveProperty('worker');
   expect(runExperiment.mock.calls[0][0].concurrency).toBe(1);
   expect(runExperiment.mock.calls[0][1]).toEqual(
     expect.arrayContaining([expect.objectContaining({ name: 'TPSuppressedByTuning' })])

@@ -20,7 +20,8 @@ export type TuningFamily = 'encoded-powershell' | 'mimicrat-clickfix';
 export const buildRuleTuningWorld = (
   family: TuningFamily,
   suffix: string,
-  ruleId: string
+  ruleId: string,
+  ruleRevision = 0
 ): FpTpWorld => {
   const fpId = family === 'encoded-powershell' ? `${family}.fp` : `${family}.fp-benign-mimic`;
   const fp = buildFpTpExampleWorld(fpId, `${suffix}-fp`);
@@ -32,6 +33,8 @@ export const buildRuleTuningWorld = (
       'kibana.alert.uuid': id,
       'kibana.alert.rule.uuid': ruleId,
       'kibana.alert.rule.rule_id': ruleId,
+      // The sweep only fans out a rule whose alerts carry its current revision.
+      'kibana.alert.rule.revision': ruleRevision,
       'kibana.alert.rule.name': `Rule Tuning TP control ${suffix}`,
       'kibana.alert.workflow_status': falsePositive ? 'closed' : 'open',
       'kibana.alert.workflow_reason': falsePositive ? 'false_positive' : 'true_positive',
@@ -52,46 +55,52 @@ export const buildRuleTuningWorld = (
   };
 };
 
-/** Isolated-stack caller supplies separate worker and operator authenticated handlers. */
+/**
+ * The operator dispatches the per-space Rule Tuning worker and the product's own sweep
+ * launches the review, so the review runs as the worker service account. The harness
+ * never triggers the review with the worker's credential.
+ */
 export const runSeededRuleTuningScenario = async ({
-  worker,
   operator,
   esClient,
   family,
   ...input
 }: Omit<RuleTuningScenarioInput, 'ruleId' | 'alertIds'> & {
-  worker: KbnRequestContext;
   operator: KbnRequestContext;
   esClient: EsClient;
   family: TuningFamily;
 }) => {
   // seedFixture owns the default-space alert index; do not pretend it is space-aware.
-  if (worker.spaceId !== 'default' || operator.spaceId !== 'default') {
+  if (operator.spaceId !== 'default') {
     throw new Error('Seeded Rule Tuning requires a dedicated default-space stack');
   }
   const suffix = randomUUID();
-  const { id: ruleId } = await operator.fetch<{ id: string }>('/api/detection_engine/rules', {
-    method: 'POST',
-    version: '2023-10-31',
-    headers: { 'elastic-api-version': '2023-10-31', 'kbn-xsrf': 'true' },
-    body: JSON.stringify({
-      rule_id: `tuning-${suffix}`,
-      name: `Rule Tuning TP control ${suffix}`,
-      description: 'Isolated FP/TP tuning control',
-      type: 'query',
-      language: 'kuery',
-      query: 'process.name:*',
-      index: ['logs-*'],
-      severity: 'medium',
-      risk_score: 47,
-      enabled: false,
-      interval: '5m',
-      from: 'now-10m',
-    }),
-  });
+  const { id: ruleId, revision } = await operator.fetch<{ id: string; revision: number }>(
+    '/api/detection_engine/rules',
+    {
+      method: 'POST',
+      version: '2023-10-31',
+      headers: { 'elastic-api-version': '2023-10-31', 'kbn-xsrf': 'true' },
+      body: JSON.stringify({
+        rule_id: `tuning-${suffix}`,
+        name: `Rule Tuning TP control ${suffix}`,
+        description: 'Isolated FP/TP tuning control',
+        type: 'query',
+        language: 'kuery',
+        // Enabled so the sweep will review it; matches nothing so it adds no alerts of its own.
+        query: 'process.name:__alertzero_rule_tuning_control_never_matches__',
+        index: ['logs-*'],
+        severity: 'medium',
+        risk_score: 47,
+        enabled: true,
+        interval: '5m',
+        from: 'now-10m',
+      }),
+    }
+  );
   let cleanup: (() => Promise<void>) | undefined;
   try {
-    const world = buildRuleTuningWorld(family, suffix, ruleId);
+    const world = buildRuleTuningWorld(family, suffix, ruleId, revision);
     const seeded = await seedFixture({
       esClient,
       kbnRequest: kbnRequestFromFetch(operator.fetch),
@@ -107,7 +116,7 @@ export const runSeededRuleTuningScenario = async ({
       tpRuleIds: [ruleId],
       goldVerdict: 'true_positive',
     };
-    const record = await runRuleTuningScenario(worker, operator, {
+    const record = await runRuleTuningScenario(operator, {
       ...input,
       ruleId: scenario.rule.id,
       alertIds: scenario.alerts.map(({ id }) => id),

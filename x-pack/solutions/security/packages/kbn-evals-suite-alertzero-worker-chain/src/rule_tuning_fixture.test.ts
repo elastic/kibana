@@ -27,3 +27,10 @@ it.each(['encoded-powershell', 'mimicrat-clickfix'] as const)(
     expect(world.attack).toBeUndefined();
   }
 );
+
+it('stamps every alert with the rule revision the sweep matches against', () => {
+  const world = buildRuleTuningWorld('encoded-powershell', 'unique-run', 'isolated-rule', 3);
+  expect(world.alerts.map(({ source }) => source['kibana.alert.rule.revision'])).toEqual(
+    Array(13).fill(3)
+  );
+});
