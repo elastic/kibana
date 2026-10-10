@@ -22,7 +22,7 @@ import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score
 import { useEntityRiskScoreRecalculation } from '../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { buildHostNamesFilter, type RiskSeverity } from '../../../../common/search_strategy';
+import { buildHostNamesFilter } from '../../../../common/search_strategy';
 import { useKibana } from '../../../common/lib/kibana';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { Footer } from '../../../flyout_v2/entity/host/main/footer';
@@ -35,8 +35,10 @@ import { EntityType } from '../../../../common/entity_analytics/types';
 import { useObservedHost } from '../../../flyout_v2/entity/host/main/hooks/use_observed_host';
 import {
   buildRiskScoreStateFromEntityRecord,
+  getHeaderRiskLevel,
   getRiskFromEntityRecord,
 } from '../shared/entity_store_risk_utils';
+import { useNewEntityAnalyticsPage } from '../../../entity_analytics/hooks/use_new_entity_analytics_page';
 import { useEntityFromStore, type EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 import {
   buildExecutionContext,
@@ -274,6 +276,9 @@ export const HostPanel = memo(function HostPanel({
     entityRecord: observedHost.entityRecord ?? null,
   });
 
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
+  const headerRiskLevel = getHeaderRiskLevel(observedHost.entityRecord, isNewEntityAnalyticsPage);
+
   const tabsNode = tabs ? (
     <EntityPanelHeaderTabs
       tabs={tabs}
@@ -303,12 +308,7 @@ export const HostPanel = memo(function HostPanel({
           entityId={panelDisplayEntityId}
           identityFields={documentEntityIdentifiers}
           isEntityInStore={!!observedHost.entityRecord}
-          riskLevel={
-            observedHost.entityRecord
-              ? ((getRiskFromEntityRecord(observedHost.entityRecord)?.calculated_level ??
-                  'Unknown') as RiskSeverity)
-              : undefined
-          }
+          riskLevel={headerRiskLevel}
         />
       </FlyoutHeader>
       <FlyoutBody>

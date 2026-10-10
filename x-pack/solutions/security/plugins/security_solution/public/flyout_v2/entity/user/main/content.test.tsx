@@ -8,22 +8,26 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
+import { RESOLUTION_SECTION_TEST_ID } from '../../../../entity_analytics/components/entity_resolution/test_ids';
+import { useHasEntityResolutionLicense } from '../../../../common/hooks/use_has_entity_resolution_license';
+import { USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG } from '../../../../../common/constants';
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import { Content } from './content';
 import { mockUserEntityRiskScores } from '../../../../flyout/entity_details/mocks';
 
 jest.mock('../../../../entity_analytics/components/entity_resolution/resolution_section', () => ({
-  ResolutionSection: () => null,
+  ResolutionSection: () => <div data-test-subj="securitySolutionFlyoutResolutionSection" />,
 }));
 jest.mock('../../../../common/hooks/use_has_entity_resolution_license', () => ({
   useHasEntityResolutionLicense: jest.fn(() => false),
 }));
 jest.mock('../../../../entity_analytics/components/risk_summary_flyout/risk_summary', () => ({
-  FlyoutRiskSummary: () => null,
+  FlyoutRiskSummary: () => <div data-test-subj="flyoutRiskSummary" />,
 }));
 jest.mock(
   '../../../../flyout/entity_details/shared/components/right/visualizations_section',
   () => ({
-    VisualizationsSection: () => null,
+    VisualizationsSection: () => <div data-test-subj="visualizationsSection" />,
   })
 );
 jest.mock(
@@ -60,6 +64,59 @@ const defaultProps = {
   entityStoreEntityId: 'user:user-1@okta',
   riskScoreQueryId: 'UserPanelRiskScoreQuery',
 };
+
+const appearsBefore = (html: string, earlier: string, later: string) =>
+  html.indexOf(earlier) < html.indexOf(later);
+
+describe('Content — resolution section placement', () => {
+  const resolvedScores = {
+    ...mockUserEntityRiskScores,
+    resolution: {
+      ...mockUserEntityRiskScores.resolution,
+      hasResolutionGroup: true,
+      resolutionTargetEntityId: 'user:target',
+      state: {
+        ...mockUserEntityRiskScores.resolution.state,
+        loading: false,
+        data: mockUserEntityRiskScores.base.data,
+      },
+    },
+  };
+
+  const renderContent = (newEntityAnalyticsPage: boolean) => {
+    const startServices = createStartServicesMock();
+    jest
+      .mocked(startServices.featureFlags.useBooleanValue)
+      .mockImplementation((flag, fallback) =>
+        flag === USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG ? newEntityAnalyticsPage : fallback
+      );
+    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
+
+    return render(
+      <TestProviders startServices={startServices}>
+        <Content
+          {...defaultProps}
+          entityRiskScores={resolvedScores}
+          riskScoreState={{ hasEngineBeenInstalled: true, data: [{}], loading: false } as never}
+        />
+      </TestProviders>
+    );
+  };
+
+  it('keeps the resolution section below visualizations when the flag is off', () => {
+    const { container } = renderContent(false);
+    expect(
+      appearsBefore(container.innerHTML, 'visualizationsSection', RESOLUTION_SECTION_TEST_ID)
+    ).toBe(true);
+  });
+
+  it('moves the resolution section above visualizations when the flag is on and a resolution score exists', () => {
+    const { container } = renderContent(true);
+    const html = container.innerHTML;
+    expect(appearsBefore(html, 'flyoutRiskSummary', RESOLUTION_SECTION_TEST_ID)).toBe(true);
+    expect(appearsBefore(html, RESOLUTION_SECTION_TEST_ID, 'visualizationsSection')).toBe(true);
+  });
+});
 
 describe('Content — legacy asset criticality accordion gating', () => {
   it('renders the legacy accordion when entity store v2 is disabled', () => {

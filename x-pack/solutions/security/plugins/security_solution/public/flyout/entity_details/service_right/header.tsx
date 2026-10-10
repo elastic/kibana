@@ -30,6 +30,8 @@ interface ServicePanelHeaderProps {
    * compact spacing in the EUI system flyout). Legacy callers omit this and keep the default.
    */
   flyoutHeaderProps?: Omit<React.ComponentProps<typeof FlyoutHeader>, 'children'>;
+  /** Extra header chrome, such as the new-flyout copy link. Legacy callers omit this. */
+  headerActions?: React.ReactNode;
 }
 
 export const ServicePanelHeader = ({
@@ -38,6 +40,7 @@ export const ServicePanelHeader = ({
   isEntityInStore,
   riskLevel,
   flyoutHeaderProps,
+  headerActions,
 }: ServicePanelHeaderProps) => {
   const lastSeenDate = useMemo(
     () => observedService.lastSeen.date && new Date(observedService.lastSeen.date),
@@ -46,6 +49,7 @@ export const ServicePanelHeader = ({
 
   return (
     <FlyoutHeader data-test-subj="service-panel-header" {...flyoutHeaderProps}>
+      {headerActions}
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
         <EuiFlexItem grow={false}>
           <EuiText size="xs" data-test-subj={'service-panel-header-lastSeen'}>
