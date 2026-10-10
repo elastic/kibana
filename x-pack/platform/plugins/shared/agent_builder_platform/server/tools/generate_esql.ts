@@ -85,6 +85,7 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
         includeDatasets: experimentalFeatures.datasets,
         modelProvider,
         esClient: esClient.asCurrentUser,
+        internalEsClient: esClient.asInternalUser,
         logger,
         events,
       });
