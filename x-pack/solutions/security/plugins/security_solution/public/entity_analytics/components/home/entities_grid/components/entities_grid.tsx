@@ -39,12 +39,14 @@ import {
   useEntityGridData,
 } from '../hooks/use_entity_grid_data';
 import { GROUP_SIZE_FIELD, getEntityId, getNumber } from '../common';
-import { renderEntityCell, RowActionsCell } from './entities_cell_renderer';
+import { renderEntityCell } from './entities_cell_renderer';
+import { RowActionsCell } from './cells/row_actions_cell';
 import { ExpandedEntityGroup, getGroupRecordsOptions } from './entities_expanded_row';
 import { AdditionalControls } from '../../entities_table/additional_controls';
 import { DataViewContext } from '../../entities_table';
 import { LastUpdated } from '../../last_updated';
-import type { CellHandlers, RowActions } from './entities_cell_renderer';
+import type { CellHandlers } from './entities_cell_renderer';
+import type { RowActions } from './cells/row_actions_cell';
 import { isGridColumnId } from '../grid_columns';
 import { useEntityAnalyticsUrlState } from '../hooks/use_entity_analytics_url_state';
 import type { TimeRange } from '../hooks/use_entity_analytics_url_state';

@@ -19,7 +19,8 @@ import { RISK_SCORE_NORM_FIELD } from '../common';
 import { joinAnd } from '../queries/esql';
 import type { RowsMode, SortDir } from '../common';
 import type { TimeRange } from '../hooks/use_entity_analytics_url_state';
-import type { CellHandlers, RowActions } from './entities_cell_renderer';
+import type { CellHandlers } from './entities_cell_renderer';
+import type { RowActions } from './cells/row_actions_cell';
 
 const GROUPED_VIEW_TABLE_ID = 'ea-new-home-grouped';
 const GROUPED_VIEW_GROUPING_ID = 'ea-new-home-grouped';
