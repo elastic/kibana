@@ -171,6 +171,34 @@ export class DashboardApp {
     }
   }
 
+  async getDashboardIdFromCurrentUrl(): Promise<string | undefined> {
+    if (this.page.url().includes('/app/r?l=DASHBOARD')) {
+      await this.page.waitForURL((url) => !url.toString().includes('/app/r?l=DASHBOARD'));
+    }
+    return this.getDashboardIdFromUrl(this.page.url());
+  }
+
+  getDashboardIdFromUrl(url: string): string | undefined {
+    const urlSubstring = '#/view/';
+    const startOfIdIndex = url.indexOf(urlSubstring) + urlSubstring.length;
+    if (startOfIdIndex < urlSubstring.length) {
+      return undefined;
+    }
+    const idSubstring = url.substring(startOfIdIndex);
+    const slashIndex = idSubstring.indexOf('/');
+    const queryIndex = idSubstring.indexOf('?');
+    if (slashIndex === -1 && queryIndex === -1) {
+      return idSubstring;
+    }
+    const endIndex =
+      slashIndex === -1
+        ? queryIndex
+        : queryIndex === -1
+        ? slashIndex
+        : Math.min(slashIndex, queryIndex);
+    return idSubstring.substring(0, endIndex);
+  }
+
   /** Navigates to the new dashboard creation page and waits for the editor toolbar to load. */
   async openNewDashboard(options?: TimeoutOptions) {
     await this.page.gotoApp('dashboards', { hash: '/create' });

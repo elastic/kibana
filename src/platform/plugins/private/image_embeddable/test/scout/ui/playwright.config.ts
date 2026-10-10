@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('image embeddable', function () {
-    loadTestFile(require.resolve('./image_embeddable'));
-  });
-}
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
