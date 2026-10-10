@@ -110,8 +110,8 @@ module.exports = {
 
   // A map from regular expressions to paths to transformers
   transform: {
-    '^.+\\.(js|tsx?)$':
-      '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/babel/index.js',
+    '^.+\\.(js|mjs|tsx?)$':
+      '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/swc/index.js',
     '^.+\\.(txt|html)?$':
       '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/raw.js',
     '^.+\\.peggy?$': '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/peggy.js',
@@ -119,7 +119,7 @@ module.exports = {
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
   transformIgnorePatterns: [
-    // ignore all node_modules except monaco-editor, monaco-yaml which requires babel transforms to handle dynamic import()
+    // ignore all node_modules except packages that require transforms for ESM syntax such as dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
     '[/\\\\]node_modules(?![\\/\\\\](@apidevtools/json-schema-ref-parser|byte-size|monaco-editor|monaco-yaml|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager|vscode-languageserver-types|d3-interpolate|d3-color|langchain|langsmith|@cfworker|gpt-tokenizer|flat|@langchain|eventsource-parser|fast-check|@fast-check/jest|@assemblyscript|quickselect|rbush|zod/v4|vega-interpreter|vega-util|vega-tooltip|@modelcontextprotocol|pkce-challenge|ansi-styles|uuid|copy-anything|is-what|@faker-js|query-string|decode-uri-component|split-on-first|filter-obj))[/\\\\].+\\.m?js$',
     'packages/kbn-pm/dist/index.js',
