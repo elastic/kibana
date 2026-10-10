@@ -98,6 +98,32 @@ describe('useCreationOptions', () => {
     expect(history.location.state).toBeUndefined();
   });
 
+  it('passes allowed locator change sources to the creation options and clears them from history.state', async () => {
+    const history = createMemoryHistory();
+    history.replace({
+      pathname: '/',
+      search: '',
+      hash: '',
+      state: { changeSources: ['agent', 'unknown', 42] },
+    });
+
+    const { result } = renderHook(() =>
+      useCreationOptions({
+        history,
+        getScopedHistory: () => history as unknown as ScopedHistory,
+        kbnUrlStateStorage: mockKbnUrlStateStorage,
+        validateOutcome,
+        incomingEmbeddables: undefined,
+      })
+    );
+
+    const creationOptions = await result.current();
+    creationOptions.getInitialInput?.();
+
+    expect(creationOptions.changeSources).toEqual(['agent']);
+    expect(history.location.state).toBeUndefined();
+  });
+
   it('does not clear history.state when there is no locator dashboard payload', async () => {
     const history = createMemoryHistory();
     const replaceSpy = jest.spyOn(history, 'replace');

@@ -14,6 +14,7 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { isEqual } from 'lodash';
 import { firstValueFrom } from 'rxjs';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { DashboardChangeSource } from '../../common/change_sources';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 const DASHBOARD_VIEWMODE_LOCAL_KEY = 'dashboardViewMode';
@@ -21,6 +22,7 @@ const DASHBOARD_STATE_SESSION_KEY = 'dashboardStateManagerPanels';
 
 export type DashboardBackupState = Partial<DashboardState> & {
   viewMode?: ViewMode;
+  changeSources?: DashboardChangeSource[];
 };
 
 export interface DashboardBackupService {

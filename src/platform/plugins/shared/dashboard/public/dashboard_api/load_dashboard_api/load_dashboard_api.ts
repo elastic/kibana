@@ -22,6 +22,7 @@ import {
 import { coreServices } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getDashboardUserActivityService } from '../../services/user_activity_service';
+import { parseChangeSources } from '../../../common/change_sources';
 import { getDashboardApi } from '../get_dashboard_api';
 import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
 import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
@@ -74,9 +75,10 @@ export async function loadDashboardApi({
   }
 
   await initializeDashboardApiServices();
-  const unsavedChanges = creationOptions?.useSessionStorageIntegration
-    ? getDashboardBackupService().getState(savedObjectId)
-    : undefined;
+  const { changeSources: restoredChangeSources, ...unsavedChanges } =
+    (creationOptions?.useSessionStorageIntegration
+      ? getDashboardBackupService().getState(savedObjectId)
+      : undefined) ?? {};
 
   const { viewMode, ...overrideState } = creationOptions?.getInitialInput?.() ?? {};
   if (overrideState.panels) {
@@ -101,6 +103,10 @@ export async function loadDashboardApi({
     savedObjectId,
     user,
     isAccessControlEnabled,
+    changeSources: [
+      ...(creationOptions?.changeSources ?? []),
+      ...parseChangeSources(restoredChangeSources),
+    ],
   });
   const userActivityService = getDashboardUserActivityService(api);
 

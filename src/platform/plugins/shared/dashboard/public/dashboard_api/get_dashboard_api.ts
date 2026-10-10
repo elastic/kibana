@@ -15,16 +15,18 @@ import type { EuiFlyoutProps } from '@elastic/eui';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { DashboardChangeSource } from '../../common/change_sources';
 import { getLastSavedState } from '../../common/default_dashboard_state';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { DashboardReadResponseBody } from '../../server';
 import { initializeAccessControlManager } from './access_control_manager';
 import { initializeApproximationManager } from './approximation_manager';
+import { initializeChangeSourceTracker, type LatestChangeBySource } from './change_source_tracker';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
 import { initializeESQLVariablesManager } from './esql_variables_manager';
 import { initializeFiltersManager } from './filters_manager';
-import { initializeHistoryManager } from './history_manager';
+import { initializeHistoryManager, type DashboardHistoryState } from './history_manager';
 import { initializeLayoutManager } from './layout_manager';
 import type { DashboardChildren } from './layout_manager/types';
 import { initializePauseFetchManager } from './pause_fetch_manager';
@@ -42,13 +44,16 @@ import type {
   DashboardApi,
   DashboardCreationOptions,
   DashboardInternalApi,
-  DashboardSaveEvent,
+  DashboardSetStateOptions,
   DashboardUser,
   UserActivity,
 } from './types';
 import { DASHBOARD_API_TYPE } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
-import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
+import {
+  initializeUnsavedChangesManager,
+  type DashboardSaveWithChangeSources,
+} from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 
 export function getDashboardApi({
@@ -60,6 +65,7 @@ export function getDashboardApi({
   savedObjectId,
   user,
   isAccessControlEnabled,
+  changeSources,
 }: {
   creationOptions?: DashboardCreationOptions;
   panelFlyoutType?: EuiFlyoutProps['type'];
@@ -69,11 +75,13 @@ export function getDashboardApi({
   savedObjectId?: string;
   user?: DashboardUser;
   isAccessControlEnabled?: boolean;
+  changeSources?: readonly DashboardChangeSource[];
 }) {
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = readResult?.meta.managed ?? false;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
-  const onSave$ = new Subject<DashboardSaveEvent>();
+  const onSave$ = new Subject<DashboardSaveWithChangeSources>();
+  const changeSourceTracker = initializeChangeSourceTracker(changeSources);
   const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(null);
   const userActivity$ = new Subject<UserActivity>();
 
@@ -148,7 +156,8 @@ export function getDashboardApi({
 
   const approximationManager = initializeApproximationManager(initialState);
 
-  async function setState(state: DashboardState) {
+  async function setState(state: DashboardState, options?: DashboardSetStateOptions) {
+    changeSourceTracker.recordChange(options?.changeSources ?? []);
     await layoutManager.internalApi.reset(state);
     unifiedSearchManager.internalApi.reset(state);
     projectRoutingManager?.internalApi.reset(state);
@@ -201,14 +210,22 @@ export function getDashboardApi({
     approximationManager,
     setState,
     onSave$: onSave$.asObservable(),
+    changeSourceTracker,
   });
 
-  const initialState$ = new Subject<DashboardState>();
+  const getHistoryState = (): DashboardHistoryState => ({
+    ...getState(),
+    latestChangeBySource: changeSourceTracker.getLatestChanges(),
+  });
+  const initialState$ = new Subject<DashboardHistoryState>();
   const historyManager = initializeHistoryManager({
     anyStateChange$,
     hasOverlays$: trackOverlayApi.hasOverlays$,
-    setState,
-    getState,
+    setState: async ({ latestChangeBySource, ...state }) => {
+      changeSourceTracker.restoreLatestChanges(latestChangeBySource);
+      await setState(state);
+    },
+    getState: getHistoryState,
     dataLoading$: combineLatest([
       layoutManager.internalApi.childrenStateLoading$,
       layoutManager.internalApi.childrenLoading$,
@@ -223,7 +240,7 @@ export function getDashboardApi({
 
   if (incomingEmbeddables?.length) {
     // allow incoming embeddables to be undone
-    initialState$.next(getState());
+    initialState$.next(getHistoryState());
     layoutManager.api.addIncomingEmbeddables(incomingEmbeddables);
   }
 
@@ -267,7 +284,7 @@ export function getDashboardApi({
       description: settingsManager.api.title$.value,
     },
     fullScreenMode$,
-    onSave$: onSave$.asObservable(),
+    onSave$: onSave$.pipe(map(({ latestChangeBySource, ...saveEvent }) => saveEvent)),
     getAppContext: () => {
       const embeddableAppContext = creationOptions?.getEmbeddableAppContext?.(savedObjectId$.value);
       return {
@@ -296,11 +313,15 @@ export function getDashboardApi({
       let resolve: ((results: { id: string } | undefined) => void) | undefined;
       const promise = new Promise<{ id: string } | undefined>((_resolve) => (resolve = _resolve));
 
+      let latestChangeBySource: LatestChangeBySource = {};
       openSaveModal({
         description,
         isManaged,
         lastSavedId: savedObjectId$.value,
-        serializeState: getState,
+        serializeState: () => {
+          latestChangeBySource = changeSourceTracker.getLatestChanges();
+          return getState();
+        },
         setTimeRestore: (newTimeRestore: boolean) =>
           settingsManager.api.setSettings({ time_restore: newTimeRestore }),
         setProjectRoutingRestore: (newProjectRoutingRestore: boolean) =>
@@ -327,6 +348,7 @@ export function getDashboardApi({
             previousDashboardId,
             dashboardId: id,
             dashboardState: getState(),
+            latestChangeBySource,
           });
           if (redirectTo && redirectRequired) {
             redirectTo({
@@ -345,6 +367,7 @@ export function getDashboardApi({
     },
     runQuickSave: async () => {
       if (isManaged) return;
+      const latestChangeBySource = changeSourceTracker.getLatestChanges();
       const dashboardState = getState();
       const previousDashboardId = savedObjectId$.value;
       const saveResult = await saveDashboard({
@@ -359,6 +382,7 @@ export function getDashboardApi({
         previousDashboardId,
         dashboardId: saveResult?.id ?? previousDashboardId,
         dashboardState,
+        latestChangeBySource,
       });
 
       return;

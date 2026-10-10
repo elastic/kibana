@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isEqual } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
@@ -14,6 +15,7 @@ import {
   filter,
   map,
   merge,
+  scan,
   type Observable,
   type Subject,
 } from 'rxjs';
@@ -22,6 +24,9 @@ import { startTrackingHistory } from '@kbn/rxjs-history';
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { initializeTrackOverlay } from './track_overlay';
+import type { LatestChangeBySource } from './change_source_tracker';
+
+export type DashboardHistoryState = DashboardState & { latestChangeBySource: LatestChangeBySource };
 
 export function initializeHistoryManager({
   anyStateChange$,
@@ -33,10 +38,10 @@ export function initializeHistoryManager({
 }: {
   anyStateChange$: Observable<void>;
   hasOverlays$: ReturnType<typeof initializeTrackOverlay>['hasOverlays$'];
-  getState: () => DashboardState;
-  setState: (state: DashboardState) => Promise<void>;
+  getState: () => DashboardHistoryState;
+  setState: (state: DashboardHistoryState) => Promise<void>;
   dataLoading$: Observable<boolean>;
-  initialState$: Subject<DashboardState>;
+  initialState$: Subject<DashboardHistoryState>;
 }) {
   const pauseHistory$ = new BehaviorSubject<boolean>(false);
   const pauseHistorySubscription = combineLatest([hasOverlays$, dataLoading$]).subscribe(
@@ -56,14 +61,22 @@ export function initializeHistoryManager({
     })
   );
 
-  const { api: historyApi, cleanup: cleanupHistoryTracking } = startTrackingHistory<DashboardState>(
-    {
-      onStateChange$: merge(initialState$, onStateChange$),
+  const { api: historyApi, cleanup: cleanupHistoryTracking } =
+    startTrackingHistory<DashboardHistoryState>({
+      onStateChange$: merge(initialState$, onStateChange$).pipe(
+        // A snapshot that differs only in its latest change numbers is not an undo step. Re-emit the
+        // previous snapshot instead of filtering it out, because rxjs-history skips the first
+        // emission after an undo or redo.
+        scan<DashboardHistoryState>((previous, current) =>
+          isEqual({ ...current, latestChangeBySource: previous.latestChangeBySource }, previous)
+            ? previous
+            : current
+        )
+      ),
       setState,
       maxSize: 100,
       pause$: pauseHistory$,
-    }
-  );
+    });
 
   return {
     internalApi: historyApi,

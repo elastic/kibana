@@ -84,6 +84,8 @@ import { registerActions } from './dashboard_actions/register_actions';
 import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 import type { FindDashboardsService } from './dashboard_client';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/telemetry/dashboard_duration_start_mark';
+import { dashboardSavedEventSchema } from './dashboard_api/telemetry/report_dashboard_saved';
+import { DASHBOARD_SAVED_EVENT } from './utils/telemetry_constants';
 import type { DashboardApi } from './dashboard_api/types';
 
 export interface DashboardSetupDependencies {
@@ -170,6 +172,10 @@ export class DashboardPlugin
     core.analytics.registerEventType({
       eventType: 'dashboard_loaded_with_data',
       schema: {},
+    });
+    core.analytics.registerEventType({
+      eventType: DASHBOARD_SAVED_EVENT,
+      schema: dashboardSavedEventSchema,
     });
 
     if (share) {

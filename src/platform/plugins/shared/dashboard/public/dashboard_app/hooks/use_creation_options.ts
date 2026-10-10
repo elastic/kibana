@@ -18,6 +18,7 @@ import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DASHBOARD_APP_ID } from '../../../common/page_bundle_constants';
 import type { DashboardCreationOptions } from '../..';
 import { screenshotModeService } from '../../services/kibana_services';
+import { parseChangeSources, type DashboardChangeSource } from '../../../common/change_sources';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../utils/urls';
 import type { DashboardEmbedSettings } from '../types';
 import {
@@ -29,6 +30,11 @@ import {
 import { extractDashboardState, loadAndRemoveDashboardState } from '../url';
 
 type IncomingEmbeddables = EmbeddablePackageState[] | undefined;
+
+const extractChangeSources = (locationState: unknown): DashboardChangeSource[] =>
+  locationState && typeof locationState === 'object' && 'changeSources' in locationState
+    ? parseChangeSources(locationState.changeSources)
+    : [];
 
 interface UseCreationOptionsProps {
   history: History;
@@ -49,6 +55,7 @@ export const useCreationOptions = ({
 }: UseCreationOptionsProps) => {
   return useCallback((): Promise<DashboardCreationOptions> => {
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+    const changeSources = extractChangeSources(getScopedHistory().location.state);
 
     const getInitialInput = () => {
       const scopedHistory = getScopedHistory();
@@ -73,7 +80,7 @@ export const useCreationOptions = ({
       // Locator / navigateToApp store dashboard fields on `history.state`, which survives a full
       // reload. After merging them into the initial input, clear `location.state` so a refresh
       // does not re-apply stale overrides.
-      if (Object.keys(stateFromLocator).length > 0) {
+      if (Object.keys(stateFromLocator).length > 0 || changeSources.length > 0) {
         try {
           scopedHistory.replace({
             ...scopedHistory.location,
@@ -100,6 +107,7 @@ export const useCreationOptions = ({
 
     return Promise.resolve<DashboardCreationOptions>({
       getIncomingEmbeddables: () => incomingEmbeddables,
+      changeSources,
 
       // integrations
       useSessionStorageIntegration: true,
