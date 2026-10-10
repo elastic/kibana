@@ -53,6 +53,12 @@ export interface FleetConfigType {
     managedBulk?: {
       enabled: boolean;
     };
+    autoUpgrade?: {
+      enabled: boolean;
+      dryRun: boolean;
+      interval: string;
+      packages: Array<{ name: string; versionRange: string }>;
+    };
   };
   iacProvisioner?: {
     api?: {
