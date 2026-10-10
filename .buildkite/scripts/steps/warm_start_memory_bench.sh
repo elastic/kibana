@@ -58,6 +58,13 @@ download_and_extract target "$EFFECTIVE_BUILD_ID" "$TARGET_BUILD_DIR"
 export KIBANA_CI_WARM_START_MEMORY_BASELINE_BUILD_ID="$BASELINE_BUILD_ID"
 export KIBANA_CI_WARM_START_MEMORY_REPORT_PATH="$REPORT_PATH"
 
+echo "--- Build server plugin bundle for the target boot"
+export KBN_PLUGIN_BUNDLE_OUT=/tmp/kibana-server-plugin-bundle
+python3 scripts/server_plugin_bundle/generate_entry.py
+node --max-old-space-size=16384 scripts/server_plugin_bundle/compile.js
+node scripts/server_plugin_bundle/latin1ify.js /tmp/kibana-server-plugin-bundle/plugins.cjs
+export KBN_PLUGIN_BUNDLE_CI=1
+
 echo "--- Warm-start memory benchmark against merge base"
 rm -f "$REPORT_PATH"
 set +e
