@@ -1656,7 +1656,7 @@
     "safe-stable-stringify": "2.5.0",
     "seedrandom": "3.0.5",
     "semver": "7.8.5",
-    "snakecase-keys": "8.0.1",
+    "snakecase-keys": "9.0.2",
     "source-map-support": "0.5.21",
     "stats-lite": "2.2.0",
     "strip-ansi": "6.0.1",
