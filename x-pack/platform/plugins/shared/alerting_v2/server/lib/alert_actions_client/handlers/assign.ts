@@ -23,8 +23,8 @@ type AssignAlertActionBody = Extract<
  */
 export const assignHandler: ActionHandler<AssignAlertActionBody> = {
   requiresActionState: true,
-  prepare: ({ action, alertEvent, alertActionDoc, actionState }) => {
-    if (action.assignee_uid === actionState.assignee_uid) {
+  prepare: ({ action, alertEvent, alertActionDoc, alertActionState }) => {
+    if (action.assignee_uid === alertActionState.assignee_uid) {
       throw noOpConflict({
         code: ALERTING_ERROR_CODES.ALERT_ACTION_NO_OP,
         message: getAssigneeUnchangedMessage(alertEvent.episode_id, action.assignee_uid),

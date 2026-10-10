@@ -31,8 +31,8 @@ type UnackAlertActionBody = Extract<
  */
 export const ackHandler: ActionHandler<AckAlertActionBody> = {
   requiresActionState: true,
-  prepare: ({ alertEvent, alertActionDoc, actionState }) => {
-    if (actionState.acknowledged) {
+  prepare: ({ alertEvent, alertActionDoc, alertActionState }) => {
+    if (alertActionState.acknowledged) {
       throw noOpConflict({
         code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
         message: getAlertAlreadyAcknowledgedMessage(alertEvent.episode_id),
@@ -48,8 +48,8 @@ export const ackHandler: ActionHandler<AckAlertActionBody> = {
 /** Mirror of {@link ackHandler}: rejects an alert that is not acknowledged. */
 export const unackHandler: ActionHandler<UnackAlertActionBody> = {
   requiresActionState: true,
-  prepare: ({ alertEvent, alertActionDoc, actionState }) => {
-    if (!actionState.acknowledged) {
+  prepare: ({ alertEvent, alertActionDoc, alertActionState }) => {
+    if (!alertActionState.acknowledged) {
       throw noOpConflict({
         code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
         message: getAlertNotAcknowledgedMessage(alertEvent.episode_id),

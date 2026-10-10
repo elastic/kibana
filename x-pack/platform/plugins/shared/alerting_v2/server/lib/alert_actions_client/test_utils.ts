@@ -14,6 +14,10 @@ import {
   EMPTY_ALERT_ACTION_STATE,
   type AlertActionState,
 } from './context_loaders/load_alert_action_states';
+import {
+  EMPTY_SERIES_ACTION_STATE,
+  type SeriesActionState,
+} from './context_loaders/load_series_action_states';
 
 /**
  * Sentinel audit doc used by handler tests. Handlers either forward
@@ -29,20 +33,26 @@ const SENTINEL_ALERT_ACTION_DOC = { sentinel: 'audit-doc' } as unknown as AlertA
  * the `action` body because each handler test targets a specific
  * `action_type` variant of the discriminated union. `alertActionDoc`
  * defaults to a sentinel that tests can compare by identity, and
- * `actionState` to a clean alert with no prior ack, assignee or tags.
+ * `alertActionState` to a clean alert with no prior ack, assignee or tags.
  */
 export const buildHandlerItem = <TBody extends CreateAlertActionBody>(
   action: TBody,
   alertEvent: AlertEventRecord,
   {
     alertActionDoc = SENTINEL_ALERT_ACTION_DOC,
-    actionState,
-  }: { alertActionDoc?: AlertActionDocument; actionState?: Partial<AlertActionState> } = {}
+    alertActionState,
+    seriesActionState,
+  }: {
+    alertActionDoc?: AlertActionDocument;
+    alertActionState?: Partial<AlertActionState>;
+    seriesActionState?: Partial<SeriesActionState>;
+  } = {}
 ): HandlerItem<TBody> => ({
   action,
   alertEvent,
   alertActionDoc,
-  actionState: { ...EMPTY_ALERT_ACTION_STATE, ...actionState },
+  alertActionState: { ...EMPTY_ALERT_ACTION_STATE, ...alertActionState },
+  seriesActionState: { ...EMPTY_SERIES_ACTION_STATE, ...seriesActionState },
 });
 
 /**

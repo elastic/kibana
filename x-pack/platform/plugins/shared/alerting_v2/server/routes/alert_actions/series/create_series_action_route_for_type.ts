@@ -23,7 +23,7 @@ import type { z } from '@kbn/zod/v4';
 import { AlertActionsClient } from '../../../lib/alert_actions_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../../lib/security/privileges';
 import { ALERTING_V2_INTERNAL_SERIES_API_PATH } from '../../constants';
-import { BaseAlertingRoute } from '../../base_alerting_route';
+import { BaseAlertingRoute, type AlertingRouteSchemas } from '../../base_alerting_route';
 import { AlertingRouteContext } from '../../alerting_route_context';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../../route_descriptions';
 
@@ -38,6 +38,8 @@ interface CreateSeriesActionRouteForTypeOptions<
   >;
   oasOperationObject?: RouteConfigOptions<RouteMethod>['oasOperationObject'];
   access?: RouteConfigOptions<RouteMethod>['access'];
+  /** Statuses only some action types can produce, declared by those routes. */
+  additionalResponses?: NonNullable<AlertingRouteSchemas['response']>;
 }
 
 export const createSeriesActionRouteForType = <
@@ -49,6 +51,7 @@ export const createSeriesActionRouteForType = <
   bodySchema,
   oasOperationObject,
   access,
+  additionalResponses,
 }: CreateSeriesActionRouteForTypeOptions<TAction>): RouteDefinition<
   SeriesAlertActionParams,
   unknown,
@@ -92,6 +95,7 @@ export const createSeriesActionRouteForType = <
           body: () => errorResponseSchema,
           description: 'Indicates the alert episode series was not found.',
         },
+        ...additionalResponses,
       },
     };
 
