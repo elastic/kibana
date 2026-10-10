@@ -22,6 +22,11 @@ import {
  * `connectorId` is pinned to the current Playwright project's connector so the workflow's
  * `ai.agent` step uses the same model the suite is evaluating. Auto-close is disabled so
  * the eval never mutates alert status (we only read the classification verdict).
+ *
+ * `createConversation` must stay `true`: the `ai.agent` step only reports a `conversation_id`
+ * in its output when it stores a conversation, and that id is the only key that joins the
+ * workflow execution to the agent's `gen_ai.conversation.id` tool spans. Without it the
+ * trajectory evaluator has nothing to join on and is permanently N/A.
  */
 export const configureAlertAnalysisWorkflow = async ({
   fetch,
@@ -48,7 +53,7 @@ export const configureAlertAnalysisWorkflow = async ({
       workflowEnabled: true,
       connectorId,
       agentId,
-      createConversation: false,
+      createConversation: true,
       autoCloseEnabled: false,
       autoCloseConfidenceScoreMinThreshold: 0.9,
       autoCloseConfidenceScoreMaxThreshold: 1,
