@@ -748,7 +748,7 @@ const RowControlsMenu = ({
             data-test-subj="unifiedDataTable_additionalRowControl_actionsMenu"
             size="xs"
             iconSize="s"
-            iconType="boxesVertical"
+            iconType="ellipsis"
             color="text"
             aria-label={buttonLabel}
             onClick={() => setIsOpen((open) => !open)}
@@ -1839,7 +1839,8 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
     };
 
     if (isSummaryMode) {
-      if (showTimeCol && timeFieldName) {
+      // Same check as UnifiedDataTable, e.g. no time column when an ES|QL query drops it.
+      if (shouldPrependTimeFieldColumn && timeFieldName) {
         const timeField = getDataViewFieldOrCreateFromColumnMeta({
           dataView,
           fieldName: timeFieldName,
@@ -2002,7 +2003,6 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
     onFilter,
     settings,
     shouldShowFieldHandler,
-    showTimeCol,
     isPlainRecord,
     timeFieldName,
     rowAdditionalLeadingControls,
@@ -2012,12 +2012,14 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
     maxDocFieldsDisplayed,
     displayedRows,
     hideFilteringOnComputedColumns,
+    shouldPrependTimeFieldColumn,
   ]);
 
   const dataColumns = useMemo<TanStackDataColumnDescriptor[]>(() => {
     if (isSummaryMode) {
       const cols: Array<{ id: string; isSummary?: boolean; isTimestamp?: boolean }> = [];
-      if (showTimeCol && timeFieldName) {
+      // Same check as UnifiedDataTable, e.g. no time column when an ES|QL query drops it.
+      if (shouldPrependTimeFieldColumn && timeFieldName) {
         cols.push({ id: timeFieldName, isTimestamp: true });
       }
       cols.push({ id: SOURCE_COLUMN_ID, isSummary: true });
@@ -2029,7 +2031,7 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
       isSummary: colId === SOURCE_COLUMN_ID,
       isTimestamp: colId === timeFieldName,
     }));
-  }, [effectiveColumns, isSummaryMode, showTimeCol, timeFieldName]);
+  }, [effectiveColumns, isSummaryMode, timeFieldName, shouldPrependTimeFieldColumn]);
 
   const [containerWidth, setContainerWidth] = useState(0);
 
