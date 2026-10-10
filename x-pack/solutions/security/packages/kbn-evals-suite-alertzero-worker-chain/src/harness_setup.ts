@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// eslint-disable-next-line import/no-nodejs-modules
+import { isDeepStrictEqual } from 'util';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { enableAlertAnalysisInSpace } from './alert_analysis_setting';
@@ -103,6 +105,29 @@ export const setupWorkerChainHarness = async ({
 };
 
 /**
+ * Differences between a Worker read back after restore and its pre-run snapshot. Settings are
+ * compared structurally: a nested value (`extras`) is a fresh object on every read.
+ */
+export const diffWorkerSnapshots = (
+  after: WorkerAutonomySnapshot,
+  snapshot: WorkerAutonomySnapshot
+): string[] => {
+  const diffs: string[] = [];
+  if (after.enabled !== snapshot.enabled) {
+    diffs.push(`enabled ${after.enabled} != ${snapshot.enabled}`);
+  }
+  const keys = new Set([...Object.keys(after.settings), ...Object.keys(snapshot.settings)]);
+  for (const key of keys) {
+    const a = (after.settings as Record<string, unknown>)[key];
+    const s = (snapshot.settings as Record<string, unknown>)[key];
+    if (!isDeepStrictEqual(a, s)) {
+      diffs.push(`settings.${key} ${JSON.stringify(a)} != ${JSON.stringify(s)}`);
+    }
+  }
+  return diffs;
+};
+
+/**
  * Workers first, the setting last: restoring a Worker goes through the Workers
  * routes, which 404 once the setting is back to false. Every step is attempted
  * and failures are logged, not thrown.
@@ -138,16 +163,7 @@ export const teardownWorkerChainHarness = async ({
     // F6: read the restored state back and diff it against the snapshot.
     await captureWorker(ctx, snapshot.workerId)
       .then((after) => {
-        const diffs: string[] = [];
-        if (after.enabled !== snapshot.enabled) {
-          diffs.push(`enabled ${after.enabled} != ${snapshot.enabled}`);
-        }
-        const keys = new Set([...Object.keys(after.settings), ...Object.keys(snapshot.settings)]);
-        for (const key of keys) {
-          const a = (after.settings as Record<string, unknown>)[key];
-          const s = (snapshot.settings as Record<string, unknown>)[key];
-          if (a !== s) diffs.push(`settings.${key} ${String(a)} != ${String(s)}`);
-        }
+        const diffs = diffWorkerSnapshots(after, snapshot);
         if (diffs.length === 0) {
           log.info(`Worker ${snapshot.workerId} restored (read-back matches snapshot)`);
         } else {

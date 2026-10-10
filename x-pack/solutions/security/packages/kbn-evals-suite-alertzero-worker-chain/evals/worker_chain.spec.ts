@@ -32,7 +32,6 @@ import {
   selectEvaluators,
   tags,
 } from '@kbn/evals-suite-attack-discovery-fp-tp/src/evaluate';
-import { overrideInferenceFeature } from '@kbn/evals-suite-attack-discovery-fp-tp/src/inference_override';
 import { waitForConversationsReady } from '@kbn/evals-suite-attack-discovery-fp-tp/src/investigation';
 import { kbnRequestFromFetch } from '@kbn/evals-suite-attack-discovery-fp-tp/src/kbn_request';
 import { buildFpTpExampleWorld } from '@kbn/evals-suite-attack-discovery-fp-tp/src/scenarios';
@@ -40,11 +39,11 @@ import {
   ensureFpTpSeedPrerequisites,
   seedFixture,
 } from '@kbn/evals-suite-attack-discovery-fp-tp/src/world';
+import { WORKER_CHAIN_EXPERIMENT_CONCURRENCY, WORKER_IDS } from '../src/constants';
 import {
-  ALERTZERO_REASONING_FEATURE_ID,
-  WORKER_CHAIN_EXPERIMENT_CONCURRENCY,
-  WORKER_IDS,
-} from '../src/constants';
+  assertInvestigateRuleSkillRegistered,
+  bindWorkerChainInferenceFeatures,
+} from '../src/harness_preflight';
 import { assertWorkerChainFitsCiBudget, selectWorkerChainExamples } from '../src/example_selection';
 import {
   createHarnessState,
@@ -78,6 +77,7 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
   /** Everything setup changed (B4 snapshots, the AlertZero setting), put back in afterAll even when a run fails. */
   const harness = createHarnessState();
   let restoreInferenceSettings: (() => Promise<void>) | undefined;
+  let candidateConnectorId: string | undefined;
   let restoreEntityExtraction: (() => Promise<void>) | undefined;
   const pendingCleanups = new Set<() => Promise<void>>();
 
@@ -92,11 +92,10 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
       log: ToolingLog;
     }) => {
       assertWorkerChainFitsCiBudget();
-      restoreInferenceSettings = await overrideInferenceFeature({
-        fetch,
-        featureId: ALERTZERO_REASONING_FEATURE_ID,
-        endpointId: connector.id,
-      });
+      // Fail before measuring anything if the Rule Tuning review's skill is not registered.
+      await assertInvestigateRuleSkillRegistered(fetch);
+      restoreInferenceSettings = await bindWorkerChainInferenceFeatures(fetch, connector.id);
+      candidateConnectorId = connector.id;
       restoreEntityExtraction = await ensureFpTpSeedPrerequisites(kbnRequestFromFetch(fetch));
       await waitForConversationsReady(fetch);
       // Applied, not declared: enable the AlertZero setting, provision the Worker service
@@ -245,6 +244,7 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
               approve: true,
               baseSha: asString(process.env.KIBANA_BUILD_SHA) ?? 'unknown',
               runAsIdentity: harness.workerServiceAccounts[WORKER_IDS.ruleTuning],
+              expectedConnectorId: candidateConnectorId,
             });
             log.info(`Rule Tuning run ${record.runId}: ${record.actions.length} proposals`);
             return { record };

@@ -6,7 +6,7 @@
  */
 
 import type { WorkflowExecutionDto } from '@kbn/workflows';
-import { assertRuleTuningIdentity } from './rule_tuning_identity';
+import { assertReviewConnector, assertRuleTuningIdentity } from './rule_tuning_identity';
 
 const execution = (effectiveIdentity?: WorkflowExecutionDto['effectiveIdentity']) =>
   ({ executedBy: 'operator', effectiveIdentity } as WorkflowExecutionDto);
@@ -34,5 +34,33 @@ describe('assertRuleTuningIdentity', () => {
         'kibana/alertzero_rule_tuning'
       )
     ).toThrow('did not execute as its worker service account');
+  });
+});
+
+describe('assertReviewConnector', () => {
+  const withConnector = (connectorId?: string) =>
+    ({
+      stepExecutions: [
+        { stepId: 'diagnose_rule', output: { metadata: { usage: { connectorId } } } },
+      ],
+    } as unknown as WorkflowExecutionDto);
+
+  it('accepts the candidate connector', () => {
+    expect(assertReviewConnector(withConnector('candidate'), 'candidate')).toBe('candidate');
+  });
+
+  it('rejects another connector, naming both', () => {
+    expect(() => assertReviewConnector(withConnector('.claude-5'), 'candidate')).toThrow(
+      '.claude-5, not the candidate candidate'
+    );
+  });
+
+  it('rejects a step that reports no connector', () => {
+    expect(() => assertReviewConnector(withConnector(undefined), 'candidate')).toThrow(
+      'none reported'
+    );
+    expect(() => assertReviewConnector({} as WorkflowExecutionDto, 'candidate')).toThrow(
+      'none reported'
+    );
   });
 });

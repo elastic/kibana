@@ -10,6 +10,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { ALERTZERO_ENABLED_SETTING_ID, ALERT_ANALYSIS_SETTINGS_URL, WORKER_IDS } from './constants';
 import {
   createHarnessState,
+  diffWorkerSnapshots,
   setupWorkerChainHarness,
   teardownWorkerChainHarness,
 } from './harness_setup';
@@ -289,5 +290,30 @@ describe('setupWorkerChainHarness / teardownWorkerChainHarness', () => {
     expect(settingRestore).toBeGreaterThan(lastWorkerCall);
     expect(stack.getSetting()).toBe(false);
     expect(log.warning).not.toHaveBeenCalled();
+  });
+});
+
+describe('diffWorkerSnapshots (S3)', () => {
+  const snap = (settings: Record<string, unknown>, enabled = true) =>
+    ({ workerId: 'w', enabled, settingsRevision: 1, settings } as never);
+
+  it('treats structurally equal nested settings as unchanged', () => {
+    expect(
+      diffWorkerSnapshots(
+        snap({ autonomy: 'manual', extras: { a: [1, 2], b: { c: 1 } } }),
+        snap({ autonomy: 'manual', extras: { a: [1, 2], b: { c: 1 } } })
+      )
+    ).toEqual([]);
+  });
+
+  it('reports a real nested difference readably, not as [object Object]', () => {
+    const diffs = diffWorkerSnapshots(snap({ extras: { a: 2 } }), snap({ extras: { a: 1 } }));
+    expect(diffs).toEqual(['settings.extras {"a":2} != {"a":1}']);
+  });
+
+  it('reports enabled and scalar drift', () => {
+    expect(
+      diffWorkerSnapshots(snap({ autonomy: 'manual' }, false), snap({ autonomy: 'assisted' }, true))
+    ).toEqual(['enabled false != true', 'settings.autonomy "manual" != "assisted"']);
   });
 });

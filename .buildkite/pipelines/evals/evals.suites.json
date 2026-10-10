@@ -532,7 +532,7 @@
       "ciLabels": [
         "evals:security-alertzero-worker-chain"
       ],
-      "serverConfigSet": "evals_attack_discovery_fp_tp"
+      "serverConfigSet": "evals_alertzero_worker_chain"
     },
     {
       "id": "skill-selection-benchmark",

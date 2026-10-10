@@ -85,6 +85,11 @@ export const PROPOSALS_URL = '/internal/proposals';
 export const INFERENCE_SETTINGS_ROUTE = '/internal/search_inference_endpoints/settings';
 export const INFERENCE_SETTINGS_API_VERSION = '1';
 export const ALERTZERO_REASONING_FEATURE_ID = 'alertzero_reasoning';
+/** Feature the Rule Tuning review's `diagnose_rule` step resolves its connector through. */
+export const ALERTZERO_AGENTIC_FEATURE_ID = 'alertzero_agentic';
+
+export const SKILLS_URL = '/api/agent_builder/skills';
+export const INVESTIGATE_RULE_SKILL_ID = 'investigate-rule';
 
 /**
  * Per-hop timeouts (design Rev 3 §4). Supervised terminal = every hop reaches
