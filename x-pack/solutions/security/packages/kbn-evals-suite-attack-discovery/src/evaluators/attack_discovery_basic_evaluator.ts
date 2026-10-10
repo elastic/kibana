@@ -51,9 +51,9 @@ export const createAttackDiscoveryBasicEvaluator = (): Evaluator<
         return { score: 0, label: 'missing_insights' };
       }
 
-      const invalid = insights.find((i) => !isValidInsight(i));
-
-      if (invalid) {
+      // `some`, not `find`: a falsy invalid element (null, 0, '') would be returned
+      // by `find` as a falsy value and slip past the check.
+      if (insights.some((i) => !isValidInsight(i))) {
         return { score: 0, label: 'invalid_shape' };
       }
 

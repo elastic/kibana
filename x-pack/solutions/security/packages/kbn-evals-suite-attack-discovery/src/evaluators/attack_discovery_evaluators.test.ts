@@ -8,7 +8,7 @@
 import type { Evaluator } from '@kbn/evals';
 import { createAttackDiscoveryBasicEvaluator } from './attack_discovery_basic_evaluator';
 import { createAttackDiscoveryRubricEvaluator } from './attack_discovery_rubric_evaluator';
-import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from './types';
+import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
 
 /**
  * A real `_find` doc as returned by the public `GET /api/attack_discovery/_find`
@@ -80,7 +80,11 @@ describe('AttackDiscoveryBasic', () => {
   it('still returns invalid_shape for docs missing required fields in both shapes', async () => {
     const snake = await run(
       evaluator,
-      { insights: [{ alert_ids: ['a'], title: 't' }] },
+      {
+        insights: [
+          { alert_ids: ['a'], title: 't' },
+        ] as unknown as AttackDiscoveryTaskOutput['insights'],
+      },
       {
         attackDiscoveries: [],
       }
@@ -89,13 +93,31 @@ describe('AttackDiscoveryBasic', () => {
 
     const camel = await run(
       evaluator,
-      { insights: [{ alertIds: ['a'], title: 't' }] },
+      {
+        insights: [
+          { alertIds: ['a'], title: 't' },
+        ] as unknown as AttackDiscoveryTaskOutput['insights'],
+      },
       {
         attackDiscoveries: [],
       }
     );
     expect(camel.label).toBe('invalid_shape');
   });
+
+  it.each([[null], [undefined], [0], [false], ['']])(
+    'returns invalid_shape when an insight is the falsy value %p',
+    async (falsyInsight) => {
+      const result = await run(
+        evaluator,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        { insights: [findApiDoc, falsyInsight] as any },
+        { attackDiscoveries: [] }
+      );
+      expect(result.score).toBe(0);
+      expect(result.label).toBe('invalid_shape');
+    }
+  );
 
   it('returns missing_insights when there are no insights', async () => {
     const result = await run(evaluator, { insights: null }, { attackDiscoveries: [] });
