@@ -12,36 +12,64 @@ import { MAX_KQL_LENGTH } from './constants';
 /** Maximum number of tags that can be set on a policy matcher. */
 export const POLICY_MATCHER_TAGS_MAX = 50;
 /**
- * Matcher tags are compared against rule tags, so a longer one could never
+ * Matcher tags are compared against rule routing tags, so a longer one could never
  * match anything.
  */
 export const POLICY_MATCHER_TAG_MAX_LENGTH = MAX_TAG_LENGTH;
 
-export const POLICY_MATCHER_TAGS_DESCRIPTION =
-  'Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.';
+// Only a PATCH accepts `null` on a matcher or its leaves, so each description comes in two
+// flavours over a shared lead: following the PATCH wording on a create or replace is a 400.
 
-export const POLICY_MATCHER_EXPRESSION_DESCRIPTION =
-  "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone.";
+const TAGS_LEAD =
+  'Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. An empty array is not accepted.';
 
-export const POLICY_MATCHER_DESCRIPTION =
-  'Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts.';
+export const POLICY_MATCHER_TAGS_DESCRIPTION = `${TAGS_LEAD} Omit \`matcher.tags\` to match on \`matcher.expression\` alone.`;
 
-export const POLICY_MATCHER_UPDATE_DESCRIPTION =
-  'Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts. <br/><br/> Updating `matcher` replaces it entirely: to change `tags` without dropping `expression`, resend the current `expression` value.';
+export const POLICY_MATCHER_TAGS_PATCH_DESCRIPTION = `${TAGS_LEAD} Omit \`matcher.tags\` to keep the stored tags, or set it to \`null\` to clear them and match on \`matcher.expression\` alone.`;
 
-export const policyMatcherSchema = z.object({
-  tags: z
-    .array(z.string().min(1).max(POLICY_MATCHER_TAG_MAX_LENGTH))
-    .max(POLICY_MATCHER_TAGS_MAX)
-    .nullable()
-    .optional()
-    .describe(POLICY_MATCHER_TAGS_DESCRIPTION),
-  expression: z
-    .string()
-    .max(MAX_KQL_LENGTH)
-    .nullable()
-    .optional()
-    .describe(POLICY_MATCHER_EXPRESSION_DESCRIPTION),
-});
+const EXPRESSION_LEAD =
+  "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work.";
+
+export const POLICY_MATCHER_EXPRESSION_DESCRIPTION = `${EXPRESSION_LEAD} Omit \`matcher.expression\` to match on \`tags\` alone.`;
+
+export const POLICY_MATCHER_EXPRESSION_PATCH_DESCRIPTION = `${EXPRESSION_LEAD} Omit \`matcher.expression\` to keep the stored expression, or set it to \`null\` to clear it and match on \`tags\` alone.`;
+
+const MATCHER_LEAD =
+  'Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply.';
+
+export const POLICY_MATCHER_DESCRIPTION = `${MATCHER_LEAD} At least one of \`tags\` and \`expression\` must be set, so an empty \`matcher\` is rejected. Omit \`matcher\` entirely for a catch-all policy that applies to all alerts.`;
+
+export const POLICY_MATCHER_PATCH_DESCRIPTION = `${MATCHER_LEAD} Omit \`matcher\` to keep the stored matcher, or set it to \`null\` for a catch-all policy that applies to all alerts. An empty \`matcher\` names no leaf and so changes nothing; clearing the last of \`tags\` and \`expression\` clears the matcher itself, which is also a catch-all.`;
+
+const MATCHER_AT_LEAST_ONE_MESSAGE =
+  'matcher must set at least one of `tags`, `expression`; omit `matcher` for a catch-all policy.';
+
+const namesAMatcherLeaf = (matcher: { tags?: string[]; expression?: string }): boolean =>
+  matcher.tags !== undefined || matcher.expression !== undefined;
+
+const matcherTagsSchema = z
+  .array(z.string().min(1).max(POLICY_MATCHER_TAG_MAX_LENGTH))
+  .min(1)
+  .max(POLICY_MATCHER_TAGS_MAX);
+
+const matcherExpressionSchema = z.string().max(MAX_KQL_LENGTH).trim().min(1);
+
+export const policyMatcherSchema = z
+  .object({
+    tags: matcherTagsSchema.optional().describe(POLICY_MATCHER_TAGS_DESCRIPTION),
+    expression: matcherExpressionSchema.optional().describe(POLICY_MATCHER_EXPRESSION_DESCRIPTION),
+  })
+  .strict()
+  .refine(namesAMatcherLeaf, { message: MATCHER_AT_LEAST_ONE_MESSAGE });
 
 export type PolicyMatcher = z.infer<typeof policyMatcherSchema>;
+
+export const policyMatcherPatchSchema = z
+  .object({
+    tags: matcherTagsSchema.nullable().optional().describe(POLICY_MATCHER_TAGS_PATCH_DESCRIPTION),
+    expression: matcherExpressionSchema
+      .nullable()
+      .optional()
+      .describe(POLICY_MATCHER_EXPRESSION_PATCH_DESCRIPTION),
+  })
+  .strict();

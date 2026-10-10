@@ -75,6 +75,8 @@ The director creates a new episode id when:
 
 Otherwise it preserves the existing episode id so the lifecycle stays correlated across runs.
 
+A new episode id is **deterministic** (uuid v5), seeded from `rule.id | group_hash | scheduled_timestamp`, not a random uuid. This matters because the director runs once per streamed batch and a single-series (ungrouped) rule emits one event per returned row — many events sharing one `group_hash` within a run, spread across batches the director processes independently against the same (empty, for a new series) prior state. A random id per event would split that one series into many episodes; seeding from the run's scheduled timestamp collapses every new-episode event of a run to the same id (within and across batches, with no shared state), while a later run that reopens the series gets a different id because the timestamp differs. A series opens at most one episode per run, so distinct episodes never collide, and the id is idempotent across task retries of the same run.
+
 ## Lifecycle concepts
 
 ### Input event status

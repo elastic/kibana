@@ -39,6 +39,9 @@ describe('nightshift investigation saved object model version 4', () => {
 
   it('registers a schema-only model version without data or mapping changes', () => {
     expect(modelVersion4?.changes).toEqual([]);
+    expect(Object.keys(modelVersions)).toEqual(['1', '2', '3', '4']);
+    expect(modelVersion4?.schemas?.create).toBeDefined();
+    expect(modelVersion4?.schemas?.forwardCompatibility).toBeDefined();
   });
 
   it('accepts an impact with a top-level summary and evidence and no entities on create', () => {
@@ -73,6 +76,71 @@ describe('nightshift investigation saved object model version 4', () => {
         ...baseAttributes,
         blind_spots: [{ title: 'No traces', confidence: 0.5, description: 'Missing' }],
       })
+    ).toThrow();
+  });
+
+  it('keeps delivery state out of the investigation Saved Object schema', () => {
+    expect(() =>
+      modelVersion4?.schemas?.create?.validate({
+        ...baseAttributes,
+        notificationDestinations: [],
+        notifications: [],
+      })
+    ).toThrow();
+  });
+  it("accepts the latest run's execution", () => {
+    expect(() =>
+      modelVersion4?.schemas?.create?.validate({
+        ...baseAttributes,
+        status: 'running',
+        execution_id: 'exec-follow-up',
+      })
+    ).not.toThrow();
+  });
+
+  const threadInvestigation = (thread: Record<string, unknown>) => ({
+    ...baseAttributes,
+    status: 'pending',
+    thread,
+  });
+
+  it('accepts the thread the investigation belongs to', () => {
+    expect(() =>
+      modelVersion4?.schemas?.create?.validate(
+        threadInvestigation({
+          surface: 'slack',
+          workspace: 'T1',
+          channel: 'C1',
+          thread_ts: '1700.0001',
+          status_message_ts: '1700.0002',
+          seen_events: [
+            { event_id: 'Ev1', execution_id: 'exec-1' },
+            { event_id: 'Ev2', execution_id: 'exec-2' },
+          ],
+        })
+      )
+    ).not.toThrow();
+  });
+
+  it('rejects a handled event without the execution that handled it', () => {
+    expect(() =>
+      modelVersion4?.schemas?.create?.validate(
+        threadInvestigation({
+          surface: 'slack',
+          workspace: 'T1',
+          channel: 'C1',
+          thread_ts: '1700.0001',
+          seen_events: [{ event_id: 'Ev1' }],
+        })
+      )
+    ).toThrow();
+  });
+
+  it('rejects a thread from another surface', () => {
+    expect(() =>
+      modelVersion4?.schemas?.create?.validate(
+        threadInvestigation({ surface: 'teams', workspace: 'T1', channel: 'C1', thread_ts: '1' })
+      )
     ).toThrow();
   });
 });

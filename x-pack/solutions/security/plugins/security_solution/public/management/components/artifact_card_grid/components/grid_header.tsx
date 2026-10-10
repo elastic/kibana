@@ -10,21 +10,21 @@ import { i18n } from '@kbn/i18n';
 import type { CommonProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
 import { CardCompressedHeaderLayout, CardSectionPanel } from '../../artifact_entry_card';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-
-const GridHeaderContainer = styled(CardSectionPanel)`
-  padding-top: 0;
-  padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
-`;
 
 export type GridHeaderProps = Pick<CommonProps, 'data-test-subj'> & {
   expandAllIconType: 'fold' | 'unfold';
   onExpandCollapseAll(): void;
+  showEnabledColumn?: boolean;
 };
 export const GridHeader = memo<GridHeaderProps>(
-  ({ 'data-test-subj': dataTestSubj, expandAllIconType, onExpandCollapseAll }) => {
+  ({
+    'data-test-subj': dataTestSubj,
+    expandAllIconType,
+    onExpandCollapseAll,
+    showEnabledColumn = false,
+  }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     const expandToggleElement = useMemo(
@@ -46,7 +46,6 @@ export const GridHeader = memo<GridHeaderProps>(
             aria-expanded={expandAllIconType === 'fold'}
             iconType={expandAllIconType}
             onClick={() => onExpandCollapseAll()}
-            css={{ marginLeft: '-5px' }}
           />
         </EuiToolTip>
       ),
@@ -54,7 +53,7 @@ export const GridHeader = memo<GridHeaderProps>(
     );
 
     return (
-      <GridHeaderContainer data-test-subj={dataTestSubj}>
+      <CardSectionPanel gridHeader data-test-subj={dataTestSubj}>
         <CardCompressedHeaderLayout
           expanded={false}
           expandToggle={expandToggleElement}
@@ -90,9 +89,21 @@ export const GridHeader = memo<GridHeaderProps>(
               </strong>
             </EuiText>
           }
+          enabledStatus={
+            showEnabledColumn ? (
+              <EuiText size="xs" data-test-subj={getTestId('enabled')}>
+                <strong>
+                  <FormattedMessage
+                    id="xpack.securitySolution.artifactCardGrid.enabledColumn"
+                    defaultMessage="Enabled"
+                  />
+                </strong>
+              </EuiText>
+            ) : undefined
+          }
           actionMenu={true}
         />
-      </GridHeaderContainer>
+      </CardSectionPanel>
     );
   }
 );

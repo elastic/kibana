@@ -145,7 +145,7 @@ export const fromStoredSearchAndTable = (
       }
     : {
         ...apiTab,
-        ...(sampleSize && { sample_size: sampleSize }),
+        ...(sampleSize && { sample_size: Math.max(10, sampleSize) }),
         ...(query && { query: toAsCodeQuery(query) }),
         filters: fromStoredTabFilters(searchSource),
         data_source: fromStoredDataView(index),

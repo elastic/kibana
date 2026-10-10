@@ -206,6 +206,30 @@ describe('RelayClient', () => {
     });
   });
 
+  it('returns the workspace name and URL from a complete claim', async () => {
+    requestMock.mockResolvedValueOnce({
+      status: 200,
+      data: { tenant_key: 'T0123ABC', tenant_name: 'Acme', tenant_url: 'https://acme.slack.com/' },
+    } as never);
+    await expect(createClient().fetchClaim('claim-1')).resolves.toEqual({
+      status: 'complete',
+      tenant_key: 'T0123ABC',
+      tenant_name: 'Acme',
+      tenant_url: 'https://acme.slack.com/',
+    });
+  });
+
+  it('drops non-string workspace name and URL from a complete claim', async () => {
+    requestMock.mockResolvedValueOnce({
+      status: 200,
+      data: { tenant_key: 'T0123ABC', tenant_name: 42, tenant_url: null },
+    } as never);
+    await expect(createClient().fetchClaim('claim-1')).resolves.toEqual({
+      status: 'complete',
+      tenant_key: 'T0123ABC',
+    });
+  });
+
   it('unbind posts the tenant key to the uninstall endpoint', async () => {
     requestMock.mockResolvedValue({ status: 200, data: {} } as never);
 
@@ -381,6 +405,32 @@ describe('RelayClient', () => {
       expect(requestMock).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({ thread_ts: '1700000000.000100' }),
+        })
+      );
+    });
+
+    it('sends message_ts and drops thread_ts when editing a posted message', async () => {
+      requestMock.mockResolvedValue({
+        status: 200,
+        data: { ref: '1700000000.000200', tenant_key: 'team-A' },
+      } as never);
+
+      await createClient().trigger({
+        tenantKey: 'team-A',
+        channel: 'C123',
+        message: 'edited',
+        threadTs: '1700000000.000100',
+        messageTs: '1700000000.000200',
+      });
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: {
+            tenant_key: 'team-A',
+            channel: 'C123',
+            message: 'edited',
+            message_ts: '1700000000.000200',
+          },
         })
       );
     });

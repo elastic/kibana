@@ -290,6 +290,7 @@ describe('rule template create-rule schema coupling', () => {
                     "type": "string",
                   },
                   "maxItems": 16,
+                  "minItems": 1,
                   "type": "array",
                 },
               },
@@ -302,14 +303,26 @@ describe('rule template create-rule schema coupling', () => {
               "additionalProperties": false,
               "description": "Rule metadata.",
               "properties": Object {
-                "builder_type": Object {
-                  "description": "Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES|QL.",
-                  "maxLength": 64,
-                  "type": "string",
+                "builder": Object {
+                  "additionalProperties": false,
+                  "description": "Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES|QL; send \`null\` on PATCH to clear it.",
+                  "properties": Object {
+                    "type": Object {
+                      "description": "Rule builder type.",
+                      "maxLength": 64,
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                  },
+                  "required": Array [
+                    "type",
+                  ],
+                  "type": "object",
                 },
                 "description": Object {
-                  "description": "Human-readable description of the rule.",
+                  "description": "Human-readable description of the rule. Omit to leave it unset; send \`null\` on PATCH to clear it. An empty string is rejected.",
                   "maxLength": 1024,
+                  "minLength": 1,
                   "type": "string",
                 },
                 "name": Object {
@@ -317,6 +330,17 @@ describe('rule template create-rule schema coupling', () => {
                   "maxLength": 256,
                   "minLength": 1,
                   "type": "string",
+                },
+                "routing_tags": Object {
+                  "description": "Routing tags that link alerts from this rule to action policies. An action policy applies when its \`matcher.tags\` contains at least one of these tags. Only allowed when kind is \\"alert\\".",
+                  "items": Object {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "maxItems": 20,
+                  "minItems": 1,
+                  "type": "array",
                 },
                 "tags": Object {
                   "description": "Tags for categorization, e.g. [\\"production\\", \\"infra\\"].",
@@ -632,11 +656,12 @@ describe('rule template create-rule schema coupling', () => {
           },
           "properties": Object {
             "artifacts": Object {
-              "description": "Optional objects attached to the rule, such as a runbook or a dashboard. Each item has \`id\`, \`type\`, and \`data\`. The shape of \`data\` depends on \`type\`. For example, a \`runbook\` uses \`content\` and a \`dashboard\` uses \`dashboard_id\`. Known types are validated against that shape. Unknown types are stored when \`id\`, \`type\`, and \`data\` are present.",
+              "description": "Optional objects attached to the rule, such as a runbook or a dashboard. Each item has \`id\`, \`type\`, and \`data\`. The shape of \`data\` depends on \`type\`. For example, a \`runbook\` uses \`content\` and a \`dashboard\` uses \`dashboard_id\`. Known types are validated against that shape. Unknown types are stored when \`id\`, \`type\`, and \`data\` are present. An empty array is rejected: omit \`artifacts\` on create, or send \`null\` on PATCH to clear.",
               "items": Object {
                 "$ref": "#/definitions/alerting_rule_artifact",
               },
               "maxItems": 100,
+              "minItems": 1,
               "type": "array",
             },
             "grouping": Object {
@@ -685,16 +710,9 @@ describe('rule template create-rule schema coupling', () => {
               "$ref": "#/definitions/alerting_rule_schedule",
             },
             "state_transition": Object {
-              "anyOf": Array [
+              "allOf": Array [
                 Object {
-                  "allOf": Array [
-                    Object {
-                      "$ref": "#/definitions/alerting_rule_state_transition",
-                    },
-                  ],
-                },
-                Object {
-                  "type": "null",
+                  "$ref": "#/definitions/alerting_rule_state_transition",
                 },
               ],
             },

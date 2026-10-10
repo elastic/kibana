@@ -220,8 +220,6 @@ dependsOn:
   - '@kbn/data-stream-adapter'
   - '@kbn/core-lifecycle-server'
   - '@kbn/core-user-profile-common'
-  - '@kbn/core-user-profile-server'
-  - '@kbn/core-user-profile-server-mocks'
   - '@kbn/langchain'
   - '@kbn/discover-shared-plugin'
   - '@kbn/react-hooks'
@@ -279,6 +277,7 @@ dependsOn:
   - '@kbn/agentic-investigations-plugin'
   - '@kbn/mitre-attack-plugin'
   - '@kbn/security-mitre-attack-common'
+  - '@kbn/security-mitre-attack-server'
   - '@kbn/lazy-object'
   - '@kbn/ai-assistant-common'
   - '@kbn/product-doc-common'
@@ -305,6 +304,7 @@ dependsOn:
   - '@kbn/evals-plugin'
   - '@kbn/shared-ux-column-presets'
   - '@kbn/core-overlays-browser'
+  - '@kbn/flyout-template'
   - '@kbn/workflows-management-plugin'
   - '@kbn/core-application-browser-mocks'
   - '@kbn/date-range-picker'
@@ -320,6 +320,9 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/code-editor-mock'
   - '@kbn/test-es-server'
+  - '@kbn/core-user-profile-server-mocks'
+  - '@kbn/core-user-profile-server'
+  - '@kbn/core-security-server'
 tags:
   - plugin
   - prod
@@ -335,10 +338,9 @@ fileGroups:
     - test/scout_ai_value_report/**/*
     - test/scout_cps_local/**/*
     - test/scout_edr_real_fleet/**/*
-    - test/scout_managed_mitre/**/*
     - test/scout_es_max_response_size/**/*
     - test/scout_security_attacks_alignment/**/*
-    - test/scout_threat_intel/**/*
+    - test/scout_alertzero/**/*
     - common/**/*.json
     - server/**/*.json
     - scripts/**/*.json

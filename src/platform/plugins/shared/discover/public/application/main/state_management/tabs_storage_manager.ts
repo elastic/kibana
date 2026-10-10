@@ -56,6 +56,7 @@ interface TabsStateInLocalStorage {
   userId: string;
   spaceId: string;
   discoverSessionId: string | undefined;
+  draftSessionTitle: string | undefined;
   openTabs: TabStateInLocalStorage[];
   closedTabs: RecentlyClosedTabStateInLocalStorage[];
 }
@@ -64,6 +65,7 @@ const defaultTabsStateInLocalStorage: TabsStateInLocalStorage = {
   userId: '',
   spaceId: '',
   discoverSessionId: undefined,
+  draftSessionTitle: undefined,
   openTabs: [],
   closedTabs: [],
 };
@@ -87,6 +89,7 @@ interface LoadTabsOptions {
 interface LoadedTabs extends TabsInternalStatePayload {
   updatedDiscoverSession: DiscoverSession | undefined;
   inlineDataViewIds: NormalizedInlineDataViewIds;
+  draftSessionTitle: string | undefined;
 }
 
 export interface TabsStorageManager {
@@ -98,7 +101,8 @@ export interface TabsStorageManager {
   persistLocally: (
     props: Omit<TabsInternalStatePayload, 'selectedTabId'>,
     getInternalState: (tabId: string) => TabState['initialInternalState'] | undefined,
-    discoverSessionId: string | undefined
+    discoverSessionId: string | undefined,
+    draftSessionTitle?: string
   ) => Promise<void>;
   updateTabStateLocally: (
     tabId: string,
@@ -321,6 +325,7 @@ export const createTabsStorageManager = ({
       userId: storedTabsState?.userId || '',
       spaceId: storedTabsState?.spaceId || '',
       discoverSessionId: storedTabsState?.discoverSessionId || undefined,
+      draftSessionTitle: storedTabsState?.draftSessionTitle || undefined,
       openTabs: storedTabsState?.openTabs || [],
       closedTabs: storedTabsState?.closedTabs || [],
     };
@@ -371,7 +376,8 @@ export const createTabsStorageManager = ({
   const persistLocally: TabsStorageManager['persistLocally'] = async (
     { allTabs, recentlyClosedTabs },
     getInternalState,
-    discoverSessionId
+    discoverSessionId,
+    draftSessionTitle
   ) => {
     if (!enabled) {
       return;
@@ -388,6 +394,7 @@ export const createTabsStorageManager = ({
       userId: sessionInfo.userId,
       spaceId: sessionInfo.spaceId,
       discoverSessionId,
+      draftSessionTitle,
       openTabs,
       closedTabs, // wil be used for "Recently closed tabs" feature
     };
@@ -500,6 +507,11 @@ export const createTabsStorageManager = ({
       // if the discover session has changed, use the tabs from the session
       openTabs = persistedTabs ?? [];
     }
+    // The draft title belongs to the unsaved session, so only keep it when restoring its open tabs
+    const restoredDraftSessionTitle =
+      !updatedDiscoverSession && !storedTabsState.discoverSessionId
+        ? storedTabsState.draftSessionTitle
+        : undefined;
 
     // restore previously opened tabs
     if (enabled) {
@@ -514,6 +526,7 @@ export const createTabsStorageManager = ({
           selectedTabId,
           updatedDiscoverSession,
           inlineDataViewIds,
+          draftSessionTitle: restoredDraftSessionTitle,
           recentlyClosedTabs: getNRecentlyClosedTabs({
             previousOpenTabs,
             previousRecentlyClosedTabs: closedTabs,
@@ -543,6 +556,7 @@ export const createTabsStorageManager = ({
           selectedTabId: newTab.id,
           updatedDiscoverSession,
           inlineDataViewIds,
+          draftSessionTitle: restoredDraftSessionTitle,
           recentlyClosedTabs: getNRecentlyClosedTabs({
             previousOpenTabs,
             previousRecentlyClosedTabs: closedTabs,
@@ -565,6 +579,7 @@ export const createTabsStorageManager = ({
             selectedTabId,
             updatedDiscoverSession,
             inlineDataViewIds,
+            draftSessionTitle: undefined,
             recentlyClosedTabs: getNRecentlyClosedTabs({
               previousOpenTabs,
               previousRecentlyClosedTabs: closedTabs,
@@ -598,6 +613,7 @@ export const createTabsStorageManager = ({
       selectedTabId: selectedTab.id,
       updatedDiscoverSession,
       inlineDataViewIds,
+      draftSessionTitle: undefined,
       recentlyClosedTabs: getNRecentlyClosedTabs({
         previousOpenTabs,
         previousRecentlyClosedTabs: closedTabs,

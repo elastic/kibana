@@ -691,6 +691,13 @@ describe('search embeddable transform utils', () => {
   });
 
   describe('fromStoredTableSettings', () => {
+    it.each([1, 9])('raises sample size %s to the API minimum of 10', (sampleSize) => {
+      const storedState = { sampleSize };
+
+      expect(fromStoredTableSettings(storedState)).toEqual({ sample_size: 10 });
+      expect(storedState.sampleSize).toBe(sampleSize);
+    });
+
     it('converts stored state with all fields to panel overrides', () => {
       const storedState: StoredSearchEmbeddableState = {
         sort: [['@timestamp', 'desc']],

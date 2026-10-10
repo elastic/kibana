@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type {
   EuiDataGridCellValueElementProps,
@@ -21,6 +20,7 @@ import type { UnifiedDataTableProps } from './data_table';
 import React, { useCallback, useState } from 'react';
 import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
+import { EsqlSource } from '@kbn/data-source';
 import {
   buildDataViewMock,
   deepMockedFields,
@@ -54,6 +54,7 @@ import { useColumns } from '../hooks/use_data_grid_columns';
 import { UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS } from '../hooks/use_full_screen_watcher';
 import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 const mockUseDataGridColumnsCellActions = jest.fn((_prop: unknown) => []);
 
@@ -632,7 +633,7 @@ describe('UnifiedDataTable', () => {
       async () => {
         await renderDataTable({
           columns: ['message'],
-          isPlainRecord: true,
+          dataSource: createMockEsqlSource(),
           rows: generateEsHits(dataViewMock, 10).map((hit) =>
             buildDataTableRecord(hit, dataViewMock)
           ),
@@ -680,7 +681,7 @@ describe('UnifiedDataTable', () => {
       async () => {
         await renderDataTable({
           columns: ['message'],
-          isPlainRecord: true,
+          dataSource: createMockEsqlSource(),
           isInMemorySortEnabled: false,
           rows: generateEsHits(dataViewMock, 10).map((hit) =>
             buildDataTableRecord(hit, dataViewMock)
@@ -811,7 +812,7 @@ describe('UnifiedDataTable', () => {
 
         await renderDataTable({
           columns: ['message'],
-          isPlainRecord: true,
+          dataSource: createMockEsqlSource(),
           rows: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
         });
 
@@ -1111,8 +1112,6 @@ describe('UnifiedDataTable', () => {
         },
       };
 
-      const columnsMetaOverride = { testField: { type: 'number' as DatatableColumnType } };
-
       const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
         <div data-test-subj="test-document-view">{hit.id}</div>
       ));
@@ -1121,7 +1120,6 @@ describe('UnifiedDataTable', () => {
 
       await renderComponent({
         ...getProps(),
-        columnsMeta: columnsMetaOverride,
         expandedDoc,
         externalControlColumns: [testLeadingControlColumn],
         renderDocumentView: renderDocumentViewMock,
@@ -1135,7 +1133,38 @@ describe('UnifiedDataTable', () => {
         expandedDoc,
         getProps().rows,
         ['_source'],
-        columnsMetaOverride
+        undefined
+      );
+    },
+    EXTENDED_JEST_TIMEOUT
+  );
+
+  it(
+    'should give renderDocumentView the data source',
+    async () => {
+      const dataSource = await EsqlSource.create({
+        query: 'FROM test_i | EVAL testField = 1',
+        resultColumns: [{ id: 'testField', name: 'testField', meta: { type: 'number' } }],
+      });
+      const { rows } = getProps();
+      const expandedDoc = rows?.[0];
+      const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
+        <div data-test-subj="test-document-view">{hit.id}</div>
+      ));
+
+      await renderComponent({
+        ...getProps(),
+        dataSource,
+        expandedDoc,
+        renderDocumentView: renderDocumentViewMock,
+        setExpandedDoc: jest.fn(),
+      });
+
+      expect(renderDocumentViewMock).toHaveBeenLastCalledWith(
+        expandedDoc,
+        rows,
+        ['_source'],
+        dataSource
       );
     },
     EXTENDED_JEST_TIMEOUT

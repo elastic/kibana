@@ -75,6 +75,8 @@ export class StreamsApp {
   public readonly canvasContextMenu;
   public readonly canvasContextMenuTidyUp;
   public readonly canvasEmptyState;
+  public readonly canvasSearch;
+  public readonly canvasSearchNoMatches;
   // Streams layout
   public readonly streamsSourcesTable;
   public readonly streamsAddSourceButton;
@@ -144,6 +146,8 @@ export class StreamsApp {
     this.canvasContextMenu = this.page.testSubj.locator('streamsCanvasContextMenu');
     this.canvasContextMenuTidyUp = this.page.testSubj.locator('streamsCanvasContextMenuTidyUp');
     this.canvasEmptyState = this.page.testSubj.locator('streamsCanvasEmptyState');
+    this.canvasSearch = this.page.testSubj.locator('streamsCanvasSearch');
+    this.canvasSearchNoMatches = this.page.testSubj.locator('streamsCanvasSearchNoMatches');
     // Streams layout locators
     this.streamsSourcesTable = this.page.testSubj.locator('streamsSourcesTable');
     this.streamsAddSourceButton = this.page.testSubj.locator('streamsAddSourceButton');
@@ -205,6 +209,27 @@ export class StreamsApp {
 
   async clickStreamsLayoutTab(tabName: string) {
     await this.getStreamsLayoutTab(tabName).click();
+  }
+
+  /** Opens the canvas with its search pre-filled from the URL. */
+  async gotoCanvasSearch(query: string) {
+    await this.page.gotoApp('streams/new-experience/canvas', {
+      params: { canvasState: `(flyoutName:!n,flyoutTab:!n,query:'${query}')` },
+    });
+  }
+
+  getDestinationShowOnCanvasButton(destinationName: string) {
+    return this.streamsDestinationsTable
+      .getByRole('row')
+      .filter({ hasText: destinationName })
+      .getByTestId('streamsShowOnCanvasAction');
+  }
+
+  getSourceShowOnCanvasButton(sourceName: string) {
+    return this.streamsSourcesTable
+      .getByRole('row')
+      .filter({ hasText: sourceName })
+      .getByTestId('streamsShowOnCanvasAction');
   }
 
   // Canvas utility methods
@@ -509,10 +534,7 @@ export class StreamsApp {
 
   // Routing-specific utility methods
   async clickCreateRoutingRule() {
-    const button = this.page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton');
-    await expect(button).toBeVisible();
-    // Locator.click() can get flaky here due to rapid re-renders; use a direct DOM click.
-    await button.evaluate((el) => (el as HTMLElement).click());
+    await this.page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton').click();
   }
 
   async fillRoutingRuleName(name: string) {
@@ -892,25 +914,18 @@ export class StreamsApp {
   }
 
   async fillGrokPatternInput(value: string) {
-    // Clean previous content
-    await this.page.getByTestId('streamsAppPatternExpression').click();
-    await this.page.keyboard.press('Control+A');
-    await this.page.keyboard.press('Backspace');
-    // Fill with new condition
-    await this.page.getByTestId('streamsAppPatternExpression').getByRole('textbox').fill(value);
+    await this.kibanaMonacoEditor.setCodeEditorValueByTestSubj(
+      'streamsAppPatternExpression',
+      value
+    );
   }
 
   async fillGrokPatternDefinitionsInput(value: string) {
     await this.page.getByRole('button', { name: 'Advanced settings' }).click();
-    // Clean previous content
-    await this.page.getByTestId('streamsAppPatternDefinitionsEditor').click();
-    await this.page.keyboard.press('Control+A');
-    await this.page.keyboard.press('Backspace');
-    // Fill with new condition
-    await this.page
-      .getByTestId('streamsAppPatternDefinitionsEditor')
-      .getByRole('textbox')
-      .fill(value);
+    await this.kibanaMonacoEditor.setCodeEditorValueByTestSubj(
+      'streamsAppPatternDefinitionsEditor',
+      value
+    );
   }
 
   async fillDateProcessorSourceFieldInput(value: string) {
@@ -942,15 +957,10 @@ export class StreamsApp {
   }
 
   async fillCustomSamplesEditor(value: string) {
-    // Clean previous content
-    await this.page.getByTestId('streamsAppCustomSamplesDataSourceEditor').click();
-    await this.page.keyboard.press('Control+A');
-    await this.page.keyboard.press('Backspace');
-    // Fill with new condition
-    await this.page
-      .getByTestId('streamsAppCustomSamplesDataSourceEditor')
-      .getByRole('textbox')
-      .fill(value);
+    await this.kibanaMonacoEditor.setCodeEditorValueByTestSubj(
+      'streamsAppCustomSamplesDataSourceEditor',
+      value
+    );
   }
 
   async fillCondition(field: string, operator: string, value: string) {
