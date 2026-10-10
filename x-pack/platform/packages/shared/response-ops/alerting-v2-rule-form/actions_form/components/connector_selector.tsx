@@ -22,14 +22,25 @@ import {
   type SingleStepConnector,
   useFetchConnectorsByType,
 } from '../hooks/use_fetch_connectors_by_type';
+import type { ConnectorCreationConfig } from '../types';
 
 interface ConnectorSelectorProps {
   connectorTypeId: string;
   value: string | null;
   onChange: (connectorId: string | null) => void;
+  onBlur?: () => void;
+  connectorCreationConfig?: ConnectorCreationConfig;
+  error?: string;
 }
 
-export const ConnectorSelector = ({ connectorTypeId, value, onChange }: ConnectorSelectorProps) => {
+export const ConnectorSelector = ({
+  connectorTypeId,
+  value,
+  onChange,
+  onBlur,
+  connectorCreationConfig = { mode: 'flyout' },
+  error,
+}: ConnectorSelectorProps) => {
   const { data: connectors = [], isLoading } = useFetchConnectorsByType({ connectorTypeId });
   const triggersActionsUi = useService(
     PluginStart('triggersActionsUi')
@@ -89,7 +100,13 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
         labelAppend={
           <EuiLink
             data-test-subj="singleStepWorkflowCreateConnectorLink"
-            onClick={() => setIsCreateFlyoutOpen(true)}
+            {...(connectorCreationConfig.mode === 'new-tab'
+              ? {
+                  href: connectorCreationConfig.href,
+                  target: '_blank',
+                  rel: 'noopener noreferrer',
+                }
+              : { onClick: () => setIsCreateFlyoutOpen(true) })}
           >
             {i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.connector.createNew', {
               defaultMessage: '+ Create new connector',
@@ -97,6 +114,8 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
           </EuiLink>
         }
         fullWidth
+        isInvalid={!!error}
+        error={error}
       >
         <EuiComboBox
           fullWidth
@@ -104,6 +123,7 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
           singleSelection={{ asPlainText: true }}
           data-test-subj="singleStepWorkflowConnectorSelect"
           isLoading={isLoading}
+          isInvalid={!!error}
           placeholder={i18n.translate(
             'xpack.responseOps.alertingV2RuleForm.actionForm.connector.placeholder',
             {
@@ -111,11 +131,13 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
             }
           )}
           selectedOptions={selected}
+          onFocus={() => queryClient.invalidateQueries({ queryKey: ALL_CONNECTORS_KEY })}
+          onBlur={onBlur}
           onChange={(next) => onChange(next[0]?.value ?? null)}
           options={options}
         />
       </EuiFormRow>
-      {isCreateFlyoutOpen && (
+      {connectorCreationConfig.mode === 'flyout' && isCreateFlyoutOpen && (
         <KibanaContextProvider services={connectorFlyoutServices}>
           {triggersActionsUi.getAddConnectorFlyout({
             initialConnector: { actionTypeId: connectorTypeId },

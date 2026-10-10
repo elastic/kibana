@@ -16,6 +16,7 @@ import { ElasticInferenceServiceModelsPage } from './elastic_inference_service_m
 import { EIS_DISPLAY_OPTIONS_TOUR_STORAGE_KEY } from '../../hooks/use_display_options_tour';
 import type { EisInferenceEndpoint } from '../../../common/types';
 import { useEisModels } from '../../hooks/use_eis_models';
+import type { EisPageState } from '../../hooks/use_eis_page_state';
 import { InferenceEndpoints } from '../../__mocks__/inference_endpoints';
 
 jest.mock('../../hooks/use_eis_models');
@@ -23,6 +24,9 @@ jest.mock('../../hooks/use_kibana');
 
 const { useKibana } = jest.requireMock('../../hooks/use_kibana');
 const mockUseKibana = useKibana as jest.Mock;
+
+const mockNavigateToApp = jest.fn();
+const mockShowErrorDialog = jest.fn();
 
 const mockKibanaReturn = ({
   manage = true,
@@ -32,9 +36,11 @@ const mockKibanaReturn = ({
     notifications: {
       toasts: { addSuccess: jest.fn(), addDanger: jest.fn() },
       tours: { isEnabled: () => toursEnabled },
+      showErrorDialog: mockShowErrorDialog,
     },
     application: {
       capabilities: { searchInferenceEndpoints: { show: true, manage } },
+      navigateToApp: mockNavigateToApp,
     },
   },
 });
@@ -57,12 +63,15 @@ const countCards = (container: HTMLElement) =>
 
 // The page mounts under the app's `Router`, which is what enables the Content
 // List's URL sync — omitting it here hid a filtering regression from jest.
-const renderPage = () =>
+const renderPage = (pageState: EisPageState = 'models') =>
   render(
     <EuiThemeProvider>
       <I18nProvider>
         <Router history={createMemoryHistory()}>
-          <ElasticInferenceServiceModelsPage />
+          <ElasticInferenceServiceModelsPage
+            pageState={pageState}
+            isCloudConnectPromoVisible={false}
+          />
         </Router>
       </I18nProvider>
     </EuiThemeProvider>
@@ -88,14 +97,93 @@ describe('ElasticInferenceServiceModelsPage', () => {
 
   it('renders a loading spinner when data is loading', () => {
     mockUseEisModels.mockReturnValue({ data: undefined, isLoading: true, isError: false });
-    const { container } = renderPage();
-    expect(container.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+    const { getByTestId } = renderPage('loading');
+    expect(getByTestId('eisModelsLoadingSpinner')).toBeInTheDocument();
   });
 
-  it('renders an error prompt when fetching fails', () => {
-    mockUseEisModels.mockReturnValue({ data: undefined, isLoading: false, isError: true });
-    const { getByText } = renderPage();
-    expect(getByText('Unable to load models')).toBeInTheDocument();
+  describe('Elastic Inference Service unavailable', () => {
+    const error = new Error('Service unavailable');
+    const refetch = jest.fn();
+
+    it('renders the unavailable prompt without the models grid', () => {
+      mockUseEisModels.mockReturnValue({ data: undefined, isError: true, error, refetch });
+      const { getByTestId, queryByTestId } = renderPage('unavailable');
+      expect(getByTestId('eisUnavailablePrompt')).toBeInTheDocument();
+      expect(queryByTestId(SEARCH_BOX)).not.toBeInTheDocument();
+    });
+
+    it('refetches the models when Retry is clicked', () => {
+      mockUseEisModels.mockReturnValue({ data: undefined, isError: true, error, refetch });
+      const { getByTestId } = renderPage('unavailable');
+      fireEvent.click(getByTestId('eisUnavailableRetryButton'));
+      expect(refetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('opens the error dialog when View error details is clicked', () => {
+      mockUseEisModels.mockReturnValue({ data: undefined, isError: true, error, refetch });
+      const { getByTestId } = renderPage('unavailable');
+      fireEvent.click(getByTestId('eisUnavailableErrorDetailsButton'));
+      expect(mockShowErrorDialog).toHaveBeenCalledWith({
+        title: 'Elastic Inference Service unavailable',
+        error,
+      });
+    });
+
+    it('shows a loading Retry button while refetching', () => {
+      mockUseEisModels.mockReturnValue({
+        data: undefined,
+        isError: true,
+        isFetching: true,
+        error,
+        refetch,
+      });
+      const { getByTestId } = renderPage('unavailable');
+      expect(getByTestId('eisUnavailableRetryButton')).toBeDisabled();
+    });
+
+    it('hides View error details when there is no error', () => {
+      mockUseEisModels.mockReturnValue({ data: [], error: null, refetch });
+      const { queryByTestId } = renderPage('unavailable');
+      expect(queryByTestId('eisUnavailableErrorDetailsButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('self-managed without Elastic Inference Service', () => {
+    it('renders the self-managed empty prompt without the models grid', () => {
+      mockUseEisModels.mockReturnValue({ data: [], isLoading: false, isError: false });
+      const { getByTestId, queryByTestId } = renderPage('selfManagedEmpty');
+      expect(getByTestId('eisSelfManagedEmptyPrompt')).toBeInTheDocument();
+      expect(getByTestId('eisDocumentationLink')).toBeInTheDocument();
+      expect(queryByTestId(SEARCH_BOX)).not.toBeInTheDocument();
+    });
+
+    it('opens Cloud Connect when Connect your cluster is clicked', () => {
+      mockUseEisModels.mockReturnValue({ data: [], isLoading: false, isError: false });
+      const { getByTestId } = renderPage('selfManagedEmpty');
+      fireEvent.click(getByTestId('eisConnectYourClusterButton'));
+      expect(mockNavigateToApp).toHaveBeenCalledWith('cloud_connect', { openInNewTab: true });
+    });
+  });
+
+  describe('Elastic Inference Service disabled in Cloud Connect', () => {
+    it('renders the disabled callout above the models grid', async () => {
+      mockUseEisModels.mockReturnValue({ data: endpoints, isLoading: false, isError: false });
+      const { container, getByTestId } = renderPage('serviceDisabled');
+      expect(getByTestId('eisServiceDisabledCallout')).toBeInTheDocument();
+      await waitFor(() => expect(countCards(container)).toBeGreaterThan(0));
+    });
+
+    it('opens Cloud Connect when Open Cloud Connect is clicked', () => {
+      mockUseEisModels.mockReturnValue({ data: endpoints, isLoading: false, isError: false });
+      const { getByTestId } = renderPage('serviceDisabled');
+      fireEvent.click(getByTestId('eisOpenCloudConnectButton'));
+      expect(mockNavigateToApp).toHaveBeenCalledWith('cloud_connect', { openInNewTab: true });
+    });
+
+    it('does not render the disabled callout when the service is enabled', async () => {
+      const { queryByTestId } = await renderPopulatedPage();
+      expect(queryByTestId('eisServiceDisabledCallout')).not.toBeInTheDocument();
+    });
   });
 
   it('renders model cards when data is loaded', async () => {
@@ -169,14 +257,63 @@ describe('ElasticInferenceServiceModelsPage', () => {
     expect(getByTestId('modelFamilyFilterMultiselect')).toBeInTheDocument();
   });
 
+  it('filters models by region and clears the selection', async () => {
+    mockUseEisModels.mockReturnValue({
+      data: [
+        {
+          inference_id: '.us-model',
+          task_type: 'chat_completion',
+          service: 'elastic',
+          service_settings: { model_id: 'us-model' },
+          metadata: {
+            heuristics: { status: 'ga' },
+            display: { name: 'US Model', model_creator: 'Anthropic' },
+            regions: [{ csp: 'aws', region: 'us-east-1', geo: 'us' }],
+          },
+        },
+        {
+          inference_id: '.eu-model',
+          task_type: 'chat_completion',
+          service: 'elastic',
+          service_settings: { model_id: 'eu-model' },
+          metadata: {
+            heuristics: { status: 'ga' },
+            display: { name: 'EU Model', model_creator: 'OpenRouter' },
+            regions: [{ geo: 'eu' }],
+          },
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    const { getByTestId, queryByTestId } = renderPage();
+    await waitFor(() => expect(getByTestId('eisModelCard-US Model')).toBeInTheDocument());
+    expect(getByTestId('regionFilterMultiselect')).toHaveTextContent('Region');
+
+    fireEvent.click(getByTestId('regionFilterMultiselect'));
+    fireEvent.click(await waitFor(() => getByTestId('regionFilterOption-geo-us')));
+    await waitFor(() => expect(queryByTestId('eisModelCard-EU Model')).not.toBeInTheDocument());
+    expect(getByTestId('eisModelCard-US Model')).toBeInTheDocument();
+
+    fireEvent.click(getByTestId('regionFilterOption-geo-eu'));
+    await waitFor(() => expect(getByTestId('eisModelCard-EU Model')).toBeInTheDocument());
+    expect(getByTestId('eisModelCard-US Model')).toBeInTheDocument();
+
+    fireEvent.click(getByTestId('regionFilterOption-geo-us'));
+    fireEvent.click(getByTestId('regionFilterOption-geo-eu'));
+    await waitFor(() => expect(getByTestId('eisModelCard-EU Model')).toBeInTheDocument());
+
+    fireEvent.click(getByTestId('regionFilterOption-region-aws-us-east-1'));
+    await waitFor(() => expect(queryByTestId('eisModelCard-EU Model')).not.toBeInTheDocument());
+    expect(getByTestId('eisModelCard-US Model')).toBeInTheDocument();
+  });
+
   it('filters models by provider via model family filter', async () => {
-    const { container, getByText } = await renderPopulatedPage();
+    const { container, getByTestId, getByText } = await renderPopulatedPage();
     const allCards = countCards(container);
 
-    fireEvent.click(getByText('Model provider'));
-    await waitFor(() => expect(getByText('Anthropic')).toBeInTheDocument());
-
-    fireEvent.click(getByText('Anthropic'));
+    fireEvent.click(getByTestId('modelFamilyFilterMultiselect'));
+    fireEvent.click(await waitFor(() => getByTestId('modelFamilyFilterOption-Anthropic')));
 
     await waitFor(() => expect(countCards(container)).toBeLessThan(allCards));
     expect(countCards(container)).toBeGreaterThan(0);
@@ -184,18 +321,136 @@ describe('ElasticInferenceServiceModelsPage', () => {
   });
 
   it('renders the table view when the view mode is switched', async () => {
-    const { getByTestId, getByText, queryByText } = await renderPopulatedPage();
+    const { getAllByTestId, getByTestId, queryByTestId, queryByText } = await renderPopulatedPage();
+
+    expect(queryByTestId('contentListFooter-pagination')).not.toBeInTheDocument();
 
     fireEvent.click(getByTestId('eisModelsViewModeSelector-table'));
 
-    await waitFor(() => expect(getByTestId('content-list-table')).toBeInTheDocument());
-    expect(getByText('Model')).toBeInTheDocument();
-    expect(getByText('Provider')).toBeInTheDocument();
-    expect(getByText('Type')).toBeInTheDocument();
+    const table = await waitFor(() => getByTestId('content-list-table'));
+    expect(table).toHaveTextContent('Model name');
+    expect(table).toHaveTextContent('Type');
+    expect(table).toHaveTextContent('Provider');
+    expect(table).toHaveTextContent('Released');
+    expect(table).toHaveTextContent('End of Life');
     expect(queryByText('Supported tasks')).not.toBeInTheDocument();
+    expect(getByTestId('contentListFooter-pagination')).toBeInTheDocument();
 
-    fireEvent.click(getByText('Jina Reranker v2'));
+    const searchBox = getByTestId(SEARCH_BOX);
+    fireEvent.change(searchBox, { target: { value: 'Jina Reranker v2' } });
+    fireEvent.keyUp(searchBox, { key: 'Enter', code: 'Enter' });
+
+    await waitFor(() =>
+      expect(
+        getAllByTestId('content-list-table-item-link').some(
+          (link) => link.textContent === 'Jina Reranker v2'
+        )
+      ).toBe(true)
+    );
+
+    const typeCell = getAllByTestId('eisTableType').find((cell) => cell.textContent === 'Rerank');
+    const providerCell = getAllByTestId('eisTableProvider').find(
+      (cell) => cell.textContent === 'Jina'
+    );
+    const releasedCell = getAllByTestId('eisTableReleased').find((cell) =>
+      cell.textContent?.includes('2024-06-25')
+    );
+    const endOfLifeCell = getAllByTestId('eisTableEndOfLife').find((cell) =>
+      cell.textContent?.includes('--')
+    );
+    expect(typeCell).toBeDefined();
+    expect(providerCell).toBeDefined();
+    expect(releasedCell).toBeDefined();
+    expect(endOfLifeCell).toBeDefined();
+
+    const modelLink = getAllByTestId('content-list-table-item-link').find(
+      (link) => link.textContent === 'Jina Reranker v2'
+    );
+    if (!modelLink) {
+      throw new Error('Jina Reranker v2 link was not rendered');
+    }
+    fireEvent.click(modelLink);
     expect(getByTestId('modelDetailFlyout')).toBeInTheDocument();
+
+    fireEvent.click(getByTestId('eisModelsViewModeSelector-card'));
+    await waitFor(() => expect(queryByTestId('content-list-table')).not.toBeInTheDocument());
+    expect(queryByTestId('contentListFooter-pagination')).not.toBeInTheDocument();
+  });
+
+  it('renders a future end-of-life date in the table', async () => {
+    const modelName = 'Visible EOL model';
+    mockUseEisModels.mockReturnValue({
+      data: [
+        {
+          inference_id: 'visible-eol',
+          task_type: 'chat_completion',
+          service: 'elastic',
+          service_settings: { model_id: 'visible-eol-model' },
+          metadata: {
+            heuristics: {
+              status: 'ga',
+              release_date: '2024-01-01',
+              end_of_life_date: '2027-12-01',
+            },
+            display: { name: modelName, model_creator: 'Elastic' },
+          },
+        },
+      ] as EisInferenceEndpoint[],
+      isLoading: false,
+      isError: false,
+    });
+    const { getAllByTestId, getByTestId } = renderPage();
+
+    fireEvent.click(getByTestId('eisModelsViewModeSelector-table'));
+    await waitFor(() =>
+      expect(
+        getAllByTestId('content-list-table-item-link').some(
+          (link) => link.textContent === modelName
+        )
+      ).toBe(true)
+    );
+
+    const endOfLifeCell = getAllByTestId('eisTableEndOfLife').find((cell) =>
+      cell.textContent?.includes('2027-12-01')
+    );
+    expect(endOfLifeCell).toBeDefined();
+  });
+
+  it('shows the next page of models when paging the table', async () => {
+    const pagedEndpoints = Array.from({ length: 26 }, (_, index) => {
+      const name = `Paged model ${String(index + 1).padStart(2, '0')}`;
+      return {
+        inference_id: `paged-${name}`,
+        task_type: 'chat_completion',
+        service: 'elastic',
+        service_settings: { model_id: name },
+        metadata: { display: { name, model_creator: 'Elastic' } },
+      } as EisInferenceEndpoint;
+    });
+    mockUseEisModels.mockReturnValue({ data: pagedEndpoints, isLoading: false, isError: false });
+    const { getAllByTestId, getByTestId } = renderPage();
+
+    fireEvent.click(getByTestId('eisModelsViewModeSelector-table'));
+    await waitFor(() => expect(getAllByTestId('content-list-table-item-link')).toHaveLength(25));
+
+    const firstPageNames = getAllByTestId('content-list-table-item-link').map(
+      (link) => link.textContent
+    );
+    expect(firstPageNames).not.toContain('Paged model 26');
+
+    fireEvent.click(getByTestId('pagination-button-next'));
+    await waitFor(() =>
+      expect(
+        getAllByTestId('content-list-table-item-link').some(
+          (link) => link.textContent === 'Paged model 26'
+        )
+      ).toBe(true)
+    );
+    expect(
+      getAllByTestId('content-list-table-item-link').some(
+        (link) => link.textContent === 'Paged model 01'
+      )
+    ).toBe(false);
   });
 
   it('opens model detail flyout when clicking a card with valid model_id', async () => {

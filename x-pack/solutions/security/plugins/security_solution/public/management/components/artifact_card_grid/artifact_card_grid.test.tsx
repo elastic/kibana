@@ -85,6 +85,20 @@ describe.each([
     expect(renderResult.getByTestId(testSubjId)).not.toBeNull();
   });
 
+  it('should not show an enabled column by default', () => {
+    render();
+
+    expect(renderResult.queryByTestId('testGrid-header-layout-enabledHolder')).toBeNull();
+    expect(renderResult.queryByTestId('card-0-header-enabledStatus')).toBeNull();
+  });
+
+  it('should show an enabled column and card badges when showEnabledColumn is set', () => {
+    render({ showEnabledColumn: true });
+
+    expect(renderResult.getByTestId('testGrid-header-enabled')).toHaveTextContent('Enabled');
+    expect(renderResult.getAllByTestId(/-header-enabledStatus$/)).toHaveLength(items.length);
+  });
+
   it('should call onPageChange callback when paginating', () => {
     items = Array.from({ length: 15 }, () => generateItem());
     render();

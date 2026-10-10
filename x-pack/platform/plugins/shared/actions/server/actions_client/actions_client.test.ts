@@ -24,6 +24,7 @@ import { ActionExecutor, TaskRunnerFactory, asHttpRequestExecutionSource } from 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { getActionsConfigurationUtilities } from '../actions_config';
+import { defaultInboundEventsLimitConfigs } from '../config';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import {
@@ -369,6 +370,7 @@ describe('create()', () => {
         Object {
           "actionTypeId": "my-connector-type",
           "config": Object {},
+          "hasInboundEventIdentity": false,
           "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
@@ -516,6 +518,7 @@ describe('create()', () => {
             "b": true,
             "c": true,
           },
+          "hasInboundEventIdentity": false,
           "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
@@ -557,6 +560,7 @@ describe('create()', () => {
         enabled: false,
         maxBodyBytes: new ByteSizeValue(1024 * 1024),
         maxEmitted: 25,
+        ...defaultInboundEventsLimitConfigs,
       },
     });
 
@@ -2545,6 +2549,7 @@ describe('update()', () => {
         Object {
           "actionTypeId": "my-connector-type",
           "config": Object {},
+          "hasInboundEventIdentity": false,
           "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
@@ -2614,6 +2619,7 @@ describe('update()', () => {
         Object {
           "actionTypeId": "my-connector-type",
           "config": Object {},
+          "hasInboundEventIdentity": false,
           "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
@@ -2770,6 +2776,7 @@ describe('update()', () => {
             "b": true,
             "c": true,
           },
+          "hasInboundEventIdentity": false,
           "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},

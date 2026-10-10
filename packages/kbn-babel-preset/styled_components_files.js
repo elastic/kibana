@@ -17,7 +17,7 @@ module.exports = {
    * Node.js path logic as described here:
    * https://babeljs.io/docs/options#matchpattern
    *
-   * Used by `kbn-babel-preset` and `kbn-eslint-config`.
+   * Used by `kbn-babel-preset` and `.oxlint/module_migration.mts`.
    */
   USES_STYLED_COMPONENTS: [
     /src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-ui-shared-deps-npm[\/\\]/,
@@ -261,7 +261,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]explore[\/\\]components[\/\\]paginated_table[\/\\]index.test.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]explore[\/\\]components[\/\\]paginated_table[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]flyout[\/\\]rule_details[\/\\]right[\/\\]index.test.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_card_grid[\/\\]components[\/\\]grid_header.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_entry_card[\/\\]components[\/\\]date_field_value.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_entry_card[\/\\]components[\/\\]effect_scope.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_entry_card[\/\\]components[\/\\]touched_by_users.tsx/,

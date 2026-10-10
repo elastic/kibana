@@ -10,6 +10,8 @@ import { css } from '@emotion/react';
 import {
   EuiCode,
   EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiLink,
   EuiSkeletonText,
@@ -34,6 +36,7 @@ import { TagBadges } from './actions/tags';
 import { AlertEpisodeSeverityBadge } from './severity/episode_severity_badge';
 import type { EpisodeSeverity } from './severity/severity_utils';
 import { EMPTY_VALUE } from '../constants';
+import { useEpisodeSource } from '../source_labels';
 import * as i18n from './translations';
 
 type Rule = FindRulesResponse['items'][number];
@@ -62,8 +65,25 @@ const getEpisodeGroupingFromRow = (
   };
 };
 
+export const EpisodeSourceCell = ({ row }: CellRendererProps) => {
+  const { label, icon } = useEpisodeSource(row.flattened.source_id as string | undefined);
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      {icon && (
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={icon} size="m" data-test-subj="episodeSourceIcon" aria-hidden={true} />
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <span data-test-subj="episodeSourceCell">{label}</span>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
   const status = row.flattened[columnId] as AlertEpisodeStatus;
+  const isFlapping = row.flattened.is_flapping === true;
 
   const episodeAction: EpisodeActionState = {
     episodeId: row.flattened['episode.id'] as string,
@@ -72,11 +92,13 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
     lastAckAction: (row.flattened.last_ack_action as string | undefined) ?? null,
     lastAssigneeUid: (row.flattened.last_assignee_uid as string | undefined) ?? null,
     lastAckActor: (row.flattened.last_ack_actor as string | undefined) ?? null,
+    lastDeactivateAction: null,
+    lastDeactivateActor: null,
   };
 
   const groupAction: EpisodeStatusGroupAction = {
     lastSnoozeAction: (row.flattened.last_snooze_action as string | undefined) ?? null,
-    snoozeExpiry: (row.flattened.snooze_expiry as string | undefined) ?? null,
+    snoozedUntil: (row.flattened.snoozed_until as string | undefined) ?? null,
   };
 
   return (
@@ -84,6 +106,7 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
       status={status}
       episodeAction={episodeAction}
       groupAction={groupAction}
+      isFlapping={isFlapping}
     />
   );
 };

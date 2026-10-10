@@ -9,7 +9,13 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiIcon, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiIcon,
+  EuiToolTip,
+  useEuiButtonColorCSS,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -17,7 +23,8 @@ import type { SecondaryMenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { useScrollToActive } from '../../hooks/use_scroll_to_active';
-import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
+import { useLabelMarquee } from '../../hooks/use_label_marquee';
+import { NAVIGATION_SELECTOR_PREFIX, TOOLTIP_OFFSET } from '../../constants';
 
 export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> {
   children: ReactNode;
@@ -32,8 +39,8 @@ export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> 
 }
 
 /**
- * `EuiButton` and `EuiButtonEmpty` are used for consistency with the component library.
- * The only style overrides are making the button labels left-aligned.
+ * `EuiButtonEmpty` is used for consistency with the component library. When highlighted, it
+ * takes `EuiButton`'s colors instead of switching components, so the item does not remount.
  */
 export const SecondaryMenuItemComponent = ({
   badgeType,
@@ -50,6 +57,7 @@ export const SecondaryMenuItemComponent = ({
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
+  const highlightedColorStyles = useEuiButtonColorCSS({ display: 'base' }).primary;
   const highContrastModeStyles = useHighContrastModeStyles();
   const activeItemRef = useScrollToActive<HTMLLIElement>(isCurrent);
   const resolvedTestSubjPrefix = testSubjPrefix ?? `${NAVIGATION_SELECTOR_PREFIX}-secondaryItem`;
@@ -90,13 +98,6 @@ export const SecondaryMenuItemComponent = ({
     min-width: 0;
   `;
 
-  const labelTextStyles = css`
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    min-width: 0;
-  `;
-
   const submenuIconStyles = css`
     flex-shrink: 0;
     margin-left: auto;
@@ -110,13 +111,24 @@ export const SecondaryMenuItemComponent = ({
     if (badgeType && badgeType !== 'new') return <BetaBadge type={badgeType} />;
     if (isNew) return <BetaBadge type="new" />;
   };
+  const badge = getBadge();
+
+  const {
+    isOverflowing: isLabelOverflowing,
+    labelProps,
+    trackProps,
+  } = useLabelMarquee({
+    gutter: euiTheme.size.s,
+    isLabelFirst: !iconType,
+    isLabelLast: !badge && !hasSubmenu && !isExternal,
+  });
 
   const content = (
     <div css={labelAndBadgeStyles}>
-      <span css={labelTextStyles} title={typeof children === 'string' ? children : undefined}>
-        {children}
+      <span {...labelProps}>
+        <span {...trackProps}>{children}</span>
       </span>
-      {getBadge()}
+      {badge}
       {hasSubmenu && (
         <EuiIcon
           aria-hidden={true}
@@ -132,29 +144,21 @@ export const SecondaryMenuItemComponent = ({
 
   return (
     <li ref={activeItemRef} role="none">
-      {isHighlighted ? (
-        <EuiButton
-          id={id}
-          aria-current={isCurrent ? 'page' : undefined}
-          css={buttonStyles}
-          data-highlighted="true"
-          data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
-          fullWidth
-          href={hasSubmenu ? undefined : href}
-          size="s"
-          textProps={false}
-          {...iconProps}
-          {...props}
-        >
-          {content}
-        </EuiButton>
-      ) : (
+      {/* Always rendered so the measured label never remounts; empty content never shows. */}
+      <EuiToolTip
+        content={isLabelOverflowing ? children : undefined}
+        disableScreenReaderOutput
+        display="block"
+        offset={TOOLTIP_OFFSET}
+        position="right"
+        repositionOnScroll
+      >
         <EuiButtonEmpty
           id={id}
           aria-current={isCurrent ? 'page' : undefined}
-          color="text"
-          css={buttonStyles}
-          data-highlighted="false"
+          color={isHighlighted ? 'primary' : 'text'}
+          css={[isHighlighted && highlightedColorStyles, buttonStyles]}
+          data-highlighted={isHighlighted ? 'true' : 'false'}
           data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
           href={hasSubmenu ? undefined : href}
           size="s"
@@ -164,7 +168,7 @@ export const SecondaryMenuItemComponent = ({
         >
           {content}
         </EuiButtonEmpty>
-      )}
+      </EuiToolTip>
     </li>
   );
 };

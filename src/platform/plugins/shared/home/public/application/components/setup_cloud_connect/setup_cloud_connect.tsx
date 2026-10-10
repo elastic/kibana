@@ -13,12 +13,14 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
+  EuiIllustration,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { api } from '@elastic/eui-illustrations';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -27,11 +29,10 @@ import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import { getServices } from '../../kibana_services';
 
 interface Props {
-  addBasePath: (path: string) => string;
   application: ApplicationStart;
 }
 
-export const SetupCloudConnect: FC<Props> = ({ addBasePath, application }) => {
+export const SetupCloudConnect: FC<Props> = ({ application }) => {
   const { trackUiMetric } = getServices();
   const cloudConnectUrl = application.getUrlForApp('cloud_connect');
   const handleConnectClick = (e: React.MouseEvent) => {
@@ -45,14 +46,14 @@ export const SetupCloudConnect: FC<Props> = ({ addBasePath, application }) => {
   );
 
   return (
-    <EuiPanel paddingSize="l">
-      <EuiFlexGroup alignItems="center" gutterSize="xl">
-        <EuiFlexItem>
-          <EuiImage
+    <EuiPanel paddingSize="l" css={cardPanel}>
+      <EuiFlexGroup alignItems="center" gutterSize="xl" responsive={false} css={cardRow}>
+        <EuiFlexItem grow={false} css={illustrationFrame}>
+          <EuiIllustration
+            type={api}
             alt={i18n.translate('home.setupCloudConnect.illustration.alt.text', {
               defaultMessage: 'Illustration for Cloud Connect setup',
             })}
-            src={addBasePath('/plugins/kibanaReact/assets/') + 'illustration_cloud_migration.png'}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -83,3 +84,22 @@ export const SetupCloudConnect: FC<Props> = ({ addBasePath, application }) => {
     </EuiPanel>
   );
 };
+
+const cardPanel = css({
+  containerType: 'inline-size',
+});
+
+// Stack only when the card cannot fit the 128px illustration beside the text.
+const cardRow = css({
+  '@container (max-width: 20rem)': {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    '& > .euiFlexItem:last-child': {
+      alignSelf: 'stretch',
+    },
+  },
+});
+
+const illustrationFrame = css({
+  inlineSize: 128,
+});

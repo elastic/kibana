@@ -13,21 +13,44 @@ import {
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/server';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER_ID } from '../common/constants';
+import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agent-builder-server';
+import type { AgenticInvestigationsConfig } from './config';
 import { registerFeatures } from './features';
-import { initializeManagedWorkflows } from './proposals/managed_workflows/initialize_managed_workflows';
-import { registerRoutes } from './proposals/routes/register_routes';
-import { ProposalsService } from './proposals/services/proposals_service';
-import { createProposalPrivilegesChecker } from './proposals/services/check_proposal_privileges';
-import type { ProposalPrivilegesChecker } from './proposals/services/check_proposal_privileges';
-import { createProposalUserResolver } from './proposals/services/resolve_proposal_user';
-import type { ResolveProposalUser } from './proposals/services/resolve_proposal_user';
-import { registerProposalAttachment } from './proposals/attachments';
-import { registerStepDefinitions } from './proposals/step_types';
-import { createProposalsStorageClient } from './proposals/storage/proposals_storage';
+import { registerImpactAttachment } from './impact/attachments';
+import { registerImpactRoutes } from './impact/routes/register_routes';
+import { createInvestigationsPrivilegesChecker } from './investigations/services/check_investigations_privileges';
+import { createImpactClient } from './impact/services/impact_client';
+import { ImpactService } from './impact/services/impact_service';
+import { registerImpactStepDefinitions } from './impact/step_types';
+import { registerInvestigationStepDefinitions } from './investigations/step_types';
+import { registerWorkflowExecutionStepDefinitions } from './workflow_execution/step_types';
+import { createImpactStorageClient } from './impact/storage/impact_storage';
+import { createSetImpactTool } from './impact/tools/set_impact_tool';
+import { registerSubjectAttachment, subjectAttachment } from './subjects/attachments';
+import { SubjectsService } from './subjects/services/subjects_service';
+import {
+  createSubjectClaimStorageClient,
+  SubjectClaimsService,
+} from './subjects/services/subject_claims_service';
+import { createSubjectsClient } from './subjects/services/subjects_client';
+import { hypothesesAttachment, registerHypothesesAttachment } from './hypotheses/attachments';
+import { HypothesesService } from './hypotheses/services/hypotheses_service';
+import { createSetHypothesesTool } from './hypotheses/tools/set_hypotheses_tool';
 import { EscalationsService } from './escalations/services/escalations_service';
+import { registerEscalationConversationEvents } from './escalations/conversation_events';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
+import { AssignmentsService } from './assignments/assignments_service';
+import { InvestigationStatusService } from './investigations/services/investigation_status_service';
+import { registerInvestigationRoutes } from './investigations/routes/register_routes';
+import { createInvestigationsPrivilegesReader } from './investigations/services/check_investigations_privileges';
+import { deleteInvestigationDataAcrossSpaces } from './investigations/services/delete_investigation_data_across_spaces';
+import { countPendingProposals } from './investigations/services/count_pending_proposals';
+import { InProgressResolver } from './investigations/services/in_progress';
+import { InvestigationsQueryService } from './investigations/services/investigations_query_service';
+import { createInvestigationsClient } from './investigations/services/investigations_client';
+import { createConversationReadCheck } from './investigation_attachments';
+import { createUserResolver } from './services/resolve_user';
+import type { ResolveUser } from './services/resolve_user';
 import type {
   AgenticInvestigationsPluginSetup,
   AgenticInvestigationsPluginStart,
@@ -45,66 +68,133 @@ export class AgenticInvestigationsPlugin
     >
 {
   private readonly logger: Logger;
-  private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
-  // `workflowsManagement` is a required plugin, so this is set in setup() and
-  // read only from start() onwards; the getter asserts that ordering.
-  private proposalsService?: ProposalsService;
-  private proposalPrivileges?: ProposalPrivilegesChecker;
+  private readonly escalationsEnabled: boolean;
+  private impactService?: ImpactService;
+  private subjectsService?: SubjectsService;
+  private hypothesesService?: HypothesesService;
   private escalationsService?: EscalationsService;
+  private assignmentsService?: AssignmentsService;
+  private investigationStatusService?: InvestigationStatusService;
+  private investigationsQueryService?: InvestigationsQueryService;
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
-  private resolveUser?: ResolveProposalUser;
+  private resolveUser?: ResolveUser;
+  private agentBuilder?: AgenticInvestigationsStartDependencies['agentBuilder'];
 
-  constructor(context: PluginInitializerContext) {
+  constructor(context: PluginInitializerContext<AgenticInvestigationsConfig>) {
     this.logger = context.logger.get();
+    this.escalationsEnabled = context.config.get().escalations.enabled;
   }
 
   setup(
     coreSetup: CoreSetup<AgenticInvestigationsStartDependencies>,
-    {
-      features,
-      workflowsExtensions,
-      workflowsManagement,
-      agentBuilder,
-    }: AgenticInvestigationsSetupDependencies
+    { features, workflowsExtensions, agentBuilder }: AgenticInvestigationsSetupDependencies
   ): AgenticInvestigationsPluginSetup {
-    // The workflows management API is only exposed on the setup contract.
-    this.workflowsManagementApi = workflowsManagement.management;
+    registerFeatures({ features, escalationsEnabled: this.escalationsEnabled });
 
-    registerFeatures({ features });
+    if (this.escalationsEnabled) {
+      registerEscalationConversationEvents(agentBuilder);
+    }
 
-    registerProposalAttachment(agentBuilder);
+    // Attachment types, steps and tools register during setup but only run once Kibana has
+    // started, so the authorization service is resolved per call rather than
+    // captured here — `security.authz` does not exist yet.
+    const investigationsPrivileges = createInvestigationsPrivilegesChecker({
+      getSecurity: async () => (await coreSetup.getStartServices())[1].security,
+      logger: this.logger,
+    });
 
-    // Declares ownership of this plugin's managed workflows. Without it the
-    // startup orphan sweep treats every workflow we installed as owned by an
-    // unregistered plugin and force-deletes it.
-    workflowsExtensions.registerManagedWorkflowOwner(
-      AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER_ID
+    const assertCanReadConversation = createConversationReadCheck({
+      getConversationClient: (request) => this.getConversationClient(request),
+    });
+
+    registerImpactAttachment(agentBuilder, {
+      getImpactService: () => this.requireImpactService(),
+      privileges: investigationsPrivileges,
+      assertCanReadConversation,
+      logger: this.logger,
+    });
+    registerSubjectAttachment(agentBuilder, {
+      getSubjectsService: () => this.requireSubjectsService(),
+      privileges: investigationsPrivileges,
+      assertCanReadConversation,
+      logger: this.logger,
+    });
+    registerHypothesesAttachment(agentBuilder, {
+      getHypothesesService: () => this.requireHypothesesService(),
+      privileges: investigationsPrivileges,
+      assertCanReadConversation,
+      logger: this.logger,
+    });
+
+    agentBuilder.tools.register(
+      createSetImpactTool({
+        getImpactService: () => this.requireImpactService(),
+        resolveUser: (request) => this.requireUserResolver()(request),
+        privileges: investigationsPrivileges,
+        logger: this.logger,
+      })
+    );
+    agentBuilder.tools.register(
+      createSetHypothesesTool({
+        getHypothesesService: () => this.requireHypothesesService(),
+        resolveUser: (request) => this.requireUserResolver()(request),
+        privileges: investigationsPrivileges,
+        logger: this.logger,
+      })
     );
 
-    registerStepDefinitions({
+    registerImpactStepDefinitions({
       workflowsExtensions,
-      getProposalsService: () => this.requireProposalsService(),
+      getImpactService: () => this.requireImpactService(),
       resolveUser: (request) => this.requireUserResolver()(request),
-      // Steps register during setup but only run once Kibana has started, so
-      // the authorization service is resolved per call rather than captured
-      // here — `security.authz` does not exist yet.
-      privileges: this.getProposalPrivilegesChecker(coreSetup),
+      privileges: investigationsPrivileges,
+      getAttachmentClient: (request) => this.getAttachmentClient(request),
+      getConversationClient: (request) => this.getConversationClient(request),
     });
 
     const router = coreSetup.http.createRouter();
 
-    registerRoutes({
+    registerImpactRoutes({
       router,
       logger: this.logger,
-      getProposalsService: () => this.requireProposalsService(),
+      getImpactService: () => this.requireImpactService(),
       getSpaceId: (request) => this.getSpaceId(request),
       resolveUser: (request) => this.requireUserResolver()(request),
+      getAttachmentClient: (request) => this.getAttachmentClient(request),
+      getConversationClient: (request) => this.getConversationClient(request),
     });
 
     registerEscalationRoutes({
       router,
       logger: this.logger,
       getEscalationsService: () => this.requireEscalationsService(),
+      getAssignmentsService: () => this.requireAssignmentsService(),
+      getSpaceId: (request) => this.getSpaceId(request),
+      getSecurity: async () => (await coreSetup.getStartServices())[1].security,
+      escalationsEnabled: this.escalationsEnabled,
+    });
+
+    registerInvestigationRoutes({
+      router,
+      logger: this.logger,
+      getAssignmentsService: () => this.requireAssignmentsService(),
+      getInvestigationStatusService: () => this.requireInvestigationStatusService(),
+      getInvestigationsQueryService: () => this.requireInvestigationsQueryService(),
+      privileges: createInvestigationsPrivilegesReader({
+        getSecurity: async () => (await coreSetup.getStartServices())[1].security,
+        escalationsEnabled: this.escalationsEnabled,
+      }),
+    });
+
+    registerInvestigationStepDefinitions({
+      workflowsExtensions,
+      getInvestigationStatusService: () => this.requireInvestigationStatusService(),
+      getConversationClient: (request) => this.getConversationClient(request),
+    });
+
+    registerWorkflowExecutionStepDefinitions({
+      workflowsExtensions,
+      getConversationClient: (request) => this.getConversationClient(request),
     });
 
     return {};
@@ -115,7 +205,8 @@ export class AgenticInvestigationsPlugin
     plugins: AgenticInvestigationsStartDependencies
   ): AgenticInvestigationsPluginStart {
     this.spaces = plugins.spaces;
-    this.resolveUser = createProposalUserResolver({
+    this.agentBuilder = plugins.agentBuilder;
+    this.resolveUser = createUserResolver({
       userProfile: coreStart.userProfile,
       security: coreStart.security,
       logger: this.logger,
@@ -123,83 +214,168 @@ export class AgenticInvestigationsPlugin
 
     // Reads and writes go through the internal user; authorization is enforced
     // at the API layer.
-    const storage = createProposalsStorageClient({
-      esClient: coreStart.elasticsearch.client.asInternalUser,
-      logger: this.logger,
+    this.impactService = new ImpactService({
+      storage: createImpactStorageClient({
+        esClient: coreStart.elasticsearch.client.asInternalUser,
+        logger: this.logger,
+      }),
     });
 
-    this.proposalsService = new ProposalsService({
-      storage,
-      logger: this.logger,
-      getWorkflowsApi: () => this.requireWorkflowsApi(),
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    this.subjectsService = new SubjectsService({
+      documents: subjectAttachment.createService({ esClient, logger: this.logger }),
+      claims: new SubjectClaimsService({
+        storage: createSubjectClaimStorageClient({ esClient, logger: this.logger }),
+      }),
+    });
+    this.hypothesesService = new HypothesesService({
+      documents: hypothesesAttachment.createService({ esClient, logger: this.logger }),
     });
 
-    this.escalationsService = new EscalationsService({
-      logger: this.logger,
+    this.investigationStatusService = new InvestigationStatusService({
       getConversationClient: (request) =>
         plugins.agentBuilder.conversations.getScopedClient({ request }),
-      conversationTemplates: plugins.agentBuilder.conversationTemplates,
+      getProposals: () => plugins.proposals,
+      getSpaceId: (request) => this.getSpaceId(request),
+      logger: this.logger,
     });
 
-    void initializeManagedWorkflows({
-      workflowsExtensions: plugins.workflowsExtensions,
+    this.investigationsQueryService = new InvestigationsQueryService({
+      getConversationClient: (request) => this.getConversationClient(request),
+      getSpaceId: (request) => this.getSpaceId(request),
+      getImpactService: () => this.requireImpactService(),
+      getSubjectsService: () => this.requireSubjectsService(),
+      getHypothesesService: () => this.requireHypothesesService(),
+      getProposals: () => plugins.proposals,
+      inProgress: new InProgressResolver({
+        getAgentExecutions: () => plugins.agentBuilder.execution,
+        logger: this.logger,
+      }),
       logger: this.logger,
-    }).catch((error) => {
-      this.logger.error(
-        `Agentic investigations managed workflow initialization failed: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+    });
+
+    const startPrivileges = createInvestigationsPrivilegesChecker({
+      getSecurity: async () => plugins.security,
+      logger: this.logger,
+    });
+    const getImpactClient = createImpactClient({
+      getImpactService: () => this.requireImpactService(),
+      getSpaceId: (request) => this.getSpaceId(request),
+      privileges: startPrivileges,
+      getConversationClient: (request) => this.getConversationClient(request),
+    });
+
+    if (this.escalationsEnabled) {
+      this.escalationsService = new EscalationsService({
+        logger: this.logger,
+        getImpactClient,
+        getConversationClient: (request) =>
+          plugins.agentBuilder.conversations.getScopedClient({ request }),
+        getAttachmentsClient: (request) =>
+          plugins.agentBuilder.attachments.getScopedClient({ request }),
+        conversationTemplates: plugins.agentBuilder.conversationTemplates,
+        getInvestigationStatusService: () => this.requireInvestigationStatusService(),
+        countPendingProposals: (request, conversationIds) =>
+          countPendingProposals({
+            proposals: plugins.proposals,
+            request,
+            conversationIds,
+            spaceId: this.getSpaceId(request),
+            logger: this.logger,
+          }),
+      });
+    }
+
+    this.assignmentsService = new AssignmentsService({
+      getConversationClient: (request) =>
+        plugins.agentBuilder.conversations.getScopedClient({ request }),
+    });
+
+    const getSubjectsClient = createSubjectsClient({
+      getSubjectsService: () => this.requireSubjectsService(),
+      getSpaceId: (request) => this.getSpaceId(request),
+      privileges: startPrivileges,
+      resolveUser: (request) => this.requireUserResolver()(request),
+      getConversationClient: (request) => this.getConversationClient(request),
+      getAttachmentClient: (request) => this.getAttachmentClient(request),
+    });
+
+    const getInvestigationsClient = createInvestigationsClient({
+      getQueryService: () => this.requireInvestigationsQueryService(),
+      getSpaceId: (request) => this.getSpaceId(request),
+      privileges: startPrivileges,
+      deleteAllInSpace: async (spaceId) => {
+        const { subjects, claims } = await this.requireSubjectsService().deleteAllInSpace(spaceId);
+        const impact = await this.requireImpactService()
+          .getDocumentService()
+          .deleteAllInSpace(spaceId);
+        const hypotheses = await this.requireHypothesesService()
+          .getDocumentService()
+          .deleteAllInSpace(spaceId);
+        return { subjects, subjectClaims: claims, impact, hypotheses };
+      },
     });
 
     return {
-      getProposalsService: () => this.requireProposalsService(),
-      getProposalPrivileges: () => this.requireProposalPrivileges(),
+      getImpactClient,
+      getSubjectsClient,
+      getInvestigationsClient,
+      deleteSubjectInvestigationDataAcrossSpaces: () => {
+        const subjects = this.requireSubjectsService();
+        return deleteInvestigationDataAcrossSpaces({
+          subjects: subjects.getDocumentService(),
+          impact: this.requireImpactService().getDocumentService(),
+          hypotheses: this.requireHypothesesService().getDocumentService(),
+          deleteClaims: (ids, spaceId) => subjects.deleteClaimsByConversationIds(ids, spaceId),
+          deleteAllClaims: () => subjects.deleteAllClaimsAcrossSpaces(),
+        });
+      },
       getEscalationsService: () => this.requireEscalationsService(),
     };
   }
 
-  private requireWorkflowsApi(): WorkflowsServerPluginSetup['management'] {
-    if (!this.workflowsManagementApi) {
+  private requireImpactService(): ImpactService {
+    if (!this.impactService) {
       throw new Error(
-        'Workflows management API is not available until the agenticInvestigations plugin has been set up'
+        'Impact service is not available until the agenticInvestigations plugin has started'
       );
     }
-    return this.workflowsManagementApi;
+    return this.impactService;
   }
 
-  private requireProposalsService(): ProposalsService {
-    if (!this.proposalsService) {
+  private requireSubjectsService(): SubjectsService {
+    if (!this.subjectsService) {
       throw new Error(
-        'Proposals service is not available until the agenticInvestigations plugin has started'
+        'Subjects service is not available until the agenticInvestigations plugin has started'
       );
     }
-    return this.proposalsService;
+    return this.subjectsService;
   }
 
-  // Resolves security lazily per call, so step registration can use it during setup.
-  private getProposalPrivilegesChecker(
-    coreSetup: CoreSetup<AgenticInvestigationsStartDependencies>
-  ): ProposalPrivilegesChecker {
-    if (!this.proposalPrivileges) {
-      this.proposalPrivileges = createProposalPrivilegesChecker({
-        getSecurity: async () => (await coreSetup.getStartServices())[1].security,
-        logger: this.logger,
-      });
-    }
-    return this.proposalPrivileges;
-  }
-
-  private requireProposalPrivileges(): ProposalPrivilegesChecker {
-    if (!this.proposalPrivileges) {
+  private requireHypothesesService(): HypothesesService {
+    if (!this.hypothesesService) {
       throw new Error(
-        'Proposal privileges checker is not available until the agenticInvestigations plugin has been set up'
+        'Hypotheses service is not available until the agenticInvestigations plugin has started'
       );
     }
-    return this.proposalPrivileges;
+    return this.hypothesesService;
+  }
+
+  private requireInvestigationsQueryService(): InvestigationsQueryService {
+    if (!this.investigationsQueryService) {
+      throw new Error(
+        'Investigations query service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.investigationsQueryService;
   }
 
   private requireEscalationsService(): EscalationsService {
+    if (!this.escalationsEnabled) {
+      throw new Error(
+        'Escalations are disabled by xpack.agenticInvestigations.escalations.enabled: false'
+      );
+    }
     if (!this.escalationsService) {
       throw new Error(
         'Escalations service is not available until the agenticInvestigations plugin has started'
@@ -208,15 +384,55 @@ export class AgenticInvestigationsPlugin
     return this.escalationsService;
   }
 
+  private requireAssignmentsService(): AssignmentsService {
+    if (!this.assignmentsService) {
+      throw new Error(
+        'Assignments service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.assignmentsService;
+  }
+
+  private requireInvestigationStatusService(): InvestigationStatusService {
+    if (!this.investigationStatusService) {
+      throw new Error(
+        'InvestigationStatusService is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.investigationStatusService;
+  }
+
   private getSpaceId(request: KibanaRequest): string {
     return this.spaces?.spacesService.getSpaceId(request) ?? 'default';
   }
 
   /**
-   * Server-derived so a caller can never attribute a decision to someone else.
-   * Built in `start()`, and only ever called from a request handler or a step.
+   * Agent Builder stays required because escalations and assignments are
+   * conversations. Callers resolve these clients before the impact index write,
+   * so a missing client fails the attach.
    */
-  private requireUserResolver(): ResolveProposalUser {
+  private requireAgentBuilder(): NonNullable<AgenticInvestigationsPlugin['agentBuilder']> {
+    if (!this.agentBuilder) {
+      throw new Error(
+        'Agent Builder is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.agentBuilder;
+  }
+
+  private async getAttachmentClient(request: KibanaRequest): Promise<AttachmentPublicClient> {
+    return this.requireAgentBuilder().attachments.getScopedClient({ request });
+  }
+
+  private async getConversationClient(request: KibanaRequest): Promise<ConversationPublicClient> {
+    return this.requireAgentBuilder().conversations.getScopedClient({ request });
+  }
+
+  /**
+   * Server-derived so a caller can never attribute a write to someone else.
+   * Built in `start()`, and only ever called from a request handler.
+   */
+  private requireUserResolver(): ResolveUser {
     if (!this.resolveUser) {
       throw new Error(
         'User resolution is not available until the agenticInvestigations plugin has started'

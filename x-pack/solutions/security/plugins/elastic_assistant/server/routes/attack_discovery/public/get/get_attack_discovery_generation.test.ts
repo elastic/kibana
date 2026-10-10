@@ -67,6 +67,7 @@ describe('getAttackDiscoveryGenerationRoute', () => {
   let mockDataClient: {
     getAttackDiscoveryGenerationById: jest.Mock;
     findAttackDiscoveryAlerts: jest.Mock;
+    isServiceAccountGeneration: jest.Mock;
   };
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
@@ -87,6 +88,7 @@ describe('getAttackDiscoveryGenerationRoute', () => {
         unique_alert_ids_count: 2,
         connector_names: ['test-connector'],
       }),
+      isServiceAccountGeneration: jest.fn().mockResolvedValue(false),
     };
     mockContext = {
       resolve: jest.fn().mockResolvedValue({
@@ -156,6 +158,42 @@ describe('getAttackDiscoveryGenerationRoute', () => {
         ignoreDismissed: true,
         logger: mockLogger,
         spaceId: 'default',
+      });
+    });
+
+    describe('service account generations', () => {
+      it('checks whether the generation was written by a service account in the space', async () => {
+        await getHandler(mockContext, mockRequest, mockResponse);
+
+        expect(mockDataClient.isServiceAccountGeneration).toHaveBeenCalledWith({
+          eventLogIndex: 'event-log-index',
+          executionUuid: 'test-uuid',
+          spaceId: 'default',
+        });
+      });
+
+      it('finds the discoveries of every author for a service account generation', async () => {
+        mockDataClient.isServiceAccountGeneration.mockResolvedValueOnce(true);
+
+        await getHandler(mockContext, mockRequest, mockResponse);
+
+        const passed =
+          mockDataClient.findAttackDiscoveryAlerts.mock.calls[0][0].findAttackDiscoveryAlertsParams
+            .includeAllAuthors;
+
+        expect(passed).toBe(true);
+      });
+
+      it("finds only the user's own (and shared) discoveries for any other generation", async () => {
+        mockDataClient.isServiceAccountGeneration.mockResolvedValueOnce(false);
+
+        await getHandler(mockContext, mockRequest, mockResponse);
+
+        const passed =
+          mockDataClient.findAttackDiscoveryAlerts.mock.calls[0][0].findAttackDiscoveryAlertsParams
+            .includeAllAuthors;
+
+        expect(passed).toBe(false);
       });
     });
 

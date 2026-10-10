@@ -57,10 +57,17 @@ interface RelayBindingsListResponse {
   next_cursor?: string;
 }
 
-/** Raw shape of the `POST /v1/trigger` acknowledgement body. */
+interface RelayClaimResponseBody {
+  tenant_key?: string;
+  tenant_name?: string;
+  tenant_url?: string;
+}
+
+/** Raw shape of the `POST /v1/slack/trigger` acknowledgement body. */
 interface RelayTriggerResponseBody {
   ref?: string;
   tenant_key?: string;
+  channel?: string;
 }
 
 export class RelayClient implements RelayClientContract {
@@ -97,8 +104,13 @@ export class RelayClient implements RelayClientContract {
       return { status: 'pending' };
     }
 
-    const claim = response.data as { tenant_key?: string };
-    return { status: 'complete', tenant_key: claim.tenant_key };
+    const claim = response.data as RelayClaimResponseBody | undefined;
+    return {
+      status: 'complete',
+      tenant_key: claim?.tenant_key,
+      ...(typeof claim?.tenant_name === 'string' ? { tenant_name: claim.tenant_name } : {}),
+      ...(typeof claim?.tenant_url === 'string' ? { tenant_url: claim.tenant_url } : {}),
+    };
   }
 
   /** Unbind a single workspace binding identified by its tenant key. */
@@ -178,12 +190,13 @@ export class RelayClient implements RelayClientContract {
     channel,
     message,
     threadTs,
+    messageTs,
   }: RelayTriggerInput): Promise<RelayTriggerResponse> {
     const response = await this.post('/v1/slack/trigger', {
       tenant_key: tenantKey,
       channel,
       message,
-      ...(threadTs ? { thread_ts: threadTs } : {}),
+      ...(messageTs ? { message_ts: messageTs } : threadTs ? { thread_ts: threadTs } : {}),
     });
 
     const body = response.data as RelayTriggerResponseBody | undefined;
@@ -194,7 +207,11 @@ export class RelayClient implements RelayClientContract {
         'Relay invalid response format missing expected `ref`'
       );
     }
-    return { ref: body.ref, tenantKey: body?.tenant_key ?? tenantKey };
+    return {
+      ref: body.ref,
+      tenantKey: body.tenant_key ?? tenantKey,
+      channel: typeof body.channel === 'string' && body.channel.length > 0 ? body.channel : channel,
+    };
   }
 
   isRelayOrigin(url: string): boolean {

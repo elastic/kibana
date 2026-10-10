@@ -23,6 +23,7 @@ import {
   mergeEmitterWorkflowIntoEventChainVisited,
 } from '../lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
+import { LogsRepository } from '../repositories/logs_repository';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
@@ -35,7 +36,7 @@ import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/wor
 import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { WorkflowRuntimeGraph } from '../workflow_context_manager/workflow_runtime_graph';
 
-import { WorkflowEventLoggerService } from '../workflow_event_logger';
+import { WorkflowEventLoggerFactory, WorkflowEventQueue } from '../workflow_event_logger';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 export async function setupDependencies(
@@ -142,13 +143,15 @@ export async function setupDependencies(
   const scopedActionsClient = await actions.getActionsClientWithRequest(fakeRequest);
   const connectorExecutor = new ConnectorExecutor(scopedActionsClient);
 
-  const workflowEventLoggerService = new WorkflowEventLoggerService(
-    dependencies.coreStart.dataStreams,
+  const logsRepository = new LogsRepository(dependencies.coreStart.dataStreams, logger);
+  const eventQueue = new WorkflowEventQueue(logsRepository, logger);
+  const workflowEventLoggerFactory = new WorkflowEventLoggerFactory(
     logger,
+    eventQueue,
     config.logging.console
   );
 
-  const workflowLogger = workflowEventLoggerService.createLogger({
+  const workflowLogger = workflowEventLoggerFactory.createLogger({
     workflowId: workflowExecution.workflowId,
     workflowName: workflowExecution.workflowDefinition.name,
     executionId: workflowExecution.id,
@@ -232,6 +235,7 @@ export async function setupDependencies(
     workflowExecutionState,
     stepIoService,
     workflowLogger,
+    eventQueue,
     workflowTaskManager,
     nodesFactory,
     workflowExecutionRepository,

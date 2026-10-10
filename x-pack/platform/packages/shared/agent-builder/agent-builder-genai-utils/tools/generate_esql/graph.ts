@@ -23,6 +23,7 @@ import {
   executeEsql,
   validateEsqlQuery,
   buildTimeRangeParams,
+  buildTimeSeriesTimeRangeFilter,
 } from '../utils/esql';
 import { createRequestDocumentationPrompt, createGenerateEsqlPrompt } from './prompts';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
@@ -42,6 +43,8 @@ import {
   isRequestDocumentationAction,
 } from './actions';
 import type { EsqlLoadedDocumentation } from './documentation';
+import { hasRejectedJoinTarget } from './join_errors';
+import { withPromqlKeyword } from './promql_keyword';
 
 export const requestDocumentationSchema = z
   .object({
@@ -87,6 +90,8 @@ export const createNlToEsqlGraph = ({
   documentation,
   esqlCallbacks,
   includeDatasets = false,
+  includeViews = false,
+  includeFrozen = false,
   sessionId,
   cacheControl,
 }: {
@@ -96,6 +101,8 @@ export const createNlToEsqlGraph = ({
   documentation: EsqlLoadedDocumentation;
   esqlCallbacks?: ValidateEsqlQueryCallbacks;
   includeDatasets?: boolean;
+  includeViews?: boolean;
+  includeFrozen?: boolean;
   sessionId?: string;
   cacheControl?: ChatCompleteCacheControl;
 }) => {
@@ -104,6 +111,8 @@ export const createNlToEsqlGraph = ({
       resourceName: state.target,
       samplingSize: 100,
       includeDatasets,
+      includeViews,
+      includeFrozen,
       esClient,
     });
 
@@ -130,10 +139,15 @@ export const createNlToEsqlGraph = ({
         nlQuery: state.nlQuery,
         documentation,
         resource: state.resource,
+        additionalContext: state.additionalContext,
       })
     );
 
-    const requestedKeywords = [...commands, ...functions];
+    const requestedKeywords = withPromqlKeyword(
+      [...commands, ...functions],
+      state.nlQuery,
+      state.additionalContext
+    );
     const fetchedDoc = docBase.getDocumentation(requestedKeywords);
 
     const action: RequestDocumentationAction = {
@@ -183,6 +197,17 @@ export const createNlToEsqlGraph = ({
       currentTry: state.currentTry + 1,
     };
   };
+
+  /**
+   * Regenerating after a rejected join target cannot produce the answer: this tool returns a
+   * single query, and the question needed more than one index. Further attempts would each cost a
+   * full generation over the accumulated history, and the best they could yield is a query over
+   * the primary index alone — valid, but silently missing the other half. So the call ends and the
+   * caller gets a fast, truthful failure to act on.
+   *
+   * Decided from the errors already in state; no cluster lookup is involved.
+   */
+  const joinTargetRejected = (state: StateType): boolean => hasRejectedJoinTarget(state.actions);
 
   const branchAfterGenerate = async (state: StateType) => {
     const lastAction = state.actions[state.actions.length - 1];
@@ -256,11 +281,10 @@ export const createNlToEsqlGraph = ({
     if (!isValidateQueryAction(lastAction)) {
       throw new Error(`Last action is not a validate_query action`);
     }
-    if (lastAction.success || state.currentTry >= state.maxRetries) {
+    if (lastAction.success || state.currentTry >= state.maxRetries || joinTargetRejected(state)) {
       return 'finalize';
-    } else {
-      return 'generate_esql';
     }
+    return 'generate_esql';
   };
 
   // execute query step - validate first (ANTLR), then execute only if valid
@@ -295,7 +319,16 @@ export const createNlToEsqlGraph = ({
       const results = await executeEsql({
         query,
         params: buildTimeRangeParams(state.timeRange),
-        ...(schemaOnly ? { limit: 1, dropNullColumns: false } : {}),
+        // The schema probe only collects columns, so bounding it to the time range is safe and
+        // keeps TS and PROMQL queries from aggregating all data.
+        ...(schemaOnly
+          ? {
+              limit: 1,
+              dropNullColumns: false,
+              filter: buildTimeSeriesTimeRangeFilter(query, state.timeRange),
+            }
+          : {}),
+        includeFrozen,
         esClient,
       });
       action = {
@@ -323,11 +356,10 @@ export const createNlToEsqlGraph = ({
     if (!isExecuteQueryAction(lastAction)) {
       throw new Error(`Last action is not an execute_query action`);
     }
-    if (lastAction.success || state.currentTry >= state.maxRetries) {
+    if (lastAction.success || state.currentTry >= state.maxRetries || joinTargetRejected(state)) {
       return 'finalize';
-    } else {
-      return 'generate_esql';
     }
+    return 'generate_esql';
   };
 
   // finalize step - process / generate the outputs

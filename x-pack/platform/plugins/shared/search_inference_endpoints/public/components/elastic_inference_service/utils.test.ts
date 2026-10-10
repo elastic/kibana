@@ -48,6 +48,7 @@ describe('utils', () => {
       ['completion', 'LLM'],
       ['text_embedding', 'Embedding'],
       ['sparse_embedding', 'Embedding'],
+      ['embedding', 'Embedding'],
       ['rerank', 'Rerank'],
     ] as const)('%s → %s', (taskType, expectedCategory) => {
       expect(TASK_TYPE_CATEGORY[taskType]).toBe(expectedCategory);
@@ -290,6 +291,33 @@ describe('utils', () => {
       expect(result[0].modelName).toBe('Elastic ELSER v2');
       expect(result[0].modelCreator).toBe('Elastic');
     });
+
+    it('keeps release and end-of-life dates from a later endpoint when the first metadata has none', () => {
+      const withoutDates = {
+        ...makeEndpoint({
+          inference_id: 'eis-model-a',
+          task_type: 'chat_completion' as const,
+          service_settings: { model_id: 'shared-model' },
+        }),
+        metadata: { display: { name: 'Shared model', model_creator: 'Elastic' }, heuristics: {} },
+      } as EisInferenceEndpoint;
+      const withDates = {
+        ...makeEndpoint({
+          inference_id: 'eis-model-b',
+          task_type: 'completion' as const,
+          service_settings: { model_id: 'shared-model' },
+        }),
+        metadata: {
+          heuristics: { release_date: '2024-06-25', end_of_life_date: '2026-01-01' },
+        },
+      } as EisInferenceEndpoint;
+
+      const [grouped] = groupEndpointsByModel([withoutDates, withDates]);
+
+      expect(grouped.modelMetadata?.heuristics?.release_date).toBe('2024-06-25');
+      expect(grouped.modelMetadata?.heuristics?.end_of_life_date).toBe('2026-01-01');
+      expect(grouped.modelName).toBe('Shared model');
+    });
   });
 
   describe('getProviderOptions', () => {
@@ -519,6 +547,141 @@ describe('utils', () => {
           showPreviewModels: true,
         });
         expect(shown.map((m) => m.modelName)).toEqual(['preview-model']);
+      });
+    });
+
+    describe('region options', () => {
+      const usModel = makeGroupedModel({
+        modelName: 'us-model',
+        modelCreator: 'Anthropic',
+        taskTypes: ['chat_completion'],
+        categories: ['LLM'],
+        endpoints: [
+          makeEndpoint({
+            inference_id: 'us-model',
+            task_type: 'chat_completion',
+            metadata: {
+              regions: [{ csp: 'aws', region: 'us-east-1', geo: 'us' }],
+            },
+          }),
+        ],
+      });
+      const euModel = makeGroupedModel({
+        modelName: 'eu-model',
+        modelCreator: 'OpenRouter',
+        taskTypes: ['chat_completion'],
+        categories: ['LLM'],
+        endpoints: [
+          makeEndpoint({
+            inference_id: 'eu-model',
+            task_type: 'chat_completion',
+            metadata: { regions: [{ geo: 'eu' }] },
+          }),
+        ],
+      });
+      const plainModel = makeGroupedModel({ modelName: 'plain-model' });
+      const regionModels = [usModel, euModel, plainModel];
+
+      it('keeps every model when no region is selected', () => {
+        expect(filterGroupedModels(regionModels, noFilters).map((m) => m.modelName)).toEqual([
+          'eu-model',
+          'plain-model',
+          'us-model',
+        ]);
+      });
+
+      it('matches a geography for a specific region and for geography-only models', () => {
+        expect(
+          filterGroupedModels(regionModels, {
+            ...noFilters,
+            selectedRegionOptions: ['geo-us'],
+          }).map((m) => m.modelName)
+        ).toEqual(['us-model']);
+
+        expect(
+          filterGroupedModels(regionModels, {
+            ...noFilters,
+            selectedRegionOptions: ['geo-eu'],
+          }).map((m) => m.modelName)
+        ).toEqual(['eu-model']);
+      });
+
+      it('matches a specific region', () => {
+        expect(
+          filterGroupedModels(regionModels, {
+            ...noFilters,
+            selectedRegionOptions: ['region-aws-us-east-1'],
+          }).map((m) => m.modelName)
+        ).toEqual(['us-model']);
+      });
+
+      it('does not match a region the model is not available in', () => {
+        expect(
+          filterGroupedModels(regionModels, {
+            ...noFilters,
+            selectedRegionOptions: ['region-aws-eu-west-1'],
+          })
+        ).toEqual([]);
+      });
+
+      it('matches any selected geography or region', () => {
+        expect(
+          filterGroupedModels(regionModels, {
+            ...noFilters,
+            selectedRegionOptions: ['geo-eu', 'region-aws-us-east-1'],
+          }).map((m) => m.modelName)
+        ).toEqual(['eu-model', 'us-model']);
+      });
+
+      it('combines a region with search, model type, and provider', () => {
+        expect(
+          filterGroupedModels(regionModels, {
+            searchQuery: 'us-model',
+            selectedTaskTypes: new Set<TaskTypeCategory>(['LLM']),
+            selectedProviders: ['Anthropic'],
+            selectedRegionOptions: ['geo-us'],
+          }).map((m) => m.modelName)
+        ).toEqual(['us-model']);
+
+        expect(
+          filterGroupedModels(regionModels, {
+            searchQuery: 'us-model',
+            selectedTaskTypes: new Set<TaskTypeCategory>(['Rerank']),
+            selectedProviders: ['Anthropic'],
+            selectedRegionOptions: ['geo-us'],
+          })
+        ).toEqual([]);
+      });
+
+      it('keeps a region-blocked model hidden unless outside-region models are shown', () => {
+        const blocked = makeGroupedModel({
+          modelName: 'blocked-us',
+          endpoints: [
+            makeEndpoint({
+              inference_id: 'blocked-us',
+              task_type: 'chat_completion',
+              metadata: {
+                denied_by_region_policy: true,
+                regions: [{ csp: 'aws', region: 'us-east-1', geo: 'us' }],
+              },
+            }),
+          ],
+        });
+
+        expect(
+          filterGroupedModels([blocked, usModel], {
+            ...noFilters,
+            selectedRegionOptions: ['region-aws-us-east-1'],
+          }).map((m) => m.modelName)
+        ).toEqual(['us-model']);
+
+        expect(
+          filterGroupedModels([blocked, usModel], {
+            ...noFilters,
+            selectedRegionOptions: ['region-aws-us-east-1'],
+            showOutsideRegionPreferences: true,
+          }).map((m) => m.modelName)
+        ).toEqual(['blocked-us', 'us-model']);
       });
     });
   });

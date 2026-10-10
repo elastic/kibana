@@ -13,22 +13,29 @@ import type {
 } from '@kbn/alerting-v2-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { AppHeaderTab } from '@kbn/app-header';
-import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
+import {
+  OBSERVABILITY_ALERTING_APP_ID,
+  OBSERVABILITY_ALERTING_BASE_PATH,
+  createObservabilityAlertingV2Host,
+} from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useCallback, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { EuiPageSection } from '@elastic/eui';
+import { ALERTING_V2_RULES_TAB_ID } from '@kbn/alerting-v2-constants';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
-  OBSERVABILITY_ALERTING_BASE_PATH,
+  OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-  OBSERVABILITY_ALERTING_INBOX_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
+import { createInvestigateEpisodeAction } from '../actions/investigate_episode_action';
 import { hasObservabilityAlertingCapabilities } from './has_observability_alerting_privilege';
+
+const createObservabilityEpisodeActions = () => [createInvestigateEpisodeAction()];
 
 interface ObservabilityAlertingAppProps {
   coreStart: CoreStart;
@@ -42,14 +49,7 @@ const useObservabilityHostApp = (
   createAlertingV2HostApp: AlertingV2PublicStart['createAlertingV2HostApp']
 ): AlertingV2HostApp =>
   useMemo(
-    () =>
-      createAlertingV2HostApp(OBSERVABILITY_ALERTING_APP_ID, {
-        rules: OBSERVABILITY_ALERTING_RULES_V2_PATH,
-        ruleLibrary: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
-        episodes: OBSERVABILITY_ALERTING_INBOX_PATH,
-        actionPolicies: OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
-        executionHistory: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-      }),
+    () => createObservabilityAlertingV2Host(createAlertingV2HostApp),
     [createAlertingV2HostApp]
   );
 
@@ -63,14 +63,14 @@ const useObservabilityRulesTabs = (
 
     if (showV2) {
       tabs.push({
-        id: 'v2Rules',
+        id: ALERTING_V2_RULES_TAB_ID,
         label: i18n.translate('xpack.observabilityAlerting.rulesPage.v2RulesTabTitle', {
-          defaultMessage: 'V2 rules',
+          defaultMessage: 'Universal',
         }),
         isSelected: selected === 'v2',
         href: prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V2_PATH}`),
         badge: {
-          iconType: 'sparkles',
+          iconType: 'dot',
           tooltip: i18n.translate(
             'xpack.observabilityAlerting.rulesPage.v2RulesTabNewBadgeTooltip',
             { defaultMessage: 'New' }
@@ -84,7 +84,7 @@ const useObservabilityRulesTabs = (
       tabs.push({
         id: 'v1Rules',
         label: i18n.translate('xpack.observabilityAlerting.rulesPage.v1RulesTabTitle', {
-          defaultMessage: 'V1 rules',
+          defaultMessage: 'Classic',
         }),
         isSelected: selected === 'v1',
         href: prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V1_PATH}`),
@@ -149,6 +149,13 @@ export const ObservabilityAlertingApp = ({
     'rules'
   );
   const rulesTabVisibility = { showV1: hasV1Rules, showV2: hasV2Rules };
+
+  const manageRulesHref = useMemo(() => {
+    const rulesPath = hasV2Rules
+      ? OBSERVABILITY_ALERTING_RULES_V2_PATH
+      : OBSERVABILITY_ALERTING_RULES_V1_PATH;
+    return prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${rulesPath}`);
+  }, [hasV2Rules, prepend]);
   const rulesV1Tabs = useObservabilityRulesTabs(prepend, 'v1', rulesTabVisibility);
   const rulesV2Tabs = useObservabilityRulesTabs(prepend, 'v2', rulesTabVisibility);
 
@@ -166,9 +173,10 @@ export const ObservabilityAlertingApp = ({
   return (
     <Routes>
       <Route exact path="/">
-        <Redirect to={OBSERVABILITY_ALERTING_INBOX_PATH} />
+        <Redirect to={OBSERVABILITY_ALERTING_ALERTS_PATH} />
       </Route>
-      <Route path={OBSERVABILITY_ALERTING_INBOX_PATH}>
+      {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
+      <Route path={OBSERVABILITY_ALERTING_ALERTS_PATH}>
         <EuiPageSection paddingSize="m">
           {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
           <EpisodesPage
@@ -176,6 +184,8 @@ export const ObservabilityAlertingApp = ({
             setBreadcrumbs={setBreadcrumbs}
             hostApp={hostApp}
             privilegeCheck={privilegeCheck}
+            createActions={createObservabilityEpisodeActions}
+            manageRulesHref={manageRulesHref}
           />
         </EuiPageSection>
       </Route>
@@ -200,6 +210,7 @@ export const ObservabilityAlertingApp = ({
           />
         </EuiPageSection>
       </Route>
+      {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
       <Route path={OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH}>
         <EuiPageSection paddingSize="m">
           {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
@@ -229,7 +240,7 @@ export const ObservabilityAlertingApp = ({
           />
         </EuiPageSection>
       </Route>
-      <Redirect to={OBSERVABILITY_ALERTING_INBOX_PATH} />
+      <Redirect to={OBSERVABILITY_ALERTING_ALERTS_PATH} />
     </Routes>
   );
 };

@@ -11,6 +11,7 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 import type { ScoutLogger, ScoutTestConfig } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../common/saved_object_types';
+import type { RuleSavedObjectAttributes } from '../../../../server/saved_objects';
 import { createSystemIndicesEsClient } from './system_indices_es_client';
 
 /**
@@ -34,11 +35,12 @@ const getDocumentId = (ruleId: string, spaceId: string): string =>
 
 /**
  * Test-time direct-index accessor for the rule saved object. The type is
- * `hidden: true`, so the saved objects HTTP API cannot reach it and specs that
- * need framework-owned fields the rule API never returns — namely
- * `references[]` — have to read the raw document.
+ * `hidden: true`, so the saved objects HTTP API cannot reach it, and specs that
+ * need what the rule API never returns — `references[]`, or the stored
+ * attributes before the response projection — have to read the raw document.
  */
 export interface RuleSavedObjectService {
+  getAttributes: (ruleId: string, spaceId?: string) => Promise<RuleSavedObjectAttributes>;
   /** Reads the raw `references[]` of a rule saved object. */
   getReferences: (ruleId: string, spaceId?: string) => Promise<SavedObjectReference[]>;
   /**
@@ -49,6 +51,16 @@ export interface RuleSavedObjectService {
   setReferences: (
     ruleId: string,
     references: SavedObjectReference[],
+    spaceId?: string
+  ) => Promise<void>;
+  /**
+   * Sets the server-managed `metadata.template` on a rule saved object. The
+   * rule API never accepts it, so specs seed it here to cover the rules the
+   * template install route creates.
+   */
+  setMetadataTemplate: (
+    ruleId: string,
+    template: { id: string },
     spaceId?: string
   ) => Promise<void>;
 }
@@ -80,6 +92,23 @@ export const getRuleSavedObjectService = ({
   };
 
   return {
+    getAttributes: (ruleId, spaceId = DEFAULT_SPACE_ID) =>
+      measurePerformanceAsync(log, 'ruleSavedObject.getAttributes', async () => {
+        const client = await getSavedObjectClient();
+        const response = await client.get<Record<string, RuleSavedObjectAttributes>>({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          id: getDocumentId(ruleId, spaceId),
+          _source_includes: [RULE_SAVED_OBJECT_TYPE],
+        });
+
+        const attributes = response._source?.[RULE_SAVED_OBJECT_TYPE];
+        if (!attributes) {
+          throw new Error(`Rule saved object "${ruleId}" has no ${RULE_SAVED_OBJECT_TYPE} source`);
+        }
+
+        return attributes;
+      }),
+
     getReferences: (ruleId, spaceId = DEFAULT_SPACE_ID) =>
       measurePerformanceAsync(log, 'ruleSavedObject.getReferences', async () => {
         const client = await getSavedObjectClient();
@@ -99,6 +128,17 @@ export const getRuleSavedObjectService = ({
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: getDocumentId(ruleId, spaceId),
           doc: { references },
+          refresh: 'wait_for',
+        });
+      }),
+
+    setMetadataTemplate: (ruleId, template, spaceId = DEFAULT_SPACE_ID) =>
+      measurePerformanceAsync(log, 'ruleSavedObject.setMetadataTemplate', async () => {
+        const client = await getSavedObjectClient();
+        await client.update({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          id: getDocumentId(ruleId, spaceId),
+          doc: { [RULE_SAVED_OBJECT_TYPE]: { metadata: { template } } },
           refresh: 'wait_for',
         });
       }),

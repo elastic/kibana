@@ -8,6 +8,7 @@
 import { uniqBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { resolveContentTitle } from '@kbn/product-doc-common';
 import type { ExtractedDocument } from './extract_documentation';
 
 export const processDocuments = async ({
@@ -64,7 +65,7 @@ const processDocument = (document: ExtractedDocument) => {
     // limit to 2 consecutive carriage return
     .replaceAll(/\n\n+/g, '\n\n');
 
-  document.content_title = document.content_title.split('|')[0].trim();
+  document.content_title = resolveContentTitle(document.content_title, document.content_body);
 
   // specific to security: remove rule query section as it's usually large without much value for the LLM
   if (document.product_name === 'security') {

@@ -23,6 +23,7 @@ products:
     - security
   default:
     - product: kibana
+    - product: cloud-serverless
       # lifecycle: ga
 
 # Extraction configuration
@@ -57,7 +58,7 @@ pivot:
     #     security: ">security-breaking"
     #     other:
     # Simple string form: labels as comma-separated string
-    bug-fix: 'release_note:fix'
+    bug-fix: 'release_note:fix, release_note:bug'
     deprecation: 'release_note:deprecation'
     feature: 'release_note:feature'
     enhancement: 'release_note:enhancement'
@@ -208,7 +209,7 @@ pivot:
     'observability':
       - 'Feature:Observability Home'
       - 'Feature:SLO'
-      - 'Team:obs-ux-management'
+      - 'Team:obs-ux-management - DEPRECATED'
       - 'Team:nightshift-context-and-research'
       - 'Team:obs-ux-infra_services - DEPRECATED'
       - 'Team:obs-ux-logs'
@@ -225,7 +226,7 @@ pivot:
       - 'Feature:Logs UI'
       - 'Feature:Infra UI'
       - 'Feature:Service Maps'
-      - 'Team:actionable-obs'
+      - 'Team:actionable-obs - DEPRECATED'
       - 'Team:obs-exploration'
       - 'Team:obs-signals-traces'
       - 'Team:Observability'
@@ -277,27 +278,25 @@ rules:
   # Bundle — filtering applied during 'changelog bundle' and 'changelog gh-release'.
   # Applied after the primary filter (--prs, --issues, --all, ...) has collected changelogs.
   bundle:
-    exclude_types:
-      'docs'
-      # products:
-      #   'cloud-serverless':
-      #     exclude_types:
-      #       - docs
-      #   'kibana':
-      #     exclude_types:
-      #       - docs
+    products:
+      'cloud-serverless':
+        exclude_types:
+          - docs
+      'kibana':
+        exclude_types:
+          - docs
       #     # match_areas: any
       #     # include_areas:
       #     #   - "Alerting and Reporting":
       #     #   - "Dashboards and Visualizations"
       #     #   - "Discover and ES|QL"
       #     #   - Other
-      #   'observability':
-      #     exclude_types:
-      #       - docs
-      #   'security':
-      #     exclude_types:
-      #       - docs
+      'observability':
+        exclude_types:
+          - docs
+      'security':
+        exclude_types:
+          - docs
 
 # Bundle configuration (profiles and defaults)
 bundle:
@@ -318,21 +317,23 @@ bundle:
   # description: |
   #   This release includes new features and bug fixes.
   use_local_changelogs: false
+  releases:
+    products:
+      kibana: kibana-release
+      cloud-serverless: serverless-release
+      observability: observability-release
+      security: security-release
 
   # Named bundle profiles for different release scenarios
   profiles:
     kibana-release:
-      output_products: 'kibana {version} {lifecycle}'
-      output_directory: docs/releases/kibana
+      product: kibana
     observability-release:
-      output_products: 'observability {version} {lifecycle}'
-      output_directory: docs/releases/observability
+      product: observability
     security-release:
-      output_products: 'security {version} {lifecycle}'
-      output_directory: docs/releases/security
+      product: security
     serverless-release:
-      output_products: 'cloud-serverless {version} {lifecycle}'
-      output_directory: docs/releases/cloud-serverless
+      product: cloud-serverless
       # Feature IDs to hide when bundling with this profile (accepts string or list)
       hide_features:
         - data-federation

@@ -9,7 +9,7 @@ import type { KueryNode } from '@kbn/es-query';
 import type { Readable } from 'stream';
 import type { ReplaySubject } from 'rxjs';
 import type { AttachmentType } from '../../../common';
-import type { FindAttachmentsQueryParams } from '../../../common/types/api';
+import type { UnifiedAttachmentsFindQueryParams } from '../../../common/types/api';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 
 /**
@@ -25,13 +25,17 @@ export interface AddArgs {
    * toUnifiedAttachmentRequest.
    */
   comment: UnifiedAttachmentPayload;
+  /**
+   * Optional pre-generated saved object id. The internal POST /attachments route
+   * supplies this so it can locate the created attachment in the returned case.
+   */
+  id?: string;
 }
 
 export interface BulkCreateArgs {
   caseId: string;
   /**
-   * Unified payloads only. Callers with mixed wire shapes convert first via
-   * toUnifiedAttachmentRequest.
+   * Unified payloads only.
    */
   attachments: UnifiedAttachmentPayload[];
 }
@@ -77,15 +81,15 @@ export interface DeleteArgs {
 /**
  * Parameters for finding attachments of a case
  */
-export interface FindCommentsArgs {
+export interface FindAttachmentsArgs {
   /**
    * The case ID for finding associated attachments
    */
   caseID: string;
   /**
-   * Optional parameters for filtering the returned attachments
+   * Optional parameters for filtering the returned attachments, including `type`
    */
-  findQueryParams?: FindAttachmentsQueryParams;
+  findQueryParams?: UnifiedAttachmentsFindQueryParams;
 }
 
 /**

@@ -206,6 +206,30 @@ describe('RelayClient', () => {
     });
   });
 
+  it('returns the workspace name and URL from a complete claim', async () => {
+    requestMock.mockResolvedValueOnce({
+      status: 200,
+      data: { tenant_key: 'T0123ABC', tenant_name: 'Acme', tenant_url: 'https://acme.slack.com/' },
+    } as never);
+    await expect(createClient().fetchClaim('claim-1')).resolves.toEqual({
+      status: 'complete',
+      tenant_key: 'T0123ABC',
+      tenant_name: 'Acme',
+      tenant_url: 'https://acme.slack.com/',
+    });
+  });
+
+  it('drops non-string workspace name and URL from a complete claim', async () => {
+    requestMock.mockResolvedValueOnce({
+      status: 200,
+      data: { tenant_key: 'T0123ABC', tenant_name: 42, tenant_url: null },
+    } as never);
+    await expect(createClient().fetchClaim('claim-1')).resolves.toEqual({
+      status: 'complete',
+      tenant_key: 'T0123ABC',
+    });
+  });
+
   it('unbind posts the tenant key to the uninstall endpoint', async () => {
     requestMock.mockResolvedValue({ status: 200, data: {} } as never);
 
@@ -353,7 +377,7 @@ describe('RelayClient', () => {
           channel: 'C123',
           message: 'hello',
         })
-      ).resolves.toEqual({ ref: '1700000000.000100', tenantKey: 'team-A' });
+      ).resolves.toEqual({ ref: '1700000000.000100', tenantKey: 'team-A', channel: 'C123' });
 
       expect(requestMock).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -385,7 +409,33 @@ describe('RelayClient', () => {
       );
     });
 
-    it.each([403, 409, 502])(
+    it('sends message_ts and drops thread_ts when editing a posted message', async () => {
+      requestMock.mockResolvedValue({
+        status: 200,
+        data: { ref: '1700000000.000200', tenant_key: 'team-A' },
+      } as never);
+
+      await createClient().trigger({
+        tenantKey: 'team-A',
+        channel: 'C123',
+        message: 'edited',
+        threadTs: '1700000000.000100',
+        messageTs: '1700000000.000200',
+      });
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: {
+            tenant_key: 'team-A',
+            channel: 'C123',
+            message: 'edited',
+            message_ts: '1700000000.000200',
+          },
+        })
+      );
+    });
+
+    it.each([403, 409, 429, 502])(
       'turns a %s into a RelayRequestError carrying the status',
       async (status) => {
         requestMock.mockResolvedValue({ status, data: { message: 'nope' } } as never);
@@ -431,7 +481,32 @@ describe('RelayClient', () => {
           channel: 'C123',
           message: 'hello',
         })
-      ).resolves.toEqual({ ref: '1700000000.000400', tenantKey: 'team-A' });
+      ).resolves.toEqual({ ref: '1700000000.000400', tenantKey: 'team-A', channel: 'C123' });
+    });
+
+    it("forwards a channel name and returns Relay's resolved channel id", async () => {
+      requestMock.mockResolvedValue({
+        status: 202,
+        data: { ref: '1700000000.000500', tenant_key: 'team-A', channel: 'C0123456789' },
+      } as never);
+
+      await expect(
+        createClient().trigger({
+          tenantKey: 'team-A',
+          channel: '#general',
+          message: 'hello',
+        })
+      ).resolves.toEqual({
+        ref: '1700000000.000500',
+        tenantKey: 'team-A',
+        channel: 'C0123456789',
+      });
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: { tenant_key: 'team-A', channel: '#general', message: 'hello' },
+        })
+      );
     });
   });
 

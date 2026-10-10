@@ -12,9 +12,11 @@ import { EuiAccordion, EuiBasicTable, EuiSpacer, EuiText, useGeneratedHtmlId } f
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
+import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
+import { getAgentActionState } from '../response_action/response_action_results/utils';
 import type {
   ActionDetails,
   GetProcessesActionOutputContent,
@@ -32,23 +34,41 @@ export interface RunningProcessesActionResultsProps {
   'data-test-subj'?: string;
 }
 
+/**
+ * DO NOT USE as it is undergoing refactoring. Use `<ResponseActionResults>` component instead
+ * @deprecated
+ */
 export const RunningProcessesActionResults = memo<RunningProcessesActionResultsProps>(
   ({ action, agentId, textSize = 's', 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+    const { wasSuccessful } = useMemo(
+      () => (agentId ? getAgentActionState(action, agentId) : action),
+      [action, agentId]
+    );
+
     return (
-      <EuiText size={textSize}>
-        {action.agentType === 'endpoint' ? (
-          <EndpointRunningProcessesResults
+      <EuiText size={textSize} data-test-subj={getTestId('container')}>
+        {wasSuccessful ? (
+          action.agentType === 'endpoint' ? (
+            <EndpointRunningProcessesResults
+              action={action}
+              agentId={agentId}
+              data-test-subj={dataTestSubj}
+            />
+          ) : action.agentType === 'sentinel_one' ? (
+            <SentinelOneRunningProcessesResults
+              action={action}
+              agentId={agentId}
+              data-test-subj={dataTestSubj}
+            />
+          ) : null
+        ) : (
+          <EndpointActionFailureMessage
             action={action}
             agentId={agentId}
-            data-test-subj={dataTestSubj}
+            data-test-subj={getTestId('outputFailureMessage')}
           />
-        ) : action.agentType === 'sentinel_one' ? (
-          <SentinelOneRunningProcessesResults
-            action={action}
-            agentId={agentId}
-            data-test-subj={dataTestSubj}
-          />
-        ) : null}
+        )}
       </EuiText>
     );
   }

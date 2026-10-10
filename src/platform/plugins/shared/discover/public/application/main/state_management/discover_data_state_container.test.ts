@@ -11,6 +11,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
+import { createResolvedMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { createDiscoverServicesMock, discoverServiceMock } from '../../../__mocks__/services';
 import { FetchStatus } from '../../types';
 import type { DataDocuments$ } from './discover_data_state_container';
@@ -31,6 +32,7 @@ import {
 } from './redux';
 import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
 import { TEST_PROFILE_STATE_DEF } from '../../../context_awareness/__mocks__/profile_state';
+import * as resolveEsqlSourceModule from '../data_fetching/resolve_esql_source';
 
 jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
@@ -189,6 +191,39 @@ describe('test getDataStateContainer', () => {
     ).toHaveBeenCalled();
 
     unsubscribe();
+  });
+
+  test('fetches with the EsqlSource set on the tab without resolving it again', async () => {
+    const services = createDiscoverServicesMock();
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true, services });
+    const { esqlSource } = await createResolvedMockEsqlSource([], [], '@timestamp', 'FROM logs-*');
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.setDataSource)({
+        dataSource: esqlSource,
+      })
+    );
+    const { currentDataSource$ } = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    );
+
+    const resolveSpy = jest.spyOn(resolveEsqlSourceModule, 'resolveEsqlSource');
+    services.data.query.timefilter.timefilter.getTime = jest.fn(() => {
+      return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
+    });
+    const dataState = initializeDataStateInDiscoverStateMock(stateContainer, services);
+    const unsubscribe = dataState.subscribe();
+
+    dataState.refetch$.next(undefined);
+    await waitFor(() => {
+      expect(dataState.data$.main$.value.fetchStatus).toBe('complete');
+    });
+
+    expect(currentDataSource$.getValue()).toBe(esqlSource);
+    expect(resolveSpy).not.toHaveBeenCalled();
+
+    unsubscribe();
+    resolveSpy.mockRestore();
   });
 
   test('does not reset warning callout dismiss on fetch more', async () => {

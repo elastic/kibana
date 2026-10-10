@@ -7,6 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
+import { ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_ALERTS_ALL_ROLE,
   ALERTING_V2_ALERTS_READ_ROLE,
@@ -47,7 +48,7 @@ apiTest.describe('Create assign episode action API', { tag: '@local-stateful-cla
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: episodeId, status: 'active' },
+          alert: { id: episodeId, status: 'active' },
         }),
       ]);
       const response = await apiClient.post(getAssignEpisodeActionUrl(episodeId), {
@@ -64,7 +65,7 @@ apiTest.describe('Create assign episode action API', { tag: '@local-stateful-cla
       expect(actions[0]).toMatchObject({
         action_type: 'assign',
         group_hash: groupHash,
-        episode_id: episodeId,
+        alert_id: episodeId,
         rule_id: ruleId,
         space_id: 'default',
         assignee_uid: assigneeUid,
@@ -82,9 +83,15 @@ apiTest.describe('Create assign episode action API', { tag: '@local-stateful-cla
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: episodeId, status: 'active' },
+          alert: { id: episodeId, status: 'active' },
         }),
       ]);
+      const assignResponse = await apiClient.post(getAssignEpisodeActionUrl(episodeId), {
+        headers: writerHeaders,
+        body: { assignee_uid: 'u_assigned_first' },
+      });
+      expect(assignResponse).toHaveStatusCode(204);
+
       const response = await apiClient.post(getAssignEpisodeActionUrl(episodeId), {
         headers: writerHeaders,
         body: { assignee_uid: null },
@@ -94,14 +101,121 @@ apiTest.describe('Create assign episode action API', { tag: '@local-stateful-cla
         ruleId,
         actionTypes: ['assign'],
       });
-      expect(actions).toHaveLength(1);
-      expect(actions[0]).toMatchObject({
+      expect(actions).toHaveLength(2);
+      expect(actions[1]).toMatchObject({
         action_type: 'assign',
         group_hash: groupHash,
-        episode_id: episodeId,
+        alert_id: episodeId,
         rule_id: ruleId,
         assignee_uid: null,
       });
+    }
+  );
+
+  apiTest(
+    'assign: repeating the current assignee returns 409 and writes no second action',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'assign-no-op-rule';
+      const groupHash = 'assign-no-op-group';
+      const episodeId = 'assign-no-op-episode';
+      const assigneeUid = 'u_already_assigned';
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          alert: { id: episodeId, status: 'active' },
+        }),
+      ]);
+      const firstResponse = await apiClient.post(getAssignEpisodeActionUrl(episodeId), {
+        headers: writerHeaders,
+        body: { assignee_uid: assigneeUid },
+      });
+      expect(firstResponse).toHaveStatusCode(204);
+
+      const response = await apiClient.post(getAssignEpisodeActionUrl(episodeId), {
+        headers: writerHeaders,
+        body: { assignee_uid: assigneeUid },
+      });
+      expect(response).toHaveStatusCode(409);
+      expect(response.body.code).toBe('ALERT_ACTION_NO_OP');
+      expect(response.body.details).toMatchObject({
+        alert_id: episodeId,
+        group_hash: groupHash,
+        action_type: 'assign',
+      });
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['assign'],
+      });
+      expect(actions).toHaveLength(1);
+    }
+  );
+
+  apiTest(
+    'assign: clearing the assignee of an unassigned alert returns 409',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'assign-clear-no-op-rule';
+      const groupHash = 'assign-clear-no-op-group';
+      const episodeId = 'assign-clear-no-op-episode';
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          alert: { id: episodeId, status: 'active' },
+        }),
+      ]);
+
+      const response = await apiClient.post(getAssignEpisodeActionUrl(episodeId), {
+        headers: writerHeaders,
+        body: { assignee_uid: null },
+      });
+      expect(response).toHaveStatusCode(409);
+      expect(response.body.code).toBe('ALERT_ACTION_NO_OP');
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['assign'],
+      });
+      expect(actions).toHaveLength(0);
+    }
+  );
+
+  apiTest(
+    'assign: reinstating a cleared assignee returns 204',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'assign-reinstate-rule';
+      const groupHash = 'assign-reinstate-group';
+      const episodeId = 'assign-reinstate-episode';
+      const assigneeUid = 'u_reinstated';
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          alert: { id: episodeId, status: 'active' },
+        }),
+      ]);
+
+      for (const body of [{ assignee_uid: assigneeUid }, { assignee_uid: null }]) {
+        const setupResponse = await apiClient.post(getAssignEpisodeActionUrl(episodeId), {
+          headers: writerHeaders,
+          body,
+        });
+        expect(setupResponse).toHaveStatusCode(204);
+      }
+
+      const response = await apiClient.post(getAssignEpisodeActionUrl(episodeId), {
+        headers: writerHeaders,
+        body: { assignee_uid: assigneeUid },
+      });
+      expect(response).toHaveStatusCode(204);
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['assign'],
+      });
+      expect(actions).toHaveLength(3);
+      expect(actions[2]).toMatchObject({ assignee_uid: assigneeUid });
     }
   );
 
@@ -124,13 +238,13 @@ apiTest.describe('Create assign episode action API', { tag: '@local-stateful-cla
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
           status: 'recovered',
-          episode: { id: olderEpisodeId, status: 'inactive' },
+          alert: { id: olderEpisodeId, status: 'inactive' },
         }),
         buildAlertEvent({
           '@timestamp': new Date(now).toISOString(),
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: newerEpisodeId, status: 'active' },
+          alert: { id: newerEpisodeId, status: 'active' },
         }),
       ]);
 
@@ -148,7 +262,7 @@ apiTest.describe('Create assign episode action API', { tag: '@local-stateful-cla
       expect(actions[0]).toMatchObject({
         action_type: 'assign',
         group_hash: groupHash,
-        episode_id: olderEpisodeId,
+        alert_id: olderEpisodeId,
         assignee_uid: 'u_someone',
       });
     }
@@ -163,24 +277,33 @@ apiTest.describe('Create assign episode action API', { tag: '@local-stateful-cla
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
+  apiTest('schema: rejects alert_id in the body (strict mode) with 400', async ({ apiClient }) => {
+    // The episode id moved to the path; the assign body only carries the
+    // assignee.
+    const response = await apiClient.post(getAssignEpisodeActionUrl('any-episode'), {
+      headers: writerHeaders,
+      body: { alert_id: 'any-episode', assignee_uid: 'u_someone' },
+    });
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
   apiTest(
-    'schema: rejects episode_id in the body (strict mode) with 400',
+    `schema: rejects assignee_uid over ${ID_MAX_LENGTH} chars with 400`,
     async ({ apiClient }) => {
-      // The episode id moved to the path; the assign body only carries the
-      // assignee.
       const response = await apiClient.post(getAssignEpisodeActionUrl('any-episode'), {
         headers: writerHeaders,
-        body: { episode_id: 'any-episode', assignee_uid: 'u_someone' },
+        body: { assignee_uid: 'a'.repeat(ID_MAX_LENGTH + 1) },
       });
       expect(response).toHaveStatusCode(400);
       expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
-  apiTest('schema: rejects assignee_uid over 256 chars with 400', async ({ apiClient }) => {
+  apiTest('schema: rejects an empty assignee_uid with 400', async ({ apiClient }) => {
     const response = await apiClient.post(getAssignEpisodeActionUrl('any-episode'), {
       headers: writerHeaders,
-      body: { assignee_uid: 'a'.repeat(257) },
+      body: { assignee_uid: '' },
     });
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
@@ -207,7 +330,7 @@ apiTest.describe('Create assign episode action API', { tag: '@local-stateful-cla
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('schema: rejects episode_id over 150 chars with 400', async ({ apiClient }) => {
+  apiTest('schema: rejects alert_id over 150 chars with 400', async ({ apiClient }) => {
     const response = await apiClient.post(getAssignEpisodeActionUrl('a'.repeat(151)), {
       headers: writerHeaders,
       body: { assignee_uid: 'u_someone' },
@@ -216,14 +339,14 @@ apiTest.describe('Create assign episode action API', { tag: '@local-stateful-cla
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('returns 404 when episode_id matches no events', async ({ apiClient }) => {
+  apiTest('returns 404 when alert_id matches no events', async ({ apiClient }) => {
     const response = await apiClient.post(getAssignEpisodeActionUrl('unknown-episode'), {
       headers: writerHeaders,
       body: { assignee_uid: 'u_someone' },
     });
     expect(response).toHaveStatusCode(404);
-    expect(response.body.code).toBe('ALERT_EPISODE_NOT_FOUND');
-    expect(response.body.details).toMatchObject({ episode_id: 'unknown-episode' });
+    expect(response.body.code).toBe('ALERT_NOT_FOUND');
+    expect(response.body.details).toMatchObject({ alert_id: 'unknown-episode' });
   });
 
   apiTest(
