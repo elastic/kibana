@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CSSProperties, FocusEvent } from 'react';
+import type { CSSProperties, FocusEvent, KeyboardEvent } from 'react';
 import React, {
   createContext,
   memo,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -43,6 +44,7 @@ import {
   EuiText,
   EuiToolTip,
   euiFontSize,
+  keys,
   useResizeObserver,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -143,6 +145,20 @@ const FieldTableCell = memo(
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const openPopover = useCallback(() => setIsPopoverOpen(true), []);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+
+    // Like EuiDataGrid, Enter or F2 on the focused cell opens its popover.
+    useEffect(() => {
+      const cellElement = anchorCellRef?.current;
+      if (!cellElement) return;
+      const onKeyDown = (event: globalThis.KeyboardEvent) => {
+        if (event.target === cellElement && (event.key === keys.ENTER || event.key === keys.F2)) {
+          event.preventDefault();
+          openPopover();
+        }
+      };
+      cellElement.addEventListener('keydown', onKeyDown);
+      return () => cellElement.removeEventListener('keydown', onKeyDown);
+    }, [anchorCellRef, openPopover]);
 
     const row = rows[rowIndex];
     const warningMessage = useMemo(() => {
@@ -262,6 +278,23 @@ const FieldTableCell = memo(
     );
   }
 );
+
+// Like EuiDataGrid, keep keys used inside the grid from reaching the flyout
+// (arrow keys navigate between documents and Escape closes it).
+const GRID_KEYS = new Set<string>([
+  keys.ARROW_LEFT,
+  keys.ARROW_RIGHT,
+  keys.ARROW_UP,
+  keys.ARROW_DOWN,
+  keys.ESCAPE,
+]);
+const stopGridKeyPropagation = (event: KeyboardEvent<HTMLDivElement>) => {
+  // Only while a cell or header is focused, like EuiDataGrid's keyboard navigation.
+  const role = event.target instanceof HTMLElement ? event.target.getAttribute('role') : null;
+  if ((role === 'gridcell' || role === 'columnheader') && GRID_KEYS.has(event.key)) {
+    event.stopPropagation();
+  }
+};
 
 const GridCell = memo(
   ({ cell, styles }: { cell: Cell<FieldRow, unknown>; styles: TableStyles }) => {
@@ -492,7 +525,13 @@ export const TanStackTableGrid = ({
                   { defaultMessage: 'Pin field column' }
                 );
                 return (
-                  <EuiIconTip aria-label={pinColumnHeader} type="info" content={pinColumnHeader} />
+                  <EuiIconTip
+                    aria-label={pinColumnHeader}
+                    type="info"
+                    content={pinColumnHeader}
+                    // Like EuiDataGrid, header content is not a separate tab stop.
+                    iconProps={{ tabIndex: -1 }}
+                  />
                 );
               },
               cell: ({ row }: { row: { original: FieldRow } }) => (
@@ -593,6 +632,8 @@ export const TanStackTableGrid = ({
     <div
       ref={scrollRef}
       onScroll={onScroll}
+      onKeyDown={stopGridKeyPropagation}
+      tabIndex={-1}
       role="grid"
       aria-rowcount={rows.length + (headerVisibility ? 1 : 0)}
       aria-colcount={tableColumns.length}
@@ -612,6 +653,8 @@ export const TanStackTableGrid = ({
                 <div
                   key={header.id}
                   role="columnheader"
+                  tabIndex={-1}
+                  data-test-subj={`dataGridHeaderCell-${header.column.id}`}
                   data-gridcell-column-id={header.column.id}
                   css={[styles.headerCell, getColumnCss(styles, header.column.id)]}
                 >
