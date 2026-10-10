@@ -9,19 +9,19 @@ import type { MockedGraphEnvironment } from './mocks';
 import { createMockGraphStore } from './mocks';
 import type { AdvancedSettings, WorkspaceField } from '../types';
 import { datasourceSelector, requestDatasource } from './datasource';
-import { datasourceSaga } from './datasource.sagas';
+import { registerDatasourceListeners } from './datasource_listeners';
 import { fieldsSelector } from './fields';
 import { updateSettings } from './advanced_settings';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 const waitForPromise = () => new Promise((r) => setTimeout(r));
 
-describe('datasource saga', () => {
+describe('datasource listener', () => {
   let env: MockedGraphEnvironment;
 
   beforeEach(() => {
     env = createMockGraphStore({
-      sagas: [datasourceSaga],
+      listeners: [registerDatasourceListeners],
       mockedDepsOverwrites: {
         indexPatternProvider: {
           get: jest.fn(() =>
@@ -68,6 +68,41 @@ describe('datasource saga', () => {
     expect(env.mockedDeps.createWorkspace).toHaveBeenCalledWith('test-pattern', {
       timeoutMillis: 123,
     });
+  });
+
+  it('should discard a stale response when a newer datasource request finishes first', async () => {
+    let resolveFirstRequest: (dataView: DataView) => void = () => {};
+    const firstRequest = new Promise<DataView>((resolve) => {
+      resolveFirstRequest = resolve;
+    });
+    const secondDataView = {
+      title: 'second-pattern',
+      getNonScriptedFields: () => [{ name: 'second-field', type: 'string', isMapped: true }],
+    } as DataView;
+    (env.mockedDeps.indexPatternProvider.get as jest.Mock)
+      .mockReturnValueOnce(firstRequest)
+      .mockResolvedValueOnce(secondDataView);
+
+    env.store.dispatch(
+      requestDatasource({ type: 'indexpattern', id: 'first-id', title: 'first-pattern' })
+    );
+    env.store.dispatch(
+      requestDatasource({ type: 'indexpattern', id: 'second-id', title: 'second-pattern' })
+    );
+    await waitForPromise();
+
+    resolveFirstRequest({
+      title: 'first-pattern',
+      getNonScriptedFields: () => [{ name: 'first-field', type: 'string', isMapped: true }],
+    } as DataView);
+    await waitForPromise();
+
+    expect(fieldsSelector(env.store.getState()).map(({ name }) => name)).toEqual(['second-field']);
+    expect(env.mockedDeps.createWorkspace).toHaveBeenCalledTimes(1);
+    expect(env.mockedDeps.createWorkspace).toHaveBeenCalledWith(
+      'second-pattern',
+      expect.anything()
+    );
   });
 
   it('should error with a toast and abort if index pattern is not found', async () => {
