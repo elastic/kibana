@@ -1284,6 +1284,7 @@
     "@kbn/streams-app-plugin": "workspace:*",
     "@kbn/streams-plugin": "workspace:*",
     "@kbn/streams-schema": "workspace:*",
+    "@kbn/subscription-status-plugin": "workspace:*",
     "@kbn/synthetics-plugin": "workspace:*",
     "@kbn/task-manager-dependencies-plugin": "workspace:*",
     "@kbn/task-manager-fixture-plugin": "workspace:*",

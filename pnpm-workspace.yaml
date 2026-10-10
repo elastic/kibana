@@ -1421,6 +1421,7 @@ packages:
   - 'x-pack/platform/plugins/private/rollup'
   - 'x-pack/platform/plugins/private/runtime_fields'
   - 'x-pack/platform/plugins/private/snapshot_restore'
+  - 'x-pack/platform/plugins/private/subscription_status'
   - 'x-pack/platform/plugins/private/task_manager_dependencies'
   - 'x-pack/platform/plugins/private/telemetry_collection_xpack'
   - 'x-pack/platform/plugins/private/transform'

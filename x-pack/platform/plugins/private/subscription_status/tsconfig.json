@@ -1,0 +1,21 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "public/**/*",
+    ".storybook/**/*",
+    "test/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/cloud-plugin",
+    "@kbn/i18n",
+    "@kbn/storybook",
+    "@kbn/scout"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

@@ -167,6 +167,7 @@
     "xpack.slo": "solutions/observability/plugins/slo",
     "xpack.snapshotRestore": "platform/plugins/private/snapshot_restore",
     "xpack.spaces": "platform/plugins/shared/spaces",
+    "xpack.subscriptionStatus": "platform/plugins/private/subscription_status",
     "xpack.savedObjectsTagging": ["platform/plugins/shared/saved_objects_tagging"],
     "xpack.taskManager": "legacy/platform/plugins/shared/task_manager",
     "xpack.threatIntelligence": "solutions/security/plugins/threat_intelligence",

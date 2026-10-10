@@ -206,6 +206,9 @@ export interface InternalChromeControls extends ChromeControls {
   projectPicker: ChromeControls['projectPicker'] & {
     get$(): Observable<ReactNode>;
   };
+  subscriptionBadge: ChromeControls['subscriptionBadge'] & {
+    get$(): Observable<ReactNode>;
+  };
   userMenu: ChromeControls['userMenu'] & {
     get$(): Observable<ReactNode>;
   };

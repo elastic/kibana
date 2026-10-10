@@ -3775,6 +3775,9 @@ importers:
       '@kbn/streams-schema':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-streams-schema
+      '@kbn/subscription-status-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/private/subscription_status
       '@kbn/synthetics-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/synthetics
@@ -9343,6 +9346,8 @@ importers:
   x-pack/platform/plugins/private/runtime_fields: {}
 
   x-pack/platform/plugins/private/snapshot_restore: {}
+
+  x-pack/platform/plugins/private/subscription_status: {}
 
   x-pack/platform/plugins/private/task_manager_dependencies: {}
 
