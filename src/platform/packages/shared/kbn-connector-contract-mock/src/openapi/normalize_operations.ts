@@ -24,11 +24,20 @@ const isUnicodeRegExp = (pattern: string): boolean => {
   }
 };
 
+// Leading inline flags, as in Java's and Python's `(?i)^[a-f]+$`; JavaScript only scopes them.
+const LEADING_FLAGS = /^\(\?([ims]+)\)/;
+
 /**
  * Schema validators compile patterns with the `u` flag, which rejects identity escapes such as
- * `\_` that vendor specs commonly use. Drops the backslash from those escapes.
+ * `\_` that vendor specs commonly use. Drops the backslash from those escapes, and scopes leading
+ * inline flags such as `(?i)` over the rest of the pattern.
  */
-export const toUnicodePattern = (pattern: string): string => {
+export const toUnicodePattern = (source: string): string => {
+  if (isUnicodeRegExp(source)) {
+    return source;
+  }
+  const flags = LEADING_FLAGS.exec(source);
+  const pattern = flags ? `(?${flags[1]}:${source.slice(flags[0].length)})` : source;
   if (isUnicodeRegExp(pattern)) {
     return pattern;
   }
@@ -90,7 +99,8 @@ const normalizeSchema = (schema: SchemaNode): void => {
 };
 
 // OpenAPI 3.0 inherits draft-04's boolean `exclusiveMinimum`/`exclusiveMaximum`; draft-07 and
-// later only define the numeric form.
+// later only define the numeric form. Some OpenAPI 3.1 specs still use the boolean form, which
+// has no other meaning there.
 const toNumericExclusiveBounds = (schema: SchemaNode): void => {
   for (const [exclusive, bound] of [
     ['exclusiveMinimum', 'minimum'],
@@ -122,9 +132,7 @@ export const normalizeOperations = (operations: ContractOperation[]): ContractOp
     const resolveRef = (ref: string) => getAtPointer(spec.document, refToPointer(ref));
     const visit = (schema: SchemaNode) => {
       normalizeSchema(schema);
-      if (spec.dialect === 'openapi-3.0') {
-        toNumericExclusiveBounds(schema);
-      }
+      toNumericExclusiveBounds(schema);
     };
     for (const { schema } of getOperationSchemas(operation)) {
       walkSchema(schema.schema, visit, { seen, resolveRef });
