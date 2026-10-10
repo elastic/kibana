@@ -1519,10 +1519,11 @@ steps:
                 properties:
                   verdicts:
                     type: array
-                    # Cap at consts.batch_size: a batch never has more than 50 real alerts, so
-                    # more than 50 verdicts is hallucination/injection. Without this bound a
-                    # 10 MB response can inflate all_verdicts across up to 20 batches.
-                    maxItems: 50
+                    # No maxItems here on purpose: Gemini rejects this schema with a 400
+                    # ("Provider returned error") when an array cap above ~40 is combined with
+                    # the per-verdict bounds below. The cap is enforced after parsing instead,
+                    # in filter_verdicts_to_batch (slice to consts.batch_size), so a 10 MB
+                    # response still cannot inflate all_verdicts across up to 20 batches.
                     description: One verdict per alert in the batch, in the order the alerts were given.
                     items:
                       type: object
@@ -1620,7 +1621,7 @@ steps:
               - name: filter_verdicts_to_batch
                 type: data.set
                 with:
-                  batch_verdicts: "${{ steps.runAgent_step.output.structured_output.verdicts | where_exp: 'v', 'variables.batch_alert_ids contains v.id' }}"
+                  batch_verdicts: "${{ steps.runAgent_step.output.structured_output.verdicts | where_exp: 'v', 'variables.batch_alert_ids contains v.id' | slice: 0, consts.batch_size }}"
 
               - name: collect_batch_verdicts
                 type: data.set
