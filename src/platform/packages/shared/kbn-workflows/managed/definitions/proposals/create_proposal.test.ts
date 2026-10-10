@@ -10,6 +10,7 @@
 import { parse } from 'yaml';
 import type { z } from '@kbn/zod/v4';
 import CREATE_PROPOSAL_YAML from './create_proposal.yaml';
+import { getManagedWorkflowDefinition } from '../..';
 import { isValidDuration, parseDuration } from '../../../common/utils';
 import {
   DataSetStepSchema,
@@ -21,6 +22,7 @@ import {
   WorkflowExecuteStepSchema,
   WorkflowOutputStepSchema,
 } from '../../../spec/schema';
+import { ALERTZERO_ACTION_WORKFLOW_IDS } from '../alertzero';
 
 /** Local shape: the parsed YAML is untyped, and only these fields are asserted on. */
 interface WorkflowStep {
@@ -678,27 +680,96 @@ describe('create-investigation-proposal workflow', () => {
       );
     });
 
-    it('passes the action input through under a single actionInput key', () => {
-      const execute = findStep(workflow.steps, 'execute_action');
-      const settings = execute?.with as {
-        'workflow-id'?: string;
-        inputs?: Record<string, unknown>;
-      };
+    const EXECUTE_STEPS = ['execute_as_approver', 'execute_as_worker'];
 
-      // `workflow-id` is the only key the engine reads; `workflowId` is ignored.
-      expect(settings['workflow-id']).toContain('variables.action_workflow_id');
-      expect(Object.keys(settings.inputs ?? {})).toEqual(['actionInput']);
-    });
+    it.each(EXECUTE_STEPS)(
+      '%s passes the action input through under a single actionInput key',
+      (name) => {
+        const execute = findStep(workflow.steps, name);
+        const settings = execute?.with as {
+          'workflow-id'?: string;
+          inputs?: Record<string, unknown>;
+        };
 
-    it('executes the live revision input, not the trigger input a revision may have corrected', () => {
-      // The trigger value is captured before the gate is parked, so a revision
-      // that corrected the parameters would otherwise be approved and then
-      // ignored: the analyst approves one input and the action runs another.
-      const execute = findStep(workflow.steps, 'execute_action');
-      const settings = execute?.with as { inputs?: Record<string, unknown> };
+        // `workflow-id` is the only key the engine reads; `workflowId` is ignored.
+        expect(settings['workflow-id']).toContain('variables.action_workflow_id');
+        expect(Object.keys(settings.inputs ?? {})).toEqual(['actionInput']);
+      }
+    );
 
-      expect(String(settings.inputs?.actionInput)).toContain('variables.action_input');
-      expect(String(settings.inputs?.actionInput)).not.toContain('inputs.actionInput');
+    it.each(EXECUTE_STEPS)(
+      '%s executes the live revision input, not the trigger input a revision may have corrected',
+      (name) => {
+        // The trigger value is captured before the gate is parked, so a revision
+        // that corrected the parameters would otherwise be approved and then
+        // ignored: the analyst approves one input and the action runs another.
+        const execute = findStep(workflow.steps, name);
+        const settings = execute?.with as { inputs?: Record<string, unknown> };
+
+        expect(String(settings.inputs?.actionInput)).toContain('variables.action_input');
+        expect(String(settings.inputs?.actionInput)).not.toContain('inputs.actionInput');
+      }
+    );
+
+    describe('identity by approval mode', () => {
+      it('runs a human-approved action with the default identity, so as the approver', () => {
+        const execute = findStep(workflow.steps, 'execute_as_approver');
+
+        expect(execute?.if).toBe('${{ variables.needs_gate == true }}');
+        expect(execute?.with?.['run-as-mode']).toBeUndefined();
+      });
+
+      it("runs an auto-approved action as the caller's service account", () => {
+        const execute = findStep(workflow.steps, 'execute_as_worker');
+
+        expect(execute?.if).toBe('${{ variables.needs_gate != true }}');
+        expect(execute?.with?.['run-as-mode']).toBe('inherit');
+      });
+
+      // Inheritance through a templated id needs a literal allowlist. It must name exactly
+      // the actions that can be auto-approved, read from the actions' own metadata.
+      it('allows exactly the auto-approvable actions to run as the service account', () => {
+        const autoApprovableActionIds = ALERTZERO_ACTION_WORKFLOW_IDS.filter((id) => {
+          const definition = getManagedWorkflowDefinition(id);
+          const yaml = definition && 'yaml' in definition ? definition.yaml : '';
+          const { consts } = parse(yaml) as {
+            consts?: { actionMetadata?: { approvalPolicy?: string } };
+          };
+          return consts?.actionMetadata?.approvalPolicy === 'autonomy-dependent';
+        });
+        const allowed = findStep(workflow.steps, 'execute_as_worker')?.with?.[
+          'allowed-workflow-ids'
+        ] as string[] | undefined;
+
+        expect(autoApprovableActionIds.length).toBeGreaterThan(0);
+        expect([...(allowed ?? [])].sort()).toEqual([...autoApprovableActionIds].sort());
+      });
+
+      // A step that did not run this pass still returns its previous value, so
+      // each result is adopted under the same guard as the step that produced it.
+      it.each([
+        ['adopt_approver_result', 'execute_as_approver'],
+        ['adopt_worker_result', 'execute_as_worker'],
+      ])('%s adopts only the result of %s, under the same guard', (adopt, execute) => {
+        const adoptStep = findStep(workflow.steps, adopt);
+
+        expect(adoptStep?.type).toBe('data.set');
+        expect(adoptStep?.if).toBe(findStep(workflow.steps, execute)?.if);
+        expect(adoptStep?.with?.action_failed).toBe(`\${{ steps.${execute}.error != blank }}`);
+        expect(adoptStep?.with?.action_error_message).toBe(`{{ steps.${execute}.error.message }}`);
+      });
+
+      it('branches on the adopted result rather than on either step', () => {
+        expect(findStep(workflow.steps, 'handle_action_success')?.condition).toBe(
+          '${{ variables.action_failed != true }}'
+        );
+        expect(findStep(workflow.steps, 'handle_action_failure')?.condition).toBe(
+          '${{ variables.action_failed == true }}'
+        );
+        expect(findStep(workflow.steps, 'record_action_failure')?.with?.executionError).toBe(
+          '{{ variables.action_error_message }}'
+        );
+      });
     });
 
     it('records the execution outcome after the action', () => {
@@ -709,7 +780,8 @@ describe('create-investigation-proposal workflow', () => {
     it('keeps an action failure inside the loop so it can be re-offered', () => {
       // Without the step-level continue the workflow-level handler would settle
       // the proposal and stop, making the clone branch unreachable.
-      expect(findStep(workflow.steps, 'execute_action')?.['on-failure']?.continue).toBe(true);
+      expect(findStep(workflow.steps, 'execute_as_approver')?.['on-failure']?.continue).toBe(true);
+      expect(findStep(workflow.steps, 'execute_as_worker')?.['on-failure']?.continue).toBe(true);
       expect(findStep(workflow.steps, 'record_action_failure')?.with?.status).toBe('failed');
       expect(findStep(workflow.steps, 'clone_proposal')?.type).toBe('proposals.cloneProposal');
     });
