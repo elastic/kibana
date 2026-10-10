@@ -16,12 +16,16 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { z } from '@kbn/zod/v4';
+import { mapWithConcurrency } from '@kbn/evals-runner';
 import { withEvaluatorNameBaggage } from '../../../evaluators/evaluator_tracing_context';
 import { formatEvidenceSchemaIssues } from '../../../evaluators/evidence/schema_issues';
 import { createTraceAccessor } from '../../../evaluators/trace_accessor';
 import { awaitTraceReady, TraceReadinessError } from '../../../evaluators/trace_readiness';
 import type { EvaluatorDefinition } from '../../../evaluators/types';
 import { resolveConnectorModel } from '../../../lib/resolve_connector_model';
+
+/** Max evaluators graded in parallel for one trace; bounds concurrent judge-model calls. */
+export const EVALUATOR_CONCURRENCY = 4;
 
 export class EvaluationExecutionError extends Error {
   constructor(message: string, public readonly responseType: 'badRequest' | 'notFound') {
@@ -126,10 +130,9 @@ export const executeEvaluators = async ({
     return inferenceStartPromise;
   };
 
-  const inferenceClientByConnectorId = new Map<string, BoundInferenceClient>();
-  const getInferenceClient = async (
-    connectorId: string
-  ): Promise<BoundInferenceClient | undefined> => {
+  // Promises are cached so concurrent evaluators sharing a connector share one client.
+  const inferenceClientByConnectorId = new Map<string, Promise<BoundInferenceClient>>();
+  const getInferenceClient = (connectorId: string): Promise<BoundInferenceClient> | undefined => {
     const cachedClient = inferenceClientByConnectorId.get(connectorId);
     if (cachedClient) {
       return cachedClient;
@@ -140,8 +143,9 @@ export const executeEvaluators = async ({
       return undefined;
     }
 
-    const inference = await inferencePromise;
-    const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
+    const inferenceClient = inferencePromise.then((inference) =>
+      inference.getClient({ request, bindTo: { connectorId } })
+    );
     inferenceClientByConnectorId.set(connectorId, inferenceClient);
     return inferenceClient;
   };
@@ -182,12 +186,14 @@ export const executeEvaluators = async ({
     return model ? { ...base, model } : base;
   };
 
-  const results: EvaluateResponse['results'] = [];
-  for (const { definition, connectorId } of evaluators) {
+  const runEvaluator = async ({
+    definition,
+    connectorId,
+  }: ResolvedEvaluator): Promise<EvaluateResponse['results'][number]> => {
     if (definition.evidenceSchema) {
       const evidenceParsed = definition.evidenceSchema.safeParse(round);
       if (!evidenceParsed.success) {
-        results.push({
+        return {
           status: 'error',
           evaluator: await describeEvaluator(definition, connectorId),
           error: {
@@ -196,8 +202,7 @@ export const executeEvaluators = async ({
               evidenceParsed.error
             )}`,
           },
-        });
-        continue;
+        };
       }
     }
 
@@ -216,21 +221,21 @@ export const executeEvaluators = async ({
         })
       );
 
-      results.push({
+      return {
         status: 'ok',
         evaluator: await describeEvaluator(definition, connectorId),
         scores: result.scores,
-      });
+      };
     } catch (error) {
       const errorDetail = error instanceof Error ? error.stack ?? error.message : String(error);
       logger.error(`Failed to execute evaluator "${definition.name}": ${errorDetail}`);
-      results.push({
+      return {
         status: 'error',
         evaluator: await describeEvaluator(definition, connectorId),
         error: { message: error instanceof Error ? error.message : String(error) },
-      });
+      };
     }
-  }
+  };
 
-  return results;
+  return mapWithConcurrency(evaluators, runEvaluator, { concurrency: EVALUATOR_CONCURRENCY });
 };
