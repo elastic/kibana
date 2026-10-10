@@ -182,6 +182,7 @@ export interface GrantAPIKeyResult {
 export interface CloneAPIKeyParams {
   name: string;
   metadata?: Record<string, unknown>;
+  refresh?: boolean | 'wait_for';
 }
 
 export interface CloneAPIKeyResult {
