@@ -59,6 +59,15 @@ export const isAlertingV2Enabled: (core: CoreStart) => boolean = (core) => {
   return core.settings.globalClient.get<boolean>(ALERTING_V2_ENABLED_SETTING_ID, false) === true;
 };
 
+const OBSERVABILITY_SOLUTION_NAV_ID = 'oblt';
+
+/** Returns whether the active solution nav id is Observability or none (a classic space); other solution views return `false`. */
+export const isAlertingV2AvailableInSolution = (
+  solutionNavId: string | null | undefined
+): boolean => {
+  return !solutionNavId || solutionNavId === OBSERVABILITY_SOLUTION_NAV_ID;
+};
+
 /**
  * Returns whether Alerting v2 create-rule UI should be shown for the current user.
  *

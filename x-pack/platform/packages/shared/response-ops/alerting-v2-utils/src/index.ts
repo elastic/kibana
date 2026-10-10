@@ -7,6 +7,7 @@
 
 export {
   hasAlertingV2Capability,
+  isAlertingV2AvailableInSolution,
   isAlertingV2Enabled,
   shouldShowAlertingV2CreateRuleFlyout,
   shouldShowV1ObservabilityAlertsTable,
