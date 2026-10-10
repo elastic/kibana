@@ -1744,7 +1744,7 @@ const componentStyles = {
         backgroundColor: euiTheme.colors.backgroundBaseWarning,
       },
       '.unifiedDataTable__cell--expanded': {
-        backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
+        backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelectHover,
       },
       '.unifiedDataTable__cellValue': {
         fontFamily: euiTheme.font.familyCode,
