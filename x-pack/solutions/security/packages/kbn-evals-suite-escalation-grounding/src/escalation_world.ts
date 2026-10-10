@@ -17,9 +17,13 @@ import {
   ESCALATION_SYNC_URL,
 } from '@kbn/agentic-investigations-plugin/common/escalations/constants';
 import type { SyncEscalationResponse } from '@kbn/agentic-investigations-plugin/common/escalations/escalation';
+import { collectSummaryDiagnostics } from './summary_diagnostics';
 import type { EscalationCase, EscalationTaskOutput, SeededEvent } from './types';
 
 const PUBLIC_API_VERSION = '2023-10-31';
+
+/** The managed workflow that writes the escalation `metadata.summary`. */
+export const SUMMARY_WORKFLOW_ID = 'system-alertzero-investigation-summary';
 
 const publicHeaders = { 'elastic-api-version': PUBLIC_API_VERSION } as const;
 const internalHeaders = {
@@ -335,11 +339,22 @@ export const runEscalationCase = async ({
       postInternal<SyncEscalationResponse>(fetch, escalationUrl(ESCALATION_SYNC_URL, esclId), {})
     );
     assertSyncCopiedAll(c.id, sync, expectedCopies);
+    const syncCompletedAt = new Date().toISOString();
 
-    // 4. Wait for the summarize workflow to write metadata.summary.
+    // 4. Wait for the summarize workflow to write metadata.summary. Acceptance is unchanged
+    // (first non-empty summary); the diagnostics record whether that summary could have
+    // covered the last synced attachment.
     const summary = await setupStep(`wait for the summary of ${c.id}`, () =>
       waitForSummary(fetch, esclId)
     );
+    const summaryDiagnostics = await collectSummaryDiagnostics({
+      fetch,
+      escalationId: esclId,
+      workflowId: SUMMARY_WORKFLOW_ID,
+      syncCompletedAt,
+      summaryObservedAt: new Date().toISOString(),
+    });
+    log.info(`Summary diagnostics ${c.id}: ${JSON.stringify(summaryDiagnostics)}`);
 
     // 5. Ask the escalation-context chat every question. A failed round is a
     // scored failure (kept in the denominator, error recorded), never dropped.
@@ -390,6 +405,7 @@ export const runEscalationCase = async ({
       summary,
       answers,
       answerErrors,
+      summaryDiagnostics,
       ...(drop !== undefined ? { droppedInvestigation: drop } : {}),
     };
   } finally {

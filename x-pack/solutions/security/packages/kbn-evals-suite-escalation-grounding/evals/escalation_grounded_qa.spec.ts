@@ -48,7 +48,7 @@ import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import { evaluate, selectEvaluators } from '../src/evaluate';
 import { escalationCases, validateCases } from '../src/dataset';
-import { runEscalationCase, withSpace } from '../src/escalation_world';
+import { runEscalationCase, SUMMARY_WORKFLOW_ID, withSpace } from '../src/escalation_world';
 import { overrideInferenceFeature, SUMMARY_INFERENCE_FEATURE_ID } from '../src/inference_override';
 import { assertJudgeIsolation } from '../src/judge';
 import { ensureWorkflowEnabled } from '../src/summary_workflow';
@@ -63,7 +63,6 @@ import {
 type DatasetExample = Example<{ caseId: string }, { c: EscalationCase }, { description: string }>;
 
 const MUTATION = process.env.ESCALATION_MUTATION === 'drop-last';
-const SUMMARY_WORKFLOW_ID = 'system-alertzero-investigation-summary';
 /** G20 hook: run the whole suite inside this Kibana space (`/s/<id>`). */
 const SPACE_ID = process.env.ESCALATION_SPACE_ID || undefined;
 

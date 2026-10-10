@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SummaryDiagnostics } from './summary_diagnostics';
+
 /** A custom timeline event seeded into a conversation through `_add_events`. */
 export interface SeededEvent {
   /**
@@ -71,6 +73,8 @@ export interface EscalationTaskOutput {
   answers: Record<string, string | undefined>;
   /** Error message per question whose converse round failed; those score 0. */
   answerErrors?: Record<string, string>;
+  /** Summary-run vs attachment-add timing for this escalation; evidence only, never graded. */
+  summaryDiagnostics?: SummaryDiagnostics;
   /**
    * Index of the investigation the mutation arm withheld from the escalation.
    * Precision graders (ClaimGrounding, unsupported specifics) use the corpus

@@ -83,6 +83,12 @@ const createFakeKibana = ({
     if (options.method === 'GET' && path === `${CONVERSATIONS_PATH}/esc-1`) {
       return { id: 'esc-1', metadata: { summary: 'a summary' } };
     }
+    if (
+      options.method === 'GET' &&
+      path.startsWith('/api/workflows/workflow/system-alertzero-investigation-summary/executions?')
+    ) {
+      return { results: [] };
+    }
     if (options.method === 'POST' && path === CONVERSE_PATH) {
       return converse(body);
     }
@@ -102,6 +108,8 @@ describe('runEscalationCase', () => {
     const result = await run(kibana.fetch);
 
     expect(result.summary).toBe('a summary');
+    // timing evidence rides along, scoped to this escalation's summary runs
+    expect(result.summaryDiagnostics).toMatchObject({ summaryRuns: [], errors: [] });
     expect(kibana.calls.some((call) => call.path === SYNC_PATH)).toBe(true);
     expect(kibana.calls.every((call) => !call.path.endsWith('/_sync'))).toBe(true);
     // the escalation is created with an assignee (required by the create route)
