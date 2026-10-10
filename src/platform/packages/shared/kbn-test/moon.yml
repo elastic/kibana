@@ -41,7 +41,6 @@ dependsOn:
   - '@kbn/scout-reporting'
   - '@kbn/scout-info'
   - '@kbn/react-mute-legacy-root-warning'
-  - '@kbn/babel-preset'
   - '@kbn/moon'
 tags:
   - shared-common
