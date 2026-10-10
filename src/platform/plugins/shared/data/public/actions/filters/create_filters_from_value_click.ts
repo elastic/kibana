@@ -10,12 +10,7 @@
 import _ from 'lodash';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { isSourceParamsESQL } from '@kbn/expressions-plugin/public';
-import {
-  getESQLAdHocDataview,
-  getViews,
-  resolveViewColumnToIndexField,
-  splitIndexPatternSources,
-} from '@kbn/esql-utils';
+import { EsqlSource, getOrRegisterEsqlDataView } from '@kbn/data-source';
 import type { Filter } from '@kbn/es-query';
 import {
   compareFilters,
@@ -32,6 +27,7 @@ import {
 } from '@kbn/es-query/src/filters/build_filters';
 import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { getHttp, getIndexPatterns, getSearchService } from '../../services';
 import type { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
@@ -146,72 +142,14 @@ export const createFilter = async (
 
 type RawColumnValue = string | number | boolean | (string | number | boolean)[] | null | undefined;
 
-/** View names confirmed this session, so a later click does not field-cap the view name again. */
-const knownViewSources = new Set<string>();
-
-/** Fields added onto a view data view. They are not field-caps results and must not count as one. */
-const injectedViewFields = new Set<string>();
-
-const injectedViewFieldKey = (dataViewId: string | undefined, fieldName: string): string =>
-  `${dataViewId ?? ''}:${fieldName}`;
-
-const isKnownViewPattern = (indexPattern: string): boolean => {
-  const sources = splitIndexPatternSources(indexPattern);
-  return sources.length > 0 && sources.every((source) => knownViewSources.has(source));
-};
-
-/** Clears the session cache of ES|QL view sources. Test-only. */
-export const clearKnownEsqlViewSources = (): void => {
-  knownViewSources.clear();
-};
-
-/** Clears fields injected onto view data views. Test-only. */
-export const clearInjectedEsqlViewFields = (): void => {
-  injectedViewFields.clear();
-};
-
 const isUnfilterableComputedColumn = (column: DatatableColumn): boolean =>
   column.isComputedColumn === true && column.meta?.sourceParams?.isSourceFieldFilterable !== true;
-
-type ESQLAdHocDataView = Awaited<ReturnType<typeof getESQLAdHocDataview>>;
-
-/** Puts the resolved index field on the view's ad hoc data view so the filter pill and editor can see it. */
-const ensureResolvedFieldOnDataView = (
-  dataView: ESQLAdHocDataView,
-  fieldName: string,
-  column: DatatableColumn
-): void => {
-  const alreadyInjected = injectedViewFields.has(injectedViewFieldKey(dataView.id, fieldName));
-  if (dataView.getFieldByName(fieldName) || alreadyInjected) {
-    return;
-  }
-
-  dataView.fields.add({
-    name: fieldName,
-    type: column.meta?.type ?? 'string',
-    searchable: true,
-    aggregatable: false,
-    count: 0,
-    readFromDocValues: false,
-  });
-  injectedViewFields.add(injectedViewFieldKey(dataView.id, fieldName));
-};
-
-const removeInjectedViewFields = (dataView: ESQLAdHocDataView): void => {
-  const injected = dataView.fields
-    .getAll()
-    .filter((field) => injectedViewFields.has(injectedViewFieldKey(dataView.id, field.name)));
-  for (const field of injected) {
-    dataView.fields.remove(field);
-    injectedViewFields.delete(injectedViewFieldKey(dataView.id, field.name));
-  }
-};
 
 const buildRawColumnFilter = (
   filterFieldName: string,
   value: RawColumnValue,
   column: DatatableColumn,
-  dataView: ESQLAdHocDataView
+  dataView: DataView
 ) => {
   // Only null/undefined mean "no value" here. ES|QL rows never contain the MISSING_TOKEN
   // sentinel (it is injected by the DSL terms agg), so a literal "__missing__" string is a
@@ -232,34 +170,11 @@ const buildRawColumnFilter = (
   return [filter];
 };
 
-const resolveViewSourceField = async (
-  indexPattern: string,
-  fieldName: string
-): Promise<string | undefined> => {
+/** The DataView registered for the dataset of the index pattern, with the filterable fields of its ES|QL schema. */
+const getEsqlDataView = async (indexPattern: string): Promise<DataView> => {
   const http = getHttp();
-  if (!http) {
-    return undefined;
-  }
-
-  const { views } = await getViews(http);
-  const viewNames = new Set(views.map((view) => view.name));
-  const sources = splitIndexPatternSources(indexPattern);
-  if (!sources.some((source) => viewNames.has(source))) {
-    for (const source of sources) {
-      knownViewSources.delete(source);
-    }
-    return undefined;
-  }
-
-  for (const source of sources) {
-    if (viewNames.has(source)) {
-      knownViewSources.add(source);
-    } else {
-      knownViewSources.delete(source);
-    }
-  }
-
-  return resolveViewColumnToIndexField(fieldName, indexPattern, views);
+  const source = await EsqlSource.create({ query: 'FROM ' + indexPattern, http });
+  return getOrRegisterEsqlDataView(getIndexPatterns() as DataViewsPublicPluginStart, source, http);
 };
 
 const createFilterFromRawColumnsESQL = async (column: DatatableColumn, value: RawColumnValue) => {
@@ -272,72 +187,19 @@ const createFilterFromRawColumnsESQL = async (column: DatatableColumn, value: Ra
   // Prefer `sourceField` (index field name). Fall back to `column.name` when it is not a string
   const sourceFieldName = column.meta?.sourceParams?.sourceField;
   const fieldName = typeof sourceFieldName === 'string' ? sourceFieldName : column.name;
-  const knownView = isKnownViewPattern(indexPattern);
 
-  const loadAdHocDataView = (skipFetchFields: boolean) =>
-    getESQLAdHocDataview({
-      query: 'FROM ' + indexPattern,
-      dataViewsService: getIndexPatterns() as DataViewsPublicPluginStart,
-      http: getHttp(),
-      ...(skipFetchFields ? { options: { skipFetchFields: true } } : {}),
-    });
+  const dataView = await getEsqlDataView(indexPattern);
+  const field = dataView.getFieldByName(fieldName);
 
-  let dataView: ESQLAdHocDataView | undefined;
-  let fieldCapsError: unknown;
-  if (!knownView) {
-    try {
-      dataView = await loadAdHocDataView(false);
-    } catch (error) {
-      // Field caps rejects names that are views rather than indices. An unfilterable computed
-      // column has nothing to resolve, so surface the original index error.
-      if (isUnfilterableComputedColumn(column)) {
-        throw error;
-      }
-      fieldCapsError = error;
-    }
-
-    if (dataView) {
-      const field = dataView.getFieldByName(fieldName);
-      const injected = injectedViewFields.has(injectedViewFieldKey(dataView.id, fieldName));
-
-      // Field should be present in the data view and filterable.
-      // A computed column (e.g. EVAL bytes = bytes * 2) can have the same name as a real,
-      // filterable field, so the check above isn't enough: fieldName would resolve to that
-      // unrelated field, but the value shown is the computed one, not the raw field's value.
-      // A field this click path injected for a view is not a field-caps result.
-      if (field && !injected) {
-        if (!field.filterable || isUnfilterableComputedColumn(column)) {
-          return [];
-        }
-        return buildRawColumnFilter(fieldName, value, column, dataView);
-      }
-    }
-  }
-
-  // Field caps does not describe ES|QL views. Resolve the column from the cached view
-  // definition and skip another field-caps call once this pattern is known to be a view.
-  if (isUnfilterableComputedColumn(column)) {
-    if (fieldCapsError) {
-      throw fieldCapsError;
-    }
+  // The field should be present in the data view and filterable.
+  // A computed column (e.g. EVAL bytes = bytes * 2) can have the same name as a real,
+  // filterable field, so the field check isn't enough: fieldName would resolve to that
+  // unrelated field, but the value shown is the computed one, not the raw field's value.
+  if (!field?.filterable || isUnfilterableComputedColumn(column)) {
     return [];
   }
 
-  dataView = dataView ?? (await loadAdHocDataView(true));
-
-  const resolvedField = await resolveViewSourceField(indexPattern, fieldName);
-  if (!resolvedField) {
-    if (!isKnownViewPattern(indexPattern)) {
-      removeInjectedViewFields(dataView);
-    }
-    if (fieldCapsError) {
-      throw fieldCapsError;
-    }
-    return [];
-  }
-
-  ensureResolvedFieldOnDataView(dataView, resolvedField, column);
-  return buildRawColumnFilter(resolvedField, value, column, dataView);
+  return buildRawColumnFilter(fieldName, value, column, dataView);
 };
 
 export const createFilterESQL = async (

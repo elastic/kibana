@@ -10,27 +10,22 @@
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { dataPluginMock } from '../../mocks';
-import { setHttp, setIndexPatterns, setSearchService } from '../../services';
-import { getESQLAdHocDataview, getViews } from '@kbn/esql-utils';
-import type { HttpStart } from '@kbn/core/public';
+import { setIndexPatterns, setSearchService } from '../../services';
+import { EsqlSource, getOrRegisterEsqlDataView } from '@kbn/data-source';
 
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLAdHocDataview: jest.fn(),
-  getViews: jest.fn(),
+jest.mock('@kbn/data-source', () => ({
+  ...jest.requireActual('@kbn/data-source'),
+  getOrRegisterEsqlDataView: jest.fn(),
 }));
 
-const mockGetESQLAdHocDataview = getESQLAdHocDataview as jest.MockedFunction<
-  typeof getESQLAdHocDataview
+const mockGetOrRegisterEsqlDataView = getOrRegisterEsqlDataView as jest.MockedFunction<
+  typeof getOrRegisterEsqlDataView
 >;
-const mockGetViews = getViews as jest.MockedFunction<typeof getViews>;
 
 import {
   createFiltersFromValueClickAction,
   appendFilterToESQLQueryFromValueClickAction,
   createFilterESQL,
-  clearKnownEsqlViewSources,
-  clearInjectedEsqlViewFields,
 } from './create_filters_from_value_click';
 import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { BytesFormat } from '@kbn/field-formats-plugin/common';
@@ -236,11 +231,17 @@ describe('createFiltersFromClickEvent', () => {
       });
 
       mockDataView.getFieldByName = mockFieldByName;
+      let createSourceSpy: jest.SpyInstance;
+
+      afterEach(() => {
+        createSourceSpy.mockRestore();
+      });
 
       beforeEach(() => {
         mockFieldByName.mockReset();
-        mockGetESQLAdHocDataview.mockReset();
-        mockGetESQLAdHocDataview.mockResolvedValue(mockDataView);
+        mockGetOrRegisterEsqlDataView.mockReset();
+        mockGetOrRegisterEsqlDataView.mockResolvedValue(mockDataView);
+        createSourceSpy = jest.spyOn(EsqlSource, 'create').mockResolvedValue({} as EsqlSource);
 
         table.columns[0] = {
           name: 'message',
@@ -426,193 +427,56 @@ describe('createFiltersFromClickEvent', () => {
         );
       });
 
-      describe('ES|QL views', () => {
-        const viewList = {
-          views: [
-            {
-              name: 'meow',
-              query: 'FROM kibana_sample_data_logs | STATS count = COUNT(*) BY geo.dest',
-            },
-            {
-              name: 'woof',
-              query: 'FROM kibana_sample_data_logs | EVAL foo = geo.dest',
-            },
-            {
-              name: 'bark',
-              query: 'FROM kibana_sample_data_logs | EVAL foo = CONCAT(geo.dest, "x")',
-            },
-          ],
-        };
-
-        const useViewColumn = (indexPattern: string, sourceField: string, value: string) => {
+      describe('ES|QL views and datasets', () => {
+        const useColumnOf = (indexPattern: string, sourceField: string, value: string) => {
           table.columns[0] = {
             name: sourceField,
             id: '1-1',
-            meta: {
-              type: 'string',
-              sourceParams: {
-                indexPattern,
-                sourceField,
-                isSourceFieldFilterable: true,
-              },
-            },
+            meta: { type: 'string', sourceParams: { indexPattern, sourceField } },
           };
           table.rows[0]['1-1'] = value;
         };
 
-        const fieldsAdd = jest.spyOn(mockDataView.fields, 'add');
+        test('takes the DataView of the dataset from the ES|QL source, not from field caps', async () => {
+          useColumnOf('meow', 'geo.dest', 'US');
+          mockFieldByName.mockReturnValue({ name: 'geo.dest', filterable: true });
 
-        beforeEach(() => {
-          clearKnownEsqlViewSources();
-          clearInjectedEsqlViewFields();
-          setHttp({} as HttpStart);
-          mockGetViews.mockClear();
-          mockGetViews.mockResolvedValue(viewList);
-          mockFieldByName.mockReturnValue(undefined);
-          fieldsAdd.mockClear();
+          await createFilterESQL(table, 0, 0);
+
+          expect(createSourceSpy).toHaveBeenCalledWith(
+            expect.objectContaining({ query: 'FROM meow' })
+          );
+          expect(mockGetOrRegisterEsqlDataView).toHaveBeenCalledTimes(1);
         });
 
-        test('creates a phrase filter for a STATS grouping field on a view', async () => {
-          useViewColumn('meow', 'geo.dest', 'US');
+        test('creates a phrase filter for any output column of a view', async () => {
+          useColumnOf('meow', 'count', '10');
+          mockFieldByName.mockReturnValue({ name: 'count', filterable: true });
 
           const filter = await createFilterESQL(table, 0, 0);
 
           expect(filter).toEqual([
-            expect.objectContaining({
-              query: { match_phrase: { 'geo.dest': 'US' } },
-            }),
+            expect.objectContaining({ query: { match_phrase: { count: '10' } } }),
           ]);
-          expect(mockGetESQLAdHocDataview).toHaveBeenCalledWith(
-            expect.objectContaining({ query: 'FROM meow' })
-          );
-          expect(
-            mockGetESQLAdHocDataview.mock.calls[0][0].options?.skipFetchFields
-          ).toBeUndefined();
-          expect(fieldsAdd).toHaveBeenCalledWith(
-            expect.objectContaining({
-              name: 'geo.dest',
-              type: 'string',
-              searchable: true,
-              aggregatable: false,
-            })
-          );
         });
 
-        test('does not create a filter for an aggregate column of a view', async () => {
-          useViewColumn('meow', 'count', '10');
-
-          const filter = await createFilterESQL(table, 0, 0);
-
-          expect(filter).toEqual([]);
-          expect(fieldsAdd).not.toHaveBeenCalled();
-        });
-
-        test('creates a phrase filter for a pass-through field and a bare EVAL alias', async () => {
-          useViewColumn('woof', 'geo.dest', 'US');
-          const passThrough = await createFilterESQL(table, 0, 0);
-          expect(passThrough[0]).toEqual(
-            expect.objectContaining({
-              query: { match_phrase: { 'geo.dest': 'US' } },
-            })
-          );
-
-          clearKnownEsqlViewSources();
-          mockGetESQLAdHocDataview.mockClear();
-          useViewColumn('woof', 'foo', 'US');
-          const alias = await createFilterESQL(table, 0, 0);
-          expect(alias[0]).toEqual(
-            expect.objectContaining({
-              query: { match_phrase: { 'geo.dest': 'US' } },
-            })
-          );
-          expect(fieldsAdd).toHaveBeenLastCalledWith(
-            expect.objectContaining({
-              name: 'geo.dest',
-            })
-          );
-        });
-
-        test('does not create a filter for an EVAL expression', async () => {
-          useViewColumn('bark', 'foo', 'USx');
+        test('does not create a filter for a column the query computes on top of a view', async () => {
+          useColumnOf('meow', 'foo', 'USx');
+          table.columns[0].isComputedColumn = true;
+          mockFieldByName.mockReturnValue(undefined);
 
           const filter = await createFilterESQL(table, 0, 0);
 
           expect(filter).toEqual([]);
         });
 
-        test('skips field caps on a later click once the pattern is known to be a view', async () => {
-          useViewColumn('meow', 'geo.dest', 'US');
-          await createFilterESQL(table, 0, 0);
-          mockGetESQLAdHocDataview.mockClear();
-
-          await createFilterESQL(table, 0, 0);
-
-          expect(mockGetESQLAdHocDataview).toHaveBeenCalledWith(
-            expect.objectContaining({
-              query: 'FROM meow',
-              options: { skipFetchFields: true },
-            })
-          );
-        });
-
-        test('creates a view filter when field caps rejects the view name', async () => {
-          useViewColumn('meow', 'geo.dest', 'US');
-          mockGetESQLAdHocDataview
-            .mockRejectedValueOnce(new Error('index_not_found'))
-            .mockResolvedValueOnce(mockDataView);
-
-          const filter = await createFilterESQL(table, 0, 0);
-
-          expect(filter[0]).toEqual(
-            expect.objectContaining({
-              query: { match_phrase: { 'geo.dest': 'US' } },
-            })
-          );
-          expect(mockGetESQLAdHocDataview).toHaveBeenLastCalledWith(
-            expect.objectContaining({
-              options: { skipFetchFields: true },
-            })
-          );
-        });
-
-        test('does not filter from an injected field after the view is gone', async () => {
-          useViewColumn('meow', 'geo.dest', 'US');
-          await createFilterESQL(table, 0, 0);
-
-          clearKnownEsqlViewSources();
-          mockGetViews.mockResolvedValue({ views: [] });
-          mockGetViews.mockClear();
-          mockFieldByName.mockReturnValue({ name: 'geo.dest', filterable: true });
-          const fieldsRemove = jest.spyOn(mockDataView.fields, 'remove');
+        test('does not create a filter for a field the dataset does not have', async () => {
+          useColumnOf('meow', 'unknown', 'x');
+          mockFieldByName.mockReturnValue(undefined);
 
           const filter = await createFilterESQL(table, 0, 0);
 
           expect(filter).toEqual([]);
-          expect(mockGetViews).toHaveBeenCalled();
-          expect(fieldsRemove).toHaveBeenCalled();
-          fieldsRemove.mockRestore();
-        });
-
-        test('does not fetch views when field caps already resolved a filterable index field', async () => {
-          mockFieldByName.mockReturnValue({ name: 'message', filterable: true });
-          table.columns[0] = {
-            name: 'message',
-            id: '1-1',
-            meta: {
-              type: 'string',
-              sourceParams: {
-                indexPattern: 'logs*',
-                sourceField: 'message',
-              },
-            },
-          };
-          table.rows[0]['1-1'] = 'test message';
-
-          const filter = await createFilterESQL(table, 0, 0);
-
-          expect(filter).toHaveLength(1);
-          expect(mockGetViews).not.toHaveBeenCalled();
-          expect(fieldsAdd).not.toHaveBeenCalled();
         });
       });
     });

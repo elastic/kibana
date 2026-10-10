@@ -20,6 +20,7 @@ import { sampleIndexPatterns, mockDataViewsService } from './mocks';
 import { documentField } from '../datasources/form_based/document_field';
 
 jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
   getESQLTimeField: jest.fn(),
 }));
 
