@@ -17,7 +17,7 @@ import { useAlertTimeRange } from '../../../entity_analytics/hooks/use_alert_tim
 import { useAssetCriticalityPrivileges } from '../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
-import { buildUserNamesFilter, type RiskSeverity } from '../../../../common/search_strategy';
+import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { useKibana } from '../../../common/lib/kibana';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
@@ -45,8 +45,10 @@ import {
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import {
   buildRiskScoreStateFromEntityRecord,
+  getHeaderRiskLevel,
   getRiskFromEntityRecord,
 } from '../shared/entity_store_risk_utils';
+import { useNewEntityAnalyticsPage } from '../../../entity_analytics/hooks/use_new_entity_analytics_page';
 import {
   mergeLegacyIdentityWhenStoreEntityMissing,
   type IdentityFields,
@@ -269,11 +271,11 @@ export const UserPanel = memo(function UserPanel({
 
   const entityFromStore: EntityStoreRecord | undefined = observedUser.entityRecord ?? undefined;
 
-  const headerRiskLevel = useMemo<RiskSeverity | undefined>(() => {
-    if (!entityFromStoreResult.entityRecord) return undefined;
-    return (getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??
-      'Unknown') as RiskSeverity;
-  }, [entityFromStoreResult.entityRecord]);
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
+  const headerRiskLevel = useMemo(
+    () => getHeaderRiskLevel(entityFromStoreResult.entityRecord, isNewEntityAnalyticsPage),
+    [entityFromStoreResult.entityRecord, isNewEntityAnalyticsPage]
+  );
 
   const entityStoreLookupRequested =
     Boolean(entityIdProp) ||

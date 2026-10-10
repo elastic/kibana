@@ -25,7 +25,9 @@ import type { FirstLastSeenData } from '../../shared/components/observed_entity/
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { EntitySourceBadge } from '../../../../flyout/entity_details/shared/components/entity_source_badge';
+import { useResolvedFromRecordCount } from '../../../../flyout/entity_details/shared/components/use_resolved_from_record_count';
 import { RiskLevelBadge } from '../../../../flyout/entity_details/shared/components/risk_level_badge';
+import { EntityAnalyticsFlyoutCopyLink } from '../../shared/components/entity_analytics_flyout_copy_link';
 
 export interface HeaderProps {
   /** Host name displayed as the flyout title. */
@@ -40,6 +42,10 @@ export interface HeaderProps {
   isEntityInStore?: boolean;
   /** Risk severity level for the host. */
   riskLevel?: RiskSeverity;
+  /** Scope id included in the copied Entity Analytics flyout link. */
+  scopeId?: string;
+  /** Shows the copy-link button. Set only by the new flyout; the button still hides when the feature flag is off. */
+  showEntityAnalyticsCopyLink?: boolean;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
@@ -55,6 +61,8 @@ export const Header = ({
   identityFields,
   isEntityInStore,
   riskLevel,
+  scopeId,
+  showEntityAnalyticsCopyLink,
 }: HeaderProps) => {
   const lastSeenDate = lastSeen?.date;
   const isLoading = lastSeen?.isLoading ?? false;
@@ -62,9 +70,14 @@ export const Header = ({
     () => lastSeenDate && new Date(lastSeenDate),
     [lastSeenDate]
   );
+  const resolvedFromCount = useResolvedFromRecordCount(entityId);
   return (
     <>
-      <FlyoutHeaderActions />
+      <FlyoutHeaderActions>
+        {showEntityAnalyticsCopyLink && (
+          <EntityAnalyticsFlyoutCopyLink target={{ kind: 'host', hostName, entityId, scopeId }} />
+        )}
+      </FlyoutHeaderActions>
       <div data-test-subj="host-panel-header">
         <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
           {!isEntityInStore && (
@@ -138,6 +151,7 @@ export const Header = ({
                   <EntitySourceBadge
                     isEntityInStore={!!isEntityInStore}
                     hasLastSeenDate={!!lastSeenDateFormatted}
+                    resolvedFromCount={resolvedFromCount}
                     data-test-subj="host-panel-header-observed-badge"
                   />
                 </EuiFlexItem>
