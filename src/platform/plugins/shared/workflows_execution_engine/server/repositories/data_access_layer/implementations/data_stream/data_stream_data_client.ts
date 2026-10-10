@@ -118,10 +118,16 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       }
     }
 
+    // mget cannot filter, so `deleted` is always read to hide soft-deleted documents.
+    const sourceIncludes = options?.sourceIncludes?.length
+      ? [...options.sourceIncludes, 'deleted']
+      : undefined;
+    const sourceExcludes = options?.sourceExcludes?.filter((field) => field !== 'deleted');
+
     const mgetResponse = await this.deps.esClient.mget<TExecution>({
       docs: mgetDocs,
-      ...(options?.sourceIncludes?.length ? { _source_includes: options.sourceIncludes } : {}),
-      ...(options?.sourceExcludes?.length ? { _source_excludes: options.sourceExcludes } : {}),
+      ...(sourceIncludes ? { _source_includes: sourceIncludes } : {}),
+      ...(sourceExcludes?.length ? { _source_excludes: sourceExcludes } : {}),
     });
 
     const items: Array<GetExecutionByIdsItem<TExecution>> = [];
@@ -130,7 +136,9 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     for (const doc of mgetResponse.docs) {
       if ('found' in doc && doc.found && doc._source && doc._id) {
         const docId = doc._id;
-        if (!foundIds.has(docId)) {
+        // Soft-deleted documents are treated as missing.
+        const isDeleted = (doc._source as { deleted?: unknown }).deleted === true;
+        if (!isDeleted && !foundIds.has(docId)) {
           foundIds.add(docId);
           items.push({
             document: { ...doc._source, id: docId } as TExecution,

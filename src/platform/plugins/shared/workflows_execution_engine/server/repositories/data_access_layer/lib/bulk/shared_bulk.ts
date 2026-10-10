@@ -151,7 +151,8 @@ const mgetUpdaterSources = async <TExecution extends { id: string }>(
     fallbackIndexes.map((index) => ({
       _id: documentId,
       _index: index,
-      ...(fields ? { _source: { includes: Array.from(fields) } } : {}),
+      // `deleted` is always read so soft-deleted documents can be treated as missing.
+      ...(fields ? { _source: { includes: [...Array.from(fields), 'deleted'] } } : {}),
     }))
   );
 
@@ -165,7 +166,8 @@ const mgetUpdaterSources = async <TExecution extends { id: string }>(
       doc._id &&
       doc._seq_no !== undefined &&
       doc._primary_term !== undefined &&
-      !foundById.has(doc._id)
+      !foundById.has(doc._id) &&
+      !isSoftDeleted(doc._source)
     ) {
       // `_source.includes` can omit `id`; updaters and callers key by document.id.
       foundById.set(doc._id, {
@@ -176,14 +178,6 @@ const mgetUpdaterSources = async <TExecution extends { id: string }>(
       });
     } else if ('error' in doc && doc.error && doc._id && !errorById.has(doc._id)) {
       errorById.set(doc._id, doc.error);
-    }
-  }
-
-  // A per-document MGET error is a storage failure, not a missing document. Only surface it
-  // when no other index returned the document.
-  for (const [id, error] of errorById) {
-    if (!foundById.has(id)) {
-      throw new Error(`Bulk updater source read failed for ${id}: ${JSON.stringify(error)}`);
     }
   }
 
@@ -203,7 +197,7 @@ const mgetUpdaterSources = async <TExecution extends { id: string }>(
       size: missingIds.length,
       seq_no_primary_term: true,
       ignore_unavailable: true,
-      ...(includes ? { _source: { includes } } : {}),
+      ...(includes ? { _source: { includes: [...includes, 'deleted'] } } : {}),
     });
 
     for (const hit of searchResponse.hits.hits) {
@@ -212,7 +206,8 @@ const mgetUpdaterSources = async <TExecution extends { id: string }>(
         hit._source &&
         hit._seq_no !== undefined &&
         hit._primary_term !== undefined &&
-        !foundById.has(hit._id)
+        !foundById.has(hit._id) &&
+        !isSoftDeleted(hit._source)
       ) {
         foundById.set(hit._id, {
           source: { ...hit._source, id: hit._id } as TExecution,
@@ -224,8 +219,20 @@ const mgetUpdaterSources = async <TExecution extends { id: string }>(
     }
   }
 
+  // A per-document MGET error is a storage failure, not a missing document. Only surface it
+  // when no other index or the search fallback returned the document. A missing index (e.g. the
+  // legacy index in data stream mode) just means the document is not there.
+  for (const [id, error] of errorById) {
+    if (!foundById.has(id) && error.type !== 'index_not_found_exception') {
+      throw new Error(`Bulk updater source read failed for ${id}: ${JSON.stringify(error)}`);
+    }
+  }
+
   return foundById;
 };
+
+const isSoftDeleted = (source: object): boolean =>
+  (source as { deleted?: unknown }).deleted === true;
 
 const resolveBatchToSend = <TExecution extends { id: string }>(
   batch: Array<QueueItem<TExecution>>,
