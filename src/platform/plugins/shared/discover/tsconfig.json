@@ -79,6 +79,7 @@
     "@kbn/shared-ux-toolbar-selector",
     "@kbn/calculate-width-from-char-count",
     "@kbn/deeplinks-observability",
+    "@kbn/esql-browser",
     "@kbn/esql-utils",
     "@kbn/data-source",
     "@kbn/managed-content-badge",

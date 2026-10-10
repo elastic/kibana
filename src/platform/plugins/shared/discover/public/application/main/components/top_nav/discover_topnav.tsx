@@ -25,6 +25,7 @@ import {
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
+import { esqlApproximationStorage } from '@kbn/esql-browser';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   useDiscoverCustomization,
@@ -88,7 +89,9 @@ export const DiscoverTopNav = ({
   const onSaveCbRef = useRef<(() => void) | undefined>(undefined);
 
   const query = useAppStateSelector((state) => state.query);
-  const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation ?? false);
+  const esqlApproximation = useAppStateSelector(
+    (state) => state.esqlApproximation ?? esqlApproximationStorage.get() ?? false
+  );
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
   const { timeRangeAbsolute } = useCurrentTabSelector((tab) => tab.dataRequestParams);
   const refreshInterval = useCurrentTabSelector((state) => state.globalState.refreshInterval);

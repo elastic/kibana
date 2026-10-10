@@ -77,6 +77,7 @@
     "@kbn/deeplinks-analytics",
     "@kbn/react-kibana-context-render",
     "@kbn/observability-ai-assistant-plugin",
+    "@kbn/esql-browser",
     "@kbn/esql-utils",
     "@kbn/lens-embeddable-utils",
     "@kbn/lens-plugin",

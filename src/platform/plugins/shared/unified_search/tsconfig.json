@@ -48,6 +48,7 @@
     "@kbn/date-range-picker",
     "@kbn/date-range-picker-presets",
     "@kbn/scout",
+    "@kbn/esql-browser",
     "@kbn/esql-utils",
     "@kbn/licensing-plugin",
     "@kbn/field-formats-common",

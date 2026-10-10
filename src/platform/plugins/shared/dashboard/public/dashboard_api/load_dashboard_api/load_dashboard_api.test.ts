@@ -8,10 +8,17 @@
  */
 
 import { Subject } from 'rxjs';
+import { getDefaultApproximation } from '../approximation_manager';
 import { DEFAULT_DASHBOARD_STATE } from '../../../common/default_dashboard_state';
+import { dashboardClient } from '../../dashboard_client';
 import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
 import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
 import { loadDashboardApi } from './load_dashboard_api';
+
+jest.mock('../approximation_manager', () => ({
+  ...jest.requireActual('../approximation_manager'),
+  getDefaultApproximation: jest.fn().mockReturnValue({}),
+}));
 
 jest.mock('../telemetry/dashboard_load_telemetry', () => {
   return {
@@ -98,6 +105,43 @@ describe('loadDashboardApi', () => {
       expect(getDashboardApiMock.mock.calls[0][0].initialState).toEqual({
         ...DEFAULT_DASHBOARD_STATE,
         query: lastSavedQuery,
+      });
+    });
+
+    describe('esql_approximation localStorage seeding', () => {
+      test('seeds esql_approximation from localStorage when not set in saved object', async () => {
+        jest.mocked(getDefaultApproximation).mockReturnValue({ esql_approximation: true });
+        await loadDashboardApi({
+          getCreationOptions: async () => ({ useSessionStorageIntegration: false }),
+          savedObjectId: '12345',
+        });
+        // @ts-ignore
+        expect(getDashboardApiMock.mock.calls[0][0].initialState.esql_approximation).toBe(true);
+      });
+
+      test('prefers saved object value over localStorage', async () => {
+        jest.mocked(getDefaultApproximation).mockReturnValue({ esql_approximation: true });
+        jest.mocked(dashboardClient.get).mockResolvedValueOnce({
+          data: { ...DEFAULT_DASHBOARD_STATE, esql_approximation: false },
+        } as Awaited<ReturnType<typeof dashboardClient.get>>);
+        await loadDashboardApi({
+          getCreationOptions: async () => ({ useSessionStorageIntegration: false }),
+          savedObjectId: '12345',
+        });
+        // @ts-ignore
+        expect(getDashboardApiMock.mock.calls[0][0].initialState.esql_approximation).toBe(false);
+      });
+
+      test('leaves esql_approximation undefined when localStorage is empty and not in saved object', async () => {
+        jest.mocked(getDefaultApproximation).mockReturnValue({ esql_approximation: undefined });
+        await loadDashboardApi({
+          getCreationOptions: async () => ({ useSessionStorageIntegration: false }),
+          savedObjectId: '12345',
+        });
+        // @ts-ignore
+        expect(
+          getDashboardApiMock.mock.calls[0][0].initialState.esql_approximation
+        ).toBeUndefined();
       });
     });
 
