@@ -18,6 +18,7 @@ import type { DataSource, S3DataSourceWithSecrets } from '../../common/datasourc
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
 import { authenticationStrings } from './create_data_source_flyout_authentication_i18n';
 import type { DataFederationKibanaServices } from '../types';
+import { UI_COUNTER_EVENTS } from '../ui_counters';
 
 const createToastsMock = (): ToastsStart =>
   ({
@@ -101,6 +102,52 @@ const renderFederatedS3EditFlyout = (onSave: jest.Mock) => {
 };
 
 describe('CreateDataSourceFlyout', () => {
+  describe('datasource_create_form_opened ui counter', () => {
+    const renderFlyout = (initialDataSource?: DataSource) => {
+      const reportUiCounter = jest.fn();
+      const services: DataFederationKibanaServices = {
+        dataSourcesClient: createClientMock(),
+        datasetsClient: createDatasetsClientMock(),
+        toasts: createToastsMock(),
+        docLinks: createDocLinksMock(),
+        featureFlags: {},
+        reportUiCounter,
+      };
+      const view = render(
+        <EuiProvider>
+          <KibanaContextProvider services={services}>
+            <CreateDataSourceFlyout
+              onClose={jest.fn()}
+              onSave={jest.fn()}
+              existingDataSourceNames={[]}
+              initialDataSource={initialDataSource}
+            />
+          </KibanaContextProvider>
+        </EuiProvider>
+      );
+      return { ...view, reportUiCounter };
+    };
+
+    it('reports once when opened in create mode', () => {
+      const { reportUiCounter } = renderFlyout();
+
+      expect(reportUiCounter).toHaveBeenCalledTimes(1);
+      expect(reportUiCounter).toHaveBeenCalledWith(UI_COUNTER_EVENTS.datasourceCreateFormOpened);
+    });
+
+    it('does not report when opened in edit mode', () => {
+      const existingDataSource: DataSource = {
+        name: 'existing-ds',
+        type: 's3',
+        description: '',
+        settings: { region: 'us-east-1' },
+      };
+      const { reportUiCounter } = renderFlyout(existingDataSource);
+
+      expect(reportUiCounter).not.toHaveBeenCalled();
+    });
+  });
+
   it('renders core actions and disables save while saving', async () => {
     const toasts = createToastsMock();
     const client = createClientMock();

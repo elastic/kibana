@@ -13,6 +13,7 @@ import type { DatasetFormat } from '../common/dataset_types';
 export const UI_COUNTER_APP_NAME = 'data_federation';
 
 export const UI_COUNTER_EVENTS = {
+  datasourceCreateFormOpened: 'datasource_create_form_opened',
   datasourceCreate: 'datasource_create',
   datasourceUpdate: 'datasource_update',
   datasourceDelete: 'datasource_delete',

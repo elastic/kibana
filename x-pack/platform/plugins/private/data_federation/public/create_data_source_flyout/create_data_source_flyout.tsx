@@ -57,6 +57,7 @@ import {
 import { getDataSourceTypeVerbose } from '../get_data_source_type_label';
 import type { CreateDataSourceFlyoutFormValues } from './types';
 import type { DataFederationKibanaServices } from '../types';
+import { UI_COUNTER_EVENTS } from '../ui_counters';
 
 export interface CreateDataSourceFlyoutProps {
   /** When set, the flyout opens in edit mode for this data source. */
@@ -77,7 +78,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   onSave,
 }) => {
   const {
-    services: { cloudInfo, featureFlags, docLinks },
+    services: { cloudInfo, featureFlags, docLinks, reportUiCounter },
   } = useKibana<DataFederationKibanaServices>();
 
   const dataFederationLinks = docLinks.links.dataFederation;
@@ -87,6 +88,12 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     featureFlags?.enableGoogleCloudStorageDataSourceType;
   const enableAzureDataSourceType = featureFlags?.enableAzureDataSourceType;
   const isEditMode = initialDataSource !== undefined;
+
+  useEffect(() => {
+    if (!isEditMode) {
+      reportUiCounter?.(UI_COUNTER_EVENTS.datasourceCreateFormOpened);
+    }
+  }, [isEditMode, reportUiCounter]);
 
   const formDefaultValues = useMemo(
     (): CreateDataSourceFlyoutFormValues =>
