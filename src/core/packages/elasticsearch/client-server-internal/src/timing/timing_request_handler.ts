@@ -27,7 +27,7 @@ export function getTimingRequestHandler(kibanaRequest?: KibanaRequest): OnReques
     }
     (options.context as any).timingContext = {
       startTime: performance.now(),
-      kibanaRequest,
+      measure: kibanaRequest?.serverTiming.measure.bind(kibanaRequest.serverTiming),
     };
   };
 }
