@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiLoadingChart, EuiPanel } from '@elastic/eui';
+import { EuiLoadingChart, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const PanelLoader = (props: {
@@ -16,6 +16,8 @@ export const PanelLoader = (props: {
   showBorder?: boolean;
   dataTestSubj?: string;
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiPanel
       css={css`
@@ -28,11 +30,12 @@ export const PanelLoader = (props: {
         position: relative;
         justify-content: center;
         align-items: center;
+        border-radius: ${euiTheme.border.radius.control};
       `}
       role="figure"
       paddingSize="none"
       hasShadow={props.showShadow}
-      hasBorder={props.showBorder}
+      hasBorder={props.showBorder ?? false}
       data-test-subj={props.dataTestSubj}
     >
       <EuiLoadingChart size="l" />
