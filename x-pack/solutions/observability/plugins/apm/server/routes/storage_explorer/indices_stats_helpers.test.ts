@@ -59,11 +59,7 @@ describe('storage explorer with missing APM indices', () => {
   });
 
   it('does not hide unrelated index statistics errors', async () => {
-    const securityError = createEsError(
-      'security_exception',
-      'missing monitor privilege',
-      403
-    );
+    const securityError = createEsError('security_exception', 'missing monitor privilege', 403);
     const stats = jest.fn(async ({ index }: { index: string }) => {
       if (index === 'traces-apm-missing') {
         throw securityError;
@@ -123,6 +119,7 @@ describe('storage explorer with missing APM indices', () => {
     const context = contextFor({ indices: { get } });
 
     await expect(getIndicesInfo({ context, apmEventClient })).resolves.toEqual({});
+    expect(get).toHaveBeenCalledWith(expect.objectContaining({ ignore_unavailable: true }));
   });
 
   it('does not hide unrelated lifecycle errors', async () => {
@@ -171,14 +168,14 @@ describe('storage explorer with missing APM indices', () => {
     const partialApmEventClient = {
       indices: {
         transaction: 'traces-apm-existing-*',
-        span: 'traces-apm-missing-*',
+        span: 'traces-apm-missing',
         metric: 'metrics-apm-existing-*',
-        error: 'logs-apm-missing-*',
+        error: 'traces-apm-missing',
       },
     } as unknown as APMEventClient;
 
     const stats = jest.fn(async ({ index }: { index: string }) => {
-      if (index.includes('missing')) {
+      if (index === 'traces-apm-missing') {
         throw missingIndex;
       }
       const size = index.startsWith('traces') ? 40 : 2;
@@ -213,14 +210,14 @@ describe('storage explorer with missing APM indices', () => {
     const partialApmEventClient = {
       indices: {
         transaction: 'traces-apm-existing-*',
-        span: 'traces-apm-missing-*',
+        span: 'traces-apm-missing',
         metric: 'metrics-apm-existing-*',
-        error: 'logs-apm-missing-*',
+        error: 'traces-apm-missing',
       },
     } as unknown as APMEventClient;
 
     const explainLifecycle = jest.fn(async ({ index }: { index: string }) => {
-      if (index.includes('missing')) {
+      if (index === 'traces-apm-missing') {
         throw missingIndex;
       }
       const concreteIndex = index.replace('*', '000001');

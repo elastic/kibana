@@ -10,7 +10,7 @@ import type { APMEventClient } from '../../../lib/helpers/create_es_client/creat
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import type { Environment } from '../../../../common/environment_rt';
-import { isIndexNotFoundError } from '../../storage_explorer/indices_stats_helpers';
+import { isIndexNotFoundError } from '../../../lib/helpers/is_index_not_found_error';
 
 export async function getServiceNamesFromTermsEnum({
   apmEventClient,
@@ -28,9 +28,8 @@ export async function getServiceNamesFromTermsEnum({
   if (environment !== ENVIRONMENT_ALL.value) {
     return [];
   }
-  let response;
   try {
-    response = await apmEventClient.termsEnum('get_services_from_terms_enum', {
+    const response = await apmEventClient.termsEnum('get_services_from_terms_enum', {
       apm: {
         events: [
           ProcessorEvent.transaction,
@@ -51,12 +50,11 @@ export async function getServiceNamesFromTermsEnum({
         },
       },
     });
+    return response.terms;
   } catch (error) {
     if (isIndexNotFoundError(error)) {
       return [];
     }
     throw error;
   }
-
-  return response.terms;
 }

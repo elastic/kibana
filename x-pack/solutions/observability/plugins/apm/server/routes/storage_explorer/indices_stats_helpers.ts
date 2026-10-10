@@ -4,17 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { errors } from '@elastic/elasticsearch';
 import { uniq, values, sumBy } from 'lodash';
 import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
-import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
 import type { ApmPluginRequestHandlerContext } from '../typings';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { isIndexNotFoundError } from '../../lib/helpers/is_index_not_found_error';
 
-const EMPTY_INDICES_STATS = {
-  _all: { total: { store: { size_in_bytes: 0 } } },
-  indices: {},
-};
+async function fetchPerIndexPattern<T>(
+  apmEventClient: APMEventClient,
+  fetch: (index: string) => Promise<Record<string, T> | undefined>
+): Promise<Record<string, T>> {
+  const responses = await Promise.all(
+    getApmIndexPatterns(apmEventClient).map(async (index) => {
+      try {
+        return await fetch(index);
+      } catch (error) {
+        if (isIndexNotFoundError(error)) {
+          return undefined;
+        }
+        throw error;
+      }
+    })
+  );
+
+  const indices: Record<string, T> = {};
+  for (const response of responses) {
+    if (response) {
+      for (const [indexName, value] of Object.entries(response)) {
+        indices[indexName] = value;
+      }
+    }
+  }
+
+  return indices;
+}
 
 export async function getTotalIndicesStats({
   context,
@@ -22,32 +45,21 @@ export async function getTotalIndicesStats({
 }: {
   context: ApmPluginRequestHandlerContext;
   apmEventClient: APMEventClient;
-}) {
+}): Promise<{
+  _all: { total: { store: { size_in_bytes: number } } };
+  indices: Record<string, IndicesStatsIndicesStats>;
+}> {
   const esClient = (await context.core).elasticsearch.client;
-  const responses = await Promise.all(
-    getApmIndexPatterns(apmEventClient).map(async (index) => {
-      try {
-        return await esClient.asCurrentUser.indices.stats({
+  const indices = await fetchPerIndexPattern<IndicesStatsIndicesStats>(
+    apmEventClient,
+    async (index) =>
+      (
+        await esClient.asCurrentUser.indices.stats({
           index,
           expand_wildcards: 'all',
-        });
-      } catch (error) {
-        if (isIndexNotFoundError(error)) {
-          return null;
-        }
-        throw error;
-      }
-    })
+        })
+      ).indices
   );
-
-  const indices = Object.assign(
-    {},
-    ...responses.filter((response) => response !== null).map((response) => response?.indices ?? {})
-  );
-
-  if (!Object.keys(indices).length) {
-    return EMPTY_INDICES_STATS;
-  }
 
   const totalSize = sumBy(
     values(indices),
@@ -103,25 +115,15 @@ export async function getIndicesLifecycleStatus({
   apmEventClient: APMEventClient;
 }) {
   const esClient = (await context.core).elasticsearch.client;
-  const responses = await Promise.all(
-    getApmIndexPatterns(apmEventClient).map(async (index) => {
-      try {
-        return await esClient.asCurrentUser.ilm.explainLifecycle({
+  return fetchPerIndexPattern(
+    apmEventClient,
+    async (index) =>
+      (
+        await esClient.asCurrentUser.ilm.explainLifecycle({
           index,
           filter_path: 'indices.*.phase',
-        });
-      } catch (error) {
-        if (isIndexNotFoundError(error)) {
-          return null;
-        }
-        throw error;
-      }
-    })
-  );
-
-  return Object.assign(
-    {},
-    ...responses.filter((response) => response !== null).map((response) => response?.indices ?? {})
+        })
+      ).indices
   );
 }
 
@@ -159,14 +161,4 @@ function getApmIndexPatterns(apmEventClient: APMEventClient) {
 
 export function getApmIndicesCombined(apmEventClient: APMEventClient) {
   return getApmIndexPatterns(apmEventClient).join();
-}
-
-export function isIndexNotFoundError(error: unknown): boolean {
-  const elasticsearchError =
-    error instanceof WrappedElasticsearchClientError ? error.originalError : error;
-
-  return (
-    elasticsearchError instanceof errors.ResponseError &&
-    elasticsearchError.body?.error?.type === 'index_not_found_exception'
-  );
 }
