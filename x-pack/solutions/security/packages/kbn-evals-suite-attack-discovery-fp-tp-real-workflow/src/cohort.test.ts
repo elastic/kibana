@@ -11,6 +11,8 @@ import {
   corporaForCohort,
   DEFAULT_MAX_EXAMPLES_PER_CORPUS,
   resolveCohort,
+  hasEvidence,
+  partitionByEvidence,
 } from './cohort';
 import { loadCorpusExamples } from './corpus_loader';
 
@@ -84,5 +86,26 @@ describe('capExamples', () => {
         0
       )
     );
+  });
+});
+
+describe('evidenced cohort', () => {
+  it('uses the non-sanity corpora', () => {
+    expect(corporaForCohort('evidenced')).toEqual(corporaForCohort('scored'));
+    expect(resolveCohort('evidenced')).toBe('evidenced');
+  });
+
+  it('keeps rows with events and counts the rest as excluded, before any cap', () => {
+    const rows = [
+      { input: { payload: { events: [{}] } } },
+      { input: { payload: { events: [] } } },
+      { input: { payload: { matched_events: [{}] } } },
+      { input: { payload: {} } },
+    ];
+    const { scored, excluded } = partitionByEvidence(rows);
+    expect(scored).toHaveLength(1);
+    expect(excluded).toBe(3);
+    expect(hasEvidence({ events: [{}] })).toBe(true);
+    expect(hasEvidence({ events: 'x' })).toBe(false);
   });
 });

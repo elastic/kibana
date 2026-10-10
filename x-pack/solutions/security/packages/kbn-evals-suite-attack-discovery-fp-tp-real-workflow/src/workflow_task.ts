@@ -69,6 +69,7 @@ import {
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
 import { FP_TP_ANALYSIS_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
+import { buildEvidence } from './evidence';
 
 /**
  * The seeder→reader contract this module must honor: the workflow's
@@ -723,7 +724,20 @@ export interface SeedingClients {
  */
 export interface EsClientLike {
   get(params: { index: string; id: string }): Promise<{ found: boolean; _source?: unknown }>;
-  bulk(params: { body: unknown[]; refresh?: boolean | 'wait_for' }): Promise<{ errors: boolean }>;
+  bulk(params: {
+    body: unknown[];
+    refresh?: boolean | 'wait_for';
+  }): Promise<{ errors: boolean; items?: unknown[] }>;
+  indices?: {
+    create(params: { index: string; mappings: Record<string, unknown> }): Promise<unknown>;
+    putIndexTemplate(params: {
+      name: string;
+      index_patterns: string[];
+      priority: number;
+      data_stream: Record<string, never>;
+      template: { mappings: Record<string, unknown> };
+    }): Promise<unknown>;
+  };
   deleteByQuery(params: {
     index: string;
     query: Record<string, unknown>;
@@ -792,7 +806,8 @@ export const copyAttackDiscoveryToAdhocIndex = async (
 export const seedCitedAlerts = async (
   { esClient, log }: SeedingClients,
   doc: ReturnType<typeof buildAttackDiscoveryFromPayload>,
-  attackDiscoveryId: string
+  attackDiscoveryId: string,
+  evidence?: ReturnType<typeof buildEvidence>
 ): Promise<void> => {
   if (!esClient) {
     log.warning(
@@ -803,8 +818,12 @@ export const seedCitedAlerts = async (
   }
   const index = `${SEED_CITED_ALERTS_INDEX_PREFIX}${seedSpaceId()}`;
   const timestamp = doc.timestamp ?? new Date().toISOString();
-  const hostId = `host-${attackDiscoveryId}`;
-  const userName = `user-${attackDiscoveryId.slice(0, 8)}`;
+  // Rows that carry raw events cite the identity those events (and the derived
+  // entity docs) use, so the workflow's host.id / user.name joins resolve.
+  const identity = evidence?.identities[0] ?? {
+    host: { id: `host-${attackDiscoveryId}`, name: `host-${attackDiscoveryId}` },
+    user: { name: `user-${attackDiscoveryId.slice(0, 8)}` },
+  };
   const ruleName = doc.title.slice(0, 200);
   const severity = 'medium';
   const body: unknown[] = [];
@@ -816,8 +835,8 @@ export const seedCitedAlerts = async (
       'kibana.alert.rule.name': ruleName,
       'kibana.alert.rule.uuid': `rule-${attackDiscoveryId}`,
       'kibana.alert.severity': severity,
-      host: { id: hostId, name: hostId },
-      user: { name: userName },
+      host: identity.host,
+      user: identity.user,
     });
   }
   if (body.length === 0) {
@@ -830,6 +849,104 @@ export const seedCitedAlerts = async (
   }
   log.info(
     `Seeded ${doc.alertIds.length} cited alert(s) into ${index} for AD ${attackDiscoveryId}`
+  );
+};
+
+const assertBulkOk = (label: string, result: { errors?: boolean; items?: unknown[] }): void => {
+  if (result.errors) {
+    throw new Error(`${label} bulk had item errors: ${JSON.stringify(result.items).slice(0, 500)}`);
+  }
+};
+
+/** Identity fields the workflow's `terms` filters hit must be keyword, not dynamic text. */
+const EVIDENCE_MAPPINGS = {
+  properties: {
+    '@timestamp': { type: 'date' },
+    host: { properties: { id: { type: 'keyword' }, name: { type: 'keyword' } } },
+    user: { properties: { name: { type: 'keyword' } } },
+  },
+};
+
+const isAlreadyExists = (error: unknown): boolean =>
+  JSON.stringify((error as { meta?: { body?: unknown } })?.meta?.body ?? '').includes(
+    'resource_already_exists_exception'
+  );
+
+const ensureEntityIndex = async (esClient: EsClientLike, index: string): Promise<void> => {
+  if (!esClient.indices) {
+    throw new Error(`esClient.indices is required to provision ${index}`);
+  }
+  try {
+    await esClient.indices.create({ index, mappings: EVIDENCE_MAPPINGS });
+  } catch (error) {
+    if (!isAlreadyExists(error)) {
+      throw error;
+    }
+  }
+};
+
+const RAW_EVENTS_TEMPLATE = 'fp-tp-corpus-endpoint-events';
+
+/** Installs the data-stream template (idempotent PUT) before the first `create` op. */
+const ensureRawEventsTemplate = async (esClient: EsClientLike): Promise<void> => {
+  if (!esClient.indices) {
+    throw new Error('esClient.indices is required to provision logs-endpoint.events.*');
+  }
+  await esClient.indices.putIndexTemplate({
+    name: RAW_EVENTS_TEMPLATE,
+    index_patterns: ['logs-endpoint.events.*-default'],
+    priority: 500,
+    data_stream: {},
+    template: { mappings: EVIDENCE_MAPPINGS },
+  });
+};
+
+const RAW_EVENT_CATEGORIES = ['process', 'network', 'file'];
+
+const rawEventIndexFor = (event: Record<string, unknown>): string => {
+  const raw = (event.event as { category?: string | string[] } | undefined)?.category;
+  const category = Array.isArray(raw) ? raw[0] : raw;
+  return `logs-endpoint.events.${
+    category && RAW_EVENT_CATEGORIES.includes(category) ? category : 'process'
+  }-default`;
+};
+
+/**
+ * Indexes the case's raw events into `logs-endpoint.events.*` and the
+ * identity-only entity docs (derived from observed host/user, no invented
+ * attributes) into `entities-latest-<space>`. Rows without events seed
+ * nothing. Any failure throws, so the case surfaces as a `seedingError`
+ * instead of silently grading as an abstention.
+ */
+export const seedRawEvidence = async (
+  { esClient, log }: SeedingClients,
+  evidence: ReturnType<typeof buildEvidence>,
+  attackDiscoveryId: string
+): Promise<void> => {
+  if (evidence.events.length === 0) {
+    return;
+  }
+  if (!esClient) {
+    throw new Error(`No esClient: cannot seed raw evidence for AD ${attackDiscoveryId}`);
+  }
+  // `logs-endpoint.events.*` is a data stream: it takes `create` ops only and
+  // auto-creates on first write from the template installed here.
+  await ensureRawEventsTemplate(esClient);
+  const eventOps = evidence.events.flatMap((event) => [
+    { create: { _index: rawEventIndexFor(event) } },
+    event,
+  ]);
+  assertBulkOk('raw events', await esClient.bulk({ body: eventOps, refresh: true }));
+
+  const entityIndex = `entities-latest-${seedSpaceId()}`;
+  await ensureEntityIndex(esClient, entityIndex);
+  const entityOps = evidence.entities.flatMap((entity) => [
+    { index: { _index: entityIndex, _id: entity.entity.id } },
+    entity,
+  ]);
+  assertBulkOk('entities', await esClient.bulk({ body: entityOps, refresh: true }));
+  log.info(
+    `Seeded ${evidence.events.length} raw event(s) and ${evidence.entities.length} derived entity doc(s) for AD ${attackDiscoveryId}`
   );
 };
 
@@ -851,7 +968,8 @@ export const seedCitedAlerts = async (
 export const seedAttackDiscovery = async (
   { fetch, log, esClient }: SeedingClients,
   doc: ReturnType<typeof buildAttackDiscoveryFromPayload>,
-  caseId: string
+  caseId: string,
+  payload: Record<string, unknown> = {}
 ): Promise<PersistedAttackDiscovery> => {
   const response = (await fetch(
     '/internal/elastic_assistant/data_generator/attack_discoveries/_create',
@@ -901,7 +1019,15 @@ export const seedAttackDiscovery = async (
   // The route persisted into the SCHEDULED index; the workflow reads the
   // ad-hoc one. Copy the doc across (same _id) and seed the alerts it cites.
   await copyAttackDiscoveryToAdhocIndex({ fetch: noopFetch, log, esClient }, persisted.id);
-  await seedCitedAlerts({ fetch: noopFetch, log, esClient }, doc, persisted.id);
+  const evidence = buildEvidence(payload, persisted.id);
+  if (evidence.identities.length > 1) {
+    throw new Error(
+      `Case ${caseId} carries ${evidence.identities.length} host/user identities; ` +
+        'cited-alert projection supports exactly one'
+    );
+  }
+  await seedRawEvidence({ fetch: noopFetch, log, esClient }, evidence, persisted.id);
+  await seedCitedAlerts({ fetch: noopFetch, log, esClient }, doc, persisted.id, evidence);
   return persisted;
 };
 
@@ -974,7 +1100,8 @@ export const runAttackDiscoveryWorkflow = async ({
     seeded = await seedAttackDiscovery(
       { fetch, log, esClient },
       buildAttackDiscoveryFromPayload(caseId, payload),
-      caseId
+      caseId,
+      payload
     );
     investigationId = await seedInvestigation({ fetch, log }, seeded.id, seeded.title ?? caseId);
   } catch (err) {

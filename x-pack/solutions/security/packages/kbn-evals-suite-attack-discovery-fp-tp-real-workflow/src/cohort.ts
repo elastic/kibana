@@ -16,8 +16,11 @@ import { CORPUS_NAMES, SANITY_ONLY_CORPORA, type CorpusName } from './constants'
  *             never feed an acceptance number.
  *  - `sanity` only the sanity-only corpora (750 cases), for corpus-level
  *             sanity checks.
+ *  - `evidenced` the non-sanity rows that carry raw events (39 cases). Only these
+ *             can be seeded with entity and event evidence; every other row is
+ *             excluded (not scored, not counted as an abstention failure).
  */
-export const FP_TP_COHORTS = ['all', 'scored', 'sanity'] as const;
+export const FP_TP_COHORTS = ['all', 'scored', 'sanity', 'evidenced'] as const;
 
 export type FpTpCohort = (typeof FP_TP_COHORTS)[number];
 
@@ -39,6 +42,7 @@ export const corporaForCohort = (cohort: FpTpCohort): CorpusName[] => {
   const isSanity = (name: CorpusName) => SANITY_ONLY_CORPORA.includes(name);
   switch (cohort) {
     case 'scored':
+    case 'evidenced':
       return CORPUS_NAMES.filter((name) => !isSanity(name));
     case 'sanity':
       return CORPUS_NAMES.filter(isSanity);
@@ -57,4 +61,24 @@ export const DEFAULT_MAX_EXAMPLES_PER_CORPUS = 15;
 export const capExamples = <T>(examples: T[], rawMax: string | undefined): T[] => {
   const max = Number(rawMax ?? DEFAULT_MAX_EXAMPLES_PER_CORPUS);
   return Number.isFinite(max) && max > 0 ? examples.slice(0, max) : examples;
+};
+
+/** True when the case payload carries raw events the seeder can index. */
+export const hasEvidence = (payload: Record<string, unknown>): boolean =>
+  Array.isArray(payload.events) && payload.events.length > 0;
+
+export interface EvidencePartition<T> {
+  readonly scored: T[];
+  readonly excluded: number;
+}
+
+/**
+ * Splits examples into those that carry raw events and the count of those that do
+ * not. Run before {@link capExamples} so the cap never hides eligible rows.
+ */
+export const partitionByEvidence = <T extends { input: { payload: Record<string, unknown> } }>(
+  examples: T[]
+): EvidencePartition<T> => {
+  const scored = examples.filter((example) => hasEvidence(example.input.payload));
+  return { scored, excluded: examples.length - scored.length };
 };

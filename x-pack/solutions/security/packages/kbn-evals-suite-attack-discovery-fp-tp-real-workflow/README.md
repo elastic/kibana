@@ -66,6 +66,24 @@ is intentionally **not** vendored — see the external
 | `all` (default) | all 7 | 1,017 |
 | `scored` | everything except `guide-sanity` | 267 |
 | `sanity` | `guide-sanity` only | 750 |
+| `evidenced` | non-sanity rows that carry raw `events` | 39 of 1,017 |
+
+`evidenced` is the only cohort whose rows the workflow can decide on. The
+analysis workflow reads `entities-latest-<space>` and `logs-endpoint.events.*`
+and cannot clear an alert without them, so rows with no evidence abstain by
+design. Under `evidenced` the 978 rows without events are excluded (neither
+scored nor counted as abstention failures); the scored/excluded counts are
+printed at startup. Report results as n=39 with confidence intervals; do not
+extrapolate to the full corpus.
+
+For those 39 rows the seeder indexes the corpus events into
+`logs-endpoint.events.<category>-default` and projects identity-only host and
+user entity docs into `entities-latest-<space>` from the events' observed
+`host.name` / `user.name`, tagged `labels.provenance: derived-from-raw-events`.
+No role, ownership, criticality, reputation, allowlist or asset tier is added.
+`host.id` is fixture bookkeeping (a hash of the attack discovery id and host
+name) so each attack discovery joins only its own events. A seeding failure for
+a row that carries events fails the case as a `seedingError`.
 
 A scored/gating run uses `FP_TP_COHORT=scored`. An unknown value throws rather
 than falling back to `all`. `FP_TP_MAX_EXAMPLES_PER_CORPUS` (default 15; `0` or

@@ -33,8 +33,8 @@ import {
   type EvalConnector,
 } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
-import type { CorpusName } from '../src/constants';
-import { capExamples, corporaForCohort, resolveCohort } from '../src/cohort';
+import { CORPUS_NAMES, type CorpusName } from '../src/constants';
+import { capExamples, corporaForCohort, partitionByEvidence, resolveCohort } from '../src/cohort';
 import { loadCorpusExamples } from '../src/corpus_loader';
 import {
   payloadConformance,
@@ -62,7 +62,13 @@ interface AttackDiscoveryExample extends Example {
 }
 
 const corpusDataset = (name: CorpusName): EvaluationDataset => {
-  const all = loadCorpusExamples(name) as AttackDiscoveryExample[];
+  const loaded = loadCorpusExamples(name) as AttackDiscoveryExample[];
+  // The `evidenced` cohort scores only rows whose raw events can be seeded; rows
+  // without events are excluded (not scored, not counted as abstentions), and the
+  // count is printed so the exclusion is never silent.
+  const evidencedOnly = resolveCohort(process.env.FP_TP_COHORT) === 'evidenced';
+  const { scored } = partitionByEvidence(loaded);
+  const all = evidencedOnly ? scored : loaded;
   // Live-run cap: live LLM verdicts run ~28s/case (run9), so 7 corpora × 20
   // cases ≈ 66min of grading. Cap at 15 per corpus (105 cases ≈ 50min) inside
   // the 120-min Playwright test timeout; raise (or unset) for a full sweep.
@@ -72,6 +78,27 @@ const corpusDataset = (name: CorpusName): EvaluationDataset => {
     description: `${examples.length} labeled ${name} cases graded against the review verdict.`,
     examples,
   };
+};
+
+/**
+ * Datasets for the resolved cohort. Under `evidenced`, corpora with no event-bearing
+ * rows are dropped and the scored/excluded totals over the whole 1,017-row corpus
+ * are printed, so the exclusion is never silent.
+ */
+const evalDatasets = (): EvaluationDataset[] => {
+  const cohort = resolveCohort(process.env.FP_TP_COHORT);
+  const datasets = corporaForCohort(cohort).map(corpusDataset);
+  if (cohort !== 'evidenced') {
+    return datasets;
+  }
+  const total = CORPUS_NAMES.reduce((sum, name) => sum + loadCorpusExamples(name).length, 0);
+  const scoredCount = datasets.reduce((sum, dataset) => sum + dataset.examples.length, 0);
+  // eslint-disable-next-line no-console
+  console.log(
+    `[fp-tp] evidenced cohort: ${scoredCount} scored (carry raw events), ` +
+      `${total - scoredCount} excluded (no raw events) of ${total} corpus rows`
+  );
+  return datasets.filter((dataset) => dataset.examples.length > 0);
 };
 
 evaluate.describe(
@@ -120,7 +147,7 @@ evaluate.describe(
 
         await executorClient.runExperiment(
           {
-            datasets: corporaForCohort(resolveCohort(process.env.FP_TP_COHORT)).map(corpusDataset),
+            datasets: evalDatasets(),
             task: async (example: {
               input: { caseId: string; payload: Record<string, unknown> };
             }) => {
