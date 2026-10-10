@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderWithTestingProviders } from '../../common/mock';
 import { SimilarCasesTable, type SimilarCasesTableProps } from './table';
 import { mockCase, mockSimilarObservables } from '../../containers/mock';
@@ -84,5 +85,49 @@ describe('SimilarCasesTable', () => {
     renderWithTestingProviders(<SimilarCasesTable {...props} isLoading={true} />);
     expect(screen.queryByTestId('similar-cases-table')).not.toBeInTheDocument();
     expect(screen.getByTestId('similar-cases-table-loading')).toBeInTheDocument();
+  });
+
+  describe('sorting', () => {
+    it('shows the sort indicator on the sorted column', async () => {
+      renderWithTestingProviders(
+        <SimilarCasesTable {...props} sorting={{ sort: { field: 'title', direction: 'asc' } }} />
+      );
+
+      expect(await screen.findByRole('columnheader', { name: /Name/ })).toHaveAttribute(
+        'aria-sort',
+        'ascending'
+      );
+    });
+
+    it('reflects the sort direction in the sort indicator', async () => {
+      renderWithTestingProviders(
+        <SimilarCasesTable
+          {...props}
+          sorting={{ sort: { field: 'createdAt', direction: 'desc' } }}
+        />
+      );
+
+      expect(await screen.findByRole('columnheader', { name: /Created on/ })).toHaveAttribute(
+        'aria-sort',
+        'descending'
+      );
+    });
+
+    it('calls onChange with the sort when a sortable header is clicked', async () => {
+      const onChange = jest.fn();
+      renderWithTestingProviders(
+        <SimilarCasesTable
+          {...props}
+          onChange={onChange}
+          sorting={{ sort: { field: 'createdAt', direction: 'desc' } }}
+        />
+      );
+
+      await userEvent.click(await screen.findByRole('button', { name: /Name/ }));
+
+      expect(onChange).toHaveBeenCalledWith(
+        expect.objectContaining({ sort: { field: 'title', direction: 'asc' } })
+      );
+    });
   });
 });

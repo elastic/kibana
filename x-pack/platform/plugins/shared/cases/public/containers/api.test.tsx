@@ -17,6 +17,7 @@ import {
   INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
 } from '../../common/constants';
+import { SortFieldCase } from '../../common/ui/types';
 
 import {
   deleteCases,
@@ -1297,6 +1298,41 @@ describe('Cases API', () => {
           perPage: 10,
         }),
         signal: abortCtrl.signal,
+      });
+    });
+
+    it('should omit sortField and sortOrder from the body when they are undefined', async () => {
+      await getSimilarCases({
+        caseId: mockCase.id,
+        signal: abortCtrl.signal,
+        page: 1,
+        perPage: 10,
+        sortField: undefined,
+        sortOrder: undefined,
+      });
+
+      const { body } = fetchMock.mock.calls[0][1];
+
+      expect(JSON.parse(body)).toEqual({ page: 1, perPage: 10 });
+    });
+
+    it('should include sortField and sortOrder in the body when they are set', async () => {
+      await getSimilarCases({
+        caseId: mockCase.id,
+        signal: abortCtrl.signal,
+        page: 1,
+        perPage: 10,
+        sortField: SortFieldCase.title,
+        sortOrder: 'asc',
+      });
+
+      const { body } = fetchMock.mock.calls[0][1];
+
+      expect(JSON.parse(body)).toEqual({
+        page: 1,
+        perPage: 10,
+        sortField: 'title',
+        sortOrder: 'asc',
       });
     });
 

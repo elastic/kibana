@@ -9,6 +9,7 @@ import type { UseQueryResult } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import { casesQueriesKeys } from './constants';
 import type { CasesSimilarResponseUI } from './types';
+import type { SortFieldCase, SortOrder } from '../../common/ui/types';
 import { useToasts } from '../common/lib/kibana';
 import * as i18n from './translations';
 import { getSimilarCases } from './api';
@@ -26,6 +27,8 @@ export const useGetSimilarCases = (params: {
   perPage: number;
   page: number;
   enabled: boolean;
+  sortField?: SortFieldCase;
+  sortOrder?: SortOrder;
 }): UseQueryResult<CasesSimilarResponseUI> => {
   const toasts = useToasts();
 
@@ -36,6 +39,8 @@ export const useGetSimilarCases = (params: {
         caseId: params.caseId,
         perPage: params.perPage,
         page: params.page,
+        sortField: params.sortField,
+        sortOrder: params.sortOrder,
         signal,
       });
     },
