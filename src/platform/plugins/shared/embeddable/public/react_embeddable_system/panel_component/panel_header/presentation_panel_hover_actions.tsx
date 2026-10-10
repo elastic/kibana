@@ -15,6 +15,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 import type { EuiContextMenuPanelDescriptor, IconType } from '@elastic/eui';
 import {
   EuiButtonIcon,
+  EuiCheckbox,
   EuiContextMenu,
   EuiIcon,
   EuiIconTip,
@@ -27,7 +28,12 @@ import { buildContextMenuForActions, triggers } from '@kbn/ui-actions-plugin/pub
 
 import { css } from '@emotion/react';
 import type { EmbeddableApiContext, PublishesTitle, ViewMode } from '@kbn/presentation-publishing';
-import { apiCanLockHoverActions, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  apiCanLockHoverActions,
+  apiCanSelectPanels,
+  apiHasParentApi,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import { getPanelContextMenuTriggerId } from '@kbn/presentation-util';
 import type { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
 import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
@@ -104,6 +110,11 @@ export const PresentationPanelHoverActions = ({
 
   const { euiTheme } = useEuiTheme();
 
+  const selectionApi = useMemo(
+    () => (apiHasParentApi(api) && apiCanSelectPanels(api.parentApi) ? api.parentApi : undefined),
+    [api]
+  );
+
   const [
     title,
     description,
@@ -111,13 +122,15 @@ export const PresentationPanelHoverActions = ({
     hasLockedHoverActions,
     parentHideTitle,
     disabledActionIds,
+    selectedPanelIds,
   ] = useBatchedPublishingSubjects(
     api.title$ ?? new BehaviorSubject(undefined),
     api.description$ ?? new BehaviorSubject(undefined),
     api.hideTitle$ ?? new BehaviorSubject(false),
     api.hasLockedHoverActions$ ?? new BehaviorSubject(false),
     (api.parentApi as Partial<PublishesTitle>)?.hideTitle$ ?? new BehaviorSubject(false),
-    api.disabledActionIds$ ?? new BehaviorSubject(undefined)
+    api.disabledActionIds$ ?? new BehaviorSubject(undefined),
+    selectionApi?.selectedPanelIds$ ?? new BehaviorSubject<string[]>([])
   );
 
   const hideTitle = hidePanelTitle || parentHideTitle;
@@ -339,6 +352,57 @@ export const PresentationPanelHoverActions = ({
     [setDragHandle, euiTheme.size.xs]
   );
 
+  const isSelected = Boolean(api?.uuid && selectedPanelIds.includes(api.uuid));
+  const selectCheckbox =
+    selectionApi && api?.uuid && viewMode === 'edit' ? (
+      <EuiToolTip
+        content={
+          isSelected
+            ? i18n.translate('embeddableApi.deselectPanel', {
+                defaultMessage: 'Deselect panel',
+              })
+            : i18n.translate('embeddableApi.selectPanel', {
+                defaultMessage: 'Select panel. Shift + click a panel to select multiple panels.',
+              })
+        }
+        disableScreenReaderOutput
+      >
+        <EuiCheckbox
+          id={`embeddablePanelSelect-${api.uuid}`}
+          className="embPanel--selectPanel"
+          css={css`
+            margin: 0 ${euiTheme.size.xs};
+          `}
+          checked={isSelected}
+          aria-label={
+            isSelected
+              ? i18n.translate('embeddableApi.deselectPanelAriaLabel', {
+                  defaultMessage: 'Deselect panel',
+                })
+              : i18n.translate('embeddableApi.selectPanelAriaLabel', {
+                  defaultMessage: 'Select panel',
+                })
+          }
+          data-test-subj="embeddablePanelSelectToggle"
+          onChange={() => selectionApi.togglePanelSelection(api.uuid)}
+        />
+      </EuiToolTip>
+    ) : null;
+
+  // Group the drag handle and the select checkbox in a single floating pill so they sit side by side
+  const leftActions = selectCheckbox ? (
+    <span
+      css={css`
+        align-items: center;
+      `}
+    >
+      {dragHandle}
+      {selectCheckbox}
+    </span>
+  ) : (
+    dragHandle
+  );
+
   const showContextMenu = useMemo(() => {
     return contextMenuPanels.some(({ items }) => items?.length);
   }, [contextMenuPanels]);
@@ -350,7 +414,7 @@ export const PresentationPanelHoverActions = ({
           className={classNames('embPanel__hoverActions', className)}
           data-test-subj={`hover-actions-${api.uuid}`}
         >
-          {dragHandle}
+          {leftActions}
           {/* Wrapping all "right actions" in a span so that flex space-between works as expected */}
           <span>
             {quickActionElements.map(

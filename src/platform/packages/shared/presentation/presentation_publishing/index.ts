@@ -299,6 +299,10 @@ export {
 } from './interfaces/containers/publishes_settings';
 
 export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/containers/can_focus_panel';
+export {
+  apiCanSelectPanels,
+  type CanSelectPanels,
+} from './interfaces/containers/can_select_panels';
 
 export { apiPublishesEsql, type PublishesEsql, useHasEsqlPanel } from './interfaces/publishes_esql';
 

@@ -21,6 +21,7 @@ import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ViewMode } from '@kbn/presentation-publishing';
+import { apiCanSelectPanels, apiHasParentApi } from '@kbn/presentation-publishing';
 import type { CustomizePanelActionApi } from '../../../ui_actions/customize_panel_action';
 import { isApiCompatibleWithCustomizePanelAction } from '../../../ui_actions/customize_panel_action';
 import { openCustomizePanelFlyout } from '../../../ui_actions/customize_panel_action/open_customize_panel';
@@ -43,7 +44,11 @@ export const PresentationPanelTitle = ({
   titleHighlight?: string | string[];
 }) => {
   const { euiTheme } = useEuiTheme();
-  const isEditableTitle = viewMode === 'edit' && isApiCompatibleWithCustomizePanelAction(api);
+  // When the parent container supports panel selection, clicking the title selects the panel
+  // instead of opening the customize flyout, so the title must not be rendered as a link.
+  const parentCanSelectPanels = apiHasParentApi(api) && apiCanSelectPanels(api.parentApi);
+  const isEditableTitle =
+    viewMode === 'edit' && isApiCompatibleWithCustomizePanelAction(api) && !parentCanSelectPanels;
 
   const onClick = useCallback(() => {
     openCustomizePanelFlyout({
