@@ -55,6 +55,111 @@ export const verdictsMentioned = (answer: string): CoverageVerdict[] =>
 export const mentionsRule = (answer: string, ruleName: string): boolean =>
   answer.toLowerCase().includes(ruleName.toLowerCase());
 
+/** Statement boundaries: sentence, line and `;`-clause ends. */
+const STATEMENT_SPLIT = /[.;\n]+/;
+/** How close a denial has to be to a rule name to be about that rule ("unlike X", "X does not cover"). */
+const NEGATION_WINDOW = 30;
+const NEGATION_CUE = /\b(?:not|never|unlike|without|cannot|neither|nor|none)\b|n['’]t/;
+/** Language that credits a rule with covering the behaviour under discussion. */
+const COVERAGE_CREDIT =
+  /\b(?:covers?|covering rule|matching rule|matches?|detects?|catches|flags)\b/;
+
+interface Statement {
+  start: number;
+  end: number;
+}
+
+const statementsOf = (answer: string): Statement[] => {
+  const statements: Statement[] = [];
+  let start = 0;
+  const boundaries = new RegExp(STATEMENT_SPLIT, 'g');
+  for (let match = boundaries.exec(answer); match; match = boundaries.exec(answer)) {
+    statements.push({ start, end: match.index });
+    start = match.index + match[0].length;
+  }
+  statements.push({ start, end: answer.length });
+  return statements;
+};
+
+const statementAt = (statements: Statement[], index: number): number =>
+  statements.findIndex((statement) => statement.start <= index && index < statement.end);
+
+/**
+ * The rule a verdict leans on.
+ *
+ * Naming a rule is not the same as claiming it covers the behaviour, and a presence check
+ * cannot tell the two apart: `POWERSHELL` and `OFFICE_CMD` are both T1059, so
+ * "covered_enabled: <powershell> covers this behaviour; <office_cmd> does not" contains the
+ * right name and credits the wrong rule — exactly the same-technique regression this suite
+ * exists to trap.
+ *
+ * Attribution is read off the answer's structure, not a phrasing list. A mention is denied when
+ * a negation cue sits in its own clause ("unlike X", "X does not cover this"), and credited when
+ * coverage language sits in that clause ("X covers this", "the covering rule is X"). The verdict
+ * is attributed to a credited mention — of several, the one nearest the verdict token, so a rule
+ * named beside the verdict beats one a sentence away. Accurate answers survive: "<office_cmd>
+ * covers this, unlike <powershell>" credits the Office rule, and so does a verdict that stands
+ * alone with the covering rule on the next line. `undefined` means the verdict was stated
+ * without crediting any rule that could justify it, which is also a failure.
+ */
+export const ruleJustifyingVerdict = (
+  answer: string,
+  verdict: CoverageVerdict,
+  ruleNames: readonly string[]
+): string | undefined => {
+  const haystack = answer.toLowerCase();
+  // A scored answer carries exactly one verdict token (`verdictsMentioned`); the last
+  // occurrence is the stated one when a draft repeats the token mid-answer.
+  const verdictAt = haystack.lastIndexOf(verdict);
+  if (verdictAt === -1) return undefined;
+
+  const statements = statementsOf(haystack);
+  const verdictStatement = statementAt(statements, verdictAt);
+
+  const mentions = ruleNames
+    .flatMap((name) => {
+      const needle = name.toLowerCase();
+      const indexes: number[] = [];
+      for (let at = haystack.indexOf(needle); at !== -1; at = haystack.indexOf(needle, at + 1)) {
+        indexes.push(at);
+      }
+      return indexes.map((at) => ({ name, at, end: at + needle.length }));
+    })
+    .sort((a, b) => a.at - b.at);
+
+  const scored = mentions.map((mention) => {
+    const statementIndex = statementAt(statements, mention.at);
+    const statement = statements[statementIndex];
+    // Credit language may introduce the rule ("the covering rule is X") or follow it
+    // ("X covers this"), and both live in the rule's own clause. A denial is narrower: only
+    // text right beside the name is about that name ("unlike X", "X does not cover this").
+    const denialBefore = haystack.slice(
+      Math.max(statement.start, mention.at - NEGATION_WINDOW),
+      mention.at
+    );
+    const denialAfter = haystack.slice(
+      mention.end,
+      Math.min(mention.end + NEGATION_WINDOW, statement.end)
+    );
+    return {
+      ...mention,
+      statementIndex,
+      denied: NEGATION_CUE.test(denialBefore) || NEGATION_CUE.test(denialAfter),
+      credited: COVERAGE_CREDIT.test(haystack.slice(statement.start, statement.end)),
+    };
+  });
+
+  const candidates = scored.filter((mention) => !mention.denied);
+  const credited = candidates.filter((mention) => mention.credited);
+  const [best] = [...(credited.length > 0 ? credited : candidates)].sort(
+    (a, b) =>
+      Math.abs(a.statementIndex - verdictStatement) -
+        Math.abs(b.statementIndex - verdictStatement) ||
+      Math.abs(a.at - verdictAt) - Math.abs(b.at - verdictAt)
+  );
+  return best?.name;
+};
+
 const MUTATION_VERBS = '(?:enabled|installed|created|activated|turned on|switched on)';
 // Passive split by verb: bare "has been enabled" attributes the change to the speaker,
 // but correct answers describe state with "has been installed/created" ("has been created

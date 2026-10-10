@@ -18,6 +18,7 @@ import {
   givesRulePageRoute,
   loadedSkillNames,
   mentionsRule,
+  ruleJustifyingVerdict,
   toolCalls,
   verdictsMentioned,
   type CoverageVerdict,
@@ -112,6 +113,24 @@ const expectSingleVerdict = (answer: string, expected: CoverageVerdict) => {
   ).toEqual([expected]);
 };
 
+/**
+ * A positive coverage verdict must be justified by the rule that detects the asked-for
+ * behaviour — not merely accompanied by its name. The same-technique near-miss is the
+ * regression this suite exists to trap (`POWERSHELL` and `OFFICE_CMD` are both T1059), and it
+ * survives a presence check: "covered_enabled: <powershell> covers this; <office_cmd> does
+ * not" names the right rule and credits the wrong one.
+ */
+const expectVerdictJustifiedBy = (
+  answer: string,
+  verdict: CoverageVerdict,
+  expectedRule: string
+) => {
+  expect(
+    ruleJustifyingVerdict(answer, verdict, Object.values(COVERAGE_RULE_NAMES)),
+    `the ${verdict} verdict must be justified by "${expectedRule}", not by a rule that detects a different behaviour`
+  ).toBe(expectedRule);
+};
+
 const answerOf = finalAnswer;
 
 evaluate.describe(
@@ -185,7 +204,11 @@ evaluate.describe(
 
         expectCoverageSkillRan((response.steps ?? []) as ToolCallStep[]);
         expectSingleVerdict(answerOf(response), 'covered_enabled');
-        expect(mentionsRule(answerOf(response), COVERAGE_RULE_NAMES.powershell)).toBe(true);
+        expectVerdictJustifiedBy(
+          answerOf(response),
+          'covered_enabled',
+          COVERAGE_RULE_NAMES.powershell
+        );
         // Installed rules must be searched before any verdict about existing coverage.
         expect(
           toolCalls((response.steps ?? []) as ToolCallStep[], FIND_RULES_TOOL_ID).length
@@ -207,7 +230,7 @@ evaluate.describe(
 
         expectCoverageSkillRan((response.steps ?? []) as ToolCallStep[]);
         expectSingleVerdict(answerOf(response), 'covered_disabled');
-        expect(mentionsRule(answerOf(response), COVERAGE_RULE_NAMES.smb)).toBe(true);
+        expectVerdictJustifiedBy(answerOf(response), 'covered_disabled', COVERAGE_RULE_NAMES.smb);
         // The cheapest route is enabling what already exists, so the answer must not
         // propose authoring a rule, and must not pretend it enabled anything itself.
         expect(
@@ -292,6 +315,8 @@ evaluate.describe(
       async ({ chatClient }) => {
         // Near miss: Office-spawns-cmd and encoded PowerShell are both enabled and both T1059.
         // Picking the PowerShell rule here means the verdict rode on the technique, not the behaviour.
+        // So assert WHICH rule the verdict leans on: naming both while crediting the sibling
+        // ("<powershell> covers this; <office_cmd> does not") is the same regression.
         const response = await chatClient.converse({
           options: { agentId: coverageAgentId },
           messages: [
@@ -304,7 +329,11 @@ evaluate.describe(
 
         expectCoverageSkillRan((response.steps ?? []) as ToolCallStep[]);
         expectSingleVerdict(answerOf(response), 'covered_enabled');
-        expect(mentionsRule(answerOf(response), COVERAGE_RULE_NAMES.officeCmd)).toBe(true);
+        expectVerdictJustifiedBy(
+          answerOf(response),
+          'covered_enabled',
+          COVERAGE_RULE_NAMES.officeCmd
+        );
       }
     );
 
@@ -324,7 +353,11 @@ evaluate.describe(
 
         expectCoverageSkillRan((response.steps ?? []) as ToolCallStep[]);
         expectSingleVerdict(answerOf(response), 'covered_enabled');
-        expect(mentionsRule(answerOf(response), COVERAGE_RULE_NAMES.kubectlStaging)).toBe(true);
+        expectVerdictJustifiedBy(
+          answerOf(response),
+          'covered_enabled',
+          COVERAGE_RULE_NAMES.kubectlStaging
+        );
       }
     );
 

@@ -85,6 +85,31 @@ describe('detection coverage near-miss evals', () => {
     await runVerdictTest(nearMissNames[0], siblingAnswer);
   });
 
+  it('accepts an accurate answer that names both rules in one sentence', async () => {
+    await runVerdictTest(
+      nearMissNames[0],
+      `covered_enabled: ${COVERAGE_RULE_NAMES.officeCmd} covers Office spawning cmd.exe, unlike ${COVERAGE_RULE_NAMES.powershell}.`
+    );
+  });
+
+  it('rejects an answer that credits the PowerShell sibling while naming the Office rule', async () => {
+    await expect(
+      runVerdictTest(
+        nearMissNames[0],
+        `covered_enabled: ${COVERAGE_RULE_NAMES.powershell} covers this behaviour; ${COVERAGE_RULE_NAMES.officeCmd} does not.`
+      )
+    ).rejects.toThrow();
+  });
+
+  it('rejects the same wrong attribution when the verdict stands alone', async () => {
+    await expect(
+      runVerdictTest(
+        nearMissNames[0],
+        `covered_enabled.\nThe covering rule is ${COVERAGE_RULE_NAMES.powershell}, and ${COVERAGE_RULE_NAMES.officeCmd} detects other behaviour.`
+      )
+    ).rejects.toThrow();
+  });
+
   it.each([
     [nearMissNames[0], `covered_enabled: ${COVERAGE_RULE_NAMES.officeCmd}`],
     [nearMissNames[1], `covered_enabled: ${COVERAGE_RULE_NAMES.kubectlStaging}`],

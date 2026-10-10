@@ -19,6 +19,7 @@ import {
   queriesOnlySeverity,
   relatesToIntegration,
   routedToTactic,
+  ruleJustifyingVerdict,
   rulesFromStep,
   verdictsMentioned,
   type ToolCallStep,
@@ -57,6 +58,121 @@ describe('mentionsRule', () => {
 
   it('rejects a near-miss rule name', () => {
     expect(mentionsRule('Lateral Movement via RDP', 'Lateral Movement via SMB')).toBe(false);
+  });
+});
+
+const POWERSHELL = 'Encoded PowerShell Command on Windows Endpoints';
+const OFFICE_CMD = 'Office Spawning Windows Command Shell';
+const SIBLING_RULES = [POWERSHELL, OFFICE_CMD];
+
+describe('ruleJustifyingVerdict', () => {
+  it('credits the rule the verdict is stated with', () => {
+    expect(
+      ruleJustifyingVerdict(
+        `covered_enabled: ${OFFICE_CMD} covers Office spawning cmd.exe.`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBe(OFFICE_CMD);
+  });
+
+  it('credits the sibling, not the expected rule, when the verdict rides on the wrong one', () => {
+    // The regression the near-miss case exists to trap: both names appear, the verdict credits
+    // the same-technique sibling.
+    expect(
+      ruleJustifyingVerdict(
+        `covered_enabled: ${POWERSHELL} covers this behaviour; ${OFFICE_CMD} does not.`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBe(POWERSHELL);
+  });
+
+  it('keeps an explanatory mention in a later statement out of the credit', () => {
+    expect(
+      ruleJustifyingVerdict(
+        `covered_enabled: ${OFFICE_CMD} covers Office spawning cmd.exe. ${POWERSHELL} does not cover that behaviour.`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBe(OFFICE_CMD);
+  });
+
+  it('keeps an explanatory mention in the same sentence out of the credit', () => {
+    expect(
+      ruleJustifyingVerdict(
+        `covered_enabled: ${OFFICE_CMD} covers Office spawning cmd.exe, unlike ${POWERSHELL}.`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBe(OFFICE_CMD);
+  });
+
+  it('reads the credit from the neighbouring line when the verdict stands alone', () => {
+    expect(
+      ruleJustifyingVerdict(
+        `Verdict: covered_enabled.\nThe covering rule is ${OFFICE_CMD}.`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBe(OFFICE_CMD);
+    expect(
+      ruleJustifyingVerdict(
+        `covered_enabled.\nThe covering rule is ${POWERSHELL}, and ${OFFICE_CMD} detects other behaviour.`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBe(POWERSHELL);
+  });
+
+  it('reads the credit from a conclusion that restates a rule named earlier', () => {
+    expect(
+      ruleJustifyingVerdict(
+        `The ${OFFICE_CMD} rule covers this and is disabled. covered_disabled`,
+        'covered_disabled',
+        SIBLING_RULES
+      )
+    ).toBe(OFFICE_CMD);
+  });
+
+  it('credits nothing when every mention is a denial', () => {
+    expect(
+      ruleJustifyingVerdict(
+        `The ${POWERSHELL} rule does not cover this. covered_enabled`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBeUndefined();
+  });
+
+  it('does not confuse a sibling verdict token for the one being attributed', () => {
+    expect(
+      ruleJustifyingVerdict(
+        `covered_disabled: ${OFFICE_CMD} is off. covered_enabled: ${POWERSHELL} matches.`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBe(POWERSHELL);
+  });
+
+  it('credits the rule the answer says covers it, not the sibling named beside the verdict', () => {
+    expect(
+      ruleJustifyingVerdict(
+        `covered_enabled: the ${POWERSHELL} rule is enabled and shares the T1059 technique. ${OFFICE_CMD} covers Office spawning cmd.exe.`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBe(OFFICE_CMD);
+  });
+
+  it('ignores a sibling denied inside the verdict statement itself', () => {
+    expect(
+      ruleJustifyingVerdict(
+        `covered_enabled — the ${POWERSHELL} rule does not apply here.\nThe covering rule is ${OFFICE_CMD}.`,
+        'covered_enabled',
+        SIBLING_RULES
+      )
+    ).toBe(OFFICE_CMD);
   });
 });
 
