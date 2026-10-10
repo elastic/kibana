@@ -13,6 +13,7 @@ import { actionsConfigMock } from '../../actions_config.mock';
 import { connectorTokenClientMock } from '../connector_token_client.mock';
 import { getEarsAccessToken } from './get_ears_access_token';
 import { requestEarsRefreshToken } from './request_ears_refresh_token';
+import { EarsRequestError } from './ears_request_error';
 
 jest.mock('./request_ears_refresh_token', () => ({
   requestEarsRefreshToken: jest.fn(),
@@ -406,6 +407,112 @@ describe('getEarsAccessToken', () => {
       expect(requestEarsRefreshToken).toHaveBeenCalledTimes(1);
       expect(result1).toBe('Bearer new-access-token');
       expect(result2).toBe('stored-access-token');
+    });
+  });
+
+  describe('structured logging', () => {
+    const perUserOpts = {
+      ...baseOpts,
+      authMode: 'per-user' as const,
+      profileUid: 'profile-1',
+    };
+
+    it('logs a tagged success line with the EARS request id when a token is refreshed', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredPerUserToken,
+      });
+      (requestEarsRefreshToken as jest.Mock).mockResolvedValueOnce({
+        ...refreshResponse,
+        earsRequestId: 'req-1',
+      });
+
+      await getEarsAccessToken(perUserOpts);
+
+      expect(logger.info).toHaveBeenCalledWith(
+        'EARS token_refresh success: connectorId=connector-1 provider=my-provider profileUid=profile-1 earsRequestId=req-1 forced=false',
+        { tags: ['ears', 'token_refresh', 'success'] }
+      );
+    });
+
+    it('marks the line as forced when the refresh was triggered by a 401', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: validPerUserToken,
+      });
+      (requestEarsRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+
+      await getEarsAccessToken({ ...perUserOpts, forceRefresh: true });
+
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('forced=true'), {
+        tags: ['ears', 'token_refresh', 'success'],
+      });
+    });
+
+    it('does not log a refresh line when the stored token is still valid', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: validPerUserToken,
+      });
+
+      await getEarsAccessToken(perUserOpts);
+
+      expect(logger.info).not.toHaveBeenCalled();
+      expect(requestEarsRefreshToken).not.toHaveBeenCalled();
+    });
+
+    it('logs the status and request id when EARS rejects the refresh, and still surfaces the auth error', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredPerUserToken,
+      });
+      (requestEarsRefreshToken as jest.Mock).mockRejectedValueOnce(
+        new EarsRequestError({
+          message: 'Failed to refresh token from auth redirect service',
+          status: 502,
+          earsRequestId: 'req-502',
+        })
+      );
+
+      await expect(getEarsAccessToken(perUserOpts)).rejects.toBeInstanceOf(
+        ConnectorAuthorizationError
+      );
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        'EARS token_refresh failure: connectorId=connector-1 provider=my-provider profileUid=profile-1 earsRequestId=req-502 status=502 forced=false',
+        { tags: ['ears', 'token_refresh', 'failure'] }
+      );
+    });
+
+    it('logs the reason when the failure has no EARS response (e.g. a network error)', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredPerUserToken,
+      });
+      (requestEarsRefreshToken as jest.Mock).mockRejectedValueOnce(new Error('socket hang up'));
+
+      await expect(getEarsAccessToken(perUserOpts)).rejects.toBeInstanceOf(
+        ConnectorAuthorizationError
+      );
+
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('reason=socket hang up'), {
+        tags: ['ears', 'token_refresh', 'failure'],
+      });
+    });
+
+    it('never logs token values', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredPerUserToken,
+      });
+      (requestEarsRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+
+      await getEarsAccessToken(perUserOpts);
+
+      const logged = JSON.stringify([logger.info.mock.calls, logger.debug.mock.calls]);
+      expect(logged).not.toContain('new-access-token');
+      expect(logged).not.toContain('new-refresh-token');
+      expect(logged).not.toContain('stored-per-user-refresh-token');
     });
   });
 });

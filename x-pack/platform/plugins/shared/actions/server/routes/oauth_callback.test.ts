@@ -22,6 +22,7 @@ import { OAuthStateClient } from '../lib/oauth_state_client';
 import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
 import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authorization_code_token';
 import { requestEarsToken } from '../lib/ears/request_ears_token';
+import { EarsRequestError } from '../lib/ears/ears_request_error';
 import { asSpaceId } from '@kbn/core-spaces-common';
 
 const KIBANA_URL = 'https://kibana.example.com';
@@ -437,6 +438,7 @@ describe('oauthCallbackRoute', () => {
       refreshToken: 'ears-refresh',
       expiresIn: 3600,
       refreshTokenExpiresIn: 7200,
+      earsRequestId: 'req-1',
     });
 
     const [, handler] = registerRoute();
@@ -465,6 +467,112 @@ describe('oauthCallbackRoute', () => {
     // grant (the new token shares the same grant).
     expect(mockConnectorTokenClientInstance.deleteConnectorTokens).toHaveBeenCalledWith(
       expect.objectContaining({ skipRevocation: true })
+    );
+
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      'EARS token_exchange success: connectorId=connector-1 provider=test-provider profileUid=test-profile-uid spaceId=default state=valid-state earsRequestId=req-1',
+      { tags: ['ears', 'token_exchange', 'success'] }
+    );
+    // the authorization code, PKCE verifier and tokens must never be logged
+    const logged = JSON.stringify([
+      (mockLogger.info as jest.Mock).mock.calls,
+      (mockLogger.warn as jest.Mock).mock.calls,
+      (mockLogger.error as jest.Mock).mock.calls,
+      (mockLogger.debug as jest.Mock).mock.calls,
+    ]);
+    expect(logged).not.toContain('auth-code');
+    expect(logged).not.toContain('test-verifier');
+    expect(logged).not.toContain('ears-token');
+    expect(logged).not.toContain('ears-refresh');
+  });
+
+  it('logs a tagged failure line with the EARS status and request id when the EARS token exchange fails', async () => {
+    mockOAuthStateClientInstance.get.mockResolvedValue({
+      id: 'state-id',
+      state: 'valid-state',
+      codeVerifier: 'test-verifier',
+      connectorId: 'connector-1',
+      kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
+      spaceId: asSpaceId('default'),
+      createdAt: '2025-01-01T00:00:00.000Z',
+      expiresAt: '2025-01-01T00:10:00.000Z',
+      createdBy: 'test-profile-uid',
+    });
+    mockEncryptedSavedObjectsClient.getClient.mockReturnValue({
+      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+        attributes: {
+          config: { authType: 'ears' },
+          secrets: { provider: 'test-provider' },
+        },
+      }),
+    });
+    mockRequestEarsToken.mockRejectedValue(
+      new EarsRequestError({
+        message: 'Failed to request access token from auth redirect service',
+        status: 400,
+        earsRequestId: 'req-400',
+      })
+    );
+
+    const [, handler] = registerRoute();
+    const req = httpServerMock.createKibanaRequest({
+      query: { code: 'auth-code', state: 'valid-state' },
+    });
+    const res = httpServerMock.createResponseFactory();
+
+    await handler(createMockContext(), req, res);
+
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'EARS token_exchange failure: connectorId=connector-1 provider=test-provider profileUid=test-profile-uid spaceId=default state=valid-state earsRequestId=req-400 status=400',
+      { tags: ['ears', 'token_exchange', 'failure'] }
+    );
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'OAuth callback failed: Failed to request access token from auth redirect service'
+    );
+    expect(mockConnectorTokenClientInstance.createWithRefreshToken).not.toHaveBeenCalled();
+  });
+
+  it('keeps the EARS request id on the failure line when storing the token fails after a successful exchange', async () => {
+    mockOAuthStateClientInstance.get.mockResolvedValue({
+      id: 'state-id',
+      state: 'valid-state',
+      codeVerifier: 'test-verifier',
+      connectorId: 'connector-1',
+      kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
+      spaceId: asSpaceId('default'),
+      createdAt: '2025-01-01T00:00:00.000Z',
+      expiresAt: '2025-01-01T00:10:00.000Z',
+      createdBy: 'test-profile-uid',
+    });
+    mockEncryptedSavedObjectsClient.getClient.mockReturnValue({
+      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+        attributes: {
+          config: { authType: 'ears' },
+          secrets: { provider: 'test-provider' },
+        },
+      }),
+    });
+    mockRequestEarsToken.mockResolvedValue({
+      tokenType: 'Bearer',
+      accessToken: 'ears-token',
+      expiresIn: 3600,
+      refreshToken: 'ears-refresh',
+      refreshTokenExpiresIn: 7200,
+      earsRequestId: 'req-1',
+    });
+    mockConnectorTokenClientInstance.createWithRefreshToken.mockRejectedValue(
+      new Error('storage failed')
+    );
+
+    const [, handler] = registerRoute();
+    const req = httpServerMock.createKibanaRequest({
+      query: { code: 'auth-code', state: 'valid-state' },
+    });
+    await handler(createMockContext(), req, httpServerMock.createResponseFactory());
+
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'EARS token_exchange failure: connectorId=connector-1 provider=test-provider profileUid=test-profile-uid spaceId=default state=valid-state earsRequestId=req-1 reason=storage failed',
+      { tags: ['ears', 'token_exchange', 'failure'] }
     );
   });
 
@@ -508,6 +616,11 @@ describe('oauthCallbackRoute', () => {
     await handler(context, req, res);
 
     expect(mockLogger.error).toHaveBeenCalledWith('OAuth callback failed: Token exchange failed');
+    expect(
+      (mockLogger.warn as jest.Mock).mock.calls.filter(
+        ([, meta]: [unknown, { tags?: string[] } | undefined]) => meta?.tags?.includes('ears')
+      )
+    ).toEqual([]);
     expect(res.redirected).toHaveBeenCalledWith({
       headers: {
         location:

@@ -122,4 +122,43 @@ describe('requestEarsRefreshToken', () => {
       )
     ).rejects.toThrow('Failed to refresh token from auth redirect service');
   });
+
+  it('returns the EARS request id from the x-cloud-request-id response header', async () => {
+    mockRequest.mockResolvedValueOnce({
+      status: 200,
+      data: { access_token: 'a', token_type: 'Bearer', expires_in: 1 },
+      headers: { 'x-cloud-request-id': 'req-123' },
+    } as unknown as AxiosResponse);
+
+    const result = await requestEarsRefreshToken(
+      'my-provider',
+      logger,
+      { refreshToken: 'stored-refresh-token' },
+      configurationUtilities
+    );
+
+    expect(result.earsRequestId).toBe('req-123');
+  });
+
+  it('throws an EarsRequestError carrying the status and request id on a non-200 response', async () => {
+    mockRequest.mockResolvedValueOnce({
+      status: 401,
+      data: { error: 'invalid_token' },
+      headers: { 'x-cloud-request-id': 'req-401' },
+    } as unknown as AxiosResponse);
+
+    await expect(
+      requestEarsRefreshToken(
+        'my-provider',
+        logger,
+        { refreshToken: 'expired-refresh-token' },
+        configurationUtilities
+      )
+    ).rejects.toMatchObject({
+      name: 'EarsRequestError',
+      message: 'Failed to refresh token from auth redirect service',
+      status: 401,
+      earsRequestId: 'req-401',
+    });
+  });
 });

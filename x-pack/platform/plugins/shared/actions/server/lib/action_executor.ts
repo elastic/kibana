@@ -21,9 +21,10 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource as getTaskManagerErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { isConnectorAuthorizationError } from '@kbn/connector-specs';
+import { EARS_AUTH_ID, isConnectorAuthorizationError } from '@kbn/connector-specs';
 import { IN_MEMORY_CONNECTOR_REVISION } from './single_file_connectors/build_client_lease_key';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
+import { logEarsEvent } from './ears/log_ears_event';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 import {
   getGenAiTokenTracking,
@@ -542,8 +543,8 @@ export class ActionExecutor {
         eventLogger.logEvent(startEvent);
 
         let validatedParams: Record<string, unknown>;
-        let validatedConfig;
-        let validatedSecrets;
+        let validatedConfig: Record<string, unknown>;
+        let validatedSecrets: Record<string, unknown>;
         try {
           const validationResult = validateAction(
             {
@@ -577,6 +578,9 @@ export class ActionExecutor {
           eventLogger.logEvent(event);
           return err.result;
         }
+
+        const authType = validatedSecrets.authType ?? validatedConfig.authType;
+        const isEarsPerUserExecution = authMode === 'per-user' && authType === EARS_AUTH_ID;
 
         let rawResult: ActionTypeExecutorRawResult<unknown>;
         try {
@@ -733,6 +737,18 @@ export class ActionExecutor {
           }
 
           eventLogger.logEvent(event);
+
+          if (isEarsPerUserExecution) {
+            logEarsEvent(logger, {
+              step: 'execute',
+              outcome: result.status === 'ok' ? 'success' : 'failure',
+              connectorId: actionId,
+              profileUid,
+              spaceId,
+              executionId: actionExecutionId,
+              extra: { actionTypeId },
+            });
+          }
         }
 
         // start genai extension

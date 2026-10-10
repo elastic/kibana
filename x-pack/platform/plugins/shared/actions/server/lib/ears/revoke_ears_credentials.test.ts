@@ -9,6 +9,7 @@ jest.mock('./request_ears_revoke');
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
+import { EarsRequestError } from './ears_request_error';
 import { requestEarsRevoke } from './request_ears_revoke';
 import { revokeEarsCredentials } from './revoke_ears_credentials';
 
@@ -20,7 +21,7 @@ describe('revokeEarsCredentials', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRequestEarsRevoke.mockResolvedValue(undefined);
+    mockRequestEarsRevoke.mockResolvedValue({});
   });
 
   it('revokes the access token (stripped of its token-type prefix) and the refresh token', async () => {
@@ -62,8 +63,11 @@ describe('revokeEarsCredentials', () => {
     );
   });
 
-  it('throws when a revoke call fails', async () => {
-    mockRequestEarsRevoke.mockRejectedValueOnce(new Error('revoke failed'));
+  it('returns the error and the other request id when one revoke call fails', async () => {
+    const error = new Error('revoke failed');
+    mockRequestEarsRevoke
+      .mockResolvedValueOnce({ earsRequestId: 'req-access' })
+      .mockRejectedValueOnce(error);
 
     await expect(
       revokeEarsCredentials({
@@ -72,6 +76,50 @@ describe('revokeEarsCredentials', () => {
         configurationUtilities,
         logger,
       })
-    ).rejects.toThrow('revoke failed');
+    ).resolves.toEqual({ earsRequestIds: ['req-access'], errors: [error] });
+  });
+
+  it('keeps the request ids of failed revokes alongside successful ones', async () => {
+    const failure = new EarsRequestError({ message: 'x', status: 502, earsRequestId: 'req-502' });
+    mockRequestEarsRevoke
+      .mockResolvedValueOnce({ earsRequestId: 'req-access' })
+      .mockRejectedValueOnce(failure);
+
+    await expect(
+      revokeEarsCredentials({
+        provider: 'google',
+        credentials: { accessToken: 'Bearer access-token-1', refreshToken: 'refresh-token-1' },
+        configurationUtilities,
+        logger,
+      })
+    ).resolves.toEqual({ earsRequestIds: ['req-access', 'req-502'], errors: [failure] });
+  });
+
+  it('returns the EARS request ids of the revoke calls', async () => {
+    mockRequestEarsRevoke
+      .mockResolvedValueOnce({ earsRequestId: 'req-access' })
+      .mockResolvedValueOnce({ earsRequestId: 'req-refresh' });
+
+    await expect(
+      revokeEarsCredentials({
+        provider: 'google',
+        credentials: { accessToken: 'Bearer access-token-1', refreshToken: 'refresh-token-1' },
+        configurationUtilities,
+        logger,
+      })
+    ).resolves.toEqual({ earsRequestIds: ['req-access', 'req-refresh'], errors: [] });
+  });
+
+  it('omits missing request ids', async () => {
+    mockRequestEarsRevoke.mockResolvedValueOnce({});
+
+    await expect(
+      revokeEarsCredentials({
+        provider: 'google',
+        credentials: { accessToken: 'Bearer access-token-1' },
+        configurationUtilities,
+        logger,
+      })
+    ).resolves.toEqual({ earsRequestIds: [], errors: [] });
   });
 });

@@ -122,4 +122,54 @@ describe('requestEarsToken', () => {
       )
     ).rejects.toThrow('Failed to request access token from auth redirect service');
   });
+
+  it('returns the EARS request id from the x-cloud-request-id response header', async () => {
+    mockRequest.mockResolvedValueOnce({
+      status: 200,
+      data: { access_token: 'a', token_type: 'Bearer', expires_in: 1, refresh_token: 'r' },
+      headers: { 'x-cloud-request-id': 'req-123' },
+    } as unknown as AxiosResponse);
+
+    const result = await requestEarsToken(
+      'my-provider',
+      logger,
+      { code: 'auth-code', pkceVerifier: 'pkce-verifier' },
+      configurationUtilities
+    );
+
+    expect(result.earsRequestId).toBe('req-123');
+  });
+
+  it('leaves earsRequestId undefined when the header is absent', async () => {
+    const result = await requestEarsToken(
+      'my-provider',
+      logger,
+      { code: 'auth-code', pkceVerifier: 'pkce-verifier' },
+      configurationUtilities
+    );
+
+    expect(result.earsRequestId).toBeUndefined();
+  });
+
+  it('throws an EarsRequestError carrying the status and request id on a non-200 response', async () => {
+    mockRequest.mockResolvedValueOnce({
+      status: 400,
+      data: { error: 'invalid_grant' },
+      headers: { 'x-cloud-request-id': 'req-400' },
+    } as unknown as AxiosResponse);
+
+    await expect(
+      requestEarsToken(
+        'my-provider',
+        logger,
+        { code: 'auth-code', pkceVerifier: 'pkce-verifier' },
+        configurationUtilities
+      )
+    ).rejects.toMatchObject({
+      name: 'EarsRequestError',
+      message: 'Failed to request access token from auth redirect service',
+      status: 400,
+      earsRequestId: 'req-400',
+    });
+  });
 });

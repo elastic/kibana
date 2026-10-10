@@ -14,6 +14,7 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 import { EARS_AUTH_ID } from '@kbn/connector-specs';
 import { retryIfConflicts } from './retry_if_conflicts';
 import { revokeEarsCredentials } from './ears/revoke_ears_credentials';
+import { getEarsErrorLogFields, logEarsEvent } from './ears/log_ears_event';
 import type {
   UserConnectorToken,
   OAuthPersonalCredentials,
@@ -529,13 +530,39 @@ export class UserConnectorTokenClient {
         );
 
         for (const [i, result] of results.entries()) {
-          if (result.status === 'rejected') {
-            const tokenProfileUid = credentialsList[i].profileUid;
-            const userContext = tokenProfileUid ? `, profileUid "${tokenProfileUid}"` : '';
-            this.logger.error(
-              `Failed to revoke EARS OAuth token for connectorId "${connectorId}"${userContext}: ${result.reason?.message}`
-            );
+          const tokenProfileUid = credentialsList[i].profileUid;
+          const { error, earsRequestIds } =
+            result.status === 'rejected'
+              ? { error: result.reason, earsRequestIds: [] }
+              : { error: result.value.errors[0], earsRequestIds: result.value.earsRequestIds };
+          const logFields = {
+            step: 'revoke',
+            connectorId,
+            provider,
+            profileUid: tokenProfileUid,
+          } as const;
+
+          if (error === undefined) {
+            logEarsEvent(this.logger, {
+              ...logFields,
+              outcome: 'success',
+              earsRequestId: earsRequestIds.join(',') || undefined,
+            });
+            continue;
           }
+
+          const userContext = tokenProfileUid ? `, profileUid "${tokenProfileUid}"` : '';
+          this.logger.error(
+            `Failed to revoke EARS OAuth token for connectorId "${connectorId}"${userContext}: ${error?.message}`
+          );
+          const errorFields = getEarsErrorLogFields(error);
+          logEarsEvent(this.logger, {
+            ...logFields,
+            outcome: 'failure',
+            ...errorFields,
+            // every attempted revoke's id, not just the first failure's
+            earsRequestId: earsRequestIds.join(',') || errorFields.earsRequestId,
+          });
         }
       } catch (err) {
         this.logger.error(
