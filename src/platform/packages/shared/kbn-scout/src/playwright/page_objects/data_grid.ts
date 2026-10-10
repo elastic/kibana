@@ -90,6 +90,17 @@ export class DataGrid {
     return this.page.testSubj.locator(DOC_TABLE_TEST_SUBJ);
   }
 
+  /**
+   * EuiPopover moves focus into its panel shortly after opening. Escape only closes it once focus
+   * is inside, so wait for that before interacting with it.
+   */
+  private async waitForPopoverFocus(content: Locator) {
+    await content.waitFor({ state: 'visible' });
+    await expect
+      .poll(() => content.evaluate((element) => element.contains(document.activeElement)))
+      .toBe(true);
+  }
+
   /** EuiDataGrid opens the cell popover from the hover expand button, the TanStack grid on cell click. */
   private async isEuiDataGridCell(cell: Locator): Promise<boolean> {
     return cell.evaluate((element, selector) => element.matches(selector), ROW_CELL_SELECTOR);
@@ -480,9 +491,9 @@ export class DataGrid {
 
   async openComparisonSettings() {
     await this.page.testSubj.locator('unifiedDataTableComparisonSettings').click();
-    await this.page.testSubj.locator('unifiedDataTableComparisonSettingsMenu').waitFor({
-      state: 'visible',
-    });
+    await this.waitForPopoverFocus(
+      this.page.testSubj.locator('unifiedDataTableComparisonSettingsMenu')
+    );
   }
 
   async selectComparisonDiffMode(mode: 'basic' | 'chars' | 'words' | 'lines') {
@@ -541,6 +552,7 @@ export class DataGrid {
       .then(() => true)
       .catch(() => false);
     await this.page.keyboard.press('Escape');
+    await this.page.testSubj.locator('unifiedDataTableSelectionMenu').waitFor({ state: 'hidden' });
     return exists;
   }
 
@@ -668,7 +680,7 @@ export class DataGrid {
 
   async openSelectedRowsMenu() {
     await this.page.testSubj.click('unifiedDataTableSelectionBtn');
-    await this.page.testSubj.waitForSelector('unifiedDataTableSelectionMenu', { state: 'visible' });
+    await this.waitForPopoverFocus(this.page.testSubj.locator('unifiedDataTableSelectionMenu'));
   }
 
   async resetColumnWidth(field: string) {
