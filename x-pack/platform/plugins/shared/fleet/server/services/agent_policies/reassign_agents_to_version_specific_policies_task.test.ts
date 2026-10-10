@@ -45,7 +45,7 @@ describe('ReassignAgentsToVersionSpecificPoliciesTask', () => {
       undefined,
       {
         kuery:
-          '(policy_id:"policy-with-agents" AND agent.version:9.3.*) OR (policy_id:policy-with-agents* AND agent.version:9.3.* AND upgraded_at:*)',
+          '(policy_id:("policy-with-agents" or "policy-with-agents#sentinel") AND agent.version:9.3.*) OR ((policy_id:policy-with-agents#* and not policy_id:"policy-with-agents#sentinel") AND agent.version:9.3.* AND upgraded_at:*)',
         showInactive: false,
         spaceId: '*',
         _internalCrossSpace: true,

@@ -1,0 +1,73 @@
+{
+  "sha1": "20c3ec208ecabaf5dcbf52a0ca58d9881001e1af",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "74d0a788532183d-f65919aca15e852",
+      "title": "Sentinel policy version with a real Elastic Agent deploys the base and the #sentinel policy and moves the agent to the #sentinel policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fleet_real_agent/api/tests/sentinel_policy_version.spec.ts",
+        "line": 99,
+        "column": 25
+      }
+    },
+    {
+      "id": "74d0a788532183d-af568be529011b8",
+      "title": "Sentinel policy version with a real Elastic Agent keeps the agent on the #sentinel policy and up to date when the policy is updated",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fleet_real_agent/api/tests/sentinel_policy_version.spec.ts",
+        "line": 123,
+        "column": 16
+      }
+    },
+    {
+      "id": "74d0a788532183d-1735b621a4cbf32",
+      "title": "Sentinel policy version with a real Elastic Agent moves the agent back to the base policy when the sentinel version is disabled, and again when enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fleet_real_agent/api/tests/sentinel_policy_version.spec.ts",
+        "line": 163,
+        "column": 22
+      }
+    },
+    {
+      "id": "74d0a788532183d-27ba08e49cca0f2",
+      "title": "Sentinel policy version with a real Elastic Agent moves an agent enrolled later to the #sentinel policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fleet_real_agent/api/tests/sentinel_policy_version.spec.ts",
+        "line": 190,
+        "column": 19
+      }
+    },
+    {
+      "id": "74d0a788532183d-ca30a9fa4bd284b",
+      "title": "Sentinel policy version with a real Elastic Agent removes the base and the #sentinel policy docs when the policy is deleted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fleet_real_agent/api/tests/sentinel_policy_version.spec.ts",
+        "line": 201,
+        "column": 7
+      }
+    }
+  ]
+}
