@@ -34,6 +34,7 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/i18n'
   - '@kbn/management-plugin'
+  - '@kbn/scout'
   - '@kbn/share-plugin'
   - '@kbn/utility-types'
 tags:
@@ -47,6 +48,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
