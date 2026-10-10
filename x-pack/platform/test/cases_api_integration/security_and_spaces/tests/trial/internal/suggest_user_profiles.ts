@@ -184,8 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(profiles[0].user.username).to.contain('sec_only');
     });
 
-    // Failing: See https://github.com/elastic/kibana/issues/262485
-    describe.skip('user with both security and observability privileges', () => {
+    describe('user with both security and observability privileges', () => {
       const obsAndSecRole: Role = {
         name: 'obsAndSecRole',
         privileges: {
