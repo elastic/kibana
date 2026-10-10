@@ -135,6 +135,16 @@ export class DataGrid {
       .waitFor({ state: 'visible' });
   }
 
+  /**
+   * Whether Discover renders the classic EuiDataGrid (UnifiedDataTable) rather than the TanStack
+   * grid. Use it only where the two grids intentionally differ, e.g. in focus management.
+   */
+  async isEuiDataGrid(): Promise<boolean> {
+    const docTable = this.page.testSubj.locator(DOC_TABLE_TEST_SUBJ);
+    await docTable.waitFor({ state: 'visible' });
+    return (await docTable.locator(euiSelectors.dataGrid.ROOT_SELECTOR).count()) > 0;
+  }
+
   async expandCell({ rowIndex, columnId }: { rowIndex: number; columnId: string }) {
     const cell = this.getCell(rowIndex, columnId);
     const expansionPopover = this.page.testSubj.locator('euiDataGridExpansionPopover');
