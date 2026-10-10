@@ -29,7 +29,11 @@ const callGenerateEsql = async (params: Parameters<typeof generateEsql>[0]) => {
 };
 
 const nlToEsqlToolSchema = z.object({
-  query: z.string().describe('A natural language query to generate an ES|QL query from.'),
+  query: z
+    .string()
+    .describe(
+      'A natural language query to generate an ES|QL query from. Describe the data and the result to return, and whether it is over time (such as for a line chart) or a single value per group, not how to compute it: leave out ES|QL or PromQL syntax, functions, formulas, range selectors such as [5m] and steps, unless the user provided them. Set the time range with time_range rather than describing it here, unless disable_named_params is true: time_range only provides the ?_tstart and ?_tend parameters, so without them, describe the time range here.'
+    ),
   index: z
     .string()
     .optional()

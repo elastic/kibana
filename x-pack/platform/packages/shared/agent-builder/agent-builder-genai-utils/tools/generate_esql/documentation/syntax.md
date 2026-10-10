@@ -298,6 +298,12 @@ For example:
  | KEEP `1.field`
  ```
 
+Index patterns in `FROM` and `TS` are not identifiers. Never quote them with backticks, even if they contain `-`, `.` or `*`: the backticks become part of the pattern, which then matches no index.
+
+```esql
+ TS metrics-node_exporter.prometheus-*
+ ```
+
 ### String Literals
 
 String literals are enclosed in double quotes (`"`).
