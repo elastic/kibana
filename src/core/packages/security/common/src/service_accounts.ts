@@ -92,6 +92,12 @@ export interface ServiceAccountWorkloadCoordinates extends ServiceAccountWorkloa
 export interface ServiceAccountWorkloadRequestParams extends ServiceAccountWorkloadCoordinates {
   /** Reject before minting if the verified binding points to another account. */
   expectedServiceAccountId?: string;
+  /**
+   * The id of this run of the workload in the calling plugin's own records, such as a workflow
+   * execution id. Recorded on the audit events of the run, so they can be traced back to it. Held
+   * to the same length limit as a workload ID.
+   */
+  executionId?: string;
 }
 
 /**

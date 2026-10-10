@@ -29,6 +29,12 @@ To ensure that a record of every operation is persisted even in case of an unexp
 | `user_logout` | `unknown` | User is logging out. |
 | `session_cleanup` | `unknown` | Removing invalid or expired session. |
 | `access_agreement_acknowledged` | n/a | User has acknowledged the access agreement. |
+| `service_account_assume` {applies_to}`stack: preview 9.6+` | `success` | Workload [plugin/type/id] is executing as service account [id=x]. Every event the workload causes while it runs shares this event's `trace.id`. |
+| | `failure` | Workload [plugin/type/id] failed to execute as service account [id=x]. Logged when the workload starts, or when it loses its credential while it runs. The account was deleted, or recreated after the workload was bound, its credential was refused, the binding failed integrity verification, or the workload was bound to a different account or unbound. A temporary failure, such as an unavailable {{es}} cluster, is not logged. The account is omitted when the binding failed integrity verification. |
+
+::::{note}
+For `service_account_assume`, the service account is the actor: `user.id` and `user.name` are the account id, and `user.roles` is omitted. A workload that runs often writes one event per run. To drop the successful ones, add `{ actions: ['service_account_assume'], outcomes: ['success'] }` to `xpack.security.audit.ignore_filters`.
+::::
 
 ### Category: database
 #### Type: creation
@@ -398,15 +404,15 @@ Audit logs are written in JSON using the [Elastic Common Schema (ECS)](ecs://ref
 | --- | --- |
 | `event.action` | The action captured by the event.<br>Refer to [Audit events](./kibana-audit-events.md#xpack-security-ecs-audit-logging) for a table of possible actions. |
 | `event.category` | High level category associated with the event.<br>This field is closely related to `event.type`, which is used as a subcategory.<br>Possible values:`database`,`web`,`authentication`,`iam` |
-| `event.type` | Subcategory associated with the event.<br>This field can be used along with the `event.category` field to enable filtering events down to a level appropriate for single visualization.<br>Possible values:`creation`,`access`,`change`,`deletion`,`user` |
+| `event.type` | Subcategory associated with the event.<br>This field can be used along with the `event.category` field to enable filtering events down to a level appropriate for single visualization.<br>Possible values:`creation`,`access`,`change`,`deletion`,`start`,`user` |
 | `event.outcome` | Denotes whether the event represents a success or failure:<br><br>* Any actions that the user is not authorized to perform are logged with outcome:  `failure`<br>* Authorized read operations are only logged after successfully fetching the data from {{es}} with outcome: `success`<br>* Authorized create, update, or delete operations are logged before attempting the operation in {{es}} with outcome: `unknown`, unless the event's own description says otherwise (for example `service_account_create` is logged after the operation)<br><br>Possible values: `success`, `failure`, `unknown`<br> |
 
 ### User fields
 
 | **Field** | **Description** |
 | --- | --- |
-| `user.id` | Unique identifier of the user across sessions (See [user profiles](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/user-profiles.md)). |
-| `user.name` | Login name of the user.<br>Example: `jdoe` |
+| `user.id` | Unique identifier of the user across sessions (See [user profiles](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/user-profiles.md)).<br>For a service account, the account id. |
+| `user.name` | Login name of the user.<br>For a service account, the account id.<br>Example: `jdoe` |
 | `user.email` | Email address of the user at the time of the event, when provided by the identity source. |
 | `user.full_name` | Full name of the user at the time of the event, when provided by the identity source. |
 | `user.roles[]` | Set of user roles at the time of the event.<br>Example: `[kibana_admin, reporting_user]` |
@@ -422,9 +428,10 @@ Audit logs are written in JSON using the [Elastic Common Schema (ECS)](ecs://ref
 | `kibana.session_id` | ID of the user session associated with the event.<br>Each login attempt results in a unique session id. |
 | `kibana.saved_object.type` | Type of saved object associated with the event.<br>Example: `dashboard` |
 | `kibana.saved_object.id` | ID of the saved object associated with the event. |
-| `kibana.workload.plugin_id` | ID of the plugin that owns the workload a service account is bound to as part of the event.<br>Example: `workflowsManagement` |
+| `kibana.workload.plugin_id` | ID of the plugin that owns the workload a service account is bound to, or is executing for, as part of the event.<br>Example: `workflowsManagement` |
 | `kibana.workload.type` | Type of the workload.<br>Example: `workflow` |
 | `kibana.workload.id` | ID of the workload. |
+| `kibana.workload.execution_id` | ID of the run of the workload, when the plugin executing it supplied one. Recorded on `service_account_assume` events.<br>Example: the workflow execution ID |
 | `kibana.authentication_provider` | Name of the authentication provider associated with the event.<br>Example: `my-saml-provider` |
 | `kibana.authentication_type` | Type of the authentication provider associated with the event.<br>Example: `saml` |
 | `kibana.authentication_realm` | Name of the Elasticsearch realm that has authenticated the user.<br>Example: `native` |

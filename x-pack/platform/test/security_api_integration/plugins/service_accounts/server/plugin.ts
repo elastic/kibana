@@ -133,10 +133,13 @@ export class ServiceAccountsTestPlugin
               [
                 schema.literal('authenticate'),
                 schema.literal('read_role'),
+                schema.literal('get_saved_object'),
                 schema.literal('create_rule'),
               ],
               { defaultValue: 'authenticate' }
             ),
+            // The dashboard `get_saved_object` reads as the service account.
+            savedObjectId: schema.maybe(schema.string({ minLength: 1, maxLength: 128 })),
             rule: schema.maybe(schema.object({}, { unknowns: 'allow' })),
             revoke: schema.oneOf(
               [
@@ -160,7 +163,8 @@ export class ServiceAccountsTestPlugin
         const [start] = await core.getStartServices();
         const api = start.security.serviceAccounts;
         const workload = { workloadType: 'job', workloadId: request.params.workloadId };
-        const { operation, serviceAccountId, waitMs, action, revoke, rule } = request.body;
+        const { operation, serviceAccountId, waitMs, action, revoke, savedObjectId, rule } =
+          request.body;
         try {
           if (operation === 'bind') {
             if (!serviceAccountId) return response.badRequest();
@@ -174,6 +178,19 @@ export class ServiceAccountsTestPlugin
           const result = await api.withScopedRequestForWorkload(
             { ...workload, spaceId: request.spaceId ?? 'default' },
             async (fakeRequest) => {
+              if (action === 'get_saved_object') {
+                if (!savedObjectId) throw Boom.badRequest();
+                try {
+                  await start.savedObjects
+                    .getScopedClient(fakeRequest)
+                    .get('dashboard', savedObjectId);
+                  return { savedObjectStatus: 200 };
+                } catch (error) {
+                  return {
+                    savedObjectStatus: Boom.isBoom(error) ? error.output.statusCode : 500,
+                  };
+                }
+              }
               // A nested caller: the workload calls a Kibana API as the account through the self
               // client, and that API mints the workload's own credential.
               if (action === 'create_rule') {

@@ -995,6 +995,117 @@ describe('#serviceAccountAuditEvent', () => {
     `);
   });
 
+  test('creates a `success` assume event with the account as the actor', () => {
+    expect(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.ASSUME,
+        serviceAccount: { id: 'kibana/nightshift-relay' },
+        workload: { plugin_id: 'workflowsManagement', type: 'workflow', id: 'WORKFLOW_ID' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "service_account_assume",
+          "category": Array [
+            "authentication",
+          ],
+          "outcome": "success",
+          "type": Array [
+            "start",
+          ],
+        },
+        "kibana": Object {
+          "workload": Object {
+            "id": "WORKFLOW_ID",
+            "plugin_id": "workflowsManagement",
+            "type": "workflow",
+          },
+        },
+        "message": "Workload [workflowsManagement/workflow/WORKFLOW_ID] is executing as service account [id=kibana/nightshift-relay]",
+        "user": Object {
+          "id": "kibana/nightshift-relay",
+          "name": "kibana/nightshift-relay",
+        },
+      }
+    `);
+  });
+
+  test('creates a `failure` assume event carrying the space when logged without a request', () => {
+    expect(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.ASSUME,
+        serviceAccount: { id: 'kibana/nightshift-relay' },
+        workload: { plugin_id: 'workflowsManagement', type: 'workflow', id: 'WORKFLOW_ID' },
+        spaceId: 'marketing',
+        error: new Error('ERROR_MESSAGE'),
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": Object {
+          "code": "Error",
+          "message": "ERROR_MESSAGE",
+        },
+        "event": Object {
+          "action": "service_account_assume",
+          "category": Array [
+            "authentication",
+          ],
+          "outcome": "failure",
+          "type": Array [
+            "start",
+          ],
+        },
+        "kibana": Object {
+          "space_id": "marketing",
+          "workload": Object {
+            "id": "WORKFLOW_ID",
+            "plugin_id": "workflowsManagement",
+            "type": "workflow",
+          },
+        },
+        "message": "Workload [workflowsManagement/workflow/WORKFLOW_ID] failed to execute as service account [id=kibana/nightshift-relay]",
+        "user": Object {
+          "id": "kibana/nightshift-relay",
+          "name": "kibana/nightshift-relay",
+        },
+      }
+    `);
+  });
+
+  test('creates a `failure` assume event without `user` when the account is unknown', () => {
+    const event = serviceAccountAuditEvent({
+      action: ServiceAccountAuditAction.ASSUME,
+      workload: { plugin_id: 'workflowsManagement', type: 'workflow', id: 'WORKFLOW_ID' },
+      error: new Error('ERROR_MESSAGE'),
+    });
+
+    expect(event).not.toHaveProperty('user');
+    expect(event.kibana).not.toHaveProperty('space_id');
+    expect(event.message).toBe(
+      'Workload [workflowsManagement/workflow/WORKFLOW_ID] failed to execute as its service account'
+    );
+  });
+
+  test('names the run of the workload when it has an execution id', () => {
+    const workload = {
+      plugin_id: 'workflowsManagement',
+      type: 'workflow',
+      id: 'WORKFLOW_ID',
+      execution_id: 'EXECUTION_ID',
+    };
+    const event = serviceAccountAuditEvent({
+      action: ServiceAccountAuditAction.ASSUME,
+      serviceAccount: { id: 'kibana/nightshift-relay' },
+      workload,
+    });
+
+    expect(event.kibana).toEqual({ workload });
+    expect(event.message).toBe(
+      'Workload [workflowsManagement/workflow/WORKFLOW_ID] [executionId=EXECUTION_ID] is executing as service account [id=kibana/nightshift-relay]'
+    );
+  });
+
   test('creates an `unknown` delete event', () => {
     expect(
       serviceAccountAuditEvent({

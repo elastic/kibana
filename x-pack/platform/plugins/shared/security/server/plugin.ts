@@ -347,6 +347,8 @@ export class SecurityPlugin
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request),
       getSID: (request) => this.getSession().getSID(request),
       getCurrentUser,
+      getFakeRequestPrincipal: (request) =>
+        this.serviceAccountsStart?.backend.getFakeRequestPrincipal(request) ?? null,
       recordAuditLoggingUsage: () => this.getFeatureUsageService().recordAuditLoggingUsage(),
     });
 

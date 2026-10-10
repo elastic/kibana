@@ -489,6 +489,169 @@ describe('#asScoped', () => {
     audit.stop();
   });
 
+  describe('service accounts', () => {
+    const SERVICE_ACCOUNT_ID = 'kibana/nightshift-relay';
+    const serviceAccountPrincipal = {
+      type: 'service_account' as const,
+      serviceAccountId: SERVICE_ACCOUNT_ID,
+      variant: 'stack' as const,
+    };
+
+    const setupWith = (
+      overrides: Partial<Parameters<AuditService['setup']>[0]> = {}
+    ): { audit: AuditService; auditSetup: ReturnType<AuditService['setup']> } => {
+      const audit = new AuditService(logger);
+      const auditSetup = audit.setup({
+        license,
+        config,
+        logging,
+        status,
+        http,
+        getCurrentUser: () => null,
+        getSpaceId: (req) => req.spaceId,
+        getSID: () => Promise.resolve(undefined),
+        recordAuditLoggingUsage,
+        ...overrides,
+      });
+      return { audit, auditSetup };
+    };
+
+    const serviceAccountFakeRequest = () =>
+      kibanaRequestFactory({
+        headers: { authorization: 'Bearer essu_token' },
+        spaceId: asSpaceId('my-space'),
+      } as FakeRawRequest);
+
+    it('names the service account a fake request runs as, without roles', async () => {
+      const getFakeRequestPrincipal = jest.fn().mockReturnValue(serviceAccountPrincipal);
+      const { audit, auditSetup } = setupWith({ getFakeRequestPrincipal });
+      const request = serviceAccountFakeRequest();
+
+      await auditSetup.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+
+      expect(getFakeRequestPrincipal).toHaveBeenCalledWith(request);
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'MESSAGE',
+        expect.objectContaining({
+          user: { id: SERVICE_ACCOUNT_ID, name: SERVICE_ACCOUNT_ID },
+          kibana: { space_id: 'my-space', session_id: undefined },
+          trace: { id: request.id },
+        })
+      );
+      audit.stop();
+    });
+
+    it('keeps `user.target` from the event on a service account fake request', async () => {
+      const { audit, auditSetup } = setupWith({
+        getFakeRequestPrincipal: () => serviceAccountPrincipal,
+      });
+
+      await auditSetup.asScoped(serviceAccountFakeRequest()).log({
+        message: 'MESSAGE',
+        event: { action: 'ACTION' },
+        user: { name: 'DISCARDED', target: { id: 'kibana/other-account' } },
+      });
+
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'MESSAGE',
+        expect.objectContaining({
+          user: {
+            id: SERVICE_ACCOUNT_ID,
+            name: SERVICE_ACCOUNT_ID,
+            target: { id: 'kibana/other-account' },
+          },
+        })
+      );
+      audit.stop();
+    });
+
+    it('keeps the event user on a fake request the service accounts backend did not mint', async () => {
+      const { audit, auditSetup } = setupWith({ getFakeRequestPrincipal: () => null });
+
+      await auditSetup.asScoped(serviceAccountFakeRequest()).log({
+        message: 'MESSAGE',
+        event: { action: 'ACTION' },
+        user: { name: 'EVENT_USER' },
+      });
+
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'MESSAGE',
+        expect.objectContaining({ user: { name: 'EVENT_USER' } })
+      );
+      audit.stop();
+    });
+
+    it('uses the service account id as `user.id` for a request authenticated with a service account token', async () => {
+      const getFakeRequestPrincipal = jest.fn();
+      const { audit, auditSetup } = setupWith({
+        getFakeRequestPrincipal,
+        getCurrentUser: () =>
+          ({
+            username: SERVICE_ACCOUNT_ID,
+            roles: [],
+            authentication_provider: { type: 'http', name: '__http__' },
+            authentication_realm: { type: '_service_account', name: '_service_account' },
+          } as never),
+      });
+
+      await auditSetup
+        .asScoped(httpServerMock.createKibanaRequest())
+        .log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'MESSAGE',
+        expect.objectContaining({
+          user: { id: SERVICE_ACCOUNT_ID, name: SERVICE_ACCOUNT_ID, roles: [] },
+        })
+      );
+      expect(getFakeRequestPrincipal).not.toHaveBeenCalled();
+      audit.stop();
+    });
+
+    it('leaves a user with a profile unchanged, without asking about fake requests', async () => {
+      const getFakeRequestPrincipal = jest.fn();
+      const { audit, auditSetup } = setupWith({ getFakeRequestPrincipal, getCurrentUser });
+
+      await auditSetup
+        .asScoped(httpServerMock.createKibanaRequest())
+        .log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'MESSAGE',
+        expect.objectContaining({ user: { id: 'uid', name: 'jdoe', roles: ['admin'] } })
+      );
+      expect(getFakeRequestPrincipal).not.toHaveBeenCalled();
+      audit.stop();
+    });
+
+    // `log` is not awaited by its callers, so a workload can release its fake request while the
+    // session lookup is still pending.
+    it('names the service account even when the fake request is released before the event is written', async () => {
+      let resolveSID: (sid: string | undefined) => void = () => {};
+      const getFakeRequestPrincipal = jest.fn().mockReturnValue(serviceAccountPrincipal);
+      const { audit, auditSetup } = setupWith({
+        getFakeRequestPrincipal,
+        getSID: () =>
+          new Promise((resolve) => {
+            resolveSID = resolve;
+          }),
+      });
+
+      const logged = auditSetup
+        .asScoped(serviceAccountFakeRequest())
+        .log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+      getFakeRequestPrincipal.mockReturnValue(null);
+      resolveSID(undefined);
+      await logged;
+
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'MESSAGE',
+        expect.objectContaining({ user: { id: SERVICE_ACCOUNT_ID, name: SERVICE_ACCOUNT_ID } })
+      );
+      audit.stop();
+    });
+  });
+
   it('does not log to audit logger if event matches ignore filter', async () => {
     const audit = new AuditService(logger);
     const auditSetup = audit.setup({
