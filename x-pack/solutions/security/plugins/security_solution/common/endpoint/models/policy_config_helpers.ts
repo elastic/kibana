@@ -8,7 +8,11 @@
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS } from '../service/policy/custom_yara_signatures';
-import { DefaultPolicyNotificationMessage } from './policy_config';
+import {
+  DefaultPolicyNotificationMessage,
+  DefaultPolicyRuleNotificationMessage,
+  DefaultPolicyDeviceNotificationMessage,
+} from './policy_config';
 import type { PolicyConfig, UIPolicyConfig } from '../types';
 import {
   PolicyOperatingSystem,
@@ -31,28 +35,34 @@ const allOsValues = [
 ];
 
 const getPolicyPopupReference = (): Array<{
-  keyPath: string;
+  branchPath: string;
   osList: PolicyOperatingSystem[];
+  defaultMessage: string;
 }> => [
   {
-    keyPath: 'popup.malware.message',
+    branchPath: 'popup.malware',
     osList: [...allOsValues],
+    defaultMessage: DefaultPolicyNotificationMessage,
   },
   {
-    keyPath: 'popup.memory_protection.message',
+    branchPath: 'popup.memory_protection',
     osList: [...allOsValues],
+    defaultMessage: DefaultPolicyRuleNotificationMessage,
   },
   {
-    keyPath: 'popup.behavior_protection.message',
+    branchPath: 'popup.behavior_protection',
     osList: [...allOsValues],
+    defaultMessage: DefaultPolicyRuleNotificationMessage,
   },
   {
-    keyPath: 'popup.ransomware.message',
+    branchPath: 'popup.ransomware',
     osList: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac],
+    defaultMessage: DefaultPolicyNotificationMessage,
   },
   {
-    keyPath: 'popup.device_control.message',
+    branchPath: 'popup.device_control',
     osList: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac],
+    defaultMessage: DefaultPolicyDeviceNotificationMessage,
   },
 ];
 
@@ -298,11 +308,16 @@ export function isBillablePolicy(policy: PolicyConfig) {
 export const checkIfPopupMessagesContainCustomNotifications = (policy: PolicyConfig): boolean => {
   const popupRefs = getPolicyPopupReference();
 
-  return popupRefs.some(({ keyPath, osList }) => {
+  return popupRefs.some(({ branchPath, osList, defaultMessage }) => {
     return osList.some((osValue) => {
-      const fullKeyPathForOs = `${osValue}.${keyPath}`;
-      const currentValue = get(policy, fullKeyPathForOs);
-      return currentValue !== '' && currentValue !== DefaultPolicyNotificationMessage;
+      const currentValue = get(policy, `${osValue}.${branchPath}.message`);
+      // Legacy {filename} default: the startup migration wrote it into every key of migrated policies.
+      return (
+        currentValue != null &&
+        currentValue !== '' &&
+        currentValue !== defaultMessage &&
+        currentValue !== DefaultPolicyNotificationMessage
+      );
     });
   });
 };
@@ -331,13 +346,17 @@ export const getDeviceControlNotificationConflicts = (
 };
 
 export const resetCustomNotifications = (
-  customNotification = DefaultPolicyNotificationMessage
+  policy: PolicyConfig,
+  customNotification = ''
 ): Partial<PolicyConfig> => {
   const popupRefs = getPolicyPopupReference();
 
-  return popupRefs.reduce((acc, { keyPath, osList }) => {
+  return popupRefs.reduce((acc, { branchPath, osList }) => {
     osList.forEach((osValue) => {
-      set(acc, `${osValue}.${keyPath}`, customNotification);
+      // A stripped branch (e.g. device_control on Essentials) must not be recreated as a partial stub.
+      if (get(policy, `${osValue}.${branchPath}`) !== undefined) {
+        set(acc, `${osValue}.${branchPath}.message`, customNotification);
+      }
     });
     return acc;
   }, {});

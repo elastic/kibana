@@ -9,6 +9,7 @@ import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys'
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { policyFactory } from '../../../../../../common/endpoint/models/policy_config';
+import { removeDeviceControl } from '../../../../../../common/endpoint/models/policy_config_helpers';
 import {
   ProtectionModes,
   DeviceControlAccessLevel,
@@ -181,5 +182,43 @@ describe('buildPolicyChangeAssessment', () => {
 
     expect(assessment.changes[0]?.eligibility).toEqual({ eligible: true });
     expect(assessment.globalBlockers).toEqual([{ reason: 'managed_policy_not_writable' }]);
+  });
+
+  it('does not produce endpoint_custom_notification_disabled for a stripped Essentials policy with default messages', () => {
+    // Simulate an Essentials stored policy: no device_control, all popup messages at defaults (empty)
+    const stored = removeDeviceControl(policyFactory());
+
+    const assessment = buildPolicyChangeAssessment(
+      createPolicy(stored),
+      [{ op: 'set_field', path: 'windows.malware.mode', value: ProtectionModes.detect }],
+      {
+        ...capabilities(),
+        endpointCustomNotification: false,
+      }
+    );
+
+    expect(assessment.changes[0]?.eligibility).toEqual({ eligible: true });
+    const customNotificationBlocker = assessment.globalBlockers.find(
+      (b) => b.reason === 'endpoint_custom_notification_disabled'
+    );
+    expect(customNotificationBlocker).toBeUndefined();
+  });
+
+  it('still yields endpoint_custom_notification_disabled when a real custom message is present', () => {
+    const stored = removeDeviceControl(policyFactory());
+    stored.windows.popup.malware.message = 'Block it!';
+
+    const assessment = buildPolicyChangeAssessment(
+      createPolicy(stored),
+      [{ op: 'set_field', path: 'windows.malware.mode', value: ProtectionModes.detect }],
+      {
+        ...capabilities(),
+        endpointCustomNotification: false,
+      }
+    );
+
+    expect(assessment.globalBlockers).toEqual(
+      expect.arrayContaining([{ reason: 'endpoint_custom_notification_disabled' }])
+    );
   });
 });
