@@ -190,6 +190,14 @@ const getCredentialConflict = (id: string): SavedObjectErrorResult => ({
   ).output.payload,
 });
 
+const getWriteErrorResult = (id: string, error: Error): SavedObjectErrorResult => ({
+  id,
+  type: 'task',
+  error: SavedObjectsErrorHelpers.isSavedObjectsClientError(error)
+    ? error.output.payload
+    : { error: 'Internal Server Error', message: error.message, statusCode: 500 },
+});
+
 /**
  * Wraps an elasticsearch connection and provides a task manager-specific
  * interface into the index.
@@ -1030,8 +1038,9 @@ export class TaskStore {
     const { invalidationTargets } = regenerateResult;
 
     // Docs rejected during local validation never reach `bulkUpdate`, so they get no entry in the
-    // bulk response; track them here so their regenerated keys are still invalidated below.
-    const omittedDocIds: string[] = [];
+    // bulk response; give them an error result so they're reported, and their regenerated keys
+    // invalidated, like any other task that fails to update.
+    const omittedDocResults: SavedObjectErrorResult[] = [];
     const newDocs = docs.reduce(
       (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
         try {
@@ -1077,7 +1086,11 @@ export class TaskStore {
           this.logger.error(
             `[TaskStore] An error occured. Task ${doc.id} will not be updated. Error: ${e.message}`
           );
-          omittedDocIds.push(doc.id);
+          omittedDocResults.push({
+            id: doc.id,
+            type: 'task',
+            error: { error: 'Bad Request', message: e.message, statusCode: 400 },
+          });
         }
         return acc;
       },
@@ -1095,41 +1108,45 @@ export class TaskStore {
       (object) => !plainRepositoryObjects.includes(object)
     );
 
-    let updatedSavedObjects: Awaited<
-      ReturnType<typeof soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>>
-    >['saved_objects'];
-    try {
-      const [soClientResult, plainRepositoryResult] = await Promise.all([
-        soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>(soClientObjects, {
-          refresh: false,
-        }),
-        plainRepositoryObjects.length
-          ? this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
-              plainRepositoryObjects,
-              { refresh: false }
-            )
-          : { saved_objects: [] },
-      ]);
-      updatedSavedObjects = [
-        ...soClientResult.saved_objects,
-        ...plainRepositoryResult.saved_objects,
-      ];
-    } catch (e) {
+    const [soClientWrite, plainRepositoryWrite] = await Promise.allSettled([
+      soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>(soClientObjects, {
+        refresh: false,
+      }),
+      plainRepositoryObjects.length
+        ? this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
+            plainRepositoryObjects,
+            { refresh: false }
+          )
+        : { saved_objects: [] },
+    ]);
+    const writes = [
+      { objects: soClientObjects, write: soClientWrite },
+      { objects: plainRepositoryObjects, write: plainRepositoryWrite },
+    ];
+
+    const writeErrors = writes.flatMap(({ write }) =>
+      write.status === 'rejected' ? [write.reason] : []
+    );
+    writeErrors.forEach((e) => this.errors$.next(e));
+    const hasPersistedWrite = writes.some(
+      ({ objects, write }) => objects.length > 0 && write.status === 'fulfilled'
+    );
+    if (writeErrors.length && !hasPersistedWrite) {
       await this.invalidateUnpersistedApiKeys([...apiKeySOFieldsMap.values()]);
-      this.errors$.next(e);
-      throw e;
+      throw writeErrors[0];
     }
+
+    // A failed write fails only its own tasks, so the other write's results are kept.
+    const updatedSavedObjects = [
+      ...writes.flatMap(({ objects, write }) =>
+        write.status === 'fulfilled'
+          ? write.value.saved_objects
+          : objects.map(({ id }) => getWriteErrorResult(id, write.reason))
+      ),
+      ...omittedDocResults,
+    ];
 
     const allInvalidationTargets: InvalidationTarget[] = [];
-
-    for (const omittedDocId of omittedDocIds) {
-      // Same as the error-result branch below: the regenerated key never made it onto the task,
-      // but an omitted doc has no bulk response entry, so it has to be queued explicitly.
-      const granted = apiKeySOFieldsMap.get(omittedDocId);
-      if (granted) {
-        allInvalidationTargets.push(...this.apiKeyStrategy.getApiKeyIdsForInvalidation(granted));
-      }
-    }
 
     const updates = updatedSavedObjects.map((updatedSavedObject) => {
       if (isSavedObjectErrorResult(updatedSavedObject)) {
