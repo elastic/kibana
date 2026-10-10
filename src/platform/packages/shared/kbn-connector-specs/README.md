@@ -562,6 +562,95 @@ import type {
 } from '@kbn/connector-specs';
 ```
 
+## Contract Tests
+
+`createContractContext` (in `src/test`) runs actions offline against the vendor's OpenAPI spec, using [`@kbn/connector-contract-mock`](../kbn-connector-contract-mock/README.md). The handler gets a real axios client, authenticated by the connector's own auth type, whose requests are validated and answered by the mock:
+
+```typescript
+import { createContractContext } from '../../test/create_contract_context';
+
+const { runAction, mock } = await createContractContext({
+  connector: FirecrawlConnector,
+  specs: [firecrawlOpenApiSpec],
+});
+
+await runAction('scrape', { url: 'https://example.com' });
+expect(mock.calls.flatMap(({ requestViolations }) => requestViolations)).toEqual([]);
+```
+
+Inputs are parsed with the action's schema first. Auth secrets the test leaves out get the auth type's defaults, or placeholders its schema accepts. OAuth auth types get a fixed access token.
+
+## Vendor API artifacts
+
+Each connector can have a `vendor_api/` folder next to its spec, recording the vendor API it depends on ([#295685](https://github.com/elastic/kibana/issues/295685)). `recordActions` (in `src/test/vendor_api`) produces most of it: it runs every action against the contract mock, with inputs generated from the action's schema (one without and one with optional properties), and records the vendor operations each one calls.
+
+```sh
+# First run: name each vendor spec; YAML or JSON, external $refs are bundled
+node scripts/connector_vendor_api --connector datadog --source v1=https://… --source v2=https://…
+# After changing the connector: record offline against the committed snapshots
+node scripts/connector_vendor_api --connector datadog
+# Pick up vendor changes: fetch every source in manifest.json again
+node scripts/connector_vendor_api --connector datadog --refresh
+# CI: write nothing, fail if anything would change
+node scripts/connector_vendor_api --connector datadog --check
+```
+
+The folder holds:
+
+- `manifest.json`: the sources and the operations each action calls.
+- `snapshots/<source>.openapi.json`: each vendor spec, converted to OpenAPI 3 if needed and cut down to the recorded operations and what they reference. Descriptions, examples and `x-` extensions are dropped so that wording changes don't produce diffs. Snapshots are the vendor's spec as published: the overlay is not applied to them.
+- `overlay.yaml` (optional): an [OpenAPI Overlay](https://spec.openapis.org/overlay/latest.html) correcting the vendor specs, applied whenever they are loaded, including while recording. An action that no longer matches anything is reported, as the vendor may have fixed the spec.
+- `fixtures.json` (optional): see below.
+
+The script fails when a `readOnly` action changes state, a response override breaks the spec, or a request matches no operation and isn't listed in `unmatched`. Requests that break the spec and handler errors are reported as warnings.
+
+### `manifest.json`
+
+```json
+{
+  "sources": {
+    "v1": {
+      "format": "openapi",
+      "url": "https://example.com/openapi.json",
+      "apiVersion": "1.0",
+      "fetchedAt": "2026-10-07T00:00:00Z"
+    }
+  },
+  "operations": {
+    "search": [{ "source": "v1", "method": "get", "path": "/search" }]
+  },
+  "unmatched": {
+    "mute": [{ "method": "post", "path": "/v1/mute", "reason": "Missing from the spec; see #123" }]
+  }
+}
+```
+
+- `sources`: one entry per vendor spec. `format` is what the vendor publishes (`openapi`, `swagger` or `discovery`). `apiVersion` is the spec's `info.version`. `fetchedAt` only changes when the snapshot changes.
+- `operations`: per action, the operations its runs matched, by source, lowercase method and path template, sorted.
+- `unmatched`: per action, requests that match no operation in any source, with the reason that's expected. A request that matches nothing and isn't listed fails the script.
+
+Keys are sorted at every depth (`serializeManifest`), so regenerating without vendor changes produces no diff. `vendorApiManifestSchema` is the schema.
+
+### `fixtures.json` (optional)
+
+```json
+{
+  "getCard": {
+    "input": { "cardId": "5f0c1e2d3b4a596877665544" },
+    "readOnly": true,
+    "responses": [{ "method": "GET", "path": "/cards/{id}", "status": 200, "body": { "id": "5f0c1e2d3b4a596877665544" } }]
+  }
+}
+```
+
+Per action:
+
+- `input`: merged into each generated input, for values the schema can't describe, such as cross-field rules or IDs with a vendor format.
+- `readOnly`: the action must not change vendor state. Recording reports any request other than `GET`, `HEAD` or `OPTIONS`.
+- `responses`: served by the mock for the action's runs instead of sampled responses, so handlers that branch on a response take the intended path. A `source` restricts an override to one spec. Overrides that break the spec, or name an operation it lacks, are reported.
+
+`vendorApiFixturesSchema` is the schema.
+
 ## Related Documentation
 
 - [Connector Spec](./src/connector_spec.ts) - Full API reference
