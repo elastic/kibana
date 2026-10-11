@@ -54,6 +54,7 @@ const docLinksMock = {
       dataSources: '',
       datasets: '',
       datasetSettings: '',
+      datasetMappings: '',
       authentication: '',
       staticCredentials: '',
       federatedIdentity: '',
