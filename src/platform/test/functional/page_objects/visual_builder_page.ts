@@ -264,11 +264,10 @@ export class VisualBuilderPageObject extends FtrService {
   public async clearMarkdown() {
     await this.monacoEditor.clearCodeEditorValueByCssSelector('.tvbMarkdownEditor__editor');
     await this.retry.waitForWithTimeout('text area is cleared', 20000, async () => {
-      const linesContainer = await this.find.byCssSelector(
-        '.tvbMarkdownEditor__editor .view-lines'
+      return (
+        (await this.monacoEditor.getCodeEditorValueByCssSelector('.tvbMarkdownEditor__editor')) ===
+        ''
       );
-      const lines = await linesContainer.findAllByClassName('mtk1');
-      return lines.length === 0;
     });
   }
 

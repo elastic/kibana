@@ -75,14 +75,19 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async navigateToAppFromAppsMenu() {
+    await this.appsMenu.clickLink('Dashboard', { category: 'kibana' });
     await this.retry.try(async () => {
-      await this.appsMenu.clickLink('Dashboard', { category: 'kibana' });
-      await this.header.waitUntilLoadingHasFinished();
       const currentUrl = await this.browser.getCurrentUrl();
       if (!currentUrl.includes('app/dashboard')) {
         throw new Error(`Not in dashboard application after clicking 'Dashboard' in apps menu`);
       }
+      const destination = await this.testSubjects.waitForFirst([
+        'dshDashboardViewport',
+        'dashboardLandingPage',
+      ]);
+      if (!destination) throw new Error('Dashboard destination did not appear');
     });
+    await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
   public async expectAppStateRemovedFromURL() {
@@ -95,14 +100,18 @@ export class DashboardPageObject extends FtrService {
   public async preserveCrossAppState() {
     const url = await this.browser.getCurrentUrl();
     await this.browser.get(url, false);
-    await this.header.waitUntilLoadingHasFinished();
+    const destination = await this.testSubjects.waitForFirst(
+      ['dshDashboardViewport', 'dashboardLandingPage'],
+      { timeout: this.config.get('timeouts.find') * 10 }
+    );
+    if (!destination) throw new Error('Dashboard did not load after reloading');
+    await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
   public async clickFullScreenMode() {
-    await this.header.waitUntilLoadingHasFinished();
     this.log.debug(`clickFullScreenMode`);
-    await this.appMenu.clickMenuItem('dashboardFullScreenMode');
-    await this.testSubjects.exists('exitFullScreenModeButton');
+    await this.appMenu.clickMenuItem('dashboardFullScreenMode', { waitForEnabled: true });
+    await this.testSubjects.existOrFail('exitFullScreenModeButton');
     await this.waitForRenderComplete();
   }
 
@@ -316,9 +325,11 @@ export class DashboardPageObject extends FtrService {
     }
     // wait until the count of dashboard panels equals the count of drag handles
     await this.retry.waitFor('in edit mode', async () => {
-      const panels = await this.find.allByCssSelector('[data-test-subj="embeddablePanel"]');
+      if (!(await this.getIsInEditMode())) return false;
+      const panels = await this.find.allByCssSelector('[data-test-subj="embeddablePanel"]', 0);
       const dragHandles = await this.find.allByCssSelector(
-        '[data-test-subj="embeddablePanelDragHandle"]'
+        '[data-test-subj="embeddablePanelDragHandle"]',
+        0
       );
       return panels.length === dragHandles.length;
     });
@@ -776,16 +787,18 @@ export class DashboardPageObject extends FtrService {
     await this.gotoDashboardLandingPage();
 
     await this.listingTable.searchForItemWithName(dashboardName, { escape: false });
+    if (openInEditMode) {
+      await this.listingTable.clickActionButton('edit-action');
+    } else {
+      await this.listingTable.clickItemLink('dashboard', dashboardName);
+    }
     await this.retry.try(async () => {
-      if (openInEditMode) {
-        await this.listingTable.clickActionButton('edit-action');
-      } else {
-        await this.listingTable.clickItemLink('dashboard', dashboardName);
-      }
-      await this.header.waitUntilLoadingHasFinished();
-      // check Dashboard landing page is not present
       await this.testSubjects.missingOrFail('dashboardLandingPage', { timeout: 10000 });
+      await this.testSubjects.existOrFail('dshDashboardViewport', { timeout: 10000 });
+      const viewMode = await this.getViewMode();
+      if (openInEditMode) expect(viewMode).to.be('edit');
     });
+    await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
   public async loadSavedDashboard(dashboardName: string) {
@@ -796,10 +809,12 @@ export class DashboardPageObject extends FtrService {
     await this._loadDashboard(dashboardName, true);
   }
 
-  public async getPanelTitles() {
+  public async getPanelTitles(timeout?: number): Promise<string[]> {
     this.log.debug('in getPanelTitles');
+    await this.testSubjects.existOrFail('dshDashboardViewport');
     const titleObjects = await this.find.allByCssSelector(
-      '[data-test-subj="embeddablePanelTitle"]'
+      '[data-test-subj="embeddablePanelTitle"]',
+      timeout
     );
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
   }
@@ -856,7 +871,8 @@ export class DashboardPageObject extends FtrService {
 
   public async getPanelCount() {
     this.log.debug('getPanelCount');
-    const panels = await this.testSubjects.findAll('embeddablePanel');
+    await this.testSubjects.existOrFail('dshDashboardViewport');
+    const panels = await this.testSubjects.findAll('embeddablePanel', 0);
     return panels.length;
   }
 

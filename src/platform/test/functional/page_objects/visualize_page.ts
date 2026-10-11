@@ -33,6 +33,7 @@ type DashboardPickerOption =
 export class VisualizePageObject extends FtrService {
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly config = this.ctx.getService('config');
+  private readonly browser = this.ctx.getService('browser');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
@@ -615,9 +616,15 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async saveVisualizationAndReturn() {
-    await this.header.waitUntilLoadingHasFinished();
-    await this.appMenu.existOrFail('visualizesaveAndReturnButton');
-    await this.appMenu.clickMenuItem('visualizesaveAndReturnButton');
+    const editorUrl = new URL(await this.browser.getCurrentUrl());
+    await this.appMenu.clickMenuItem('visualizesaveAndReturnButton', { waitForEnabled: true });
+    if (editorUrl.hash.startsWith('#/edit/')) {
+      await this.testSubjects.existOrFail('saveVisualizationSuccess');
+      await this.toasts.getTitleAndDismiss('saveVisualizationSuccess');
+    }
+    await this.retry.waitFor('return to the originating application', async () => {
+      return new URL(await this.browser.getCurrentUrl()).pathname !== editorUrl.pathname;
+    });
   }
 
   public async linkedToOriginatingApp() {

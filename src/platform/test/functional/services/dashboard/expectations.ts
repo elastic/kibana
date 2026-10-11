@@ -17,6 +17,7 @@ export class DashboardExpectService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
   private readonly filterBar = this.ctx.getService('filterBar');
+  private readonly panelActions = this.ctx.getService('dashboardPanelActions');
   private readonly elasticChart = this.ctx.getService('elasticChart');
 
   private readonly dashboard = this.ctx.getPageObject('dashboard');
@@ -176,38 +177,29 @@ export class DashboardExpectService extends FtrService {
     });
   }
 
-  async emptyTagCloudFound() {
-    this.log.debug(`DashboardExpect.emptyTagCloudFound()`);
-    const tagCloudVisualizations = await this.testSubjects.findAll('tagCloudVisualization');
-    if (tagCloudVisualizations.length > 0) {
-      const tagCloudsHaveContent = await Promise.all(
-        tagCloudVisualizations.map(async (tagCloud) => {
-          return await this.find.descendantExistsByCssSelector('text', tagCloud);
-        })
+  async emptyTagCloudFound(title: string): Promise<void> {
+    this.log.debug(`DashboardExpect.emptyTagCloudFound(${title})`);
+    await this.retry.try(async () => {
+      const panel = await this.panelActions.getPanelWrapper(title);
+      await this.find.descendantDisplayedByCssSelector(
+        '[data-test-subj="emptyPlaceholder"], [data-test-subj="visNoResult"]',
+        panel
       );
-      expect(tagCloudsHaveContent.indexOf(false)).to.be.greaterThan(-1);
-    }
+    });
   }
 
-  async tagCloudWithValuesFound(values: string[]) {
+  async tagCloudWithValuesFound(values: string[]): Promise<void> {
     this.log.debug(`DashboardExpect.tagCloudWithValuesFound(${values})`);
-    const tagCloudVisualizations = await this.testSubjects.findAll('tagCloudVisualization');
-    if (tagCloudVisualizations.length > 0) {
-      const matches = await Promise.all(
-        tagCloudVisualizations.map(async (tagCloud) => {
-          await this.visChart.waitForVisualization();
-          const tagCloudData = await this.tagCloud.getTextTagByElement(tagCloud);
-          for (let i = 0; i < values.length; i++) {
-            const valueExists = tagCloudData.includes(values[i]);
-            if (!valueExists) {
-              return false;
-            }
-          }
-          return true;
-        })
-      );
+    await this.retry.try(async () => {
+      const tagCloudVisualizations = await this.testSubjects.findAll('tagCloudVisualization', 0);
+      expect(tagCloudVisualizations.length).to.be.greaterThan(0);
+      const matches: boolean[] = [];
+      for (const tagCloud of tagCloudVisualizations) {
+        const tagCloudData = await this.tagCloud.getTextTagByElement(tagCloud, 0);
+        matches.push(values.every((value) => tagCloudData.includes(value)));
+      }
       expect(matches.indexOf(true)).to.be.greaterThan(-1);
-    }
+    });
   }
 
   async goalAndGuageLabelsExist(labels: string[]) {

@@ -30,8 +30,11 @@ export class TagCloudPageObject extends FtrService {
     await this.visChart.waitForVisualizationRenderComplete(renderingCount + 1);
   }
 
-  public async getTextTagByElement(webElement: WebElementWrapper) {
-    const elements = await webElement.findAllByCssSelector('text');
+  public async getTextTagByElement(
+    webElement: WebElementWrapper,
+    timeout?: number
+  ): Promise<string[]> {
+    const elements = await webElement.findAllByCssSelector('text', timeout);
     return await Promise.all(elements.map(async (element) => await element.getVisibleText()));
   }
 

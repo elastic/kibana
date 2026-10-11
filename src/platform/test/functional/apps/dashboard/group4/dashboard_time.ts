@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, header, timePicker } = getPageObjects(['dashboard', 'header', 'timePicker']);
   const pieChart = getService('pieChart');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   describe('dashboard time', () => {
     before(async function () {
@@ -104,6 +105,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
          * range and NOT the saved time range was properly set on the Dashboard and passed down to its children.
          */
         await pieChart.expectEmptyPieChart();
+        await retry.waitFor('the overridden time to be backed up for this dashboard', async () => {
+          const storedState = await browser.getSessionStorageItem('dashboardStateManagerPanels');
+          if (!storedState) return false;
+          const backups = JSON.parse(storedState) as Record<
+            string,
+            Record<string, { time_range?: { from: string; to: string } }>
+          >;
+          const range = backups.default?.[id]?.time_range;
+          return (range?.from === 'now-1h' || range?.from === 'now-1h/h') && range.to === 'now';
+        });
       });
 
       it('should use unsaved saved time from session storage, if time is missing in global state, but _g is present in the url', async function () {

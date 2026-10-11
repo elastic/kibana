@@ -36,7 +36,7 @@ export class DashboardAddPanelService extends FtrService {
 
   async clickTopNavAddMenu() {
     this.log.debug('DashboardAddPanel.clickTopNavAddMenu');
-    await this.appMenu.clickMenuItem('dashboardAddTopNavButton');
+    await this.appMenu.clickMenuItem('dashboardAddTopNavButton', { waitForEnabled: true });
   }
 
   async clickAddFromLibrary() {
@@ -105,7 +105,9 @@ export class DashboardAddPanelService extends FtrService {
 
   async openAddPanelFlyout() {
     this.log.debug('DashboardAddPanel.openAddPanelFlyout');
-    await this.clickTopNavAddMenu();
+    if (!(await this.testSubjects.exists('dashboardAddPanel'))) {
+      await this.clickTopNavAddMenu();
+    }
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('dashboardAddPanel');
     });

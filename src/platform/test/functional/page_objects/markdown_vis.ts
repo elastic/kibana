@@ -30,13 +30,13 @@ export class MarkdownVisPageObject extends FtrService {
   }
 
   public async applyChanges() {
-    const input = await this.testSubjects.find('markdownEditorApplyButton');
-    await input.click();
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('markdownEditorApplyButton');
+    await this.testSubjects.waitForDeleted('euiMarkdownEditorTextArea');
   }
 
   public async discardChanges() {
-    const input = await this.testSubjects.find('markdownEditorDiscardButton');
-    await input.click();
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('markdownEditorDiscardButton');
+    await this.testSubjects.waitForDeleted('euiMarkdownEditorTextArea');
   }
   public async clickPreview() {
     await (await this.testSubjects.find('markdownEditorPreview')).click();

@@ -55,13 +55,17 @@ export class VisualizeEditorPageObject extends FtrService {
   }
 
   public async inputControlClear() {
-    await this.testSubjects.click('inputControlClearBtn');
-    await this.header.waitUntilLoadingHasFinished();
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('inputControlClearBtn');
+    await this.retry.waitFor('input control selection to be cleared', async () => {
+      return !(await this.testSubjects.isEnabled('inputControlClearBtn'));
+    });
   }
 
   public async inputControlSubmit() {
     await this.testSubjects.clickWhenNotDisabledWithoutRetry('inputControlSubmitBtn');
-    await this.visChart.waitForVisualizationRenderingStabilized();
+    await this.retry.waitFor('input control changes to be submitted', async () => {
+      return !(await this.testSubjects.isEnabled('inputControlSubmitBtn'));
+    });
   }
 
   public async clickGo(isLegacyChartLib = false) {

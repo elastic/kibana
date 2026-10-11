@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await queryBar.clickQuerySubmitButton();
       await retry.tryForTime(5000, async () => {
-        const headers = await discover.getColumnHeaders();
+        const headers = await discover.getColumnHeaders(0);
         expect(headers.length).to.be(0);
         await pieChart.expectEmptyPieChart();
       });

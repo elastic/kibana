@@ -33,6 +33,32 @@ describe('RangeSliderControl', () => {
     label: 'Test',
   };
 
+  it('distinguishes a pending typed range from the committed selection', () => {
+    jest.useFakeTimers();
+    try {
+      const onChange = jest.fn();
+      const control = render(<RangeSliderControl {...defaultProps} onChange={onChange} />);
+      const lowerBoundInput = control.getByTestId('rangeSlider__lowerBoundFieldNumber');
+      fireEvent.input(lowerBoundInput, { target: { value: '25' } });
+      expect(onChange).not.toHaveBeenCalled();
+      expect(control.getByTestId('range-slider-control-test-uuid')).toHaveAttribute(
+        'data-control-value',
+        '["",""]'
+      );
+      jest.advanceTimersByTime(750);
+      expect(onChange).toHaveBeenCalledWith(['25', '']);
+      control.rerender(
+        <RangeSliderControl {...defaultProps} value={['25', '']} onChange={onChange} />
+      );
+      expect(control.getByTestId('range-slider-control-test-uuid')).toHaveAttribute(
+        'data-control-value',
+        '["25",""]'
+      );
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('renders range slider without selection', () => {
     const rangeSliderControl = render(<RangeSliderControl {...defaultProps} />);
 

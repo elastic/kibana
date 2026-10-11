@@ -20,16 +20,13 @@ marks: [{
 }]}`;
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { dashboard, header, visualize, visEditor, vegaChart, visChart, timePicker } =
-    getPageObjects([
-      'dashboard',
-      'header',
-      'visualize',
-      'visEditor',
-      'vegaChart',
-      'visChart',
-      'timePicker',
-    ]);
+  const { dashboard, visualize, visEditor, vegaChart, timePicker } = getPageObjects([
+    'dashboard',
+    'visualize',
+    'visEditor',
+    'vegaChart',
+    'timePicker',
+  ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const kibanaServer = getService('kibanaServer');
@@ -53,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardAddPanel.clickAddVega();
     await fillSpecAndGo(getTestSpec());
 
-    await visChart.waitForVisualizationRenderingStabilized();
+    await expectVegaText('Test');
     if (title) {
       await visualize.saveVisualizationExpectSuccess(title, {
         saveAsNew: true,
@@ -67,9 +64,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const editVegaVis = async () => {
     await dashboardPanelActions.clickEdit();
-    await header.waitUntilLoadingHasFinished();
     await fillSpecAndGo(getTestSpec('Modified'));
-    await visChart.waitForVisualizationRenderingStabilized();
+    await expectVegaText('Modified');
   };
 
   describe('edit visualizations from dashboard', () => {
@@ -102,7 +98,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('cancel button returns to dashboard with no modal if there are no changes to apply', async () => {
       await dashboardPanelActions.clickEdit();
-      await header.waitUntilLoadingHasFinished();
 
       await visualize.cancelAndReturn(false);
       await expectVegaText('Modified');
@@ -126,7 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await editVegaVis();
       await visualize.saveVisualizationAndReturn();
 
-      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('dshDashboardViewport');
       await appsMenu.clickLink('Visualize library');
       await testSubjects.existOrFail('visualizationLandingPage', { timeout: 5000 });
     });
@@ -139,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await editVegaVis();
       await visualize.saveVisualizationAndReturn();
 
-      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('dshDashboardViewport');
       await appsMenu.clickLink('Visualize library');
       await testSubjects.existOrFail('visualizationLandingPage', { timeout: 5000 });
     });

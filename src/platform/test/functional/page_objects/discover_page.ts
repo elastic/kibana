@@ -283,8 +283,8 @@ export class DiscoverPageObject extends FtrService {
     await this.waitUntilTabIsLoaded();
   }
 
-  public async getColumnHeaders() {
-    return await this.dataGrid.getHeaderFields();
+  public async getColumnHeaders(timeout?: number) {
+    return await this.dataGrid.getHeaderFields(timeout);
   }
 
   public async openLoadSavedSearchPanel() {

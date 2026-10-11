@@ -63,8 +63,8 @@ export class DashboardPageControls extends FtrService {
     await this.testSubjects.existOrFail('controls-empty');
   }
 
-  public async getAllControlIds() {
-    const controls = await this.find.allByCssSelector('[data-control-id]');
+  public async getAllControlIds(timeout?: number): Promise<string[]> {
+    const controls = await this.find.allByCssSelector('[data-control-id]', timeout);
     const ids = await Promise.all([
       ...controls.map(async (control) => (await control.getAttribute('data-control-id')) ?? ''),
     ]);
@@ -87,8 +87,8 @@ export class DashboardPageControls extends FtrService {
     return Boolean(titles.find((currentTitle) => currentTitle.indexOf(title)));
   }
 
-  public async getControlsCount() {
-    const allControlIds = await this.getAllControlIds();
+  public async getControlsCount(timeout?: number): Promise<number> {
+    const allControlIds = await this.getAllControlIds(timeout);
     return allControlIds.length;
   }
 
@@ -107,11 +107,16 @@ export class DashboardPageControls extends FtrService {
     });
 
     /** All control type options should be disabled until a field is selected */
-    const controlTypeOptions = await this.find.allByCssSelector(
-      '[data-test-subj="controlTypeMenu"] > li > button'
-    );
-    await asyncForEach(controlTypeOptions, async (controlTypeOption) => {
-      expect(await controlTypeOption.isEnabled()).to.be(false);
+    await this.testSubjects.existOrFail(`create__${OPTIONS_LIST_CONTROL}`);
+    await this.retry.try(async () => {
+      const controlTypeOptions = await this.find.allByCssSelector(
+        '[data-test-subj="controlTypeMenu"] [data-test-subj^="create__"]',
+        0
+      );
+      expect(controlTypeOptions.length).to.be.above(0);
+      await asyncForEach(controlTypeOptions, async (controlTypeOption) => {
+        expect(await controlTypeOption.isEnabled()).to.be(false);
+      });
     });
   }
 
@@ -165,7 +170,9 @@ export class DashboardPageControls extends FtrService {
       if (controlFrame !== null) await this.removeExistingControl(controlId);
       else expectedRemainingPanelControls++;
     }
-    expect(await this.getControlsCount()).to.be(expectedRemainingPanelControls);
+    await this.retry.try(async () => {
+      expect(await this.getControlsCount(0)).to.be(expectedRemainingPanelControls);
+    });
   }
 
   public async setPinnedControlWidth(controlId: string, width: ControlWidth) {
@@ -485,7 +492,8 @@ export class DashboardPageControls extends FtrService {
     }
 
     const invalidSelectionElements = await availableOptions.findAllByClassName(
-      'optionsList__selectionInvalid'
+      'optionsList__selectionInvalid',
+      0
     );
     const invalidSelections = await Promise.all(
       invalidSelectionElements.map(async (option) => {
@@ -749,32 +757,47 @@ export class DashboardPageControls extends FtrService {
 
   public async rangeSliderSetLowerBound(controlId: string, value: string) {
     this.log.debug(`Setting range slider lower bound to ${value}`);
+    await this.testSubjects.setValue(
+      `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`,
+      value,
+      { clearWithKeyboard: true }
+    );
+    await this.testSubjects.pressEnter(
+      `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`
+    );
     await this.retry.try(async () => {
-      await this.testSubjects.setValue(
-        `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`,
-        value
-      );
-      await this.testSubjects.pressEnter(
-        // force the change without waiting for the debounce
-        `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`
-      );
       expect(await this.rangeSliderGetLowerBoundAttribute(controlId, 'value')).to.be(value);
+      const committedValue = await this.getCommittedRangeSliderValue(controlId);
+      expect(committedValue[0]).to.be(value);
     });
   }
 
   public async rangeSliderSetUpperBound(controlId: string, value: string) {
     this.log.debug(`Setting range slider lower bound to ${value}`);
+    await this.testSubjects.setValue(
+      `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`,
+      value,
+      { clearWithKeyboard: true }
+    );
+    await this.testSubjects.pressEnter(
+      `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`
+    );
     await this.retry.try(async () => {
-      await this.testSubjects.setValue(
-        `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`,
-        value
-      );
-      await this.testSubjects.pressEnter(
-        // force the change without waiting for the debounce
-        `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`
-      );
       expect(await this.rangeSliderGetUpperBoundAttribute(controlId, 'value')).to.be(value);
+      const committedValue = await this.getCommittedRangeSliderValue(controlId);
+      expect(committedValue[1]).to.be(value);
     });
+  }
+
+  private async getCommittedRangeSliderValue(controlId: string): Promise<[string, string]> {
+    const committedValue = await this.testSubjects.getAttribute(
+      `range-slider-control-${controlId}`,
+      'data-control-value'
+    );
+    if (!committedValue) {
+      throw new Error(`Range slider ${controlId} has no committed value`);
+    }
+    return JSON.parse(committedValue) as [string, string];
   }
 
   public async rangeSliderOpenPopover(controlId: string) {
@@ -831,24 +854,30 @@ export class DashboardPageControls extends FtrService {
   // Time slider functions
   public async gotoNextTimeSlice() {
     await this.closeTimeSliderPopover(); // prevents the pin tooltip from getting in the way
-    await this.testSubjects.click('timeSlider-nextTimeWindow');
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('timeSlider-nextTimeWindow');
+    await this.testSubjects.existOrFail('timeSlider-popoverContents');
   }
 
   public async closeTimeSliderPopover() {
-    const isOpen = await this.testSubjects.exists('timeSlider-popoverContents');
+    const toggle = await this.testSubjects.find('timeSlider-popoverToggleButton');
+    const isOpen = (await toggle.getAttribute('aria-expanded')) === 'true';
     if (isOpen) {
-      await this.testSubjects.click('timeSlider-popoverToggleButton');
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('timeSlider-popoverToggleButton');
     }
+    await this.testSubjects.missingOrFail('timeSlider-popoverContents');
+    await this.retry.try(async () => {
+      const currentToggle = await this.testSubjects.find('timeSlider-popoverToggleButton');
+      expect(await currentToggle.getAttribute('aria-expanded')).to.be('false');
+    });
   }
 
   public async getTimeSliceFromTimeSlider() {
-    const isOpen = await this.testSubjects.exists('timeSlider-popoverContents');
+    const toggle = await this.testSubjects.find('timeSlider-popoverToggleButton');
+    const isOpen = (await toggle.getAttribute('aria-expanded')) === 'true';
     if (!isOpen) {
-      await this.testSubjects.click('timeSlider-popoverToggleButton');
-      await this.retry.try(async () => {
-        await this.testSubjects.existOrFail('timeSlider-popoverContents');
-      });
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('timeSlider-popoverToggleButton');
     }
+    await this.testSubjects.existOrFail('timeSlider-popoverContents');
     const popover = await this.testSubjects.find('timeSlider-popoverContents');
     const dualRangeSlider = await this.find.descendantDisplayedByCssSelector(
       '.euiRangeDraggable',

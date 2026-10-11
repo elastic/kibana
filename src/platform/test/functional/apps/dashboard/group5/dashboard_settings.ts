@@ -23,8 +23,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let originalTitles: string[] = [];
 
     const checkDashboardTitle = async (expectedTitle: string) => {
-      expect(await browser.getTitle()).to.equal(`${expectedTitle} - Elastic`);
       await retry.try(async () => {
+        expect(await browser.getTitle()).to.equal(`${expectedTitle} - Elastic`);
         const breadcrumb = await globalNav.getLastBreadcrumb();
         expect(breadcrumb).to.equal(`Editing ${expectedTitle}`);
       });
@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardSettings.toggleShowPanelTitles(false);
       await dashboardSettings.clickApplyButton();
       await retry.try(async () => {
-        const titles = await dashboard.getPanelTitles();
+        const titles = await dashboard.getPanelTitles(0);
         expect(titles[0]).to.eql(undefined);
       });
     });
@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardSettings.toggleShowPanelTitles(true);
       await dashboardSettings.clickApplyButton();
       await retry.try(async () => {
-        const titles = await dashboard.getPanelTitles();
+        const titles = await dashboard.getPanelTitles(0);
         expect(titles[0]).to.eql(originalTitles[0]);
       });
     });
