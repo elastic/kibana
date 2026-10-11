@@ -110,6 +110,7 @@ describe('runEscalationCase', () => {
     expect(result.summary).toBe('a summary');
     // timing evidence rides along, scoped to this escalation's summary runs
     expect(result.summaryDiagnostics).toMatchObject({ summaryRuns: [], errors: [] });
+    expect(result.summarySettledBy).toBe('settled');
     expect(kibana.calls.some((call) => call.path === SYNC_PATH)).toBe(true);
     expect(kibana.calls.every((call) => !call.path.endsWith('/_sync'))).toBe(true);
     // the escalation is created with an assignee (required by the create route)
@@ -218,6 +219,25 @@ describe('runEscalationCase', () => {
     // the failed question stays in the denominator
     expect(scored.metadata.total).toBe(c.questions.length);
     expect(scored.score).toBe(0);
+  });
+
+  it('marks and warns when the summary was read without timing diagnostics', async () => {
+    const kibana = createFakeKibana();
+    const fetch = (async (path: string, options: { method: string; body?: string }) => {
+      if (path.startsWith('/api/workflows/workflow/')) {
+        throw new Error('403 executions');
+      }
+      return kibana.fetch(path, options as never);
+    }) as unknown as HttpHandler;
+    (log.warning as jest.Mock).mockClear();
+
+    const result = await run(fetch);
+
+    expect(result.summary).toBe('a summary');
+    expect(result.summarySettledBy).toBe('diagnostics-unavailable');
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('read without timing diagnostics')
+    );
   });
 });
 
@@ -404,6 +424,7 @@ describe('waitForSettledSummary', () => {
     const result = await waitForSettledSummary(fetch, 'esc-1', opts);
 
     expect(result.summary).toBe('covers inv1 and inv2');
+    expect(result.settledBy).toBe('settled');
     expect(result.summaryDiagnostics.completedRunsStartedAfterLastAttachment).toBe(1);
     expect(result.summaryDiagnostics.unfinishedRuns).toBe(0);
   });
@@ -432,8 +453,106 @@ describe('waitForSettledSummary', () => {
     const result = await waitForSettledSummary(fetch, 'esc-1', opts);
 
     expect(result.summary).toBe('stale');
+    expect(result.settledBy).toBe('quiet-window');
     expect(result.summaryDiagnostics.completedRunsStartedAfterLastAttachment).toBe(0);
     expect(result.summaryDiagnostics.unfinishedRuns).toBe(0);
+  });
+
+  // Long timeout so multi-step scripts are not cut short; the quiet window stays 25ms.
+  const slowOpts = { timeoutMs: 2_000, intervalMs: 5, quietMs: 25 };
+  const twoAttachments = [
+    attached('a1', '2026-10-09T13:50:00.000Z'),
+    attached('a2', '2026-10-09T13:50:05.000Z'),
+  ];
+  const beforeLast = summaryRun('completed', '2026-10-09T13:50:01.000Z');
+  const afterLast = summaryRun('completed', '2026-10-09T13:50:06.000Z');
+
+  /**
+   * Quiet-window tests run on a fake clock that advances 200ms per poll (quiet window 300ms),
+   * so they do not depend on how fast the CI agent schedules timers.
+   */
+  const withPollClock = async <T>(fetch: HttpHandler, body: (f: HttpHandler) => Promise<T>) => {
+    let clock = 1_000_000;
+    const nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => clock);
+    const ticking = (async (path: string, options: unknown) => {
+      if (path.startsWith(`${CONVERSATIONS_PATH}/`)) clock += 100; // two conversation reads per poll
+      return (fetch as unknown as (p: string, o: unknown) => Promise<unknown>)(path, options);
+    }) as unknown as HttpHandler;
+    try {
+      return await body(ticking);
+    } finally {
+      nowSpy.mockRestore();
+    }
+  };
+  const clockOpts = { timeoutMs: 60_000, intervalMs: 1, quietMs: 300 };
+
+  it('does not score the stale summary as settled before the quiet window ends', async () => {
+    // Poll 1: all runs terminal, none after the last attachment. Poll 2 (200ms later, inside the
+    // 300ms window): a run that saw the last attachment has completed. The fresh summary wins.
+    const fetch = scripted([
+      { summary: 'stale', events: twoAttachments, runs: [beforeLast] },
+      { summary: 'fresh', events: twoAttachments, runs: [beforeLast, afterLast] },
+    ]);
+
+    const result = await withPollClock(fetch, (f) => waitForSettledSummary(f, 'esc-1', clockOpts));
+
+    expect(result.summary).toBe('fresh');
+    expect(result.settledBy).toBe('settled');
+  });
+
+  it('does not treat a completed post-attachment run as settled while another run is in flight', async () => {
+    const queuedLater = summaryRun('queued', '2026-10-09T13:50:07.000Z');
+    const fetch = scripted([
+      { summary: 'mid', events: twoAttachments, runs: [afterLast, queuedLater] },
+      {
+        summary: 'final',
+        events: twoAttachments,
+        runs: [afterLast, { ...queuedLater, status: 'completed' }],
+      },
+    ]);
+
+    const result = await waitForSettledSummary(fetch, 'esc-1', slowOpts);
+
+    expect(result.summary).toBe('final');
+    expect(result.settledBy).toBe('settled');
+  });
+
+  it('restarts the quiet window when a run goes back in flight', async () => {
+    // Quiet starts at poll 1, a run is in flight for 2s (> quietMs), then it fails. The quiet
+    // window must restart from that point, so the run that completes 200ms later is the one read.
+    const inFlight = summaryRun('running', '2026-10-09T13:50:06.000Z');
+    const failed = { ...inFlight, status: 'failed' };
+    const fetch = scripted([
+      { summary: 'stale', events: twoAttachments, runs: [beforeLast] },
+      ...Array.from({ length: 10 }, () => ({
+        summary: 'stale',
+        events: twoAttachments,
+        runs: [beforeLast, inFlight],
+      })),
+      { summary: 'stale', events: twoAttachments, runs: [beforeLast, failed] },
+      {
+        summary: 'fresh',
+        events: twoAttachments,
+        runs: [beforeLast, failed, summaryRun('completed', '2026-10-09T13:50:09.000Z')],
+      },
+    ]);
+
+    const result = await withPollClock(fetch, (f) => waitForSettledSummary(f, 'esc-1', clockOpts));
+
+    expect(result.summary).toBe('fresh');
+    expect(result.settledBy).toBe('settled');
+  });
+
+  it('labels a read without executions diagnostics as diagnostics-unavailable, even with attachments', async () => {
+    const fetch = scripted([{ summary: 'early', events: twoAttachments }], {
+      failExecutions: true,
+    });
+
+    const result = await waitForSettledSummary(fetch, 'esc-1', slowOpts);
+
+    expect(result.summary).toBe('early');
+    expect(result.settledBy).toBe('diagnostics-unavailable');
+    expect(result.summaryDiagnostics.errors).toEqual([expect.stringContaining('403 executions')]);
   });
 
   it('returns the first non-empty summary when diagnostics cannot be read', async () => {
@@ -442,6 +561,7 @@ describe('waitForSettledSummary', () => {
     const result = await waitForSettledSummary(fetch, 'esc-1', opts);
 
     expect(result.summary).toBe('done');
+    expect(result.settledBy).toBe('diagnostics-unavailable');
     expect(result.summaryDiagnostics.errors).toHaveLength(1);
   });
 

@@ -19,7 +19,7 @@ import {
 import type { SyncEscalationResponse } from '@kbn/agentic-investigations-plugin/common/escalations/escalation';
 import { collectSummaryDiagnostics } from './summary_diagnostics';
 import type { SummaryDiagnostics } from './summary_diagnostics';
-import type { EscalationCase, EscalationTaskOutput, SeededEvent } from './types';
+import type { EscalationCase, EscalationTaskOutput, SeededEvent, SummarySettledBy } from './types';
 
 const PUBLIC_API_VERSION = '2023-10-31';
 
@@ -196,6 +196,7 @@ const isSummarySettled = (diagnostics: SummaryDiagnostics): boolean =>
 export interface SettledSummary {
   summary: string;
   summaryDiagnostics: SummaryDiagnostics;
+  settledBy: SummarySettledBy;
 }
 
 /**
@@ -247,13 +248,16 @@ export const waitForSettledSummary = async (
     const summary = conversation.metadata?.summary;
     const hasSummary = typeof summary === 'string' && summary.trim().length > 0;
     if (hasSummary) {
-      if (summaryDiagnostics.errors.length > 0 || isSummarySettled(summaryDiagnostics)) {
-        return { summary, summaryDiagnostics };
+      if (summaryDiagnostics.errors.length > 0) {
+        return { summary, summaryDiagnostics, settledBy: 'diagnostics-unavailable' };
+      }
+      if (isSummarySettled(summaryDiagnostics)) {
+        return { summary, summaryDiagnostics, settledBy: 'settled' };
       }
       if (summaryDiagnostics.unfinishedRuns === 0) {
         quietSince = quietSince ?? Date.now();
         if (Date.now() - quietSince >= quietMs) {
-          return { summary, summaryDiagnostics };
+          return { summary, summaryDiagnostics, settledBy: 'quiet-window' };
         }
       } else {
         quietSince = undefined;
@@ -399,10 +403,20 @@ export const runEscalationCase = async ({
     // 4. Wait for the summarize workflow to write metadata.summary AND settle, so the scored
     // summary comes from a run that saw the last synced attachment. The diagnostics taken at
     // read time stay on the task output.
-    const { summary, summaryDiagnostics } = await setupStep(`wait for the summary of ${c.id}`, () =>
-      waitForSettledSummary(fetch, esclId, { syncCompletedAt })
+    const { summary, summaryDiagnostics, settledBy } = await setupStep(
+      `wait for the summary of ${c.id}`,
+      () => waitForSettledSummary(fetch, esclId, { syncCompletedAt })
     );
-    log.info(`Summary diagnostics ${c.id}: ${JSON.stringify(summaryDiagnostics)}`);
+    log.info(
+      `Summary diagnostics ${c.id} (settledBy=${settledBy}): ${JSON.stringify(summaryDiagnostics)}`
+    );
+    if (settledBy === 'diagnostics-unavailable') {
+      log.warning(
+        `Summary for ${c.id} read without timing diagnostics (${summaryDiagnostics.errors.join(
+          '; '
+        )}); it may predate the last attachment. Exclude summarySettledBy=diagnostics-unavailable runs when comparing recall.`
+      );
+    }
 
     // 5. Ask the escalation-context chat every question. A failed round is a
     // scored failure (kept in the denominator, error recorded), never dropped.
@@ -454,6 +468,7 @@ export const runEscalationCase = async ({
       answers,
       answerErrors,
       summaryDiagnostics,
+      summarySettledBy: settledBy,
       ...(drop !== undefined ? { droppedInvestigation: drop } : {}),
     };
   } finally {

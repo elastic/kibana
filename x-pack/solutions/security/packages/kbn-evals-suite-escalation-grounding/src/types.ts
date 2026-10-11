@@ -62,6 +62,14 @@ export interface CaseValidationIssue {
   problem: string;
 }
 
+/**
+ * Why the escalation summary was read: `settled` (a run that saw the last attachment
+ * completed), `quiet-window` (all runs terminal, none after the last attachment: a product
+ * miss, still scored), or `diagnostics-unavailable` (timing unknown; the first non-empty summary
+ * was read, which can predate the last attachment).
+ */
+export type SummarySettledBy = 'settled' | 'quiet-window' | 'diagnostics-unavailable';
+
 /** Raw per-case outputs the task produces. */
 export interface EscalationTaskOutput {
   caseId: string;
@@ -75,6 +83,12 @@ export interface EscalationTaskOutput {
   answerErrors?: Record<string, string>;
   /** Summary-run vs attachment-add timing for this escalation; evidence only, never graded. */
   summaryDiagnostics?: SummaryDiagnostics;
+  /**
+   * Why the summary was read (see `waitForSettledSummary`). `diagnostics-unavailable` means the
+   * read timing is unknown and the summary may predate the last attachment: report those runs
+   * separately rather than folding them into a recall comparison.
+   */
+  summarySettledBy?: SummarySettledBy;
   /**
    * Index of the investigation the mutation arm withheld from the escalation.
    * Precision graders (ClaimGrounding, unsupported specifics) use the corpus
