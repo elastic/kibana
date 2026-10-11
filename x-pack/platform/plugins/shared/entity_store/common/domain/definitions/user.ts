@@ -13,7 +13,11 @@ import {
   getEntityFieldsDescriptions,
   isNotEmptyCondition,
 } from './common_fields';
-import type { EntityDefinitionManagedBy, EntityDefinitionWithoutId } from './entity_schema';
+import type {
+  EntityDefinitionManagedBy,
+  EntityDefinitionWithoutId,
+  EuidAttribute,
+} from './entity_schema';
 import { PLUGIN_ID } from '../../plugin_id';
 import {
   ENTITY_CONFIDENCE,
@@ -31,6 +35,33 @@ const entityIdExistsAfterLookup = { field: 'entity.id', exists: true } as const;
 
 /** Only asset events create IdP identities. */
 const idpGate: Condition = { field: 'event.kind', includes: 'asset' };
+
+/**
+ * Cloud providers whose audit logs and asset discovery share the same `user.entity.id`
+ * (AWS: the IAM ARN), so it can rank above the default identity fields.
+ */
+const CLOUD_PROVIDERS_RANKING_USER_ENTITY_ID = ['aws'] as const;
+
+const cloudProviderEntityIdGate: Condition = {
+  or: CLOUD_PROVIDERS_RANKING_USER_ENTITY_ID.map((provider) => ({
+    field: 'cloud.provider',
+    eq: provider,
+  })),
+};
+
+/** Non-local ranking: email, id, name@domain, name — each scoped by namespace. */
+const defaultEuidRanking: EuidAttribute[][] = [
+  [{ field: 'user.email' }, { sep: '@' }, { field: 'entity.namespace' }],
+  [{ field: 'user.id' }, { sep: '@' }, { field: 'entity.namespace' }],
+  [
+    { field: 'user.name' },
+    { sep: '@' },
+    { field: 'user.domain' },
+    { sep: '@' },
+    { field: 'entity.namespace' },
+  ],
+  [{ field: 'user.name' }, { sep: '@' }, { field: 'entity.namespace' }],
+];
 
 function buildLocalNamespaceGate(excludedUserNames: string[]): Condition {
   return {
@@ -130,18 +161,15 @@ export function buildUserEntityDefinition(
             ],
           },
           {
+            // A matched branch never falls through, so keep the default ranking after user.entity.id.
+            when: cloudProviderEntityIdGate,
             ranking: [
-              [{ field: 'user.email' }, { sep: '@' }, { field: 'entity.namespace' }],
-              [{ field: 'user.id' }, { sep: '@' }, { field: 'entity.namespace' }],
-              [
-                { field: 'user.name' },
-                { sep: '@' },
-                { field: 'user.domain' },
-                { sep: '@' },
-                { field: 'entity.namespace' },
-              ],
-              [{ field: 'user.name' }, { sep: '@' }, { field: 'entity.namespace' }],
+              [{ field: 'user.entity.id' }, { sep: '@' }, { field: 'entity.namespace' }],
+              ...defaultEuidRanking,
             ],
+          },
+          {
+            ranking: defaultEuidRanking,
           },
         ],
       },
@@ -246,6 +274,8 @@ export function buildUserEntityDefinition(
       }),
       collect({ source: 'user.hash' }),
       collect({ source: 'user.id' }),
+      // Ranked first for CLOUD_PROVIDERS_RANKING_USER_ENTITY_ID; record-based lookups need it.
+      collect({ source: 'user.entity.id' }),
       collect({ source: 'user.roles' }),
       collect({ source: 'user.group.domain' }),
       collect({ source: 'user.group.id' }),

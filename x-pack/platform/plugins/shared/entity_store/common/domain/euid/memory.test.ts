@@ -257,6 +257,132 @@ describe('getEuidFromObject', () => {
         })
       ).toBe('user:jane@corp.com@okta');
     });
+
+    describe('aws: user.entity.id ranked first when cloud.provider is aws', () => {
+      const IAM_USER_ARN = 'arn:aws:iam::123456789012:user/alice';
+      const IAM_ROLE_ARN = 'arn:aws:iam::123456789012:role/path/Admin';
+
+      const inventoryDoc = (arn: string, name: string) => ({
+        user: { id: arn, name, entity: { id: arn } },
+        event: { kind: 'asset', module: 'asset_discovery' },
+        cloud: { provider: 'aws' },
+      });
+
+      const cloudTrailDoc = (user: Record<string, unknown>) => ({
+        user,
+        event: { kind: 'event', module: 'aws', outcome: 'success' },
+        cloud: { provider: 'aws' },
+      });
+
+      it('resolves an inventory IAM role to user:<role ARN>@aws', () => {
+        expect(getEuidFromObject('user', inventoryDoc(IAM_ROLE_ARN, 'Admin'))).toBe(
+          `user:${IAM_ROLE_ARN}@aws`
+        );
+      });
+
+      it('resolves a CloudTrail IAM user to the same id as the inventory IAM user', () => {
+        const inventoryId = getEuidFromObject('user', inventoryDoc(IAM_USER_ARN, 'alice'));
+        const cloudTrailId = getEuidFromObjectForSearch(
+          'user',
+          cloudTrailDoc({ id: 'AIDAEXAMPLE', name: 'alice', entity: { id: IAM_USER_ARN } })
+        );
+
+        expect(inventoryId).toBe(`user:${IAM_USER_ARN}@aws`);
+        expect(cloudTrailId).toBe(inventoryId);
+      });
+
+      it('resolves a CloudTrail assumed role (principalId in user.id) to the role ARN', () => {
+        expect(
+          getEuidFromObjectForSearch(
+            'user',
+            cloudTrailDoc({
+              id: 'AROAEXAMPLE:session-1',
+              name: 'session-1',
+              entity: { id: IAM_ROLE_ARN },
+            })
+          )
+        ).toBe(`user:${IAM_ROLE_ARN}@aws`);
+      });
+
+      it('ranks user.entity.id above user.email', () => {
+        expect(
+          getEuidFromObjectForSearch(
+            'user',
+            cloudTrailDoc({
+              email: 'alice@example.com',
+              id: 'AROAEXAMPLE:alice@example.com',
+              entity: { id: IAM_ROLE_ARN },
+            })
+          )
+        ).toBe(`user:${IAM_ROLE_ARN}@aws`);
+      });
+
+      it('treats a single-element user.entity.id array like the scalar value', () => {
+        expect(
+          getEuidFromObjectForSearch(
+            'user',
+            cloudTrailDoc({ id: 'AIDAEXAMPLE', entity: { id: [IAM_USER_ARN] } })
+          )
+        ).toBe(`user:${IAM_USER_ARN}@aws`);
+      });
+
+      it('falls back to user.id when user.entity.id is missing or empty', () => {
+        expect(getEuidFromObjectForSearch('user', cloudTrailDoc({ id: 'AIDAEXAMPLE' }))).toBe(
+          'user:AIDAEXAMPLE@aws'
+        );
+        expect(
+          getEuidFromObjectForSearch(
+            'user',
+            cloudTrailDoc({ id: 'AIDAEXAMPLE', entity: { id: '' } })
+          )
+        ).toBe('user:AIDAEXAMPLE@aws');
+      });
+
+      it('does not create a user from a CloudTrail event alone (creation gate unchanged)', () => {
+        expect(
+          getEuidFromObject(
+            'user',
+            cloudTrailDoc({ id: 'AIDAEXAMPLE', name: 'alice', entity: { id: IAM_USER_ARN } })
+          )
+        ).toBeUndefined();
+      });
+
+      it('keeps the local namespace first when user.name and host.id are present', () => {
+        expect(
+          getEuidFromObject('user', {
+            user: { name: 'alice', entity: { id: IAM_USER_ARN } },
+            host: { id: 'host-1' },
+            cloud: { provider: 'aws' },
+          })
+        ).toBe('user:alice@host-1@local');
+      });
+
+      it('keeps the default ranking for aws-hosted logs without user.entity.id', () => {
+        expect(
+          getEuidFromObject('user', {
+            user: { email: 'alice@example.com' },
+            event: { kind: 'asset', module: 'okta' },
+            cloud: { provider: 'aws' },
+          })
+        ).toBe('user:alice@example.com@okta');
+      });
+
+      it('ignores user.entity.id when cloud.provider is not aws', () => {
+        expect(
+          getEuidFromObject('user', {
+            user: { email: 'alice@example.com', entity: { id: 'okta-entity-id' } },
+            event: { kind: 'asset', module: 'okta' },
+          })
+        ).toBe('user:alice@example.com@okta');
+        expect(
+          getEuidFromObject('user', {
+            user: { id: 'gcp-user-id', entity: { id: 'gcp-entity-id' } },
+            event: { kind: 'asset', module: 'asset_discovery' },
+            cloud: { provider: 'gcp' },
+          })
+        ).toBe('user:gcp-user-id@gcp');
+      });
+    });
   });
 
   describe('service', () => {

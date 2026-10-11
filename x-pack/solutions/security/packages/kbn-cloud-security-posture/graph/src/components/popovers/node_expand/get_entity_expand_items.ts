@@ -432,11 +432,15 @@ export const getRelatedEventsFilter = (
 ): { field: string; values: string[] } | undefined => {
   const type = engineType ?? getEntityTypeFromNodeId(nodeId);
 
-  const valuesForPrefix = (prefix: string): string[] =>
-    Object.entries(sourceFields ?? {})
-      .filter(([field]) => field.startsWith(prefix))
-      .flatMap(([, value]) => ([] as string[]).concat(value))
-      .filter((value) => value !== '');
+  // Several identity fields can carry the same value (for example `user.id` and `user.entity.id`).
+  const valuesForPrefix = (prefix: string): string[] => [
+    ...new Set(
+      Object.entries(sourceFields ?? {})
+        .filter(([field]) => field.startsWith(prefix))
+        .flatMap(([, value]) => ([] as string[]).concat(value))
+        .filter((value) => value !== '')
+    ),
+  ];
 
   const { field, values } =
     type === 'user'
