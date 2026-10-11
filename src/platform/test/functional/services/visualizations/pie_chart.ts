@@ -199,8 +199,10 @@ export class PieChartService extends FtrService {
   }
 
   async expectEmptyPieChart() {
-    const noResult = await this.testSubjects.exists('partitionVisEmptyValues');
-    expect(noResult).to.be(true);
+    this.log.debug('PieChart.expectEmptyPieChart');
+    await this.testSubjects.existOrFail('partitionVisEmptyValues', {
+      timeout: this.config.get('timeouts.waitFor'),
+    });
   }
 
   async expectPieChartLabels(expectedLabels: string[]) {
