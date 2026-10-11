@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiCode,
   EuiFieldText,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -17,6 +18,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,6 +29,14 @@ import { DatetimeFormatHelpText } from '../components/datetime_format_help_text'
 import { TIMESTAMP_LOGICAL_FIELD_NAME } from '../constants';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import { fieldTypeSelectStrings } from './mapping_editor/field_type_select_i18n';
+import {
+  fieldRowContainerStyles,
+  getRemainingFieldsGridStyles,
+  getRemainingFieldsGroupItemStyles,
+  getTypeFieldItemStyles,
+} from './field_row_layout';
+
+const REMAINING_FIELD_COUNT = 2;
 
 export interface TimeseriesDataSectionProps {
   isEnabled: boolean;
@@ -45,6 +55,23 @@ export function TimeseriesDataSection({
 }: TimeseriesDataSectionProps) {
   const isTimestampPathMissing =
     shouldShowValidation && isEnabled && (timestampField?.path ?? '').trim() === '';
+  const { euiTheme } = useEuiTheme();
+  const gutter = euiTheme.size.base;
+  // The field mapping editor pads its form on both sides; matching it keeps both rows switching
+  // layouts at the same viewport width.
+  const inset = `calc(${euiTheme.size.s} * 2)`;
+  const typeFieldItemStyles = useMemo(
+    () => getTypeFieldItemStyles(REMAINING_FIELD_COUNT, gutter, inset),
+    [gutter, inset]
+  );
+  const remainingFieldsGroupStyles = useMemo(
+    () => getRemainingFieldsGroupItemStyles(REMAINING_FIELD_COUNT, gutter, inset),
+    [gutter, inset]
+  );
+  const remainingFieldsGridStyles = useMemo(
+    () => getRemainingFieldsGridStyles(REMAINING_FIELD_COUNT, gutter, inset),
+    [gutter, inset]
+  );
 
   return (
     <>
@@ -88,8 +115,14 @@ export function TimeseriesDataSection({
       {isEnabled ? (
         <>
           <EuiSpacer size="m" />
-          <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
-            <EuiFlexItem grow={false} style={{ maxWidth: 200 }}>
+          <EuiFlexGroup
+            gutterSize="m"
+            alignItems="flexStart"
+            responsive={false}
+            wrap
+            css={fieldRowContainerStyles}
+          >
+            <EuiFlexItem css={typeFieldItemStyles}>
               <EuiFormRow
                 label={i18n.translate(
                   'xpack.dataFederation.createDatasetWizard.timestampFieldTypeLabel',
@@ -116,68 +149,73 @@ export function TimeseriesDataSection({
               </EuiFormRow>
             </EuiFlexItem>
 
-            <EuiFlexItem>
-              <EuiFormRow
-                label={i18n.translate(
-                  'xpack.dataFederation.createDatasetWizard.timestampFieldPathLabel',
-                  {
-                    defaultMessage: 'Field name',
-                  }
-                )}
-                helpText={i18n.translate(
-                  'xpack.dataFederation.createDatasetWizard.timestampFieldPathHelp',
-                  {
-                    defaultMessage: 'Source column or JSON path.',
-                  }
-                )}
-                isInvalid={isTimestampPathMissing}
-                error={
-                  isTimestampPathMissing
-                    ? i18n.translate(
-                        'xpack.dataFederation.createDatasetWizard.timestampFieldPathRequired',
-                        { defaultMessage: 'Field name is required.' }
-                      )
-                    : undefined
-                }
-                fullWidth
-              >
-                <EuiFieldText
+            <EuiFlexGrid
+              responsive={false}
+              css={[remainingFieldsGroupStyles, remainingFieldsGridStyles]}
+            >
+              <EuiFlexItem>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.dataFederation.createDatasetWizard.timestampFieldPathLabel',
+                    {
+                      defaultMessage: 'Field name',
+                    }
+                  )}
+                  helpText={i18n.translate(
+                    'xpack.dataFederation.createDatasetWizard.timestampFieldPathHelp',
+                    {
+                      defaultMessage: 'Source column or JSON path.',
+                    }
+                  )}
                   isInvalid={isTimestampPathMissing}
-                  fullWidth
-                  value={timestampField?.path ?? ''}
-                  onChange={(e) => onChangeTimestampField({ path: e.target.value })}
-                  data-test-subj="createDatasetWizardTimestampPath"
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-
-            <EuiFlexItem>
-              <EuiFormRow
-                label={i18n.translate(
-                  'xpack.dataFederation.createDatasetWizard.timestampFieldFormatLabel',
-                  {
-                    defaultMessage: 'Date and time format (optional)',
+                  error={
+                    isTimestampPathMissing
+                      ? i18n.translate(
+                          'xpack.dataFederation.createDatasetWizard.timestampFieldPathRequired',
+                          { defaultMessage: 'Field name is required.' }
+                        )
+                      : undefined
                   }
-                )}
-                helpText={<DatetimeFormatHelpText />}
-                fullWidth
-              >
-                <DatetimeFormatComboBox
-                  value={timestampField?.format ?? ''}
-                  onChange={(next: string) => onChangeTimestampField({ format: next })}
-                  onBlur={() => {}}
-                  placeholder={i18n.translate(
-                    'xpack.dataFederation.createDatasetWizard.timestampFieldFormatPlaceholder',
-                    { defaultMessage: 'yyyy-MM-dd HH:mm:ss' }
+                  fullWidth
+                >
+                  <EuiFieldText
+                    isInvalid={isTimestampPathMissing}
+                    fullWidth
+                    value={timestampField?.path ?? ''}
+                    onChange={(e) => onChangeTimestampField({ path: e.target.value })}
+                    data-test-subj="createDatasetWizardTimestampPath"
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+
+              <EuiFlexItem>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.dataFederation.createDatasetWizard.timestampFieldFormatLabel',
+                    {
+                      defaultMessage: 'Date and time format (optional)',
+                    }
                   )}
-                  data-test-subj="createDatasetWizardTimestampFormat"
-                  aria-label={i18n.translate(
-                    'xpack.dataFederation.createDatasetWizard.timestampFieldFormatAriaLabel',
-                    { defaultMessage: 'Select or enter a format' }
-                  )}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
+                  helpText={<DatetimeFormatHelpText />}
+                  fullWidth
+                >
+                  <DatetimeFormatComboBox
+                    value={timestampField?.format ?? ''}
+                    onChange={(next: string) => onChangeTimestampField({ format: next })}
+                    onBlur={() => {}}
+                    placeholder={i18n.translate(
+                      'xpack.dataFederation.createDatasetWizard.timestampFieldFormatPlaceholder',
+                      { defaultMessage: 'yyyy-MM-dd HH:mm:ss' }
+                    )}
+                    data-test-subj="createDatasetWizardTimestampFormat"
+                    aria-label={i18n.translate(
+                      'xpack.dataFederation.createDatasetWizard.timestampFieldFormatAriaLabel',
+                      { defaultMessage: 'Select or enter a format' }
+                    )}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGrid>
           </EuiFlexGroup>
         </>
       ) : null}
