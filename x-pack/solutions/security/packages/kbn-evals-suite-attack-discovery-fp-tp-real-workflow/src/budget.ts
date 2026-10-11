@@ -6,7 +6,14 @@
  */
 
 import { CORPUS_CASE_COUNTS } from './constants';
-import { corporaForCohort, DEFAULT_MAX_EXAMPLES_PER_CORPUS, resolveCohort } from './cohort';
+import {
+  corporaForCohort,
+  DEFAULT_MAX_EXAMPLES_PER_CORPUS,
+  effectiveMaxExamples,
+  partitionByEvidence,
+  resolveCohort,
+} from './cohort';
+import { loadCorpusExamples } from './corpus_loader';
 
 /** The Playwright timeout the suite always had; the budget never goes below it. */
 export const MIN_TEST_TIMEOUT_MS = 120 * 60_000;
@@ -24,12 +31,20 @@ const positiveInt = (raw: string | undefined, fallback: number): number => {
 
 /** Cases a run grades per repetition: the cohort's corpora, each capped like `capExamples`. */
 export const countCohortCases = (env: NodeJS.ProcessEnv): number => {
-  const max = Number(env.FP_TP_MAX_EXAMPLES_PER_CORPUS ?? DEFAULT_MAX_EXAMPLES_PER_CORPUS);
-  const cap = Number.isFinite(max) && max > 0 ? max : Infinity;
-  return corporaForCohort(resolveCohort(env.FP_TP_COHORT)).reduce(
-    (sum, name) => sum + Math.min(cap, CORPUS_CASE_COUNTS[name]),
-    0
+  const cohort = resolveCohort(env.FP_TP_COHORT);
+  const max = Number(
+    effectiveMaxExamples(cohort, env.FP_TP_MAX_EXAMPLES_PER_CORPUS) ??
+      DEFAULT_MAX_EXAMPLES_PER_CORPUS
   );
+  const cap = Number.isFinite(max) && max > 0 ? max : Infinity;
+  return corporaForCohort(cohort).reduce((sum, name) => {
+    // `evidenced` grades only rows carrying raw events, so count those, not the corpus size.
+    const available =
+      cohort === 'evidenced'
+        ? partitionByEvidence(loadCorpusExamples(name)).scored.length
+        : CORPUS_CASE_COUNTS[name];
+    return sum + Math.min(cap, available);
+  }, 0);
 };
 
 /**

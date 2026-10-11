@@ -63,6 +63,16 @@ export const capExamples = <T>(examples: T[], rawMax: string | undefined): T[] =
   return Number.isFinite(max) && max > 0 ? examples.slice(0, max) : examples;
 };
 
+/**
+ * The cap value a cohort actually uses. `evidenced` is a small, fully eligible set
+ * (39 rows), so an unset cap means no cap there: the default of 15 would silently
+ * drop 6 of the 21 adversarial twins. An explicit value still wins.
+ */
+export const effectiveMaxExamples = (
+  cohort: FpTpCohort,
+  rawMax: string | undefined
+): string | undefined => (cohort === 'evidenced' && rawMax === undefined ? '0' : rawMax);
+
 /** True when the case payload carries raw events the seeder can index. */
 export const hasEvidence = (payload: Record<string, unknown>): boolean =>
   Array.isArray(payload.events) && payload.events.length > 0;

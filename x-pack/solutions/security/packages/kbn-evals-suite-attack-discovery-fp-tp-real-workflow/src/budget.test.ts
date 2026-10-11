@@ -14,6 +14,10 @@ describe('countCohortCases', () => {
     );
   });
 
+  it('counts all 39 event-bearing rows for the evidenced cohort (no default cap)', () => {
+    expect(countCohortCases({ FP_TP_COHORT: 'evidenced' })).toBe(39);
+  });
+
   it('applies the per-corpus cap on top of the cohort', () => {
     // benign-day 96→15, fp-alerts 54→15, tp-chains 3, twins 21→15, perturbations 15, cloud 78→15
     expect(countCohortCases({ FP_TP_COHORT: 'scored' })).toBe(15 + 15 + 3 + 15 + 15 + 15);

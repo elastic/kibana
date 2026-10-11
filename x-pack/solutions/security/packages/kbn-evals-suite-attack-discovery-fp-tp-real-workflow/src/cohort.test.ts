@@ -10,6 +10,7 @@ import {
   capExamples,
   corporaForCohort,
   DEFAULT_MAX_EXAMPLES_PER_CORPUS,
+  effectiveMaxExamples,
   resolveCohort,
   hasEvidence,
   partitionByEvidence,
@@ -107,5 +108,26 @@ describe('evidenced cohort', () => {
     expect(excluded).toBe(3);
     expect(hasEvidence({ events: [{}] })).toBe(true);
     expect(hasEvidence({ events: 'x' })).toBe(false);
+  });
+
+  it('grades all 39 evidenced rows by default; the 15/corpus cap would drop 6 twins', () => {
+    const graded = (rawMax: string | undefined) =>
+      corporaForCohort('evidenced').reduce(
+        (sum, name) =>
+          sum +
+          capExamples(
+            partitionByEvidence(loadCorpusExamples(name)).scored,
+            effectiveMaxExamples('evidenced', rawMax)
+          ).length,
+        0
+      );
+    expect(graded(undefined)).toBe(39);
+    expect(graded('10')).toBe(10 + 10 + 3);
+  });
+
+  it('only lifts the default cap for the evidenced cohort', () => {
+    expect(effectiveMaxExamples('evidenced', '5')).toBe('5');
+    expect(effectiveMaxExamples('scored', undefined)).toBeUndefined();
+    expect(effectiveMaxExamples('all', undefined)).toBeUndefined();
   });
 });

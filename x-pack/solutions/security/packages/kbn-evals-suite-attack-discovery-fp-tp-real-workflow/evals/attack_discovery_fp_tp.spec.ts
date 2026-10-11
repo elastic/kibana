@@ -34,7 +34,13 @@ import {
 } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
 import { CORPUS_NAMES, type CorpusName } from '../src/constants';
-import { capExamples, corporaForCohort, partitionByEvidence, resolveCohort } from '../src/cohort';
+import {
+  capExamples,
+  corporaForCohort,
+  effectiveMaxExamples,
+  partitionByEvidence,
+  resolveCohort,
+} from '../src/cohort';
 import { loadCorpusExamples } from '../src/corpus_loader';
 import {
   payloadConformance,
@@ -72,7 +78,13 @@ const corpusDataset = (name: CorpusName): EvaluationDataset => {
   // Live-run cap: live LLM verdicts run ~28s/case (run9), so 7 corpora × 20
   // cases ≈ 66min of grading. Cap at 15 per corpus (105 cases ≈ 50min) inside
   // the 120-min Playwright test timeout; raise (or unset) for a full sweep.
-  const examples = capExamples(all, process.env.FP_TP_MAX_EXAMPLES_PER_CORPUS);
+  const examples = capExamples(
+    all,
+    effectiveMaxExamples(
+      resolveCohort(process.env.FP_TP_COHORT),
+      process.env.FP_TP_MAX_EXAMPLES_PER_CORPUS
+    )
+  );
   return {
     name: `security: attack-discovery-fp-tp ${name}`,
     description: `${examples.length} labeled ${name} cases graded against the review verdict.`,
