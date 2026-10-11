@@ -1,0 +1,22 @@
+{
+  "sha1": "b0b622297b076e6060b5a71b9d369a09c5a5b252",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "f52a69848223796-4cfaa649570b3e9",
+      "title": "Endpoint list isolation filter metadata list returns only the host whose isolation state matches the kuery",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/api/tests/endpoint_list_isolation_filter.spec.ts",
+        "line": 164,
+        "column": 6
+      }
+    }
+  ]
+}

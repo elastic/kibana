@@ -69,6 +69,8 @@ describe('deleteIndexedFleetAgents', () => {
     expect(deleteByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         index: agentIndexes,
+        allow_no_indices: true,
+        ignore_unavailable: true,
         conflicts: 'proceed',
         expand_wildcards: 'all',
       })
@@ -77,6 +79,7 @@ describe('deleteIndexedFleetAgents', () => {
     expect(refresh).toHaveBeenCalledWith({
       index: agentIndexes,
       ignore_unavailable: true,
+      allow_no_indices: true,
       expand_wildcards: 'all',
     });
     expect(count).toHaveBeenCalled();
@@ -130,6 +133,12 @@ describe('deleteIndexedFleetAgents', () => {
 
     expect(deleteByQuery).toHaveBeenCalledTimes(5);
     expect(refresh).toHaveBeenCalledTimes(5);
+    expect(refresh).toHaveBeenCalledWith({
+      index: agentIndexes,
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      expand_wildcards: 'all',
+    });
     expect(updateByQuery).toHaveBeenCalledTimes(1);
   });
 
