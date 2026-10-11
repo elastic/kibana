@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/plugin-initialize-example-plugin",
+  "owner": "@elastic/kibana-core",
+  "description": "Example of the initialize() plugin lifecycle hook: its status API, and the routes and app core gates until it has run",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "pluginInitializeExample",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [],
+    "hasInitialization": true
+  }
+}

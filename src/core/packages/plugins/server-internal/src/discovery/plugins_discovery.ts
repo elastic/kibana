@@ -15,6 +15,7 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { PluginWrapper } from '../plugin';
 import { pluginManifestFromPluginPackage } from './plugin_manifest_from_plugin_package';
+import type { DeferredInitEngine } from '../deferred_init';
 import type { InstanceInfo } from '../plugin_context';
 import { createPluginInitializerContext } from '../plugin_context';
 import type { PluginsConfig } from '../plugins_config';
@@ -37,11 +38,13 @@ export function discover({
   coreContext,
   instanceInfo,
   nodeInfo,
+  deferredInitEngine,
 }: {
   config: PluginsConfig;
   coreContext: CoreContext;
   instanceInfo: InstanceInfo;
   nodeInfo: NodeInfo;
+  deferredInitEngine: DeferredInitEngine;
 }) {
   const log = coreContext.logger.get('plugins-discovery');
   log.debug('Discovering plugins...');
@@ -58,7 +61,14 @@ export function discover({
   ).pipe(
     concatMap((pluginPathOrError) => {
       return typeof pluginPathOrError === 'string'
-        ? createPlugin$(pluginPathOrError, log, coreContext, instanceInfo, nodeInfo)
+        ? createPlugin$(
+            pluginPathOrError,
+            log,
+            coreContext,
+            instanceInfo,
+            nodeInfo,
+            deferredInitEngine
+          )
         : [pluginPathOrError];
     })
   );
@@ -86,6 +96,7 @@ export function discover({
         manifest,
         instanceInfo,
         nodeInfo,
+        deferredInitEngine,
       });
 
       return new PluginWrapper({
@@ -129,13 +140,15 @@ export function discover({
  * @param coreContext Kibana core context.
  * @param instanceInfo Info about the instance running Kibana, including uuid.
  * @param nodeRoles Roles this process has been configured with.
+ * @param deferredInitEngine Engine that tracks every plugin's `initialize()` status.
  */
 function createPlugin$(
   path: string,
   log: Logger,
   coreContext: CoreContext,
   instanceInfo: InstanceInfo,
-  nodeInfo: NodeInfo
+  nodeInfo: NodeInfo,
+  deferredInitEngine: DeferredInitEngine
 ) {
   return from(parseManifest(path, coreContext.env.packageInfo)).pipe(
     map((manifest) => {
@@ -151,6 +164,7 @@ function createPlugin$(
           manifest,
           instanceInfo,
           nodeInfo,
+          deferredInitEngine,
         }),
       });
     }),

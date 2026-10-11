@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { duration } from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { isPromise } from '@kbn/std';
@@ -22,7 +22,12 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { coreLifecycleMock, coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
-import type { SharedGlobalConfig, PluginInitializerContext } from '@kbn/core-plugins-server';
+import type {
+  SharedGlobalConfig,
+  PluginInitializerContext,
+  PluginInitialization,
+  PluginInitStatus,
+} from '@kbn/core-plugins-server';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
@@ -85,8 +90,16 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
   return mock;
 }
 
-export type PluginInitializerContextMock<T> = Omit<PluginInitializerContext<T>, 'config'> & {
+type MockedPluginInitialization = jest.Mocked<Omit<PluginInitialization, 'status$'>> & {
+  status$: BehaviorSubject<PluginInitStatus>;
+};
+
+export type PluginInitializerContextMock<T> = Omit<
+  PluginInitializerContext<T>,
+  'config' | 'initialization'
+> & {
   config: MockedPluginInitializerConfig<T>;
+  initialization: MockedPluginInitialization;
 };
 
 function pluginInitializerContextMock<T>(config: T = {} as T) {
@@ -115,6 +128,11 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
     },
     config: pluginInitializerContextConfigMock<T>(config),
     node: nodeServiceMock.createInternalPrebootContract(),
+    initialization: {
+      initialize: jest.fn().mockResolvedValue(undefined),
+      status$: new BehaviorSubject<PluginInitStatus>({ state: 'available', attempts: 0 }),
+      getStatus: jest.fn().mockReturnValue({ state: 'available', attempts: 0 }),
+    },
   };
 
   return mock;

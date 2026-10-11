@@ -1237,6 +1237,15 @@ importers:
       '@kbn/core-data-streams-server-mocks':
         specifier: workspace:*
         version: link:src/core/packages/data-streams/server-mocks
+      '@kbn/core-deferred-init-browser':
+        specifier: workspace:*
+        version: link:src/core/packages/plugins/deferred-init-browser
+      '@kbn/core-deferred-init-browser-internal':
+        specifier: workspace:*
+        version: link:src/core/packages/plugins/deferred-init-browser-internal
+      '@kbn/core-deferred-init-common':
+        specifier: workspace:*
+        version: link:src/core/packages/plugins/deferred-init-common
       '@kbn/core-deprecations-browser':
         specifier: workspace:*
         version: link:src/core/packages/deprecations/browser
@@ -2965,6 +2974,12 @@ importers:
       '@kbn/panel-loader':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-panel-loader
+      '@kbn/plugin-initialize-example-consumer-plugin':
+        specifier: workspace:*
+        version: link:examples/plugin_initialize_example_consumer
+      '@kbn/plugin-initialize-example-plugin':
+        specifier: workspace:*
+        version: link:examples/plugin_initialize_example
       '@kbn/portable-dashboards-example':
         specifier: workspace:*
         version: link:examples/portable_dashboards_example
@@ -6936,6 +6951,10 @@ importers:
 
   examples/partial_results_example: {}
 
+  examples/plugin_initialize_example: {}
+
+  examples/plugin_initialize_example_consumer: {}
+
   examples/portable_dashboards_example: {}
 
   examples/preboot_example: {}
@@ -7437,6 +7456,12 @@ importers:
   src/core/packages/plugins/contracts-browser: {}
 
   src/core/packages/plugins/contracts-server: {}
+
+  src/core/packages/plugins/deferred-init-browser: {}
+
+  src/core/packages/plugins/deferred-init-browser-internal: {}
+
+  src/core/packages/plugins/deferred-init-common: {}
 
   src/core/packages/plugins/server: {}
 

@@ -53,6 +53,12 @@ function parseLegacyKibanaPlatformPlugin(manifestPath) {
     );
   }
 
+  if (manifest.hasInitialization && !manifest.server) {
+    throw new TypeError(
+      `Plugin ${manifest.id} sets hasInitialization without a server entry; initialize() is a server-side lifecycle (${manifestPath})`
+    );
+  }
+
   return {
     directory: Path.dirname(manifestPath),
     manifestPath,
@@ -68,6 +74,7 @@ function parseLegacyKibanaPlatformPlugin(manifestPath) {
       owner: manifest.owner,
       description: manifest.description,
       enabledOnAnonymousPages: Boolean(manifest.enabledOnAnonymousPages),
+      hasInitialization: Boolean(manifest.hasInitialization),
       requiredPlugins: isValidDepsDeclaration(manifest.requiredPlugins, 'requiredPlugins'),
       optionalPlugins: isValidDepsDeclaration(manifest.optionalPlugins, 'optionalPlugins'),
       requiredBundles: isValidDepsDeclaration(manifest.requiredBundles, 'requiredBundles'),

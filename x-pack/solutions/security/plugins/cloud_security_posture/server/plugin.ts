@@ -127,17 +127,21 @@ export class CspPlugin
         );
 
         // If package is installed we want to make sure all needed assets are installed.
-        // initialize() is idempotent, so retrying on transient failures (e.g. ES not ready,
+        // initializeCspResources() is idempotent, so retrying on transient failures (e.g. ES not ready,
         // transforms not yet available) is safe and prevents isPluginInitialized from
         // staying false when CI infrastructure is slow to come up.
         if (packageInfo) {
-          pRetry(() => this.initialize(core, plugins.taskManager, packageInfo.install_version), {
-            ...getRetryOptions(this.logger, 'initialize'),
-            // Use longer backoff than the default (1s) so transient ES/transform
-            // failures have time to resolve before the next attempt.
-            minTimeout: 5_000,
-            maxTimeout: 30_000,
-          }).catch((e) => {
+          pRetry(
+            () =>
+              this.initializeCspResources(core, plugins.taskManager, packageInfo.install_version),
+            {
+              ...getRetryOptions(this.logger, 'initializeCspResources'),
+              // Use longer backoff than the default (1s) so transient ES/transform
+              // failures have time to resolve before the next attempt.
+              minTimeout: 5_000,
+              maxTimeout: 30_000,
+            }
+          ).catch((e) => {
             this.logger.error('CSP plugin initialization failed after all retries', e);
           });
         }
@@ -206,7 +210,11 @@ export class CspPlugin
             soClient: SavedObjectsClientContract
           ): Promise<PackagePolicy> => {
             if (isCspPackage(packagePolicy.package?.name)) {
-              await this.initialize(core, plugins.taskManager, packagePolicy.package!.version);
+              await this.initializeCspResources(
+                core,
+                plugins.taskManager,
+                packagePolicy.package!.version
+              );
               return packagePolicy;
             }
 
@@ -246,12 +254,12 @@ export class CspPlugin
   /**
    * Initialization is idempotent and required for (re)creating indices and transforms.
    */
-  async initialize(
+  async initializeCspResources(
     core: CoreStart,
     taskManager: TaskManagerStartContract,
     packagePolicyVersion: string
   ): Promise<void> {
-    this.logger.debug('initialize');
+    this.logger.debug('initializeCspResources');
     const esClient = core.elasticsearch.client.asInternalUser;
     const soClient = core.savedObjects.createInternalRepository();
     const isIntegrationVersionIncludesTransformAsset =

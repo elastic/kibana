@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Observable } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { PluginName } from '@kbn/core-base-common';
 import type {
@@ -14,13 +15,24 @@ import type {
   PluginContractMap,
   PluginContractResolverResponseItem,
 } from '@kbn/core-plugins-contracts-server';
+import type { PluginInitStatus } from '@kbn/core-plugins-server';
+import type { DeferredInitEngine } from './deferred_init';
 
 export type IRuntimePluginContractResolver = PublicMethodsOf<RuntimePluginContractResolver>;
+
+/** The `core.plugins` APIs that only accept dependencies declared in the calling plugin's manifest. */
+type DependencyApi =
+  | 'onSetup'
+  | 'onStart'
+  | 'initializePlugin'
+  | 'pluginInitStatus$'
+  | 'getPluginInitStatus';
 
 export class RuntimePluginContractResolver {
   private dependencyMap?: Map<PluginName, Set<PluginName>>;
   private setupContracts?: Map<PluginName, unknown>;
   private startContracts?: Map<PluginName, unknown>;
+  private deferredInitEngine?: DeferredInitEngine;
 
   private readonly setupRequestQueue: PluginContractRequest[] = [];
   private readonly startRequestQueue: PluginContractRequest[] = [];
@@ -29,24 +41,15 @@ export class RuntimePluginContractResolver {
     this.dependencyMap = new Map(depMap.entries());
   }
 
+  setDeferredInitEngine(engine: DeferredInitEngine) {
+    this.deferredInitEngine = engine;
+  }
+
   onSetup = <T extends PluginContractMap>(
     pluginName: PluginName,
     dependencyNames: Array<keyof T>
   ): Promise<PluginContractResolverResponse<T>> => {
-    if (!this.dependencyMap) {
-      throw new Error('onSetup cannot be called before setDependencyMap');
-    }
-
-    const dependencyList = this.dependencyMap.get(pluginName) ?? new Set();
-    const notDependencyPlugins = dependencyNames.filter(
-      (name) => !dependencyList.has(name as PluginName)
-    );
-    if (notDependencyPlugins.length) {
-      throw new Error(
-        'Dynamic contract resolving requires the dependencies to be declared in the plugin manifest.' +
-          `Undeclared dependencies: ${notDependencyPlugins.join(', ')}`
-      );
-    }
+    this.assertDeclaredDependencies('onSetup', pluginName, dependencyNames as PluginName[]);
 
     if (this.setupContracts) {
       const response = createContractRequestResponse(
@@ -67,20 +70,7 @@ export class RuntimePluginContractResolver {
     pluginName: PluginName,
     dependencyNames: Array<keyof T>
   ): Promise<PluginContractResolverResponse<T>> => {
-    if (!this.dependencyMap) {
-      throw new Error('onStart cannot be called before setDependencyMap');
-    }
-
-    const dependencyList = this.dependencyMap.get(pluginName) ?? new Set();
-    const notDependencyPlugins = dependencyNames.filter(
-      (name) => !dependencyList.has(name as PluginName)
-    );
-    if (notDependencyPlugins.length) {
-      throw new Error(
-        'Dynamic contract resolving requires the dependencies to be declared in the plugin manifest.' +
-          `Undeclared dependencies: ${notDependencyPlugins.join(', ')}`
-      );
-    }
+    this.assertDeclaredDependencies('onStart', pluginName, dependencyNames as PluginName[]);
 
     if (this.startContracts) {
       const response = createContractRequestResponse(
@@ -96,6 +86,58 @@ export class RuntimePluginContractResolver {
       return startContractRequest.contractPromise;
     }
   };
+
+  /**
+   * Backs `core.plugins.initializePlugin()`: waits until the declared dependency is `available`,
+   * honoring a retry the engine has already scheduled for it rather than forcing a new attempt.
+   * `async` so an undeclared dependency surfaces as a rejection like any other failure.
+   */
+  initializePlugin = async (pluginName: PluginName, dependencyName: PluginName): Promise<void> => {
+    this.assertDeclaredDependencies('initializePlugin', pluginName, [dependencyName]);
+    await this.getEngine('initializePlugin').waitUntilAvailable(dependencyName);
+  };
+
+  /** Backs `core.plugins.pluginInitStatus$()`: replays the dependency's current status and never triggers anything. */
+  pluginInitStatus$ = (
+    pluginName: PluginName,
+    dependencyName: PluginName
+  ): Observable<PluginInitStatus> => {
+    this.assertDeclaredDependencies('pluginInitStatus$', pluginName, [dependencyName]);
+    return this.getEngine('pluginInitStatus$').status$(dependencyName);
+  };
+
+  /** Backs `core.plugins.getPluginInitStatus()`: synchronous and never triggers anything. */
+  getPluginInitStatus = (pluginName: PluginName, dependencyName: PluginName): PluginInitStatus => {
+    this.assertDeclaredDependencies('getPluginInitStatus', pluginName, [dependencyName]);
+    return this.getEngine('getPluginInitStatus').getStatus(dependencyName);
+  };
+
+  private assertDeclaredDependencies(
+    api: DependencyApi,
+    pluginName: PluginName,
+    dependencyNames: PluginName[]
+  ): void {
+    if (!this.dependencyMap) {
+      throw new Error(`${api} cannot be called before setDependencyMap`);
+    }
+
+    const dependencyList = this.dependencyMap.get(pluginName) ?? new Set();
+    const notDependencyPlugins = dependencyNames.filter((name) => !dependencyList.has(name));
+    if (notDependencyPlugins.length) {
+      throw new Error(
+        'Dynamic contract resolving requires the dependencies to be declared in the plugin manifest.' +
+          `Undeclared dependencies: ${notDependencyPlugins.join(', ')}`
+      );
+    }
+  }
+
+  /** `PluginsSystem.setupPlugins` attaches the engine before any plugin's `setup()` runs. */
+  private getEngine(api: DependencyApi): DeferredInitEngine {
+    if (!this.deferredInitEngine) {
+      throw new Error(`${api} is not available before plugin setup`);
+    }
+    return this.deferredInitEngine;
+  }
 
   resolveSetupRequests(setupContracts: Map<PluginName, unknown>) {
     if (this.setupContracts) {

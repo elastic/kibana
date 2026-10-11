@@ -26,6 +26,7 @@ import { PluginDiscoveryError } from './discovery';
 import { PluginWrapper } from './plugin';
 import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
+import { DeferredInitEngine } from './deferred_init';
 import type { PluginsConfigType } from './plugins_config';
 import { config } from './plugins_config';
 import { take } from 'rxjs';
@@ -140,6 +141,7 @@ async function testSetup() {
 
   pluginsConfig = {
     initialize: true,
+    initializeOnBoot: true,
     paths: [],
     allowlistPluginGroups: ['observability'],
   };
@@ -751,6 +753,7 @@ describe('PluginsService', () => {
           additionalPluginPaths: [],
           allowlistPluginGroups: ['observability'],
           initialize: true,
+          initializeOnBoot: true,
           pluginSearchPaths: [
             resolve(REPO_ROOT, '..', 'kibana-extra'),
             resolve(REPO_ROOT, 'plugins'),
@@ -760,6 +763,7 @@ describe('PluginsService', () => {
         coreContext: { coreId, env, logger, configService },
         instanceInfo: { uuid: 'uuid', airgapped: false },
         nodeInfo: { roles: { backgroundTasks: true, ui: true, migrator: false } },
+        deferredInitEngine: expect.any(DeferredInitEngine),
       });
 
       const logs = loggingSystemMock.collect(logger);
@@ -1370,6 +1374,7 @@ describe('PluginsService', () => {
 
       expect(prebootMockPluginSystem.stopPlugins).not.toHaveBeenCalled();
       expect(standardMockPluginSystem.startPlugins).not.toHaveBeenCalled();
+      expect(standardMockPluginSystem.setInitializeOnBoot).not.toHaveBeenCalled();
     });
 
     it('stops `preboot` plugins and starts `standard` ones', async () => {
@@ -1388,6 +1393,32 @@ describe('PluginsService', () => {
       expect(standardMockPluginSystem.startPlugins).toHaveBeenCalledTimes(1);
       expect(standardMockPluginSystem.startPlugins).toHaveBeenCalledWith(startDeps);
       expect(prebootMockPluginSystem.startPlugins).not.toHaveBeenCalled();
+    });
+
+    it('forwards plugins.initializeOnBoot (default `true`) to the standard plugins system before starting them', async () => {
+      await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
+      await pluginsService.preboot(prebootDeps);
+      await pluginsService.setup(setupDeps);
+
+      await pluginsService.start(startDeps);
+
+      expect(standardMockPluginSystem.setInitializeOnBoot).toHaveBeenCalledTimes(1);
+      expect(standardMockPluginSystem.setInitializeOnBoot).toHaveBeenCalledWith(true);
+      expect(standardMockPluginSystem.setInitializeOnBoot.mock.invocationCallOrder[0]).toBeLessThan(
+        standardMockPluginSystem.startPlugins.mock.invocationCallOrder[0]
+      );
+      expect(prebootMockPluginSystem.setInitializeOnBoot).not.toHaveBeenCalled();
+    });
+
+    it('forwards plugins.initializeOnBoot: `false` to the standard plugins system', async () => {
+      config$.next({ plugins: { initialize: true, initializeOnBoot: false } });
+
+      await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
+      await pluginsService.preboot(prebootDeps);
+      await pluginsService.setup(setupDeps);
+      await pluginsService.start(startDeps);
+
+      expect(standardMockPluginSystem.setInitializeOnBoot).toHaveBeenCalledWith(false);
     });
   });
 

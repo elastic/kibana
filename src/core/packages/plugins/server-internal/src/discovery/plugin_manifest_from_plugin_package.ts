@@ -21,6 +21,7 @@ export function pluginManifestFromPluginPackage(
     id: manifest.plugin.id,
     version: '1.0.0',
     enabledOnAnonymousPages: manifest.plugin.enabledOnAnonymousPages,
+    hasInitialization: manifest.plugin.hasInitialization,
     serviceFolders: manifest.serviceFolders,
     kibanaVersion,
     optionalPlugins: manifest.plugin.optionalPlugins ?? [],

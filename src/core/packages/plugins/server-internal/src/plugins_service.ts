@@ -36,6 +36,7 @@ import type { PluginsConfigType } from './plugins_config';
 import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { createBrowserConfig } from './create_browser_config';
+import { DeferredInitEngine, registerDeferredInitStatusRoute } from './deferred_init';
 
 /** @internal */
 export type DiscoveredPlugins = {
@@ -89,6 +90,7 @@ export class PluginsService
   private readonly config$: Observable<PluginsConfig>;
   private readonly pluginConfigDescriptors = new Map<PluginName, PluginConfigDescriptor>();
   private readonly pluginConfigUsageDescriptors = new Map<string, Record<string, any | any[]>>();
+  private readonly deferredInitEngine: DeferredInitEngine;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-service');
@@ -96,8 +98,15 @@ export class PluginsService
     this.config$ = coreContext.configService
       .atPath<PluginsConfigType>('plugins')
       .pipe(map((rawConfig) => new PluginsConfig(rawConfig, coreContext.env)));
+    this.deferredInitEngine = new DeferredInitEngine(
+      coreContext.logger.get('plugins-initialization')
+    );
     this.prebootPluginsSystem = new PluginsSystem(this.coreContext, PluginType.preboot);
-    this.standardPluginsSystem = new PluginsSystem(this.coreContext, PluginType.standard);
+    this.standardPluginsSystem = new PluginsSystem(
+      this.coreContext,
+      PluginType.standard,
+      this.deferredInitEngine
+    );
   }
 
   public async discover({
@@ -120,7 +129,9 @@ export class PluginsService
       nodeInfo: {
         roles: node.roles,
       },
+      deferredInitEngine: this.deferredInitEngine,
     });
+    this.standardPluginsSystem.setNodeRoles(node.roles);
 
     await this.handleDiscoveryErrors(error$);
     await this.handleDiscoveredPlugins(plugin$);
@@ -171,6 +182,10 @@ export class PluginsService
 
     const config = await firstValueFrom(this.config$);
 
+    // Always-available core endpoint the initializing UI polls for plugin initialization status.
+    // Registered on a core router so it is never gated while a plugin is initializing.
+    registerDeferredInitStatusRoute(deps.http.createRouter(''), this.deferredInitEngine);
+
     let contracts = new Map<PluginName, unknown>();
     if (config.initialize) {
       contracts = await this.standardPluginsSystem.setupPlugins(deps);
@@ -200,6 +215,7 @@ export class PluginsService
     await this.prebootPluginsSystem.stopPlugins();
     this.arePrebootPluginsStopped = true;
 
+    this.standardPluginsSystem.setInitializeOnBoot(config.initializeOnBoot);
     const contracts = await this.standardPluginsSystem.startPlugins(deps);
     return { contracts };
   }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { shareReplay } from 'rxjs';
+import { defer, shareReplay } from 'rxjs';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { NodeInfo } from '@kbn/core-node-server';
@@ -28,6 +28,7 @@ import type {
 } from './plugins_service';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
 import type { IRuntimePluginContractResolver } from './plugin_contract_resolver';
+import { createGuardedRouter, type DeferredInitEngine } from './deferred_init';
 
 /** @internal */
 export interface InstanceInfo {
@@ -49,6 +50,7 @@ export interface InstanceInfo {
  * @param manifest The manifest of the plugin we're building these values for.
  * @param instanceInfo Info about the instance Kibana is running on.
  * @param nodeInfo Info about how the Kibana process has been configured.
+ * @param deferredInitEngine The engine that tracks every plugin's `initialize()` status.
  *
  * @internal
  */
@@ -58,12 +60,14 @@ export function createPluginInitializerContext({
   manifest,
   instanceInfo,
   nodeInfo,
+  deferredInitEngine,
 }: {
   coreContext: CoreContext;
   opaqueId: PluginOpaqueId;
   manifest: PluginManifest;
   instanceInfo: InstanceInfo;
   nodeInfo: NodeInfo;
+  deferredInitEngine: DeferredInitEngine;
 }): PluginInitializerContext {
   return {
     opaqueId,
@@ -119,6 +123,16 @@ export function createPluginInitializerContext({
       get<T>() {
         return coreContext.configService.atPathSync<T>(manifest.configPath);
       },
+    },
+
+    /**
+     * This plugin's own `initialize()` status, under the id the engine tracks it by. `status$` is
+     * built on subscribe so creating the context leaves no engine record behind.
+     */
+    initialization: {
+      initialize: () => deferredInitEngine.initialize(manifest.id),
+      status$: defer(() => deferredInitEngine.status$(manifest.id)),
+      getStatus: () => deferredInitEngine.getStatus(manifest.id),
     },
   };
 }
@@ -189,12 +203,31 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
   deps,
   plugin,
   runtimeResolver,
+  deferredInitEngine,
 }: {
   deps: PluginsServiceSetupDeps;
   plugin: PluginWrapper<TPlugin, TPluginDependencies>;
   runtimeResolver: IRuntimePluginContractResolver;
+  deferredInitEngine?: DeferredInitEngine;
 }): CoreSetup {
   const router = deps.http.createRouter('', plugin.opaqueId);
+
+  // Set only for plugins with an `initialize()` hook, so the router selection below narrows on it
+  // instead of re-checking both conditions at each use.
+  const gatingEngine = plugin.hasInitialization ? deferredInitEngine : undefined;
+
+  // A plugin with `initialize()` gets a guarded router whose routes answer 503 until the plugin is
+  // available. Memoized on the first `createRouter()` call. Asset serving via `resources` keeps the
+  // raw, un-gated router.
+  let exposedRouter: IRouter | undefined;
+  const getExposedRouter = (): IRouter => {
+    if (!exposedRouter) {
+      exposedRouter = gatingEngine
+        ? createGuardedRouter(router, gatingEngine, plugin.name)
+        : router;
+    }
+    return exposedRouter;
+  };
 
   return {
     analytics: {
@@ -242,7 +275,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
         provider: IContextProvider<Context, ContextName>
       ) => deps.http.registerRouteHandlerContext(plugin.opaqueId, contextName, provider),
       createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>() =>
-        router as IRouter<Context>,
+        getExposedRouter() as IRouter<Context>,
       resources: deps.httpResources.createRegistrar(router),
       registerOnPreRouting: deps.http.registerOnPreRouting,
       registerOnPreAuth: deps.http.registerOnPreAuth,
@@ -308,6 +341,12 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     plugins: {
       onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
+      initializePlugin: (dependencyName) =>
+        runtimeResolver.initializePlugin(plugin.name, dependencyName),
+      pluginInitStatus$: (dependencyName) =>
+        runtimeResolver.pluginInitStatus$(plugin.name, dependencyName),
+      getPluginInitStatus: (dependencyName) =>
+        runtimeResolver.getPluginInitStatus(plugin.name, dependencyName),
     },
     pricing: {
       isFeatureAvailable: deps.pricing.isFeatureAvailable,
@@ -422,6 +461,12 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
+      initializePlugin: (dependencyName) =>
+        runtimeResolver.initializePlugin(plugin.name, dependencyName),
+      pluginInitStatus$: (dependencyName) =>
+        runtimeResolver.pluginInitStatus$(plugin.name, dependencyName),
+      getPluginInitStatus: (dependencyName) =>
+        runtimeResolver.getPluginInitStatus(plugin.name, dependencyName),
     },
     pricing: deps.pricing,
     security: {

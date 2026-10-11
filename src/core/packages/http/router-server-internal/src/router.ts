@@ -14,6 +14,8 @@ import apm from 'elastic-apm-node';
 import type { Logger } from '@kbn/logging';
 import type { UnauthorizedError as EsNotAuthorizedError } from '@kbn/es-errors';
 import { isUnauthorizedError as isElasticsearchUnauthorizedError } from '@kbn/es-errors';
+import { isPluginInitializationError } from '@kbn/core-deferred-init-common';
+import type { DeferredInitUnavailableBody } from '@kbn/core-deferred-init-common';
 import type {
   KibanaRequest,
   ErrorHttpResponseOptions,
@@ -228,6 +230,29 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
         this.log.error('401 Unauthorized', formatErrorMeta(401, { request, error }));
         return hapiResponseAdapter.handle(
           kibanaResponseFactory.unauthorized(convertEsUnauthorized(error))
+        );
+      }
+
+      // a plugin's `initialize()` did not succeed and the rejection escaped the handler; mirror the
+      // guarded router's own 503 (same `{ pluginId, status }` body) so this trigger path behaves
+      // the same way. `error.status` carries the plugin's real state at throw time; fall back to
+      // `failed`, since an initialization attempt only rejects once it has failed.
+      if (isPluginInitializationError(error)) {
+        this.log.debug(
+          `503 Plugin "${error.pluginId}" not initialized`,
+          formatErrorMeta(503, { request, error })
+        );
+        const body: DeferredInitUnavailableBody = {
+          pluginId: error.pluginId,
+          status: error.status ?? 'failed',
+        };
+        return hapiResponseAdapter.handle(
+          kibanaResponseFactory.custom({
+            statusCode: 503,
+            headers: { 'retry-after': '1' },
+            bypassErrorFormat: true,
+            body,
+          })
         );
       }
 

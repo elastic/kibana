@@ -65,6 +65,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     requiredBundles,
     runtimePluginDependencies,
     enabledOnAnonymousPages,
+    hasInitialization,
     type,
     __category__,
   } = plugin;
@@ -125,6 +126,17 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     throw err(`plugin.enabledOnAnonymousPages`, enabledOnAnonymousPages, `must be a boolean`);
   }
 
+  if (hasInitialization !== undefined && typeof hasInitialization !== 'boolean') {
+    throw err(`plugin.hasInitialization`, hasInitialization, `must be a boolean`);
+  }
+  if (hasInitialization === true && server !== true) {
+    throw err(
+      `plugin.hasInitialization`,
+      hasInitialization,
+      `requires plugin.server to be true; initialize() is a server-side lifecycle`
+    );
+  }
+
   if (type !== undefined && type !== 'preboot') {
     throw err(`plugin.type`, type, `must be undefined or "preboot"`);
   }
@@ -166,6 +178,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     requiredBundles,
     runtimePluginDependencies,
     enabledOnAnonymousPages,
+    hasInitialization,
     extraPublicDirs,
     [PLUGIN_CATEGORY]: __category__,
   };
