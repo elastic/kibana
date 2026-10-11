@@ -270,6 +270,9 @@ export async function ingestInboundEvent({
         spaceId,
         config: stripIngestTokenHash(connector.config),
         rawBody: body,
+        headers: Object.fromEntries(
+          (spec.events.headers ?? []).map((name) => [name, headers[name]])
+        ),
         log: logger,
       }),
       { maxEvents: maxEmitted, maxPayloadBytes: maxBodyBytes }

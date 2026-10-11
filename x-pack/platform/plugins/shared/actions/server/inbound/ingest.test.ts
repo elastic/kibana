@@ -104,7 +104,7 @@ describe('ingestInboundEvent', () => {
     },
   });
 
-  const createFakeSpec = (handleEvents: jest.Mock) =>
+  const createFakeSpec = (handleEvents: jest.Mock, headers?: string[]) =>
     ({
       metadata: {
         id: '.myConnector',
@@ -124,6 +124,7 @@ describe('ingestInboundEvent', () => {
             eventSchema: z.object({ body: z.unknown() }),
           },
         },
+        headers,
         handleEvents,
       },
     } as ReturnType<typeof getConnectorSpec>);
@@ -609,6 +610,37 @@ describe('ingestInboundEvent', () => {
     });
     expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
     expect(emitConnectorEvents).toHaveBeenCalled();
+  });
+
+  it('passes only the headers the spec declares to the event handler', async () => {
+    const handleEvents = jest.fn().mockResolvedValue({ type: 'emit', events: [] });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents, ['x-vendor-event', 'x-vendor-delivery'])
+    );
+
+    await run({
+      headers: {
+        authorization: `Bearer ${token}`,
+        cookie: 'session=private',
+        'x-vendor-signature': 'private-signature',
+        'x-vendor-event': 'issues',
+      },
+    });
+
+    expect(handleEvents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: { 'x-vendor-event': 'issues', 'x-vendor-delivery': undefined },
+      })
+    );
+  });
+
+  it('passes no headers when the spec declares none', async () => {
+    const handleEvents = jest.fn().mockResolvedValue({ type: 'emit', events: [] });
+    getConnectorSpecMock.mockReturnValue(createFakeSpec(handleEvents));
+
+    await run({ headers: { authorization: `Bearer ${token}`, 'x-vendor-event': 'issues' } });
+
+    expect(handleEvents).toHaveBeenCalledWith(expect.objectContaining({ headers: {} }));
   });
 
   it('returns 202 and emits on the happy path without secrets', async () => {
