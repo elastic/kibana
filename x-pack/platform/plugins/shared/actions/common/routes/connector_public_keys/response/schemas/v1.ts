@@ -13,6 +13,7 @@ export const connectorSsfDiscoveryResponseSchema = schema.object(
     issuer: schema.string({ meta: { description: 'The issuer of the signed tokens.' } }),
     jwks_uri: schema.string({ meta: { description: 'The URL of the public keys.' } }),
     delivery_methods_supported: schema.arrayOf(schema.string(), {
+      maxSize: 10,
       meta: { description: 'The supported delivery methods.' },
     }),
   },
@@ -30,7 +31,7 @@ export const connectorJwksResponseSchema = schema.object(
         alg: schema.string(),
         use: schema.string(),
       }),
-      { meta: { description: 'The public keys of the connector, as JSON Web Keys.' } }
+      { maxSize: 10, meta: { description: 'The public keys of the connector, as JSON Web Keys.' } }
     ),
   },
   { meta: { id: 'connector_jwks_response' } }
