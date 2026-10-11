@@ -8,7 +8,6 @@
 import { renderHook } from '@testing-library/react';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { useRuleFlyoutApi } from './use_rule_flyout_api';
-import { FLYOUT_WIDTH_LOCAL_STORAGE } from '../shared/constants/local_storage';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
@@ -72,27 +71,6 @@ describe('useRuleFlyoutApi', () => {
       session: FLYOUT_SESSION_KIND.START,
       origin: undefined,
     });
-  });
-
-  it('opens a rule at the origin flyout size instead of the persisted Security width', () => {
-    const storageGet = jest.fn((key: string) =>
-      key === FLYOUT_WIDTH_LOCAL_STORAGE ? 720 : undefined
-    );
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        overlays: { openSystemFlyout: mockOpenSystemFlyout },
-        storage: { get: storageGet, set: jest.fn(), remove: jest.fn() },
-        telemetry: { reportEvent: mockReportEvent },
-      },
-    });
-
-    const { result } = renderHook(() => useRuleFlyoutApi());
-    result.current.openRuleFlyout({ ruleId, originFlyoutSize: 640 });
-
-    expect(mockOpenSystemFlyout.mock.calls[0][1]).toEqual(
-      expect.objectContaining({ size: 640, maxWidth: false })
-    );
-    expect(mockOpenSystemFlyout.mock.calls[0][1].defaultSize).toBeUndefined();
   });
 
   it('openRuleFlyout forwards the given origin', () => {

@@ -18,7 +18,7 @@ const renderFlyout = (events: Array<{ timestamp: string; host: string; descripti
   );
 
 describe('InvestigationTimelineFlyout', () => {
-  it('titles the flyout Investigation timeline, and renders one vertical event per entry', () => {
+  it('titles the flyout like its summary row, and renders one vertical event per entry', () => {
     renderFlyout([
       {
         timestamp: '2026-09-11T14:23:32.488Z',
@@ -32,7 +32,7 @@ describe('InvestigationTimelineFlyout', () => {
       },
     ]);
 
-    expect(screen.getByRole('heading', { name: 'Investigation timeline' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Forensic timeline' })).toBeInTheDocument();
     expect(screen.getByTestId('investigationTimelineFlyout')).toHaveClass('euiFlyoutBody');
     expect(
       screen.getAllByTestId('investigationTimelineEventTimestamp').map((el) => el.textContent)
