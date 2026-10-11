@@ -37,6 +37,17 @@ export const RECONCILIATION_TASK_TYPE = 'cases.analyticsV2.reconciliation';
  */
 export const RECONCILIATION_TASK_ID = 'cases-analyticsV2-reconciliation';
 
+/**
+ * Bump to make the next reconciliation tick schedule one full reset. Needed
+ * after fixing a write path that changed case SOs without bumping
+ * `attributes.updated_at`: the incremental cursor never revisits those cases,
+ * so docs written before the fix stay stale until a full walk.
+ *
+ *  1. Incremental ids applied by the incremental-id task were never mirrored
+ *     to `.cases`.
+ */
+export const CASES_BACKFILL_GENERATION = 1;
+
 interface RegisterReconciliationTaskArgs {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
@@ -55,6 +66,8 @@ interface RegisterReconciliationTaskArgs {
     writer: CasesAnalyticsV2WriterContract;
     activityWriter: CasesActivityV2WriterContract;
     attachmentsWriter: CasesAttachmentsV2WriterContract;
+    /** Schedules the one-shot full reset task. Rejects if scheduling fails. */
+    scheduleFullReset: () => Promise<unknown>;
   }>;
 }
 
@@ -71,6 +84,8 @@ interface ReconciliationTaskState {
   activity_last_run_at?: string;
   /** Attachments-surface cursor (from `runAttachmentsReconciliation`). */
   attachments_last_run_at?: string;
+  /** Last `CASES_BACKFILL_GENERATION` satisfied by a full walk. */
+  cases_backfill_generation?: number;
 }
 
 /**
@@ -120,6 +135,34 @@ export function registerReconciliationTask({
           };
 
           const deps = await getRunnerDeps();
+
+          nextState.cases_backfill_generation = previousState.cases_backfill_generation;
+          if (
+            !signal.aborted &&
+            (previousState.cases_backfill_generation ?? 0) < CASES_BACKFILL_GENERATION
+          ) {
+            if (casesLastRunAt == null) {
+              // No cursor, so this tick's cases walk is already a full walk.
+              nextState.cases_backfill_generation = CASES_BACKFILL_GENERATION;
+            } else {
+              // Delegated to the reset task rather than walked here: a full
+              // walk can outlast this task's default timeout on large
+              // tenants, which would pin the cursor and retry forever.
+              try {
+                await deps.scheduleFullReset();
+                nextState.cases_backfill_generation = CASES_BACKFILL_GENERATION;
+                logger.info(
+                  `cases-analyticsV2: scheduled full reset for cases backfill generation ${CASES_BACKFILL_GENERATION}`
+                );
+              } catch (err) {
+                logger.warn(
+                  `cases-analyticsV2: failed to schedule full reset for cases backfill generation ${CASES_BACKFILL_GENERATION}: ${
+                    err instanceof Error ? err.message : String(err)
+                  }. Will retry next tick.`
+                );
+              }
+            }
+          }
 
           // Cooperative cancellation. Task Manager aborts this signal
           // on timeout or shutdown; it never reads the signal itself, so
@@ -364,7 +407,13 @@ export async function resetReconciliationTask({
   // future-proofing so a later change that lets it throw can't break this contract.
   try {
     await scheduleReconciliationTask({ taskManager, logger, intervalMinutes });
-    await taskManager.bulkUpdateState([RECONCILIATION_TASK_ID], () => initialState);
+    // A reset is a full walk (or leaves cursors unset, which forces one), so
+    // it satisfies any pending backfill. Stamping here also keeps the
+    // reset's own state write from re-triggering another reset.
+    await taskManager.bulkUpdateState([RECONCILIATION_TASK_ID], () => ({
+      ...initialState,
+      cases_backfill_generation: CASES_BACKFILL_GENERATION,
+    }));
   } catch (err) {
     logger.warn(
       `cases-analyticsV2: failed to reset reconciliation task state: ${

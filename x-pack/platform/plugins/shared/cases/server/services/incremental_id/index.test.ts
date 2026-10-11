@@ -9,6 +9,7 @@ import { CasesIncrementalIdService } from '.';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { CasesAnalyticsV2WriterContract } from '../../cases_analytics_v2/writer';
 
 describe('CasesIncrementalIdService', () => {
   const savedObjectsClient = savedObjectsClientMock.create();
@@ -349,6 +350,137 @@ describe('CasesIncrementalIdService', () => {
 
       // Only called once, when it rejected
       expect(service.applyIncrementalIdToCaseSo).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('incrementCaseIds analytics v2 mirroring', () => {
+    const cases = [
+      { id: 'case-1', attributes: {}, namespaces: ['default'] },
+      { id: 'case-2', attributes: {}, namespaces: ['second-life'] },
+    ];
+    let writer: jest.Mocked<CasesAnalyticsV2WriterContract>;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      writer = {
+        upsertCase: jest.fn(),
+        deleteCase: jest.fn(),
+        bulkUpsertCases: jest.fn(),
+        bulkDeleteCases: jest.fn(),
+        bulkUpsertCasesAwait: jest.fn(),
+      };
+      service = new CasesIncrementalIdService(savedObjectsClient, mockLogger, writer);
+      service.getOrCreateCaseIdIncrementerSo = jest
+        .fn()
+        .mockImplementation(() => ({ attributes: { last_id: 0 } }));
+      service.applyIncrementalIdToCaseSo = jest.fn().mockResolvedValue(null);
+      service.incrementCounterSO = jest.fn().mockResolvedValue(null);
+    });
+
+    it('re-reads the numbered cases and upserts them to the analytics writer', async () => {
+      const freshCases = [
+        {
+          type: CASE_SAVED_OBJECT,
+          id: 'case-1',
+          attributes: { incremental_id: 1 },
+          references: [],
+        },
+        {
+          type: CASE_SAVED_OBJECT,
+          id: 'case-2',
+          attributes: { incremental_id: 1 },
+          references: [],
+        },
+      ];
+      savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: freshCases });
+
+      // @ts-expect-error: case SO types are not correct
+      await service.incrementCaseIds(cases);
+
+      expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
+        { type: CASE_SAVED_OBJECT, id: 'case-1', namespaces: ['default'] },
+        { type: CASE_SAVED_OBJECT, id: 'case-2', namespaces: ['second-life'] },
+      ]);
+      expect(writer.bulkUpsertCases).toHaveBeenCalledWith(freshCases);
+    });
+
+    it('does not upsert cases that could not be re-read (e.g. deleted mid-run)', async () => {
+      const freshCase = {
+        type: CASE_SAVED_OBJECT,
+        id: 'case-1',
+        attributes: { incremental_id: 1 },
+        references: [],
+      };
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          freshCase,
+          {
+            type: CASE_SAVED_OBJECT,
+            id: 'case-2',
+            attributes: {},
+            references: [],
+            error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+          },
+        ],
+      });
+
+      // @ts-expect-error: case SO types are not correct
+      await service.incrementCaseIds(cases);
+
+      expect(writer.bulkUpsertCases).toHaveBeenCalledWith([freshCase]);
+    });
+
+    it('does not mirror a case whose id was rolled back because the service stopped', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [] });
+      service.applyIncrementalIdToCaseSo = jest
+        .fn()
+        .mockImplementationOnce(() => Promise.resolve(null))
+        .mockImplementationOnce(() => {
+          service.stopService();
+          return Promise.resolve();
+        })
+        .mockImplementationOnce(() => Promise.resolve(null));
+
+      // @ts-expect-error: case SO types are not correct
+      await service.incrementCaseIds(cases);
+
+      expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
+        { type: CASE_SAVED_OBJECT, id: 'case-1', namespaces: ['default'] },
+      ]);
+    });
+
+    it('does not read or write when no ids were applied', async () => {
+      service.applyIncrementalIdToCaseSo = jest.fn().mockRejectedValue(null);
+
+      // @ts-expect-error: case SO types are not correct
+      await service.incrementCaseIds(cases);
+
+      expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+      expect(writer.bulkUpsertCases).not.toHaveBeenCalled();
+    });
+
+    it('does not re-read cases when no analytics writer is provided', async () => {
+      service = new CasesIncrementalIdService(savedObjectsClient, mockLogger);
+      service.getOrCreateCaseIdIncrementerSo = jest
+        .fn()
+        .mockImplementation(() => ({ attributes: { last_id: 0 } }));
+      service.applyIncrementalIdToCaseSo = jest.fn().mockResolvedValue(null);
+      service.incrementCounterSO = jest.fn().mockResolvedValue(null);
+
+      // @ts-expect-error: case SO types are not correct
+      await expect(service.incrementCaseIds(cases)).resolves.toBe(2);
+
+      expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+    });
+
+    it('logs and still reports the processed count when the re-read fails', async () => {
+      savedObjectsClient.bulkGet.mockRejectedValue(new Error('es down'));
+
+      // @ts-expect-error: case SO types are not correct
+      await expect(service.incrementCaseIds(cases)).resolves.toBe(2);
+
+      expect(writer.bulkUpsertCases).not.toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('es down'));
     });
   });
 });
