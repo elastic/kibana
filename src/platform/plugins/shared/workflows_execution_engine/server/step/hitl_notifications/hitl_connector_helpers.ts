@@ -30,6 +30,56 @@ export function slackApiChannelTarget(channel: string): SlackApiChannelTarget {
   return { channelIds: [channel] };
 }
 
+/** Renders an HITL HTTP channel and builds the workflow HTTP connector params. */
+export function renderHitlHttpConnectorInput(
+  channel: {
+    url: string;
+    method?: string;
+    headers?: Record<string, string>;
+    body: string;
+  },
+  renderTemplate: (template: string) => string
+) {
+  const headers = channel.headers
+    ? Object.fromEntries(
+        Object.entries(channel.headers).map(([name, value]) => {
+          const renderedName = renderTemplate(name);
+          if (renderedName.length === 0) {
+            throw new Error('HTTP HITL header name rendered to an empty string');
+          }
+          return [renderedName, renderTemplate(value)];
+        })
+      )
+    : undefined;
+
+  return buildHitlHttpConnectorInput({
+    url: renderTemplate(channel.url),
+    method: channel.method,
+    headers,
+    body: renderTemplate(channel.body),
+  });
+}
+
+/** Builds params for the workflow HTTP system connector. */
+export function buildHitlHttpConnectorInput({
+  url,
+  method,
+  headers,
+  body,
+}: {
+  url: string;
+  method?: string;
+  headers?: Record<string, string>;
+  body: string;
+}) {
+  return {
+    url,
+    method: method ?? 'POST',
+    ...(headers ? { headers } : {}),
+    body,
+  };
+}
+
 /**
  * Builds Actions params for a Slack v2 `sendMessage` call.
  * Unfurling is off so Slack does not GET the resume URL.

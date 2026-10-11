@@ -16,6 +16,7 @@ import { hasExternalHitlChannels } from './has_external_hitl_channels';
 import {
   assertConnectorSucceeded,
   buildSlack2SendMessageInput,
+  renderHitlHttpConnectorInput,
   slackApiChannelTarget,
 } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
@@ -200,5 +201,15 @@ export async function sendWaitForInputNotifications({
       });
       assertConnectorSucceeded(result);
     }
+  }
+
+  const httpConfig = channels.http;
+  if (httpConfig?.url && httpConfig.body) {
+    const result = await connectorExecutor.executeSystemConnector({
+      connectorType: '.http-system',
+      input: renderHitlHttpConnectorInput(httpConfig, renderTemplate),
+      abortController,
+    });
+    assertConnectorSucceeded(result);
   }
 }

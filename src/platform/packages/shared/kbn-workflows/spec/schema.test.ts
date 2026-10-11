@@ -1337,6 +1337,10 @@ describe('HITL external channel schemas', () => {
       channels: ['C0123'],
       message: 'slack2 note',
     },
+    http: {
+      url: 'https://hooks.example/hitl',
+      body: '{{context.hitl.externalFormLink}}',
+    },
   };
 
   const channelPropertyNames = (schema: z.ZodType): Record<string, string[]> => {
@@ -1366,6 +1370,7 @@ describe('HITL external channel schemas', () => {
       slack: ['connector-id', 'message'],
       slack_api: ['connector-id', 'channels', 'message'],
       slack2: ['connector-id', 'channels', 'message'],
+      http: ['url', 'method', 'headers', 'body'],
     });
   });
 
@@ -1381,7 +1386,22 @@ describe('HITL external channel schemas', () => {
       slack: ['connector-id'],
       slack_api: ['connector-id', 'channels'],
       slack2: ['connector-id', 'channels'],
+      http: ['url', 'method', 'headers', 'body'],
     });
+  });
+
+  it('rejects unknown keys on the HTTP approval channel', () => {
+    const result = WaitForApprovalStepSchema.safeParse({
+      name: 's',
+      type: 'waitForApproval',
+      with: {
+        channels: {
+          http: { url: 'https://hooks.example/hitl', body: 'ping', mthod: 'POST' },
+        },
+      },
+    });
+
+    expect(result.success).toBe(false);
   });
 });
 

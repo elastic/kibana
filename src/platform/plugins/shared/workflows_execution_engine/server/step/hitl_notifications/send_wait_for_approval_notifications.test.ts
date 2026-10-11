@@ -42,6 +42,14 @@ describe('send_wait_for_approval_notifications', () => {
         })
       ).toBe(true);
     });
+
+    it('returns true when an HTTP destination is configured', () => {
+      expect(
+        hasExternalHitlChannels({
+          http: { url: 'https://hooks.example/hitl', body: 'ping' },
+        })
+      ).toBe(true);
+    });
   });
 
   describe('buildWaitForApprovalResumeLinks', () => {
@@ -194,6 +202,35 @@ describe('send_wait_for_approval_notifications', () => {
         })
       );
       expect(execute.mock.calls[1][0].input.subActionParams.channel).toBe('C0456');
+    });
+
+    it('posts rendered approve and reject links through the HTTP system connector', async () => {
+      const executeSystemConnector = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          http: {
+            url: 'https://hooks.example/hitl',
+            body: '{"approve":"{{context.hitl.externalApproveLink}}","reject":"{{context.hitl.externalRejectLink}}"}',
+          },
+        },
+        renderTemplate: (template) =>
+          template
+            .replace('{{context.hitl.externalApproveLink}}', 'https://kibana.example/approve')
+            .replace('{{context.hitl.externalRejectLink}}', 'https://kibana.example/reject'),
+        connectorExecutor: { executeSystemConnector } as never,
+      });
+
+      expect(executeSystemConnector).toHaveBeenCalledWith({
+        connectorType: '.http-system',
+        input: {
+          url: 'https://hooks.example/hitl',
+          method: 'POST',
+          body: '{"approve":"https://kibana.example/approve","reject":"https://kibana.example/reject"}',
+        },
+        abortController: expect.any(AbortController),
+      });
     });
 
     it('throws when a configured connector fails', async () => {
