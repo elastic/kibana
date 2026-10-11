@@ -12,6 +12,7 @@ import {
   THREAT_INTEL_SOURCES_INDEX,
   DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID,
 } from '../../../common/threat_intel';
+import { getSemanticTextInferenceId } from '../lib/semantic_text_mapping';
 import { installIndexTemplates } from './index_templates';
 import { seedDefaultSources, type SeedDefaultSourcesResult } from './seed_default_sources';
 
@@ -64,13 +65,10 @@ const checkReportSemanticTextEndpoints = async (
   esClient: ElasticsearchClient,
   log: Logger
 ): Promise<void> => {
-  let mappings: Awaited<ReturnType<typeof esClient.indices.getFieldMapping>>;
+  let mappings: Awaited<ReturnType<typeof esClient.indices.getMapping>>;
   try {
-    mappings = await esClient.indices.getFieldMapping({
-      index: THREAT_REPORTS_INDEX,
-      fields: REQUIRED_REPORT_SEMANTIC_FIELDS.map((field) => `content.${field}`),
-      include_defaults: true,
-    });
+    // `getMapping`, not `getFieldMapping`: the latter is unavailable (410) on serverless.
+    mappings = await esClient.indices.getMapping({ index: THREAT_REPORTS_INDEX });
   } catch (err) {
     const status = err instanceof errors.ResponseError ? err.statusCode : undefined;
     if (status === 404) {
@@ -84,19 +82,20 @@ const checkReportSemanticTextEndpoints = async (
     }
     throw err;
   }
-  const fieldMappings = mappings[THREAT_REPORTS_INDEX]?.mappings;
   const endpointIds = new Set<string>();
 
   for (const field of REQUIRED_REPORT_SEMANTIC_FIELDS) {
-    const fullName = `content.${field}`;
-    const fieldMapping = fieldMappings?.[fullName];
-    const mapping = fieldMapping?.mapping[field] ?? fieldMapping?.mapping[fullName];
-    if (mapping?.type !== 'semantic_text' || !mapping.inference_id) {
+    const inferenceId = getSemanticTextInferenceId(
+      mappings,
+      THREAT_REPORTS_INDEX,
+      `content.${field}`
+    );
+    if (!inferenceId) {
       throw new Error(
         `Required report field content.${field} did not resolve to a semantic_text inference endpoint`
       );
     }
-    endpointIds.add(mapping.inference_id);
+    endpointIds.add(inferenceId);
   }
 
   for (const endpointId of endpointIds) {

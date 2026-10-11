@@ -20,6 +20,7 @@ import {
   type ReadinessStatus,
 } from '../../../common/threat_intel';
 import { HIDDEN_INDEX_SEARCH_OPTIONS } from '../lib/es_options';
+import { getSemanticTextInferenceId } from '../lib/semantic_text_mapping';
 import { buildSpaceFilterTerms } from '../lib/space_filter';
 import { USABLE_REPORT_FILTER } from '../lib/usable_report_filter';
 
@@ -75,22 +76,20 @@ const checkEmbeddingEndpoints = async (
   logger: Logger
 ): Promise<boolean> => {
   try {
-    const mappings = await esClient.indices.getFieldMapping({
-      index: THREAT_REPORTS_INDEX,
-      fields: REQUIRED_REPORT_SEMANTIC_FIELDS.map((field) => `content.${field}`),
-      include_defaults: true,
-    });
-    const fieldMappings = mappings[THREAT_REPORTS_INDEX]?.mappings;
+    // `getMapping`, not `getFieldMapping`: the latter is unavailable (410) on serverless.
+    const mappings = await esClient.indices.getMapping({ index: THREAT_REPORTS_INDEX });
     const endpointIds = new Set<string>();
 
     for (const field of REQUIRED_REPORT_SEMANTIC_FIELDS) {
-      const fullName = `content.${field}`;
-      const fieldMapping = fieldMappings?.[fullName];
-      const mapping = fieldMapping?.mapping[field] ?? fieldMapping?.mapping[fullName];
-      if (mapping?.type !== 'semantic_text' || !mapping.inference_id) {
+      const inferenceId = getSemanticTextInferenceId(
+        mappings,
+        THREAT_REPORTS_INDEX,
+        `content.${field}`
+      );
+      if (!inferenceId) {
         return false;
       }
-      endpointIds.add(mapping.inference_id);
+      endpointIds.add(inferenceId);
     }
 
     for (const endpointId of endpointIds) {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ThreatIntelSupplyHardGate } from './types';
 
@@ -12,6 +13,30 @@ import type { ThreatIntelSupplyHardGate } from './types';
 const THREAT_REPORTS_INDEX = '.kibana-threat-reports';
 
 const REQUIRED_REPORT_SEMANTIC_FIELDS = ['title', 'body_text'] as const;
+
+interface MappingNode {
+  type?: string;
+  inference_id?: string;
+  properties?: Record<string, MappingNode>;
+}
+
+/**
+ * Walks `properties` of an `indices.getMapping` response to the `semantic_text`
+ * field at `fieldPath` and returns its `inference_id`. Mirrors the helper in
+ * security_solution (AlertZero cannot import that plugin).
+ */
+const getSemanticTextInferenceId = (
+  mappings: IndicesGetMappingResponse,
+  index: string,
+  fieldPath: string
+): string | undefined => {
+  let node: MappingNode | undefined = mappings[index]?.mappings as MappingNode | undefined;
+  for (const segment of fieldPath.split('.')) {
+    node = node?.properties?.[segment];
+    if (!node) return undefined;
+  }
+  return node?.type === 'semantic_text' && node.inference_id ? node.inference_id : undefined;
+};
 
 type ReportsIndexState = 'exists' | 'missing' | 'check_failed';
 
@@ -39,22 +64,20 @@ const checkEmbeddingEndpoints = async (
   logger: Logger
 ): Promise<boolean> => {
   try {
-    const mappings = await esClient.indices.getFieldMapping({
-      index: THREAT_REPORTS_INDEX,
-      fields: REQUIRED_REPORT_SEMANTIC_FIELDS.map((field) => `content.${field}`),
-      include_defaults: true,
-    });
-    const fieldMappings = mappings[THREAT_REPORTS_INDEX]?.mappings;
+    // `getMapping`, not `getFieldMapping`: the latter is unavailable (410) on serverless.
+    const mappings = await esClient.indices.getMapping({ index: THREAT_REPORTS_INDEX });
     const endpointIds = new Set<string>();
 
     for (const field of REQUIRED_REPORT_SEMANTIC_FIELDS) {
-      const fullName = `content.${field}`;
-      const fieldMapping = fieldMappings?.[fullName];
-      const mapping = fieldMapping?.mapping[field] ?? fieldMapping?.mapping[fullName];
-      if (mapping?.type !== 'semantic_text' || !mapping.inference_id) {
+      const inferenceId = getSemanticTextInferenceId(
+        mappings,
+        THREAT_REPORTS_INDEX,
+        `content.${field}`
+      );
+      if (!inferenceId) {
         return false;
       }
-      endpointIds.add(mapping.inference_id);
+      endpointIds.add(inferenceId);
     }
 
     for (const endpointId of endpointIds) {

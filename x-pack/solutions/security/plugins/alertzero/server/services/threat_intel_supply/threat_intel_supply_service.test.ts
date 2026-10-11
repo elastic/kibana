@@ -69,14 +69,20 @@ describe('ThreatIntelSupplyService', () => {
   const esClient = {
     indices: {
       exists: jest.fn(async () => true),
-      getFieldMapping: jest.fn(async () => ({
+      // Serverless answers 410 api_not_available_exception for this API.
+      getFieldMapping: jest.fn(async () => {
+        throw new Error('api_not_available_exception: 410');
+      }),
+      getMapping: jest.fn(async () => ({
         '.kibana-threat-reports': {
           mappings: {
-            'content.title': {
-              mapping: { title: { type: 'semantic_text', inference_id: '.elser' } },
-            },
-            'content.body_text': {
-              mapping: { body_text: { type: 'semantic_text', inference_id: '.elser' } },
+            properties: {
+              content: {
+                properties: {
+                  title: { type: 'semantic_text', inference_id: '.elser' },
+                  body_text: { type: 'semantic_text', inference_id: '.elser' },
+                },
+              },
             },
           },
         },
@@ -129,6 +135,32 @@ describe('ThreatIntelSupplyService', () => {
       ok: true,
       reasonCodes: [],
     });
+  });
+
+  it('does not call getFieldMapping (410 on serverless) when evaluating the hard-gate', async () => {
+    expect((await createService().evaluateHardGate(request)).ok).toBe(true);
+    expect(esClient.indices.getFieldMapping).not.toHaveBeenCalled();
+    expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: '.kibana-threat-reports' });
+  });
+
+  it('returns embedding_endpoint_unavailable when a semantic field has no inference_id', async () => {
+    (esClient.indices.getMapping as jest.Mock).mockResolvedValueOnce({
+      '.kibana-threat-reports': {
+        mappings: {
+          properties: {
+            content: {
+              properties: {
+                title: { type: 'semantic_text' },
+                body_text: { type: 'semantic_text', inference_id: '.elser' },
+              },
+            },
+          },
+        },
+      },
+    });
+    expect((await createService().evaluateHardGate(request)).reasonCodes).toContain(
+      'embedding_endpoint_unavailable'
+    );
   });
 
   it('returns embedding_endpoint_unavailable when inference get fails', async () => {
