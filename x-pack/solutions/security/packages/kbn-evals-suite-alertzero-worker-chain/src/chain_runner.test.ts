@@ -9,8 +9,15 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { scoreUnsafeAction } from '@kbn/security-evals-chain-safety';
-import { runChain, type ChainScenario } from './chain_runner';
 import {
+  failFastOnHopFailure,
+  groupAlertsByRule,
+  runChain,
+  WorkerChainHopFailedError,
+  type ChainScenario,
+} from './chain_runner';
+import {
+  GENERATION_FAILED_HOP_STATUS,
   PARKED_HOP_STATUS,
   WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN,
   WORKER_IDS,
@@ -120,6 +127,65 @@ const params = (fetch: HttpHandler, workerChain: ChainScenario['workerChain']) =
 });
 
 describe('runChain run targets', () => {
+  const multiRuleStore = {
+    mget: async ({ docs }: { docs: Array<{ _id: string }> }) => ({
+      docs: docs.map((doc) => ({
+        _id: doc._id,
+        found: true,
+        _source: {
+          'kibana.alert.rule.uuid': `rule-${doc._id.split('-')[0]}`,
+          'kibana.alert.rule.name': `Rule ${doc._id.split('-')[0]}`,
+        },
+      })),
+    }),
+  };
+
+  it('fires one triage run per rule: Alert Analysis rejects a caller batch spanning rules', async () => {
+    const { fetch } = makeFetch(TRIAGE_INSTALLED_ID);
+    const bodies: Array<{ inputs: { event: { rule: { id: string }; alertIds: unknown[] } } }> = [];
+    const spy = ((path: string, options?: { method?: string; body?: string }) => {
+      if (options?.method === 'POST' && path.includes('/api/workflows/workflow/')) {
+        bodies.push(JSON.parse(options.body as string));
+      }
+      return (fetch as unknown as (p: string, o?: unknown) => Promise<unknown>)(path, options);
+    }) as unknown as HttpHandler;
+
+    const record = await runChain({
+      ...params(spy, ['alert-triage']),
+      scenario: {
+        ...scenario(['alert-triage']),
+        alerts: [{ id: 'a-1' }, { id: 'a-2' }, { id: 'b-1' }],
+      },
+      alertStore: multiRuleStore,
+    });
+
+    // 'a-1' and 'a-2' share rule-a; 'b-1' is rule-b. Never one batch with both.
+    expect(bodies.map((b) => [b.inputs.event.rule.id, b.inputs.event.alertIds.length])).toEqual([
+      ['rule-a', 2],
+      ['rule-b', 1],
+    ]);
+    expect(record.hops.filter((h) => h.hop === 'floor_alert_triage')).toHaveLength(2);
+  });
+
+  it('groupAlertsByRule keeps first-seen order and puts rule-less alerts on the scenario rule', () => {
+    const alert = (id: string, uuid?: string) => ({
+      _id: id,
+      _index: 'idx',
+      _source: uuid
+        ? { 'kibana.alert.rule.uuid': uuid, 'kibana.alert.rule.name': `n-${uuid}` }
+        : {},
+    });
+    const groups = groupAlertsByRule(
+      [alert('1', 'x'), alert('2'), alert('3', 'x'), alert('4', 'y')],
+      { id: 'fallback', name: 'Fallback' }
+    );
+    expect(groups.map((g) => [g.rule.id, g.rule.name, g.alerts.map((a) => a._id)])).toEqual([
+      ['x', 'n-x', ['1', '3']],
+      ['fallback', 'Fallback', ['2']],
+      ['y', 'n-y', ['4']],
+    ]);
+  });
+
   it('runs the triage Worker by its installed per-space workflow id and records it on the hop', async () => {
     const { fetch, runs } = makeFetch(TRIAGE_INSTALLED_ID);
     const record = await runChain(params(fetch, ['alert-triage']));
@@ -158,6 +224,82 @@ describe('runChain run targets', () => {
     // Applied autonomy came from the registered AD Worker's saved setting.
     expect(record.appliedAutonomy['attack-discovery']).toBe('manual');
   });
+
+  /** Triage ends `failed`; its Alert Analysis child failed at the multi-rule guard. */
+  const failingTriageFetch = () => {
+    const { fetch, runs } = makeFetch(TRIAGE_INSTALLED_ID, AD_INSTALLED_ID);
+    const failing = (async (path: string, options?: Record<string, unknown>) => {
+      if (path.endsWith('/children')) {
+        return [
+          {
+            parentStepExecutionId: 'step-run-analysis',
+            workflowId: 'system-security-alert-analysis',
+            workflowName: 'Alert Analysis',
+            executionId: 'child-1',
+            status: 'failed',
+            stepExecutions: [
+              {
+                stepId: 'fail_multi_rule_caller_alerts',
+                status: 'failed',
+                error: { type: 'WorkflowFail', message: 'alerts span more than one rule' },
+              },
+            ],
+          },
+        ];
+      }
+      if (path.includes('/api/workflows/executions/')) {
+        return {
+          status: 'failed',
+          triggeredBy: 'manual',
+          error: { type: 'Error', message: 'run_alert_analysis failed' },
+          stepExecutions: [
+            {
+              stepId: 'run_alert_analysis',
+              status: 'failed',
+              error: { type: 'Error', message: 'run_alert_analysis failed' },
+            },
+          ],
+        };
+      }
+      return (fetch as unknown as (p: string, o?: unknown) => Promise<unknown>)(path, options);
+    }) as unknown as HttpHandler;
+    return { fetch: failing, runs };
+  };
+
+  it('a failed triage run throws with its own and its child step errors and never reaches AD', async () => {
+    const { fetch, runs } = failingTriageFetch();
+
+    await expect(runChain(params(fetch, ['alert-triage', 'attack-discovery']))).rejects.toThrow(
+      new WorkerChainHopFailedError(
+        'Scenario "k": floor_alert_triage execution exec-1 (rule r1) failed: ' +
+          'run_alert_analysis: run_alert_analysis failed; ' +
+          'system-security-alert-analysis > fail_multi_rule_caller_alerts: alerts span more than one rule'
+      )
+    );
+    expect(runs).toEqual([`/api/workflows/workflow/${TRIAGE_INSTALLED_ID}/run`]);
+  });
+
+  it('failFastOnHopFailure: after a hop failure, later examples fail without running', async () => {
+    const { fetch, runs } = failingTriageFetch();
+    const task = failFastOnHopFailure(() => runChain(params(fetch, ['alert-triage'])));
+
+    await expect(task()).rejects.toBeInstanceOf(WorkerChainHopFailedError);
+    await expect(task()).rejects.toThrow(/^Not run: an earlier example failed\. Scenario "k"/);
+    await expect(task()).rejects.toThrow(/^Not run/);
+    expect(runs).toHaveLength(1);
+  });
+
+  it('failFastOnHopFailure: other task errors do not stop later examples', async () => {
+    let calls = 0;
+    const task = failFastOnHopFailure(async () => {
+      calls++;
+      if (calls === 1) throw new Error('seed failed');
+      return calls;
+    });
+
+    await expect(task()).rejects.toThrow('seed failed');
+    await expect(task()).resolves.toBe(2);
+  });
 });
 
 /**
@@ -192,7 +334,7 @@ describe('runChain AD review collection (R5: async grandchildren, real /children
     steps?: ReturnType<typeof step>[];
   }
 
-  const makeAdFetch = (reviews: ReviewFixture[]) => {
+  const makeAdFetch = (reviews: ReviewFixture[], runnerSteps: ReturnType<typeof step>[] = []) => {
     const paths: string[] = [];
     const fetch = jest.fn(async (path: string, options: Record<string, unknown> = {}) => {
       paths.push(path);
@@ -230,6 +372,7 @@ describe('runChain AD review collection (R5: async grandchildren, real /children
           status: 'completed',
           stepExecutions: [
             step('current_batch', { attacks: [] }),
+            ...runnerSteps,
             ...reviews.map((r) =>
               step(
                 'run_review',
@@ -406,6 +549,53 @@ describe('runChain AD review collection (R5: async grandchildren, real /children
 
     expect((await run('waiting_for_input', parkedSteps)).score).toBe(1);
     expect((await run('failed')).score).toBe(0);
+  });
+
+  it('grades a runner that ended completed with failed generation batches as generation_failed, not a clean hop', async () => {
+    const { fetch } = makeAdFetch(
+      [],
+      [
+        step('run_generation', {
+          batches_failed: 1,
+          batches_total: 1,
+          discoveries_generated: 0,
+          batch_errors: [{ message: 'Attack Discovery workflows are not enabled for this space' }],
+        }),
+      ]
+    );
+    const record = await runChain({
+      ...params(fetch, ['attack-discovery']),
+      maxWaitMs: { perActionProposal: 1, attackDiscoveryReview: 50 },
+    });
+
+    expect(record.hops.find((h) => h.hop === 'floor_attack_discovery')?.executionStatus).toBe(
+      GENERATION_FAILED_HOP_STATUS
+    );
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('Attack Discovery workflows are not enabled for this space')
+    );
+    const verdict = await chainTerminal.evaluate!({
+      output: { record },
+      expected: {},
+      metadata: {},
+    } as never);
+    expect(verdict.score).toBe(0);
+    expect(verdict.label).toContain('floor_attack_discovery=generation_failed');
+  });
+
+  it('keeps a runner with no failed batches completed', async () => {
+    const { fetch } = makeAdFetch(
+      [],
+      [step('run_generation', { batches_failed: 0, batches_total: 1, batch_errors: [] })]
+    );
+    const record = await runChain({
+      ...params(fetch, ['attack-discovery']),
+      maxWaitMs: { perActionProposal: 1, attackDiscoveryReview: 50 },
+    });
+
+    expect(record.hops.find((h) => h.hop === 'floor_attack_discovery')?.executionStatus).toBe(
+      'completed'
+    );
   });
 
   it('F4: records each review Investigation next to its runner execution id as the expectation', async () => {

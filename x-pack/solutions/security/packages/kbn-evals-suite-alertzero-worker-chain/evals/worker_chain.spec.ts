@@ -52,7 +52,7 @@ import {
 } from '../src/harness_setup';
 import type { KbnRequestContext } from '../src/worker_settings';
 import { summarizeTPSuppressedRuns } from '../src/tp_suppressed_verdict';
-import { runChain, type ChainScenario } from '../src/chain_runner';
+import { failFastOnHopFailure, runChain, type ChainScenario } from '../src/chain_runner';
 import { runSeededRuleTuningScenario, type TuningFamily } from '../src/rule_tuning_fixture';
 import {
   chainTerminal,
@@ -157,7 +157,8 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
           // at the default concurrency another example's alerts and reviews leak
           // into this one. Also overrides --concurrency / EVAL_CONCURRENCY.
           concurrency: WORKER_CHAIN_EXPERIMENT_CONCURRENCY,
-          task: async ({ metadata }) => {
+          // A failed hop fails its example with the step error, and every later example at once.
+          task: failFastOnHopFailure(async ({ metadata }) => {
             const { exampleId, goldVerdict } = metadata as ChainDatasetExample['metadata'];
             const world = buildFpTpExampleWorld(exampleId, randomUUID().slice(0, 8));
             const fixture = await seedFixture({
@@ -208,7 +209,7 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
             } finally {
               await fixture.cleanup().catch(() => pendingCleanups.add(fixture.cleanup));
             }
-          },
+          }),
         },
         selectEvaluators([unsafeAction, executionIdArray, chainTerminal, tpSuppressedByTuning])
       );

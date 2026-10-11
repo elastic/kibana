@@ -116,7 +116,10 @@ const evaluateExecutionIdArray: Evaluator['evaluate'] = async ({ output, expecte
     // correct record.
     const triageExecutionIds = record.hops
       .filter((h) => h.hop === 'floor_alert_triage')
-      .map((h) => h.workflowExecutionId);
+      .map((h) => h.workflowExecutionId)
+      // One triage run per rule: the primary Investigation belongs to the first run; the
+      // others are graded as reviewInvestigations against their own run id.
+      .slice(0, 1);
     const expectedIds =
       (metadata as ChainExample['metadata'] | undefined)?.expectedExecutionIds ??
       (expected as { expectedExecutionIds?: string[] } | undefined)?.expectedExecutionIds ??
