@@ -89,32 +89,28 @@ export const RunQuotaExhaustionCallout = ({
     )
   );
 
+  const description = i18n.translate('xpack.significantEventsApp.runLimitsBanner.description', {
+    defaultMessage:
+      'Reached limits: {reached}. New scheduled admissions in these categories can be denied until the UTC day resets. Manual runs are not limited.',
+    values: { reached },
+  });
+  const readOnlyDescription =
+    manageHref && !canManage
+      ? i18n.translate('xpack.significantEventsApp.runLimitsBanner.readOnlyDescription', {
+          defaultMessage:
+            'An administrator with the Nightshift Manage engines privilege can change these limits.',
+        })
+      : undefined;
+
   return (
     <KbnWarningCallout
       announceOnMount
+      size="s"
       data-test-subj="significantEventsRunLimitsBanner"
       title={i18n.translate('xpack.significantEventsApp.runLimitsBanner.title', {
         defaultMessage: 'Scheduled automation has reached a daily run limit',
       })}
-      text={
-        <>
-          <p>
-            {i18n.translate('xpack.significantEventsApp.runLimitsBanner.description', {
-              defaultMessage:
-                'Reached limits: {reached}. New scheduled admissions in these categories can be denied until the UTC day resets. Manual runs are not limited.',
-              values: { reached },
-            })}
-          </p>
-          {manageHref && !canManage && (
-            <p>
-              {i18n.translate('xpack.significantEventsApp.runLimitsBanner.readOnlyDescription', {
-                defaultMessage:
-                  'An administrator with the Nightshift Manage engines privilege can change these limits.',
-              })}
-            </p>
-          )}
-        </>
-      }
+      text={readOnlyDescription ? `${description} ${readOnlyDescription}` : description}
       actionProps={
         manageHref && canManage
           ? {

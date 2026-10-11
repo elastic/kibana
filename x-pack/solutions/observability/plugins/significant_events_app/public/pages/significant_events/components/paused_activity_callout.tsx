@@ -24,24 +24,25 @@ export const PausedActivityCallout = ({
   settingsHref?: string;
 }) => {
   const failureCount = status.lastSummary?.partialFailures.length ?? 0;
+  const description = getDetectionPausedCalloutBody({ status, canManageAndConfigure });
+  const partialFailuresDescription =
+    failureCount > 0
+      ? i18n.translate('xpack.significantEventsApp.pausedBannerPartialFailures', {
+          defaultMessage:
+            'Some maintenance operations could not be completed. Check Settings and the Kibana server logs for details.',
+        })
+      : undefined;
 
   return (
     <KbnWarningCallout
       announceOnMount
+      size="s"
       data-test-subj="significantEventsPausedBanner"
       title={getDetectionPausedCalloutTitle(status)}
       text={
-        <>
-          <p>{getDetectionPausedCalloutBody({ status, canManageAndConfigure })}</p>
-          {failureCount > 0 && (
-            <p>
-              {i18n.translate('xpack.significantEventsApp.pausedBannerPartialFailures', {
-                defaultMessage:
-                  'Some maintenance operations could not be completed. Check Settings and the Kibana server logs for details.',
-              })}
-            </p>
-          )}
-        </>
+        partialFailuresDescription
+          ? `${description} ${partialFailuresDescription}`
+          : description
       }
       actionProps={
         canManageAndConfigure && settingsHref
