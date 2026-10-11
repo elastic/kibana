@@ -296,7 +296,7 @@ export function SignificantEventsPage() {
                 size="s"
                 data-test-subj="significantEventsStatusLoadingBanner"
                 title={i18n.translate('xpack.significantEventsApp.statusLoadingBannerTitle', {
-                  defaultMessage: 'Checking event activity status',
+                  defaultMessage: 'Checking significant events activity status',
                 })}
                 text={i18n.translate('xpack.significantEventsApp.statusLoadingBannerBody', {
                   defaultMessage: 'Manual triggers stay disabled until activity status is known.',
@@ -312,7 +312,7 @@ export function SignificantEventsPage() {
                 size="s"
                 data-test-subj="significantEventsStatusErrorBanner"
                 title={i18n.translate('xpack.significantEventsApp.statusErrorBannerTitle', {
-                  defaultMessage: 'Could not load event activity status',
+                  defaultMessage: 'Could not load significant events activity status',
                 })}
                 text={i18n.translate('xpack.significantEventsApp.statusErrorBannerBody', {
                   defaultMessage:
