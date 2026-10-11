@@ -23,10 +23,12 @@ import { LogRateAnalysisContent } from './log_rate_analysis_content/log_rate_ana
 
 export interface LogRateAnalysisForEmbeddableProps {
   timeRange: TimeRange;
+  parentApi: unknown;
 }
 
 export const LogRateAnalysisForEmbeddable: FC<LogRateAnalysisForEmbeddableProps> = ({
   timeRange,
+  parentApi,
 }) => {
   const { uiSettings } = useAiopsAppContext();
   const { dataView } = useDataSource();
@@ -57,7 +59,7 @@ export const LogRateAnalysisForEmbeddable: FC<LogRateAnalysisForEmbeddableProps>
         timeRange={timeRangeParsed}
         esSearchQuery={searchQuery}
       />
-      <LogRateAnalysisContent esSearchQuery={searchQuery} />
+      <LogRateAnalysisContent esSearchQuery={searchQuery} parentApi={parentApi} />
     </>
   );
 };

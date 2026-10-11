@@ -11,7 +11,7 @@ import React, { useMemo } from 'react';
 import type { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { FetchContext } from '@kbn/presentation-publishing';
+import type { FetchContext, PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { FieldStatisticsTable } from '../../application/main/components/field_stats_table';
@@ -22,6 +22,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi & {
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
+    viewMode$: PublishingSubject<ViewMode>;
   };
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
@@ -34,9 +35,10 @@ export function SearchEmbeddablFieldStatsTableComponent({
   onAddFilter,
   stateManager,
 }: SavedSearchEmbeddableComponentProps) {
-  const [fetchContext, savedSearch] = useBatchedPublishingSubjects(
+  const [fetchContext, savedSearch, viewMode] = useBatchedPublishingSubjects(
     api.fetchContext$,
-    api.savedSearch$
+    api.savedSearch$,
+    api.viewMode$
   );
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
   const services = useDiscoverServices();
@@ -45,7 +47,6 @@ export function SearchEmbeddablFieldStatsTableComponent({
   if (isEsql && services.dataVisualizer?.FieldStatsUnavailableMessage) {
     return <services.dataVisualizer.FieldStatsUnavailableMessage />;
   }
-
   return (
     <FieldStatisticsTable
       dataView={dataView}
@@ -57,6 +58,7 @@ export function SearchEmbeddablFieldStatsTableComponent({
       searchSessionId={fetchContext?.searchSessionId}
       isEsqlMode={isEsql}
       timeRange={fetchContext?.timeRange}
+      isInteractive={viewMode !== 'non-interactive'}
     />
   );
 }

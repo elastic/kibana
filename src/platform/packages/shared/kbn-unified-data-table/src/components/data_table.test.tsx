@@ -2200,6 +2200,90 @@ describe('UnifiedDataTable', () => {
     );
   });
 
+  describe('renderMode', () => {
+    it('suppresses sorting, column/display selectors, and keyboard shortcuts in the toolbar', async () => {
+      await renderComponent({
+        ...getProps(),
+        columns: ['bytes'],
+        sort: [['bytes', 'desc']],
+        renderMode: 'print',
+        onUpdateDataGridDensity: jest.fn(),
+      });
+
+      expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
+        showSortSelector: false,
+        showColumnSelector: false,
+        showKeyboardShortcuts: false,
+        showDisplaySelector: undefined,
+      });
+      // the current sort order is still shown, read-only, rather than hidden outright
+      expect(getLastEuiDataGridProps().sorting?.columns).toEqual([
+        { id: 'bytes', direction: 'desc' },
+      ]);
+    });
+
+    it('disables column resize and column/cell actions', async () => {
+      await renderComponent({
+        ...getProps(),
+        columns: ['bytes'],
+        renderMode: 'print',
+      });
+
+      const column = getLastEuiDataGridProps().columns.find((col) => col.id === 'bytes');
+      expect(column?.isResizable).toBe(false);
+      expect(column?.actions).toBe(false);
+      expect(column?.cellActions).toEqual([]);
+    });
+
+    it('removes the row selection control column and disables drag-and-drop', async () => {
+      await renderComponent({
+        ...getProps(),
+        columns: ['bytes'],
+        renderMode: 'print',
+        canDragAndDropColumns: true,
+      });
+
+      expect(getLastEuiDataGridProps().leadingControlColumns).toEqual([]);
+      expect(
+        (getLastEuiDataGridProps().columnVisibility as { canDragAndDropColumns?: boolean })
+          .canDragAndDropColumns
+      ).toBe(false);
+    });
+
+    it('hides the rows-per-page options while leaving pagination active', async () => {
+      await renderComponent({
+        ...getProps(),
+        columns: ['bytes'],
+        renderMode: 'print',
+        rowsPerPageOptions: [5, 10],
+      });
+
+      expect(getLastEuiDataGridProps().pagination?.pageSizeOptions).toEqual([]);
+    });
+
+    it(
+      'disables in-table search',
+      async () => {
+        await renderDataTable({
+          columns: ['bytes'],
+          renderMode: 'print',
+          enableInTableSearch: true,
+        });
+
+        expect(screen.queryByTestId(BUTTON_TEST_SUBJ)).not.toBeInTheDocument();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it('defaults to interactive mode when renderMode is not set', async () => {
+      await renderComponent({ ...getProps(), columns: ['bytes'] });
+
+      expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
+        showSortSelector: true,
+      });
+    });
+  });
+
   describe('Refs', () => {
     it('should expose the EuiDataGrid ref', async () => {
       const ref = React.createRef<EuiDataGridRefProps & RestorableStateProviderApi>();

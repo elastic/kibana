@@ -59,6 +59,7 @@ export interface PatternAnalysisProps {
   onRenderComplete: () => void;
   onError: (error: Error) => void;
   filtersApi?: PublishesFilters;
+  parentApi: unknown;
 }
 
 const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
@@ -79,6 +80,7 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
   lastReloadRequestTime,
   onChange,
   filtersApi,
+  parentApi,
 }) => {
   const deps = useMemo(() => {
     const {
@@ -155,6 +157,7 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
             >
               <FilterQueryContextProvider timeRange={timeRange} filtersApi={filtersApi}>
                 <PatternAnalysisEmbeddableWrapper
+                  parentApi={parentApi}
                   dataViewId={dataViewId}
                   timeRange={timeRange}
                   fieldName={fieldName}

@@ -13,7 +13,12 @@ import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EsqlSource } from '@kbn/data-source';
 import { SORT_DEFAULT_ORDER_SETTING, getSortArray } from '@kbn/discover-utils';
-import { useBatchedPublishingSubjects, type FetchContext } from '@kbn/presentation-publishing';
+import {
+  useBatchedPublishingSubjects,
+  type PublishingSubject,
+  type ViewMode,
+  type FetchContext,
+} from '@kbn/presentation-publishing';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
@@ -60,6 +65,7 @@ interface SavedSearchEmbeddableComponentProps {
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
     abortSignal$: BehaviorSubject<AbortSignal | undefined>;
+    viewMode$: PublishingSubject<ViewMode>;
   };
   dataView: DataView;
   esqlSource$?: BehaviorSubject<EsqlSource | undefined>;
@@ -101,6 +107,7 @@ export function SearchEmbeddableGridComponent({
   const kbnDataSource = useObservable(esqlSource$ ?? emptyEsqlSource$, undefined);
 
   const [
+    viewMode,
     loading,
     savedSearch,
     savedSearchId,
@@ -119,6 +126,7 @@ export function SearchEmbeddableGridComponent({
     esqlVariables,
     abortSignal,
   ] = useBatchedPublishingSubjects(
+    api.viewMode$,
     api.dataLoading$,
     api.savedSearch$,
     api.savedObjectId$,
@@ -407,6 +415,7 @@ export function SearchEmbeddableGridComponent({
       setExpandedDoc={setExpandedDoc}
       searchContext={searchContext}
       flyoutMenuTrailingActions={flyoutMenuTrailingActions}
+      isInteractive={viewMode !== 'non-interactive'}
     />
   );
 }

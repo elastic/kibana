@@ -41,12 +41,12 @@ export const TimeseriesVisTypes: Record<string, React.ComponentType<TimeseriesVi
 
 export interface TimeseriesVisProps {
   model: TimeseriesVisParams;
-  onBrush: (gte: string, lte: string, series: PanelData[]) => Promise<void>;
-  onFilterClick: (
+  onBrush?: (gte: string, lte: string, series: PanelData[]) => Promise<void>;
+  onFilterClick?: (
     series: PanelData[],
     points: Array<[GeometryValue, XYChartSeriesIdentifier]>
   ) => Promise<void>;
-  onUiState: (
+  onUiState?: (
     field: string,
     value: {
       column: string;

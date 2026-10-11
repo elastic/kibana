@@ -46,6 +46,8 @@ describe('loadDashboardApi', () => {
   const getDashboardApiMock = jest.fn();
   const userActivity$ = new Subject();
 
+  const storeViewModeMock = jest.fn();
+
   beforeEach(() => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('../get_dashboard_api').getDashboardApi = getDashboardApiMock;
@@ -60,6 +62,7 @@ describe('loadDashboardApi', () => {
       getState: () => ({
         query: lastSavedQuery,
       }),
+      storeViewMode: storeViewModeMock,
     });
 
     window.performance.getEntriesByName = jest.fn().mockReturnValue([
@@ -119,6 +122,53 @@ describe('loadDashboardApi', () => {
         ...DEFAULT_DASHBOARD_STATE,
         query: queryFromUrl,
       });
+    });
+  });
+
+  describe('view mode', () => {
+    test('passes the view mode from creation options through to getDashboardApi', async () => {
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: false,
+          getInitialInput: () => ({ viewMode: 'non-interactive' }),
+        }),
+        savedObjectId: '12345',
+      });
+      expect(getDashboardApiMock).toHaveBeenCalled();
+      // @ts-ignore
+      expect(getDashboardApiMock.mock.calls[0][0].viewMode).toBe('non-interactive');
+    });
+
+    test('backs up an explicit non-"non-interactive" view mode', async () => {
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: false,
+          getInitialInput: () => ({ viewMode: 'view' }),
+        }),
+        savedObjectId: '12345',
+      });
+      expect(storeViewModeMock).toHaveBeenCalledWith('view');
+    });
+
+    test('never backs up non-interactive view mode, so it cannot be restored on a later load', async () => {
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: false,
+          getInitialInput: () => ({ viewMode: 'non-interactive' }),
+        }),
+        savedObjectId: '12345',
+      });
+      expect(storeViewModeMock).not.toHaveBeenCalled();
+    });
+
+    test('does not back up view mode when none was explicitly provided', async () => {
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: false,
+        }),
+        savedObjectId: '12345',
+      });
+      expect(storeViewModeMock).not.toHaveBeenCalled();
     });
   });
 

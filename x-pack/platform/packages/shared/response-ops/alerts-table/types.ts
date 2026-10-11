@@ -546,6 +546,8 @@ export type RenderContext<AC extends AdditionalContext> = {
   showAlertStatusWithFlapping?: boolean;
 
   bulkActionsStore: [BulkActionsState, Dispatch<BulkActionsReducerAction>];
+
+  allowLinks?: boolean;
 } & SetRequired<
   Pick<
     AlertsTableProps<AC>,

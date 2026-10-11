@@ -24,7 +24,7 @@ import type {
   DocumentsDisplayMode,
 } from '@kbn/unified-data-table';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
-import type { FetchContext } from '@kbn/presentation-publishing';
+import type { FetchContext, PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
@@ -94,12 +94,14 @@ const createApi = (
     description$: new BehaviorSubject<string | undefined>(undefined),
     defaultTitle$: new BehaviorSubject<string | undefined>('Test'),
     defaultDescription$: new BehaviorSubject<string | undefined>(undefined),
+    viewMode$: new BehaviorSubject<ViewMode>('view'),
   } as unknown as SearchEmbeddableApi & {
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
     abortSignal$: BehaviorSubject<AbortSignal | undefined>;
     query$: BehaviorSubject<AggregateQuery | Query | undefined>;
     savedSearch$: BehaviorSubject<SavedSearch>;
+    viewMode$: PublishingSubject<ViewMode>;
   };
 };
 
@@ -419,6 +421,45 @@ describe('SearchEmbeddableGridComponent', () => {
       });
 
       expect(getLastFlyoutMenuTrailingActions()).toBeUndefined();
+    });
+  });
+
+  describe('isInteractive', () => {
+    it('should pass isInteractive=false to DiscoverGridEmbeddable when viewMode is non-interactive', async () => {
+      const savedSearch = createSavedSearch(false);
+      const api = createApi(savedSearch);
+      const stateManager = createStateManager();
+      const docViewerRef = React.createRef<DocViewerApi>();
+      stateManager.rows.next(rows);
+      stateManager.totalHitCount.next(rows.length);
+
+      (api.viewMode$ as unknown as BehaviorSubject<ViewMode>).next('non-interactive');
+
+      render(
+        <DiscoverTestProvider services={services}>
+          <SearchEmbeddableGridComponent
+            api={api}
+            dataView={dataViewMock}
+            stateManager={stateManager}
+            enableDocumentViewer={true}
+            inlineEditing={{
+              isActive: false,
+              hasPendingChanges: false,
+              onApply: jest.fn(),
+              onCancel: jest.fn(),
+            }}
+            docViewerRef={docViewerRef}
+            expandedDoc={undefined}
+            initialDocViewerTabId={undefined}
+          />
+        </DiscoverTestProvider>
+      );
+
+      await waitFor(() => {
+        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+      });
+
+      expect(getLastGridProps().isInteractive).toBe(false);
     });
   });
 });

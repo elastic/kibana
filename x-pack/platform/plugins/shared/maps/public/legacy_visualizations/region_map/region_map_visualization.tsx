@@ -20,9 +20,10 @@ interface Props {
   timeRange?: TimeRange;
   visConfig: RegionMapVisConfig;
   onInitialRenderComplete: () => void;
+  interactive?: boolean;
 }
 
-export function RegionMapVisualization(props: Props) {
+export function RegionMapVisualization({ interactive, ...props }: Props) {
   const isMounted = useMountedState();
   const initialMapCenter = useMemo(() => {
     return {
@@ -48,6 +49,7 @@ export function RegionMapVisualization(props: Props) {
       mapCenter={initialMapCenter}
       isLayerTOCOpen={true}
       layerList={initialLayerList}
+      interactive={interactive}
       onApiAvailable={(api) => {
         api.onRenderComplete$.pipe(first()).subscribe(() => {
           if (isMounted()) {

@@ -11,6 +11,7 @@ import type { FileLayer } from '@elastic/ems-client';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import type { LayerDescriptor } from '../../../common';
 import {
   FIELD_ORIGIN,
@@ -30,6 +31,8 @@ interface Props extends ChoroplethChartProps {
   uiSettings: IUiSettingsClient;
   emsFileLayers: FileLayer[];
   onRenderComplete: () => void;
+  interactive?: boolean;
+  viewMode: ViewMode;
 }
 
 export function ChoroplethChart({
@@ -39,6 +42,8 @@ export function ChoroplethChart({
   uiSettings,
   emsFileLayers,
   onRenderComplete,
+  interactive = true,
+  viewMode,
 }: Props) {
   if (!args.regionAccessor || !args.valueAccessor) {
     return null;
@@ -127,7 +132,14 @@ export function ChoroplethChart({
     type: LAYER_TYPE.GEOJSON_VECTOR,
   } as LayerDescriptor;
 
-  return <PassiveMap passiveLayer={choroplethLayer} onRenderComplete={onRenderComplete} />;
+  return (
+    <PassiveMap
+      passiveLayer={choroplethLayer}
+      onRenderComplete={onRenderComplete}
+      interactive={interactive}
+      viewMode={viewMode}
+    />
+  );
 }
 
 function getAccessorLabel(table: Datatable, accessor: string) {

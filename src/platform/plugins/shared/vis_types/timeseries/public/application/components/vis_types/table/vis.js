@@ -171,7 +171,7 @@ class TableVis extends Component {
       const metric = last(item.metrics);
       const label = calculateHeaderLabel(metric, item);
       const handleClick = () => {
-        if (!isSortable(metric)) return;
+        if (!onUiState || !isSortable(metric)) return;
         let order;
         if (sort.column === item.id) {
           order = sort.order === 'asc' ? 'desc' : 'asc';
@@ -181,7 +181,7 @@ class TableVis extends Component {
         onUiState(stateKey, { column: item.id, order });
       };
       let sortComponent;
-      if (isSortable(metric)) {
+      if (onUiState && isSortable(metric)) {
         let sortIcon;
         if (sort.column === item.id) {
           sortIcon = sort.order === 'asc' ? 'sortUp' : 'sortDown';
@@ -225,6 +225,7 @@ class TableVis extends Component {
     }
     const sortComponent = <EuiIcon type={sortIcon} aria-hidden={true} />;
     const handleSortClick = () => {
+      if (!onUiState) return;
       let order;
       if (sort.column === '_default_') {
         order = sort.order === 'asc' ? 'desc' : 'asc';

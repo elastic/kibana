@@ -131,19 +131,19 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     ) : (
       <UnifiedDataTable
         showColumnTokens
-        canDragAndDropColumns
-        enableComparisonMode
-        enableInTableSearch
-        showSummaryColumnToggle
         renderCustomToolbar={renderCustomToolbar}
         rowAdditionalLeadingControls={rowAdditionalLeadingControls}
-        visibleCellActions={3} // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
         paginationMode={paginationModeConfig.paginationMode}
         customGridColumnsConfiguration={customGridColumnsConfiguration}
         shouldKeepAdHocDataViewImmutable
         externalAdditionalControls={externalAdditionalControls}
         onFullScreenChange={onFullScreenChange}
         {...props}
+        canDragAndDropColumns
+        enableComparisonMode
+        enableInTableSearch
+        showSummaryColumnToggle
+        visibleCellActions={3} // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
         dataSource={dataSource}
         getRowIndicator={getRowIndicator}
       />
