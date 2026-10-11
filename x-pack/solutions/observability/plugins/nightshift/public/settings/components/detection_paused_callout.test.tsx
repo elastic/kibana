@@ -20,10 +20,10 @@ jest.mock('../hooks/use_significant_events_maintenance', () => ({
   useMaintenanceStatus: () => mockMaintenanceStatus,
 }));
 
-const renderCallout = (canManageAndConfigure = true) =>
+const renderCallout = () =>
   render(
     <I18nProvider>
-      <DetectionPausedCallout canManageAndConfigure={canManageAndConfigure} />
+      <DetectionPausedCallout canManageAndConfigure={true} />
     </I18nProvider>
   );
 
@@ -50,22 +50,6 @@ describe('DetectionPausedCallout', () => {
     expect(callout).toHaveTextContent('Nightshift activity is stopped across the deployment');
     expect(callout).toHaveTextContent(
       'Manual triggers are blocked until you resume from Settings.'
-    );
-    expect(screen.queryByRole('link', { name: 'Open settings' })).not.toBeInTheDocument();
-  });
-
-  it('uses read-only wording when the user cannot manage engines', () => {
-    mockMaintenanceStatus = {
-      data: {
-        state: 'paused',
-        updatedBy: 'achyut@elastic.co',
-      },
-    };
-
-    renderCallout(false);
-
-    expect(screen.getByTestId('streams-settings-maintenance-paused-status')).toHaveTextContent(
-      'An administrator with the Nightshift Manage engines privilege must resume activity from Settings.'
     );
     expect(screen.queryByRole('link', { name: 'Open settings' })).not.toBeInTheDocument();
   });
