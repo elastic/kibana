@@ -12,19 +12,29 @@ import { FtrService } from '../ftr_provider_context';
 
 export class TagCloudPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
-  private readonly header = this.ctx.getPageObject('header');
+  private readonly retry = this.ctx.getService('retry');
+  private readonly visChart = this.ctx.getPageObject('visChart');
 
-  public async selectTagCloudTag(tagDisplayText: string) {
-    const elements = await this.find.allByCssSelector('text');
-    const targetElement = elements.find(
-      async (element) => (await element.getVisibleText()) === tagDisplayText
-    );
-    await targetElement?.click();
-    await this.header.waitUntilLoadingHasFinished();
+  public async selectTagCloudTag(tagDisplayText: string): Promise<void> {
+    const targetElement = await this.retry.try(async () => {
+      const elements = await this.find.allByCssSelector('text');
+      for (const element of elements) {
+        if ((await element.getVisibleText()) === tagDisplayText) {
+          return element;
+        }
+      }
+      throw new Error(`Tag cloud tag "${tagDisplayText}" is not present`);
+    });
+    const renderingCount = await this.visChart.getVisualizationRenderingCount();
+    await targetElement.click();
+    await this.visChart.waitForVisualizationRenderComplete(renderingCount + 1);
   }
 
-  public async getTextTagByElement(webElement: WebElementWrapper) {
-    const elements = await webElement.findAllByCssSelector('text');
+  public async getTextTagByElement(
+    webElement: WebElementWrapper,
+    timeout?: number
+  ): Promise<string[]> {
+    const elements = await webElement.findAllByCssSelector('text', timeout);
     return await Promise.all(elements.map(async (element) => await element.getVisibleText()));
   }
 

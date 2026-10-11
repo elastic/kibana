@@ -8,6 +8,7 @@
  */
 
 import type { $Values } from '@kbn/utility-types';
+import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
 export const Operation = {
@@ -190,8 +191,9 @@ export class FilterBarService extends FtrService {
     // Use pressEnter instead of click to avoid ElementClickInterceptedError if a tooltip covers the button
     await this.testSubjects.pressEnter('showQueryBarMenu');
     await this.testSubjects.click('filter-sets-removeAllFilters');
-    await this.header.waitUntilLoadingHasFinished();
     await this.common.waitUntilUrlIncludes('filters:!()');
+    await this.testSubjects.missingOrFail('~filter');
+    await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
   /**
@@ -230,6 +232,13 @@ export class FilterBarService extends FtrService {
   public async getFilterCount(): Promise<number> {
     const filters = await this.testSubjects.findAll('~filter');
     return filters.length;
+  }
+
+  public async expectFilterCount(expectedCount: number): Promise<void> {
+    await this.retry.try(async () => {
+      const filters = await this.testSubjects.findAll('~filter', 0);
+      expect(filters.length).to.be(expectedCount);
+    });
   }
 
   public async getFiltersLabel(): Promise<string[]> {
@@ -421,10 +430,7 @@ export class FilterBarService extends FtrService {
    * Closes field editor modal window
    */
   public async ensureFieldEditorModalIsClosed(): Promise<void> {
-    const cancelSaveFilterModalButtonExists = await this.testSubjects.waitForExists(
-      'cancelSaveFilter',
-      { timeout: 1000 }
-    );
+    const cancelSaveFilterModalButtonExists = await this.testSubjects.exists('cancelSaveFilter');
     if (cancelSaveFilterModalButtonExists) {
       await this.testSubjects.click('cancelSaveFilter');
     }

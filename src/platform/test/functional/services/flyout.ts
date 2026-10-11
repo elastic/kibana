@@ -33,7 +33,7 @@ export class FlyoutService extends FtrService {
 
   public async ensureAllClosed(): Promise<void> {
     await this.retry.waitFor('all flyouts to be closed', async () => {
-      let flyoutElements = await this.find.allByCssSelector('.euiFlyout', 2500);
+      let flyoutElements = await this.find.allByCssSelector('.euiFlyout', 0);
       if (!flyoutElements.length) {
         return true;
       }
@@ -41,7 +41,8 @@ export class FlyoutService extends FtrService {
       for (let i = 0; i < flyoutElements.length; i++) {
         const closeBtnExists = await this.find.descendantExistsByCssSelector(
           '[aria-label*="Close"]',
-          flyoutElements[i]
+          flyoutElements[i],
+          0
         );
         if (closeBtnExists) {
           const closeBtn = await flyoutElements[i].findByCssSelector('[aria-label*="Close"]');
@@ -52,7 +53,7 @@ export class FlyoutService extends FtrService {
           expectedFlyoutCount++;
         }
       }
-      flyoutElements = await this.find.allByCssSelector('.euiFlyout', 500);
+      flyoutElements = await this.find.allByCssSelector('.euiFlyout', 0);
       return flyoutElements.length === expectedFlyoutCount;
     });
   }

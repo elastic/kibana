@@ -20,6 +20,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
+  const browser = getService('browser');
   const filterBar = getService('filterBar');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
@@ -82,6 +83,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           // No-op on the first attempt, when there's no filter yet to remove.
           await filterBar.removeAllFilters().catch(() => {});
+          await retry.waitForWithTimeout(
+            'unfiltered CCS results before the stalled query',
+            15_000,
+            async () => {
+              return (
+                (await testSubjects.exists('discoverQueryHits')) &&
+                (await testSubjects.getVisibleText('discoverQueryHits')) === '28,008'
+              );
+            }
+          );
+          const queryStartedAt = await browser.execute(() => {
+            performance.clearResourceTimings();
+            return performance.now();
+          });
 
           await filterBar.addDslFilter(
             `
@@ -102,8 +117,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             false
           );
 
-          // Secondary button enabled = SearchSessionState.Loading after 500ms delay,
-          // which guarantees the async-search ID is set (see query_bar_top_row.tsx).
+          // Both document and hit-count searches need their initial async responses.
+          // Loading-state controls alone do not prove those responses have arrived.
+          await retry.waitForWithTimeout(
+            'CCS async search responses before cancellation',
+            15_000,
+            async () => {
+              return browser.execute(
+                (startedAt: number) =>
+                  performance.getEntriesByType('resource').filter((entry) => {
+                    const resource = entry as PerformanceResourceTiming;
+                    return (
+                      /\/internal\/search\/[^/]+\/?$/.test(new URL(resource.name).pathname) &&
+                      resource.startTime >= startedAt &&
+                      resource.responseEnd > 0
+                    );
+                  }).length >= 2,
+                queryStartedAt
+              );
+            }
+          );
           await testSubjects.waitForEnabled('queryCancelButton-secondary-button');
           await testSubjects.existOrFail('queryCancelButton');
           await testSubjects.click('queryCancelButton');

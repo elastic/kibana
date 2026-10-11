@@ -35,6 +35,36 @@ Starts Elasticsearch and Kibana servers given a specified config.
 
 Allows users to start another process to run just the tests while keeping the servers running with this method. Start servers _and_ run tests using the same config file ([see how](../../../../../scripts/README.md)).
 
+### Recording FTR waits
+
+Set `FTR_RECORD_WAITS=1` when running `scripts/functional_tests` or
+`scripts/functional_test_runner` to record any existing config without modifying
+it:
+
+```sh
+FTR_RECORD_WAITS=1 TEST_BROWSER_HEADLESS=1 node scripts/functional_tests \
+  --config src/platform/test/functional/apps/visualize/group1/config.ts
+```
+
+The default output root is `target/ftr-wait-recordings`. Override it with
+`FTR_WAIT_RECORDING_DIRECTORY=/absolute/output/path`. Each config has its own
+directory matching its repository-relative config path, followed by a unique
+`<timestamp>-<pid>` execution directory. Configs outside the repository use a hash
+of their absolute path under `external/`.
+
+Each execution writes `waits.json` with config, file, test, and hook summaries,
+individual wait spans, and call stacks, plus `trace.json` for Chrome trace
+viewers such as Perfetto. Recording starts with Mocha execution and excludes
+server startup. Overlapping waits are counted once in aggregate totals.
+WebDriver waits and lookups include browser work and transport time, so they do
+not directly measure avoidable idle time. Custom test runners and dry runs do
+not produce Mocha recordings.
+
+Recording is disabled by default. Configs may also opt in with
+`waitRecording: { enabled: true, directory: '/absolute/output/root' }`.
+`FTR_RECORD_WAITS=1` enables recording even when the config leaves it disabled;
+`FTR_WAIT_RECORDING_DIRECTORY` overrides the configured output root.
+
 ## Rationale
 
 ### Single config per setup

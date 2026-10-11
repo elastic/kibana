@@ -14,8 +14,7 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
 
-  const { visChart, visualBuilder, visualize, common } = getPageObjects([
-    'visChart',
+  const { visualBuilder, visualize, common } = getPageObjects([
     'visualBuilder',
     'visualize',
     'common',
@@ -54,9 +53,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should verify topN label and count display', async () => {
-        await visChart.waitForVisualizationRenderingStabilized();
-        const topNLabel = await visualBuilder.getTopNLabel();
-        const topNCount = await visualBuilder.getTopNCount();
+        const topNLabel = await visualBuilder.expectTopNLabel('Count');
+        const topNCount = await visualBuilder.expectTopNCount('156');
         expect(topNLabel).to.be('Count');
         expect(topNCount).to.be('156');
       });
@@ -65,8 +63,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.selectAggType('Counter rate');
         await visualBuilder.setFieldForAggregation('memory');
 
-        const topNLabel = await visualBuilder.getTopNLabel();
-        const topNCount = await visualBuilder.getTopNCount();
+        const topNLabel = await visualBuilder.expectTopNLabel('Counter Rate of memory');
+        const topNCount = await visualBuilder.expectTopNCount('29,520');
 
         expect(topNLabel).to.be('Counter Rate of memory');
         expect(topNCount).to.be('29,520');
@@ -80,8 +78,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.clickPanelOptions('topN');
         await visualBuilder.setMetricsDataTimerangeMode('Entire time range');
 
-        const topNLabel = await visualBuilder.getTopNLabel();
-        const topNCount = await visualBuilder.getTopNCount();
+        const topNLabel = await visualBuilder.expectTopNLabel('Sum of Squares of bytes');
+        const topNCount = await visualBuilder.expectTopNCount('630,170,001,503');
 
         expect(topNLabel).to.be('Sum of Squares of bytes');
         expect(topNCount).to.be('630,170,001,503');
@@ -92,8 +90,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.setColorPickerValue('#E5FFCF');
         await visualBuilder.setColorPickerValue('#80e08a', 1);
 
-        const firstTopNBarStyle = await visualBuilder.getTopNBarStyle();
-        const secondTopNBarStyle = await visualBuilder.getTopNBarStyle(1);
+        const firstTopNBarStyle = await visualBuilder.expectTopNBarStyle(
+          'background-color: rgb(229, 255, 207);'
+        );
+        const secondTopNBarStyle = await visualBuilder.expectTopNBarStyle(
+          'background-color: rgb(128, 224, 138);',
+          1
+        );
 
         expect(firstTopNBarStyle).to.contain('background-color: rgb(229, 255, 207);');
         expect(secondTopNBarStyle).to.contain('background-color: rgb(128, 224, 138);');
@@ -106,8 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.selectAggType('derivative', 1);
         await visualBuilder.setFieldForAggregation('Max of machine.ram', 1);
 
-        await visChart.waitForVisualizationRenderingStabilized();
-        const value = await visualBuilder.getTopNCount();
+        const value = await visualBuilder.expectTopNCount('0');
 
         expect(value).to.eql('0');
 
@@ -132,8 +134,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await visualBuilder.setBackgroundColor('#FBFFD4');
           await visualBuilder.setColorPickerValue('#D6BF57', 1);
 
-          const backGroundStyle = await visualBuilder.getBackgroundStyle();
-          const topNBarStyle = await visualBuilder.getTopNBarStyle();
+          const backGroundStyle = await visualBuilder.expectBackgroundStyle(
+            'background-color: rgb(251, 255, 212);'
+          );
+          const topNBarStyle = await visualBuilder.expectTopNBarStyle(
+            'background-color: rgb(214, 191, 87);'
+          );
 
           expect(backGroundStyle).to.eql('background-color: rgb(251, 255, 212);');
           expect(topNBarStyle).to.contain('background-color: rgb(214, 191, 87);');

@@ -12,9 +12,27 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 import { LifecyclePhase } from './lifecycle_phase';
 
+import type { WaitCategory, WaitRecorder } from './wait_recorder';
+
 import type { Suite, Test } from '../fake_mocha_types';
 
 export class Lifecycle {
+  public waitRecorder?: WaitRecorder;
+
+  /** Records a wait without changing the callback's result or error. */
+  public async recordWait<T>(
+    category: WaitCategory,
+    name: string,
+    callback: () => Promise<T>
+  ): Promise<T> {
+    const finish = this.waitRecorder?.beginWait(category, name);
+    try {
+      return await callback();
+    } finally {
+      finish?.();
+    }
+  }
+
   /** root subscription to cleanup lifecycle phases when lifecycle completes */
   private readonly sub = new Rx.Subscription();
 

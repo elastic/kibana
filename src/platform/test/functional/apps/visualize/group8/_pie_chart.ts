@@ -17,12 +17,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const inspector = getService('inspector');
 
-  const { common, visualize, visEditor, visChart, header, timePicker } = getPageObjects([
+  const { common, visualize, visEditor, visChart, timePicker } = getPageObjects([
     'common',
     'visualize',
     'visEditor',
     'visChart',
-    'header',
     'timePicker',
   ]);
 
@@ -44,8 +43,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visEditor.selectAggregation('Histogram');
       log.debug('Click field memory');
       await visEditor.selectField('memory');
-      await header.waitUntilLoadingHasFinished();
-      await common.sleep(1003);
       log.debug('setNumericInterval 4000');
       await visEditor.setInterval('40000', { type: 'numeric' });
       log.debug('clickGo');
@@ -60,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await visualize.loadSavedVisualization(vizName1);
-      await visChart.waitForVisualization();
+      await visChart.waitForVisualizationRenderComplete();
     });
 
     it('should have inspector enabled', async function () {
@@ -114,21 +111,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should apply correct filter on other bucket', async () => {
         const expectedTableData = ['Missing', 'osx'];
 
+        const renderingCount = await visChart.getVisualizationRenderingCount();
         await pieChart.filterOnPieSlice('Other');
-        await visChart.waitForVisualization();
+        await visChart.waitForVisualizationRenderComplete(renderingCount + 1);
         await pieChart.expectPieChartLabels(expectedTableData);
+        const filteredRenderingCount = await visChart.getVisualizationRenderingCount();
         await filterBar.removeFilter('machine.os.raw');
-        await visChart.waitForVisualization();
+        await visChart.waitForVisualizationRenderComplete(filteredRenderingCount + 1);
       });
 
       it('should apply correct filter on other bucket by clicking on a legend', async () => {
         const expectedTableData = ['Missing', 'osx'];
 
         await visChart.filterLegend('Other');
-        await visChart.waitForVisualization();
+        await visChart.waitForVisualizationRenderComplete();
         await pieChart.expectPieChartLabels(expectedTableData);
+        const filteredRenderingCount = await visChart.getVisualizationRenderingCount();
         await filterBar.removeFilter('machine.os.raw');
-        await visChart.waitForVisualization();
+        await visChart.waitForVisualizationRenderComplete(filteredRenderingCount + 1);
       });
 
       it('should show two levels of other buckets', async () => {
@@ -311,8 +311,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(
           'Switch to a different time range from "' + emptyFromTime + '" to "' + emptyToTime + '"'
         );
+        const renderingCount = await visChart.getVisualizationRenderingCount();
         await timePicker.setAbsoluteRange(emptyFromTime, emptyToTime);
-        await visChart.waitForVisualization();
+        await visChart.waitForVisualizationRenderComplete(renderingCount + 1);
       });
     });
     describe('multi series slice', () => {
@@ -328,8 +329,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.selectAggregation('Histogram');
         log.debug('Click field memory');
         await visEditor.selectField('memory');
-        await header.waitUntilLoadingHasFinished();
-        await common.sleep(1003);
         log.debug('setNumericInterval 4000');
         await visEditor.setInterval('40000', { type: 'numeric' });
         log.debug('Toggle previous editor');
@@ -435,10 +434,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.clickGo();
 
         await visChart.filterLegend('CN');
-        await visChart.waitForVisualization();
+        await visChart.waitForVisualizationRenderComplete();
         await pieChart.expectPieChartLabels(expectedTableData);
+        const filteredRenderingCount = await visChart.getVisualizationRenderingCount();
         await filterBar.removeFilter('geo.dest');
-        await visChart.waitForVisualization();
+        await visChart.waitForVisualizationRenderComplete(filteredRenderingCount + 1);
       });
 
       // TODO: it seems that adding a filter agg which has no results to a pie chart breaks it and instead it shows "no data"
@@ -534,7 +534,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           [row[0], ...row.slice(2)]
         );
         await visChart.filterLegend('CN');
-        await header.waitUntilLoadingHasFinished();
         await inspector.open();
         await inspector.setTablePageSize(50);
         await inspector.expectTableData(expectedTableData);

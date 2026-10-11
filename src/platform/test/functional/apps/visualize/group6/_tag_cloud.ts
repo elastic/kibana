@@ -19,17 +19,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
   const find = getService('find');
-  const { common, visualize, visEditor, visChart, header, settings, timePicker, tagCloud } =
-    getPageObjects([
-      'common',
-      'visualize',
-      'visEditor',
-      'visChart',
-      'header',
-      'settings',
-      'timePicker',
-      'tagCloud',
-    ]);
+  const { common, visualize, visEditor, visChart, settings, timePicker, tagCloud } = getPageObjects(
+    ['common', 'visualize', 'visEditor', 'visChart', 'settings', 'timePicker', 'tagCloud']
+  );
 
   describe('tag cloud chart', function () {
     const vizName1 = 'Visualization tagCloud';
@@ -64,68 +56,76 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show correct tag cloud data', async function () {
-      await visChart.waitForVisualization();
-      const data = await tagCloud.getTextTag();
-      log.debug(data);
-      expect(data).to.eql([
-        '32,212,254,720',
-        '21,474,836,480',
-        '19,327,352,832',
-        '20,401,094,656',
-        '18,253,611,008',
-      ]);
+      await visChart.waitForVisualizationRenderComplete();
+      await retry.try(async () => {
+        const data = await tagCloud.getTextTag();
+        log.debug(data);
+        expect(data).to.eql([
+          '32,212,254,720',
+          '21,474,836,480',
+          '19,327,352,832',
+          '20,401,094,656',
+          '18,253,611,008',
+        ]);
+      });
     });
 
     it('should collapse the sidebar', async function () {
       const editorSidebar = await find.byCssSelector('.visEditorSidebar');
       await visEditor.clickEditorSidebarCollapse();
-      // Give d3 tag cloud some time to rearrange tags
-      await common.sleep(1000);
-      const isDisplayed = await editorSidebar.isDisplayed();
-      expect(isDisplayed).to.be(false);
+      await retry.try(async () => {
+        expect(await editorSidebar.isDisplayed()).to.be(false);
+      });
       await visEditor.clickEditorSidebarCollapse();
     });
 
     it('should still show all tags after sidebar has been collapsed', async function () {
       await visEditor.clickEditorSidebarCollapse();
-      // Give d3 tag cloud some time to rearrange tags
-      await common.sleep(1000);
+      await retry.waitFor(
+        'sidebar to be collapsed',
+        async () => !(await (await find.byCssSelector('.visEditorSidebar')).isDisplayed())
+      );
       await visEditor.clickEditorSidebarCollapse();
-      // Give d3 tag cloud some time to rearrange tags
-      await common.sleep(1000);
-      await visChart.waitForVisualization();
-      const data = await tagCloud.getTextTag();
-      log.debug(data);
-      expect(data).to.eql([
-        '32,212,254,720',
-        '21,474,836,480',
-        '19,327,352,832',
-        '20,401,094,656',
-        '18,253,611,008',
-      ]);
+      await retry.waitFor('sidebar to be expanded', async () =>
+        (await find.byCssSelector('.visEditorSidebar')).isDisplayed()
+      );
+      await visChart.waitForVisualizationRenderComplete();
+      await retry.try(async () => {
+        const data = await tagCloud.getTextTag();
+        log.debug(data);
+        expect(data).to.eql([
+          '32,212,254,720',
+          '21,474,836,480',
+          '19,327,352,832',
+          '20,401,094,656',
+          '18,253,611,008',
+        ]);
+      });
     });
 
     it('should still show all tags after browser was resized very small', async function () {
+      const renderingCount = await visChart.getVisualizationRenderingCount();
       await browser.setWindowSize(200, 200);
-      await common.sleep(1000);
+      await visChart.waitForVisualizationRenderComplete(renderingCount + 1);
       await browser.setWindowSize(1200, 800);
-      await common.sleep(1000);
-      await visChart.waitForVisualization();
-      const data = await tagCloud.getTextTag();
-      expect(data).to.eql([
-        '32,212,254,720',
-        '21,474,836,480',
-        '19,327,352,832',
-        '20,401,094,656',
-        '18,253,611,008',
-      ]);
+      await visChart.waitForVisualizationRenderComplete();
+      await retry.try(async () => {
+        const data = await tagCloud.getTextTag();
+        expect(data).to.eql([
+          '32,212,254,720',
+          '21,474,836,480',
+          '19,327,352,832',
+          '20,401,094,656',
+          '18,253,611,008',
+        ]);
+      });
     });
 
     it('should save and load', async function () {
       await visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await visualize.loadSavedVisualization(vizName1);
-      await visChart.waitForVisualization();
+      await visChart.waitForVisualizationRenderComplete();
     });
 
     it('should show the tags and relative size', function () {
@@ -166,8 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualize.loadSavedVisualization(vizName1, {
           navigateToVisualize: false,
         });
-        await header.waitUntilLoadingHasFinished();
-        await visChart.waitForVisualization();
+        await visChart.waitForVisualizationRenderComplete();
       });
 
       after(async function () {
@@ -181,18 +180,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should format tags with field formatter', async function () {
-        await visChart.waitForVisualization();
-        const data = await tagCloud.getTextTag();
-        log.debug(data);
-        expect(data).to.eql(['30GB', '20GB', '18GB', '19GB', '17GB']);
+        await visChart.waitForVisualizationRenderComplete();
+        await retry.try(async () => {
+          const data = await tagCloud.getTextTag();
+          log.debug(data);
+          expect(data).to.eql(['30GB', '20GB', '18GB', '19GB', '17GB']);
+        });
       });
 
       it('should apply filter with unformatted value', async function () {
         await tagCloud.selectTagCloudTag('30GB');
-        await header.waitUntilLoadingHasFinished();
-        await visChart.waitForVisualization();
-        const data = await tagCloud.getTextTag();
-        expect(data).to.eql(['30GB']);
+        await visChart.waitForVisualizationRenderComplete();
+        await retry.try(async () => {
+          const data = await tagCloud.getTextTag();
+          expect(data).to.eql(['30GB']);
+        });
       });
     });
   });

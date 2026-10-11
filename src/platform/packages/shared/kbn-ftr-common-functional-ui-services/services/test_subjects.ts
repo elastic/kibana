@@ -237,11 +237,16 @@ export class TestSubjects extends FtrService {
     await element.doubleClick();
   }
 
-  async descendantExists(selector: string, parentElement: WebElementWrapper): Promise<boolean> {
+  async descendantExists(
+    selector: string,
+    parentElement: WebElementWrapper,
+    { timeout }: { timeout?: number } = {}
+  ): Promise<boolean> {
     this.log.debug(`TestSubjects.descendantExists(${selector})`);
     return await this.findService.descendantExistsByCssSelector(
       testSubjSelector(selector),
-      parentElement
+      parentElement,
+      timeout
     );
   }
 
@@ -429,11 +434,15 @@ export class TestSubjects extends FtrService {
   }
 
   public async waitForEnabled(selector: string, timeout: number = this.TRY_TIME): Promise<boolean> {
-    const success = await this.retry.tryForTime(timeout, async () => {
-      const element = await this.find(selector);
-      return (await element.isDisplayed()) && (await element.isEnabled());
-    });
-    return success;
+    await this.retry.waitForWithTimeout(
+      `${selector} to be visible and enabled`,
+      timeout,
+      async () => {
+        const element = await this.find(selector);
+        return (await element.isDisplayed()) && (await element.isEnabled());
+      }
+    );
+    return true;
   }
 
   public getCssSelector(selector: string): string {

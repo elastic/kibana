@@ -525,8 +525,8 @@ export class DataGridService extends FtrService {
     return Number(match[1]);
   }
 
-  public async getHeaderFields(): Promise<string[]> {
-    const result = await this.find.allByCssSelector('.euiDataGridHeaderCell__content');
+  public async getHeaderFields(timeout?: number): Promise<string[]> {
+    const result = await this.find.allByCssSelector('.euiDataGridHeaderCell__content', timeout);
 
     const textArr = [];
     for (const cell of result) {

@@ -15,13 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
-  const { common, visualize, header, visEditor, visChart } = getPageObjects([
-    'common',
-    'visualize',
-    'header',
-    'visEditor',
-    'visChart',
-  ]);
+  const { visualize, visEditor, visChart } = getPageObjects(['visualize', 'visEditor', 'visChart']);
 
   const xyChartSelector = 'xyVisChart';
 
@@ -34,7 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('clickVerticalBarChart');
       await visualize.clickVerticalBarChart();
       await visualize.clickNewSearch(visualize.index.LOGSTASH_NON_TIME_BASED);
-      await common.sleep(500);
       log.debug('Bucket = X-Axis');
       await visEditor.clickBucket('X-axis');
       log.debug('Aggregation = Date Histogram');
@@ -42,7 +35,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('Field = @timestamp');
       await visEditor.selectField('@timestamp');
       await visEditor.setInterval('3h', { type: 'custom' });
-      await visChart.waitForVisualizationRenderingStabilized();
       await visEditor.clickGo();
     };
 
@@ -55,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await visualize.loadSavedVisualization(vizName1);
-      await visChart.waitForVisualization();
+      await visChart.waitForVisualizationRenderComplete();
     });
 
     it('should have inspector enabled', async function () {
@@ -183,11 +175,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.clickBucket('Split series');
         await visEditor.selectAggregation('Terms');
         await visEditor.selectField('response.raw');
-        await header.waitUntilLoadingHasFinished();
 
-        await common.sleep(1003);
         await visEditor.clickGo();
-        await header.waitUntilLoadingHasFinished();
 
         const expectedEntries = ['200', '404', '503']; // sorting order aligned with reading direction top-bottom
 
@@ -204,17 +193,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.clickBucket('Split series');
         await visEditor.selectAggregation('Terms');
         await visEditor.selectField('response.raw');
-        await header.waitUntilLoadingHasFinished();
 
         await visEditor.toggleOpenEditor(3, 'false');
         await visEditor.clickBucket('Split series');
         await visEditor.selectAggregation('Terms');
         await visEditor.selectField('machine.os');
-        await header.waitUntilLoadingHasFinished();
 
-        await common.sleep(1003);
         await visEditor.clickGo();
-        await header.waitUntilLoadingHasFinished();
 
         const expectedEntries = [
           '200 › win 8',
@@ -240,7 +225,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show correct series when disabling first agg', async function () {
         await visEditor.toggleDisabledAgg(3);
         await visEditor.clickGo();
-        await header.waitUntilLoadingHasFinished();
 
         const expectedEntries = ['win 8', 'win xp', 'ios', 'osx', 'win 7'];
         const legendEntries = await visChart.getLegendEntriesXYCharts(xyChartSelector);
@@ -255,11 +239,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.toggleOpenEditor(2, 'false');
         await visEditor.toggleOpenEditor(1);
         await visEditor.selectAggregation('Derivative', 'metrics');
-        await header.waitUntilLoadingHasFinished();
 
-        await common.sleep(1003);
         await visEditor.clickGo();
-        await header.waitUntilLoadingHasFinished();
 
         const expectedEntries = ['Derivative of Count'];
         const legendEntries = await visChart.getLegendEntriesXYCharts(xyChartSelector);

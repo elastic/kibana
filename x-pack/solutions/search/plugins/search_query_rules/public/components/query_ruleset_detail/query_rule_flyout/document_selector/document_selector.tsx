@@ -53,34 +53,37 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
     : undefined;
 
   return (
-    <EditableResult
-      initialDocId={initialDocId}
-      initialIndex={index}
-      leftSideItem={
-        <>
-          {type === 'pinned' && (
-            <EuiPanel color="transparent" paddingSize="s" aria-label="Drag Handle">
-              <EuiFlexGroup alignItems="center" gutterSize="s" direction="row" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="dragVertical" aria-hidden />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiNotificationBadge color="subdued">{(indexDoc ?? 0) + 1}</EuiNotificationBadge>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          )}
-        </>
-      }
-      data-test-subj="searchQueryRulesQueryRuleFlyoutDocumentCount"
-      indices={indices}
-      hasIndexSelector={hasIndexSelector}
-      fields={document && resultToFieldFromMappingResponse(document, mappings)}
-      onIdSelectorChange={onIdSelectorChange}
-      onIndexSelectorChange={onIndexSelectorChange}
-      onDeleteDocument={onDeleteDocument}
-      isLoading={showLoading}
-      error={error}
-    />
+    <div data-test-subj="searchQueryRulesQueryRuleFlyoutDocumentCount" data-test-index={index}>
+      <EditableResult
+        initialDocId={initialDocId}
+        initialIndex={index}
+        leftSideItem={
+          <>
+            {type === 'pinned' && (
+              <EuiPanel color="transparent" paddingSize="s" aria-label="Drag Handle">
+                <EuiFlexGroup alignItems="center" gutterSize="s" direction="row" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="dragVertical" aria-hidden />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiNotificationBadge color="subdued">
+                      {(indexDoc ?? 0) + 1}
+                    </EuiNotificationBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            )}
+          </>
+        }
+        indices={indices}
+        hasIndexSelector={hasIndexSelector}
+        fields={document && resultToFieldFromMappingResponse(document, mappings)}
+        onIdSelectorChange={onIdSelectorChange}
+        onIndexSelectorChange={onIndexSelectorChange}
+        onDeleteDocument={onDeleteDocument}
+        isLoading={showLoading}
+        error={error}
+      />
+    </div>
   );
 };

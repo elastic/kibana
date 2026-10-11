@@ -32,11 +32,49 @@ export class DashboardPanelActionsService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
   private readonly inspector = this.ctx.getService('inspector');
+  private readonly browser = this.ctx.getService('browser');
+  private readonly config = this.ctx.getService('config');
   private readonly testSubjects = this.ctx.getService('testSubjects');
 
-  private readonly header = this.ctx.getPageObject('header');
   private readonly common = this.ctx.getPageObject('common');
   private readonly dashboard = this.ctx.getPageObject('dashboard');
+
+  private async getVisibleFlyoutIds(): Promise<Set<string>> {
+    const flyouts = await this.find.allByCssSelector('.euiFlyout', 0);
+    const ids = new Set<string>();
+    for (const flyout of flyouts) {
+      if (await flyout.isDisplayed()) {
+        ids.add(await flyout._webElement.getId());
+      }
+    }
+    return ids;
+  }
+
+  private async clickEditAction(wrapper: WebElementWrapper): Promise<void> {
+    const originalPath = new URL(await this.browser.getCurrentUrl()).pathname;
+    const originalFlyouts = await this.retry.try(() => this.getVisibleFlyoutIds());
+    const wasMarkdownEditing = await this.testSubjects.descendantExists(
+      'euiMarkdownEditorTextArea',
+      wrapper,
+      { timeout: 0 }
+    );
+    await this.clickPanelAction(EDIT_PANEL_DATA_TEST_SUBJ, wrapper);
+    await this.retry.waitFor('panel editor destination', async () => {
+      if (new URL(await this.browser.getCurrentUrl()).pathname !== originalPath) {
+        await this.find.waitForElementStale(wrapper);
+        return true;
+      }
+      const visibleFlyouts = await this.getVisibleFlyoutIds();
+      if ([...visibleFlyouts].some((id) => !originalFlyouts.has(id))) return true;
+      return (
+        !wasMarkdownEditing &&
+        (await this.testSubjects.descendantExists('euiMarkdownEditorTextArea', wrapper, {
+          timeout: 0,
+        }))
+      );
+    });
+    await this.common.waitForTopNavToBeVisible();
+  }
 
   async getContainerTopOffset() {
     const existsDashboardContainer = await this.testSubjects.exists('dashboardContainer');
@@ -47,14 +85,12 @@ export class DashboardPanelActionsService extends FtrService {
   }
 
   async getDashboardContainerTopOffset() {
-    const fixedHeaders = (
-      await Promise.all([
-        // global fixed eui headers, TODO: remove when Kibana switched to grid layout
-        this.find.allByCssSelector('[data-fixed-header="true"]', 500),
-        // sticky unified search bar
-        this.find.allByCssSelector('[data-test-subj="globalQueryBar"]', 500),
-      ])
-    ).flat();
+    const fixedHeaders = [
+      // global fixed eui headers, TODO: remove when Kibana switched to grid layout
+      ...(await this.find.allByCssSelector('[data-fixed-header="true"]', 0)),
+      // sticky unified search bar
+      ...(await this.find.allByCssSelector('[data-test-subj="globalQueryBar"]', 0)),
+    ];
 
     let fixedHeaderHeight = 0;
     await asyncMap(fixedHeaders, async (header) => {
@@ -125,7 +161,7 @@ export class DashboardPanelActionsService extends FtrService {
     this.log.debug(`clickPanelAction(${testSubject})`);
     wrapper = wrapper || (await this.getPanelWrapper());
     await this.scrollPanelIntoView(wrapper);
-    const exists = await this.testSubjects.descendantExists(testSubject, wrapper);
+    const exists = await this.testSubjects.descendantExists(testSubject, wrapper, { timeout: 0 });
     let action;
     if (!exists) {
       await this.openContextMenu(wrapper);
@@ -145,24 +181,29 @@ export class DashboardPanelActionsService extends FtrService {
 
   async navigateToEditorFromFlyout(wrapper?: WebElementWrapper) {
     this.log.debug('navigateToEditorFromFlyout');
-    // make sure the context menu is open before proceeding
-    await this.openContextMenu();
-    await this.clickPanelAction(EDIT_PANEL_DATA_TEST_SUBJ);
-    await this.header.waitUntilLoadingHasFinished();
+    await this.clickEditAction(wrapper ?? (await this.getPanelWrapper()));
+    await this.navigateToLensEditor();
+  }
+
+  private async navigateToLensEditor(): Promise<void> {
     await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ);
-    const isConfirmModalVisible = await this.testSubjects.exists('confirmModalConfirmButton');
-    if (isConfirmModalVisible) {
+    const timeout = this.config.get('timeouts.find') * 10;
+    const destination = await this.testSubjects.waitForFirst(
+      ['confirmModalConfirmButton', 'lnsApp'],
+      { timeout }
+    );
+    if (!destination) throw new Error('Lens editor or navigation confirmation did not appear');
+    if (destination === 'confirmModalConfirmButton') {
       await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmModalConfirmButton', {
         timeout: 20000,
       });
     }
+    await this.testSubjects.existOrFail('lnsApp', { timeout });
   }
 
   async clickInlineEdit(wrapper?: WebElementWrapper) {
     this.log.debug('clickInlineEditAction');
-    await this.clickPanelAction(EDIT_PANEL_DATA_TEST_SUBJ, wrapper);
-    await this.header.waitUntilLoadingHasFinished();
-    await this.common.waitForTopNavToBeVisible();
+    await this.clickEditAction(wrapper ?? (await this.getPanelWrapper()));
   }
 
   /**
@@ -172,16 +213,10 @@ export class DashboardPanelActionsService extends FtrService {
   async clickEdit(wrapper?: WebElementWrapper) {
     this.log.debug(`clickEdit`);
     wrapper = wrapper || (await this.getPanelWrapper());
-    await this.scrollPanelIntoView(wrapper);
-    if (await this.testSubjects.descendantExists(EDIT_PANEL_DATA_TEST_SUBJ, wrapper)) {
-      // navigate to the editor
-      await this.clickPanelAction(EDIT_PANEL_DATA_TEST_SUBJ, wrapper);
-    } else {
-      // open the flyout and then navigate to the editor
-      await this.navigateToEditorFromFlyout(wrapper);
+    await this.clickEditAction(wrapper);
+    if (await this.testSubjects.exists('lnsEditOnFlyFlyout')) {
+      await this.navigateToLensEditor();
     }
-    await this.header.waitUntilLoadingHasFinished();
-    await this.common.waitForTopNavToBeVisible();
   }
 
   /**
@@ -278,7 +313,7 @@ export class DashboardPanelActionsService extends FtrService {
   async panelActionExists(testSubject: string, wrapper?: WebElementWrapper) {
     this.log.debug(`panelActionExists(${testSubject})`);
     return wrapper
-      ? await this.testSubjects.descendantExists(testSubject, wrapper)
+      ? await this.testSubjects.descendantExists(testSubject, wrapper, { timeout: 0 })
       : await this.testSubjects.exists(testSubject, { allowHidden: true });
   }
 

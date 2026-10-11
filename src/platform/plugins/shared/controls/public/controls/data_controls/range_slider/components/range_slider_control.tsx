@@ -201,6 +201,7 @@ export const RangeSliderControl: FC<Props> = ({
         className="rangeSliderAnchor__button kbnGridLayout--hideDragHandle"
         data-test-subj={`range-slider-control-${uuid}`}
         data-control-id={uuid}
+        data-control-value={JSON.stringify(value ?? ['', ''])}
       >
         <EuiDualRange
           ref={rangeSliderRef}

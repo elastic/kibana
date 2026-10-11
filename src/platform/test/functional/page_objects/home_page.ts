@@ -13,7 +13,6 @@ export class HomePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
-  private readonly common = this.ctx.getPageObject('common');
   public readonly log = this.ctx.getService('log');
   private readonly toasts = this.ctx.getService('toasts');
 
@@ -46,7 +45,8 @@ export class HomePageObject extends FtrService {
       const installStatus = await (
         await sampleDataCard.findByCssSelector('[data-status]')
       ).getAttribute('data-status');
-      const deleteButton = await sampleDataCard.findAllByTestSubject(`removeSampleDataSet${id}`);
+      if (installStatus !== 'installed') return false;
+      const deleteButton = await sampleDataCard.findAllByTestSubject(`removeSampleDataSet${id}`, 0);
       this.log.debug(`Sample data installed: ${deleteButton.length > 0}`);
       return installStatus === 'installed' && deleteButton.length > 0;
     } catch (e) {
@@ -87,46 +87,32 @@ export class HomePageObject extends FtrService {
     await this.doesSampleDataSetExist('ecommerce');
   }
 
-  async addSampleDataSet(id: string) {
-    await this.openSampleDataAccordion();
-    await this.retry.waitFor(`${id} sample data to be installed`, async () => {
-      if (await this.isSampleDataSetInstalled(id)) {
-        return true;
-      }
-
-      this.log.debug(`Attempting to add sample data: ${id}`);
-
-      // Echoing the adjustments made to 'removeSampleDataSet', as we are seeing flaky test cases here as well
-      // https://github.com/elastic/kibana/issues/52714
-      await this.testSubjects.waitForEnabled(`addSampleDataSet${id}`);
-      await this.common.sleep(1010);
-      await this.testSubjects.click(`addSampleDataSet${id}`);
-      await this.common.sleep(1010);
-      await this._waitForSampleDataLoadingAction(id);
-      return await this.isSampleDataSetInstalled(id);
-    });
+  private async getSampleDataSetStatus(id: string): Promise<string> {
+    const card = await this.testSubjects.find(`sampleDataSetCard${id}`);
+    const footer = await card.findByCssSelector('[data-status]');
+    const status = await footer.getAttribute('data-status');
+    if (!status) throw new Error(`Sample data ${id} has no installation status`);
+    return status;
   }
 
-  async removeSampleDataSet(id: string) {
+  async addSampleDataSet(id: string): Promise<void> {
     await this.openSampleDataAccordion();
-    await this.retry.waitFor('sample data to be removed', async () => {
-      if (!(await this.isSampleDataSetInstalled(id))) {
-        return true;
-      }
-
-      this.log.debug(`Attempting to remove sample data: ${id}`);
-
-      // looks like overkill but we're hitting flaky cases where we click but it doesn't remove
-      await this.testSubjects.waitForEnabled(`removeSampleDataSet${id}`);
-      // https://github.com/elastic/kibana/issues/65949
-      // Even after waiting for the "Remove" button to be enabled we still have failures
-      // where it appears the click just didn't work.
-      await this.common.sleep(1010);
-      await this.testSubjects.click(`removeSampleDataSet${id}`);
-      await this.common.sleep(1010);
-      await this._waitForSampleDataLoadingAction(id);
-      return !(await this.isSampleDataSetInstalled(id));
+    if ((await this.getSampleDataSetStatus(id)) === 'installed') return;
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry(`addSampleDataSet${id}`);
+    await this.retry.waitFor(`${id} sample data to be installed`, async () => {
+      return (await this.getSampleDataSetStatus(id)) === 'installed';
     });
+    await this.testSubjects.waitForEnabled(`removeSampleDataSet${id}`);
+  }
+
+  async removeSampleDataSet(id: string): Promise<void> {
+    await this.openSampleDataAccordion();
+    if ((await this.getSampleDataSetStatus(id)) === 'not_installed') return;
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry(`removeSampleDataSet${id}`);
+    await this.retry.waitFor(`${id} sample data to be removed`, async () => {
+      return (await this.getSampleDataSetStatus(id)) === 'not_installed';
+    });
+    await this.testSubjects.waitForEnabled(`addSampleDataSet${id}`);
   }
 
   // loading action is either uninstall and install

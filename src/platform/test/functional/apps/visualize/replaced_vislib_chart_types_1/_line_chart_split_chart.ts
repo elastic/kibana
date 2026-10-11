@@ -71,26 +71,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // it could also check the legend to verify the extensions
       const expectedChartData = ['jpg 9,109', 'css 2,159', 'png 1,373', 'gif 918', 'php 445'];
 
-      // sleep a bit before trying to get the chart data
-      await common.sleep(3000);
-      const data = await visChart.getLineChartData(xyChartSelector);
-      log.debug('data=' + data);
-      const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
-      for (let x = 0; x < data.length; x++) {
-        const expected = Number(expectedChartData[x].split(' ')[1].replace(',', ''));
-        log.debug(
-          'x=' +
-            x +
-            " expectedChartData[x].split(' ')[1] = " +
-            expected +
-            '  data[x]=' +
-            data[x] +
-            ' diff=' +
-            Math.abs(expected - data[x])
-        );
-        expect(Math.abs(expected - data[x]) < tolerance).to.be.ok();
-      }
-      log.debug('Done');
+      await retry.try(async () => {
+        const data = await visChart.getAllLineChartData(xyChartSelector);
+        log.debug('data=' + data);
+        expect(data).to.have.length(expectedChartData.length);
+        const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
+        for (let x = 0; x < data.length; x++) {
+          const expected = Number(expectedChartData[x].split(' ')[1].replace(',', ''));
+          log.debug(
+            'x=' +
+              x +
+              " expectedChartData[x].split(' ')[1] = " +
+              expected +
+              '  data[x]=' +
+              data[x] +
+              ' diff=' +
+              Math.abs(expected - data[x])
+          );
+          expect(Math.abs(expected - data[x]) < tolerance).to.be.ok();
+        }
+        log.debug('Done');
+      });
     });
 
     it('should have inspector enabled', async function () {
@@ -106,8 +107,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visEditor.selectOrderByMetric(2, '_key');
       await visEditor.clickGo();
       await retry.try(async function () {
-        const data = await visChart.getLineChartData(xyChartSelector);
+        const data = await visChart.getAllLineChartData(xyChartSelector);
         log.debug('data=' + data);
+        expect(data).to.have.length(expectedChartData.length);
         const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
         for (let x = 0; x < data.length; x++) {
           const expected = Number(expectedChartData[x].split(' ')[1].replace(',', ''));
@@ -149,11 +151,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await inspector.openInspectorRequestsView();
       const requestTimestampBefore = await getRequestTimestamp();
 
-      // pause to allow time for autorefresh to fire another request
-      await common.sleep(intervalS * 1000 * 1.5);
-
-      // get the latest timestamp from request stats
-      const requestTimestampAfter = await getRequestTimestamp();
+      let requestTimestampAfter = requestTimestampBefore;
+      await retry.tryForTime(10000, async () => {
+        requestTimestampAfter = await getRequestTimestamp();
+        expect(requestTimestampBefore).not.to.equal(requestTimestampAfter);
+      });
       log.debug(
         `Timestamp before: ${requestTimestampBefore}, Timestamp after: ${requestTimestampAfter}`
       );
@@ -171,7 +173,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName);
 
       await visualize.loadSavedVisualization(vizName);
-      await visChart.waitForVisualization();
+      await visChart.waitForVisualizationRenderComplete();
     });
 
     describe('switch between Y axis scale types', () => {

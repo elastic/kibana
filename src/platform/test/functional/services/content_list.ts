@@ -39,7 +39,7 @@ export class ContentListService extends FtrService {
 
   /** All rendered item links (one per row) on the current page. */
   public async findItemLinks() {
-    return this.testSubjects.findAll(CONTENT_LIST_TABLE_ITEM_LINK);
+    return this.testSubjects.findAll(CONTENT_LIST_TABLE_ITEM_LINK, 0);
   }
 
   /** Retries until the visible item-link count matches `count`. */

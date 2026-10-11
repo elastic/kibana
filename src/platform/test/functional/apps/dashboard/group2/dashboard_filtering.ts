@@ -117,7 +117,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('tag cloud values are filtered', async () => {
-        await dashboardExpect.emptyTagCloudFound();
+        await dashboardExpect.emptyTagCloudFound(
+          'Filter Bytes Test: tag cloud with not 0 bytes filter'
+        );
       });
 
       it('tsvb metric is filtered', async () => {
@@ -221,7 +223,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await timePicker.setDefaultDataRange();
 
         await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
-        await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
         await pieChart.expectPieSliceCount(5);
 
@@ -245,7 +246,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('Nested visualization filter pills filters data as expected', async () => {
         await dashboardPanelActions.clickEdit();
-        await header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
         await pieChart.filterOnPieSlice('grr');
         await header.waitUntilLoadingHasFinished();
@@ -259,7 +259,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('Removing filter pills and query unfiters data as expected', async () => {
         await dashboardPanelActions.clickEdit();
-        await header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
         await queryBar.setQuery('');
         await queryBar.submitQuery();

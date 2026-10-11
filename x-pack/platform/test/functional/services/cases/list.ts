@@ -63,6 +63,18 @@ export function CasesTableServiceProvider(
     '[data-test-subj^="cases-table-row-"],[data-test-subj^="cases-list-item-clickable-"]';
 
   return {
+    async setRowsPerPage(rows: number): Promise<void> {
+      const paginationButton = await testSubjects.find('tablePaginationPopoverButton');
+      await browser.execute(
+        'arguments[0].scrollIntoView({behavior:"instant",block:"center"})',
+        paginationButton
+      );
+      await paginationButton.click();
+      const option = `tablePagination-${rows}-rows`;
+      await testSubjects.click(option);
+      await testSubjects.missingOrFail(option);
+    },
+
     /**
      * Whether the card list view is currently rendered (as opposed to the table view which reuses `cases-table`).
      */

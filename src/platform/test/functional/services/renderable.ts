@@ -29,11 +29,11 @@ export class RenderableService extends FtrService {
       return;
     }
     await this.retry.try(async () => {
-      const completedElements = await this.find.allByCssSelector(RENDER_COMPLETE_SELECTOR);
+      const completedElements = await this.find.allByCssSelector(RENDER_COMPLETE_SELECTOR, 0);
       if (completedElements.length < count) {
         const pendingElements = await this.find.allByCssSelector(
           RENDER_COMPLETE_PENDING_SELECTOR,
-          2500
+          0
         );
         const pendingElementNames = [];
         for (const pendingElement of pendingElements) {

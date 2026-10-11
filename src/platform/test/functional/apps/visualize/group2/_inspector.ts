@@ -15,12 +15,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const inspector = getService('inspector');
   const filterBar = getService('filterBar');
+  const retry = getService('retry');
   const { visualize, visEditor, visChart, timePicker } = getPageObjects([
     'visualize',
     'visEditor',
     'visChart',
     'timePicker',
   ]);
+
+  const expectInspectorTableData = async (expectedData: string[][]): Promise<void> => {
+    await retry.try(async () => {
+      await inspector.expectTableData(expectedData);
+    });
+  };
 
   describe('inspector', function describeIndexTests() {
     before(async function () {
@@ -74,6 +81,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       describe('filtering on inspector table values', function () {
+        const unfilteredTableData = [
+          ['win 8', '2,904', '13,031,579,645.108'],
+          ['win xp', '2,858', '13,073,190,186.423'],
+          ['Other', '6,920', '13,123,599,766.011'],
+        ];
+
         before(async function () {
           log.debug('Add X-axis terms agg on machine.os.raw');
           await visEditor.clickBucket('X-axis');
@@ -85,32 +98,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         beforeEach(async function () {
+          await visChart.waitForVisualizationRenderComplete();
           await inspector.open();
-          await visChart.waitForVisualizationRenderingStabilized();
+          await expectInspectorTableData(unfilteredTableData);
         });
 
         afterEach(async function () {
           await inspector.close();
+          const renderingCount = await visChart.getVisualizationRenderingCount();
           await filterBar.removeFilter('machine.os.raw');
-          await visChart.waitForVisualizationRenderingStabilized();
+          await visChart.waitForVisualizationRenderComplete(renderingCount + 1);
         });
 
         it('should allow filtering for values', async function () {
-          await inspector.expectTableData([
-            ['win 8', '2,904', '13,031,579,645.108'],
-            ['win xp', '2,858', '13,073,190,186.423'],
-            ['Other', '6,920', '13,123,599,766.011'],
-          ]);
-
+          const renderingCount = await visChart.getVisualizationRenderingCount();
           await inspector.filterForTableCell({ column: 1, row: 1, filter: 'in' });
-          await visChart.waitForVisualization();
-          await inspector.expectTableData([['win 8', '2,904', '13,031,579,645.108']]);
+          await visChart.waitForVisualizationRenderComplete(renderingCount + 1);
+          await expectInspectorTableData([['win 8', '2,904', '13,031,579,645.108']]);
         });
 
         it('should allow filtering out values', async function () {
+          const renderingCount = await visChart.getVisualizationRenderingCount();
           await inspector.filterForTableCell({ column: 1, row: 1, filter: 'out' });
-          await visChart.waitForVisualization();
-          await inspector.expectTableData([
+          await visChart.waitForVisualizationRenderComplete(renderingCount + 1);
+          await expectInspectorTableData([
             ['win xp', '2,858', '13,073,190,186.423'],
             ['win 7', '2,814', '13,186,695,551.251'],
             ['Other', '4,106', '13,080,420,659.354'],
@@ -118,9 +129,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should allow filtering for other values', async function () {
+          const renderingCount = await visChart.getVisualizationRenderingCount();
           await inspector.filterForTableCell({ column: 1, row: 3, filter: 'in' });
-          await visChart.waitForVisualization();
-          await inspector.expectTableData([
+          await visChart.waitForVisualizationRenderComplete(renderingCount + 1);
+          await expectInspectorTableData([
             ['win 7', '2,814', '13,186,695,551.251'],
             ['ios', '2,784', '13,009,497,206.823'],
             ['Other', '1,322', '13,228,964,670.613'],
@@ -128,9 +140,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should allow filtering out other values', async function () {
+          const renderingCount = await visChart.getVisualizationRenderingCount();
           await inspector.filterForTableCell({ column: 1, row: 3, filter: 'out' });
-          await visChart.waitForVisualization();
-          await inspector.expectTableData([
+          await visChart.waitForVisualizationRenderComplete(renderingCount + 1);
+          await expectInspectorTableData([
             ['win 8', '2,904', '13,031,579,645.108'],
             ['win xp', '2,858', '13,073,190,186.423'],
           ]);
