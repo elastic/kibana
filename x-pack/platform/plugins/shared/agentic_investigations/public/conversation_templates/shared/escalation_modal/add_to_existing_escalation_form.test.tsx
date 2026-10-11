@@ -9,13 +9,13 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { EscalationIncidentSummary } from '@kbn/agentic-investigations-common';
+import type { EscalationSummary } from '@kbn/agentic-investigations-common';
 import {
   AddToExistingEscalationForm,
   type AddToExistingEscalationFormProps,
 } from './add_to_existing_escalation_form';
 
-const freeIncident: EscalationIncidentSummary = {
+const freeEscalation: EscalationSummary = {
   id: 'esc-1',
   title: 'First escalation',
   linkedInvestigationCount: 2,
@@ -23,7 +23,7 @@ const freeIncident: EscalationIncidentSummary = {
   canManage: true,
 };
 
-const linkedIncident: EscalationIncidentSummary = {
+const linkedEscalation: EscalationSummary = {
   id: 'esc-2',
   title: 'Already linked escalation',
   linkedInvestigationCount: 1,
@@ -31,7 +31,7 @@ const linkedIncident: EscalationIncidentSummary = {
   canManage: true,
 };
 
-const nonOwnerIncident: EscalationIncidentSummary = {
+const nonOwnerEscalation: EscalationSummary = {
   id: 'esc-3',
   title: 'Participant-only escalation',
   linkedInvestigationCount: 0,
@@ -40,7 +40,7 @@ const nonOwnerIncident: EscalationIncidentSummary = {
 };
 
 const defaultProps: AddToExistingEscalationFormProps = {
-  incidents: [freeIncident],
+  escalations: [freeEscalation],
   isLoading: false,
   isError: false,
   onRetry: jest.fn(),
@@ -64,28 +64,28 @@ afterEach(() => jest.clearAllMocks());
 
 describe('AddToExistingEscalationForm', () => {
   it('shows a loading spinner while escalations are loading', () => {
-    renderForm({ isLoading: true, incidents: [] });
+    renderForm({ isLoading: true, escalations: [] });
 
     expect(document.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
   });
 
-  it('shows an empty state message when there are no incidents', () => {
-    renderForm({ incidents: [] });
+  it('shows an empty state message when there are no escalations', () => {
+    renderForm({ escalations: [] });
 
     expect(screen.getByText('No escalations found.')).toBeInTheDocument();
   });
 
   it('renders escalation rows', () => {
-    renderForm({ incidents: [freeIncident] });
+    renderForm({ escalations: [freeEscalation] });
 
-    expect(screen.getByTestId('escalationModalIncident-esc-1')).toBeInTheDocument();
+    expect(screen.getByTestId('escalationModalEscalation-esc-1')).toBeInTheDocument();
     expect(screen.getByText('First escalation')).toBeInTheDocument();
   });
 
   it('disables the radio for an already-linked escalation', () => {
-    renderForm({ incidents: [linkedIncident] });
+    renderForm({ escalations: [linkedEscalation] });
 
-    const radio = document.getElementById('incident-esc-2') as HTMLInputElement;
+    const radio = document.getElementById('escalation-esc-2') as HTMLInputElement;
     expect(radio).toBeDisabled();
   });
 
@@ -98,7 +98,7 @@ describe('AddToExistingEscalationForm', () => {
   it('enables submit after selecting an escalation', () => {
     renderForm();
 
-    fireEvent.click(screen.getByTestId('escalationModalIncident-esc-1'));
+    fireEvent.click(screen.getByTestId('escalationModalEscalation-esc-1'));
 
     expect(screen.getByTestId('escalationModalattachToEscalation')).not.toBeDisabled();
   });
@@ -107,16 +107,16 @@ describe('AddToExistingEscalationForm', () => {
     const onSubmit = jest.fn();
     renderForm({ onSubmit });
 
-    fireEvent.click(screen.getByTestId('escalationModalIncident-esc-1'));
+    fireEvent.click(screen.getByTestId('escalationModalEscalation-esc-1'));
     fireEvent.click(screen.getByTestId('escalationModalattachToEscalation'));
 
     expect(onSubmit).toHaveBeenCalledWith('esc-1');
   });
 
   it('ignores clicks on an already-linked escalation row', () => {
-    renderForm({ incidents: [linkedIncident] });
+    renderForm({ escalations: [linkedEscalation] });
 
-    fireEvent.click(screen.getByTestId('escalationModalIncident-esc-2'));
+    fireEvent.click(screen.getByTestId('escalationModalEscalation-esc-2'));
 
     expect(screen.getByTestId('escalationModalattachToEscalation')).toBeDisabled();
   });
@@ -134,7 +134,7 @@ describe('AddToExistingEscalationForm', () => {
     const onSearchChange = jest.fn();
     renderForm({ onSearchChange });
 
-    fireEvent.change(screen.getByTestId('escalationModalIncidentSearch'), {
+    fireEvent.change(screen.getByTestId('escalationModalEscalationSearch'), {
       target: { value: 'critical' },
     });
 
@@ -144,10 +144,10 @@ describe('AddToExistingEscalationForm', () => {
   it('clears selection when the search query changes', () => {
     renderForm();
 
-    fireEvent.click(screen.getByTestId('escalationModalIncident-esc-1'));
+    fireEvent.click(screen.getByTestId('escalationModalEscalation-esc-1'));
     expect(screen.getByTestId('escalationModalattachToEscalation')).not.toBeDisabled();
 
-    fireEvent.change(screen.getByTestId('escalationModalIncidentSearch'), {
+    fireEvent.change(screen.getByTestId('escalationModalEscalationSearch'), {
       target: { value: 'new query' },
     });
 
@@ -156,7 +156,7 @@ describe('AddToExistingEscalationForm', () => {
 
   it('shows an error callout with a retry button when isError is true', () => {
     const onRetry = jest.fn();
-    renderForm({ isError: true, incidents: [], onRetry });
+    renderForm({ isError: true, escalations: [], onRetry });
 
     expect(screen.getByTestId('escalationModalLoadError')).toBeInTheDocument();
 
@@ -165,16 +165,16 @@ describe('AddToExistingEscalationForm', () => {
   });
 
   it('disables the radio for a non-owner escalation', () => {
-    renderForm({ incidents: [nonOwnerIncident] });
+    renderForm({ escalations: [nonOwnerEscalation] });
 
-    const radio = document.getElementById('incident-esc-3') as HTMLInputElement;
+    const radio = document.getElementById('escalation-esc-3') as HTMLInputElement;
     expect(radio).toBeDisabled();
   });
 
   it('ignores clicks on a non-owner escalation row', () => {
-    renderForm({ incidents: [nonOwnerIncident] });
+    renderForm({ escalations: [nonOwnerEscalation] });
 
-    fireEvent.click(screen.getByTestId('escalationModalIncident-esc-3'));
+    fireEvent.click(screen.getByTestId('escalationModalEscalation-esc-3'));
 
     expect(screen.getByTestId('escalationModalattachToEscalation')).toBeDisabled();
   });

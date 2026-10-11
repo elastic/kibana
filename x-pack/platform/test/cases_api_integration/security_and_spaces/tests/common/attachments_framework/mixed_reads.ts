@@ -12,6 +12,7 @@ import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   COMMENT_ATTACHMENT_TYPE,
+  INDICATOR_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
   OSQUERY_ATTACHMENT_TYPE,
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
@@ -23,6 +24,7 @@ import {
   postCaseReq,
   postCommentActionsReq,
   postCommentUserReq,
+  postUnifiedIndicatorReq,
 } from '../../../../common/lib/mock';
 import {
   createCase,
@@ -313,22 +315,18 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(osqueryAttachment.attachmentId).to.be('mixed-osquery-1');
       });
 
-      it('handles mixed legacy v1 and unified v2 payloads in bulk create', async () => {
+      it('handles a batch of mixed unified attachment types in bulk create', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const updatedCase = await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
           params: [
             {
-              type: AttachmentType.user,
-              comment: 'legacy v1 style comment',
+              type: COMMENT_ATTACHMENT_TYPE,
+              data: { content: 'unified comment' },
               owner: 'securitySolutionFixture',
             },
-            {
-              type: 'comment' as const,
-              data: { content: 'unified v2 style comment' },
-              owner: 'securitySolutionFixture',
-            },
+            postUnifiedIndicatorReq,
             {
               type: LENS_ATTACHMENT_TYPE,
               data: { state: { attributes: { title: 'mixed test viz' } } },
@@ -337,7 +335,9 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
         });
 
-        expect(updatedCase.comments?.length).to.be(3);
+        expect(updatedCase.comments?.map(({ type }) => type).sort()).to.eql(
+          [COMMENT_ATTACHMENT_TYPE, INDICATOR_ATTACHMENT_TYPE, LENS_ATTACHMENT_TYPE].sort()
+        );
       });
     });
 

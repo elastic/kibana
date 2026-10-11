@@ -89,7 +89,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
         {...rest}
       >
         {renderChildren && (
-          <>
+          <AlertsContextProvider>
             <GlobalKQLHeader />
             <KibanaPageTemplate.Section
               className="securityPageWrapper"
@@ -99,12 +99,10 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
               component="div"
               grow={true}
             >
-              <AlertsContextProvider>
-                <ExpandableFlyoutProvider urlKey={isPreview ? undefined : URL_PARAM_KEY.flyout}>
-                  {children}
-                  <SecuritySolutionFlyout />
-                </ExpandableFlyoutProvider>
-              </AlertsContextProvider>
+              <ExpandableFlyoutProvider urlKey={isPreview ? undefined : URL_PARAM_KEY.flyout}>
+                {children}
+                <SecuritySolutionFlyout />
+              </ExpandableFlyoutProvider>
             </KibanaPageTemplate.Section>
             {isTimelineBottomBarVisible && (
               <KibanaPageTemplate.BottomBar data-test-subj="timeline-bottom-bar-container">
@@ -116,7 +114,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
                 </EuiThemeProvider>
               </KibanaPageTemplate.BottomBar>
             )}
-          </>
+          </AlertsContextProvider>
         )}
       </StyledKibanaPageTemplate>
     );

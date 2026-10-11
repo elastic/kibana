@@ -52,7 +52,10 @@ export const ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS = {
 } as const satisfies WorkerSettingsDefaults;
 
 export const CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS = {
-  allowedAutonomyLevels: WORKER_AUTONOMY_LEVELS,
+  // Manual only: Hunt Watch locks autonomy at the settings-page level too (see
+  // `CONTINUOUS_THREAT_HUNT_SETTINGS` in @kbn/alertzero-common). A stored assisted/supervised
+  // value from before the lock is read and rendered as manual.
+  allowedAutonomyLevels: ['manual'],
   scheduleInterval: { defaultValue: '4h' },
 } as const satisfies WorkerSettingsDefaults;
 
