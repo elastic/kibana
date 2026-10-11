@@ -154,6 +154,86 @@ describe('WebhookActionConnectorFields renders', () => {
       jest.clearAllMocks();
     });
 
+    describe.each([false, true])('URL validation with isEdit=%s', (isEdit) => {
+      it.each([
+        'http://dev-logstash:10200',
+        'http://dev-logstash:10200/',
+        'https://dev-logstash:10200/logs?source=kibana',
+        'http://dev-logstash',
+        'https://example.com/webhook',
+        'http://localhost:10200',
+        'http://127.0.0.1:10200',
+        'http://[::1]:10200',
+      ])('accepts an HTTP or HTTPS endpoint: %s', async (url) => {
+        render(
+          <ConnectorFormTestProvider
+            isEdit={isEdit}
+            connector={{
+              ...actionConnector,
+              id: 'webhook',
+              config: { ...actionConnector.config, url },
+            }}
+            onSubmit={onSubmit}
+            serializer={formSerializer}
+            deserializer={formDeserializer}
+          >
+            <WebhookActionConnectorFields
+              readOnly={false}
+              isEdit={isEdit}
+              registerPreSubmitValidator={() => {}}
+            />
+          </ConnectorFormTestProvider>,
+          { wrapper: customQueryProviderWrapper }
+        );
+
+        await screen.findByTestId('webhookHeaderPanel');
+        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+
+        await waitFor(() => {
+          expect(onSubmit).toHaveBeenCalledWith({
+            data: expect.objectContaining({
+              config: expect.objectContaining({ url }),
+            }),
+            isValid: true,
+          });
+        });
+      });
+
+      it.each(['', 'dev-logstash:10200', 'http://', 'https://', 'ftp://dev-logstash:10200'])(
+        'rejects an endpoint without an HTTP or HTTPS URL: %s',
+        async (url) => {
+          render(
+            <ConnectorFormTestProvider
+              isEdit={isEdit}
+              connector={{
+                ...actionConnector,
+                id: 'webhook',
+                config: { ...actionConnector.config, url },
+              }}
+              onSubmit={onSubmit}
+              serializer={formSerializer}
+              deserializer={formDeserializer}
+            >
+              <WebhookActionConnectorFields
+                readOnly={false}
+                isEdit={isEdit}
+                registerPreSubmitValidator={() => {}}
+              />
+            </ConnectorFormTestProvider>,
+            { wrapper: customQueryProviderWrapper }
+          );
+
+          await screen.findByTestId('webhookHeaderPanel');
+          await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+
+          await waitFor(() => {
+            expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+            expect(screen.getByText('URL is invalid.')).toBeInTheDocument();
+          });
+        }
+      );
+    });
+
     it.each([
       WebhookMethods.POST,
       WebhookMethods.PUT,
