@@ -10,7 +10,6 @@ import {
   getFieldEvaluationsEsql,
 } from '@kbn/entity-store/common/domain/euid';
 import { ALLOWED_ENTITY_TYPES } from '../common';
-import { evalGuardedTypedEuids } from '../../needs_attention_tiles/queries/guarded_typed_euid_eval';
 import { indentForkBranch, toList } from './esql';
 
 // ── EUID query pipeline builders ─────────────────────────────────────────────
@@ -24,6 +23,23 @@ export const buildPerTypeEuidEvals = (): string[] =>
       `| EVAL ${getEuidEsqlEvaluation(entityType, `${entityType}_euid`)}`,
     ];
   });
+
+/**
+ * ES|QL EVAL that folds `user_euid`, `host_euid`, and `service_euid` into one
+ * multi-value column of the ids that are present. `MV_APPEND` returns null if any
+ * argument is null, so each argument is a COALESCE that is null only when all three
+ * ids are; MV_DEDUPE drops the repeats that come from the fallbacks.
+ *
+ * A multi-condition CASE would do the same, but ES|QL evaluates it one row at a time,
+ * which made this EVAL most of the cost of the alerts tile.
+ */
+export const evalGuardedTypedEuids = (outputColumn: string): string =>
+  [
+    `| EVAL ${outputColumn} = MV_DEDUPE(MV_APPEND(MV_APPEND(`,
+    '  COALESCE(user_euid, host_euid, service_euid),',
+    '  COALESCE(host_euid, service_euid, user_euid)),',
+    '  COALESCE(service_euid, user_euid, host_euid)))',
+  ].join('\n');
 
 /**
  * Derives one EUID per document into `entity.id` (first of user, host, service).

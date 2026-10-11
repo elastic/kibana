@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { evalGuardedTypedEuids } from './guarded_typed_euid_eval';
+import { evalGuardedTypedEuids } from './euid_pipeline';
 
 describe('evalGuardedTypedEuids', () => {
   it('writes an MV_DEDUPE+MV_APPEND EVAL of null-safe COALESCEs into the given column', () => {

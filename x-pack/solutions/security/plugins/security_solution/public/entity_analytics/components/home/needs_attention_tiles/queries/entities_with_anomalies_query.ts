@@ -13,8 +13,10 @@ import {
   buildLookback,
   ML_ANOMALY_INDICES,
 } from '../../entities_grid/queries/esql';
-import { buildPerTypeEuidEvals } from '../../entities_grid/queries/euid_pipeline';
-import { evalGuardedTypedEuids } from './guarded_typed_euid_eval';
+import {
+  buildPerTypeEuidEvals,
+  evalGuardedTypedEuids,
+} from '../../entities_grid/queries/euid_pipeline';
 
 /**
  * Builds a single ES|QL query that counts distinct entities with at least one
