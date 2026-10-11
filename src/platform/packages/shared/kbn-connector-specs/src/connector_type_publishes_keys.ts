@@ -11,4 +11,4 @@ import { getConnectorSpec } from './get_connector_spec';
 
 /** True when the registered spec for this type id signs with a Kibana-managed key. */
 export const connectorTypePublishesKeys = (actionTypeId: string): boolean =>
-  getConnectorSpec(actionTypeId)?.metadata.supportsPublicKeys === true;
+  getConnectorSpec(actionTypeId)?.signingKey !== undefined;

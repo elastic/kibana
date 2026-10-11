@@ -54,6 +54,7 @@ const signerFor = (
     getEncryptedSavedObjectsClient: async () => esoClient,
     getSavedObjectsRepository: async () => savedObjectsRepository,
     connectorId: 'connector-1',
+    jwtType: 'secevent+jwt',
   });
 };
 

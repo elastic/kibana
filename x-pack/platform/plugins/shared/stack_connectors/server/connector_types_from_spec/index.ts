@@ -21,7 +21,7 @@ export function registerConnectorTypesFromSpecs({
   const specsToRegister = Object.values(connectorsSpecs).filter(
     (spec) =>
       (inboundEventsEnabled || !isInboundOnlyConnectorSpec(spec)) &&
-      (connectorSigningKeysEnabled || !spec.metadata.supportsPublicKeys)
+      (connectorSigningKeysEnabled || !spec.signingKey)
   );
 
   for (const spec of specsToRegister) {

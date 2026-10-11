@@ -46,7 +46,7 @@ import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverle
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { AxiosInstance } from 'axios';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
-import type { CredentialAccessor } from '@kbn/connector-specs';
+import type { ConnectorSigningKey, CredentialAccessor } from '@kbn/connector-specs';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import { type ActionsConfig, type EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
@@ -156,7 +156,10 @@ export interface PluginSetupContract {
   getCredential(opts: GetCredentialFnOpts): CredentialAccessor;
 
   /** Signs claims with the Kibana-managed key of a connector whose spec publishes keys. */
-  getConnectorJwtSigner(connectorId: string): (claims: Record<string, unknown>) => Promise<string>;
+  getConnectorJwtSigner(
+    connectorId: string,
+    signingKey: ConnectorSigningKey
+  ): (claims: Record<string, unknown>) => Promise<string>;
 
   /**
    * Process-wide pool for reusable, long-lived connector clients. Empty until a client
@@ -547,7 +550,7 @@ export class ActionsPlugin
         plugins.cloud
       ),
       getCredential: this.getCredentialHelper(actionsConfigUtils),
-      getConnectorJwtSigner: (connectorId: string) =>
+      getConnectorJwtSigner: (connectorId: string, { jwtType }: ConnectorSigningKey) =>
         createConnectorJwtSigner({
           getEncryptedSavedObjectsClient: async () => {
             const [, { encryptedSavedObjects }] = await core.getStartServices();
@@ -560,6 +563,7 @@ export class ActionsPlugin
             return coreStart.savedObjects.createInternalRepository([ACTION_SAVED_OBJECT_TYPE]);
           },
           connectorId,
+          jwtType,
         }),
       getClientLeasePool: () => this.clientLeasePool,
       isPreconfiguredConnector: (connectorId: string): boolean => {

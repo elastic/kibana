@@ -66,7 +66,6 @@ export interface ConnectorMetadata {
   docsUrl?: string;
   minimumLicense: LicenseType;
   isTechnicalPreview?: boolean;
-  supportsPublicKeys?: boolean;
   supportedFeatureIds: Array<
     | 'alerting'
     | 'cases'
@@ -315,7 +314,7 @@ export interface ActionContext {
   secrets?: Record<string, unknown>;
   /**
    * Signs claims with the connector's private key and sets `iss` to the connector issuer.
-   * Defined only when `metadata.supportsPublicKeys` is true.
+   * Defined only when the spec declares `signingKey`.
    */
   signJwt?: (claims: Record<string, unknown>) => Promise<string>;
   /**
@@ -370,6 +369,15 @@ export interface ConnectorTest {
 }
 
 // ============================================================================
+// SIGNING KEY
+// ============================================================================
+
+export interface ConnectorSigningKey {
+  /** Value of the JWT `typ` header, for example `secevent+jwt`. */
+  jwtType: string;
+}
+
+// ============================================================================
 // MAIN CONNECTOR DEFINITION
 // ============================================================================
 
@@ -415,6 +423,10 @@ export interface ConnectorSpec {
   // Omit when the connector has no inbound surface. A connector may declare both
   // `actions` and `events`. Only allowlisted specs may set this (see contract tests).
   events?: ConnectorSpecEvents;
+
+  // Optional Kibana-managed signing key. When present, creating a connector generates
+  // a key pair, Kibana publishes the public key, and actions get `signJwt`.
+  signingKey?: ConnectorSigningKey;
 
   transformations?: Transformations;
 

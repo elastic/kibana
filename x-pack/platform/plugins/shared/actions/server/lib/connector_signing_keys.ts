@@ -156,10 +156,12 @@ export const createConnectorJwtSigner =
     getEncryptedSavedObjectsClient,
     getSavedObjectsRepository,
     connectorId,
+    jwtType,
   }: {
     getEncryptedSavedObjectsClient: () => Promise<EncryptedSavedObjectsClient>;
     getSavedObjectsRepository: () => Promise<ISavedObjectsRepository>;
     connectorId: string;
+    jwtType: string;
   }) =>
   async (claims: Record<string, unknown>): Promise<string> => {
     const client = await getEncryptedSavedObjectsClient();
@@ -179,6 +181,6 @@ export const createConnectorJwtSigner =
     }
     return jwt.sign({ ...claims, iss: issuer }, privateKey, {
       algorithm: 'RS256',
-      header: { alg: 'RS256', typ: 'secevent+jwt', kid: publicKey.kid },
+      header: { alg: 'RS256', typ: jwtType, kid: publicKey.kid },
     });
   };

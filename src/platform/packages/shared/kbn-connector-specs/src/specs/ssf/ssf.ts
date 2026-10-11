@@ -56,11 +56,11 @@ export const SSF: ConnectorSpec = {
     docsUrl: '',
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportsPublicKeys: true,
     supportedFeatureIds: ['workflows'],
     icon: 'key',
   },
   auth: { types: ['none'] },
+  signingKey: { jwtType: 'secevent+jwt' },
   actions: {
     signSet: {
       description:

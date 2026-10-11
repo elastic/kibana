@@ -76,7 +76,7 @@ describe('Connector type config checks', () => {
       .isConnectorSigningKeysEnabled();
     const connectorSpecIds = Object.values(connectorsSpecs)
       .filter((spec) => inboundEventsEnabled || !isInboundOnlyConnectorSpec(spec))
-      .filter((spec) => connectorSigningKeysEnabled || !spec.metadata.supportsPublicKeys)
+      .filter((spec) => connectorSigningKeysEnabled || !spec.signingKey)
       .map(({ metadata }) => metadata.id);
     expect([...connectorTypes, ...connectorSpecIds].sort()).toEqual(
       actionTypeRegistry.getAllTypes().sort()
