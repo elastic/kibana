@@ -40,6 +40,9 @@ export const servers: ScoutServerConfig = {
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
+      // Defaults to false; without it the batched-generation step throws "Attack Discovery
+      // workflows are not enabled for this space" and the run completes with zero discoveries.
+      '--uiSettings.overrides.securitySolution:enableAttackDiscoveryWorkflows=true',
     ],
   },
 };
