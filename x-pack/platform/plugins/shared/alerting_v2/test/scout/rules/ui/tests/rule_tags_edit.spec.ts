@@ -43,10 +43,9 @@ test.describe('Rule tags — edit via ES|QL form', { tag: testData.UI_TAG }, () 
     });
   });
 
-  test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAlertingV2Editor();
     await pageObjects.rulesList.goto();
-    await expect(page.testSubj.locator('rulesListLoading')).toBeHidden({ timeout: 60_000 });
   });
 
   test.afterAll(async ({ esClient, apiServices }) => {

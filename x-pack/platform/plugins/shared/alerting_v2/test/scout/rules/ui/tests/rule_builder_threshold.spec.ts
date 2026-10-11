@@ -43,10 +43,9 @@ test.describe('Rule Builder — threshold create and edit flows', { tag: testDat
     });
   });
 
-  test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAlertingV2Editor();
     await pageObjects.rulesList.goto();
-    await expect(page.testSubj.locator('rulesListLoading')).toBeHidden({ timeout: 60_000 });
   });
 
   test.afterAll(async ({ esClient, apiServices }) => {
@@ -208,7 +207,11 @@ test.describe('Rule Builder — threshold create and edit flows', { tag: testDat
       await page.goto('about:blank');
       await browserAuth.loginAsAlertingV2Viewer();
       await pageObjects.rulesList.goto();
-      await expect(page.testSubj.locator('rulesListLoading')).toBeHidden({ timeout: 60_000 });
+      // The heading renders for any role with read access, so it is the readiness signal that
+      // keeps the absence assertion below from passing against a page that has not rendered.
+      await expect(pageObjects.alertingNavigation.pageHeading('rules')).toBeVisible({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
     });
 
     await test.step('create rule button is not visible', async () => {
@@ -217,7 +220,6 @@ test.describe('Rule Builder — threshold create and edit flows', { tag: testDat
   });
 
   test('builder-to-esql: rule without builder metadata opens in ES|QL mode', async ({
-    page,
     apiServices,
     pageObjects,
   }) => {
@@ -251,7 +253,6 @@ test.describe('Rule Builder — threshold create and edit flows', { tag: testDat
 
     await test.step('open rule for editing', async () => {
       await pageObjects.rulesList.goto();
-      await expect(page.testSubj.locator('rulesListLoading')).toBeHidden({ timeout: 60_000 });
       await pageObjects.composeDiscover.openEditFlyout(ruleId!);
     });
 
@@ -264,7 +265,6 @@ test.describe('Rule Builder — threshold create and edit flows', { tag: testDat
   });
 
   test('builder-to-esql: unparseable query shows confirmation modal', async ({
-    page,
     apiServices,
     pageObjects,
   }) => {
@@ -287,7 +287,6 @@ test.describe('Rule Builder — threshold create and edit flows', { tag: testDat
 
     await test.step('open rule for editing', async () => {
       await pageObjects.rulesList.goto();
-      await expect(page.testSubj.locator('rulesListLoading')).toBeHidden({ timeout: 60_000 });
       await pageObjects.composeDiscover.openEditFlyout(ruleId!);
     });
 
@@ -307,7 +306,6 @@ test.describe('Rule Builder — threshold create and edit flows', { tag: testDat
   });
 
   test('builder-to-esql: switch toggle shows confirmation modal', async ({
-    page,
     apiServices,
     pageObjects,
   }) => {
@@ -330,7 +328,6 @@ test.describe('Rule Builder — threshold create and edit flows', { tag: testDat
 
     await test.step('open rule for editing in builder mode', async () => {
       await pageObjects.rulesList.goto();
-      await expect(page.testSubj.locator('rulesListLoading')).toBeHidden({ timeout: 60_000 });
       await pageObjects.composeDiscover.openEditFlyout(ruleId!);
       await expect(pageObjects.composeDiscover.flyout).toBeVisible({
         timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,

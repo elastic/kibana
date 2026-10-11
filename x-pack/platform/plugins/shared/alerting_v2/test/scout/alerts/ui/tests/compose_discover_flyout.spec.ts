@@ -115,10 +115,9 @@ test.describe('ComposeDiscoverFlyout — create and edit flows', { tag: testData
     });
   });
 
-  test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAlertingV2Editor();
     await pageObjects.rulesList.goto();
-    await expect(page.testSubj.locator('rulesListLoading')).toBeHidden({ timeout: 60_000 });
   });
 
   test.afterAll(async ({ esClient, apiServices }) => {

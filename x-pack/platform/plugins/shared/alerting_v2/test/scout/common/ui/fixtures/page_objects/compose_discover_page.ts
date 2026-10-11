@@ -140,10 +140,8 @@ export class ComposeDiscoverPage {
   }
 
   async openCreateFlyout() {
-    // Wait until either entry point is rendered — split dropdown (table state)
-    // or empty-state card — before deciding which path to take. After a prior
-    // test navigates away, Kibana can still be on the splash screen when
-    // beforeEach's rulesListLoading check already passed, so allow a long wait.
+    // Which entry point renders depends on whether the list is empty, so wait for either before
+    // deciding which path to take.
     await this.createRuleSplitDropdownButton
       .or(this.createEsqlRuleCard)
       .waitFor({ state: 'visible', timeout: UI_SLOW_RENDER_TIMEOUT_MS });
@@ -156,7 +154,11 @@ export class ComposeDiscoverPage {
   }
 
   async openEditFlyout(ruleId: string) {
-    await this.editRuleButton(ruleId).click();
+    // The row only exists once the list has loaded, so waiting for it doubles as the readiness
+    // signal callers would otherwise have to repeat after every `rulesList.goto()`.
+    const editButton = this.editRuleButton(ruleId);
+    await editButton.waitFor({ state: 'visible', timeout: UI_SLOW_RENDER_TIMEOUT_MS });
+    await editButton.click();
   }
 
   async clickSwitchToEsql() {
