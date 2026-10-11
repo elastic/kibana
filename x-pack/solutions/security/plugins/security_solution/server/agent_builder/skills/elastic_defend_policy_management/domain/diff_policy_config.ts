@@ -26,19 +26,21 @@ const collectDiffs = (fromValue: unknown, toValue: unknown, path: string): Polic
 
   if (isRecord(fromValue) && isRecord(toValue)) {
     const keys = new Set([...Object.keys(fromValue), ...Object.keys(toValue)]);
-    return [...keys].flatMap((key) => {
-      const fromHas = Object.hasOwn(fromValue, key);
-      const toHas = Object.hasOwn(toValue, key);
-      const nextPath = childPath(path, key);
+    return [...keys].flatMap((key) =>
+      collectDiffs(fromValue[key], toValue[key], childPath(path, key))
+    );
+  }
 
-      if (!fromHas) {
-        return [{ path: nextPath, from: undefined, to: toValue[key] }];
-      }
-      if (!toHas) {
-        return [{ path: nextPath, from: fromValue[key], to: undefined }];
-      }
-      return collectDiffs(fromValue[key], toValue[key], nextPath);
-    });
+  if (isRecord(fromValue)) {
+    return Object.keys(fromValue).flatMap((key) =>
+      collectDiffs(fromValue[key], undefined, childPath(path, key))
+    );
+  }
+
+  if (isRecord(toValue)) {
+    return Object.keys(toValue).flatMap((key) =>
+      collectDiffs(undefined, toValue[key], childPath(path, key))
+    );
   }
 
   return [{ path, from: fromValue, to: toValue }];

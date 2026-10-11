@@ -15,19 +15,11 @@ import type {
   PreparedPolicyChangeAssessment,
   PolicyChangeSideEffect,
 } from './policy_change_operation';
-import {
-  POLICY_CHANGE_PREPARATION_ERROR_CODE,
-  PolicyChangePreparationError,
-  nonWritablePathMessage,
-} from './policy_change_operation';
 
 const toDerivedSideEffect = (path: string, from: unknown, to: unknown): PolicyChangeSideEffect => {
   const entry = fieldRegistry.getFieldRegistryEntry(path);
   if (entry === undefined) {
-    throw new PolicyChangePreparationError(
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.non_writable_path,
-      nonWritablePathMessage(path)
-    );
+    throw new Error(`Derived policy change has no field registry entry: ${path}`);
   }
 
   return {

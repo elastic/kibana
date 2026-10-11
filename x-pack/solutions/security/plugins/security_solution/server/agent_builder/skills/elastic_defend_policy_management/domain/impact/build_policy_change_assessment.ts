@@ -16,11 +16,6 @@ import type { NormalizedEndpointPolicy } from '../normalized_endpoint_policy';
 import type { BuildEligibilityContextInput } from './build_eligibility_context';
 import { buildEligibilityContext } from './build_eligibility_context';
 import { computeGlobalManifestBlockers, computePathEligibility } from './compute_path_eligibility';
-import {
-  POLICY_CHANGE_PREPARATION_ERROR_CODE,
-  PolicyChangePreparationError,
-  nonWritablePathMessage,
-} from './policy_change_operation';
 import type {
   EligibilityContext,
   ExplicitPolicyChange,
@@ -40,10 +35,7 @@ const toPolicyChangeFact = (
 ): PolicyChangeFact => {
   const entry = getFieldRegistryEntry(change.path);
   if (entry === undefined) {
-    throw new PolicyChangePreparationError(
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.non_writable_path,
-      nonWritablePathMessage(change.path)
-    );
+    throw new Error(`Expanded policy change has no field registry entry: ${change.path}`);
   }
 
   return {

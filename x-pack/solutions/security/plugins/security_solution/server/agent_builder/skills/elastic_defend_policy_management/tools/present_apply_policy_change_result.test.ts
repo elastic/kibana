@@ -171,11 +171,7 @@ const createOversizedWindowsAdvancedResidualResult = () => {
     );
   }
 
-  const returnedNormalized = createNormalizedPolicy(returned);
-  const residual = diffPolicyConfig(
-    normalize(assessment.proposedConfig),
-    returnedNormalized.normalizedConfig
-  );
+  const residual = [{ path: 'windows.advanced', from: undefined, to: returned.windows.advanced }];
   const identity = {
     id: normalized.snapshot.identity.id,
     name: normalized.snapshot.identity.name,

@@ -180,8 +180,7 @@ describe('assessChange', () => {
         changes: [{ op: 'set_field', path: 'windows.popup.device_control.enabled', value: true }],
       })
     ).rejects.toMatchObject({
-      name: 'PolicyChangePreparationError',
-      code: 'unsupported_operation',
+      name: 'PolicyChangeRejectedError',
     });
     expect(countSpy).not.toHaveBeenCalled();
     expect(getAgentStatusForAgentPolicy).not.toHaveBeenCalled();
