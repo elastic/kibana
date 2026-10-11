@@ -112,6 +112,13 @@ export interface HuntCoordinatorCoreResult {
   /** The signals that contributed to `tier2_targets`. Empty when `tier2_targets` is. */
   tier2_target_sources: Tier2TargetSource[];
   /**
+   * The datasets the report itself points at (its vendor or product match, or the model's
+   * match), without Tier 1 hit indices or the process-bearing streams in `tier2_targets`.
+   * Hunt packaging names these as the data a detection would query when a run has no hit
+   * events to name. Empty when neither signal matched.
+   */
+  report_intent_targets: string[];
+  /**
    * Streams and indices in the universe whose mapping carries `process.entity_id` or
    * `process.pid`: where a hit can become a Defend response action. A mapping says a host
    * can report process telemetry, not that it is enrolled; packaging decides that.
@@ -475,6 +482,7 @@ const huntCoordinatorCore = async (
       index_patterns: [],
       tier2_targets: [],
       tier2_target_sources: [],
+      report_intent_targets: [],
       actionable_indices: [],
       tier1: {
         tier: 1,
@@ -608,6 +616,7 @@ const huntCoordinatorCore = async (
       index_patterns: [],
       tier2_targets: [],
       tier2_target_sources: [],
+      report_intent_targets: [],
       actionable_indices: [],
       tier1: emptyTier1,
       // Not the `on_hits` gate: with no scope there is no allowlist for Tier 2 to
@@ -644,6 +653,7 @@ const huntCoordinatorCore = async (
       index_patterns: [],
       tier2_targets: [],
       tier2_target_sources: [],
+      report_intent_targets: [],
       actionable_indices: [],
       tier1: {
         tier: 1,
@@ -751,6 +761,7 @@ const huntCoordinatorCore = async (
       index_patterns: scope.index_patterns,
       tier2_targets: targets.tier2_targets,
       tier2_target_sources: targets.tier2_target_sources,
+      report_intent_targets: targets.report_intent_targets,
       actionable_indices: scope.actionable_indices,
       tier1,
       tier2_skipped_reason: reason,
@@ -799,6 +810,7 @@ const huntCoordinatorCore = async (
       index_patterns: scope.index_patterns,
       tier2_targets: targets.tier2_targets,
       tier2_target_sources: targets.tier2_target_sources,
+      report_intent_targets: targets.report_intent_targets,
       actionable_indices: scope.actionable_indices,
       tier1,
       tier2_skipped_reason: 'no_report_text',
@@ -912,6 +924,7 @@ const huntCoordinatorCore = async (
     index_patterns: scope.index_patterns,
     tier2_targets: targets.tier2_targets,
     tier2_target_sources: targets.tier2_target_sources,
+    report_intent_targets: targets.report_intent_targets,
     actionable_indices: scope.actionable_indices,
     tier1,
     tier2,

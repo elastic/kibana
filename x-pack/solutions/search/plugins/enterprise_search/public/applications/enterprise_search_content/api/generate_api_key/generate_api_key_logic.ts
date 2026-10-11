@@ -24,7 +24,7 @@ export interface GenerateApiKeyApiArgs {
 }
 
 export const generateApiKey = async ({ indexName, keyName }: GenerateApiKeyApiArgs) => {
-  const route = `/internal/enterprise_search/${indexName}/api_keys`;
+  const route = `/internal/enterprise_search/${encodeURIComponent(indexName)}/api_keys`;
 
   return await HttpLogic.values.http.post<APIKeyResponse>(route, {
     body: JSON.stringify({

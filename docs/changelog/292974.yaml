@@ -1,7 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/292974
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: Fix knowledge indicator names becoming unreadable on narrow pages

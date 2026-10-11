@@ -1,0 +1,23 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {},
+    "index": "million-integers",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "values": {
+          "type": "integer"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

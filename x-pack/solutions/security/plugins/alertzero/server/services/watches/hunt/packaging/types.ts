@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { ActionCatalogEntry } from '@kbn/alertzero-common';
-import type { PackageReportMintPayload } from '../../../../../common/step_types/package_report';
+import type { ActionCatalogEntry, ActionSubjectKind } from '@kbn/alertzero-common';
+import type {
+  PackageReportBehavior,
+  PackageReportMintPayload,
+} from '../../../../../common/step_types/package_report';
 
 /** One host observed on the current-run SSE, with enrollment resolution applied. */
 export interface CurrentRunHost {
@@ -14,6 +17,8 @@ export interface CurrentRunHost {
   /** Elastic Defend agent id when enrolled; absent when unenrolled or unknown. */
   agentId?: string;
   enrolled: boolean;
+  /** `Endpoint.capabilities` from the endpoint metadata document; `[]` when unknown. */
+  capabilities: string[];
 }
 
 /** Process selector fillable into kill/suspend `parameters`. */
@@ -30,6 +35,8 @@ export interface ProcessSelector {
   hostName: string;
   /** e.g. `powershell.exe`; drives both the Proposal title and comment. */
   processName: string;
+  /** Full executable path (`process.executable`) when the source document carried one. */
+  processExecutable?: string;
   observedAt?: string;
   /**
    * ATT&CK technique this specific process was matched against (from the source event's
@@ -38,7 +45,33 @@ export interface ProcessSelector {
    * every technique confirmed anywhere on the host.
    */
   techniqueId?: string;
+  /**
+   * Every technique any ref for this process was attributed to (`techniqueId` is the one
+   * representative). Lets rules see a destructive technique the representative did not carry.
+   */
+  techniqueIds?: string[];
+  /** True when a Tier 1 ref that rehydrated to this process carried `matched.ioc`. */
+  iocMatched: boolean;
 }
+
+export type SubjectKind = ActionSubjectKind;
+
+/**
+ * One thing packaging could act on. Hosts and processes are reachable when the host is
+ * enrolled with an agent id; users and services are always reachable (the identity action
+ * is a Kibana API). `value` is the human-readable name the proposal is about.
+ */
+export type Subject =
+  | { kind: 'host'; value: string; reachable: boolean; host: CurrentRunHost }
+  | {
+      kind: 'process';
+      value: string;
+      reachable: boolean;
+      host: CurrentRunHost;
+      processSelector: ProcessSelector;
+    }
+  | { kind: 'user'; value: string; reachable: true }
+  | { kind: 'service'; value: string; reachable: true };
 
 /** One confirmed Tier 2 behavior, deduped by `technique_id` across current-run SSEs. */
 export interface HuntEvidenceTechnique {
@@ -59,6 +92,50 @@ export interface HuntEvidenceSummary {
   tier2Confirmed: HuntEvidenceTechnique[];
 }
 
+/** Whether the query a coverage KI carries matched anything in the hunt window. */
+export type EsqlStatus = 'executed_hit' | 'executed_no_rows' | 'executed_inconclusive';
+
+/** One Tier 2 behavior that executed, normalized from the coordinator result or an SSE. */
+export interface CoverageBehavior {
+  techniqueId: string;
+  techniqueName?: string;
+  title?: string;
+  /** Report quote the behavior was derived from; only the coordinator result carries it. */
+  evidenceQuote?: string;
+  confidence: number;
+  severity?: string;
+  validatedEsql: string;
+  rowCount: number;
+  hit: boolean;
+  /** Why a `hit: false` execution is not evidence of absence (rows it could not evaluate). */
+  inconclusiveReason?: string;
+}
+
+/** The coordinator result packaging is handed because a clean run leaves no SSE to read it from. */
+export interface CoordinatorInputs {
+  /** The coordinator's report-intent datasets: where a rule for this report would query. */
+  reportIntentTargets?: string[];
+  behaviors?: PackageReportBehavior[];
+}
+
+/** What one current-run SSE contributes to a coverage subject. */
+export interface CurrentRunFinding {
+  title: string;
+  /** `hypothesis_tested`, absent when it is the generic "evaluated report" fallback. */
+  hypothesis?: string;
+  severity: string;
+  corroboratedTechniqueId?: string;
+  /** Source event refs only; alert refs never feed coverage `data_sources`. */
+  eventRefs: Array<{ index: string; techniqueId?: string }>;
+  /** Tier 1 `per_index` hit indices, the complete list `eventRefs` samples from. */
+  tier1Indices: string[];
+  behaviors: CoverageBehavior[];
+  window?: { from: string; to: string };
+  evidenceLines: string[];
+  hosts: string[];
+  users: string[];
+}
+
 /**
  * Staged current-run Investigation state packaging reads. Scoped by `runId`;
  * never accumulated attachments from prior runs.
@@ -70,12 +147,32 @@ export interface CurrentRunState {
   sseCount: number;
   /** True when at least one current-run SSE has `hunt_result.has_confirmed_hit`. */
   hasConfirmedHit: boolean;
+  /** Max SSE `confidence` across current-run SSEs. */
+  confidence: number;
+  /** Min `from` / max `to` of `hunt_result.time_range` across current-run SSEs; absent when none carried one. */
+  huntWindow?: { from: string; to: string };
   /** SSE titles for the closure summary. */
   titles: string[];
   /** Short evidence lines for the closure summary. */
   evidenceLines: string[];
   /** Technique ids from current-run SKIs (`type: technique`), proposed or corroborated. */
   techniques: string[];
+  /** One entry per current-run SSE, with the pieces coverage subjects are derived from. */
+  findings: CurrentRunFinding[];
+  /** Technique id to display name, from SSE behaviors and technique SKIs (`T1078.004 (Cloud Accounts)`). */
+  techniqueNames: Record<string, string>;
+  /**
+   * Distinct `user.name` entities across current-run SSEs, in SSE order. Tier 1's CloudTrail
+   * identity-type vote decides whether an identity lands here or in `services`.
+   */
+  users: string[];
+  /** Hunt window of the first current-run SSE that names one. */
+  window?: { from: string; to: string };
+  /**
+   * Highest current-run SSE `severity` (critical > high > medium > low), or undefined when
+   * there is no current-run SSE at all (the report-scoped clean/no-SSE packaging branch).
+   */
+  severity?: string;
   /**
    * Subset of `techniques` this run actually corroborated (the SSE entry naming it carried
    * `corroborated_technique_id`), as opposed to one merely named on the report-scoped
@@ -88,10 +185,17 @@ export interface CurrentRunState {
    * Empty means kill/suspend cannot be filled.
    */
   processSelectors: ProcessSelector[];
-  /** True when any current-run SSE entity is `user.name` or `service.name`, not a host. */
-  hasNonHostEntity: boolean;
+  /** Deduped `service.name` entity values across current-run SSEs (assumed roles, service accounts). */
+  services: string[];
   /** True when any current-run SSE security knowledge indicator is IOC-typed. */
   hasIocIndicator: boolean;
+  /**
+   * True when a current-run SSE entity names an identity by `user.email`, `user.id`, or
+   * `service.id` -- allowlisted fields the deterministic mapper never emits, but an
+   * agent-written SSE could. Not resolvable to a `users`/`services` entry, so this is the
+   * only signal that evidence exists for it at all.
+   */
+  hasUnnamedIdentityEntity: boolean;
   /** False when a current-run SSE event ref's `source_index` falls outside the run's `actionable_indices`. */
   allEventsActionable: boolean;
   /** True when a current-run SSE event ref's `source_index` is one of the run's `actionable_indices`. */
@@ -116,6 +220,19 @@ export interface CoverageSubject {
   title: string;
   description: string;
   content: string;
+  /** Short threat / finding description; hit prefers SSE, no-hit prefers the threat report. */
+  threatSummary?: string;
+  /** Dataset patterns a rule would query: hit event indices, else report-intent Tier 2 targets. */
+  dataSources: string[];
+  /** Executed Tier 2 query for this subject; omitted when none executed or it exceeds the CE cap. */
+  validatedEsql?: string;
+  esqlStatus?: EsqlStatus;
+  /** Report severity when known, else SSE finding severity; omitted when neither exists. */
+  severity?: string;
+  /** Short packaging-built synopsis, mirroring the run's closure summary. */
+  investigationSummary?: string;
+  /** Explicit hit/clean flag so a consumer does not have to parse prose. */
+  hasConfirmedHit: boolean;
 }
 
 export interface CoverageWriteResult {

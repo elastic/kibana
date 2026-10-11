@@ -296,6 +296,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'attack-discovery-alert-retrieval-builder',
   'attack-discovery-generator',
   'attack-discovery-workflow-troubleshooting',
+  'endpoint-response-actions',
 
   // O11Y
   'observability.investigation',
@@ -445,6 +446,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'investigation_impact',
   'investigation_subject',
   'investigation_hypotheses',
+
+  // Observability – Nightshift
+  'nightshift.notification_routing',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];

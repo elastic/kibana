@@ -9,7 +9,12 @@
 
 import { type DataViewField } from '@kbn/data-plugin/common';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { getSelectedFields, shouldShowField, INITIAL_SELECTED_FIELDS_RESULT } from './group_fields';
+import {
+  getSelectedFields,
+  reorderSelectedFields,
+  shouldShowField,
+  INITIAL_SELECTED_FIELDS_RESULT,
+} from './group_fields';
 
 describe('group_fields', function () {
   it('should pick fields as unknown_selected if they are unknown', function () {
@@ -202,5 +207,52 @@ describe('group_fields', function () {
     expect(
       shouldShowField({ type: '_source', name: 'source' } as DataViewField, 'documents', true)
     ).toBe(false);
+  });
+
+  describe('reorderSelectedFields', () => {
+    const selectedFieldNames = ['a', 'b', 'c', 'd'];
+
+    // mimics how the returned index is applied by `onMoveColumn` of the unified data table
+    const moveField = (names: string[], sourceFieldName: string, targetIndex: number) => {
+      const nextNames = [...names];
+      nextNames.splice(nextNames.indexOf(sourceFieldName), 1);
+      nextNames.splice(targetIndex, 0, sourceFieldName);
+      return nextNames;
+    };
+
+    it('should place the dragged field right after the target when moving down', () => {
+      expect(
+        reorderSelectedFields({ selectedFieldNames, sourceFieldName: 'a', targetFieldName: 'c' })
+      ).toEqual({ targetIndex: 2, reorderedFieldNames: ['b', 'c', 'a', 'd'] });
+      // the returned index yields the same order when applied as a move action
+      expect(moveField(selectedFieldNames, 'a', 2)).toEqual(['b', 'c', 'a', 'd']);
+
+      expect(
+        reorderSelectedFields({ selectedFieldNames, sourceFieldName: 'b', targetFieldName: 'd' })
+      ).toEqual({ targetIndex: 3, reorderedFieldNames: ['a', 'c', 'd', 'b'] });
+    });
+
+    it('should place the dragged field right before the target when moving up', () => {
+      expect(
+        reorderSelectedFields({ selectedFieldNames, sourceFieldName: 'd', targetFieldName: 'b' })
+      ).toEqual({ targetIndex: 1, reorderedFieldNames: ['a', 'd', 'b', 'c'] });
+      expect(moveField(selectedFieldNames, 'd', 1)).toEqual(['a', 'd', 'b', 'c']);
+
+      expect(
+        reorderSelectedFields({ selectedFieldNames, sourceFieldName: 'c', targetFieldName: 'a' })
+      ).toEqual({ targetIndex: 0, reorderedFieldNames: ['c', 'a', 'b', 'd'] });
+    });
+
+    it('should return undefined when the field cannot be moved', () => {
+      expect(
+        reorderSelectedFields({ selectedFieldNames, sourceFieldName: 'b', targetFieldName: 'b' })
+      ).toBeUndefined();
+      expect(
+        reorderSelectedFields({ selectedFieldNames, sourceFieldName: 'x', targetFieldName: 'b' })
+      ).toBeUndefined();
+      expect(
+        reorderSelectedFields({ selectedFieldNames, sourceFieldName: 'b', targetFieldName: 'x' })
+      ).toBeUndefined();
+    });
   });
 });
