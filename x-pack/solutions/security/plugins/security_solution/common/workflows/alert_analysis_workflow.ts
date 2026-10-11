@@ -66,7 +66,7 @@ export type AlertAnalysisWorkflowSettings = z.infer<typeof AlertAnalysisWorkflow
 // in @kbn/workflows builtinWorkflowInputDefinitions — keep both in lockstep
 // (see alert_analysis_builtin_workflow_input_definition.test.ts).
 export const ALERT_ANALYSIS_CALLER_ALERT_INDEX_PATTERN =
-  /^\.(internal\.)?(preview\.)?alerts-security\.alerts-[a-zA-Z0-9._-]+$/;
+  /^(\.ds-)?\.(internal\.)?(preview\.)?alerts-security\.alerts-[a-zA-Z0-9._-]+$/;
 
 export const AlertAnalysisCallerAlertItem = lazySchema(() =>
   z.looseObject({

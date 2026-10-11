@@ -936,7 +936,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     // related-alert graph search uses the executing-space alias, not this field.
     expect(alertsInput?.items?.properties?._index?.maxLength).toBe(512);
     expect(alertsInput?.items?.properties?._index?.pattern).toBe(
-      '^\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$'
+      '^(\\.ds-)?\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$'
     );
     // Used as an ES date-math enrichment anchor — reject non-dates at the input boundary.
     expect(alertsInput?.items?.properties?.['@timestamp']?.format).toBe('date-time');
