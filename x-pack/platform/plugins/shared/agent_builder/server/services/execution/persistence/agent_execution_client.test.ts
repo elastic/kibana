@@ -32,6 +32,7 @@ describe('AgentExecutionClient', () => {
     spaceId: 'default',
     agentParams: { nextInput: { message: 'hello' } },
     executionMode: AgentExecutionMode.conversation,
+    dispatchReady: false,
   } as const;
 
   beforeEach(() => {
@@ -65,6 +66,14 @@ describe('AgentExecutionClient', () => {
       const [{ document }] = mockStorageClient.index.mock.calls[0];
       expect(document).not.toHaveProperty('owner');
       expect(execution.owner).toBeUndefined();
+    });
+
+    it('records whether a replay may dispatch the run', async () => {
+      await client.create({ ...createParams, dispatchReady: true });
+
+      expect(mockStorageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({ document: expect.objectContaining({ dispatch_ready: true }) })
+      );
     });
 
     it('propagates document conflicts to the caller', async () => {
@@ -125,6 +134,40 @@ describe('AgentExecutionClient', () => {
         error: null,
         abort_reason: abortReason,
       });
+    });
+  });
+
+  describe('markDispatchReady', () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const readyClient = createAgentExecutionClient({ logger: loggerMock.create(), esClient });
+
+    it('flags the document ready to dispatch', async () => {
+      await readyClient.markDispatchReady('exec-1');
+
+      expect(esClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'exec-1', doc: { dispatch_ready: true } })
+      );
+    });
+  });
+
+  describe('peek', () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const peekClient = createAgentExecutionClient({ logger: loggerMock.create(), esClient });
+
+    it('reports whether the execution is ready to dispatch', async () => {
+      esClient.get.mockResolvedValueOnce({
+        _source: { status: ExecutionStatus.scheduled, dispatch_ready: true },
+      } as never);
+
+      await expect(peekClient.peek('exec-1')).resolves.toMatchObject({ dispatchReady: true });
+    });
+
+    it('omits the flag on documents written before it existed', async () => {
+      esClient.get.mockResolvedValueOnce({
+        _source: { status: ExecutionStatus.scheduled },
+      } as never);
+
+      await expect(peekClient.peek('exec-1')).resolves.not.toHaveProperty('dispatchReady');
     });
   });
 });

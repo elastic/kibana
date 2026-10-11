@@ -29,6 +29,7 @@ const storageSettings = {
       '@timestamp': types.date({}),
       last_heartbeat: types.date({}),
       status: types.keyword({}),
+      dispatch_ready: types.boolean({}),
       agent_id: types.keyword({}),
       execution_mode: types.keyword({}),
       interactivity: types.object({
@@ -79,6 +80,8 @@ export interface AgentExecutionProperties {
   '@timestamp': string;
   last_heartbeat?: string;
   status: ExecutionStatus;
+  /** Whether everything the run reads is persisted, so a replay may dispatch it. */
+  dispatch_ready?: boolean;
   agent_id: string;
   execution_mode?: string;
   interactivity?: InteractivityConfig;

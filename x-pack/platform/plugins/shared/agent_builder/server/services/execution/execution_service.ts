@@ -162,6 +162,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     // Reserved for the round this run opens, so its events are named after it.
     const roundId = uuidv4();
 
+    // A resume continues a round that is already open, so it does not write a new message.
+    const writesUserMessage =
+      conversationParams !== undefined &&
+      conversation !== undefined &&
+      conversationParams.storeConversation !== false &&
+      !isPendingResumeConversation(conversation);
+
     let execution: AgentExecution;
     try {
       execution = await executionClient.create({
@@ -186,6 +193,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         parentExecutionId: params.parentExecutionId,
         metadata,
         interactivity,
+        // The run reads the opening message, so a replay must not dispatch it before that lands.
+        dispatchReady: !writesUserMessage,
       });
     } catch (err) {
       if (isVersionConflictError(err)) {
@@ -194,11 +203,12 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
             `Duplicate idempotency key detected, returning existing execution ${executionId}`
           );
 
-          // Repairs executions left in `scheduled` when the original delivery
-          // failed before scheduling the task.
+          // Repairs executions left in `scheduled` when the original delivery failed between
+          // persisting what the run reads and scheduling the task. Until then the original
+          // delivery may still be writing, so dispatching would run against a missing conversation.
           const existing = await executionClient.peek(executionId);
 
-          if (existing?.status === ExecutionStatus.scheduled) {
+          if (existing?.status === ExecutionStatus.scheduled && existing.dispatchReady) {
             await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
               request,
               cloneApiKey: true,
@@ -220,13 +230,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     }
 
     // After the record, so an idempotency-key replay is recognised before a second message lands.
-    // A resume continues a round that is already open, so it does not write a new message.
-    if (
-      conversationParams &&
-      conversation &&
-      conversationParams.storeConversation !== false &&
-      !isPendingResumeConversation(conversation)
-    ) {
+    if (writesUserMessage) {
       try {
         await this.writeUserMessage({
           conversation,
@@ -251,6 +255,15 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
           );
         }
         throw err;
+      }
+
+      // Only gates a replay's repair: this delivery dispatches the run either way.
+      try {
+        await executionClient.markDispatchReady(executionId);
+      } catch (err) {
+        this.logger.warn(
+          `Failed to mark execution ${executionId} ready to dispatch: ${err.message}`
+        );
       }
     }
 

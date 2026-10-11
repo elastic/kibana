@@ -31,7 +31,10 @@ type CreateExecutionParams = Pick<
   | 'interactivity'
   | 'parentExecutionId'
   | 'owner'
->;
+> & {
+  /** Whether the run can be dispatched as soon as the record exists. */
+  dispatchReady: boolean;
+};
 
 /** What a status update records alongside the status. */
 export interface UpdateExecutionStatusOptions {
@@ -44,6 +47,8 @@ export interface UpdateExecutionStatusOptions {
 /** Lightweight snapshot returned by {@link AgentExecutionClient.peek}, without the events. */
 export interface ExecutionPeek {
   status: ExecutionStatus;
+  /** Whether the original delivery persisted everything the run reads. */
+  dispatchReady?: boolean;
   error?: SerializedExecutionError;
   eventCount: number;
   lastHeartbeat?: string;
@@ -92,6 +97,9 @@ export interface AgentExecutionClient {
     status: ExecutionStatus,
     options?: UpdateExecutionStatusOptions
   ): Promise<void>;
+
+  /** Records that everything the run reads is persisted, so a replay may dispatch it. */
+  markDispatchReady(executionId: string): Promise<void>;
 
   /** Append events to an execution document using a scripted update. */
   appendEvents(executionId: string, events: ChatEvent[]): Promise<void>;
@@ -156,6 +164,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     interactivity,
     parentExecutionId,
     owner,
+    dispatchReady,
   }: CreateExecutionParams): Promise<AgentExecution> {
     if (metadata) {
       for (const key of Object.keys(metadata)) {
@@ -171,6 +180,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       '@timestamp': now,
       last_heartbeat: now,
       status: ExecutionStatus.scheduled,
+      dispatch_ready: dispatchReady,
       agent_id: agentId,
       execution_mode: executionMode,
       ...(interactivity ? { interactivity } : {}),
@@ -229,6 +239,15 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     });
   }
 
+  async markDispatchReady(executionId: string): Promise<void> {
+    await this.esClient.update({
+      index: agentExecutionIndexName,
+      id: executionId,
+      retry_on_conflict: UPDATE_RETRY_ON_CONFLICT,
+      doc: { dispatch_ready: true },
+    });
+  }
+
   async appendEvents(executionId: string, events: ChatEvent[]): Promise<void> {
     if (events.length === 0) {
       return;
@@ -266,6 +285,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
         id: executionId,
         _source_includes: [
           'status',
+          'dispatch_ready',
           'error',
           'event_count',
           'last_heartbeat',
@@ -283,6 +303,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       return {
         status: source.status,
         eventCount: source.event_count ?? 0,
+        ...(source.dispatch_ready ? { dispatchReady: true } : {}),
         ...(source.error ? { error: source.error } : {}),
         ...(source.last_heartbeat ? { lastHeartbeat: source.last_heartbeat } : {}),
         ...(conversationId ? { conversationId } : {}),
