@@ -163,6 +163,7 @@ describe('createToolRoutingEvaluator', () => {
 });
 
 describe('assertToolSpansReachable', () => {
+  const quick = { timeoutMs: 30, pollIntervalMs: 5 };
   it('passes when spans are reachable on the first key', async () => {
     await expect(
       assertToolSpansReachable({ traceEsClient: esWith(() => spans(4)), probe: result(), log })
@@ -178,7 +179,59 @@ describe('assertToolSpansReachable', () => {
 
   it('THROWS when no key reaches a span — arming evaluators here would be dishonest', async () => {
     await expect(
-      assertToolSpansReachable({ traceEsClient: esWith(() => spans(0)), probe: result(), log })
+      assertToolSpansReachable({
+        traceEsClient: esWith(() => spans(0)),
+        probe: result(),
+        log,
+        ...quick,
+      })
+    ).rejects.toThrow(/No agent TOOL spans are reachable/);
+  });
+
+  it('waits for late spans: passes when they land after several empty polls', async () => {
+    let polls = 0;
+    const client = esWith(() => spans(++polls > 6 ? 3 : 0));
+    await expect(
+      assertToolSpansReachable({
+        traceEsClient: client,
+        probe: result(),
+        log,
+        timeoutMs: 2_000,
+        pollIntervalMs: 1,
+      })
+    ).resolves.toBeUndefined();
+    expect(polls).toBeGreaterThan(6);
+  });
+
+  it('keeps polling until the deadline before failing, and fails with the same error', async () => {
+    const client = esWith(() => spans(0));
+    const started = Date.now();
+    await expect(
+      assertToolSpansReachable({
+        traceEsClient: client,
+        probe: result(),
+        log,
+        timeoutMs: 120,
+        pollIntervalMs: 20,
+      })
+    ).rejects.toThrow(/No agent TOOL spans are reachable.*waited 120ms/s);
+    expect(Date.now() - started).toBeGreaterThanOrEqual(80);
+    // two join keys per round, several rounds
+    expect((client.esql.query as jest.Mock).mock.calls.length).toBeGreaterThan(4);
+  });
+
+  it('fails after the wait for a trace id that matches no span (mutation probe)', async () => {
+    // The fake only knows trace-1 / conv-1; a non-existent id must stay red after the wait.
+    const client = esWith((q) =>
+      q.includes('trace-1') || q.includes('conv-1') ? spans(2) : spans(0)
+    );
+    await expect(
+      assertToolSpansReachable({
+        traceEsClient: client,
+        probe: result({ traceId: 'does-not-exist', stepExecutions: [] } as never),
+        log,
+        ...quick,
+      })
     ).rejects.toThrow(/No agent TOOL spans are reachable/);
   });
 
@@ -211,7 +264,12 @@ describe('assertToolSpansReachable', () => {
       q.includes('attributes.gen_ai.tool.call.id IS NOT NULL') ? spans(0) : spans(7)
     );
     await expect(
-      assertToolSpansReachable({ traceEsClient: client, probe: result(), log })
+      assertToolSpansReachable({
+        traceEsClient: client,
+        probe: result(),
+        log,
+        ...quick,
+      })
     ).rejects.toThrow(/No agent TOOL spans are reachable/);
   });
 });

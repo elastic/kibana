@@ -241,16 +241,20 @@ export class RuleCreationClient {
     approved,
     maxWaitMs = 5 * 60_000,
     pollIntervalMs = 5_000,
+    gateWaitMs = 60_000,
   }: {
     workflowExecutionId: string;
     proposalId: string | undefined;
     approved: boolean;
     maxWaitMs?: number;
     pollIntervalMs?: number;
+    gateWaitMs?: number;
   }): Promise<WorkflowExecutionDto> {
     if (!proposalId) {
       throw new Error(`No pending proposal to decide for execution ${workflowExecutionId}`);
     }
+
+    await this.waitForProposalGate({ proposalId, maxWaitMs: gateWaitMs, pollIntervalMs });
 
     const action = approved ? 'approve' : 'dismiss';
     this.log.info(`Sending ${action} for proposal ${proposalId}`);
@@ -268,6 +272,45 @@ export class RuleCreationClient {
       execution = await this.getExecution(workflowExecutionId);
     }
     return execution;
+  }
+
+  /**
+   * The proposal row is written by the gate workflow's create step, before that same execution
+   * parks on waitForInput. The proposals service refuses a decision (409 "is not waiting for
+   * input") unless the gate execution is WAITING_FOR_INPUT, by design, so a decision sent in the
+   * window between the two races the park. Waits, bounded, until the gate is parked; throws if
+   * the gate went terminal or never parked.
+   */
+  async waitForProposalGate({
+    proposalId,
+    maxWaitMs = 60_000,
+    pollIntervalMs = 1_000,
+  }: {
+    proposalId: string;
+    maxWaitMs?: number;
+    pollIntervalMs?: number;
+  }): Promise<void> {
+    const deadline = Date.now() + maxWaitMs;
+    let last = 'gate execution not recorded on the proposal yet';
+    for (;;) {
+      const { workflowExecutionId } = await this.getProposal(proposalId);
+      if (workflowExecutionId) {
+        const { status, finishedAt } = await this.getExecution(workflowExecutionId);
+        if (status === ExecutionStatus.WAITING_FOR_INPUT && !finishedAt) return;
+        if (TerminalExecutionStatuses.includes(status)) {
+          throw new Error(
+            `Gate execution ${workflowExecutionId} for proposal ${proposalId} is already ${status}, so it can no longer be decided`
+          );
+        }
+        last = `gate execution ${workflowExecutionId} status: ${status}`;
+      }
+      if (Date.now() >= deadline) {
+        throw new Error(
+          `Proposal ${proposalId} gate did not reach ${ExecutionStatus.WAITING_FOR_INPUT} within ${maxWaitMs}ms (${last})`
+        );
+      }
+      await sleep(pollIntervalMs);
+    }
   }
 
   /** Reads the proposal back; the approve/dismiss routes do not return the settled record. */

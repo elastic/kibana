@@ -184,15 +184,29 @@ export function createToolRoutingEvaluator({
  * about whether Agent Builder exported the tool spans the evaluator counts. Asserting the
  * weaker property armed the evaluators on a run that had no agent output at all
  * (measured: build 459, where 6 of 25 runs produced no rule yet setup passed).
+ *
+ * Spans are exported asynchronously (batch processor, then ES ingest), so they can trail the
+ * workflow's terminal state by tens of seconds. This is a bounded readiness wait, not a relaxed
+ * assertion: the same clauses are polled and the same error is thrown when none reaches a span
+ * within `timeoutMs`. Zero spans still fail.
  */
+export const SPAN_READINESS_TIMEOUT_MS = 90_000;
+export const SPAN_READINESS_POLL_MS = 5_000;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export const assertToolSpansReachable = async ({
   traceEsClient,
   probe,
   log,
+  timeoutMs = SPAN_READINESS_TIMEOUT_MS,
+  pollIntervalMs = SPAN_READINESS_POLL_MS,
 }: {
   traceEsClient: EsClient;
   probe: RuleCreationResult;
   log: ToolingLog;
+  timeoutMs?: number;
+  pollIntervalMs?: number;
 }): Promise<void> => {
   if (probe.skipped) {
     log.info('Trace reachability probe was declined by the quality gate — skipping span check');
@@ -204,28 +218,34 @@ export const assertToolSpansReachable = async ({
     conversationId: extractConversationId(probe),
   });
 
-  for (const clause of clauses) {
-    try {
-      const response = (await traceEsClient.esql.query({
-        query: `FROM traces-*\n| WHERE ${clause.where} AND ${LLM_ISSUED_TOOL_SPAN}\n| STATS tool_spans = COUNT(*)`,
-      })) as unknown as EsqlResponse;
-      if (Number(response.values?.[0]?.[0] ?? 0) > 0) {
-        log.info(`Tool spans reachable via ${clause.name}`);
-        return;
+  const deadline = Date.now() + timeoutMs;
+  for (let attempt = 1; ; attempt++) {
+    for (const clause of clauses) {
+      try {
+        const response = (await traceEsClient.esql.query({
+          query: `FROM traces-*\n| WHERE ${clause.where} AND ${LLM_ISSUED_TOOL_SPAN}\n| STATS tool_spans = COUNT(*)`,
+        })) as unknown as EsqlResponse;
+        if (Number(response.values?.[0]?.[0] ?? 0) > 0) {
+          log.info(`Tool spans reachable via ${clause.name} (attempt ${attempt})`);
+          return;
+        }
+      } catch (error) {
+        log.debug(
+          `Reachability probe on ${clause.name} failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
       }
-    } catch (error) {
-      log.debug(
-        `Reachability probe on ${clause.name} failed: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
     }
+    if (clauses.length === 0 || Date.now() + pollIntervalMs > deadline) break;
+    log.debug(`No tool spans yet (attempt ${attempt}); retrying in ${pollIntervalMs}ms`);
+    await sleep(pollIntervalMs);
   }
 
   throw new Error(
     `No agent TOOL spans are reachable for the setup probe (tried: ${
       clauses.map((c) => c.name).join(', ') || 'no join keys at all'
-    }). Trace-based evaluators would score N/A on every example and the suite would still ` +
+    }, waited ${timeoutMs}ms). Trace-based evaluators would score N/A on every example and the suite would still ` +
       'report a pass. Check that Agent Builder spans are exported to TRACING_ES_URL.'
   );
 };
