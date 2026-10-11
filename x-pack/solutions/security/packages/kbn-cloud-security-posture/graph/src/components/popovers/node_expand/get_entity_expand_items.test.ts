@@ -518,6 +518,16 @@ describe('getRelatedEventsFilter', () => {
     });
   });
 
+  it('lists each related value once when several user.* source fields carry the same value', () => {
+    const result = getRelatedEventsFilter(
+      'user:admin@example.com@gcp',
+      { 'user.id': 'admin@example.com', 'user.entity.id': 'admin@example.com' },
+      'user'
+    );
+
+    expect(result).toEqual({ field: 'related.user', values: ['admin@example.com'] });
+  });
+
   it('uses related.hosts with host.* values for an enriched host entity', () => {
     const result = getRelatedEventsFilter(
       'host:h1',
