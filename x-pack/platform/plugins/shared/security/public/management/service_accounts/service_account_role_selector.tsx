@@ -5,18 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiIconTip,
-  EuiInputPopover,
-  EuiLink,
-  EuiSelectable,
-  useEuiTheme,
-} from '@elastic/eui';
-import type { EuiSelectableOption } from '@elastic/eui';
-import { css } from '@emotion/react';
-import React, { useRef, useState } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiBadge, EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,13 +22,17 @@ interface Props {
   availableRoles: Role[];
   selectedRoleNames: string[];
   onChange: (roles: string[]) => void;
-  createRoleUrl?: string;
   isInvalid: boolean;
   isDisabled: boolean;
   isLoading: boolean;
 }
 
-type RoleOption = EuiSelectableOption<{ data?: { description?: string } }>;
+interface RoleOptionData {
+  isDeprecated: boolean;
+  isReserved: boolean;
+}
+
+type RoleOption = EuiComboBoxOptionOption<RoleOptionData>;
 
 export const ServiceAccountRoleSelector = ({
   id,
@@ -46,213 +41,87 @@ export const ServiceAccountRoleSelector = ({
   availableRoles,
   selectedRoleNames,
   onChange,
-  createRoleUrl,
   isInvalid,
   isDisabled,
   isLoading,
 }: Props) => {
-  const { euiTheme } = useEuiTheme();
-  const [isOpen, setIsOpen] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement>(null);
   const selectRolesLabel = i18n.translate(
     'xpack.security.management.serviceAccounts.create.selectRolesLabel',
-    {
-      defaultMessage: 'Select roles',
-    }
+    { defaultMessage: 'Select roles' }
   );
   const optionForRole = (role: Role): RoleOption => ({
-    key: role.name,
     label: role.name,
-    checked: selectedRoleNames.includes(role.name) ? 'on' : undefined,
     'data-test-subj': `roleOption-${role.name}`,
-    data: { description: role.description },
-    css: css({ height: 32, borderBottom: euiTheme.border.thin }),
-    append: isRoleDeprecated(role) ? (
-      <EuiBadge color="warning">
-        <FormattedMessage
-          id="xpack.security.management.serviceAccounts.create.deprecatedRoleBadge"
-          defaultMessage="deprecated"
-        />
-      </EuiBadge>
-    ) : isRoleReserved(role) ? (
-      <EuiBadge color="primary">
-        <FormattedMessage
-          id="xpack.security.management.serviceAccounts.create.builtInRoleBadge"
-          defaultMessage="built-in"
-        />
-      </EuiBadge>
-    ) : undefined,
+    toolTipContent: role.description,
+    value: {
+      isDeprecated: isRoleDeprecated(role),
+      isReserved: isRoleReserved(role),
+    },
   });
   const customRoles = availableRoles.filter((role) => !isRoleReserved(role));
   const predefinedRoles = availableRoles.filter(isRoleReserved);
-  const groupStyle = css({
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    fontSize: 14,
-    minHeight: 32,
-    color: euiTheme.colors.textParagraph,
-    paddingBlock: 0,
-    '&:not(:first-child)': { paddingBlockStart: 0 },
-    borderBottom: euiTheme.border.thin,
+  const selectedOptions = selectedRoleNames.map((roleName) => {
+    const role = availableRoles.find(({ name }) => name === roleName);
+    return role ? optionForRole(role) : { label: roleName };
   });
-  const missingRoles = selectedRoleNames.filter(
-    (name) => !availableRoles.some((role) => role.name === name)
-  );
-  const options: RoleOption[] = [
-    ...missingRoles.map(
-      (name): RoleOption => ({
-        key: name,
-        label: name,
-        checked: 'on',
-        'data-test-subj': `roleOption-${name}`,
-        append: (
-          <EuiBadge color="warning">
-            <FormattedMessage
-              id="xpack.security.management.serviceAccounts.create.unavailableRoleBadge"
-              defaultMessage="unavailable"
-            />
-          </EuiBadge>
-        ),
-      })
-    ),
-    ...customRoles.map(optionForRole),
-    ...(predefinedRoles.length
-      ? [
-          {
-            label: i18n.translate(
-              'xpack.security.management.serviceAccounts.create.predefinedRolesLabel',
-              {
-                defaultMessage: 'Pre-defined roles',
-              }
-            ),
-            isGroupLabel: true as const,
-            css: groupStyle,
-          },
-          ...predefinedRoles.map(optionForRole),
-        ]
-      : []),
-  ];
 
   return (
-    <EuiInputPopover
+    <EuiComboBox<RoleOptionData>
+      id={id}
+      aria-describedby={describedBy}
+      aria-labelledby={labelledBy}
+      data-test-subj="serviceAccountRolesSelector"
       fullWidth
-      isOpen={isOpen && !isDisabled}
-      closePopover={() => setIsOpen(false)}
-      panelPaddingSize="none"
-      panelProps={{
-        onKeyDown: (event) => {
-          if (event.key === 'Escape') {
-            event.preventDefault();
-            event.stopPropagation();
-            setIsOpen(false);
-            buttonRef.current?.focus();
-          }
-        },
-      }}
-      input={
-        <EuiButtonEmpty
-          id={id}
-          buttonRef={buttonRef}
-          size="s"
-          color="text"
-          iconType="chevronSingleDown"
-          iconSide="right"
-          isDisabled={isDisabled}
-          isLoading={isLoading}
-          aria-label={labelledBy ? undefined : selectRolesLabel}
-          aria-labelledby={labelledBy}
-          aria-haspopup="listbox"
-          aria-expanded={isOpen && !isDisabled}
-          aria-describedby={describedBy}
-          aria-invalid={isInvalid}
-          data-test-subj="serviceAccountRolesSelector"
-          onClick={() => setIsOpen(!isOpen)}
-          onKeyDown={(event: React.KeyboardEvent<HTMLButtonElement>) => {
-            if (event.key === 'ArrowDown') {
-              event.preventDefault();
-              setIsOpen(true);
+      isInvalid={isInvalid}
+      isDisabled={isDisabled}
+      isLoading={isLoading}
+      placeholder={selectRolesLabel}
+      options={[
+        {
+          label: i18n.translate(
+            'xpack.security.management.serviceAccounts.create.customRolesLabel',
+            {
+              defaultMessage: 'Custom roles',
             }
-          }}
-          contentProps={{ css: css({ justifyContent: 'space-between', width: '100%' }) }}
-          css={css({
-            width: '100%',
-            textAlign: 'left',
-            fontWeight: euiTheme.font.weight.regular,
-            border: euiTheme.border.thin,
-            borderColor: isInvalid ? euiTheme.colors.danger : euiTheme.colors.mediumShade,
-            borderRadius: euiTheme.border.radius.small,
-            backgroundColor: euiTheme.colors.backgroundBasePlain,
-          })}
-        >
-          {selectedRoleNames.length ? selectedRoleNames.join(', ') : selectRolesLabel}
-        </EuiButtonEmpty>
-      }
-    >
-      <div>
-        <div
-          css={css({
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            height: 32,
-            paddingInline: euiTheme.size.s,
-            borderBottom: euiTheme.border.thin,
-          })}
-        >
-          <strong>
-            <FormattedMessage
-              id="xpack.security.management.serviceAccounts.create.customRolesLabel"
-              defaultMessage="Custom roles"
-            />
-          </strong>
-          {createRoleUrl && (
-            <EuiLink
-              href={createRoleUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              color="text"
-              css={css({ textDecoration: 'underline' })}
-              data-test-subj="createServiceAccountRoleLink"
-            >
-              <FormattedMessage
-                id="xpack.security.management.serviceAccounts.create.createRoleLinkText"
-                defaultMessage="Create new role"
-              />
-            </EuiLink>
-          )}
-        </div>
-        <EuiSelectable
-          aria-label={selectRolesLabel}
-          options={options}
-          height={Math.min(256, Math.max(32, options.length * 32))}
-          onChange={(nextOptions) =>
-            onChange(
-              nextOptions.filter((option) => option.checked === 'on').map(({ label }) => label)
-            )
-          }
-          listProps={{
-            rowHeight: 32,
-            showIcons: false,
-            paddingSize: 'none',
-            onFocusBadge: false,
-            autoFocus: true,
-          }}
-          renderOption={(option) => (
-            <span>
-              {option.label}
-              {option.data?.description && (
-                <>
-                  {' '}
-                  <EuiIconTip type="info" content={option.data.description} />
-                </>
-              )}
-            </span>
-          )}
-        >
-          {(list) => list}
-        </EuiSelectable>
-      </div>
-    </EuiInputPopover>
+          ),
+          options: customRoles.map(optionForRole),
+        },
+        {
+          label: i18n.translate(
+            'xpack.security.management.serviceAccounts.create.predefinedRolesLabel',
+            { defaultMessage: 'Pre-defined roles' }
+          ),
+          options: predefinedRoles.map(optionForRole),
+        },
+      ]}
+      selectedOptions={selectedOptions}
+      onChange={(options) => onChange(options.map(({ label }) => label))}
+      sortMatchesBy="none"
+      rowHeight={40}
+      renderOption={(option) => (
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlexItem>{option.label}</EuiFlexItem>
+          {option.value?.isDeprecated ? (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="warning">
+                <FormattedMessage
+                  id="xpack.security.management.serviceAccounts.create.deprecatedRoleBadge"
+                  defaultMessage="deprecated"
+                />
+              </EuiBadge>
+            </EuiFlexItem>
+          ) : option.value?.isReserved ? (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="primary">
+                <FormattedMessage
+                  id="xpack.security.management.serviceAccounts.create.builtInRoleBadge"
+                  defaultMessage="built-in"
+                />
+              </EuiBadge>
+            </EuiFlexItem>
+          ) : undefined}
+        </EuiFlexGroup>
+      )}
+    />
   );
 };
