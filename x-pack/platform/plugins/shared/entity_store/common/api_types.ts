@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityStoreStatus, EntityType } from '.';
+import type { EntityStoreStatus, EntityType, ExtractionMode } from '.';
 import type { Entity } from './domain/definitions/entity.gen';
 
 export type EngineStatus = 'installing' | 'started' | 'stopped' | 'updating' | 'error';
@@ -22,7 +22,22 @@ export interface EngineDescriptor {
   frequency?: string;
   delay?: string;
   docsPerSecond?: number;
-  error?: { message: string; action: 'init' };
+  lastExecutionTimestamp?: string;
+  error?: EngineError | null;
+  /** Present only for types with a priority extraction gate, with the dual-process flag on. */
+  nonPriority?: NonPriorityEngineStatus;
+}
+
+export interface EngineError {
+  message: string;
+  action: 'init' | 'extractLogs';
+}
+
+export interface NonPriorityEngineStatus {
+  status: EngineStatus | null;
+  error: EngineError | null;
+  lastExecutionTimestamp?: string;
+  samplingRate: number | null;
 }
 
 export type EngineComponentResource =
@@ -45,6 +60,11 @@ export interface EngineComponentStatus {
   metadata?: Record<string, unknown>;
   health?: 'green' | 'yellow' | 'red' | 'unavailable' | 'unknown';
   errors?: Array<{ title?: string; message?: string }>;
+  /** Set on extraction task components only. */
+  extractionMode?: ExtractionMode;
+  status?: string | null;
+  runs?: number;
+  lastError?: string | null;
 }
 
 export interface GetEntityStoreStatusResponse {

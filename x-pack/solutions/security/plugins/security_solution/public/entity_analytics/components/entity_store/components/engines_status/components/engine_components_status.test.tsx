@@ -105,6 +105,48 @@ describe('EngineComponentsStatusTable', () => {
       expect(screen.queryByRole('img', { name: /health/i })).not.toBeInTheDocument();
     });
 
+    it('labels extraction task rows by process', () => {
+      const task = { installed: true, resource: EngineComponentResourceEnum.task };
+      render(
+        <EngineComponentsStatusTable
+          components={[
+            { ...task, id: 'single_task', extractionMode: 'single' },
+            { ...task, id: 'priority_task', extractionMode: 'priority' },
+            { ...task, id: 'non_priority_task', extractionMode: 'nonPriority' },
+          ]}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      expect(screen.getByText('Task')).toBeInTheDocument();
+      expect(screen.getByText('Task (priority)')).toBeInTheDocument();
+      expect(screen.getByText('Task (non-priority)')).toBeInTheDocument();
+    });
+
+    it('shows the last task error of a failed task', () => {
+      render(
+        <EngineComponentsStatusTable
+          components={[
+            {
+              id: 'non_priority_task',
+              installed: true,
+              resource: EngineComponentResourceEnum.task,
+              extractionMode: 'nonPriority',
+              status: 'error',
+              runs: 3,
+              lastError: 'Task timed out',
+            },
+          ]}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      fireEvent.click(screen.getByLabelText('Expand'));
+
+      expect(screen.getByText('Last task error')).toBeInTheDocument();
+      expect(screen.getByText('Task timed out')).toBeInTheDocument();
+    });
+
     it('renders the correct identifier link', () => {
       mockGetUrlForApp.mockReturnValue('mockedUrl');
 
