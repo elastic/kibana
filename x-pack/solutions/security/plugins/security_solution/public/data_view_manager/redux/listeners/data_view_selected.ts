@@ -10,6 +10,7 @@ import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { isEmpty } from 'lodash';
+import hash from 'object-hash';
 import type { CoreStart } from '@kbn/core/public';
 import type { RootState } from '../reducer';
 import { scopes } from '../reducer';
@@ -122,9 +123,14 @@ export const createDataViewSelectedListener = (dependencies: {
             throw new Error('empty adhoc title field');
           }
 
+          const { fallbackTimeFieldSpec } = action.payload;
           adHocDataView = await dependencies.dataViews.create({
-            id: `adhoc_${title}`,
+            // The data views service caches by id, so the id must change whenever the time field does.
+            id: fallbackTimeFieldSpec
+              ? `adhoc_${title}_${hash(fallbackTimeFieldSpec)}`
+              : `adhoc_${title}`,
             title,
+            ...fallbackTimeFieldSpec,
           });
           if (adHocDataView) {
             listenerApi.dispatch(sharedDataViewManagerSlice.actions.addDataView(adHocDataView));
