@@ -54,10 +54,11 @@ export const EPISODE_DETAILS_READ_ROLE = withFeatures(ALERTING_V2_ALERTS_READ_RO
   alerting_v2_execution_history: ['read'],
 });
 
-/** Execution history page, whose rows resolve the policies and workflows they dispatched to. */
+/** Execution history page, whose rows resolve the rules, policies and workflows they dispatched to. */
 export const EXECUTION_HISTORY_PAGE_READ_ROLE = withFeatures(
   ALERTING_V2_EXECUTION_HISTORY_READ_ROLE,
   {
+    alerting_v2_rules: ['read'],
     alerting_v2_alerts: ['read'],
     alerting_v2_action_policies: ['read'],
     workflowsManagement: ['read'],

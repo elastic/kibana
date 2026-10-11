@@ -60,7 +60,7 @@ export interface AlertingBrowserAuthFixture extends BrowserAuthFixture {
   loginAsActionPolicyFormEditor: () => Promise<void>;
   /** Action policy write plus the rule read the affected-rules flyout needs. */
   loginAsActionPolicyRuleReviewer: () => Promise<void>;
-  /** Execution history page, whose rows resolve the policies and workflows they dispatched to. */
+  /** Execution history page, whose rows resolve the rules, policies and workflows they dispatched to. */
   loginAsExecutionHistoryViewer: () => Promise<void>;
 }
 
