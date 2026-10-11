@@ -98,6 +98,35 @@ describe('sendWaitForInputNotifications', () => {
     expect(execute.mock.calls[0][0].input.message).toBe('Open https://kibana.example/form');
   });
 
+  it('renders email recipients and drops a blank address', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        email: {
+          'connector-id': 'email-1',
+          to: ['{{inputs.email}}', '{{inputs.empty}}'],
+          cc: ['{{inputs.cc}}'],
+          bcc: ['audit@example.com'],
+        },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
+      renderTemplate: (template) =>
+        template
+          .replaceAll('{{inputs.email}}', 'analyst@example.com')
+          .replaceAll('{{inputs.empty}}', '  ')
+          .replaceAll('{{inputs.cc}}', 'lead@example.com'),
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute.mock.calls[0][0].input.to).toEqual(['analyst@example.com']);
+    expect(execute.mock.calls[0][0].input.cc).toEqual(['lead@example.com']);
+    expect(execute.mock.calls[0][0].input.bcc).toEqual(['audit@example.com']);
+  });
+
   it('sends slack2 sendMessage with default Open form mrkdwn and optional message override', async () => {
     const execute = jest.fn().mockResolvedValue({ status: 'ok' });
 

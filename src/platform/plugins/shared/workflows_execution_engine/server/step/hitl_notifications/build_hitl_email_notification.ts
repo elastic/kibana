@@ -89,6 +89,16 @@ export function buildDefaultHitlApprovalEmailMessage({
   return `${prompt}[${approveLabel}](${approveUrl})  [${rejectLabel}](${rejectUrl})`;
 }
 
+/** Renders recipient templates and drops entries that render blank. */
+export function renderHitlEmailAddresses(
+  addresses: string[] | undefined,
+  renderTemplate: (template: string) => string
+): string[] {
+  return (addresses ?? [])
+    .map((address) => renderTemplate(address).trim())
+    .filter((address) => address.length > 0);
+}
+
 export function buildHitlEmailConnectorInput({
   emailConfig,
   subject,

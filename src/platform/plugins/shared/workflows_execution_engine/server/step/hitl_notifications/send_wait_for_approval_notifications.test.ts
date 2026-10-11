@@ -90,6 +90,7 @@ describe('send_wait_for_approval_notifications', () => {
       resumeLinks,
       spaceId: 'default',
       executionId: 'exec-1',
+      renderTemplate: (template: string) => template,
       abortController: new AbortController(),
     };
 
@@ -212,6 +213,29 @@ describe('send_wait_for_approval_notifications', () => {
         },
         abortController: expect.any(AbortController),
       });
+    });
+
+    it('renders the approval subject and recipients', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          email: {
+            'connector-id': 'email-1',
+            to: ['{{inputs.email}}'],
+            subject: 'Approval for {{inputs.hostname}}',
+          },
+        },
+        renderTemplate: (template) =>
+          template
+            .replaceAll('{{inputs.email}}', 'oncall@example.com')
+            .replaceAll('{{inputs.hostname}}', 'web-01'),
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute.mock.calls[0][0].input.to).toEqual(['oncall@example.com']);
+      expect(execute.mock.calls[0][0].input.subject).toBe('Approval for web-01');
     });
 
     it('sends slack2 sendMessage notifications to every configured channel', async () => {

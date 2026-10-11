@@ -16,6 +16,7 @@ import {
   absoluteUrlToKibanaFooterPath,
   buildDefaultHitlInputEmailMessage,
   buildHitlEmailConnectorInput,
+  renderHitlEmailAddresses,
   resolveHitlEmailSubject,
 } from './build_hitl_email_notification';
 import { hasExternalHitlChannels } from './has_external_hitl_channels';
@@ -186,7 +187,8 @@ export async function sendWaitForInputNotifications({
   }
 
   const emailConfig = channels.email;
-  if (emailConfig?.['connector-id'] && emailConfig.to?.length) {
+  const emailTo = renderHitlEmailAddresses(emailConfig?.to, renderTemplate);
+  if (emailConfig?.['connector-id'] && emailTo.length) {
     const message =
       emailConfig.message != null
         ? resolveWaitForInputChannelMessage({
@@ -201,7 +203,12 @@ export async function sendWaitForInputNotifications({
       connectorType: 'email',
       connectorNameOrId: emailConfig['connector-id'],
       input: buildHitlEmailConnectorInput({
-        emailConfig,
+        emailConfig: {
+          ...emailConfig,
+          to: emailTo,
+          cc: renderHitlEmailAddresses(emailConfig.cc, renderTemplate),
+          bcc: renderHitlEmailAddresses(emailConfig.bcc, renderTemplate),
+        },
         subject: resolveHitlEmailSubject(
           emailConfig.subject != null ? renderTemplate(emailConfig.subject) : undefined,
           'input'

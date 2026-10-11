@@ -13,6 +13,7 @@ import {
   buildDefaultHitlApprovalEmailMessage,
   buildHitlEmailConnectorInput,
   buildHitlExecutionFooterPath,
+  renderHitlEmailAddresses,
   resolveHitlEmailSubject,
 } from './build_hitl_email_notification';
 import {
@@ -143,6 +144,7 @@ export async function sendWaitForApprovalNotifications({
   resumeLinks,
   spaceId,
   executionId,
+  renderTemplate,
   connectorExecutor,
   abortController,
 }: {
@@ -153,6 +155,7 @@ export async function sendWaitForApprovalNotifications({
   resumeLinks: WaitForApprovalResumeLinks;
   spaceId: string;
   executionId: string;
+  renderTemplate: (template: string) => string;
   connectorExecutor: ConnectorExecutor;
   abortController: AbortController;
 }): Promise<void> {
@@ -193,13 +196,22 @@ export async function sendWaitForApprovalNotifications({
   }
 
   const emailConfig = channels.email;
-  if (emailConfig?.['connector-id'] && emailConfig.to?.length) {
+  const emailTo = renderHitlEmailAddresses(emailConfig?.to, renderTemplate);
+  if (emailConfig?.['connector-id'] && emailTo.length) {
     const result = await connectorExecutor.execute({
       connectorType: 'email',
       connectorNameOrId: emailConfig['connector-id'],
       input: buildHitlEmailConnectorInput({
-        emailConfig,
-        subject: resolveHitlEmailSubject(emailConfig.subject, 'approval'),
+        emailConfig: {
+          ...emailConfig,
+          to: emailTo,
+          cc: renderHitlEmailAddresses(emailConfig.cc, renderTemplate),
+          bcc: renderHitlEmailAddresses(emailConfig.bcc, renderTemplate),
+        },
+        subject: resolveHitlEmailSubject(
+          emailConfig.subject != null ? renderTemplate(emailConfig.subject) : undefined,
+          'approval'
+        ),
         message: buildDefaultHitlApprovalEmailMessage(linkParams),
         footerLinkPath: buildHitlExecutionFooterPath({ spaceId, executionId }),
       }),
