@@ -207,10 +207,12 @@ export const assertToolSpansReachable = async ({
   log: ToolingLog;
   timeoutMs?: number;
   pollIntervalMs?: number;
-}): Promise<void> => {
+}): Promise<'reachable' | 'skipped'> => {
   if (probe.skipped) {
-    log.info('Trace reachability probe was declined by the quality gate — skipping span check');
-    return;
+    // A declined probe made no tool call, so it proves nothing about tracing. Report it as
+    // unproven; callers must not treat this as "trace evaluators armed".
+    log.warning('Trace reachability probe was declined by the quality gate — span check not run');
+    return 'skipped';
   }
 
   const clauses = toolSpanJoinClauses({
@@ -227,7 +229,7 @@ export const assertToolSpansReachable = async ({
         })) as unknown as EsqlResponse;
         if (Number(response.values?.[0]?.[0] ?? 0) > 0) {
           log.info(`Tool spans reachable via ${clause.name} (attempt ${attempt})`);
-          return;
+          return 'reachable';
         }
       } catch (error) {
         log.debug(
@@ -247,5 +249,49 @@ export const assertToolSpansReachable = async ({
       clauses.map((c) => c.name).join(', ') || 'no join keys at all'
     }, waited ${timeoutMs}ms). Trace-based evaluators would score N/A on every example and the suite would still ` +
       'report a pass. Check that Agent Builder spans are exported to TRACING_ES_URL.'
+  );
+};
+
+/**
+ * Runs the reachability probe on each candidate gap in turn until one is NOT declined by the
+ * quality gate, then asserts its tool spans are reachable. A declined probe proves nothing about
+ * tracing, so when every candidate is declined this THROWS rather than reporting the trace
+ * evaluators armed (they would score N/A and the suite would still pass).
+ */
+export const armTraceEvaluators = async <TInput>({
+  inputs,
+  runProbe,
+  traceEsClient,
+  log,
+  timeoutMs,
+  pollIntervalMs,
+}: {
+  inputs: TInput[];
+  runProbe: (input: TInput) => Promise<RuleCreationResult>;
+  traceEsClient: EsClient;
+  log: ToolingLog;
+  timeoutMs?: number;
+  pollIntervalMs?: number;
+}): Promise<RuleCreationResult> => {
+  for (const [index, input] of inputs.entries()) {
+    const probe = await runProbe(input);
+    const outcome = await assertToolSpansReachable({
+      traceEsClient,
+      probe,
+      log,
+      timeoutMs,
+      pollIntervalMs,
+    });
+    if (outcome === 'reachable') return probe;
+    log.warning(
+      `Reachability probe ${index + 1}/${inputs.length} was declined (${
+        probe.skipReason ?? 'no reason given'
+      })`
+    );
+  }
+  throw new Error(
+    `All ${inputs.length} trace reachability probes were declined by the quality gate, so tool ` +
+      'span reachability was never verified. Trace-based evaluators (Tool Routing, Trajectory: *) ' +
+      'are unarmed and would score N/A while the suite reports a pass.'
   );
 };
