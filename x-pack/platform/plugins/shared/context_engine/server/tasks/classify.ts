@@ -20,7 +20,14 @@ export const classify = (signal: EsqlToolCallSignal): SignalTag[] => {
   // groups. `empty_retrieval` therefore only applies when the query actually ran.
   if (data.status === 'Error') {
     tags.push('query_error');
-  } else if (data.query_kind !== 'other' && data.returned.row_count === 0) {
+  } else if (
+    data.query_kind !== 'other' &&
+    data.returned.row_count !== undefined &&
+    data.returned.row_count === 0
+  ) {
+    // `row_count === undefined` means the tool result was unreadable from the trace
+    // span (e.g. dropped by the traces index `ignore_above` limit) — unknown is not
+    // zero, so no `empty_retrieval` tag.
     tags.push('empty_retrieval');
   }
 
