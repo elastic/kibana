@@ -17,11 +17,11 @@ import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/
 import { buildAlertBasedTilesQuery } from '../queries/entities_with_alerts_query';
 import { EMPTY_ENTITY_IDS } from '../data';
 import {
-  buildEntityFilterClauses,
   EMPTY_ENTITY_FILTERS,
   type EntityFilters,
   type TimeRange,
-} from '../../entities_grid';
+} from '../../entities_grid/common';
+import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 
 interface AlertBasedTilesResult {
   severeAlertsCount: number;

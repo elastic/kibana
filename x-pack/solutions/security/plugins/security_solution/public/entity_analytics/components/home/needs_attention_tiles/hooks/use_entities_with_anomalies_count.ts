@@ -18,11 +18,11 @@ import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildEntitiesWithAnomaliesCountQuery } from '../queries/entities_with_anomalies_query';
 import {
-  buildEntityFilterClauses,
   EMPTY_ENTITY_FILTERS,
   type EntityFilters,
   type TimeRange,
-} from '../../entities_grid';
+} from '../../entities_grid/common';
+import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 
 const esqlSearch = async (
   searchService: ReturnType<typeof useKibana>['services']['data']['search'],

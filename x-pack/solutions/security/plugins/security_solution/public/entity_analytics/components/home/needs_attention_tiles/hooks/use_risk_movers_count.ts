@@ -17,11 +17,11 @@ import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildRiskMoversCountQuery } from '../queries/tile_risk_movers_query';
 import {
-  buildEntityFilterClauses,
   EMPTY_ENTITY_FILTERS,
   type EntityFilters,
   type TimeRange,
-} from '../../entities_grid';
+} from '../../entities_grid/common';
+import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 
 export const useRiskMoversCount = ({
   spaceId,
