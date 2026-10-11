@@ -1,0 +1,137 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import type { Composition, StyleHandle as SdkStyleHandle } from '@elastic/isomer-sdk';
+import { definePrimitive, definePrimitivePack } from '@elastic/isomer-sdk';
+import { md } from '@elastic/isomer-sdk/markdown';
+import { createIsomerRuntime } from '@elastic/isomer-runtime';
+import { z } from '@kbn/zod';
+import { borealisDark } from './borealis_tokens.generated';
+import { classNames } from './class_names';
+import { isomerDistillery } from './distillery';
+import { isomerStyleAdapter } from './style_adapter';
+
+const noteStyles = isomerDistillery.createStyleModule('testNote', ({ css, tokens }) => ({
+  root: css`
+    color: ${tokens.color.text.paragraph};
+    box-shadow: ${tokens.shadow.m};
+  `,
+}));
+
+const root = noteStyles.handles.root as unknown as SdkStyleHandle;
+
+const renderStyles = (scheme?: 'light' | 'dark') => {
+  const collector = isomerStyleAdapter.createCollector({});
+  const { resolveClassName } = isomerStyleAdapter.createRenderContext(collector, {});
+  const className = resolveClassName?.(root) ?? '';
+  return { className, css: isomerStyleAdapter.renderStyles(collector, scheme ? { scheme } : {}) };
+};
+
+describe('isomerStyleAdapter', () => {
+  it('emits CSS for the class names a render resolves', () => {
+    const { className, css } = renderStyles();
+
+    expect(className).toBe('testNote-root');
+    expect(css).toContain(`.${className}{`);
+  });
+
+  it('lets the wrapper data-theme choose the color scheme', () => {
+    const { css } = renderStyles();
+
+    expect(css).toContain('light-dark(');
+    expect(css).toContain(".isomer[data-theme='dark']{color-scheme:dark}");
+  });
+
+  it('inherits the host color scheme without data-theme', () => {
+    const { css } = renderStyles();
+
+    expect(css).not.toMatch(/\.isomer\{[^}]*color-scheme/);
+  });
+
+  it('gives the wrapper EUI base typography', () => {
+    const { css } = renderStyles();
+
+    expect(css).toMatch(/\.isomer\{[^}]*font-family:var\(--isomer-font-family-sans\)/);
+    expect(css).toMatch(/\.isomer\{[^}]*line-height:var\(--isomer-font-lineHeight-s\)/);
+    expect(css).toContain('--isomer-font-family-sans:');
+  });
+
+  it('resolves a requested scheme to literal values', () => {
+    const { css } = renderStyles('dark');
+
+    expect(css).not.toContain('light-dark(');
+    expect(css).toContain(borealisDark.color.text.paragraph);
+  });
+
+  it('switches shadows on the wrapper data-theme', () => {
+    const { css } = renderStyles();
+
+    expect(css).toMatch(/\.isomer\{[^}]*--isomer-shadow-m:0px 0px 2px/);
+    expect(css).toMatch(
+      /\.isomer\[data-theme='dark'\]\{--isomer-shadow-m:0px 3px 10px 0px hsla\(0,0%,0%,0\.52\)/
+    );
+  });
+
+  it('resolves shadows for a requested scheme', () => {
+    expect(renderStyles('dark').css).toMatch(
+      /--isomer-shadow-m:0px 3px 10px 0px hsla\(0,0%,0%,0\.52\)/
+    );
+    expect(renderStyles('dark').css).not.toContain("[data-theme='dark']{--isomer-shadow");
+    expect(renderStyles('light').css).toMatch(/--isomer-shadow-m:0px 0px 2px/);
+  });
+
+  it('owns only handles authored in the Isomer distillery', () => {
+    expect(isomerStyleAdapter.ownsHandle?.(root)).toBe(true);
+    expect(
+      isomerStyleAdapter.ownsHandle?.({
+        key: 'chart.root',
+        readableName: 'chart-root',
+        moduleName: 'chart',
+      } as SdkStyleHandle)
+    ).toBe(false);
+  });
+
+  it('styles a pack rendered through the HTML surface', () => {
+    const noteSchema = z.object({ type: z.literal('note'), text: z.string() });
+    type NoteNode = z.infer<typeof noteSchema>;
+    const composition: Composition<NoteNode> = {
+      type: 'view',
+      body: [{ type: 'note', text: 'Healthy.' }],
+    };
+    const note = definePrimitive<NoteNode>({
+      type: 'note',
+      schema: noteSchema,
+      catalog: {
+        type: 'note',
+        purpose: 'State one short fact.',
+        useWhen: ['A sentence answers the question.'],
+        avoidWhen: ['The answer needs structure.'],
+        example: { type: 'note', text: 'Healthy.' },
+      },
+      examples: [{ type: 'note', text: 'Healthy.' }],
+      renderers: {
+        react: (node, { context }) => (
+          <p className={classNames(context, noteStyles.handles.root)}>{node.text}</p>
+        ),
+        text: (node) => node.text,
+        markdown: (node) => md.paragraph(node.text),
+      },
+    });
+    const runtime = createIsomerRuntime({
+      packs: [
+        definePrimitivePack({ id: 'test', primitives: [note], styleAdapter: isomerStyleAdapter }),
+      ],
+    });
+
+    const { html, css } = runtime.surfaces.html.render(composition, { theme: 'dark' });
+
+    expect(html).toMatch(/<section class="isomer[^"]*"[^>]*data-theme="dark"/);
+    expect(html).toContain('<p class="testNote-root">Healthy.</p>');
+    expect(css).toContain('.testNote-root{');
+  });
+});

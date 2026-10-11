@@ -18,6 +18,7 @@ import { TimelineEventType } from './timeline_events';
 import type { ExecutionAbortReason, SerializedExecutionError } from '../agents/execution_status';
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
+import type { SurfacePayload } from './surface_payload';
 import type {
   CompactionSummary,
   ConversationInternalState,
@@ -363,7 +364,13 @@ export interface RoundCompleteEventData {
   workspace_id?: string;
 }
 
-export type RoundCompleteEvent = ChatEventBase<ChatEventType.roundComplete, RoundCompleteEventData>;
+export type RoundCompleteEvent = ChatEventBase<
+  ChatEventType.roundComplete,
+  RoundCompleteEventData
+> & {
+  /** The response message rendered for the round's surface, added at callback delivery. */
+  surface_payload?: SurfacePayload;
+};
 
 export const isRoundCompleteEvent = (
   event: AgentBuilderEvent<string, any>

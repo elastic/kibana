@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/ui';
 import { TRUSTED_APP_HASH } from '../artifact_tabs_test_data';
 
 export type PolicyArtifactKind =
@@ -197,8 +198,8 @@ export class PolicyArtifactsPage {
     }
   }
 
-  private async fillComboBox(testSubj: string, value: string, custom = false) {
-    const combo = this.page.components.comboBox(testSubj);
+  private async fillComboBox(testSubj: string, value: string, custom = false, scope?: Locator) {
+    const combo = this.page.components.comboBox(testSubj, scope);
     if (custom) {
       await combo.setCustomSelectedOptions([value]);
       return;
@@ -341,6 +342,50 @@ export class PolicyArtifactsPage {
     );
     await this.fillComboBox('fieldAutocompleteComboBox', 'agent.version');
     await this.fillComboBox('valuesAutocompleteMatch', '1234', true);
+    await this.commitEndpointExceptionEntry();
+  }
+
+  /**
+   * Adds one OR group and fills its field and value. The field combobox stores
+   * the selection on the input value, so the new group is the entry whose
+   * field input is still empty.
+   */
+  async addEndpointExceptionOrCondition(field: string, value: string) {
+    await this.page.testSubj.locator('exceptionsOrButton').click();
+    const entry = await this.emptyEndpointExceptionEntry();
+    await this.fillComboBox('fieldAutocompleteComboBox', field, false, entry);
+    await this.fillComboBox('valuesAutocompleteMatch', value, true, entry);
+    await this.commitEndpointExceptionEntry();
+  }
+
+  async addEndpointExceptionOrConditions(
+    conditions: ReadonlyArray<{ field: string; value: string }>
+  ) {
+    for (const condition of conditions) {
+      await this.addEndpointExceptionOrCondition(condition.field, condition.value);
+    }
+  }
+
+  private async emptyEndpointExceptionEntry(): Promise<Locator> {
+    const flyout = this.page.testSubj.locator('endpointExceptionsListPage-flyout');
+    const entries = flyout.getByTestId('exceptionEntriesContainer');
+    let emptyIndex = -1;
+
+    await expect(async () => {
+      const emptyIndexes = await entries.evaluateAll((nodes) =>
+        nodes.flatMap((node, index) => {
+          const input = node.querySelector('[data-test-subj="fieldAutocompleteComboBox"] input');
+          return input instanceof HTMLInputElement && input.value === '' ? [index] : [];
+        })
+      );
+      expect(emptyIndexes).toHaveLength(1);
+      emptyIndex = emptyIndexes[0];
+    }).toPass();
+
+    return flyout.locator(`[data-test-subj="exceptionEntriesContainer"] >> nth=${emptyIndex}`);
+  }
+
+  private async commitEndpointExceptionEntry() {
     await this.page.testSubj.locator('endpointExceptions-form-description-input').click();
   }
 }

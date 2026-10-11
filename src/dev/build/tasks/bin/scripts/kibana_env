@@ -1,0 +1,6 @@
+# DIR is set by the calling launcher after resolving its symlinks.
+CONFIG_DIR=${KBN_PATH_CONF:-"$DIR/config"}
+
+if [ -f "${CONFIG_DIR}/node.options" ]; then
+  KBN_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
+fi

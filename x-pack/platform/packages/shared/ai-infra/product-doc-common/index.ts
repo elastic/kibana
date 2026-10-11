@@ -31,6 +31,7 @@ export {
   getOpenApiSpecIndexName,
 } from './src/indices';
 export type { ProductDocumentationAttributes } from './src/documents';
+export { resolveContentTitle, stripSiteSuffix } from './src/content_title';
 export {
   eisInferenceIdCandidates,
   getProductDocInferenceIdCandidates,

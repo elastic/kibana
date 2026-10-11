@@ -160,13 +160,136 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
     {
       group: 'top_n',
       dataset: logs,
-      description: 'terms alongside a date histogram is not convertible',
+      description: 'terms above a date histogram is not convertible yet',
       columns: {
         col1: terms('host.keyword', {}),
         col2: dateHistogram('timestamp', { interval: '1h' }),
         col3: count(),
       },
       columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: false,
+        reason: 'terms_date_histogram_not_supported',
+      },
+    },
+    // A date histogram above Top values ranks the top N per time bucket, which is the
+    // inner-terms `LIMIT n BY` path with the bucket as the group. The bucket output name is
+    // an expression for fixed intervals, so LIMIT BY and SORT quote it as one identifier.
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'date histogram (fixed interval) above terms ranked by metric',
+      columns: {
+        col1: dateHistogram('timestamp', { interval: '1d' }),
+        col2: terms('host.keyword', {
+          size: 5,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | STATS AVG(bytes) BY BUCKET(timestamp, 1 day), host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 5 BY \`BUCKET(timestamp, 1 day)\` | SORT \`BUCKET(timestamp, 1 day)\` ASC, \`AVG(bytes)\` DESC`,
+        columnNames: ['AVG(bytes)', 'BUCKET(timestamp, 1 day)', 'host.keyword'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'BUCKET(timestamp, 1 day)': ['col1'],
+          'host.keyword': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'date histogram (auto interval) above terms ranked alphabetically',
+      columns: {
+        col1: dateHistogram('timestamp', { interval: 'auto' }),
+        col2: terms('host.keyword', {
+          size: 4,
+          orderBy: { type: 'alphabetical' },
+          orderDirection: 'desc',
+        }),
+        col3: count(),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        // The auto-interval bucket is aliased to its source field, so it needs no quoting.
+        esql: `${logsFrom} | ${logsWhere} | STATS COUNT(*) BY timestamp = BUCKET(timestamp, 75, ?_tstart, ?_tend), host.keyword | SORT host.keyword DESC | LIMIT 4 BY timestamp | SORT timestamp ASC, host.keyword DESC`,
+        columnNames: ['COUNT(*)', 'timestamp', 'host.keyword'],
+        expectedSourceIds: {
+          'COUNT(*)': ['col3'],
+          timestamp: ['col1'],
+          'host.keyword': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description:
+        'terms above a date histogram above terms keeps the top N per outer value and bucket',
+      columns: {
+        col1: terms('geo.src', {
+          size: 5,
+          orderBy: { type: 'column', columnId: 'col4' },
+          orderDirection: 'desc',
+        }),
+        col2: dateHistogram('timestamp', { interval: '1d' }),
+        col3: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col4' },
+          orderDirection: 'desc',
+        }),
+        col4: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3', 'col4'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'geo.src',
+          score: 'rank_geo_src = AVG(bytes)',
+          sort: 'rank_geo_src DESC',
+          size: 5,
+        })} | INLINE STATS rank_geo_src = AVG(bytes) BY geo.src | STATS AVG(bytes) BY rank_geo_src, geo.src, BUCKET(timestamp, 1 day), host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY geo.src, \`BUCKET(timestamp, 1 day)\` | SORT rank_geo_src DESC, \`BUCKET(timestamp, 1 day)\` ASC, \`AVG(bytes)\` DESC | DROP rank_geo_src`,
+        columnNames: ['AVG(bytes)', 'geo.src', 'BUCKET(timestamp, 1 day)', 'host.keyword'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col4'],
+          'geo.src': ['col1'],
+          'BUCKET(timestamp, 1 day)': ['col2'],
+          'host.keyword': ['col3'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'date histogram above two terms dimensions is not convertible',
+      columns: {
+        col1: dateHistogram('timestamp', { interval: '1d' }),
+        col2: terms('geo.src', {}),
+        col3: terms('host.keyword', {}),
+        col4: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3', 'col4'],
+      expected: {
+        success: false,
+        reason: 'terms_date_histogram_not_supported',
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'two terms dimensions above a date histogram is not convertible',
+      columns: {
+        col1: terms('geo.src', {}),
+        col2: terms('host.keyword', {}),
+        col3: dateHistogram('timestamp', { interval: '1d' }),
+        col4: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3', 'col4'],
       expected: {
         success: false,
         reason: 'terms_date_histogram_not_supported',

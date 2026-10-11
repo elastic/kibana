@@ -13,10 +13,12 @@ import type { ScoutTestChannel } from '@kbn/scout-info';
 import { ScoutTestTarget } from '@kbn/scout-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { findPackageForPath } from '@kbn/repo-packages';
+import { TestTrack } from '../execution/test_track';
 import {
   msToHuman,
   identifyTestLoads,
   buildTrack,
+  combineShortLanes,
   type ScoutCIConfig,
   type ScoutCITestLoad,
 } from './create_test_tracks';
@@ -688,5 +690,105 @@ describe('buildTrack', () => {
     // so we expect 2 lanes: lane 1 gets [large, small], lane 2 gets [medium]
     expect(track.laneCount).toBe(2);
     expect(track.lanes[0].loads[0].id).toBe('large.ts');
+  });
+});
+
+describe('combineShortLanes', () => {
+  const testTarget = new ScoutTestTarget('local', 'stateful', 'classic');
+  // Lanes shorter than half of the runtime target are considered short
+  const runtimeTarget = 1000;
+  const shortLaneThreshold = runtimeTarget / 2;
+  const laneSetupDuration = 100;
+  let log: ToolingLog;
+
+  beforeEach(() => {
+    log = createMockLog();
+  });
+
+  const createTrack = (
+    configSet: string,
+    loadEstimates: number[],
+    { agentQueue = 'n2-4-spot', target = testTarget } = {}
+  ): TestTrack => {
+    const track = new TestTrack({ runtimeTarget, estimatedLaneSetupDuration: laneSetupDuration });
+    track.metadata.testTarget = target;
+    track.metadata.server = { configSet };
+
+    loadEstimates.forEach((estimate, index) => {
+      const lane = track.addLane();
+      lane.loads.push({
+        id: `${configSet}-${index}.ts`,
+        stats: {
+          runCount: 1,
+          runtime: { avg: 0, median: 0, pc95th: 0, pc99th: 0, max: 0, estimate },
+        },
+        metadata: {},
+      });
+      lane.metadata.buildkite = { agentQueue };
+    });
+
+    return track;
+  };
+
+  it('moves short lanes into a combined track and keeps the other lanes in place', () => {
+    const defaultTrack = createTrack('default', [700, 100]);
+    const tracks = combineShortLanes(
+      [defaultTrack, createTrack('config_a', [150]), createTrack('config_b', [200])],
+      shortLaneThreshold,
+      log
+    );
+
+    expect(tracks).toHaveLength(2);
+    expect(tracks[0]).toBe(defaultTrack);
+    expect(defaultTrack.lanes.map((lane) => [lane.number, lane.loads[0].id])).toEqual([
+      [1, 'default-0.ts'],
+    ]);
+
+    const [combinedLane] = tracks[1].lanes;
+    expect(tracks[1].metadata.testTarget).toBe(testTarget);
+    expect(tracks[1].laneCount).toBe(1);
+    expect(combinedLane.metadata.buildkite.agentQueue).toBe('n2-4-spot');
+    // Each group restarts the server, so every combined lane keeps its setup duration
+    expect(combinedLane.estimatedSetupDuration).toBe(3 * laneSetupDuration);
+    expect(combinedLane.runtimeEstimate).toBe(750);
+    expect(tracks[1].specification.lanes[0].metadata.loadGroups).toEqual([
+      { configSet: 'config_b', loads: ['config_b-0.ts'] },
+      { configSet: 'config_a', loads: ['config_a-0.ts'] },
+      { configSet: 'default', loads: ['default-1.ts'] },
+    ]);
+  });
+
+  it('does not combine lanes with different agent queues or test targets', () => {
+    const tracks = [
+      createTrack('config_a', [100]),
+      createTrack('config_b', [100], { agentQueue: 'n2-8-spot' }),
+      createTrack('config_c', [100], {
+        target: new ScoutTestTarget('local', 'serverless', 'search'),
+      }),
+    ];
+
+    expect(combineShortLanes([...tracks], shortLaneThreshold, log)).toEqual(tracks);
+    tracks.forEach((track) => expect(track.laneCount).toBe(1));
+  });
+
+  it('places the longest short lanes first and opens a new lane when the runtime target is exceeded', () => {
+    const tracks = combineShortLanes(
+      [
+        createTrack('config_a', [100]),
+        createTrack('config_b', [300]),
+        createTrack('config_c', [300]),
+        createTrack('config_d', [300]),
+      ],
+      shortLaneThreshold,
+      log
+    );
+
+    expect(tracks).toHaveLength(1);
+    expect(
+      tracks[0].lanes.map((lane) =>
+        lane.metadata.loadGroups.map(({ configSet }: { configSet: string }) => configSet)
+      )
+    ).toEqual([['config_b', 'config_c', 'config_a'], ['config_d']]);
+    tracks[0].lanes.forEach((lane) => expect(lane.isCongested).toBe(false));
   });
 });
