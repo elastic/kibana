@@ -8,4 +8,4 @@
  */
 
 export const FIPS_BASE_IMAGE =
-  'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:f911251e69719da5eabb1b724ff8c7e71c8646fc8ad83ee067ea885335c3af40';
+  'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:399cdbd265867d73c1c6efc3f36262e4396f2dd04df3a2782cde03687ddc0e13';
