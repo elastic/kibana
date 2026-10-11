@@ -11,6 +11,7 @@ import type { RuleCreationResult } from '../rule_creation_client';
 import { draftRuleSchema } from '../types';
 import {
   createFieldCoverageEvaluator,
+  createGapAddressedEvaluator,
   createIntervalFormatEvaluator,
   createLookbackGapEvaluator,
   createMitreAccuracyEvaluator,
@@ -257,5 +258,40 @@ describe('createQueryExecutabilityEvaluator', () => {
     const result = await evaluator.evaluate(makeArgs(makeRule()));
     expect(result.score).toBe(1);
     expect(result.metadata).toMatchObject({ rowCount: 0 });
+  });
+});
+
+describe('createGapAddressedEvaluator', () => {
+  const makeEvaluators = (gapScore: number) =>
+    ({
+      criteria: jest.fn().mockReturnValue({
+        evaluate: jest.fn().mockResolvedValue({ score: gapScore }),
+      }),
+    } as unknown as import('@kbn/evals').DefaultEvaluators);
+
+  it('scores N/A instead of 0 when the rule artifact is empty `{}`', async () => {
+    // The judge never sees an empty draft: absence is a measurement gap, not a
+    // quality judgment, so the mean must not absorb it as a zero.
+    const evaluators = makeEvaluators(0);
+    const evaluator = createGapAddressedEvaluator(evaluators);
+    const result = await evaluator.evaluate(makeArgs(makeRule({ name: '', query: '' })));
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
+    expect(evaluators.criteria).not.toHaveBeenCalled();
+  });
+
+  it('returns N/A when no rule was produced', async () => {
+    const evaluators = makeEvaluators(0);
+    const result = await createGapAddressedEvaluator(evaluators).evaluate(noRule);
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
+    expect(evaluators.criteria).not.toHaveBeenCalled();
+  });
+
+  it('delegates to the criteria judge when the draft is real', async () => {
+    const evaluators = makeEvaluators(1);
+    const result = await createGapAddressedEvaluator(evaluators).evaluate(makeArgs(makeRule()));
+    expect(result.score).toBe(1);
+    expect(evaluators.criteria).toHaveBeenCalledTimes(1);
   });
 });

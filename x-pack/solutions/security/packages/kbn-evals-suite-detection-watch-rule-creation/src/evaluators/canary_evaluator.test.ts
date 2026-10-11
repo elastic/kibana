@@ -59,6 +59,18 @@ describe('createCanaryEvaluator', () => {
     expect(result.label).toBe('N/A');
   });
 
+  it('scores N/A — not 1 — when the draft is an empty `{}` rule artifact', async () => {
+    // Same broken-run shape as no rule, but the artifact exists as `{}`. Scoring
+    // 1 would reward a crashed draft; scoring via the judge would grade absence.
+    const evaluators = makeEvaluators(1);
+    const result = await createCanaryEvaluator(evaluators).evaluate(
+      makeArgs({ ...goodRule, name: '', query: '' })
+    );
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
+    expect(evaluators.criteria).not.toHaveBeenCalled();
+  });
+
   it('trips on a catch-all query without consulting the LLM judge', async () => {
     const evaluators = makeEvaluators(1);
     const result = await createCanaryEvaluator(evaluators).evaluate(
