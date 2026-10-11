@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { getPlaywrightTagsFor } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
   ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   buildCreateActionPolicyData,
   test,
+  testData,
 } from '../fixtures';
 
 /*
@@ -21,69 +21,65 @@ import {
  * flyout Take action button) is hidden and the `/edit/:id` route is gated by
  * the required-privileges interstitial.
  */
-test.describe(
-  'Action Policies - read/write privileges',
-  { tag: getPlaywrightTagsFor('stateful', 'classic', 'local') },
-  () => {
-    const RUN_ID = Date.now().toString();
-    let policyId: string;
-    let policyName: string;
+test.describe('Action Policies - read/write privileges', { tag: testData.UI_TAG }, () => {
+  const RUN_ID = Date.now().toString();
+  let policyId: string;
+  let policyName: string;
 
-    test.beforeAll(async ({ apiServices }) => {
-      policyName = `scout-action-policy-privileges-${RUN_ID}`;
-      const policy = await apiServices.alertingV2.actionPolicies.create(
-        buildCreateActionPolicyData({ name: policyName })
-      );
-      policyId = policy.id;
-    });
+  test.beforeAll(async ({ apiServices }) => {
+    policyName = `scout-action-policy-privileges-${RUN_ID}`;
+    const policy = await apiServices.alertingV2.actionPolicies.create(
+      buildCreateActionPolicyData({ name: policyName })
+    );
+    policyId = policy.id;
+  });
 
-    test.afterAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.actionPolicies.delete(policyId);
-    });
+  test.afterAll(async ({ apiServices }) => {
+    await apiServices.alertingV2.actionPolicies.delete(policyId);
+  });
 
-    test('editor sees every write affordance', async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICIES_ALL_ROLE);
-      const { actionPoliciesList } = pageObjects;
-      await actionPoliciesList.goto();
-      await actionPoliciesList.search(policyName);
+  test('editor sees every write affordance', async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICIES_ALL_ROLE);
+    const { actionPoliciesList } = pageObjects;
+    await actionPoliciesList.goto();
+    await actionPoliciesList.search(policyName);
+    await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
+
+    await test.step('create button and the row name link are visible', async () => {
+      await expect(actionPoliciesList.createButton).toBeVisible();
       await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
-
-      await test.step('create button and the row name link are visible', async () => {
-        await expect(actionPoliciesList.createButton).toBeVisible();
-        await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
-      });
-
-      await test.step('details flyout exposes the Take action button', async () => {
-        await actionPoliciesList.openDetailsFlyout(policyName);
-        await expect(actionPoliciesList.detailsFlyout).toBeVisible();
-        await expect(actionPoliciesList.detailsFlyoutTakeActionButton).toBeVisible();
-      });
     });
 
-    test('read-only user cannot access write affordances', async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICIES_READ_ROLE);
-      const { actionPoliciesList } = pageObjects;
-      await actionPoliciesList.goto();
-      await actionPoliciesList.search(policyName);
+    await test.step('details flyout exposes the Take action button', async () => {
+      await actionPoliciesList.openDetailsFlyout(policyName);
+      await expect(actionPoliciesList.detailsFlyout).toBeVisible();
+      await expect(actionPoliciesList.detailsFlyoutTakeActionButton).toBeVisible();
+    });
+  });
+
+  test('read-only user cannot access write affordances', async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICIES_READ_ROLE);
+    const { actionPoliciesList } = pageObjects;
+    await actionPoliciesList.goto();
+    await actionPoliciesList.search(policyName);
+    await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
+
+    await test.step('create button is hidden but the row name link remains', async () => {
+      await expect(actionPoliciesList.createButton).toHaveCount(0);
       await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
-
-      await test.step('create button is hidden but the row name link remains', async () => {
-        await expect(actionPoliciesList.createButton).toHaveCount(0);
-        await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
-      });
-
-      await test.step('details flyout opens but hides the Take action button', async () => {
-        await actionPoliciesList.openDetailsFlyout(policyName);
-        await expect(actionPoliciesList.detailsFlyout).toBeVisible();
-        await expect(actionPoliciesList.detailsFlyoutTakeActionButton).toHaveCount(0);
-      });
     });
 
-    test('read-only user is blocked from the edit route', async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICIES_READ_ROLE);
-      await pageObjects.actionPoliciesList.gotoEdit(policyId);
-
-      await expect(pageObjects.alertingNavigation.requiredPrivilegesPrompt).toBeVisible();
+    await test.step('details flyout opens but hides the Take action button', async () => {
+      await actionPoliciesList.openDetailsFlyout(policyName);
+      await expect(actionPoliciesList.detailsFlyout).toBeVisible();
+      await expect(actionPoliciesList.detailsFlyoutTakeActionButton).toHaveCount(0);
     });
-  }
-);
+  });
+
+  test('read-only user is blocked from the edit route', async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICIES_READ_ROLE);
+    await pageObjects.actionPoliciesList.gotoEdit(policyId);
+
+    await expect(pageObjects.alertingNavigation.requiredPrivilegesPrompt).toBeVisible();
+  });
+});
