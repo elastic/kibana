@@ -4539,6 +4539,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/BulkEditSkipReason'
             - $ref: '#/components/schemas/BulkGapsFillingSkipReason'
+            - $ref: '#/components/schemas/BulkDeleteSkipReason'
       required:
         - id
         - skip_reason
@@ -4580,6 +4581,10 @@ components:
           type: string
       required:
         - action
+    BulkDeleteSkipReason:
+      enum:
+        - RULE_NOT_FOUND
+      type: string
     BulkDisableRules:
       type: object
       properties:
