@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { getNodeRegisterParserConfig } = require('./node_register');
+const { getNodeRegisterParserConfig, getNodeRegisterSwcConfig } = require('./node_register');
 
 /**
  * Get SWC configuration for Node.js server-side builds. Must stay loadable
  * without a runtime transpiler, so it cannot require `@kbn/transpiler-config`.
  *
  * @param {string} path
- * @param {{ production?: boolean }} [options]
+ * @param {{ production?: boolean, source?: string }} [options]
  * @returns {import('@swc/core').Options}
  */
 function getNodeSwcConfig(path, options = {}) {
@@ -36,9 +36,7 @@ function getNodeSwcConfig(path, options = {}) {
     },
     sourceMaps: production ? false : 'inline',
     inlineSourcesContent: !production,
-    module: {
-      type: 'commonjs',
-    },
+    module: getNodeRegisterSwcConfig(path, { source: options.source }).module,
     minify: false,
   };
 }
