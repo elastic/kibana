@@ -1,5 +1,5 @@
 {
-  "sha1": "614d69ab52644cc14c17e93cd3b2065794556e93",
+  "sha1": "b6bc7efe9bc8e2c2471586e224d09c2cdbe5109b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -62,8 +62,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/alerts_privileges.spec.ts",
-        "line": 96,
-        "column": 66
+        "line": 72,
+        "column": 15
       }
     },
     {
@@ -76,8 +76,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/alerts_privileges.spec.ts",
-        "line": 101,
-        "column": 79
+        "line": 77,
+        "column": 5
       }
     },
     {
@@ -91,7 +91,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
         "line": 130,
-        "column": 87
+        "column": 5
       }
     },
     {
@@ -104,8 +104,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 220,
-        "column": 15
+        "line": 221,
+        "column": 31
       }
     },
     {
@@ -118,8 +118,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 282,
-        "column": 24
+        "line": 286,
+        "column": 13
       }
     },
     {
@@ -132,8 +132,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 332,
-        "column": 13
+        "line": 340,
+        "column": 7
       }
     },
     {
@@ -146,8 +146,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 389,
-        "column": 24
+        "line": 399,
+        "column": 13
       }
     },
     {
@@ -160,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 425,
-        "column": 8
+        "line": 437,
+        "column": 23
       }
     },
     {
@@ -174,8 +174,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 477,
-        "column": 7
+        "line": 493,
+        "column": 24
       }
     },
     {
@@ -188,8 +188,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 527,
-        "column": 78
+        "line": 546,
+        "column": 9
       }
     },
     {
@@ -202,8 +202,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 568,
-        "column": 7
+        "line": 589,
+        "column": 11
       }
     },
     {
@@ -216,8 +216,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 622,
-        "column": 7
+        "line": 631,
+        "column": 24
       }
     },
     {
@@ -230,7 +230,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 649,
+        "line": 671,
         "column": 7
       }
     },
@@ -244,8 +244,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 667,
-        "column": 24
+        "line": 689,
+        "column": 13
       }
     },
     {
@@ -258,8 +258,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 690,
-        "column": 11
+        "line": 712,
+        "column": 24
       }
     },
     {
@@ -295,12 +295,13 @@
       "title": "Execution history — smoke shows action policy executions on the Action policies tab",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/execution_history_smoke.spec.ts",
-        "line": 117,
-        "column": 26
+        "line": 95,
+        "column": 24
       }
     },
     {

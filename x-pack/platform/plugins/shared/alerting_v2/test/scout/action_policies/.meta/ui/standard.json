@@ -1,5 +1,5 @@
 {
-  "sha1": "b30b5825b4190fc38f39d3fb6dfefea639ff84ea",
+  "sha1": "74c73d8ae692282aab6958ec8f966cb09a1f2350",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -34,8 +34,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_crud.spec.ts",
-        "line": 63,
-        "column": 7
+        "line": 57,
+        "column": 5
       }
     },
     {
@@ -43,12 +43,13 @@
       "title": "Action Policies - create and edit edits an existing policy without dropping untouched fields",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_crud.spec.ts",
-        "line": 113,
-        "column": 28
+        "line": 108,
+        "column": 24
       }
     },
     {
@@ -56,12 +57,13 @@
       "title": "Action Policies - read/write privileges editor sees every write affordance",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_privileges.spec.ts",
-        "line": 36,
-        "column": 8
+        "line": 27,
+        "column": 6
       }
     },
     {
@@ -69,12 +71,13 @@
       "title": "Action Policies - read/write privileges read-only user cannot access write affordances",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_privileges.spec.ts",
-        "line": 47,
-        "column": 13
+        "line": 38,
+        "column": 11
       }
     },
     {
@@ -82,12 +85,13 @@
       "title": "Action Policies - read/write privileges read-only user is blocked from the edit route",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_privileges.spec.ts",
-        "line": 63,
-        "column": 100
+        "line": 54,
+        "column": 98
       }
     },
     {
@@ -95,12 +99,13 @@
       "title": "Action Policies - affected rules navigates from the details flyout to the affected rules and back",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_affected_rules.spec.ts",
-        "line": 49,
-        "column": 46
+        "line": 36,
+        "column": 44
       }
     },
     {
@@ -108,12 +113,13 @@
       "title": "Action Policies - affected rules hides the link from users who cannot read rules",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_affected_rules.spec.ts",
-        "line": 82,
-        "column": 9
+        "line": 69,
+        "column": 7
       }
     },
     {
