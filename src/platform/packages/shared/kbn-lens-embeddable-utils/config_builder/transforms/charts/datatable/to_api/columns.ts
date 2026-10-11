@@ -64,7 +64,7 @@ export function buildColorProps(
   assertNoUnsupportedProgressDecoration(column);
 
   const { colorMode, palette, colorMapping } = column;
-  if (!colorMode || colorMode === 'none') return {};
+  if (!colorMode || colorMode === 'none') return { color: AUTO_COLOR };
 
   const applyColorTo = colorModeToApplyColorTo(colorMode);
 
@@ -139,7 +139,7 @@ function buildRowsAPINoESQL(column: ColumnState): APIRowPropsNoESQL {
                 fromColorMappingLensStateToAPI(colorMapping, palette as PaletteOutput)
               : AUTO_COLOR,
         }
-      : {}),
+      : { color: AUTO_COLOR }),
   };
 }
 

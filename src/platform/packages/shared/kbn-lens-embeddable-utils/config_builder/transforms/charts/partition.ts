@@ -568,10 +568,12 @@ function fromLensStateToAPIMetrics(
   const staticColouring = vizLayer.colorsByDimension;
   // Mosaic metrics do not carry color in the API schema -> color is only owned by the breakdown dimensions
   const supportsMetricColor = !isStateMosaicChart(visualization);
-  const colorForMetric = (id: string) =>
-    !supportsMetricColor || hasActiveGroupBy
-      ? undefined
-      : fromStaticColorLensStateToAPI(staticColouring?.[id]) ?? AUTO_COLOR;
+  // With an active breakdown the metric color is not used, `auto` matches the schema default
+  const colorForMetric = (id: string) => {
+    if (!supportsMetricColor) return undefined;
+    if (hasActiveGroupBy) return AUTO_COLOR;
+    return fromStaticColorLensStateToAPI(staticColouring?.[id]) ?? AUTO_COLOR;
+  };
 
   if (isTextBasedLayer(layer)) {
     return getMetrics(vizLayer).map(
