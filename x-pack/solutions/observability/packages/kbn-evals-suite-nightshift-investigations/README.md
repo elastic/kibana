@@ -230,7 +230,18 @@ selection alone does not restart Scout. `run` and `start --skip-server` use your
 whose Task Manager capacity you must configure yourself. Wait for any active eval to finish before
 restarting a shared local stack.
 
-## Remote telemetry investigations
+## Telemetry targets
+
+A telemetry target is the Elasticsearch the sandbox queries. The hook resolves the target named by
+`NIGHTSHIFT_TELEMETRY_TARGET` to one URL, API key and optional readable-indices hint, which always
+feed the preconfigured `nightshift-evals-telemetry` connector and manifest hint, so datasets, tasks
+and evaluators do not depend on the target. `none` adds no connector: smoke needs no credentials,
+and the synthetic questions need only a sandbox. `profile` uses the settings below. Unset, the
+target is `profile` when any of those settings is present and `none` otherwise; set it to `none` to
+run without the telemetry a profile such as `dev-vault` configures. Other values fail before Scout
+starts.
+
+### Remote telemetry investigations (`profile` target)
 
 Use the same `trace-only` selection, dataset loader, investigation task, placeholder evaluator and
 trace acceptance checks to investigate an operator-configured Elasticsearch cluster. The telemetry
@@ -257,9 +268,11 @@ CLI or global config schema:
 }
 ```
 
-`url` and `apiKey` are required together; `readableIndices` is optional. Profile values take
-precedence over the following shell fallbacks. The hook selects the telemetry YAML only when the
-URL and key are configured, and requires sandbox credentials for remote investigations.
+`url` and `apiKey` are required together; `readableIndices` is optional. The URL and key come from
+the profile block, or from the shell variables below when the block has neither. A profile URL is
+never paired with a shell key or the other way round; the hook used to accept that mix and now
+fails. `readableIndices` falls back to the shell on its own. The hook also fails when `url` embeds
+credentials, and requires sandbox credentials for remote investigations.
 
 | Variable | Purpose |
 | --- | --- |

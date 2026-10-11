@@ -9,6 +9,7 @@ import { spawnSync } from 'child_process';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import Path from 'path';
+import { getConfigFromFiles } from '@kbn/config';
 
 const HOOK = Path.join(__dirname, 'scout_hook.sh');
 const PEM_DIR = mkdtempSync(Path.join(tmpdir(), 'scout-hook-pem-'));
@@ -307,5 +308,101 @@ describe('nightshift-investigations scout hook', () => {
     });
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain('requires sandbox credentials');
+  });
+
+  describe('telemetry targets', () => {
+    const TELEMETRY = {
+      url: 'https://remote.example.com',
+      apiKey: 'remote-key',
+      readableIndices: 'remote:logs-*',
+    };
+    const PROFILE = { sandbox: SANDBOX, nightshift: { telemetry: TELEMETRY } };
+
+    it('resolves a profile block to the same env as before, which feeds the one connector', () => {
+      const { output } = runHook(PROFILE);
+      expect(output).toEqual({
+        env: {
+          ...runHook({ sandbox: SANDBOX }).output.env,
+          NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: 'https://remote.example.com',
+          NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'remote-key',
+          NIGHTSHIFT_SANDBOX_READABLE_INDICES: 'remote:logs-*',
+          NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: Path.join(__dirname, 'kibana.telemetry.yml'),
+        },
+      });
+
+      const originalEnv = process.env;
+      process.env = { ...originalEnv, ...output.env };
+      try {
+        const { xpack } = getConfigFromFiles([
+          output.env.SANDBOX_KIBANA_CONFIG,
+          output.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG,
+        ]);
+        expect(xpack.actions.preconfigured['nightshift-evals-telemetry']).toMatchObject({
+          config: { url: 'https://remote.example.com' },
+          secrets: { secretHeaders: { Authorization: 'ApiKey remote-key' } },
+        });
+        expect(xpack.nightshift_investigations.sandbox).toEqual({
+          telemetry_connector_id: 'nightshift-evals-telemetry',
+          telemetry_readable_indices: 'remote:logs-*',
+        });
+      } finally {
+        process.env = originalEnv;
+      }
+    });
+
+    it('ignores profile telemetry for the explicit none target, so smoke needs no credentials', () => {
+      const noneTarget = { NIGHTSHIFT_TELEMETRY_TARGET: 'none' };
+      expect(runHook({ nightshift: { telemetry: TELEMETRY } }, noneTarget).output).toEqual({});
+      expect(runHook(PROFILE, noneTarget).output).toEqual(runHook({ sandbox: SANDBOX }).output);
+    });
+
+    it('changes the Scout fingerprint when the target or its settings change', () => {
+      // The evals CLI restarts a reused Scout whenever the hook's env output changes.
+      const inferred = runHook(PROFILE).output;
+      const rotated = {
+        sandbox: SANDBOX,
+        nightshift: { telemetry: { ...TELEMETRY, apiKey: 'new' } },
+      };
+      expect(runHook(PROFILE, { NIGHTSHIFT_TELEMETRY_TARGET: 'profile' }).output).toEqual(inferred);
+      expect(runHook(PROFILE, { NIGHTSHIFT_TELEMETRY_TARGET: 'none' }).output).not.toEqual(
+        inferred
+      );
+      expect(runHook(rotated).output).not.toEqual(inferred);
+    });
+
+    it.each([
+      [{ url: 'https://profile.example.com' }, { NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'k' }],
+      [
+        { apiKey: 'profile-key' },
+        { NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: 'https://shell.example.com' },
+      ],
+      [{}, { NIGHTSHIFT_TELEMETRY_TARGET: 'profile' }],
+    ])(
+      'rejects profile telemetry %j with env %j: URL and key need one source',
+      (telemetry, env) => {
+        const { status, stderr } = runHook({ sandbox: SANDBOX, nightshift: { telemetry } }, env);
+        expect(status).toBe(1);
+        expect(stderr).toContain('requires both URL and API key from one source');
+      }
+    );
+
+    it.each(['scout', 'c0', 'PROFILE'])('rejects the unknown telemetry target %s', (target) => {
+      const { status, stderr } = runHook({}, { NIGHTSHIFT_TELEMETRY_TARGET: target });
+      expect(status).toBe(1);
+      expect(stderr).toContain(
+        `NIGHTSHIFT_TELEMETRY_TARGET must be none or profile, got "${target}"`
+      );
+    });
+
+    it('rejects a telemetry URL with embedded credentials without echoing them', () => {
+      const url = 'https://elastic:SECRET_PASSWORD@telemetry.example.com';
+      const { status, stderr } = runHook({
+        sandbox: SANDBOX,
+        nightshift: { telemetry: { ...TELEMETRY, url } },
+      });
+      expect(status).toBe(1);
+      expect(stderr).toContain('telemetry URL must not embed credentials');
+      expect(stderr).not.toContain('SECRET_PASSWORD');
+    });
   });
 });
