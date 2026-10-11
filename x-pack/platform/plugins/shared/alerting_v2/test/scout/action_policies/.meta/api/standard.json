@@ -1,5 +1,5 @@
 {
-  "sha1": "6eece95d014be14b203f16cf040cea88b0123bad",
+  "sha1": "448c8fd8b9d681300e29b4bb367385c94c8ae9c2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1300,7 +1300,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 67,
+        "line": 68,
         "column": 14
       }
     },
@@ -1321,7 +1321,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
         "line": 94,
-        "column": 26
+        "column": 12
       }
     },
     {
@@ -1340,7 +1340,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 115,
+        "line": 113,
         "column": 7
       }
     },
@@ -1360,7 +1360,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 131,
+        "line": 129,
         "column": 29
       }
     },
@@ -1380,8 +1380,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 147,
-        "column": 27
+        "line": 145,
+        "column": 32
       }
     },
     {
@@ -1400,7 +1400,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 170,
+        "line": 168,
         "column": 14
       }
     },
@@ -1420,7 +1420,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 181,
+        "line": 179,
         "column": 7
       }
     },
@@ -1440,13 +1440,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 191,
+        "line": 189,
         "column": 13
       }
     },
     {
-      "id": "1b575d98308e7fd-d0090cfe4ca663b",
-      "title": "Create action policy API validation: rejects missing description",
+      "id": "1b575d98308e7fd-2985f7314a33614",
+      "title": "Create action policy API accepts a body with no description",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1460,8 +1460,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 200,
-        "column": 49
+        "line": 198,
+        "column": 64
       }
     },
     {
@@ -1480,8 +1480,28 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 213,
-        "column": 24
+        "line": 211,
+        "column": 15
+      }
+    },
+    {
+      "id": "1b575d98308e7fd-788ee8ddc4c408a",
+      "title": "Create action policy API validation: rejects an empty or blank description",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
+        "line": 221,
+        "column": 22
       }
     },
     {
@@ -1500,8 +1520,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 223,
-        "column": 16
+        "line": 235,
+        "column": 23
       }
     },
     {
@@ -1520,7 +1540,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 234,
+        "line": 245,
         "column": 22
       }
     },
@@ -1540,7 +1560,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 243,
+        "line": 254,
         "column": 11
       }
     },
@@ -1560,7 +1580,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 250,
+        "line": 261,
         "column": 12
       }
     },
@@ -1580,7 +1600,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 268,
+        "line": 279,
         "column": 89
       }
     },
@@ -1600,7 +1620,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 277,
+        "line": 288,
         "column": 7
       }
     },
@@ -1620,7 +1640,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 295,
+        "line": 306,
         "column": 14
       }
     },
@@ -1640,33 +1660,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 308,
+        "line": 319,
         "column": 12
       }
     },
     {
-      "id": "1b575d98308e7fd-b4c6116e8bba1b4",
-      "title": "Create action policy API validation: rejects group_by with too many fields",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 316,
-        "column": 8
-      }
-    },
-    {
-      "id": "1b575d98308e7fd-66bc9e145a1ca1e",
-      "title": "Create action policy API validation: rejects group_by with empty field name",
+      "id": "1b575d98308e7fd-31c95f89acab529",
+      "title": "Create action policy API validation: rejects grouping fields over the maximum count",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1681,12 +1681,12 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
         "line": 327,
-        "column": 36
+        "column": 8
       }
     },
     {
-      "id": "1b575d98308e7fd-89315cde2e8fe53",
-      "title": "Create action policy API validation: rejects group_by field name over max length",
+      "id": "1b575d98308e7fd-2638087a2365a75",
+      "title": "Create action policy API validation: rejects a grouping field with an empty name",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1700,13 +1700,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 338,
-        "column": 13
+        "line": 340,
+        "column": 7
       }
     },
     {
-      "id": "1b575d98308e7fd-86b49cf3ea98faa",
-      "title": "Create action policy API validation: rejects unknown grouping_mode",
+      "id": "1b575d98308e7fd-b2166143e004fe4",
+      "title": "Create action policy API validation: rejects a grouping field name over the maximum length",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1720,8 +1720,28 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 349,
-        "column": 49
+        "line": 353,
+        "column": 9
+      }
+    },
+    {
+      "id": "1b575d98308e7fd-2ca371e9b7d1cc3",
+      "title": "Create action policy API validation: rejects an unknown grouping mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
+        "line": 364,
+        "column": 87
       }
     },
     {
@@ -1740,8 +1760,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 359,
-        "column": 21
+        "line": 377,
+        "column": 29
       }
     },
     {
@@ -1760,8 +1780,88 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 371,
-        "column": 49
+        "line": 389,
+        "column": 13
+      }
+    },
+    {
+      "id": "1b575d98308e7fd-31b83d647bad937",
+      "title": "Create action policy API validation: rejects an empty grouping fields array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
+        "line": 401,
+        "column": 64
+      }
+    },
+    {
+      "id": "1b575d98308e7fd-6f424cc1f2657f6",
+      "title": "Create action policy API validation: rejects an empty matcher object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
+        "line": 414,
+        "column": 64
+      }
+    },
+    {
+      "id": "1b575d98308e7fd-15840ca4124ed26",
+      "title": "Create action policy API validation: rejects an empty throttle object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
+        "line": 425,
+        "column": 74
+      }
+    },
+    {
+      "id": "1b575d98308e7fd-2d8a6d0e9747bf1",
+      "title": "Create action policy API validation: rejects a null throttle interval",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
+        "line": 429,
+        "column": 7
       }
     },
     {
@@ -1780,8 +1880,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 384,
-        "column": 21
+        "line": 439,
+        "column": 63
       }
     },
     {
@@ -1800,13 +1900,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 396,
-        "column": 22
+        "line": 454,
+        "column": 5
       }
     },
     {
-      "id": "1b575d98308e7fd-2fbbec4211e9d26",
-      "title": "Create action policy API validation: rejects strategy/grouping_mode combo mismatch",
+      "id": "1b575d98308e7fd-2646e85893edb9b",
+      "title": "Create action policy API validation: rejects an interval on the every_time strategy",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1820,8 +1920,48 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 407,
-        "column": 99
+        "line": 473,
+        "column": 52
+      }
+    },
+    {
+      "id": "1b575d98308e7fd-7a1431ed83b8ca7",
+      "title": "Create action policy API validation: rejects an interval on the on_status_change strategy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
+        "line": 473,
+        "column": 52
+      }
+    },
+    {
+      "id": "1b575d98308e7fd-699ae42db58ddcf",
+      "title": "Create action policy API validation: rejects a strategy the grouping mode does not allow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
+        "line": 488,
+        "column": 54
       }
     },
     {
@@ -1840,8 +1980,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 421,
-        "column": 5
+        "line": 506,
+        "column": 25
       }
     },
     {
@@ -1860,8 +2000,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 427,
-        "column": 55
+        "line": 509,
+        "column": 50
       }
     },
     {
@@ -1880,8 +2020,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/create_action_policy.spec.ts",
-        "line": 438,
-        "column": 64
+        "line": 523,
+        "column": 51
       }
     },
     {
@@ -2640,7 +2780,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/get_action_policy.spec.ts",
-        "line": 73,
+        "line": 76,
         "column": 14
       }
     },
@@ -2660,8 +2800,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/get_action_policy.spec.ts",
-        "line": 98,
-        "column": 23
+        "line": 97,
+        "column": 14
       }
     },
     {
@@ -2680,7 +2820,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/get_action_policy.spec.ts",
-        "line": 117,
+        "line": 116,
         "column": 51
       }
     },
@@ -2700,7 +2840,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/get_action_policy.spec.ts",
-        "line": 127,
+        "line": 126,
         "column": 16
       }
     },
@@ -2720,7 +2860,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/get_action_policy.spec.ts",
-        "line": 134,
+        "line": 133,
         "column": 86
       }
     },
@@ -2740,7 +2880,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/get_action_policy.spec.ts",
-        "line": 145,
+        "line": 144,
         "column": 43
       }
     },
@@ -2760,7 +2900,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/get_action_policy.spec.ts",
-        "line": 161,
+        "line": 160,
         "column": 23
       }
     },
@@ -2820,7 +2960,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 120,
+        "line": 115,
         "column": 7
       }
     },
@@ -2840,7 +2980,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 148,
+        "line": 143,
         "column": 12
       }
     },
@@ -2860,7 +3000,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 158,
+        "line": 153,
         "column": 21
       }
     },
@@ -2880,7 +3020,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 168,
+        "line": 163,
         "column": 77
       }
     },
@@ -2900,7 +3040,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 181,
+        "line": 176,
         "column": 24
       }
     },
@@ -2920,7 +3060,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 193,
+        "line": 188,
         "column": 5
       }
     },
@@ -2940,7 +3080,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 213,
+        "line": 208,
         "column": 23
       }
     },
@@ -2960,7 +3100,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 222,
+        "line": 217,
         "column": 65
       }
     },
@@ -2980,7 +3120,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 233,
+        "line": 228,
         "column": 49
       }
     },
@@ -3000,7 +3140,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 252,
+        "line": 247,
         "column": 25
       }
     },
@@ -3020,7 +3160,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 261,
+        "line": 256,
         "column": 18
       }
     },
@@ -3040,7 +3180,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 269,
+        "line": 264,
         "column": 65
       }
     },
@@ -3060,7 +3200,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 284,
+        "line": 279,
         "column": 14
       }
     },
@@ -3080,7 +3220,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 297,
+        "line": 292,
         "column": 58
       }
     },
@@ -3100,7 +3240,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 311,
+        "line": 306,
         "column": 11
       }
     },
@@ -3120,7 +3260,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 322,
+        "line": 317,
         "column": 17
       }
     },
@@ -3140,7 +3280,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 338,
+        "line": 333,
         "column": 5
       }
     },
@@ -3160,7 +3300,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 352,
+        "line": 347,
         "column": 12
       }
     },
@@ -3180,7 +3320,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 360,
+        "line": 355,
         "column": 18
       }
     },
@@ -3200,7 +3340,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 368,
+        "line": 363,
         "column": 64
       }
     },
@@ -3220,7 +3360,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 376,
+        "line": 371,
         "column": 6
       }
     },
@@ -3240,7 +3380,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 385,
+        "line": 380,
         "column": 81
       }
     },
@@ -3260,7 +3400,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 393,
+        "line": 388,
         "column": 22
       }
     },
@@ -3280,7 +3420,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 400,
+        "line": 395,
         "column": 69
       }
     },
@@ -3300,7 +3440,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 409,
+        "line": 404,
         "column": 5
       }
     },
@@ -3320,7 +3460,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 413,
+        "line": 408,
         "column": 49
       }
     },
@@ -3340,7 +3480,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/list_action_policies.spec.ts",
-        "line": 421,
+        "line": 416,
         "column": 53
       }
     },
@@ -3382,6 +3522,110 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/match_action_policies.spec.ts",
         "line": 30,
         "column": 42
+      }
+    },
+    {
+      "id": "c5bc284da9650c4-37b01f16b6cc9e6",
+      "title": "Patch action policy saved object clears a field by removing its key, never by storing null",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/patch.spec.ts",
+        "line": 39,
+        "column": 61
+      }
+    },
+    {
+      "id": "c5bc284da9650c4-8de9ad50b679e40",
+      "title": "Patch action policy saved object leaves every field the body omits unchanged on disk",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/patch.spec.ts",
+        "line": 67,
+        "column": 12
+      }
+    },
+    {
+      "id": "c5bc284da9650c4-5dc6c033cbd58a7",
+      "title": "Patch action policy saved object clears a nested leaf without disturbing its siblings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/patch.spec.ts",
+        "line": 93,
+        "column": 17
+      }
+    },
+    {
+      "id": "c5bc284da9650c4-c6dc81bdf13cee3",
+      "title": "Patch action policy saved object drops a throttle interval the merged strategy does not use",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/patch.spec.ts",
+        "line": 108,
+        "column": 60
+      }
+    },
+    {
+      "id": "c5bc284da9650c4-8acc1e05119261b",
+      "title": "Patch action policy saved object clears the description by removing its key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/patch.spec.ts",
+        "line": 122,
+        "column": 91
+      }
+    },
+    {
+      "id": "c5bc284da9650c4-95c3c4709642156",
+      "title": "Patch action policy saved object rejects an empty union patch and leaves the stored block alone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/patch.spec.ts",
+        "line": 132,
+        "column": 27
+      }
+    },
+    {
+      "id": "c5bc284da9650c4-91f988fc59e75ae",
+      "title": "Patch action policy saved object clears the matcher when its last leaf goes, leaving a catch-all policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/patch.spec.ts",
+        "line": 166,
+        "column": 20
+      }
+    },
+    {
+      "id": "c5bc284da9650c4-0c259fb7be637d7",
+      "title": "Patch action policy saved object never writes enabled or the snooze state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/patch.spec.ts",
+        "line": 191,
+        "column": 65
       }
     },
     {
@@ -3645,8 +3889,8 @@
       }
     },
     {
-      "id": "c90f0d85e53b2e9-4f14ff51d75c2e4",
-      "title": "Unsnooze action policy API unsnooze: unsnoozes a snoozed policy and returns snoozed_until=null",
+      "id": "c90f0d85e53b2e9-cf0e0ea53ed77ee",
+      "title": "Unsnooze action policy API unsnooze: unsnoozes a snoozed policy and omits snoozed_until",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -3685,8 +3929,8 @@
       }
     },
     {
-      "id": "c90f0d85e53b2e9-147c88a76b8a255",
-      "title": "Unsnooze action policy API idempotency: unsnoozing an already-unsnoozed policy returns snoozed_until=null",
+      "id": "c90f0d85e53b2e9-2537733607473ec",
+      "title": "Unsnooze action policy API idempotency: unsnoozing an already-unsnoozed policy leaves snoozed_until absent",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -3700,8 +3944,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/unsnooze_action_policy.spec.ts",
-        "line": 69,
-        "column": 24
+        "line": 67,
+        "column": 13
       }
     },
     {
@@ -3720,8 +3964,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/unsnooze_action_policy.spec.ts",
-        "line": 80,
-        "column": 19
+        "line": 77,
+        "column": 29
       }
     },
     {
@@ -3740,8 +3984,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/unsnooze_action_policy.spec.ts",
-        "line": 94,
-        "column": 18
+        "line": 90,
+        "column": 45
       }
     },
     {
@@ -3760,8 +4004,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/unsnooze_action_policy.spec.ts",
-        "line": 102,
-        "column": 84
+        "line": 100,
+        "column": 4
       }
     },
     {
@@ -3780,8 +4024,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/unsnooze_action_policy.spec.ts",
-        "line": 115,
-        "column": 18
+        "line": 111,
+        "column": 70
       }
     },
     {
@@ -3800,8 +4044,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/unsnooze_action_policy.spec.ts",
-        "line": 128,
-        "column": 8
+        "line": 125,
+        "column": 43
       }
     },
     {
@@ -3960,7 +4204,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
-        "line": 34,
+        "line": 35,
         "column": 31
       }
     },
@@ -3980,7 +4224,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
-        "line": 85,
+        "line": 92,
         "column": 25
       }
     },
@@ -4000,13 +4244,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
-        "line": 123,
+        "line": 133,
         "column": 26
       }
     },
     {
-      "id": "8f546e558bd4d8d-7bdb2c51aa68082",
-      "title": "Update action policy API partial: updates matcher/group_by/throttle and preserves name/description/destinations",
+      "id": "8f546e558bd4d8d-cbac61052e261ab",
+      "title": "Update action policy API partial: updates matcher/grouping/throttle and preserves name/description/destinations",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -4020,7 +4264,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
-        "line": 155,
+        "line": 168,
         "column": 34
       }
     },
@@ -4040,13 +4284,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
-        "line": 199,
-        "column": 23
+        "line": 213,
+        "column": 65
       }
     },
     {
-      "id": "8f546e558bd4d8d-8bfaadc1e0531a1",
-      "title": "Update action policy API partial: updates grouping_mode and throttle strategy together",
+      "id": "8f546e558bd4d8d-d552404b91e6640",
+      "title": "Update action policy API partial: updates grouping and throttle strategy together",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -4060,8 +4304,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
-        "line": 236,
-        "column": 9
+        "line": 256,
+        "column": 33
       }
     },
     {
@@ -4080,13 +4324,193 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
-        "line": 266,
+        "line": 286,
+        "column": 52
+      }
+    },
+    {
+      "id": "8f546e558bd4d8d-4e221db70b99bbf",
+      "title": "Update action policy API nullable: clears grouping/throttle when set to null",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
+        "line": 314,
+        "column": 15
+      }
+    },
+    {
+      "id": "8f546e558bd4d8d-937314b81d50223",
+      "title": "Update action policy API nullable: clears matcher/grouping/throttle when set to null",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
+        "line": 341,
+        "column": 51
+      }
+    },
+    {
+      "id": "8f546e558bd4d8d-6e47738f7a2bb88",
+      "title": "Update action policy API merge: patches one matcher leaf and preserves its sibling",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
+        "line": 384,
+        "column": 4
+      }
+    },
+    {
+      "id": "8f546e558bd4d8d-b8206b2c75d06b6",
+      "title": "Update action policy API merge: an empty matcher names no leaf, so it changes nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
+        "line": 414,
+        "column": 16
+      }
+    },
+    {
+      "id": "8f546e558bd4d8d-83745318a35f18c",
+      "title": "Update action policy API merge: an empty body names no field, so nothing changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
+        "line": 430,
+        "column": 12
+      }
+    },
+    {
+      "id": "8f546e558bd4d8d-1f9a9550c744a60",
+      "title": "Update action policy API merge: clears one matcher leaf with null and preserves its sibling",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
+        "line": 460,
+        "column": 29
+      }
+    },
+    {
+      "id": "8f546e558bd4d8d-b0027c8751c8d4e",
+      "title": "Update action policy API merge: clears the whole matcher with a top-level null even when both leaves are set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
+        "line": 489,
+        "column": 8
+      }
+    },
+    {
+      "id": "8f546e558bd4d8d-02ee22b46b02a58",
+      "title": "Update action policy API merge: replaces the throttle whole and rejects a patch that names one of its keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
+        "line": 502,
+        "column": 72
+      }
+    },
+    {
+      "id": "8f546e558bd4d8d-dcc544182339570",
+      "title": "Update action policy API merge: replaces the grouping and destinations wholesale rather than merging",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
+        "line": 533,
         "column": 9
       }
     },
     {
-      "id": "8f546e558bd4d8d-9ab1b8865546a78",
-      "title": "Update action policy API nullable: clears grouping_mode/group_by/throttle when set to null",
+      "id": "8f546e558bd4d8d-d7ec94eed9cf0c3",
+      "title": "Update action policy API merge: rejects an unknown key nested inside matcher",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -4100,13 +4524,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
-        "line": 298,
-        "column": 25
+        "line": 573,
+        "column": 35
       }
     },
     {
-      "id": "8f546e558bd4d8d-e116ecd6498c289",
-      "title": "Update action policy API nullable: clears matcher/group_by/throttle when set to null",
+      "id": "8f546e558bd4d8d-94efc295afec64c",
+      "title": "Update action policy API merge: rejects a patch whose merged document is invalid and stores nothing",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -4120,8 +4544,28 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
-        "line": 328,
-        "column": 25
+        "line": 591,
+        "column": 20
+      }
+    },
+    {
+      "id": "8f546e558bd4d8d-71ba074f99e2fa9",
+      "title": "Update action policy API round trip: the patch response matches a subsequent GET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
+        "line": 612,
+        "column": 68
       }
     },
     {
@@ -4140,8 +4584,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
-        "line": 364,
-        "column": 21
+        "line": 642,
+        "column": 23
       }
     },
     {
@@ -4160,8 +4604,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
-        "line": 380,
-        "column": 51
+        "line": 659,
+        "column": 25
       }
     },
     {
@@ -4180,8 +4624,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
-        "line": 396,
-        "column": 24
+        "line": 674,
+        "column": 4
       }
     },
     {
@@ -4200,8 +4644,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
-        "line": 411,
-        "column": 29
+        "line": 686,
+        "column": 9
       }
     },
     {
@@ -4220,8 +4664,28 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
-        "line": 425,
-        "column": 70
+        "line": 700,
+        "column": 60
+      }
+    },
+    {
+      "id": "8f546e558bd4d8d-f4681a45680f3a5",
+      "title": "Update action policy API validation: rejects the empty collections that would otherwise reach storage",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
+        "line": 711,
+        "column": 83
       }
     },
     {
@@ -4240,8 +4704,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
-        "line": 439,
-        "column": 25
+        "line": 747,
+        "column": 66
       }
     },
     {
@@ -4260,8 +4724,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
-        "line": 447,
-        "column": 9
+        "line": 759,
+        "column": 13
       }
     },
     {
@@ -4280,8 +4744,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
-        "line": 465,
-        "column": 51
+        "line": 777,
+        "column": 23
       }
     },
     {
@@ -4300,8 +4764,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
-        "line": 479,
-        "column": 8
+        "line": 786,
+        "column": 9
       }
     },
     {
@@ -4320,8 +4784,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
-        "line": 492,
-        "column": 56
+        "line": 803,
+        "column": 95
       }
     },
     {
@@ -4340,8 +4804,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/update_action_policy.spec.ts",
-        "line": 510,
-        "column": 5
+        "line": 821,
+        "column": 24
       }
     },
     {
@@ -4365,8 +4829,8 @@
       }
     },
     {
-      "id": "6e13a7f39ba4f0e-448a2f2f884a98d",
-      "title": "Upsert action policy API upsert: should create a disabled policy when the body sets enabled=false",
+      "id": "6e13a7f39ba4f0e-f291ed08cc8e1aa",
+      "title": "Upsert action policy API upsert: rejects a body carrying enabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -4380,13 +4844,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 55,
+        "line": 56,
         "column": 14
       }
     },
     {
-      "id": "6e13a7f39ba4f0e-65da087e4c7d369",
-      "title": "Upsert action policy API upsert: should enable a disabled policy when the replace body sets enabled=true",
+      "id": "6e13a7f39ba4f0e-db8fdcdfba4d07a",
+      "title": "Upsert action policy API upsert: creates an enabled policy",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -4400,13 +4864,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 73,
-        "column": 51
+        "line": 72,
+        "column": 16
       }
     },
     {
-      "id": "6e13a7f39ba4f0e-6fa60f04988144e",
-      "title": "Upsert action policy API upsert: should disable an enabled policy when the replace body sets enabled=false",
+      "id": "6e13a7f39ba4f0e-11b67cf6403251d",
+      "title": "Upsert action policy API upsert: leaves a disabled policy disabled on replace",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -4420,8 +4884,28 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 95,
-        "column": 24
+        "line": 80,
+        "column": 68
+      }
+    },
+    {
+      "id": "6e13a7f39ba4f0e-acd9a7199e57790",
+      "title": "Upsert action policy API upsert: rejects empty optional collections",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
+        "line": 96,
+        "column": 43
       }
     },
     {
@@ -4440,8 +4924,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 114,
-        "column": 45
+        "line": 126,
+        "column": 7
       }
     },
     {
@@ -4460,8 +4944,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 129,
-        "column": 4
+        "line": 135,
+        "column": 88
       }
     },
     {
@@ -4480,8 +4964,28 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 165,
-        "column": 44
+        "line": 172,
+        "column": 24
+      }
+    },
+    {
+      "id": "6e13a7f39ba4f0e-6102032a34240fe",
+      "title": "Upsert action policy API upsert: replace does not merge nested matcher leaves",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
+        "line": 200,
+        "column": 68
       }
     },
     {
@@ -4500,8 +5004,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 193,
-        "column": 33
+        "line": 230,
+        "column": 23
       }
     },
     {
@@ -4520,8 +5024,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 210,
-        "column": 11
+        "line": 244,
+        "column": 75
       }
     },
     {
@@ -4540,13 +5044,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 224,
-        "column": 12
+        "line": 259,
+        "column": 5
       }
     },
     {
-      "id": "6e13a7f39ba4f0e-c992e82524d541f",
-      "title": "Upsert action policy API validation: rejects missing description",
+      "id": "6e13a7f39ba4f0e-947cffca2c44307",
+      "title": "Upsert action policy API accepts a body with no description",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -4560,8 +5064,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 239,
-        "column": 75
+        "line": 276,
+        "column": 12
       }
     },
     {
@@ -4580,8 +5084,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 252,
-        "column": 7
+        "line": 289,
+        "column": 12
       }
     },
     {
@@ -4600,7 +5104,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 263,
+        "line": 298,
         "column": 15
       }
     },
@@ -4620,7 +5124,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 273,
+        "line": 308,
         "column": 22
       }
     },
@@ -4640,7 +5144,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 282,
+        "line": 317,
         "column": 11
       }
     },
@@ -4660,7 +5164,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 286,
+        "line": 321,
         "column": 7
       }
     },
@@ -4680,13 +5184,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 302,
+        "line": 337,
         "column": 11
       }
     },
     {
-      "id": "6e13a7f39ba4f0e-1c94bac105d2967",
-      "title": "Upsert action policy API validation: rejects strategy/grouping_mode combo mismatch",
+      "id": "6e13a7f39ba4f0e-7f033903dad185b",
+      "title": "Upsert action policy API validation: rejects a strategy the grouping mode does not allow",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -4700,7 +5204,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 312,
+        "line": 347,
         "column": 73
       }
     },
@@ -4720,8 +5224,28 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 323,
-        "column": 12
+        "line": 360,
+        "column": 5
+      }
+    },
+    {
+      "id": "6e13a7f39ba4f0e-8daa58f93c0231e",
+      "title": "Upsert action policy API validation: rejects an interval on the every_time strategy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
+        "line": 382,
+        "column": 18
       }
     },
     {
@@ -4740,8 +5264,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 338,
-        "column": 14
+        "line": 396,
+        "column": 21
       }
     },
     {
@@ -4760,8 +5284,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 347,
-        "column": 24
+        "line": 400,
+        "column": 7
       }
     },
     {
@@ -4780,8 +5304,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
-        "line": 358,
-        "column": 16
+        "line": 410,
+        "column": 49
       }
     },
     {

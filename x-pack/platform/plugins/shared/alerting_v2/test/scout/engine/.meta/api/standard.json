@@ -1,5 +1,5 @@
 {
-  "sha1": "00c93417018da39ed89e3e5d4ed6901cba072b30",
+  "sha1": "ea224b22293a3f875769a3ce1ce54ffa70601187",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -505,6 +505,34 @@
       }
     },
     {
+      "id": "381b495daf02266-f031c12351371f0",
+      "title": "Rule change history API list + detail: returns lean rows with server-side diffs and full snapshots on detail",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/rule_history_http.spec.ts",
+        "line": 29,
+        "column": 71
+      }
+    },
+    {
+      "id": "381b495daf02266-5c25cb3a2bbc6d8",
+      "title": "Rule change history API detail: resolves an older event from the change id alone, without a rule id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/rule_history_http.spec.ts",
+        "line": 96,
+        "column": 47
+      }
+    },
+    {
       "id": "d2d098357d3068e-7f791e41745c742",
       "title": "Rule change history create: logs a rule_create entry with sequence 1 and a RuleResponse-shaped snapshot",
       "expectedStatus": "passed",
@@ -642,26 +670,6 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/rule_history.spec.ts",
         "line": 400,
         "column": 80
-      }
-    },
-    {
-      "id": "d2d098357d3068e-7466317b0fa1c8e",
-      "title": "Rule change history HTTP list + detail: returns lean rows with server-side diffs and full snapshots on detail",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/rule_history.spec.ts",
-        "line": 460,
-        "column": 18
       }
     },
     {
