@@ -54,7 +54,7 @@ export class ObservabilityAlertingPlugin
       visibleIn: [],
       updater$: from(startServices).pipe(
         switchMap(([coreStart]) =>
-          coreStart.settings.globalClient.get$<boolean>(ALERTING_V2_ENABLED_SETTING_ID, false).pipe(
+          coreStart.settings.globalClient.get$<boolean>(ALERTING_V2_ENABLED_SETTING_ID).pipe(
             map(
               (settingEnabled): AppUpdater =>
                 () => {

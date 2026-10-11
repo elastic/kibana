@@ -44,14 +44,14 @@ groups:
 
           For the steps to turn the system on, confirm that it is available, and stop rules from running, refer to [Set up the experimental alerting system](docs-content://explore-analyze/alerting/experimental-alerting-system/get-started/setup.md).
         datatype: bool
-        default: false
+        default: true
         applies_to:
-          stack: preview 9.5+
+          stack: experimental =9.5, ga 9.6+
           ech: ga
           ece: ga
           eck: ga
           self: ga
-          serverless: preview
+          serverless: ga
         note: |
           :applies_to: security: ga
           This setting is unavailable on the [Elastic AI SOC Engine (EASE)](docs-content://solutions/security/ai/ease/ease-intro.md) Security project type.

@@ -12,7 +12,6 @@ import type { AppHeaderMenu } from '@kbn/app-header';
 import { useContentListPhase } from '@kbn/content-list-provider';
 import { ALERTING_V2_ACTION_POLICIES_APP_ID } from '@kbn/alerting-v2-constants';
 import { i18n } from '@kbn/i18n';
-import { experimentalBadge } from '../../components/experimental_badge';
 import {
   UniversalRulesOnlyCallout,
   universalRulesOnlyBadge,
@@ -146,7 +145,7 @@ export const ActionPoliciesListHeader = ({
       <AppHeader
         sticky={false}
         title={ACTION_POLICIES_LIST_PAGE_TITLE}
-        badges={[universalRulesOnlyBadge, experimentalBadge]}
+        badges={[universalRulesOnlyBadge]}
         spacing="bleed"
         menu={headerMenu}
       />

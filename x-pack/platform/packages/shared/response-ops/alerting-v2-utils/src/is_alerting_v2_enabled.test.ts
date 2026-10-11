@@ -20,6 +20,7 @@ describe('isAlertingV2Enabled', () => {
 
   beforeEach(() => {
     core = coreMock.createStart();
+    core.settings.globalClient.isDeclared = () => true;
     core.settings.globalClient.get = <T>(_key: string) => true as T;
   });
 
@@ -33,8 +34,23 @@ describe('isAlertingV2Enabled', () => {
     expect(isAlertingV2Enabled(core)).toBe(false);
   });
 
+  it('resolves to the registered default when no user value is set', () => {
+    // Mirrors the settings client: a fallback passed to `get` wins over the registered default.
+    core.settings.globalClient.get = <T>(_key: string, defaultOverride?: T) =>
+      (defaultOverride !== undefined ? defaultOverride : true) as T;
+
+    expect(isAlertingV2Enabled(core)).toBe(true);
+  });
+
   it('returns false when alerting v2 is not set', () => {
     core.settings.globalClient.get = <T>(_key: string) => undefined as T;
+
+    expect(isAlertingV2Enabled(core)).toBe(false);
+  });
+
+  it('returns false when the setting is not declared', () => {
+    core.settings.globalClient.isDeclared = () => false;
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
 
     expect(isAlertingV2Enabled(core)).toBe(false);
   });
@@ -51,6 +67,7 @@ describe('shouldShowAlertingV2CreateRuleFlyout', () => {
 
   beforeEach(() => {
     core = coreMock.createStart();
+    core.settings.globalClient.isDeclared = () => true;
     core.settings.globalClient.get = <T>(_key: string) => true as T;
     core.application.capabilities = {
       ...core.application.capabilities,
@@ -96,6 +113,7 @@ describe('hasAlertingV2Capability', () => {
 
   beforeEach(() => {
     core = coreMock.createStart();
+    core.settings.globalClient.isDeclared = () => true;
   });
 
   it('returns true for read when the feature has the read capability', () => {
@@ -162,6 +180,7 @@ describe('shouldShowV1ObservabilityAlertsTable', () => {
 
   beforeEach(() => {
     core = coreMock.createStart();
+    core.settings.globalClient.isDeclared = () => true;
     core.settings.globalClient.get = <T>(_key: string) => false as T;
     core.settings.client.get = <T>(_key: string) => false as T;
   });
@@ -196,6 +215,7 @@ describe('canAccessAlertingV2Rules', () => {
 
   beforeEach(() => {
     core = coreMock.createStart();
+    core.settings.globalClient.isDeclared = () => true;
     core.settings.globalClient.get = <T>(_key: string) => true as T;
     core.application.capabilities = {
       ...core.application.capabilities,
