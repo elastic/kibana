@@ -34,6 +34,8 @@ export interface ConnectorLike {
   config?: unknown;
   /** Flat inference-endpoint definitions (EIS/OpenRouter) carry this at the top level, not under `config`. */
   providerConfig?: unknown;
+  /** Flat inference-endpoint definitions also carry the endpoint's inference id (`.<model>-chat_completion`). */
+  inferenceId?: string;
 }
 
 /**
@@ -52,6 +54,12 @@ export interface ConnectorLike {
  * shape the id falls back to the connector name (`eis-…`) and never matches the
  * spans' `gen_ai.request.model` (`anthropic-…`).
  */
+const EIS_INFERENCE_ID = /^\.(.+)-chat_completion$/;
+
+/** `.anthropic-claude-5-sonnet-chat_completion` → `anthropic-claude-5-sonnet`. */
+const modelFromInferenceId = (inferenceId: unknown): string | undefined =>
+  typeof inferenceId === 'string' ? EIS_INFERENCE_ID.exec(inferenceId)?.[1] : undefined;
+
 export const expectedModelId = (connector: ConnectorLike): string => {
   const config = (connector.config ?? {}) as {
     providerConfig?: { model_id?: string };
@@ -63,6 +71,10 @@ export const expectedModelId = (connector: ConnectorLike): string => {
     (typeof endpointModelId === 'string' ? endpointModelId : undefined) ??
     config.providerConfig?.model_id ??
     config.defaultModel ??
+    // Endpoint definitions without `providerConfig.model_id` (the controller-generated EIS map)
+    // still name the model in their inference id, which is what the workflow actually calls.
+    modelFromInferenceId(connector.inferenceId) ??
+    modelFromInferenceId(connector.id) ??
     connector.name ??
     ''
   );
