@@ -519,32 +519,20 @@ describe('runNode', () => {
     });
   });
 
-  describe('releaseReadPins lifecycle hook (pin cleanup on node exit)', () => {
-    it('calls releaseReadPins on every successful run', async () => {
+  describe('ensureContextReady pre-warm', () => {
+    it('prepares the context once on every successful run', async () => {
       await runNode(mockParams);
 
-      expect(mockStepExecutionRuntime.contextManager.releaseReadPins).toHaveBeenCalledTimes(1);
+      expect(mockStepExecutionRuntime.contextManager.ensureContextReady).toHaveBeenCalledTimes(1);
     });
 
-    it('calls releaseReadPins even when run() throws', async () => {
-      mockNodeImplementation.run.mockRejectedValue(new Error('node exploded'));
-
-      await runNode(mockParams);
-
-      // Error is caught → captureError on the cursor, but the finally block still fires.
-      expect(mockParams.workflowExecutionCursor.captureError).toHaveBeenCalled();
-      expect(mockStepExecutionRuntime.contextManager.releaseReadPins).toHaveBeenCalledTimes(1);
-    });
-
-    it('calls releaseReadPins on the status !== RUNNING short-circuit even though ensureContextReady never ran', async () => {
-      // Verifies idempotency: the pin release fires in finally regardless of whether
-      // ensureContextReady set any pins (eviction-disabled fast path, or early return).
+    it('does not prepare the context when the execution is no longer RUNNING', async () => {
       workflowExecution.status = ExecutionStatus.CANCELLED;
 
       await runNode(mockParams);
 
       expect(mockNodeImplementation.run).not.toHaveBeenCalled();
-      expect(mockStepExecutionRuntime.contextManager.releaseReadPins).toHaveBeenCalledTimes(1);
+      expect(mockStepExecutionRuntime.contextManager.ensureContextReady).not.toHaveBeenCalled();
     });
   });
 });

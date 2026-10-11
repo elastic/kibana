@@ -115,14 +115,8 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
 
   // Flush the final state (including terminal status) to Elasticsearch
   const finalStateFlushSpan = apm.startSpan('final state flush', 'workflow', 'persistence');
-  await params.stepIoService.flush();
+  await params.workflowExecutionState.flushWorkflowAndSteps();
   finalStateFlushSpan?.end();
-
-  // Workflow-end cleanup for transiently-rehydrated outputs. The per-step
-  // release lives in `prepareForRead` (deferred-release pattern), so the
-  // last step's transient set is still resident when the loop exits — this
-  // call drops it. Idempotent and a no-op when nothing is transient.
-  params.stepIoService.releaseTransientlyRehydratedOutputs();
 
   const finalLogFlushSpan = apm.startSpan('final flush logs', 'workflow', 'logging');
   await params.eventQueue.flush({

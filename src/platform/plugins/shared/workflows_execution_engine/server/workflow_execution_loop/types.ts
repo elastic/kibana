@@ -11,7 +11,7 @@ import type { CoreStart, ElasticsearchClient, KibanaRequest } from '@kbn/core/se
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { NodesFactory } from '../step/nodes_factory';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
-import type { StepIoService } from '../workflow_context_manager/step_io_service';
+import type { StepIoLifecycle } from '../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionCursorApi } from '../workflow_context_manager/workflow_execution_cursor';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
@@ -26,7 +26,7 @@ export interface WorkflowExecutionLoopParams {
   workflowExecutionCursor: WorkflowExecutionCursorApi;
   stepExecutionRuntimeFactory: StepExecutionRuntimeFactory;
   workflowExecutionState: WorkflowExecutionState;
-  stepIoService: StepIoService;
+  stepIoService: StepIoLifecycle;
   workflowLogger: IWorkflowEventLogger;
   eventQueue: WorkflowEventQueue;
   workflowExecutionRepository: WorkflowExecutionRepository;
