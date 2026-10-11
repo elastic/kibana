@@ -91,8 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const query = await queryBar.getQueryString();
         expect(query).to.eql('');
-        const filterCount = await filterBar.getFilterCount();
-        expect(filterCount).to.eql(0);
+        await filterBar.expectFilterCount(0);
       });
     });
 

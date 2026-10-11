@@ -15,7 +15,18 @@ import { CasesNavigationProvider } from './navigation';
 import { CasesSingleViewServiceProvider } from './single_case_view';
 import { CasesTestResourcesServiceProvider } from './test_resources';
 
-export function CasesServiceProvider(context: FtrProviderContext) {
+export interface CasesService {
+  api: ReturnType<typeof CasesAPIServiceProvider>;
+  common: ReturnType<typeof CasesCommonServiceProvider>;
+  casesTable: ReturnType<typeof CasesTableServiceProvider>;
+  casesFilesTable: ReturnType<typeof CasesFilesTableServiceProvider>;
+  create: ReturnType<typeof CasesCreateViewServiceProvider>;
+  navigation: ReturnType<typeof CasesNavigationProvider>;
+  singleCase: ReturnType<typeof CasesSingleViewServiceProvider>;
+  testResources: ReturnType<typeof CasesTestResourcesServiceProvider>;
+}
+
+export function CasesServiceProvider(context: FtrProviderContext): CasesService {
   const casesCommon = CasesCommonServiceProvider(context);
 
   return {

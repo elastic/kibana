@@ -531,19 +531,29 @@ export class DashboardPageControls extends FtrService {
       expect(availableOptions.invalidSelections.sort()).to.eql(
         expectation.invalidSelections.sort()
       );
+      if (await this.testSubjects.exists('optionsList-cardinality-label')) {
+        expect(await this.optionsListGetCardinalityValue()).to.be(
+          Object.keys(expectation.suggestions).length.toLocaleString()
+        );
+      }
     });
-    if (await this.testSubjects.exists('optionsList-cardinality-label')) {
-      expect(await this.optionsListGetCardinalityValue()).to.be(
-        Object.keys(expectation.suggestions).length.toLocaleString()
-      );
-    }
     if (!skipOpen) await this.optionsListEnsurePopoverIsClosed(controlId);
   }
 
-  public async optionsListGetCardinalityValue() {
+  private async getVisibleOptionsListElement(subject: string): Promise<WebElementWrapper> {
+    return await this.retry.tryForTime(this.testSubjects.FIND_TIME, async () => {
+      const elements = await this.testSubjects.findAll(subject, 0);
+      for (const element of elements) {
+        if (await element.isDisplayed()) return element;
+      }
+      throw new Error(`Waiting for displayed options-list element: ${subject}`);
+    });
+  }
+
+  public async optionsListGetCardinalityValue(): Promise<string> {
     this.log.debug(`getting the value of the cardinality badge`);
     const cardinalityLabel = await (
-      await this.testSubjects.find('optionsList-cardinality-label')
+      await this.getVisibleOptionsListElement('optionsList-cardinality-label')
     ).getVisibleText();
     return cardinalityLabel.split(' ')[0];
   }
@@ -614,7 +624,9 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`exclude selections`);
     await this.optionsListPopoverAssertOpen();
 
-    const buttonGroup = await this.testSubjects.find('optionsList__includeExcludeButtonGroup');
+    const buttonGroup = await this.getVisibleOptionsListElement(
+      'optionsList__includeExcludeButtonGroup'
+    );
     await (
       await this.find.descendantDisplayedByCssSelector(
         include ? '[data-text="Include"]' : '[data-text="Exclude"]',

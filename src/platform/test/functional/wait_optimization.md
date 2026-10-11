@@ -81,7 +81,7 @@ Recordings are written under `target/ftr-wait-recordings/<config-path>/<timestam
 | Popover transitions triggered by another action | Next automatically opens the time-slider popover, but an immediate read toggles it closed again | Await closing before Next, then its automatic opening. Check the toggle's expanded state before explicitly opening. See `gotoNextTimeSlice`, `closeTimeSliderPopover`, and `getTimeSliceFromTimeSlider` in [dashboard controls](page_objects/dashboard_page_controls.ts). |
 | Sample-data operation status | Install/remove sleeps twice for 1010 ms and repeats the mutation inside a retry | Click the enabled action once; retry fresh `data-status` reads for installed/not-installed, then await the opposite enabled action. Missing Remove is an immediate optional lookup when status is not installed. See [Home](page_objects/home_page.ts). |
 | Scoped empty-result assertion | A tag-cloud check passes without an assertion when there are no chart elements | Identify the intended panel by title and require its displayed empty-result UI. See `emptyTagCloudFound` in [dashboard expectations](services/dashboard/expectations.ts) and [filtering](apps/dashboard/group2/dashboard_filtering.ts). |
-| Popover text commits after loading | A cardinality badge exists but still has blank text after control loading completes | Open once and retry fresh reads against the expected cardinality. See [multiple-data-view controls](apps/dashboard_elements/controls/common/multiple_data_views.ts). |
+| Popover text commits after loading | A cardinality badge exists but still has blank text after control loading completes | Open once, select the displayed badge rather than one in a closing popover, and retry fresh reads against the expected cardinality. Resolve displayed Include/Exclude groups too. See `ensureAvailableOptionsEqual` and `getVisibleOptionsListElement` in [dashboard controls](page_objects/dashboard_page_controls.ts), and [multiple-data-view controls](apps/dashboard_elements/controls/common/multiple_data_views.ts). |
 
 ## Example: inspector filtering
 
@@ -144,3 +144,33 @@ For the 8 remaining configs with successful baselines, recorded waits/lookups fe
 The FAST_3G batch is not a clean pass. The initial group4 run and group6 hit beforeEach deadlines during full-page resets; group4 subsequently passed all 11 bodies with setup and cleanup unthrottled, and group7 exceeded its bulk-delete test deadline. Group8 exposed pie-result and annotation readiness failures; replacement charts 1 failed waiting for an embedded visualization and replacement charts 2 read stale legend results. These remain open validation work. No config or Mocha deadline was increased.
 
 Raw recordings and per-pass reports remain local artifacts under `target/ftr-wait-recordings/`; this catalog retains the transferable patterns and source references.
+
+## Remaining functional apps
+
+The remaining 16 leaf configs completed with 319 active tests and 24 existing pending tests. Getting Started has seven pending tests and no active tests. The parent CCS config also passed its 31 active tests with seven existing pending; its coverage overlaps the leaf Discover suite in a different cluster mode, so its timings are reported separately. No test was removed or skipped by this optimization.
+
+Across the leaf configs, recorded waits/lookups fell from **1,866.3 to 679.9 seconds (63.6%)**, and FTR runtime fell from **2,569.3 to 1,363.0 seconds (47.0%)**. Fixed sleeps totaled 13.3 seconds across 53 existing 250 ms options-list search debounces; that wait needs a committed-search signal before it can be removed safely. These are individual local runs with incremental baselines, not a controlled benchmark or visual-idle measurement. Server startup is excluded.
+
+| Config | Active tests | Recorded waits (s), before → after | Runtime (s), before → after |
+| --- | ---: | ---: | ---: |
+| `bundles` | 4 | 0.0 → 0.0 | 0.8 → 0.7 |
+| `dashboard/esql_controls` | 3 | 67.6 → 7.9 | 107.3 → 41.3 |
+| `dashboard/group1` | 23 | 199.6 → 68.7 | 271.7 → 141.5 |
+| `dashboard/group2` | 53 | 224.2 → 133.0 | 319.5 → 217.6 |
+| `dashboard/group3` | 11 | 146.0 → 66.0 | 194.0 → 119.4 |
+| `dashboard/group4` | 39 | 175.1 → 55.7 | 233.7 → 113.2 |
+| `dashboard/group5` | 8 | 28.6 → 4.8 | 57.2 → 31.6 |
+| `dashboard/group6` | 18 | 115.4 → 45.7 | 170.3 → 105.5 |
+| `dashboard_elements/controls/common` | 65 | 361.2 → 121.2 | 458.8 → 222.0 |
+| `dashboard_elements/controls/options_list` | 52 | 374.9 → 77.5 | 435.0 → 134.2 |
+| `dashboard_elements/image_embeddable` | 2 | 24.9 → 6.6 | 32.5 → 14.1 |
+| `dashboard_elements/input_control_vis` | 15 | 41.9 → 27.9 | 85.4 → 65.4 |
+| `dashboard_elements/links` | 8 | 33.5 → 9.4 | 65.3 → 40.0 |
+| `dashboard_elements/markdown` | 1 | 20.3 → 1.5 | 27.2 → 8.3 |
+| `discover/ccs_compatibility` | 17 | 53.0 → 54.0 | 110.5 → 108.1 |
+| `getting_started` | 0 (7 existing pending) | — | — |
+| `config.ccs.ts` | 31 | 234.2 → 211.2 | 392.1 → 358.7 |
+
+Recordings were accepted only when complete active-test counts matched, every wait completed, and every recorded runnable ID resolved. Failed and interrupted recordings were retained as diagnostics and excluded from comparisons. The Visualize Monaco clearing change also passed all 12 TSVB Markdown tests.
+
+The legacy timepicker passed its three saved-query tests with the new picker flag disabled. Representative delayed-network checks throttle bodies and per-test hooks while leaving suite setup and teardown unthrottled. See [PR #296962](https://github.com/elastic/kibana/pull/296962) for current FAST_3G and CI results. This scope does not establish cold full-config slow-network safety.
