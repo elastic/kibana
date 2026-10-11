@@ -7,8 +7,8 @@
 
 import { evaluate as base, selectEvaluators, tags } from '@kbn/evals';
 import type { EsClient } from '@kbn/scout';
-import type { ConnectorPinClient } from './model_attribution';
-import { pinWorkflowConnector } from './model_attribution';
+import type { ConnectorPinClient, InferenceSettingsClient } from './model_attribution';
+import { pinInferenceFeatures, pinWorkflowConnector } from './model_attribution';
 
 /**
  * Extends the base `@kbn/evals` fixture with an auto, worker-scoped pin of the
@@ -31,7 +31,7 @@ import { pinWorkflowConnector } from './model_attribution';
  */
 export const evaluate = base.extend<
   {},
-  { pinnedWorkflowConnector: string; traceEsClient: EsClient }
+  { pinnedWorkflowConnector: string; pinnedInferenceFeatures: string[]; traceEsClient: EsClient }
 >({
   // Agent Builder child spans are exported to local ES via ElasticsearchOtlpExporter,
   // not to the golden cluster TRACING_ES_URL points at.
@@ -41,6 +41,20 @@ export const evaluate = base.extend<
       await use(esClient);
     },
     { scope: 'worker' },
+  ],
+  // The tuning workflow's agent steps resolve their model through Model Management features that
+  // ignore the space default (alertzero_* tiers set `ignoreGlobalDefault`), so the connector pin
+  // below does not reach them.
+  pinnedInferenceFeatures: [
+    async ({ kbnClient, connector, log }, use) => {
+      const pinned = await pinInferenceFeatures({
+        kbnClient: kbnClient as unknown as InferenceSettingsClient,
+        connector,
+        log,
+      });
+      await use(pinned);
+    },
+    { scope: 'worker', auto: true },
   ],
   pinnedWorkflowConnector: [
     async ({ kbnClient, connector, log }, use) => {

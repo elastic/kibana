@@ -215,3 +215,29 @@ export const WORKER_HARVEST_STEP_ID = 'harvest_fp_alerts_by_rule';
 
 /** Advanced setting that decides which connector the workflows' agents resolve. */
 export const GEN_AI_DEFAULT_CONNECTOR_SETTING = 'genAiSettings:defaultAIConnector';
+
+/** Model Management API the per-feature inference picks are written through (internal, versioned). */
+export const INFERENCE_SETTINGS_ROUTE = '/internal/search_inference_endpoints/settings';
+
+export const INFERENCE_SETTINGS_HEADERS = {
+  'elastic-api-version': '1',
+  'x-elastic-internal-origin': 'Kibana',
+} as const;
+
+/**
+ * Inference features the rule-tuning workflow tree resolves a model through besides the
+ * space-default connector. Inlined (like the rest of this file) from:
+ *   - ALERTZERO_(AGENTIC|FAST|REASONING)_INFERENCE_FEATURE_ID (@kbn/alertzero-common). Every
+ *     alertzero tier registers `ignoreGlobalDefault: true`, so `genAiSettings:defaultAIConnector`
+ *     never reaches them; `diagnose_rule` resolves `connector-id-by-feature: alertzero_agentic`.
+ *   - AGENT_BUILDER_(FAST_)INFERENCE_FEATURE_ID (@kbn/agent-builder-common). The agent run's own
+ *     low-effort calls (conversation title generation) go through `agent_builder_fast`, whose
+ *     first recommended endpoint is gemini-flash-lite.
+ */
+export const PINNED_INFERENCE_FEATURE_IDS = [
+  'alertzero_agentic',
+  'alertzero_fast',
+  'alertzero_reasoning',
+  'agent_builder',
+  'agent_builder_fast',
+] as const;

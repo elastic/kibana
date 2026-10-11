@@ -7,7 +7,12 @@
 
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { GEN_AI_DEFAULT_CONNECTOR_SETTING } from './constants';
+import {
+  GEN_AI_DEFAULT_CONNECTOR_SETTING,
+  INFERENCE_SETTINGS_HEADERS,
+  INFERENCE_SETTINGS_ROUTE,
+  PINNED_INFERENCE_FEATURE_IDS,
+} from './constants';
 import { extractConversationId, toolSpanJoinClauses } from './evaluators/tool_routing';
 import type { RuleTuningVerdict } from './workflow_task';
 
@@ -144,6 +149,106 @@ export const pinWorkflowConnector = async ({
     )}) — the workflow's ai.agent step now runs the model this run is stamped with`
   );
   return pinned;
+};
+
+/** The slice of `kbnClient` the inference-settings pin needs (the real client is `KbnClient`). */
+export interface InferenceSettingsClient {
+  request: <T = unknown>(options: {
+    path: string;
+    method: 'GET' | 'PUT';
+    headers?: Record<string, string>;
+    body?: unknown;
+  }) => Promise<{ data: T }>;
+}
+
+interface InferenceFeatureSetting {
+  feature_id: string;
+  endpoints: Array<{ id: string }>;
+}
+
+interface InferenceSettingsBody {
+  data?: { features?: InferenceFeatureSetting[] };
+}
+
+const readInferenceFeatures = async (
+  kbnClient: InferenceSettingsClient
+): Promise<InferenceFeatureSetting[]> => {
+  const { data } = await kbnClient.request<InferenceSettingsBody>({
+    path: INFERENCE_SETTINGS_ROUTE,
+    method: 'GET',
+    headers: { ...INFERENCE_SETTINGS_HEADERS },
+  });
+  return data?.data?.features ?? [];
+};
+
+/**
+ * Point every inference feature the workflow tree resolves a model through at the eval connector.
+ *
+ * `pinWorkflowConnector` only moves `genAiSettings:defaultAIConnector`, and every alertzero tier
+ * registers `ignoreGlobalDefault: true`: `diagnose_rule` (`connector-id-by-feature:
+ * alertzero_agentic`) kept calling the tier's recommended claude-5-sonnet whatever the candidate
+ * was, and the agent's low-effort calls kept calling flash-lite. A saved Model Management entry
+ * outranks `recommendedEndpoints`, so write one per feature.
+ *
+ * The PUT replaces the whole document, so existing picks for other features are merged in, not
+ * dropped. The read-back is the assertion: a feature that did not take the connector throws.
+ */
+export const pinInferenceFeatures = async ({
+  kbnClient,
+  connector,
+  log,
+  featureIds = PINNED_INFERENCE_FEATURE_IDS,
+}: {
+  kbnClient: InferenceSettingsClient;
+  connector: ConnectorLike;
+  log: ToolingLog;
+  featureIds?: readonly string[];
+}): Promise<string[]> => {
+  if (!connector.id) {
+    throw new Error(
+      `Cannot pin inference features ${featureIds.join(', ')}: the eval connector fixture has no ` +
+        `id (name: ${connector.name ?? 'unknown'}). The workflow would run each tier's recommended ` +
+        `endpoint while the score docs name this connector's model.`
+    );
+  }
+  const connectorId = connector.id;
+  const pinned = new Set<string>(featureIds);
+
+  const existing = await readInferenceFeatures(kbnClient);
+  await kbnClient.request({
+    path: INFERENCE_SETTINGS_ROUTE,
+    method: 'PUT',
+    headers: { ...INFERENCE_SETTINGS_HEADERS },
+    body: {
+      features: [
+        ...existing.filter(({ feature_id: id }) => !pinned.has(id)),
+        ...featureIds.map((featureId) => ({
+          feature_id: featureId,
+          endpoints: [{ id: connectorId }],
+        })),
+      ],
+    },
+  });
+
+  const after = await readInferenceFeatures(kbnClient);
+  const unpinned = featureIds.filter((featureId) => {
+    const endpoints = after.find(({ feature_id: id }) => id === featureId)?.endpoints ?? [];
+    return endpoints.length !== 1 || endpoints[0].id !== connectorId;
+  });
+  if (unpinned.length > 0) {
+    throw new Error(
+      `Inference settings did not stick for ${unpinned.join(', ')}: expected endpoint ` +
+        `"${connectorId}" on each. Those features would run their recommended endpoint while ` +
+        `every score doc of this run names "${expectedModelId(connector)}".`
+    );
+  }
+
+  log.info(
+    `Inference features ${featureIds.join(', ')} pinned to ${connectorId} (model ${expectedModelId(
+      connector
+    )})`
+  );
+  return [...featureIds];
 };
 
 interface ChatModelCount {

@@ -7,13 +7,19 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { DIAGNOSE_STEP_ID, GEN_AI_DEFAULT_CONNECTOR_SETTING } from './constants';
+import {
+  DIAGNOSE_STEP_ID,
+  GEN_AI_DEFAULT_CONNECTOR_SETTING,
+  INFERENCE_SETTINGS_ROUTE,
+} from './constants';
 import type { RuleTuningVerdict } from './workflow_task';
 import {
   assertWorkflowModelMatches,
   expectedModelId,
+  pinInferenceFeatures,
   pinWorkflowConnector,
   type ConnectorPinClient,
+  type InferenceSettingsClient,
 } from './model_attribution';
 
 const log = {
@@ -52,7 +58,7 @@ const probe = (over: Partial<RuleTuningVerdict> = {}): RuleTuningVerdict =>
     executionStatus: 'completed',
     stepExecutions: [{ stepId: DIAGNOSE_STEP_ID, output: { conversation_id: 'conv-1' } }],
     ...over,
-  } as unknown as RuleTuningVerdict);
+  }) as unknown as RuleTuningVerdict;
 
 const traceEsWith = (models: Array<{ model: string; chats: number }>) =>
   ({
@@ -65,7 +71,7 @@ const traceEsWith = (models: Array<{ model: string; chats: number }>) =>
         values: models.map(({ model, chats }) => [model, chats]),
       })),
     },
-  } as unknown as EsClient);
+  }) as unknown as EsClient;
 
 const pinClientWith = ({ readBack }: { readBack: string | null }) => {
   const update = jest.fn(async () => undefined);
@@ -149,6 +155,102 @@ describe('pinWorkflowConnector', () => {
     await expect(
       pinWorkflowConnector({ kbnClient, connector: { name: 'nameless' }, log })
     ).rejects.toThrow(/no id/);
+  });
+});
+
+interface StoredFeature {
+  feature_id: string;
+  endpoints: Array<{ id: string }>;
+}
+
+/** A fake Model Management endpoint: PUT replaces the document, GET returns it. */
+const inferenceSettingsServer = ({
+  initial = [],
+  dropFromStored = [],
+}: {
+  initial?: StoredFeature[];
+  /** Feature ids the server silently fails to persist, to exercise the read-back. */
+  dropFromStored?: string[];
+} = {}) => {
+  let stored = initial;
+  const request = jest.fn(async ({ method, body }: { method: string; body?: unknown }) => {
+    if (method === 'PUT') {
+      stored = (body as { features: StoredFeature[] }).features.filter(
+        ({ feature_id: id }) => !dropFromStored.includes(id)
+      );
+    }
+    return { data: { data: { features: stored } } };
+  });
+  return { kbnClient: { request } as unknown as InferenceSettingsClient, request };
+};
+
+const putBody = (request: jest.Mock) =>
+  request.mock.calls.find(([{ method }]) => method === 'PUT')![0] as {
+    path: string;
+    headers: Record<string, string>;
+    body: { features: StoredFeature[] };
+  };
+
+describe('pinInferenceFeatures', () => {
+  it('writes the eval connector onto every alertzero tier and agent-builder feature', async () => {
+    const { kbnClient, request } = inferenceSettingsServer();
+
+    await pinInferenceFeatures({ kbnClient, connector: eisConnector, log });
+
+    const put = putBody(request);
+    expect(put.path).toBe(INFERENCE_SETTINGS_ROUTE);
+    expect(put.headers).toMatchObject({ 'elastic-api-version': '1' });
+    expect(put.body.features).toEqual(
+      expect.arrayContaining(
+        [
+          'alertzero_agentic',
+          'alertzero_fast',
+          'alertzero_reasoning',
+          'agent_builder',
+          'agent_builder_fast',
+        ].map((feature_id) => ({ feature_id, endpoints: [{ id: eisConnector.id }] }))
+      )
+    );
+  });
+
+  it('keeps picks for unrelated features and replaces a stale pick for a pinned one', async () => {
+    const { kbnClient, request } = inferenceSettingsServer({
+      initial: [
+        { feature_id: 'other_feature', endpoints: [{ id: 'keep-me' }] },
+        {
+          feature_id: 'alertzero_agentic',
+          endpoints: [{ id: '.anthropic-claude-5-sonnet-chat_completion' }],
+        },
+      ],
+    });
+
+    await pinInferenceFeatures({ kbnClient, connector: eisConnector, log });
+
+    const { features } = putBody(request).body;
+    expect(features).toContainEqual({
+      feature_id: 'other_feature',
+      endpoints: [{ id: 'keep-me' }],
+    });
+    expect(features.filter(({ feature_id: id }) => id === 'alertzero_agentic')).toEqual([
+      { feature_id: 'alertzero_agentic', endpoints: [{ id: eisConnector.id }] },
+    ]);
+  });
+
+  it('THROWS naming the feature when the read-back does not carry the connector', async () => {
+    const { kbnClient } = inferenceSettingsServer({ dropFromStored: ['alertzero_agentic'] });
+
+    await expect(pinInferenceFeatures({ kbnClient, connector: eisConnector, log })).rejects.toThrow(
+      /did not stick for alertzero_agentic/
+    );
+  });
+
+  it('THROWS when the connector fixture has no id, before touching the stack', async () => {
+    const { kbnClient, request } = inferenceSettingsServer();
+
+    await expect(
+      pinInferenceFeatures({ kbnClient, connector: { name: 'nameless' }, log })
+    ).rejects.toThrow(/no id/);
+    expect(request).not.toHaveBeenCalled();
   });
 });
 
