@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildFixtures } from './seed_security_data';
+import { AUTH_INDEX, SEEDED_INDEX_PATTERNS, buildFixtures } from './seed_security_data';
 import { goldenDataset } from '../datasets/golden';
 import { hardCases } from '../datasets/hard_cases';
 
@@ -104,6 +104,70 @@ describe('term-level match operators', () => {
       });
     }
     expect(missing).toEqual([]);
+  });
+});
+
+describe('T1078.001 auth-log fixture (logs-system.auth)', () => {
+  const authFixtureDocs = buildFixtures().find((f) => f.index === AUTH_INDEX)?.docs as Array<{
+    event: { outcome: string; dataset: string };
+    process: { name: string };
+    host: { name: string; os: { type: string } };
+    user: { name: string };
+    message: string;
+  }>;
+  const authDocs = () => authFixtureDocs;
+  const defaultUserFailures = () =>
+    authDocs().filter(
+      (d) =>
+        d.event.outcome === 'failure' &&
+        ['su', 'sudo'].includes(d.process.name) &&
+        ['admin', 'root', 'administrator', 'guest'].includes(d.user.name)
+    );
+
+  it('is seeded, and is an index pattern the hygiene guard accepts', () => {
+    expect(authDocs()?.length).toBeGreaterThan(0);
+    expect(SEEDED_INDEX_PATTERNS).toContain('logs-system.auth');
+  });
+
+  it('carries su/sudo failures with default usernames across the 3 Linux endpoints the gap names', () => {
+    const hosts = new Set(defaultUserFailures().map((d) => d.host.name));
+    expect([...hosts].sort()).toEqual(['linux-build-02', 'linux-cron-01', 'linux-web-01']);
+    expect(new Set(defaultUserFailures().map((d) => d.process.name))).toEqual(
+      new Set(['su', 'sudo'])
+    );
+    for (const doc of authDocs()) {
+      expect(doc.host.os.type).toBe('linux');
+      expect(doc.event.dataset).toBe('system.auth');
+    }
+  });
+
+  it('writes auth-log messages, not process-start events', () => {
+    for (const doc of defaultUserFailures()) {
+      expect(doc.message.length).toBeGreaterThan(0);
+      expect(doc.message).toMatch(/authentication failure|incorrect password/);
+    }
+  });
+
+  it('keeps benign controls an over-broad rule would wrongly match', () => {
+    const benign = authDocs().filter((d) => !defaultUserFailures().includes(d));
+    expect(benign.length).toBeGreaterThanOrEqual(3);
+    expect(benign.some((d) => d.event.outcome === 'success')).toBe(true);
+    expect(benign.some((d) => d.event.outcome === 'failure')).toBe(true);
+    for (const doc of benign) {
+      expect(['admin', 'root', 'administrator', 'guest']).not.toContain(doc.user.name);
+    }
+  });
+
+  it('shares host identities with the process fixtures, so the endpoint data tells one story', () => {
+    const processHosts = new Set(
+      (
+        buildFixtures().find((f) => f.index.startsWith('logs-endpoint.events.process'))
+          ?.docs as Array<{ host: { name: string } }>
+      ).map((d) => d.host.name)
+    );
+    for (const doc of authDocs()) {
+      expect(processHosts.has(doc.host.name)).toBe(true);
+    }
   });
 });
 

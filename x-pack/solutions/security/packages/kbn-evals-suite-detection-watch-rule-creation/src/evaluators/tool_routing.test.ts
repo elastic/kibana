@@ -10,6 +10,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { RuleCreationResult } from '../rule_creation_client';
 import { DRAFT_STEP_ID, RULE_CREATION_TOOL_ID } from '../constants';
 import {
+  armTraceEvaluators,
   assertToolSpansReachable,
   createToolRoutingEvaluator,
   extractConversationId,
@@ -88,6 +89,18 @@ describe('toolSpanJoinClauses', () => {
     expect(toolSpanJoinClauses({ conversationId: 'c' })).toHaveLength(1);
     expect(toolSpanJoinClauses({})).toHaveLength(0);
   });
+
+  it('matches the conversation id both raw and in the hashed form spans are exported with', () => {
+    // Agent Builder hashes gen_ai.conversation.id on export unless
+    // agentBuilder:tracing:includeRealIds is on. The hash is hardcoded (sha256, first 16 hex)
+    // so this fails if the join stops hashing, rather than agreeing with whatever it computes.
+    const [clause] = toolSpanJoinClauses({
+      conversationId: '3f2b9a10-1111-4c2d-9e8f-0123456789ab',
+    });
+    expect(clause.where).toBe(
+      'attributes.gen_ai.conversation.id IN ("3f2b9a10-1111-4c2d-9e8f-0123456789ab", "6eef11fb8dd0b621")'
+    );
+  });
 });
 
 describe('createToolRoutingEvaluator', () => {
@@ -151,26 +164,79 @@ describe('createToolRoutingEvaluator', () => {
 });
 
 describe('assertToolSpansReachable', () => {
+  const quick = { timeoutMs: 30, pollIntervalMs: 5 };
   it('passes when spans are reachable on the first key', async () => {
     await expect(
       assertToolSpansReachable({ traceEsClient: esWith(() => spans(4)), probe: result(), log })
-    ).resolves.toBeUndefined();
+    ).resolves.toBe('reachable');
   });
 
   it('passes when only the conversation-id key reaches spans', async () => {
     const client = esWith((q) => (q.includes('trace.id') ? spans(0) : spans(2)));
     await expect(
       assertToolSpansReachable({ traceEsClient: client, probe: result(), log })
-    ).resolves.toBeUndefined();
+    ).resolves.toBe('reachable');
   });
 
   it('THROWS when no key reaches a span — arming evaluators here would be dishonest', async () => {
     await expect(
-      assertToolSpansReachable({ traceEsClient: esWith(() => spans(0)), probe: result(), log })
+      assertToolSpansReachable({
+        traceEsClient: esWith(() => spans(0)),
+        probe: result(),
+        log,
+        ...quick,
+      })
     ).rejects.toThrow(/No agent TOOL spans are reachable/);
   });
 
-  it('skips the check when the quality gate declined the probe', async () => {
+  it('waits for late spans: passes when they land after several empty polls', async () => {
+    let polls = 0;
+    const client = esWith(() => spans(++polls > 6 ? 3 : 0));
+    await expect(
+      assertToolSpansReachable({
+        traceEsClient: client,
+        probe: result(),
+        log,
+        timeoutMs: 2_000,
+        pollIntervalMs: 1,
+      })
+    ).resolves.toBe('reachable');
+    expect(polls).toBeGreaterThan(6);
+  });
+
+  it('keeps polling until the deadline before failing, and fails with the same error', async () => {
+    const client = esWith(() => spans(0));
+    const started = Date.now();
+    await expect(
+      assertToolSpansReachable({
+        traceEsClient: client,
+        probe: result(),
+        log,
+        timeoutMs: 120,
+        pollIntervalMs: 20,
+      })
+    ).rejects.toThrow(/No agent TOOL spans are reachable.*waited 120ms/s);
+    expect(Date.now() - started).toBeGreaterThanOrEqual(80);
+    // two join keys per round, several rounds
+    expect((client.esql.query as jest.Mock).mock.calls.length).toBeGreaterThan(4);
+  });
+
+  it('fails after the wait for a trace id that matches no span (mutation probe)', async () => {
+    // The fake only knows trace-1 / conv-1; a non-existent id must stay red after the wait.
+    const client = esWith((q) =>
+      q.includes('trace-1') || q.includes('conv-1') ? spans(2) : spans(0)
+    );
+    await expect(
+      assertToolSpansReachable({
+        traceEsClient: client,
+        probe: result({ traceId: 'does-not-exist', stepExecutions: [] } as never),
+        log,
+        ...quick,
+      })
+    ).rejects.toThrow(/No agent TOOL spans are reachable/);
+  });
+
+  it('reports skipped (not reachable) when the quality gate declined the probe', async () => {
     const client = esWith(() => spans(0));
     await expect(
       assertToolSpansReachable({
@@ -178,7 +244,8 @@ describe('assertToolSpansReachable', () => {
         probe: result({ skipped: true } as never),
         log,
       })
-    ).resolves.toBeUndefined();
+    ).resolves.toBe('skipped');
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('declined'));
   });
 
   it('demands the SAME span predicate the evaluators score on, not just TOOL kind', async () => {
@@ -199,7 +266,70 @@ describe('assertToolSpansReachable', () => {
       q.includes('attributes.gen_ai.tool.call.id IS NOT NULL') ? spans(0) : spans(7)
     );
     await expect(
-      assertToolSpansReachable({ traceEsClient: client, probe: result(), log })
+      assertToolSpansReachable({
+        traceEsClient: client,
+        probe: result(),
+        log,
+        ...quick,
+      })
+    ).rejects.toThrow(/No agent TOOL spans are reachable/);
+  });
+});
+
+describe('armTraceEvaluators', () => {
+  const quick = { timeoutMs: 30, pollIntervalMs: 5 };
+  const declined = result({ skipped: true, skipReason: 'low evidence' } as never);
+
+  it('returns the first probe whose spans are reachable', async () => {
+    const runProbe = jest.fn(async () => result());
+    await expect(
+      armTraceEvaluators({
+        inputs: ['a', 'b'],
+        runProbe,
+        traceEsClient: esWith(() => spans(2)),
+        log,
+        ...quick,
+      })
+    ).resolves.toMatchObject({ traceId: 'trace-1' });
+    expect(runProbe).toHaveBeenCalledTimes(1);
+  });
+
+  it('re-probes with the next gap when the first is declined', async () => {
+    const runProbe = jest.fn().mockResolvedValueOnce(declined).mockResolvedValueOnce(result());
+    await armTraceEvaluators({
+      inputs: ['a', 'b'],
+      runProbe,
+      traceEsClient: esWith(() => spans(2)),
+      log,
+      ...quick,
+    });
+    expect(runProbe).toHaveBeenNthCalledWith(1, 'a');
+    expect(runProbe).toHaveBeenNthCalledWith(2, 'b');
+  });
+
+  it('THROWS when every probe is declined — never reports evaluators armed', async () => {
+    const runProbe = jest.fn(async () => declined);
+    await expect(
+      armTraceEvaluators({
+        inputs: ['a', 'b'],
+        runProbe,
+        traceEsClient: esWith(() => spans(0)),
+        log,
+        ...quick,
+      })
+    ).rejects.toThrow(/trace reachability probes were declined/);
+    expect(runProbe).toHaveBeenCalledTimes(2);
+  });
+
+  it('still fails on a non-skipped probe with zero spans', async () => {
+    await expect(
+      armTraceEvaluators({
+        inputs: ['a', 'b'],
+        runProbe: async () => result(),
+        traceEsClient: esWith(() => spans(0)),
+        log,
+        ...quick,
+      })
     ).rejects.toThrow(/No agent TOOL spans are reachable/);
   });
 });

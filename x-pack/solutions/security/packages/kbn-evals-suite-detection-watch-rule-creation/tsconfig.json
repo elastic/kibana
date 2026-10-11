@@ -15,7 +15,9 @@
     "@kbn/workflows",
     "@kbn/core",
     "@kbn/zod",
-    "@kbn/inbox-common",
-    "@kbn/agent-builder-common"
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-server",
+    "@kbn/proposals-common",
+    "@kbn/alertzero-plugin"
   ]
 }
