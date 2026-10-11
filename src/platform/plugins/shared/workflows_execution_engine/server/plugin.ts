@@ -586,9 +586,10 @@ export class WorkflowsExecutionEnginePlugin
                     spaceId
                   );
                   if (!execution || isTerminalStatus(execution.status)) {
-                    await new WorkflowTaskManager(
-                      pluginsStart.taskManager
-                    ).removeParkedImmediateResume(workflowRunId);
+                    await new WorkflowTaskManager(pluginsStart.taskManager).removeTasksForExecution(
+                      workflowRunId,
+                      { exceptTaskId: taskInstance.id }
+                    );
                     return;
                   }
                   isUserInteractive =

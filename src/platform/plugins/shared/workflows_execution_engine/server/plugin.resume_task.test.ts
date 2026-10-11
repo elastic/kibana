@@ -188,17 +188,18 @@ describe('workflow:resume task runner event fields', () => {
       state: {},
       priority: TaskPriority.Standard,
     });
-    expect(taskManagerStart.removeIfExists).not.toHaveBeenCalled();
+    expect(taskManagerStart.bulkRemove).not.toHaveBeenCalled();
     mockGetWorkflowExecutionById.mockResolvedValue({ status: 'completed' });
-    taskManagerStart.get.mockResolvedValue({
-      ...taskManagerMock.createTask(),
-      id: getWorkflowImmediateResumeTaskId('retained'),
-      status: TaskStatus.Idle,
-    });
-    expect(await runner.run()).toBeUndefined();
-    expect(taskManagerStart.removeIfExists).toHaveBeenCalledWith(
-      getWorkflowImmediateResumeTaskId('retained')
+    const idleTasks = [
+      getWorkflowImmediateResumeTaskId('retained'),
+      getWorkflowGlobalTimeoutResumeTaskId('retained'),
+    ].map((id) => ({ ...taskManagerMock.createTask(), id, status: TaskStatus.Idle, attempts: 0 }));
+    taskManagerStart.fetch.mockResolvedValue({ docs: idleTasks, versionMap: new Map() });
+    taskManagerStart.bulkGet.mockResolvedValue(
+      idleTasks.map((value) => ({ tag: 'ok' as const, value }))
     );
+    expect(await runner.run()).toBeUndefined();
+    expect(taskManagerStart.bulkRemove).toHaveBeenCalledWith(idleTasks.map(({ id }) => id));
   });
 
   it('parks the immediate runner while the execution is still waiting', async () => {
@@ -261,11 +262,17 @@ describe('workflow:resume task runner event fields', () => {
   it('does not remove a claimed runner when the retained wake sees a terminal execution', async () => {
     setupPlugin();
     mockGetWorkflowExecutionById.mockResolvedValue({ status: 'failed' });
-    taskManagerStart.get.mockResolvedValue({
+    const claimedRunner = {
       ...taskManagerMock.createTask(),
       id: getWorkflowImmediateResumeTaskId('claimed'),
       status: TaskStatus.Running,
+    };
+    // The search still reports the runner idle; the fresh read sees the claim.
+    taskManagerStart.fetch.mockResolvedValue({
+      docs: [{ ...claimedRunner, status: TaskStatus.Idle }],
+      versionMap: new Map(),
     });
+    taskManagerStart.bulkGet.mockResolvedValue([{ tag: 'ok', value: claimedRunner }]);
     const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: {
@@ -278,7 +285,8 @@ describe('workflow:resume task runner event fields', () => {
     );
 
     expect(await runner.run()).toBeUndefined();
-    expect(taskManagerStart.removeIfExists).not.toHaveBeenCalled();
+    expect(taskManagerStart.bulkGet).toHaveBeenCalledWith([claimedRunner.id]);
+    expect(taskManagerStart.bulkRemove).not.toHaveBeenCalled();
   });
 
   it('retains interactive priority through a busy handoff and resets it after consumption', async () => {

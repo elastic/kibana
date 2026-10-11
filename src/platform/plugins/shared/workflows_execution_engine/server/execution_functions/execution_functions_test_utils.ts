@@ -105,7 +105,7 @@ export const buildMockSetupDependenciesReturn = (options: {
     workflowLogger: {},
     nodesFactory: {},
     workflowExecutionGraph: {},
-    workflowTaskManager: {},
+    workflowTaskManager: { removeTasksForExecution: jest.fn().mockResolvedValue(undefined) },
     workflowExecutionRepository: options.workflowExecutionRepository,
     esClient: {},
     telemetryClient: options.telemetryClient ?? createMockTelemetryClient(),
@@ -131,5 +131,5 @@ export const getExpectedWorkflowExecutionLoopCallArgs = (options: {
   fakeRequest: options.fakeRequest,
   coreStart: options.dependencies.coreStart,
   signal: options.signal,
-  workflowTaskManager: {},
+  workflowTaskManager: { removeTasksForExecution: expect.any(Function) },
 });
