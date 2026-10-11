@@ -123,7 +123,7 @@ apiTest.describe(
               it.rules.map((r) => r.id)
             )
           );
-          return ids.has(RULE_ID_KEPT) && ids.has(RULE_ID_DELETED);
+          return [RULE_ID_KEPT, RULE_ID_DELETED].every((id) => ids.has(id));
         };
 
         await expect

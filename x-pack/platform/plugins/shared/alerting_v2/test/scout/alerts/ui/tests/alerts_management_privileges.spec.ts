@@ -24,8 +24,10 @@ const assertEpisodesManagementHappyPath = async ({
   alertingNavigation,
 }: Pick<AlertingPageObjects, 'alertEpisodesList' | 'alertingNavigation'>): Promise<void> => {
   await test.step('page renders without the privilege prompt', async () => {
-    await expect(alertEpisodesList.pageContainer).toBeVisible({ timeout: 60_000 });
-    await expect(alertingNavigation.requiredPrivilegesPrompt).not.toBeVisible();
+    await expect(alertEpisodesList.pageContainer).toBeVisible({
+      timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+    });
+    await expect(alertingNavigation.requiredPrivilegesPrompt).toBeHidden();
   });
 
   await test.step('KPI panels render successfully', async () => {
