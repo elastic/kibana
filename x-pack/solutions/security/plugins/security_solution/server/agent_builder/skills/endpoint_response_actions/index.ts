@@ -9,7 +9,15 @@ import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { getEndpointStatusTool, listEndpointsTool, getResponseActionStatusTool } from './tools';
+import {
+  isolateHostTool,
+  unisolateHostTool,
+  getEndpointStatusTool,
+  listEndpointsTool,
+  getRunningProcessesTool,
+  scanHostTool,
+  getResponseActionStatusTool,
+} from './tools';
 import { ENDPOINT_RESPONSE_ACTIONS_REFERENCE } from './skill_reference';
 
 const ID = 'endpoint-response-actions';
@@ -18,8 +26,12 @@ const BASE_PATH = 'skills/security/endpoint';
 function toolName(name: string) {
   return `${ID}.${name}`;
 }
+export const ISOLATE_TOOL_ID = toolName('isolate_host');
+export const UNISOLATE_TOOL_ID = toolName('unisolate_host');
 export const GET_ENDPOINT_STATUS_TOOL_ID = toolName('get_endpoint_status');
 export const LIST_ENDPOINTS_TOOL_ID = toolName('list_endpoints');
+export const RUNNING_PROCESSES_TOOL_ID = toolName('running_processes');
+export const SCAN_TOOL_ID = toolName('scan');
 export const GET_RESPONSE_ACTION_STATUS_TOOL_ID = toolName('get_response_action_status');
 
 const SYSTEM_INSTRUCTIONS = `# Endpoint Response Actions Skill
@@ -47,11 +59,19 @@ improvise one with another tool.
 
 1. **Route intent to the right tool**
    - list / available hosts → \`list_endpoints\`
-   - status / is it isolated → \`get_endpoint_status\`
+   - isolate / quarantine / contain → \`isolate_host\` (write, platform-confirmed)
+   - release / unisolate / reconnect → \`unisolate_host\` (write, platform-confirmed)
+   - status / is isolated → \`get_endpoint_status\`
+   - running processes → \`running_processes\`
+   - scan path → \`scan\` (write, platform-confirmed)
    - prior action status / action ID → \`get_response_action_status\`
 
-2. **Report** — include host identity and state, or the action ID, status, and
-   output. See \`./reference\` for error codes and best practices.
+2. **Write tools** — call directly; Agent Builder shows the confirmation card.
+   Do not ask for chat confirmation first. If declined, report cancelled.
+
+3. **Report** — always include action ID, status, and output. For pending actions,
+   offer \`get_response_action_status\` follow-up. See \`./reference\` for error
+   codes and best practices.
 
 ## Guardrails
 
@@ -87,7 +107,11 @@ export const createEndpointResponseActionsSkill = (
     ],
     getInlineTools: () => [
       listEndpointsTool(endpointAppContextService),
+      isolateHostTool(endpointAppContextService),
+      unisolateHostTool(endpointAppContextService),
       getEndpointStatusTool(endpointAppContextService),
+      getRunningProcessesTool(endpointAppContextService),
+      scanHostTool(endpointAppContextService),
       getResponseActionStatusTool(endpointAppContextService),
     ],
   });

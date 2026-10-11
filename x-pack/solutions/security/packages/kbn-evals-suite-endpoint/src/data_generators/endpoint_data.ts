@@ -19,7 +19,6 @@ const POLL_INTERVAL_MS = 5_000;
 
 /** Disjoint from the forensic suite's `eval-agent-forensic-` ids (see cleanup.ts). */
 const EVAL_AGENT_ID_PREFIX = 'eval-agent-ts-';
-const EVAL_SEEDED_QUERY = { prefix: { 'agent.id': EVAL_AGENT_ID_PREFIX } };
 
 export async function waitForEndpointPackage(
   kbnClient: KbnClient,
@@ -94,10 +93,12 @@ export async function waitForTransformPropagation(
   esClient: Client,
   log: ToolingLog,
   expectedCounts: { metadataCurrent: number; metadataUnited: number },
-  maxWaitMs = 180_000
+  maxWaitMs = 180_000,
+  agentIdPrefix: string = EVAL_AGENT_ID_PREFIX
 ): Promise<void> {
   const start = Date.now();
   let lastCounts = { metadataCurrent: 0, metadataUnited: 0 };
+  const seededQuery = { prefix: { 'agent.id': agentIdPrefix } };
   log.info(
     `Waiting for transform propagation: metadataCurrent >= ${expectedCounts.metadataCurrent}, metadataUnited >= ${expectedCounts.metadataUnited}`
   );
@@ -107,12 +108,12 @@ export async function waitForTransformPropagation(
       const [currentCount, unitedCount] = await Promise.all([
         esClient.count({
           index: metadataCurrentIndexPattern,
-          query: EVAL_SEEDED_QUERY,
+          query: seededQuery,
           ignore_unavailable: true,
         }),
         esClient.count({
           index: METADATA_UNITED_INDEX,
-          query: EVAL_SEEDED_QUERY,
+          query: seededQuery,
           ignore_unavailable: true,
         }),
       ]);
