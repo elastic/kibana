@@ -91,6 +91,7 @@ describe('control panel transforms', () => {
             type: 'dropped_property',
             tab_id: 'tab-1',
             key: 'control_panels',
+            value: controlGroupJson,
           }),
         ]);
       });
@@ -120,7 +121,25 @@ describe('control panel transforms', () => {
             tab_id: 'tab-1',
             panel_id: 'bad',
             message:
-              'Unable to transform control panel [bad]. Error: controlGroupJson panels must be JSON objects',
+              'Unable to transform control panel. Error: controlGroupJson panels must be JSON objects',
+          },
+        ]);
+      });
+
+      it('reports the config of a panel without a type', () => {
+        const { warnings } = transformControlPanelsOut(
+          JSON.stringify({ untyped: { order: 0, variable_name: 'foo' } }),
+          'tab-1'
+        );
+
+        expect(warnings).toEqual([
+          {
+            type: 'dropped_panel',
+            tab_id: 'tab-1',
+            panel_id: 'untyped',
+            panel_config: { order: 0, variable_name: 'foo' },
+            message:
+              'Unable to transform control panel. Error: controlGroupJson panels must have a type',
           },
         ]);
       });
@@ -149,9 +168,19 @@ describe('control panel transforms', () => {
             type: 'dropped_panel',
             tab_id: 'tab-1',
             panel_id: 'invalid-width',
+            panel_type: ESQL_CONTROL,
+            panel_config: {
+              order: 0,
+              width: 'extra_large',
+              control_type: 'STATIC_VALUES',
+              variable_name: 'country',
+              variable_type: 'values',
+              available_options: ['US'],
+              selected_options: ['US'],
+              single_select: true,
+            },
             message:
-              'Unable to transform control panel [invalid-width]. Error: ' +
-              'Invalid input: expected "small", Invalid input: expected "medium", Invalid input: expected "large"',
+              'Unable to transform control panel. ✖ Invalid option: expected one of "small"|"medium"|"large"\n  → at width',
           },
         ]);
       });

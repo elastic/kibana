@@ -30,11 +30,7 @@ export const discoverSessionApiEmbeddableOverridesSchema = z
         'Sort configuration (field and direction) for the data table. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
     }),
     density: z
-      .union([
-        z.literal(DataGridDensity.COMPACT),
-        z.literal(DataGridDensity.EXPANDED),
-        z.literal(DataGridDensity.NORMAL),
-      ])
+      .enum([DataGridDensity.COMPACT, DataGridDensity.EXPANDED, DataGridDensity.NORMAL])
       .optional()
       .meta({
         description:

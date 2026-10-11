@@ -69,7 +69,7 @@ describe('showSessionWarnings', () => {
 
     expect(core.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
     expect(core.notifications.toasts.addWarning).toHaveBeenCalledWith({
-      title: 'Some session content could not be loaded',
+      title: 'Some session content was skipped while loading',
       actionProps: {
         primary: {
           children: 'Learn more',

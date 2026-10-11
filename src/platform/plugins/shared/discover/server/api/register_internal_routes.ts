@@ -23,8 +23,8 @@ import type {
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import {
-  DISCOVER_SESSION_API_VERSION,
   DISCOVER_SESSION_INTERNAL_API_BASE_PATH,
+  DISCOVER_SESSION_INTERNAL_API_VERSION,
 } from '../../common/constants';
 import {
   discoverSessionInternalParamsSchema,
@@ -33,6 +33,7 @@ import {
   discoverSessionInternalDataSchema,
   type DiscoverSessionInternalResponse,
 } from './internal_schema';
+import { onRequestValidationError } from './request_validation_error';
 import type { DiscoverSessionWarning } from './schema';
 import { transformInternalDiscoverSessionIn } from './transforms/transform_discover_session_in';
 import { transformInternalDiscoverSessionOut } from './transforms/transform_discover_session_out';
@@ -64,9 +65,10 @@ export const registerInternalRoutes = (
     })
     .addVersion(
       {
-        version: DISCOVER_SESSION_API_VERSION,
+        version: DISCOVER_SESSION_INTERNAL_API_VERSION,
         validate: {
           request: { body: discoverSessionInternalDataSchema },
+          onRequestValidationError,
           response: {
             201: { body: () => discoverSessionInternalResponseSchema, description: 'Created' },
             400: { description: 'Invalid request' },
@@ -98,12 +100,13 @@ export const registerInternalRoutes = (
     })
     .addVersion(
       {
-        version: DISCOVER_SESSION_API_VERSION,
+        version: DISCOVER_SESSION_INTERNAL_API_VERSION,
         validate: {
           request: {
             params: discoverSessionInternalParamsSchema,
             body: discoverSessionInternalDataSchema,
           },
+          onRequestValidationError,
           response: {
             200: { body: () => discoverSessionInternalResponseSchema, description: 'Updated' },
             201: { body: () => discoverSessionInternalResponseSchema, description: 'Created' },
@@ -151,7 +154,7 @@ export const registerInternalRoutes = (
     })
     .addVersion(
       {
-        version: DISCOVER_SESSION_API_VERSION,
+        version: DISCOVER_SESSION_INTERNAL_API_VERSION,
         validate: {
           request: { params: discoverSessionInternalParamsSchema },
           response: {

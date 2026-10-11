@@ -36,21 +36,43 @@ const discoverSessionWarningBaseSchema = z.object({
   tab_id: z.string().meta({ description: 'The ID of the affected tab.' }),
 });
 
-/* Reports one invalid panel while allowing the other panels in the tab to be returned. */
 const discoverSessionDroppedPanelWarningSchema = discoverSessionWarningBaseSchema
   .extend({
     type: z.literal('dropped_panel'),
     panel_id: z.string().meta({ description: 'The ID of the omitted control panel.' }),
+    panel_type: z
+      .string()
+      .optional()
+      .meta({ description: 'The type identifier of the omitted control panel.' }),
+    panel_config: z
+      .object({})
+      .loose()
+      .optional()
+      .meta({ description: 'The original configuration of the omitted control panel.' }),
   })
-  .strict();
+  .strict()
+  .meta({
+    id: 'kbn-discover-session-dropped-panel-warning',
+    title: 'Dropped panel',
+    description:
+      'A control panel that was excluded from the response because it failed validation. The other panels in the tab are still returned.',
+  });
 
-/* Reports a tab property that could not be returned as a whole. */
 const discoverSessionDroppedPropertyWarningSchema = discoverSessionWarningBaseSchema
   .extend({
     type: z.literal('dropped_property'),
     key: z.string().meta({ description: 'The name of the property omitted from the response.' }),
+    value: z
+      .unknown()
+      .optional()
+      .meta({ description: 'The original value of the property omitted from the response.' }),
   })
-  .strict();
+  .strict()
+  .meta({
+    id: 'kbn-discover-session-dropped-property-warning',
+    title: 'Dropped property',
+    description: 'A tab property that was excluded from the response as a whole.',
+  });
 
 /* Allows GET responses to preserve valid session data while reporting what was dropped. */
 export const discoverSessionWarningsSchema = z

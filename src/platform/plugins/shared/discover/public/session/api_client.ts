@@ -13,7 +13,7 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { SavedSearchType, type DiscoverSession } from '@kbn/saved-search-plugin/common';
 import {
   DISCOVER_SESSION_INTERNAL_API_BASE_PATH,
-  DISCOVER_SESSION_API_VERSION,
+  DISCOVER_SESSION_INTERNAL_API_VERSION,
 } from '../../common/constants';
 import type {
   DiscoverSessionInternalDataInput,
@@ -57,7 +57,7 @@ export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionCli
   create: (data) =>
     requestWithReadableError(() =>
       http.post<DiscoverSessionInternalResponse>(DISCOVER_SESSION_INTERNAL_API_BASE_PATH, {
-        version: DISCOVER_SESSION_API_VERSION,
+        version: DISCOVER_SESSION_INTERNAL_API_VERSION,
         body: JSON.stringify(data),
       })
     ),
@@ -68,7 +68,7 @@ export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionCli
         const { body, response } = await http.get<DiscoverSessionInternalGetResponse>(
           buildDiscoverSessionPath(id),
           {
-            version: DISCOVER_SESSION_API_VERSION,
+            version: DISCOVER_SESSION_INTERNAL_API_VERSION,
             asResponse: true,
           }
         );
@@ -88,7 +88,7 @@ export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionCli
   upsert: (id, data) =>
     requestWithReadableError(() =>
       http.put<DiscoverSessionInternalResponse>(buildDiscoverSessionPath(id), {
-        version: DISCOVER_SESSION_API_VERSION,
+        version: DISCOVER_SESSION_INTERNAL_API_VERSION,
         body: JSON.stringify(data),
       })
     ),

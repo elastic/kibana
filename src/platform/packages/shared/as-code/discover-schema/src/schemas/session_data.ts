@@ -82,22 +82,9 @@ export const discoverSessionApiClassicTabSchema = z
     ...discoverSessionTabIdentitySchema.shape,
     ...discoverSessionApiClassicTabBaseSchema.shape,
     ...discoverSessionTabPresentationSchema.shape,
-    chart_interval: z
-      .union([
-        z.literal('auto'),
-        z.literal('ms'),
-        z.literal('s'),
-        z.literal('m'),
-        z.literal('h'),
-        z.literal('d'),
-        z.literal('w'),
-        z.literal('M'),
-        z.literal('y'),
-      ])
-      .optional()
-      .meta({
-        description: 'Time interval for the chart histogram on this tab.',
-      }),
+    chart_interval: z.enum(['auto', 'ms', 's', 'm', 'h', 'd', 'w', 'M', 'y']).optional().meta({
+      description: 'Time interval for the chart histogram on this tab.',
+    }),
     hide_aggregated_preview: z
       .boolean()
       .optional()

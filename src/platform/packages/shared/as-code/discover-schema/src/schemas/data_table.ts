@@ -30,9 +30,7 @@ export const sortSchema = z
   })
   .strict();
 
-export const documentsDisplayModeSchema = z
-  .union([z.literal('table'), z.literal('json')])
-  .optional();
+export const documentsDisplayModeSchema = z.enum(['table', 'json']).optional();
 
 export const dataTableLimitsSchema = z
   .object({
@@ -66,11 +64,7 @@ export const dataTableSchema = z
       description: 'Sort configuration for the data table (field and direction).',
     }),
     density: z
-      .union([
-        z.literal(DataGridDensity.COMPACT),
-        z.literal(DataGridDensity.EXPANDED),
-        z.literal(DataGridDensity.NORMAL),
-      ])
+      .enum([DataGridDensity.COMPACT, DataGridDensity.EXPANDED, DataGridDensity.NORMAL])
       .optional()
       .meta({
         description:

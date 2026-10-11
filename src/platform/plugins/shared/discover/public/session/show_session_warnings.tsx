@@ -91,8 +91,8 @@ export const showSessionWarnings = ({
   };
 
   core.notifications.toasts.addWarning({
-    title: i18n.translate('discover.sessionLoadWarnings.title', {
-      defaultMessage: 'Some session content could not be loaded',
+    title: i18n.translate('discover.sessionLoadWarnings.skippedContentTitle', {
+      defaultMessage: 'Some session content was skipped while loading',
     }),
     actionProps: {
       primary: {

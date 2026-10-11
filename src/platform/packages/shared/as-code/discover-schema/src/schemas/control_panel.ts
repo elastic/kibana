@@ -19,11 +19,7 @@ import {
 import { MAX_DISCOVER_SESSION_CONTROL_PANELS } from '@kbn/discover-session-constants';
 
 const discoverSessionControlWidthSchema = z
-  .union([
-    z.literal(CONTROL_WIDTH_SMALL),
-    z.literal(CONTROL_WIDTH_MEDIUM),
-    z.literal(CONTROL_WIDTH_LARGE),
-  ])
+  .enum([CONTROL_WIDTH_SMALL, CONTROL_WIDTH_MEDIUM, CONTROL_WIDTH_LARGE])
   .default(DEFAULT_PINNED_CONTROL_STATE.width as typeof CONTROL_WIDTH_MEDIUM)
   .meta({
     description: 'Minimum width of the control panel.',
