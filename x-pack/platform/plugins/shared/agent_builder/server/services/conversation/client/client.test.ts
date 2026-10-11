@@ -3558,6 +3558,25 @@ describe('ConversationClient', () => {
       });
     });
 
+    it('appendEvents does not publish hidden attachment events', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+      const visible = attachmentAddedEvent('evt-att-1');
+      const hidden = {
+        ...attachmentAddedEvent('evt-att-2'),
+        data: { ...(attachmentAddedEvent('evt-att-2').data as object), hidden: true },
+      } as TimelineEvent;
+
+      await clientWithCb.appendEvents(
+        { id: 'conversation-1', events: [visible, hidden] },
+        { source: 'http_api' }
+      );
+
+      expect(emitAttachmentEvents).toHaveBeenCalledWith({
+        conversationId: 'conversation-1',
+        events: [visible],
+      });
+    });
+
     it('appendEvents does not fire for an event id that was already stored (dedup)', async () => {
       const added = attachmentAddedEvent('evt-att-1');
       mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [added] }));

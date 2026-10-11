@@ -10,7 +10,6 @@ import { attachmentTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
-import type { AttachmentToolsOptions } from './types';
 
 const attachmentListSchema = z.object({
   include_deleted: z
@@ -23,9 +22,9 @@ const attachmentListSchema = z.object({
  * Creates the attachment_list tool.
  * Lists all attachments with their metadata.
  */
-export const createAttachmentListTool = ({
-  attachmentManager,
-}: AttachmentToolsOptions): InternalBuiltinToolDefinition<typeof attachmentListSchema> => ({
+export const createAttachmentListTool = (): InternalBuiltinToolDefinition<
+  typeof attachmentListSchema
+> => ({
   id: attachmentTools.list,
   type: ToolType.builtin,
   description:
@@ -33,7 +32,7 @@ export const createAttachmentListTool = ({
   schema: attachmentListSchema,
   tags: ['attachment'],
   excludeFromMcp: true,
-  handler: async ({ include_deleted: includeDeleted }) => {
+  handler: async ({ include_deleted: includeDeleted }, { attachments: attachmentManager }) => {
     const attachments = includeDeleted ? attachmentManager.getAll() : attachmentManager.getActive();
 
     const attachmentList = attachments.map((attachment) => {

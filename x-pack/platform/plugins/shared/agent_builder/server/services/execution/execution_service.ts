@@ -855,10 +855,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     return persistUserMessage({
       ...base,
       user,
-      input: { message: nextInput.message, attachment_refs: stateManager.getAccessedRefs() },
+      input: { message: nextInput.message },
       additionalEvents: attachmentChangesToEvents(stateManager.drainChanges(), {
         source: 'chat_input',
         actor: userMessageActor({ ...conversation, user }, { author, origin }),
+        trigger_event_id: eventId,
         created_at: receivedAt.toISOString(),
       }),
       attachments: { snapshot, produced: stateManager.getAll() },

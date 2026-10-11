@@ -226,6 +226,32 @@ describe('registerConversationWorkflowEventBridge', () => {
         )
       );
     });
+
+    it('emits no trigger for attachment_restored', async () => {
+      const restoredEvent: AttachmentTimelineEvent = {
+        id: 'evt-restored',
+        type: TimelineEventType.attachmentRestored,
+        created_at: '2026-01-01T00:00:00.000Z',
+        actor: systemActor,
+        data: {
+          attachment_id: 'att-1',
+          attachment_type: 'text',
+          current_version: 1,
+          source: 'http_api',
+        },
+      };
+      eventBus.emitAttachmentEvents(request, {
+        conversationId: 'conv-1',
+        events: [restoredEvent, addedEvent],
+      });
+      await flushMicrotasks();
+
+      expect(mockClient.emitEvent).toHaveBeenCalledTimes(1);
+      expect(mockClient.emitEvent).toHaveBeenCalledWith(
+        ConversationAttachmentAddedTriggerId,
+        expect.objectContaining({ attachmentId: 'att-1' })
+      );
+    });
   });
 
   describe('ai.conversation.updated', () => {

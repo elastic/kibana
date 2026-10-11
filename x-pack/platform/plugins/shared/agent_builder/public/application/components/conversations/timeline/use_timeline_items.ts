@@ -7,7 +7,12 @@
 
 import { useMemo } from 'react';
 import type { ConversationEvent, UserMessageEvent } from '@kbn/agent-builder-common';
-import { TimelineEventType, EventActorType, TimelineTriggerType } from '@kbn/agent-builder-common';
+import {
+  TimelineEventType,
+  EventActorType,
+  TimelineTriggerType,
+  isAttachmentEvent,
+} from '@kbn/agent-builder-common';
 import type { TimelineDisplayEvent } from '../../../../services/events';
 import type { OptimisticAttachments } from '../../../utils/build_optimistic_attachments';
 import { useConversation } from '../../../hooks/use_conversation';
@@ -37,11 +42,20 @@ const savedUserMessageId = (liveEvents: TimelineDisplayEvent[]): string | undefi
 const isUserMessageEvent = (event: ConversationEvent): event is UserMessageEvent =>
   event.type === TimelineEventType.userMessage;
 
-const isSentMessageStillMissingItsRefs = (
+const isSentMessageStillMissingItsAttachments = (
   event: ConversationEvent,
-  sentMessageId: string
+  sentMessageId: string,
+  events: ConversationEvent[]
 ): event is UserMessageEvent =>
-  event.id === sentMessageId && isUserMessageEvent(event) && !event.data.attachment_refs?.length;
+  event.id === sentMessageId &&
+  isUserMessageEvent(event) &&
+  !event.data.attachment_refs?.length &&
+  !events.some(
+    (candidate) =>
+      isAttachmentEvent(candidate) &&
+      candidate.data.source === 'chat_input' &&
+      candidate.trigger_event_id === sentMessageId
+  );
 
 const withStagedAttachments = (
   event: UserMessageEvent,
@@ -110,8 +124,9 @@ export const useTimelineItems = (): TimelineItem[] => {
     if (!pendingAttachments) {
       return [...byId.values()];
     }
-    return [...byId.values()].map((event) =>
-      isSentMessageStillMissingItsRefs(event, pendingUserMessageId)
+    const merged = [...byId.values()];
+    return merged.map((event) =>
+      isSentMessageStillMissingItsAttachments(event, pendingUserMessageId, merged)
         ? withStagedAttachments(event, pendingAttachments)
         : event
     );

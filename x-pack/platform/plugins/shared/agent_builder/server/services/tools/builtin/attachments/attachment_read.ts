@@ -30,7 +30,6 @@ const attachmentReadSchema = z.object({
  * Reads the content of an attachment by ID, optionally at a specific version.
  */
 export const createAttachmentReadTool = ({
-  attachmentManager,
   attachmentsService,
   formatContext,
 }: AttachmentToolsOptions): InternalBuiltinToolDefinition<typeof attachmentReadSchema> => ({
@@ -41,7 +40,7 @@ export const createAttachmentReadTool = ({
   schema: attachmentReadSchema,
   tags: ['attachment'],
   excludeFromMcp: true,
-  handler: async ({ attachment_id: attachmentId, version }) => {
+  handler: async ({ attachment_id: attachmentId, version }, { attachments: attachmentManager }) => {
     const attachment = attachmentManager.get(attachmentId, {
       version,
     });

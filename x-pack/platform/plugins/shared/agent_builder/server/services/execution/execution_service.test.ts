@@ -1483,7 +1483,6 @@ describe('AgentExecutionService', () => {
       conversationClient.appendEvents.mockResolvedValue(conversation);
       conversationClient.create.mockResolvedValue(conversation);
       (attachmentsService.createStateManager as jest.Mock).mockReturnValue({
-        getAccessedRefs: () => [],
         getAll: () => [],
         drainChanges: () => [],
       });
@@ -1535,12 +1534,17 @@ describe('AgentExecutionService', () => {
       expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
     });
 
-    it('persists an attachment-only message with its attachment refs', async () => {
-      const attachmentRef = { attachment_id: 'attachment-1', version: 1, actor: 'user' as const };
+    it('persists an attachment-only message with its attachments linked to it', async () => {
       (attachmentsService.createStateManager as jest.Mock).mockReturnValue({
-        getAccessedRefs: () => [attachmentRef],
         getAll: () => [],
-        drainChanges: () => [],
+        drainChanges: () => [
+          {
+            kind: 'added',
+            attachment_id: 'attachment-1',
+            attachment_type: 'text',
+            current_version: 1,
+          },
+        ],
       });
 
       await append({
@@ -1554,10 +1558,15 @@ describe('AgentExecutionService', () => {
       );
 
       const [{ events }] = conversationClient.appendEvents.mock.calls[0];
-      expect(events[0]).toMatchObject({
-        type: TimelineEventType.userMessage,
-        data: { message: '', attachment_refs: [attachmentRef] },
+      const [userMessage, attachmentEvent] = events;
+      expect(userMessage).toMatchObject({ type: TimelineEventType.userMessage });
+      expect(userMessage.data).toEqual({ message: '' });
+      expect(attachmentEvent).toMatchObject({
+        type: TimelineEventType.attachmentAdded,
+        trigger_event_id: userMessage.id,
+        data: { attachment_id: 'attachment-1', source: 'chat_input', format: 2 },
       });
+      expect(attachmentEvent).not.toHaveProperty('execution_id');
     });
 
     it('requires something to say', async () => {

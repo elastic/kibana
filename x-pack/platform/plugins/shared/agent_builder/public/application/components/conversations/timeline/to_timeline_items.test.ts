@@ -929,4 +929,103 @@ describe('groupTimelineEvents with attachment events', () => {
     expect(items.map((item) => item.key)).toEqual(['user-1', 'exec-1', 'aa-1']);
     expect(items[1].kind === 'agentTurn' && items[1].steps).toHaveLength(2);
   });
+
+  describe('attachment events', () => {
+    const userMsg = createUserMessageEvent({ id: 'user-1' });
+    const startedWithTrigger = createExecutionStartedEvent({
+      id: 's',
+      execution_id: 'exec-1',
+      trigger_event_id: 'user-1',
+    });
+    const terminatedWithTrigger = createExecutionTerminatedEvent({
+      id: 't',
+      execution_id: 'exec-1',
+      trigger_event_id: 'user-1',
+    });
+    const event = (
+      id: string,
+      attachmentId: string,
+      source: 'chat_input' | 'execution',
+      version = 1
+    ) =>
+      createAttachmentAddedEvent({
+        id,
+        execution_id: 'exec-1',
+        trigger_event_id: 'user-1',
+        data: {
+          attachment_id: attachmentId,
+          attachment_type: 'dashboard',
+          current_version: version,
+          render_inline: false,
+          source,
+          format: 2,
+        },
+      });
+
+    it('puts input events on the message, agent events in the turn footer and both in the version map', () => {
+      const events = [
+        userMsg,
+        startedWithTrigger,
+        terminatedWithTrigger,
+        event('in', 'a1', 'chat_input'),
+        event('tool', 'a2', 'execution', 2),
+      ];
+      const [message, agentTurn] = buildItems(events);
+
+      expect(
+        message.kind === 'userMessage' && message.attachmentRefs?.map((r) => r.attachment_id)
+      ).toEqual(['a1']);
+      expect(
+        agentTurn.kind === 'agentTurn' &&
+          agentTurn.triggerAttachmentRefs?.map((r) => r.attachment_id)
+      ).toEqual(['a2']);
+      expect(
+        agentTurn.kind === 'agentTurn' &&
+          agentTurn.attachmentRefs?.find((r) => r.attachment_id === 'a2')?.version
+      ).toBe(2);
+    });
+
+    it('shows a legacy message refs once, ignoring the unmarked events of its round', () => {
+      const legacy = createUserMessageEvent({
+        id: 'user-1',
+        data: {
+          message: 'hi',
+          attachment_refs: [
+            { attachment_id: 'a1', version: 1, actor: 'user', operation: 'created' },
+          ],
+        },
+      });
+      const unmarked = createAttachmentAddedEvent({
+        id: 'old',
+        execution_id: 'exec-1',
+        data: {
+          attachment_id: 'a1',
+          attachment_type: 'dashboard',
+          current_version: 1,
+          render_inline: false,
+          source: 'chat_input',
+        },
+      });
+      const [message] = buildItems([legacy, startedWithTrigger, terminatedWithTrigger, unmarked]);
+      expect(message.kind === 'userMessage' && message.attachmentRefs).toEqual([
+        { attachment_id: 'a1', version: 1, actor: 'user', operation: 'created' },
+      ]);
+    });
+
+    it('never renders a hidden event as an inline item', () => {
+      const hidden = createAttachmentAddedEvent({
+        id: 'h',
+        data: {
+          attachment_id: 's',
+          attachment_type: 'screen_context',
+          current_version: 1,
+          render_inline: true,
+          source: 'http_api',
+          hidden: true,
+          format: 2,
+        },
+      });
+      expect(buildItems([hidden])).toEqual([]);
+    });
+  });
 });

@@ -18,10 +18,10 @@ import {
   groupTimelineEntries,
   groupTimelineRounds,
   isAwaitingPrompt,
-  isTimelineCustomEvent,
+  isTimelineStandaloneEvent,
   isTimelineRound,
   type ProcessedTimelineEvent,
-  type TimelineCustomEvent,
+  type TimelineStandaloneEvent,
   type TimelineEntry,
   type TimelineRound,
   type TimelineStandaloneUserMessage,
@@ -174,7 +174,7 @@ export const resolveVisibility = ({
   }
   if ('event_id' in cursor) {
     for (const [index, entry] of entries.entries()) {
-      if (isTimelineCustomEvent(entry)) {
+      if (isTimelineStandaloneEvent(entry)) {
         if (entry.event.id === cursor.event_id) {
           return { hiddenEntryCount: index + 1, entryFromStep: 0, currentFromStep: 0 };
         }
@@ -215,8 +215,8 @@ export type ContextUnit =
       entry: TimelineStandaloneUserMessage<ProcessedTimelineEvent>;
     }
   | {
-      kind: 'custom_event';
-      entry: TimelineCustomEvent<ProcessedTimelineEvent>;
+      kind: 'standalone_event';
+      entry: TimelineStandaloneEvent<ProcessedTimelineEvent>;
     }
   | {
       kind: 'round_cycle';
@@ -240,8 +240,8 @@ export const listVisibleUnits = ({
 }): ContextUnit[] => {
   const units: ContextUnit[] = [];
   entries.slice(visibility.hiddenEntryCount).forEach((entry, offset) => {
-    if (isTimelineCustomEvent(entry)) {
-      units.push({ kind: 'custom_event', entry });
+    if (isTimelineStandaloneEvent(entry)) {
+      units.push({ kind: 'standalone_event', entry });
       return;
     }
     if (!isTimelineRound(entry)) {
@@ -279,7 +279,7 @@ export const unitSteps = (
   unit: ContextUnit,
   steps: ConversationRoundStep[]
 ): ConversationRoundStep[] => {
-  if (unit.kind === 'message' || unit.kind === 'custom_event' || !unit.range) {
+  if (unit.kind === 'message' || unit.kind === 'standalone_event' || !unit.range) {
     return [];
   }
   const source = unit.kind === 'round_cycle' ? unit.round.steps : steps;
@@ -302,7 +302,7 @@ export const unitAnchor = (
   if (unit.kind === 'message') {
     return { event_id: unit.entry.userMessage.id };
   }
-  if (unit.kind === 'custom_event') {
+  if (unit.kind === 'standalone_event') {
     return { event_id: unit.entry.event.id };
   }
   const calls = unitSteps(unit, steps).filter(isToolCallStep);
@@ -355,7 +355,7 @@ export const translateLegacySummary = ({
   const covered = coveredRoundIds({ summary, rounds, legacyEligibleIds });
   let lastCovered: TimelineRound<ProcessedTimelineEvent> | undefined;
   for (const entry of entries) {
-    if (isTimelineCustomEvent(entry)) {
+    if (isTimelineStandaloneEvent(entry)) {
       continue;
     }
     if (!isTimelineRound(entry) || !covered.has(entry.id)) {

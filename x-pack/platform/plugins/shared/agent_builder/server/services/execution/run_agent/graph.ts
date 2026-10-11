@@ -54,6 +54,7 @@ import { createAnswerAgentStructured } from './answer_agent_structured';
 import { countNonTodosSteps, stepUpdates, type RunStepUpdate } from './step_state';
 import type { ToolExecutionBuffer } from './run_tracker';
 import type { SubagentTracker } from './subagent_tracker';
+import type { RunAttachmentEvents } from './run_attachment_events';
 import type { ProcessedConversation } from './utils/prepare_conversation';
 
 // number of successive recoverable errors we try to recover from before throwing
@@ -73,6 +74,7 @@ export const createAgentGraph = ({
   subagentTracker,
   toolExecutionBuffer,
   todoStateManager,
+  runAttachmentEvents,
   roundId,
   sessionId,
   cacheControl,
@@ -93,6 +95,7 @@ export const createAgentGraph = ({
   toolExecutionBuffer?: ToolExecutionBuffer;
   /** Authoritative view of the todos written by the `todo_write` tool during this run. */
   todoStateManager?: TodoStateManager;
+  runAttachmentEvents?: RunAttachmentEvents;
   roundId: string;
   /** Optional session ID forwarded to EIS for prompt-cache scoping. Non-EIS endpoints ignore it. */
   sessionId?: string;
@@ -297,6 +300,9 @@ export const createAgentGraph = ({
     }
 
     const completed = new Set(processed.completedToolCallIds);
+    const attachmentEvents =
+      runAttachmentEvents?.drainToolCalls(outcome.toolCalls.map(({ toolCallId }) => toolCallId)) ??
+      [];
     return {
       steps: updates,
       toolRenderState: processed.renderState,
@@ -305,6 +311,7 @@ export const createAgentGraph = ({
         processed.prompts.length > 0
           ? { type: 'interrupted', prompts: processed.prompts }
           : { type: 'completed' },
+      attachmentEvents,
     };
   };
 

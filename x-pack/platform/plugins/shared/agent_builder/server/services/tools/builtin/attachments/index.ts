@@ -37,7 +37,7 @@ export const createAttachmentTools = (
     createAttachmentReadTool(options),
     createAttachmentUpdateTool(options),
     createAttachmentAddTool(options),
-    createAttachmentListTool(options),
-    createAttachmentDiffTool(options),
+    createAttachmentListTool(),
+    createAttachmentDiffTool(),
   ];
 };

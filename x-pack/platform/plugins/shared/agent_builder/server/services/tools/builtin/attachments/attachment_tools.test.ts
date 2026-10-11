@@ -11,7 +11,10 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
+import type {
+  ToolHandlerContext,
+  ToolHandlerStandardReturn,
+} from '@kbn/agent-builder-server/tools';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createResolveContextMock } from '../../../../test_utils';
 import { createAttachmentTools } from '.';
@@ -47,9 +50,11 @@ describe('attachment tools', () => {
 
   const formatContext = { request: httpServerMock.createKibanaRequest(), spaceId: 'default' };
 
+  const toolContext = (manager: AttachmentStateManager = attachmentManager) =>
+    ({ attachments: manager.forToolCall('call-1') } as unknown as ToolHandlerContext);
+
   const getTools = () =>
     createAttachmentTools({
-      attachmentManager,
       attachmentsService,
       formatContext,
     });
@@ -60,7 +65,7 @@ describe('attachment tools', () => {
       const tool = getTool(attachmentTools.add);
       const result = (await tool.handler(
         { type: 'text', data: 'hello world', description: 'Test' },
-        {} as any
+        toolContext()
       )) as ToolHandlerStandardReturn;
 
       expect(result.results).toHaveLength(1);
@@ -80,14 +85,13 @@ describe('attachment tools', () => {
       } as any;
 
       const tool = createAttachmentTools({
-        attachmentManager,
         attachmentsService: readonlyAttachmentsService,
         formatContext,
       }).find((t) => t.id === attachmentTools.add)!;
 
       const result = (await tool.handler(
         { type: 'text', data: 'hello world', description: 'Test' },
-        {} as any
+        toolContext()
       )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
@@ -103,7 +107,7 @@ describe('attachment tools', () => {
           data: 'hello world',
           description: 'Test',
         },
-        {} as any
+        toolContext()
       )) as ToolHandlerStandardReturn;
 
       expect(result.results).toHaveLength(1);
@@ -119,7 +123,6 @@ describe('attachment tools', () => {
       } as any;
 
       const tool = createAttachmentTools({
-        attachmentManager,
         attachmentsService: typedAttachmentsService,
         formatContext,
       }).find((t) => t.id === attachmentTools.add)!;
@@ -135,7 +138,6 @@ describe('attachment tools', () => {
       } as any;
 
       const tool = createAttachmentTools({
-        attachmentManager,
         attachmentsService: typedAttachmentsService,
         formatContext,
       }).find((t) => t.id === attachmentTools.add)!;
@@ -159,14 +161,13 @@ describe('attachment tools', () => {
       } as any;
 
       const tool = createAttachmentTools({
-        attachmentManager,
         attachmentsService: typedAttachmentsService,
         formatContext,
       }).find((t) => t.id === attachmentTools.add)!;
 
       const result = (await tool.handler(
         { type: 'image', data: 'binary data', description: 'A photo' },
-        {} as any
+        toolContext()
       )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
@@ -194,7 +195,7 @@ describe('attachment tools', () => {
           data: 'second',
           description: 'Second',
         },
-        {} as any
+        toolContext()
       )) as ToolHandlerStandardReturn;
 
       expect(result.results).toHaveLength(1);
@@ -213,7 +214,7 @@ describe('attachment tools', () => {
       const tool = getTool(attachmentTools.read);
       const result = (await tool.handler(
         { attachment_id: attachment.id },
-        {} as any
+        toolContext()
       )) as ToolHandlerStandardReturn;
 
       expect(result.results).toHaveLength(1);
@@ -264,14 +265,13 @@ describe('attachment tools', () => {
 
       // Read should return the resolved data directly — no raw_data, no re-resolve
       const tool = createAttachmentTools({
-        attachmentManager: resolveAttachmentManager,
         attachmentsService: customAttachmentsService,
         formatContext,
       }).find((t) => t.id === attachmentTools.read)!;
 
       const result = (await tool.handler(
         { attachment_id: attachment.id },
-        {} as any
+        toolContext(resolveAttachmentManager)
       )) as ToolHandlerStandardReturn;
 
       expect((result.results[0] as any).data.type).toBe(VISUALIZATION_ATTACHMENT_TYPE);
@@ -292,7 +292,7 @@ describe('attachment tools', () => {
       const tool = getTool(attachmentTools.read);
       const result = (await tool.handler(
         { attachment_id: attachment.id, version: 1 },
-        {} as any
+        toolContext()
       )) as ToolHandlerStandardReturn;
 
       expect((result.results[0] as any).data.type).toBe('text');
@@ -303,7 +303,7 @@ describe('attachment tools', () => {
       const tool = getTool(attachmentTools.read);
       const result = (await tool.handler(
         { attachment_id: 'non-existent' },
-        {} as any
+        toolContext()
       )) as ToolHandlerStandardReturn;
 
       expect(result.results).toHaveLength(1);
@@ -337,14 +337,13 @@ describe('attachment tools', () => {
       });
 
       const tool = createAttachmentTools({
-        attachmentManager: imageManager,
         attachmentsService: imageAttachmentsService,
         formatContext,
       }).find((t) => t.id === attachmentTools.read)!;
 
       const result = (await tool.handler(
         { attachment_id: attachment.id },
-        {} as any
+        toolContext(imageManager)
       )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.image);
@@ -368,7 +367,7 @@ describe('attachment tools', () => {
       const tool = getTool(attachmentTools.update);
       const result = (await tool.handler(
         { attachment_id: attachment.id, data: 'v2' },
-        {} as any
+        toolContext()
       )) as ToolHandlerStandardReturn;
 
       expect((result.results[0] as any).data.type).toBe('text');
@@ -387,7 +386,7 @@ describe('attachment tools', () => {
       const tool = getTool(attachmentTools.update);
       const result = (await tool.handler(
         { attachment_id: attachment.id, data: 'v2' },
-        {} as any
+        toolContext()
       )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
@@ -404,7 +403,6 @@ describe('attachment tools', () => {
       } as any;
 
       const tool = createAttachmentTools({
-        attachmentManager,
         attachmentsService: readonlyAttachmentsService,
         formatContext,
       }).find((t) => t.id === attachmentTools.update)!;
@@ -417,7 +415,7 @@ describe('attachment tools', () => {
 
       const result = (await tool.handler(
         { attachment_id: attachment.id, data: 'v2' },
-        {} as any
+        toolContext()
       )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
@@ -435,7 +433,7 @@ describe('attachment tools', () => {
       });
 
       const tool = getTool(attachmentTools.list);
-      const result = (await tool.handler({}, {} as any)) as ToolHandlerStandardReturn;
+      const result = (await tool.handler({}, toolContext())) as ToolHandlerStandardReturn;
 
       expect((result.results[0] as any).data.count).toBe(2);
       expect((result.results[0] as any).data.attachments).toHaveLength(2);
@@ -451,10 +449,10 @@ describe('attachment tools', () => {
       attachmentManager.delete(a1.id);
 
       const tool = getTool(attachmentTools.list);
-      const resultActive = (await tool.handler({}, {} as any)) as ToolHandlerStandardReturn;
+      const resultActive = (await tool.handler({}, toolContext())) as ToolHandlerStandardReturn;
       const resultAll = (await tool.handler(
         { include_deleted: true },
-        {} as any
+        toolContext()
       )) as ToolHandlerStandardReturn;
 
       expect((resultActive.results[0] as any).data.count).toBe(1);
@@ -478,7 +476,7 @@ describe('attachment tools', () => {
           from_version: 1,
           to_version: 2,
         },
-        {} as any
+        toolContext()
       )) as ToolHandlerStandardReturn;
 
       expect((result.results[0] as any).data.attachment_id).toBe(attachment.id);
@@ -496,10 +494,18 @@ describe('attachment tools', () => {
           from_version: 1,
           to_version: 2,
         },
-        {} as any
+        toolContext()
       )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
     });
+  });
+
+  it('records changes made by a tool under its tool call id', async () => {
+    const tool = getTool(attachmentTools.add);
+    await tool.handler({ type: 'text', data: 'hello', description: 'Test' }, toolContext());
+    expect(attachmentManager.drainChanges()).toEqual([
+      expect.objectContaining({ kind: 'added', tool_call_id: 'call-1', description: 'Test' }),
+    ]);
   });
 });

@@ -28,6 +28,8 @@ import {
 } from './render_steps_to_messages';
 import { toolCallKey } from './filestore_substitution';
 import type { ToolCallResultTransformer } from './tool_summarization';
+import { attachmentEventFixture } from '../../../../test_utils/timeline';
+import { createAttachmentNoticeRenderer } from './attachment_event_presentation';
 
 const other = (id: string, data: object = { id }): ToolResult => ({
   tool_result_id: `r-${id}`,
@@ -422,6 +424,57 @@ describe('renderCurrentRun', () => {
       { type: 'text', text: expect.stringContaining('attachment_id="ok"') },
       { type: 'image_url', image_url: { url: 'data:image/png;base64,AAA' } },
     ]);
+  });
+
+  it('puts the attachment notice after the tool results and before the image trailer', async () => {
+    const results: ToolResult[] = [
+      {
+        tool_result_id: 'i1',
+        type: ToolResultType.image,
+        data: { attachment_id: 'ok', mime_type: 'image/png', name: 'pic', description: '' },
+      },
+    ];
+    const messages = await renderCurrentRun({
+      run: {
+        roundId: 'r',
+        steps: [call('c1', { results })],
+        renderState: rendered('c1'),
+        cycleLimit: 10,
+        pendingToolCallIds: [],
+        retryNotices: [],
+        attachmentEvents: [
+          attachmentEventFixture({ id: 't', toolCallId: 'c1', attachmentId: 'att-2' }),
+        ],
+      },
+      phase: 'research',
+      imageResolver: async () => ({ base64: 'AAA', mimeType: 'image/png' }),
+      attachments: {
+        notices: createAttachmentNoticeRenderer({ describeType: () => undefined }),
+        resumeAnchors: new Map(),
+      },
+    });
+    expect(types(messages)).toEqual(['ai', 'tool', 'human', 'human']);
+    expect(messages[2].content).toContain('attachment_id="att-2"');
+    expect(messages[3].content).toEqual([
+      { type: 'text', text: expect.stringContaining('attachment_id="ok"') },
+      { type: 'image_url', image_url: { url: 'data:image/png;base64,AAA' } },
+    ]);
+  });
+
+  it('renders no notice when the run has attachment events but no attachments option', async () => {
+    const messages = await renderCurrentRun({
+      run: {
+        roundId: 'r',
+        steps: [call('c1')],
+        renderState: rendered('c1'),
+        cycleLimit: 10,
+        pendingToolCallIds: [],
+        retryNotices: [],
+        attachmentEvents: [attachmentEventFixture({ id: 't', toolCallId: 'c1' })],
+      },
+      phase: 'research',
+    });
+    expect(types(messages)).toEqual(['ai', 'tool']);
   });
 
   describe('range', () => {

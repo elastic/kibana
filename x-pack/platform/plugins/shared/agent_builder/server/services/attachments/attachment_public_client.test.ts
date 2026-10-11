@@ -180,6 +180,7 @@ describe('createAttachmentPublicClient', () => {
             current_version: 1,
             render_inline: true,
             source: 'http_api',
+            format: 2,
           },
         }),
       ]);
@@ -322,6 +323,7 @@ describe('createAttachmentPublicClient', () => {
             current_version: 2,
             render_inline: false,
             source: 'http_api',
+            format: 2,
           },
         }),
       ]);
@@ -417,6 +419,7 @@ describe('createAttachmentPublicClient', () => {
             attachment_type: 'text',
             hard_delete: false,
             source: 'http_api',
+            format: 2,
           },
         }),
       ]);
@@ -477,6 +480,7 @@ describe('createAttachmentPublicClient', () => {
         attachment_type: 'text',
         hard_delete: true,
         source: 'http_api',
+        format: 2,
       });
     });
 
@@ -523,6 +527,60 @@ describe('createAttachmentPublicClient', () => {
         code: 'attachmentPermanentDeleteBlocked',
         meta: { reason: 'client_id' },
       });
+    });
+  });
+
+  describe('restore', () => {
+    it('restores a soft-deleted attachment and emits attachment_restored in the same write', async () => {
+      const deps = buildDeps();
+      deps.conversationClient.get.mockResolvedValue({
+        id: 'c1',
+        attachments: [makeAttachment({ id: 'a1', active: false, description: 'Notes' })],
+        rounds: [],
+      });
+
+      const restored = await deps.build().restore({ conversationId: 'c1', attachmentId: 'a1' });
+
+      expect(restored.active).toBe(true);
+      const [{ events, attachments }] = deps.conversationClient.appendEvents.mock.calls[0];
+      expect(events).toEqual([
+        expect.objectContaining({
+          type: 'attachment_restored',
+          data: {
+            attachment_id: 'a1',
+            attachment_type: 'text',
+            current_version: 1,
+            description: 'Notes',
+            source: 'http_api',
+            format: 2,
+          },
+        }),
+      ]);
+      expect(attachments.produced[0].active).toBe(true);
+    });
+
+    it('throws AttachmentNotFoundError when the attachment is missing', async () => {
+      const deps = buildDeps();
+      deps.conversationClient.get.mockResolvedValue({ id: 'c1', attachments: [], rounds: [] });
+      await expect(
+        deps.build().restore({ conversationId: 'c1', attachmentId: 'missing' })
+      ).rejects.toMatchObject({ meta: expect.objectContaining({ statusCode: 404 }) });
+    });
+
+    it('rejects an attachment that is not deleted, without writing', async () => {
+      const deps = buildDeps();
+      deps.conversationClient.get.mockResolvedValue({
+        id: 'c1',
+        attachments: [makeAttachment({ id: 'a1' })],
+        rounds: [],
+      });
+      await expect(
+        deps.build().restore({ conversationId: 'c1', attachmentId: 'a1' })
+      ).rejects.toMatchObject({
+        message: "Attachment 'a1' is not deleted",
+        meta: expect.objectContaining({ statusCode: 400 }),
+      });
+      expect(deps.conversationClient.appendEvents).not.toHaveBeenCalled();
     });
   });
 

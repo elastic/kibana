@@ -188,6 +188,7 @@ export type {
   GetAttachmentArgs,
   UpdateAttachmentArgs,
   DeleteAttachmentArgs,
+  RestoreAttachmentArgs,
   ListAttachmentsArgs,
   BulkCreateAttachmentInput,
   BulkCreateAttachmentError,
