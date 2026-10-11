@@ -7,7 +7,8 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import { ExecutionStatus } from '@kbn/workflows';
-import { isReviewAtApprovalGate } from './workflow_task';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { decideReviewProposal, isReviewAtApprovalGate } from './workflow_task';
 
 const CONVERSATION_ID = 'conv-1';
 
@@ -83,5 +84,54 @@ describe('isReviewAtApprovalGate', () => {
       await expect(isReviewAtApprovalGate({ fetch, review: review(status) })).resolves.toBe(false);
     }
     expect(fetch).not.toHaveBeenCalled();
+  });
+});
+
+describe('decideReviewProposal', () => {
+  const log = { info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
+  const stepExecutions = review(ExecutionStatus.WAITING_FOR_CHILD).stepExecutions;
+
+  const conflict = (status: string) =>
+    new Error(
+      `[POST http://localhost:5620/internal/proposals/p1/approve] 409 Conflict -- ` +
+        `{"message":"Execution [e1] is not waiting for input (status: ${status})"}`
+    );
+
+  const fetchApproveFailing = (error: Error) =>
+    jest.fn().mockImplementation(async (path: string) => {
+      if (path === '/internal/proposals') return { proposals: [{ id: 'p1' }] };
+      throw error;
+    }) as unknown as jest.MockedFunction<HttpHandler>;
+
+  const decide = (fetch: HttpHandler) =>
+    decideReviewProposal({
+      fetch,
+      log,
+      stepExecutions,
+      executionId: 'rev-1',
+      approved: true,
+      pollIntervalMs: 1,
+    });
+
+  // smoke 8ceaabb8: the proposal is listed `pending` before its gate execution has parked,
+  // so approve 409s with status: running. That is a re-poll, not a failed run.
+  it('reports "not decided yet" when the gate execution is still running', async () => {
+    await expect(decide(fetchApproveFailing(conflict('running')))).resolves.toBe(false);
+  });
+
+  it('still throws on a genuine conflict (gate already finished)', async () => {
+    await expect(decide(fetchApproveFailing(conflict('completed')))).rejects.toThrow(
+      /not waiting for input \(status: completed\)/
+    );
+  });
+
+  it('returns true once the approve call lands', async () => {
+    const fetch = jest
+      .fn()
+      .mockImplementation(async (path: string) =>
+        path === '/internal/proposals' ? { proposals: [{ id: 'p1' }] } : {}
+      ) as unknown as jest.MockedFunction<HttpHandler>;
+
+    await expect(decide(fetch)).resolves.toBe(true);
   });
 });

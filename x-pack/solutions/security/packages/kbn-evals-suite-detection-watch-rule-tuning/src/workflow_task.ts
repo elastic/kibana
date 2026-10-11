@@ -220,6 +220,18 @@ export const isWaitingStepNotReady = (error: unknown): boolean =>
   /waiting step not found/.test(String((error as { message?: unknown })?.message ?? error));
 
 /**
+ * True for the 409 `/internal/proposals/{id}/approve|dismiss` returns while the proposal's gate
+ * execution is still `running`: the proposal record is written before the gate workflow has
+ * parked on its waitForInput step, so a just-listed `pending` proposal can briefly be undecidable.
+ * The harness re-polls through it. Any other status (completed, cancelled, failed) is a real
+ * conflict and does NOT match.
+ */
+export const isGateNotParkedYet = (error: unknown): boolean =>
+  /is not waiting for input \(status: (running|waiting_for_child|pending)\)/.test(
+    String((error as { message?: unknown })?.message ?? error)
+  );
+
+/**
  * True for executions the runtime never actually ran — dropped by a concurrency
  * group or cancelled. Scoring these 0 would report an infrastructure collision as a
  * model failure.
@@ -337,7 +349,7 @@ const getExecution = async (
  * (edit-rule patch), dismissing walks it down the no-action branch, which is
  * what the approval spec's engine-side assertions observe.
  */
-const decideReviewProposal = async ({
+export const decideReviewProposal = async ({
   fetch,
   log,
   stepExecutions,
@@ -378,16 +390,25 @@ const decideReviewProposal = async ({
   }
 
   const proposalId = proposals[0].id;
-  await fetch(
-    approved
-      ? `/internal/proposals/${proposalId}/approve`
-      : `/internal/proposals/${proposalId}/dismiss`,
-    {
-      method: 'POST',
-      headers: { 'elastic-api-version': '1', 'kbn-xsrf': 'true' },
-      body: JSON.stringify(approved ? {} : { dismissReason: 'no_reason' }),
-    }
-  );
+  try {
+    await fetch(
+      approved
+        ? `/internal/proposals/${proposalId}/approve`
+        : `/internal/proposals/${proposalId}/dismiss`,
+      {
+        method: 'POST',
+        headers: { 'elastic-api-version': '1', 'kbn-xsrf': 'true' },
+        body: JSON.stringify(approved ? {} : { dismissReason: 'no_reason' }),
+      }
+    );
+  } catch (error) {
+    if (!isGateNotParkedYet(error)) throw error;
+    log.info(
+      `Proposal ${proposalId} gate has not parked yet (execution still running); retrying after ${pollIntervalMs}ms`
+    );
+    await sleep(pollIntervalMs);
+    return false;
+  }
   log.info(
     `${
       approved ? 'Approved' : 'Dismissed'
