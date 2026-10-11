@@ -23,6 +23,9 @@ import * as i18n from './translations';
 
 export const isImage = (file: { mimeType?: string }) => file.mimeType?.startsWith('image/');
 
+export const getFileDisplayName = (file: { name: string; extension?: string }) =>
+  file.extension !== undefined ? `${file.name}.${file.extension}` : file.name;
+
 export const parseMimeType = (mimeType: string | undefined) => {
   if (typeof mimeType === 'undefined') {
     return i18n.UNKNOWN_MIME_TYPE;

@@ -216,8 +216,27 @@ describe('getFileType', () => {
   });
 
   describe('getRemovalActivity', () => {
-    it('event renders the right message', () => {
-      expect(fileType.getRemovalActivity?.(undefined as never).event).toBe('removed file');
+    it('includes the file name', () => {
+      expect(
+        fileType.getRemovalActivity?.({
+          attachmentId: basicFileMock.id,
+          metadata: {
+            files: [
+              {
+                name: basicFileMock.name,
+                extension: 'png',
+                mimeType: 'image/png',
+                created: basicFileMock.created,
+              },
+            ],
+            soType: FILE_SO_TYPE,
+          },
+        } as FileViewProps).event
+      ).toBe('removed file my-super-cool-screenshot.png');
+    });
+
+    it('falls back to the generic message without valid metadata', () => {
+      expect(fileType.getRemovalActivity?.({} as FileViewProps).event).toBe('removed file');
     });
   });
 });

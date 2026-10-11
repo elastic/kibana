@@ -212,4 +212,29 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     expect(screen.getByText(/My event/)).toBeInTheDocument();
     expect(screen.getByTestId('user-action-via-source')).toHaveTextContent('via Elastic AI Agent');
   });
+
+  it('keeps only the copy link when the attachment is deleted', () => {
+    const getActions = jest.fn().mockReturnValue([]);
+    getCreationActivity.mockReturnValue({ ...creationActivityProps, getActions });
+
+    const [built] = createRegisteredAttachmentUserActionBuilder({
+      ...userActionBuilderArgs,
+      isDeleted: true,
+    }).build();
+
+    render(
+      <TestProviders>
+        <EuiCommentList comments={[built]} />
+      </TestProviders>
+    );
+
+    expect(built).not.toHaveProperty('children');
+    expect(built['data-test-subj']).toBe(`comment-${attachment.type}-${attachmentTypeId}-deleted`);
+    expect(getActions).not.toHaveBeenCalled();
+    expect(screen.getByTestId(`copy-link-${attachment.id}`)).toHaveAttribute(
+      'id',
+      `${attachment.id}-permLink`
+    );
+    expect(screen.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
+  });
 });
