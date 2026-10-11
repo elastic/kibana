@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout-security';
+import { globalSetupHook, SECURITY_ARCHIVES } from '@kbn/scout-security';
 import type { GetMitreEntitiesResponse } from '@kbn/security-mitre-attack-common';
 import { GET_MITRE_ENTITIES_URL } from '@kbn/security-mitre-attack-common';
 import {
@@ -22,6 +22,12 @@ import { createSystemIndicesEsClient } from '../fixtures/system_indices_es_clien
 globalSetupHook(
   `Seed synthetic MITRE entities (version ${SEEDED_MITRE_FRAMEWORK_VERSION})`,
   async ({ esClient, kbnClient, config, log }) => {
+    // Serverless does not allow writing to restricted indices, and only stateful specs need the seed.
+    if (config.serverless) {
+      log.info('[managed-mitre setup] Skipping on serverless');
+      return;
+    }
+
     log.info(
       `[managed-mitre setup] Indexing ${SEEDED_MITRE_FRAMEWORK_VERSION} fixture entities into ${SEEDED_MITRE_INDEX}`
     );
@@ -93,3 +99,9 @@ globalSetupHook(
     }
   }
 );
+
+globalSetupHook('Ingest archives to Elasticsearch', async ({ esArchiver, log }) => {
+  log.debug('[setup] loading indicator match archives (only if indexes do not exist)...');
+  await esArchiver.loadIfNeeded(SECURITY_ARCHIVES.THREAT_INDICATOR);
+  await esArchiver.loadIfNeeded(SECURITY_ARCHIVES.SUSPICIOUS_SOURCE_EVENT);
+});

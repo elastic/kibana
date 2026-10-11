@@ -7,7 +7,7 @@
 
 import type { KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
-import type { CustomQueryRule } from '../../../constants/detection_rules';
+import type { CustomQueryRule, ThreatMatchRule } from '../../../constants/detection_rules';
 import { CUSTOM_QUERY_RULE } from '../../../constants/detection_rules';
 
 const DETECTION_ENGINE_RULES_URL = '/api/detection_engine/rules';
@@ -15,6 +15,7 @@ const DETECTION_ENGINE_RULES_BULK_ACTION = '/api/detection_engine/rules/_bulk_ac
 
 export interface DetectionRuleApiService {
   createCustomQueryRule: (body: CustomQueryRule) => Promise<{ id: string }>;
+  createThreatMatchRule: (body: ThreatMatchRule) => Promise<{ id: string }>;
   disable: (id: string) => Promise<void>;
   deleteAll: () => Promise<void>;
 }
@@ -35,6 +36,23 @@ export const getDetectionRuleApiService = ({
       return measurePerformanceAsync(
         log,
         'security.detectionRule.createCustomQueryRule',
+        async () => {
+          const { data } = await kbnClient.request<{ id: string }>({
+            method: 'POST',
+            path: `${basePath}${DETECTION_ENGINE_RULES_URL}`,
+            body,
+            // Avoid duplicate rule creation if the request is retried
+            retries: 0,
+          });
+          return { id: data.id };
+        }
+      );
+    },
+
+    createThreatMatchRule: async (body: ThreatMatchRule) => {
+      return measurePerformanceAsync(
+        log,
+        'security.detectionRule.createThreatMatchRule',
         async () => {
           const { data } = await kbnClient.request<{ id: string }>({
             method: 'POST',

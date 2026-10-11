@@ -17,6 +17,8 @@ import { CspmIntegrationPage } from './cspm_integration_page';
 import { TimelinePage } from './timeline';
 import { DetectionsAttackDiscoveryPage } from './detections_attack_discovery';
 import { RuleCreateWizardPage } from './rule_create_wizard';
+import { RuleDetailsPage } from './rule_details_page';
+import { RulesManagementPage } from './rules_management_page';
 import { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 import { AttackDetailsRightPanelPage } from './attack_details_right_panel';
 import { ServerlessProjectChromePage } from './serverless_project_chrome_page';
@@ -35,6 +37,8 @@ import { CoverageOverviewPage } from './coverage_overview';
 import { SecurityOverviewPage } from './security_overview_page';
 
 export type { RuleCreateWizardPage } from './rule_create_wizard';
+export type { RuleDetailsPage } from './rule_details_page';
+export type { RulesManagementPage } from './rules_management_page';
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 export { AddExceptionButtonType } from './add_exception_flyout';
 
@@ -50,6 +54,10 @@ export interface SecurityPageObjects extends PageObjects {
   detectionsAttackDiscoveryPage: DetectionsAttackDiscoveryPage;
   /** Custom query rule create wizard — Define → About → Schedule → Actions. */
   ruleCreateWizard: RuleCreateWizardPage;
+  /** Detection rules management page: rules table, row actions and bulk actions. */
+  rulesManagementPage: RulesManagementPage;
+  /** Rule details page: about/definition/schedule sections, execution status and alerts tab. */
+  ruleDetailsPage: RuleDetailsPage;
   /** Indicator match (threat match) rule creation page — threat index and field mapping controls. */
   threatMatchRuleCreatePage: ThreatMatchRuleCreatePage;
   attackDetailsRightPanelPage: AttackDetailsRightPanelPage;
@@ -103,6 +111,8 @@ export function extendPageObjects(
       config
     ),
     ruleCreateWizard: createLazyPageObject(RuleCreateWizardPage, page),
+    rulesManagementPage: createLazyPageObject(RulesManagementPage, page),
+    ruleDetailsPage: createLazyPageObject(RuleDetailsPage, page),
     threatMatchRuleCreatePage: createLazyPageObject(ThreatMatchRuleCreatePage, page),
     attackDetailsRightPanelPage: createLazyPageObject(AttackDetailsRightPanelPage, page),
     serverlessProjectChromePage: createLazyPageObject(ServerlessProjectChromePage, page),

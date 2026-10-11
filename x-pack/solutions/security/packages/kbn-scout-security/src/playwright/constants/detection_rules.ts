@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export type RuleSeverity = 'low' | 'medium' | 'high' | 'critical';
+
 export interface CustomQueryRuleResponseAction {
   action_type_id: '.endpoint';
   params: {
@@ -24,7 +26,7 @@ export interface CustomQueryRule {
   description: string;
   risk_score: number;
   rule_id: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: RuleSeverity;
   type: 'query';
   query: string;
   from: string;
@@ -32,6 +34,26 @@ export interface CustomQueryRule {
   interval?: string;
   investigation_fields?: { field_names: string[] };
   response_actions?: CustomQueryRuleResponseAction[];
+}
+
+export interface ThreatMatchRule {
+  name: string;
+  description: string;
+  enabled: boolean;
+  risk_score: number;
+  rule_id: string;
+  severity: RuleSeverity;
+  type: 'threat_match';
+  query: string;
+  index: string[];
+  threat_index: string[];
+  threat_query: string;
+  threat_mapping: Array<{ entries: Array<{ field: string; value: string; type: 'mapping' }> }>;
+  threat_indicator_path?: string;
+  from: string;
+  interval?: string;
+  timeline_id?: string;
+  timeline_title?: string;
 }
 
 export const DEFAULT_SECURITY_SOLUTION_INDEXES = [
