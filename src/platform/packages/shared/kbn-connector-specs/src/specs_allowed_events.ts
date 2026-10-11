@@ -20,4 +20,9 @@
  * available, delete this set and rely on code review, the kill switch, and
  * route authz. "Accept whatever specs define" is the intended end state.
  */
-export const SPECS_ALLOWED_EVENTS = new Set<string>(['.datadog', '.inboundWebhook', '.slack2']);
+export const SPECS_ALLOWED_EVENTS = new Set<string>([
+  '.datadog',
+  '.inboundWebhook',
+  '.servicenow_search',
+  '.slack2',
+]);

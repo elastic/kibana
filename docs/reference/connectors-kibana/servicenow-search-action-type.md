@@ -1,7 +1,7 @@
 ---
 navigation_title: "ServiceNow"
 type: reference
-description: "Use the ServiceNow connector to search, read, and write records, incidents, security incidents, events, and attachments in ServiceNow."
+description: "Use the ServiceNow connector to search, read, and write records, incidents, security incidents, events, and attachments in ServiceNow, and to start workflows from incident, journal, and change-approval events."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -11,7 +11,7 @@ applies_to:
 
 The {{sn}} connector enables federated search and data retrieval from {{sn}} tables using the ServiceNow Table API.
 
-You can use this connector in **Agent Builder** and **Workflows**.
+You can use this connector in **Agent Builder** and **Workflows**. With **Receive events** turned on, {{sn}} can also start a workflow when an incident, journal entry, or change approval changes.
 
 ::::{note}
 For the ServiceNow ITSM, SecOps, and ITOM connectors used with alerting and cases, refer to [ServiceNow ITSM](/reference/connectors-kibana/servicenow-action-type.md), [ServiceNow SecOps](/reference/connectors-kibana/servicenow-sir-action-type.md), and [ServiceNow ITOM](/reference/connectors-kibana/servicenow-itom-action-type.md).
@@ -48,6 +48,285 @@ Client Secret
 :   The OAuth client secret for your {{sn}} application.
 
 The connector automatically uses the correct {{sn}} OAuth endpoints for your instance (`https://<your-instance>.service-now.com/oauth_auth.do` for authorization and `https://<your-instance>.service-now.com/oauth_token.do` for token exchange). The connector handles scopes automatically.
+
+## Receive ServiceNow events [servicenow-search-inbound-events]
+```{applies_to}
+serverless: unavailable
+stack: preview 9.6+
+```
+
+The connector can start a workflow from an incident, a journal entry, or a change-approval update. {{kib}} does not create the {{sn}} rules. An administrator creates one outbound REST message first, then three **after** business rules that POST the JSON envelope below. A record saved before those rules exist is not sent later. Create a new record after the REST message and the matching rule are saved.
+
+A saved connector does not receive events until **Receive events** is turned on and the connector is saved. Rotate the ingest token after that save, and copy the ingest URL from the connector. The connector requires an Enterprise license. The {{sn}} instance must be able to reach that URL. A developer instance cannot call `localhost`. Set `server.publicBaseUrl` to the same host you put in the REST message.
+
+### Prerequisites [servicenow-search-inbound-prerequisites]
+
+{{kib}}
+:   Enterprise license, `server.publicBaseUrl`, and `xpack.actions.inboundEvents.enabled: true`. On the connector, turn on **Receive events**, save, and rotate the ingest token.
+
+{{sn}} platform
+:   The rules run **after** the database write and send the HTTP call with `executeAsync()`, so the user transaction does not wait on {{kib}}. An **async** rule has no `previous` object, so an update is sent as `incident.created`. Flow Designer and IntegrationHub are not required.
+
+Incident and journal events
+:   Incident Management, which provides the `incident` table. Journal rows are stored in the platform table `sys_journal_field`.
+
+Change-approval events
+:   Change Management, which provides `change_request`. Approval rows are stored in the platform table `sysapproval_approver`. An instance without Change Management can still use the incident and journal triggers.
+
+Roles
+:   Creating the business rules and the REST message requires the admin role. The user who changes the record must be able to read that row. The journal rule sends a work note only when that user can read `work_notes` on the incident. Otherwise it does not call {{kib}}.
+
+### Ingest URL [servicenow-search-inbound-url]
+
+Copy the URL from the connector. It has this shape. The default space has no `/s/{space-id}` prefix.
+
+```text
+https://<kibana-host>/api/actions/events/.servicenow_search/<connector-id>
+https://<kibana-host>/s/<space-id>/api/actions/events/.servicenow_search/<connector-id>
+```
+
+Send `Authorization: Bearer <ingest-token>` and `Content-Type: application/json`. If the REST message cannot set `Authorization`, add `?token=<ingest-token>` to the URL instead.
+
+### Payload [servicenow-search-inbound-payload]
+
+Each POST sends one `occurrence`. Reference fields are sys_ids (`getValue()`), not display values. `sys_updated_on` is used only to correlate retries. It is not a workflow field. A body that omits it still starts the workflow, with a new correlation key.
+
+| Workflow event | `occurrence` | Required fields | Optional fields |
+| --- | --- | --- | --- |
+| `servicenow_search.incident_created` | `incident.created` | `table`, `sys_id`, `number` | `summary`, `state`, `priority`, `assignment_group`, `assigned_to` |
+| `servicenow_search.incident_updated` | `incident.updated` | `table`, `sys_id` | `number`, `changed_fields` |
+| `servicenow_search.incident_resolved` | `incident.resolved` | `table`, `sys_id`, `state` | `number`, `close_code`, `close_notes` |
+| `servicenow_search.comment_added` | `comment.added` | `table`, `sys_id`, `journal_entry_id`, `author`, `text` | `number`, `timestamp` |
+| `servicenow_search.work_note_added` | `work_note.added` | `table`, `sys_id`, `journal_entry_id`, `author`, `text` | `number`, `timestamp` |
+| `servicenow_search.change_approval_state_changed` | `change.approval_state_changed` | `change_request_id`, `approval_id`, `state` | `approver`, `previous_state` |
+
+`summary` is the incident short description. `changed_fields` is an array of up to 20 objects, `{ "field", "previous", "current" }`. `previous` and `current` are included when {{sn}} sent them. Identifiers are limited to 128 characters, field values and `summary` to 1,024, and `text` and `close_notes` to 40,000.
+
+`incident.resolved` covers both resolved and closed. The resulting `state` is on the event, so a workflow condition can keep one of the two. A comment, a work note, and an approval are separate occurrences. A workflow subscribed to one of them does not run for the others.
+
+An `occurrence` that is not in this table, or a body missing a required field, does not start these workflows.
+
+### Outbound REST message [servicenow-search-inbound-rest-message]
+
+In the {{sn}} banner, click **All** and type `REST Message`. Open **System Web Services > Outbound > REST Message**. The Admin workspace menu does not list this record.
+
+Create a message whose **Name** is exactly `Elastic Workflows`, then save it before adding a method. Under **HTTP Methods**, click **New** and set:
+
+- **Name**: `post`. The scripts look up this name. It is case sensitive. **POST**, `Default POST`, or any other name throws `com.glide.communications.ProcessingException` and writes nothing to the outbound HTTP log. That error is in **System Logs > Errors**.
+- **HTTP method**: POST. This dropdown is the verb. It is separate from **Name**.
+- **Endpoint**: the ingest URL copied from the connector, on a host the {{sn}} instance can reach.
+- HTTP header `Content-Type`: `application/json`
+- HTTP header `Authorization`: `Bearer <ingest-token>`
+
+The three business rules call `new sn_ws.RESTMessageV2('Elastic Workflows', 'post')`. Rotating the ingest token means updating this header, or the `token` query parameter, and saving the connector token in {{kib}}.
+
+### Incident rule [servicenow-search-inbound-incident-rule]
+
+Click **All**, type `Business Rules`, and open **System Definition > Business Rules**. Create an **after** business rule on `incident` with **Advanced**, **Insert**, and **Update** selected. Put the script on the **Advanced** tab. Leave **When** set to **after**. **async** has no `previous` record, so `previous.nil()` is true for an update and the workflow receives `servicenow_search.incident_created`.
+
+On insert, `current.operation()` is `insert` and the script sends `incident.created`.
+
+When `state` changes to the resolved or closed value, it sends `incident.resolved` and does not also send `incident.updated`. Out-of-box values are `6` (Resolved) and `7` (Closed). If this instance uses different choices, change those two values in the script. Any other watched-field change sends `incident.updated` with `changed_fields`. A journal-only update changes none of those fields, so the script does not call {{kib}}. Comments and work notes are delivered by the journal rule.
+
+```javascript
+(function executeRule(current, previous) {
+  var isInsert = current.operation() == 'insert';
+  var state = current.getValue('state');
+  var stateChanged = !isInsert && current.state.changes();
+  var isResolvedOrClosed = stateChanged && (state == '6' || state == '7');
+  var occurrence;
+
+  if (isInsert) {
+    occurrence = 'incident.created';
+  } else if (isResolvedOrClosed) {
+    occurrence = 'incident.resolved';
+  } else {
+    occurrence = 'incident.updated';
+  }
+
+  var watched = [
+    'short_description', 'state', 'priority', 'assignment_group', 'assigned_to',
+    'urgency', 'impact', 'category', 'caller_id', 'cmdb_ci', 'close_code', 'close_notes'
+  ];
+  var changedFields = [];
+
+  if (occurrence == 'incident.updated') {
+    for (var i = 0; i < watched.length; i++) {
+      var fieldName = watched[i];
+      if (current[fieldName].changes()) {
+        changedFields.push({
+          field: fieldName,
+          previous: previous.getValue(fieldName),
+          current: current.getValue(fieldName)
+        });
+      }
+    }
+    if (changedFields.length === 0) {
+      return;
+    }
+  }
+
+  var body = {
+    occurrence: occurrence,
+    table: current.getTableName(),
+    sys_id: current.getUniqueValue(),
+    number: current.getValue('number'),
+    sys_updated_on: current.getValue('sys_updated_on')
+  };
+
+  if (occurrence == 'incident.created') {
+    body.summary = current.getValue('short_description');
+    body.state = state;
+    body.priority = current.getValue('priority');
+    body.assignment_group = current.getValue('assignment_group');
+    body.assigned_to = current.getValue('assigned_to');
+  } else if (occurrence == 'incident.updated') {
+    body.changed_fields = changedFields.slice(0, 20);
+  } else {
+    body.state = state;
+    body.close_code = current.getValue('close_code');
+    body.close_notes = current.getValue('close_notes');
+  }
+
+  var request = new sn_ws.RESTMessageV2('Elastic Workflows', 'post');
+  request.setRequestBody(JSON.stringify(body));
+  request.executeAsync();
+})(current, previous);
+```
+
+### Journal rule [servicenow-search-inbound-journal-rule]
+
+Create an **after** business rule on `sys_journal_field` with **Insert** selected. Set the condition to `name=incident` and `element` in `comments`, `work_notes`. `comments` sends `comment.added`. `work_notes` sends `work_note.added` only when the user who saved the record can read `work_notes` on the parent incident. `table` and `sys_id` identify that incident (`name` and `element_id`). `author` is `sys_created_by` on the journal row.
+
+```javascript
+(function executeRule(current, previous) {
+  var element = current.getValue('element');
+  var occurrence;
+
+  if (element == 'comments') {
+    occurrence = 'comment.added';
+  } else if (element == 'work_notes') {
+    occurrence = 'work_note.added';
+  } else {
+    return;
+  }
+
+  var parent = new GlideRecord(current.getValue('name'));
+  var parentFound = parent.get(current.getValue('element_id'));
+  if (element == 'work_notes' && (!parentFound || !parent.work_notes.canRead())) {
+    return;
+  }
+
+  var text = current.getValue('value');
+  var author = current.getValue('sys_created_by');
+  if (!text || !author) {
+    return;
+  }
+
+  var body = {
+    occurrence: occurrence,
+    table: current.getValue('name'),
+    sys_id: current.getValue('element_id'),
+    journal_entry_id: current.getUniqueValue(),
+    author: author,
+    text: text,
+    timestamp: current.getValue('sys_created_on')
+  };
+  if (parentFound) {
+    body.number = parent.getValue('number');
+  }
+
+  var request = new sn_ws.RESTMessageV2('Elastic Workflows', 'post');
+  request.setRequestBody(JSON.stringify(body));
+  request.executeAsync();
+})(current, previous);
+```
+
+### Change-approval rule [servicenow-search-inbound-approval-rule]
+
+Create an **after** business rule on `sysapproval_approver` with **Update** selected and a condition that **State** changes. **after** is required so `previous` contains the approval state before the change. The script sends `change.approval_state_changed` only when `sysapproval` is the sys_id of a `change_request`. Approvals for other tables are ignored. `approver` is the approver's sys_id. `state` is the current approval choice, such as `approved` or `rejected`.
+
+```javascript
+(function executeRule(current, previous) {
+  if (!current.state.changes()) {
+    return;
+  }
+
+  var changeRequestId = current.getValue('sysapproval');
+  var changeRequest = new GlideRecord('change_request');
+  if (!changeRequest.get(changeRequestId)) {
+    return;
+  }
+
+  var body = {
+    occurrence: 'change.approval_state_changed',
+    change_request_id: changeRequestId,
+    approval_id: current.getUniqueValue(),
+    state: current.getValue('state'),
+    approver: current.getValue('approver'),
+    previous_state: previous.getValue('state')
+  };
+
+  var request = new sn_ws.RESTMessageV2('Elastic Workflows', 'post');
+  request.setRequestBody(JSON.stringify(body));
+  request.executeAsync();
+})(current, previous);
+```
+
+### Confirm the call [servicenow-search-inbound-confirm]
+
+Create a new incident after the REST message and the incident rule are saved. Then click **All**, type `Outbound HTTP Log`, and open the list at `sys_outbound_http_log_list.do`. The form `sys_outbound_http_log.do` is a new record, not the list of calls.
+
+Look for a row whose hostname is the {{kib}} host:
+
+- **No {{kib}} row, and System Logs > Errors shows `ProcessingException`.** The REST message **Name** is not `Elastic Workflows`, or the HTTP method **Name** is not `post`.
+- **No {{kib}} row and no error.** The incident script returned before the REST call. On an update, a watched field has to change. A journal-only save does not call {{kib}}.
+- **An update starts `servicenow_search.incident_created`.** **When** is **async**. Set it to **after** and detect the insert with `current.operation() == 'insert'` only. An async rule has no `previous` object, so treating an empty `previous` as an insert labels every save as created.
+- **A connection error.** The endpoint is not reachable from the {{sn}} instance. Use a public host, and set `server.publicBaseUrl` to that host.
+- **HTTP 404.** The ingest token does not match the connector, or **Receive events** was not saved before the token was rotated.
+- **HTTP 202.** {{kib}} accepted the event. The workflow must be enabled and subscribed to that event id, such as `servicenow_search.incident_created`.
+
+Rows for `signaldc.service-now.com` are {{sn}} telemetry. A response status of `-1` on those rows is not a {{kib}} response.
+
+### Example [servicenow-search-inbound-example]
+
+POST this body to the ingest URL. It starts `servicenow_search.incident_created` with `number` `INC0010001`, `summary` `VPN is down`, and `priority` `1`.
+
+```bash
+curl -X POST \
+  'https://<kibana-host>/api/actions/events/.servicenow_search/<connector-id>' \
+  -H 'Authorization: Bearer <ingest-token>' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "occurrence": "incident.created",
+    "table": "incident",
+    "sys_id": "46b66a40a9fe198101d44d884e7d3a1a",
+    "number": "INC0010001",
+    "summary": "VPN is down",
+    "state": "1",
+    "priority": "1",
+    "assignment_group": "group-1",
+    "assigned_to": "user-1",
+    "sys_updated_on": "2026-01-01 12:00:00"
+  }'
+```
+
+This workflow runs for that event when the priority is `1`. It stays disabled until the sample execution shows the expected fields. For another space, use the ingest URL copied from that space's connector. Replace `<connector-id>` with the connector instance id.
+
+```yaml
+name: Notify on a new priority 1 incident
+enabled: true
+triggers:
+  - type: servicenow_search.incident_created
+    connector-id: <connector-id>
+    on:
+      condition: "event.priority:1"
+steps:
+  - name: log_incident
+    type: console
+    with:
+      message: "Incident {{ event.number }} was created: {{ event.summary }}"
+```
 
 ## Test connectors [servicenow-search-action-configuration]
 
