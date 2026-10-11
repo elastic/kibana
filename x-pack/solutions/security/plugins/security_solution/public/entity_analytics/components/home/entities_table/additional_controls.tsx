@@ -21,6 +21,7 @@ export const AdditionalControls = ({
   onAddColumn,
   onRemoveColumn,
   onResetColumns,
+  showFieldsButton = true,
 }: {
   total: number;
   title: string;
@@ -28,6 +29,7 @@ export const AdditionalControls = ({
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
   onResetColumns: () => void;
+  showFieldsButton?: boolean;
 }) => {
   const { isFieldSelectorModalVisible, closeFieldsSelectorModal, openFieldsSelectorModal } =
     useFieldsModal();
@@ -52,20 +54,22 @@ export const AdditionalControls = ({
             total
           )} ${title}`}</span>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="tableOfContents"
-            onClick={openFieldsSelectorModal}
-            size="xs"
-            color="text"
-            data-test-subj={ENTITY_ANALYTICS_FIELDS_SELECTOR_OPEN_BUTTON}
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.entitiesTable.fieldsButton"
-              defaultMessage="Fields"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        {showFieldsButton && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="tableOfContents"
+              onClick={openFieldsSelectorModal}
+              size="xs"
+              color="text"
+              data-test-subj={ENTITY_ANALYTICS_FIELDS_SELECTOR_OPEN_BUTTON}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.entitiesTable.fieldsButton"
+                defaultMessage="Fields"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );

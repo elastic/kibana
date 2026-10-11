@@ -21,16 +21,16 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-import type { ActiveFilter, SignalCardData, SignalCardId } from './data';
+import type { SignalCardData, SignalCardId } from './data';
 
 export interface SignalCardsProps {
-  activeFilter: ActiveFilter | null;
-  /** Card values for the current page filters — see `getSignalCards`. */
+  activeTile: SignalCardId | null;
+  /** Tile values for the current page filters. */
   cards: SignalCardData[];
-  onFilterForCard: (cardId: SignalCardId) => void;
-  /** Kept for MetricChartsPanel wiring; cards are whole-card toggles in v.5. */
-  onFilterOutCard?: (cardId: SignalCardId) => void;
-  onAddCardToTimeline?: (cardId: SignalCardId) => void;
+  onFilterForTile: (tileId: SignalCardId) => void;
+  /** Kept for MetricChartsPanel wiring; tiles are whole-tile toggles in v.5. */
+  onFilterOutTile?: (tileId: SignalCardId) => void;
+  onAddTileToTimeline?: (tileId: SignalCardId) => void;
 }
 
 /** Named container so the grid can step columns from its own width, not the viewport. */
@@ -126,10 +126,6 @@ const CornerControl: React.FC<{
 }> = ({ selected, interactive, emphasized, title, onToggle }) => {
   const { euiTheme } = useEuiTheme();
 
-  if (!interactive) {
-    return null;
-  }
-
   // Match default filter chrome; selection is signaled by the accent dot only.
   const iconColor = emphasized ? 'primary' : euiTheme.colors.textSubdued;
 
@@ -165,6 +161,21 @@ const CornerControl: React.FC<{
       ) : null}
     </span>
   );
+
+  if (!interactive) {
+    // Keep the icon's space so the title wraps the same and the tile height doesn't change.
+    return (
+      <span
+        aria-hidden
+        css={css`
+          display: inline-flex;
+          visibility: hidden;
+        `}
+      >
+        {icon}
+      </span>
+    );
+  }
 
   return (
     <button
@@ -230,6 +241,7 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
   const isZero = card.value === 0;
   const isLoading = card.isLoading ?? false;
   const interactive = !isZero && !isLoading;
+  const metric = isZero ? '—' : card.value.toLocaleString();
   // Hover only — mouse clicks must not leave focus chrome that looks like hover after deselect.
   const emphasized = interactive && hovered;
 
@@ -396,34 +408,41 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
                 align-items: flex-end;
               `}
             >
-              {isLoading ? (
-                <EuiLoadingSpinner size="l" />
-              ) : (
-                <>
-                  <EuiTitle
-                    size="l"
-                    css={css`
-                      line-height: ${METRIC_LINE_HEIGHT};
-                      text-align: end;
-                      ${isExpanded ? `font-size: calc(${euiTheme.base}px * 2.5);` : ''}
-                    `}
-                  >
-                    <span>{isZero ? '—' : card.value.toLocaleString()}</span>
-                  </EuiTitle>
-                  {isZero && card.noDataMessage && (
-                    <EuiText
-                      size="xs"
-                      color="subdued"
+              {/* The spinner sits inside the title so the value's line box keeps the tile
+                  height while loading; otherwise the table below jumps. */}
+              <EuiTitle
+                size="l"
+                css={css`
+                  line-height: ${METRIC_LINE_HEIGHT};
+                  text-align: end;
+                  ${isExpanded ? `font-size: calc(${euiTheme.base}px * 2.5);` : ''}
+                `}
+              >
+                <span>
+                  {isLoading ? (
+                    <EuiLoadingSpinner
+                      size="l"
                       css={css`
-                        text-align: end;
-                        margin-block-start: ${euiTheme.size.xs};
-                        font-style: italic;
+                        vertical-align: middle;
                       `}
-                    >
-                      {card.noDataMessage}
-                    </EuiText>
+                    />
+                  ) : (
+                    metric
                   )}
-                </>
+                </span>
+              </EuiTitle>
+              {!isLoading && isZero && card.noDataMessage && (
+                <EuiText
+                  size="xs"
+                  color="subdued"
+                  css={css`
+                    text-align: end;
+                    margin-block-start: ${euiTheme.size.xs};
+                    font-style: italic;
+                  `}
+                >
+                  {card.noDataMessage}
+                </EuiText>
               )}
             </div>
           </EuiFlexItem>
@@ -455,14 +474,10 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
  * Needs-attention metrics in a capped wrapping grid (6 compact, 3 expanded).
  * Each card toggles an in-page table filter; selection stays on the card itself.
  */
-export const SignalCards: React.FC<SignalCardsProps> = ({
-  activeFilter,
-  cards,
-  onFilterForCard,
-}) => {
+export const SignalCards: React.FC<SignalCardsProps> = ({ activeTile, cards, onFilterForTile }) => {
   const { euiTheme } = useEuiTheme();
   const [isExpanded, setIsExpanded] = useState(false);
-  const anySelected = activeFilter?.type === 'card';
+  const anySelected = activeTile != null;
 
   return (
     <>
@@ -503,7 +518,7 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
           })}
         >
           {cards.map((card) => {
-            const selected = activeFilter?.type === 'card' && activeFilter.cardId === card.id;
+            const selected = activeTile === card.id;
             const dimmed = Boolean(anySelected && !selected);
 
             return (
@@ -526,7 +541,7 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
                   selected={selected}
                   dimmed={dimmed}
                   isExpanded={isExpanded}
-                  onToggle={() => onFilterForCard(card.id)}
+                  onToggle={() => onFilterForTile(card.id)}
                 />
               </div>
             );

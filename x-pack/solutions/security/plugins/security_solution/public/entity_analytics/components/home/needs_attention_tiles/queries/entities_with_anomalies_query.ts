@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import type { EntityStoreEuid } from '@kbn/entity-store/public';
-import type { TimeRange } from '../../use_time_range_param';
-import { evalGuardedTypedEuids } from './guarded_typed_euid_eval';
-
-const ML_ANOMALIES_INDEX = '.ml-anomalies-shared*';
-const ENTITY_TYPES = ['user', 'host', 'service'] as const;
+import type { TimeRange } from '../../entities_grid/common';
+// The query module, not the table index: the index also loads the grid components.
+import {
+  ANOMALY_RECORD_FILTER,
+  buildAnomalyJobFilter,
+  buildLookback,
+  ML_ANOMALY_INDICES,
+} from '../../entities_grid/queries/esql';
+import {
+  buildPerTypeEuidEvals,
+  evalGuardedTypedEuids,
+} from '../../entities_grid/queries/euid_pipeline';
 
 /**
  * Builds a single ES|QL query that counts distinct entities with at least one
@@ -18,7 +24,6 @@ const ENTITY_TYPES = ['user', 'host', 'service'] as const;
  * anomalies → entity-latest on the typed EUID (entity.id).
  */
 export const buildEntitiesWithAnomaliesCountQuery = (
-  euid: EntityStoreEuid,
   entitiesIndexName: string,
   timeRange: TimeRange = '24h',
   entityFilterClauses: string[] = [],
@@ -27,22 +32,14 @@ export const buildEntitiesWithAnomaliesCountQuery = (
   const parts: string[] = [];
 
   parts.push(`SET unmapped_fields="nullify";`);
-  parts.push(`FROM ${ML_ANOMALIES_INDEX}`);
-
-  const jobFilter =
-    jobIds.length > 0 ? ` AND job_id IN (${jobIds.map((id) => `"${id}"`).join(', ')})` : '';
+  parts.push(`FROM ${ML_ANOMALY_INDICES}`);
   parts.push(
-    `| WHERE result_type == "record" AND is_interim == false AND record_score >= 1 AND @timestamp >= NOW() - ${timeRange}${jobFilter}`
+    `| WHERE ${ANOMALY_RECORD_FILTER} AND @timestamp >= ${buildLookback(
+      timeRange
+    )} AND ${buildAnomalyJobFilter(jobIds)}`
   );
 
-  for (const entityType of ENTITY_TYPES) {
-    const fieldEvals = euid.esql.getFieldEvaluations(entityType);
-    if (fieldEvals) {
-      parts.push(`| EVAL ${fieldEvals}`);
-    }
-    parts.push(`| EVAL ${euid.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
-  }
-
+  parts.push(...buildPerTypeEuidEvals());
   parts.push(evalGuardedTypedEuids('derived_euids'));
   parts.push(`| MV_EXPAND derived_euids`);
   parts.push(`| WHERE derived_euids IS NOT NULL`);
@@ -58,7 +55,8 @@ export const buildEntitiesWithAnomaliesCountQuery = (
   parts.push(
     `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`
   );
-  parts.push(`| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(entity.id)`);
+  // VALUES(effective_id) so tile → table IN-filter matches resolved-rows entity.id
+  parts.push(`| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)`);
 
   return parts.join('\n');
 };

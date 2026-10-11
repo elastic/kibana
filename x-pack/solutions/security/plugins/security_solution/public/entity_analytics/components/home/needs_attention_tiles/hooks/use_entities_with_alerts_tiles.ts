@@ -11,30 +11,39 @@ import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { buildAlertBasedTilesQuery } from '../queries/entities_with_alerts_query';
-import type { TimeRange } from '../../use_time_range_param';
 import { EMPTY_ENTITY_IDS } from '../data';
 import {
-  getEntityFilterESQL,
   EMPTY_ENTITY_FILTERS,
   type EntityFilters,
-} from '../../use_entity_filters_param';
+  type TimeRange,
+} from '../../entities_grid/common';
+import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 
 interface AlertBasedTilesResult {
-  alertsCount: number;
-  alertsEntityIds: string[];
+  severeAlertsCount: number;
+  severeAlertsEntityIds: string[];
   watchlistedCount: number;
   watchlistedEntityIds: string[];
+  newAlertingCount: number;
+  newAlertingEntityIds: string[];
 }
+
+const EMPTY_RESULT: AlertBasedTilesResult = {
+  severeAlertsCount: 0,
+  severeAlertsEntityIds: [],
+  watchlistedCount: 0,
+  watchlistedEntityIds: [],
+  newAlertingCount: 0,
+  newAlertingEntityIds: [],
+};
 
 export const parseAlertBasedTilesResponse = (raw: ESQLSearchResponse): AlertBasedTilesResult => {
   const row = raw.values?.[0];
-  if (!row)
-    return { alertsCount: 0, alertsEntityIds: [], watchlistedCount: 0, watchlistedEntityIds: [] };
+  if (!row) return EMPTY_RESULT;
 
   const col = (name: string) => raw.columns?.findIndex((c) => c.name === name) ?? -1;
   const toIds = (idx: number): string[] => {
@@ -44,25 +53,27 @@ export const parseAlertBasedTilesResponse = (raw: ESQLSearchResponse): AlertBase
     if (typeof v === 'string' && v) return [v];
     return [];
   };
+  const toCount = (idx: number): number => {
+    const v = idx < 0 ? undefined : row[idx];
+    return typeof v === 'number' ? v : 0;
+  };
 
   return {
-    alertsCount:
-      typeof row[col('alerts_count')] === 'number' ? (row[col('alerts_count')] as number) : 0,
-    alertsEntityIds: toIds(col('alerts_entity_ids')),
-    watchlistedCount:
-      typeof row[col('watchlisted_count')] === 'number'
-        ? (row[col('watchlisted_count')] as number)
-        : 0,
+    severeAlertsCount: toCount(col('severe_alerts_count')),
+    severeAlertsEntityIds: toIds(col('severe_alerts_entity_ids')),
+    watchlistedCount: toCount(col('watchlisted_count')),
     watchlistedEntityIds: toIds(col('watchlisted_entity_ids')),
+    newAlertingCount: toCount(col('new_alerting_count')),
+    newAlertingEntityIds: toIds(col('new_alerting_entity_ids')),
   };
 };
 
 /**
- * Runs a single alerts query that produces counts and entity ID lists for both the
- * "entities with alerts" tile and the "watchlisted entities with alerts" tile.
+ * Runs a single alerts query that produces counts and entity ID lists for the severely
+ * alerting, watchlisted & alerting, and new & alerting tiles.
  *
- * Running one query rather than two avoids executing the EUID pipeline twice, which
- * is expensive at high alert volumes. See buildAlertBasedTilesQuery for query details.
+ * Running one query rather than one per tile avoids executing the EUID pipeline several
+ * times, which is expensive at high alert volumes. See buildAlertBasedTilesQuery for details.
  */
 export const useAlertBasedTiles = ({
   spaceId,
@@ -76,26 +87,23 @@ export const useAlertBasedTiles = ({
   entityFilters?: EntityFilters;
 }) => {
   const { data } = useKibana().services;
-  const euidApi = useEntityStoreEuidApi();
   const {
     data: resolvedIndex,
     isLoading: isIndexLoading,
     error: indexError,
   } = useResolvedLatestEntitiesIndexName(spaceId);
 
-  const isEnabled =
-    !skip && !isIndexLoading && Boolean(euidApi) && Boolean(resolvedIndex?.indexName);
+  const isEnabled = !skip && !isIndexLoading && Boolean(resolvedIndex?.indexName);
 
   const query = useMemo(() => {
-    if (!resolvedIndex?.indexName || !euidApi) return null;
+    if (!resolvedIndex?.indexName) return null;
     return buildAlertBasedTilesQuery(
-      euidApi.euid,
       resolvedIndex.indexName,
       spaceId,
       timeRange,
-      getEntityFilterESQL(entityFilters)
+      buildEntityFilterClauses(entityFilters)
     );
-  }, [euidApi, resolvedIndex?.indexName, spaceId, timeRange, entityFilters]);
+  }, [resolvedIndex?.indexName, spaceId, timeRange, entityFilters]);
 
   const {
     data: queryResult,
@@ -105,13 +113,7 @@ export const useAlertBasedTiles = ({
   } = useQuery<AlertBasedTilesResult, SecurityAppError>(
     ['alertBasedTiles', query],
     async ({ signal }) => {
-      if (!query)
-        return {
-          alertsCount: 0,
-          alertsEntityIds: [],
-          watchlistedCount: 0,
-          watchlistedEntityIds: [],
-        };
+      if (!query) return EMPTY_RESULT;
       const raw = await lastValueFrom(
         data.search.search({ params: { query } }, { abortSignal: signal, strategy: 'esql_async' })
       );
@@ -138,14 +140,18 @@ export const useAlertBasedTiles = ({
   );
 
   return {
-    alertsCount: queryResult?.alertsCount ?? 0,
-    alertsEntityIds: isFetching
+    severeAlertsCount: queryResult?.severeAlertsCount ?? 0,
+    severeAlertsEntityIds: isFetching
       ? EMPTY_ENTITY_IDS
-      : queryResult?.alertsEntityIds ?? EMPTY_ENTITY_IDS,
+      : queryResult?.severeAlertsEntityIds ?? EMPTY_ENTITY_IDS,
     watchlistedCount: queryResult?.watchlistedCount ?? 0,
     watchlistedEntityIds: isFetching
       ? EMPTY_ENTITY_IDS
       : queryResult?.watchlistedEntityIds ?? EMPTY_ENTITY_IDS,
+    newAlertingCount: queryResult?.newAlertingCount ?? 0,
+    newAlertingEntityIds: isFetching
+      ? EMPTY_ENTITY_IDS
+      : queryResult?.newAlertingEntityIds ?? EMPTY_ENTITY_IDS,
     isLoading: isIndexLoading || isLoading || isFetching,
     error: filteredError ?? indexError,
   };
