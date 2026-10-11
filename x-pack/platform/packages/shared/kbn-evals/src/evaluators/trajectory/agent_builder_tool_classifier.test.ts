@@ -7,6 +7,7 @@
 
 import { attachmentTools, internalTools, platformCoreTools } from '@kbn/agent-builder-common';
 import { createTrajectoryEvaluator } from '.';
+import type { TrajectoryToolCall } from '.';
 import {
   createAgentBuilderToolClassifier,
   createUnclassifiedToolsEvaluator,
@@ -81,6 +82,35 @@ describe('createAgentBuilderToolClassifier', () => {
     expect(classify({ id: 'plan_next_step' })).toBe('unclassified');
   });
 
+  it('pins browser API tools (origin internal, not classified by Agent Builder) as unclassified', () => {
+    expect(
+      createAgentBuilderToolClassifier({ knownToolIds: ['browser_api_navigate'] })({
+        id: 'browser_api_navigate',
+        origin: 'internal',
+      })
+    ).toBe('unclassified');
+  });
+
+  it('does not silently drop an unknown attachments.* tool (N/A, not a false match)', async () => {
+    const evaluator = createTrajectoryEvaluator({
+      extractToolCalls: (output) => output as TrajectoryToolCall[],
+      goldenPathExtractor: () => [],
+      classifyTool: classify,
+    });
+    expect(
+      await evaluator.evaluate({
+        input: {},
+        output: [{ id: 'attachments.fetch_from_es', origin: 'internal' }],
+        expected: {},
+        metadata: null,
+      })
+    ).toMatchObject({
+      score: null,
+      label: 'N/A',
+      explanation: 'unclassified-tool:attachments.fetch_from_es',
+    });
+  });
+
   it('makes a trajectory with a simulated new Agent Builder tool N/A instead of 0', async () => {
     const evaluator = createTrajectoryEvaluator({
       extractToolCalls: (output) => output as string[],
@@ -120,6 +150,30 @@ describe('createUnclassifiedToolsEvaluator', () => {
 
   it('scores 0 when every tool is classified', async () => {
     expect(await run([attachmentTools.read, 'security.alerts'])).toMatchObject({ score: 0 });
+  });
+
+  it('exempts golden tools like the trajectory evaluator, so the two agree', async () => {
+    const extractToolCalls = (output: unknown) => output as string[];
+    const goldenPathExtractor = () => ['my_custom'];
+    const classifyTool = createAgentBuilderToolClassifier();
+    const args = { input: {}, output: ['my_custom'], expected: {}, metadata: null };
+
+    expect(
+      await createTrajectoryEvaluator({
+        extractToolCalls,
+        goldenPathExtractor,
+        classifyTool,
+      }).evaluate(args)
+    ).toMatchObject({ score: 1 });
+    expect(
+      await createUnclassifiedToolsEvaluator({
+        extractToolCalls,
+        goldenPathExtractor,
+        classifyTool,
+      }).evaluate(args)
+    ).toMatchObject({ score: 0, metadata: { unclassifiedToolIds: [] } });
+    // Without the extractor the golden tool is counted.
+    expect(await run(['my_custom'])).toMatchObject({ score: 1 });
   });
 
   it('is a lower-is-better code evaluator', () => {

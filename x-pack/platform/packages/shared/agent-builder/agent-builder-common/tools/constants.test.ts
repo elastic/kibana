@@ -44,11 +44,15 @@ describe('getInternalToolKind', () => {
     expect(getInternalToolKind(toolId)).toBe('data_access');
   });
 
-  it('classifies every attachment tool, including future ones, as runtime', () => {
+  it('classifies every known attachment tool as runtime', () => {
     for (const toolId of Object.values(attachmentTools)) {
       expect(getInternalToolKind(toolId)).toBe('runtime');
     }
-    expect(getInternalToolKind('attachments.some_future_tool')).toBe('runtime');
+  });
+
+  it('leaves an unknown attachments.* tool unclassified so it is not silently dropped', () => {
+    expect(getInternalToolKind('attachments.some_future_tool')).toBeUndefined();
+    expect(getInternalToolKind('attachments.fetch_from_es')).toBeUndefined();
   });
 
   it('classifies legacy filestore tools as data_access', () => {
