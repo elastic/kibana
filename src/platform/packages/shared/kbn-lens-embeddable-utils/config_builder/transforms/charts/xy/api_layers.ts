@@ -212,7 +212,11 @@ const seriesTypeFromStateToAPIMap: Record<SeriesType, DataLayerType['type']> = {
 };
 
 function convertSeriesTypeToAPIFormat(seriesType: SeriesType): DataLayerType['type'] {
-  return seriesTypeFromStateToAPIMap[seriesType];
+  const apiType = seriesTypeFromStateToAPIMap[seriesType];
+  if (!apiType) {
+    throw new Error(`Unsupported XY series type "${seriesType}"`);
+  }
+  return apiType;
 }
 
 export function buildAPIDataLayer(

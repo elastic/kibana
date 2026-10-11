@@ -14,7 +14,12 @@ import type { XYConfig, XYConfigNoESQL, XYConfigESQL, XYLayer } from '../../../s
 import type { DataSourceStateLayer } from '../../utils';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import { buildXYLayer } from './state_layers';
-import { isAPIDataLayer, isAPIesqlXYLayer, isLensStateDataLayer } from './helpers';
+import {
+  isAPIDataLayer,
+  isAPIesqlXYLayer,
+  isLensStateDataLayer,
+  normalizeLegacySeriesTypes,
+} from './helpers';
 import { nonNullable, isFormBasedLayer, isTextBasedLayer } from '../../utils';
 import { getReversibleMappings, getScaleTypeFromColumnType } from '../utils';
 import {
@@ -189,12 +194,13 @@ function areAllDataLayersNoEsql(apiLayers: XYLayer[]): apiLayers is XYConfigNoES
 }
 
 export function buildVisualizationAPI(
-  config: XYPersistedState,
+  persistedConfig: XYPersistedState,
   layers: Record<string, DataSourceStateLayer>,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
   internalReferences: SavedObjectReference[]
 ): XYConfig {
+  const config = normalizeLegacySeriesTypes(persistedConfig);
   const dataLayers = config.layers.filter(isLensStateDataLayer);
   const seriesTypes = dataLayers.map((layer) => layer.seriesType);
 

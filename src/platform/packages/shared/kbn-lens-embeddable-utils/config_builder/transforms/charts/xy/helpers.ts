@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYDataLayerConfig, XYLayerConfig, XYPersistedLayerConfig } from '@kbn/lens-common';
+import type {
+  SeriesType,
+  XYDataLayerConfig,
+  XYLayerConfig,
+  XYPersistedLayerConfig,
+  XYPersistedState,
+} from '@kbn/lens-common';
 import type { AvailableAnnotationIcon } from '@kbn/event-annotation-common';
 import type {
   AnnotationLayerType,
@@ -78,6 +84,32 @@ export function isLensStateDataLayer(
   layer: XYLayerConfig | XYPersistedLayerConfig
 ): layer is XYDataLayerConfig {
   return layer.layerType === 'data' || !('layerType' in layer);
+}
+
+/**
+ * Series types written by older integration packages. Lens treats them as the plain unstacked
+ * series (the expression only reads the part before the first `_` and the `stacked` flag).
+ */
+const LEGACY_SERIES_TYPES: Record<string, SeriesType> = {
+  area_unstacked: 'area',
+  bar_unstacked: 'bar',
+};
+
+const toCurrentSeriesType = (seriesType: SeriesType): SeriesType =>
+  LEGACY_SERIES_TYPES[seriesType] ?? seriesType;
+
+export function normalizeLegacySeriesTypes(config: XYPersistedState): XYPersistedState {
+  return {
+    ...config,
+    ...(config.preferredSeriesType
+      ? { preferredSeriesType: toCurrentSeriesType(config.preferredSeriesType) }
+      : {}),
+    layers: config.layers.map((layer) =>
+      isLensStateDataLayer(layer)
+        ? { ...layer, seriesType: toCurrentSeriesType(layer.seriesType) }
+        : layer
+    ),
+  };
 }
 
 type XYApiIconName = NonNullable<ReferenceLineLayerType['thresholds'][number]['icon']>;

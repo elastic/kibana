@@ -55,6 +55,9 @@ const seriesTypeToAPIType: Record<string, string> = {
   area: 'area',
   area_stacked: 'area_stacked',
   area_percentage_stacked: 'area_percentage',
+  // legacy series types are converted to the plain unstacked series
+  area_unstacked: 'area',
+  bar_unstacked: 'bar',
 };
 
 function getAPILayerType(layer: any): string | undefined {
@@ -188,6 +191,19 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
   original: (attributes) => {
     const viz = attributes.state.visualization as any;
     const layers: any[] = viz.layers ?? [];
+
+    // Legacy series types are converted to the plain unstacked series by the transform
+    const legacySeriesTypes: Record<string, string> = {
+      area_unstacked: 'area',
+      bar_unstacked: 'bar',
+    };
+    layers.forEach((layer: any) => {
+      if (layer.seriesType in legacySeriesTypes)
+        layer.seriesType = legacySeriesTypes[layer.seriesType];
+    });
+    if (viz.preferredSeriesType in legacySeriesTypes) {
+      viz.preferredSeriesType = legacySeriesTypes[viz.preferredSeriesType];
+    }
 
     // Collect IDs of viz layers that will be dropped (unknown layerType).
     // Their datasource references are stale after the transform and must be removed.
