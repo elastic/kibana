@@ -625,6 +625,7 @@ export class VisualizePageObject extends FtrService {
     await this.retry.waitFor('return to the originating application', async () => {
       return new URL(await this.browser.getCurrentUrl()).pathname !== editorUrl.pathname;
     });
+    await this.testSubjects.existOrFail('dshDashboardViewport');
   }
 
   public async linkedToOriginatingApp() {

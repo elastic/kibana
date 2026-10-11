@@ -60,6 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     } else {
       await visualize.saveVisualizationAndReturn();
     }
+    await expectVegaText('Test');
   };
 
   const editVegaVis = async () => {

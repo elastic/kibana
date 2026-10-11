@@ -326,7 +326,7 @@ export class DashboardPageObject extends FtrService {
     // wait until the count of dashboard panels equals the count of drag handles
     await this.retry.waitFor('in edit mode', async () => {
       if (!(await this.getIsInEditMode())) return false;
-      const panels = await this.find.allByCssSelector('[data-test-subj="embeddablePanel"]', 0);
+      const panels = await this.getDashboardPanels(0);
       const dragHandles = await this.find.allByCssSelector(
         '[data-test-subj="embeddablePanelDragHandle"]',
         0
@@ -869,10 +869,10 @@ export class DashboardPageObject extends FtrService {
     );
   }
 
-  public async getPanelCount() {
+  public async getPanelCount(): Promise<number> {
     this.log.debug('getPanelCount');
     await this.testSubjects.existOrFail('dshDashboardViewport');
-    const panels = await this.testSubjects.findAll('embeddablePanel', 0);
+    const panels = await this.getDashboardPanels(0);
     return panels.length;
   }
 
@@ -895,8 +895,8 @@ export class DashboardPageObject extends FtrService {
     return this.getTestVisualizations().map((visualization) => visualization.description);
   }
 
-  public async getDashboardPanels() {
-    return await this.testSubjects.findAll('dashboardPanel');
+  public async getDashboardPanels(timeout?: number) {
+    return await this.testSubjects.findAll('dashboardPanel', timeout);
   }
 
   public async addVisualizations(visualizations: string[]) {

@@ -71,7 +71,8 @@ Recordings are written under `target/ftr-wait-recordings/<config-path>/<timestam
 | Save completion differs from panel rendering | Saving a dashboard waits for an analysis panel that has not been run to report render-complete | Await the existing save success notification and modal closure; save completion does not require every embeddable to finish an analysis. See `saveDashboard` in [dashboard](page_objects/dashboard_page.ts). |
 
 
-| Empty dashboard collections | Entering edit mode waits ten seconds each for a panel and drag handle on an empty dashboard | Await the edit-mode control, then compare immediate panel/handle snapshots. Counts and titles first require the dashboard viewport. Keep the title getter's positive lookup default; use explicit zero-timeout snapshots within the hide/unhide assertions. See `switchToEditMode`, `getPanelCount`, and `getPanelTitles` in [Dashboard](page_objects/dashboard_page.ts). |
+| Restored state before the next action | A restored panel count appears before the debounced unsaved-state badge; switching to view mode can bypass discard entirely | Await the unsaved-changes badge after restoration, then take the action once and retry the expected saved count or query. Navigation, render completion, and a matching count do not establish this action precondition. See [unsaved dashboard changes](apps/dashboard/group1/dashboard_unsaved_changes.ts). Save-and-return also awaits the destination viewport and verifies the returned chart before capturing a panel count; see [edit visualizations](apps/dashboard/group1/edit_visualizations.ts). |
+| Empty dashboard collections | Entering edit mode waits ten seconds each for a panel and drag handle on an empty dashboard | Await the edit-mode control, then compare immediate panel/handle snapshots. Counts and titles first require the dashboard viewport. Count canonical panel frames rather than inner presentations, which do not exist during embeddable initialization; compare frames to drag handles for edit readiness. Keep the title getter's positive lookup default; use explicit zero-timeout snapshots within the hide/unhide assertions. See `switchToEditMode`, `getPanelCount`, and `getPanelTitles` in [Dashboard](page_objects/dashboard_page.ts). |
 | Specific editor destination | Edit waits for a spinner twice and can mistake Dashboard's existing top navigation for the editor | Capture the current path and visible flyouts before clicking; await a changed path with the old panel gone, a newly visible flyout, or a newly opened Markdown editor within the same panel. Keep inline editing distinct from navigating from Lens's flyout to its full editor. See [panel actions](services/dashboard/panel_actions.ts). |
 | Idempotent flyout opening | A caller opens Add Panel and a nested helper clicks disabled Add again | Await enabled Add for a closed flyout; return through the existing open-state assertion when it is already open. See `openAddPanelFlyout` in [Add Panel](services/dashboard/add_panel.ts). |
 | Current selectors and nonempty collections | A stale control-type selector waits ten seconds and then checks disabled state over zero buttons | Build the known control button subject from its registered type constant, use the explicit control subjects, and require a nonempty collection before asserting each button is disabled. See `openCreateControlFlyout` in [dashboard controls](page_objects/dashboard_page_controls.ts). |
@@ -113,7 +114,7 @@ See [the complete group2 tests](apps/visualize/group2/_inspector.ts) for the exp
 
 ## Investigations to carry forward
 
-- **Timepicker delays:** audit date entry, Apply/Update clicks, auto-refresh setup, and redundant waits after the time range has committed. Group wait spans by [the shared timepicker](page_objects/time_picker.ts) call stacks, distinguish input/model readiness from query/render completion, and validate any replacements under FAST_3G. Initial targets include the legacy absolute-time reader’s two-second popover delay, repeated date-popover transitions, and the global-loading check after `setAbsoluteRange`. Deletion polling is already being improved in the shared find helper; the remaining timepicker behavior needs its own validation. This is an open investigation, not a measured improvement yet.
+- **Timepicker delays:** audit date entry, Apply/Update clicks, auto-refresh setup, and redundant waits after the time range has committed. Group wait spans by [the shared timepicker](page_objects/time_picker.ts) call stacks, distinguish input/model readiness from query/render completion, and validate any replacements under FAST_3G. The legacy absolute-time reader’s two-second delay was replaced with Escape and explicit popover closure; its three saved-query tests passed with the new picker flag disabled. Remaining targets include repeated date-popover transitions and the global-loading check after `setAbsoluteRange`. The rest of this investigation needs its own measurement and delayed-network validation.
 
 - **Remaining TSVB setter probes:** the final group6 normal run still records spinner appearance checks in `setDrilldownUrl`, `fillInVariable`, and `fillInExpression`; group11 retains checks around index-pattern editing. These are future candidates for model/input readiness checks, not proof that the elapsed waits are required.
 
@@ -149,18 +150,18 @@ Raw recordings and per-pass reports remain local artifacts under `target/ftr-wai
 
 The remaining 16 leaf configs completed with 319 active tests and 24 existing pending tests. Getting Started has seven pending tests and no active tests. The parent CCS config also passed its 31 active tests with seven existing pending; its coverage overlaps the leaf Discover suite in a different cluster mode, so its timings are reported separately. No test was removed or skipped by this optimization.
 
-Across the leaf configs, recorded waits/lookups fell from **1,866.3 to 679.9 seconds (63.6%)**, and FTR runtime fell from **2,569.3 to 1,363.0 seconds (47.0%)**. Fixed sleeps totaled 13.3 seconds across 53 existing 250 ms options-list search debounces; that wait needs a committed-search signal before it can be removed safely. These are individual local runs with incremental baselines, not a controlled benchmark or visual-idle measurement. Server startup is excluded.
+Across the leaf configs, recorded waits/lookups fell from **1,866.3 to 670.2 seconds (64.1%)**, and FTR runtime fell from **2,569.3 to 1,341.4 seconds (47.8%)**. Fixed sleeps totaled 13.3 seconds across 53 existing 250 ms options-list search debounces; that wait needs a committed-search signal before it can be removed safely. These are individual local runs with incremental baselines, not a controlled benchmark or visual-idle measurement. Server startup is excluded.
 
 | Config | Active tests | Recorded waits (s), before → after | Runtime (s), before → after |
 | --- | ---: | ---: | ---: |
 | `bundles` | 4 | 0.0 → 0.0 | 0.8 → 0.7 |
 | `dashboard/esql_controls` | 3 | 67.6 → 7.9 | 107.3 → 41.3 |
-| `dashboard/group1` | 23 | 199.6 → 68.7 | 271.7 → 141.5 |
+| `dashboard/group1` | 23 | 199.6 → 69.6 | 271.7 → 134.3 |
 | `dashboard/group2` | 53 | 224.2 → 133.0 | 319.5 → 217.6 |
 | `dashboard/group3` | 11 | 146.0 → 66.0 | 194.0 → 119.4 |
 | `dashboard/group4` | 39 | 175.1 → 55.7 | 233.7 → 113.2 |
 | `dashboard/group5` | 8 | 28.6 → 4.8 | 57.2 → 31.6 |
-| `dashboard/group6` | 18 | 115.4 → 45.7 | 170.3 → 105.5 |
+| `dashboard/group6` | 18 | 115.4 → 35.1 | 170.3 → 91.0 |
 | `dashboard_elements/controls/common` | 65 | 361.2 → 121.2 | 458.8 → 222.0 |
 | `dashboard_elements/controls/options_list` | 52 | 374.9 → 77.5 | 435.0 → 134.2 |
 | `dashboard_elements/image_embeddable` | 2 | 24.9 → 6.6 | 32.5 → 14.1 |
