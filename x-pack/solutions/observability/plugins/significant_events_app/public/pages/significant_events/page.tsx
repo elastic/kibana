@@ -325,7 +325,7 @@ export function SignificantEventsPage() {
                           children: i18n.translate(
                             'xpack.significantEventsApp.statusErrorBannerSettingsButton',
                             {
-                              defaultMessage: 'Go to Settings',
+                              defaultMessage: 'Open settings',
                             }
                           ),
                           href: detectionSettingsHref,
