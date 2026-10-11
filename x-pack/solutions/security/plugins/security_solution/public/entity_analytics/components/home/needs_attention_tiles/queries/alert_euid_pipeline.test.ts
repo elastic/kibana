@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 import { buildAlertEuidPipeline } from './alert_euid_pipeline';
 
-const mockEuid = {
-  esql: {
-    getFieldEvaluations: () => undefined,
-    getEuidEvaluation: (_type: string, varName: string) => `${varName} = "mock_euid"`,
+const mockEuidApi = {
+  euid: {
+    esql: {
+      getFieldEvaluations: () => undefined,
+      getEuidEvaluation: (_definition: unknown, varName: string) => `${varName} = "mock_euid"`,
+    },
   },
-} as unknown as EntityStoreEuid;
+  getBuiltInEntityDefinition: (type: string) => ({ type }),
+} as unknown as EntityStoreEuidApi;
 
-const pipelineText = (euid: EntityStoreEuid = mockEuid): string =>
-  buildAlertEuidPipeline(euid).join('\n');
+const pipelineText = (euidApi: EntityStoreEuidApi = mockEuidApi): string =>
+  buildAlertEuidPipeline(euidApi).join('\n');
 
 describe('buildAlertEuidPipeline', () => {
   it('FORKs stamped alerts away from EUID derivation', () => {
@@ -42,7 +45,7 @@ describe('buildAlertEuidPipeline', () => {
   });
 
   it('expands _ea_entity_id, filters nulls, deduplicates, then renames to entity.id for the JOIN', () => {
-    const pipeline = buildAlertEuidPipeline(mockEuid);
+    const pipeline = buildAlertEuidPipeline(mockEuidApi);
     expect(pipeline).toContain('| MV_EXPAND _ea_entity_id');
     expect(pipeline).toContain('| WHERE _ea_entity_id IS NOT NULL');
     expect(pipeline).toContain('| STATS BY _ea_entity_id');
@@ -50,15 +53,18 @@ describe('buildAlertEuidPipeline', () => {
   });
 
   it('includes optional field evaluation EVALs when the euid provides them', () => {
-    const euidWithFieldEvals = {
-      esql: {
-        getFieldEvaluations: (type: string) =>
-          type === 'user' ? 'user.namespace = user.domain' : undefined,
-        getEuidEvaluation: (_type: string, varName: string) => `${varName} = "mock_euid"`,
+    const euidApiWithFieldEvals = {
+      euid: {
+        esql: {
+          getFieldEvaluations: ({ type }: { type: string }) =>
+            type === 'user' ? 'user.namespace = user.domain' : undefined,
+          getEuidEvaluation: (_definition: unknown, varName: string) => `${varName} = "mock_euid"`,
+        },
       },
-    } as unknown as EntityStoreEuid;
+      getBuiltInEntityDefinition: (type: string) => ({ type }),
+    } as unknown as EntityStoreEuidApi;
 
-    expect(pipelineText(euidWithFieldEvals)).toContain('| EVAL user.namespace = user.domain');
+    expect(pipelineText(euidApiWithFieldEvals)).toContain('| EVAL user.namespace = user.domain');
   });
 
   it('does not include a field evaluation EVAL when getFieldEvaluations returns undefined', () => {

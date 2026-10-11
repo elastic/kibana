@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { TimeRange } from '../../use_time_range_param';
 import { evalGuardedTypedEuids } from './guarded_typed_euid_eval';
 
@@ -18,7 +18,7 @@ const ENTITY_TYPES = ['user', 'host', 'service'] as const;
  * anomalies → entity-latest on the typed EUID (entity.id).
  */
 export const buildEntitiesWithAnomaliesCountQuery = (
-  euid: EntityStoreEuid,
+  { euid, getBuiltInEntityDefinition }: EntityStoreEuidApi,
   entitiesIndexName: string,
   timeRange: TimeRange = '24h',
   entityFilterClauses: string[] = [],
@@ -36,11 +36,16 @@ export const buildEntitiesWithAnomaliesCountQuery = (
   );
 
   for (const entityType of ENTITY_TYPES) {
-    const fieldEvals = euid.esql.getFieldEvaluations(entityType);
+    const fieldEvals = euid.esql.getFieldEvaluations(getBuiltInEntityDefinition(entityType));
     if (fieldEvals) {
       parts.push(`| EVAL ${fieldEvals}`);
     }
-    parts.push(`| EVAL ${euid.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
+    parts.push(
+      `| EVAL ${euid.esql.getEuidEvaluation(
+        getBuiltInEntityDefinition(entityType),
+        `${entityType}_euid`
+      )}`
+    );
   }
 
   parts.push(evalGuardedTypedEuids('derived_euids'));

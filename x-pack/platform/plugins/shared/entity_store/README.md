@@ -147,6 +147,19 @@ Every registered definition has a `managedBy` field saying who manages it:
 
 Only `plugin` can be registered today. The four built-ins are managed by the `entityStore` plugin (`{ kind: 'plugin', id: 'entityStore' }`). `managedBy` is returned on every definition read from the registry, so readers can tell who manages it.
 
+### Compiling entity ids for a registered definition
+
+Every function of the `euid` helper (`@kbn/entity-store/common/euid_helpers`) outside `experimental` takes a definition as its first argument, so it works for any registered type. `getBuiltInEntityDefinition`, exported beside `euid`, resolves one of the Entity Store's four built-ins by type name. A plugin that registered `k8s.pod` reads the definition back and passes it in:
+
+```ts
+const definitions = entityStore.getEntityDefinitionsClientForSpace(spaceId);
+const definition = await definitions.get('k8s.pod');
+if (!definition) {
+  return; // not registered in this Kibana
+}
+const esql = euid.esql.getEuidEvaluation(definition, 'entity.id');
+```
+
 ### Reading definitions
 
 The start contract exposes two ways to get an `EntityDefinitionsClient` (`get(type)` and `list()`, both async):

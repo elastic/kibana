@@ -32,6 +32,8 @@ jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: {
     getEuidFromObjectForSearch: jest.fn(),
   },
+  getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+    .getBuiltInEntityDefinition,
 }));
 const mockGetEuidForSearch = euid.getEuidFromObjectForSearch as jest.Mock;
 
@@ -335,9 +337,9 @@ describe('enrichEvents', () => {
         listEntities: mockListEntities,
       } as unknown as EntityStoreCRUDClient;
       mockGetEuidForSearch.mockImplementation(
-        (entityType: string, source: Record<string, { name?: string } | undefined>) => {
-          const name = source?.[entityType]?.name;
-          return name ? `${entityType}:${name}` : undefined;
+        ({ type }: { type: string }, source: Record<string, { name?: string } | undefined>) => {
+          const name = source?.[type]?.name;
+          return name ? `${type}:${name}` : undefined;
         }
       );
     });

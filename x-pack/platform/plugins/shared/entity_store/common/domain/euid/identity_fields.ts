@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { EntityType } from '../definitions/entity_schema';
+import type { EntityDefinitionOfAnyType } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
-import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isEuidField, getSourceFieldNames } from './commons';
 
 export interface IdentitySourceFields {
@@ -38,14 +37,14 @@ export interface NamespaceSourceFields {
 }
 
 /**
- * Returns the identity source field names for a given entity type.
+ * Returns the identity source field names for a given entity definition.
  * Field evaluation destinations (e.g. entity.namespace) are excluded, since they are computed and not stored.
  *
- * @param entityType - The entity type (e.g. 'host', 'user', 'service')
+ * @param definition - The entity definition
  * @returns requiresOneOf (same as identitySourceFields) and identitySourceFields from euidRanking
  */
-export function getEuidSourceFields(entityType: EntityType): IdentitySourceFields {
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
+export function getEuidSourceFields(definition: EntityDefinitionOfAnyType): IdentitySourceFields {
+  const { identityField } = definition;
 
   if (isSingleFieldIdentity(identityField)) {
     const field = identityField.singleField;
@@ -74,7 +73,7 @@ export function getEuidSourceFields(entityType: EntityType): IdentitySourceField
 }
 
 /**
- * Returns the namespace source fields for a given entity type, split by how they are matched.
+ * Returns the namespace source fields for a given entity definition, split by how they are matched.
  *
  * The entity store derives `entity.namespace` from a `fieldEvaluations` entry whose `sources`
  * list may contain plain fields (`{ field }`, matched with a term query) and prefix-chunked fields
@@ -88,11 +87,13 @@ export function getEuidSourceFields(entityType: EntityType): IdentitySourceField
  * (`whenClauses` with `condition:`) are not included because they never produce prefix clauses
  * in the DSL.
  *
- * @param entityType - The entity type (e.g. 'host', 'user', 'service', 'generic')
+ * @param definition - The entity definition
  * @returns exactMatchFields and prefixMatchFields from the entity's fieldEvaluations sources
  */
-export function getEuidNamespaceSourceFields(entityType: EntityType): NamespaceSourceFields {
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
+export function getEuidNamespaceSourceFields(
+  definition: EntityDefinitionOfAnyType
+): NamespaceSourceFields {
+  const { identityField } = definition;
   if (isSingleFieldIdentity(identityField)) {
     return { exactMatchFields: [], prefixMatchFields: [] };
   }
@@ -102,12 +103,12 @@ export function getEuidNamespaceSourceFields(entityType: EntityType): NamespaceS
 
 /**
  * Reduces a raw observed field value to the prefix a prefix-matched namespace source would derive
- * from it, or `undefined` when the field is not such a source for this entity type.
+ * from it, or `undefined` when the field is not such a source for this entity definition.
  *
  * A `firstChunkOfField` source keeps only the part before its delimiter, so
  * `data_stream.dataset: "okta.system"` derives the namespace prefix `okta`. The DSL builder reverses
  * that into a prefix query (`data_stream.dataset: okta*`), and callers replacing such a clause with
- * an exact phrase filter need to know which arm an observed value belongs to — an entity type can
+ * an exact phrase filter need to know which arm an observed value belongs to — an entity definition can
  * emit several arms for one field (the `user` definition accepts both `okta` and
  * `entityanalytics_okta`).
  *
@@ -116,18 +117,18 @@ export function getEuidNamespaceSourceFields(entityType: EntityType): NamespaceS
  * its string starts with it. Use this rather than reimplementing the split, since only the entity
  * definition knows each source's `splitBy` delimiter.
  *
- * @param entityType - The entity type whose definition declares the source
+ * @param definition - The entity definition that declares the source
  * @param field - The candidate namespace source field (e.g. `data_stream.dataset`)
  * @param observedValue - The raw value the document carried (e.g. `okta.system`)
  * @returns the derived prefix (e.g. `okta`), or `undefined` if `field` is not a prefix-matched
- *   source for this entity type
+ *   source for this entity definition
  */
 export function getEuidNamespaceSourcePrefix(
-  entityType: EntityType,
+  definition: EntityDefinitionOfAnyType,
   field: string,
   observedValue: string
 ): string | undefined {
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const { identityField } = definition;
   if (isSingleFieldIdentity(identityField)) {
     return undefined;
   }

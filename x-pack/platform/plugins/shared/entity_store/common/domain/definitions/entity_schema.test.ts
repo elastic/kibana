@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { euidRankingSchema, setFieldsByConditionSchema } from './entity_schema';
+import {
+  ENTITY_DEFINITION_TYPE_MAX_LENGTH,
+  euidRankingSchema,
+  setFieldsByConditionSchema,
+  validateEntityDefinitionType,
+} from './entity_schema';
 
 describe('setFieldsByConditionSchema', () => {
   const alwaysCondition = { always: {} as const };
@@ -96,5 +101,21 @@ describe('euidRankingSchema', () => {
       branches: [{ ranking: [[{ sep: '@' }, { sep: '.' }]] }],
     });
     expect(parsed.success).toBe(false);
+  });
+});
+
+describe('validateEntityDefinitionType', () => {
+  it('accepts a valid type name', () => {
+    expect(validateEntityDefinitionType('k8s.pod')).toBeUndefined();
+  });
+
+  it('rejects a type name over the maximum length', () => {
+    expect(validateEntityDefinitionType('a'.repeat(ENTITY_DEFINITION_TYPE_MAX_LENGTH + 1))).toBe(
+      `type name exceeds the maximum length of ${ENTITY_DEFINITION_TYPE_MAX_LENGTH}`
+    );
+  });
+
+  it.each(['a"b', 'a\\b'])('rejects %s', (type) => {
+    expect(validateEntityDefinitionType(type)).toMatch(/^type name does not match pattern /);
   });
 });

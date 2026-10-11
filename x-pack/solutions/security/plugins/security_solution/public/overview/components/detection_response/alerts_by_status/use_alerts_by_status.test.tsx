@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
@@ -194,6 +195,7 @@ describe('useAlertsByStatus', () => {
     mockUseUiSetting.mockReturnValue(false);
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: { dsl: { getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument } },
+      getBuiltInEntityDefinition,
     });
 
     renderUseAlertsByStatus({
@@ -224,6 +226,7 @@ describe('useAlertsByStatus', () => {
     mockUseUiSetting.mockReturnValue(true);
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: { dsl: { getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument } },
+      getBuiltInEntityDefinition,
     });
 
     renderUseAlertsByStatus({
@@ -232,7 +235,10 @@ describe('useAlertsByStatus', () => {
       identityFields: { 'host.name': 'my-host' },
     });
 
-    expect(mockGetEuidFilterBasedOnDocument).toHaveBeenCalledWith('host', mockEntityRecord);
+    expect(mockGetEuidFilterBasedOnDocument).toHaveBeenCalledWith(
+      getBuiltInEntityDefinition('host'),
+      mockEntityRecord
+    );
     expect(mockUseQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
         query: expect.objectContaining({

@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { EntityType } from '@kbn/entity-store/common';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { DateRange } from '../../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import type { AfterKey } from './types';
@@ -77,7 +77,7 @@ export const buildEntitiesSearchBody = (
   range?: DateRange
 ): Omit<estypes.SearchRequest, 'index'> => {
   const must: estypes.QueryDslQueryContainer[] = [
-    euid.dsl.getEuidDocumentsContainsIdFilter(entityType),
+    euid.dsl.getEuidDocumentsContainsIdFilter(getBuiltInEntityDefinition(entityType)),
   ];
   if (allowedEntityIds && allowedEntityIds.length > 0) {
     must.push({ terms: { [EUID_RUNTIME_FIELD]: allowedEntityIds } });
@@ -101,7 +101,9 @@ export const buildEntitiesSearchBody = (
     size: 0,
     query: { bool: { must } },
     runtime_mappings: {
-      [EUID_RUNTIME_FIELD]: euid.painless.getEuidRuntimeMapping(entityType),
+      [EUID_RUNTIME_FIELD]: euid.painless.getEuidRuntimeMapping(
+        getBuiltInEntityDefinition(entityType)
+      ),
     },
     aggs: {
       entities: {

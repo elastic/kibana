@@ -98,7 +98,10 @@ export const useObservedUserDetails = ({
     // For entity store v2, resolve the entity via an indexed-field identity filter built from the
     // entity-store record. This replaces the previous `entity_id` runtime field, which forced
     // Elasticsearch to run the EUID Painless script on every document in the time range.
-    const recordFilter = euidApi?.euid?.dsl?.getEuidFilterBasedOnEntityRecord('user', entityRecord);
+    const recordFilter = euidApi?.euid?.dsl?.getEuidFilterBasedOnEntityRecord(
+      euidApi.getBuiltInEntityDefinition('user'),
+      entityRecord
+    );
     if (recordFilter) {
       return recordFilter;
     }
@@ -106,7 +109,7 @@ export const useObservedUserDetails = ({
     if (userName) {
       return { term: { 'user.name': userName } };
     }
-  }, [entityStoreV2Enabled, shouldSkip, userName, entityRecord, euidApi?.euid]);
+  }, [entityStoreV2Enabled, shouldSkip, userName, entityRecord, euidApi]);
 
   const {
     loading,

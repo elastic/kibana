@@ -12,10 +12,10 @@ import {
 } from '../../../../../common/domain/euid/commons';
 import {
   applyFieldEvaluations,
-  getFieldEvaluationsFromDefinition,
-  getIdentityFieldEvaluationsFromDefinition,
+  getFieldEvaluations,
+  getIdentityFieldEvaluations,
 } from '../../../../../common/domain/euid/field_evaluations';
-import { getEntityDefinitionWithoutId } from '../../../../../common/domain/definitions/registry';
+import { getBuiltInEntityDefinition } from '../../../../../common/domain/definitions/registry';
 
 const USER_ENTITY_TYPE = 'user' as const;
 
@@ -34,12 +34,12 @@ export function deriveUserEntityPreAggMetadata(hit: { _source?: unknown }): {
   entityName?: string;
 } {
   const doc = cloneDeep(getDocument(hit));
-  const def = getEntityDefinitionWithoutId(USER_ENTITY_TYPE);
-  const sharedEvaluations = getFieldEvaluationsFromDefinition(def);
+  const def = getBuiltInEntityDefinition(USER_ENTITY_TYPE);
+  const sharedEvaluations = getFieldEvaluations(def);
   if (sharedEvaluations.length > 0) {
     Object.assign(doc, applyFieldEvaluations(doc, sharedEvaluations));
   }
-  const identityEvaluations = getIdentityFieldEvaluationsFromDefinition(def);
+  const identityEvaluations = getIdentityFieldEvaluations(def);
   if (identityEvaluations.length > 0) {
     Object.assign(doc, applyFieldEvaluations(doc, identityEvaluations));
   }

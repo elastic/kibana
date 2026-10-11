@@ -6,7 +6,7 @@
  */
 
 import { chunk, cloneDeep } from 'lodash';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import { ALERT_ENTITY_ID } from '../../../../../../common/field_maps/field_names';
 import type { DetectionAlertLatest } from '../../../../../../common/api/detection_engine/model/alerts';
@@ -104,7 +104,10 @@ export const createEntityStoreEnrichment = async <T extends DetectionAlertLatest
     const eventsMapByEuid: Record<string, Array<EventsForEnrichment<T>>> = {};
     const eventsMapById: EventsMapByEnrichments = {};
     for (const event of events) {
-      const computedEuid = euid.getEuidFromObjectForSearch(entityType, event._source);
+      const computedEuid = euid.getEuidFromObjectForSearch(
+        getBuiltInEntityDefinition(entityType),
+        event._source
+      );
       if (computedEuid) {
         (eventsMapByEuid[computedEuid] ??= []).push(event);
         eventsMapById[event._id] = [buildEuidStampEnrichment(computedEuid)];

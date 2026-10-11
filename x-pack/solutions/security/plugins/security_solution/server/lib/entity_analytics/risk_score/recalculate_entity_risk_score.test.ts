@@ -55,6 +55,8 @@ jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
       getEuidFilterBasedOnDocument: () => ({ term: { 'user.name': 'alice' } }),
     },
   },
+  getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+    .getBuiltInEntityDefinition,
 }));
 
 const ENTITY_ID = 'user:alice@okta';

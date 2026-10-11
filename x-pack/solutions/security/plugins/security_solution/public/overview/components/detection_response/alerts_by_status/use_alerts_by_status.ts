@@ -194,7 +194,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
     if (entityStoreV2Enabled && euidApi?.euid && (entityRecord || entityRecordInput)) {
       // Use the entity record to generate a DSL query fragment
       const filter = euidApi.euid?.dsl.getEuidFilterBasedOnDocument(
-        storeEntityType ?? 'generic',
+        euidApi.getBuiltInEntityDefinition(storeEntityType ?? 'generic'),
         entityRecord ?? entityRecordInput
       );
       return filter != null ? [filter] : [];
@@ -205,7 +205,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
       : [];
   }, [
     entityStoreV2Enabled,
-    euidApi?.euid,
+    euidApi,
     entityRecord,
     entityRecordInput,
     identityFieldsStable,

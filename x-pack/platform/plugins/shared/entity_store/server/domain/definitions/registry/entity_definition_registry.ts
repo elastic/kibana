@@ -12,20 +12,12 @@ import {
   entitySchema,
   EntityDefinitionManagedBy,
   type EntityDefinitionType,
-  type EntityDefinitionWithoutId,
+  type EntityDefinitionOfAnyType,
+  validateEntityDefinitionType,
 } from '../../../../common/domain/definitions/entity_schema';
 
-/**
- * Registry type names: lowercase alphanumeric segments separated by `.`, `_` or `-`, starting with
- * a letter. Separators cannot lead, trail or repeat. Examples: `host`, `k8s.pod`, `aws_s3-bucket`.
- * Length is capped separately by `ENTITY_DEFINITION_TYPE_MAX_LENGTH`.
- */
-export const ENTITY_DEFINITION_TYPE_PATTERN = /^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
-export const ENTITY_DEFINITION_TYPE_MAX_LENGTH = 64;
-
 /** A definition as accepted by the registry: the built-in shape with a wider type name and a required `managedBy`. */
-export type RegistrableEntityDefinition = Omit<EntityDefinitionWithoutId, 'type' | 'managedBy'> & {
-  type: EntityDefinitionType;
+export type RegistrableEntityDefinition = Omit<EntityDefinitionOfAnyType, 'managedBy'> & {
   managedBy: EntityDefinitionManagedBy;
 };
 
@@ -195,11 +187,9 @@ export class EntityDefinitionRegistry {
     if (managedBy.kind !== 'plugin') {
       return 'only plugin-managed definitions can be registered at setup';
     }
-    if (type.length > ENTITY_DEFINITION_TYPE_MAX_LENGTH) {
-      return `type name exceeds the maximum length of ${ENTITY_DEFINITION_TYPE_MAX_LENGTH}`;
-    }
-    if (!ENTITY_DEFINITION_TYPE_PATTERN.test(type)) {
-      return `type name does not match pattern ${ENTITY_DEFINITION_TYPE_PATTERN}`;
+    const typeReason = validateEntityDefinitionType(type);
+    if (typeReason) {
+      return typeReason;
     }
     if (this.entries.has(type)) {
       return 'type name is already registered';

@@ -27,10 +27,13 @@ import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_ent
 
 jest.mock('@kbn/entity-store/public', () => {
   const actual = jest.requireActual('@kbn/entity-store/public');
-  const { euid } = jest.requireActual('@kbn/entity-store/common/euid_helpers');
+  const { euid, getBuiltInEntityDefinition } = jest.requireActual(
+    '@kbn/entity-store/common/euid_helpers'
+  );
+  const euidApi = { euid, getBuiltInEntityDefinition };
   return {
     ...actual,
-    useEntityStoreEuidApi: jest.fn(() => ({ euid })),
+    useEntityStoreEuidApi: jest.fn(() => euidApi),
   };
 });
 
@@ -256,10 +259,10 @@ describe('<EntitiesDetails />', () => {
 
   it('renders host panel from document fields when EUID host identifiers are unavailable (mirrors the user fallback)', () => {
     // dataAsNestedObject is what EUID identifier extraction reads from. Emptying `host` here
-    // means getEntityIdentifiersFromDocument('host', ...) returns nothing, even though the
-    // fields API (getFieldsData, via mockGetFieldsData) still resolves host.name. This
-    // reproduces the flyout_v2 Entities tool bug where the host was dropped because its
-    // visibility gate incorrectly required EUID identifiers while the user gate did not.
+    // means getEntityIdentifiersFromDocument(getBuiltInEntityDefinition('host'), ...) returns
+    // nothing, even though the fields API (getFieldsData, via mockGetFieldsData) still resolves
+    // host.name. This reproduces the flyout_v2 Entities tool bug where the host was dropped
+    // because its visibility gate incorrectly required EUID identifiers while the user gate did not.
     const contextValue = {
       ...mockContextValue,
       dataAsNestedObject: {

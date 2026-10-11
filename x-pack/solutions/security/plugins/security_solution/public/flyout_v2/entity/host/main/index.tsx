@@ -117,7 +117,13 @@ export const Host: FC<HostProps> = memo(function Host({
 
   // Compute entityId from hit when provided, otherwise use the prop
   const entityId = useMemo(
-    () => (hit ? euidApi?.euid?.getEuidFromObject('host', hit.flattened) : entityIdProp),
+    () =>
+      hit
+        ? euidApi?.euid?.getEuidFromObject(
+            euidApi.getBuiltInEntityDefinition('host'),
+            hit.flattened
+          )
+        : entityIdProp,
     [hit, euidApi, entityIdProp]
   );
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
@@ -144,13 +150,13 @@ export const Host: FC<HostProps> = memo(function Host({
     if (entityStoreV2Enabled) {
       const fromStore =
         euidApi?.euid?.getEntityIdentifiersFromDocument(
-          'host',
+          euidApi.getBuiltInEntityDefinition('host'),
           entityFromStoreResult.entityRecord
         ) ?? {};
       return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
     }
     return legacyFields;
-  }, [entityStoreV2Enabled, euidApi?.euid, entityFromStoreResult.entityRecord, hostName]);
+  }, [entityStoreV2Enabled, euidApi, entityFromStoreResult.entityRecord, hostName]);
 
   const hostNameFilterQuery = useMemo(
     () => (hostName ? buildHostNamesFilter([hostName]) : undefined),

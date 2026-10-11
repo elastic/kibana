@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 import { evalGuardedTypedEuids } from './guarded_typed_euid_eval';
 
 const ENTITY_TYPES = ['user', 'host', 'service'] as const;
@@ -32,15 +32,23 @@ const indentBranch = (esql: string): string =>
  * After MV_EXPAND the entity.id column is always scalar; nulls are filtered out so
  * non-matching entity types don't produce phantom rows downstream.
  */
-export const buildAlertEuidPipeline = (euid: EntityStoreEuid): string[] => {
+export const buildAlertEuidPipeline = ({
+  euid,
+  getBuiltInEntityDefinition,
+}: EntityStoreEuidApi): string[] => {
   const derivedSteps: string[] = ['WHERE `kibana.alert.entity.id` IS NULL'];
 
   for (const entityType of ENTITY_TYPES) {
-    const fieldEvals = euid.esql.getFieldEvaluations(entityType);
+    const fieldEvals = euid.esql.getFieldEvaluations(getBuiltInEntityDefinition(entityType));
     if (fieldEvals) {
       derivedSteps.push(`| EVAL ${fieldEvals}`);
     }
-    derivedSteps.push(`| EVAL ${euid.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
+    derivedSteps.push(
+      `| EVAL ${euid.esql.getEuidEvaluation(
+        getBuiltInEntityDefinition(entityType),
+        `${entityType}_euid`
+      )}`
+    );
   }
   derivedSteps.push(evalGuardedTypedEuids('_ea_entity_id'));
   derivedSteps.push('| KEEP _ea_entity_id');

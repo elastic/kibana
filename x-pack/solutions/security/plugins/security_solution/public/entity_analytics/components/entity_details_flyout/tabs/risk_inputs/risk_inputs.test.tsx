@@ -75,6 +75,8 @@ jest.mock('@kbn/entity-store/public', () => ({
     euid: {
       getEuidFromObject: (...args: unknown[]) => mockGetEuidFromObject(...args),
     },
+    getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+      .getBuiltInEntityDefinition,
   }),
 }));
 

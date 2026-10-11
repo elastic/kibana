@@ -215,8 +215,11 @@ export const MisconfigurationFindingsDetailsTable = memo(
       if (!euidApi?.euid || entityRecord == null || entityType == null) {
         return undefined;
       }
-      return euidApi.euid.dsl.getEuidFilterBasedOnDocument(entityType as EntityType, entityRecord);
-    }, [euidApi?.euid, entityType, entityRecord]);
+      return euidApi.euid.dsl.getEuidFilterBasedOnDocument(
+        euidApi.getBuiltInEntityDefinition(entityType as EntityType),
+        entityRecord
+      );
+    }, [euidApi, entityType, entityRecord]);
 
     const cspQueriesEnabled =
       entityRecord !== null && Boolean(euidEntityFilter) && Boolean(euidApi?.euid);

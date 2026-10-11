@@ -26,6 +26,8 @@ jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
       getEuidFilterBasedOnDocument: jest.fn(),
     },
   },
+  getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+    .getBuiltInEntityDefinition,
 }));
 
 const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;

@@ -11,6 +11,7 @@ import {
   getEuidNamespaceSourcePrefix,
   getEntityIdentifiersFromDocument,
 } from '@kbn/entity-store/common/domain/euid';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import {
   getSourceFieldsFromNode,
   getEntityTypeFromNodeId,
@@ -26,10 +27,13 @@ import type { NodeViewModel } from '../../types';
 // Exercise the real Entity Store EUID logic rather than a stub, so these tests fail if the
 // entity definitions' ranking or namespace evaluation changes.
 const euidApi: EuidFilterApi = {
-  dsl: { getEuidFilterBasedOnDocument: getEuidDslFilterBasedOnDocument },
-  getEuidNamespaceSourceFields,
-  getNamespaceSourcePrefix: getEuidNamespaceSourcePrefix,
-  getEntityIdentifiersFromDocument,
+  euid: {
+    dsl: { getEuidFilterBasedOnDocument: getEuidDslFilterBasedOnDocument },
+    getEuidNamespaceSourceFields,
+    getNamespaceSourcePrefix: getEuidNamespaceSourcePrefix,
+    getEntityIdentifiersFromDocument,
+  },
+  getBuiltInEntityDefinition,
 };
 
 describe('getSourceFieldsFromNode', () => {
@@ -352,7 +356,9 @@ describe('getEntityFilterSpec', () => {
     // Guards the alignment between this package and the entity definitions: if a namespace
     // source switches to/from `firstChunkOfField`, `prefixMatchFields` changes and the values we
     // carry must follow automatically.
-    const { prefixMatchFields, exactMatchFields } = getEuidNamespaceSourceFields('user');
+    const { prefixMatchFields, exactMatchFields } = getEuidNamespaceSourceFields(
+      getBuiltInEntityDefinition('user')
+    );
     expect(prefixMatchFields.length).toBeGreaterThan(0);
 
     const spec = getEntityFilterSpec(

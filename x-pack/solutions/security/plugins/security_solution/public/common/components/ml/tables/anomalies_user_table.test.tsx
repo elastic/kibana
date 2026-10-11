@@ -22,7 +22,7 @@ jest.mock('../../../../../common/machine_learning/has_ml_user_permissions');
 jest.mock('../hooks/use_installed_security_jobs');
 jest.mock('@kbn/ml-plugin/public');
 jest.mock('@kbn/entity-store/public', () => ({
-  useEntityStoreEuidApi: jest.fn(() => ({ euid: undefined })),
+  useEntityStoreEuidApi: jest.fn(() => null),
 }));
 
 const mockUseQueryToggle = useQueryToggle as jest.Mock;

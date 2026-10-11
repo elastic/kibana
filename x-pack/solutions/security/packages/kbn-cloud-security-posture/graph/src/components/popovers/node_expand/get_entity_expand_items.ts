@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { EntityType } from '@kbn/entity-store/common';
+import type { EntityDefinitionOfAnyType, EntityType } from '@kbn/entity-store/common';
 import type {
   ItemExpandPopoverListItemProps,
   SeparatorExpandPopoverListItemProps,
@@ -80,34 +80,40 @@ export const getSourceFieldsFromNode = (
 
 /**
  * EUID API surface needed to build entity filters. Matches the shape returned by
- * `useEntityStoreEuidApi()?.euid`, which is async-hydrated and therefore nullable.
+ * `useEntityStoreEuidApi()`, which is async-hydrated and therefore nullable.
  */
 export interface EuidFilterApi {
-  dsl: {
-    getEuidFilterBasedOnDocument: (entityType: EntityType, doc: unknown) => object | undefined;
+  euid: {
+    dsl: {
+      getEuidFilterBasedOnDocument: (
+        definition: EntityDefinitionOfAnyType,
+        doc: unknown
+      ) => object | undefined;
+    };
+    getEuidNamespaceSourceFields: (definition: EntityDefinitionOfAnyType) => {
+      exactMatchFields: string[];
+      prefixMatchFields: string[];
+    };
+    /**
+     * Reduces an observed namespace source value to the prefix the entity definition derives from it.
+     * Only the definition knows each source's `splitBy`, so this must not be reimplemented locally.
+     */
+    getNamespaceSourcePrefix: (
+      definition: EntityDefinitionOfAnyType,
+      field: string,
+      observedValue: string
+    ) => string | undefined;
+    /**
+     * Returns only the field→value pairs that the entity store actually used to compose the EUID for
+     * this document (the winning identity arm). Collected attributes present in the entity record but
+     * not part of identity resolution (e.g. `user.id` on a `local` user) are excluded.
+     */
+    getEntityIdentifiersFromDocument: (
+      definition: EntityDefinitionOfAnyType,
+      doc: unknown
+    ) => Record<string, string> | undefined;
   };
-  getEuidNamespaceSourceFields: (entityType: EntityType) => {
-    exactMatchFields: string[];
-    prefixMatchFields: string[];
-  };
-  /**
-   * Reduces an observed namespace source value to the prefix the entity definition derives from it.
-   * Only the definition knows each source's `splitBy`, so this must not be reimplemented locally.
-   */
-  getNamespaceSourcePrefix: (
-    entityType: EntityType,
-    field: string,
-    observedValue: string
-  ) => string | undefined;
-  /**
-   * Returns only the field→value pairs that the entity store actually used to compose the EUID for
-   * this document (the winning identity arm). Collected attributes present in the entity record but
-   * not part of identity resolution (e.g. `user.id` on a `local` user) are excluded.
-   */
-  getEntityIdentifiersFromDocument: (
-    entityType: EntityType,
-    doc: unknown
-  ) => Record<string, string> | undefined;
+  getBuiltInEntityDefinition: (entityType: EntityType) => EntityDefinitionOfAnyType;
 }
 
 /**
@@ -210,7 +216,11 @@ export const getEntityFilterSpec = (
     // Ask the entity store which source fields are prefix-matched for this entity type so we
     // replace exactly those prefix clauses with observed exact values — no more, no less.
     const prefixFields = euidApi
-      ? new Set(euidApi.getEuidNamespaceSourceFields(entityType).prefixMatchFields)
+      ? new Set(
+          euidApi.euid.getEuidNamespaceSourceFields(
+            euidApi.getBuiltInEntityDefinition(entityType)
+          ).prefixMatchFields
+        )
       : new Set<string>();
     const namespaceSourceValues = Object.fromEntries(
       Object.entries(sourceFields).filter(([field]) => prefixFields.has(field))
@@ -218,7 +228,12 @@ export const getEntityFilterSpec = (
     // Bind the entity type so the filter translator can reduce a value to its namespace prefix
     // without knowing about entity types at all.
     const getNamespaceSourcePrefix: NamespaceSourcePrefixResolver | undefined = euidApi
-      ? (field, observedValue) => euidApi.getNamespaceSourcePrefix(entityType, field, observedValue)
+      ? (field, observedValue) =>
+          euidApi.euid.getNamespaceSourcePrefix(
+            euidApi.getBuiltInEntityDefinition(entityType),
+            field,
+            observedValue
+          )
       : undefined;
     return { kind: 'dsl', dsl, namespaceSourceValues, getNamespaceSourcePrefix };
   }
@@ -229,7 +244,10 @@ export const getEntityFilterSpec = (
   const doc = { ...sourceFields, 'entity.id': nodeId };
   let rawIdentifiers: Record<string, string> | undefined;
   try {
-    rawIdentifiers = euidApi?.getEntityIdentifiersFromDocument(entityType, doc);
+    rawIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
+      euidApi.getBuiltInEntityDefinition(entityType),
+      doc
+    );
   } catch {
     // Unknown entity type — fall through to the broad sourceFields filter below.
   }
@@ -267,8 +285,9 @@ const hasNamespaceSourceField = (
 
   let namespaceSourceFields: string[];
   try {
-    const { exactMatchFields, prefixMatchFields } =
-      euidApi.getEuidNamespaceSourceFields(entityType);
+    const { exactMatchFields, prefixMatchFields } = euidApi.euid.getEuidNamespaceSourceFields(
+      euidApi.getBuiltInEntityDefinition(entityType)
+    );
     namespaceSourceFields = [...exactMatchFields, ...prefixMatchFields];
   } catch {
     // Let buildEntityDsl handle an unregistered type and fall back to its identity fields.
@@ -298,7 +317,10 @@ const buildEntityDsl = (
 
   let dsl: object | undefined;
   try {
-    dsl = euidApi.dsl.getEuidFilterBasedOnDocument(entityType, doc);
+    dsl = euidApi.euid.dsl.getEuidFilterBasedOnDocument(
+      euidApi.getBuiltInEntityDefinition(entityType),
+      doc
+    );
   } catch {
     // Unknown entity type (EUID prefix not in the entity-store registry).
     return undefined;

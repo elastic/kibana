@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import React from 'react';
 import { render, fireEvent, renderHook } from '@testing-library/react';
 import { useLeadingControlColumns } from './use_leading_control_columns';
@@ -73,6 +74,7 @@ describe('useLeadingControlColumns', () => {
     jest.clearAllMocks();
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: { kql: { getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument } },
+      getBuiltInEntityDefinition,
     });
     mockGetEuidFilterBasedOnDocument.mockReturnValue(undefined);
     mockUseInvestigateInTimeline.mockReturnValue({
@@ -102,7 +104,10 @@ describe('useLeadingControlColumns', () => {
       const { getByTestId } = renderTimelineControl(column);
       fireEvent.click(getByTestId('control-button'));
 
-      expect(mockGetEuidFilterBasedOnDocument).toHaveBeenCalledWith('user', mockRecord.raw);
+      expect(mockGetEuidFilterBasedOnDocument).toHaveBeenCalledWith(
+        getBuiltInEntityDefinition('user'),
+        mockRecord.raw
+      );
       expect(mockInvestigateInTimeline).toHaveBeenCalledWith({
         query: { query: 'user.name: "john.doe"', language: 'kuery' },
       });

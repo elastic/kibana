@@ -6,6 +6,7 @@
  */
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { HostItem } from '../../../../../common/search_strategy/security_solution/hosts';
 import type { CriteriaFields } from '../types';
@@ -69,8 +70,17 @@ describe('host_to_criteria', () => {
       getEntityIdentifiersFromDocument: jest.fn(),
     } as unknown as EntityStoreEuid;
 
-    expect(hostToCriteria({ hostItem, entityRecord, euid })).toEqual([]);
-    expect(euid.dsl.getEuidFilterBasedOnDocument).toHaveBeenCalledWith('host', entityRecord);
+    expect(
+      hostToCriteria({
+        hostItem,
+        entityRecord,
+        euidApi: { euid, getBuiltInEntityDefinition },
+      })
+    ).toEqual([]);
+    expect(euid.dsl.getEuidFilterBasedOnDocument).toHaveBeenCalledWith(
+      getBuiltInEntityDefinition('host'),
+      entityRecord
+    );
   });
 
   test('returns identifier map criteria when euid has no scoped DSL filter', () => {
@@ -89,10 +99,19 @@ describe('host_to_criteria', () => {
       }),
     } as unknown as EntityStoreEuid;
 
-    expect(hostToCriteria({ hostItem, entityRecord, euid })).toEqual([
+    expect(
+      hostToCriteria({
+        hostItem,
+        entityRecord,
+        euidApi: { euid, getBuiltInEntityDefinition },
+      })
+    ).toEqual([
       { fieldName: 'host.id', fieldValue: 'eid-1' },
       { fieldName: 'host.name', fieldValue: 'host-name' },
     ]);
-    expect(euid.getEntityIdentifiersFromDocument).toHaveBeenCalledWith('host', entityRecord);
+    expect(euid.getEntityIdentifiersFromDocument).toHaveBeenCalledWith(
+      getBuiltInEntityDefinition('host'),
+      entityRecord
+    );
   });
 });

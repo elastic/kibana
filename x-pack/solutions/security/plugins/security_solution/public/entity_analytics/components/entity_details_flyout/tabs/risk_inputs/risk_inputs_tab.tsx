@@ -486,7 +486,11 @@ const RiskInputsTabContent = <T extends EntityType>({
     if (!isResolutionView || !euidApi || !alerts.data) return map;
     alerts.data.forEach((alert) => {
       const sourceEntityId =
-        alert.input.entity_id ?? euidApi.euid.getEuidFromObject(entityType, alert.rawSource);
+        alert.input.entity_id ??
+        euidApi.euid.getEuidFromObject(
+          euidApi.getBuiltInEntityDefinition(entityType),
+          alert.rawSource
+        );
       if (sourceEntityId) {
         map.set(alert._id, entityNameByEuid.get(sourceEntityId) ?? sourceEntityId);
       }

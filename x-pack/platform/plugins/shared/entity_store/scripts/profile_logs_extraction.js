@@ -26,7 +26,7 @@ const fs = require('fs');
 const {
   buildLogsExtractionEsqlQuery,
 } = require('../server/domain/logs_extraction/logs_extraction_query_builder');
-const { getEntityDefinitionWithoutId } = require('../common/domain/definitions/registry');
+const { getBuiltInEntityDefinition } = require('../common/domain/definitions/registry');
 const { getLatestEntitiesIndexName } = require('../common/domain/entity_index');
 
 // ---------------------------------------------------------------------------
@@ -404,7 +404,7 @@ async function main() {
     for (const entityType of entities) {
       console.log(`[${clusterName}/${entityType}] Building query…`);
 
-      const entityDefinition = getEntityDefinitionWithoutId(entityType);
+      const entityDefinition = getBuiltInEntityDefinition(entityType);
       const query = buildLogsExtractionEsqlQuery({
         indexPatterns,
         latestIndex,

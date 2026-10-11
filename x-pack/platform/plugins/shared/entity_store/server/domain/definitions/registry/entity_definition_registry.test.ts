@@ -84,13 +84,25 @@ describe('EntityDefinitionRegistry', () => {
       expectRejected('bad_schema', /failed schema validation: indexPatterns/);
     });
 
-    it.each(['Host', '1host', 'host..pod', 'host-', '_host', 'host pod', 'hôst', ''])(
-      'rejects type name %p that does not match the pattern',
-      (type) => {
-        expect(registry.register(makeDefinition(type)).ok).toBe(false);
-        expectRejected(type, /does not match pattern/);
-      }
-    );
+    // `"` and `\` would break the double-quoted `<type>:` prefix the id compiler emits verbatim
+    // into ES|QL and Painless string literals, so the pattern must keep rejecting them. `'` is
+    // included for symmetry; it is simply outside the allowed character set.
+    it.each([
+      'Host',
+      '1host',
+      'host..pod',
+      'host-',
+      '_host',
+      'host pod',
+      'hôst',
+      '',
+      'a"b',
+      'a\\b',
+      "a'b",
+    ])('rejects type name %p that does not match the pattern', (type) => {
+      expect(registry.register(makeDefinition(type)).ok).toBe(false);
+      expectRejected(type, /does not match pattern/);
+    });
 
     it.each(['a', 'k8s.pod', 'aws_s3-bucket', 'a1.b2_c3-d4'])('accepts type name %p', (type) => {
       expect(ENTITY_DEFINITION_TYPE_PATTERN.test(type)).toBe(true);

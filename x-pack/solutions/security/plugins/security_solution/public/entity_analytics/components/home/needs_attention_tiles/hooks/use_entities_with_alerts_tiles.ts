@@ -89,7 +89,7 @@ export const useAlertBasedTiles = ({
   const query = useMemo(() => {
     if (!resolvedIndex?.indexName || !euidApi) return null;
     return buildAlertBasedTilesQuery(
-      euidApi.euid,
+      euidApi,
       resolvedIndex.indexName,
       spaceId,
       timeRange,

@@ -51,7 +51,10 @@ function extractEntityEntriesFromBuckets(
     const hit = b.sample?.hits?.hits?.[0];
     const source = hit?._source;
     if (source && typeof source === 'object' && !Array.isArray(source)) {
-      const identityFields = euidApi?.euid?.getEntityIdentifiersFromDocument(entityType, source);
+      const identityFields = euidApi?.euid?.getEntityIdentifiersFromDocument(
+        euidApi.getBuiltInEntityDefinition(entityType),
+        source
+      );
       if (identityFields != null) {
         result.push({
           identityFields,
@@ -89,8 +92,12 @@ export const useAttackEntitiesLists = (
       query: { ids: { values: originalAlertIds } },
       size: 0,
       runtime_mappings: {
-        [USER_EUID_RUNTIME_FIELD]: euidApi.euid.painless.getEuidRuntimeMapping('user'),
-        [HOST_EUID_RUNTIME_FIELD]: euidApi.euid.painless.getEuidRuntimeMapping('host'),
+        [USER_EUID_RUNTIME_FIELD]: euidApi.euid.painless.getEuidRuntimeMapping(
+          euidApi.getBuiltInEntityDefinition('user')
+        ),
+        [HOST_EUID_RUNTIME_FIELD]: euidApi.euid.painless.getEuidRuntimeMapping(
+          euidApi.getBuiltInEntityDefinition('host')
+        ),
       },
       aggs: {
         unique_users_by_euid: {
@@ -115,7 +122,7 @@ export const useAttackEntitiesLists = (
         },
       },
     };
-  }, [originalAlertIds, euidApi?.euid]);
+  }, [originalAlertIds, euidApi]);
 
   const { loading, data, setQuery } = useQueryAlerts<unknown, AttackEntitiesListsAggregations>({
     fetchMethod: fetchQueryAlerts,
