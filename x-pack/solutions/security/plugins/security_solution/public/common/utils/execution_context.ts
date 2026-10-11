@@ -29,7 +29,10 @@ export const EA_EXECUTION_CONTEXT_NAMES = {
   EXPLORE_NETWORK_PAGE: buildEaName('explore-network_page'),
   EXPLORE_USERS_PAGE: buildEaName('explore-users_page'),
   HOME_PAGE: buildEaName('home_page'),
+  PRIVILEGED_USER_MONITORING: buildEaName('privileged_user_monitoring'),
   RISK_SCORE_MANAGEMENT: buildEaName('risk_score_management'),
+  THREAT_HUNTING_LEADS: buildEaName('threat_hunting_leads'),
+  WATCHLISTS: buildEaName('watchlists'),
 } as const;
 
 export type EaExecutionContextName =

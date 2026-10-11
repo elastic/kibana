@@ -167,6 +167,46 @@ describe('useRecentAnomaliesQuery', () => {
     });
   });
 
+  describe('execution context', () => {
+    const homePageContext = (id: string) => ({
+      child: { type: 'security_solution', name: 'entity_analytics:home_page', id },
+    });
+
+    it('labels the top rows query as anomalies_top_rows', async () => {
+      renderHook(() => useRecentAnomaliesQuery(baseParams));
+
+      await topRowsCall()![1]({ signal: undefined });
+
+      expect(mockGetESQLResults).toHaveBeenCalledWith(
+        expect.objectContaining({ executionContext: homePageContext('anomalies_top_rows') })
+      );
+    });
+
+    it('labels the heatmap data query as anomalies_heatmap', async () => {
+      topRowsRecords = [{ entity_id: 'host:test_host_01', entity_name: 'h1', entity_type: 'host' }];
+
+      renderHook(() => useRecentAnomaliesQuery(baseParams));
+
+      await dataCall()![1]({ signal: undefined });
+
+      expect(mockGetESQLResults).toHaveBeenCalledWith(
+        expect.objectContaining({ executionContext: homePageContext('anomalies_heatmap') })
+      );
+    });
+
+    it('labels the entity resolution query as anomalies_entity_filter', async () => {
+      mockUseGlobalFilterQuery.mockReturnValue({ filterQuery: ACTIVE_BOOL });
+
+      renderHook(() => useRecentAnomaliesQuery(baseParams));
+
+      await resolutionCall()![1]({ signal: undefined });
+
+      expect(mockGetESQLResults).toHaveBeenCalledWith(
+        expect.objectContaining({ executionContext: homePageContext('anomalies_entity_filter') })
+      );
+    });
+  });
+
   describe('when no search bar filter is active', () => {
     it('does not constrain the anomaly query by entity id', () => {
       renderHook(() => useRecentAnomaliesQuery(baseParams));

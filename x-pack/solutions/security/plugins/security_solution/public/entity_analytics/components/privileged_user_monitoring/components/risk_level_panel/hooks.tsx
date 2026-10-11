@@ -17,12 +17,21 @@ import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_statu
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
 import { useKibana } from '../../../../../common/lib/kibana';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../../common/utils/execution_context';
 import { useGetDefaultRiskIndex } from '../../../../hooks/use_get_default_risk_index';
 import type { RiskLevelsTableItem, RiskLevelsPrivilegedUsersQueryResult } from './types';
 import { RiskScoreLevel } from '../../../severity/common';
 import type { RiskSeverity } from '../../../../../../common/search_strategy';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';
 import { getRiskLevelsPrivilegedUsersQueryBody } from '../../queries/risk_level_esql_query';
+
+const PUM_RISK_LEVEL_PANEL_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
+  'pum_risk_level_panel'
+);
 
 export const useRiskLevelsPrivilegedUserQuery = ({
   skip,
@@ -64,6 +73,7 @@ export const useRiskLevelsPrivilegedUserQuery = ({
         search: data.search.search,
         signal,
         filter: filterQuery,
+        executionContext: PUM_RISK_LEVEL_PANEL_CONTEXT,
       }),
     {
       keepPreviousData: true,
