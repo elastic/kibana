@@ -16,7 +16,7 @@ const SAMPLE_DATA_SET = 'ecommerce';
  * in esql_rule_utils.test.ts; these tests verify the resulting UI state (callout
  * visibility, save button enabled/disabled) end-to-end in the browser.
  */
-test.describe('ES|QL rule flyout — ?param validation', { tag: testData.UI_ENGINE_TAG }, () => {
+test.describe('ES|QL rule flyout — ?param validation', { tag: testData.UI_TAG }, () => {
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.sampleData.install(SAMPLE_DATA_SET);
   });

@@ -14,7 +14,7 @@ import { buildCreateRuleData, test, testData } from '../fixtures';
  */
 const TEST_INDEX = `test-rule-routing-tags-edit-${Date.now()}`;
 
-test.describe('Rule routing tags — edit via ES|QL form', { tag: testData.UI_ENGINE_TAG }, () => {
+test.describe('Rule routing tags — edit via ES|QL form', { tag: testData.UI_TAG }, () => {
   const createdRuleIds: string[] = [];
 
   test.beforeAll(async ({ esClient }) => {

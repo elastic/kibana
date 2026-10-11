@@ -13,7 +13,7 @@ const SAMPLE_DATA_SET = 'ecommerce';
 test.describe(
   'Discover Alerts menu with alerting v2',
   {
-    tag: testData.UI_ENGINE_TAG,
+    tag: testData.UI_TAG,
   },
   () => {
     test.beforeAll(async ({ apiServices }) => {

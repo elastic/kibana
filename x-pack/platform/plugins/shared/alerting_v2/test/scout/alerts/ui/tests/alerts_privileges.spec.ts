@@ -46,7 +46,7 @@ const ALERTS_V2_RULES_READ_ROLE = {
   ),
 };
 
-test.describe('Alerts page - read/write privileges', { tag: testData.UI_ENGINE_TAG }, () => {
+test.describe('Alerts page - read/write privileges', { tag: testData.UI_TAG }, () => {
   let ruleId: string | undefined;
 
   const deletePrivilegesRule = async (rules: RulesApiService): Promise<void> => {

@@ -13,7 +13,7 @@ const INITIAL_INDEX = 'logs-*';
 const UPDATED_QUERY = `FROM ${TEST_INDEX} | WHERE message != ""`;
 const UPDATED_ALERT_CONDITION = 'WHERE message != ""';
 
-test.describe('Discover query sync — Rule flyout', { tag: testData.UI_ENGINE_TAG }, () => {
+test.describe('Discover query sync — Rule flyout', { tag: testData.UI_TAG }, () => {
   test.beforeAll(async ({ esClient }) => {
     await esClient.indices.create(
       {

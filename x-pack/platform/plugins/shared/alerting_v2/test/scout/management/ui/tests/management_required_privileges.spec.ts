@@ -57,7 +57,7 @@ const accessTestBody =
     }
   };
 
-test.describe('Alerting pages - required privileges', { tag: testData.UI_ENGINE_TAG }, () => {
+test.describe('Alerting pages - required privileges', { tag: testData.UI_TAG }, () => {
   test('user with full access can view every page', accessTestBody(ALL_ROLE, ALL_APPS));
 
   test('user with read-only access can view every page', accessTestBody(READ_ROLE, ALL_APPS));

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getPlaywrightTagsFor } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { ApiClientFixture } from '@kbn/scout';
 import { ALERTING_V2_INTERNAL_SUGGESTIONS_MATCHER_VALUES_API_PATH } from '@kbn/alerting-v2-constants';
@@ -72,267 +73,271 @@ const buildSeededAlertEvents = () => [
  * silent false-positives, the entire suite is restricted to local stateful
  * (classic) until ECH support lands.
  */
-apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classic' }, () => {
-  let writerHeaders: Record<string, string>;
+apiTest.describe(
+  'Matcher value suggestions API',
+  { tag: getPlaywrightTagsFor('stateful', 'classic', 'local') },
+  () => {
+    let writerHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
-    // This is an internal API reached over POST, so the request needs the
-    // shared XSRF / internal-origin headers alongside the API key; without
-    // them Kibana rejects the request with a 400 before it hits validation.
-    writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
-  });
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+      // This is an internal API reached over POST, so the request needs the
+      // shared XSRF / internal-origin headers alongside the API key; without
+      // them Kibana rejects the request with a 400 before it hits validation.
+      writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
+    });
 
-  apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.rules.cleanUp();
-    await apiServices.alertingV2.ruleEvents.cleanUp();
-  });
+    apiTest.beforeEach(async ({ apiServices }) => {
+      await apiServices.alertingV2.rules.cleanUp();
+      await apiServices.alertingV2.ruleEvents.cleanUp();
+    });
 
-  apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.rules.cleanUp();
-    await apiServices.alertingV2.ruleEvents.cleanUp();
-  });
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.alertingV2.rules.cleanUp();
+      await apiServices.alertingV2.ruleEvents.cleanUp();
+    });
 
-  apiTest(
-    'alert_status: returns a 200 with an array of suggested values for a static field',
-    async ({ apiClient }) => {
-      // The status is backed by static suggestions, so the result is
-      // deterministic without seeding any alert events or rules.
-      const response = await suggestValues(
-        apiClient,
-        { field: 'alert_status', query: '' },
-        { headers: writerHeaders }
-      );
+    apiTest(
+      'alert_status: returns a 200 with an array of suggested values for a static field',
+      async ({ apiClient }) => {
+        // The status is backed by static suggestions, so the result is
+        // deterministic without seeding any alert events or rules.
+        const response = await suggestValues(
+          apiClient,
+          { field: 'alert_status', query: '' },
+          { headers: writerHeaders }
+        );
 
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual(
-        expect.arrayContaining(['inactive', 'pending', 'active', 'recovering'])
-      );
-    }
-  );
-
-  apiTest('filters static suggestions by the query prefix', async ({ apiClient }) => {
-    const response = await suggestValues(
-      apiClient,
-      { field: 'alert_status', query: 'a' },
-      { headers: writerHeaders }
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual(
+          expect.arrayContaining(['inactive', 'pending', 'active', 'recovering'])
+        );
+      }
     );
 
-    expect(response).toHaveStatusCode(200);
-    // `inactive` contains but does not start with `a`, so it is filtered out.
-    expect(response.body).toStrictEqual(['active']);
-  });
-
-  apiTest(
-    'group_hash: aggregates the values stored on the alert events',
-    async ({ apiClient, apiServices }) => {
-      await apiServices.alertingV2.ruleEvents.seed(buildSeededAlertEvents());
-
+    apiTest('filters static suggestions by the query prefix', async ({ apiClient }) => {
       const response = await suggestValues(
         apiClient,
-        { field: 'group_hash', query: '' },
+        { field: 'alert_status', query: 'a' },
         { headers: writerHeaders }
       );
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual(expect.arrayContaining(['scout.web-1', 'scoutxweb-2']));
-    }
-  );
+      // `inactive` contains but does not start with `a`, so it is filtered out.
+      expect(response.body).toStrictEqual(['active']);
+    });
 
-  apiTest(
-    'group_hash: escapes regexp characters in the query before filtering',
-    async ({ apiClient, apiServices }) => {
-      await apiServices.alertingV2.ruleEvents.seed(buildSeededAlertEvents());
+    apiTest(
+      'group_hash: aggregates the values stored on the alert events',
+      async ({ apiClient, apiServices }) => {
+        await apiServices.alertingV2.ruleEvents.seed(buildSeededAlertEvents());
 
-      const response = await suggestValues(
-        apiClient,
-        { field: 'group_hash', query: 'scout.' },
-        { headers: writerHeaders }
-      );
+        const response = await suggestValues(
+          apiClient,
+          { field: 'group_hash', query: '' },
+          { headers: writerHeaders }
+        );
 
-      expect(response).toHaveStatusCode(200);
-      // An unescaped `.` would also match `scoutxweb-2`.
-      expect(response.body).toStrictEqual(['scout.web-1']);
-    }
-  );
-
-  apiTest(
-    'alert_id: aggregates the alert ids stored on the alert events',
-    async ({ apiClient, apiServices }) => {
-      await apiServices.alertingV2.ruleEvents.seed(buildSeededAlertEvents());
-
-      const response = await suggestValues(
-        apiClient,
-        { field: 'alert_id', query: 'scout-episode-w' },
-        { headers: writerHeaders }
-      );
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual(['scout-episode-web']);
-    }
-  );
-
-  apiTest(
-    'data.*: aggregates the values of a field nested under data',
-    async ({ apiClient, apiServices }) => {
-      await apiServices.alertingV2.ruleEvents.seed(buildSeededAlertEvents());
-
-      const response = await suggestValues(
-        apiClient,
-        { field: 'data.host', query: 'scout-' },
-        { headers: writerHeaders }
-      );
-
-      expect(response).toHaveStatusCode(200);
-      expect([...response.body].sort()).toStrictEqual(['scout-db-1', 'scout-web-1']);
-    }
-  );
-
-  apiTest('returns an empty list for an unsupported field', async ({ apiClient }) => {
-    const response = await suggestValues(
-      apiClient,
-      { field: 'not_a_matcher_field', query: '' },
-      { headers: writerHeaders }
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual(expect.arrayContaining(['scout.web-1', 'scoutxweb-2']));
+      }
     );
 
-    expect(response).toHaveStatusCode(200);
-    expect(response.body).toStrictEqual([]);
-  });
+    apiTest(
+      'group_hash: escapes regexp characters in the query before filtering',
+      async ({ apiClient, apiServices }) => {
+        await apiServices.alertingV2.ruleEvents.seed(buildSeededAlertEvents());
 
-  apiTest(
-    'validation: rejects body with unknown top-level keys (strict schema)',
-    async ({ apiClient }) => {
+        const response = await suggestValues(
+          apiClient,
+          { field: 'group_hash', query: 'scout.' },
+          { headers: writerHeaders }
+        );
+
+        expect(response).toHaveStatusCode(200);
+        // An unescaped `.` would also match `scoutxweb-2`.
+        expect(response.body).toStrictEqual(['scout.web-1']);
+      }
+    );
+
+    apiTest(
+      'alert_id: aggregates the alert ids stored on the alert events',
+      async ({ apiClient, apiServices }) => {
+        await apiServices.alertingV2.ruleEvents.seed(buildSeededAlertEvents());
+
+        const response = await suggestValues(
+          apiClient,
+          { field: 'alert_id', query: 'scout-episode-w' },
+          { headers: writerHeaders }
+        );
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual(['scout-episode-web']);
+      }
+    );
+
+    apiTest(
+      'data.*: aggregates the values of a field nested under data',
+      async ({ apiClient, apiServices }) => {
+        await apiServices.alertingV2.ruleEvents.seed(buildSeededAlertEvents());
+
+        const response = await suggestValues(
+          apiClient,
+          { field: 'data.host', query: 'scout-' },
+          { headers: writerHeaders }
+        );
+
+        expect(response).toHaveStatusCode(200);
+        expect([...response.body].sort()).toStrictEqual(['scout-db-1', 'scout-web-1']);
+      }
+    );
+
+    apiTest('returns an empty list for an unsupported field', async ({ apiClient }) => {
       const response = await suggestValues(
         apiClient,
-        { field: 'alert_status', query: 'test', unknownField: 'x' },
+        { field: 'not_a_matcher_field', query: '' },
+        { headers: writerHeaders }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual([]);
+    });
+
+    apiTest(
+      'validation: rejects body with unknown top-level keys (strict schema)',
+      async ({ apiClient }) => {
+        const response = await suggestValues(
+          apiClient,
+          { field: 'alert_status', query: 'test', unknownField: 'x' },
+          { headers: writerHeaders }
+        );
+
+        expect(response).toHaveStatusCode(400);
+        expect(response.body.code).toBe('BAD_REQUEST');
+      }
+    );
+
+    apiTest(
+      'validation: accepts fieldMeta and filters sent by the KQL value suggestion provider',
+      async ({ apiClient }) => {
+        const response = await suggestValues(
+          apiClient,
+          {
+            field: 'alert_status',
+            query: 'test',
+            fieldMeta: { name: 'alert_status', type: 'string' },
+            filters: [],
+          },
+          { headers: writerHeaders }
+        );
+
+        expect(response).toHaveStatusCode(200);
+        expect(Array.isArray(response.body)).toBe(true);
+      }
+    );
+
+    apiTest('validation: rejects a body without a query', async ({ apiClient }) => {
+      const response = await suggestValues(
+        apiClient,
+        { field: 'alert_status' },
         { headers: writerHeaders }
       );
 
       expect(response).toHaveStatusCode(400);
       expect(response.body.code).toBe('BAD_REQUEST');
-    }
-  );
+    });
 
-  apiTest(
-    'validation: accepts fieldMeta and filters sent by the KQL value suggestion provider',
-    async ({ apiClient }) => {
+    apiTest('validation: rejects an empty field', async ({ apiClient }) => {
       const response = await suggestValues(
         apiClient,
-        {
-          field: 'alert_status',
-          query: 'test',
-          fieldMeta: { name: 'alert_status', type: 'string' },
-          filters: [],
-        },
+        { field: '', query: '' },
         { headers: writerHeaders }
       );
 
-      expect(response).toHaveStatusCode(200);
-      expect(Array.isArray(response.body)).toBe(true);
-    }
-  );
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    });
 
-  apiTest('validation: rejects a body without a query', async ({ apiClient }) => {
-    const response = await suggestValues(
-      apiClient,
-      { field: 'alert_status' },
-      { headers: writerHeaders }
-    );
-
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
-  });
-
-  apiTest('validation: rejects an empty field', async ({ apiClient }) => {
-    const response = await suggestValues(
-      apiClient,
-      { field: '', query: '' },
-      { headers: writerHeaders }
-    );
-
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
-  });
-
-  apiTest('validation: rejects a field longer than the schema limit', async ({ apiClient }) => {
-    const response = await suggestValues(
-      apiClient,
-      { field: 'a'.repeat(FIELD_MAX_LENGTH + 1), query: '' },
-      { headers: writerHeaders }
-    );
-
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
-  });
-
-  apiTest('validation: rejects a query longer than the schema limit', async ({ apiClient }) => {
-    const response = await suggestValues(
-      apiClient,
-      { field: 'alert_status', query: 'a'.repeat(QUERY_MAX_LENGTH + 1) },
-      { headers: writerHeaders }
-    );
-
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
-  });
-
-  apiTest(
-    'authorization: returns 200 for a user with read privileges on rules and alerts',
-    async ({ apiClient, requestAuth }) => {
-      const credentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
-
+    apiTest('validation: rejects a field longer than the schema limit', async ({ apiClient }) => {
       const response = await suggestValues(
         apiClient,
-        { field: 'alert_status', query: '' },
-        { headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader } }
+        { field: 'a'.repeat(FIELD_MAX_LENGTH + 1), query: '' },
+        { headers: writerHeaders }
       );
 
-      expect(response).toHaveStatusCode(200);
-    }
-  );
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    });
 
-  apiTest(
-    'authorization: returns 403 for a user with rules privileges but no alerts privileges',
-    async ({ apiClient, requestAuth }) => {
-      const credentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_RULES_READ_ROLE);
-
+    apiTest('validation: rejects a query longer than the schema limit', async ({ apiClient }) => {
       const response = await suggestValues(
         apiClient,
-        { field: 'alert_status', query: '' },
-        { headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader } }
+        { field: 'alert_status', query: 'a'.repeat(QUERY_MAX_LENGTH + 1) },
+        { headers: writerHeaders }
       );
 
-      expect(response).toHaveStatusCode(403);
-    }
-  );
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    });
 
-  apiTest(
-    'authorization: returns 403 for a user with alerts privileges but no rules privileges',
-    async ({ apiClient, requestAuth }) => {
-      const credentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_ALERTS_READ_ROLE);
+    apiTest(
+      'authorization: returns 200 for a user with read privileges on rules and alerts',
+      async ({ apiClient, requestAuth }) => {
+        const credentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
 
-      const response = await suggestValues(
-        apiClient,
-        { field: 'alert_status', query: '' },
-        { headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader } }
-      );
+        const response = await suggestValues(
+          apiClient,
+          { field: 'alert_status', query: '' },
+          { headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader } }
+        );
 
-      expect(response).toHaveStatusCode(403);
-    }
-  );
+        expect(response).toHaveStatusCode(200);
+      }
+    );
 
-  apiTest(
-    'authorization: returns 403 for a user without alerting_v2 privileges',
-    async ({ apiClient, requestAuth }) => {
-      const credentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
+    apiTest(
+      'authorization: returns 403 for a user with rules privileges but no alerts privileges',
+      async ({ apiClient, requestAuth }) => {
+        const credentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_RULES_READ_ROLE);
 
-      const response = await suggestValues(
-        apiClient,
-        { field: 'alert_status', query: '' },
-        { headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader } }
-      );
+        const response = await suggestValues(
+          apiClient,
+          { field: 'alert_status', query: '' },
+          { headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader } }
+        );
 
-      expect(response).toHaveStatusCode(403);
-    }
-  );
-});
+        expect(response).toHaveStatusCode(403);
+      }
+    );
+
+    apiTest(
+      'authorization: returns 403 for a user with alerts privileges but no rules privileges',
+      async ({ apiClient, requestAuth }) => {
+        const credentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_ALERTS_READ_ROLE);
+
+        const response = await suggestValues(
+          apiClient,
+          { field: 'alert_status', query: '' },
+          { headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader } }
+        );
+
+        expect(response).toHaveStatusCode(403);
+      }
+    );
+
+    apiTest(
+      'authorization: returns 403 for a user without alerting_v2 privileges',
+      async ({ apiClient, requestAuth }) => {
+        const credentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
+
+        const response = await suggestValues(
+          apiClient,
+          { field: 'alert_status', query: '' },
+          { headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader } }
+        );
+
+        expect(response).toHaveStatusCode(403);
+      }
+    );
+  }
+);

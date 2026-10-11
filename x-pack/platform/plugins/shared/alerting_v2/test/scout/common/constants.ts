@@ -9,14 +9,10 @@ import { getPlaywrightTagsFor, tags } from '@kbn/scout';
 
 export const API_ENGINE_TAG = tags.deploymentAgnostic;
 
-/** UI suites are local-only: custom-role auth is not on Elastic Cloud Hosted yet. */
-export const UI_STATEFUL_TAG = getPlaywrightTagsFor('stateful', 'classic', 'local');
-export const UI_SERVERLESS_TAG = getPlaywrightTagsFor(
-  'serverless',
-  'observability_complete',
-  'local'
-);
-export const UI_ENGINE_TAG = [...UI_STATEFUL_TAG, ...UI_SERVERLESS_TAG];
+export const UI_TAG = [
+  ...getPlaywrightTagsFor('stateful', 'classic', 'local'),
+  ...getPlaywrightTagsFor('serverless', 'observability_complete', 'local'),
+];
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',

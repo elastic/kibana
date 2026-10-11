@@ -59,58 +59,51 @@ const assertEpisodesManagementHappyPath = async ({
  * v1-only users never reach this mount; they are covered by the observability
  * plugin.
  */
-test.describe(
-  'Alerts management page - privilege-based access',
-  { tag: testData.UI_ENGINE_TAG },
-  () => {
-    test.beforeAll(async ({ apiServices }) => {
-      test.setTimeout(180_000);
-      await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId: SEEDED_RULE_ID });
-      await apiServices.alertingV2.alertActionsEvents.cleanUp({ ruleId: SEEDED_RULE_ID });
-      const now = new Date().toISOString();
-      await apiServices.alertingV2.ruleEvents.seed([
-        buildAlertEvent({
-          '@timestamp': now,
-          rule: { id: SEEDED_RULE_ID, version: 1 },
-          group_hash: SEEDED_GROUP_HASH,
-          alert: { id: 'scout-alerts-mgmt-priv-episode', status: 'active' },
-        }),
-      ]);
-      await apiServices.alertingV2.alertActionsEvents.seed([
-        {
-          '@timestamp': now,
-          last_series_event_timestamp: now,
-          actor: { type: 'user' },
-          action_type: 'tag',
-          group_hash: SEEDED_GROUP_HASH,
-          rule_id: SEEDED_RULE_ID,
-          tags: [SEEDED_TAG],
-          space_id: 'default',
-          source: 'scout-test',
-        },
-      ]);
-    });
+test.describe('Alerts management page - privilege-based access', { tag: testData.UI_TAG }, () => {
+  test.beforeAll(async ({ apiServices }) => {
+    test.setTimeout(180_000);
+    await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId: SEEDED_RULE_ID });
+    await apiServices.alertingV2.alertActionsEvents.cleanUp({ ruleId: SEEDED_RULE_ID });
+    const now = new Date().toISOString();
+    await apiServices.alertingV2.ruleEvents.seed([
+      buildAlertEvent({
+        '@timestamp': now,
+        rule: { id: SEEDED_RULE_ID, version: 1 },
+        group_hash: SEEDED_GROUP_HASH,
+        alert: { id: 'scout-alerts-mgmt-priv-episode', status: 'active' },
+      }),
+    ]);
+    await apiServices.alertingV2.alertActionsEvents.seed([
+      {
+        '@timestamp': now,
+        last_series_event_timestamp: now,
+        actor: { type: 'user' },
+        action_type: 'tag',
+        group_hash: SEEDED_GROUP_HASH,
+        rule_id: SEEDED_RULE_ID,
+        tags: [SEEDED_TAG],
+        space_id: 'default',
+        source: 'scout-test',
+      },
+    ]);
+  });
 
-    test.afterAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId: SEEDED_RULE_ID });
-      await apiServices.alertingV2.alertActionsEvents.cleanUp({ ruleId: SEEDED_RULE_ID });
-    });
+  test.afterAll(async ({ apiServices }) => {
+    await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId: SEEDED_RULE_ID });
+    await apiServices.alertingV2.alertActionsEvents.cleanUp({ ruleId: SEEDED_RULE_ID });
+  });
 
-    test('alerting_v2_alerts all user sees the full page', async ({ browserAuth, pageObjects }) => {
-      test.setTimeout(180_000);
-      await browserAuth.loginWithCustomRole(ALERTING_V2_ALERTS_ALL_ROLE);
-      await pageObjects.alertEpisodesList.goto();
-      await assertEpisodesManagementHappyPath(pageObjects);
-    });
+  test('alerting_v2_alerts all user sees the full page', async ({ browserAuth, pageObjects }) => {
+    test.setTimeout(180_000);
+    await browserAuth.loginWithCustomRole(ALERTING_V2_ALERTS_ALL_ROLE);
+    await pageObjects.alertEpisodesList.goto();
+    await assertEpisodesManagementHappyPath(pageObjects);
+  });
 
-    test('alerting_v2_alerts read user sees the full page', async ({
-      browserAuth,
-      pageObjects,
-    }) => {
-      test.setTimeout(180_000);
-      await browserAuth.loginWithCustomRole(ALERTING_V2_ALERTS_READ_ROLE);
-      await pageObjects.alertEpisodesList.goto();
-      await assertEpisodesManagementHappyPath(pageObjects);
-    });
-  }
-);
+  test('alerting_v2_alerts read user sees the full page', async ({ browserAuth, pageObjects }) => {
+    test.setTimeout(180_000);
+    await browserAuth.loginWithCustomRole(ALERTING_V2_ALERTS_READ_ROLE);
+    await pageObjects.alertEpisodesList.goto();
+    await assertEpisodesManagementHappyPath(pageObjects);
+  });
+});

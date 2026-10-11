@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 
-test.describe('Rule name validation — Discover flyout', { tag: testData.UI_ENGINE_TAG }, () => {
+test.describe('Rule name validation — Discover flyout', { tag: testData.UI_TAG }, () => {
   const SOURCE_INDEX = 'test-discover-rule-validation';
 
   test.beforeAll(async ({ esClient }) => {

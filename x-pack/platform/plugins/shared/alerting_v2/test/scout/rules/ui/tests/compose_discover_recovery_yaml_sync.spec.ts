@@ -48,7 +48,7 @@ const yamlRule = ({
 
 test.describe(
   'ComposeDiscoverFlyout — recovery strategy YAML <-> GUI round trip (#278327)',
-  { tag: testData.UI_ENGINE_TAG },
+  { tag: testData.UI_TAG },
   () => {
     const createdRuleIds: string[] = [];
 

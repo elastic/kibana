@@ -12,7 +12,7 @@ const RULE_ID = 'episode-policy-history-rule';
 const GROUP_HASH = 'episode-policy-history-series-1';
 const EPISODE_ID = 'episode-policy-history-ep-1';
 
-test.describe('Alert details — action policy history tab', { tag: testData.UI_ENGINE_TAG }, () => {
+test.describe('Alert details — action policy history tab', { tag: testData.UI_TAG }, () => {
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.alertingV2.alertActionsEvents.cleanUp({ ruleId: RULE_ID });
     await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId: RULE_ID });

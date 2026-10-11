@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest, getPlaywrightTagsFor, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { API_ENGINE_TAG } from '../../../common/constants';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
 const SKILLS_API = '/api/agent_builder/skills';
@@ -58,7 +59,7 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
 
   apiTest(
     'does not list the alerting V2 skills when neither gate is enabled',
-    { tag: tags.deploymentAgnostic },
+    { tag: API_ENGINE_TAG },
     async ({ apiClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
 
@@ -80,7 +81,7 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
 
   apiTest(
     'does not list the alerting V2 skills when only experimental features are enabled',
-    { tag: tags.deploymentAgnostic },
+    { tag: API_ENGINE_TAG },
     async ({ apiClient, kbnClient, requestAuth }) => {
       await kbnClient.uiSettings.update({
         [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
@@ -106,7 +107,7 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
   // Constantly fails on ECH: https://github.com/elastic/kibana/issues/283926
   apiTest(
     'does not list the alerting V2 skills when only alerting:v2:enabled is on',
-    { tag: '@local-stateful-classic' },
+    { tag: getPlaywrightTagsFor('stateful', 'classic', 'local') },
     async ({ apiClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
       const headers = { ...COMMON_HEADERS, ...apiKeyHeader };

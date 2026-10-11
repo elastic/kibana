@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getPlaywrightTagsFor } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
@@ -43,452 +44,462 @@ const findRulesUrl = (
  * custom roles), the entire suite is restricted to local stateful (classic)
  * until ECH support lands.
  */
-apiTest.describe('Find rules API', { tag: '@local-stateful-classic' }, () => {
-  let adminCredentials: RoleApiCredentials;
-  let adminHeaders: Record<string, string>;
+apiTest.describe(
+  'Find rules API',
+  { tag: getPlaywrightTagsFor('stateful', 'classic', 'local') },
+  () => {
+    let adminCredentials: RoleApiCredentials;
+    let adminHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    adminCredentials = await requestAuth.getApiKeyForAdmin();
-    adminHeaders = { ...adminCredentials.apiKeyHeader };
-  });
-
-  apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.rules.cleanUp();
-  });
-
-  apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.rules.cleanUp();
-  });
-
-  apiTest('search: should find rules by name prefix', async ({ apiClient, apiServices }) => {
-    for (const name of ['HighCpuAlert', 'DiskUsageAlert']) {
-      await apiServices.alertingV2.rules.create(buildCreateRuleData({ metadata: { name } }));
-    }
-
-    const response = await apiClient.get(findRulesUrl({ search: 'HighCpu', per_page: 100 }), {
-      headers: adminHeaders,
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      adminCredentials = await requestAuth.getApiKeyForAdmin();
+      adminHeaders = { ...adminCredentials.apiKeyHeader };
     });
 
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.items).toHaveLength(1);
-    expect(response.body.items[0].metadata.name).toBe('HighCpuAlert');
-  });
-
-  apiTest('search: should find rules by description prefix', async ({ apiClient, apiServices }) => {
-    const rules = [
-      { name: 'rule-with-desc', description: 'Monitors memory pressure on production hosts' },
-      { name: 'rule-no-match', description: 'Tracks network latency' },
-    ];
-
-    for (const { name, description } of rules) {
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name, description } })
-      );
-    }
-
-    const response = await apiClient.get(findRulesUrl({ search: 'memory', per_page: 100 }), {
-      headers: adminHeaders,
+    apiTest.beforeEach(async ({ apiServices }) => {
+      await apiServices.alertingV2.rules.cleanUp();
     });
 
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.items).toHaveLength(1);
-    expect(response.body.items[0].metadata.name).toBe('rule-with-desc');
-  });
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.alertingV2.rules.cleanUp();
+    });
 
-  apiTest('search: should AND multiple terms together', async ({ apiClient, apiServices }) => {
-    const rules = [
-      { name: 'prod-cpu-alert', description: 'Monitors production CPU usage' },
-      { name: 'dev-cpu-alert', description: 'Monitors development CPU usage' },
-    ];
-
-    for (const { name, description } of rules) {
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name, description } })
-      );
-    }
-
-    const response = await apiClient.get(
-      findRulesUrl({ search: 'cpu production', per_page: 100 }),
-      {
-        headers: adminHeaders,
+    apiTest('search: should find rules by name prefix', async ({ apiClient, apiServices }) => {
+      for (const name of ['HighCpuAlert', 'DiskUsageAlert']) {
+        await apiServices.alertingV2.rules.create(buildCreateRuleData({ metadata: { name } }));
       }
-    );
 
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.items).toHaveLength(1);
-    expect(response.body.items[0].metadata.name).toBe('prod-cpu-alert');
-  });
-
-  apiTest(
-    'search: should match the name regardless of casing',
-    async ({ apiClient, apiServices }) => {
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'HighCpuAlert' } })
-      );
-
-      const response = await apiClient.get(findRulesUrl({ search: 'highcpu', per_page: 100 }), {
+      const response = await apiClient.get(findRulesUrl({ search: 'HighCpu', per_page: 100 }), {
         headers: adminHeaders,
       });
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.items).toHaveLength(1);
       expect(response.body.items[0].metadata.name).toBe('HighCpuAlert');
-    }
-  );
+    });
 
-  apiTest(
-    'search: should not error on simple_query_string operators in user input',
-    async ({ apiClient, apiServices }) => {
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'safe-rule' } })
-      );
+    apiTest(
+      'search: should find rules by description prefix',
+      async ({ apiClient, apiServices }) => {
+        const rules = [
+          { name: 'rule-with-desc', description: 'Monitors memory pressure on production hosts' },
+          { name: 'rule-no-match', description: 'Tracks network latency' },
+        ];
 
-      // Unescaped, characters like `(`, `+`, `|` would cause simple_query_string
-      // to either parse-error or return arbitrary matches. The server escapes
-      // operators so the request always succeeds.
-      for (const search of ['(unterminated', '+leading', 'with|pipe']) {
-        await apiTest.step(`search="${search}" returns 200`, async () => {
-          const response = await apiClient.get(findRulesUrl({ search, per_page: 100 }), {
-            headers: adminHeaders,
-          });
-          expect(response).toHaveStatusCode(200);
+        for (const { name, description } of rules) {
+          await apiServices.alertingV2.rules.create(
+            buildCreateRuleData({ metadata: { name, description } })
+          );
+        }
+
+        const response = await apiClient.get(findRulesUrl({ search: 'memory', per_page: 100 }), {
+          headers: adminHeaders,
         });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.items).toHaveLength(1);
+        expect(response.body.items[0].metadata.name).toBe('rule-with-desc');
       }
-    }
-  );
+    );
 
-  apiTest(
-    'search: should return empty results when no fields match',
-    async ({ apiClient, apiServices }) => {
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'some-rule' } })
-      );
+    apiTest('search: should AND multiple terms together', async ({ apiClient, apiServices }) => {
+      const rules = [
+        { name: 'prod-cpu-alert', description: 'Monitors production CPU usage' },
+        { name: 'dev-cpu-alert', description: 'Monitors development CPU usage' },
+      ];
 
-      const response = await apiClient.get(findRulesUrl({ search: 'nonexistent', per_page: 100 }), {
-        headers: adminHeaders,
-      });
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.items).toHaveLength(0);
-      expect(response.body.total).toBe(0);
-    }
-  );
-
-  apiTest(
-    'pagination: should respect page and perPage and report total / current page',
-    async ({ apiClient, apiServices }) => {
-      for (let i = 0; i < 5; i++) {
+      for (const { name, description } of rules) {
         await apiServices.alertingV2.rules.create(
-          buildCreateRuleData({ metadata: { name: `paginated-rule-${i}` } })
+          buildCreateRuleData({ metadata: { name, description } })
         );
       }
 
-      await apiTest.step('first page returns the first slice', async () => {
-        const firstPage = await apiClient.get(findRulesUrl({ page: 1, per_page: 2 }), {
+      const response = await apiClient.get(
+        findRulesUrl({ search: 'cpu production', per_page: 100 }),
+        {
           headers: adminHeaders,
-        });
-
-        expect(firstPage).toHaveStatusCode(200);
-        expect(firstPage.body).toMatchObject({ page: 1, per_page: 2, total: 5 });
-        expect(firstPage.body.items).toHaveLength(2);
-      });
-
-      await apiTest.step('last page returns the remaining items', async () => {
-        const lastPage = await apiClient.get(findRulesUrl({ page: 3, per_page: 2 }), {
-          headers: adminHeaders,
-        });
-
-        expect(lastPage).toHaveStatusCode(200);
-        expect(lastPage.body).toMatchObject({ page: 3, per_page: 2, total: 5 });
-        expect(lastPage.body.items).toHaveLength(1);
-      });
-    }
-  );
-
-  apiTest(
-    'pagination: should return zero items when page is beyond the result set',
-    async ({ apiClient, apiServices }) => {
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'only-rule' } })
+        }
       );
 
-      const response = await apiClient.get(findRulesUrl({ page: 99, per_page: 10 }), {
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.items).toHaveLength(1);
+      expect(response.body.items[0].metadata.name).toBe('prod-cpu-alert');
+    });
+
+    apiTest(
+      'search: should match the name regardless of casing',
+      async ({ apiClient, apiServices }) => {
+        await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({ metadata: { name: 'HighCpuAlert' } })
+        );
+
+        const response = await apiClient.get(findRulesUrl({ search: 'highcpu', per_page: 100 }), {
+          headers: adminHeaders,
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.items).toHaveLength(1);
+        expect(response.body.items[0].metadata.name).toBe('HighCpuAlert');
+      }
+    );
+
+    apiTest(
+      'search: should not error on simple_query_string operators in user input',
+      async ({ apiClient, apiServices }) => {
+        await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({ metadata: { name: 'safe-rule' } })
+        );
+
+        // Unescaped, characters like `(`, `+`, `|` would cause simple_query_string
+        // to either parse-error or return arbitrary matches. The server escapes
+        // operators so the request always succeeds.
+        for (const search of ['(unterminated', '+leading', 'with|pipe']) {
+          await apiTest.step(`search="${search}" returns 200`, async () => {
+            const response = await apiClient.get(findRulesUrl({ search, per_page: 100 }), {
+              headers: adminHeaders,
+            });
+            expect(response).toHaveStatusCode(200);
+          });
+        }
+      }
+    );
+
+    apiTest(
+      'search: should return empty results when no fields match',
+      async ({ apiClient, apiServices }) => {
+        await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({ metadata: { name: 'some-rule' } })
+        );
+
+        const response = await apiClient.get(
+          findRulesUrl({ search: 'nonexistent', per_page: 100 }),
+          {
+            headers: adminHeaders,
+          }
+        );
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.items).toHaveLength(0);
+        expect(response.body.total).toBe(0);
+      }
+    );
+
+    apiTest(
+      'pagination: should respect page and perPage and report total / current page',
+      async ({ apiClient, apiServices }) => {
+        for (let i = 0; i < 5; i++) {
+          await apiServices.alertingV2.rules.create(
+            buildCreateRuleData({ metadata: { name: `paginated-rule-${i}` } })
+          );
+        }
+
+        await apiTest.step('first page returns the first slice', async () => {
+          const firstPage = await apiClient.get(findRulesUrl({ page: 1, per_page: 2 }), {
+            headers: adminHeaders,
+          });
+
+          expect(firstPage).toHaveStatusCode(200);
+          expect(firstPage.body).toMatchObject({ page: 1, per_page: 2, total: 5 });
+          expect(firstPage.body.items).toHaveLength(2);
+        });
+
+        await apiTest.step('last page returns the remaining items', async () => {
+          const lastPage = await apiClient.get(findRulesUrl({ page: 3, per_page: 2 }), {
+            headers: adminHeaders,
+          });
+
+          expect(lastPage).toHaveStatusCode(200);
+          expect(lastPage.body).toMatchObject({ page: 3, per_page: 2, total: 5 });
+          expect(lastPage.body.items).toHaveLength(1);
+        });
+      }
+    );
+
+    apiTest(
+      'pagination: should return zero items when page is beyond the result set',
+      async ({ apiClient, apiServices }) => {
+        await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({ metadata: { name: 'only-rule' } })
+        );
+
+        const response = await apiClient.get(findRulesUrl({ page: 99, per_page: 10 }), {
+          headers: adminHeaders,
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.total).toBe(1);
+        expect(response.body.items).toHaveLength(0);
+      }
+    );
+
+    apiTest(
+      'sort: should sort rules by name in ascending order',
+      async ({ apiClient, apiServices }) => {
+        for (const name of ['c-rule', 'a-rule', 'b-rule']) {
+          await apiServices.alertingV2.rules.create(buildCreateRuleData({ metadata: { name } }));
+        }
+
+        const response = await apiClient.get(
+          findRulesUrl({ sort_field: 'name', sort_order: 'asc', per_page: 100 }),
+          { headers: adminHeaders }
+        );
+
+        expect(response).toHaveStatusCode(200);
+        expect(getRuleNames(response.body.items)).toStrictEqual(['a-rule', 'b-rule', 'c-rule']);
+      }
+    );
+
+    apiTest(
+      'sort: should sort rules by name in descending order',
+      async ({ apiClient, apiServices }) => {
+        for (const name of ['c-rule', 'a-rule', 'b-rule']) {
+          await apiServices.alertingV2.rules.create(buildCreateRuleData({ metadata: { name } }));
+        }
+
+        const response = await apiClient.get(
+          findRulesUrl({ sort_field: 'name', sort_order: 'desc', per_page: 100 }),
+          { headers: adminHeaders }
+        );
+
+        expect(response).toHaveStatusCode(200);
+        expect(getRuleNames(response.body.items)).toStrictEqual(['c-rule', 'b-rule', 'a-rule']);
+      }
+    );
+
+    apiTest('filter: should filter rules by enabled state', async ({ apiClient, apiServices }) => {
+      // Rules are created enabled by default. Disable one and assert that the
+      // `enabled` filter partitions them correctly.
+      const ruleToDisable = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-becomes-disabled' } })
+      );
+      await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-stays-enabled' } })
+      );
+
+      await apiClient.post(`${testData.RULE_API_PATH}/_bulk_disable`, {
+        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+        body: { ids: [ruleToDisable.id] },
+      });
+
+      await apiTest.step('filter=enabled:true returns only the enabled rule', async () => {
+        const response = await apiClient.get(
+          findRulesUrl({ filter: 'enabled: true', per_page: 100 }),
+          { headers: adminHeaders }
+        );
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.items).toHaveLength(1);
+        expect(response.body.items[0].metadata.name).toBe('rule-stays-enabled');
+      });
+
+      await apiTest.step('filter=enabled:false returns only the disabled rule', async () => {
+        const response = await apiClient.get(
+          findRulesUrl({ filter: 'enabled: false', per_page: 100 }),
+          { headers: adminHeaders }
+        );
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.items).toHaveLength(1);
+        expect(response.body.items[0].metadata.name).toBe('rule-becomes-disabled');
+      });
+    });
+
+    apiTest('filter: should filter rules by metadata.tags', async ({ apiClient, apiServices }) => {
+      await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'prod-rule', tags: ['production', 'cpu'] } })
+      );
+      await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'dev-rule', tags: ['development'] } })
+      );
+
+      const response = await apiClient.get(
+        findRulesUrl({ filter: 'metadata.tags: "production"', per_page: 100 }),
+        { headers: adminHeaders }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.items).toHaveLength(1);
+      expect(response.body.items[0].metadata.name).toBe('prod-rule');
+    });
+
+    apiTest(
+      'filter: should support compound expressions with AND/OR/NOT',
+      async ({ apiClient, apiServices }) => {
+        await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({ metadata: { name: 'rule-a', tags: ['production'] } })
+        );
+        await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({ metadata: { name: 'rule-b', tags: ['production'] } })
+        );
+        await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({ metadata: { name: 'rule-c', tags: ['development'] } })
+        );
+
+        const response = await apiClient.get(
+          findRulesUrl({
+            filter: 'metadata.tags: "production" AND NOT metadata.name: "rule-a"',
+            per_page: 100,
+          }),
+          { headers: adminHeaders }
+        );
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.items).toHaveLength(1);
+        expect(response.body.items[0].metadata.name).toBe('rule-b');
+      }
+    );
+
+    apiTest(
+      'filter: should reject filters that reference unknown fields with a 400',
+      async ({ apiClient, apiServices }) => {
+        // Seed a rule so a 200 response with an empty list would be a regression —
+        // the request must fail rather than silently match nothing.
+        await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({ metadata: { name: 'should-not-match' } })
+        );
+
+        const response = await apiClient.get(
+          findRulesUrl({ filter: 'unknown_field: "value"', per_page: 100 }),
+          { headers: adminHeaders }
+        );
+
+        expect(response).toHaveStatusCode(400);
+        expect(response.body.code).toBe('INVALID_FILTER_FIELD');
+      }
+    );
+
+    apiTest('filter: rejects malformed KQL with a 400', async ({ apiClient }) => {
+      const response = await apiClient.get(findRulesUrl({ filter: 'enabled:', per_page: 100 }), {
         headers: adminHeaders,
       });
 
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.total).toBe(1);
-      expect(response.body.items).toHaveLength(0);
-    }
-  );
-
-  apiTest(
-    'sort: should sort rules by name in ascending order',
-    async ({ apiClient, apiServices }) => {
-      for (const name of ['c-rule', 'a-rule', 'b-rule']) {
-        await apiServices.alertingV2.rules.create(buildCreateRuleData({ metadata: { name } }));
-      }
-
-      const response = await apiClient.get(
-        findRulesUrl({ sort_field: 'name', sort_order: 'asc', per_page: 100 }),
-        { headers: adminHeaders }
-      );
-
-      expect(response).toHaveStatusCode(200);
-      expect(getRuleNames(response.body.items)).toStrictEqual(['a-rule', 'b-rule', 'c-rule']);
-    }
-  );
-
-  apiTest(
-    'sort: should sort rules by name in descending order',
-    async ({ apiClient, apiServices }) => {
-      for (const name of ['c-rule', 'a-rule', 'b-rule']) {
-        await apiServices.alertingV2.rules.create(buildCreateRuleData({ metadata: { name } }));
-      }
-
-      const response = await apiClient.get(
-        findRulesUrl({ sort_field: 'name', sort_order: 'desc', per_page: 100 }),
-        { headers: adminHeaders }
-      );
-
-      expect(response).toHaveStatusCode(200);
-      expect(getRuleNames(response.body.items)).toStrictEqual(['c-rule', 'b-rule', 'a-rule']);
-    }
-  );
-
-  apiTest('filter: should filter rules by enabled state', async ({ apiClient, apiServices }) => {
-    // Rules are created enabled by default. Disable one and assert that the
-    // `enabled` filter partitions them correctly.
-    const ruleToDisable = await apiServices.alertingV2.rules.create(
-      buildCreateRuleData({ metadata: { name: 'rule-becomes-disabled' } })
-    );
-    await apiServices.alertingV2.rules.create(
-      buildCreateRuleData({ metadata: { name: 'rule-stays-enabled' } })
-    );
-
-    await apiClient.post(`${testData.RULE_API_PATH}/_bulk_disable`, {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
-      body: { ids: [ruleToDisable.id] },
-    });
-
-    await apiTest.step('filter=enabled:true returns only the enabled rule', async () => {
-      const response = await apiClient.get(
-        findRulesUrl({ filter: 'enabled: true', per_page: 100 }),
-        { headers: adminHeaders }
-      );
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.items).toHaveLength(1);
-      expect(response.body.items[0].metadata.name).toBe('rule-stays-enabled');
-    });
-
-    await apiTest.step('filter=enabled:false returns only the disabled rule', async () => {
-      const response = await apiClient.get(
-        findRulesUrl({ filter: 'enabled: false', per_page: 100 }),
-        { headers: adminHeaders }
-      );
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.items).toHaveLength(1);
-      expect(response.body.items[0].metadata.name).toBe('rule-becomes-disabled');
-    });
-  });
-
-  apiTest('filter: should filter rules by metadata.tags', async ({ apiClient, apiServices }) => {
-    await apiServices.alertingV2.rules.create(
-      buildCreateRuleData({ metadata: { name: 'prod-rule', tags: ['production', 'cpu'] } })
-    );
-    await apiServices.alertingV2.rules.create(
-      buildCreateRuleData({ metadata: { name: 'dev-rule', tags: ['development'] } })
-    );
-
-    const response = await apiClient.get(
-      findRulesUrl({ filter: 'metadata.tags: "production"', per_page: 100 }),
-      { headers: adminHeaders }
-    );
-
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.items).toHaveLength(1);
-    expect(response.body.items[0].metadata.name).toBe('prod-rule');
-  });
-
-  apiTest(
-    'filter: should support compound expressions with AND/OR/NOT',
-    async ({ apiClient, apiServices }) => {
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-a', tags: ['production'] } })
-      );
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-b', tags: ['production'] } })
-      );
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-c', tags: ['development'] } })
-      );
-
-      const response = await apiClient.get(
-        findRulesUrl({
-          filter: 'metadata.tags: "production" AND NOT metadata.name: "rule-a"',
-          per_page: 100,
-        }),
-        { headers: adminHeaders }
-      );
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.items).toHaveLength(1);
-      expect(response.body.items[0].metadata.name).toBe('rule-b');
-    }
-  );
-
-  apiTest(
-    'filter: should reject filters that reference unknown fields with a 400',
-    async ({ apiClient, apiServices }) => {
-      // Seed a rule so a 200 response with an empty list would be a regression —
-      // the request must fail rather than silently match nothing.
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'should-not-match' } })
-      );
-
-      const response = await apiClient.get(
-        findRulesUrl({ filter: 'unknown_field: "value"', per_page: 100 }),
-        { headers: adminHeaders }
-      );
-
       expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('INVALID_FILTER_FIELD');
-    }
-  );
-
-  apiTest('filter: rejects malformed KQL with a 400', async ({ apiClient }) => {
-    const response = await apiClient.get(findRulesUrl({ filter: 'enabled:', per_page: 100 }), {
-      headers: adminHeaders,
+      expect(response.body.code).toBe('INVALID_FILTER_SYNTAX');
     });
 
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('INVALID_FILTER_SYNTAX');
-  });
-
-  apiTest('validation: should reject perPage above the maximum', async ({ apiClient }) => {
-    const response = await apiClient.get(findRulesUrl({ per_page: MAX_PER_PAGE + 1 }), {
-      headers: adminHeaders,
-    });
-
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
-  });
-
-  apiTest('validation: should reject perPage below the minimum', async ({ apiClient }) => {
-    const response = await apiClient.get(findRulesUrl({ per_page: 0 }), {
-      headers: adminHeaders,
-    });
-
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
-  });
-
-  apiTest('validation: should reject page values below 1', async ({ apiClient }) => {
-    const response = await apiClient.get(findRulesUrl({ page: 0 }), {
-      headers: adminHeaders,
-    });
-
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
-  });
-
-  apiTest('validation: should reject non-numeric page values', async ({ apiClient }) => {
-    const response = await apiClient.get(findRulesUrl({ page: 'abc' }), {
-      headers: adminHeaders,
-    });
-
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
-  });
-
-  apiTest('validation: should reject unknown sortField values', async ({ apiClient }) => {
-    const response = await apiClient.get(findRulesUrl({ sort_field: 'unknown-field' }), {
-      headers: adminHeaders,
-    });
-
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
-  });
-
-  apiTest('validation: should reject unknown sortOrder values', async ({ apiClient }) => {
-    const response = await apiClient.get(
-      findRulesUrl({ sort_field: 'name', sort_order: 'ascending' }),
-      { headers: adminHeaders }
-    );
-
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
-  });
-
-  apiTest(
-    'validation: should reject empty search after trimming whitespace',
-    async ({ apiClient }) => {
-      const response = await apiClient.get(findRulesUrl({ search: '   ' }), {
+    apiTest('validation: should reject perPage above the maximum', async ({ apiClient }) => {
+      const response = await apiClient.get(findRulesUrl({ per_page: MAX_PER_PAGE + 1 }), {
         headers: adminHeaders,
       });
 
       expect(response).toHaveStatusCode(400);
       expect(response.body.code).toBe('BAD_REQUEST');
-    }
-  );
+    });
 
-  apiTest(
-    'authorization: should return 200 for a user with read-only alerting_v2 privileges',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'visible-to-readers' } })
-      );
-
-      const readerCredentials = await requestAuth.getApiKeyForCustomRole(
-        ALERTING_V2_RULES_READ_ROLE
-      );
-
-      const response = await apiClient.get(findRulesUrl({ per_page: 100 }), {
-        headers: readerCredentials.apiKeyHeader,
+    apiTest('validation: should reject perPage below the minimum', async ({ apiClient }) => {
+      const response = await apiClient.get(findRulesUrl({ per_page: 0 }), {
+        headers: adminHeaders,
       });
 
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.items).toHaveLength(1);
-      expect(response.body.items[0].metadata.name).toBe('visible-to-readers');
-    }
-  );
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    });
 
-  apiTest(
-    'authorization: should return 200 for a user with full alerting_v2 privileges',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'visible-to-writers' } })
-      );
-
-      const writerCredentials = await requestAuth.getApiKeyForCustomRole(
-        ALERTING_V2_RULES_ALL_ROLE
-      );
-
-      const response = await apiClient.get(findRulesUrl({ per_page: 100 }), {
-        headers: writerCredentials.apiKeyHeader,
+    apiTest('validation: should reject page values below 1', async ({ apiClient }) => {
+      const response = await apiClient.get(findRulesUrl({ page: 0 }), {
+        headers: adminHeaders,
       });
 
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.items).toHaveLength(1);
-    }
-  );
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    });
 
-  apiTest(
-    'authorization: should return 403 for a user without alerting_v2 privileges',
-    async ({ apiClient, apiServices, requestAuth }) => {
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'hidden-rule' } })
-      );
-
-      const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
-
-      const response = await apiClient.get(findRulesUrl({ per_page: 100 }), {
-        headers: noAccessCredentials.apiKeyHeader,
+    apiTest('validation: should reject non-numeric page values', async ({ apiClient }) => {
+      const response = await apiClient.get(findRulesUrl({ page: 'abc' }), {
+        headers: adminHeaders,
       });
 
-      expect(response).toHaveStatusCode(403);
-    }
-  );
-});
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    });
+
+    apiTest('validation: should reject unknown sortField values', async ({ apiClient }) => {
+      const response = await apiClient.get(findRulesUrl({ sort_field: 'unknown-field' }), {
+        headers: adminHeaders,
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    });
+
+    apiTest('validation: should reject unknown sortOrder values', async ({ apiClient }) => {
+      const response = await apiClient.get(
+        findRulesUrl({ sort_field: 'name', sort_order: 'ascending' }),
+        { headers: adminHeaders }
+      );
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    });
+
+    apiTest(
+      'validation: should reject empty search after trimming whitespace',
+      async ({ apiClient }) => {
+        const response = await apiClient.get(findRulesUrl({ search: '   ' }), {
+          headers: adminHeaders,
+        });
+
+        expect(response).toHaveStatusCode(400);
+        expect(response.body.code).toBe('BAD_REQUEST');
+      }
+    );
+
+    apiTest(
+      'authorization: should return 200 for a user with read-only alerting_v2 privileges',
+      async ({ apiClient, apiServices, requestAuth }) => {
+        await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({ metadata: { name: 'visible-to-readers' } })
+        );
+
+        const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+          ALERTING_V2_RULES_READ_ROLE
+        );
+
+        const response = await apiClient.get(findRulesUrl({ per_page: 100 }), {
+          headers: readerCredentials.apiKeyHeader,
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.items).toHaveLength(1);
+        expect(response.body.items[0].metadata.name).toBe('visible-to-readers');
+      }
+    );
+
+    apiTest(
+      'authorization: should return 200 for a user with full alerting_v2 privileges',
+      async ({ apiClient, apiServices, requestAuth }) => {
+        await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({ metadata: { name: 'visible-to-writers' } })
+        );
+
+        const writerCredentials = await requestAuth.getApiKeyForCustomRole(
+          ALERTING_V2_RULES_ALL_ROLE
+        );
+
+        const response = await apiClient.get(findRulesUrl({ per_page: 100 }), {
+          headers: writerCredentials.apiKeyHeader,
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.items).toHaveLength(1);
+      }
+    );
+
+    apiTest(
+      'authorization: should return 403 for a user without alerting_v2 privileges',
+      async ({ apiClient, apiServices, requestAuth }) => {
+        await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({ metadata: { name: 'hidden-rule' } })
+        );
+
+        const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
+
+        const response = await apiClient.get(findRulesUrl({ per_page: 100 }), {
+          headers: noAccessCredentials.apiKeyHeader,
+        });
+
+        expect(response).toHaveStatusCode(403);
+      }
+    );
+  }
+);

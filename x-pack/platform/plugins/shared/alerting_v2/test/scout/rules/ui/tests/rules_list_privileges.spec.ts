@@ -19,7 +19,7 @@ import {
  * `read` vs `all`) actually reaches the client and drives
  * `UserCapabilities.canWrite('rules')` on the Rules list page.
  */
-test.describe('Rules list - read/write privileges', { tag: testData.UI_ENGINE_TAG }, () => {
+test.describe('Rules list - read/write privileges', { tag: testData.UI_TAG }, () => {
   let ruleId: string;
   const SUITE_TAG = `scout-privileges-${Date.now()}`;
 

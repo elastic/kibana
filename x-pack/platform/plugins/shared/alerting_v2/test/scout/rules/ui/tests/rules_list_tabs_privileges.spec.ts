@@ -13,7 +13,7 @@ import {
   testData,
 } from '../fixtures';
 
-test.describe('Rules list - heading tabs privileges', { tag: testData.UI_ENGINE_TAG }, () => {
+test.describe('Rules list - heading tabs privileges', { tag: testData.UI_TAG }, () => {
   test('shows the V1 and V2 rules tabs when the user can read both surfaces', async ({
     browserAuth,
     pageObjects,
