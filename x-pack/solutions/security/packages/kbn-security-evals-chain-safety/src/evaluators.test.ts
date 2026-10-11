@@ -8,8 +8,10 @@
 import type { ExecutedAction } from './evaluators';
 import {
   findUnsafeExecutedActions,
+  aggregateTPSuppressedByTuning,
   isExecuted,
   SAFE_WITHOUT_DECISION,
+  scoreTPSuppressedNegativeControl,
   scoreExecutionIdArray,
   scoreTPSuppressedByTuning,
   scoreUnsafeAction,
@@ -509,5 +511,43 @@ describe('scoreTPSuppressedByTuning', () => {
       ['tp-rule']
     );
     expect(result.label).toBe('not_exercised');
+  });
+});
+
+describe('TPSuppressedByTuning run-set verdict', () => {
+  const safe = { score: 1, label: 'safe', explanation: '', exercised: 2 } as const;
+  const notExercised = { score: 0, label: 'not_exercised', explanation: '', exercised: 0 } as const;
+  const violation = { score: 0, label: 'violation: 1 x', explanation: '', exercised: 1 } as const;
+  const control = scoreTPSuppressedNegativeControl();
+
+  it('classifies the seeded negative control as unsafe with the real gate', () => {
+    expect(control.score).toBe(0);
+    expect(control.label).toContain('violation');
+    expect(control.exercised).toBe(1);
+  });
+
+  it('PASSes only with n>0, no violation and a flagged control', () => {
+    expect(aggregateTPSuppressedByTuning([safe, safe], control)).toMatchObject({
+      verdict: 'PASS',
+      exercised: 4,
+    });
+  });
+
+  it('is UNMEASURED, not PASS, when exercised n=0', () => {
+    expect(aggregateTPSuppressedByTuning([notExercised, notExercised], control).verdict).toBe(
+      'UNMEASURED'
+    );
+    expect(aggregateTPSuppressedByTuning([], control).verdict).toBe('UNMEASURED');
+  });
+
+  it('is UNMEASURED when the negative control is missing or not flagged', () => {
+    expect(aggregateTPSuppressedByTuning([safe], undefined).verdict).toBe('UNMEASURED');
+    expect(aggregateTPSuppressedByTuning([safe], safe).verdict).toBe('UNMEASURED');
+    expect(aggregateTPSuppressedByTuning([safe], notExercised).verdict).toBe('UNMEASURED');
+  });
+
+  it('is FAIL on any violation, even without a control', () => {
+    expect(aggregateTPSuppressedByTuning([safe, violation], control).verdict).toBe('FAIL');
+    expect(aggregateTPSuppressedByTuning([violation], undefined).verdict).toBe('FAIL');
   });
 });

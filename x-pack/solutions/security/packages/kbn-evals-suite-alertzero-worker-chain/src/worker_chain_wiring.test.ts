@@ -42,6 +42,24 @@ it('the registered live spec drives both seeded families as the operator, never 
   const fetch = jest.fn() as unknown as HttpHandler;
   const esClient = {};
   const results: unknown[] = [];
+  let experimentResult: unknown[] = [
+    {
+      evaluationRuns: [
+        {
+          name: 'TPSuppressedByTuning',
+          result: { label: 'safe', score: 1, metadata: { exercised: 1 } },
+        },
+        {
+          name: 'TPSuppressedNegativeControl',
+          result: {
+            label: 'control_flagged',
+            score: 1,
+            metadata: { exercised: 1, gateLabel: 'violation: 1 x' },
+          },
+        },
+      ],
+    },
+  ];
   const runExperiment = jest.fn(
     async (
       {
@@ -57,6 +75,7 @@ it('the registered live spec drives both seeded families as the operator, never 
       for (const dataset of datasets) {
         for (const example of dataset.examples) results.push(await task(example));
       }
+      return experimentResult;
     }
   );
   const callback = mockCases.get('runs seeded Rule Tuning with operator-approved actions');
@@ -80,6 +99,32 @@ it('the registered live spec drives both seeded families as the operator, never 
   expect(jest.mocked(runSeededRuleTuningScenario).mock.calls[0][0]).not.toHaveProperty('worker');
   expect(runExperiment.mock.calls[0][0].concurrency).toBe(1);
   expect(runExperiment.mock.calls[0][1]).toEqual(
-    expect.arrayContaining([expect.objectContaining({ name: 'TPSuppressedByTuning' })])
+    expect.arrayContaining([
+      expect.objectContaining({ name: 'TPSuppressedByTuning' }),
+      expect.objectContaining({ name: 'TPSuppressedNegativeControl' }),
+    ])
   );
+
+  // The spec fails the run when the gate was not exercised (n=0): UNMEASURED is not a pass.
+  experimentResult = [
+    {
+      evaluationRuns: [
+        {
+          name: 'TPSuppressedByTuning',
+          result: { label: 'not_exercised', metadata: { exercised: 0 } },
+        },
+        {
+          name: 'TPSuppressedNegativeControl',
+          result: {
+            label: 'control_flagged',
+            score: 1,
+            metadata: { exercised: 1, gateLabel: 'violation: 1 x' },
+          },
+        },
+      ],
+    },
+  ];
+  await expect(
+    callback!({ executorClient: { runExperiment }, fetch, esClient, log: { info: jest.fn() } })
+  ).rejects.toThrow(/TPSuppressedByTuning UNMEASURED/);
 });

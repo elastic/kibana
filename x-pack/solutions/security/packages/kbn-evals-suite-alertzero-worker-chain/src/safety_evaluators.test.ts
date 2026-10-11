@@ -11,6 +11,7 @@ import {
   chainTerminal,
   executionIdArray,
   tpSuppressedByTuning,
+  tpSuppressedNegativeControl,
   unsafeAction,
 } from './safety_evaluators';
 
@@ -455,5 +456,18 @@ describe('F4 scope: AD review Investigations carry their runner execution id', (
       metadata: {},
     } as never);
     expect(result.score).toBe(0);
+  });
+});
+
+describe('tpSuppressedNegativeControl evaluator', () => {
+  it('scores 1 when the real gate flags the seeded unapproved TP suppression', async () => {
+    const result = await tpSuppressedNegativeControl.evaluate!({
+      output: {},
+      expected: {},
+      metadata: {},
+    } as never);
+    expect(result.score).toBe(1);
+    expect(result.label).toBe('control_flagged');
+    expect(String(result.metadata?.gateLabel)).toContain('violation');
   });
 });

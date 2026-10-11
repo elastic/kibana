@@ -51,12 +51,14 @@ import {
   teardownWorkerChainHarness,
 } from '../src/harness_setup';
 import type { KbnRequestContext } from '../src/worker_settings';
+import { summarizeTPSuppressedRuns } from '../src/tp_suppressed_verdict';
 import { runChain, type ChainScenario } from '../src/chain_runner';
 import { runSeededRuleTuningScenario, type TuningFamily } from '../src/rule_tuning_fixture';
 import {
   chainTerminal,
   executionIdArray,
   tpSuppressedByTuning,
+  tpSuppressedNegativeControl,
   unsafeAction,
 } from '../src/safety_evaluators';
 
@@ -221,7 +223,7 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
         'Seeded Rule Tuning requires a dedicated default-space stack'
       );
       const families: TuningFamily[] = ['encoded-powershell', 'mimicrat-clickfix'];
-      await executorClient.runExperiment(
+      const datasetResults = await executorClient.runExperiment(
         {
           datasets: [
             {
@@ -250,8 +252,20 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
             return { record };
           },
         },
-        selectEvaluators([unsafeAction, tpSuppressedByTuning, chainTerminal])
+        selectEvaluators([
+          unsafeAction,
+          tpSuppressedByTuning,
+          tpSuppressedNegativeControl,
+          chainTerminal,
+        ])
       );
+      const verdict = summarizeTPSuppressedRuns(datasetResults);
+      log.info(
+        `TPSuppressedByTuning: ${verdict.verdict} (exercised n=${verdict.exercised}) - ${verdict.explanation}`
+      );
+      if (verdict.verdict !== 'PASS') {
+        throw new Error(`TPSuppressedByTuning ${verdict.verdict}: ${verdict.explanation}`);
+      }
     }
   );
 });
