@@ -23,8 +23,8 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
-import { OperatingSystem, isPathValid } from '@kbn/securitysolution-utils';
-import { isOneOfOperator, isOperator } from '@kbn/securitysolution-list-utils';
+import { OperatingSystem, isPathValid, validateWildcardInput } from '@kbn/securitysolution-utils';
+import { isOneOfOperator, isOperator, matchesOperator } from '@kbn/securitysolution-list-utils';
 import { uniq } from 'lodash';
 
 import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
@@ -44,6 +44,7 @@ import {
   DETAILS_HEADER,
   DETAILS_HEADER_DESCRIPTION,
   FIELD_LABEL,
+  MATCHES_OPERATOR_LABEL,
   NAME_LABEL,
   OPERATOR_LABEL,
   POLICY_SELECT_DESCRIPTION,
@@ -74,7 +75,58 @@ interface BlocklistEntryMatchAny {
   value: string[];
 }
 
-export type BlocklistEntry = BlocklistEntryMatch | BlocklistEntryMatchAny;
+interface BlocklistEntryWildcard {
+  field: BlocklistConditionEntryField;
+  operator: ListOperatorEnum.INCLUDED;
+  type: ListOperatorTypeEnum.WILDCARD;
+  value: string;
+}
+
+export type BlocklistEntry = BlocklistEntryMatch | BlocklistEntryMatchAny | BlocklistEntryWildcard;
+
+// Fields that support the `Match` (wildcard) operator, in addition to `is one of`
+const WILDCARD_ELIGIBLE_FIELDS: ReadonlySet<BlocklistConditionEntryField> = new Set([
+  'file.path',
+  'file.path.caseless',
+  'file.name',
+  'file.name.caseless',
+]);
+
+// The two wire values for the File Name field. `is one of` always uses the cased `file.name`;
+// `Match` (wildcard) uses whichever variant matches the target OS's filesystem case-sensitivity.
+const FILE_NAME_FIELDS: ReadonlySet<BlocklistConditionEntryField> = new Set([
+  'file.name',
+  'file.name.caseless',
+]);
+
+// Windows and macOS have case-insensitive filesystems; Linux does not.
+function resolveFileNameFieldForOs(os: OperatingSystem): BlocklistConditionEntryField {
+  return os === OperatingSystem.LINUX ? 'file.name' : 'file.name.caseless';
+}
+
+// Resolves the wire `field` value for the given operator/OS combination. Only the File Name
+// field has more than one wire value (see `resolveFileNameFieldForOs`); every other field is
+// left untouched here.
+function resolveFieldForOperator(
+  field: BlocklistConditionEntryField,
+  operator: ListOperatorTypeEnum,
+  os: OperatingSystem
+): BlocklistConditionEntryField {
+  if (!FILE_NAME_FIELDS.has(field)) {
+    return field;
+  }
+
+  return operator === ListOperatorTypeEnum.WILDCARD ? resolveFileNameFieldForOs(os) : 'file.name';
+}
+
+// The field dropdown only ever registers the canonical (cased) field value for a given
+// conceptual field, so the currently selected wire value must be normalized to match.
+function toDisplayField(field: BlocklistConditionEntryField): BlocklistConditionEntryField {
+  return field === 'file.name.caseless' ? 'file.name' : field;
+}
+
+// Endpoint artifact matching does not require escaping `\`, `*`, or `?`
+const UNNECESSARY_ESCAPING_REGEX = /\\[\\*?]/;
 
 type ERROR_KEYS = keyof typeof ERRORS;
 
@@ -131,8 +183,10 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
 
     const windowsSignatureField = 'file.Ext.code_signature';
     const isWindowsSignatureEntry = blocklistEntry.field === windowsSignatureField;
+    const isWildcardEligibleField = WILDCARD_ELIGIBLE_FIELDS.has(blocklistEntry.field);
     const displaySingleValueInput =
-      isWindowsSignatureEntry && blocklistEntry.type === ListOperatorTypeEnum.MATCH;
+      (isWindowsSignatureEntry && blocklistEntry.type === ListOperatorTypeEnum.MATCH) ||
+      blocklistEntry.type === ListOperatorTypeEnum.WILDCARD;
 
     const selectedOs = useMemo((): OperatingSystem => {
       if (!item?.os_types?.length) {
@@ -179,12 +233,26 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
 
       if (selectedOs === OperatingSystem.LINUX) {
         selectableFields.push({
+          value: 'file.name',
+          inputDisplay: CONDITION_FIELD_TITLE['file.name'],
+          dropdownDisplay: getDropdownDisplay('file.name'),
+          'data-test-subj': getTestId('file.name'),
+        });
+
+        selectableFields.push({
           value: 'file.path',
           inputDisplay: CONDITION_FIELD_TITLE['file.path'],
           dropdownDisplay: getDropdownDisplay('file.path'),
           'data-test-subj': getTestId('file.path'),
         });
       } else {
+        selectableFields.push({
+          value: 'file.name',
+          inputDisplay: CONDITION_FIELD_TITLE['file.name.caseless'],
+          dropdownDisplay: getDropdownDisplay('file.name.caseless'),
+          'data-test-subj': getTestId('file.name.caseless'),
+        });
+
         selectableFields.push({
           value: 'file.path.caseless',
           inputDisplay: CONDITION_FIELD_TITLE['file.path.caseless'],
@@ -206,19 +274,34 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     }, [selectedOs, getTestId]);
 
     const operatorOptions: Array<EuiSuperSelectOption<ListOperatorTypeEnum>> = useMemo(() => {
+      const isOneOfOption = {
+        value: isOneOfOperator.type,
+        inputDisplay: isOneOfOperator.message,
+        dropdownDisplay: isOneOfOperator.message,
+      };
+
+      // Path and File Name support `is one of` + the new `Match` (wildcard) operator.
+      // Signer (the only other field with a selectable operator) keeps `is one of` + `is`.
+      if (isWildcardEligibleField) {
+        return [
+          isOneOfOption,
+          {
+            value: matchesOperator.type,
+            inputDisplay: MATCHES_OPERATOR_LABEL,
+            dropdownDisplay: MATCHES_OPERATOR_LABEL,
+          },
+        ];
+      }
+
       return [
-        {
-          value: isOneOfOperator.type,
-          inputDisplay: isOneOfOperator.message,
-          dropdownDisplay: isOneOfOperator.message,
-        },
+        isOneOfOption,
         {
           value: isOperator.type,
           inputDisplay: isOperator.message,
           dropdownDisplay: isOperator.message,
         },
       ];
-    }, []);
+    }, [isWildcardEligibleField]);
 
     const valueLabel = useMemo(() => {
       return (
@@ -285,6 +368,41 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         } else {
           delete newValueWarnings.INVALID_PATH;
         }
+
+        const hasWildcardCharacter = values.some((v) => !!validateWildcardInput(v));
+
+        // warn if a wildcard character is used without the Match operator, making the entry ineffective
+        if (
+          type !== ListOperatorTypeEnum.WILDCARD &&
+          hasWildcardCharacter &&
+          WILDCARD_ELIGIBLE_FIELDS.has(field)
+        ) {
+          newValueWarnings.WILDCARD_WRONG_OPERATOR = createValidationMessage(
+            ERRORS.WILDCARD_WRONG_OPERATOR
+          );
+        } else {
+          delete newValueWarnings.WILDCARD_WRONG_OPERATOR;
+        }
+
+        // warn about the performance impact of using a wildcard value with the Match operator
+        if (type === ListOperatorTypeEnum.WILDCARD && hasWildcardCharacter) {
+          newValueWarnings.WILDCARD_PRESENT = createValidationMessage(ERRORS.WILDCARD_PRESENT);
+        } else {
+          delete newValueWarnings.WILDCARD_PRESENT;
+        }
+
+        // warn if the wildcard value is unnecessarily escaped (Endpoint matching doesn't require it)
+        if (
+          type === ListOperatorTypeEnum.WILDCARD &&
+          values.some((v) => UNNECESSARY_ESCAPING_REGEX.test(v))
+        ) {
+          newValueWarnings.UNNECESSARY_ESCAPING = createValidationMessage(
+            ERRORS.UNNECESSARY_ESCAPING
+          );
+        } else {
+          delete newValueWarnings.UNNECESSARY_ESCAPING;
+        }
+
         // warn if duplicates
         if (values.length !== uniq(values).length) {
           newValueWarnings.DUPLICATE_VALUES = createValidationMessage(ERRORS.DUPLICATE_VALUES);
@@ -344,16 +462,20 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
 
     const handleOnOsChange = useCallback(
       (os: OperatingSystem) => {
+        const nextField =
+          os !== OperatingSystem.WINDOWS && isWindowsSignatureEntry
+            ? 'file.hash.*'
+            : blocklistEntry.field;
+
         const nextItem = {
           ...item,
           os_types: [os],
           entries: [
             {
               ...blocklistEntry,
-              field:
-                os !== OperatingSystem.WINDOWS && isWindowsSignatureEntry
-                  ? 'file.hash.*'
-                  : blocklistEntry.field,
+              // OS changes always reset the operator to `is one of`, so the field must be
+              // re-resolved for the new OS too (relevant for the File Name field only).
+              field: resolveFieldForOperator(nextField, ListOperatorTypeEnum.MATCH_ANY, os),
               type: ListOperatorTypeEnum.MATCH_ANY,
               ...(typeof blocklistEntry.value === 'string'
                 ? { value: blocklistEntry.value.length ? blocklistEntry.value.split(',') : [] }
@@ -400,7 +522,10 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
 
     const generateBlocklistEntryValue = useCallback(
       (value: string | string[], newOperator: ListOperatorTypeEnum) => {
-        if (newOperator === ListOperatorTypeEnum.MATCH) {
+        if (
+          newOperator === ListOperatorTypeEnum.MATCH ||
+          newOperator === ListOperatorTypeEnum.WILDCARD
+        ) {
           return { value: Array.isArray(value) ? value.join(',') : value };
         } else {
           return {
@@ -418,11 +543,14 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
           entries: [
             {
               ...blocklistEntry,
+              field: resolveFieldForOperator(blocklistEntry.field, newOperator, selectedOs),
               type: newOperator,
               ...generateBlocklistEntryValue(blocklistEntry.value, newOperator),
             },
           ],
-        };
+        } as ArtifactFormComponentProps['item'];
+
+        validateValues(nextItem);
 
         onChange({
           isValid: isValid(errorsRef.current),
@@ -430,7 +558,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
           item: nextItem as ArtifactFormComponentOnChangeCallbackProps['item'],
         });
       },
-      [item, blocklistEntry, generateBlocklistEntryValue, onChange]
+      [item, blocklistEntry, selectedOs, generateBlocklistEntryValue, validateValues, onChange]
     );
 
     const handleOnValueTextChange = useCallback(
@@ -605,7 +733,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
                 <EuiSuperSelect
                   name="field"
                   options={fieldOptions}
-                  valueOfSelected={blocklistEntry.field}
+                  valueOfSelected={toDisplayField(blocklistEntry.field)}
                   onChange={handleOnFieldChange}
                   data-test-subj={getTestId('field-select')}
                   fullWidth
@@ -614,7 +742,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
               <EuiFormRow label={OPERATOR_LABEL} fullWidth>
-                {isWindowsSignatureEntry ? (
+                {isWindowsSignatureEntry || isWildcardEligibleField ? (
                   <EuiSuperSelect
                     name="operator"
                     options={operatorOptions}

@@ -163,6 +163,94 @@ describe('Blocklists API validations', () => {
       }
     );
   });
+
+  describe('file.name field and wildcard (Match) operator', () => {
+    let validator: BlocklistValidator;
+
+    beforeEach(() => {
+      validator = new BlocklistValidator(
+        createMockEndpointAppContextService(),
+        httpServerMock.createKibanaRequest()
+      );
+    });
+
+    const buildItem = (
+      entries: CreateExceptionListItemOptions['entries'],
+      osTypes: CreateExceptionListItemOptions['osTypes'] = ['windows']
+    ): CreateExceptionListItemOptions =>
+      ({
+        listId: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
+        name: 'Test blocklist',
+        description: '',
+        namespaceType: 'agnostic',
+        osTypes,
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries,
+      } as unknown as CreateExceptionListItemOptions);
+
+    const fileNameMatchAnyEntry = (value: string[]): CreateExceptionListItemOptions['entries'] => [
+      { field: 'file.name', type: 'match_any', operator: 'included', value },
+    ];
+
+    const wildcardEntry = (
+      field: 'file.path' | 'file.path.caseless' | 'file.name' | 'file.name.caseless',
+      value: string
+    ): CreateExceptionListItemOptions['entries'] => [
+      { field, type: 'wildcard', operator: 'included', value },
+    ];
+
+    it.each([['windows'], ['linux'], ['macos']] as const)(
+      'accepts a file.name match_any entry on %s',
+      async (os) => {
+        await expect(
+          validator.validatePreCreateItem(buildItem(fileNameMatchAnyEntry(['notepad.exe']), [os]))
+        ).resolves.toBeDefined();
+      }
+    );
+
+    it.each([
+      ['file.path'],
+      ['file.path.caseless'],
+      ['file.name'],
+      ['file.name.caseless'],
+    ] as const)('accepts a wildcard (Match) entry for field %s', async (field) => {
+      await expect(
+        validator.validatePreCreateItem(buildItem(wildcardEntry(field, 'C:\\foo\\*.exe')))
+      ).resolves.toBeDefined();
+    });
+
+    it('rejects a wildcard entry over the 4096 character limit', async () => {
+      await expect(
+        validator.validatePreCreateItem(buildItem(wildcardEntry('file.name', 'a'.repeat(4097))))
+      ).rejects.toThrow(EndpointArtifactExceptionValidationError);
+    });
+
+    it('rejects a wildcard type for the hash field', async () => {
+      await expect(
+        validator.validatePreCreateItem(
+          buildItem([
+            { field: 'file.hash.sha256', type: 'wildcard', operator: 'included', value: '*' },
+          ] as unknown as CreateExceptionListItemOptions['entries'])
+        )
+      ).rejects.toThrow(EndpointArtifactExceptionValidationError);
+    });
+
+    it('rejects an array value for a wildcard entry', async () => {
+      await expect(
+        validator.validatePreCreateItem(
+          buildItem([
+            {
+              field: 'file.name',
+              type: 'wildcard',
+              operator: 'included',
+              value: ['a.exe', 'b.exe'],
+            },
+          ] as unknown as CreateExceptionListItemOptions['entries'])
+        )
+      ).rejects.toThrow(EndpointArtifactExceptionValidationError);
+    });
+  });
+
   // -----------------------------------------------------------------------------
   //
   //  API TESTS FOR THIS ARTIFACT TYPE SHOULD BE COVERED WITH INTEGRATION TESTS.

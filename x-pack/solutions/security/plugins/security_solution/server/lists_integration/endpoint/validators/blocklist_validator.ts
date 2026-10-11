@@ -33,20 +33,34 @@ const FilePath = schema.oneOf(
   allowedFilePaths.map((path) => schema.literal(path)) as [Type<string>]
 );
 
+const FileName = schema.literal('file.name');
+const FileNameCaseless = schema.literal('file.name.caseless');
+
 const FileCodeSigner = schema.literal('file.Ext.code_signature');
 
-const ConditionEntryTypeSchema = schema.literal('match_any');
+// Path and File Name support an additional `wildcard` (Match) entry type, in addition to `match_any`.
+// `file.name.caseless` is the field the UI sends for `wildcard` (Match) entries on Windows/macOS.
+const PathOrFileNameField = schema.oneOf([FilePath, FileName, FileNameCaseless]);
+
+const ConditionEntryTypeSchema = schema.conditional(
+  schema.siblingRef('field'),
+  PathOrFileNameField,
+  schema.oneOf([schema.literal('match_any'), schema.literal('wildcard')]),
+  schema.literal('match_any')
+);
 const ConditionEntryOperatorSchema = schema.literal('included');
 
 type ConditionEntryFieldAllowedType =
   | TypeOf<typeof FileHashField>
   | TypeOf<typeof FilePath>
+  | TypeOf<typeof FileName>
+  | TypeOf<typeof FileNameCaseless>
   | TypeOf<typeof FileCodeSigner>;
 
 type BlocklistConditionEntry =
   | {
       field: ConditionEntryFieldAllowedType;
-      type: 'match_any' | 'match';
+      type: 'match_any' | 'match' | 'wildcard';
       operator: 'included';
       value: string[] | string;
     }
@@ -56,7 +70,7 @@ type BlocklistConditionEntry =
  * A generic Entry schema to be used for a specific entry schema depending on the OS
  */
 const CommonEntrySchema = {
-  field: schema.oneOf([FileHashField, FilePath]),
+  field: schema.oneOf([FileHashField, FilePath, FileName, FileNameCaseless]),
   type: ConditionEntryTypeSchema,
   operator: ConditionEntryOperatorSchema,
   // If field === HASH then validate hash with custom method, else validate string with minLength = 1
@@ -73,14 +87,24 @@ const CommonEntrySchema = {
     ),
     schema.conditional(
       schema.siblingRef('field'),
-      FilePath,
-      schema.arrayOf(
+      PathOrFileNameField,
+      // `wildcard` (Match) entries carry a single value, `match_any` (is one of) entries an array
+      schema.conditional(
+        schema.siblingRef('type'),
+        schema.literal('wildcard'),
         schema.string({
           maxLength: ENTRY_VALUE_MAX_LENGTH,
           validate: (pathValue: string) =>
             pathValue.length > 0 ? undefined : `invalid path value [${pathValue}]`,
         }),
-        { minSize: 1, maxSize: 2000 }
+        schema.arrayOf(
+          schema.string({
+            maxLength: ENTRY_VALUE_MAX_LENGTH,
+            validate: (pathValue: string) =>
+              pathValue.length > 0 ? undefined : `invalid path value [${pathValue}]`,
+          }),
+          { minSize: 1, maxSize: 2000 }
+        )
       ),
       schema.arrayOf(
         schema.string({
@@ -121,7 +145,7 @@ const WindowsEntrySchema = schema.oneOf([
   WindowsSignerEntrySchema,
   schema.object({
     ...CommonEntrySchema,
-    field: schema.oneOf([FileHashField, FilePath]),
+    field: schema.oneOf([FileHashField, FilePath, FileName, FileNameCaseless]),
   }),
 ]);
 
