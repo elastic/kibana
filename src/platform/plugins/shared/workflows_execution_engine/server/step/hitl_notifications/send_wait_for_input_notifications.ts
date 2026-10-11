@@ -12,6 +12,14 @@ import {
   DEFAULT_HITL_INPUT_CHANNEL_MESSAGE,
   DEFAULT_HITL_INPUT_OPEN_FORM_LABEL,
 } from '@kbn/workflows/server';
+import {
+  absoluteUrlToKibanaFooterPath,
+  assertRenderedHitlEmailRecipients,
+  buildDefaultHitlInputEmailMessage,
+  buildHitlEmailConnectorInput,
+  renderHitlEmailAddresses,
+  resolveHitlEmailSubject,
+} from './build_hitl_email_notification';
 import { hasExternalHitlChannels } from './has_external_hitl_channels';
 import {
   assertConnectorSucceeded,
@@ -113,6 +121,7 @@ export async function sendWaitForInputNotifications({
   channels,
   stepMessage,
   formUrl,
+  kibanaUrl,
   renderTemplate,
   connectorExecutor,
   abortController,
@@ -120,6 +129,7 @@ export async function sendWaitForInputNotifications({
   channels: WaitForInputChannels;
   stepMessage: string;
   formUrl: string;
+  kibanaUrl: string;
   renderTemplate: (template: string) => string;
   connectorExecutor: ConnectorExecutor;
   abortController: AbortController;
@@ -175,6 +185,42 @@ export async function sendWaitForInputNotifications({
       });
       assertConnectorSucceeded(result);
     }
+  }
+
+  const emailConfig = channels.email;
+  const emailTo = renderHitlEmailAddresses(emailConfig?.to, renderTemplate);
+  if (emailConfig?.['connector-id']) {
+    assertRenderedHitlEmailRecipients(emailTo);
+    const message =
+      emailConfig.message != null
+        ? resolveWaitForInputChannelMessage({
+            channelMessageTemplate: emailConfig.message,
+            stepMessage,
+            formUrl,
+            renderTemplate,
+          })
+        : buildDefaultHitlInputEmailMessage({ stepMessage, formUrl });
+
+    const result = await connectorExecutor.execute({
+      connectorType: 'email',
+      connectorNameOrId: emailConfig['connector-id'],
+      input: buildHitlEmailConnectorInput({
+        emailConfig: {
+          ...emailConfig,
+          to: emailTo,
+          cc: renderHitlEmailAddresses(emailConfig.cc, renderTemplate),
+          bcc: renderHitlEmailAddresses(emailConfig.bcc, renderTemplate),
+        },
+        subject: resolveHitlEmailSubject(
+          emailConfig.subject != null ? renderTemplate(emailConfig.subject) : undefined,
+          'input'
+        ),
+        message,
+        footerLinkPath: absoluteUrlToKibanaFooterPath(formUrl, kibanaUrl),
+      }),
+      abortController,
+    });
+    assertConnectorSucceeded(result);
   }
 
   const slack2Config = channels.slack2;
