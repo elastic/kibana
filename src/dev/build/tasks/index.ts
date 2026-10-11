@@ -35,3 +35,5 @@ export * from './write_sha_sums_task';
 export * from './fetch_agent_versions_list';
 
 export { InstallChromium } from './install_chromium';
+
+export { CreateDistributionDefaults } from './create_distribution_defaults_task';
