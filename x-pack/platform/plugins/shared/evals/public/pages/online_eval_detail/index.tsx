@@ -46,6 +46,7 @@ import {
 } from '@kbn/evals-common';
 import { LensConfigBuilder, type LensApiConfig } from '@kbn/lens-embeddable-utils';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { HttpStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -60,7 +61,11 @@ import {
   useUpdateOnlineEvalWorkflow,
 } from '../../hooks/use_online_eval_workflows';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
-import type { OnlineEvalWorkflowConfig } from '../../../common/online_evals/workflow_yaml';
+import { useActiveSpaceId } from '../../hooks/use_active_space_id';
+import {
+  isLegacyOnlineEvalWorkflowYaml,
+  type OnlineEvalWorkflowConfig,
+} from '../../../common/online_evals/workflow_yaml';
 import { useModelConnectors } from '../../hooks/use_model_connectors';
 import {
   ConnectorSelector,
@@ -131,18 +136,20 @@ const useOnlineEvalDraft = ({
   return { saved, draft, setDraft, hasChanged, reset, save, isSaving };
 };
 
-const getMonitorFilterExpression = (monitorId: string): string => {
-  const escaped = monitorId.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-  return `monitor.id: "${escaped}"`;
-};
+interface ScoresFilter {
+  monitorId: string;
+  spaceId: string;
+}
+
+const escapeKqlValue = (value: string): string => value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
+const getScoresFilterExpression = ({ monitorId, spaceId }: ScoresFilter): string =>
+  `monitor.id: "${escapeKqlValue(monitorId)}" and space_ids: "${escapeKqlValue(spaceId)}"`;
 
 const buildAverageScoreByNameLensConfig = ({
   dataViewId,
-  monitorId,
-}: {
-  dataViewId: string;
-  monitorId: string;
-}) =>
+  ...scoresFilter
+}: ScoresFilter & { dataViewId: string }) =>
   ({
     type: 'xy',
     title: i18n.translate('xpack.evals.onlineEvaluations.detail.avgScoresPanelTitle', {
@@ -150,7 +157,7 @@ const buildAverageScoreByNameLensConfig = ({
     }),
     query: {
       language: 'kql',
-      expression: getMonitorFilterExpression(monitorId),
+      expression: getScoresFilterExpression(scoresFilter),
     },
     layers: [
       {
@@ -189,11 +196,8 @@ const buildAverageScoreByNameLensConfig = ({
 
 const buildScoreCountByLabelLensConfig = ({
   dataViewId,
-  monitorId,
-}: {
-  dataViewId: string;
-  monitorId: string;
-}) =>
+  ...scoresFilter
+}: ScoresFilter & { dataViewId: string }) =>
   ({
     type: 'xy',
     title: i18n.translate('xpack.evals.onlineEvaluations.detail.scoreLabelsPanelTitle', {
@@ -201,7 +205,7 @@ const buildScoreCountByLabelLensConfig = ({
     }),
     query: {
       language: 'kql',
-      expression: getMonitorFilterExpression(monitorId),
+      expression: getScoresFilterExpression(scoresFilter),
     },
     layers: [
       {
@@ -253,6 +257,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
   const [isDataViewLoading, setIsDataViewLoading] = useState(true);
   const [dataViewId, setDataViewId] = useState<string | null>(null);
   const [dataViewError, setDataViewError] = useState<Error | null>(null);
+  const { spaceId, isLoading: isSpaceIdLoading } = useActiveSpaceId();
   const {
     data: workflow,
     isLoading: isWorkflowLoading,
@@ -463,32 +468,34 @@ export const OnlineEvalDetailPage: React.FC = () => {
   const connectorMissing = hasLlmEvaluatorSelected && !draftState.draft?.connectorId;
 
   const averageScoreAttributes = useMemo(() => {
-    if (!dataViewId) {
+    if (!dataViewId || !spaceId) {
       return null;
     }
 
     try {
       return new LensConfigBuilder(services.dataViews).fromAPIFormat(
-        buildAverageScoreByNameLensConfig({ dataViewId, monitorId: workflowId })
+        buildAverageScoreByNameLensConfig({ dataViewId, monitorId: workflowId, spaceId })
       );
     } catch {
       return null;
     }
-  }, [dataViewId, services.dataViews, workflowId]);
+  }, [dataViewId, services.dataViews, workflowId, spaceId]);
 
   const scoreCountAttributes = useMemo(() => {
-    if (!dataViewId) {
+    if (!dataViewId || !spaceId) {
       return null;
     }
 
     try {
       return new LensConfigBuilder(services.dataViews).fromAPIFormat(
-        buildScoreCountByLabelLensConfig({ dataViewId, monitorId: workflowId })
+        buildScoreCountByLabelLensConfig({ dataViewId, monitorId: workflowId, spaceId })
       );
     } catch {
       return null;
     }
-  }, [dataViewId, services.dataViews, workflowId]);
+  }, [dataViewId, services.dataViews, workflowId, spaceId]);
+
+  const isPanelsLoading = isDataViewLoading || isSpaceIdLoading;
 
   const updateErrorMessage = updateWorkflow.error
     ? i18n.translate('xpack.evals.onlineEvaluations.detail.updateWorkflowError', {
@@ -503,6 +510,28 @@ export const OnlineEvalDetailPage: React.FC = () => {
       })
     : null;
   const editorErrorMessage = editErrorMessage ?? connectorsErrorMessage ?? updateErrorMessage;
+  // Legacy workflows always target the default space, so they only misbehave in other spaces.
+  const isLegacyWorkflow = useMemo(
+    () =>
+      workflow !== undefined &&
+      spaceId !== undefined &&
+      spaceId !== DEFAULT_SPACE_ID &&
+      isLegacyOnlineEvalWorkflowYaml(workflow.yaml),
+    [workflow, spaceId]
+  );
+
+  const upgradeLegacyWorkflow = async () => {
+    if (!workflow?.parsedConfig) {
+      return;
+    }
+
+    setEditErrorMessage(null);
+    try {
+      await updateWorkflow.mutateAsync({ workflowId, config: workflow.parsedConfig });
+    } catch (error) {
+      setEditErrorMessage(String(error));
+    }
+  };
 
   if (isWorkflowLoading) {
     return (
@@ -632,6 +661,46 @@ export const OnlineEvalDetailPage: React.FC = () => {
                 values: { interval: draftState.saved.every },
               })}
               data-test-subj="onlineEvalDetailActiveCallout"
+            />
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
+        {isLegacyWorkflow ? (
+          <>
+            <KbnWarningCallout
+              announceOnMount={false}
+              title={i18n.translate(
+                'xpack.evals.onlineEvaluations.detail.legacyWorkflowCalloutTitle',
+                {
+                  defaultMessage: 'This online evaluation needs to be updated',
+                }
+              )}
+              text={i18n.translate(
+                'xpack.evals.onlineEvaluations.detail.legacyWorkflowCalloutText',
+                {
+                  defaultMessage:
+                    'It was created by an earlier version that evaluates and stores scores in the default space, so new scores do not appear here. Update the workflow to evaluate and store scores in this space.',
+                }
+              )}
+              actionProps={
+                // With unsaved edits, the regular Save regenerates the workflow and keeps them.
+                canManage && !draftState.hasChanged
+                  ? {
+                      primary: {
+                        children: i18n.translate(
+                          'xpack.evals.onlineEvaluations.detail.legacyWorkflowUpdateButton',
+                          {
+                            defaultMessage: 'Update workflow',
+                          }
+                        ),
+                        onClick: upgradeLegacyWorkflow,
+                        isLoading: updateWorkflow.isLoading,
+                        'data-test-subj': 'onlineEvalDetailLegacyWorkflowUpdateButton',
+                      },
+                    }
+                  : undefined
+              }
+              data-test-subj="onlineEvalDetailLegacyWorkflowCallout"
             />
             <EuiSpacer size="m" />
           </>
@@ -1148,7 +1217,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
           <EuiFlexGroup direction="column" gutterSize="m">
             <EuiFlexItem>
               <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-                {isDataViewLoading ? (
+                {isPanelsLoading ? (
                   <EuiText size="s">
                     <p>
                       {i18n.translate('xpack.evals.onlineEvaluations.detail.loadingPanelDataView', {
@@ -1185,7 +1254,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-                {isDataViewLoading ? (
+                {isPanelsLoading ? (
                   <EuiText size="s">
                     <p>
                       {i18n.translate('xpack.evals.onlineEvaluations.detail.loadingPanelLabels', {

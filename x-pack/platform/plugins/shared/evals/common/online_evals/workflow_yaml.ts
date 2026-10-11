@@ -20,6 +20,15 @@ const TRACE_ID_TEMPLATE = '{{ foreach.item[1] }}';
 const CONNECTOR_ID_TEMPLATE = '{{ consts.connector_id }}';
 const WORKFLOW_ID_TEMPLATE = '{{ workflow.id }}';
 const WORKFLOW_NAME_TEMPLATE = '{{ workflow.name }}';
+// `kibana.request` paths are sent as Kibana-root paths, so the workflow space must be
+// explicit for the evals routes to resolve evaluators and stamp scores in that space.
+const SPACE_PATH_PREFIX_TEMPLATE = '/s/{{ workflow.spaceId }}';
+const EVALUATE_PATH = '/internal/evals/_evaluate';
+const PERSIST_PATH = '/internal/evals/online_scores';
+// Keep module-level values plain literals: computed values make the bundler keep this module
+// in the plugin's page-load bundle through the `common` barrel.
+const SPACE_EVALUATE_PATH = '/s/{{ workflow.spaceId }}/internal/evals/_evaluate';
+const SPACE_PERSIST_PATH = '/s/{{ workflow.spaceId }}/internal/evals/online_scores';
 // `${{ ... }}` (not `{{ ... }}`) is required here: the workflow templating engine
 // stringifies plain `{{ }}` interpolations, which would turn this array into a
 // string and fail `IngestOnlineScoresRequestBody`'s `results: array` validation.
@@ -193,6 +202,10 @@ const getNamedStep = (steps: unknown, expectedName: string): WorkflowStep | null
   return toWorkflowStep(maybeStep);
 };
 
+// Workflows created by older builds use the unprefixed path, which targets the default space.
+const isStepPath = (path: unknown, routePath: string): boolean =>
+  path === `${SPACE_PATH_PREFIX_TEMPLATE}${routePath}` || path === routePath;
+
 export const buildOnlineEvalWorkflowYaml = (config: OnlineEvalWorkflowConfig): string => {
   const {
     name,
@@ -240,7 +253,7 @@ export const buildOnlineEvalWorkflowYaml = (config: OnlineEvalWorkflowConfig): s
             type: 'kibana.request',
             with: {
               method: 'POST',
-              path: '/internal/evals/_evaluate',
+              path: SPACE_EVALUATE_PATH,
               headers: {
                 'kbn-xsrf': 'true',
                 'elastic-api-version': '1',
@@ -264,7 +277,7 @@ export const buildOnlineEvalWorkflowYaml = (config: OnlineEvalWorkflowConfig): s
             type: 'kibana.request',
             with: {
               method: 'POST',
-              path: '/internal/evals/online_scores',
+              path: SPACE_PERSIST_PATH,
               headers: {
                 'kbn-xsrf': 'true',
                 'elastic-api-version': '1',
@@ -368,7 +381,7 @@ export const parseOnlineEvalWorkflowYaml = (yaml: string): OnlineEvalWorkflowCon
   if (
     !evaluateStepWith ||
     evaluateStepWith.method !== 'POST' ||
-    evaluateStepWith.path !== '/internal/evals/_evaluate'
+    !isStepPath(evaluateStepWith.path, EVALUATE_PATH)
   ) {
     return undefined;
   }
@@ -425,7 +438,7 @@ export const parseOnlineEvalWorkflowYaml = (yaml: string): OnlineEvalWorkflowCon
   if (
     !persistStepWith ||
     persistStepWith.method !== 'POST' ||
-    persistStepWith.path !== '/internal/evals/online_scores'
+    !isStepPath(persistStepWith.path, PERSIST_PATH)
   ) {
     return undefined;
   }
@@ -462,4 +475,26 @@ export const parseOnlineEvalWorkflowYaml = (yaml: string): OnlineEvalWorkflowCon
     evaluators: parsedEvaluators,
     connectorId,
   };
+};
+
+const getStepPath = (step: WorkflowStep | null): unknown =>
+  step?.with && typeof step.with === 'object' ? (step.with as { path?: unknown }).path : undefined;
+
+/** Whether an online eval workflow still calls the evals routes without the workflow space prefix. */
+export const isLegacyOnlineEvalWorkflowYaml = (yaml: string): boolean => {
+  if (!parseOnlineEvalWorkflowYaml(yaml)) {
+    return false;
+  }
+
+  const parsed = parseYamlToJSONWithoutValidation(yaml);
+  if (!parsed.success) {
+    return false;
+  }
+
+  const { steps } = parsed.json as Record<string, unknown>;
+  const evaluateEachStep = getNamedStep(steps, EVALUATE_EACH_STEP_NAME);
+  return (
+    getStepPath(getNamedStep(evaluateEachStep?.steps, EVALUATE_STEP_NAME)) === EVALUATE_PATH ||
+    getStepPath(getNamedStep(evaluateEachStep?.steps, PERSIST_STEP_NAME)) === PERSIST_PATH
+  );
 };
