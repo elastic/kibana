@@ -138,12 +138,14 @@ export class ReportingPlugin
       await reportingCore.pluginStart({
         logger,
         esClient: elasticsearch.client,
+        featureFlags: core.featureFlags,
         analytics: core.analytics,
         savedObjects,
         uiSettings,
         store,
         securityService: core.security,
         ...plugins,
+        screenshotting: plugins.pageRenderScreenshotting ?? plugins.screenshotting,
       });
 
       // Note: this must be called after ReportingCore.pluginStart

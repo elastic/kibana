@@ -142,6 +142,8 @@ if (getFips() === 0) {
         'telemetry.labels',
         // This allow to test fleet features flags while in devlopment
         'xpack.fleet.experimentalFeatures',
+        // Differs per serverless project.
+        'xpack.pageRenderScreenshotting.kibanaBaseUrl',
       ]);
     });
   });

@@ -103,6 +103,14 @@ export class GenerateRequestHandler extends RequestHandler<
       return checkErrorResponse;
     }
 
+    const disabledErrorResponse = await this.checkExportTypeEnabled(
+      exportTypeId,
+      ScheduleType.SINGLE
+    );
+    if (disabledErrorResponse) {
+      return disabledErrorResponse;
+    }
+
     let report: Report | undefined;
     try {
       report = await this.enqueueJob(params);

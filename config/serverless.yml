@@ -85,11 +85,12 @@ xpack.features.overrides:
   ### Maps feature is hidden in Role management since it's automatically granted by Dashboard feature.
   maps_v2.hidden: true
   ### Reporting feature is supposed to give access to reporting capabilities across different features.
+  ### Dashboard PDF/PNG reports are additionally gated by feature flags (see reporting's common/feature_flags.ts).
   reporting:
     privileges:
       all.composedOf:
         - feature: "dashboard_v2"
-          privileges: [ "download_csv_report" ]
+          privileges: [ "download_csv_report", "generate_report" ]
         - feature: "discover_v2"
           privileges: [ "generate_report" ]
   ### Visualize feature is hidden in Role management since it's automatically granted by Dashboard feature.
@@ -281,6 +282,17 @@ xpack.reporting.queue.pollInterval: 3m
 xpack.reporting.statefulSettings.enabled: false
 xpack.reporting.csv.maxConcurrentShardRequests: 0
 xpack.reporting.csv.maxRows: 100000
+# PDF/PNG reports render through page-render-service, since Chromium is not shipped. They stay hidden
+# until enabled by feature flags (see reporting's common/feature_flags.ts).
+xpack.reporting.export_types.pdf.enabled: true
+xpack.reporting.export_types.png.enabled: true
+xpack.pageRenderScreenshotting.enabled: true
+xpack.pageRenderScreenshotting.url: https://page-render-service.page-render-service.svc
+# Must match xpack.security.uiam.ssl: the service authenticates Kibana by this certificate.
+xpack.pageRenderScreenshotting.ssl.certificate: /mnt/elastic-internal/http-certs/uiam.crt
+xpack.pageRenderScreenshotting.ssl.key: /mnt/elastic-internal/http-certs/uiam.key
+# The platform CA, which signs the render service's certificate (http-certs/ca.crt does not).
+xpack.pageRenderScreenshotting.ssl.certificateAuthorities: /mnt/elastic-internal/trust-bundle/ca.crt
 
 # Disabled Platform plugins
 monitoring.enabled: false

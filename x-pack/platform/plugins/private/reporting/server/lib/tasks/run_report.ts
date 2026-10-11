@@ -135,6 +135,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
   // Abstract methods
   public abstract exportType: string;
+  protected abstract readonly scheduleType: ScheduleType;
   public abstract get TYPE(): string;
 
   public abstract getTaskDefinition(): TaskRegisterDefinition;
@@ -421,6 +422,9 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     const exportType = this.exportTypesRegistry.getByJobType(task.jobtype);
     if (!exportType) {
       throw new Error(`No export type from ${task.jobtype} found to execute report`);
+    }
+    if (!(await this.opts.reporting.isExportTypeEnabled(exportType.id, this.scheduleType))) {
+      throw new Error(`Export type ${exportType.id} is disabled`);
     }
     // notify usage
     exportType.notifyUsage(this.exportType);
