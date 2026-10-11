@@ -285,6 +285,7 @@ const createInternalStartContractMock = () => {
     isListening: jest.fn(),
     setRedactedSessionIdGetter: jest.fn(),
     setSelfClientUiamAttestationGetter: jest.fn(),
+    setSelfClientOwnClientAuthenticationCheck: jest.fn(),
   };
 
   mock.isListening.mockReturnValue(true);

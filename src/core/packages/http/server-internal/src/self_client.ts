@@ -54,6 +54,13 @@ export type SelfClientUiamAttestationGetter = (
   outboundAuthorization: string | null
 ) => string | undefined;
 
+/**
+ * Returns whether `value` is Kibana's own UIAM client authentication, as opposed to one relayed
+ * by an upstream caller.
+ * @internal
+ */
+export type SelfClientOwnClientAuthenticationCheck = (value: string) => boolean;
+
 export const SELF_CALL_RECURSION_ERROR =
   'Refusing Kibana self HTTP call because a self call cannot issue another self call.';
 export const SELF_CALL_MTLS_ERROR =
@@ -80,6 +87,9 @@ interface HttpSelfClientParams {
   readonly log: Logger;
   readonly target: 'auto' | 'local';
   readonly getUiamAttestationGetter?: () => SelfClientUiamAttestationGetter | undefined;
+  readonly getOwnClientAuthenticationCheck?: () =>
+    | SelfClientOwnClientAuthenticationCheck
+    | undefined;
   readonly getUnauthorizedErrorHandler?: () => HttpSelfUnauthorizedErrorHandler | undefined;
 }
 
@@ -398,6 +408,13 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     headers.delete('cookie');
     // Strip the internal-origin header from all self calls before optionally adding Core's marker below.
     headers.delete(X_ELASTIC_INTERNAL_ORIGIN_REQUEST);
+    const clientAuthentication = headers.get(ES_CLIENT_AUTHENTICATION_HEADER);
+    if (
+      clientAuthentication !== null &&
+      this.params.getOwnClientAuthenticationCheck?.()?.(clientAuthentication)
+    ) {
+      headers.delete(ES_CLIENT_AUTHENTICATION_HEADER);
+    }
     headers.set(KIBANA_VERSION_HEADER, this.params.kibanaVersion);
     headers.set(SELF_CALL_HEADER, 'true');
     headers.set('user-agent', `KibanaSelfHttpClient/${this.params.kibanaVersion}`);
@@ -526,8 +543,7 @@ const selfUnauthorizedToolkit: HttpSelfUnauthorizedErrorHandlerToolkit = {
 /**
  * Core-owned headers a retry overlay must not be able to set. Deliberately narrower than
  * {@link isProtectedHeader}: overriding `authorization` is the whole point of a retry. The UIAM
- * shared secret headers are denied outright — they belong to the Elasticsearch client and must
- * never leave this process on a self call.
+ * shared secret headers are denied outright: only the request's own auth headers may supply them.
  */
 const isRetryOverridableHeader = (name: string): boolean => {
   const lowerName = name.toLowerCase();
