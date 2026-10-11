@@ -140,7 +140,10 @@ apiTest.describe(
       for (const id of taskIds) {
         await kbnClient.request({ method: 'DELETE', path: `/${TASKS_PATH}/${id}` });
       }
-      await unbindWorkloads(kbnClient, workloadIds);
+      await unbindWorkloads(
+        kbnClient,
+        workloadIds.map((workloadId) => ({ workloadId }))
+      );
       for (const name of builtInTokenNames) {
         await esClient.security.deleteServiceToken(
           { namespace: 'elastic', service: 'fleet-server', name },

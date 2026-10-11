@@ -27,6 +27,25 @@ describe('WorkloadTypeRegistry', () => {
     });
   });
 
+  it('keeps the resolver of a registration', () => {
+    const resolveWorkloads = jest.fn();
+    registry.register('workflows', { type: 'workflow', name: 'Workflow', resolveWorkloads });
+
+    expect(registry.get('workflows', 'workflow')?.resolveWorkloads).toBe(resolveWorkloads);
+  });
+
+  it('rejects a resolver that is not a function', () => {
+    expect(() =>
+      registry.register('workflows', {
+        type: 'workflow',
+        name: 'Workflow',
+        resolveWorkloads: 'nope' as unknown as () => Promise<[]>,
+      })
+    ).toThrow(
+      'Service account workload type [workflow] registered by plugin [workflows] has a resolveWorkloads that is not a function.'
+    );
+  });
+
   it('does not know types that were never registered', () => {
     expect(registry.isRegistered('alerting', 'rule')).toBe(false);
     expect(registry.get('alerting', 'rule')).toBeUndefined();

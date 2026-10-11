@@ -17,6 +17,9 @@ export type { CoreAuditService } from './src/audit';
 export type { CoreServiceAccountsService } from './src/service_accounts';
 export type {
   CoreServiceAccountsSetup,
+  ServiceAccountWorkloadDetails,
+  ServiceAccountWorkloadLocator,
+  ServiceAccountWorkloadResolver,
   ServiceAccountWorkloadTypeRegistration,
 } from './src/service_account_workloads';
 export {
@@ -42,6 +45,10 @@ export type {
   AuthenticationServiceContract,
   AuditServiceContract,
   ServiceAccountsServiceContract,
+  CoreSecurityDelegateHandle,
+  CoreSecurityDelegateServiceAccounts,
+  ResolvedServiceAccountWorkload,
+  ServiceAccountBoundWorkloadRef,
 } from './src/api_provider';
 export type {
   SecurityRequestHandlerContext,

@@ -55,6 +55,13 @@ export class ServiceAccountsPage {
     await this.accountRow(name).getByTestId('serviceAccountsDeleteAction').click();
   }
 
+  /** The link to the bound workload titled `title`, in the bound modal. */
+  boundWorkloadLink(title: string) {
+    return this.boundModal
+      .getByTestId('serviceAccountBoundWorkloadLink')
+      .filter({ hasText: title });
+  }
+
   async confirmDelete() {
     await this.deleteConfirmModal.getByTestId('confirmModalConfirmButton').click();
   }
