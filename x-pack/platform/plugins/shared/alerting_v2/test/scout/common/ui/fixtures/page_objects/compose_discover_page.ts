@@ -99,11 +99,11 @@ export class ComposeDiscoverPage {
     this.timeFieldSelector = this.page.testSubj.locator('composeDiscoverTimeField');
     this.timeFieldError = this.page.testSubj.locator('composeDiscoverTimeFieldError');
     this.sandboxTimeFieldSelector = this.page.testSubj.locator('querySandboxTimeField');
-    this.ruleNameInput = this.flyout.locator('[data-test-subj="ruleNameInput"]');
-    this.tagsInput = this.flyout.locator('[data-test-subj="ruleTagsInput"]');
-    this.routingTagsInput = this.flyout.locator('[data-test-subj="ruleRoutingTagsInput"]');
-    this.addRunbookButton = this.flyout.locator('[data-test-subj="addRunbookButton"]');
-    this.relatedDashboardsSelector = this.flyout.locator('[data-test-subj="dashboardsSelector"]');
+    this.ruleNameInput = this.flyout.getByTestId('ruleNameInput');
+    this.tagsInput = this.flyout.getByTestId('ruleTagsInput');
+    this.routingTagsInput = this.flyout.getByTestId('ruleRoutingTagsInput');
+    this.addRunbookButton = this.flyout.getByTestId('addRunbookButton');
+    this.relatedDashboardsSelector = this.flyout.getByTestId('dashboardsSelector');
     this.relatedDashboardsInput = this.flyout.locator(
       'input[placeholder="Link related dashboards for investigation"]'
     );
@@ -162,13 +162,11 @@ export class ComposeDiscoverPage {
   }
 
   async clickSwitchToEsql() {
-    await this.switchToEsqlToggle.locator('[data-test-subj="esql"]').click();
+    await this.switchToEsqlToggle.getByTestId('esql').click();
   }
 
   async confirmBuilderToEsql() {
-    await this.confirmBuilderToEsqlModal
-      .locator('[data-test-subj="confirmModalConfirmButton"]')
-      .click();
+    await this.confirmBuilderToEsqlModal.getByTestId('confirmModalConfirmButton').click();
   }
 
   /**
@@ -231,19 +229,19 @@ export class ComposeDiscoverPage {
 
   /** Removes every selected tag via the combobox clear button. */
   async clearAllTags() {
-    await this.tagsInput.locator('[data-test-subj="comboBoxClearButton"]').click();
+    await this.tagsInput.getByTestId('comboBoxClearButton').click();
   }
 
   /** Types a routing tag on the Actions step and presses Enter to add it. */
   async addRoutingTag(tag: string) {
-    const input = this.routingTagsInput.locator('[data-test-subj="comboBoxSearchInput"]');
+    const input = this.routingTagsInput.getByTestId('comboBoxSearchInput');
     await input.fill(tag);
     await input.press('Enter');
   }
 
   /** Removes every selected routing tag via the combobox clear button. */
   async clearAllRoutingTags() {
-    await this.routingTagsInput.locator('[data-test-subj="comboBoxClearButton"]').click();
+    await this.routingTagsInput.getByTestId('comboBoxClearButton').click();
   }
 
   /**
@@ -281,7 +279,7 @@ export class ComposeDiscoverPage {
 
   /** Toggles the flyout between Form view and YAML view. */
   async toggleEditMode(mode: 'yaml' | 'form') {
-    await this.editModeToggle.locator(`[data-test-subj="${mode}"]`).click();
+    await this.editModeToggle.getByTestId(mode).click();
   }
 
   /** Returns the sandbox tab button for the given tab id. */
