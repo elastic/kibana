@@ -26,6 +26,13 @@ export const getAgentBuilderToolCalls = (output: unknown): TrajectoryToolCall[] 
  * 4. without an origin (trace spans carry none): ids in a protected namespace are built-in domain
  *    tools, and `knownToolIds` (e.g. custom tools the suite registers) are scored.
  * Anything else is `unclassified`, which makes the trajectory N/A instead of a score.
+ *
+ * `knownToolIds` only applies on the trace path (no origin); it never rescues a call the runtime
+ * tags `internal`. Browser API tools are registered with origin `internal` (run_chat_agent.ts), so
+ * on the conversation path they come back unclassified (N/A).
+ *
+ * An unclassified call makes the result N/A even when a golden tool was missed. That is by design:
+ * the trajectory is unmeasured until the tool is classified.
  */
 export const createAgentBuilderToolClassifier = ({
   knownToolIds = [],
@@ -59,19 +66,23 @@ export const createAgentBuilderToolClassifier = ({
 export const createUnclassifiedToolsEvaluator = ({
   extractToolCalls,
   classifyTool,
+  goldenPathExtractor,
 }: {
   extractToolCalls: (output: unknown) => Array<string | TrajectoryToolCall>;
   classifyTool: (call: TrajectoryToolCall) => ToolCallClass;
+  /** Same extractor as the trajectory evaluator: golden tools are exempt from classification. */
+  goldenPathExtractor?: (expected: unknown) => string[];
 }): Evaluator => ({
   name: 'unclassified-tools',
   kind: 'CODE',
   direction: 'minimize',
-  evaluate: async ({ output }) => {
+  evaluate: async ({ output, expected }) => {
+    const golden = new Set(goldenPathExtractor?.(expected) ?? []);
     const ids = [
       ...new Set(
         extractToolCalls(output)
           .map((call) => (typeof call === 'string' ? { id: call } : call))
-          .filter((call) => classifyTool(call) === 'unclassified')
+          .filter((call) => !golden.has(call.id) && classifyTool(call) === 'unclassified')
           .map((call) => call.id)
       ),
     ];
