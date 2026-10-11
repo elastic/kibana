@@ -19,10 +19,8 @@ const mockEncryptedSo = mockEncryptedSO();
 const mockLogger = loggerMock.create();
 
 const mockSyntheticsMonitorClient: any = {
-  syntheticsService: {
-    getSyntheticsParams: jest.fn().mockResolvedValue({}),
-    getMaintenanceWindows: jest.fn().mockResolvedValue([]),
-  },
+  getSyntheticsParams: jest.fn().mockResolvedValue({}),
+  getMaintenanceWindows: jest.fn().mockResolvedValue([]),
 };
 
 const mockServerSetup = {

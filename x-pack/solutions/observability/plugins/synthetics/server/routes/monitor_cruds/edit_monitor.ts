@@ -125,9 +125,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
 
       const maintenanceWindowRefs = formattedConfig?.[ConfigKey.MAINTENANCE_WINDOWS];
       const maintenanceWindows = maintenanceWindowRefs?.length
-        ? (await routeContext.syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(
-            spaceId
-          )) ?? []
+        ? (await routeContext.syntheticsMonitorClient.getMaintenanceWindows(spaceId)) ?? []
         : [];
 
       editedMonitor = await editMonitorAPI.normalizeMonitor(

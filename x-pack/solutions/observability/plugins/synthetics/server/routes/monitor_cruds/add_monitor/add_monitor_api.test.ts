@@ -8,7 +8,7 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { AddEditMonitorAPI, isPackagePolicyConflictFailure } from './add_monitor_api';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { SyntheticsService } from '../../../synthetics_service/synthetics_service';
+import { ServiceManagedLocations } from '../../../synthetics_service/service_managed_locations';
 import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
 import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
@@ -125,13 +125,13 @@ describe('AddNewMonitorsPublicAPI', () => {
   });
 
   it('should normalize schedule', async function () {
-    const syntheticsService = new SyntheticsService({
+    const serviceManagedLocations = new ServiceManagedLocations({
       config: {
         enabled: true,
       },
     } as any);
     const api = new AddEditMonitorAPI({
-      syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+      syntheticsMonitorClient: new SyntheticsMonitorClient(serviceManagedLocations, {} as any),
       request: {
         body: {},
       },
@@ -166,11 +166,11 @@ describe('AddNewMonitorsPublicAPI', () => {
   });
 
   describe('normalizeMonitor defaults', () => {
-    const syntheticsService = new SyntheticsService({
+    const serviceManagedLocations = new ServiceManagedLocations({
       config: {},
     } as any);
     const api = new AddEditMonitorAPI({
-      syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+      syntheticsMonitorClient: new SyntheticsMonitorClient(serviceManagedLocations, {} as any),
       request: {
         body: {},
       },
@@ -407,16 +407,22 @@ describe('AddNewMonitorsPublicAPI', () => {
 
   describe('normalizeMonitor - maintenance windows', () => {
     const buildApi = (maintenanceWindows: Array<{ id: string; title: string }>) => {
-      const syntheticsService = new SyntheticsService({ config: {} } as any);
-      syntheticsService.getMaintenanceWindows = jest.fn().mockResolvedValue(maintenanceWindows);
+      const serviceManagedLocations = new ServiceManagedLocations({ config: {} } as any);
+      const syntheticsMonitorClient = new SyntheticsMonitorClient(
+        serviceManagedLocations,
+        {} as any
+      );
+      syntheticsMonitorClient.getMaintenanceWindows = jest
+        .fn()
+        .mockResolvedValue(maintenanceWindows);
       return {
         api: new AddEditMonitorAPI({
           spaceId: 'default',
-          syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+          syntheticsMonitorClient,
           request: { body: {} },
         } as any),
         maintenanceWindows,
-        getMaintenanceWindows: syntheticsService.getMaintenanceWindows,
+        getMaintenanceWindows: syntheticsMonitorClient.getMaintenanceWindows,
       };
     };
 

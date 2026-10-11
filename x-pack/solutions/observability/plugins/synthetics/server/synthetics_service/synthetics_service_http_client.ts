@@ -55,7 +55,32 @@ export interface ServicePayload {
   cloud_id?: string;
 }
 
-export class ServiceAPIClient {
+/** The only fields the service needs to keep an already-cached monitor alive. */
+export interface RetainedMonitor {
+  id: string;
+  type: string;
+}
+
+export type RetainPayload = Omit<ServicePayload, 'monitors' | 'is_edit'> & {
+  monitors: RetainedMonitor[];
+};
+
+interface RetainErrorBody {
+  failed_monitors?: Array<{ id: string; message: string }> | null;
+}
+
+export interface RetainData {
+  monitors: RetainedMonitor[];
+  output: ServiceData['output'];
+  license: LicenseGetLicenseInformation;
+  locationId: string;
+}
+
+// A service that does not know the retain endpoint is probed again after this long, so a
+// service upgrade is picked up without restarting Kibana.
+const RETAIN_UNSUPPORTED_RETRY_MS = 60 * 60 * 1000;
+
+export class SyntheticsServiceHttpClient {
   private readonly username?: string;
   private readonly authorization: string;
   public locations: PublicLocations;
@@ -63,6 +88,7 @@ export class ServiceAPIClient {
   private readonly config?: ServiceConfig;
   private readonly stackVersion: string;
   private readonly server: SyntheticsServerSetup;
+  private readonly retainUnsupportedSince = new Map<string, number>();
 
   constructor(logger: Logger, config: ServiceConfig, server: SyntheticsServerSetup) {
     this.config = config;
@@ -81,7 +107,7 @@ export class ServiceAPIClient {
     this.server = server;
   }
 
-  addVersionHeader(req: AxiosRequestConfig) {
+  private addVersionHeader(req: AxiosRequestConfig) {
     req.headers = { ...req.headers, 'x-kibana-version': this.stackVersion };
     return req;
   }
@@ -155,31 +181,31 @@ export class ServiceAPIClient {
     return baseHttpsAgent;
   }
 
-  async inspect(data: ServiceData) {
-    const monitorsByLocation = this.processServiceData(data);
+  async inspectMonitors(data: ServiceData) {
+    const monitorsByLocation = this.groupMonitorsByLocation(data);
 
     return monitorsByLocation.map(({ data: payload }) => payload);
   }
 
-  async post(data: ServiceData) {
-    return (await this.callAPI('POST', data)).pushErrors;
+  async addMonitors(data: ServiceData) {
+    return (await this.sendToLocations('POST', data)).pushErrors;
   }
 
-  async put(data: ServiceData) {
-    return (await this.callAPI('PUT', data)).pushErrors;
+  async editMonitors(data: ServiceData) {
+    return (await this.sendToLocations('PUT', data)).pushErrors;
   }
 
-  async delete(data: ServiceData) {
-    return (await this.callAPI('DELETE', data)).pushErrors;
+  async deleteMonitors(data: ServiceData) {
+    return (await this.sendToLocations('DELETE', data)).pushErrors;
   }
 
   async runOnce(data: ServiceData) {
-    return (await this.callAPI('POST', { ...data, endpoint: 'runOnce' })).pushErrors;
+    return (await this.sendToLocations('POST', { ...data, endpoint: 'runOnce' })).pushErrors;
   }
 
   async syncMonitors(data: ServiceData) {
     try {
-      return (await this.callAPI('PUT', { ...data, endpoint: 'sync' })).pushErrors;
+      return (await this.sendToLocations('PUT', { ...data, endpoint: 'sync' })).pushErrors;
     } catch (error) {
       this.logger.error(`Error syncing Synthetics monitors, Error: ${error.message}`, {
         error: getSanitizedError(error),
@@ -187,7 +213,69 @@ export class ServiceAPIClient {
     }
   }
 
-  processServiceData({ monitors, location, ...restOfData }: ServiceData) {
+  /** Whether the location's service is expected to accept `PUT /monitors/sync/retain`. */
+  supportsRetain(locationId: string) {
+    const unsupportedSince = this.retainUnsupportedSince.get(locationId);
+    return (
+      unsupportedSince === undefined || Date.now() - unsupportedSince > RETAIN_UNSUPPORTED_RETRY_MS
+    );
+  }
+
+  /**
+   * Keeps monitors the service has already cached alive without resending their configuration.
+   * Resolves with the ids of the monitors that were not retained and need a full sync instead.
+   */
+  async retainMonitors({ monitors, output, license, locationId }: RetainData): Promise<string[]> {
+    const ids = monitors.map(({ id }) => id);
+    if (this.username === TEST_SERVICE_USERNAME || monitors.length === 0) {
+      return [];
+    }
+
+    const location = this.locations.find(({ id }) => id === locationId);
+    if (!location) {
+      this.logger.debug(`Cannot retain monitors at unknown service location ${locationId}`);
+      return ids;
+    }
+
+    const payload: RetainPayload = {
+      monitors: monitors.map(({ id, type }) => ({ id, type })),
+      ...this.buildPayloadEnvelope({ output, license }),
+    };
+
+    try {
+      await this.requestEndpoint(payload, 'PUT', location.url, 'retain');
+      this.retainUnsupportedSince.delete(location.id);
+      this.logger.debug(`Retained ${ids.length} monitors at service location ${location.id}`);
+      return [];
+    } catch (error) {
+      const axiosError = error as AxiosError<{ reason: string; status: number } & RetainErrorBody>;
+      const status = axiosError.response?.status;
+      const failedMonitors = axiosError.response?.data?.failed_monitors;
+
+      // Some monitors were not cached; the rest of the batch was retained.
+      if (status === 404 && Array.isArray(failedMonitors)) {
+        this.retainUnsupportedSince.delete(location.id);
+        this.logger.debug(
+          `${failedMonitors.length} of ${ids.length} monitors were not retained by service location ${location.id}`
+        );
+        return failedMonitors.map(({ id }) => id);
+      }
+
+      // The route is not served at all: an older service that only knows the full sync.
+      if (status === 404 || status === 405) {
+        this.retainUnsupportedSince.set(location.id, Date.now());
+        this.logger.debug(
+          `Service location ${location.id} does not support retaining monitors, falling back to full sync`
+        );
+        return ids;
+      }
+
+      this.logServiceError(axiosError, location.url, 'PUT', ids.length);
+      return ids;
+    }
+  }
+
+  groupMonitorsByLocation({ monitors, location, ...restOfData }: ServiceData) {
     // group monitors by location
     const monitorsByLocation: Array<{
       location: { id: string; url: string };
@@ -200,7 +288,7 @@ export class ServiceAPIClient {
           locations?.find((loc) => loc.id === id && loc.isServiceManaged)
         );
         if (locMonitors.length > 0) {
-          const data = this.getRequestData({ ...restOfData, monitors: locMonitors });
+          const data = this.buildPayload({ ...restOfData, monitors: locMonitors });
           monitorsByLocation.push({ location: { id, url }, monitors: locMonitors, data });
         }
       }
@@ -208,7 +296,7 @@ export class ServiceAPIClient {
     return monitorsByLocation;
   }
 
-  async callAPI(method: 'POST' | 'PUT' | 'DELETE', serviceData: ServiceData) {
+  async sendToLocations(method: 'POST' | 'PUT' | 'DELETE', serviceData: ServiceData) {
     const { endpoint } = serviceData;
     if (this.username === TEST_SERVICE_USERNAME) {
       // we don't want to call service while local integration tests are running
@@ -218,11 +306,11 @@ export class ServiceAPIClient {
     const pushErrors: ServiceLocationErrors = [];
     const promises: Array<Observable<unknown>> = [];
 
-    const monitorsByLocation = this.processServiceData(serviceData);
+    const monitorsByLocation = this.groupMonitorsByLocation(serviceData);
 
     monitorsByLocation.forEach(({ location: { url, id }, data }) => {
       const sendRequest = (payload: ServicePayload): Observable<any> => {
-        const promise = this.callServiceEndpoint(payload, method, url, endpoint);
+        const promise = this.requestEndpoint(payload, method, url, endpoint);
         return rxjsFrom(promise).pipe(
           tap((result) => {
             this.logSuccessMessage(url, method, payload.monitors.length, result);
@@ -268,8 +356,8 @@ export class ServiceAPIClient {
     return { pushErrors, result };
   }
 
-  async callServiceEndpoint(
-    data: ServicePayload,
+  async requestEndpoint(
+    data: ServicePayload | RetainPayload,
     // INSPECT is a special case where we don't want to call the service, but just return the data
     method: 'POST' | 'PUT' | 'DELETE',
     baseUrl: string,
@@ -286,6 +374,9 @@ export class ServiceAPIClient {
       case 'sync':
         url += '/monitors/sync';
         break;
+      case 'retain':
+        url += '/monitors/sync/retain';
+        break;
     }
 
     const authHeader = this.authorization ? { Authorization: this.authorization } : undefined;
@@ -301,7 +392,7 @@ export class ServiceAPIClient {
     );
   }
 
-  getRequestData({ monitors, output, isEdit, license }: ServiceData) {
+  private buildPayload({ monitors, output, isEdit, license }: ServiceData) {
     // don't need to pass locations to heartbeat
     const monitorsStreams = monitors.map(({ locations, ...rest }) =>
       convertToDataStreamFormat(rest)
@@ -309,9 +400,15 @@ export class ServiceAPIClient {
 
     return {
       monitors: monitorsStreams,
+      is_edit: isEdit,
+      ...this.buildPayloadEnvelope({ output, license }),
+    };
+  }
+
+  private buildPayloadEnvelope({ output, license }: Pick<ServiceData, 'output' | 'license'>) {
+    return {
       output,
       stack_version: this.stackVersion,
-      is_edit: isEdit,
       license_level: license.type,
       license_issued_to: license.issued_to,
       deployment_id: this.server.cloud?.deploymentId,
@@ -319,12 +416,12 @@ export class ServiceAPIClient {
     };
   }
 
-  isLoggable(result: unknown): result is { status?: any; request?: any } {
+  private isLoggable(result: unknown): result is { status?: any; request?: any } {
     const objCast = result as object;
     return Object.keys(objCast).some((k) => k === 'status' || k === 'request');
   }
 
-  logSuccessMessage(
+  private logSuccessMessage(
     url: string,
     method: string,
     numMonitors: number,
@@ -340,7 +437,7 @@ export class ServiceAPIClient {
     }
   }
 
-  logServiceError(
+  private logServiceError(
     err: AxiosError<{ reason: string; status: number }>,
     url: string,
     method: string,

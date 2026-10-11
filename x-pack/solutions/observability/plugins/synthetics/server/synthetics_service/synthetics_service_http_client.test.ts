@@ -9,7 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { CoreStart } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
-import { ServiceAPIClient } from './service_api_client';
+import { SyntheticsServiceHttpClient } from './synthetics_service_http_client';
 import type { ServiceConfig } from '../config';
 import axios from 'axios';
 import type { PublicLocations } from '../../common/runtime_types';
@@ -65,46 +65,46 @@ mockCoreStart.elasticsearch.client.asInternalUser.license.get = jest.fn().mockRe
 
 describe('getHttpsAgent', () => {
   it('does not use certs if basic auth is set', () => {
-    const apiClient = new ServiceAPIClient(
+    const httpClient = new SyntheticsServiceHttpClient(
       jest.fn() as unknown as Logger,
       { username: 'u', password: 'p' },
       { isDev: true, coreStart: mockCoreStart } as SyntheticsServerSetup
     );
-    const { options: result } = apiClient.getHttpsAgent('https://localhost:10001');
+    const { options: result } = httpClient.getHttpsAgent('https://localhost:10001');
     expect(result).not.toHaveProperty('cert');
     expect(result).not.toHaveProperty('key');
   });
 
   it('rejectUnauthorised is true for requests out of localhost even in dev', () => {
-    const apiClient = new ServiceAPIClient(
+    const httpClient = new SyntheticsServiceHttpClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
       { isDev: true, coreStart: mockCoreStart } as SyntheticsServerSetup
     );
 
-    const { options: result } = apiClient.getHttpsAgent('https://example.com');
+    const { options: result } = httpClient.getHttpsAgent('https://example.com');
     expect(result).toEqual(expect.objectContaining({ rejectUnauthorized: true }));
   });
 
   it('use rejectUnauthorised as true out of dev for localhost', () => {
-    const apiClient = new ServiceAPIClient(
+    const httpClient = new SyntheticsServiceHttpClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
       { isDev: false, coreStart: mockCoreStart } as SyntheticsServerSetup
     );
 
-    const { options: result } = apiClient.getHttpsAgent('https://localhost:10001');
+    const { options: result } = httpClient.getHttpsAgent('https://localhost:10001');
     expect(result).toEqual(expect.objectContaining({ rejectUnauthorized: true }));
   });
 
   it('uses certs when defined', () => {
-    const apiClient = new ServiceAPIClient(
+    const httpClient = new SyntheticsServiceHttpClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
       { isDev: false, coreStart: mockCoreStart } as SyntheticsServerSetup
     );
 
-    const { options: result } = apiClient.getHttpsAgent('https://localhost:10001');
+    const { options: result } = httpClient.getHttpsAgent('https://localhost:10001');
     expect(result).toEqual(expect.objectContaining({ cert: 'crt', key: 'k' }));
   });
 });
@@ -115,13 +115,13 @@ describe('checkAccountAccessStatus', () => {
   });
 
   it('includes a header with the kibana version', async () => {
-    const apiClient = new ServiceAPIClient(
+    const httpClient = new SyntheticsServiceHttpClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' }, manifestUrl: 'http://localhost' } as ServiceConfig,
       { isDev: false, stackVersion: '8.4', coreStart: mockCoreStart } as SyntheticsServerSetup
     );
 
-    apiClient.locations = [
+    httpClient.locations = [
       {
         id: 'test-location',
         url: 'http://localhost',
@@ -138,7 +138,7 @@ describe('checkAccountAccessStatus', () => {
       data: { allowed: true, signupUrl: 'http://localhost:666/example' },
     });
 
-    const result = await apiClient.checkAccountAccessStatus();
+    const result = await httpClient.checkAccountAccessStatus();
 
     expect(axios).toHaveBeenCalledWith(
       expect.objectContaining({ headers: { 'x-kibana-version': '8.4' } })
@@ -149,12 +149,12 @@ describe('checkAccountAccessStatus', () => {
 
   it('logs a sanitized error if the request fails', async () => {
     const logger = loggerMock.create();
-    const apiClient = new ServiceAPIClient(
+    const httpClient = new SyntheticsServiceHttpClient(
       logger,
       { tls: { certificate: 'crt', key: 'k' }, manifestUrl: 'http://localhost' } as ServiceConfig,
       { isDev: false, stackVersion: '8.4', coreStart: mockCoreStart } as SyntheticsServerSetup
     );
-    apiClient.locations = [
+    httpClient.locations = [
       {
         id: 'test-location',
         url: 'http://localhost',
@@ -165,7 +165,7 @@ describe('checkAccountAccessStatus', () => {
     const error = new Error('Request failed', { someConfig: 'someValue' } as any);
     (axios as jest.MockedFunction<typeof axios>).mockRejectedValue(error);
 
-    await apiClient.checkAccountAccessStatus();
+    await httpClient.checkAccountAccessStatus();
 
     expect(logger.error).toHaveBeenCalledWith(
       'Error getting isAllowed status, Error: Request failed',
@@ -184,12 +184,12 @@ describe('syncMonitors', () => {
 
   it('logs a sanitized error if callAPI fails', async () => {
     const logger = loggerMock.create();
-    const apiClient = new ServiceAPIClient(
+    const httpClient = new SyntheticsServiceHttpClient(
       logger,
       { tls: { certificate: 'crt', key: 'k' }, manifestUrl: 'http://localhost' } as ServiceConfig,
       { isDev: false, stackVersion: '8.4', coreStart: mockCoreStart } as SyntheticsServerSetup
     );
-    apiClient.locations = [
+    httpClient.locations = [
       {
         id: 'us_central',
         url: 'http://localhost',
@@ -202,9 +202,9 @@ describe('syncMonitors', () => {
 
     const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
 
-    jest.spyOn(apiClient, 'callAPI').mockRejectedValueOnce(error);
+    jest.spyOn(httpClient, 'sendToLocations').mockRejectedValueOnce(error);
 
-    await apiClient.syncMonitors({
+    await httpClient.syncMonitors({
       monitors: testMonitors,
       output,
       license: licenseMock.license,
@@ -217,6 +217,210 @@ describe('syncMonitors', () => {
       }
     );
     expect(getSanitizedError).toHaveBeenCalledWith(error);
+  });
+});
+
+describe('retainMonitors', () => {
+  const location = {
+    id: 'us_central',
+    label: 'US Central',
+    url: 'https://service.dev',
+    isServiceManaged: true,
+  };
+  const output = { hosts: ['https://localhost:9200'], api_key: 'id:key' };
+  const monitors = [
+    { id: 'browser-monitor', type: 'browser' },
+    { id: 'http-monitor', type: 'http' },
+  ];
+
+  const createClient = (logger: Logger = loggerMock.create()) => {
+    const httpClient = new SyntheticsServiceHttpClient(
+      logger,
+      { manifestUrl: 'http://localhost:8080/api/manifest' },
+      {
+        isDev: true,
+        stackVersion: '8.7.0',
+        cloud: { cloudId: 'test-id', deploymentId: 'deployment-id' },
+      } as SyntheticsServerSetup
+    );
+    httpClient.locations = [location];
+    return httpClient;
+  };
+
+  const retain = (httpClient: SyntheticsServiceHttpClient) =>
+    httpClient.retainMonitors({
+      monitors,
+      output,
+      license: licenseMock.license,
+      locationId: location.id,
+    });
+
+  const rejectWith = (status: number, data?: unknown) =>
+    (axios as jest.MockedFunction<typeof axios>).mockRejectedValue({
+      message: `Request failed with status code ${status}`,
+      response: { status, data },
+    });
+
+  beforeEach(() => {
+    (axios as jest.MockedFunction<typeof axios>).mockReset();
+  });
+
+  it('puts only the id and type of each monitor to the `/monitors/sync/retain` endpoint', async () => {
+    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
+      status: 202,
+      statusText: 'Accepted',
+      headers: {},
+      config: {},
+      data: '',
+    });
+
+    const logger = loggerMock.create();
+    const failedIds = await retain(createClient(logger));
+
+    expect(failedIds).toEqual([]);
+    expect(logger.debug).toHaveBeenCalledWith('Retained 2 monitors at service location us_central');
+    expect(axiosSpy).toHaveBeenCalledTimes(1);
+    expect(axiosSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'PUT',
+        url: 'https://service.dev/monitors/sync/retain',
+        headers: { 'x-kibana-version': '8.7.0' },
+        data: {
+          monitors,
+          output,
+          stack_version: '8.7.0',
+          license_level: 'trial',
+          license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
+          cloud_id: 'test-id',
+          deployment_id: 'deployment-id',
+        },
+      })
+    );
+  });
+
+  it('strips everything but the id and type from the monitors it is given', async () => {
+    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as any);
+
+    await createClient().retainMonitors({
+      monitors: [{ id: 'a', type: 'http', savedObjectId: 'so-id', namespace: 'default' } as any],
+      output,
+      license: licenseMock.license,
+      locationId: location.id,
+    });
+
+    expect(axiosSpy.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        data: expect.objectContaining({ monitors: [{ id: 'a', type: 'http' }] }),
+      })
+    );
+  });
+
+  it('does not call the service when there is nothing to retain', async () => {
+    const failedIds = await createClient().retainMonitors({
+      monitors: [],
+      output,
+      license: licenseMock.license,
+      locationId: location.id,
+    });
+
+    expect(failedIds).toEqual([]);
+    expect(axios).not.toHaveBeenCalled();
+  });
+
+  it('returns every monitor without calling the service for a location it does not know', async () => {
+    const failedIds = await createClient().retainMonitors({
+      monitors,
+      output,
+      license: licenseMock.license,
+      locationId: 'unknown_location',
+    });
+
+    expect(failedIds).toEqual(['browser-monitor', 'http-monitor']);
+    expect(axios).not.toHaveBeenCalled();
+  });
+
+  it('returns the monitors the service reports as not found without logging an error', async () => {
+    const logger = loggerMock.create();
+    rejectWith(404, {
+      status: 404,
+      reason: 'failed to sync monitors',
+      failed_monitors: [{ id: 'http-monitor', message: 'monitor not found' }],
+    });
+
+    const httpClient = createClient(logger);
+    const failedIds = await retain(httpClient);
+
+    expect(failedIds).toEqual(['http-monitor']);
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(httpClient.supportsRetain(location.id)).toBe(true);
+  });
+
+  describe('against a service without the endpoint', () => {
+    it.each([404, 405])('treats a %s without failed monitors as unsupported', async (status) => {
+      const logger = loggerMock.create();
+      rejectWith(status, '404 page not found');
+
+      const httpClient = createClient(logger);
+      const failedIds = await retain(httpClient);
+
+      expect(failedIds).toEqual(['browser-monitor', 'http-monitor']);
+      expect(httpClient.supportsRetain(location.id)).toBe(false);
+      expect(httpClient.supportsRetain('another_location')).toBe(true);
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('tries the endpoint again after an hour', async () => {
+      const now = jest.spyOn(Date, 'now').mockReturnValue(0);
+      rejectWith(404, '404 page not found');
+
+      const httpClient = createClient();
+      await retain(httpClient);
+
+      now.mockReturnValue(59 * 60 * 1000);
+      expect(httpClient.supportsRetain(location.id)).toBe(false);
+      now.mockReturnValue(61 * 60 * 1000);
+      expect(httpClient.supportsRetain(location.id)).toBe(true);
+
+      now.mockRestore();
+    });
+
+    it('supports the endpoint again once the service accepts a request', async () => {
+      rejectWith(404, '404 page not found');
+      const httpClient = createClient();
+      await retain(httpClient);
+      expect(httpClient.supportsRetain(location.id)).toBe(false);
+
+      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as any);
+      await retain(httpClient);
+
+      expect(httpClient.supportsRetain(location.id)).toBe(true);
+    });
+  });
+
+  it.each([
+    ['a server error', 500, { status: 500, reason: 'failed to sync monitors' }],
+    ['a rate limit', 429, { status: 429, reason: 'rate limit exceeded' }],
+    ['a bad request', 400, { status: 400, reason: 'output is required' }],
+  ])('returns every monitor and logs an error for %s', async (_, status, data) => {
+    const logger = loggerMock.create();
+    rejectWith(status, data);
+
+    const httpClient = createClient(logger);
+    const failedIds = await retain(httpClient);
+
+    expect(failedIds).toEqual(['browser-monitor', 'http-monitor']);
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    expect(httpClient.supportsRetain(location.id)).toBe(true);
+  });
+
+  it('returns every monitor and logs an error when the service cannot be reached', async () => {
+    const logger = loggerMock.create();
+    (axios as jest.MockedFunction<typeof axios>).mockRejectedValue(new Error('socket hang up'));
+
+    const failedIds = await retain(createClient(logger));
+
+    expect(failedIds).toEqual(['browser-monitor', 'http-monitor']);
+    expect(logger.error).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -243,15 +447,15 @@ describe('callAPI', () => {
       data: { allowed: true, signupUrl: 'http://localhost:666/example' },
     });
 
-    const apiClient = new ServiceAPIClient(logger, config, {
+    const httpClient = new SyntheticsServiceHttpClient(logger, config, {
       isDev: true,
       stackVersion: '8.7.0',
       coreStart: mockCoreStart,
     } as SyntheticsServerSetup);
 
-    const spy = jest.spyOn(apiClient, 'callServiceEndpoint');
+    const spy = jest.spyOn(httpClient, 'requestEndpoint');
 
-    apiClient.locations = testLocations;
+    httpClient.locations = testLocations;
 
     const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
 
@@ -262,12 +466,12 @@ describe('callAPI', () => {
       endpoint: 'monitors' as const,
     };
 
-    await apiClient.callAPI('POST', serviceData);
+    await httpClient.sendToLocations('POST', serviceData);
 
     expect(spy).toHaveBeenCalledTimes(3);
     const devUrl = 'https://service.dev';
 
-    const monitorsByLocation = apiClient.processServiceData(serviceData);
+    const monitorsByLocation = httpClient.groupMonitorsByLocation(serviceData);
 
     expect(spy).toHaveBeenNthCalledWith(
       1,
@@ -395,7 +599,7 @@ describe('callAPI', () => {
       data: { allowed: true, signupUrl: 'http://localhost:666/example' },
     });
 
-    const apiClient = new ServiceAPIClient(
+    const httpClient = new SyntheticsServiceHttpClient(
       logger,
       {
         manifestUrl: 'http://localhost:8080/api/manifest',
@@ -410,11 +614,11 @@ describe('callAPI', () => {
         coreStart: mockCoreStart,
       } as SyntheticsServerSetup
     );
-    apiClient.locations = testLocations;
+    httpClient.locations = testLocations;
 
     const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
 
-    await apiClient.callAPI('POST', {
+    await httpClient.sendToLocations('POST', {
       monitors: testMonitors,
       output,
       license: licenseMock.license,
@@ -455,7 +659,7 @@ describe('callAPI', () => {
       data: { allowed: true, signupUrl: 'http://localhost:666/example' },
     });
 
-    const apiClient = new ServiceAPIClient(
+    const httpClient = new SyntheticsServiceHttpClient(
       logger,
       {
         manifestUrl: 'http://localhost:8080/api/manifest',
@@ -464,11 +668,11 @@ describe('callAPI', () => {
       { isDev: true, stackVersion: '8.7.0' } as SyntheticsServerSetup
     );
 
-    apiClient.locations = testLocations;
+    httpClient.locations = testLocations;
 
     const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
 
-    await apiClient.runOnce({
+    await httpClient.runOnce({
       monitors: testMonitors,
       output,
       license: licenseMock.license,
@@ -509,7 +713,7 @@ describe('callAPI', () => {
       data: { allowed: true, signupUrl: 'http://localhost:666/example' },
     });
 
-    const apiClient = new ServiceAPIClient(
+    const httpClient = new SyntheticsServiceHttpClient(
       logger,
       {
         manifestUrl: 'http://localhost:8080/api/manifest',
@@ -522,11 +726,11 @@ describe('callAPI', () => {
       } as SyntheticsServerSetup
     );
 
-    apiClient.locations = testLocations;
+    httpClient.locations = testLocations;
 
     const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
 
-    await apiClient.syncMonitors({
+    await httpClient.syncMonitors({
       monitors: testMonitors,
       output,
       license: licenseMock.license,
@@ -563,16 +767,16 @@ describe('callAPI', () => {
   it('sends a DELETE request with only the monitors it is given and without their locations', async () => {
     const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as any);
 
-    const apiClient = new ServiceAPIClient(logger, config, {
+    const httpClient = new SyntheticsServiceHttpClient(logger, config, {
       isDev: true,
       stackVersion: '8.7.0',
       coreStart: mockCoreStart,
     } as SyntheticsServerSetup);
-    apiClient.locations = testLocations;
+    httpClient.locations = testLocations;
 
     const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
 
-    await apiClient.delete({
+    await httpClient.deleteMonitors({
       monitors: [
         {
           id: 'mon-1',
@@ -640,7 +844,7 @@ describe('callAPI', () => {
       return Promise.resolve({} as any);
     });
 
-    const apiClient = new ServiceAPIClient(
+    const httpClient = new SyntheticsServiceHttpClient(
       logger,
       {
         manifestUrl: 'http://localhost:8080/api/manifest',
@@ -653,7 +857,7 @@ describe('callAPI', () => {
       } as SyntheticsServerSetup
     );
 
-    apiClient.locations = testLocations;
+    httpClient.locations = testLocations;
 
     const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
 
@@ -667,7 +871,7 @@ describe('callAPI', () => {
       ],
     });
 
-    await apiClient.syncMonitors({
+    await httpClient.syncMonitors({
       monitors,
       output,
       license: licenseMock.license,

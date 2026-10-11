@@ -6,9 +6,12 @@
  */
 import { omit } from 'lodash';
 import type { FormattedValue } from './common';
+import type { SavedObject } from '@kbn/core/server';
 import {
   formatMonitorConfigFields,
   formatHeartbeatRequest,
+  formatMonitorConfigs,
+  formatSavedMonitors,
   mixParamsWithGlobalParams,
 } from './format_configs';
 
@@ -18,6 +21,7 @@ import type {
   MonitorFields,
   ResponseBodyIndexPolicy,
   SyntheticsMonitor,
+  SyntheticsMonitorWithSecretsAttributes,
 } from '../../../../common/runtime_types';
 import {
   ConfigKey,
@@ -733,5 +737,118 @@ describe('mixParamsWithGlobalParams', () => {
       },
       str: '{"username":"superpower-user","password":"test-password","url":"test-url"}',
     });
+  });
+});
+
+describe('formatMonitorConfigs', () => {
+  const logger = loggerMock.create();
+  const config = {
+    monitor: testHTTPConfig as SyntheticsMonitor,
+    configId: 'config-id',
+    heartbeatId: 'heartbeat-id',
+    params: {},
+    spaceId: 'default',
+  };
+
+  it('formats a list of configs, one result for each', () => {
+    const formatted = formatMonitorConfigs({
+      configs: [config, { ...config, heartbeatId: 'another-id' }],
+      maintenanceWindows: [],
+      logger,
+    });
+
+    expect(formatted.map(({ id }) => id)).toEqual(['heartbeat-id', 'another-id']);
+  });
+
+  it('formats a single config like a list of one', () => {
+    expect(formatMonitorConfigs({ configs: config, maintenanceWindows: [], logger })).toEqual(
+      formatMonitorConfigs({ configs: [config], maintenanceWindows: [], logger })
+    );
+  });
+});
+
+describe('formatSavedMonitors', () => {
+  const logger = loggerMock.create();
+  const urlWithParams = String.raw`https://${'$'}{host}:${'$'}{port}`;
+
+  const savedMonitor = (
+    overrides: { namespaces?: string[]; attributes?: Record<string, unknown> } = {}
+  ) =>
+    ({
+      id: 'config-id',
+      type: 'synthetics-monitor-multi-space',
+      references: [],
+      namespaces: ['default'],
+      ...overrides,
+      attributes: {
+        ...testHTTPConfig,
+        id: 'heartbeat-id',
+        urls: urlWithParams,
+        secrets: '{}',
+        ...overrides.attributes,
+      },
+    } as unknown as SavedObject<SyntheticsMonitorWithSecretsAttributes>);
+
+  // `fields` is added when the config is formatted but is not part of the monitor fields type
+  const fieldsOf = (formatted: Partial<MonitorFields>) =>
+    (formatted as Partial<MonitorFields> & { fields?: { config_id?: string; kibanaUrl?: string } })
+      .fields;
+
+  const format = (
+    monitors: Array<SavedObject<SyntheticsMonitorWithSecretsAttributes>>,
+    paramsBySpace: Record<string, Record<string, string>> = {},
+    kibanaUrl?: string
+  ) => formatSavedMonitors({ monitors, paramsBySpace, maintenanceWindows: [], kibanaUrl, logger });
+
+  it('identifies each monitor by its heartbeat id and keeps its config id in the fields', () => {
+    const [formatted] = format([savedMonitor()]);
+
+    expect(formatted.id).toBe('heartbeat-id');
+    expect(fieldsOf(formatted)?.config_id).toBe('config-id');
+  });
+
+  it('resolves the params of the space the monitor is in', () => {
+    const [formatted] = format([savedMonitor()], {
+      default: { host: 'default.example.com', port: '8080' },
+      other: { host: 'other.example.com', port: '9090' },
+    });
+
+    expect(formatted.urls).toBe('https://default.example.com:8080');
+  });
+
+  it('lets params shared across all spaces win over the monitors own space', () => {
+    const [formatted] = format([savedMonitor()], {
+      default: { host: 'default.example.com', port: '8080' },
+      '*': { port: '7070' },
+    });
+
+    expect(formatted.urls).toBe('https://default.example.com:7070');
+  });
+
+  it('applies params shared across all spaces to a space that has no params of its own', () => {
+    const [formatted] = format([savedMonitor({ namespaces: ['no-params-space'] })], {
+      '*': { host: 'shared.example.com', port: '7070' },
+    });
+
+    expect(formatted.urls).toBe('https://shared.example.com:7070');
+  });
+
+  it('treats a monitor without a space as being in the default space', () => {
+    const [formatted] = format([savedMonitor({ namespaces: undefined })], {
+      default: { host: 'default.example.com', port: '8080' },
+    });
+
+    expect(formatted.urls).toBe('https://default.example.com:8080');
+  });
+
+  it('puts the kibana url in the fields only when it is known', () => {
+    expect(fieldsOf(format([savedMonitor()], {}, 'https://kibana.example.com')[0])?.kibanaUrl).toBe(
+      'https://kibana.example.com'
+    );
+    expect(fieldsOf(format([savedMonitor()])[0])?.kibanaUrl).toBeUndefined();
+  });
+
+  it('formats nothing when there are no monitors', () => {
+    expect(format([])).toEqual([]);
   });
 });
