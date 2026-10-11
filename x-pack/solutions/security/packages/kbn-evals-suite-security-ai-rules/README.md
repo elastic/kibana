@@ -57,7 +57,7 @@ kbn-evals-suite-security-ai-rules/
 
 4. **GenAI Settings**: Navigate to **Stack Management > AI > GenAI Settings** (`app/management/ai/genAiSettings`) and select **AI agent (Beta)** in Chat Experience. This enables the Agent Builder API that the eval suite calls.
 
-5. **Index patterns**: The dataset prompts reference specific index patterns (e.g., `logs-endpoint.events.*`, `logs-aws.cloudtrail*`). If these indices do not exist in your Elasticsearch instance, the affected examples will be skipped (all evaluators return N/A). Check the task logs for "Could not discover a suitable index" warnings.
+5. **Index patterns**: The dataset prompts reference specific index patterns (e.g., `logs-endpoint.events.*`, `logs-aws.cloudtrail*`). The suite seeds a few synthetic ECS documents for each of them in `beforeAll` (`src/source_data.ts`, run-scoped data streams plus an isolated `.alerts-security.*` index) and removes them in `afterAll`, so a fresh stack needs no extra data. The seeded documents only make the patterns discoverable; they are not meant to match the reference detections.
 
 ## Running Evaluations
 
@@ -292,12 +292,12 @@ GET .evaluation-scores/_search
 
 **Problem**: The rule creation tool cannot find matching data for the index pattern in the prompt.
 
-This means the required index (e.g., `logs-azure.auditlogs*`) does not exist in the Elasticsearch instance. All evaluators for the affected example will return N/A.
+This means a required index pattern matched nothing. The suite seeds fixture data for every pattern its datasets reference and fails in `beforeAll` if one is still empty, so this normally indicates a new dataset pattern missing from `src/source_data.ts` or a failed cleanup race. All evaluators for the affected example will return N/A.
 
 **Solution**:
 
 1. Check the task logs for a summary line: `[Summary] ... X/Y examples scored (Z skipped due to missing indices)`
-2. Ingest sample data for the missing index patterns, or use a cluster that has the required data
+2. Add the missing pattern to `src/source_data.ts` (the unit test lists uncovered patterns)
 3. If many examples are skipped, the reported metrics may not be representative
 
 ### Low Scores on All Evaluators
