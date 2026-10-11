@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { connectorTypePublishesKeys } from '@kbn/connector-specs';
 import { CONNECTOR_PUBLIC_KEYS_API_PATH, SSF_DISCOVERY_PATH_PREFIX } from '../../common';
+import { getConnectorPublicKeysParamsSchemaV1 } from '../../common/routes/connector_public_keys/apis/get';
+import {
+  connectorJwksResponseSchemaV1,
+  connectorSsfDiscoveryResponseSchemaV1,
+} from '../../common/routes/connector_public_keys/response';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   CONNECTOR_SIGNING_KEY_SAVED_OBJECT_TYPE,
@@ -49,11 +53,19 @@ export const connectorPublicKeysRoutes = ({
         },
         options: { access: 'public' },
         validate: {
-          params: schema.object({
-            connector_type_id: schema.string({ minLength: 1, maxLength: 128 }),
-            connector_id: schema.string({ minLength: 1, maxLength: 128 }),
-            space_id: schema.maybe(schema.string({ minLength: 1, maxLength: 128 })),
-          }),
+          request: {
+            params: getConnectorPublicKeysParamsSchemaV1,
+          },
+          response: {
+            200: {
+              body: () =>
+                discovery ? connectorSsfDiscoveryResponseSchemaV1 : connectorJwksResponseSchemaV1,
+              description: 'Indicates a successful call.',
+            },
+            404: {
+              description: 'The connector or its signing key was not found.',
+            },
+          },
         },
       },
       router.handleLegacyErrors(async (_context, request, response) => {

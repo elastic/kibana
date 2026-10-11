@@ -8,34 +8,42 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
 import type { ConnectorSpec } from '../../connector_spec';
 
 const MAX_EVENTS = 10;
 
-const inputSchema = z.object({
-  audience: z
-    .string()
-    .min(1)
-    .max(2048)
-    .describe('Value of the `aud` claim. The receiver defines it.'),
-  events: z
-    .record(z.url().max(2048), z.record(z.string().max(256), z.unknown()))
-    .refine((events) => {
-      const count = Object.keys(events).length;
-      return count >= 1 && count <= MAX_EVENTS;
-    }, `Give 1 to ${MAX_EVENTS} events.`)
-    .describe(
-      'Value of the `events` claim: event type URIs and their payloads. Give one event. SSF 1.0 permits more URIs only as alternative URIs for the same event type.'
-    ),
-  subId: z
-    .looseObject({
-      format: z.string().min(1).max(64).describe('Subject identifier format, for example `email`.'),
-    })
-    .describe('Value of the `sub_id` claim (an RFC 9493 subject identifier). SSF 1.0 requires it.'),
-  txn: z.string().min(1).max(256).optional().describe('Optional value of the `txn` claim.'),
-});
+const inputSchema = lazySchema(() =>
+  z.object({
+    audience: z
+      .string()
+      .min(1)
+      .max(2048)
+      .describe('Value of the `aud` claim. The receiver defines it.'),
+    events: z
+      .record(z.url().max(2048), z.record(z.string().max(256), z.unknown()))
+      .refine((events) => {
+        const count = Object.keys(events).length;
+        return count >= 1 && count <= MAX_EVENTS;
+      }, `Give 1 to ${MAX_EVENTS} events.`)
+      .describe(
+        'Value of the `events` claim: event type URIs and their payloads. Give one event. SSF 1.0 permits more URIs only as alternative URIs for the same event type.'
+      ),
+    subId: z
+      .looseObject({
+        format: z
+          .string()
+          .min(1)
+          .max(64)
+          .describe('Subject identifier format, for example `email`.'),
+      })
+      .describe(
+        'Value of the `sub_id` claim (an RFC 9493 subject identifier). SSF 1.0 requires it.'
+      ),
+    txn: z.string().min(1).max(256).optional().describe('Optional value of the `txn` claim.'),
+  })
+);
 
 export const SSF: ConnectorSpec = {
   metadata: {
@@ -46,7 +54,7 @@ export const SSF: ConnectorSpec = {
         'Sign Security Event Tokens with a key that Kibana manages, and publish the public key for SSF receivers.',
     }),
     docsUrl: '',
-    minimumLicense: 'gold',
+    minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportsPublicKeys: true,
     supportedFeatureIds: ['workflows'],

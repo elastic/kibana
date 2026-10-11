@@ -15,6 +15,10 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { connectorPublicKeysRoutes } from './connector_public_keys';
 import { createUnsecuredInboundSavedObjectsClient } from '../inbound/create_unsecured_inbound_saved_objects_client';
 import { mockHandlerArguments } from './_mock_handler_arguments';
+import {
+  connectorJwksResponseSchemaV1,
+  connectorSsfDiscoveryResponseSchemaV1,
+} from '../../common/routes/connector_public_keys/response';
 
 jest.mock('../inbound/create_unsecured_inbound_saved_objects_client');
 
@@ -98,6 +102,9 @@ describe('connector public keys', () => {
       body: { keys: [publicKey] },
       headers: { 'Cache-Control': 'public, max-age=60' },
     });
+    expect(() =>
+      connectorJwksResponseSchemaV1.validate(jest.mocked(response.ok).mock.calls[0][0]?.body)
+    ).not.toThrow();
   });
 
   it('returns discovery metadata with the issuer from the key record', async () => {
@@ -112,6 +119,11 @@ describe('connector public keys', () => {
         },
       })
     );
+    expect(() =>
+      connectorSsfDiscoveryResponseSchemaV1.validate(
+        jest.mocked(response.ok).mock.calls[0][0]?.body
+      )
+    ).not.toThrow();
   });
 
   it('does not load connectors that do not publish keys', async () => {

@@ -23,8 +23,12 @@ import type { rawConnectorSigningKeySchemaV1 } from '../saved_objects/schemas/ra
 
 export type RawConnectorSigningKey = TypeOf<typeof rawConnectorSigningKeySchemaV1>;
 
-export const NO_SIGNING_KEY_MESSAGE =
-  'This connector has no signing key. Create a new connector to get a key.';
+export const NO_SIGNING_KEY_MESSAGE = i18n.translate(
+  'xpack.actions.serverSideErrors.noConnectorSigningKey',
+  {
+    defaultMessage: 'This connector has no signing key. Create a new connector to get a key.',
+  }
+);
 
 /** Returns the origin to publish keys under, or a 400 error when it cannot be used. */
 export const getSigningKeyPublicBaseUrl = (publicBaseUrl: string | undefined): string => {
