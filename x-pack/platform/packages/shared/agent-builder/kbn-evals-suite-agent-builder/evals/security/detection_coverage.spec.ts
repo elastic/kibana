@@ -12,6 +12,18 @@ import { defaultAgentToolIds } from '@kbn/agent-builder-common';
 import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
+import {
+  claimsMutation,
+  finalAnswer,
+  givesRulePageRoute,
+  loadedSkillNames,
+  mentionsRule,
+  ruleJustifyingVerdict,
+  toolCalls,
+  verdictsMentioned,
+  type CoverageVerdict,
+  type ToolCallStep,
+} from '../../src/security_rule_checks';
 import { COVERAGE_RULE_NAMES, seedDetectionCoverageFixtures } from './detection_coverage_fixtures';
 
 /**
@@ -65,7 +77,6 @@ const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
 const FIND_RULES_TOOL_ID = 'security.find_rules';
 const FIND_PREBUILT_RULES_TOOL_ID = 'security.find_prebuilt_rules';
 const CREATE_RULE_TOOL_ID = 'security.create_detection_rule';
-const REDIRECT_TOOL_ID = 'security.build_redirect_url';
 
 const FLEET_BULK_INSTALL_PATH = '/api/fleet/epm/packages/_bulk';
 const AGENTS_API_BASE_PATH = '/api/agent_builder/agents';
@@ -77,36 +88,6 @@ const COVERAGE_SKILL_IDS = [
   'recommend-prebuilt-rules',
 ];
 
-/** Every verdict the skill may return; asserting "exactly one" needs the whole set. */
-const ALL_VERDICTS = [
-  'covered_enabled',
-  'covered_disabled',
-  'prebuilt_available',
-  'no_coverage',
-] as const;
-
-type Verdict = (typeof ALL_VERDICTS)[number];
-
-interface ToolCallStep {
-  type?: string;
-  tool_id?: string;
-  params?: Record<string, unknown>;
-  results?: unknown[];
-}
-
-const toolCalls = (steps: ToolCallStep[], toolId: string): ToolCallStep[] =>
-  steps.filter((step) => step?.type === 'tool_call' && step.tool_id === toolId);
-
-/**
- * The verdict the answer actually commits to.
- *
- * The skill is told to lead with one verdict token. Mentioning several would make the
- * recommendation ambiguous for a human and unusable for the workflow, so a multi-verdict
- * answer is a failure, not a pass with noise.
- */
-const verdictsMentioned = (answer: string): Verdict[] =>
-  ALL_VERDICTS.filter((verdict) => answer.includes(verdict));
-
 /**
  * Fail with the actual cause when a verdict is missing.
  *
@@ -116,9 +97,7 @@ const verdictsMentioned = (answer: string): Verdict[] =>
  * real diagnosis.
  */
 const expectCoverageSkillRan = (steps: ToolCallStep[]) => {
-  const loaded = steps
-    .filter((step) => step?.type === 'tool_call' && step.tool_id === 'load_skill')
-    .map((step) => String((step.params as { skill?: unknown })?.skill ?? ''));
+  const loaded = loadedSkillNames(steps);
   expect(
     loaded.some((skill) => skill.includes('detection-coverage')),
     `routing miss: the agent never loaded detection-coverage (loaded: ${
@@ -127,7 +106,7 @@ const expectCoverageSkillRan = (steps: ToolCallStep[]) => {
   ).toBe(true);
 };
 
-const expectSingleVerdict = (answer: string, expected: Verdict) => {
+const expectSingleVerdict = (answer: string, expected: CoverageVerdict) => {
   expect(
     verdictsMentioned(answer),
     `expected exactly one verdict token (${expected}) in the answer`
@@ -135,15 +114,24 @@ const expectSingleVerdict = (answer: string, expected: Verdict) => {
 };
 
 /**
- * The assistant's final answer. `converse` returns the whole message list, so the reply
- * under test is the last entry, not a `message` field on the response.
+ * A positive coverage verdict must be justified by the rule that detects the asked-for
+ * behaviour — not merely accompanied by its name. The same-technique near-miss is the
+ * regression this suite exists to trap (`POWERSHELL` and `OFFICE_CMD` are both T1059), and it
+ * survives a presence check: "covered_enabled: <powershell> covers this; <office_cmd> does
+ * not" names the right rule and credits the wrong one.
  */
-const answerOf = (response: { messages: Array<{ message: string }> }): string =>
-  response.messages[response.messages.length - 1]?.message ?? '';
+const expectVerdictJustifiedBy = (
+  answer: string,
+  verdict: CoverageVerdict,
+  expectedRule: string
+) => {
+  expect(
+    ruleJustifyingVerdict(answer, verdict, Object.values(COVERAGE_RULE_NAMES)),
+    `the ${verdict} verdict must be justified by "${expectedRule}", not by a rule that detects a different behaviour`
+  ).toBe(expectedRule);
+};
 
-/** Case-insensitive: the answer may bold or re-case a rule name. */
-const mentionsRule = (answer: string, ruleName: string): boolean =>
-  answer.toLowerCase().includes(ruleName.toLowerCase());
+const answerOf = finalAnswer;
 
 evaluate.describe(
   'Security Skills - Detection Coverage verdicts',
@@ -216,7 +204,11 @@ evaluate.describe(
 
         expectCoverageSkillRan((response.steps ?? []) as ToolCallStep[]);
         expectSingleVerdict(answerOf(response), 'covered_enabled');
-        expect(mentionsRule(answerOf(response), COVERAGE_RULE_NAMES.powershell)).toBe(true);
+        expectVerdictJustifiedBy(
+          answerOf(response),
+          'covered_enabled',
+          COVERAGE_RULE_NAMES.powershell
+        );
         // Installed rules must be searched before any verdict about existing coverage.
         expect(
           toolCalls((response.steps ?? []) as ToolCallStep[], FIND_RULES_TOOL_ID).length
@@ -238,13 +230,13 @@ evaluate.describe(
 
         expectCoverageSkillRan((response.steps ?? []) as ToolCallStep[]);
         expectSingleVerdict(answerOf(response), 'covered_disabled');
-        expect(mentionsRule(answerOf(response), COVERAGE_RULE_NAMES.smb)).toBe(true);
+        expectVerdictJustifiedBy(answerOf(response), 'covered_disabled', COVERAGE_RULE_NAMES.smb);
         // The cheapest route is enabling what already exists, so the answer must not
         // propose authoring a rule, and must not pretend it enabled anything itself.
         expect(
           toolCalls((response.steps ?? []) as ToolCallStep[], CREATE_RULE_TOOL_ID)
         ).toHaveLength(0);
-        expect(answerOf(response)).not.toMatch(/\bI (?:have )?enabled\b/i);
+        expect(claimsMutation(answerOf(response)), 'the skill cannot enable a rule').toBe(false);
       }
     );
 
@@ -314,7 +306,86 @@ evaluate.describe(
         // exact duplicate this skill exists to prevent.
         expect(toolCalls(steps, FIND_RULES_TOOL_ID).length).toBeGreaterThan(0);
         expect(toolCalls(steps, FIND_PREBUILT_RULES_TOOL_ID).length).toBeGreaterThan(0);
-        expect(answerOf(response)).not.toMatch(/\bI (?:have )?installed\b/i);
+        expect(claimsMutation(answerOf(response)), 'the skill cannot install a rule').toBe(false);
+      }
+    );
+
+    evaluate(
+      'a same-technique sibling resolves to its own rule, not the other T1059 rule',
+      async ({ chatClient }) => {
+        // Near miss: Office-spawns-cmd and encoded PowerShell are both enabled and both T1059.
+        // Picking the PowerShell rule here means the verdict rode on the technique, not the behaviour.
+        // So assert WHICH rule the verdict leans on: naming both while crediting the sibling
+        // ("<powershell> covers this; <office_cmd> does not") is the same regression.
+        const response = await chatClient.converse({
+          options: { agentId: coverageAgentId },
+          messages: [
+            {
+              message:
+                'Do we detect Word or Excel spawning cmd.exe on Windows endpoints? I want that covered.',
+            },
+          ],
+        });
+
+        expectCoverageSkillRan((response.steps ?? []) as ToolCallStep[]);
+        expectSingleVerdict(answerOf(response), 'covered_enabled');
+        expectVerdictJustifiedBy(
+          answerOf(response),
+          'covered_enabled',
+          COVERAGE_RULE_NAMES.officeCmd
+        );
+      }
+    );
+
+    evaluate(
+      'a request inside a narrow rule scope is covered, where the same ask outside it is not',
+      async ({ chatClient }) => {
+        // Pair for the production kubectl case: the staging scope IS covered, so a skill that
+        // answers no_coverage for every kubectl ask would pass that case and fail this one.
+        const response = await chatClient.converse({
+          options: { agentId: coverageAgentId },
+          messages: [
+            {
+              message: 'Is kubectl exec into pods in the staging namespace already detected?',
+            },
+          ],
+        });
+
+        expectCoverageSkillRan((response.steps ?? []) as ToolCallStep[]);
+        expectSingleVerdict(answerOf(response), 'covered_enabled');
+        expectVerdictJustifiedBy(
+          answerOf(response),
+          'covered_enabled',
+          COVERAGE_RULE_NAMES.kubectlStaging
+        );
+      }
+    );
+
+    evaluate(
+      'a different lateral-movement protocol is not covered by the disabled SMB rule',
+      async ({ chatClient }) => {
+        // Near miss: the disabled SMB rule is a lateral-movement rule, but RDP is a different
+        // protocol and behaviour. covered_disabled would tell the analyst to enable a rule that
+        // cannot detect what they asked about.
+        const response = await chatClient.converse({
+          options: { agentId: coverageAgentId },
+          messages: [
+            {
+              message: 'We need detection for lateral movement over RDP between Windows hosts.',
+            },
+          ],
+        });
+
+        expectCoverageSkillRan((response.steps ?? []) as ToolCallStep[]);
+        const verdicts = verdictsMentioned(answerOf(response));
+        expect(verdicts).toHaveLength(1);
+        expect(
+          ['no_coverage', 'prebuilt_available'],
+          'an SMB rule is not RDP coverage, enabled or not'
+        ).toContain(verdicts[0]);
+        expect(
+          toolCalls((response.steps ?? []) as ToolCallStep[], CREATE_RULE_TOOL_ID)
+        ).toHaveLength(0);
       }
     );
 
@@ -331,10 +402,11 @@ evaluate.describe(
       const steps = (response.steps ?? []) as ToolCallStep[];
       expect(toolCalls(steps, CREATE_RULE_TOOL_ID)).toHaveLength(0);
       // The route still has to be actionable for the user, with a link to the rule page.
-      const linked =
-        toolCalls(steps, REDIRECT_TOOL_ID).length > 0 ||
-        /\/app\/security\/rules/.test(answerOf(response));
-      expect(linked, 'an enable route must give the user a way to act').toBe(true);
+      expect(
+        givesRulePageRoute(steps, answerOf(response)),
+        'an enable route must link a specific rule page'
+      ).toBe(true);
+      expect(claimsMutation(answerOf(response)), 'the skill cannot enable a rule').toBe(false);
     });
   }
 );
