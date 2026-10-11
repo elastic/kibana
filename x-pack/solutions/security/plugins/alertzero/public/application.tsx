@@ -87,6 +87,11 @@ export const renderApp = async ({
    * but not Chrome. Prefer it over `KibanaRenderContextProvider`, which is deprecated in favour of
    * this contract.
    */
+  // The mount element is a child of the chrome's flex-column app wrapper. Letting it grow and
+  // flex its own children is what makes `rootStyle` fill the viewport, so footers pinned to the
+  // bottom of the content stay at the bottom of the viewport on tall screens.
+  Object.assign(params.element.style, { display: 'flex', flexDirection: 'column', flexGrow: '1' });
+
   ReactDOM.render(coreStart.rendering.addContext(<App />), params.element);
 
   return () => {
