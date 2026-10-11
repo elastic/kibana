@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-escalation-grounding
 dependsOn:
   - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-plugin'
   - '@kbn/agentic-investigations-plugin'
   - '@kbn/core'
   - '@kbn/evals'
