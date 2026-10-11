@@ -218,19 +218,10 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
 
       <EuiFlyoutBody>
         <EuiForm component="form" id={formId} onSubmit={handleSubmit}>
-          <EuiTitle size="s">
-            <h3>{translations.viewDetailsTitle}</h3>
-          </EuiTitle>
-          <EuiText color="subdued" size="s">
-            <p>{translations.viewDetailsDescription}</p>
-          </EuiText>
-
-          <EuiSpacer size="m" />
-
           <EuiFormRow
             error={nameError}
             fullWidth
-            helpText={translations.viewNameDescription}
+            helpText={isEditing ? undefined : translations.viewNameDescription}
             isInvalid={Boolean(nameError)}
             label={translations.viewNameLabel}
           >
