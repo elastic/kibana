@@ -4796,8 +4796,8 @@ importers:
         specifier: 9.2.0
         version: 9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1)
       react-redux-v7:
-        specifier: npm:react-redux@7.2.8
-        version: react-redux@7.2.8(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: npm:react-redux@9.3.0
+        version: react-redux@9.3.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1)
       react-reverse-portal:
         specifier: 2.3.0
         version: 2.3.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -4847,8 +4847,8 @@ importers:
         specifier: npm:@reduxjs/toolkit@1.9.7
         version: '@reduxjs/toolkit@1.9.7(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)'
       redux-v4:
-        specifier: npm:redux@4.2.1
-        version: redux@4.2.1
+        specifier: npm:redux@5.0.1
+        version: redux@5.0.1
       reflect-metadata:
         specifier: 0.2.2
         version: 0.2.2
@@ -4871,8 +4871,8 @@ importers:
         specifier: 5.1.0
         version: 5.1.0
       reselect-v4:
-        specifier: npm:reselect@4.1.8
-        version: reselect@4.1.8
+        specifier: npm:reselect@5.3.0
+        version: reselect@5.3.0
       rison-node:
         specifier: 2.1.1
         version: 2.1.1
@@ -15533,9 +15533,6 @@ packages:
   '@types/react-recompose@0.33.6':
     resolution: {integrity: sha512-sEJsTPkdMa0QuI7gtfz2+u99dbTjIr34I84DgYZR+8Fs4tdHO3Efuf2Wi0gTK4L4KkfjFh+xgB/nuuDmaWesig==}
 
-  '@types/react-redux@7.1.34':
-    resolution: {integrity: sha512-GdFaVjEbYv4Fthm2ZLvj1VSCedV7TqE5y1kNwnjSdBOTXuRSgowux6J8TAct15T3CKBr63UMk+2CO7ilRhyrAQ==}
-
   '@types/react-router-config@5.0.7':
     resolution: {integrity: sha512-pFFVXUIydHlcJP6wJm7sDii5mD/bCmmAY0wQzq+M+uX7bqS95AQqHZWP1iNMKrWVQSuHIzj5qi9BvrtLX2/T4w==}
 
@@ -23467,20 +23464,20 @@ packages:
     peerDependencies:
       react: ^18.3.1
 
-  react-redux@7.2.8:
-    resolution: {integrity: sha512-6+uDjhs3PSIclqoCk0kd6iX74gzrGc3W5zcAjbrFgEdIjRSQObdIwfx80unTkVUYvbQ95Y8Av3OvFHq1w5EOUw==}
-    peerDependencies:
-      react: ^16.8.3 || ^17 || ^18
-      react-dom: '*'
-      react-native: '*'
-    peerDependenciesMeta:
-      react-dom:
-        optional: true
-      react-native:
-        optional: true
-
   react-redux@9.2.0:
     resolution: {integrity: sha512-ROY9fvHhwOD9ySfrF0wmvu//bKCQ6AeZZq1nJNtbDC+kk5DuSuNX/n6YWYF/SYy7bSba4D4FSz8DJeKY/S/r+g==}
+    peerDependencies:
+      '@types/react': 18.2.79
+      react: ^18.0 || ^19
+      redux: ^5.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      redux:
+        optional: true
+
+  react-redux@9.3.0:
+    resolution: {integrity: sha512-KQopgqFo/p/fgmAs5qz6p5RWaNAzq40WAu7fJIXnQpYxFPbJYtsJPWvGeF2rOBaY/kEuV77AVsX8TsQzKm+A/g==}
     peerDependencies:
       '@types/react': 18.2.79
       react: ^18.0 || ^19
@@ -23887,6 +23884,9 @@ packages:
 
   reselect@5.1.0:
     resolution: {integrity: sha512-aw7jcGLDpSgNDyWBQLv2cedml85qd95/iszJjN988zX1t7AVRJi19d9kto5+W7oCfQ94gyo40dVbT6g2k4/kXg==}
+
+  reselect@5.3.0:
+    resolution: {integrity: sha512-XGoLeRAVzUTcJ1qkxPQhDJyIZ5d6zzZD9nT7AEZOaaU9UbWclhycElmhO+VD5bFeLuzhPBaOV2oXC8uG35ZSpg==}
 
   resize-observer-polyfill@1.5.1:
     resolution: {integrity: sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==}
@@ -33190,13 +33190,6 @@ snapshots:
     dependencies:
       '@types/prop-types': 15.7.5
       '@types/react': 18.2.79
-
-  '@types/react-redux@7.1.34':
-    dependencies:
-      '@types/hoist-non-react-statics': 3.3.7(@types/react@18.2.79)
-      '@types/react': 18.2.79
-      hoist-non-react-statics: 3.3.2
-      redux: 4.2.1
 
   '@types/react-router-config@5.0.7':
     dependencies:
@@ -42693,19 +42686,16 @@ snapshots:
       react: 18.2.0
       scheduler: 0.23.2
 
-  react-redux@7.2.8(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
-    dependencies:
-      '@babel/runtime': 7.29.7
-      '@types/react-redux': 7.1.34
-      hoist-non-react-statics: 3.3.2
-      loose-envify: 1.4.0
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-is: 17.0.2
-    optionalDependencies:
-      react-dom: 18.2.0(react@18.2.0)
-
   react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1):
+    dependencies:
+      '@types/use-sync-external-store': 0.0.6
+      react: 18.2.0
+      use-sync-external-store: 1.7.0(react@18.2.0)
+    optionalDependencies:
+      '@types/react': 18.2.79
+      redux: 5.0.1
+
+  react-redux@9.3.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1):
     dependencies:
       '@types/use-sync-external-store': 0.0.6
       react: 18.2.0
@@ -43285,6 +43275,8 @@ snapshots:
   reselect@4.1.8: {}
 
   reselect@5.1.0: {}
+
+  reselect@5.3.0: {}
 
   resize-observer-polyfill@1.5.1: {}
 
