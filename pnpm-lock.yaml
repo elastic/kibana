@@ -2032,6 +2032,9 @@ importers:
       '@kbn/elasticsearch-client-xpack-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client
+      '@kbn/elasticsearch-home':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/elasticsearch_home
       '@kbn/embeddable-alerts-table-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/embeddable_alerts_table
@@ -9409,6 +9412,8 @@ importers:
   x-pack/platform/plugins/shared/dataset_quality: {}
 
   x-pack/platform/plugins/shared/elastic_console: {}
+
+  x-pack/platform/plugins/shared/elasticsearch_home: {}
 
   x-pack/platform/plugins/shared/embeddable_alerts_table: {}
 

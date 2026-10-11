@@ -1245,6 +1245,8 @@
       "@kbn/elasticsearch-client-plugin/*": ["./src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin/*"],
       "@kbn/elasticsearch-client-xpack-plugin": ["./x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client"],
       "@kbn/elasticsearch-client-xpack-plugin/*": ["./x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client/*"],
+      "@kbn/elasticsearch-home": ["./x-pack/platform/plugins/shared/elasticsearch_home"],
+      "@kbn/elasticsearch-home/*": ["./x-pack/platform/plugins/shared/elasticsearch_home/*"],
       "@kbn/embeddable-alerts-table-plugin": ["./x-pack/platform/plugins/shared/embeddable_alerts_table"],
       "@kbn/embeddable-alerts-table-plugin/*": ["./x-pack/platform/plugins/shared/embeddable_alerts_table/*"],
       "@kbn/embeddable-examples-plugin": ["./examples/embeddable_examples"],

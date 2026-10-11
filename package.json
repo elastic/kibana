@@ -703,6 +703,7 @@
     "@kbn/elastic-console-plugin": "workspace:*",
     "@kbn/elasticsearch-client-plugin": "workspace:*",
     "@kbn/elasticsearch-client-xpack-plugin": "workspace:*",
+    "@kbn/elasticsearch-home": "workspace:*",
     "@kbn/embeddable-alerts-table-plugin": "workspace:*",
     "@kbn/embeddable-examples-plugin": "workspace:*",
     "@kbn/embeddable-plugin": "workspace:*",
