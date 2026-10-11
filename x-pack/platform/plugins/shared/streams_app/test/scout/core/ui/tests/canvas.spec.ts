@@ -274,5 +274,21 @@ test.describe(
       await expect(flyout).toBeVisible();
       await expect(attachmentsTab).toHaveAttribute('aria-selected', 'true');
     });
+
+    test('shows a menu for editing an edge between nodes', async ({ page }) => {
+      // Doesn't matter which one, just get an edge so defaulting to the first
+      // eslint-disable-next-line playwright/no-nth-methods
+      const edge = page.getByTestId('streamsCanvasBasicEdge').first();
+
+      await expect(edge).toBeVisible();
+      // Hovering over the edge path won't work unless forced?
+      // eslint-disable-next-line playwright/no-force-option
+      await edge.hover({ force: true });
+      await page.getByTestId('streamsCanvasEdgeMenuButton').click();
+
+      await expect(page.getByTestId('streamsCanvasEdgeMenu')).toBeVisible();
+      await expect(page.getByText('Add processing')).toBeVisible();
+      await expect(page.getByText('Add routing')).toBeVisible();
+    });
   }
 );
