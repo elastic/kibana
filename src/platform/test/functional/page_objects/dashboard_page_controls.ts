@@ -558,8 +558,16 @@ export class DashboardPageControls extends FtrService {
       // Type into the search input element itself, not whatever happens to hold focus,
       // so a missed focus can't drop the search text on the wrong element.
       const input = await this.testSubjects.find('optionsList-control-search-input');
-      await input.clearValue();
+      await input.clearValueWithKeyboard();
       await input.type(search, { charByChar: true });
+      const currentValue = await (
+        await this.testSubjects.find('optionsList-control-search-input')
+      ).getAttribute('value');
+      if (currentValue !== search) {
+        throw new Error(
+          `Options list search input contained '${currentValue}' instead of '${search}'`
+        );
+      }
     });
     await this.optionsListPopoverWaitForLoading();
   }

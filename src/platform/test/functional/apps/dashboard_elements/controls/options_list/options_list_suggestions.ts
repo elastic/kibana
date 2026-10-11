@@ -187,7 +187,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await dashboardControls.optionsListPopoverSearchForOption('R');
         expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(0);
         await dashboardControls.optionsListPopoverSearchForOption('RuFf');
-        expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
+        await retry.try(async () => {
+          expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
+        });
 
         await dashboardControls.optionsListPopoverClearSearch();
         await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
