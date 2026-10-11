@@ -211,6 +211,66 @@ describe('CoverageChain', () => {
     expect(esClient.index.mock.calls[0][0].id).not.toBe(esClient.index.mock.calls[1][0].id);
   });
 
+  describe('cleanup', () => {
+    const failExecutionRead = (
+      fetch: ReturnType<typeof stack>['fetch'],
+      id: string,
+      error: unknown
+    ) => {
+      const original = fetch.getMockImplementation()!;
+      fetch.mockImplementation(async (url, options) => {
+        if (url === `/api/workflows/executions/${id}`) throw error;
+        return original(url, options);
+      });
+      return original;
+    };
+
+    it('treats an already-deleted owned execution (404) as cleaned and still deletes the KI', async () => {
+      const { chain, fetch, esClient } = stack();
+      await chain.start(input, Date.now() + 2_000, 1);
+      failExecutionRead(fetch, 'review', Object.assign(new Error('gone'), { status: 404 }));
+      await expect(chain.cleanup(1)).resolves.toBeUndefined();
+      expect(esClient.delete).toHaveBeenCalledTimes(1);
+    });
+
+    it('still deletes the KI when an owned execution cannot be cancelled, then reports and retries it', async () => {
+      const { chain, fetch, esClient } = stack();
+      await chain.start(input, Date.now() + 2_000, 1);
+      const original = failExecutionRead(fetch, 'review', new Error('boom'));
+      await expect(chain.cleanup(1)).rejects.toThrow(/cleanup incomplete: execution review: boom/);
+      expect(esClient.delete).toHaveBeenCalledTimes(1);
+
+      // The stuck execution stays tracked, so the next cleanup re-reads it.
+      const reviewReads = () =>
+        fetch.mock.calls.filter(([url]) => url === '/api/workflows/executions/review').length;
+      const readsBefore = reviewReads();
+      fetch.mockImplementation(original);
+      await expect(chain.cleanup(1)).resolves.toBeUndefined();
+      expect(reviewReads()).toBeGreaterThan(readsBefore);
+      expect(esClient.delete).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the KI tracked when its deletion fails, and retries it', async () => {
+      const { chain, esClient } = stack();
+      await chain.start(input, Date.now() + 2_000, 1);
+      esClient.delete.mockRejectedValueOnce(new Error('es down'));
+      await expect(chain.cleanup(1)).rejects.toThrow(
+        /investigation rule-creation-eval-.*: es down/
+      );
+      await expect(chain.cleanup(1)).resolves.toBeUndefined();
+      expect(esClient.delete).toHaveBeenCalledTimes(2);
+    });
+
+    it('treats an already-deleted KI (ES 404) as cleaned', async () => {
+      const { chain, esClient } = stack();
+      await chain.start(input, Date.now() + 2_000, 1);
+      esClient.delete.mockRejectedValueOnce(Object.assign(new Error('nf'), { statusCode: 404 }));
+      await expect(chain.cleanup(1)).resolves.toBeUndefined();
+      await chain.cleanup(1);
+      expect(esClient.delete).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it('rejects a missing run_as before seeding or running', async () => {
     const { chain, esClient } = stack({ bound: false });
     await expect(chain.start(input, Date.now() + 2_000, 1)).rejects.toThrow('settings.run_as');

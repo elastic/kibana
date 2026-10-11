@@ -209,6 +209,26 @@ describe('RuleCreationClient proposal gate', () => {
     ).rejects.toThrow(/already completed/);
   });
 
+  it('logs a chain cleanup failure instead of throwing, and still deletes its investigations', async () => {
+    jest
+      .mocked(CoverageChain.prototype.cleanup)
+      .mockRejectedValueOnce(new Error('Coverage chain cleanup incomplete: execution x: boom'));
+    const { fetch, calls } = gatedStack();
+    const client = new RuleCreationClient(fetch, log, esClient);
+    const result = await client.run({ input: INPUT, ...fast });
+
+    await expect(client.cancelPending()).resolves.toBeUndefined();
+
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('execution x: boom'));
+    expect(
+      calls.some(
+        (c) =>
+          c.method === 'DELETE' &&
+          c.url === `/api/agent_builder/conversations/${result.investigationId}`
+      )
+    ).toBe(true);
+  });
+
   it('deletes the investigations it created on cleanup', async () => {
     const { fetch, calls } = gatedStack();
     const client = new RuleCreationClient(fetch, log, esClient);

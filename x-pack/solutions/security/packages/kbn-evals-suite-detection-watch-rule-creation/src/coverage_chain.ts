@@ -27,6 +27,21 @@ const options = {
 };
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const errorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
+/** HTTP 404 from the Kibana HttpHandler or the ES client: the resource is already gone. */
+const isNotFound = (error: unknown): boolean => {
+  if (typeof error !== 'object' || error === null) return false;
+  const e = error as {
+    status?: number;
+    statusCode?: number;
+    response?: { status?: number };
+    meta?: { statusCode?: number };
+  };
+  return [e.status, e.statusCode, e.response?.status, e.meta?.statusCode].includes(404);
+};
+
 export const childExecutionId = (
   execution: WorkflowExecutionDto,
   stepId: string
@@ -234,26 +249,49 @@ export class CoverageChain {
     return { workflowExecutionId, investigationId: inputs.investigation_id };
   }
 
+  private async cancelOwned(id: string, pollIntervalMs: number): Promise<void> {
+    const execution = await this.getExecution(id);
+    if (TerminalExecutionStatuses.includes(execution.status)) return;
+    await this.fetch(`/api/workflows/executions/${id}/cancel`, {
+      ...options,
+      method: 'POST',
+    });
+    const deadline = Date.now() + 60_000;
+    while (!TerminalExecutionStatuses.includes((await this.getExecution(id)).status)) {
+      if (Date.now() >= deadline) throw new Error(`Cannot cancel owned execution ${id}`);
+      await sleep(pollIntervalMs);
+    }
+  }
+
+  /**
+   * Cancels every execution this chain owns and deletes its KI. Each step is attempted
+   * independently so one stuck execution cannot leak the others or the KI, and a resource
+   * that is already gone (404) counts as cleaned. Anything left over stays tracked, is
+   * retried by the next cleanup, and is reported in one aggregate error.
+   */
   async cleanup(pollIntervalMs = 1_000): Promise<void> {
-    for (const id of this.ownedExecutionIds) {
-      const execution = await this.getExecution(id);
-      if (!TerminalExecutionStatuses.includes(execution.status)) {
-        await this.fetch(`/api/workflows/executions/${id}/cancel`, {
-          ...options,
-          method: 'POST',
-        });
-        const deadline = Date.now() + 60_000;
-        while (!TerminalExecutionStatuses.includes((await this.getExecution(id)).status)) {
-          if (Date.now() >= deadline) throw new Error(`Cannot cancel owned execution ${id}`);
-          await sleep(pollIntervalMs);
-        }
+    const failures: string[] = [];
+    for (const id of [...this.ownedExecutionIds]) {
+      try {
+        await this.cancelOwned(id, pollIntervalMs);
+        this.ownedExecutionIds.delete(id);
+      } catch (error) {
+        if (isNotFound(error)) this.ownedExecutionIds.delete(id);
+        else failures.push(`execution ${id}: ${errorMessage(error)}`);
       }
     }
-    this.ownedExecutionIds.clear();
-    this.reviewId = undefined;
+    if (this.ownedExecutionIds.size === 0) this.reviewId = undefined;
     if (this.kiId) {
-      await this.esClient.delete({ index: KI_INDEX, id: this.kiId, refresh: 'wait_for' });
-      this.kiId = undefined;
+      try {
+        await this.esClient.delete({ index: KI_INDEX, id: this.kiId, refresh: 'wait_for' });
+        this.kiId = undefined;
+      } catch (error) {
+        if (isNotFound(error)) this.kiId = undefined;
+        else failures.push(`investigation ${this.kiId}: ${errorMessage(error)}`);
+      }
+    }
+    if (failures.length > 0) {
+      throw new Error(`Coverage chain cleanup incomplete: ${failures.join('; ')}`);
     }
   }
 }

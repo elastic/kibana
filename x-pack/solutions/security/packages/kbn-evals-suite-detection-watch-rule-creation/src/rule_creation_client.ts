@@ -328,7 +328,15 @@ export class RuleCreationClient {
    * investigations it opened.
    */
   async cancelPending(): Promise<void> {
-    await this.chain.cleanup();
+    // Teardown runs after the examples are scored. A chain-cleanup failure must not skip
+    // cancelling this client's own executions or deleting its investigations (a leak), nor
+    // crash the worker after green examples. It is logged; the chain keeps whatever it could
+    // not clean, and the next start() retries it and throws if it is still stuck.
+    try {
+      await this.chain.cleanup();
+    } catch (error) {
+      this.log.warning(`Coverage chain cleanup incomplete: ${(error as Error).message}`);
+    }
     await Promise.allSettled(
       this.pendingExecutionIds.map((id) =>
         this.fetch(`/api/workflows/executions/${encodeURIComponent(id)}/cancel`, {
