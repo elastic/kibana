@@ -18,7 +18,7 @@ import {
   EscalationWorldSetupError,
   runEscalationCase,
   spacePath,
-  waitForSummary,
+  waitForSettledSummary,
   withSpace,
 } from './escalation_world';
 import { chatKeyMentionRecall } from './evaluators';
@@ -328,24 +328,127 @@ describe('space parameter (G20 hook)', () => {
   });
 });
 
-describe('waitForSummary', () => {
-  const conversationFetch = (metadata: Record<string, unknown>) =>
-    (async () => ({ id: 'esc-1', metadata })) as unknown as HttpHandler;
-
-  it('returns the summary once it is written', async () => {
-    await expect(
-      waitForSummary(conversationFetch({ summary: 'done' }), 'esc-1', {
-        timeoutMs: 50,
-        intervalMs: 5,
-      })
-    ).resolves.toBe('done');
+describe('waitForSettledSummary', () => {
+  const WORKFLOW = 'system-alertzero-investigation-summary';
+  const opts = { timeoutMs: 60, intervalMs: 5, quietMs: 25 };
+  const attached = (id: string, at: string) => ({
+    id: `ev-${id}`,
+    type: 'attachment_added',
+    created_at: at,
+    data: { attachment_id: id },
+  });
+  const summaryRun = (status: string, startedAt: string) => ({
+    id: `run-${startedAt}`,
+    status,
+    startedAt,
+    finishedAt: status === 'completed' ? startedAt : null,
   });
 
-  it('throws EscalationWorldSetupError when no summary appears before the timeout', async () => {
-    const error = await waitForSummary(conversationFetch({}), 'esc-1', {
-      timeoutMs: 30,
-      intervalMs: 5,
-    }).catch((e) => e);
+  /** Each call returns the next scripted state; the last one repeats. */
+  const scripted = (
+    states: Array<{ summary?: string; events?: unknown[]; runs?: unknown[] }>,
+    { failExecutions = false }: { failExecutions?: boolean } = {}
+  ) => {
+    let index = 0;
+    let current = states[0];
+    return (async (path: string) => {
+      if (path.startsWith('/api/workflows/workflow/')) {
+        if (failExecutions) throw new Error('403 executions');
+        return { results: current.runs ?? [] };
+      }
+      // The conversation is read twice per poll (events, then summary); advance after the second.
+      const response = {
+        id: 'esc-1',
+        events: current.events ?? [],
+        metadata: current.summary === undefined ? {} : { summary: current.summary },
+      };
+      if (path.startsWith(`${CONVERSATIONS_PATH}/`)) {
+        reads += 1;
+        if (reads % 2 === 0) {
+          index = Math.min(index + 1, states.length - 1);
+          current = states[index];
+        }
+      }
+      return response;
+    }) as unknown as HttpHandler;
+  };
+  let reads = 0;
+  beforeEach(() => {
+    reads = 0;
+  });
+
+  it('does not return a summary written by a run that predates the last attachment while a later run is in flight', async () => {
+    const events = [
+      attached('a1', '2026-10-09T13:50:00.000Z'),
+      attached('a2', '2026-10-09T13:50:05.000Z'),
+    ];
+    const fetch = scripted([
+      {
+        summary: 'covers inv1 only',
+        events,
+        runs: [
+          summaryRun('completed', '2026-10-09T13:50:01.000Z'),
+          summaryRun('running', '2026-10-09T13:50:06.000Z'),
+        ],
+      },
+      {
+        summary: 'covers inv1 and inv2',
+        events,
+        runs: [
+          summaryRun('completed', '2026-10-09T13:50:01.000Z'),
+          summaryRun('completed', '2026-10-09T13:50:06.000Z'),
+        ],
+      },
+    ]);
+
+    const result = await waitForSettledSummary(fetch, 'esc-1', opts);
+
+    expect(result.summary).toBe('covers inv1 and inv2');
+    expect(result.summaryDiagnostics.completedRunsStartedAfterLastAttachment).toBe(1);
+    expect(result.summaryDiagnostics.unfinishedRuns).toBe(0);
+  });
+
+  it('fails the run when a summary run is still in flight at the timeout', async () => {
+    const events = [attached('a1', '2026-10-09T13:50:00.000Z')];
+    const fetch = scripted([
+      { summary: 'partial', events, runs: [summaryRun('queued', '2026-10-09T13:50:06.000Z')] },
+    ]);
+
+    const error = await waitForSettledSummary(fetch, 'esc-1', opts).catch((e) => e);
+
+    expect(error).toBeInstanceOf(EscalationWorldSetupError);
+    expect(error.message).toMatch(/did not settle/);
+  });
+
+  it('still scores a product miss: all runs terminal, none after the last attachment, after the quiet window', async () => {
+    const events = [
+      attached('a1', '2026-10-09T13:50:00.000Z'),
+      attached('a2', '2026-10-09T13:50:05.000Z'),
+    ];
+    const fetch = scripted([
+      { summary: 'stale', events, runs: [summaryRun('completed', '2026-10-09T13:50:01.000Z')] },
+    ]);
+
+    const result = await waitForSettledSummary(fetch, 'esc-1', opts);
+
+    expect(result.summary).toBe('stale');
+    expect(result.summaryDiagnostics.completedRunsStartedAfterLastAttachment).toBe(0);
+    expect(result.summaryDiagnostics.unfinishedRuns).toBe(0);
+  });
+
+  it('returns the first non-empty summary when diagnostics cannot be read', async () => {
+    const fetch = scripted([{ summary: 'done' }], { failExecutions: true });
+
+    const result = await waitForSettledSummary(fetch, 'esc-1', opts);
+
+    expect(result.summary).toBe('done');
+    expect(result.summaryDiagnostics.errors).toHaveLength(1);
+  });
+
+  it('keeps waiting while there is no summary, then throws EscalationWorldSetupError', async () => {
+    const error = await waitForSettledSummary(scripted([{ events: [] }]), 'esc-1', opts).catch(
+      (e) => e
+    );
 
     expect(error).toBeInstanceOf(EscalationWorldSetupError);
     expect(error.message).toMatch(/no metadata\.summary/);
@@ -353,10 +456,21 @@ describe('waitForSummary', () => {
 
   it('treats a blank summary as missing', async () => {
     await expect(
-      waitForSummary(conversationFetch({ summary: '   ' }), 'esc-1', {
-        timeoutMs: 30,
-        intervalMs: 5,
-      })
+      waitForSettledSummary(scripted([{ summary: '   ' }]), 'esc-1', opts)
     ).rejects.toBeInstanceOf(EscalationWorldSetupError);
+  });
+
+  it('queries the same workflow the diagnostics key on', async () => {
+    const paths: string[] = [];
+    const fetch = (async (path: string) => {
+      paths.push(path);
+      return path.startsWith('/api/workflows/')
+        ? { results: [] }
+        : { id: 'esc-1', events: [], metadata: { summary: 'x' } };
+    }) as unknown as HttpHandler;
+
+    await waitForSettledSummary(fetch, 'esc-1', opts);
+
+    expect(paths.some((p) => p.includes(`/workflow/${WORKFLOW}/executions`))).toBe(true);
   });
 });

@@ -18,6 +18,7 @@ import {
 } from '@kbn/agentic-investigations-plugin/common/escalations/constants';
 import type { SyncEscalationResponse } from '@kbn/agentic-investigations-plugin/common/escalations/escalation';
 import { collectSummaryDiagnostics } from './summary_diagnostics';
+import type { SummaryDiagnostics } from './summary_diagnostics';
 import type { EscalationCase, EscalationTaskOutput, SeededEvent } from './types';
 
 const PUBLIC_API_VERSION = '2023-10-31';
@@ -186,29 +187,83 @@ export interface RunEscalationCaseResult extends EscalationTaskOutput {
   raw?: unknown;
 }
 
+/** No summary run in flight, and a completed run started at or after the last `attachment_added`. */
+const isSummarySettled = (diagnostics: SummaryDiagnostics): boolean =>
+  diagnostics.unfinishedRuns === 0 &&
+  (diagnostics.lastAttachmentAddedAt === undefined ||
+    diagnostics.completedRunsStartedAfterLastAttachment >= 1);
+
+export interface SettledSummary {
+  summary: string;
+  summaryDiagnostics: SummaryDiagnostics;
+}
+
 /**
- * Polls the escalation conversation until `metadata.summary` appears. Throws
- * `EscalationWorldSetupError` when the summarize workflow produces none within
- * the timeout, so a missing summary fails the run instead of scoring 0.
+ * Polls until `metadata.summary` is written AND the summary workflow has settled. The workflow is
+ * serialized (max 1, backlog 1) and each run snapshots the conversation when it executes, so the
+ * first non-empty summary can come from a run that predates the last synced investigation
+ * (in the G19 live runs every summary miss had a run still in flight at read time). Scoring that
+ * summary measures a timing race, not the product.
+ *
+ * Only the moment the summary is read changes; no grader is touched. If every run is terminal
+ * but none started after the last attachment, the product never re-summarized: after `quietMs`
+ * that summary is returned with the diagnostics attached, so a real product miss is still
+ * scored. Runs still in flight at the timeout fail the run instead of scoring a partial summary.
+ * If diagnostics cannot be read, the first non-empty summary is returned (legacy behaviour).
  */
-export const waitForSummary = async (
+export const waitForSettledSummary = async (
   fetch: HttpHandler,
   escalationId: string,
-  { timeoutMs = 5 * 60_000, intervalMs = 10_000 }: { timeoutMs?: number; intervalMs?: number } = {}
-): Promise<string> => {
+  {
+    workflowId = SUMMARY_WORKFLOW_ID,
+    syncCompletedAt = new Date().toISOString(),
+    timeoutMs = 10 * 60_000,
+    intervalMs = 10_000,
+    quietMs = 60_000,
+  }: {
+    workflowId?: string;
+    syncCompletedAt?: string;
+    timeoutMs?: number;
+    intervalMs?: number;
+    quietMs?: number;
+  } = {}
+): Promise<SettledSummary> => {
   const deadline = Date.now() + timeoutMs;
+  let quietSince: number | undefined;
   for (;;) {
+    // Diagnostics before the summary read: no run can start without a new attachment, so a
+    // settled snapshot stays settled and the summary read after it is at least as new.
+    const summaryDiagnostics = await collectSummaryDiagnostics({
+      fetch,
+      escalationId,
+      workflowId,
+      syncCompletedAt,
+      summaryObservedAt: new Date().toISOString(),
+    });
     const conversation = await get<ConversationGetResponse>(
       fetch,
       `/api/agent_builder/conversations/${encodeURIComponent(escalationId)}`
     );
     const summary = conversation.metadata?.summary;
-    if (typeof summary === 'string' && summary.trim().length > 0) {
-      return summary;
+    const hasSummary = typeof summary === 'string' && summary.trim().length > 0;
+    if (hasSummary) {
+      if (summaryDiagnostics.errors.length > 0 || isSummarySettled(summaryDiagnostics)) {
+        return { summary, summaryDiagnostics };
+      }
+      if (summaryDiagnostics.unfinishedRuns === 0) {
+        quietSince = quietSince ?? Date.now();
+        if (Date.now() - quietSince >= quietMs) {
+          return { summary, summaryDiagnostics };
+        }
+      } else {
+        quietSince = undefined;
+      }
     }
     if (Date.now() >= deadline) {
       throw new EscalationWorldSetupError(
-        `Escalation ${escalationId} has no metadata.summary after ${timeoutMs}ms; is the investigation-summary workflow enabled?`
+        hasSummary
+          ? `Escalation ${escalationId} summary did not settle after ${timeoutMs}ms (${summaryDiagnostics.unfinishedRuns} summary run(s) in flight); refusing to score a possibly partial summary`
+          : `Escalation ${escalationId} has no metadata.summary after ${timeoutMs}ms; is the investigation-summary workflow enabled?`
       );
     }
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
@@ -341,19 +396,12 @@ export const runEscalationCase = async ({
     assertSyncCopiedAll(c.id, sync, expectedCopies);
     const syncCompletedAt = new Date().toISOString();
 
-    // 4. Wait for the summarize workflow to write metadata.summary. Acceptance is unchanged
-    // (first non-empty summary); the diagnostics record whether that summary could have
-    // covered the last synced attachment.
-    const summary = await setupStep(`wait for the summary of ${c.id}`, () =>
-      waitForSummary(fetch, esclId)
+    // 4. Wait for the summarize workflow to write metadata.summary AND settle, so the scored
+    // summary comes from a run that saw the last synced attachment. The diagnostics taken at
+    // read time stay on the task output.
+    const { summary, summaryDiagnostics } = await setupStep(`wait for the summary of ${c.id}`, () =>
+      waitForSettledSummary(fetch, esclId, { syncCompletedAt })
     );
-    const summaryDiagnostics = await collectSummaryDiagnostics({
-      fetch,
-      escalationId: esclId,
-      workflowId: SUMMARY_WORKFLOW_ID,
-      syncCompletedAt,
-      summaryObservedAt: new Date().toISOString(),
-    });
     log.info(`Summary diagnostics ${c.id}: ${JSON.stringify(summaryDiagnostics)}`);
 
     // 5. Ask the escalation-context chat every question. A failed round is a
