@@ -32,6 +32,8 @@ export interface ConnectorLike {
   id?: string;
   name?: string;
   config?: unknown;
+  /** Flat inference-endpoint definitions (EIS/OpenRouter) carry this at the top level, not under `config`. */
+  providerConfig?: unknown;
 }
 
 /**
@@ -44,13 +46,26 @@ export interface ConnectorLike {
  * `config.defaultModel`, and a connector that answers neither falls back to its
  * name. It is duplicated rather than imported because neither helper is part of
  * `@kbn/evals`' public API — keep it in step with `get_connector_model.ts`.
+ *
+ * The eval fixture binds EIS to a flat inference-endpoint definition
+ * (`providerConfig.model_id` at the top level, no `config`); without reading that
+ * shape the id falls back to the connector name (`eis-…`) and never matches the
+ * spans' `gen_ai.request.model` (`anthropic-…`).
  */
 export const expectedModelId = (connector: ConnectorLike): string => {
   const config = (connector.config ?? {}) as {
     providerConfig?: { model_id?: string };
     defaultModel?: string;
   };
-  return config.providerConfig?.model_id ?? config.defaultModel ?? connector.name ?? '';
+  const endpointModelId = (connector.providerConfig as { model_id?: unknown } | undefined)
+    ?.model_id;
+  return (
+    (typeof endpointModelId === 'string' ? endpointModelId : undefined) ??
+    config.providerConfig?.model_id ??
+    config.defaultModel ??
+    connector.name ??
+    ''
+  );
 };
 
 /** Model ids differ in separators/case across the stack (`.` vs `-`, `_`); the model does not. */

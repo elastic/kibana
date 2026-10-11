@@ -83,6 +83,16 @@ describe('expectedModelId', () => {
     expect(expectedModelId(eisConnector)).toBe('anthropic-claude-4.6-sonnet');
   });
 
+  it('reads the model id off a flat inference-endpoint definition (the EIS fixture shape)', () => {
+    expect(
+      expectedModelId({
+        id: '.anthropic-claude-5-sonnet-chat_completion',
+        name: 'eis-anthropic-claude-5-sonnet',
+        providerConfig: { model_id: 'anthropic-claude-5-sonnet' },
+      })
+    ).toBe('anthropic-claude-5-sonnet');
+  });
+
   it('reads defaultModel for the vendor-shaped connectors', () => {
     expect(expectedModelId(geminiConnector)).toBe('google-gemini-3.5-flash-lite');
   });
