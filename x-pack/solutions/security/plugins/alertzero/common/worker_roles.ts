@@ -17,8 +17,15 @@ import {
 
 /** Security's public role API, used with `createOnly` so an existing role is never overwritten. */
 export const SECURITY_ROLE_API_VERSION = '2023-10-31' as const;
+export const SECURITY_ROLES_URL = '/api/security/role';
 export const buildSecurityRoleUrl = (roleName: string) =>
-  `/api/security/role/${encodeURIComponent(roleName)}`;
+  `${SECURITY_ROLES_URL}/${encodeURIComponent(roleName)}`;
+
+/**
+ * On Serverless each worker role ships as a reserved predefined role, whose name must start with
+ * `_`. Defined in elasticsearch-controller and mirrored in `kbn-es`.
+ */
+export const getPredefinedWorkerRoleName = (name: string) => `_${name}`;
 
 interface IndexPrivileges {
   names: string[];
@@ -115,6 +122,8 @@ const buildRole = (
  * and the actions it can auto-approve, in every space. Actions that always need a human
  * (`approvalPolicy: always-gate`) run as the approver, so their privileges are left out. Mirrors
  * "AlertZero prebuilt service accounts — Minimum privileges", including its conditional rows.
+ * Serverless ships these as predefined roles, so update elasticsearch-controller and the `kbn-es`
+ * mirror whenever a role changes here.
  */
 export const WORKER_ROLE_DEFINITIONS: Readonly<Record<string, WorkerRoleDefinition>> = {
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: {

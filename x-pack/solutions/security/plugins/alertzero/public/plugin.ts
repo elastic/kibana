@@ -115,6 +115,7 @@ export class AlertZeroPublicPlugin
           startDeps,
           params,
           availability$: this.availability$,
+          isServerless: this.isServerless,
         });
       },
     });
