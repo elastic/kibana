@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { fireEvent, screen, within } from '@testing-library/react';
+import React, { useState } from 'react';
+import { act, fireEvent, screen, within } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
 import type { DateRangePickerProps } from '../date_range_picker';
@@ -25,6 +25,8 @@ interface RenderPanelProps {
   defaultValue?: string;
   onChange?: DateRangePickerProps['onChange'];
   onPresetSave?: DateRangePickerProps['onPresetSave'];
+  /** Renders a button that hands the provider a new `presets` array identity. */
+  withPresetsBump?: boolean;
 }
 
 const OpenCustomPanelButton = () => {
@@ -63,18 +65,32 @@ const TestHarness = ({
   defaultValue = '-15m',
   onChange = () => {},
   onPresetSave,
+  withPresetsBump = false,
 }: RenderPanelProps) => {
+  // Same content as the provider's default presets, so only the identity differs.
+  const [presets, setPresets] = useState<DateRangePickerProps['presets']>(undefined);
+
   return (
     <DateRangePickerProvider
       defaultValue={defaultValue}
       onChange={onChange}
       onPresetSave={onPresetSave}
+      presets={presets}
       settings={{ roundRelativeTime: false }}
       onSettingsChange={() => {}}
     >
       <DateRangePickerPanelNavigationProvider defaultPanelId="main" panelDescriptors={[]}>
         <CurrentTextProbe />
         <TextSetterProbe />
+        {withPresetsBump && (
+          <button
+            type="button"
+            data-test-subj="bumpPresetsButton"
+            onClick={() => setPresets([{ start: 'now/d', end: 'now/d', label: 'Today' }])}
+          >
+            Bump presets
+          </button>
+        )}
         <DateRangePickerPanel id="main">
           <OpenCustomPanelButton />
         </DateRangePickerPanel>
@@ -270,6 +286,26 @@ describe('CustomTimeRangePanel', () => {
       expect(
         within(getEndFieldset()).getByText(customTimeRangePanelTexts.nowEndHelpText)
       ).toBeInTheDocument();
+    });
+
+    it('keeps a just-switched tab when the context recomputes without an external change', () => {
+      // '2025-01-01 to now' → start=ABSOLUTE, end=NOW.
+      renderCustomTimeRangePanel({ defaultValue: '2025-01-01 to now', withPresetsBump: true });
+      openCustomPanel();
+
+      // Both clicks land in one React batch, so the context recomputes `timeRange`
+      // in the very commit that switches the End tab — what an async presets source
+      // (`useDateRangePickerPresets`) does when it emits while the user is editing.
+      const absoluteTab = within(getEndFieldset()).getByText('Absolute');
+      const bumpPresets = screen.getByTestId('bumpPresetsButton');
+      act(() => {
+        absoluteTab.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        bumpPresets.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      });
+
+      // That recompute still carries the pre-switch `end: 'now'`, so re-deriving
+      // from it would snap End back to Now and unmount the field mid-edit.
+      expect(within(getEndFieldset()).getByLabelText('End date absolute date')).toBeInTheDocument();
     });
   });
 
