@@ -80,6 +80,9 @@ describe('buildAlertsRagEvaluators', () => {
     // Code-judged (no LLM cost). Reports N/A for unannotated examples so
     // partial coverage doesn't pull averages down.
     'Trajectory',
+    // Distinct tools per example that Agent Builder's classification cannot place;
+    // each one makes Trajectory N/A for that example.
+    'unclassified-tools',
   ];
 
   it('returns the canonical evaluator set in a stable order', () => {
@@ -167,7 +170,7 @@ describe('toDatasetExample', () => {
 describe('createAlertsRagTrajectoryEvaluator', () => {
   const buildArgs = (
     expected: AlertsRagDatasetExample['output'],
-    steps: Array<{ type?: string; tool_id?: string }>
+    steps: Array<{ type?: string; tool_id?: string; tool_origin?: string }>
   ) =>
     ({
       input: { question: 'q' },
@@ -201,20 +204,40 @@ describe('createAlertsRagTrajectoryEvaluator', () => {
     expect(result.label).toBe('good');
   });
 
-  it('filters filestore.read from the actual sequence so SKILL.md loads do not show as extras', async () => {
+  it('drops Agent Builder runtime tools from the actual sequence', async () => {
     const evaluator = createAlertsRagTrajectoryEvaluator();
     const result = await evaluator.evaluate(
       buildArgs({ reference: 'r', expected: 'r', tool_sequence: ['security.alerts'] }, [
-        // SKILL.md load is covered by the skill-invocation evaluator and
-        // must be excluded from trajectory metadata to keep reports clean.
+        { type: 'tool_call', tool_id: 'load_skill', tool_origin: 'internal' },
         { type: 'tool_call', tool_id: 'filestore.read' },
-        { type: 'tool_call', tool_id: 'security.alerts' },
+        { type: 'tool_call', tool_id: 'security.alerts', tool_origin: 'registry' },
+        { type: 'tool_call', tool_id: 'attachments.read', tool_origin: 'internal' },
       ])
     );
     expect(result.score).toBe(1);
-    const metadata = result.metadata as { actual: string[]; extraTools: string[] };
-    expect(metadata.actual).not.toContain('filestore.read');
-    expect(metadata.extraTools).toEqual([]);
+    const metadata = result.metadata as {
+      actual: string[];
+      extraTools: string[];
+      runtimeToolIds: string[];
+    };
+    // Legacy filestore reads reach data, so they stay in the scored sequence.
+    expect(metadata.actual).toEqual(['filestore.read', 'security.alerts']);
+    expect(metadata.runtimeToolIds).toEqual(['load_skill', 'attachments.read']);
+  });
+
+  it('returns N/A naming a tool Agent Builder does not classify', async () => {
+    const evaluator = createAlertsRagTrajectoryEvaluator();
+    const result = await evaluator.evaluate(
+      buildArgs({ reference: 'r', expected: 'r', tool_sequence: ['security.alerts'] }, [
+        { type: 'tool_call', tool_id: 'security.alerts', tool_origin: 'registry' },
+        { type: 'tool_call', tool_id: 'new_ab_tool', tool_origin: 'internal' },
+      ])
+    );
+    expect(result).toMatchObject({
+      score: null,
+      label: 'N/A',
+      explanation: 'unclassified-tool:new_ab_tool',
+    });
   });
 
   it('flags the wrong tool with extra tools and a low score', async () => {

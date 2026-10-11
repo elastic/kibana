@@ -7,11 +7,13 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import {
+  createAgentBuilderToolClassifier,
   createQuantitativeCorrectnessEvaluators,
   createQuantitativeGroundednessEvaluator,
   createSkillInvocationEvaluator,
   createTrajectoryEvaluator,
-  getToolCallSteps,
+  createUnclassifiedToolsEvaluator,
+  getAgentBuilderToolCalls,
   type DefaultEvaluators,
   type EvalsExecutorClient,
   type EvaluationDataset,
@@ -89,37 +91,29 @@ export const toDatasetExample = (ex: AlertsRagExample): AlertsRagDatasetExample 
   },
 });
 
-/**
- * Spans for `filestore.read` (SKILL.md activation, attachment loads) are
- * already covered by the skill-invocation evaluator and add noise to the
- * trajectory report's "extra tools" list, so we strip them from the actual
- * sequence before scoring. The trajectory evaluator's LCS already tolerates
- * extras without lowering the score, but a clean per-example metadata blob
- * makes the eventual report easier to read.
- */
-const FILESTORE_READ_TOOL_ID = 'filestore.read';
+const classifyTool = createAgentBuilderToolClassifier();
 
 /**
  * Trajectory evaluator wrapper. Returns N/A when an example has no
  * `tool_sequence` annotation so partial-coverage datasets don't get
  * penalised. Mirrors the N/A-on-missing-golden pattern used by the
- * workflows eval suite (`createToolTrajectoryEvaluator`).
+ * workflows eval suite (`createToolTrajectoryEvaluator`). Agent Builder
+ * runtime tools (skill loads, attachments, ...) are dropped and unknown
+ * tools make the result N/A, per `createAgentBuilderToolClassifier`.
  */
 export const createAlertsRagTrajectoryEvaluator = (): Evaluator<
   AlertsRagDatasetExample,
   TaskOutput
 > => {
   const inner = createTrajectoryEvaluator({
-    extractToolCalls: (output) =>
-      getToolCallSteps(output as TaskOutput)
-        .map((step) => step.tool_id)
-        .filter((id): id is string => Boolean(id) && id !== FILESTORE_READ_TOOL_ID),
+    extractToolCalls: getAgentBuilderToolCalls,
     goldenPathExtractor: (expected) => {
       const exp = expected as AlertsRagDatasetExpected | undefined;
       return exp?.tool_sequence ?? [];
     },
     orderWeight: 0.6,
     coverageWeight: 0.4,
+    classifyTool,
   });
 
   return {
@@ -195,6 +189,10 @@ export const buildAlertsRagEvaluators = ({
       skillName: ALERTS_RAG_SKILL_NAME,
     }) as Evaluator<AlertsRagDatasetExample, TaskOutput>,
     createAlertsRagTrajectoryEvaluator(),
+    createUnclassifiedToolsEvaluator({
+      extractToolCalls: getAgentBuilderToolCalls,
+      classifyTool,
+    }) as Evaluator<AlertsRagDatasetExample, TaskOutput>,
   ];
 };
 

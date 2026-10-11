@@ -7,6 +7,7 @@
 
 import type { Evaluator, TaskOutput } from '@kbn/evals';
 import {
+  createForensicTrajectoryEvaluator,
   wrapSkillInvocationForDistractors,
   type ForensicDatasetExample,
 } from './evaluate_forensic_dataset';
@@ -95,5 +96,52 @@ describe('wrapSkillInvocationForDistractors', () => {
 
     expect(result.score).toBe(0);
     expect(result.label).toBe('potentially_incomplete');
+  });
+});
+
+describe('createForensicTrajectoryEvaluator', () => {
+  const golden = ['platform.core.generate_esql', 'platform.core.execute_esql'];
+  const run = (steps: Array<{ tool_id: string; tool_origin?: string }>) =>
+    createForensicTrajectoryEvaluator().evaluate({
+      input: { question: 'patient zero?' },
+      output: {
+        messages: [],
+        steps: steps.map((step) => ({ type: 'tool_call', ...step })),
+        errors: [],
+      } as TaskOutput,
+      expected: { criteria: [], tool_sequence: golden },
+      metadata: {},
+    });
+
+  it('drops skill loading and other runtime tools before scoring', async () => {
+    const result = await run([
+      { tool_id: 'load_skill', tool_origin: 'internal' },
+      { tool_id: 'platform.core.generate_esql', tool_origin: 'registry' },
+      { tool_id: 'write_todos', tool_origin: 'internal' },
+      { tool_id: 'platform.core.execute_esql', tool_origin: 'registry' },
+    ]);
+    expect(result.score).toBe(1);
+    expect((result.metadata as { actual: string[] }).actual).toEqual(golden);
+  });
+
+  it('keeps data-reaching internal tools as extras', async () => {
+    const result = await run([
+      { tool_id: 'platform.core.generate_esql', tool_origin: 'registry' },
+      { tool_id: 'execute_api', tool_origin: 'internal' },
+      { tool_id: 'platform.core.execute_esql', tool_origin: 'registry' },
+    ]);
+    expect((result.metadata as { extraTools: string[] }).extraTools).toEqual(['execute_api']);
+  });
+
+  it('returns N/A naming a tool Agent Builder does not classify', async () => {
+    const result = await run([
+      { tool_id: 'platform.core.generate_esql', tool_origin: 'registry' },
+      { tool_id: 'new_ab_tool', tool_origin: 'internal' },
+    ]);
+    expect(result).toMatchObject({
+      score: null,
+      label: 'N/A',
+      explanation: 'unclassified-tool:new_ab_tool',
+    });
   });
 });
