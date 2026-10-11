@@ -208,9 +208,13 @@ export class ComboBoxService extends FtrService {
       await this.openOptionsList(comboBoxElement);
       selectedText = await this.clickOption(options.clickWithMouse, trimmedValue);
       await this.closeOptionsList(comboBoxElement);
-      expect(await this.isRenderedOptionSelected(comboBoxElement, selectedText, value)).to.equal(
-        true
-      );
+      // Async selections can disable the input before committing the selected label.
+      // Wait for that commit without restarting the selection or typing again.
+      await this.retry.try(async () => {
+        expect(await this.isRenderedOptionSelected(comboBoxElement, selectedText, value)).to.equal(
+          true
+        );
+      });
     });
   }
 

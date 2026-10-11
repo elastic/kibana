@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       log.debug(JSON.stringify(response));
       expect(response.body.result).to.be('updated');
-      await PageObjects.settings.controlChangeSave();
+      await PageObjects.settings.controlChangeSave({ expectSuccess: false });
       await retry.try(async function () {
         const message = await toasts.getTitleAndDismiss();
         expect(message).to.contain('Unable');

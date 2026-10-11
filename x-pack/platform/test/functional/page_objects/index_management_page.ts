@@ -190,33 +190,25 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
     },
 
     async expectIndexIsDeleted(indexName: string) {
-      try {
+      await retry.try(async () => {
+        if (
+          (await testSubjects.exists('noIndicesMessage')) ||
+          (await testSubjects.exists('createIndexMessage')) ||
+          (await testSubjects.exists('createIndexButtonEmptyList'))
+        ) {
+          return;
+        }
+
         const table = await find.byCssSelector('table');
         const rows = await table.findAllByTestSubject('indexTableRow');
-
         const indexNames = await Promise.all(
-          rows.map(async (row) => {
-            try {
-              return await (
-                await row.findByTestSubject('indexTableIndexNameLink')
-              ).getVisibleText();
-            } catch (error) {
-              // If the current row is stale, it has already been removed
-              if (error.name === 'StaleElementReferenceError') return undefined;
-              throw error; // Rethrow unexpected errors
-            }
-          })
-        ).then((names) => names.filter((name) => name !== undefined));
+          rows.map(async (row) =>
+            (await row.findByTestSubject('indexTableIndexNameLink')).getVisibleText()
+          )
+        );
 
         expect(indexNames.includes(indexName)).to.be(false);
-      } catch (error) {
-        if (error.name === 'StaleElementReferenceError') {
-          // If the table itself is stale, it means all rows have been removed
-          return; // Pass the test since the table is gone
-        } else {
-          throw error; // Rethrow unexpected errors
-        }
-      }
+      });
     },
     async manageIndex(indexName: string) {
       const id = `checkboxSelectIndex-${indexName}`;

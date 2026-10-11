@@ -479,8 +479,11 @@ export class SettingsPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
-  async controlChangeSave() {
+  async controlChangeSave({
+    expectSuccess = true,
+  }: { expectSuccess?: boolean } = {}): Promise<void> {
     await this.testSubjects.click('fieldSaveButton');
+    if (!expectSuccess) return;
     await this.testSubjects.missingOrFail('fieldSaveButton', {
       timeout: this.testSubjects.TRY_TIME,
     });

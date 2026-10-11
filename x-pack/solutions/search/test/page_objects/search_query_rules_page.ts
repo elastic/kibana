@@ -233,6 +233,7 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
       },
       async clickUpdateButton() {
         await testSubjects.click(this.TEST_IDS.RULE_FLYOUT_UPDATE_BUTTON);
+        await this.expectRuleFlyoutNotToExist();
       },
       async clickActionTypeExclude() {
         await testSubjects.click(this.TEST_IDS.RULE_FLYOUT_ACTION_TYPE_EXCLUDE);

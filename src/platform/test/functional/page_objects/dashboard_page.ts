@@ -666,7 +666,6 @@ export class DashboardPageObject extends FtrService {
     if (saveOptions.exitFromEditMode && !isInViewMode) {
       await this.clickCancelOutOfEditMode();
     }
-    await this.waitForRenderComplete();
 
     return message;
   }
