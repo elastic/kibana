@@ -87,6 +87,7 @@ Follow existing patterns in the target area first; below are common defaults.
 
 ### Schema validation
 - When adding `schema.string()` / `schema.arrayOf()` (`@kbn/config-schema`) or `z.string()` / `z.array()` (`zod`) for HTTP request input, always bound them (`maxLength` / `maxSize` / `.max()`) to prevent unbounded-input DoS.
+- For new Zod schemas created when a module loads, wrap the full schema expression in `lazySchema(() => ...)` so it is built on first use. Import `lazySchema` from the same `@kbn/zod` entry point as `z`.
 
 ## Internationalization (i18n)
 - Guidelines are found in src/platform/packages/shared/kbn-i18n/GUIDELINE.md

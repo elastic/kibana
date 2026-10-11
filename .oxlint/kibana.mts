@@ -152,6 +152,29 @@ export const kibanaOverrides: OxlintOverride[] = [
     },
   },
   {
+    files: ['**/*.{ts,tsx}'],
+    excludeFiles: [
+      '**/*.test.{ts,tsx}',
+      '**/*.mock.{ts,tsx}',
+      '**/*.stories.{ts,tsx}',
+      '**/__tests__/**',
+      '**/__mocks__/**',
+      '**/__fixtures__/**',
+      '**/__snapshots__/**',
+      '**/test/**',
+      '**/tests/**',
+      '**/scripts/**',
+      '**/cypress/**',
+      '**/e2e/**',
+      '**/ftr_e2e/**',
+      '**/.storybook/**',
+      'src/platform/packages/shared/kbn-zod/**',
+    ],
+    rules: {
+      '@kbn/eslint/require_lazy_zod_schema': 'warn',
+    },
+  },
+  {
     // Plugin and core index files must list the APIs they expose instead of using `export *`.
     files: [
       'src/core/{server,public,common}/index.ts',
