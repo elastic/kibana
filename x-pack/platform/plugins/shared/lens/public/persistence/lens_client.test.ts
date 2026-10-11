@@ -14,6 +14,10 @@ import { getLensBuilder } from '../lazy_builder';
 
 jest.mock('../lazy_builder');
 
+jest.mock('../lazy_builder', () => ({
+  getLensBuilder: jest.fn(() => null),
+}));
+
 const mockResponse = {
   data: {},
   meta: {},
