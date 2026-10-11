@@ -37,7 +37,7 @@ interface RouteDependencies {
 
 export const registerFindRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies
+  { coreUsageData, logger, access, deprecationInfo }: RouteDependencies
 ) => {
   const referenceSchema = schema.object({
     type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
@@ -49,7 +49,6 @@ export const registerFindRoute = (
       description: 'The boolean operator to use when combining multiple values.',
     },
   });
-  const { allowHttpApiAccess } = config;
   router.get(
     {
       path: '/_find',
@@ -234,7 +233,7 @@ For transferring or backing up saved objects, prefer the export API (\`POST /api
           return fullType.name;
         }
       });
-      if (unsupportedTypes.length > 0 && !allowHttpApiAccess) {
+      if (unsupportedTypes.length > 0) {
         throwOnHttpHiddenTypes(unsupportedTypes);
       }
 

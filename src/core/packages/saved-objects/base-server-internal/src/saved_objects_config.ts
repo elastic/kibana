@@ -11,6 +11,7 @@ import { valid } from 'semver';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import type { ConfigDeprecationProvider } from '@kbn/config';
 import buffer from 'buffer';
 
 const migrationSchema = schema.object({
@@ -90,28 +91,24 @@ export const savedObjectsMigrationConfig: ServiceConfigDescriptor<SavedObjectsMi
 const soSchema = schema.object({
   maxImportPayloadBytes: schema.byteSize({ defaultValue: 26_214_400 }),
   maxImportExportSize: schema.number({ defaultValue: 10_000 }),
-  /* @internal Conditionally set default, dependening on if kibana's running from a dist build or not */
-  allowHttpApiAccess: schema.conditional(
-    schema.contextRef('dist'),
-    true,
-    schema.boolean({ defaultValue: true }),
-    schema.boolean({ defaultValue: false })
-  ),
   enableAccessControl: schema.boolean({ defaultValue: true }),
 });
 
 export type SavedObjectsConfigType = TypeOf<typeof soSchema>;
 
+const soDeprecations: ConfigDeprecationProvider = ({ unused }) => [
+  unused('allowHttpApiAccess', { level: 'warning' }),
+];
+
 export const savedObjectsConfig: ServiceConfigDescriptor<SavedObjectsConfigType> = {
   path: 'savedObjects',
   schema: soSchema,
+  deprecations: soDeprecations,
 };
 
 export class SavedObjectConfig {
   public maxImportPayloadBytes: number;
   public maxImportExportSize: number;
-  /* @internal depend on env: see https://github.com/elastic/dev/issues/2200 */
-  public allowHttpApiAccess: boolean;
   public migration: SavedObjectsMigrationConfigType;
   public enableAccessControl: boolean;
 
@@ -122,7 +119,6 @@ export class SavedObjectConfig {
     this.maxImportPayloadBytes = rawConfig.maxImportPayloadBytes.getValueInBytes();
     this.maxImportExportSize = rawConfig.maxImportExportSize;
     this.migration = rawMigrationConfig;
-    this.allowHttpApiAccess = rawConfig.allowHttpApiAccess;
     this.enableAccessControl = rawConfig.enableAccessControl;
   }
 }

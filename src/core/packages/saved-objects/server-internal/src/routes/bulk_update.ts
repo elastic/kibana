@@ -39,9 +39,8 @@ interface RouteDependencies {
 
 export const registerBulkUpdateRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies
+  { coreUsageData, logger, access, deprecationInfo }: RouteDependencies
 ) => {
-  const { allowHttpApiAccess } = config;
   router.put(
     {
       path: '/_bulk_update',
@@ -105,9 +104,7 @@ For transferring or backing up saved objects, prefer the import and export APIs 
 
       const { savedObjects } = await context.core;
 
-      if (!allowHttpApiAccess) {
-        throwIfAnyTypeNotVisibleByAPI(types, savedObjects.typeRegistry);
-      }
+      throwIfAnyTypeNotVisibleByAPI(types, savedObjects.typeRegistry);
       const savedObject = await savedObjects.client.bulkUpdate(request.body);
       return response.ok({ body: savedObject });
     })
