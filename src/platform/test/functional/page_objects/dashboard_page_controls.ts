@@ -457,14 +457,14 @@ export class DashboardPageControls extends FtrService {
   public async optionsListPopoverGetAvailableOptionsCount() {
     this.log.debug(`getting available options count from options list`);
     await this.optionsListPopoverWaitForLoading();
-    const availableOptions = await this.testSubjects.find(`optionsList-control-available-options`);
+    const availableOptions = await this.getVisibleOptionsListAvailableOptions();
     return +((await availableOptions.getAttribute('data-option-count')) ?? '0');
   }
 
   public async optionsListPopoverGetAvailableOptions() {
     this.log.debug(`getting available options from options list`);
     await this.optionsListPopoverWaitForLoading();
-    const availableOptions = await this.testSubjects.find(`optionsList-control-available-options`);
+    const availableOptions = await this.getVisibleOptionsListAvailableOptions();
     const optionsCount = await this.optionsListPopoverGetAvailableOptionsCount();
 
     const selectableListItems = await availableOptions.findByClassName('euiSelectableList__list');
@@ -494,6 +494,20 @@ export class DashboardPageControls extends FtrService {
     );
 
     return { suggestions, invalidSelections };
+  }
+
+  private async getVisibleOptionsListAvailableOptions(): Promise<WebElementWrapper> {
+    return await this.retry.try(async () => {
+      // A closing popover can remain in the DOM after another control opens.
+      const containers = await this.testSubjects.findAll(
+        'optionsList-control-available-options',
+        0
+      );
+      for (const container of containers) {
+        if (await container.isDisplayed()) return container;
+      }
+      throw new Error('Waiting for visible options-list suggestions');
+    });
   }
 
   public async ensureAvailableOptionsEqual(
