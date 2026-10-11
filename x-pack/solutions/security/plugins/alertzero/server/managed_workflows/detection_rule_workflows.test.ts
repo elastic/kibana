@@ -1382,17 +1382,24 @@ describe('detection rule workflows', () => {
         expect(emitInput).toContain('_shards.failed == 0');
       });
 
-      it('excludes rule modes with omitted preview fields from auto-apply', () => {
+      // Data view, timestamp override and alert suppression are passed through to
+      // both preview bodies instead of excluding the rule from the backtest.
+      it('previews rules with a data view, timestamp override or alert suppression', () => {
         const support = reviewSteps.find(({ name }) => name === 'can_preview_query_change')!;
-        expect(String(support.with?.supported)).toContain(
-          'steps.fetch_rule.output.data_view_id == null'
-        );
-        expect(String(support.with?.supported)).toContain(
-          'steps.fetch_rule.output.timestamp_override == null'
-        );
-        expect(String(support.with?.supported)).toContain(
-          'steps.fetch_rule.output.alert_suppression == null'
-        );
+        expect(String(support.with?.supported)).not.toContain('data_view_id');
+        expect(String(support.with?.supported)).not.toContain('timestamp_override');
+        expect(String(support.with?.supported)).not.toContain('alert_suppression');
+
+        const previewStep = reviewSteps.find(({ name }) => name === 'run_previews')!;
+        const bodies = previewStep.with?.inputs as Record<string, Record<string, string>>;
+        for (const body of [bodies.preview_body, bodies.proposed_body]) {
+          expect(body.data_view_id).toBe('${{ steps.fetch_rule.output.data_view_id }}');
+          expect(body.timestamp_override).toBe('${{ steps.fetch_rule.output.timestamp_override }}');
+          expect(body.timestamp_override_fallback_disabled).toBe(
+            '${{ steps.fetch_rule.output.timestamp_override_fallback_disabled }}'
+          );
+          expect(body.alert_suppression).toBe('${{ steps.fetch_rule.output.alert_suppression }}');
+        }
         expect(String(support.with?.supported)).toContain(
           "steps.diagnose_rule.output.structured_output.change_type == 'query'"
         );

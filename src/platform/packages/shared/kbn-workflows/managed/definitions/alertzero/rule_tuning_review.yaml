@@ -604,13 +604,12 @@ steps:
     on-failure:
       continue: true
 
-  # Rules using a data view, timestamp override, or alert suppression need fields
-  # the preview API cannot conditionally omit, so query and exception auto-apply is
-  # restricted the same way (both reuse this same preview mechanism below). The type
-  # check alone excludes saved-query rules, which carry no inline query. The exception arm additionally
-  # requires its filter to have been built: falling back to the rule's own filters
-  # would backtest the unchanged rule and present it as the exception's result.
-  # Gated on fetch_rule so a skipped diagnose_rule leaves supported null/false.
+  # The preview bodies below carry the rule's own data view, timestamp override and
+  # alert suppression, so those settings no longer exclude a rule. The type check
+  # alone excludes saved-query rules, which carry no inline query. The exception arm
+  # additionally requires its filter to have been built: falling back to the rule's
+  # own filters would backtest the unchanged rule and present it as the exception's
+  # result. Gated on fetch_rule so a skipped diagnose_rule leaves supported null/false.
   - name: can_preview_query_change
     type: data.set
     if: >-
@@ -627,10 +626,7 @@ steps:
           and (steps.fetch_rule.output.type == 'query'
             or (steps.fetch_rule.output.type == 'threshold'
               and (steps.diagnose_rule.output.structured_output.change_type == 'threshold'
-                or steps.diagnose_rule.output.structured_output.change_type == 'schedule')))
-          and steps.fetch_rule.output.data_view_id == null
-          and steps.fetch_rule.output.timestamp_override == null
-          and steps.fetch_rule.output.alert_suppression == null }}
+                or steps.diagnose_rule.output.structured_output.change_type == 'schedule'))) }}
 
   # The diagnosis reports the proposed threshold as three fields; the preview body
   # and the apply action take one object. Skipped for every other arm, so the
@@ -683,6 +679,12 @@ steps:
           query: "{{ steps.fetch_rule.output.query }}"
           language: "{{ steps.fetch_rule.output.language }}"
           index: "${{ steps.fetch_rule.output.index }}"
+          # Unset on the rule means undefined here, and undefined keys are dropped from
+          # the request, so these are passed through as-is.
+          data_view_id: "${{ steps.fetch_rule.output.data_view_id }}"
+          timestamp_override: "${{ steps.fetch_rule.output.timestamp_override }}"
+          timestamp_override_fallback_disabled: "${{ steps.fetch_rule.output.timestamp_override_fallback_disabled }}"
+          alert_suppression: "${{ steps.fetch_rule.output.alert_suppression }}"
           filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
           exceptions_list: "${{ steps.fetch_rule.output.exceptions_list | default: consts.no_items }}"
           severity: "{{ steps.fetch_rule.output.severity }}"
@@ -711,6 +713,12 @@ steps:
             {% if steps.diagnose_rule.output.structured_output.change_type == 'query' %}{{ steps.diagnose_rule.output.structured_output.proposed_query }}{% else %}{{ steps.fetch_rule.output.query }}{% endif %}
           language: "{{ steps.fetch_rule.output.language }}"
           index: "${{ steps.fetch_rule.output.index }}"
+          # Unset on the rule means undefined here, and undefined keys are dropped from
+          # the request, so these are passed through as-is.
+          data_view_id: "${{ steps.fetch_rule.output.data_view_id }}"
+          timestamp_override: "${{ steps.fetch_rule.output.timestamp_override }}"
+          timestamp_override_fallback_disabled: "${{ steps.fetch_rule.output.timestamp_override_fallback_disabled }}"
+          alert_suppression: "${{ steps.fetch_rule.output.alert_suppression }}"
           # build_exception_filter's output (the rule's filters plus the negated exception
           # clause) takes precedence when it ran; otherwise this previews unchanged, same
           # as the query arm.
@@ -940,8 +948,8 @@ steps:
         Proposed preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
         {% endif %}
         {% else %}
-        No backtest is available. The preview supports only plain query rules.
-        It does not support a saved query, a data view, a timestamp override or alert suppression.
+        No backtest is available. The preview supports only query rules and threshold rules.
+        It does not support a saved query.
         Or the agent could not convert the proposed exception into a preview filter.
         Approving still applies the proposed change.
         Judge it on the change and on the false positives above, not on a simulated alert count.
