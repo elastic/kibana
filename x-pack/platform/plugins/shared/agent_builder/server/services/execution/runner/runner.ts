@@ -147,6 +147,8 @@ export interface CreateScopedRunnerDeps {
   conversationAccess: ExecutionConversationAccess;
   /** Sub-agent executor for spawning child executions. */
   subAgentExecutor: SubAgentExecutor;
+  /** Lazy getter for the execution service. */
+  getExecutionService: () => AgentExecutionService;
   /** Experimental features enabled for this runner context. */
   experimentalFeatures: ExperimentalFeatures;
   /** The effective agent configuration for the current run (with overrides applied). */
@@ -186,8 +188,6 @@ export type CreateRunnerDeps = Omit<
   | 'experimentalFeatures'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
-  /** Lazy getter for the execution service (breaks circular dep with runner). */
-  getExecutionService: () => AgentExecutionService;
 };
 
 const toToolRunInteractivity = (approvals?: RunApprovals): InteractivityConfig => {
@@ -254,8 +254,14 @@ export class RunnerManager {
     };
   };
 
-  createChild(childContext: RunContext): RunnerManager {
-    return new RunnerManager(this.deps, childContext);
+  createChild(
+    childContext: RunContext,
+    depsOverrides?: Partial<CreateScopedRunnerDeps>
+  ): RunnerManager {
+    return new RunnerManager(
+      depsOverrides ? { ...this.deps, ...depsOverrides } : this.deps,
+      childContext
+    );
   }
 }
 
@@ -265,7 +271,8 @@ export const createScopedRunner = (deps: CreateScopedRunnerDeps): ScopedRunner =
 };
 
 export const createRunner = (deps: CreateRunnerDeps): Runner => {
-  const { modelProviderFactory, getExecutionService, ...runnerDeps } = deps;
+  const { modelProviderFactory, ...runnerDeps } = deps;
+  const { getExecutionService } = runnerDeps;
 
   const createScopedRunnerWithDeps = async ({
     request,

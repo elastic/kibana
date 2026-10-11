@@ -276,7 +276,11 @@ describe('AgentsService', () => {
             ...agent,
             access_control: undefined,
             created_by: undefined,
-            permissions: { update_agent: true, update_access_control: true },
+            permissions: {
+              update_agent: true,
+              update_access_control: true,
+              update_approvals: true,
+            },
           }),
         } as any);
 

@@ -273,6 +273,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             canChangeAccessControl={
               isCreateMode ? manageAgents : permissions?.update_access_control ?? false
             }
+            canChangeApprovals={
+              isCreateMode ? manageAgents : permissions?.update_approvals ?? false
+            }
             owner={agentState?.created_by}
             agentId={editingAgentId}
           />
@@ -382,6 +385,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       activePluginsCount,
       manageAgents,
       permissions?.update_access_control,
+      permissions?.update_approvals,
       isExperimentalFeaturesEnabled,
       enableElasticCapabilities,
     ]
