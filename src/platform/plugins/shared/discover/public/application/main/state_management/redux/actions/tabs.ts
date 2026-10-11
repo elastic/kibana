@@ -9,7 +9,7 @@
 
 import { cloneDeep, differenceBy, omit } from 'lodash';
 import type { DataViewSpec, QueryState } from '@kbn/data-plugin/common';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import { AbortReason, SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
@@ -684,7 +684,7 @@ export const clearRecentlyClosedTabs: InternalStateThunkActionCreator = () =>
 export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> = ({ tabId }) =>
   function disconnectTabThunkFn(dispatch, __, { runtimeStateManager }) {
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-    tabRuntimeState.dataStateContainer$.getValue()?.cancel();
+    tabRuntimeState.dataStateContainer$.getValue()?.cancel(AbortReason.CLEANUP);
     dispatch(stopSyncing({ tabId }));
     tabRuntimeState.customizationService$.getValue()?.cleanup();
     dispatch(internalStateSlice.actions.disconnectTab({ tabId }));

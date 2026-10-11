@@ -108,6 +108,28 @@ export function sendErrorMsg<T extends DataMsg>(
 }
 
 /**
+ * Settles the data subjects after an explicit user cancellation. Keeps whatever
+ * results are already present and does not report an error, since nothing failed.
+ */
+export function sendCancelledMsg(data: SavedSearchData) {
+  const documents = data.documents$.getValue();
+  if (
+    documents.fetchStatus === FetchStatus.LOADING ||
+    documents.fetchStatus === FetchStatus.PARTIAL
+  ) {
+    data.documents$.next({ ...documents, fetchStatus: FetchStatus.COMPLETE, error: undefined });
+  }
+
+  const totalHits = data.totalHits$.getValue();
+  if (
+    totalHits.fetchStatus === FetchStatus.LOADING ||
+    totalHits.fetchStatus === FetchStatus.PARTIAL
+  ) {
+    data.totalHits$.next({ ...totalHits, fetchStatus: FetchStatus.COMPLETE });
+  }
+}
+
+/**
  * Sends a RESET message to all data subjects
  * Needed when data view is switched or a new runtime field is added
  */
