@@ -124,6 +124,10 @@ interface Options {
 // had no equivalent socket-connect cutoff. Restore that headroom.
 const FETCH_CONNECT_TIMEOUT_MS = 60_000;
 
+// undici defaults headersTimeout to 300s, which kills slow self-hosted LLM converse calls on local
+// (plain-http) Scout/eval stacks at the transport; allow 15m instead.
+const PLAIN_HTTP_TIMEOUT_MS = 900_000; // 15m
+
 export class KbnClientRequester {
   // `url` retains any `user:pass@` from the original config - `resolveUrl()` is
   // a public API used by FTR tests (e.g. http connector tests) that pluck
@@ -158,7 +162,10 @@ export class KbnClientRequester {
               timeout: FETCH_CONNECT_TIMEOUT_MS,
             },
           })
-        : null;
+        : new Agent({
+            headersTimeout: PLAIN_HTTP_TIMEOUT_MS,
+            bodyTimeout: PLAIN_HTTP_TIMEOUT_MS,
+          });
   }
 
   public resolveUrl(relativeUrl = '/') {
