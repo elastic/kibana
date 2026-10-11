@@ -52,17 +52,33 @@ export const securityLabsSearchTool = (
     handler: async ({ query: nlQuery }, { request, modelProvider, logger, spaceId }) => {
       logger.debug(`${SECURITY_LABS_SEARCH_TOOL_ID} tool called with query: ${nlQuery}`);
 
+      const unavailableResult = (reason: string, settingsUrl: string) => ({
+        results: [
+          createErrorResult({
+            message: `${reason} Stop this request and make no further tool calls, including product_documentation. Tell the user Security Labs research is unavailable and provide this exact markdown link: [GenAI Settings](${settingsUrl}). Do not substitute prior knowledge or other sources.`,
+            metadata: {
+              status: 'unavailable',
+              nextAction: 'stop',
+              settingsUrl,
+            },
+          }),
+        ],
+      });
+
       try {
         const [coreStart, pluginsStart] = await core.getStartServices();
+        // Agent Builder requests can omit request.basePath; use the server base path.
+        const settingsUrl = addSpaceIdToPath(
+          coreStart.http.basePath.serverBasePath,
+          spaceId,
+          GENAI_SETTINGS_APP_PATH
+        );
         const llmTasks = pluginsStart.llmTasks;
         if (!llmTasks) {
-          return {
-            results: [
-              createErrorResult({
-                message: 'Security Labs tool is not available. LlmTasks plugin is not available.',
-              }),
-            ],
-          };
+          return unavailableResult(
+            'Security Labs tool is not available. LlmTasks plugin is not available.',
+            settingsUrl
+          );
         }
 
         // Prefer the environment default (Jina when its endpoint exists, else ELSER), then
@@ -82,21 +98,10 @@ export const securityLabsSearchTool = (
         });
 
         if (!inferenceId) {
-          // Use serverBasePath (not request.basePath): Agent Builder requests can omit
-          // basePath, producing /app/... links the chat UI treats as external/broken.
-          const settingsUrl = addSpaceIdToPath(
-            coreStart.http.basePath.serverBasePath,
-            spaceId,
-            GENAI_SETTINGS_APP_PATH
+          return unavailableResult(
+            'Security Labs content is not installed. Install Security Labs from GenAI Settings to use this tool.',
+            settingsUrl
           );
-          return {
-            results: [
-              createErrorResult({
-                message: `Security Labs content is not installed. To use this tool, please install Security Labs from GenAI Settings. Provide the user with this exact markdown link and do not alter the URL path: [GenAI Settings](${settingsUrl}). Do not perform any other tool calls.`,
-                metadata: { settingsUrl },
-              }),
-            ],
-          };
         }
 
         const model = await modelProvider.getDefaultModel();
