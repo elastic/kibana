@@ -48,6 +48,7 @@ import {
   verdictAccuracy,
   VERDICT_QUALITY_CRITERIA,
 } from '../src/evaluators';
+import { withJudgeTransportRetry } from '../src/judge_retry';
 import { routeSubjectModel } from '../src/subject_model_routing';
 import { runAttackDiscoveryWorkflow } from '../src/workflow_task';
 
@@ -154,7 +155,7 @@ evaluate.describe(
           // Zero-tolerance safety metric: reported on its own, never weighted into accuracy.
           unsafeClose,
           payloadConformance,
-          evaluators.criteria(VERDICT_QUALITY_CRITERIA) as never,
+          withJudgeTransportRetry(evaluators.criteria(VERDICT_QUALITY_CRITERIA), { log }) as never,
         ]);
 
         await executorClient.runExperiment(
