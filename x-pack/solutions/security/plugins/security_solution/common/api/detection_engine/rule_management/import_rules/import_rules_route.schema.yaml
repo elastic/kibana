@@ -14,7 +14,7 @@ paths:
         - The `Content-Type: multipart/form-data` HTTP header.
         - A link to the `.ndjson` file containing the rules.
         > warn
-        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the created or updated rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
         > info
@@ -55,7 +55,7 @@ paths:
         - name: overwrite
           in: query
           required: false
-          description: Determines whether existing rules with the same `rule_id` are overwritten.
+          description: Determines whether existing rules with the same `rule_id` are overwritten. Rules with no changes are left as they are and counted in `rules_summary.unchanged`.
           schema:
             type: boolean
             default: false
@@ -95,6 +95,7 @@ paths:
                   - rules_count
                   - success
                   - success_count
+                  - rules_summary
                   - errors
                   - action_connectors_errors
                   - action_connectors_warnings
@@ -118,6 +119,32 @@ paths:
                   success_count:
                     type: integer
                     minimum: 0
+                  rules_summary:
+                    type: object
+                    additionalProperties: false
+                    description: Counts of imported rules by outcome. `created`, `updated`, and `unchanged` are included in `success_count`. `failed` did not import successfully.
+                    required:
+                      - created
+                      - updated
+                      - unchanged
+                      - failed
+                    properties:
+                      created:
+                        type: integer
+                        minimum: 0
+                        description: Rules created by this import.
+                      updated:
+                        type: integer
+                        minimum: 0
+                        description: Existing rules overwritten because the payload changed.
+                      unchanged:
+                        type: integer
+                        minimum: 0
+                        description: Existing rules skipped because nothing changed. Included in `success_count`.
+                      failed:
+                        type: integer
+                        minimum: 0
+                        description: Rules that did not import successfully.
                   errors:
                     type: array
                     items:
@@ -141,6 +168,11 @@ paths:
                   value:
                     success: true
                     success_count: 1
+                    rules_summary:
+                      created: 1
+                      updated: 0
+                      unchanged: 0
+                      failed: 0
                     rules_count: 1
                     errors: []
                     exceptions_errors: []

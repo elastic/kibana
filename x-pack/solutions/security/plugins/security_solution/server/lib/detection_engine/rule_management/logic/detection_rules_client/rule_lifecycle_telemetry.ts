@@ -68,13 +68,30 @@ export function sendRuleInstallTelemetryEvents(
   }
 }
 
+export type RuleImportOutcome = 'created' | 'updated' | 'unchanged';
+
+export type RuleImportTelemetryData = RuleLifecycleTelemetryData & { outcome: RuleImportOutcome };
+
+export interface RuleImportTelemetry extends RuleLifecycleTelemetry {
+  outcome: RuleImportOutcome;
+}
+
 export function sendRuleImportTelemetryEvents(
   analytics: AnalyticsServiceSetup,
-  rules: RuleLifecycleTelemetryData[],
+  rules: RuleImportTelemetryData[],
   logger?: Logger
 ): void {
   for (const rule of rules) {
-    sendRuleLifecycleTelemetryEvent(analytics, DETECTION_RULE_IMPORT_EVENT, rule, logger);
+    try {
+      const event: RuleImportTelemetry = {
+        ...createRuleLifecycleTelemetryEvent(rule),
+        outcome: rule.outcome,
+      };
+      analytics.reportEvent(DETECTION_RULE_IMPORT_EVENT.eventType, event);
+    } catch (e) {
+      // we don't want telemetry errors to impact the main flow
+      logger?.debug(`Failed to send ${DETECTION_RULE_IMPORT_EVENT.eventType} telemetry`, e);
+    }
   }
 }
 
