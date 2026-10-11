@@ -30,7 +30,7 @@ Array [
 | WHERE kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\"
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
-    | WHERE \`kibana.alert.entity.id\` IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
+    | WHERE MV_CONTAINS(\`kibana.alert.entity.id\`, \\"host:h-1\\") OR MV_CONTAINS(\`kibana.alert.entity.id\`, \\"host:web-2\\") OR MV_CONTAINS(\`kibana.alert.entity.id\`, \\"user:alice@h-1@local\\") OR MV_CONTAINS(\`kibana.alert.entity.id\`, \\"user:bob@corp.com@okta\\") OR MV_CONTAINS(\`kibana.alert.entity.id\`, \\"service:payments\\")
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )

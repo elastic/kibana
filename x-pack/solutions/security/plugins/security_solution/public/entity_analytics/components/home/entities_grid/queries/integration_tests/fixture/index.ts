@@ -35,7 +35,8 @@ import type { FixtureIndex } from './fixture_index';
  *
  * Aliases: host:h4 and host:h5 resolve to host:h1, user:carol@okta resolves to user:bob@okta.
  * Alerts are stamped with the entity id, except the one of host:h2, whose id comes from
- * `host.id`. Anomaly records carry no entity id: theirs comes from `user.name` with
+ * `host.id`. One alert of host:h1 is also stamped with user:dave@okta, an entity outside the
+ * store, so its `kibana.alert.entity.id` is multi-value. Anomaly records carry no entity id: theirs comes from `user.name` with
  * `event.module` (okta), or from `host.id`.
  * Excluded alerts: a closed alert of host:h3, and an alert of host:h3 from 40 days ago.
  * Risk change is the current score minus the last score in the 2 hours before the window;

@@ -21,6 +21,8 @@ interface AlertSeed {
   entityId: string;
   /** Leaves `kibana.alert.entity.id` unset, so the EUID comes from `host.id`. */
   hostId?: string;
+  /** Another id the alert is stamped with, which makes `kibana.alert.entity.id` multi-value. */
+  otherEntityId?: string;
   severity: 'critical' | 'high' | 'medium' | 'low';
   hoursAgo: number;
   status?: 'open' | 'closed';
@@ -28,7 +30,7 @@ interface AlertSeed {
 
 const ALERTS: readonly AlertSeed[] = [
   { entityId: 'host:h1', severity: 'critical', hoursAgo: 3 },
-  { entityId: 'host:h1', severity: 'high', hoursAgo: 5 },
+  { entityId: 'host:h1', otherEntityId: 'user:dave@okta', severity: 'high', hoursAgo: 5 },
   { entityId: 'host:h1', severity: 'high', hoursAgo: 7 },
   { entityId: 'host:h2', hostId: 'h2', severity: 'low', hoursAgo: 1 },
   { entityId: 'user:alice@okta', severity: 'medium', hoursAgo: 2 },
@@ -38,11 +40,13 @@ const ALERTS: readonly AlertSeed[] = [
 ];
 
 const toAlertDoc = (
-  { entityId, hostId, severity, hoursAgo, status = 'open' }: AlertSeed,
+  { entityId, hostId, otherEntityId, severity, hoursAgo, status = 'open' }: AlertSeed,
   now: number
 ) => ({
   '@timestamp': toIsoAgo(now, hoursAgo * HOUR_MS),
-  ...(hostId ? { 'host.id': hostId } : { 'kibana.alert.entity.id': entityId }),
+  ...(hostId
+    ? { 'host.id': hostId }
+    : { 'kibana.alert.entity.id': otherEntityId ? [entityId, otherEntityId] : entityId }),
   'kibana.alert.severity': severity,
   'kibana.alert.workflow_status': status,
 });

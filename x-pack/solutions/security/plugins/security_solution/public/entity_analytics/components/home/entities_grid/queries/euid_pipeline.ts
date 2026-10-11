@@ -10,7 +10,7 @@ import {
   getFieldEvaluationsEsql,
 } from '@kbn/entity-store/common/domain/euid';
 import { ALLOWED_ENTITY_TYPES } from '../common';
-import { indentForkBranch, toList } from './esql';
+import { esc, indentForkBranch } from './esql';
 
 // ── EUID query pipeline builders ─────────────────────────────────────────────
 
@@ -51,6 +51,13 @@ export const buildEuidStages = (): string[] => [
   '| WHERE `entity.id` IS NOT NULL',
 ];
 
+/**
+ * Keeps alerts stamped with any of the ids. An alert can be stamped with several ids, and
+ * `IN` is null on a multi-value field, so each id is an `MV_CONTAINS`, which checks every value.
+ */
+const buildStampedIdsCondition = (entityIds: readonly string[]): string =>
+  entityIds.map((id) => `MV_CONTAINS(\`kibana.alert.entity.id\`, ${esc(id)})`).join(' OR ');
+
 export interface AlertEuidPipelineOptions {
   /** When set, the stamped branch keeps only alerts stamped with one of these entity ids. */
   stampedEntityIds?: readonly string[];
@@ -87,12 +94,14 @@ export const buildAlertEuidPipeline = (options: AlertEuidPipelineOptions = {}): 
     extraBranch,
   } = options;
   const guard = alertBranchCondition ? [`(${alertBranchCondition})`] : [];
-  const idsList = stampedEntityIds?.length ? toList(stampedEntityIds) : undefined;
+  const stampedIdsCondition = stampedEntityIds?.length
+    ? buildStampedIdsCondition(stampedEntityIds)
+    : undefined;
   const keepCols = ['`@timestamp`', '`kibana.alert.severity`', '_ea_entity_id'].join(', ');
 
   const stampedSteps = [
     `WHERE ${[...guard, '`kibana.alert.entity.id` IS NOT NULL'].join(' AND ')}`,
-    ...(idsList ? [`| WHERE \`kibana.alert.entity.id\` IN (${idsList})`] : []),
+    ...(stampedIdsCondition ? [`| WHERE ${stampedIdsCondition}`] : []),
     '| EVAL _ea_entity_id = `kibana.alert.entity.id`',
     `| KEEP ${keepCols}`,
   ];
@@ -110,7 +119,7 @@ export const buildAlertEuidPipeline = (options: AlertEuidPipelineOptions = {}): 
       : []),
   ];
   const unstampedWhere =
-    idsList != null && unstampedIdentityClause == null
+    stampedIdsCondition != null && unstampedIdentityClause == null
       ? 'WHERE false'
       : `WHERE ${unstampedConjuncts.join(' AND ')}`;
 
