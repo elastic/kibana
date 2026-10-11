@@ -10,7 +10,6 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { ConnectedProps } from 'react-redux-v7';
 import { connect } from 'react-redux-v7';
 import deepEqual from 'fast-deep-equal';
-import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { RunTimeMappings, TimelineItem } from '@kbn/timelines-plugin/common/search_strategy';
@@ -236,7 +235,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     [enableNewFlyout, openNotes, openFlyout, selectedPatterns, telemetry, timelineId]
   );
 
-  const leadingControlColumns = useTimelineControlColumn({
+  const rowAdditionalLeadingControls = useTimelineControlColumn({
     timelineId,
     refetch,
     events,
@@ -262,7 +261,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       activeTab={TimelineTabs.pinned}
       updatedAt={refreshedAt}
       isTextBasedQuery={false}
-      leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+      rowAdditionalLeadingControls={rowAdditionalLeadingControls}
       trailingControlColumns={rowDetailColumn}
       onUpdatePageIndex={onUpdatePageIndex}
     />

@@ -45,7 +45,6 @@ import { EuiButton, EuiThemeProvider } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   mockRowAdditionalLeadingControls,
-  testLeadingControlColumn,
   testTrailingControlColumns,
 } from '../../__mocks__/external_control_columns';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -996,13 +995,11 @@ describe('UnifiedDataTable', () => {
             },
             flattened: { test: jest.fn() },
           },
-          externalControlColumns: [testLeadingControlColumn],
           renderDocumentView: jest.fn(),
           rowAdditionalLeadingControls: mockRowAdditionalLeadingControls,
           setExpandedDoc: jest.fn(),
         });
 
-        expect(screen.getAllByTestId('test-body-control-column-cell')[0]).toBeVisible();
         expect(screen.getAllByTestId('exampleRowControl-chartBarVerticalStack')[0]).toBeVisible();
 
         // The other actions are within the popover
@@ -1029,40 +1026,12 @@ describe('UnifiedDataTable', () => {
               _id: 'test',
             },
           },
-          externalControlColumns: [testLeadingControlColumn],
           renderDocumentView: jest.fn(),
           setExpandedDoc: jest.fn(),
           trailingControlColumns: testTrailingControlColumns,
         });
 
-        expect(screen.getAllByTestId('test-body-control-column-cell')[0]).toBeVisible();
         expect(screen.getAllByTestId('test-trailing-column-popover-button')[0]).toBeVisible();
-      },
-      EXTENDED_JEST_TIMEOUT
-    );
-  });
-
-  describe('externalControlColumns', () => {
-    it(
-      'should render external leading control columns',
-      async () => {
-        await renderComponent({
-          ...getProps(),
-          expandedDoc: {
-            id: 'test',
-            flattened: { test: jest.fn() },
-            raw: {
-              _index: 'test_i',
-              _id: 'test',
-            },
-          },
-          externalControlColumns: [testLeadingControlColumn],
-          renderDocumentView: jest.fn(),
-          setExpandedDoc: jest.fn(),
-        });
-
-        expect(screen.getAllByTestId('docTableExpandToggleColumn')[0]).toBeVisible();
-        expect(screen.getAllByTestId('test-body-control-column-cell')[0]).toBeVisible();
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -1089,7 +1058,6 @@ describe('UnifiedDataTable', () => {
       await renderComponent({
         ...getProps(),
         expandedDoc,
-        externalControlColumns: [testLeadingControlColumn],
         renderDocumentView: renderDocumentViewMock,
         setExpandedDoc: setExpandedDocMock,
       });
