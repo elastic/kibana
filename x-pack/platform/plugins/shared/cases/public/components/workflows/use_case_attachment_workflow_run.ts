@@ -37,6 +37,8 @@ export interface UseCaseAttachmentWorkflowRunParams {
   attachmentType: string;
   /** Memoize it: a new object builds a new executor. */
   target: CaseAttachmentWorkflowTarget;
+  /** Telemetry the surface reports when the run is not routed through Cases. Memoize it. */
+  fallbackTelemetry?: RunWorkflowTelemetry;
 }
 
 export interface CaseAttachmentWorkflowRunProps {
@@ -44,7 +46,7 @@ export interface CaseAttachmentWorkflowRunProps {
   runWorkflow: RunWorkflowExecutor | undefined;
   /** Pass to `RunWorkflowPanel`. */
   showSuccessToast: boolean;
-  /** Pass to `RunWorkflowPanel`. Undefined outside a case, so the caller can report its own surface. */
+  /** Pass to `RunWorkflowPanel`. The case attachment origin when routed through Cases, else `fallbackTelemetry`. */
   telemetry: RunWorkflowTelemetry | undefined;
 }
 
@@ -64,12 +66,13 @@ export const useCaseAttachmentWorkflowRouting = (): CaseAttachmentWorkflowRoutin
 export const useCaseAttachmentWorkflowRun = ({
   attachmentType,
   target,
+  fallbackTelemetry,
 }: UseCaseAttachmentWorkflowRunParams): CaseAttachmentWorkflowRunProps => {
   const context = useCaseAttachmentWorkflowContext();
 
   return useMemo(() => {
     if (context.status !== 'available') {
-      return { runWorkflow: undefined, showSuccessToast: true, telemetry: undefined };
+      return { runWorkflow: undefined, showSuccessToast: true, telemetry: fallbackTelemetry };
     }
 
     const { caseId, createExecutor, owner } = context;
@@ -93,5 +96,5 @@ export const useCaseAttachmentWorkflowRun = ({
       showSuccessToast: false,
       telemetry: { ...getCaseWorkflowRunTelemetry(origin), owner },
     };
-  }, [attachmentType, context, target]);
+  }, [attachmentType, context, fallbackTelemetry, target]);
 };

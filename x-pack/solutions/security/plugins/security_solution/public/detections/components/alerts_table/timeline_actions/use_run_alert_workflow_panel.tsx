@@ -26,6 +26,10 @@ import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import { RUN_ALERT_WORKFLOW_ACTION_ID } from '../../../../common/constants/action_ids';
 import * as i18n from '../translations';
+import {
+  getRunWorkflowTelemetry,
+  type RunWorkflowTelemetrySurface,
+} from '../../../../common/lib/telemetry/run_workflow_telemetry';
 
 // Server-side: include managed workflows tagged for the rule_action selector (e.g. the alert
 // analysis workflow). Module-scoped so the object reference is stable across renders.
@@ -58,6 +62,10 @@ export interface AlertWorkflowsPanelProps {
    * Inside a case where Cases runs are unavailable, the menu hooks do not render this panel.
    */
   originAlertId?: string;
+  /** Surface reported with the run telemetry outside a case. Defaults to `alert`. */
+  telemetrySurface?: Extract<RunWorkflowTelemetrySurface, 'alert' | 'attack'>;
+  /** Reports the run as a bulk run outside a case. Bulk actions set it. */
+  isBulk?: boolean;
 }
 
 /** A panel that lets users select and execute a workflow against one or more alerts. **/
@@ -66,6 +74,8 @@ export const AlertWorkflowsPanel = ({
   onClose,
   onExecute,
   originAlertId,
+  telemetrySurface = 'alert',
+  isBulk = false,
 }: AlertWorkflowsPanelProps) => {
   // When rendered inside a case's attachment surface, route through the Cases API so the run
   // is authorized, audited, and recorded in the case activity feed. Outside a case the panel
@@ -77,9 +87,19 @@ export const AlertWorkflowsPanel = ({
         : { attachmentIds: alertIds.map(({ _id }) => _id) },
     [alertIds, originAlertId]
   );
+  const fallbackTelemetry = useMemo(
+    () =>
+      getRunWorkflowTelemetry({
+        surface: telemetrySurface,
+        isBulk,
+        itemCount: alertIds.length,
+      }),
+    [alertIds.length, isBulk, telemetrySurface]
+  );
   const { runWorkflow, showSuccessToast, telemetry } = useCaseAttachmentWorkflowRun({
     attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE,
     target,
+    fallbackTelemetry,
   });
 
   const inputs = useMemo(
