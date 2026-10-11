@@ -22,7 +22,7 @@ import type { OasExampleEntry } from '../oas_types';
 export const SAMPLE_GROUP_HASH = '98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56';
 export const SAMPLE_OTHER_GROUP_HASH =
   '62b86eca4670c2a0a01fa8bb5570c5c2dfa7d20a9d9def5b6acfdef4d98d307a';
-export const SAMPLE_EPISODE_ID = 'episode-1';
+export const SAMPLE_EPISODE_ID = 'alert-1';
 
 /** Shared 400 body for series-level alert-action routes (missing path params). */
 export const INVALID_SERIES_ACTION_PARAMS_RESPONSE = invalidResponseExample({
@@ -54,7 +54,7 @@ export const ALERT_SERIES_NOT_FOUND_RESPONSE: OasExampleEntry = {
 
 /** Shared 404 body for episode-level alert-action routes. */
 export const ALERT_EPISODE_NOT_FOUND_RESPONSE: OasExampleEntry = {
-  name: 'alertEpisodeNotFound',
+  name: 'alertNotFound',
   summary: 'No alert exists for the given alert_id',
   value: {
     code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_FOUND,
@@ -134,7 +134,7 @@ export const ALERT_TAGS_UNCHANGED_RESPONSE: OasExampleEntry = {
 
 /** Shared 409 body for the lifecycle episode actions, which require the latest episode. */
 export const ALERT_EPISODE_NOT_LATEST_RESPONSE: OasExampleEntry = {
-  name: 'alertEpisodeNotLatest',
+  name: 'alertNotLatest',
   summary: 'The alert has been superseded by a newer alert of its series',
   value: {
     code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_LATEST,

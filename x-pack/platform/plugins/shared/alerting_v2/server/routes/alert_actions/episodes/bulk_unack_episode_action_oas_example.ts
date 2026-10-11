@@ -10,7 +10,7 @@ import { buildOasOperation, invalidResponseExample } from '../../oas_utils';
 import type { AlertingOasOperationObject } from '../../oas_types';
 
 export const BULK_UNACK_EPISODE_ACTION_REQUEST: BulkUnackEpisodeActionBody = {
-  items: [{ alert_id: 'episode-1' }, { alert_id: 'episode-2' }],
+  items: [{ alert_id: 'alert-1' }, { alert_id: 'alert-2' }],
 };
 
 export const BULK_UNACK_EPISODE_ACTION_RESPONSE: BulkResponse = {
@@ -27,13 +27,13 @@ const INVALID_BULK_UNACK_EPISODE_ACTION_RESPONSE = invalidResponseExample({
 export const bulkUnackEpisodeActionOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     requestBody: {
-      name: 'bulkUnackEpisodeActionRequest',
-      summary: 'Unacknowledge two alert episodes',
+      name: 'bulkUnackAlertActionRequest',
+      summary: 'Unacknowledge two alerts',
       value: BULK_UNACK_EPISODE_ACTION_REQUEST,
     },
     responses: {
       200: {
-        name: 'bulkUnackEpisodeActionResponse',
+        name: 'bulkUnackAlertActionResponse',
         summary: 'All actions created',
         value: BULK_UNACK_EPISODE_ACTION_RESPONSE,
       },

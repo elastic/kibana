@@ -16,7 +16,7 @@ import { createEpisodeActionRouteForType } from './create_episode_action_route_f
 export const CreateTagEpisodeActionRoute = createEpisodeActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
   pathSuffix: '_tag',
-  summary: 'Tag an alert episode',
+  summary: 'Tag an alert',
   bodySchema: createTagEpisodeActionBodySchema,
   oasOperationObject: createTagEpisodeActionOasExamples,
   access: 'public' as const,

@@ -9459,7 +9459,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -9576,7 +9576,7 @@ paths:
         Get an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
       operationId: get-alerting-v2-action-policies-id
       parameters:
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -9728,7 +9728,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -9921,7 +9921,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -10136,7 +10136,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -10304,7 +10304,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -10482,7 +10482,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -10661,7 +10661,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -10829,7 +10829,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -10987,7 +10987,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create the same action for multiple alerts in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-bulk-ack
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -11001,12 +11001,12 @@ paths:
         content:
           application/json:
             examples:
-              bulkAckEpisodeActionRequest:
-                summary: Acknowledge two alert episodes
+              bulkAckAlertActionRequest:
+                summary: Acknowledge two alerts
                 value:
                   items:
-                    - alert_id: episode-1
-                    - alert_id: episode-2
+                    - alert_id: alert-1
+                    - alert_id: alert-2
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_ack_alerts_request'
       responses:
@@ -11014,15 +11014,15 @@ paths:
           content:
             application/json:
               examples:
-                bulkAckEpisodeActionResponse:
-                  summary: One action created, one episode not found
+                bulkAckAlertActionResponse:
+                  summary: One action created, one alert not found
                   value:
                     affected_count: 1
                     errors:
                       - error:
                           code: ALERT_NOT_FOUND
-                          message: Alert with alert_id [episode-2] not found
-                        id: episode-2
+                          message: Alert with alert_id [alert-2] not found
+                        id: alert-2
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_operation_response'
           description: Returns the number of created actions and per-item errors for actions that were not created.
@@ -11095,7 +11095,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Bulk acknowledge alert episodes
+      summary: Bulk acknowledge alerts
       tags:
         - alerting-v2
       x-state: Experimental
@@ -11111,7 +11111,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create the same action for multiple alerts in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-bulk-activate
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -11125,11 +11125,11 @@ paths:
         content:
           application/json:
             examples:
-              bulkActivateEpisodeActionRequest:
-                summary: Reopen an alert episode with a reason
+              bulkActivateAlertActionRequest:
+                summary: Reopen an alert with a reason
                 value:
                   items:
-                    - alert_id: episode-1
+                    - alert_id: alert-1
                       reason: manual reopen
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_activate_alerts_request'
@@ -11138,7 +11138,7 @@ paths:
           content:
             application/json:
               examples:
-                bulkActivateEpisodeActionResponse:
+                bulkActivateAlertActionResponse:
                   summary: All actions created
                   value:
                     affected_count: 1
@@ -11215,7 +11215,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Bulk activate alert episodes
+      summary: Bulk activate alerts
       tags:
         - alerting-v2
       x-state: Experimental
@@ -11231,7 +11231,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create the same action for multiple alerts in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-bulk-assign
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -11245,13 +11245,13 @@ paths:
         content:
           application/json:
             examples:
-              bulkAssignEpisodeActionRequest:
-                summary: Assign one episode and clear the assignee of another
+              bulkAssignAlertActionRequest:
+                summary: Assign one alert and clear the assignee of another
                 value:
                   items:
-                    - alert_id: episode-1
+                    - alert_id: alert-1
                       assignee_uid: u_abc123
-                    - alert_id: episode-2
+                    - alert_id: alert-2
                       assignee_uid: null
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_assign_alerts_request'
@@ -11260,7 +11260,7 @@ paths:
           content:
             application/json:
               examples:
-                bulkAssignEpisodeActionResponse:
+                bulkAssignAlertActionResponse:
                   summary: All actions created
                   value:
                     affected_count: 2
@@ -11337,7 +11337,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Bulk assign alert episodes
+      summary: Bulk assign alerts
       tags:
         - alerting-v2
       x-state: Experimental
@@ -11353,7 +11353,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create the same action for multiple alerts in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-bulk-deactivate
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -11367,11 +11367,11 @@ paths:
         content:
           application/json:
             examples:
-              bulkDeactivateEpisodeActionRequest:
-                summary: Close an alert episode with a reason
+              bulkDeactivateAlertActionRequest:
+                summary: Close an alert with a reason
                 value:
                   items:
-                    - alert_id: episode-1
+                    - alert_id: alert-1
                       reason: false positive
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_deactivate_alerts_request'
@@ -11380,7 +11380,7 @@ paths:
           content:
             application/json:
               examples:
-                bulkDeactivateEpisodeActionResponse:
+                bulkDeactivateAlertActionResponse:
                   summary: All actions created
                   value:
                     affected_count: 1
@@ -11457,7 +11457,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Bulk deactivate alert episodes
+      summary: Bulk deactivate alerts
       tags:
         - alerting-v2
       x-state: Experimental
@@ -11473,7 +11473,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create the same action for multiple alerts in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-bulk-tag
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -11487,14 +11487,14 @@ paths:
         content:
           application/json:
             examples:
-              bulkTagEpisodeActionRequest:
-                summary: Tag two alert episodes with production
+              bulkTagAlertActionRequest:
+                summary: Tag two alerts with production
                 value:
                   items:
-                    - alert_id: episode-1
+                    - alert_id: alert-1
                       tags:
                         - production
-                    - alert_id: episode-2
+                    - alert_id: alert-2
                       tags:
                         - production
             schema:
@@ -11504,7 +11504,7 @@ paths:
           content:
             application/json:
               examples:
-                bulkTagEpisodeActionResponse:
+                bulkTagAlertActionResponse:
                   summary: All actions created
                   value:
                     affected_count: 2
@@ -11581,7 +11581,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Bulk tag alert episodes
+      summary: Bulk tag alerts
       tags:
         - alerting-v2
       x-state: Experimental
@@ -11597,7 +11597,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create the same action for multiple alerts in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-bulk-unack
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -11611,12 +11611,12 @@ paths:
         content:
           application/json:
             examples:
-              bulkUnackEpisodeActionRequest:
-                summary: Unacknowledge two alert episodes
+              bulkUnackAlertActionRequest:
+                summary: Unacknowledge two alerts
                 value:
                   items:
-                    - alert_id: episode-1
-                    - alert_id: episode-2
+                    - alert_id: alert-1
+                    - alert_id: alert-2
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unack_alerts_request'
       responses:
@@ -11624,7 +11624,7 @@ paths:
           content:
             application/json:
               examples:
-                bulkUnackEpisodeActionResponse:
+                bulkUnackAlertActionResponse:
                   summary: All actions created
                   value:
                     affected_count: 2
@@ -11701,7 +11701,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Bulk unacknowledge alert episodes
+      summary: Bulk unacknowledge alerts
       tags:
         - alerting-v2
       x-state: Experimental
@@ -11717,7 +11717,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-id-ack
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -11739,8 +11739,8 @@ paths:
         content:
           application/json:
             examples:
-              createAckEpisodeActionRequest:
-                summary: Acknowledge the alert episode
+              createAckAlertActionRequest:
+                summary: Acknowledge the alert
                 value: {}
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_ack_alert_action'
@@ -11794,17 +11794,17 @@ paths:
           content:
             application/json:
               examples:
-                alertEpisodeNotFound:
+                alertNotFound:
                   summary: No alert exists for the given alert_id
                   value:
                     code: ALERT_NOT_FOUND
                     details:
-                      alert_id: episode-1
+                      alert_id: alert-1
                     error: Not Found
-                    message: Alert with alert_id [episode-1] not found
+                    message: Alert with alert_id [alert-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode was not found.
+          description: Indicates the alert was not found.
         '409':
           content:
             application/json:
@@ -11815,10 +11815,10 @@ paths:
                     code: INVALID_ALERT_STATE_TRANSITION
                     details:
                       action_type: ack
-                      alert_id: episode-1
+                      alert_id: alert-1
                       group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
                     error: Conflict
-                    message: '[episode-1] is already acknowledged.'
+                    message: '[alert-1] is already acknowledged.'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert is already acknowledged.
@@ -11848,7 +11848,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Acknowledge an alert episode
+      summary: Acknowledge an alert
       tags:
         - alerting-v2
       x-state: Experimental
@@ -11864,7 +11864,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-id-activate
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -11886,7 +11886,7 @@ paths:
         content:
           application/json:
             examples:
-              createActivateEpisodeActionRequest:
+              createActivateAlertActionRequest:
                 summary: Activate with a reason
                 value:
                   reason: Issue reappeared after silence window.
@@ -11942,33 +11942,33 @@ paths:
           content:
             application/json:
               examples:
-                alertEpisodeNotFound:
+                alertNotFound:
                   summary: No alert exists for the given alert_id
                   value:
                     code: ALERT_NOT_FOUND
                     details:
-                      alert_id: episode-1
+                      alert_id: alert-1
                     error: Not Found
-                    message: Alert with alert_id [episode-1] not found
+                    message: Alert with alert_id [alert-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode was not found.
+          description: Indicates the alert was not found.
         '409':
           content:
             application/json:
               examples:
-                alertEpisodeNotLatest:
+                alertNotLatest:
                   summary: The alert has been superseded by a newer alert of its series
                   value:
                     code: ALERT_NOT_LATEST
                     details:
-                      alert_id: episode-1
+                      alert_id: alert-1
                       group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
                     error: Conflict
-                    message: Alert [episode-1] is not the latest alert for group [98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56]
+                    message: Alert [alert-1] is not the latest alert for group [98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56]
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode has been superseded by a newer episode of its series, or is already in the requested state.
+          description: Indicates the alert has been superseded by a newer alert in its series, or is already in the requested state.
         '500':
           content:
             application/json:
@@ -11995,7 +11995,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Activate an alert episode
+      summary: Activate an alert
       tags:
         - alerting-v2
       x-state: Experimental
@@ -12011,7 +12011,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-id-assign
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -12033,8 +12033,8 @@ paths:
         content:
           application/json:
             examples:
-              createAssignEpisodeActionRequest:
-                summary: Assign the alert episode to user u_abc123
+              createAssignAlertActionRequest:
+                summary: Assign the alert to user u_abc123
                 value:
                   assignee_uid: u_abc123
             schema:
@@ -12089,17 +12089,17 @@ paths:
           content:
             application/json:
               examples:
-                alertEpisodeNotFound:
+                alertNotFound:
                   summary: No alert exists for the given alert_id
                   value:
                     code: ALERT_NOT_FOUND
                     details:
-                      alert_id: episode-1
+                      alert_id: alert-1
                     error: Not Found
-                    message: Alert with alert_id [episode-1] not found
+                    message: Alert with alert_id [alert-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode was not found.
+          description: Indicates the alert was not found.
         '409':
           content:
             application/json:
@@ -12110,10 +12110,10 @@ paths:
                     code: ALERT_ACTION_NO_OP
                     details:
                       action_type: assign
-                      alert_id: episode-1
+                      alert_id: alert-1
                       group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
                     error: Conflict
-                    message: '[episode-1] is already assigned to [u_abc123].'
+                    message: '[alert-1] is already assigned to [u_abc123].'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert already carries the requested assignee.
@@ -12143,7 +12143,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Assign an alert episode to a user
+      summary: Assign an alert to a user
       tags:
         - alerting-v2
       x-state: Experimental
@@ -12159,7 +12159,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-id-deactivate
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -12181,7 +12181,7 @@ paths:
         content:
           application/json:
             examples:
-              createDeactivateEpisodeActionRequest:
+              createDeactivateAlertActionRequest:
                 summary: Deactivate as a false positive
                 value:
                   reason: False positive confirmed by on-call.
@@ -12237,33 +12237,33 @@ paths:
           content:
             application/json:
               examples:
-                alertEpisodeNotFound:
+                alertNotFound:
                   summary: No alert exists for the given alert_id
                   value:
                     code: ALERT_NOT_FOUND
                     details:
-                      alert_id: episode-1
+                      alert_id: alert-1
                     error: Not Found
-                    message: Alert with alert_id [episode-1] not found
+                    message: Alert with alert_id [alert-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode was not found.
+          description: Indicates the alert was not found.
         '409':
           content:
             application/json:
               examples:
-                alertEpisodeNotLatest:
+                alertNotLatest:
                   summary: The alert has been superseded by a newer alert of its series
                   value:
                     code: ALERT_NOT_LATEST
                     details:
-                      alert_id: episode-1
+                      alert_id: alert-1
                       group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
                     error: Conflict
-                    message: Alert [episode-1] is not the latest alert for group [98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56]
+                    message: Alert [alert-1] is not the latest alert for group [98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56]
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode has been superseded by a newer episode of its series, or is already in the requested state.
+          description: Indicates the alert has been superseded by a newer alert in its series, or is already in the requested state.
         '500':
           content:
             application/json:
@@ -12290,7 +12290,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Deactivate an alert episode
+      summary: Deactivate an alert
       tags:
         - alerting-v2
       x-state: Experimental
@@ -12306,7 +12306,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-id-tag
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -12328,8 +12328,8 @@ paths:
         content:
           application/json:
             examples:
-              createTagEpisodeActionRequest:
-                summary: Tag the alert episode with production and investigating
+              createTagAlertActionRequest:
+                summary: Tag the alert with production and investigating
                 value:
                   tags:
                     - production
@@ -12386,17 +12386,17 @@ paths:
           content:
             application/json:
               examples:
-                alertEpisodeNotFound:
+                alertNotFound:
                   summary: No alert exists for the given alert_id
                   value:
                     code: ALERT_NOT_FOUND
                     details:
-                      alert_id: episode-1
+                      alert_id: alert-1
                     error: Not Found
-                    message: Alert with alert_id [episode-1] not found
+                    message: Alert with alert_id [alert-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode was not found.
+          description: Indicates the alert was not found.
         '409':
           content:
             application/json:
@@ -12407,10 +12407,10 @@ paths:
                     code: ALERT_ACTION_NO_OP
                     details:
                       action_type: tag
-                      alert_id: episode-1
+                      alert_id: alert-1
                       group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
                     error: Conflict
-                    message: '[episode-1] already has these tags.'
+                    message: '[alert-1] already has these tags.'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert already carries exactly the requested tags.
@@ -12440,7 +12440,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Tag an alert episode
+      summary: Tag an alert
       tags:
         - alerting-v2
       x-state: Experimental
@@ -12456,7 +12456,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-id-unack
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -12478,8 +12478,8 @@ paths:
         content:
           application/json:
             examples:
-              createUnackEpisodeActionRequest:
-                summary: Unacknowledge the alert episode
+              createUnackAlertActionRequest:
+                summary: Unacknowledge the alert
                 value: {}
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_unack_alert_action'
@@ -12533,17 +12533,17 @@ paths:
           content:
             application/json:
               examples:
-                alertEpisodeNotFound:
+                alertNotFound:
                   summary: No alert exists for the given alert_id
                   value:
                     code: ALERT_NOT_FOUND
                     details:
-                      alert_id: episode-1
+                      alert_id: alert-1
                     error: Not Found
-                    message: Alert with alert_id [episode-1] not found
+                    message: Alert with alert_id [alert-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode was not found.
+          description: Indicates the alert was not found.
         '409':
           content:
             application/json:
@@ -12554,10 +12554,10 @@ paths:
                     code: INVALID_ALERT_STATE_TRANSITION
                     details:
                       action_type: unack
-                      alert_id: episode-1
+                      alert_id: alert-1
                       group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
                     error: Conflict
-                    message: '[episode-1] must be acknowledged first before it can be unacknowledged.'
+                    message: '[alert-1] must be acknowledged first before it can be unacknowledged.'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert is not acknowledged.
@@ -12587,7 +12587,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Unacknowledge an alert episode
+      summary: Unacknowledge an alert
       tags:
         - alerting-v2
       x-state: Experimental
@@ -12717,7 +12717,7 @@ paths:
                       - action_group_count: 1
                         alert_count: 1
                         alerts:
-                          - id: episode-1
+                          - id: alert-1
                         dispatched_at: '2026-01-15T12:05:00.000Z'
                         outcome: success
                         policy:
@@ -14791,7 +14791,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -14908,7 +14908,7 @@ paths:
         [Required authorization] Route required privileges: read_alerting-v2-rules.
       operationId: get-alerting-v2-rules-id
       parameters:
-        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -15080,7 +15080,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -15275,7 +15275,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -15529,7 +15529,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -15715,7 +15715,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -15897,7 +15897,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
