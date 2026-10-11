@@ -18,7 +18,6 @@ import type { EntityStoreStatus, GetStatusSuccessResult } from '../../domain/typ
 import type { EngineError, EngineStatus, LogExtractionConfig } from '../../domain/saved_objects';
 import { capAtMaxLogsPerWindow } from '../../domain/logs_extraction/effective_page_limits';
 import { ENTITY_STORE_STATUS } from '../../domain/constants';
-import { hasPriorityExtractionGate } from '../../../common/domain/definitions/registry';
 
 /**
  * Legacy engine descriptor from V1. will be removed in a future version.
@@ -42,8 +41,24 @@ interface LegacyEngineDescriptorV1 {
   lastExecutionTimestamp: string | undefined;
 }
 
-/** Operational state of the non-priority extraction process, for types that run one. */
-interface NonPriorityEngineStatus {
+type LogExtractionStatusFields = Pick<
+  LegacyEngineDescriptorV1,
+  | 'delay'
+  | 'timeout'
+  | 'frequency'
+  | 'lookbackPeriod'
+  | 'fieldHistoryLength'
+  | 'maxLogsPerPage'
+  | 'maxTimeWindowSize'
+  | 'maxLogsPerWindow'
+  | 'maxLogsPerWindowCapBehavior'
+>;
+
+/**
+ * State and resolved config of the non-priority extraction process, for types that run one.
+ * The config fields mirror the engine's top-level ones, which describe the priority process.
+ */
+interface NonPriorityEngineStatus extends LogExtractionStatusFields {
   status: EngineStatus | null;
   error: EngineError | null;
   lastExecutionTimestamp: string | undefined;
@@ -81,10 +96,32 @@ const querySchema = lazySchema(() =>
 );
 export type StatusRequestQuery = z.infer<typeof querySchema>;
 
+const toLogExtractionStatusFields = ({
+  delay,
+  timeout,
+  frequency,
+  lookbackPeriod,
+  fieldHistoryLength,
+  maxLogsPerPage,
+  maxTimeWindowSize,
+  maxLogsPerWindow,
+  maxLogsPerWindowCapBehavior,
+}: LogExtractionConfig): LogExtractionStatusFields => ({
+  delay,
+  timeout,
+  frequency,
+  lookbackPeriod,
+  fieldHistoryLength,
+  maxLogsPerPage: capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow),
+  maxTimeWindowSize,
+  maxLogsPerWindow,
+  maxLogsPerWindowCapBehavior,
+});
+
 function toPublicEngine(
   engine: GetStatusSuccessResult['engines'][number],
   logsExtractionConfig: LogExtractionConfig,
-  dualProcess: boolean
+  nonPriorityLogsExtractionConfig: LogExtractionConfig | undefined
 ): StatusEngine {
   const {
     versionState,
@@ -96,41 +133,22 @@ function toPublicEngine(
     nonPriorityError,
     ...rest
   } = engine;
-  const {
-    delay,
-    timeout,
-    frequency,
-    lookbackPeriod,
-    fieldHistoryLength,
-    maxLogsPerPage,
-    maxTimeWindowSize,
-    maxLogsPerWindow,
-    maxLogsPerWindowCapBehavior,
-  } = logsExtractionConfig;
 
   return {
     ...rest,
     // TODO: Remove the legacy fields once we stop supporting V1.
     filter: '',
-    delay,
-    timeout,
-    frequency,
-    lookbackPeriod,
-    fieldHistoryLength,
-    maxLogsPerPage: capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow),
-    maxTimeWindowSize,
-    maxLogsPerWindow,
-    maxLogsPerWindowCapBehavior,
+    ...toLogExtractionStatusFields(logsExtractionConfig),
     docsPerSecond: -1,
     indexPattern: '',
     enrichPolicyExecutionInterval: null,
     timestampField: '@timestamp',
     maxPageSearchSize: 10000,
     lastExecutionTimestamp: logExtractionState.lastExecutionTimestamp ?? undefined,
-    // Only types with a priority gate run a second process; for the rest there is nothing to report.
-    // With the flag off the non-priority task skips every run without updating its stored status,
-    // so reporting it would show a stale `started`.
-    ...(dualProcess && hasPriorityExtractionGate(engine.type)
+    // getStatus resolves a non-priority config only for types that run that process: types with a
+    // priority gate, with the flag on. With the flag off the non-priority task skips every run
+    // without updating its stored status, so reporting it would show a stale `started`.
+    ...(nonPriorityLogsExtractionConfig
       ? {
           nonPriority: {
             status: nonPriorityStatus ?? null,
@@ -140,6 +158,7 @@ function toPublicEngine(
             // Read off the descriptor: this reports what was configured, not the rate
             // getMergedConfig resolves for a run.
             samplingRate: nonPriorityLogExtractionConfig?.samplingRate ?? null,
+            ...toLogExtractionStatusFields(nonPriorityLogsExtractionConfig),
           },
         }
       : {}),
@@ -153,7 +172,8 @@ export function registerStatus(router: EntityStorePluginRouter) {
       access: 'public',
       summary: 'Get Entity Store status',
       description:
-        'Get the overall Entity Store status and per-engine statuses, optionally including component-level health details.',
+        'Get the overall Entity Store status and per-engine statuses, optionally including component-level health details. ' +
+        'Each engine reports the log extraction settings that apply to its entity type.',
       options: {
         tags: ['oas-tag:Security entity store'],
       },
@@ -177,13 +197,10 @@ export function registerStatus(router: EntityStorePluginRouter) {
       wrapMiddlewares(
         async (ctx, req, res): Promise<IKibanaResponse<EntityStoreStatusResponseBody>> => {
           const entityStoreCtx = await ctx.entityStore;
-          const { logger, assetManagerClient: assetManager, isDualProcessEnabled } = entityStoreCtx;
+          const { logger, assetManagerClient: assetManager } = entityStoreCtx;
           logger.debug('Status API invoked');
           const withComponents = req.query.include_components;
-          const [{ status, engines, ...rest }, dualProcess] = await Promise.all([
-            assetManager.getStatus(withComponents),
-            isDualProcessEnabled(),
-          ]);
+          const { status, engines, ...rest } = await assetManager.getStatus(withComponents);
 
           if (status === ENTITY_STORE_STATUS.NOT_INSTALLED) {
             return res.ok({
@@ -191,8 +208,12 @@ export function registerStatus(router: EntityStorePluginRouter) {
             });
           }
 
-          const { logsExtractionConfig, logsExtractionConfigByType, excludedUserNames } =
-            rest as GetStatusSuccessResult;
+          const {
+            logsExtractionConfig,
+            logsExtractionConfigByType,
+            nonPriorityLogsExtractionConfigByType,
+            excludedUserNames,
+          } = rest as GetStatusSuccessResult;
 
           return res.ok({
             body: {
@@ -201,7 +222,7 @@ export function registerStatus(router: EntityStorePluginRouter) {
                 toPublicEngine(
                   engine,
                   logsExtractionConfigByType[engine.type] ?? logsExtractionConfig,
-                  dualProcess
+                  nonPriorityLogsExtractionConfigByType[engine.type]
                 )
               ),
               excludedUserNames,
