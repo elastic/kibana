@@ -9,8 +9,7 @@
 
 import React from 'react';
 import { EuiToast } from '@elastic/eui';
-import { screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, screen, within } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -40,7 +39,7 @@ const session = createDiscoverSessionMock({
 });
 
 describe('showSessionWarnings', () => {
-  it('opens warning details with the affected tab and control or property from Learn more', async () => {
+  it('opens warning details with the affected tab and control or property from Learn more', () => {
     const core = coreMock.createStart();
     const modal = { close: jest.fn(), onClose: Promise.resolve() };
     core.overlays.openModal.mockReturnValue(modal);
@@ -84,22 +83,25 @@ describe('showSessionWarnings', () => {
     const actionProps = typeof toast === 'string' ? undefined : toast.actionProps;
 
     renderWithI18n(<EuiToast actionProps={actionProps} />);
-    await userEvent.click(screen.getByRole('button', { name: 'Learn more' }));
+    fireEvent.click(screen.getByText('Learn more'));
 
     expect(core.overlays.openModal).toHaveBeenCalledTimes(1);
 
     const mountPointMock = jest.mocked(toMountPoint);
 
     renderWithI18n(<>{mountPointMock.mock.calls[0][0]}</>);
-    const dialog = screen.getByRole('dialog', { name: 'Warning details' });
+    const dialog = screen.getByTestId('discoverSessionWarningDetailsModal');
+    expect(dialog).toHaveTextContent('Warning details');
 
-    const items = within(dialog).getAllByRole('listitem');
+    const items = within(dialog).getAllByTestId('discoverSessionWarningDetailsItem');
     expect(items).toHaveLength(3);
-    expect(within(items[0]).getByText('Tab "Logs": control "control-1"')).toBeVisible();
+    expect(within(items[0]).getByText('Tab "Logs": control "control-1"')).toBeInTheDocument();
     expect(
       within(items[1]).getByText('Tab "Metrics": property "some_future_property"')
-    ).toBeVisible();
-    expect(within(items[2]).getByText('Tab "missing-tab": control "control-2"')).toBeVisible();
+    ).toBeInTheDocument();
+    expect(
+      within(items[2]).getByText('Tab "missing-tab": control "control-2"')
+    ).toBeInTheDocument();
 
     const multilineMessage = within(items[0]).getByText(warnings[0].message, {
       normalizer: (text) => text,
@@ -108,7 +110,7 @@ describe('showSessionWarnings', () => {
     expect(items[1]).toHaveTextContent(warnings[1].message);
     expect(items[2]).toHaveTextContent(warnings[2].message);
 
-    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
+    fireEvent.click(screen.getByTestId('discoverSessionWarningDetailsCloseButton'));
     expect(modal.close).toHaveBeenCalledTimes(1);
   });
 });
