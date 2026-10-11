@@ -308,3 +308,109 @@ describe('ExpectedSkillInvocation evaluator', () => {
     });
   });
 });
+
+describe('metadata-opt-in evaluators return N/A when their key is unset', () => {
+  const finalAnswer = {
+    messages: [{ message: 'Version 8.15.0 was released on 2024-08-06.' }],
+    errors: [],
+    steps: [{ type: 'tool_call', tool_id: 'platform.core.search', results: [{ data: {} }] }],
+  } satisfies TaskOutput;
+
+  async function evaluateByName(name: string, metadata: Record<string, unknown> | undefined) {
+    const { dependencies, runExperiment } = createTestSetup();
+
+    await createEvaluateDataset(dependencies)({
+      dataset: {
+        name: 'test-dataset',
+        description: 'dataset for N/A evaluator tests',
+        examples: [{ input: { question: 'q' }, output: {} }],
+      },
+    });
+
+    const [, selectedEvaluators] = runExperiment.mock.calls[0];
+    const evaluator = selectedEvaluators.find((it) => it.name === name);
+    if (!evaluator) {
+      throw new Error(`${name} evaluator was not registered`);
+    }
+
+    return evaluator.evaluate({
+      input: { question: 'q' },
+      expected: {},
+      output: finalAnswer,
+      metadata,
+    });
+  }
+
+  const nAMetadataOptInCases: Array<[string, Record<string, unknown> | undefined]> = [
+    ['ExpectedToolCalled', undefined],
+    ['ExpectedToolCalled', {}],
+    ['ShouldNotCallTool', {}],
+    ['ToolUsageOnly', {}],
+    ['RequiredTermsInResponse', {}],
+    ['RequiredTermsInResponse', { requiredTerms: [] }],
+    ['RequiredAlertIdsInResponse', { requiredAlertIds: [] }],
+    ['RequiredAlertIdsInResponse', { requiredAlertIds: [42] }],
+    ['DocVersionReleaseDate', {}],
+    ['DocVersionReleaseDate', { requireVersionAndReleaseDate: false }],
+    ['ExpectedSkillInvocation', {}],
+  ];
+
+  it.each(nAMetadataOptInCases)(
+    '%s returns score null with unavailable label when its metadata key is unset',
+    async (name, metadata) => {
+      const result = await evaluateByName(name, metadata);
+
+      expect(result.score).toBeNull();
+      expect(result.score).not.toBe(1);
+      expect(result.score).not.toBe(0);
+      expect(result.label).toBe('unavailable');
+      expect(result.metadata).toEqual(
+        expect.objectContaining({ reason: expect.stringContaining('not set') })
+      );
+    }
+  );
+
+  it('ExpectedToolCalled still scores 1 when expectedToolId is set and the tool was called', async () => {
+    const result = await evaluateByName('ExpectedToolCalled', {
+      expectedToolId: 'platform.core.search',
+    });
+
+    expect(result.score).toBe(1);
+  });
+
+  it('RequiredTermsInResponse still scores 1 when requiredTerms match the answer', async () => {
+    const result = await evaluateByName('RequiredTermsInResponse', {
+      requiredTerms: ['8.15.0'],
+    });
+
+    expect(result.score).toBe(1);
+    expect(result.metadata).toEqual(
+      expect.objectContaining({ missing: [], requiredTerms: ['8.15.0'] })
+    );
+  });
+
+  it('RequiredTermsInResponse still scores 0 when requiredTerms are missing from the answer', async () => {
+    const result = await evaluateByName('RequiredTermsInResponse', {
+      requiredTerms: ['9.9.9'],
+    });
+
+    expect(result.score).toBe(0);
+    expect(result.metadata).toEqual(expect.objectContaining({ missing: ['9.9.9'] }));
+  });
+
+  it('ShouldNotCallTool still scores 1 when the tool was not called', async () => {
+    const result = await evaluateByName('ShouldNotCallTool', {
+      shouldNotCallToolId: 'security.siem_migration.start_rule_migration',
+    });
+
+    expect(result.score).toBe(1);
+  });
+
+  it('ShouldNotCallTool still scores 0 when the tool was called', async () => {
+    const result = await evaluateByName('ShouldNotCallTool', {
+      shouldNotCallToolId: 'platform.core.search',
+    });
+
+    expect(result.score).toBe(0);
+  });
+});
