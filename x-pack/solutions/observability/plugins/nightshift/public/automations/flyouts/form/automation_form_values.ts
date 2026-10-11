@@ -29,6 +29,7 @@ export type TriggerFormValues =
   | {
       kind: 'alert';
       ruleNamePattern: string;
+      ruleNames: string[];
       ruleTags: string[];
       alertStatus: AlertStatus;
     }
@@ -78,7 +79,7 @@ export const createTriggerFormValues = (kind: TriggerFormValues['kind']): Trigge
     return { kind, channels: [], users: [], messageFilter: '' };
   }
   if (kind === 'alert') {
-    return { kind, ruleNamePattern: '', ruleTags: [], alertStatus: 'any' };
+    return { kind, ruleNamePattern: '', ruleNames: [], ruleTags: [], alertStatus: 'any' };
   }
   if (kind === 'cron') {
     return { kind, cronExpression: DEFAULT_CRON, timezone: DEFAULT_TIMEZONE };
@@ -124,6 +125,7 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
       ? {
           kind: 'alert',
           ruleNamePattern: row.ruleNamePattern ?? '',
+          ruleNames: row.ruleNames ?? [],
           ruleTags: row.tags ?? [],
           alertStatus: row.alertStatus ?? 'any',
         }

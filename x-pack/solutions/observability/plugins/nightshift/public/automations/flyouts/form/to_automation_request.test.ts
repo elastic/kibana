@@ -76,6 +76,7 @@ describe('automation request', () => {
           trigger: {
             kind: 'alert',
             ruleNamePattern: ' cpu ',
+            ruleNames: ['Disk full'],
             ruleTags: ['infra'],
             alertStatus: 'inactive',
           },
@@ -86,7 +87,13 @@ describe('automation request', () => {
         isEnabled: true,
         trigger: {
           rows: [
-            { kind: 'alert', ruleNamePattern: 'cpu', alertStatus: 'inactive', tags: ['infra'] },
+            {
+              kind: 'alert',
+              ruleNamePattern: 'cpu',
+              ruleNames: ['Disk full'],
+              alertStatus: 'inactive',
+              tags: ['infra'],
+            },
           ],
         },
         execution: { promptTemplate: 'Find the cause', reasoningMode: 'investigate' },

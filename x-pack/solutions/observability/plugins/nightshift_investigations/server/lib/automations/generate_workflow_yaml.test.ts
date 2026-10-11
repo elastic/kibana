@@ -107,6 +107,13 @@ describe('generateWorkflowYaml', () => {
       expect(yaml.triggers[0].on.condition).toBe('rule.tags: "k8s"');
     });
 
+    it('OR-joins exact rule names with tags', () => {
+      const automation = baseAutomation();
+      automation.trigger.rows = [{ kind: 'alert', ruleNames: ['Disk full'], tags: ['k8s'] }];
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.triggers[0].on.condition).toBe('(rule.name: "Disk full" OR rule.tags: "k8s")');
+    });
+
     it('OR-joins multiple tags', () => {
       const automation = baseAutomation();
       automation.trigger.rows = [{ kind: 'alert', tags: ['k8s', 'prod'] }];

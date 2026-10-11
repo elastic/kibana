@@ -37,6 +37,7 @@ jest.mock('./hooks/use_automations', () => ({
   useUpdateAutomation: jest.fn(),
 }));
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('../hooks/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
 jest.mock('./flyouts/create_flyout/create_automation_flyout', () => ({
   CreateAutomationFlyout: () => <div data-test-subj="createAutomationFlyoutStub">new</div>,
 }));

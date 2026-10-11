@@ -50,6 +50,7 @@ dependsOn:
   - '@kbn/observability-shared-plugin'
   - '@kbn/react-hooks'
   - '@kbn/react-query'
+  - '@kbn/rule-data-utils'
   - '@kbn/scout-oblt'
   - '@kbn/serverless'
   - '@kbn/share-plugin'
