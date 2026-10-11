@@ -336,7 +336,7 @@ steps:
 
         {{ steps.classify_alerts.output.grouped_counts_summary }}
 
-        {{ steps.classify_alerts.output.generated_summary }}{% if steps.classify_alerts.output.connector_id != '' %} _(Connector: `{{ steps.classify_alerts.output.connector_id }}`, Agent: `{{ steps.classify_alerts.output.agent_id }}`)_{% endif %}
+        {{ steps.classify_alerts.output.generated_summary }}{% if steps.classify_alerts.output.connector_id != '' %} _(Connector: `{{ steps.classify_alerts.output.connector_id }}`{% if steps.classify_alerts.output.agent_id != '' %}, Agent: `{{ steps.classify_alerts.output.agent_id }}`{% endif %})_{% endif %}
 
   # ---------------------------------------------------------------------------
   # 6. Record the impacted hosts and users on the Investigation through the shared

@@ -46,6 +46,7 @@ export type AlertAnalysisWorkflowSettingsWithConnector = AlertAnalysisWorkflowSe
   connectorId?: string;
   workflowEnabled?: boolean;
   createConversation?: boolean;
+  usePrompt?: boolean;
 };
 
 export interface AlertAnalysisWorkflowSettingsWithConnectorResponse {

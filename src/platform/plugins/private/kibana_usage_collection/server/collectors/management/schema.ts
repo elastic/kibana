@@ -1024,6 +1024,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Whether the AI agent creates a new conversation per alert analysis',
     },
   },
+  'securitySolution:alertAnalysisWorkflowUsePrompt': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the alert analysis workflow classifies with a single prompt instead of an AI agent',
+    },
+  },
   'securitySolution:alertAnalysisWorkflowTagPrefix': {
     type: 'keyword',
     _meta: {
