@@ -6,13 +6,14 @@
  */
 
 import { useMemo } from 'react';
-import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
+import type { RunWorkflowExecutor, RunWorkflowTelemetry } from '@kbn/workflows-ui';
 import type { CaseWorkflowRunOrigin } from '../../../common/types/api';
 import {
   ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
   ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/types/domain/user_action/workflow/constants';
 import { useCaseAttachmentWorkflowContext } from './case_attachment_workflow_context';
+import { getCaseWorkflowRunTelemetry } from '../../analytics/use_case_workflow_run_telemetry';
 
 /**
  * A row target (`attachmentId`) or a bulk target (`attachmentIds`, including a selection of one).
@@ -43,6 +44,8 @@ export interface CaseAttachmentWorkflowRunProps {
   runWorkflow: RunWorkflowExecutor | undefined;
   /** Pass to `RunWorkflowPanel`. */
   showSuccessToast: boolean;
+  /** Pass to `RunWorkflowPanel`. Undefined outside a case, so the caller can report its own surface. */
+  telemetry: RunWorkflowTelemetry | undefined;
 }
 
 /**
@@ -66,10 +69,10 @@ export const useCaseAttachmentWorkflowRun = ({
 
   return useMemo(() => {
     if (context.status !== 'available') {
-      return { runWorkflow: undefined, showSuccessToast: true };
+      return { runWorkflow: undefined, showSuccessToast: true, telemetry: undefined };
     }
 
-    const { caseId, createExecutor } = context;
+    const { caseId, createExecutor, owner } = context;
     const origin: CaseWorkflowRunOrigin =
       'attachmentId' in target
         ? {
@@ -85,6 +88,10 @@ export const useCaseAttachmentWorkflowRun = ({
             attachmentIds: [...target.attachmentIds],
           };
 
-    return { runWorkflow: createExecutor(origin), showSuccessToast: false };
+    return {
+      runWorkflow: createExecutor(origin),
+      showSuccessToast: false,
+      telemetry: { ...getCaseWorkflowRunTelemetry(origin), owner },
+    };
   }, [attachmentType, context, target]);
 };

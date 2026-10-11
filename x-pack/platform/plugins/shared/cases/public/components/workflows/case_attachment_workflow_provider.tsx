@@ -15,6 +15,8 @@ import {
   useCasesWorkflowExecutorDeps,
 } from './use_cases_workflow_executor';
 import { useCanRunCaseWorkflow } from './use_run_case_workflow';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { getEbtOwner } from '../../analytics/get_ebt_owner';
 
 interface CaseAttachmentWorkflowProviderProps {
   caseId: string;
@@ -32,17 +34,20 @@ export const CaseAttachmentWorkflowProvider: React.FC<CaseAttachmentWorkflowProv
 }) => {
   const canRunWorkflow = useCanRunCaseWorkflow();
   const executorDeps = useCasesWorkflowExecutorDeps();
+  const { owner } = useCasesContext();
+  const ebtOwner = getEbtOwner(owner);
   const value = useMemo(
     (): CaseAttachmentWorkflowContextValue =>
       canRunWorkflow
         ? {
             status: 'available',
             caseId,
+            owner: ebtOwner,
             createExecutor: (origin) =>
               createCasesWorkflowExecutor(executorDeps, { caseId, origin }),
           }
         : { status: 'unavailable', caseId },
-    [canRunWorkflow, caseId, executorDeps]
+    [canRunWorkflow, caseId, ebtOwner, executorDeps]
   );
   return (
     <CaseAttachmentWorkflowContext.Provider value={value}>
