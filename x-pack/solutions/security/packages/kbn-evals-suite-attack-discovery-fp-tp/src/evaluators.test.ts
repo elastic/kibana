@@ -612,8 +612,30 @@ describe('trajectory', () => {
 
   it('returns less than 1 when the agent called a tool', async () => {
     expect(
-      await score(trajectory, { ...completed, toolCallIds: ['search'] }, 'false_positive')
+      await score(trajectory, { ...completed, toolCallIds: ['security.alerts'] }, 'false_positive')
     ).toBeLessThan(1);
+  });
+
+  it('returns 1 when the agent called only Agent Builder runtime tools', async () => {
+    expect(
+      await score(
+        trajectory,
+        { ...completed, toolCallIds: ['attachments.add', 'write_todos'] },
+        'false_positive'
+      )
+    ).toBe(1);
+  });
+
+  it('still fails a data-reaching internal tool', async () => {
+    expect(
+      await score(trajectory, { ...completed, toolCallIds: ['execute_api'] }, 'false_positive')
+    ).toBe(0);
+  });
+
+  it('returns N/A, not 0, for a tool Agent Builder does not classify', async () => {
+    expect(
+      await score(trajectory, { ...completed, toolCallIds: ['new_ab_tool'] }, 'false_positive')
+    ).toBeNull();
   });
 
   it('returns N/A when traces are unavailable', async () => {

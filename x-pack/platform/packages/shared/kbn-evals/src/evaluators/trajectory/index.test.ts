@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createTrajectoryEvaluator } from '.';
+import { createTrajectoryEvaluator, type ToolCallClass, type TrajectoryToolCall } from '.';
 
 describe('createTrajectoryEvaluator', () => {
   const evaluator = createTrajectoryEvaluator({
@@ -125,5 +125,99 @@ describe('createTrajectoryEvaluator', () => {
         coverageWeight: 0.3,
       })
     ).toThrow('orderWeight (0.3) + coverageWeight (0.3) must sum to 1');
+  });
+
+  describe('with classifyTool', () => {
+    type Call = string | TrajectoryToolCall;
+    const classes: Record<string, ToolCallClass> = {
+      'attachments.read': 'runtime',
+      write_todos: 'runtime',
+      execute_api: 'scored',
+      'security.alerts': 'scored',
+    };
+    const classifyTool = jest.fn(
+      (call: TrajectoryToolCall): ToolCallClass => classes[call.id] ?? 'unclassified'
+    );
+    const classified = createTrajectoryEvaluator({
+      extractToolCalls: (output: unknown) => (output as { tools: Call[] }).tools,
+      goldenPathExtractor: (expected: unknown) => (expected as { tools: string[] }).tools,
+      classifyTool,
+    });
+    const run = (tools: Call[], expected: string[]) =>
+      classified.evaluate({
+        input: {},
+        output: { tools },
+        expected: { tools: expected },
+        metadata: null,
+      });
+
+    beforeEach(() => classifyTool.mockClear());
+
+    it('drops runtime tools before the no-tools-expected guardrail', async () => {
+      const result = await run(['attachments.read', 'write_todos'], []);
+      expect(result).toMatchObject({ score: 1, label: 'match' });
+      expect(result.metadata).toEqual({ runtimeToolIds: ['attachments.read', 'write_todos'] });
+    });
+
+    it('still fails the guardrail for a scored tool next to runtime tools', async () => {
+      const result = await run(['write_todos', 'attachments.read', 'execute_api'], []);
+      expect(result).toMatchObject({ score: 0, label: 'unexpected-tools' });
+    });
+
+    it('drops runtime tools from order and coverage scoring', async () => {
+      const result = await run(
+        ['write_todos', 'security.alerts', 'attachments.read'],
+        ['security.alerts']
+      );
+      expect(result.score).toBe(1);
+      expect(result.metadata).toMatchObject({
+        actual: ['security.alerts'],
+        extraTools: [],
+        runtimeToolIds: ['write_todos', 'attachments.read'],
+      });
+    });
+
+    it('returns N/A naming every unclassified tool', async () => {
+      const result = await run(
+        ['security.alerts', 'brand_new_tool', 'other_new_tool', 'brand_new_tool'],
+        ['security.alerts']
+      );
+      expect(result).toMatchObject({
+        score: null,
+        label: 'N/A',
+        explanation: 'unclassified-tool:brand_new_tool,other_new_tool',
+      });
+      expect(result.metadata).toEqual({
+        unclassifiedToolIds: ['brand_new_tool', 'other_new_tool'],
+        runtimeToolIds: [],
+      });
+    });
+
+    it('returns N/A rather than 0 when only an unclassified tool was called and none expected', async () => {
+      const result = await run(['brand_new_tool'], []);
+      expect(result).toMatchObject({ score: null, label: 'N/A' });
+    });
+
+    it('scores golden tools without consulting the classifier', async () => {
+      const result = await run(['golden_custom_tool'], ['golden_custom_tool']);
+      expect(result.score).toBe(1);
+      expect(classifyTool).not.toHaveBeenCalled();
+    });
+
+    it('passes the call origin to the classifier', async () => {
+      await run([{ id: 'security.alerts', origin: 'registry' }], []);
+      expect(classifyTool).toHaveBeenCalledWith({ id: 'security.alerts', origin: 'registry' });
+    });
+  });
+
+  it('scores every tool when classifyTool is omitted', async () => {
+    const result = await evaluator.evaluate({
+      input: {},
+      output: { tools: ['attachments.read'] },
+      expected: { tools: [] },
+      metadata: null,
+    });
+    expect(result).toMatchObject({ score: 0, label: 'unexpected-tools' });
+    expect(result.metadata).toBeUndefined();
   });
 });

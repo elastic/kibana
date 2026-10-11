@@ -6,9 +6,15 @@
  */
 
 import type { Evaluator } from '@kbn/evals';
-import { createTrajectoryEvaluator } from '@kbn/evals';
+import {
+  createAgentBuilderToolClassifier,
+  createTrajectoryEvaluator,
+  createUnclassifiedToolsEvaluator,
+} from '@kbn/evals';
 import { CLASSIFICATIONS, type Classification } from './constants';
 import type { AlertAnalysisVerdict } from './workflow_task';
+
+const classifyTool = createAgentBuilderToolClassifier();
 
 interface ExpectedVerdict {
   classification: Classification;
@@ -80,7 +86,8 @@ export const validVerdict: Evaluator = {
 
 /**
  * L2 guardrail: the workflow pre-builds context, so the `ai.agent` step should not call tools.
- * Golden path is empty; any tool call fails trajectory.
+ * Golden path is empty; any tool call fails trajectory, except Agent Builder runtime tools
+ * (attachments, todos, ...). An unknown tool makes the result N/A.
  */
 export const createAlertAnalysisTrajectoryEvaluator = (): Evaluator => {
   const inner = createTrajectoryEvaluator({
@@ -88,6 +95,7 @@ export const createAlertAnalysisTrajectoryEvaluator = (): Evaluator => {
     goldenPathExtractor: () => [],
     orderWeight: 1,
     coverageWeight: 0,
+    classifyTool,
   });
 
   return {
@@ -105,3 +113,10 @@ export const createAlertAnalysisTrajectoryEvaluator = (): Evaluator => {
     },
   };
 };
+
+/** Count of tools in the agent's trace that Agent Builder's classification cannot place. */
+export const createAlertAnalysisUnclassifiedToolsEvaluator = (): Evaluator =>
+  createUnclassifiedToolsEvaluator({
+    extractToolCalls: (output) => asVerdict(output).toolCallIds ?? [],
+    classifyTool,
+  });

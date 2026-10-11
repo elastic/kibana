@@ -56,6 +56,7 @@ import { configureAlertAnalysisWorkflow } from '../src/space_config';
 import {
   classificationAccuracy,
   createAlertAnalysisTrajectoryEvaluator,
+  createAlertAnalysisUnclassifiedToolsEvaluator,
   validVerdict,
 } from '../src/evaluators';
 import { ALERT_ANALYSIS_EVAL_ALERTS } from '../src/synthetic_alerts';
@@ -137,6 +138,7 @@ evaluate.describe(
           classificationAccuracy,
           validVerdict,
           createAlertAnalysisTrajectoryEvaluator(),
+          createAlertAnalysisUnclassifiedToolsEvaluator(),
           evaluators.criteria(RATIONALE_CRITERIA),
         ]);
 
