@@ -6,7 +6,11 @@
  */
 
 import type { Evaluator } from '@kbn/evals';
-import { createTrajectoryEvaluator } from '@kbn/evals';
+import {
+  createAgentBuilderToolClassifier,
+  createTrajectoryEvaluator,
+  createUnclassifiedToolsEvaluator,
+} from '@kbn/evals';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   FP_TP_VERDICTS,
@@ -247,9 +251,12 @@ export const payloadConformance: Evaluator = {
   },
 };
 
+const classifyTool = createAgentBuilderToolClassifier();
+
 /**
  * Zero-tool guardrail: the workflow gathers the evidence and the agent is tool-less, so
- * any tool call fails. N/A when the traces are unavailable.
+ * any tool call fails, except Agent Builder runtime tools (attachments, todos, ...).
+ * N/A when the traces are unavailable or a tool is unknown.
  */
 export const createFpTpTrajectoryEvaluator = (): Evaluator => {
   const inner = createTrajectoryEvaluator({
@@ -257,6 +264,7 @@ export const createFpTpTrajectoryEvaluator = (): Evaluator => {
     goldenPathExtractor: () => [],
     orderWeight: 1,
     coverageWeight: 0,
+    classifyTool,
   });
 
   return {
@@ -274,6 +282,13 @@ export const createFpTpTrajectoryEvaluator = (): Evaluator => {
     },
   };
 };
+
+/** Count of tools in the agent's trace that Agent Builder's classification cannot place. */
+export const createFpTpUnclassifiedToolsEvaluator = (): Evaluator =>
+  createUnclassifiedToolsEvaluator({
+    extractToolCalls: (output) => asOutput(output).toolCallIds ?? [],
+    classifyTool,
+  });
 
 /** Reports N/A for failed runs, which have no summary or rationale to judge. */
 export const skipFailedRuns = (evaluator: Evaluator): Evaluator => ({

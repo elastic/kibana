@@ -8,9 +8,12 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { isValidTraceId } from '@opentelemetry/api';
 import {
+  createAgentBuilderToolClassifier,
   createQuantitativeCorrectnessEvaluators,
   createQuantitativeGroundednessEvaluator,
   createTrajectoryEvaluator,
+  createUnclassifiedToolsEvaluator,
+  getAgentBuilderToolCalls,
   getToolCallSteps,
   withEvaluatorSpan,
   type DefaultEvaluators,
@@ -105,23 +108,20 @@ export const createPersonaMatrixExpectedToolCalledEvaluator = (): Evaluator => (
  * Trajectory evaluator wrapper. Returns N/A when an example has no
  * `tool_sequence` annotation so partial-coverage datasets don't get
  * penalised. Mirrors `createAlertsRagTrajectoryEvaluator` in
- * `kbn-evals-suite-alerts-rag/src/evaluate_dataset.ts`. `filestore.read`
- * (SKILL.md activation) is stripped from the actual sequence since it's
- * already covered by the SkillInvoked evaluator and would otherwise show
- * up as a noisy "extra tool".
+ * `kbn-evals-suite-alerts-rag/src/evaluate_dataset.ts`. Agent Builder runtime
+ * tools (skill loads, attachments, ...) are dropped and unknown tools make the
+ * result N/A, per `createAgentBuilderToolClassifier`.
  */
-const FILESTORE_READ_TOOL_ID = 'filestore.read';
+const classifyTool = createAgentBuilderToolClassifier();
 
 export const createPersonaMatrixTrajectoryEvaluator = (): Evaluator => {
   const inner = createTrajectoryEvaluator({
-    extractToolCalls: (output) =>
-      getToolCallSteps(output as TaskOutput)
-        .map((step) => step.tool_id)
-        .filter((id): id is string => Boolean(id) && id !== FILESTORE_READ_TOOL_ID),
+    extractToolCalls: getAgentBuilderToolCalls,
     goldenPathExtractor: (expected) => {
       const exp = expected as PersonaMatrixDatasetExpected | undefined;
       return exp?.tool_sequence ?? [];
     },
+    classifyTool,
   });
 
   return {
@@ -287,6 +287,12 @@ export function createEvaluatePersonaMatrixDataset({
     const allEvaluators: Evaluator[] = [
       skillInvokedEvaluator,
       trajectoryEvaluator,
+      createUnclassifiedToolsEvaluator({
+        extractToolCalls: getAgentBuilderToolCalls,
+        goldenPathExtractor: (expected) =>
+          (expected as PersonaMatrixDatasetExpected | undefined)?.tool_sequence ?? [],
+        classifyTool,
+      }),
       expectedToolCalledEvaluator,
       ...createQuantitativeCorrectnessEvaluators(),
       createQuantitativeGroundednessEvaluator(),
