@@ -55,10 +55,10 @@ overrides:
   # Generated from package.json#resolutions by `kbn bootstrap` — edit
   # resolutions, not this block (yarn keys are mapped: `**/a` -> `a`, `a/b` -> `a>b`).
   # START GENERATED OVERRIDES
-  '@aws-sdk/client-bedrock-agent-runtime': '3.1089.0'
-  '@aws-sdk/client-bedrock-runtime': '3.1089.0'
-  '@aws-sdk/client-kendra': '3.1089.0'
-  '@aws-sdk/credential-provider-node': '3.972.70'
+  '@aws-sdk/client-bedrock-agent-runtime': '3.1141.0'
+  '@aws-sdk/client-bedrock-runtime': '3.1141.0'
+  '@aws-sdk/client-kendra': '3.1141.0'
+  '@aws-sdk/credential-provider-node': '3.972.84'
   '@babel/core': '7.29.7'
   '@babel/generator': '7.29.8'
   '@babel/helper-annotate-as-pure': '7.29.7'
@@ -73,8 +73,8 @@ overrides:
   '@emotion/sheet': 'npm:@elastic/emotion-sheet@1.4.1'
   '@hapi/mimos>mime-db': '1.53.0'
   '@hello-pangea/dnd': '18.0.1'
-  '@langchain/core': '1.2.3'
-  '@langchain/google-common': '2.2.0'
+  '@langchain/core': '1.2.13'
+  '@langchain/google-common': '2.3.2'
   '@mswjs/interceptors': '0.41.6'
   '@storybook/react-docgen-typescript-plugin': '1.0.6--canary.9.cd77847.0'
   '@types/node': '24.10.13'
