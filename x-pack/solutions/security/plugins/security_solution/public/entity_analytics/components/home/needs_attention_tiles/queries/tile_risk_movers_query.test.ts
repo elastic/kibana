@@ -18,37 +18,40 @@ describe('buildRiskMoversCountQuery', () => {
     expect(query).toContain('FROM risk-score.risk-score-my-space');
   });
 
-  it('fetches a window wider than the period so both sides of the boundary are covered', () => {
-    const query24h = buildRiskMoversCountQuery('default', '.entities-v1', '24h');
-    const query7d = buildRiskMoversCountQuery('default', '.entities-v1', '7d');
-    const query30d = buildRiskMoversCountQuery('default', '.entities-v1', '30d');
-    expect(query24h).toContain('@timestamp >= NOW() - 26h');
-    expect(query7d).toContain('@timestamp >= NOW() - 170h');
-    expect(query30d).toContain('@timestamp >= NOW() - 722h');
-  });
-
-  it('labels docs as "boundary" or "current" using the correct period cutoff for each time range', () => {
+  it('reads only the two hours of risk score docs before the boundary of each time range', () => {
     expect(buildRiskMoversCountQuery('default', '.entities-v1', '24h')).toContain(
-      'CASE(@timestamp <= NOW() - 24h, "boundary", "current")'
+      '@timestamp >= NOW() - 1 days - 2 hours AND @timestamp <= NOW() - 1 days'
     );
     expect(buildRiskMoversCountQuery('default', '.entities-v1', '7d')).toContain(
-      'CASE(@timestamp <= NOW() - 7d, "boundary", "current")'
+      '@timestamp >= NOW() - 7 days - 2 hours AND @timestamp <= NOW() - 7 days'
     );
     expect(buildRiskMoversCountQuery('default', '.entities-v1', '30d')).toContain(
-      'CASE(@timestamp <= NOW() - 30d, "boundary", "current")'
+      '@timestamp >= NOW() - 30 days - 2 hours AND @timestamp <= NOW() - 30 days'
     );
   });
 
-  it('uses LAST(risk_score, @timestamp) not MAX to get the actual snapshot at each boundary', () => {
+  it('uses LAST(risk_score, @timestamp) not MAX to get the actual snapshot at the boundary', () => {
     const query = buildRiskMoversCountQuery('default', '.entities-v1');
-    expect(query).toContain('STATS score = LAST(risk_score, @timestamp) BY entity_euid, period');
+    expect(query).toContain('STATS boundary_score = LAST(risk_score, @timestamp) BY entity_euid');
     expect(query).not.toMatch(/MAX\(risk_score/);
   });
 
-  it('qualifies only entities whose score rose by at least 10 points', () => {
+  it('compares the entity doc score to the boundary score, after merging both by entity.id', () => {
     const query = buildRiskMoversCountQuery('default', '.entities-v1');
-    expect(query).toContain('current_score - boundary_score >= 10');
-    expect(query).toContain('current_score IS NOT NULL AND boundary_score IS NOT NULL');
+    const mergeIdx = query.indexOf('| STATS boundary_score = MAX(boundary_score),');
+    const riseIdx = query.indexOf('| WHERE current_score - boundary_score >= 10');
+    expect(mergeIdx).toBeGreaterThan(-1);
+    expect(riseIdx).toBeGreaterThan(mergeIdx);
+    expect(query).not.toContain('LOOKUP JOIN');
+  });
+
+  it('reads the current score from the scored entity docs', () => {
+    const query = buildRiskMoversCountQuery('default', '.entities-v1');
+    expect(query).toContain('  FROM .entities-v1');
+    expect(query).toContain(
+      '  | WHERE entity.risk.calculated_score_norm IS NOT NULL AND entity.name IS NOT NULL'
+    );
+    expect(query).toContain('current_score = entity.risk.calculated_score_norm');
   });
 
   it('derives entity_euid from all three entity types via COALESCE', () => {
@@ -65,40 +68,30 @@ describe('buildRiskMoversCountQuery', () => {
     );
   });
 
-  it('renames entity_euid to entity.id before the LOOKUP JOIN', () => {
+  it('renames entity_euid to entity.id in the boundary branch', () => {
     const query = buildRiskMoversCountQuery('default', '.entities-v1');
-    const renameIdx = query.indexOf('| RENAME entity_euid AS `entity.id`');
-    const joinIdx = query.indexOf('| LOOKUP JOIN .entities-v1');
-    expect(renameIdx).toBeGreaterThan(-1);
-    expect(joinIdx).toBeGreaterThan(renameIdx);
+    expect(query).toContain('  | RENAME entity_euid AS `entity.id`');
   });
 
-  it('drops risk-history rows with no matching entity-latest record after the LOOKUP JOIN', () => {
-    const query = buildRiskMoversCountQuery('default', '.entities-v1');
-    const joinIdx = query.indexOf('| LOOKUP JOIN .entities-v1');
-    const dropIdx = query.indexOf('| WHERE entity.name IS NOT NULL');
-    expect(joinIdx).toBeGreaterThan(-1);
-    expect(dropIdx).toBeGreaterThan(joinIdx);
-  });
-
-  it('applies entity filter clauses after the LOOKUP JOIN', () => {
-    const filter = '| WHERE entity.type == "host"';
+  it('applies entity filter clauses to the entity branch', () => {
+    const filter = '| WHERE entity.EngineMetadata.Type == "host"';
     const query = buildRiskMoversCountQuery('default', '.entities-v1', '24h', [filter]);
-    const joinIdx = query.indexOf('| LOOKUP JOIN');
-    const filterIdx = query.indexOf(filter);
-    expect(filterIdx).toBeGreaterThan(joinIdx);
+    const entityBranchIdx = query.indexOf('  FROM .entities-v1');
+    const filterIdx = query.indexOf(`  ${filter}`);
+    const mergeIdx = query.indexOf('| STATS boundary_score = MAX(boundary_score),');
+    expect(filterIdx).toBeGreaterThan(entityBranchIdx);
+    expect(filterIdx).toBeLessThan(mergeIdx);
   });
 
   it('defaults to 24h when no time range is supplied', () => {
     const query = buildRiskMoversCountQuery('default', '.entities-v1');
-    expect(query).toContain('@timestamp >= NOW() - 26h');
-    expect(query).toContain('CASE(@timestamp <= NOW() - 24h');
+    expect(query).toContain('@timestamp <= NOW() - 1 days');
   });
 
   it('deduplicates resolved entities and emits both value and entity_ids columns', () => {
     const query = buildRiskMoversCountQuery('default', '.entities-v1');
     expect(query).toContain('COALESCE(`entity.relationships.resolution.resolved_to`, entity.id)');
     expect(query).toContain('value = COUNT_DISTINCT(effective_id)');
-    expect(query).toContain('entity_ids = VALUES(entity.id)');
+    expect(query).toContain('entity_ids = VALUES(effective_id)');
   });
 });

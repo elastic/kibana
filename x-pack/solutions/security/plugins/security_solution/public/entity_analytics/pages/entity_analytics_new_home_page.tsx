@@ -130,8 +130,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     !spaceId || entityStoreStatusLoading || entityStoreDisabled || entityStoreInstalling;
 
   const {
-    alertsCount,
-    alertsEntityIds,
+    severeAlertsCount: alertsCount,
+    severeAlertsEntityIds: alertsEntityIds,
     watchlistedCount,
     watchlistedEntityIds,
     isLoading: alertBasedLoading,
