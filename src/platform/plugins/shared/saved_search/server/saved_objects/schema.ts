@@ -253,6 +253,45 @@ const SCHEMA_DISCOVER_SESSION_V17 = SCHEMA_DISCOVER_SESSION_V16.extends({
   tabs: schema.arrayOf(SCHEMA_TAB_V17, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
 });
 
+const SCHEMA_METRICS_GRID_SORT_FIELD = schema.oneOf([
+  schema.literal('alphabetically'),
+  schema.literal('recency'),
+]);
+
+const SCHEMA_METRICS_GRID_SORT_DIRECTION = schema.oneOf([
+  schema.literal('asc'),
+  schema.literal('desc'),
+]);
+
+// Sort fields are optional so sessions saved before V18 keep validating and fall back to the
+// registered sort defaults when restored.
+const SCHEMA_TAB_TYPE_STATE_V18 = schema.oneOf([
+  schema.object({
+    type: schema.literal(DiscoverTabType.Metrics),
+    dimensions: schema.arrayOf(schema.string({ maxLength: 1000 }), {
+      maxSize: MAX_METRICS_TAB_DIMENSIONS,
+    }),
+    searchTerm: schema.string({ maxLength: 1000 }),
+    counterAggregation: SCHEMA_SIMPLE_AGGREGATION,
+    gaugeAggregation: SCHEMA_SIMPLE_AGGREGATION,
+    histogramPercentile: SCHEMA_HISTOGRAM_PERCENTILE,
+    sortField: schema.maybe(SCHEMA_METRICS_GRID_SORT_FIELD),
+    sortDirection: schema.maybe(SCHEMA_METRICS_GRID_SORT_DIRECTION),
+  }),
+]);
+
+const SCHEMA_TAB_ATTRIBUTES_V18 = SCHEMA_TAB_ATTRIBUTES_V17.extends({
+  tabTypeState: schema.maybe(SCHEMA_TAB_TYPE_STATE_V18),
+});
+
+const SCHEMA_TAB_V18 = SCHEMA_TAB_V17.extends({
+  attributes: SCHEMA_TAB_ATTRIBUTES_V18,
+});
+
+const SCHEMA_DISCOVER_SESSION_V18 = SCHEMA_DISCOVER_SESSION_V17.extends({
+  tabs: schema.arrayOf(SCHEMA_TAB_V18, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
+});
+
 // Add new model versions here, which automatically registers them
 export const DISCOVER_SESSION_MODEL_VERSIONS: SavedObjectsModelVersionMap = {
   13: {
@@ -299,11 +338,18 @@ export const DISCOVER_SESSION_MODEL_VERSIONS: SavedObjectsModelVersionMap = {
       create: SCHEMA_DISCOVER_SESSION_V17,
     },
   },
+  18: {
+    changes: [],
+    schemas: {
+      forwardCompatibility: SCHEMA_DISCOVER_SESSION_V18.extends({}, { unknowns: 'ignore' }),
+      create: SCHEMA_DISCOVER_SESSION_V18,
+    },
+  },
 };
 
 // Set constants to the latest schemas, which updates derived types and content management
-export const SCHEMA_TAB_LATEST = SCHEMA_TAB_V17;
-export const SCHEMA_DISCOVER_SESSION_LATEST = SCHEMA_DISCOVER_SESSION_V17;
+export const SCHEMA_TAB_LATEST = SCHEMA_TAB_V18;
+export const SCHEMA_DISCOVER_SESSION_LATEST = SCHEMA_DISCOVER_SESSION_V18;
 
 export type DiscoverSessionTabAttributes = TypeOf<typeof SCHEMA_TAB_LATEST>['attributes'];
 export type DiscoverSessionTab = TypeOf<typeof SCHEMA_TAB_LATEST>;
