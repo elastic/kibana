@@ -58,16 +58,40 @@ const assertSafeEsqlString = (value: string): string => {
   return value;
 };
 
+const TOOL_NAME_COLUMN = 'attributes.gen_ai.tool.name';
+const TOOL_FAILED_COLUMN = 'attributes.gen_ai.tool.call.failed';
+
+/**
+ * ES|QL rejects a query that references a field no index in the pattern maps.
+ * When the agent never called a tool on a fresh stack, no TOOL span was ever
+ * indexed, so the tool attributes are unmapped and the ordered-tool query
+ * fails verification on every attempt, even though the conversation's spans
+ * are present. These columns are dropped from the query when ES reports them
+ * as unknown.
+ */
+const OPTIONAL_TOOL_COLUMNS: readonly string[] = [TOOL_NAME_COLUMN, TOOL_FAILED_COLUMN];
+
+const getUnknownColumns = (error: unknown): string[] => {
+  const reason = (error as { meta?: { body?: { error?: { reason?: unknown } } } })?.meta?.body
+    ?.error?.reason;
+  const text = [error instanceof Error ? error.message : String(error), reason]
+    .filter((part): part is string => typeof part === 'string')
+    .join('\n');
+  return [...text.matchAll(/Unknown column \[([^\]]+)\]/g)].map((match) => match[1]);
+};
+
 const buildOrderedToolQuery = ({
   conversationIds,
   indexPattern,
   excludeToolIds,
   includeFailures,
+  unmappedColumns = new Set<string>(),
 }: {
   conversationIds: string[];
   indexPattern: string;
   excludeToolIds: string[];
   includeFailures: boolean;
+  unmappedColumns?: ReadonlySet<string>;
 }): string => {
   const conversationClause =
     conversationIds.length === 1
@@ -80,15 +104,20 @@ const buildOrderedToolQuery = ({
     .map((id) => `AND tool_id != "${assertSafeEsqlString(id)}"`)
     .join('\n  ');
 
+  const toolIdExpression = unmappedColumns.has(TOOL_NAME_COLUMN)
+    ? 'name'
+    : `COALESCE(${TOOL_NAME_COLUMN}, name)`;
+  const keepFailed = includeFailures && !unmappedColumns.has(TOOL_FAILED_COLUMN);
+
   return `
 FROM ${indexPattern}
 | WHERE ${conversationClause}
   AND attributes.elastic.inference.span.kind == "TOOL"
 | SORT @timestamp ASC
-| EVAL tool_id = COALESCE(attributes.gen_ai.tool.name, name)
+| EVAL tool_id = ${toolIdExpression}
 | WHERE tool_id IS NOT NULL
   ${excludeClause}
-| KEEP @timestamp, tool_id${includeFailures ? ', attributes.gen_ai.tool.call.failed' : ''}
+| KEEP @timestamp, tool_id${keepFailed ? `, ${TOOL_FAILED_COLUMN}` : ''}
 | LIMIT ${TOOL_SPAN_LIMIT}
 `.trim();
 };
@@ -127,9 +156,7 @@ const parseToolIds = (response: EsqlResponse): string[] => {
 
 const parseFailedToolIds = (response: EsqlResponse): string[] => {
   const toolCol = response.columns.findIndex((column) => column.name === 'tool_id');
-  const failedCol = response.columns.findIndex(
-    (column) => column.name === 'attributes.gen_ai.tool.call.failed'
-  );
+  const failedCol = response.columns.findIndex((column) => column.name === TOOL_FAILED_COLUMN);
   if (toolCol === -1 || failedCol === -1) {
     return [];
   }
@@ -206,23 +233,34 @@ export const readAgentToolCallsFromTraces = async ({
   try {
     // Built once, outside pRetry: query construction is deterministic, so a
     // rejected (unsafe) id is a permanent failure and must not burn retries.
-    const orderedToolQuery = buildOrderedToolQuery({
-      conversationIds: ids,
-      indexPattern,
-      excludeToolIds,
-      includeFailures,
-    });
+    const queryParams = { conversationIds: ids, indexPattern, excludeToolIds, includeFailures };
+    buildOrderedToolQuery(queryParams); // validates ids; throws before any request
     const spanProbeQuery = buildSpanProbeQuery({ conversationIds: ids, indexPattern });
+    const unmappedColumns = new Set<string>();
+
+    const runOrderedToolQuery = async (): Promise<EsqlResponse> => {
+      for (;;) {
+        try {
+          return await traceEsClient.transport.request<EsqlResponse>({
+            method: 'POST',
+            path: '/_query',
+            body: { query: buildOrderedToolQuery({ ...queryParams, unmappedColumns }) },
+          });
+        } catch (error) {
+          const newlyUnmapped = getUnknownColumns(error).filter(
+            (column) => OPTIONAL_TOOL_COLUMNS.includes(column) && !unmappedColumns.has(column)
+          );
+          if (newlyUnmapped.length === 0) {
+            throw error;
+          }
+          newlyUnmapped.forEach((column) => unmappedColumns.add(column));
+        }
+      }
+    };
 
     const response = await pRetry(
       async () => {
-        const result = await traceEsClient.transport.request<EsqlResponse>({
-          method: 'POST',
-          path: '/_query',
-          body: {
-            query: orderedToolQuery,
-          },
-        });
+        const result = await runOrderedToolQuery();
 
         const toolCallIds = parseToolIds(result);
         if (toolCallIds.length > 0) {

@@ -6,6 +6,7 @@
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { toHashedId } from '@kbn/agent-builder-server';
 import { readAgentToolCallsFromTraces } from './read_agent_tool_calls_from_traces';
@@ -242,6 +243,108 @@ describe('readAgentToolCallsFromTraces', () => {
       .query;
     expect(query).toContain('attributes.gen_ai.tool.call.failed');
     expect(result.failedToolCallIds).toEqual(['platform.core.esql']);
+  });
+
+  describe('tool attributes unmapped in the trace index', () => {
+    // A run whose agent never called a tool indexes no TOOL span, so on a fresh
+    // stack attributes.gen_ai.tool.* is never mapped and ES|QL rejects any query
+    // naming it at planning time. Verbatim from a gpt-5.6-sol eval run.
+    const unknownColumnError = (column: string, suggestion: string) =>
+      new errors.ResponseError({
+        statusCode: 400,
+        body: {
+          error: {
+            type: 'verification_exception',
+            reason: `Found 1 problem\nline 5:27: Unknown column [${column}], did you mean [${suggestion}]?`,
+          },
+          status: 400,
+        },
+        headers: {},
+        warnings: null,
+        meta: {} as never,
+      });
+
+    const isProbe = (query: string) => query.includes('STATS span_count');
+    const isMapped = (query: string, column: string) => query.includes(column);
+
+    it('resolves a tool-less run instead of exhausting retries on the unknown column', async () => {
+      const request = jest.fn(async ({ body }: { body: { query: string } }) => {
+        if (isProbe(body.query)) {
+          return { columns: [{ name: 'span_count' }], values: [[6]] };
+        }
+        if (isMapped(body.query, 'attributes.gen_ai.tool.name')) {
+          throw unknownColumnError(
+            'attributes.gen_ai.tool.name',
+            'attributes.gen_ai.conversation.id'
+          );
+        }
+        return { columns: [{ name: '@timestamp' }, { name: 'tool_id' }], values: [] };
+      });
+      const client = { transport: { request } } as unknown as EsClient;
+
+      const result = await readAgentToolCallsFromTraces({
+        traceEsClient: client,
+        conversationIds: '010613cb-f975-4314-baf3-c45c70040d6a',
+        log: silentLog,
+      });
+
+      expect(result).toEqual({ toolCallIds: [], unavailable: false });
+      // rejected query, query without the column, span probe: no pRetry backoff
+      expect(request).toHaveBeenCalledTimes(3);
+      const retried = request.mock.calls[1][0].body.query;
+      expect(retried).toContain('| EVAL tool_id = name');
+      expect(retried).not.toContain('attributes.gen_ai.tool.name');
+    }, 20000); // long enough for a regression to exhaust pRetry and fail on the assertion
+
+    it('drops each unmapped column in turn when failures are requested', async () => {
+      const request = jest.fn(async ({ body }: { body: { query: string } }) => {
+        if (isProbe(body.query)) {
+          return { columns: [{ name: 'span_count' }], values: [[6]] };
+        }
+        if (isMapped(body.query, 'attributes.gen_ai.tool.name')) {
+          throw unknownColumnError(
+            'attributes.gen_ai.tool.name',
+            'attributes.gen_ai.conversation.id'
+          );
+        }
+        if (isMapped(body.query, 'attributes.gen_ai.tool.call.failed')) {
+          throw unknownColumnError(
+            'attributes.gen_ai.tool.call.failed',
+            'attributes.gen_ai.conversation.id'
+          );
+        }
+        return { columns: [{ name: '@timestamp' }, { name: 'tool_id' }], values: [] };
+      });
+      const client = { transport: { request } } as unknown as EsClient;
+
+      const result = await readAgentToolCallsFromTraces({
+        traceEsClient: client,
+        conversationIds: 'conv-1',
+        log: silentLog,
+        includeFailures: true,
+      });
+
+      expect(result).toEqual({ toolCallIds: [], failedToolCallIds: [], unavailable: false });
+      expect(request).toHaveBeenCalledTimes(4);
+    }, 20000);
+
+    it('stays unavailable when the unknown column is not an optional tool attribute', async () => {
+      const request = jest.fn(async () => {
+        throw unknownColumnError(
+          'attributes.gen_ai.conversation.id',
+          'attributes.gen_ai.tool.name'
+        );
+      });
+      const client = { transport: { request } } as unknown as EsClient;
+
+      const result = await readAgentToolCallsFromTraces({
+        traceEsClient: client,
+        conversationIds: 'conv-1',
+        log: silentLog,
+      });
+
+      expect(result).toEqual({ toolCallIds: [], unavailable: true });
+    }, 20000); // backoff across 5 retries is ~15s of wall clock
   });
 
   describe('anonymized conversation ids', () => {

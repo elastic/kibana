@@ -41,3 +41,11 @@ export type FpTpOutcome = (typeof FP_TP_OUTCOMES)[number];
 export const SUMMARY_MARKDOWN_MAX_LENGTH = 8000;
 
 export const RATIONALE_MARKDOWN_MAX_LENGTH = 50000;
+
+/**
+ * Agent Builder tools the runtime can attach to any agent regardless of the tools the agent
+ * declares (e.g. `write_todos`, a planning scratchpad that reads no data). They are not domain
+ * tool calls, so the zero-tool guardrail ignores them. Inlined, like the ids above, to mirror
+ * `internalTools` in @kbn/agent-builder-common without depending on it.
+ */
+export const HARNESS_TOOL_IDS: readonly string[] = ['write_todos'];
