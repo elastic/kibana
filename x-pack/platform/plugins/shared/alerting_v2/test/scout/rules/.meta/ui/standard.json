@@ -1,5 +1,5 @@
 {
-  "sha1": "5d1846b328a0e11a4e806ceffb33bd0e4ebada91",
+  "sha1": "a0416f202d9484b49ad28c80486b5ed58cc7f81c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -146,8 +146,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 57,
-        "column": 26
+        "line": 54,
+        "column": 24
       }
     },
     {
@@ -160,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 130,
-        "column": 24
+        "line": 127,
+        "column": 22
       }
     },
     {
@@ -174,8 +174,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 178,
-        "column": 26
+        "line": 172,
+        "column": 24
       }
     },
     {
@@ -188,8 +188,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 196,
-        "column": 9
+        "line": 190,
+        "column": 7
       }
     },
     {
@@ -202,8 +202,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 242,
-        "column": 23
+        "line": 236,
+        "column": 21
       }
     },
     {
@@ -216,8 +216,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 276,
-        "column": 21
+        "line": 270,
+        "column": 19
       }
     },
     {
@@ -300,8 +300,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rules_list_bulk_respects_filters.spec.ts",
-        "line": 40,
-        "column": 10
+        "line": 37,
+        "column": 8
       }
     },
     {

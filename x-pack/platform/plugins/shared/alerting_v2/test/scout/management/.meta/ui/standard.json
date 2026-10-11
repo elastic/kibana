@@ -1,5 +1,5 @@
 {
-  "sha1": "927fce8d79ff3450acdf0823e1558c5dc0281da8",
+  "sha1": "7c3b3e53656aa3cdc9d0fe6e22af5844103ef972",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -49,7 +49,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/management/ui/tests/management_required_privileges.spec.ts",
         "line": 60,
-        "column": 94
+        "column": 87
       }
     },
     {
