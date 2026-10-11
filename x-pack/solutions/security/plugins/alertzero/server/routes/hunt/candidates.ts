@@ -53,6 +53,7 @@ const readAllOpenProposalConversationIds = async (
         {
           status,
           excludeSuperseded: true,
+          excludeUndecidedSuperseded: false,
           // Only a pending proposal can expire out of the gate. `excludeExpired`
           // filters on `expiresAt > now` whatever the status, and an executing
           // proposal keeps the deadline it was approved under — the proposals

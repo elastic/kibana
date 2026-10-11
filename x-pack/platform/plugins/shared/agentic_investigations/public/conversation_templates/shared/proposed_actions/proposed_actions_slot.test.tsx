@@ -168,6 +168,21 @@ describe('ProposedActionsSlot', () => {
     expect(screen.getByText('After-hours domain admin logins — fin-dc-01')).toBeInTheDocument();
   });
 
+  it('keeps the order the API returned, so paging and display agree', () => {
+    const retry = { ...mockProposal, id: 'retry' };
+    const failedLast = { ...decidedProposal, id: 'failed-last', status: 'failed' as const };
+    const failedFirst = { ...decidedProposal, id: 'failed-first', status: 'failed' as const };
+    mockConversationProposalsPage([retry, failedLast, failedFirst]);
+    renderSlot();
+
+    const rows = screen.getAllByTestId(/^investigationFlyoutProposedAction-/);
+    expect(rows.map((row) => row.getAttribute('data-test-subj'))).toEqual([
+      'investigationFlyoutProposedAction-retry',
+      'investigationFlyoutProposedAction-failed-last',
+      'investigationFlyoutProposedAction-failed-first',
+    ]);
+  });
+
   it('renders proposals as direct siblings so the grouped first/last-child borders apply', () => {
     mockConversationProposalsPage([mockProposal, decidedProposal]);
 

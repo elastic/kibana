@@ -155,6 +155,17 @@ describe('ProposedActionButton', () => {
       expect(screen.getByText('Declined')).toBeInTheDocument();
     });
 
+    it.each<[string, Partial<ApprovalProposal>, RegExp]>([
+      ['approved', {}, /^Approved by\s/],
+      ['declined', { decision: 'dismissed' }, /^Declined by\s/],
+      ['failed', { status: 'failed' }, /^Executed by\s/],
+    ])('captions a %s proposal with who acted and when', (_, overrides, caption) => {
+      renderButton({ proposal: { ...decidedProposal, ...overrides } });
+
+      expect(screen.getByText(caption)).toBeInTheDocument();
+      expect(screen.getByText('Bonnie Fishel')).toBeInTheDocument();
+    });
+
     it('is still clickable, opening a read-only modal for the closed record', () => {
       renderButton({ proposal: decidedProposal });
 
@@ -179,6 +190,13 @@ describe('ProposedActionButton', () => {
 
       expect(screen.getByText('Failed')).toBeInTheDocument();
       expect(screen.queryByText('Applied')).not.toBeInTheDocument();
+    });
+
+    it('keeps the badge label as the caption for an expired proposal that has an actor', () => {
+      renderButton({ proposal: { ...decidedProposal, status: 'expired' } });
+
+      expect(screen.getAllByText('Expired').length).toBeGreaterThanOrEqual(2);
+      expect(screen.queryByText(/Approved by/)).not.toBeInTheDocument();
     });
 
     it('names the decider without a time when the record carries no decidedAt', () => {

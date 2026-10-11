@@ -133,7 +133,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const isExpired = isProposalExpired(proposal);
     const isReplaced = proposal.supersededBy !== undefined || proposal.status === 'superseded';
     const displayMode = isReplaced ? 'view' : mode;
-    const decision = isReplaced ? undefined : getProposalDecision(proposal);
+    const decision = getProposalDecision(proposal);
     const tone = getProposalTone(proposal);
 
     const primaryAction: ApprovalAction | undefined = onApprove
@@ -228,13 +228,25 @@ export const ApprovalContent = memo<ApprovalContentProps>(
       ? decision.status
       : isSubmitting ?? 'pending';
 
-    const badge = getApprovalOutcomeBadge(approvalPhase);
+    // A replaced card stays 'pending' for the footer and banner (see `approvalPhase`), but a failed
+    // attempt still has to say how it ended; replaced revisions keep no badge, since their
+    // successor carries the live state.
+    const isReplacedFailure = isReplaced && decision?.status === 'failed';
+    const badge = getApprovalOutcomeBadge(isReplacedFailure ? 'failed' : approvalPhase);
     const banner = isReplaced ? undefined : getApprovalOutcomeBanner(approvalPhase);
     const bannerSuffix = decision?.reason ?? banner?.hint;
     const isSettledOrTransient = approvalPhase !== 'pending';
 
+    const replacedCaption = isReplaced ? getProposalCaption(proposal) : undefined;
     const headerCaption = decision?.actorName ? (
-      <ApprovalActorTime actorName={decision.actorName} at={decision.decidedAt} />
+      <>
+        {replacedCaption && `${replacedCaption} • `}
+        <ApprovalActorTime
+          actorName={decision.actorName}
+          at={decision.decidedAt}
+          executed={decision.status === 'failed'}
+        />
+      </>
     ) : !isReplaced && isSubmitting && since ? (
       <ApprovalActorTime actorName={actorName} at={since} live />
     ) : (
@@ -257,7 +269,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
       <>
         <ApprovalContentHeader
           badge={badge}
-          showStatusBadge={!isReplaced}
+          showStatusBadge={!isReplaced || isReplacedFailure}
           caption={headerCaption}
           title={proposal.title}
           titleId={titleId ?? generatedTitleId}
