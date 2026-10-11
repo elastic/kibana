@@ -11,7 +11,9 @@ import type {
 } from '@kbn/agentic-investigations-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { ComponentType } from 'react';
 import type { ProposalsPublicPluginStart } from '@kbn/proposals-plugin/public';
+import type { InvestigationCardProps } from './conversation_templates/templates/investigation/card';
 
 export interface AgenticInvestigationsPublicSetupDependencies {
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
@@ -41,4 +43,9 @@ export interface AgenticInvestigationsPublicPluginStart {
    * plugin's start, so the overview reads it when a row is clicked rather than at registration.
    */
   registerImpactEntityOpener: (opener: ImpactEntityOpener) => void;
+  /**
+   * The investigation card the `investigation` template's brief card renders, for a solution
+   * that lists investigations from the query API itself. Loaded on first render.
+   */
+  InvestigationCard: ComponentType<InvestigationCardProps>;
 }

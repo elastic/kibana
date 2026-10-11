@@ -71,8 +71,8 @@ apiTest.describe('Update action policy API key API', { tag: testData.API_ENGINE_
           description: 'preserve-attrs-policy description',
           destinations: [{ type: 'workflow', id: 'preserve-workflow-id' }],
           matcher: { expression: "env == 'production' && region == 'us-east-1'" },
-          group_by: ['service.name'],
-          throttle: { interval: '5m' },
+          grouping: { mode: 'per_field', fields: ['service.name'] },
+          throttle: { strategy: 'time_interval', interval: '5m' },
         })
       );
 

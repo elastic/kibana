@@ -417,7 +417,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
           query: {
             base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-basic-strategy" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
-          state_transition: null,
+          state_transition: undefined,
         })
       );
 

@@ -42,6 +42,22 @@ jest.mock('../../hooks/use_can_write_alertzero', () => ({
 }));
 jest.mock('../../hooks/use_watches_api');
 jest.mock('../../hooks/use_workers_api');
+jest.mock('../../hooks/use_hunt_threat_intel_supply', () => ({
+  useHuntThreatIntelSupplyStatus: jest.fn(() => ({
+    data: {
+      huntEnabled: false,
+      drift: false,
+      hardGate: { ok: true, reasonCodes: [] },
+      workflows: [],
+    },
+    isLoading: false,
+    isError: false,
+  })),
+  useRestoreHuntThreatIntelSupply: jest.fn(() => ({
+    mutate: jest.fn(),
+    isLoading: false,
+  })),
+}));
 jest.mock('../../components/worker_dependencies/worker_dependencies_callout', () => ({
   WorkerDependenciesCallout: ({ worker, surface }: { worker: { id: string }; surface: string }) => (
     <div data-test-subj={`alertZeroWorkerDependencies-${surface}-${worker.id}`} />
@@ -1032,6 +1048,20 @@ describe('WatchDetailPage', () => {
       expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeEnabled();
     });
 
+    it('shows no no-model warning to a user who cannot change Workers', () => {
+      renderWatch(
+        SYSTEM_SECURITY_WATCH_DETECTION_ID,
+        [blocked(ruleTuning, true), blocked(ruleCoverage, false)],
+        false
+      );
+
+      for (const worker of [ruleTuning, ruleCoverage]) {
+        expect(
+          screen.queryByTestId(`alertZeroWorkerWarningIcon-${worker.id}`)
+        ).not.toBeInTheDocument();
+      }
+    });
+
     it('gives Hunt the Models row and the block like every other Worker', () => {
       renderWatch(SYSTEM_SECURITY_WATCH_HUNT_ID, [blocked(huntWorker, false)]);
 
@@ -1446,7 +1476,7 @@ describe('WatchDetailPage', () => {
     ).toBeInTheDocument();
   });
 
-  describe('hard Worker dependencies', () => {
+  describe('Worker dependencies', () => {
     const HUNT = SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
     const RULE_COVERAGE = SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID;
     const ATTACK_DISCOVERY = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
@@ -1624,6 +1654,21 @@ describe('WatchDetailPage', () => {
       expect(enabledSwitch(ATTACK_DISCOVERY)).not.toBeChecked();
     });
 
+    it('asks before turning off Endpoint Analysis while Attack Discovery is enabled', () => {
+      renderWatch(
+        SYSTEM_SECURITY_WATCH_FORENSICS_ID,
+        allWorkers([ATTACK_DISCOVERY, ENDPOINT_ANALYSIS])
+      );
+
+      fireEvent.click(enabledSwitch(ENDPOINT_ANALYSIS));
+      expect(disableModal()).toHaveTextContent('Disable Endpoint Analysis?');
+      expect(disableModal()).toHaveTextContent(
+        "While Endpoint Analysis is off, those handoffs aren't analyzed"
+      );
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      expect(enabledSwitch(ENDPOINT_ANALYSIS)).not.toBeChecked();
+    });
+
     it('never asks when turning a provider on, even with its dependent enabled', () => {
       renderWatch(SYSTEM_SECURITY_WATCH_HUNT_ID, allWorkers([RULE_COVERAGE]));
 
@@ -1671,6 +1716,29 @@ describe('WatchDetailPage', () => {
     it('warns Endpoint Analysis on the Forensics Watch while Attack Discovery is saved as off', () => {
       renderWatch(SYSTEM_SECURITY_WATCH_FORENSICS_ID, allWorkers([ENDPOINT_ANALYSIS]));
       expect(warningIcon(ENDPOINT_ANALYSIS)).toBeInTheDocument();
+    });
+
+    it('warns Attack Discovery on the Floor Watch while Endpoint Analysis is saved as off', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, allWorkers([ATTACK_DISCOVERY]));
+      expect(warningIcon(ATTACK_DISCOVERY)).toBeInTheDocument();
+    });
+
+    it('warns Endpoint Analysis while it is off and Attack Discovery is enabled', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_FORENSICS_ID, allWorkers([ATTACK_DISCOVERY]));
+      expect(warningIcon(ENDPOINT_ANALYSIS)).toBeInTheDocument();
+    });
+
+    it('tells the user after Save that Attack Discovery depends on Endpoint Analysis being on', async () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, allWorkers([]));
+
+      fireEvent.click(enabledSwitch(ATTACK_DISCOVERY));
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+
+      const notice = await screen.findByTestId('alertZeroWorkerBlockedAfterSaveModal');
+      expect(notice).toHaveTextContent("Saved — but Attack Discovery won't run properly yet");
+      expect(notice).toHaveTextContent(
+        "Endpoint Analysis is disabled — attacks handed off for analysis aren't analyzed."
+      );
     });
 
     it('tells the user after Save that an enabled Worker still will not run, without blocking the save', async () => {

@@ -22,7 +22,6 @@ import { INVESTIGATION_TEMPLATE_ID } from '../../../common/escalations/constants
 import type { InvestigationHypotheses } from '../../../common/hypotheses/hypotheses';
 import type { Impact } from '../../../common/impact/impact';
 import {
-  INVESTIGATION_SEVERITIES,
   INVESTIGATION_SEVERITY_NONE,
   MAX_INVESTIGATION_CANDIDATES,
   MAX_INVESTIGATIONS_PAGE_SIZE,
@@ -40,6 +39,8 @@ import type {
   ListInvestigationsQuery,
   ListInvestigationsResponse,
 } from '../../../common/investigations/investigation';
+import { countPendingProposals } from './count_pending_proposals';
+import { isInvestigationSeverity } from '../../../common/investigations/severity';
 import { isInvestigationTitlePending } from '../../../common/investigations/title';
 import type {
   InvestigationSubject,
@@ -410,7 +411,13 @@ export class InvestigationsQueryService {
     const [subjects, impacts, pendingProposalCounts] = await Promise.all([
       this.deps.getSubjectsService().listByConversationIds(ids, spaceId),
       this.deps.getImpactService().listByConversationIds(ids, spaceId),
-      this.countPendingProposals(request, ids, spaceId),
+      countPendingProposals({
+        proposals: this.deps.getProposals(),
+        request,
+        conversationIds: ids,
+        spaceId,
+        logger: this.deps.logger,
+      }),
     ]);
     const subjectsByConversation = groupBy(subjects, ({ conversationId }) => conversationId);
     const impactByConversation = new Map(impacts.map((impact) => [impact.conversationId, impact]));
@@ -509,34 +516,6 @@ export class InvestigationsQueryService {
       })
     );
     return removed;
-  }
-
-  /**
-   * Pending proposals per conversation, in one aggregation. Undefined when the proposals plugin
-   * is absent or the caller may not read proposals, so a list does not need that privilege.
-   */
-  private async countPendingProposals(
-    request: KibanaRequest,
-    conversationIds: string[],
-    spaceId: string
-  ): Promise<Map<string, number> | undefined> {
-    const proposals = this.deps.getProposals();
-    if (!proposals) {
-      return undefined;
-    }
-    try {
-      await proposals.getProposalPrivileges().assertCanRead(request);
-    } catch {
-      return undefined;
-    }
-    try {
-      return await proposals
-        .getProposalsService()
-        .countPendingByConversationIds(conversationIds, spaceId);
-    } catch (error) {
-      this.deps.logger.debug(`Could not count pending proposals: ${errorMessage(error)}`);
-      return undefined;
-    }
   }
 
   /**
@@ -670,9 +649,6 @@ const severityRank = (conversation: ConversationSummary): number => {
   return severity ? SEVERITY_RANK[severity] : 0;
 };
 
-const isSeverity = (value: MetadataFieldValue | undefined): value is InvestigationSeverity =>
-  typeof value === 'string' && (INVESTIGATION_SEVERITIES as readonly string[]).includes(value);
-
 const optionalText = (value: MetadataFieldValue | undefined): string | undefined =>
   typeof value === 'string' && value.length > 0 ? value : undefined;
 
@@ -684,7 +660,7 @@ export const toMetadata = (
   const verdict = optionalText(metadata?.verdict);
   return {
     status: metadata?.status === 'closed' ? 'closed' : 'open',
-    ...(isSeverity(severity) && { severity }),
+    ...(isInvestigationSeverity(severity) && { severity }),
     ...(summary !== undefined && { summary }),
     ...(verdict !== undefined && { verdict }),
   };

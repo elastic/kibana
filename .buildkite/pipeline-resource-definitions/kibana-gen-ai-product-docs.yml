@@ -2,7 +2,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-gen-ai-product-docs
-  description: Runs the GenAI product docs pipeline twice a month. Reuses a recent kibana-on-merge kibana-default.tar.zst when possible (set KIBANA_REUSE_BUILD=false to force a fresh Kibana build).
+  description: Runs the GenAI product docs pipeline every Friday night. Reuses a recent kibana-on-merge kibana-default.tar.zst when possible (set KIBANA_REUSE_BUILD=false to force a fresh Kibana build).
   links:
     - url: 'https://buildkite.com/elastic/kibana-gen-ai-product-docs'
       title: Pipeline link
@@ -15,7 +15,7 @@ spec:
     kind: Pipeline
     metadata:
       name: kibana / gen-ai-product-docs
-      description: Runs the GenAI product docs pipeline twice a month. Reuses a recent kibana-on-merge kibana-default.tar.zst when possible (set KIBANA_REUSE_BUILD=false to force a fresh Kibana build).
+      description: Runs the GenAI product docs pipeline every Friday night. Reuses a recent kibana-on-merge kibana-default.tar.zst when possible (set KIBANA_REUSE_BUILD=false to force a fresh Kibana build).
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#search-ml-ux-alerts'
@@ -50,9 +50,9 @@ spec:
         kibana-tech-leads:
           access_level: MANAGE_BUILD_AND_READ
       schedules:
-        Twice-monthly build:
-          cronline: 0 0 1,15 * * America/New_York
-          message: Twice-monthly GenAI product docs build
+        Friday night build:
+          cronline: 0 23 * * 5 America/New_York
+          message: Friday night GenAI product docs build
           branch: main
       tags:
         - kibana

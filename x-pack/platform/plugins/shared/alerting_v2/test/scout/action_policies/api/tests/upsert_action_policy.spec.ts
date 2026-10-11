@@ -57,7 +57,7 @@ apiTest.describe('Upsert action policy API', { tag: testData.API_ENGINE_TAG }, (
       expect(response.body.description).toBe(body.description);
       expect(response.body.destinations).toStrictEqual(body.destinations);
       expect(response.body.enabled).toBe(true);
-      expect(response.body.snoozed_until).toBeNull();
+      expect(response.body.snoozed_until).toBeUndefined();
       // On create, updatedAt equals createdAt — there has been no replace yet.
       expect(response.body.updated_at).toBe(response.body.created_at);
       // API key ownership is server-side only and must never be exposed over the wire.
@@ -65,59 +65,45 @@ apiTest.describe('Upsert action policy API', { tag: testData.API_ENGINE_TAG }, (
     }
   );
 
+  // Lifecycle state is owned by `_enable`/`_disable`, so a replace body may not carry it.
+  apiTest('upsert: rejects a body carrying enabled', async ({ apiClient }) => {
+    const id = 'upsert-reject-enabled-policy';
+    const response = await apiClient.put(getActionPolicyUrl(id), {
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+      body: { ...buildCreateActionPolicyData({ name: 'carries-enabled' }), enabled: false },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  apiTest('upsert: creates an enabled policy', async ({ apiClient, apiServices }) => {
+    const id = 'upsert-create-enabled-policy';
+    const response = await apiClient.put(getActionPolicyUrl(id), {
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+      body: buildCreateActionPolicyData({ name: 'created-enabled' }),
+    });
+
+    expect(response).toHaveStatusCode(201);
+    expect(response.body.enabled).toBe(true);
+
+    const persisted = await apiServices.alertingV2.actionPolicies.get(id);
+    expect(persisted.enabled).toBe(true);
+  });
+
   apiTest(
-    'upsert: should create a disabled policy when the body sets enabled=false',
+    'upsert: leaves a disabled policy disabled on replace',
     async ({ apiClient, apiServices }) => {
-      const id = 'upsert-create-disabled-policy';
-      const response = await apiClient.put(getActionPolicyUrl(id), {
-        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { ...buildCreateActionPolicyData({ name: 'created-disabled' }), enabled: false },
-      });
-
-      expect(response).toHaveStatusCode(201);
-      expect(response.body.enabled).toBe(false);
-
-      const persisted = await apiServices.alertingV2.actionPolicies.get(id);
-      expect(persisted.enabled).toBe(false);
-    }
-  );
-
-  apiTest(
-    'upsert: should enable a disabled policy when the replace body sets enabled=true',
-    async ({ apiClient, apiServices }) => {
-      const id = 'upsert-enable-via-put-policy';
+      const id = 'upsert-preserve-disabled-policy';
       await apiServices.alertingV2.actionPolicies.upsert(
         id,
-        buildCreateActionPolicyData({ name: 'to-be-enabled' })
+        buildCreateActionPolicyData({ name: 'stays-disabled' })
       );
       await apiServices.alertingV2.actionPolicies.disable(id);
 
       const response = await apiClient.put(getActionPolicyUrl(id), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { ...buildCreateActionPolicyData({ name: 'now-enabled' }), enabled: true },
-      });
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.enabled).toBe(true);
-
-      const persisted = await apiServices.alertingV2.actionPolicies.get(id);
-      expect(persisted.enabled).toBe(true);
-    }
-  );
-
-  apiTest(
-    'upsert: should disable an enabled policy when the replace body sets enabled=false',
-    async ({ apiClient, apiServices }) => {
-      const id = 'upsert-disable-via-put-policy';
-      const created = await apiServices.alertingV2.actionPolicies.upsert(
-        id,
-        buildCreateActionPolicyData({ name: 'to-be-disabled-via-put' })
-      );
-      expect(created.enabled).toBe(true);
-
-      const response = await apiClient.put(getActionPolicyUrl(id), {
-        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { ...buildCreateActionPolicyData({ name: 'now-disabled' }), enabled: false },
+        body: buildCreateActionPolicyData({ name: 'still-disabled' }),
       });
 
       expect(response).toHaveStatusCode(200);
@@ -127,6 +113,28 @@ apiTest.describe('Upsert action policy API', { tag: testData.API_ENGINE_TAG }, (
       expect(persisted.enabled).toBe(false);
     }
   );
+
+  apiTest('upsert: rejects empty optional collections', async ({ apiClient }) => {
+    const id = 'upsert-empty-sentinels-policy';
+    const put = (body: Record<string, unknown>) =>
+      apiClient.put(getActionPolicyUrl(id), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body,
+      });
+
+    expect(
+      await put({
+        ...buildCreateActionPolicyData({ name: 'empty-group-by' }),
+        grouping: { mode: 'per_field', fields: [] },
+      })
+    ).toHaveStatusCode(400);
+    expect(
+      await put({ ...buildCreateActionPolicyData({ name: 'empty-throttle' }), throttle: {} })
+    ).toHaveStatusCode(400);
+    expect(
+      await put({ ...buildCreateActionPolicyData({ name: 'empty-matcher' }), matcher: {} })
+    ).toHaveStatusCode(400);
+  });
 
   apiTest('matcher: scopes a policy to rules via tags on create-via-PUT', async ({ apiClient }) => {
     const matcher = { tags: ['notify-upsert-scoped'] };
@@ -152,8 +160,8 @@ apiTest.describe('Upsert action policy API', { tag: testData.API_ENGINE_TAG }, (
           name: 'first-version',
           description: 'before replace',
           matcher: { expression: 'env == "production"' },
-          group_by: ['service.name'],
-          throttle: { interval: '5m' },
+          grouping: { mode: 'per_field', fields: ['service.name'] },
+          throttle: { strategy: 'time_interval', interval: '5m' },
         })
       );
 
@@ -189,8 +197,8 @@ apiTest.describe('Upsert action policy API', { tag: testData.API_ENGINE_TAG }, (
         buildCreateActionPolicyData({
           name: 'with-optional-fields',
           matcher: { expression: 'env == "production"' },
-          group_by: ['service.name'],
-          throttle: { interval: '5m' },
+          grouping: { mode: 'per_field', fields: ['service.name'] },
+          throttle: { strategy: 'time_interval', interval: '5m' },
         })
       );
 
@@ -200,10 +208,36 @@ apiTest.describe('Upsert action policy API', { tag: testData.API_ENGINE_TAG }, (
       });
 
       expect(replaced).toHaveStatusCode(200);
-      expect(replaced.body.matcher).toBeNull();
-      expect(replaced.body.group_by).toBeNull();
-      expect(replaced.body.throttle).toBeNull();
-      expect(replaced.body.grouping_mode).toBeNull();
+      expect(replaced.body.matcher).toBeUndefined();
+      expect(replaced.body.throttle).toBeUndefined();
+      expect(replaced.body.grouping).toBeUndefined();
+    }
+  );
+
+  apiTest(
+    'upsert: replace does not merge nested matcher leaves',
+    async ({ apiClient, apiServices }) => {
+      const id = 'upsert-no-leaf-merge-policy';
+      await apiServices.alertingV2.actionPolicies.upsert(
+        id,
+        buildCreateActionPolicyData({
+          name: 'with-both-matcher-leaves',
+          matcher: { tags: ['production'], expression: "data.severity == 'critical'" },
+        })
+      );
+
+      const replaced = await apiClient.put(getActionPolicyUrl(id), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: buildCreateActionPolicyData({
+          name: 'with-one-matcher-leaf',
+          matcher: { tags: ['staging'] },
+        }),
+      });
+
+      expect(replaced).toHaveStatusCode(200);
+      // PUT replaces the matcher outright, so the omitted leaf is gone rather
+      // than merged in the way PATCH would keep it.
+      expect(replaced.body.matcher).toStrictEqual({ tags: ['staging'] });
     }
   );
 
@@ -256,7 +290,8 @@ apiTest.describe('Upsert action policy API', { tag: testData.API_ENGINE_TAG }, (
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects missing description', async ({ apiClient }) => {
+  // `description` is optional: an absent one is absent on disk and in the response, not `''`.
+  apiTest('accepts a body with no description', async ({ apiClient }) => {
     const response = await apiClient.put(getActionPolicyUrl('upsert-missing-description'), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
@@ -265,8 +300,8 @@ apiTest.describe('Upsert action policy API', { tag: testData.API_ENGINE_TAG }, (
       },
     });
 
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
+    expect(response).toHaveStatusCode(201);
+    expect(Object.keys(response.body)).not.toContain('description');
   });
 
   apiTest('validation: rejects missing destinations', async ({ apiClient }) => {
@@ -340,26 +375,43 @@ apiTest.describe('Upsert action policy API', { tag: testData.API_ENGINE_TAG }, (
     }
   );
 
-  apiTest('validation: rejects strategy/grouping_mode combo mismatch', async ({ apiClient }) => {
-    const response = await apiClient.put(getActionPolicyUrl('upsert-bad-combo'), {
+  apiTest(
+    'validation: rejects a strategy the grouping mode does not allow',
+    async ({ apiClient }) => {
+      const response = await apiClient.put(getActionPolicyUrl('upsert-bad-combo'), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: buildCreateActionPolicyData({
+          grouping: { mode: 'all' },
+          throttle: { strategy: 'on_status_change' },
+        }),
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
+
+  apiTest('validation: rejects time_interval strategy without interval', async ({ apiClient }) => {
+    const response = await apiClient.put(getActionPolicyUrl('upsert-missing-interval'), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({
-        grouping_mode: 'all',
-        throttle: { strategy: 'on_status_change' },
-      }),
+      body: {
+        ...buildCreateActionPolicyData({ grouping: { mode: 'all' } }),
+        throttle: { strategy: 'time_interval' },
+      },
     });
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects time_interval strategy without interval', async ({ apiClient }) => {
-    const response = await apiClient.put(getActionPolicyUrl('upsert-missing-interval'), {
+  // An interval the strategy never reads used to be accepted and silently dropped.
+  apiTest('validation: rejects an interval on the every_time strategy', async ({ apiClient }) => {
+    const response = await apiClient.put(getActionPolicyUrl('upsert-stray-interval'), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({
-        grouping_mode: 'all',
-        throttle: { strategy: 'time_interval' },
-      }),
+      body: {
+        ...buildCreateActionPolicyData({ grouping: { mode: 'all' } }),
+        throttle: { strategy: 'every_time', interval: '5m' },
+      },
     });
 
     expect(response).toHaveStatusCode(400);

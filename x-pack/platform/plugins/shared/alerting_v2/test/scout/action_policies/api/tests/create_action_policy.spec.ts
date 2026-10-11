@@ -54,8 +54,8 @@ apiTest.describe('Create action policy API', { tag: testData.API_ENGINE_TAG }, (
         description: 'my-policy description',
         destinations: [{ type: 'workflow', id: 'my-workflow-id' }],
         matcher: { expression: "env == 'production' && region == 'us-east-1'" },
-        group_by: ['service.name', 'environment'],
-        throttle: { interval: '1m' },
+        grouping: { mode: 'per_field', fields: ['service.name', 'environment'] },
+        throttle: { strategy: 'time_interval', interval: '1m' },
       });
       const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
@@ -67,6 +67,7 @@ apiTest.describe('Create action policy API', { tag: testData.API_ENGINE_TAG }, (
       expect(response.body.description).toBe(body.description);
       expect(response.body.destinations).toStrictEqual(body.destinations);
       expect(response.body.matcher).toMatchObject(body.matcher);
+      expect(response.body.grouping).toStrictEqual(body.grouping);
       // API key ownership is server-side only and must never be exposed over the wire.
       expect(response.body.auth).toBeUndefined();
     }
@@ -88,12 +89,11 @@ apiTest.describe('Create action policy API', { tag: testData.API_ENGINE_TAG }, (
       description: 'minimal-policy description',
       destinations: [{ type: 'workflow', id: 'minimal-workflow-id' }],
       enabled: true,
-      snoozed_until: null,
-      matcher: null,
-      group_by: null,
-      grouping_mode: null,
-      throttle: null,
     });
+    expect(response.body.matcher).toBeUndefined();
+    expect(response.body.grouping).toBeUndefined();
+    expect(response.body.throttle).toBeUndefined();
+    expect(response.body.snoozed_until).toBeUndefined();
   });
 
   apiTest('create: per_field grouping with time_interval strategy', async ({ apiClient }) => {
@@ -101,16 +101,14 @@ apiTest.describe('Create action policy API', { tag: testData.API_ENGINE_TAG }, (
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         name: 'per-field-policy',
-        group_by: ['host.name'],
-        grouping_mode: 'per_field',
+        grouping: { mode: 'per_field', fields: ['host.name'] },
         throttle: { strategy: 'time_interval', interval: '5m' },
       }),
     });
 
     expect(response).toHaveStatusCode(201);
     expect(response.body).toMatchObject({
-      grouping_mode: 'per_field',
-      group_by: ['host.name'],
+      grouping: { mode: 'per_field', fields: ['host.name'] },
       throttle: { strategy: 'time_interval', interval: '5m' },
     });
   });
@@ -120,14 +118,14 @@ apiTest.describe('Create action policy API', { tag: testData.API_ENGINE_TAG }, (
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         name: 'per-episode-policy',
-        grouping_mode: 'per_alert',
+        grouping: { mode: 'per_alert' },
         throttle: { strategy: 'on_status_change' },
       }),
     });
 
     expect(response).toHaveStatusCode(201);
     expect(response.body).toMatchObject({
-      grouping_mode: 'per_alert',
+      grouping: { mode: 'per_alert' },
       throttle: { strategy: 'on_status_change' },
     });
   });
@@ -137,14 +135,14 @@ apiTest.describe('Create action policy API', { tag: testData.API_ENGINE_TAG }, (
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         name: 'all-mode-policy',
-        grouping_mode: 'all',
+        grouping: { mode: 'all' },
         throttle: { strategy: 'every_time' },
       }),
     });
 
     expect(response).toHaveStatusCode(201);
     expect(response.body).toMatchObject({
-      grouping_mode: 'all',
+      grouping: { mode: 'all' },
       throttle: { strategy: 'every_time' },
     });
   });
@@ -205,7 +203,8 @@ apiTest.describe('Create action policy API', { tag: testData.API_ENGINE_TAG }, (
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects missing description', async ({ apiClient }) => {
+  // `description` is optional: an absent one is absent on disk and in the response, not `''`.
+  apiTest('accepts a body with no description', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
@@ -214,8 +213,8 @@ apiTest.describe('Create action policy API', { tag: testData.API_ENGINE_TAG }, (
       },
     });
 
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
+    expect(response).toHaveStatusCode(201);
+    expect(Object.keys(response.body)).not.toContain('description');
   });
 
   apiTest('validation: rejects description over the maximum length', async ({ apiClient }) => {
@@ -228,6 +227,18 @@ apiTest.describe('Create action policy API', { tag: testData.API_ENGINE_TAG }, (
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  apiTest('validation: rejects an empty or blank description', async ({ apiClient }) => {
+    for (const description of ['', '   ']) {
+      const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: buildCreateActionPolicyData({ description }),
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
   });
 
   apiTest('validation: rejects missing destinations', async ({ apiClient }) => {
@@ -332,11 +343,14 @@ apiTest.describe('Create action policy API', { tag: testData.API_ENGINE_TAG }, (
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects group_by with too many fields', async ({ apiClient }) => {
+  apiTest('validation: rejects grouping fields over the maximum count', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
-        group_by: Array.from({ length: MAX_GROUPING_FIELDS + 1 }, (_, i) => `field.${i}`),
+        grouping: {
+          mode: 'per_field',
+          fields: Array.from({ length: MAX_GROUPING_FIELDS + 1 }, (_, i) => `field.${i}`),
+        },
       }),
     });
 
@@ -344,34 +358,37 @@ apiTest.describe('Create action policy API', { tag: testData.API_ENGINE_TAG }, (
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects group_by with empty field name', async ({ apiClient }) => {
+  apiTest('validation: rejects a grouping field with an empty name', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({ group_by: [''] }),
+      body: buildCreateActionPolicyData({ grouping: { mode: 'per_field', fields: [''] } }),
     });
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects group_by field name over max length', async ({ apiClient }) => {
+  apiTest(
+    'validation: rejects a grouping field name over the maximum length',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: buildCreateActionPolicyData({
+          grouping: { mode: 'per_field', fields: ['a'.repeat(MAX_FIELD_NAME_LENGTH + 1)] },
+        }),
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
+
+  apiTest('validation: rejects an unknown grouping mode', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
-        group_by: ['a'.repeat(MAX_FIELD_NAME_LENGTH + 1)],
-      }),
-    });
-
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
-  });
-
-  apiTest('validation: rejects unknown grouping_mode', async ({ apiClient }) => {
-    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({
-        // @ts-expect-error
-        grouping_mode: 'per_galaxy',
+        // @ts-expect-error a mode outside the union names no variant.
+        grouping: { mode: 'per_galaxy' },
       }),
     });
 
@@ -396,8 +413,53 @@ apiTest.describe('Create action policy API', { tag: testData.API_ENGINE_TAG }, (
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
-        throttle: { interval: 'not-a-duration' },
+        throttle: { strategy: 'per_status_interval', interval: 'not-a-duration' },
       }),
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  // An optional collection is absent or non-empty: an empty one used to reach storage and 500.
+  apiTest('validation: rejects an empty grouping fields array', async ({ apiClient }) => {
+    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+      body: { ...buildCreateActionPolicyData({}), grouping: { mode: 'per_field', fields: [] } },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  // A catch-all policy omits `matcher`; `{}` would be a second spelling for the same thing.
+  apiTest('validation: rejects an empty matcher object', async ({ apiClient }) => {
+    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+      body: { ...buildCreateActionPolicyData({}), matcher: {} },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  apiTest('validation: rejects an empty throttle object', async ({ apiClient }) => {
+    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+      body: { ...buildCreateActionPolicyData({}), throttle: {} },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  apiTest('validation: rejects a null throttle interval', async ({ apiClient }) => {
+    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+      body: {
+        ...buildCreateActionPolicyData({}),
+        throttle: { strategy: 'per_status_interval', interval: null },
+      },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -407,10 +469,10 @@ apiTest.describe('Create action policy API', { tag: testData.API_ENGINE_TAG }, (
   apiTest('validation: rejects time_interval strategy without interval', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({
-        grouping_mode: 'all',
+      body: {
+        ...buildCreateActionPolicyData({ grouping: { mode: 'all' } }),
         throttle: { strategy: 'time_interval' },
-      }),
+      },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -422,10 +484,10 @@ apiTest.describe('Create action policy API', { tag: testData.API_ENGINE_TAG }, (
     async ({ apiClient }) => {
       const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: buildCreateActionPolicyData({
-          grouping_mode: 'per_alert',
+        body: {
+          ...buildCreateActionPolicyData({ grouping: { mode: 'per_alert' } }),
           throttle: { strategy: 'per_status_interval' },
-        }),
+        },
       });
 
       expect(response).toHaveStatusCode(400);
@@ -433,18 +495,42 @@ apiTest.describe('Create action policy API', { tag: testData.API_ENGINE_TAG }, (
     }
   );
 
-  apiTest('validation: rejects strategy/grouping_mode combo mismatch', async ({ apiClient }) => {
-    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({
-        grouping_mode: 'all',
-        throttle: { strategy: 'on_status_change' },
-      }),
-    });
+  for (const [groupingMode, strategy] of [
+    ['all', 'every_time'],
+    ['per_alert', 'on_status_change'],
+  ] as const) {
+    apiTest(
+      `validation: rejects an interval on the ${strategy} strategy`,
+      async ({ apiClient }) => {
+        const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+          headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+          body: {
+            ...buildCreateActionPolicyData({ grouping: { mode: groupingMode } }),
+            throttle: { strategy, interval: '5m' },
+          },
+        });
 
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
-  });
+        expect(response).toHaveStatusCode(400);
+        expect(response.body.code).toBe('BAD_REQUEST');
+      }
+    );
+  }
+
+  apiTest(
+    'validation: rejects a strategy the grouping mode does not allow',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: buildCreateActionPolicyData({
+          grouping: { mode: 'all' },
+          throttle: { strategy: 'on_status_change' },
+        }),
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
 
   apiTest('authorization: 201 with full alerting_v2 privileges (write)', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {

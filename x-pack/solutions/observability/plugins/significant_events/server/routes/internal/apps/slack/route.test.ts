@@ -13,6 +13,7 @@ const { read, manage, configure } = NIGHTSHIFT_API_PRIVILEGES;
 describe('Slack app route privileges', () => {
   it.each([
     'POST /internal/significant_events/apps/slack/connect',
+    'POST /internal/significant_events/apps/slack/confirm',
     'POST /internal/significant_events/apps/slack/disconnect',
     'POST /internal/significant_events/apps/slack/bindings/{channelId}/bind',
     'POST /internal/significant_events/apps/slack/bindings/{channelId}/unbind',
@@ -29,5 +30,14 @@ describe('Slack app route privileges', () => {
     expect(internalSlackAppRoutes[endpoint].security.authz).toEqual({
       requiredPrivileges: [read],
     });
+  });
+});
+
+describe('Slack app disconnect route body', () => {
+  const { body } =
+    internalSlackAppRoutes['POST /internal/significant_events/apps/slack/disconnect'].params.shape;
+
+  it.each([null, undefined, {}, { tenantKey: 'T0123ABC' }])('accepts %p', (value) => {
+    expect(body.safeParse(value).success).toBe(true);
   });
 });

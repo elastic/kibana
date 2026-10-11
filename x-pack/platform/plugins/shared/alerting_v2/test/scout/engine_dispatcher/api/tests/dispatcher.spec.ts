@@ -222,8 +222,7 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
       name: 'GroupBy Policy',
       description: 'Groups by host.name',
       destinations: [{ type: 'workflow', id: 'test-workflow' }],
-      group_by: ['data.host.name'],
-      grouping_mode: 'per_field',
+      grouping: { mode: 'per_field', fields: ['data.host.name'] },
     });
 
     await apiServices.alertingV2.actionPolicies.disable(ACTION_POLICY_GROUPBY_ID);
@@ -261,7 +260,7 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
 
     await apiServices.alertingV2.actionPolicies.patch(ACTION_POLICY_ID, {
       throttle: null,
-      grouping_mode: 'per_alert',
+      grouping: { mode: 'per_alert' },
     });
 
     await apiServices.alertingV2.actionPolicies.enable(ACTION_POLICY_ID);
@@ -1113,7 +1112,7 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
   );
 
   apiTest(
-    'groups episodes by the specified data fields when the action policy has group_by fields',
+    'groups episodes by the specified data fields when the action policy groups per field',
     async ({ apiServices }) => {
       await apiServices.alertingV2.actionPolicies.disable(ACTION_POLICY_ID);
       await apiServices.alertingV2.actionPolicies.enable(ACTION_POLICY_GROUPBY_ID);
@@ -1122,7 +1121,7 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
       });
 
       // 4 episodes across 4 series, but grouped into 2 hosts. With
-      // `group_by: ['data.host.name']`, the dispatcher should produce 2 action
+      // `grouping: { mode: 'per_field', fields: ['data.host.name'] }`, the dispatcher should produce 2 action
       // groups (one notified per host).
       await apiServices.alertingV2.ruleEvents.seed([
         buildAlertEvent({
@@ -1373,7 +1372,7 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
     'throttle strategies / all + time_interval digest groups all episodes and stays throttled on subsequent dispatches',
     async ({ apiServices }) => {
       await apiServices.alertingV2.actionPolicies.patch(ACTION_POLICY_ID, {
-        grouping_mode: 'all',
+        grouping: { mode: 'all' },
         throttle: { strategy: 'time_interval', interval: '1h' },
       });
 

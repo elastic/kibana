@@ -8,6 +8,7 @@
 import {
   ALERT_EPISODE_ACTION_TYPE,
   createTagEpisodeActionBodySchema,
+  errorResponseSchema,
 } from '@kbn/alerting-v2-schemas';
 import { createTagEpisodeActionOasExamples } from './create_tag_episode_action_oas_example';
 import { createEpisodeActionRouteForType } from './create_episode_action_route_for_type';
@@ -19,4 +20,10 @@ export const CreateTagEpisodeActionRoute = createEpisodeActionRouteForType({
   bodySchema: createTagEpisodeActionBodySchema,
   oasOperationObject: createTagEpisodeActionOasExamples,
   access: 'public' as const,
+  additionalResponses: {
+    409: {
+      body: () => errorResponseSchema,
+      description: 'Indicates the alert already carries exactly the requested tags.',
+    },
+  },
 });

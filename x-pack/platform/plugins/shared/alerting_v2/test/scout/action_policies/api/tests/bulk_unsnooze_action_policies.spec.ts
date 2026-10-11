@@ -60,8 +60,8 @@ apiTest.describe('Bulk unsnooze action policies API', { tag: testData.API_ENGINE
 
     const updated1 = await apiServices.alertingV2.actionPolicies.get(p1.id);
     const updated2 = await apiServices.alertingV2.actionPolicies.get(p2.id);
-    expect(updated1.snoozed_until).toBeNull();
-    expect(updated2.snoozed_until).toBeNull();
+    expect(updated1.snoozed_until).toBeUndefined();
+    expect(updated2.snoozed_until).toBeUndefined();
   });
 
   apiTest(

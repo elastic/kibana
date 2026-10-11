@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getPlaywrightTagsFor } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { getPlaywrightTagsFor } from '@kbn/scout';
 import {
   ALERTING_V2_RULES_READ_ROLE,
   apiTest,
@@ -145,7 +145,6 @@ apiTest.describe(
         for (const body of [
           {},
           { matcher: null },
-          { matcher: { tags: null, expression: null } },
           { matcher: { expression: 'data.host.name: "host-1"' } },
         ]) {
           const response = await apiClient.post(MATCH_RULES_URL, { headers: readerHeaders, body });
@@ -171,6 +170,22 @@ apiTest.describe(
       expect(response.body.page).toBe(2);
       expect(response.body.per_page).toBe(1);
     });
+
+    // A catch-all is spelled by omitting `matcher` or sending `null`, never by an empty object.
+    apiTest(
+      'validation: should return 400 for an empty or half-null matcher',
+      async ({ apiClient }) => {
+        for (const matcher of [{}, { tags: null }, { expression: null }]) {
+          const response = await apiClient.post(MATCH_RULES_URL, {
+            headers: readerHeaders,
+            body: { matcher },
+          });
+
+          expect(response).toHaveStatusCode(400);
+          expect(response.body.code).toBe('BAD_REQUEST');
+        }
+      }
+    );
 
     apiTest('validation: should return 400 for unknown top-level keys', async ({ apiClient }) => {
       const response = await apiClient.post(MATCH_RULES_URL, {
