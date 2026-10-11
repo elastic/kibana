@@ -287,7 +287,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
       onClose={onCloseFlyout}
       size="s"
       aria-label={i18n.translate('xpack.triggersActionsUI.rulesSettings.flyout.ruleSettingsLabel', {
-        defaultMessage: 'Rule settings',
+        defaultMessage: 'Classic rule settings',
       })}
     >
       <EuiFlyoutHeader>
@@ -295,7 +295,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
           <h3>
             <FormattedMessage
               id="xpack.triggersActionsUI.rulesSettings.flyout.title"
-              defaultMessage="Rule settings"
+              defaultMessage="Classic rule settings"
             />
           </h3>
         </EuiTitle>
@@ -306,7 +306,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
       <EuiCallOut
         size="m"
         title={i18n.translate('xpack.triggersActionsUI.rulesSettings.flyout.calloutMessage', {
-          defaultMessage: 'Apply to all rules within the current space.',
+          defaultMessage: 'Apply to all classic rules within the current space.',
         })}
         css={css`
           position: sticky;

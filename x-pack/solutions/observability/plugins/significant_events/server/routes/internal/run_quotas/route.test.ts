@@ -119,6 +119,9 @@ describe('Significant Events run quota routes', () => {
   it('accepts only non-empty bounded settings updates', () => {
     expect(putRoute.params.safeParse({ body: { enabled: true } }).success).toBe(true);
     expect(putRoute.params.safeParse({ body: { limits: { detection: 0 } } }).success).toBe(true);
+    expect(putRoute.params.safeParse({ body: { activateLimits: { detection: 15 } } }).success).toBe(
+      true
+    );
     expect(
       putRoute.params.safeParse({
         body: {
@@ -135,6 +138,10 @@ describe('Significant Events run quota routes', () => {
       { limits: { detection: 10_001 } },
       { limits: { detection: 1.5 } },
       { limits: { memory: 1 } },
+      { activateLimits: {} },
+      { activateLimits: { detection: 0 } },
+      { activateLimits: { memory: 1 } },
+      { enabled: true, activateLimits: { detection: 15 } },
     ]) {
       expect(putRoute.params.safeParse({ body }).success).toBe(false);
     }

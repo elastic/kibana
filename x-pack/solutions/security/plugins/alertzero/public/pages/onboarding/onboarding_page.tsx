@@ -7,27 +7,18 @@
 
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  EuiCallOut,
-  EuiEmptyPrompt,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALERTZERO_FEATURE_ID } from '@kbn/alertzero-common';
-import { SECURITY_APP_ID } from '@kbn/deeplinks-security';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
-import { ServiceAccountField } from '../watches/components/service_account_field';
 import { ONBOARDING_CONTENT_MAX_WIDTH } from './constants';
 import { OnboardingEnableFooter } from './onboarding_enable_footer';
+import { NoModelCallout } from './no_model_callout';
 import { OnboardingIntro } from './onboarding_intro';
 import { useEnableWorkers } from './use_enable_workers';
 import { useWorkerSelection } from './use_worker_selection';
@@ -58,31 +49,22 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
     workerEnabled,
     enabledCount,
     canModifyWorkers,
+    isModelMissing,
     toggleWorker,
   } = useWorkerSelection();
-  const [serviceAccountId, setServiceAccountId] = useState<string | undefined>();
   const { handleEnableAndContinue, isSaving } = useEnableWorkers(
     availableWorkerIds,
     workerEnabled,
-    serviceAccountId,
     () => history.push('/watches'),
     onSavingChange
   );
 
   if (step === 'intro') {
-    return <OnboardingIntro onContinue={() => setStep('workers')} />;
-  }
-
-  if (!canWrite) {
     return (
-      <AlertZeroPageSection>
-        <ScanFailureCallout />
-        <EuiEmptyPrompt
-          iconType="watchesApp"
-          title={<h2>{i18n.ONBOARDING_TITLE}</h2>}
-          body={<p>{i18n.ONBOARDING_READ_ONLY_BODY}</p>}
-        />
-      </AlertZeroPageSection>
+      <OnboardingIntro
+        onContinue={() => setStep('workers')}
+        continueDisabledReason={canWrite ? undefined : i18n.ONBOARDING_CONTINUE_REQUIRES_WRITE}
+      />
     );
   }
 
@@ -135,40 +117,22 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
           </>
         )}
 
+        {isModelMissing ? (
+          <>
+            <NoModelCallout />
+            <EuiSpacer size="l" />
+          </>
+        ) : null}
+
         <WorkerSelectionList
           workers={workers}
           serverWorkers={serverWorkers}
           workerEnabled={workerEnabled}
           enabledCount={enabledCount}
           isSaving={isSaving}
-          canModifyWorkers={canModifyWorkers}
+          isLocked={!canModifyWorkers || isModelMissing}
           onToggle={toggleWorker}
         />
-
-        <EuiSpacer size="l" />
-        <EuiPanel
-          hasBorder
-          hasShadow={false}
-          paddingSize="m"
-          data-test-subj="alertZeroOnboardingServiceAccount"
-        >
-          <EuiText size="s">
-            <strong>{i18n.SERVICE_ACCOUNT_LABEL}</strong>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <ServiceAccountField
-            workerId="onboarding"
-            workerName={i18n.SERVICE_ACCOUNT_LABEL}
-            ariaLabel={i18n.SERVICE_ACCOUNT_LABEL}
-            current={serviceAccountId}
-            isDisabled={!canModifyWorkers || isSaving}
-            onChange={(nextId) => setServiceAccountId(nextId ?? undefined)}
-          />
-          <EuiSpacer size="s" />
-          <EuiText size="xs" color="subdued">
-            <p>{i18n.BEFORE_YOU_ENABLE_RUNS_AS}</p>
-          </EuiText>
-        </EuiPanel>
       </div>
 
       <OnboardingEnableFooter
@@ -179,10 +143,10 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
           availableWorkerIds.length === 0 ||
           enabledCount === 0 ||
           !canModifyWorkers ||
-          serviceAccountId == null
+          isModelMissing
         }
         onEnable={handleEnableAndContinue}
-        onBack={() => application.navigateToApp(SECURITY_APP_ID)}
+        onBack={() => setStep('intro')}
       />
     </AlertZeroPageSection>
   );

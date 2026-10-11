@@ -59,6 +59,10 @@ export interface SecondaryMenuSection {
    * (optional) The label to display for the secondary menu section.
    */
   label?: string;
+  /**
+   * (optional) Page the items behind "Show more". For dynamic lists; static navigation shows all links.
+   */
+  isPaginated?: boolean;
 }
 
 /**

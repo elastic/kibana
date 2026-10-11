@@ -1,0 +1,12 @@
+{
+  "area": "Entity Analytics",
+  "area_slug": "entity-analytics",
+  "kibana_version": "9.3.0",
+  "environment": {
+    "kind": "scout",
+    "kibana_version": "9.3.0",
+    "elasticsearch_version": "9.3.0",
+    "browser": "Chrome",
+    "browser_os": "macos"
+  }
+}

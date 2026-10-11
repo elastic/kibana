@@ -25,7 +25,7 @@ const baseActionPolicyAttrs: ActionPolicySavedObjectAttributes = {
   enabled: true,
   destinations: [{ type: 'workflow', id: 'wf-critical-route' }],
   matcher: { expression: 'alert.severity = "critical"' },
-  groupingMode: 'per_alert',
+  grouping: { mode: 'per_alert' },
   apiKeyOwner: 'elastic',
   apiKeyCreatedByUser: true,
   createdBy: { profile_uid: 'elastic' },
