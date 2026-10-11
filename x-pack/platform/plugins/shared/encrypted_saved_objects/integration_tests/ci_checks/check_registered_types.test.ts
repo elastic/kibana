@@ -148,6 +148,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "alert|11",
         "alert|10",
         "alert|1",
+        "alerting_action_policy|6",
         "alerting_action_policy|5",
         "alerting_action_policy|4",
         "alerting_action_policy|3",

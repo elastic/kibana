@@ -77,6 +77,7 @@ export {
 export type {
   AgentHandlerParams,
   AgentHandlerContext,
+  ExecutionConversationAccess,
   AgentHandlerReturn,
   AgentHandlerFn,
   RunAgentFn,
@@ -172,6 +173,8 @@ export type {
   PluginsSetup,
   PluginsStart,
   RuntimeStart,
+  ConversationsSetup,
+  ConversationUpdatedOptIn,
   ConversationsStart,
   ConversationTemplatesSetup,
   ConversationTemplatesStart,

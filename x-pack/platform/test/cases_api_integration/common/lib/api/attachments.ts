@@ -16,12 +16,10 @@ import {
   getCasesDeleteFileAttachmentsUrl,
 } from '@kbn/cases-plugin/common/api';
 import type { Case } from '@kbn/cases-plugin/common';
-import { AttachmentType } from '@kbn/cases-plugin/common';
 import type {
   BulkGetUnifiedAttachmentsResponse,
   AttachmentRequestV2,
-  BulkCreateAttachmentsRequest,
-  BulkCreateAttachmentsRequestV2,
+  BulkCreateUnifiedAttachmentsRequest,
   AttachmentPatchRequest,
   AttachmentsFindResponse,
   UnifiedAttachmentsFindResponse,
@@ -128,7 +126,7 @@ export const bulkCreateAttachments = async ({
 }: {
   supertest: SuperTest.Agent;
   caseId: string;
-  params: BulkCreateAttachmentsRequestV2;
+  params: BulkCreateUnifiedAttachmentsRequest;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
 }): Promise<Case> => {
@@ -154,21 +152,23 @@ export const createCaseAndBulkCreateAttachments = async ({
   numberOfAttachments?: number;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
-}): Promise<{ theCase: Case; attachments: BulkCreateAttachmentsRequestV2 }> => {
+}): Promise<{ theCase: Case; attachments: BulkCreateUnifiedAttachmentsRequest }> => {
   const postedCase = await createCase(supertest, postCaseReq);
+  const attachments = getUnifiedAttachments(numberOfAttachments);
   const patchedCase = await bulkCreateAttachments({
     supertest,
     caseId: postedCase.id,
-    params: getUnifiedAttachments(numberOfAttachments),
+    params: attachments,
     auth,
     expectedHttpCode,
   });
 
-  // Responses are projected to the legacy shape, so callers compare against the legacy form.
-  return { theCase: patchedCase, attachments: getAttachments(numberOfAttachments) };
+  return { theCase: patchedCase, attachments };
 };
 
-export const getUnifiedAttachments = (numberOfAttachments: number) =>
+export const getUnifiedAttachments = (
+  numberOfAttachments: number
+): BulkCreateUnifiedAttachmentsRequest =>
   [...Array(numberOfAttachments)].map((_, index) =>
     index % 10 === 0
       ? {
@@ -182,29 +182,6 @@ export const getUnifiedAttachments = (numberOfAttachments: number) =>
           rule: { id: `rule-test-id-${index + 1}`, name: `Test ${index + 1}` },
         })
   );
-
-export const getAttachments = (numberOfAttachments: number): BulkCreateAttachmentsRequest => {
-  return [...Array(numberOfAttachments)].map((_, index) => {
-    if (index % 10 === 0) {
-      return {
-        type: AttachmentType.user,
-        comment: `Test ${index + 1}`,
-        owner: 'securitySolutionFixture',
-      };
-    }
-
-    return {
-      type: AttachmentType.alert,
-      alertId: [`test-id-${index + 1}`],
-      index: [`test-index-${index + 1}`],
-      rule: {
-        id: `rule-test-id-${index + 1}`,
-        name: `Test ${index + 1}`,
-      },
-      owner: 'securitySolutionFixture',
-    };
-  });
-};
 
 export const deleteComment = async ({
   supertest,

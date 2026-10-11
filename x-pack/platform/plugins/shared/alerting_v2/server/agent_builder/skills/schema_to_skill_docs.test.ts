@@ -409,7 +409,7 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('`name`');
       expect(doc).toContain('`destinations`');
       expect(doc).toContain('`matcher`');
-      expect(doc).toContain('`grouping_mode`');
+      expect(doc).toContain('`grouping`');
       expect(doc).toContain('`throttle`');
     });
   });
@@ -486,7 +486,7 @@ describe('schema_to_skill_docs', () => {
 
     it('renders arrays whose items are referenced schemas', () => {
       expect(generateRuleSchemaDoc()).toContain(
-        '| `artifacts` | object[] | optional | Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. (max items: 100) |'
+        '| `artifacts` | object[] | optional | Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear. (min items: 1, max items: 100) |'
       );
       expect(generateActionPolicySchemaDoc()).toContain(
         '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |'
@@ -498,16 +498,16 @@ describe('schema_to_skill_docs', () => {
         '| `grouping` | object | optional | Grouping configuration. |'
       );
       expect(generateActionPolicySchemaDoc()).toContain(
-        '| `throttle` | object | optional | The throttle configuration for notifications. |'
+        '| `throttle` | { strategy: "on_status_change", ... } \\| { strategy: "per_status_interval", ... } \\| { strategy: "time_interval", ... } \\| { strategy: "every_time", ... } | optional | The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it. The strategy decides the rest of the block, so a PATCH replaces it whole: send the complete strategy variant rather than a single field. |'
       );
     });
 
     it('keeps the referencing field description when the definition also has one', () => {
       const doc = generateActionPolicySchemaDoc();
       expect(doc).toContain(
-        '| `grouping_mode` | "per_alert" \\| "all" \\| "per_field" | optional | The grouping mode for alert notifications. |'
+        '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |'
       );
-      expect(doc).not.toContain('per_alert groups by alert lifecycle');
+      expect(doc).not.toContain('An action policy destination configuration.');
     });
   });
 

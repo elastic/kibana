@@ -10,6 +10,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import {
   EMPTY_TOKENS,
+  buildKIQueryGenerationUserMessage,
   type AnalysisTarget,
   type ExistingQuerySummary,
   type QueryAttempt,
@@ -19,9 +20,8 @@ import { createAgentBuilderClient, type ConverseStep } from '@kbn/evals';
 import {
   KI_QUERY_GENERATION_AGENT_ID,
   SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
-  buildKIQueryGenerationUserMessage,
-  type AcceptedQuery,
-} from '@kbn/significant-events-plugin/server';
+} from '@kbn/significant-events-plugin/common';
+import type { AcceptedQuery } from '@kbn/significant-events-plugin/server';
 
 export interface RunKIQueryGenerationAgentParams {
   fetch: HttpHandler;
