@@ -9,8 +9,12 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { BoundInferenceClient, InferenceClient } from '@kbn/inference-common';
-import { aiAnonymizationSettings } from '@kbn/ai-anonymization-common';
-import type { AnonymizationRule, AnonymizationSettings } from '@kbn/ai-anonymization-common';
+import {
+  aiAnonymizationSettings,
+  parseLegacyAnonymizationRules,
+  parseLegacyOnFailureMode,
+} from '@kbn/ai-anonymization-common';
+import type { AnonymizationFailureMode, AnonymizationRule } from '@kbn/ai-anonymization-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -42,28 +46,27 @@ import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
 import { TokenUsageLogger } from './token_usage';
 import { installTokenUsageDashboard } from './dashboard';
 
-const parseLegacyAnonymizationRules = (value: unknown): AnonymizationRule[] => {
-  let parsed: unknown = value;
-
-  if (typeof value === 'string') {
-    try {
-      parsed = JSON.parse(value);
-    } catch {
-      return [];
-    }
+/**
+ * Resolves the `onFailure` mode from the legacy `ai:anonymizationSettings` read. A failed read
+ * resolves to `block`: the rules promise built from the same read already fails the request, and
+ * this promise must not reject on its own when nothing awaits it.
+ */
+export const resolveOnFailureMode = async ({
+  anonymizationEnabled,
+  legacySettingsPromise,
+}: {
+  anonymizationEnabled: boolean;
+  legacySettingsPromise?: Promise<unknown>;
+}): Promise<AnonymizationFailureMode> => {
+  // The profile-based path doesn't define a failure-mode concept; keep the safe default.
+  if (anonymizationEnabled || !legacySettingsPromise) {
+    return 'block';
   }
-
-  if (
-    !parsed ||
-    typeof parsed !== 'object' ||
-    !Array.isArray((parsed as AnonymizationSettings).rules)
-  ) {
-    return [];
+  try {
+    return parseLegacyOnFailureMode(await legacySettingsPromise);
+  } catch {
+    return 'block';
   }
-
-  const allRules = (parsed as AnonymizationSettings).rules;
-  const enabledRules = allRules.filter((rule) => rule.enabled);
-  return enabledRules;
 };
 
 export const resolveReplacementsEncryptionKey = async ({
@@ -161,18 +164,24 @@ export class InferencePlugin
       this.logger.get('regex_worker')
     );
 
-    const createAnonymizationRulesPromise = async (request: KibanaRequest) => {
-      const namespace =
-        core.savedObjects.getScopedClient(request).getCurrentNamespace() ?? 'default';
+    const readLegacyAnonymizationSettings = (request: KibanaRequest): Promise<unknown> => {
       const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
       const uiSettingsClient = core.uiSettings.asScopedToClient(scopedSavedObjectsClient);
+      return uiSettingsClient.get<unknown>(aiAnonymizationSettings);
+    };
+
+    const createAnonymizationRulesPromise = async (
+      request: KibanaRequest,
+      legacySettingsPromise?: Promise<unknown>
+    ) => {
+      const namespace =
+        core.savedObjects.getScopedClient(request).getCurrentNamespace() ?? 'default';
       const policyService = pluginsStart.anonymization?.getPolicyService();
 
-      const getLegacyRules = async (): Promise<AnonymizationRule[]> => {
-        const legacySettings = await uiSettingsClient.get<unknown>(aiAnonymizationSettings);
-        const parsedRules = parseLegacyAnonymizationRules(legacySettings);
-        return parsedRules;
-      };
+      const getLegacyRules = async (): Promise<AnonymizationRule[]> =>
+        parseLegacyAnonymizationRules(
+          await (legacySettingsPromise ?? readLegacyAnonymizationSettings(request))
+        );
 
       if (!anonymizationEnabled || !policyService) {
         return getLegacyRules();
@@ -209,9 +218,13 @@ export class InferencePlugin
         anonymizationEnabled,
         policyService,
       });
+      // One read of the setting feeds both the rules and the failure mode.
+      const legacySettingsPromise = anonymizationEnabled
+        ? undefined
+        : readLegacyAnonymizationSettings(request);
       return {
         namespace,
-        anonymizationRulesPromise: createAnonymizationRulesPromise(request),
+        anonymizationRulesPromise: createAnonymizationRulesPromise(request, legacySettingsPromise),
         regexWorker: (() => {
           if (!this.regexWorker) {
             this.logger.error(
@@ -223,6 +236,7 @@ export class InferencePlugin
         esClient: core.elasticsearch.client.asScoped(request).asCurrentUser,
         anonymization: {
           saltPromise: anonymizationEnabled ? policyService?.getSalt(namespace) : undefined,
+          onFailurePromise: resolveOnFailureMode({ anonymizationEnabled, legacySettingsPromise }),
           replacements: {
             esClient: core.elasticsearch.client.asInternalUser,
             encryptionKeyPromise: replacementsEncryptionKeyPromise,
@@ -311,7 +325,6 @@ export class InferencePlugin
           callbacks: options.callbacks,
           ...getAnonymizationOptions(options.request),
           actions: pluginsStart.actions,
-          anonymizationRulesPromise: createAnonymizationRulesPromise(options.request),
           regexWorker: this.regexWorker!,
           esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
           endpointIdCache: this.endpointIdCache,
