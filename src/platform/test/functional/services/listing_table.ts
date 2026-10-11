@@ -322,7 +322,7 @@ export class ListingTableService extends FtrService {
     await this.retry.try(async () => {
       const elements = await this.find.allByCssSelector(
         itemLinkSelector(appName),
-        findTimeout ?? 10000
+        findTimeout ?? (count === 0 ? 0 : 10000)
       );
       expect(elements.length).to.equal(count);
     });

@@ -24,7 +24,6 @@ export class VisualizeEditorPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly comboBox = this.ctx.getService('comboBox');
   private readonly elasticChart = this.ctx.getService('elasticChart');
-  private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly visChart = this.ctx.getPageObject('visChart');
 
@@ -69,12 +68,12 @@ export class VisualizeEditorPageObject extends FtrService {
       await this.elasticChart.setNewChartUiDebugFlag();
     }
 
-    await this.common.sleep(500); // wait for the visualization to render
+    await this.visChart.waitForVisualizationRenderComplete();
 
     const prevRenderingCount = await this.visChart.getVisualizationRenderingCount();
     this.log.debug(`Before Rendering count ${prevRenderingCount}`);
     await this.testSubjects.clickWhenNotDisabledWithoutRetry('visualizeEditorRenderButton');
-    await this.visChart.waitForRenderingCount(prevRenderingCount + 1);
+    await this.visChart.waitForVisualizationRenderComplete(prevRenderingCount + 1);
   }
 
   public async removeDimension(aggNth: number) {
@@ -194,15 +193,23 @@ export class VisualizeEditorPageObject extends FtrService {
     isChildAggregation = false,
     aggregationIndex = 0
   ) {
-    const comboBoxElements = await this.find.allByCssSelector(`
+    const selector = `
         [data-test-subj="${groupName}AggGroup"]
         [data-test-subj^="visEditorAggAccordion"].euiAccordion-isOpen
         ${isChildAggregation ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="defaultEditorAggSelect"]
-      `);
-
+      `;
+    const comboBoxElements = await this.find.allByCssSelector(selector);
     await this.comboBox.setElement(comboBoxElements[aggregationIndex], aggValue);
-    await this.common.sleep(500);
+    await this.retry.waitFor(`aggregation to be ${aggValue}`, async () => {
+      const elements = await this.find.allByCssSelector(selector);
+      const element = elements[aggregationIndex];
+      if (!element) return false;
+      // Selecting an aggregation can intentionally produce a validation error.
+      const input = await element.findByCssSelector('input[role="combobox"]');
+      const selectedValue = await input.getAttribute('value');
+      return selectedValue?.trim().toLowerCase() === aggValue.trim().toLowerCase();
+    });
   }
 
   /**
@@ -315,15 +322,25 @@ export class VisualizeEditorPageObject extends FtrService {
   }
 
   public async toggleDisabledAgg(agg: string | number) {
-    await this.testSubjects.click(`visEditorAggAccordion${agg} > ~toggleDisableAggregationBtn`);
-    await this.header.waitUntilLoadingHasFinished();
+    const buttonSubject = `visEditorAggAccordion${agg} > ~toggleDisableAggregationBtn`;
+    const button = await this.testSubjects.find(buttonSubject);
+    const previousState = await button.getAttribute('data-test-subj');
+    await this.testSubjects.click(buttonSubject);
+    await this.retry.try(async () => {
+      const updatedButton = await this.testSubjects.find(buttonSubject);
+      expect(await updatedButton.getAttribute('data-test-subj')).not.to.equal(previousState);
+    });
   }
 
   public async toggleAggregationEditor(agg: string | number) {
-    await this.find.clickByCssSelector(
-      `[data-test-subj="visEditorAggAccordion${agg}"] .euiAccordion__button`
-    );
-    await this.header.waitUntilLoadingHasFinished();
+    const selector = `[data-test-subj="visEditorAggAccordion${agg}"] .euiAccordion__button`;
+    const button = await this.find.byCssSelector(selector);
+    const previousExpanded = await button.getAttribute('aria-expanded');
+    await this.find.clickByCssSelector(selector);
+    await this.retry.try(async () => {
+      const updatedButton = await this.find.byCssSelector(selector);
+      expect(await updatedButton.getAttribute('aria-expanded')).not.to.equal(previousExpanded);
+    });
   }
 
   public async toggleOtherBucket(agg: string | number = 2) {
@@ -416,7 +433,11 @@ export class VisualizeEditorPageObject extends FtrService {
 
   public async clickReset() {
     await this.testSubjects.click('visualizeEditorResetButton');
-    await this.visChart.waitForVisualization();
+    await this.retry.waitFor(
+      'visualization params to reset',
+      async () => !(await this.isApplyEnabled())
+    );
+    await this.visChart.waitForVisualizationRenderComplete();
   }
 
   public async clickYAxisOptions(axisId: string) {

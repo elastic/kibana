@@ -368,8 +368,10 @@ export class DashboardPageObject extends FtrService {
 
     if (!accept) return;
 
-    const confirmation = await this.testSubjects.waitForExists('confirmModalTitleText', {
-      timeout: 2000,
+    const confirmation = await this.retry.try(async () => {
+      if (await this.testSubjects.exists('confirmModalTitleText')) return true;
+      if (await this.appMenu.menuItemExists('dashboardEditMode')) return false;
+      throw new Error('Waiting for the discard confirmation or dashboard view mode');
     });
     if (confirmation) {
       await this.common.clickConfirmOnModal();
@@ -478,7 +480,17 @@ export class DashboardPageObject extends FtrService {
     if (expectWarning) {
       await this.testSubjects.existOrFail('dashboardCreateConfirm');
     }
-    if (await this.testSubjects.waitForExists('dashboardCreateConfirm', { timeout: 2000 })) {
+    const shouldConfirm = await this.retry.try(async () => {
+      if (await this.testSubjects.exists('dashboardCreateConfirm')) return true;
+      if (
+        (await this.appMenu.menuItemExists('dashboardInteractiveSaveMenuItem')) ||
+        (await this.appMenu.menuItemExists('dashboardQuickSaveMenuItem'))
+      ) {
+        return false;
+      }
+      throw new Error('Waiting for the create confirmation or new dashboard editor');
+    });
+    if (shouldConfirm) {
       if (continueEditing) {
         await this.testSubjects.click('dashboardCreateConfirmContinue');
       } else {
@@ -647,7 +659,6 @@ export class DashboardPageObject extends FtrService {
 
     if (saveOptions.saveAsNew) {
       message = await this.toasts.getTitleAndDismiss();
-      await this.header.waitUntilLoadingHasFinished();
       await this.common.waitForSaveModalToClose();
     }
 
@@ -655,7 +666,7 @@ export class DashboardPageObject extends FtrService {
     if (saveOptions.exitFromEditMode && !isInViewMode) {
       await this.clickCancelOutOfEditMode();
     }
-    await this.header.waitUntilLoadingHasFinished();
+    await this.waitForRenderComplete();
 
     return message;
   }
@@ -677,9 +688,7 @@ export class DashboardPageObject extends FtrService {
     dashboardTitle: string,
     saveOptions: Omit<SaveDashboardOptions, 'saveAsNew'> = { waitDialogIsClosed: true }
   ) {
-    const isSaveModalOpen = await this.testSubjects.waitForExists('savedObjectSaveModal', {
-      timeout: 2000,
-    });
+    const isSaveModalOpen = await this.testSubjects.exists('savedObjectSaveModal');
 
     if (!isSaveModalOpen) {
       if (await this.appMenu.menuItemExists('dashboardInteractiveSaveMenuItem')) {

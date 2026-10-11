@@ -76,3 +76,7 @@ waitRecording: {
 Custom wait helpers can use the lifecycle service's `recordWait(category, name,
 callback)` method. The callback's result and errors are preserved, and recording
 is disabled by default.
+
+## Reusing the optimization patterns
+
+See the [FTR wait optimization catalog](../../../wait_optimization.md) for symptoms, replacements, source references, and slow-network validation lessons from this config and subsequent audits.

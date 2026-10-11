@@ -50,9 +50,9 @@ export class DashboardPanelActionsService extends FtrService {
     const fixedHeaders = (
       await Promise.all([
         // global fixed eui headers, TODO: remove when Kibana switched to grid layout
-        this.find.allByCssSelector('[data-fixed-header="true"]', 500),
+        this.find.allByCssSelector('[data-fixed-header="true"]', 0),
         // sticky unified search bar
-        this.find.allByCssSelector('[data-test-subj="globalQueryBar"]', 500),
+        this.find.allByCssSelector('[data-test-subj="globalQueryBar"]', 0),
       ])
     ).flat();
 
@@ -125,7 +125,7 @@ export class DashboardPanelActionsService extends FtrService {
     this.log.debug(`clickPanelAction(${testSubject})`);
     wrapper = wrapper || (await this.getPanelWrapper());
     await this.scrollPanelIntoView(wrapper);
-    const exists = await this.testSubjects.descendantExists(testSubject, wrapper);
+    const exists = await this.testSubjects.descendantExists(testSubject, wrapper, { timeout: 0 });
     let action;
     if (!exists) {
       await this.openContextMenu(wrapper);
@@ -278,7 +278,7 @@ export class DashboardPanelActionsService extends FtrService {
   async panelActionExists(testSubject: string, wrapper?: WebElementWrapper) {
     this.log.debug(`panelActionExists(${testSubject})`);
     return wrapper
-      ? await this.testSubjects.descendantExists(testSubject, wrapper)
+      ? await this.testSubjects.descendantExists(testSubject, wrapper, { timeout: 0 })
       : await this.testSubjects.exists(testSubject, { allowHidden: true });
   }
 

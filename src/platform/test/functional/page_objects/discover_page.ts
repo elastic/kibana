@@ -142,7 +142,8 @@ export class DiscoverPageObject extends FtrService {
     }
 
     await this.testSubjects.click('confirmSaveSavedObjectButton');
-    await this.header.waitUntilLoadingHasFinished();
+    await this.common.waitForSaveModalToClose();
+    await this.header.awaitGlobalLoadingIndicatorHidden();
     // LeeDr - this additional checking for the saved search name was an attempt
     // to cause this method to wait for the reloading of the page to complete so
     // that the next action wouldn't have to retry.  But it doesn't really solve

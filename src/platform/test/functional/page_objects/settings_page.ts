@@ -52,7 +52,12 @@ export class SettingsPageObject extends FtrService {
       await this.testSubjects.click('dataViews');
     }
 
-    await this.header.waitUntilLoadingHasFinished();
+    await this.retry.waitFor(
+      'data views list to be ready',
+      async () =>
+        (await this.testSubjects.exists('indexPatternTable')) ||
+        (await this.testSubjects.exists('indexPatternEmptyState'))
+    );
   }
 
   async clickSnapshotRestore() {
@@ -476,7 +481,9 @@ export class SettingsPageObject extends FtrService {
 
   async controlChangeSave() {
     await this.testSubjects.click('fieldSaveButton');
-    await this.header.waitUntilLoadingHasFinished();
+    await this.testSubjects.missingOrFail('fieldSaveButton', {
+      timeout: this.testSubjects.TRY_TIME,
+    });
   }
 
   async clickIndexPatternByName(name: string) {

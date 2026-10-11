@@ -237,11 +237,16 @@ export class TestSubjects extends FtrService {
     await element.doubleClick();
   }
 
-  async descendantExists(selector: string, parentElement: WebElementWrapper): Promise<boolean> {
+  async descendantExists(
+    selector: string,
+    parentElement: WebElementWrapper,
+    { timeout }: { timeout?: number } = {}
+  ): Promise<boolean> {
     this.log.debug(`TestSubjects.descendantExists(${selector})`);
     return await this.findService.descendantExistsByCssSelector(
       testSubjSelector(selector),
-      parentElement
+      parentElement,
+      timeout
     );
   }
 

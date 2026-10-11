@@ -16,11 +16,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const { common, discover, visualize, header, timePicker, visChart } = getPageObjects([
+  const { common, discover, visualize, timePicker, visChart } = getPageObjects([
     'common',
     'discover',
     'visualize',
-    'header',
     'timePicker',
     'visChart',
   ]);
@@ -35,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await common.navigateToApp('discover');
         await filterBar.addFilter({ field: 'extension.raw', operation: 'is', value: 'jpg' });
-        await header.waitUntilLoadingHasFinished();
+        await filterBar.expectFilter('extension.raw', 'jpg');
         await discover.saveSearch(savedSearchName);
         discoverSavedSearchUrlPath = (await browser.getCurrentUrl()).split('?')[0];
       });
@@ -57,7 +56,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should have a valid link to the saved search from the visualization', async () => {
         await testSubjects.click('showUnlinkSavedSearchPopover');
         await testSubjects.click('viewSavedSearch');
-        await header.waitUntilLoadingHasFinished();
 
         await retry.waitFor('wait discover load its breadcrumbs', async () => {
           const discoverBreadcrumb = await discover.getCurrentQueryName();
@@ -69,7 +67,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // go back to visualize
         await browser.goBack();
-        await header.waitUntilLoadingHasFinished();
+        await testSubjects.existOrFail('showUnlinkSavedSearchPopover');
+        await visChart.waitForVisualizationRenderComplete();
       });
 
       it('should respect the time filter when linked to a saved search', async () => {
@@ -89,7 +88,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           operation: 'is between',
           value: { from: '100', to: '3000' },
         });
-        await header.waitUntilLoadingHasFinished();
         await retry.waitFor('wait for count to equal 707', async () => {
           const data = await visChart.getTableVisContent();
           return data[0][0] === '707';
@@ -108,7 +106,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Disabling this filter should now result in different values, since
         // the visualization should not be linked anymore with the saved search.
         await filterBar.toggleFilterEnabled('extension.raw');
-        await header.waitUntilLoadingHasFinished();
         await retry.waitFor('wait for count to equal 1,293', async () => {
           const unfilteredData = await visChart.getTableVisContent();
           return unfilteredData[0][0] === '1,293';
@@ -117,7 +114,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should not break when saving after unlinking', async () => {
         await visualize.saveVisualizationExpectSuccess('Unlinked before saved');
-        await header.waitUntilLoadingHasFinished();
         await retry.waitFor('wait for count to equal 1,293', async () => {
           const data = await visChart.getTableVisContent();
           return data[0][0] === '1,293';

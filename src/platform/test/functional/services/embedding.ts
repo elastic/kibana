@@ -12,7 +12,7 @@ import { FtrService } from '../ftr_provider_context';
 export class EmbeddingService extends FtrService {
   private readonly browser = this.ctx.getService('browser');
   private readonly log = this.ctx.getService('log');
-  private readonly header = this.ctx.getPageObject('header');
+  private readonly renderable = this.ctx.getService('renderable');
 
   /**
    * Opens current page in embeded mode
@@ -21,6 +21,6 @@ export class EmbeddingService extends FtrService {
     const currentUrl = await this.browser.getCurrentUrl();
     this.log.debug(`Opening in embedded mode: ${currentUrl}`);
     await this.browser.get(`${currentUrl}&embed=true`);
-    await this.header.waitUntilLoadingHasFinished();
+    await this.renderable.waitForRender();
   }
 }

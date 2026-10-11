@@ -17,9 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const renderable = getService('renderable');
   const retry = getService('retry');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const { visualize, header, dashboard, timePicker, visEditor, visChart } = getPageObjects([
+  const { visualize, dashboard, timePicker, visEditor, visChart } = getPageObjects([
     'visualize',
-    'header',
     'dashboard',
     'timePicker',
     'visEditor',
@@ -52,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await visualize.loadSavedVisualization(vizName1);
-      await visChart.waitForVisualization();
+      await visChart.waitForVisualizationRenderComplete();
     });
 
     it('timefilter should be disabled', async () => {
@@ -66,15 +65,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickNewDashboard();
       await dashboardAddPanel.addVisualization(vizName1);
 
+      await renderable.waitForRender();
+      await visChart.filterOnTableCell(0, 1);
       await retry.try(async () => {
-        // hover and click on cell to filter
-        await visChart.filterOnTableCell(0, 1);
-
-        await header.waitUntilLoadingHasFinished();
-        await renderable.waitForRender();
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.be(1);
       });
+      await renderable.waitForRender();
 
       await filterBar.removeAllFilters();
     });

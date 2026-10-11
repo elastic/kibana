@@ -143,6 +143,11 @@ export class VisualizeChartPageObject extends FtrService {
     return points.sort((a, b) => a.x - b.x).map(({ y }) => y);
   }
 
+  public async getAllLineChartData(selector: string): Promise<number[]> {
+    const lines = (await this.getEsChartDebugState(selector))?.lines ?? [];
+    return lines.flatMap(({ points }) => points.map(({ y }) => y));
+  }
+
   /**
    * Returns bar chart data in pixels
    * @param dataLabel data-label value
@@ -154,20 +159,22 @@ export class VisualizeChartPageObject extends FtrService {
   }
 
   private async toggleLegend() {
-    const isVisible = await this.find.existsByCssSelector('.echLegend');
+    const isVisible = await this.find.existsByCssSelector('.echLegend', 0);
     if (!isVisible) {
-      await this.testSubjects.click('vislibToggleLegend');
+      await this.testSubjects.pressEnter('vislibToggleLegend');
     }
   }
 
   public async filterLegend(name: string) {
     await this.toggleLegend();
     await this.testSubjects.click(`legend-${name}`);
-    // wait for a short amount of time for popover to stabilize as there is no good way to check for that
-    await this.common.sleep(250);
-    const filterIn = await this.testSubjects.find(`legend-${name}-filterIn`);
-    await filterIn.click();
-    await this.waitForVisualizationRenderingStabilized();
+    await this.retry.waitFor('legend filter action to be ready', async () => {
+      const filterIn = await this.testSubjects.find(`legend-${name}-filterIn`);
+      return (await filterIn.isDisplayed()) && (await filterIn.isEnabled());
+    });
+    const renderingCount = await this.getVisualizationRenderingCount();
+    await this.testSubjects.click(`legend-${name}-filterIn`);
+    await this.waitForVisualizationRenderComplete(renderingCount + 1);
   }
 
   public async doesLegendColorChoiceExist(color: string) {
@@ -209,6 +216,23 @@ export class VisualizeChartPageObject extends FtrService {
         return currentRenderingCount >= minimumCount;
       }
     );
+  }
+
+  /** Waits for the visualization's render-complete signal and minimum completed render count. */
+  public async waitForVisualizationRenderComplete(
+    minimumCount = 1,
+    timeout = this.config.get('timeouts.waitFor')
+  ): Promise<void> {
+    await this.retry.waitForWithTimeout('visualization to finish rendering', timeout, async () =>
+      this.isVisualizationRenderComplete(minimumCount)
+    );
+  }
+
+  public async isVisualizationRenderComplete(minimumCount = 1): Promise<boolean> {
+    const visualizationLoader = await this.testSubjects.find('visualizationLoader');
+    const renderingCount = Number(await visualizationLoader.getAttribute('data-rendering-count'));
+    const renderComplete = await visualizationLoader.getAttribute('data-render-complete');
+    return renderingCount >= minimumCount && renderComplete === 'true';
   }
 
   public async waitForVisualizationRenderingStabilized() {
@@ -268,54 +292,45 @@ export class VisualizeChartPageObject extends FtrService {
     );
   }
 
-  public async openLegendOptionColorsForXY(name: string, chartSelector: string) {
-    await this.waitForVisualizationRenderingStabilized();
-    await this.retry.try(async () => {
-      const chart = await this.find.byCssSelector(chartSelector);
-      const legendItemColor = await chart.findByCssSelector(
-        `[data-ech-series-name="${name}"] .echLegendItem__color`
-      );
-      await legendItemColor.click();
+  private async openLegendColors(
+    name: string,
+    chartSelector: string,
+    availableColor: string
+  ): Promise<void> {
+    await this.waitForVisualizationRenderComplete();
+    const chart = await this.find.byCssSelector(chartSelector);
+    const legendItemColor = await chart.findByCssSelector(
+      `[data-ech-series-name="${name}"] .echLegendItem__color`
+    );
+    await legendItemColor.click();
+    await this.retry.waitFor('legend color selector to open', async () =>
+      this.doesLegendColorChoiceExist(availableColor)
+    );
+  }
 
-      await this.waitForVisualizationRenderingStabilized();
-      // arbitrary color chosen, any available would do
-      const arbitraryColor = '#ee72a6';
-      const isOpen = await this.doesLegendColorChoiceExist(arbitraryColor);
-      if (!isOpen) {
-        throw new Error('legend color selector not open');
-      }
-    });
+  public async openLegendOptionColorsForXY(name: string, chartSelector: string) {
+    await this.openLegendColors(name, chartSelector, '#ee72a6');
   }
 
   public async openLegendOptionColorsForPie(name: string, chartSelector: string) {
-    await this.waitForVisualizationRenderingStabilized();
-    await this.retry.try(async () => {
-      const chart = await this.find.byCssSelector(chartSelector);
-      const legendItemColor = await chart.findByCssSelector(
-        `[data-ech-series-name="${name}"] .echLegendItem__color`
-      );
-      await legendItemColor.click();
-
-      await this.waitForVisualizationRenderingStabilized();
-      // arbitrary color chosen, any available would do
-      const arbitraryColor = '#f66d64';
-      const isOpen = await this.doesLegendColorChoiceExist(arbitraryColor);
-      if (!isOpen) {
-        throw new Error('legend color selector not open');
-      }
-    });
+    await this.openLegendColors(name, chartSelector, '#f66d64');
   }
 
   public async filterOnTableCell(columnIndex: number, rowIndex: number) {
     await this.retry.try(async () => {
       const cell = await this.dataGrid.getCellElement(rowIndex, columnIndex);
-      await cell.click();
-      const filterBtn = await this.testSubjects.findDescendant(
-        'tbvChartCell__filterForCellValue',
-        cell
-      );
-      await this.common.sleep(2000);
-      await filterBtn.click();
+      await cell.moveMouseTo();
+      await this.retry.tryForTime(this.config.get('timeouts.waitFor'), async () => {
+        const currentCell = await this.dataGrid.getCellElement(rowIndex, columnIndex);
+        const filterBtn = await this.testSubjects.findDescendant(
+          'tbvChartCell__filterForCellValue',
+          currentCell
+        );
+        if (!(await filterBtn.isDisplayed()) || !(await filterBtn.isEnabled())) {
+          throw new Error('Table cell filter action is not ready');
+        }
+        await filterBtn.click();
+      });
     });
   }
   // Table visualization

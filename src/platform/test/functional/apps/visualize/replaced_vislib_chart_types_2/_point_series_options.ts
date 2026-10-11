@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await visEditor.toggleAccordion('visEditorSeriesAccordion3');
     log.debug('Average memory value axis - ValueAxis-2');
     await visEditor.setSeriesAxis(1, 'ValueAxis-2');
-    await visChart.waitForVisualizationRenderingStabilized();
+    await visChart.waitForVisualizationRenderComplete();
     await visEditor.clickGo();
   }
 
@@ -221,7 +221,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should preserve saved axis titles after a vis is saved and reopened', async function () {
         await visualize.saveVisualizationExpectSuccess(visName);
-        await visChart.waitForVisualization();
+        await visChart.waitForVisualizationRenderComplete();
         await visualize.loadSavedVisualization(visName);
         await visChart.waitForRenderingCount();
         await visEditor.clickDataTab();

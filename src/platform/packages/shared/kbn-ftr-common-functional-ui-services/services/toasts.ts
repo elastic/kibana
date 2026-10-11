@@ -78,7 +78,7 @@ export class ToastsService extends FtrService {
   }
 
   public async dismissAll(): Promise<void> {
-    const allToastElements = await this.getAll();
+    const allToastElements = await this.getAll({ timeout: 0 });
 
     if (allToastElements.length === 0) return;
 
@@ -111,7 +111,7 @@ export class ToastsService extends FtrService {
 
   public async assertCount(expectedCount: number): Promise<void> {
     await this.retry.tryForTime(5 * 1000, async (): Promise<void> => {
-      const toastCount = await this.getCount({ timeout: 1000 });
+      const toastCount = await this.getCount({ timeout: expectedCount === 0 ? 0 : 1000 });
       expect(toastCount).to.eql(
         expectedCount,
         `Toast count should be ${expectedCount} (got ${toastCount})`
@@ -138,13 +138,17 @@ export class ToastsService extends FtrService {
     return await elem.getVisibleText();
   }
 
-  public async getAll(): Promise<WebElementWrapper[]> {
-    const list = await this.getGlobalList();
-    return await list.findAllByCssSelector(`.euiToast`);
+  public async getAll(options?: { timeout?: number }): Promise<WebElementWrapper[]> {
+    const list = await this.getGlobalList(options);
+    return await list.findAllByCssSelector(`.euiToast`, options?.timeout);
   }
 
   private async getGlobalList(options?: { timeout?: number }): Promise<WebElementWrapper> {
-    return await this.testSubjects.find('globalToastList', options?.timeout);
+    // Zero is an unlimited explicit find deadline, so retain the container's readiness wait.
+    return await this.testSubjects.find(
+      'globalToastList',
+      options?.timeout === 0 ? undefined : options?.timeout
+    );
   }
 
   public async getCount(options?: { timeout?: number }): Promise<number> {
