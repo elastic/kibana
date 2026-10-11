@@ -80,6 +80,36 @@ describe('investigateRuleSkill', () => {
     });
   });
 
+  // ── AlertZero guards ──────────────────────────────────────────────────────
+  //
+  // Prose-pinning tests for the four hardening guards. They fail if the guard
+  // sentences are removed or reworded past recognition.
+  describe('AlertZero guards', () => {
+    // Guard (b): the two Step-2 queries are the whole dataset — no speculative
+    // security.alerts calls to corroborate or pre-validate an exception.
+    it('forbids speculative alert queries beyond the two data-collection queries', () => {
+      expect(investigateRuleSkill.content).toContain('the entire data-collection step');
+      expect(investigateRuleSkill.content).toContain('Do not issue further');
+      expect(investigateRuleSkill.content).toContain('`security.alerts` calls to corroborate');
+    });
+
+    // Guard (c): corroboration is bounded — the by-ids fallback runs at most once.
+    it('bounds the by-ids fallback to a single run', () => {
+      expect(investigateRuleSkill.content).toContain('Run that fallback **at most once**');
+    });
+
+    // Guard (c): the empty-result time-window retry is a single retry, not a loop.
+    it('bounds the empty-result window retry to a single retry', () => {
+      expect(investigateRuleSkill.content).toContain('retry **once**');
+      expect(investigateRuleSkill.content).toContain('a larger value if a query returns nothing');
+    });
+
+    // Guard (d): presenting the output ends the investigation — no post-run calls.
+    it('forbids tool calls after the output is presented', () => {
+      expect(investigateRuleSkill.content).toContain('make **no further tool calls**');
+    });
+  });
+
   // ── resolve_rule_attachment ─────────────────────────────────────────────────
   //
   // The skill itself does NO fetching: it adds a security.rule attachment by
