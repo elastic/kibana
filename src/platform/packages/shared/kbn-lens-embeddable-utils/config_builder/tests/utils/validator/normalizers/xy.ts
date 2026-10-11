@@ -402,10 +402,8 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
       if (legend.isInside === false) delete legend.isInside;
 
       if (isInsideLegend) {
-        // Inside legends always get position: 'right' and default top/right alignment
+        // Inside legends always get position: 'right', alignment is only kept when it was set
         legend.position = 'right';
-        legend.verticalAlignment ??= 'top';
-        legend.horizontalAlignment ??= 'right';
       } else {
         // Outside legends: strip inside-only fields and legendSize for horizontal positions
         delete legend.horizontalAlignment;

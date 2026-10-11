@@ -50,11 +50,11 @@ function extractAlignment(legend: XYConfig['legend']):
       horizontalAlignment: 'left' | 'right' | undefined;
     }
   | {} {
-  if (legend?.placement === 'inside') {
-    const [verticalAlignment, horizontalAlignment] = (legend.position?.split('_') ?? [
-      'top',
-      'right',
-    ]) as ['top' | 'bottom' | undefined, 'left' | 'right' | undefined];
+  if (legend?.placement === 'inside' && legend.position) {
+    const [verticalAlignment, horizontalAlignment] = legend.position.split('_') as [
+      'top' | 'bottom' | undefined,
+      'left' | 'right' | undefined
+    ];
     return { verticalAlignment, horizontalAlignment };
   }
   return {};
