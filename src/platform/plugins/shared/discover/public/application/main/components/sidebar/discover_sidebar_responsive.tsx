@@ -45,6 +45,7 @@ import {
   DiscoverSidebarReducerStatus,
 } from './lib/sidebar_reducer';
 import { useDiscoverCustomization } from '../../../../customizations';
+import { useDataViewFieldEditor } from '../../../../hooks/use_data_view_field_editor';
 import {
   internalStateActions,
   useAppStateSelector,
@@ -199,6 +200,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     sidebarToggleState$,
     additionalFilters,
   } = props;
+  const fieldEditor = useDataViewFieldEditor({ dataView: selectedDataView, onFieldEdited });
   const [sidebarState, dispatchSidebarStateAction] = useReducer(
     discoverSidebarReducer,
     getInitialState()
@@ -470,7 +472,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             onAddBreakdownField={onAddBreakdownField}
             onAddFieldToWorkspace={onAddFieldToWorkspace}
             onAddFilter={onAddFilter}
-            onFieldEdited={onFieldEdited}
+            onEditField={fieldEditor.editField}
+            onDeleteField={fieldEditor.deleteField}
             onMoveFieldInWorkspace={onMoveFieldInWorkspace}
             onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
             onRemoveFieldsFromWorkspace={onRemoveFieldsFromWorkspace}

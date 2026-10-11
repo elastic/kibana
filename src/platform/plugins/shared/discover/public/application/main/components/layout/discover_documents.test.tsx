@@ -154,6 +154,23 @@ describe('Discover documents layout', () => {
     expect(screen.getByTestId('viewModeToggle')).toBeVisible();
   });
 
+  test('delegates table field editing to the Discover session', async () => {
+    const services = createDiscoverServicesMock();
+    const beginEdit = jest.spyOn(services.inlineDataViews, 'beginEdit');
+    const { toolkit } = await setup({ services });
+    await mountComponent({ fetchStatus: FetchStatus.COMPLETE, hits: esHitsMock, toolkit });
+
+    const tableProps = discoverGridMock.mock.calls[0][0];
+    expect(tableProps.onFieldEdited).toBeUndefined();
+    tableProps.onEditField?.('message');
+
+    await waitFor(() => expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalled());
+    expect(beginEdit).toHaveBeenCalledWith(dataViewMock);
+    expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalledWith(
+      expect.objectContaining({ fieldName: 'message', onCancel: expect.any(Function) })
+    );
+  });
+
   test('ES|QL: render complete when partial and documents were already fetched', async () => {
     await mountComponent({
       fetchStatus: FetchStatus.PARTIAL,

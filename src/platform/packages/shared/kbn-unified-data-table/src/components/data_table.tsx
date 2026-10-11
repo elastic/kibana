@@ -340,6 +340,8 @@ interface InternalUnifiedDataTableProps {
    * Callback to execute on edit runtime field
    */
   onFieldEdited?: (options: { editedDataView: DataView }) => void;
+  /** Delegates field editing to the consumer without creating an internal draft. */
+  onEditField?: (fieldName: string) => void;
   /**
    * Service dependencies
    */
@@ -605,6 +607,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       rowsPerPageState,
       onUpdateRowsPerPage,
       onFieldEdited,
+      onEditField,
       services,
       renderCustomGridBody,
       renderCustomToolbar,
@@ -1060,36 +1063,35 @@ const InternalUnifiedDataTable = React.forwardRef<
       };
     }, []);
 
-    const editField = useMemo(
-      () =>
-        onFieldEdited
-          ? async (fieldName: string) => {
-              const editedDataView = shouldKeepAdHocDataViewImmutable
-                ? await prepareDataViewForEditing(dataView, data.dataViews)
-                : dataView;
-              closeFieldEditor.current =
-                onFieldEdited &&
-                (await services?.dataViewFieldEditor?.openEditor({
-                  ctx: {
-                    dataView: editedDataView,
-                  },
-                  fieldName,
-                  onSave: async () => {
-                    await onFieldEdited({
-                      editedDataView,
-                    });
-                  },
-                }));
-            }
-          : undefined,
-      [
-        data.dataViews,
-        dataView,
-        onFieldEdited,
-        services?.dataViewFieldEditor,
-        shouldKeepAdHocDataViewImmutable,
-      ]
-    );
+    const editField = useMemo(() => {
+      if (onEditField) {
+        return onEditField;
+      }
+
+      if (!onFieldEdited) {
+        return undefined;
+      }
+
+      return async (fieldName: string) => {
+        const editedDataView = shouldKeepAdHocDataViewImmutable
+          ? await prepareDataViewForEditing(dataView, data.dataViews)
+          : dataView;
+        closeFieldEditor.current = await services?.dataViewFieldEditor?.openEditor({
+          ctx: { dataView: editedDataView },
+          fieldName,
+          onSave: async () => {
+            await onFieldEdited({ editedDataView });
+          },
+        });
+      };
+    }, [
+      data.dataViews,
+      dataView,
+      onFieldEdited,
+      onEditField,
+      services?.dataViewFieldEditor,
+      shouldKeepAdHocDataViewImmutable,
+    ]);
 
     const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
       (fieldName, rowIndex) =>

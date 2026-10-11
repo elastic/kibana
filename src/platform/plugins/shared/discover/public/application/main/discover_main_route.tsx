@@ -126,7 +126,6 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
           .get<EsqlDatasetsResult>(DATASETS_ROUTE)
           .then((res) => res.datasets.length > 0)
           .catch(() => false),
-        dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
         initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
       ]);
       const initializationState: DiscoverInternalState['initializationState'] = {

@@ -49,9 +49,9 @@ import type { DiscoverAppLocatorParams } from '../../../../../../common';
 import { parseAppLocatorParams } from '../../../../../../common/app_locator_get_location';
 import type { InitialTabState } from '../../../../../plugin_imports/initial_tab_state_service';
 import { fetchData } from './tab_state';
-import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
-import { assignSessionDataViewIds } from '../../utils/assign_session_data_view_ids';
+import { applyInlineDataViewLoadState } from './apply_inline_data_view_load_state';
+import { loadDataViewList } from './data_views';
 import { showSessionWarnings } from '../../../../../session';
 
 export const setTabs: InternalStateThunkActionCreator<
@@ -383,6 +383,7 @@ export const updateTabs: InternalStateThunkActionCreator<
     );
   };
 
+/** Loads the session and saved views before normalizing and restoring its tabs. */
 export const initializeTabs = createInternalStateAsyncThunk(
   'internalState/initializeTabs',
   async function initializeTabsThunkFn(
@@ -458,43 +459,46 @@ export const initializeTabs = createInternalStateAsyncThunk(
       }
     };
 
-    const [userId, spaceId, persistedDiscoverSession] = await Promise.all([
+    const [userId, spaceId, persistedDiscoverSession, dataViewListResult] = await Promise.all([
       existingUserId === undefined ? getUserId() : existingUserId,
       existingSpaceId === undefined ? getSpaceId() : existingSpaceId,
       loadPersistedDiscoverSession(),
+      dispatch(loadDataViewList()),
     ]);
+
+    const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;
+
+    // Without the list, a navigation spec's ID cannot be classified as saved or inline.
+    if (initialTabState?.dataViewSpec?.id && loadDataViewList.rejected.match(dataViewListResult)) {
+      throw dataViewListResult.error;
+    }
 
     if (customizationContext.displayMode === 'standalone' && persistedDiscoverSession) {
       rememberDiscoverSession(services.core.http, services.chrome, persistedDiscoverSession);
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
 
-    const byValueEmbeddableTab = services.embeddableEditor.getByValueTab();
-    const byValueEmbeddableTabState = byValueEmbeddableTab
-      ? fromSavedObjectTabToTabState({
-          tab: byValueEmbeddableTab,
-          profileStateRegistry: services.profileStateRegistry,
-        })
-      : undefined;
-
-    const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;
-    const { draftSessionTitle, ...initialTabsState } = tabsStorageManager.loadLocally({
-      userId,
-      spaceId,
-      persistedDiscoverSession,
-      shouldClearAllTabs,
-      defaultTabState: byValueEmbeddableTabState ?? DEFAULT_TAB_STATE,
-      // Assign IDs before mapping saved tabs, using the incoming link and same-session local tabs.
-      prepareSession: (session, localTabs, selectedTabId) =>
-        assignSessionDataViewIds(session, localTabs, {
-          tabId: selectedTabId ?? session.tabs[0]?.id,
-          dataViewSpec: initialTabState?.dataViewSpec,
-        }),
-    });
-
-    // Hand the location state over to the tab initialization before updating the URL below, which
-    // discards it, so initial state such as ad hoc data view specs is passed on
-    services.initialTabStateService.capture(initialTabState);
+    const savedDataViewIds = getState().savedDataViews.map(({ id }) => id);
+    const { inlineDataViewIds, draftSessionTitle, ...initialTabsState } =
+      tabsStorageManager.loadLocally({
+        userId,
+        spaceId,
+        persistedDiscoverSession,
+        shouldClearAllTabs,
+        defaultTab: services.embeddableEditor.getByValueTab(),
+        navigationDataViewSpec: initialTabState?.dataViewSpec,
+        savedDataViewIds,
+      });
+    const selectedTab = initialTabsState.allTabs.find(
+      ({ id }) => id === initialTabsState.selectedTabId
+    );
+    await dispatch(
+      applyInlineDataViewLoadState({
+        normalized: inlineDataViewIds,
+        selectedTab,
+        initialTabState,
+      })
+    );
 
     // Replace instead of push the tab ID to the URL on initialization in order to
     // avoid capturing a browser history entry with a potentially empty _tab state

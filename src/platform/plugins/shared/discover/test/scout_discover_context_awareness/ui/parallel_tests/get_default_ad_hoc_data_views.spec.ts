@@ -118,6 +118,10 @@ spaceTest.describe(
         await expect.poll(() => discover.getCurrentDataViewId()).toBe(copiedDataViewId);
         await expect(discover.unsavedChangesIndicator()).toBeHidden();
 
+        await discover.editCurrentDataViewName(SESSION_DATA_VIEW);
+        await expect.poll(() => discover.getCurrentDataViewId()).toBe(copiedDataViewId);
+        await expect(discover.unsavedChangesIndicator()).toBeHidden();
+
         await discover.getSelectedDataView().click();
         await expect(page.testSubj.locator(managedBadge(SESSION_DATA_VIEW))).toBeHidden();
         await page.keyboard.press('Escape');

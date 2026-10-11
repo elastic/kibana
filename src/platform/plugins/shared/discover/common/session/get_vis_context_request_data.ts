@@ -13,10 +13,9 @@ import { get, isUndefined, omitBy } from 'lodash';
 import type { DiscoverSessionApiTab } from '@kbn/as-code-discover-schema';
 import type { StoredVisContextRequestData } from './vis_context';
 
-/** Rebuilds the chart fingerprint, using the supplied ID for an inline Data View. */
+/** Rebuilds the chart fingerprint from the tab's data source and saved ES|QL chart. */
 export const getVisContextRequestData = (
-  tab: DiscoverSessionApiTab,
-  inlineDataViewId?: string
+  tab: DiscoverSessionApiTab
 ): StoredVisContextRequestData => {
   const breakdownField = tab.breakdown_field || undefined;
   const esqlFingerprint = tab.vis_context
@@ -30,13 +29,7 @@ export const getVisContextRequestData = (
   }
 
   const { data_source: dataSource } = tab;
-  let dataViewId: string | undefined;
-
-  if ('ref_id' in dataSource) {
-    dataViewId = dataSource.ref_id;
-  } else if (dataSource.type === AS_CODE_DATA_VIEW_SPEC_TYPE) {
-    dataViewId = inlineDataViewId;
-  }
+  const dataViewId = 'ref_id' in dataSource ? dataSource.ref_id : undefined;
 
   const timeField =
     dataSource.type === AS_CODE_DATA_VIEW_SPEC_TYPE ? dataSource.time_field : undefined;

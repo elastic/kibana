@@ -16,7 +16,7 @@ import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server'
 import { createDiscoverSession } from './session_create';
 
 describe('createDiscoverSession', () => {
-  it('stores an inline ID and filter references without exposing the ID in the public response', async () => {
+  it('stores an ID-less inline spec with implicit own filters and explicit foreign references', async () => {
     const core = coreMock.createRequestHandlerContext();
     const context = jest.mocked<RequestHandlerContext>({
       core: Promise.resolve(core),
@@ -58,15 +58,9 @@ describe('createDiscoverSession', () => {
       parseSearchSourceJSON(stored.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON),
       options?.references ?? []
     );
-    const { index } = loaded;
-    if (!index || typeof index === 'string') {
-      throw new Error('Expected a stored inline Data View');
-    }
-
-    expect(index).toEqual({ title: 'logs-*', id: expect.any(String) });
-    expect(loaded.filter?.map(({ meta }) => meta.index)).toEqual([index.id, 'other-view']);
-    expect(options?.references?.map(({ id }) => id)).toEqual(['other-view']);
-    expect(response.data.tabs[0].data_source).not.toHaveProperty('id');
+    expect(loaded.index).toStrictEqual({ title: 'logs-*' });
+    expect(loaded.filter?.map(({ meta }) => meta.index)).toStrictEqual([undefined, 'other-view']);
+    expect(options?.references?.map(({ id }) => id)).toStrictEqual(['other-view']);
     expect(response.data).toEqual(data);
     expect(core.savedObjects.client.resolve).not.toHaveBeenCalled();
     expect(core.savedObjects.client.update).not.toHaveBeenCalled();

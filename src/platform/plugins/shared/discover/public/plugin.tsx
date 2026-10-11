@@ -67,6 +67,8 @@ import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
 import { registerEsqlResultsAttachmentUi } from './agent_builder/register_esql_results_ui';
 import { getProfilesInspectorView } from './context_awareness/inspector/get_profiles_inspector_view';
 import { getDiscoverRecentlyAccessedService } from './services/discover_recently_accessed_service';
+import type { InlineDataViewService } from './services/inline_data_view_service';
+import type { InlineDataViewEditPhase } from './utils/inline_data_view_editor_controller';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -88,6 +90,8 @@ export class DiscoverPlugin
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
   private profileProviderSharedServices?: Promise<ProfileProviderSharedServices>;
+  private inlineDataViewService?: InlineDataViewService;
+  private dataViewEditorAdapter?: DiscoverStartPlugins['dataViewEditor'];
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     const experimental = this.initializerContext.config.get().experimental;
@@ -432,11 +436,24 @@ export class DiscoverPlugin
     scopedHistory?: ScopedHistory;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }) => {
-    const [{ buildServices }, historyService, profileStateRegistry] = await Promise.all([
-      getSharedServices(),
-      getHistoryService(),
-      getProfileStateRegistry(),
-    ]);
+    const [
+      { buildServices, createInlineDataViewService, createDiscoverDataViewEditorAdapter },
+      historyService,
+      profileStateRegistry,
+    ] = await Promise.all([getSharedServices(), getHistoryService(), getProfileStateRegistry()]);
+
+    const inlineDataViews = (this.inlineDataViewService ??= createInlineDataViewService({
+      dataViews: plugins.data.dataViews,
+      searchSource: plugins.data.search.searchSource,
+    }));
+    const dataViewEditor = (this.dataViewEditorAdapter ??= createDiscoverDataViewEditorAdapter({
+      dataViewEditor: plugins.dataViewEditor,
+      inlineDataViews,
+      onEditError: (error, phase) => {
+        core.notifications.toasts.addError(error, { title: getDataViewEditorErrorTitle(phase) });
+      },
+    }));
+
     return buildServices({
       core,
       plugins,
@@ -450,6 +467,8 @@ export class DiscoverPlugin
       profilesManager,
       profileStateRegistry,
       ebtManager,
+      inlineDataViews,
+      dataViewEditor,
       setHeaderActionMenu,
     });
   };
@@ -548,3 +567,15 @@ const getProfileStateRegistry = once(async () => {
   const { createProfileStateRegistry } = await getSharedServices();
   return createProfileStateRegistry();
 });
+
+const getDataViewEditorErrorTitle = (phase: InlineDataViewEditPhase) => {
+  if (phase === 'open') {
+    return i18n.translate('discover.dataViewEditor.openErrorTitle', {
+      defaultMessage: 'Unable to open data view editor',
+    });
+  }
+
+  return i18n.translate('discover.dataViewEditor.commitErrorTitle', {
+    defaultMessage: 'Unable to apply data view changes',
+  });
+};

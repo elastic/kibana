@@ -44,6 +44,31 @@ spaceTest.describe('Discover inline data view editing', { tag: tags.deploymentAg
   });
 
   spaceTest(
+    'keeps unchanged edits clean after confirmation and reload',
+    async ({ page, pageObjects }) => {
+      const { discover, unifiedFieldList } = pageObjects;
+      const originalId = await discover.getCurrentDataViewId();
+      await expect(discover.unsavedChangesIndicator()).toBeHidden();
+
+      await discover.editCurrentDataViewName('Inline editing');
+      await expect.poll(() => discover.getCurrentDataViewId()).toBe(originalId);
+      await expect(discover.unsavedChangesIndicator()).toBeHidden();
+
+      await unifiedFieldList.openFieldEditor('inline_runtime');
+      await discover.saveOpenFieldEditor();
+      await expect.poll(() => discover.getCurrentDataViewId()).toBe(originalId);
+      await expect(discover.unsavedChangesIndicator()).toBeHidden();
+
+      await page.reload();
+      await discover.waitUntilTabIsLoaded();
+      await expect.poll(() => discover.getCurrentDataViewId()).toBe(originalId);
+      await expect(discover.unsavedChangesIndicator()).toBeHidden();
+      await unifiedFieldList.searchField('inline_runtime');
+      await expect(unifiedFieldList.getAvailableField('inline_runtime')).toBeVisible();
+    }
+  );
+
+  spaceTest(
     'discards field edits without changing the shared inline view',
     async ({ pageObjects }) => {
       const { discover, unifiedFieldList, unifiedTabs } = pageObjects;

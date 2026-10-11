@@ -10,11 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
 import { DataViewType, type DataView, type DataViewSpec } from '@kbn/data-views-plugin/public';
-import {
-  DiscoverFlyouts,
-  dismissAllFlyoutsExceptFor,
-  prepareDataViewForEditing,
-} from '@kbn/discover-utils';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import { useESQLQueryStats } from '@kbn/esql/public';
 import {
@@ -31,6 +27,7 @@ import {
   useDiscoverCustomizationContext,
 } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { useDataViewFieldEditor } from '../../../../hooks/use_data_view_field_editor';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   internalStateActions,
@@ -79,7 +76,7 @@ export const DiscoverTopNav = ({
   const getState = useInternalStateGetState();
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
   const services = useDiscoverServices();
-  const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
+  const { dataViewEditor, navigation } = services;
   const customizationContext = useDiscoverCustomizationContext();
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupRendererApi | undefined>();
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
@@ -110,7 +107,7 @@ export const DiscoverTopNav = ({
     return { disabled: !isTimeBased };
   }, [dataView, currentDataSource]);
 
-  const closeFieldEditor = useRef<() => void | undefined>();
+  const { editField } = useDataViewFieldEditor({ dataView, onFieldEdited });
 
   const onQuerySubmitAction = useCurrentTabAction(internalStateActions.onQuerySubmit);
 
@@ -141,43 +138,8 @@ export const DiscoverTopNav = ({
     [dispatch]
   );
 
-  useEffect(() => {
-    return () => {
-      // Make sure to close the editors when unmounting
-      if (closeFieldEditor.current) {
-        closeFieldEditor.current();
-      }
-    };
-  }, []);
-
   const canEditDataView =
     Boolean(dataViewEditor?.userPermissions.editDataView()) || !dataView.isPersisted();
-
-  const editField = useMemo(
-    () =>
-      canEditDataView
-        ? async (fieldName?: string) => {
-            if (dataView?.id) {
-              const dataViewInstance = await data.dataViews.get(dataView.id);
-              const editedDataView = await prepareDataViewForEditing(
-                dataViewInstance,
-                data.dataViews
-              );
-
-              closeFieldEditor.current = await dataViewFieldEditor.openEditor({
-                ctx: {
-                  dataView: editedDataView,
-                },
-                fieldName,
-                onSave: async () => {
-                  await onFieldEdited({ editedDataView });
-                },
-              });
-            }
-          }
-        : undefined,
-    [canEditDataView, dataView?.id, data.dataViews, dataViewFieldEditor, onFieldEdited]
-  );
 
   const addField = useMemo(
     () => (canEditDataView && editField ? () => editField() : undefined),

@@ -8,18 +8,12 @@
  */
 
 import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
-import type {
-  DiscoverSessionApiData,
-  DiscoverSessionApiTab,
-  DiscoverSessionApiTabBase,
-} from '@kbn/as-code-discover-schema';
+import type { DiscoverSessionApiData, DiscoverSessionApiTab } from '@kbn/as-code-discover-schema';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
-import type { DiscoverSessionInternalData } from '../internal_schema';
 import type { DiscoverSessionWarning } from '../schema';
 import { transformControlPanelsOut } from './transform_control_panels';
 import {
@@ -27,9 +21,7 @@ import {
   fromStoredSessionSearchAndTable,
   fromStoredClassicSessionSettings,
   fromStoredEsqlSessionSettings,
-  pinnedFiltersToAppFilters,
 } from '../../../common/session/session_tab_mapping';
-import { fromStoredSearchAndTable } from '../../../common/session/search_and_table_mapping';
 import { isDiscoverSessionEsqlTab } from '../../../common/session/type_guards';
 import { toApiVisContext } from '../../../common/session/vis_context';
 
@@ -43,53 +35,9 @@ export const transformDiscoverSessionOut = (
   attributes: DiscoverSessionAttributes,
   references: SavedObjectReference[] = []
 ): { sessionState: DiscoverSessionApiData; warnings: DiscoverSessionWarning[] } => {
-  const convertedTabs = attributes.tabs.map((storedTab) => {
-    const searchSource = readSessionSearchSource(storedTab, references);
-    const searchAndTableFields = fromStoredSessionSearchAndTable(
-      storedTab.attributes,
-      searchSource
-    );
-
-    return fromStoredSessionTab(storedTab, searchAndTableFields);
-  });
-
-  return assembleApiSession(attributes, references, convertedTabs);
-};
-
-/** Builds session data for Discover, preserving inline IDs and their filter references. */
-export const transformInternalDiscoverSessionOut = (
-  attributes: DiscoverSessionAttributes,
-  references: SavedObjectReference[] = []
-): { sessionState: DiscoverSessionInternalData; warnings: DiscoverSessionWarning[] } => {
-  const convertedTabs = attributes.tabs.map((storedTab) => {
-    let searchSource = readSessionSearchSource(storedTab, references);
-    let inlineDataViewId: string | undefined;
-
-    if (!isOfAggregateQueryType(searchSource.query)) {
-      searchSource = pinnedFiltersToAppFilters(searchSource);
-      const { index } = searchSource;
-      if (index && typeof index !== 'string') {
-        inlineDataViewId = index.id;
-      }
-    }
-
-    const searchAndTableFields = fromStoredSearchAndTable(storedTab.attributes, searchSource);
-    const converted = fromStoredSessionTab(storedTab, searchAndTableFields);
-    const { tab } = converted;
-
-    if (
-      isDiscoverSessionEsqlTab(tab) ||
-      tab.data_source.type !== AS_CODE_DATA_VIEW_SPEC_TYPE ||
-      inlineDataViewId === undefined
-    ) {
-      return converted;
-    }
-
-    return {
-      ...converted,
-      tab: { ...tab, data_source: { ...tab.data_source, id: inlineDataViewId } },
-    };
-  });
+  const convertedTabs = attributes.tabs.map((storedTab) =>
+    fromStoredSessionTab(storedTab, references)
+  );
 
   return assembleApiSession(attributes, references, convertedTabs);
 };
@@ -109,11 +57,13 @@ const readSessionSearchSource = (
   return injectReferences(searchSource, references);
 };
 
-/** Completes mapped search and table fields with session settings, chart, controls, and tab type. */
+/** Converts a stored tab to API data, including its settings, chart, controls, and tab type. */
 const fromStoredSessionTab = (
   tab: DiscoverSessionAttributes['tabs'][number],
-  searchAndTableFields: DiscoverSessionApiTabBase
+  references: SavedObjectReference[]
 ): ConvertedSessionTab => {
+  const searchSource = readSessionSearchSource(tab, references);
+  const searchAndTableFields = fromStoredSessionSearchAndTable(tab.attributes, searchSource);
   const sessionSettings = isDiscoverSessionEsqlTab(searchAndTableFields)
     ? fromStoredEsqlSessionSettings(tab.attributes)
     : fromStoredClassicSessionSettings(tab.attributes);

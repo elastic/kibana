@@ -34,11 +34,10 @@ describe('getVisContextRequestData', () => {
     breakdown_field: 'host.name',
   };
 
-  it('uses the supplied inline ID without changing the API tab', () => {
+  it('rebuilds chart settings from an inline spec without changing the tab', () => {
     const before = cloneDeep(inlineTab);
 
-    expect(getVisContextRequestData(inlineTab, 'inline-view')).toStrictEqual({
-      dataViewId: 'inline-view',
+    expect(getVisContextRequestData(inlineTab)).toStrictEqual({
       timeField: '@timestamp',
       timeInterval: 'h',
       breakdownField: 'host.name',
@@ -46,29 +45,17 @@ describe('getVisContextRequestData', () => {
     expect(inlineTab).toStrictEqual(before);
   });
 
-  it('does not invent an inline ID when none is supplied', () => {
-    expect(getVisContextRequestData(inlineTab)).toStrictEqual({
-      timeField: '@timestamp',
-      timeInterval: 'h',
-      breakdownField: 'host.name',
-    });
-  });
-
-  it('keeps a saved Data View reference instead of the supplied inline ID', () => {
+  it('keeps a saved Data View reference', () => {
     expect(
-      getVisContextRequestData(
-        { ...inlineTab, data_source: { type: 'data_view_reference', ref_id: 'saved-view' } },
-        'inline-view'
-      )
+      getVisContextRequestData({
+        ...inlineTab,
+        data_source: { type: 'data_view_reference', ref_id: 'saved-view' },
+      })
     ).toStrictEqual({
       dataViewId: 'saved-view',
       timeInterval: 'h',
       breakdownField: 'host.name',
     });
-  });
-
-  it('does not use an inline ID for an ES|QL tab', () => {
-    expect(getVisContextRequestData(createTab({}), 'inline-view')).toStrictEqual({});
   });
 
   it('keeps the ES|QL chart fingerprint after switching to an inline Data View', () => {
@@ -78,10 +65,7 @@ describe('getVisContextRequestData', () => {
     });
 
     expect(
-      getVisContextRequestData(
-        { ...inlineTab, vis_context: createTab(attributes).vis_context },
-        'inline-view'
-      )
+      getVisContextRequestData({ ...inlineTab, vis_context: createTab(attributes).vis_context })
     ).toStrictEqual({
       dataViewId: 'esql-dv',
       timeField: 'event.ingested',

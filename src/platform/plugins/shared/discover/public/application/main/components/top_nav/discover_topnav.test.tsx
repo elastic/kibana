@@ -29,6 +29,9 @@ import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider
 import { DiscoverTopNavMenuProvider, discoverTopNavMenuContext } from './discover_topnav_menu';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { FetchStatus } from '../../../types';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { generateInlineDataViewId } from '../../../../../common/session/inline_data_view';
 
 let mockDiscoverService = createDiscoverServicesMock();
 type AggregateQueryTopNavMenuProps = ComponentProps<
@@ -55,6 +58,7 @@ const MockAggregateQueryTopNavMenu = (props: AggregateQueryTopNavMenuProps) => {
       }
     >
       {dataViewPickerOverride}
+      <button onClick={() => dataViewPickerComponentProps?.onAddField?.()}>Add field</button>
       <button
         data-test-subj="mock-query-submit"
         onClick={() =>
@@ -195,6 +199,91 @@ describe('Discover topnav component', () => {
         default:
           throw new Error(`Unknown customization id: ${id}`);
       }
+    });
+  });
+
+  describe('field editor on an inline view', () => {
+    // Opens the field editor from the picker using the shared edit session.
+    const openFieldEditor = async () => {
+      const { toolkit, props } = await setup();
+      const { services } = toolkit;
+      const spec = { title: 'logs-*' };
+      const original = new DataView({
+        spec: { ...spec, id: generateInlineDataViewId(spec) },
+        fieldFormats: fieldFormatsMock,
+      });
+      toolkit.internalState.dispatch(
+        internalStateActions.setDataView({ tabId: toolkit.getCurrentTab().id, dataView: original })
+      );
+      jest
+        .mocked(services.dataViews.create)
+        .mockImplementation(
+          async (input) => new DataView({ spec: input, fieldFormats: fieldFormatsMock })
+        );
+      const closeEditor = jest.fn();
+      jest.mocked(services.dataViewFieldEditor.openEditor).mockResolvedValue(closeEditor);
+      const { unmount } = renderTestComponent({ toolkit, props });
+
+      await userEvent.setup().click(screen.getByRole('button', { name: 'Add field' }));
+      await waitFor(() => expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalled());
+      const [options] = jest.mocked(services.dataViewFieldEditor.openEditor).mock.calls[0];
+      const { dataView: draft } = options.ctx;
+
+      return { services, props, draft, options, closeEditor, unmount };
+    };
+
+    it('reports an opening failure without applying changes', async () => {
+      const { toolkit, props } = await setup();
+      const { services } = toolkit;
+      const error = new Error('Opening failed');
+      jest.mocked(services.dataViewFieldEditor.openEditor).mockRejectedValueOnce(error);
+      renderTestComponent({ toolkit, props });
+
+      await userEvent.setup().click(screen.getByRole('button', { name: 'Add field' }));
+
+      await waitFor(() =>
+        expect(services.toastNotifications.addError).toHaveBeenCalledWith(error, {
+          title: 'Unable to open field editor',
+        })
+      );
+      expect(props.onFieldEdited).not.toHaveBeenCalled();
+    });
+
+    it('edits a draft and releases it after saving', async () => {
+      const { services, props, draft, options, unmount } = await openFieldEditor();
+      const updatedFields = await draft.addRuntimeField('new_field', { type: 'keyword' });
+
+      await options.onSave?.(updatedFields);
+
+      expect(props.onFieldEdited).toHaveBeenCalledWith({
+        editedDataView: expect.objectContaining({
+          id: generateInlineDataViewId(draft.toMinimalSpec()),
+        }),
+        editedFieldName: undefined,
+      });
+      expect(jest.mocked(services.dataViews.clearInstanceCache).mock.calls).toEqual([[draft.id]]);
+
+      unmount();
+      expect(services.dataViews.clearInstanceCache).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes the editor and releases its draft on unmount', async () => {
+      const { services, props, draft, closeEditor, unmount } = await openFieldEditor();
+
+      unmount();
+
+      expect(closeEditor).toHaveBeenCalledTimes(1);
+      expect(jest.mocked(services.dataViews.clearInstanceCache).mock.calls).toEqual([[draft.id]]);
+      expect(props.onFieldEdited).not.toHaveBeenCalled();
+    });
+
+    it('releases the draft on field-editor cancellation without applying it', async () => {
+      const { services, props, draft, options } = await openFieldEditor();
+
+      options.onCancel?.();
+
+      expect(services.dataViews.clearInstanceCache).toHaveBeenCalledWith(draft.id);
+      expect(props.onFieldEdited).not.toHaveBeenCalled();
     });
   });
 
