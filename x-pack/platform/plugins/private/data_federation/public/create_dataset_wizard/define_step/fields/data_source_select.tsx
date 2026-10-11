@@ -8,9 +8,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiSpacer,
   EuiSuperSelect,
   useEuiTheme,
   type EuiSuperSelectOption,
@@ -155,6 +157,20 @@ export function DataSourceSelect({
         placeholder={createDatasetWizardStrings.dataSourcePlaceholder}
         isInvalid={isInvalid}
       />
+      {value ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            iconType="info"
+            title={createDatasetWizardStrings.dataSourceAuthenticationCalloutTitle}
+            data-test-subj="createDatasetDataSourceAuthenticationCallout"
+          >
+            <p>{createDatasetWizardStrings.dataSourceAuthenticationCalloutDescription}</p>
+          </EuiCallOut>
+        </>
+      ) : null}
       {isCreateDataSourceOpen ? (
         <CreateDataSourceFlyout
           existingDataSourceNames={existingDataSourceNames}

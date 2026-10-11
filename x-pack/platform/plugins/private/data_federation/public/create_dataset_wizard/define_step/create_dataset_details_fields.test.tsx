@@ -63,7 +63,12 @@ function Harness({
   });
 
   return (
-    <KibanaContextProvider services={{ dataSourcesClient: { add } }}>
+    <KibanaContextProvider
+      services={{
+        dataSourcesClient: { add },
+        docLinks: { links: { dataFederation: { authentication: '' } } },
+      }}
+    >
       <FormProvider {...methods}>
         <CreateDatasetDetailsFields
           control={methods.control}

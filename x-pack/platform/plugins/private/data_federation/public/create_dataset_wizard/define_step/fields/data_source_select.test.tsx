@@ -68,4 +68,26 @@ describe('DataSourceSelect', () => {
 
     expect(getByTestId('dataSourceValue')).toHaveTextContent('my-s3');
   });
+
+  it('does not show the authentication callout when no data source is selected', () => {
+    const { queryByTestId } = renderComponent();
+
+    expect(queryByTestId('createDatasetDataSourceAuthenticationCallout')).not.toBeInTheDocument();
+  });
+
+  it('shows the authentication callout when an existing data source is selected', async () => {
+    const { getByTestId } = renderComponent();
+
+    await act(async () => {
+      fireEvent.click(getByTestId('createDatasetDataSource'));
+    });
+
+    await act(async () => {
+      fireEvent.click(getByTestId('createDatasetDataSource-my-s3'));
+    });
+
+    expect(getByTestId('createDatasetDataSourceAuthenticationCallout')).toHaveTextContent(
+      'Check data source permissions'
+    );
+  });
 });

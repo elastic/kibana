@@ -248,7 +248,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
   }, [pendingRemoveField, removeField]);
 
   return (
-    <div data-test-subj="dataFederationMappingEditor">
+    <EuiPanel paddingSize="none" hasBorder={false} data-test-subj="dataFederationMappingEditor">
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
@@ -285,7 +285,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
             })}
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiSpacer size="s" />
       {value.fields.length > 0 ? (
         <>
           <EuiFlexGroup direction="column" gutterSize="s">
@@ -395,23 +394,20 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
       ) : null}
 
       {isAddFieldFormOpen && editingFieldId === null ? (
-        <>
-          <EuiSpacer size="m" />
-          <EuiPanel paddingSize="s" color="subdued" hasBorder={false}>
-            <FieldMappingForm
-              key={draftFormKey}
-              value={emptyDraftInitialValue}
-              errors={draftErrors}
-              onDraftChange={() => {
-                if (Object.keys(draftErrors).length === 0) return;
-                setDraftErrors({});
-              }}
-              mode="create"
-              onSubmit={addDraftField}
-              onCancel={closeAddFieldForm}
-            />
-          </EuiPanel>
-        </>
+        <EuiPanel paddingSize="m" color="subdued" hasBorder={false}>
+          <FieldMappingForm
+            key={draftFormKey}
+            value={emptyDraftInitialValue}
+            errors={draftErrors}
+            onDraftChange={() => {
+              if (Object.keys(draftErrors).length === 0) return;
+              setDraftErrors({});
+            }}
+            mode="create"
+            onSubmit={addDraftField}
+            onCancel={closeAddFieldForm}
+          />
+        </EuiPanel>
       ) : null}
 
       {!validation.isValid && shouldShowValidationCallout ? (
@@ -431,6 +427,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
           onConfirm={confirmRemoveField}
         />
       ) : null}
-    </div>
+    </EuiPanel>
   );
 };
