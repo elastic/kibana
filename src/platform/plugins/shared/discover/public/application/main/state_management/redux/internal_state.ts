@@ -64,6 +64,7 @@ import {
   selectTab,
 } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
+import { selectTabHasUnsavedChangesForPersistence } from '../utils/restore_clean_tabs';
 import type { DiscoverSearchSessionManager } from '../discover_search_session';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
 import type { CascadedDocumentsStateManager } from '../../data_fetching/cascaded_documents_fetcher';
@@ -661,10 +662,15 @@ const createMiddleware = (options: InternalStateDependencies) => {
   >;
 
   startListening({
-    matcher: isAnyOf(
-      internalStateSlice.actions.setTabs,
-      internalStateSlice.actions.setDraftSessionTitle
-    ),
+    predicate: (action, currentState, originalState) =>
+      isAnyOf(
+        internalStateSlice.actions.setTabs,
+        internalStateSlice.actions.setDraftSessionTitle,
+        initializeTabs.fulfilled,
+        initializeSingleTab.fulfilled
+      )(action) ||
+      (internalStateSlice.actions.setUnsavedChanges.match(action) &&
+        !isEqual(currentState.tabs.unsavedIds, originalState.tabs.unsavedIds)),
     effect: throttle<
       ListenerEffect<
         UnknownAction,
@@ -683,7 +689,13 @@ const createMiddleware = (options: InternalStateDependencies) => {
             services,
           });
         void tabsStorageManager.persistLocally(
-          { allTabs: selectAllTabs(state), recentlyClosedTabs: selectRecentlyClosedTabs(state) },
+          {
+            allTabs: selectAllTabs(state).map((tab) => ({
+              ...tab,
+              hasUnsavedChanges: selectTabHasUnsavedChangesForPersistence(state, tab.id),
+            })),
+            recentlyClosedTabs: selectRecentlyClosedTabs(state),
+          },
           getTabInternalState,
           state.persistedDiscoverSession?.id,
           state.draftSessionTitle
@@ -701,6 +713,10 @@ const createMiddleware = (options: InternalStateDependencies) => {
         const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
         withTab(listenerApi.getState(), action.payload, (tab) => {
           tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
+            hasUnsavedChanges: selectTabHasUnsavedChangesForPersistence(
+              listenerApi.getState(),
+              tab.id
+            ),
             internalState: selectTabRuntimeInternalState({
               runtimeStateManager,
               tabState: tab,

@@ -53,6 +53,10 @@ import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
 import { assignSessionDataViewIds } from '../../utils/assign_session_data_view_ids';
 import { showSessionWarnings } from '../../../../../session';
+import {
+  updateUrlStateForRestoredTab,
+  withoutUnsavedChangesFlag,
+} from '../../utils/restore_clean_tabs';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -84,7 +88,7 @@ export const setTabs: InternalStateThunkActionCreator<
     const justRemovedTabs: TabState[] = [];
 
     for (const tab of removedTabs) {
-      const newRecentlyClosedTab: TabState = { ...tab };
+      const newRecentlyClosedTab: TabState = withoutUnsavedChangesFlag(tab);
       // make sure to get the latest internal and app state from runtime state manager before deleting the runtime state
       newRecentlyClosedTab.initialInternalState =
         selectTabRuntimeInternalState({ runtimeStateManager, tabState: tab, services }) ??
@@ -478,23 +482,35 @@ export const initializeTabs = createInternalStateAsyncThunk(
       : undefined;
 
     const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;
-    const { draftSessionTitle, ...initialTabsState } = tabsStorageManager.loadLocally({
-      userId,
-      spaceId,
-      persistedDiscoverSession,
-      shouldClearAllTabs,
-      defaultTabState: byValueEmbeddableTabState ?? DEFAULT_TAB_STATE,
-      // Assign IDs before mapping saved tabs, using the incoming link and same-session local tabs.
-      prepareSession: (session, localTabs, selectedTabId) =>
-        assignSessionDataViewIds(session, localTabs, {
-          tabId: selectedTabId ?? session.tabs[0]?.id,
-          dataViewSpec: initialTabState?.dataViewSpec,
-        }),
-    });
+    const { draftSessionTitle, previousSelectedTab, ...initialTabsState } =
+      tabsStorageManager.loadLocally({
+        userId,
+        spaceId,
+        persistedDiscoverSession,
+        shouldClearAllTabs,
+        defaultTabState: byValueEmbeddableTabState ?? DEFAULT_TAB_STATE,
+        // Assign IDs before mapping saved tabs, using the incoming link and same-session local tabs.
+        prepareSession: (session, localTabs, selectedTabId) =>
+          assignSessionDataViewIds(session, localTabs, {
+            tabId: selectedTabId ?? session.tabs[0]?.id,
+            dataViewSpec: initialTabState?.dataViewSpec,
+          }),
+      });
 
     // Hand the location state over to the tab initialization before updating the URL below, which
     // discards it, so initial state such as ad hoc data view specs is passed on
     services.initialTabStateService.capture(initialTabState);
+
+    if (!initialTabState) {
+      await updateUrlStateForRestoredTab({
+        previousTab: previousSelectedTab,
+        restoredTab: initialTabsState.allTabs.find(
+          ({ id }) => id === initialTabsState.selectedTabId
+        ),
+        urlStateStorage,
+        profileStateRegistry: services.profileStateRegistry,
+      });
+    }
 
     // Replace instead of push the tab ID to the URL on initialization in order to
     // avoid capturing a browser history entry with a potentially empty _tab state

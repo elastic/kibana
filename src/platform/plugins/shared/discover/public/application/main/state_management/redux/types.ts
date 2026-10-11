@@ -216,6 +216,8 @@ export const HEAVY_STATE_KEYS = [
 ];
 
 export interface TabState extends TabItem {
+  // Unsaved changes restored from storage, retained until the tab can be compared at runtime.
+  hasUnsavedChanges?: boolean;
   initializationState:
     | { initializationStatus: Exclude<TabInitializationStatus, TabInitializationStatus.Error> }
     | { initializationStatus: TabInitializationStatus.Error; error: Error | SerializedError };

@@ -24,8 +24,11 @@ import { DEFAULT_TAB_STATE, fromSavedSearchToSavedObjectTab } from './redux';
 import {
   getRecentlyClosedTabStateMock,
   getTabStateMock,
+  getPersistedTabMock,
 } from './redux/__mocks__/internal_state.mocks';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
+import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { TEST_PROFILE_STATE_DEF } from '../../../context_awareness/__mocks__/profile_state';
 
@@ -113,6 +116,7 @@ describe('TabsStorageManager', () => {
   const toStoredTab = (tab: TabState | RecentlyClosedTabState) => ({
     id: tab.id,
     label: tab.label,
+    hasUnsavedChanges: tab.hasUnsavedChanges,
     internalState: tab.id.startsWith('closedTab')
       ? tab.initialInternalState
       : mockGetInternalState(),
@@ -127,6 +131,7 @@ describe('TabsStorageManager', () => {
     ...DEFAULT_TAB_STATE,
     id: storedTab.id,
     label: storedTab.label,
+    hasUnsavedChanges: storedTab.hasUnsavedChanges,
     initialInternalState: storedTab.initialInternalState,
     attributes: storedTab.attributes,
     appState: storedTab.appState,
@@ -221,9 +226,12 @@ describe('TabsStorageManager', () => {
     jest.spyOn(storage, 'set');
 
     const props: TabsInternalStatePayload = {
-      allTabs: [mockTab1, mockTab2],
+      allTabs: [
+        { ...mockTab1, hasUnsavedChanges: false },
+        { ...mockTab2, hasUnsavedChanges: true },
+      ],
       selectedTabId: 'tab1',
-      recentlyClosedTabs: [mockRecentlyClosedTab],
+      recentlyClosedTabs: [{ ...mockRecentlyClosedTab, hasUnsavedChanges: false }],
     };
 
     await tabsStorageManager.persistLocally(props, mockGetInternalState, 'testDiscoverSessionId');
@@ -231,8 +239,9 @@ describe('TabsStorageManager', () => {
     expect(storage.set).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY, {
       userId: mockUserId,
       spaceId: mockSpaceId,
-      openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
-      closedTabs: [toStoredTab(mockRecentlyClosedTab)],
+      openTabs: props.allTabs.map(toStoredTab),
+      // A closed tab never keeps the flag, so it can't be mistaken for a clean tab once reopened
+      closedTabs: [{ ...toStoredTab(mockRecentlyClosedTab), hasUnsavedChanges: undefined }],
       discoverSessionId: 'testDiscoverSessionId',
     });
   });
@@ -336,6 +345,7 @@ describe('TabsStorageManager', () => {
       allTabs: [toRestoredTab(mockTab1), toRestoredTab(mockTab2)],
       selectedTabId: 'tab2',
       recentlyClosedTabs: [toRestoredTab(mockRecentlyClosedTab)],
+      previousSelectedTab: toRestoredTab(mockTab2),
     });
     expect(urlStateStorage.get).toHaveBeenCalledWith(TAB_STATE_URL_KEY);
     expect(storage.get).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY);
@@ -1009,7 +1019,102 @@ describe('TabsStorageManager', () => {
       selectedTabId: mockTab2.id,
       recentlyClosedTabs: [toRestoredTab(mockRecentlyClosedTab)],
       updatedDiscoverSession: persistedDiscoverSession,
+      previousSelectedTab: toRestoredTab(mockTab2),
     });
+  });
+
+  it.each([false, true, undefined])(
+    'restores saved content only for an explicitly clean draft (hasUnsavedChanges: %s)',
+    (hasUnsavedChanges) => {
+      const { tabsStorageManager, urlStateStorage, services } = create();
+      const savedTab = getPersistedTabMock({
+        tabId: mockTab1.id,
+        dataView: dataViewMockWithTimeField,
+        services,
+        appStateOverrides: { columns: ['updated'] },
+      });
+      const session = createDiscoverSessionMock({ id: 'session', tabs: [savedTab] });
+      services.storage.set(TABS_LOCAL_STORAGE_KEY, {
+        userId: mockUserId,
+        spaceId: mockSpaceId,
+        discoverSessionId: session.id,
+        openTabs: [toStoredTab(mockTab2), toStoredTab({ ...mockTab1, hasUnsavedChanges })],
+        closedTabs: [],
+      });
+      urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: mockTab1.id });
+
+      const restored = tabsStorageManager.loadLocally({
+        userId: mockUserId,
+        spaceId: mockSpaceId,
+        persistedDiscoverSession: session,
+        defaultTabState: DEFAULT_TAB_STATE,
+      });
+
+      expect(restored.allTabs.map(({ id }) => id)).toEqual([mockTab2.id, mockTab1.id]);
+      expect(restored.selectedTabId).toBe(mockTab1.id);
+      expect(restored.previousSelectedTab).toEqual(
+        toRestoredTab({ ...mockTab1, hasUnsavedChanges })
+      );
+      expect(restored.allTabs[0]).toEqual(toRestoredTab(mockTab2));
+      expect(restored.allTabs[1].appState.columns).toEqual(
+        hasUnsavedChanges === false ? savedTab.columns : mockTab1.appState.columns
+      );
+      expect(restored.allTabs[1].globalState).toEqual(mockTab1.globalState);
+    }
+  );
+
+  it('keeps local-only fields and drops fields unset in the saved session when restoring a clean draft', () => {
+    const { tabsStorageManager, urlStateStorage, services } = create();
+    const savedTab = {
+      ...getPersistedTabMock({
+        tabId: mockTab1.id,
+        dataView: dataViewMockWithTimeField,
+        services,
+        appStateOverrides: { columns: ['updated'] },
+      }),
+      breakdownField: undefined,
+    };
+    const session = createDiscoverSessionMock({ id: 'session', tabs: [savedTab] });
+    const cleanTab = {
+      ...mockTab1,
+      hasUnsavedChanges: false,
+      appState: { ...mockTab1.appState, savedQuery: 'saved-query-id', breakdownField: 'host' },
+    };
+    const profileState = {
+      testProfileState: { persistentValue: 'persistent', urlValue: 'url' },
+    };
+    services.storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      discoverSessionId: session.id,
+      openTabs: [
+        {
+          ...toStoredTab(cleanTab),
+          internalState: { searchSessionId: 'search-session-id' },
+          profileState,
+        },
+      ],
+      closedTabs: [],
+    });
+    urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: mockTab1.id });
+
+    const restored = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      persistedDiscoverSession: session,
+      defaultTabState: DEFAULT_TAB_STATE,
+    });
+
+    expect(restored.allTabs[0].appState).toEqual(
+      expect.objectContaining({ columns: savedTab.columns, savedQuery: 'saved-query-id' })
+    );
+    expect(restored.allTabs[0].appState).not.toHaveProperty('breakdownField');
+    expect(restored.allTabs[0].initialInternalState).toEqual({
+      serializedSearchSource: savedTab.serializedSearchSource,
+      tabType: savedTab.tabTypeState?.type,
+      searchSessionId: 'search-session-id',
+    });
+    expect(restored.allTabs[0].profileState).toEqual(profileState);
   });
 
   it('should load persisted tabs when persisted discover session id differs from stored session id', () => {
@@ -1459,6 +1564,7 @@ describe('TabsStorageManager', () => {
       selectedTabId: mockTab2.id,
       recentlyClosedTabs: [toRestoredTab(mockRecentlyClosedTab)],
       draftSessionTitle: 'My draft',
+      previousSelectedTab: toRestoredTab(mockTab2),
     });
   });
 

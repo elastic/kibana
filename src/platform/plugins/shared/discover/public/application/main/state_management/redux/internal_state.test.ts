@@ -19,7 +19,10 @@ import {
   selectTabRuntimeState,
   selectTab,
 } from '.';
-import { discardFlyoutsOnTabChange } from './internal_state';
+import { discardFlyoutsOnTabChange, internalStateSlice } from './internal_state';
+import { getTabStateMock } from './__mocks__/internal_state.mocks';
+import { TabInitializationStatus } from './types';
+import { TABS_LOCAL_STORAGE_KEY } from '../tabs_storage_manager';
 import {
   buildDataViewMock,
   dataViewMock,
@@ -30,6 +33,81 @@ import { mockControlState } from '../../../../__mocks__/esql_controls';
 import { selectDataSourceProfileId } from './runtime_state';
 
 describe('InternalStateStore', () => {
+  describe('local persistence during initialization', () => {
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    const tab = getTabStateMock({
+      id: 'tab',
+      initializationState: { initializationStatus: TabInitializationStatus.Complete },
+    });
+    const setTabs = internalStateSlice.actions.setTabs({
+      allTabs: [tab],
+      selectedTabId: tab.id,
+      recentlyClosedTabs: [],
+    });
+    const setUnsaved = (unsavedTabIds: string[]) =>
+      internalStateActions.setUnsavedChanges({
+        hasUnsavedChanges: unsavedTabIds.length > 0,
+        unsavedTabIds,
+      });
+    const createStore = () => {
+      const { internalState, services } = getDiscoverInternalStateMock({
+        tabsStorageEnabled: true,
+      });
+      return { dispatch: internalState.dispatch, storageSet: jest.spyOn(services.storage, 'set') };
+    };
+    const expectFlagWritten = (
+      storageSet: jest.SpyInstance,
+      hasUnsavedChanges: boolean | undefined
+    ) =>
+      expect(storageSet).toHaveBeenLastCalledWith(
+        TABS_LOCAL_STORAGE_KEY,
+        expect.objectContaining({
+          openTabs: [expect.objectContaining({ id: tab.id, hasUnsavedChanges })],
+        })
+      );
+
+    it('does not write the unsaved changes flag until session initialization finishes', () => {
+      const { dispatch, storageSet } = createStore();
+      const args = { discoverSessionId: undefined };
+      dispatch(internalStateActions.initializeTabs.pending('request', args));
+      dispatch(setTabs);
+      dispatch(setUnsaved([tab.id]));
+      jest.advanceTimersByTime(300);
+
+      expectFlagWritten(storageSet, undefined);
+
+      dispatch(
+        internalStateActions.initializeTabs.fulfilled(
+          { userId: 'user', spaceId: 'space', persistedDiscoverSession: undefined },
+          'request',
+          args
+        )
+      );
+      jest.advanceTimersByTime(300);
+
+      expectFlagWritten(storageSet, true);
+    });
+
+    it('writes on unsaved changes only when the unsaved tabs change', () => {
+      const { dispatch, storageSet } = createStore();
+      dispatch(setTabs);
+      jest.advanceTimersByTime(300);
+      storageSet.mockClear();
+
+      dispatch(setUnsaved([]));
+      jest.advanceTimersByTime(300);
+
+      expect(storageSet).not.toHaveBeenCalled();
+
+      dispatch(setUnsaved([tab.id]));
+      jest.advanceTimersByTime(300);
+
+      expectFlagWritten(storageSet, true);
+    });
+  });
+
   const setup = async () => {
     const toolkit = getDiscoverInternalStateMock({
       persistedDataViews: [dataViewMock],
