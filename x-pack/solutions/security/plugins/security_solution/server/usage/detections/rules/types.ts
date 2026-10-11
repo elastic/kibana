@@ -85,6 +85,13 @@ export interface RuleCustomizationCounts {
   timeline_id: number;
 }
 
+export interface RuleBaseVersionCounts {
+  customized_with_base_version: number;
+  customized_without_base_version: number;
+  noncustomized_with_base_version: number;
+  noncustomized_without_base_version: number;
+}
+
 export interface RulesTypeUsage {
   query: FeatureTypeUsage;
   query_custom: FeatureTypeUsage;
@@ -123,6 +130,8 @@ export interface RuleAdoption {
   detection_rule_status: EventLogStatusMetric;
   elastic_detection_rule_upgrade_status: UpgradeableRulesSummary;
   elastic_detection_rule_customization_status: RuleCustomizationCounts;
+  elastic_detection_rule_customization_status_missing_base_version: RuleCustomizationCounts;
+  elastic_detection_rule_base_version_status: RuleBaseVersionCounts;
   elastic_detection_rule_deprecated_status: DeprecatedRulesSummary;
   ai_created_rules: AiCreatedRulesUsage;
   spaces_usage: SpacesUsage;
@@ -137,6 +146,7 @@ export interface RuleMetric {
   enabled: boolean;
   elastic_rule: boolean;
   is_customized: boolean;
+  has_base_version: boolean;
   created_on: string;
   updated_on: string;
   alert_count_daily: number;
