@@ -55,6 +55,7 @@ Recordings are written under `target/ftr-wait-recordings/<config-path>/<timestam
 | Async option provider | Retrying the entire combobox setter continually restarts a search before options arrive | Poll matching options within the existing lookup budget before repeating input changes. See `clickOption` in [comboBox](services/combo_box.ts). |
 | Previous-query bounds | A range slider's spinner is absent before chained filtering starts, so its placeholders still describe the previous query | Retry both expected bounds together. See `validateRange` in [dashboard controls](page_objects/dashboard_page_controls.ts). |
 | Closing popover remains in the DOM | Opening another control leaves the previous hidden suggestions list available to an unqualified lookup; sending keys to it fails | Resolve the visible suggestions container before reading counts or walking the virtualized list. See `getVisibleOptionsListAvailableOptions` in [dashboard controls](page_objects/dashboard_page_controls.ts). |
+| Scoped radio interaction | Entity-config popovers reuse radio IDs; a label can target another group while the previous popover closes | Click the input scoped to the intended group and retry fresh selected-value assertions. See `selectRadioGroupValue` in [ML common UI](../../../../x-pack/platform/test/functional/services/ml/common_ui.ts). |
 
 ## Example: inspector filtering
 

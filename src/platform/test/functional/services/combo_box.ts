@@ -75,6 +75,7 @@ export class ComboBoxService extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
 
   private readonly WAIT_FOR_EXISTS_TIME: number = this.config.get('timeouts.waitForExists');
+  private readonly findTimeout: number = this.config.get('timeouts.find');
 
   /**
    * Finds combobox element and sets specified value
@@ -126,7 +127,7 @@ export class ComboBoxService extends FtrService {
   private async clickOption(isMouseClick: boolean, trimmedValue?: string): Promise<string> {
     // Async option providers can commit after their spinner disappears. Poll the
     // options without typing again, which would restart a debounced search.
-    const element = await this.retry.tryForTime(this.WAIT_FOR_EXISTS_TIME, () =>
+    const element = await this.retry.tryForTime(this.findTimeout, () =>
       this.findOption(trimmedValue)
     );
     const selectedText = await element.getVisibleText();
