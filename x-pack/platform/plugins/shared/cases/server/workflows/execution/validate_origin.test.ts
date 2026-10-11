@@ -9,6 +9,7 @@ import type { DocumentResponse } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { z } from '@kbn/zod/v4';
+import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import { getAlertInfoFromComments, getEventInfoFromComments } from '../../common/utils';
 import { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import type { WorkflowAttachmentValidationContext } from '../../attachment_framework/types';
@@ -25,13 +26,17 @@ const theCase = {
   comments: [] as unknown[],
 } as unknown as Case;
 const createInputValidator =
-  (field: 'alertIds' | 'documents', missingMessage: string, mismatchMessage: string) =>
+  (
+    fields: ReadonlyArray<'alertIds' | 'documents' | 'documentIds'>,
+    missingMessage: string,
+    mismatchMessage: string
+  ) =>
   ({ targets, inputs }: WorkflowAttachmentValidationContext): void => {
     const event = inputs.event as Record<string, unknown> | undefined;
-    const pairs = event?.[field];
-    const selectedIds = Array.isArray(pairs)
-      ? pairs.map((pair) => (pair as { _id: string })._id)
-      : [];
+    const selectedIds = fields.flatMap((field) => {
+      const pairs = event?.[field];
+      return Array.isArray(pairs) ? pairs.map((pair) => (pair as { _id: string })._id) : [];
+    });
     if (selectedIds.length === 0) {
       throw new Error(missingMessage);
     }
@@ -50,7 +55,7 @@ attachmentTypeRegistry.register({
   schema: z.any(),
   workflow: {
     validateTargets: createInputValidator(
-      'alertIds',
+      ['alertIds'],
       'Alert attachment workflow origins require selected alert inputs.',
       'Alert workflow origin targets must match the selected alerts.'
     ),
@@ -61,7 +66,7 @@ attachmentTypeRegistry.register({
   schema: z.any(),
   workflow: {
     validateTargets: createInputValidator(
-      'documents',
+      ['documents', 'documentIds'],
       'Event attachment workflow origins require selected document inputs.',
       'Event workflow origin targets must match the selected documents.'
     ),
@@ -72,7 +77,7 @@ attachmentTypeRegistry.register({
   schema: z.any(),
   workflow: {
     validateTargets: createInputValidator(
-      'alertIds',
+      ['alertIds'],
       'Alert attachment workflow origins require selected alert inputs.',
       'Alert workflow origin targets must match the selected alerts.'
     ),
@@ -733,6 +738,41 @@ describe('event attachment origin', () => {
       })
     ).not.toThrow();
   });
+
+  it('passes when the event is attached and selected through documentIds', () => {
+    expect(() =>
+      validateOrigin({
+        origin: {
+          type: 'cases.attachment',
+          caseId: 'case-1',
+          attachmentType: 'security.event',
+          attachmentId: 'event-1',
+        },
+        inputs: { event: { documentIds: [{ _id: 'event-1', _index: '.ds-logs-default' }] } },
+        theCase: caseWithEvent,
+      })
+    ).not.toThrow();
+  });
+
+  it('throws when documentIds reference a document outside the case, whatever the origin', () => {
+    expect(() =>
+      validateOrigin({
+        origin: { type: 'cases.case', caseId: 'case-1' },
+        inputs: { event: { documentIds: [{ _id: 'unattached', _index: '.ds-logs-default' }] } },
+        theCase: caseWithEvent,
+      })
+    ).toThrow('All selected documents must belong to the case.');
+  });
+
+  it('throws when documentIds name an attached id under a different index', () => {
+    expect(() =>
+      validateOrigin({
+        origin: { type: 'cases.case', caseId: 'case-1' },
+        inputs: { event: { documentIds: [{ _id: 'event-1', _index: '.ds-logs-*' }] } },
+        theCase: caseWithEvent,
+      })
+    ).toThrow('All selected documents must belong to the case.');
+  });
 });
 
 // ── parseSelectedDocumentPairs input validation ───────────────────────────────
@@ -787,6 +827,36 @@ describe('parseSelectedDocumentPairs', () => {
       { _id: 'event-1', _index: '.ds-logs-a' },
       { _id: 'event-2', _index: '.ds-logs-b' },
     ]);
+  });
+
+  it('returns the pairs from documentIds alongside documents', () => {
+    expect(
+      parseSelectedDocumentPairs({
+        event: {
+          documents: [{ _id: 'event-1', _index: '.ds-logs-a' }],
+          documentIds: [{ _id: 'event-2', _index: '.ds-logs-b' }],
+        },
+      })
+    ).toEqual([
+      { _id: 'event-1', _index: '.ds-logs-a' },
+      { _id: 'event-2', _index: '.ds-logs-b' },
+    ]);
+  });
+
+  it('rejects malformed or oversized documentIds', () => {
+    expect(() => parseSelectedDocumentPairs({ event: { documentIds: 'event-1' } })).toThrow(
+      'inputs.event.documentIds must be an array.'
+    );
+    expect(() =>
+      parseSelectedDocumentPairs({ event: { documentIds: [{ _id: 'event-1' }] } })
+    ).toThrow('string "_id"');
+    const oversized = Array.from({ length: MAX_RUN_WORKFLOW_DOCS + 1 }, (_, i) => ({
+      _id: `e${i}`,
+      _index: '.idx',
+    }));
+    expect(() => parseSelectedDocumentPairs({ event: { documentIds: oversized } })).toThrow(
+      /cannot contain more than/
+    );
   });
 });
 

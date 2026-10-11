@@ -117,6 +117,28 @@ describe('useBulkActionsByTableType', () => {
       scopeId: PageScope.alerts,
       tableId: mockTableId,
     });
+
+    // The run-workflow panel needs the table query to resolve a "select all" selection beyond
+    // the loaded page.
+    expect(useBulkRunAlertWorkflowPanelModule.useBulkRunAlertWorkflowPanel).toHaveBeenCalledWith({
+      tableQuery: mockQuery,
+      scopeId: PageScope.alerts,
+      tableId: mockTableId,
+    });
+  });
+
+  // Inside a case the table runs the case's attached alert ids instead of the page query, so a
+  // "select all" must resolve with that query or it would reach alerts outside the case.
+  it('passes the query the table runs to the run-workflow panel when a host overrides it', () => {
+    const caseQuery = { ids: { values: ['alert-1', 'alert-2'] } };
+
+    renderHook(() =>
+      useBulkActionsByTableType(mockTableId, mockQuery, mockRefresh, undefined, caseQuery)
+    );
+
+    expect(useBulkRunAlertWorkflowPanelModule.useBulkRunAlertWorkflowPanel).toHaveBeenCalledWith(
+      expect.objectContaining({ tableQuery: caseQuery })
+    );
   });
 
   it('forwards runtimeMappings to useBulkAlertActionItems', () => {
