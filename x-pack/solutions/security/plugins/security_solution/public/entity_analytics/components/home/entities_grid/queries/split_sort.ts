@@ -43,7 +43,10 @@ import type { EsqlRunner, SortPageContext } from './types';
  * Why: the split sort avoids reading `entity.id` for every entity in view, but costs one or
  * two extra queries, so it only pays off on large views.
  * Measured (10M entities, 16GB ECH, Oct 2026): no filter 15–22s → 0.8–6s, a host filter
- * 5–8s → 0.4–2s; the two lines cross at about 500k entities in view.
+ * 5–8s → 0.4–2s; the two lines cross at about 500k entities in view. The alerts were all
+ * stamped, so alert sorts skipped EUID evaluation. Anomaly sorts were measured with faster
+ * EUID expressions than the entity store generates today; with the current ones, both sides
+ * of the split pay the same extra EUID cost.
  * Rejected: caching the value ids per filter set. It would only help pages inside the empty
  * block, and goes stale as new alerts arrive.
  */
