@@ -20,6 +20,7 @@ export async function getMobileFilters({
   apmEventClient,
   serviceName,
   transactionType,
+  errorType,
   environment,
   start,
   end,
@@ -28,6 +29,7 @@ export async function getMobileFilters({
   apmEventClient: APMEventClient;
   serviceName: string;
   transactionType?: string;
+  errorType?: 'crash';
   environment: string;
   start: number;
   end: number;
@@ -38,6 +40,7 @@ export async function getMobileFilters({
     apmEventClient,
     serviceName,
     transactionType,
+    errorType,
     environment,
     start,
     end,

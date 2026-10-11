@@ -12,7 +12,7 @@ import type { APIReturnType } from '@kbn/apm-api-shared';
 import { MobileProperty } from '../../../../../../common/mobile_types';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
-import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
+import { useAnyOfApmParams, useMaybeApmParams } from '../../../../../hooks/use_apm_params';
 import { useFetcher, FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { push } from '../../../../shared/links/url_helpers';
 
@@ -74,19 +74,29 @@ export function MobileFilters() {
     '/mobile-services/{serviceName}/errors-and-crashes'
   );
 
+  // `mobileErrorTabId` only exists on the errors-and-crashes route, so it can't
+  // be destructured from the union above. Read it separately (undefined on the
+  // other tabs) to scope filters to crash documents only on the crashes tab.
+  const mobileErrorTabId = useMaybeApmParams('/mobile-services/{serviceName}/errors-and-crashes')
+    ?.query.mobileErrorTabId;
+
   const filters = { netConnectionType, device, osVersion, appVersion };
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  // On the crashes tab, scope the filter dropdown options to crash documents so
+  // they only list values that appear in actual crashes (not transactions/spans).
+  const errorType = mobileErrorTabId === 'crashes' ? ('crash' as const) : undefined;
 
   const { data = { mobileFilters: [] }, status } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/services/{serviceName}/mobile/filters', {
         params: {
           path: { serviceName },
-          query: { start, end, environment, kuery, transactionType },
+          query: { start, end, environment, kuery, transactionType, errorType },
         },
       });
     },
-    [start, end, environment, kuery, serviceName, transactionType]
+    [start, end, environment, kuery, serviceName, transactionType, errorType]
   );
 
   function toSelectOptions(items?: string[]) {
