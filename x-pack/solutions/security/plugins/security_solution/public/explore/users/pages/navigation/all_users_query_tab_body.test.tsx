@@ -13,10 +13,13 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useAllEntityStoreUsers } from '../../containers/users/use_all_entity_store_users';
 import { AllUsersQueryTabBody } from './all_users_query_tab_body';
 import { UsersType } from '../../store/model';
+import { useExploreEntityStoreV2Enabled } from '../../../hooks/use_explore_entity_store_v2_enabled';
 
 jest.mock('../../containers/users/use_all_entity_store_users');
 jest.mock('../../../../common/containers/query_toggle');
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../hooks/use_explore_entity_store_v2_enabled', () => ({
+  useExploreEntityStoreV2Enabled: jest.fn(() => false),
+}));
 
 const mockSearch = jest.fn();
 const mockUseSearchStrategy = jest.fn();
@@ -32,6 +35,7 @@ jest.mock('../../../../common/containers/use_search_strategy', () => {
 describe('All users query tab body', () => {
   const mockUseAllEntityStoreUsers = useAllEntityStoreUsers as jest.Mock;
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
+  const mockUseExploreEntityStoreV2Enabled = useExploreEntityStoreV2Enabled as jest.Mock;
   const defaultProps = {
     skip: false,
     indexNames: [],
@@ -74,6 +78,7 @@ describe('All users query tab body', () => {
       refetch: jest.fn(),
     });
     mockUseAllEntityStoreUsers.mockReturnValue([false, emptyUsersArgs]);
+    mockUseExploreEntityStoreV2Enabled.mockReturnValue(false);
   });
 
   it('labels the users search with the users page execution context', () => {
@@ -116,5 +121,17 @@ describe('All users query tab body', () => {
     );
     expect(mockSearch).not.toHaveBeenCalled();
     expect(mockUseAllEntityStoreUsers.mock.calls[0][0].skip).toEqual(true);
+  });
+
+  it('skips the legacy search when entity store v2 is available', () => {
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+    mockUseExploreEntityStoreV2Enabled.mockReturnValue(true);
+    render(
+      <TestProviders>
+        <AllUsersQueryTabBody {...defaultProps} />
+      </TestProviders>
+    );
+    expect(mockSearch).not.toHaveBeenCalled();
+    expect(mockUseAllEntityStoreUsers.mock.calls[0][0].skip).toEqual(false);
   });
 });
