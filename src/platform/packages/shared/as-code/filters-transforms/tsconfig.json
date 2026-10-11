@@ -12,6 +12,7 @@
     "@kbn/es-query-constants",
     "@kbn/logging",
     "@kbn/as-code-filters-constants",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/core-saved-objects-server"
   ]
 }
