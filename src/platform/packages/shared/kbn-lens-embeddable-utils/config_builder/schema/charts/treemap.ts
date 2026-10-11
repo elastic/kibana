@@ -9,7 +9,12 @@
 
 import { z } from '@kbn/zod';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
-import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
+import {
+  colorMappingWithoutDefaultSchema,
+  staticColorSchema,
+  autoColorSchema,
+  AUTO_COLOR,
+} from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 
 import {
@@ -84,7 +89,7 @@ const partitionConfigBreakdownByOptionsShape = {
   /**
    * Color configuration: color mapping only
    */
-  color: colorMappingSchema.optional(),
+  color: colorMappingWithoutDefaultSchema.optional(),
   /**
    * Collapse by function. This parameter is used to collapse the
    * metric chart when the number of columns is bigger than the

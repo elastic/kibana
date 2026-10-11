@@ -345,17 +345,18 @@ const DEFAULT_CATEGORICAL_COLOR_MAPPING_VALUE: z.output<typeof categoricalColorM
   mapping: [],
 };
 
-export const colorMappingSchema = z
-  .union([
-    /**
-     * Categorical color mapping: assigns colors from a palette to specific values.
-     */
-    categoricalColorMappingSchema,
-    /**
-     * Gradient color mapping: assigns a gradient of colors to a range of values.
-     */
-    gradientColorMappingSchema,
-  ])
+const colorMappingUnionSchema = z.union([
+  /**
+   * Categorical color mapping: assigns colors from a palette to specific values.
+   */
+  categoricalColorMappingSchema,
+  /**
+   * Gradient color mapping: assigns a gradient of colors to a range of values.
+   */
+  gradientColorMappingSchema,
+]);
+
+export const colorMappingSchema = colorMappingUnionSchema
   .default(DEFAULT_CATEGORICAL_COLOR_MAPPING_VALUE)
   .meta({
     id: 'visColorMapping',
@@ -363,6 +364,15 @@ export const colorMappingSchema = z
     description:
       'Color mapping for dimension values, either categorical (for specific values) or as a gradient.',
   });
+
+/**
+ * Same as `colorMappingSchema` without a default value.
+ * For dimensions where the color mapping is owned by a single dimension and must not be filled in on the others.
+ */
+export const colorMappingWithoutDefaultSchema = colorMappingUnionSchema.meta({
+  description:
+    'Color mapping for dimension values, either categorical (for specific values) or as a gradient.',
+});
 
 export const noColorSchema = z
   .object({ type: z.literal('none') })

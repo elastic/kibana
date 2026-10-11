@@ -9,7 +9,12 @@
 
 import { z } from '@kbn/zod';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
-import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
+import {
+  colorMappingWithoutDefaultSchema,
+  staticColorSchema,
+  autoColorSchema,
+  AUTO_COLOR,
+} from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
@@ -79,7 +84,7 @@ const partitionConfigPrimaryMetricOptionsShape = {
  * Breakdown configuration including color mapping and collapse behavior
  */
 const partitionConfigBreakdownByOptionsShape = {
-  color: colorMappingSchema.optional(),
+  color: colorMappingWithoutDefaultSchema.optional(),
   collapse_by: collapseBySchema.optional(),
 };
 
