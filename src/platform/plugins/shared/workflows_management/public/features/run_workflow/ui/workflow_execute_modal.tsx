@@ -9,6 +9,7 @@
 
 import {
   EuiButton,
+  EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
@@ -16,7 +17,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiRadio,
   EuiScreenReaderOnly,
   EuiText,
   EuiToolTip,
@@ -474,47 +474,30 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                         triggerTabAvailability
                       );
                       const triggerButton = (
-                        <EuiButton
-                          color={selectedTrigger === trigger ? 'primary' : 'text'}
-                          onClick={() => handleChangeTrigger(trigger)}
-                          isDisabled={isTriggerTabDisabled}
-                          iconSide="right"
+                        <EuiCheckableCard
+                          id={trigger}
+                          name="workflowTriggerTab"
+                          label={<strong>{TRIGGER_TABS_LABELS[trigger]}</strong>}
+                          checked={selectedTrigger === trigger}
+                          disabled={isTriggerTabDisabled}
+                          onChange={() => handleChangeTrigger(trigger)}
                           data-test-subj={`workflowExecuteModalTrigger-${trigger}`}
-                          contentProps={{
-                            style: {
-                              justifyContent: 'flex-start',
-                              flexDirection: 'column',
-                              alignItems: 'flex-start',
-                              textAlign: 'left',
-                            },
-                          }}
                           css={css`
                             width: 100%;
                             flex: 1;
                             min-height: 0;
                             align-self: stretch;
-                            padding: ${euiTheme.size.m};
                           `}
                         >
-                          <EuiRadio
-                            name={TRIGGER_TABS_LABELS[trigger]}
-                            label={TRIGGER_TABS_LABELS[trigger]}
-                            id={trigger}
-                            checked={selectedTrigger === trigger}
-                            disabled={isTriggerTabDisabled}
-                            onChange={() => {}}
-                            css={{ fontWeight: euiTheme.font.weight.bold }}
-                          />
                           <EuiText
                             size="s"
                             css={css`
                               text-wrap: auto;
-                              margin-left: ${euiTheme.size.l};
                             `}
                           >
                             {TRIGGER_TABS_DESCRIPTIONS[trigger]}
                           </EuiText>
-                        </EuiButton>
+                        </EuiCheckableCard>
                       );
 
                       return (

@@ -175,7 +175,6 @@ const buildItem = (
   alerts: [],
   action_group_count: 2,
   workflows: [{ id: 'wf-1', name: 'My Workflow' }],
-  error: null,
   ...overrides,
 });
 
@@ -186,7 +185,6 @@ const buildResponse = (
   page: 1,
   per_page: 50,
   total: 0,
-  search_matches: null,
   ...overrides,
 });
 
@@ -290,14 +288,12 @@ describe('ExecutionHistoryPage', () => {
           items: [
             {
               id: 'exec-1',
-              rule: { id: 'rule-1', version: null },
+              rule: { id: 'rule-1' },
               space_id: 'default',
               started_at: '2026-05-05T10:00:00.000Z',
               ended_at: '2026-05-05T10:00:01.000Z',
               timings: { duration_ms: 1000, scheduled_delay_ms: 0 },
               outcome: 'success',
-              reason: null,
-              error: null,
             },
           ],
           total: 1,
@@ -371,7 +367,6 @@ describe('ExecutionHistoryPage', () => {
           page: 1,
           per_page: 50,
           total: 1,
-          search_matches: null,
         }),
       });
       renderPage();
@@ -388,7 +383,6 @@ describe('ExecutionHistoryPage', () => {
           page: 1,
           per_page: 50,
           total: 1,
-          search_matches: null,
         },
       });
       renderPage();
@@ -405,15 +399,14 @@ describe('ExecutionHistoryPage', () => {
         data: buildResponse({
           items: [
             buildItem({
-              policy: { id: 'policy-orphan', name: null },
-              rules: [{ id: 'rule-orphan', name: null }],
-              workflows: [{ id: 'wf-orphan', name: null }],
+              policy: { id: 'policy-orphan' },
+              rules: [{ id: 'rule-orphan' }],
+              workflows: [{ id: 'wf-orphan' }],
             }),
           ],
           page: 1,
           per_page: 50,
           total: 1,
-          search_matches: null,
         }),
       });
       renderPage();
@@ -450,7 +443,6 @@ describe('ExecutionHistoryPage', () => {
           page: 1,
           per_page: 50,
           total: 1,
-          search_matches: null,
         },
       });
       renderPage();
@@ -472,7 +464,6 @@ describe('ExecutionHistoryPage', () => {
           page: 1,
           per_page: 50,
           total: 1,
-          search_matches: null,
         },
       });
       renderPage();
@@ -494,7 +485,6 @@ describe('ExecutionHistoryPage', () => {
           page: 1,
           per_page: 50,
           total: 1,
-          search_matches: null,
         },
       });
       renderPage();

@@ -96,6 +96,17 @@ describe('initialize fetch', () => {
     expect(stateManager.inspectorAdapters.getValue().requests).toBeDefined();
   });
 
+  it('clears the ES|QL result source of a previous fetch on a data view fetch', async () => {
+    stateManager.resultDataSource.next({ kind: 'esql' } as EsqlSource);
+    searchSource.fetch$ = jest
+      .fn()
+      .mockImplementation(() => of({ rawResponse: { hits: { hits: [], total: 0 } } }));
+    mockedApi.savedSearch$.next(savedSearch); // reload
+    await waitOneTick();
+
+    expect(stateManager.resultDataSource.getValue()).toBeUndefined();
+  });
+
   it('should catch and emit error', async () => {
     expect(mockedApi.searchError$.getValue()).toBeUndefined();
     searchSource.fetch$ = jest.fn().mockImplementation(
@@ -237,16 +248,14 @@ describe('initialize fetch ES|QL', () => {
     jest.clearAllMocks();
   });
 
-  it('resolves EsqlSource and publishes columnsMeta from LIMIT 0 columns', async () => {
+  it('resolves EsqlSource and publishes it as the result source when the fetch has none', async () => {
     const { mocked, esqlSource$ } = setup();
     await waitOneTick();
     await waitOneTick();
 
     expect(mockResolveEsqlSource).toHaveBeenCalledTimes(1);
     expect(mockFetchEsql).toHaveBeenCalledTimes(1);
-    expect(mocked.stateManager.columnsMeta.getValue()).toEqual({
-      message: { type: 'string', esType: 'keyword', isComputedColumn: false },
-    });
+    expect(mocked.stateManager.resultDataSource.getValue()).toBe(esqlSource$.getValue());
     expect(
       esqlSource$
         .getValue()

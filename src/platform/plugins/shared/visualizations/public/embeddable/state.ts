@@ -90,6 +90,7 @@ export const deserializeSavedObjectState = async ({
   const panelDescription = embeddableDescription ?? description;
   return {
     serializedVis: {
+      id: savedObjectId,
       title,
       type: visState.type,
       params: visState.params,
