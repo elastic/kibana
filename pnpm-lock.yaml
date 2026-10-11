@@ -198,7 +198,6 @@ overrides:
   apache-arrow: 20.x - 21.x
   baseline-browser-mapping: 2.9.14
   chokidar: 3.5.3
-  d3-scale>d3-color: npm:@elastic/kibana-d3-color@2.0.1
   esbuild: 0.28.1
   fast-xml-parser: 5.5.7
   globby>fast-glob: 3.3.2
@@ -242,6 +241,7 @@ overrides:
   colorette: 2.0.20
   concaveman: 1.2.0
   d3-format@3: 3.1.0
+  d3-interpolate@2.0.1>d3-color: npm:@elastic/kibana-d3-color@2.0.1
   dom-accessibility-api@^0.5.9: 0.5.13
   eslint-module-utils: 2.8.0
   focus-lock: 0.11.6
@@ -9197,6 +9197,9 @@ packages:
   '@elastic/filesaver@1.1.2':
     resolution: {integrity: sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==}
 
+  '@elastic/kibana-d3-color@2.0.1':
+    resolution: {integrity: sha512-YZ8hV2bWNyYi833Yj3UWczmTxdHzmo/Xc2IVkNXr/ZqtkrTDlTLysCyJm7SfAt9iBy6EVRGWTn8cPz8QOY6Ixw==}
+
   '@elastic/makelogs@6.1.1':
     resolution: {integrity: sha512-cmfXFQITwyT4SV+Ryerg/vVbGQ9E2BhYKQ9flG85Ba3blGVmOjkgv7TYQam6xAIvGXFGBBrcyqEwmuw7xZ5ZNQ==}
     hasBin: true
@@ -15223,9 +15226,6 @@ packages:
 
   d3-collection@1.0.7:
     resolution: {integrity: sha512-ii0/r5f4sjKNTfh84Di+DpztYwqKhEyUlKoPrzUFfeSkWxjW49xU2QzO9qrPrNkpdI0XJkfzvmTu8V2Zylln6A==}
-
-  d3-color@2.0.0:
-    resolution: {integrity: sha512-SPXi0TSKPD4g9tw0NMZFnR95XVgUZiBH+uUTqQuDu1OsE2zomHU7ho0FISciaPvosimixwHFl3WHLGabv6dDgQ==}
 
   d3-color@3.1.0:
     resolution: {integrity: sha512-zg/chbXyeBtMQ1LbD/WSoW2DpC3I0mpmPdW+ynRTj/x2DAWYrIY7qeZIHidozwV24m4iavr15lNwIwLxRmOxhA==}
@@ -25132,6 +25132,8 @@ snapshots:
 
   '@elastic/filesaver@1.1.2': {}
 
+  '@elastic/kibana-d3-color@2.0.1': {}
+
   '@elastic/makelogs@6.1.1':
     dependencies:
       async: 1.5.2
@@ -32354,8 +32356,6 @@ snapshots:
 
   d3-collection@1.0.7: {}
 
-  d3-color@2.0.0: {}
-
   d3-color@3.1.0: {}
 
   d3-delaunay@6.0.4:
@@ -32403,7 +32403,7 @@ snapshots:
 
   d3-interpolate@2.0.1:
     dependencies:
-      d3-color: 2.0.0
+      d3-color: '@elastic/kibana-d3-color@2.0.1'
 
   d3-interpolate@3.0.1:
     dependencies:
