@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`needs attention tile queries over 24h with filters [] builds the alert based tiles query 1`] = `
+exports[`needs attention tile queries over 24h without entity filters builds the alert based tiles query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM .alerts-security.alerts-default
 | WHERE @timestamp >= NOW() - 1 days
@@ -88,7 +88,7 @@ FROM .alerts-security.alerts-default
     new_alerting_entity_ids  = VALUES(new_alerting_id)"
 `;
 
-exports[`needs attention tile queries over 24h with filters [] builds the entities with anomalies query 1`] = `
+exports[`needs attention tile queries over 24h without entity filters builds the entities with anomalies query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM .ml-anomalies-shared*
 | WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND @timestamp >= NOW() - 1 days AND job_id IN (\\"security_auth_rare_user\\")
@@ -152,7 +152,7 @@ TRUE, _euid_branch_1_formula, NULL))
 | STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
 `;
 
-exports[`needs attention tile queries over 24h with filters [] builds the newly high or critical query 1`] = `
+exports[`needs attention tile queries over 24h without entity filters builds the newly high or critical query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM (
   FROM risk-score.risk-score-default
@@ -182,7 +182,7 @@ FROM (
 | STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
 `;
 
-exports[`needs attention tile queries over 24h with filters [] builds the risk movers query 1`] = `
+exports[`needs attention tile queries over 24h without entity filters builds the risk movers query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM (
   FROM risk-score.risk-score-default
@@ -207,7 +207,7 @@ FROM (
 | STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
 `;
 
-exports[`needs attention tile queries over 30d with filters ["asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")"] builds the alert based tiles query 1`] = `
+exports[`needs attention tile queries over 30d with a criticality filter builds the alert based tiles query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM .alerts-security.alerts-default
 | WHERE @timestamp >= NOW() - 30 days
@@ -277,7 +277,7 @@ FROM .alerts-security.alerts-default
 | RENAME _ea_entity_id AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
 | WHERE entity.name IS NOT NULL
-asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
 | EVAL is_watchlisted = entity.attributes.watchlists IS NOT NULL
 | STATS has_severe_alert = MAX(has_severe_alert), is_watchlisted = MAX(is_watchlisted) BY effective_id
@@ -296,7 +296,7 @@ asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
     new_alerting_entity_ids  = VALUES(new_alerting_id)"
 `;
 
-exports[`needs attention tile queries over 30d with filters ["asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")"] builds the entities with anomalies query 1`] = `
+exports[`needs attention tile queries over 30d with a criticality filter builds the entities with anomalies query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM .ml-anomalies-shared*
 | WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND @timestamp >= NOW() - 30 days AND job_id IN (\\"security_auth_rare_user\\")
@@ -356,12 +356,12 @@ TRUE, _euid_branch_1_formula, NULL))
 | RENAME derived_euids AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
 | WHERE entity.name IS NOT NULL
-asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
 | STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
 `;
 
-exports[`needs attention tile queries over 30d with filters ["asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")"] builds the newly high or critical query 1`] = `
+exports[`needs attention tile queries over 30d with a criticality filter builds the newly high or critical query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM (
   FROM risk-score.risk-score-default
@@ -387,12 +387,12 @@ FROM (
 | WHERE current_level_num >= 3 AND (boundary_level_num IS NULL OR current_level_num > boundary_level_num)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
 | WHERE entity.name IS NOT NULL
-asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
 | STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
 `;
 
-exports[`needs attention tile queries over 30d with filters ["asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")"] builds the risk movers query 1`] = `
+exports[`needs attention tile queries over 30d with a criticality filter builds the risk movers query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM (
   FROM risk-score.risk-score-default
@@ -405,7 +405,7 @@ FROM (
 ), (
   FROM .entities.v2.latest.default-00001
   | WHERE entity.risk.calculated_score_norm IS NOT NULL AND entity.name IS NOT NULL
-  asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
+  | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
   | EVAL current_score = entity.risk.calculated_score_norm,
          effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
   | KEEP \`entity.id\`, current_score, effective_id

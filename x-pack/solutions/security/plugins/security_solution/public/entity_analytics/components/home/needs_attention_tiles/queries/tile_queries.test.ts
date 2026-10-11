@@ -5,20 +5,25 @@
  * 2.0.
  */
 
+import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import type { TimeRange } from '../../entities_grid/common';
+import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import { buildAlertBasedTilesQuery } from './entities_with_alerts_query';
 import { buildEntitiesWithAnomaliesCountQuery } from './entities_with_anomalies_query';
 import { buildNewlyHighCriticalCountQuery } from './tile_newly_high_critical_query';
 import { buildRiskMoversCountQuery } from './tile_risk_movers_query';
 
 const ENTITIES_INDEX = '.entities.v2.latest.default-00001';
-const ENTITY_FILTER_CLAUSES = ['asset.criticality IN ("high_impact", "extreme_impact")'];
+const CRITICALITY_FILTER_CLAUSES = buildEntityFilterClauses({
+  ...EMPTY_ENTITY_FILTERS,
+  assetCriticality: ['high_impact', 'extreme_impact'],
+});
 
 describe('needs attention tile queries', () => {
   describe.each([
-    ['24h', []],
-    ['30d', ENTITY_FILTER_CLAUSES],
-  ] as ReadonlyArray<[TimeRange, string[]]>)('over %s with filters %j', (timeRange, filters) => {
+    ['over 24h without entity filters', '24h', []],
+    ['over 30d with a criticality filter', '30d', CRITICALITY_FILTER_CLAUSES],
+  ] as ReadonlyArray<[string, TimeRange, string[]]>)('%s', (_name, timeRange, filters) => {
     it('builds the alert based tiles query', () => {
       expect(
         buildAlertBasedTilesQuery(ENTITIES_INDEX, 'default', timeRange, filters)
