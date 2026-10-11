@@ -106,8 +106,8 @@ export const ActionPolicyCanvasContent = ({
           type: ActionButtonType.PRIMARY,
           disabled: hasDraftDependencies,
           disabledReason: hasDraftDependencies
-            ? i18n.translate('xpack.alertingV2.actionPolicyAttachment.saveRuleAndWorkflowFirst', {
-                defaultMessage: 'Save rule and workflow before saving policy.',
+            ? i18n.translate('xpack.alertingV2.actionPolicyAttachment.saveWorkflowFirst', {
+                defaultMessage: 'Save workflow before saving policy.',
               })
             : undefined,
           handler: async () => {
