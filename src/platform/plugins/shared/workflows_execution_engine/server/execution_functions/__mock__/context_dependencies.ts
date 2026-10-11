@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import moment from 'moment';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -22,7 +23,12 @@ export const mockContextDependencies = () => ({
   workflowsExtensions: workflowsExtensionsMock.createStart(),
   config: {
     enabled: true,
-    eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+    eventDriven: {
+      enabled: true,
+      logEvents: true,
+      maxChainDepth: 10,
+      subscriptionCacheTtl: moment.duration(60, 's'),
+    },
     maxWorkflowDepth: 10,
     logging: { console: false },
     http: { allowedHosts: ['*'] },

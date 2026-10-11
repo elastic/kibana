@@ -145,6 +145,83 @@ type SuccessfullyWrittenBulkEntry = BulkWorkflowEntry & {
 export class WorkflowCrudService {
   constructor(private readonly deps: WorkflowCrudDeps) {}
 
+  /** Drops cached event subscribers affected by a successful workflow write. */
+  private dropCachedSubscriptions(
+    changes: ReadonlyArray<{ spaceId: string; triggerIds: readonly string[] }>
+  ): void {
+    const invalidate = this.deps.getInvalidateSubscriptionCache();
+    if (!invalidate) {
+      return;
+    }
+
+    const bySpace = new Map<string, Set<string>>();
+    for (const change of changes) {
+      const triggerIds = bySpace.get(change.spaceId) ?? new Set<string>();
+      for (const triggerId of change.triggerIds) {
+        triggerIds.add(triggerId);
+      }
+      bySpace.set(change.spaceId, triggerIds);
+    }
+
+    for (const [spaceId, triggerIds] of bySpace) {
+      if (triggerIds.size > 0) {
+        invalidate({
+          spaceId,
+          triggerIds: [...triggerIds],
+          ...(spaceId === GLOBAL_WORKFLOW_SPACE_ID ? { allSpaces: true } : {}),
+        });
+      }
+    }
+  }
+
+  private dropAllCachedSubscriptions(): void {
+    this.deps.getInvalidateSubscriptionCache()?.({ all: true });
+  }
+
+  private dropDeletedSubscriptionCache(
+    targets: ReadonlyMap<string, { spaceId: string; triggerIds: readonly string[] }>,
+    successfulIds: readonly string[] | undefined
+  ): void {
+    this.dropCachedSubscriptions(
+      (successfulIds ?? []).flatMap((id) => {
+        const target = targets.get(id);
+        return target ? [target] : [];
+      })
+    );
+  }
+
+  private async readSubscriptionTargets(
+    ids: string[],
+    spaceId: string
+  ): Promise<Map<string, { spaceId: string; triggerIds: readonly string[] }>> {
+    const uniqueIds = [...new Set(ids)];
+    const targets = new Map<string, { spaceId: string; triggerIds: readonly string[] }>();
+    if (uniqueIds.length === 0) {
+      return targets;
+    }
+
+    const { must, must_not } = buildWorkflowFilters({
+      ids: uniqueIds,
+      space: { id: spaceId, includeGlobal: true },
+      deleted: 'all',
+    });
+    const response = await this.deps.workflowStorage.getClient().search({
+      query: { bool: { must, must_not } },
+      _source: ['spaceId', 'triggerTypes'],
+      size: uniqueIds.length,
+      track_total_hits: false,
+    });
+    for (const hit of response.hits.hits) {
+      if (hit._id && hit._source) {
+        targets.set(hit._id, {
+          spaceId: hit._source.spaceId,
+          triggerIds: hit._source.triggerTypes ?? [],
+        });
+      }
+    }
+    return targets;
+  }
+
   private async shouldWarnIgnoredKibanaFetcher(): Promise<boolean> {
     return firstValueFrom(
       this.deps
@@ -303,9 +380,19 @@ export class WorkflowCrudService {
 
       return { seqNo: response._seq_no, primaryTerm: response._primary_term };
     };
+    const commit = async () => {
+      const result = await write();
+      this.dropCachedSubscriptions([
+        ...(previous
+          ? [{ spaceId: previous.spaceId, triggerIds: previous.triggerTypes ?? [] }]
+          : []),
+        { spaceId: document.spaceId, triggerIds: document.triggerTypes ?? [] },
+      ]);
+      return result;
+    };
     if (options?.managedOrphanDisable) {
       ensureManagedOrphanDisablePreservesBinding({ document, previous, options });
-      return write();
+      return commit();
     }
     if (options?.managedWorkflowUpgrade) {
       if (!bindings) throw new Error('Service account bindings are unavailable.');
@@ -316,9 +403,9 @@ export class WorkflowCrudService {
         previous,
         options,
       });
-      return write();
+      return commit();
     }
-    if (!accountId && !previous?.definition?.settings?.run_as) return write();
+    if (!accountId && !previous?.definition?.settings?.run_as) return commit();
     if (!bindings) throw new Error('Service account bindings are unavailable.');
     return withWorkflowBindingChange({
       getSpaceId: this.deps.getSpaceId,
@@ -331,7 +418,7 @@ export class WorkflowCrudService {
       previousAccountId: previous?.definition?.settings?.run_as,
       accountId,
       getWorkflowRevision: () => this.getWorkflowRevision(id, document.spaceId),
-      write,
+      write: commit,
     });
   }
 
@@ -895,6 +982,13 @@ export class WorkflowCrudService {
       }
     }
 
+    this.dropCachedSubscriptions(
+      successfullyWritten.map((entry) => ({
+        spaceId: entry.workflowData.spaceId,
+        triggerIds: entry.workflowData.triggerTypes ?? [],
+      }))
+    );
+
     const taskScheduler = this.deps.getTaskScheduler();
 
     if (overwrite && taskScheduler) {
@@ -1150,7 +1244,13 @@ export class WorkflowCrudService {
       (await isEntityAccessControlAdmin(this.deps.getCoreStart(), request, this.deps.authz));
     const deletionOptions = { ...options, profileId, request, isAdmin };
     const bindings = this.deps.getServiceAccountBindings?.();
-    if (!bindings) return this.deleteWorkflowDocuments(ids, spaceId, deletionOptions);
+    if (!bindings) {
+      const targets = await this.readSubscriptionTargets(ids, spaceId);
+      const result = await this.deleteWorkflowDocuments(ids, spaceId, deletionOptions);
+      this.dropDeletedSubscriptionCache(targets, result.successfulIds);
+      return result;
+    }
+    const deletedSubscriptions: Array<{ spaceId: string; triggerIds: readonly string[] }> = [];
     const result: DeleteWorkflowsResponse = {
       total: ids.length,
       deleted: 0,
@@ -1247,6 +1347,10 @@ export class WorkflowCrudService {
               throw new Error(item.failures[0]?.error ?? 'Workflow deletion failed.');
             result.deleted += item.deleted;
             result.successfulIds?.push(id);
+            deletedSubscriptions.push({
+              spaceId: versioned.source.spaceId,
+              triggerIds: versioned.source.triggerTypes ?? [],
+            });
           },
         });
       } catch (error) {
@@ -1277,7 +1381,17 @@ export class WorkflowCrudService {
       result.deleted += deleted.deleted;
       result.successfulIds?.push(...(deleted.successfulIds ?? []));
       result.failures.push(...deleted.failures);
+      const deletedIds = new Set(deleted.successfulIds ?? []);
+      for (const hit of unboundSoftDeletes) {
+        if (deletedIds.has(hit._id)) {
+          deletedSubscriptions.push({
+            spaceId: hit._source.spaceId,
+            triggerIds: hit._source.triggerTypes ?? [],
+          });
+        }
+      }
     }
+    this.dropCachedSubscriptions(deletedSubscriptions);
     if (batch)
       await cleanupDeletedWorkflows(result.successfulIds ?? [], {
         force: options?.force ?? false,
@@ -1406,6 +1520,12 @@ export class WorkflowCrudService {
     if (result.deleted !== 1) {
       throw new Error(result.failures[0]?.error ?? 'Workflow deletion failed.');
     }
+    this.dropCachedSubscriptions([
+      {
+        spaceId: versioned.source.spaceId,
+        triggerIds: versioned.source.triggerTypes ?? [],
+      },
+    ]);
     return true;
   }
 
@@ -1450,6 +1570,17 @@ export class WorkflowCrudService {
       spaceId,
       canModifyBoundWorkflows,
     });
+
+    if (spaceId === undefined) {
+      this.dropAllCachedSubscriptions();
+    } else {
+      this.dropCachedSubscriptions(
+        result.disabledWorkflows.map((workflow) => ({
+          spaceId: workflow.document.spaceId,
+          triggerIds: workflow.document.triggerTypes ?? [],
+        }))
+      );
+    }
 
     if (spaceId && result.disabledWorkflows.length > 0) {
       await this.logWorkflowChangesAfterWrite({

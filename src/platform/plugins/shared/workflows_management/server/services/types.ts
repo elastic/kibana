@@ -18,6 +18,7 @@ import type {
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
+  InvalidateSubscriptionCacheRequest,
   IWorkflowLogsQueryService,
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
@@ -45,6 +46,9 @@ export interface WorkflowCrudDeps extends WorkflowStorageDeps {
   getSecurity: () => SecurityServiceStart | undefined;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
   getTaskScheduler: () => WorkflowTaskScheduler | null;
+  getInvalidateSubscriptionCache: () =>
+    | ((params: InvalidateSubscriptionCacheRequest) => void)
+    | null;
   executionQueryService: WorkflowExecutionQueryService;
   validationService: WorkflowValidationService;
   getCoreStart: () => CoreStart;

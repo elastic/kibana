@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import moment from 'moment';
 import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -121,7 +122,12 @@ describe('bulkScheduleWorkflow', () => {
 
     const initializerContext = coreMock.createPluginInitializerContext({
       logging: { console: false },
-      eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+      eventDriven: {
+        enabled: true,
+        logEvents: true,
+        maxChainDepth: 10,
+        subscriptionCacheTtl: moment.duration(60, 's'),
+      },
     });
     plugin = new WorkflowsExecutionEnginePlugin(initializerContext);
 

@@ -2045,6 +2045,8 @@ export class WorkflowsExecutionEnginePlugin
         const triggerEventsClient = await triggerEventsClientPromise;
         return querySearchTriggerEventLog(triggerEventsClient, params);
       },
+      invalidateSubscriptionCache: (params) =>
+        triggerEventHandler.invalidateSubscriptionCache(params),
     };
 
     return {

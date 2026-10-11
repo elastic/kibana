@@ -1036,8 +1036,16 @@ const triggerEventDispatchedSchema: RootSchema<TriggerEventDispatchedParams> = {
     type: 'long',
     _meta: {
       description:
-        'Elapsed milliseconds spent resolving/filtering subscribed workflows for this trigger dispatch',
+        'Elapsed milliseconds spent resolving subscribed workflows for this trigger dispatch, including a by-id load on a cache hit',
       optional: true,
+    },
+  },
+  subscriptionCacheOutcome: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Whether subscriber resolution used a cached set (hit) or loaded subscribers (miss). An expired entry is a miss',
+      optional: false,
     },
   },
   subscribedCount: {

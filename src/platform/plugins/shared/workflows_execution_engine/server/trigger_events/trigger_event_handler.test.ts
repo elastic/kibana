@@ -7,24 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import moment from 'moment';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { EsWorkflowExecution, WorkflowDetailDto } from '@kbn/workflows';
 import type { WorkflowRepository } from '@kbn/workflows/server';
 import { TriggerEventHandler, type TriggerEventHandlerDeps } from './trigger_event_handler';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-
-const mockClassifyWorkflowTriggerMatch = jest.fn().mockReturnValue('matched');
-
-jest.mock('./filter_workflows_by_trigger_condition', () => {
-  const actual = jest.requireActual<typeof import('./filter_workflows_by_trigger_condition')>(
-    './filter_workflows_by_trigger_condition'
-  );
-  return {
-    ...actual,
-    classifyWorkflowTriggerMatch: (...args: unknown[]) => mockClassifyWorkflowTriggerMatch(...args),
-  };
-});
 
 jest.mock('./event_logs', () => ({
   initializeTriggerEventsClient: jest.fn().mockResolvedValue(null),
@@ -68,20 +57,47 @@ const { WorkflowExecutionTelemetryClient } = jest.requireMock(
   '../lib/telemetry/workflow_execution_telemetry_client'
 ) as { WorkflowExecutionTelemetryClient: jest.Mock };
 
-const createMockWorkflow = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto =>
-  ({
+/** Custom trigger types such as `cases.updated` are not in the built-in workflow YAML union. */
+interface TestWorkflowDefinition {
+  triggers?: Array<{
+    type: string;
+    'connector-id'?: string;
+    on?: { condition?: string; workflowEvents?: string };
+  }>;
+  steps?: unknown[];
+}
+
+const createMockWorkflow = (
+  overrides: Omit<Partial<WorkflowDetailDto>, 'definition'> & {
+    definition?: TestWorkflowDefinition;
+  } = {}
+): WorkflowDetailDto => {
+  const { definition, ...rest } = overrides;
+  return {
     id: 'wf-1',
     name: 'Test Workflow',
     enabled: true,
-    definition: { triggers: [{ type: 'cases.updated' }], steps: [] },
+    createdAt: '2026-01-01T00:00:00.000Z',
+    createdBy: 'test',
+    lastUpdatedAt: '2026-01-01T00:00:00.000Z',
+    lastUpdatedBy: 'test',
     yaml: 'triggers: [{ type: "cases.updated" }]\nsteps: []',
     valid: true,
-    ...overrides,
-  } as WorkflowDetailDto);
+    ...rest,
+    definition: {
+      triggers: [{ type: 'cases.updated' }],
+      steps: [],
+      ...definition,
+    } as unknown as WorkflowDetailDto['definition'],
+  };
+};
 
 const createWorkflowRepositoryMock = (subscribed: WorkflowDetailDto[] = []): WorkflowRepository =>
   ({
     getWorkflowsSubscribedToTrigger: jest.fn().mockResolvedValue(subscribed),
+    getWorkflowsByIds: jest.fn(async (ids: readonly string[]) =>
+      subscribed.filter((workflow) => ids.includes(workflow.id))
+    ),
   } as unknown as WorkflowRepository);
 
 function createDeps(overrides: Partial<TriggerEventHandlerDeps> = {}): TriggerEventHandlerDeps {
@@ -112,6 +128,7 @@ function createDeps(overrides: Partial<TriggerEventHandlerDeps> = {}): TriggerEv
       enabled: true,
       logEvents: true,
       maxChainDepth: 10,
+      subscriptionCacheTtl: moment.duration(60, 's'),
     },
     scheduleWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' }),
     logger: mockLogger,
@@ -130,7 +147,6 @@ function getTelemetryMock(): jest.Mock {
 describe('TriggerEventHandler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockClassifyWorkflowTriggerMatch.mockReturnValue('matched');
     mockGetEventChainContext.mockReturnValue(undefined);
     mockGetEmitterWorkflowExecutionIdFromRequest.mockReturnValue(undefined);
     mockGetWorkflowExecutionById.mockResolvedValue(null);
@@ -226,7 +242,15 @@ describe('TriggerEventHandler', () => {
     const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
     const deps = createDeps({
       scheduleWorkflow,
-      workflowRepository: createWorkflowRepositoryMock([createMockWorkflow({ id: 'wf-1' })]),
+      workflowRepository: createWorkflowRepositoryMock([
+        createMockWorkflow({
+          id: 'wf-1',
+          definition: {
+            triggers: [{ type: 'cases.updated', on: { condition: 'event.eventChainDepth: 3' } }],
+            steps: [],
+          },
+        }),
+      ]),
     });
     const handler = new TriggerEventHandler(deps);
 
@@ -236,13 +260,6 @@ describe('TriggerEventHandler', () => {
       request: mockRequest,
     });
 
-    expect(mockClassifyWorkflowTriggerMatch).toHaveBeenCalledWith(
-      expect.anything(),
-      'cases.updated',
-      expect.objectContaining({ eventChainDepth: 3 }),
-      deps.logger,
-      { requiresConnectorId: false }
-    );
     expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
     const contextArg = scheduleWorkflow.mock.calls[0][1] as { event: Record<string, unknown> };
     expect(contextArg.event.eventChainDepth).toBe(3);
@@ -253,7 +270,12 @@ describe('TriggerEventHandler', () => {
     const scheduleWorkflow = jest.fn();
     const deps = createDeps({
       scheduleWorkflow,
-      config: { enabled: false, logEvents: false, maxChainDepth: 10 },
+      config: {
+        enabled: false,
+        logEvents: false,
+        maxChainDepth: 10,
+        subscriptionCacheTtl: moment.duration(60, 's'),
+      },
     });
     const handler = new TriggerEventHandler(deps);
 
@@ -304,6 +326,7 @@ describe('TriggerEventHandler', () => {
         triggerId: 'cases.updated',
         eventId: expect.any(String),
         subscriberResolutionMs: expect.any(Number),
+        subscriptionCacheOutcome: 'miss',
         resolutionStats: expect.objectContaining({ matchedCount: 1 }),
         scheduleStats: expect.objectContaining({
           scheduledSuccessCount: 1,
@@ -315,42 +338,62 @@ describe('TriggerEventHandler', () => {
   });
 
   it('should pass requiresConnectorId from the trigger definition', async () => {
+    const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
     const deps = createDeps({
+      scheduleWorkflow,
       workflowsExtensions: {
         getTriggerDefinition: jest.fn().mockReturnValue({
           id: 'inboundWebhook.received',
           requiresConnectorId: true,
         }),
       } as any,
-      workflowRepository: createWorkflowRepositoryMock([createMockWorkflow()]),
+      workflowRepository: createWorkflowRepositoryMock([
+        createMockWorkflow({
+          id: 'wf-matching-connector',
+          definition: {
+            triggers: [{ type: 'inboundWebhook.received', 'connector-id': 'webhook-1' }],
+            steps: [],
+          },
+        }),
+      ]),
     });
     const handler = new TriggerEventHandler(deps);
 
     await handler.handleEvent({
       triggerId: 'inboundWebhook.received',
       payload: { connectorId: 'webhook-1' },
-      request: mockRequest,
+      request: { headers: { authorization: 'ApiKey encoded-key' } } as KibanaRequest,
     });
 
-    expect(mockClassifyWorkflowTriggerMatch).toHaveBeenCalledWith(
-      expect.anything(),
-      'inboundWebhook.received',
-      expect.anything(),
-      deps.logger,
-      { requiresConnectorId: true }
-    );
+    expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
+    expect(scheduleWorkflow.mock.calls[0][0]).toMatchObject({ id: 'wf-matching-connector' });
   });
 
   it('should not schedule workflows skipped by connector-id mismatch', async () => {
-    mockClassifyWorkflowTriggerMatch
-      .mockReturnValueOnce('connector_id_mismatch')
-      .mockReturnValueOnce('matched');
     const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
     const deps = createDeps({
       scheduleWorkflow,
+      workflowsExtensions: {
+        getTriggerDefinition: jest.fn().mockReturnValue({
+          id: 'inboundWebhook.received',
+          requiresConnectorId: true,
+        }),
+      } as any,
       workflowRepository: createWorkflowRepositoryMock([
-        createMockWorkflow({ id: 'wf-other-connector' }),
-        createMockWorkflow({ id: 'wf-matching-connector' }),
+        createMockWorkflow({
+          id: 'wf-other-connector',
+          definition: {
+            triggers: [{ type: 'inboundWebhook.received', 'connector-id': 'other' }],
+            steps: [],
+          },
+        }),
+        createMockWorkflow({
+          id: 'wf-matching-connector',
+          definition: {
+            triggers: [{ type: 'inboundWebhook.received', 'connector-id': 'webhook-1' }],
+            steps: [],
+          },
+        }),
       ]),
     });
     const handler = new TriggerEventHandler(deps);
@@ -404,7 +447,12 @@ describe('TriggerEventHandler', () => {
     const scheduleWorkflow = jest.fn();
     const deps = createDeps({
       scheduleWorkflow,
-      config: { enabled: true, logEvents: true, maxChainDepth: 5 },
+      config: {
+        enabled: true,
+        logEvents: true,
+        maxChainDepth: 5,
+        subscriptionCacheTtl: moment.duration(60, 's'),
+      },
       workflowRepository: createWorkflowRepositoryMock([createMockWorkflow()]),
     });
     const handler = new TriggerEventHandler(deps);
@@ -462,7 +510,7 @@ describe('TriggerEventHandler', () => {
       definition: {
         triggers: [{ type: 'cases.updated', on: { workflowEvents: 'ignore' } }],
         steps: [],
-      } as unknown as WorkflowDetailDto['definition'],
+      },
     });
     const scheduleWorkflow = jest.fn();
     const deps = createDeps({
@@ -506,7 +554,7 @@ describe('TriggerEventHandler', () => {
           },
         ],
         steps: [],
-      } as unknown as WorkflowDetailDto['definition'],
+      },
     });
     const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
     const deps = createDeps({
@@ -646,11 +694,23 @@ describe('TriggerEventHandler', () => {
   });
 
   it('skips schedule when connector-id does not match', async () => {
-    mockClassifyWorkflowTriggerMatch.mockReturnValueOnce('kql_false');
     const scheduleWorkflow = jest.fn();
     const deps = createDeps({
       scheduleWorkflow,
-      workflowRepository: createWorkflowRepositoryMock([createMockWorkflow()]),
+      workflowsExtensions: {
+        getTriggerDefinition: jest.fn().mockReturnValue({
+          id: 'cases.updated',
+          requiresConnectorId: true,
+        }),
+      } as any,
+      workflowRepository: createWorkflowRepositoryMock([
+        createMockWorkflow({
+          definition: {
+            triggers: [{ type: 'cases.updated', 'connector-id': 'inbound-a' }],
+            steps: [],
+          },
+        }),
+      ]),
     });
     const handler = new TriggerEventHandler(deps);
 
@@ -661,7 +721,6 @@ describe('TriggerEventHandler', () => {
     });
 
     expect(scheduleWorkflow).not.toHaveBeenCalled();
-    expect(mockClassifyWorkflowTriggerMatch).toHaveBeenCalled();
   });
 
   it('still schedules Manual Run events that have no Authorization header', async () => {
@@ -679,5 +738,147 @@ describe('TriggerEventHandler', () => {
     });
 
     expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not reload subscribers on a later emit for the same space and trigger', async () => {
+    const workflowRepository = createWorkflowRepositoryMock([createMockWorkflow()]);
+    const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
+    const handler = new TriggerEventHandler(createDeps({ scheduleWorkflow, workflowRepository }));
+
+    await handler.handleEvent({
+      triggerId: 'cases.updated',
+      payload: { n: 1 },
+      request: mockRequest,
+    });
+    await handler.handleEvent({
+      triggerId: 'cases.updated',
+      payload: { n: 2 },
+      request: mockRequest,
+    });
+
+    expect(workflowRepository.getWorkflowsSubscribedToTrigger).toHaveBeenCalledTimes(1);
+    expect(workflowRepository.getWorkflowsByIds).toHaveBeenCalledTimes(1);
+    expect(workflowRepository.getWorkflowsByIds).toHaveBeenCalledWith(['wf-1'], 'default');
+    expect(scheduleWorkflow).toHaveBeenCalledTimes(2);
+    const reportMock = getTelemetryMock();
+    expect(reportMock).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ subscriptionCacheOutcome: 'miss' })
+    );
+    expect(reportMock).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ subscriptionCacheOutcome: 'hit' })
+    );
+  });
+
+  it('reloads subscribers when a cache hit cannot load every matched workflow', async () => {
+    const workflows = [createMockWorkflow({ id: 'wf-1' }), createMockWorkflow({ id: 'wf-2' })];
+    const workflowRepository = {
+      getWorkflowsSubscribedToTrigger: jest.fn().mockResolvedValue(workflows),
+      getWorkflowsByIds: jest.fn(async (ids: readonly string[]) =>
+        workflows.filter((workflow) => workflow.id === 'wf-1' && ids.includes(workflow.id))
+      ),
+    } as unknown as WorkflowRepository;
+    const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
+    const handler = new TriggerEventHandler(createDeps({ scheduleWorkflow, workflowRepository }));
+    const emit = () =>
+      handler.handleEvent({
+        triggerId: 'cases.updated',
+        payload: {},
+        request: mockRequest,
+      });
+
+    await emit();
+    await emit();
+
+    expect(workflowRepository.getWorkflowsSubscribedToTrigger).toHaveBeenCalledTimes(1);
+    expect(workflowRepository.getWorkflowsByIds).toHaveBeenCalledTimes(1);
+    expect(scheduleWorkflow).toHaveBeenCalledTimes(3);
+
+    await emit();
+
+    expect(workflowRepository.getWorkflowsSubscribedToTrigger).toHaveBeenCalledTimes(2);
+    expect(getTelemetryMock()).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({ subscriptionCacheOutcome: 'miss' })
+    );
+  });
+
+  it('loads subscribers again for the same trigger in another space', async () => {
+    const workflowRepository = createWorkflowRepositoryMock([createMockWorkflow()]);
+    const handler = new TriggerEventHandler(
+      createDeps({
+        workflowRepository,
+        spaces: {
+          getSpaceId: jest.fn().mockReturnValueOnce('space-a').mockReturnValueOnce('space-b'),
+        } as any,
+      })
+    );
+
+    await handler.handleEvent({
+      triggerId: 'cases.updated',
+      payload: {},
+      request: mockRequest,
+    });
+    await handler.handleEvent({
+      triggerId: 'cases.updated',
+      payload: {},
+      request: mockRequest,
+    });
+
+    expect(workflowRepository.getWorkflowsSubscribedToTrigger).toHaveBeenCalledTimes(2);
+    expect(workflowRepository.getWorkflowsSubscribedToTrigger).toHaveBeenNthCalledWith(
+      1,
+      'cases.updated',
+      'space-a'
+    );
+    expect(workflowRepository.getWorkflowsSubscribedToTrigger).toHaveBeenNthCalledWith(
+      2,
+      'cases.updated',
+      'space-b'
+    );
+  });
+
+  it('reports an expired subscriber cache entry as a miss', async () => {
+    jest.useFakeTimers();
+    try {
+      const workflowRepository = createWorkflowRepositoryMock([createMockWorkflow()]);
+      const handler = new TriggerEventHandler(
+        createDeps({
+          workflowRepository,
+          config: {
+            enabled: true,
+            logEvents: true,
+            maxChainDepth: 10,
+            subscriptionCacheTtl: moment.duration(1, 's'),
+          },
+        })
+      );
+
+      await handler.handleEvent({
+        triggerId: 'cases.updated',
+        payload: {},
+        request: mockRequest,
+      });
+      await jest.advanceTimersByTimeAsync(1000);
+      await handler.handleEvent({
+        triggerId: 'cases.updated',
+        payload: {},
+        request: mockRequest,
+      });
+
+      expect(workflowRepository.getWorkflowsSubscribedToTrigger).toHaveBeenCalledTimes(2);
+      const reportMock = getTelemetryMock();
+      expect(reportMock).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ subscriptionCacheOutcome: 'miss' })
+      );
+      expect(reportMock).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ subscriptionCacheOutcome: 'miss' })
+      );
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });

@@ -294,6 +294,8 @@ export class WorkflowsService {
       getSecurity: () => this.coreStart.security,
       workflowsExtensions: this.workflowsExtensions,
       getTaskScheduler: () => this.taskScheduler,
+      getInvalidateSubscriptionCache: () =>
+        this.workflowsExecutionEngine.triggerEvents.invalidateSubscriptionCache,
       executionQueryService: this.executionQueryService,
       validationService: this.validationService,
       getCoreStart: () => this.coreStart,

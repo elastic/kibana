@@ -27,6 +27,11 @@ const EventTriggersConfigSchema = schema.object({
    * Scheduling is skipped when depth exceeds this value.
    */
   maxChainDepth: schema.number({ defaultValue: 10, min: 1 }),
+  /**
+   * How long this node keeps a cached subscriber set for one space and trigger.
+   * A hit does not extend it. Other nodes keep the previous set until their own TTL.
+   */
+  subscriptionCacheTtl: schema.duration({ defaultValue: '60s', min: '1s' }),
 });
 
 const configSchema = schema.object({
