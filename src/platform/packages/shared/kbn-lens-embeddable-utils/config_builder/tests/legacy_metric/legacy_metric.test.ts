@@ -118,7 +118,7 @@ describe('Legacy Metric', () => {
       expect(apiOutput.metric.apply_color_to).toBe('background');
     });
 
-    it('should omit color when apply_color_to is not specified', () => {
+    it('should use auto color when apply_color_to is not specified', () => {
       const config = {
         type: 'legacy_metric',
         title: 'Color default test',
@@ -139,7 +139,7 @@ describe('Legacy Metric', () => {
       const lensState = builder.fromAPIFormat(config);
       const apiOutput = builder.toAPIFormat(lensState) as LegacyMetricConfig;
 
-      expect(apiOutput.metric.color).not.toBeDefined();
+      expect(apiOutput.metric.color).toEqual({ type: 'auto' });
       expect(apiOutput.metric.apply_color_to).not.toBeDefined();
     });
   });

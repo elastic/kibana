@@ -142,6 +142,9 @@ function reverseBuildVisualizationState(
       if (isColorByValueAbsolute(color) || isAutoColor(color) || isColorByValuePalette(color)) {
         props.metric.color = color;
       }
+    } else {
+      // matches the schema default so the metric does not change on load
+      props.metric.color = AUTO_COLOR;
     }
   }
 
