@@ -15,10 +15,17 @@ import {
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
 } from '@kbn/alertzero-common';
 
-/** Security's public role API, used with `createOnly` so an existing role is never overwritten. */
+/** Security's public role API, used to look up the built-in worker roles. */
 export const SECURITY_ROLE_API_VERSION = '2023-10-31' as const;
-export const buildSecurityRoleUrl = (roleName: string) =>
-  `/api/security/role/${encodeURIComponent(roleName)}`;
+export const SECURITY_ROLES_URL = '/api/security/role';
+
+/**
+ * The built-in role a worker's service account gets. Stateful ships it as an Elasticsearch
+ * reserved role named like the account. Serverless ships it as a predefined role, whose name must
+ * start with `_`.
+ */
+export const getWorkerRoleName = (name: string, { isServerless }: { isServerless: boolean }) =>
+  isServerless ? `_${name}` : name;
 
 interface IndexPrivileges {
   names: string[];
@@ -115,6 +122,11 @@ const buildRole = (
  * and the actions it can auto-approve, in every space. Actions that always need a human
  * (`approvalPolicy: always-gate`) run as the approver, so their privileges are left out. Mirrors
  * "AlertZero prebuilt service accounts — Minimum privileges", including its conditional rows.
+ *
+ * AlertZero no longer creates these roles; they ship built in. After changing a role here,
+ * regenerate every copy with `scripts/generate_worker_roles.js`: the Elasticsearch reserved roles,
+ * and the Serverless predefined roles in elasticsearch-controller with their two mirrors in this
+ * repository (checked by `worker_roles_mirrors.test.ts`).
  */
 export const WORKER_ROLE_DEFINITIONS: Readonly<Record<string, WorkerRoleDefinition>> = {
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: {
