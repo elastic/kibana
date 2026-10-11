@@ -238,6 +238,25 @@ describe('send_wait_for_approval_notifications', () => {
       expect(execute.mock.calls[0][0].input.subject).toBe('Approval for web-01');
     });
 
+    it('throws when every email recipient renders blank', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await expect(
+        sendWaitForApprovalNotifications({
+          ...baseNotifyArgs,
+          channels: {
+            email: {
+              'connector-id': 'email-1',
+              to: ['{{inputs.email}}'],
+            },
+          },
+          renderTemplate: () => '',
+          connectorExecutor: { execute } as never,
+        })
+      ).rejects.toThrow('HITL email "to" rendered to an empty list');
+      expect(execute).not.toHaveBeenCalled();
+    });
+
     it('sends slack2 sendMessage notifications to every configured channel', async () => {
       const execute = jest
         .fn()

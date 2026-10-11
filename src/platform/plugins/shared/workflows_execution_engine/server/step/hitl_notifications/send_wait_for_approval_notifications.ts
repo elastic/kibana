@@ -10,6 +10,7 @@
 import type { WaitForApprovalStep } from '@kbn/workflows';
 import { buildExternalResumeUrl } from '@kbn/workflows/server';
 import {
+  assertRenderedHitlEmailRecipients,
   buildDefaultHitlApprovalEmailMessage,
   buildHitlEmailConnectorInput,
   buildHitlExecutionFooterPath,
@@ -197,7 +198,8 @@ export async function sendWaitForApprovalNotifications({
 
   const emailConfig = channels.email;
   const emailTo = renderHitlEmailAddresses(emailConfig?.to, renderTemplate);
-  if (emailConfig?.['connector-id'] && emailTo.length) {
+  if (emailConfig?.['connector-id']) {
+    assertRenderedHitlEmailRecipients(emailTo);
     const result = await connectorExecutor.execute({
       connectorType: 'email',
       connectorNameOrId: emailConfig['connector-id'],

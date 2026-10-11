@@ -89,6 +89,13 @@ export function buildDefaultHitlApprovalEmailMessage({
   return `${prompt}[${approveLabel}](${approveUrl})  [${rejectLabel}](${rejectUrl})`;
 }
 
+/** Fails delivery when a configured email channel has no recipients left after rendering. */
+export function assertRenderedHitlEmailRecipients(to: string[]): void {
+  if (to.length === 0) {
+    throw new Error('HITL email "to" rendered to an empty list');
+  }
+}
+
 /** Renders recipient templates and drops entries that render blank. */
 export function renderHitlEmailAddresses(
   addresses: string[] | undefined,

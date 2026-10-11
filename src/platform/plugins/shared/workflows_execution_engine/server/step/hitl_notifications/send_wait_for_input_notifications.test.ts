@@ -127,6 +127,28 @@ describe('sendWaitForInputNotifications', () => {
     expect(execute.mock.calls[0][0].input.bcc).toEqual(['audit@example.com']);
   });
 
+  it('throws when every email recipient renders blank', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await expect(
+      sendWaitForInputNotifications({
+        channels: {
+          email: {
+            'connector-id': 'email-1',
+            to: ['{{inputs.email}}'],
+          },
+        },
+        stepMessage: 'Please provide input',
+        formUrl: 'https://kibana.example/form',
+        kibanaUrl: 'https://kibana.example',
+        renderTemplate: () => '  ',
+        connectorExecutor: { execute } as never,
+        abortController: new AbortController(),
+      })
+    ).rejects.toThrow('HITL email "to" rendered to an empty list');
+    expect(execute).not.toHaveBeenCalled();
+  });
+
   it('sends slack2 sendMessage with default Open form mrkdwn and optional message override', async () => {
     const execute = jest.fn().mockResolvedValue({ status: 'ok' });
 

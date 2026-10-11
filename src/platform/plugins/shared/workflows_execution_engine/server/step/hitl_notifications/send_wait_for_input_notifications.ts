@@ -14,6 +14,7 @@ import {
 } from '@kbn/workflows/server';
 import {
   absoluteUrlToKibanaFooterPath,
+  assertRenderedHitlEmailRecipients,
   buildDefaultHitlInputEmailMessage,
   buildHitlEmailConnectorInput,
   renderHitlEmailAddresses,
@@ -188,7 +189,8 @@ export async function sendWaitForInputNotifications({
 
   const emailConfig = channels.email;
   const emailTo = renderHitlEmailAddresses(emailConfig?.to, renderTemplate);
-  if (emailConfig?.['connector-id'] && emailTo.length) {
+  if (emailConfig?.['connector-id']) {
+    assertRenderedHitlEmailRecipients(emailTo);
     const message =
       emailConfig.message != null
         ? resolveWaitForInputChannelMessage({
