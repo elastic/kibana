@@ -46,6 +46,16 @@ describe('withTimeout', () => {
       })
     ).rejects.toMatchInlineSnapshot(`[Error: from-promise]`);
   });
+
+  it('still reports a timeout when the timer is unrefd', async () => {
+    await expect(
+      withTimeout({
+        promise: new Promise((resolve) => resolve),
+        timeoutMs: 10,
+        unref: true,
+      })
+    ).resolves.toStrictEqual({ timedout: true });
+  });
 });
 
 describe('isPromise', () => {

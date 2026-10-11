@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
+import { withTimeout } from '@kbn/std';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 
@@ -221,16 +222,8 @@ export const postActionsConnectorExecuteRoute = (
                 : additionalSystemPrompt;
           }
 
-          const timeout = new Promise((_, reject) => {
-            setTimeout(() => {
-              reject(
-                new Error('Request timed out, increase xpack.elasticAssistant.responseTimeout')
-              );
-            }, config?.responseTimeout as number);
-          }) as unknown as IKibanaResponse;
-
-          return await Promise.race([
-            langChainExecute({
+          const outcome = await withTimeout({
+            promise: langChainExecute({
               abortSignal,
               isStream: request.body.subAction !== 'invokeAI',
               actionsClient,
@@ -256,8 +249,12 @@ export const postActionsConnectorExecuteRoute = (
               systemPrompt,
               ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
             }),
-            timeout,
-          ]);
+            timeoutMs: config?.responseTimeout as number,
+          });
+          if (outcome.timedout) {
+            throw new Error('Request timed out, increase xpack.elasticAssistant.responseTimeout');
+          }
+          return outcome.value;
         } catch (err) {
           logger.error(err);
           const error = transformError(err);

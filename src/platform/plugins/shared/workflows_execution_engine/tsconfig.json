@@ -37,6 +37,7 @@
     "@kbn/licensing-plugin",
     "@kbn/usage-api-plugin",
     "@kbn/logging-mocks",
+    "@kbn/std",
     "@kbn/crypto",
     "@kbn/core-elasticsearch-server-utils",
     "@kbn/es-errors",

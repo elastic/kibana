@@ -10,16 +10,22 @@
 export async function withTimeout<T>({
   promise,
   timeoutMs,
+  unref = false,
 }: {
   promise: Promise<T>;
   timeoutMs: number;
+  /** When true, the timer does not keep the Node.js event loop alive. */
+  unref?: boolean;
 }): Promise<{ timedout: true } | { timedout: false; value: T }> {
-  let timeout: NodeJS.Timeout | undefined;
+  let timeout: ReturnType<typeof setTimeout> | undefined;
   try {
     return (await Promise.race([
       promise.then((v) => ({ value: v, timedout: false })),
       new Promise((resolve) => {
         timeout = setTimeout(() => resolve({ timedout: true }), timeoutMs);
+        if (unref && typeof timeout.unref === 'function') {
+          timeout.unref();
+        }
       }),
     ])) as Promise<{ timedout: true } | { timedout: false; value: T }>;
   } finally {
