@@ -103,6 +103,24 @@ export const ONBOARDING_MODIFY_FORBIDDEN = i18n.translate(
   }
 );
 
+export const NO_MODEL_CALLOUT_TITLE = i18n.translate(
+  'xpack.alertzero.onboarding.noModelCallout.title',
+  { defaultMessage: "AI models aren't set up for this space" }
+);
+
+export const NO_MODEL_CALLOUT_TEXT = i18n.translate(
+  'xpack.alertzero.onboarding.noModelCallout.text',
+  {
+    defaultMessage:
+      'Workers need AI models to run. Set up the models for each level in Feature settings, then come back to turn on Workers.',
+  }
+);
+
+export const NO_MODEL_CALLOUT_ACTION = i18n.translate(
+  'xpack.alertzero.onboarding.noModelCallout.action',
+  { defaultMessage: 'Open Feature settings' }
+);
+
 export const ONBOARDING_CONTINUE_REQUIRES_WRITE = i18n.translate(
   'xpack.alertzero.onboarding.continueRequiresWrite',
   {

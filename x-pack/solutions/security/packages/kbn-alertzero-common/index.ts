@@ -43,6 +43,8 @@ export {
   HUNT_COORDINATOR_URL,
   FIND_OR_CREATE_INVESTIGATION_URL,
   WRITE_HUNT_EVIDENCE_URL,
+  HUNT_THREAT_INTEL_SUPPLY_URL,
+  HUNT_THREAT_INTEL_SUPPLY_RESTORE_URL,
   SYSTEM_SECURITY_HUNT_PACKAGE_REPORT_ID,
   SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID,
   SECURITY_SERVICE_ACCOUNT_URL,
@@ -78,13 +80,22 @@ export {
   buildWorkerUrl,
 } from './constants';
 
-export type { ScanFailureWorker, ScanFailuresResponse } from './constants';
+export type {
+  ScanFailureWorker,
+  ScanFailuresResponse,
+  HuntThreatIntelSupplyScope,
+  HuntThreatIntelSupplyWorkflowKey,
+  HuntThreatIntelSupplyWorkflowStatus,
+  HuntThreatIntelSupplyHardGate,
+  HuntThreatIntelSupplyStatus,
+} from './constants';
 
 export type {
   ActionApprovalPolicy,
   ActionCategory,
   ActionCatalogEntry,
   ActionImpact,
+  ActionSubjectKind,
   JsonSchema,
   ListActionsResponse,
 } from './action_catalog_types';
@@ -200,6 +211,7 @@ export {
   diffWorkerSettings,
   formatWorkerSettingsIssues,
   getAllowedAutonomyLevels,
+  isWorkerScheduleIntervalReadOnly,
   getCompleteWorkerSettingsSchema,
   getWorkerSettingsDeclaration,
   nearestLowerAutonomyLevel,

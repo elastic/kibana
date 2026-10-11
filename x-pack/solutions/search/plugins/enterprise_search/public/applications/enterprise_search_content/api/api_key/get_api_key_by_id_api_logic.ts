@@ -10,7 +10,7 @@ import { HttpLogic } from '../../../shared/http';
 import type { APIKeyResponse } from '../generate_api_key/generate_api_key_logic';
 
 export const getApiKeyById = async (id: string) => {
-  const route = `/internal/enterprise_search/api_keys/${id}`;
+  const route = `/internal/enterprise_search/api_keys/${encodeURIComponent(id)}`;
 
   return await HttpLogic.values.http.get<APIKeyResponse>(route);
 };

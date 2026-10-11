@@ -32,7 +32,7 @@ import { GLOBAL_ARTIFACT_TAG } from '../../../../../common/endpoint/service/arti
 import { useMarkInsightAsRemediated } from '../hooks/use_mark_workflow_insight_as_remediated';
 import type { WorkflowInsightRouteState } from '../../../pages/endpoint_hosts/types';
 import { useUrlParams } from '../../../hooks/use_url_params';
-import { useIsFlyoutOpened } from '../hooks/use_is_flyout_opened';
+import { useIsCreateEditFlyoutOpened } from '../hooks/use_is_create_edit_flyout_opened';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useSetUrlParams } from '../hooks/use_set_url_params';
 import type {
@@ -224,7 +224,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     );
     const getTestId = useTestIdGenerator(dataTestSubj);
     const toasts = useToasts();
-    const isFlyoutOpened = useIsFlyoutOpened();
+    const isFlyoutOpened = useIsCreateEditFlyoutOpened();
     const setUrlParams = useSetUrlParams();
     const { urlParams } = useUrlParams<ArtifactListPageUrlParams>();
     const isMounted = useIsMounted();
@@ -238,8 +238,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     }, [_labels]);
     const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
 
-    // `view` currently follows the edit flow until a dedicated view mode exists.
-    const isEditFlow = urlParams.show === 'edit' || urlParams.show === 'view';
+    const isEditFlow = urlParams.show === 'edit';
     const formMode: ArtifactFormComponentProps['mode'] = isEditFlow ? 'edit' : 'create';
 
     const [submitError, setSubmitError] = useState<IHttpFetchError | undefined>(undefined);

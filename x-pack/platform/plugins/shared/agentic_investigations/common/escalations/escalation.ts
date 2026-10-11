@@ -147,6 +147,11 @@ export interface LinkedInvestigationSummary {
   status: 'open' | 'closed';
   /** Agent Builder agent id, used for deep-linking to the conversation. */
   agent_id: string;
+  /**
+   * Proposals awaiting a decision (pending, not superseded, not expired). Omitted when the caller
+   * may not read proposals; always 0 for a closed investigation.
+   */
+  pending_proposal_count?: number;
 }
 
 export interface ListLinkedInvestigationsResponse {
