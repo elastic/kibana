@@ -58,6 +58,7 @@ import { logRunSummary, withScoreCollection, type ScoreSink } from '../src/evalu
 import { type ChangeType } from '../src/constants';
 import { assertInvestigateRuleCatalogState } from '../src/agent_builder_catalog';
 import { ensureAlertsIndexReady } from '../src/alerts_index';
+import { selectFixtures } from '../src/fixture_selection';
 import { assertWorkflowModelMatches, type ConnectorLike } from '../src/model_attribution';
 import { seedRuleAndFpAlerts, cleanupSeededArtifacts } from './seed_fp_cluster';
 
@@ -482,7 +483,8 @@ evaluate.describe(
         traceEsClient,
         connector: _judgeConnector,
       }) => {
-        const examples: RuleTuningExample[] = TUNING_FIXTURES.map((fixture) => ({
+        const selectedFixtures = selectFixtures(TUNING_FIXTURES, process.env.EVAL_EXAMPLES);
+        const examples: RuleTuningExample[] = selectedFixtures.map((fixture) => ({
           id: fixture.id,
           input: { fixtureId: fixture.id },
           output: { change_type: fixture.expected },
@@ -527,7 +529,7 @@ evaluate.describe(
                 description:
                   'Runs the managed system-security-rule-tuning-worker/review workflows ' +
                   'end-to-end against ' +
-                  `${TUNING_FIXTURES.length} seeded false-positive clusters (one per tuning path: ` +
+                  `${selectedFixtures.length} seeded false-positive clusters (one per tuning path: ` +
                   'exception, query, risk_score, manual) and grades the diagnose_rule ' +
                   "step's change_type against the golden label.",
                 examples,
