@@ -146,14 +146,29 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       .getValue()
       .trackPerformanceEvent('discoverLoadSavedSearch');
 
-    const { persistedDiscoverSession } = getState();
+    const { persistedDiscoverSession, defaultProfileEsqlQuery } = getState();
     const persistedTab = persistedDiscoverSession?.tabs.find((tab) => tab.id === tabId);
     const persistedTabSearchSource = persistedTab
       ? await fromSavedObjectTabToSearchSource({ tab: persistedTab, services })
       : undefined;
 
-    const initialQuery = urlAppState?.query ?? persistedTab?.serializedSearchSource.query;
+    const hasGlobalState = Object.keys(urlGlobalState || {}).length > 0;
+    const restoredQuery = urlAppState?.query ?? persistedTab?.serializedSearchSource.query;
+    const configuredEsqlQuery = getConfiguredDefaultEsqlQuery({
+      initialUrlState: urlAppState,
+      hasGlobalState,
+      persistedTab,
+      services,
+      defaultProfileEsqlQuery,
+      locationStateHasDataViewSpec: Boolean(dataViewSpec),
+    });
+    const initialQuery = restoredQuery ?? configuredEsqlQuery;
     const isEsqlMode = isOfAggregateQueryType(initialQuery);
+    const needsDataView = !isNonEmptyEsqlQuery(initialQuery);
+
+    if (needsDataView) {
+      await runtimeStateManager.initialDataViewListRequest;
+    }
 
     const initialDataViewIdOrSpec = tabInitialInternalState?.serializedSearchSource?.index;
     const initialAdHocDataViewSpec = isObject(initialDataViewIdOrSpec)
@@ -197,9 +212,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
      * Tab initialization
      */
 
-    const hasGlobalState = Object.keys(urlGlobalState || {}).length > 0;
-    const defaultProfileEsqlQuery = getState().defaultProfileEsqlQuery;
-
     const resolveEsqlQuerySource = (esql: string) =>
       resolveEsqlSource({
         esql,
@@ -219,22 +231,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     }> => {
       if (isNonEmptyEsqlQuery(initialQuery)) {
         return { query: initialQuery, ...(await resolveEsqlQuerySource(initialQuery.esql)) };
-      }
-
-      // A new tab whose default ES|QL query comes from the space setting or the profile.
-      const configuredEsqlQuery = getConfiguredDefaultEsqlQuery({
-        initialUrlState: urlAppState,
-        hasGlobalState,
-        persistedTab,
-        services,
-        defaultProfileEsqlQuery,
-        locationStateHasDataViewSpec,
-      });
-      if (isNonEmptyEsqlQuery(configuredEsqlQuery)) {
-        return {
-          query: configuredEsqlQuery,
-          ...(await resolveEsqlQuerySource(configuredEsqlQuery.esql)),
-        };
       }
 
       // Classic and empty ES|QL tabs use this data view; a new tab otherwise derives its

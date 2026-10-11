@@ -400,6 +400,25 @@ describe('Discover state', () => {
     );
   });
 
+  describe('Initial data view list', () => {
+    test('loads the data view list once per Discover instance', async () => {
+      const { internalState, services } = getDiscoverInternalStateMock({
+        persistedDataViews: [dataViewMock],
+      });
+
+      services.dataViews.getIdsWithTitle = jest.fn(async () => []);
+
+      const firstRequest = internalState.dispatch(internalStateActions.loadInitialDataViewList());
+      const secondRequest = internalState.dispatch(internalStateActions.loadInitialDataViewList());
+
+      expect(secondRequest).toBe(firstRequest);
+
+      await firstRequest;
+
+      expect(services.dataViews.getIdsWithTitle).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('Loading a session with an inline data view', () => {
     const storedFilters: Filter[] = [
       {

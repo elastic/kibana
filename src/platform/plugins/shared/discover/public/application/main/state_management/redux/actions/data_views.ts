@@ -17,6 +17,20 @@ export const loadDataViewList = createInternalStateAsyncThunk(
   async (_, { extra: { services } }) => services.dataViews.getIdsWithTitle(true)
 );
 
+/** Loads the data view list, once per Discover instance. */
+export const loadInitialDataViewList: InternalStateThunkActionCreator<[], Promise<void>> = () =>
+  function loadInitialDataViewListThunkFn(dispatch, _, { runtimeStateManager }) {
+    const fetchDataViewList = async () => {
+      await dispatch(loadDataViewList());
+    };
+
+    if (!runtimeStateManager.initialDataViewListRequest) {
+      runtimeStateManager.initialDataViewListRequest = fetchDataViewList();
+    }
+
+    return runtimeStateManager.initialDataViewListRequest;
+  };
+
 export const setAdHocDataViews: InternalStateThunkActionCreator<[DataView[]]> = (adHocDataViews) =>
   function setAdHocDataViewsThunkFn(_, __, { runtimeStateManager }) {
     runtimeStateManager.adHocDataViews$.next(adHocDataViews);
