@@ -12,7 +12,7 @@ import type { FilterOptions } from '../../../containers/types';
 import { useRefreshCases } from '../hooks/use_on_refresh_cases';
 import { CUSTOM_QUICK_SELECT_PANEL, LAST_30_DAYS, SHOW_ALL_CASES } from '../translations';
 import { useGetEarliestCase } from '../hooks/use_get_earliest_case';
-import { DEFAULT_FROM_DATE } from '../../../containers/constants';
+import { ALL_CASES_FROM_DATE } from '../../../containers/constants';
 
 interface DateRangeFilterProps {
   filterOptions: FilterOptions;
@@ -43,7 +43,7 @@ export const DateRangeFilter = ({
   );
 
   const onShowAllCases = useCallback(() => {
-    const fromDate = earliestCase?.createdAt ?? DEFAULT_FROM_DATE;
+    const fromDate = earliestCase?.createdAt ?? ALL_CASES_FROM_DATE;
     onFilterOptionsChange({ from: fromDate, to: 'now' });
   }, [onFilterOptionsChange, earliestCase]);
 
