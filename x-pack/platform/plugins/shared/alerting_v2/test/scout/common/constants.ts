@@ -1,0 +1,61 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { getPlaywrightTagsFor, tags } from '@kbn/scout';
+
+export const API_ENGINE_TAG = tags.deploymentAgnostic;
+
+export const UI_TAG = [
+  ...getPlaywrightTagsFor('stateful', 'classic', 'local'),
+  ...getPlaywrightTagsFor('serverless', 'observability_complete', 'local'),
+];
+
+export const COMMON_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+  'x-elastic-internal-origin': 'kibana',
+  'Content-Type': 'application/json;charset=UTF-8',
+} as const;
+
+export const SCHEDULE_INTERVAL = '1m';
+export const LOOKBACK_WINDOW = '1m';
+export const POLL_TIMEOUT_MS = 45_000;
+export const POLL_INTERVAL_MS = 1_000;
+
+/**
+ * For UI waits that outlast Scout's 10s default assertion timeout. It stays well under the 60s
+ * per-test budget so a slow render fails as the assertion that timed out rather than as a bare
+ * test timeout.
+ */
+export const UI_SLOW_RENDER_TIMEOUT_MS = 30_000;
+
+/** `test.setTimeout` budget for tests that re-authenticate as several custom roles in sequence. */
+export const MULTI_ROLE_TEST_TIMEOUT_MS = 180_000;
+
+export const ACTION_POLICY_SEARCH_MAX_LENGTH = 256;
+
+export {
+  MAX_PER_PAGE,
+  MAX_PER_PAGE as ACTION_POLICY_PER_PAGE_MAX,
+  MAX_PER_PAGE as RULE_TEMPLATE_PER_PAGE_MAX,
+} from '@kbn/alerting-v2-schemas';
+
+export { MAX_TAGS as RULE_TEMPLATE_TAGS_MAX_COUNT } from '@kbn/alerting-v2-constants';
+export {
+  ALERTING_V2_RULE_API_PATH as RULE_API_PATH,
+  ALERTING_V2_INTERNAL_RULE_API_PATH as INTERNAL_RULE_API_PATH,
+  ALERTING_V2_INTERNAL_RULE_MATCH_API_PATH as INTERNAL_RULE_MATCH_API_PATH,
+  ALERTING_V2_INTERNAL_SERIES_API_PATH as SERIES_API_PATH,
+  ALERTING_V2_EPISODES_API_PATH as EPISODES_API_PATH,
+  ALERTING_V2_ACTION_POLICY_API_PATH as ACTION_POLICY_API_PATH,
+  ALERTING_V2_INTERNAL_ACTION_POLICY_MATCH_API_PATH as INTERNAL_ACTION_POLICY_MATCH_API_PATH,
+  ALERTING_V2_INTERNAL_ACTION_POLICY_ROUTING_TAGS_API_PATH as INTERNAL_ACTION_POLICY_ROUTING_TAGS_API_PATH,
+  ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH as EXECUTION_HISTORY_API_PATH,
+  ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH as RULE_EXECUTIONS_API_PATH,
+  ALERTING_V2_INTERNAL_CHANGE_HISTORY_RULES_API_PATH as INTERNAL_CHANGE_HISTORY_RULES_API_PATH,
+  ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH as RULE_TEMPLATE_API_PATH,
+} from '@kbn/alerting-v2-constants';
+export { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';

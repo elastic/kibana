@@ -1,0 +1,146 @@
+{
+  "sha1": "5f7e2b7f9c52fe3192052d27db31d6a4f6bbf29a",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "88922a52a5a9911-abc3c97abd88ccf",
+      "title": "Enable alerting:v2:enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "e8f6d3c738719c6-8cf1f3cf6c6d663",
+      "title": "Action Policies - create and edit creates a policy from the form and persists what was typed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_crud.spec.ts",
+        "line": 57,
+        "column": 5
+      }
+    },
+    {
+      "id": "e8f6d3c738719c6-a0554bccd589a70",
+      "title": "Action Policies - create and edit edits an existing policy without dropping untouched fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_crud.spec.ts",
+        "line": 108,
+        "column": 40
+      }
+    },
+    {
+      "id": "ca90eb46c808715-c6dcf15528a3e01",
+      "title": "Action Policies - read/write privileges editor sees every write affordance",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_privileges.spec.ts",
+        "line": 27,
+        "column": 6
+      }
+    },
+    {
+      "id": "ca90eb46c808715-5993a4bf6be8200",
+      "title": "Action Policies - read/write privileges read-only user cannot access write affordances",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_privileges.spec.ts",
+        "line": 38,
+        "column": 11
+      }
+    },
+    {
+      "id": "ca90eb46c808715-1c84e85eee0a8b0",
+      "title": "Action Policies - read/write privileges read-only user is blocked from the edit route",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_privileges.spec.ts",
+        "line": 54,
+        "column": 98
+      }
+    },
+    {
+      "id": "da62bfa2a2aafb2-624163cd0374a5d",
+      "title": "Action Policies - affected rules navigates from the details flyout to the affected rules and back",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_affected_rules.spec.ts",
+        "line": 36,
+        "column": 44
+      }
+    },
+    {
+      "id": "da62bfa2a2aafb2-3f409768cd06e1b",
+      "title": "Action Policies - affected rules hides the link from users who cannot read rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_affected_rules.spec.ts",
+        "line": 69,
+        "column": 7
+      }
+    },
+    {
+      "id": "51fb9f3f83006da-ebf10327abcc16d",
+      "title": "Unset alerting:v2:enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
+      }
+    }
+  ]
+}

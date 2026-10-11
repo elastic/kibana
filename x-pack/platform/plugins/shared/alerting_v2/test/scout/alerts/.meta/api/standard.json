@@ -1,0 +1,3487 @@
+{
+  "sha1": "dc9e9cf831868beef5d649fbe1b75941c911c5aa",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "1f810a856e36d28-abc3c97abd88ccf",
+      "title": "Enable alerting:v2:enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-5e69cce7313c53d",
+      "title": "Bulk episode actions API bulk ack: processes valid items and persists one doc per episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 36,
+        "column": 23
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-da7e1b4a5968ec7",
+      "title": "Bulk episode actions API bulk tag: processes valid items and persists one doc per episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 93,
+        "column": 21
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-1261dda9aeb8f7c",
+      "title": "Bulk episode actions API bulk unack: persists the unack doc",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 169,
+        "column": 27
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-fd30e57214212b0",
+      "title": "Bulk episode actions API bulk assign: persists the assign doc with its assignee_uid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 213,
+        "column": 33
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-a7d99f0f8b19e49",
+      "title": "Bulk episode actions API partial success: reports ALERT_NOT_FOUND when some alert_ids are unknown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 253,
+        "column": 9
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-07796d772247574",
+      "title": "Bulk episode actions API partial success: bulk tag reports ALERT_NOT_FOUND keyed by the unknown alert_id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 300,
+        "column": 13
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-11a3722ac8dd651",
+      "title": "Bulk episode actions API partial success: reports a per-item error for every item when every alert_id is unknown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 362,
+        "column": 17
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-783d1d137d185b9",
+      "title": "Bulk episode actions API lifecycle: bulk deactivate writes the synthetic .rule-events doc and flips episode.status to inactive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 380,
+        "column": 15
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-cbaa57270d1af92",
+      "title": "Bulk episode actions API lifecycle: bulk activate writes the synthetic .rule-events doc and flips episode.status to active + breached",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 438,
+        "column": 9
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-2843c2863cee345",
+      "title": "Bulk episode actions API lifecycle: reports INVALID_ALERT_STATE_TRANSITION for a bulk deactivate item whose episode is already inactive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 491,
+        "column": 52
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-84ddb19c808377b",
+      "title": "Bulk episode actions API lifecycle: reports INVALID_ALERT_STATE_TRANSITION for a bulk activate item whose episode is still active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 552,
+        "column": 41
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-36f9beeabbe61a1",
+      "title": "Bulk episode actions API lifecycle: reports ALERT_NOT_LATEST for a bulk activate item targeting a superseded episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 592,
+        "column": 14
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-7594452d99ae473",
+      "title": "Bulk episode actions API lifecycle: bulk ack succeeds on a superseded episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 645,
+        "column": 9
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-613f3fc5b3e06b3",
+      "title": "Bulk episode actions API precondition: reports INVALID_ALERT_STATE_TRANSITION for an already acknowledged item",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 696,
+        "column": 15
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-cc94ca5157630f0",
+      "title": "Bulk episode actions API schema: rejects a bare array body with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 758,
+        "column": 68
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-5f0a1d0eb62f804",
+      "title": "Bulk episode actions API schema: rejects empty items with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 768,
+        "column": 12
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-a5f2b3ae7533c3d",
+      "title": "Bulk episode actions API schema: rejects items repeating an alert_id with 400 and writes nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 776,
+        "column": 23
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-c510dff1468beb0",
+      "title": "Bulk episode actions API schema: rejects more than 100 items with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 805,
+        "column": 11
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-7a0f5bd2b1c2cf3",
+      "title": "Bulk episode actions API schema: rejects an unknown envelope key with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 814,
+        "column": 12
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-e2745abda04b79f",
+      "title": "Bulk episode actions API schema: rejects an item missing alert_id with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 825,
+        "column": 12
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-9d27c737942447c",
+      "title": "Bulk episode actions API schema: rejects an item carrying action_type with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 836,
+        "column": 54
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-25e0fb8df2b5e69",
+      "title": "Bulk episode actions API schema: rejects an item carrying group_hash with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 851,
+        "column": 12
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-2d2ceb87e2e5646",
+      "title": "Bulk episode actions API schema: rejects a bulk tag item keyed by group_hash with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 869,
+        "column": 14
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-a744e2ca04ce124",
+      "title": "Bulk episode actions API schema: rejects an item with an invalid per-action body with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 887,
+        "column": 24
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-142a09902c732ea",
+      "title": "Bulk episode actions API schema: rejects an item with empty alert_id with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 898,
+        "column": 43
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-b84d2b789233f1f",
+      "title": "Bulk episode actions API schema: rejects an item with alert_id over 150 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 908,
+        "column": 4
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-8cc395075414cb0",
+      "title": "Bulk episode actions API schema: rejects an item with unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 1076,
+        "column": 27
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-8b8c4cbe8962e10",
+      "title": "Bulk episode actions API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 1091,
+        "column": 27
+      }
+    },
+    {
+      "id": "25b5f5b494009f0-873f38f323f6342",
+      "title": "Bulk episode actions API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 1108,
+        "column": 27
+      }
+    },
+    {
+      "id": "1f0d5f0ebb0068f-fc65915c28d791c",
+      "title": "Bulk series actions API bulk snooze: processes valid items and persists one doc per series",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 32,
+        "column": 23
+      }
+    },
+    {
+      "id": "1f0d5f0ebb0068f-9db11e9ff5989eb",
+      "title": "Bulk series actions API bulk unsnooze: persists the unsnooze doc",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 95,
+        "column": 23
+      }
+    },
+    {
+      "id": "1f0d5f0ebb0068f-45588f70113de12",
+      "title": "Bulk series actions API partial success: reports ALERT_GROUP_NOT_FOUND when some group_hashes are unknown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 132,
+        "column": 7
+      }
+    },
+    {
+      "id": "1f0d5f0ebb0068f-35368d65a54d69c",
+      "title": "Bulk series actions API partial success: reports a per-item error for every item when every group_hash is unknown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 181,
+        "column": 25
+      }
+    },
+    {
+      "id": "1f0d5f0ebb0068f-35e2f85b3713277",
+      "title": "Bulk series actions API schema: rejects a bare array body with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 210,
+        "column": 28
+      }
+    },
+    {
+      "id": "1f0d5f0ebb0068f-fb36314484eccf9",
+      "title": "Bulk series actions API schema: rejects empty items with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 220,
+        "column": 25
+      }
+    },
+    {
+      "id": "1f0d5f0ebb0068f-1bff2d81474ae62",
+      "title": "Bulk series actions API schema: rejects more than 100 items with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 228,
+        "column": 59
+      }
+    },
+    {
+      "id": "1f0d5f0ebb0068f-37c8ba6c8712a10",
+      "title": "Bulk series actions API schema: rejects an unknown envelope key with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 242,
+        "column": 5
+      }
+    },
+    {
+      "id": "1f0d5f0ebb0068f-c78b194d2f6d894",
+      "title": "Bulk series actions API schema: rejects an item missing group_hash with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 253,
+        "column": 22
+      }
+    },
+    {
+      "id": "1f0d5f0ebb0068f-d3de1139c64cb5a",
+      "title": "Bulk series actions API schema: rejects an item carrying action_type with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 263,
+        "column": 5
+      }
+    },
+    {
+      "id": "1f0d5f0ebb0068f-fed0eb8195f00fe",
+      "title": "Bulk series actions API schema: rejects an item carrying alert_id with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 275,
+        "column": 5
+      }
+    },
+    {
+      "id": "1f0d5f0ebb0068f-eb219bc5fb2e3d2",
+      "title": "Bulk series actions API schema: rejects an item with an invalid per-action body with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 289,
+        "column": 7
+      }
+    },
+    {
+      "id": "1f0d5f0ebb0068f-cf439521e29f2d7",
+      "title": "Bulk series actions API schema: rejects an item with empty group_hash with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 302,
+        "column": 22
+      }
+    },
+    {
+      "id": "1f0d5f0ebb0068f-555513ef84a30fc",
+      "title": "Bulk series actions API schema: rejects an item whose group_hash is not a SHA-256 digest with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 314,
+        "column": 27
+      }
+    },
+    {
+      "id": "1f0d5f0ebb0068f-605acadcc5a9594",
+      "title": "Bulk series actions API schema: rejects an item with unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 331,
+        "column": 39
+      }
+    },
+    {
+      "id": "1f0d5f0ebb0068f-afdcbb8ee993171",
+      "title": "Bulk series actions API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 347,
+        "column": 23
+      }
+    },
+    {
+      "id": "1f0d5f0ebb0068f-a0ccfa998529d3b",
+      "title": "Bulk series actions API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 361,
+        "column": 18
+      }
+    },
+    {
+      "id": "d9b5bac9b316ad2-3c3ca0979c6f0e7",
+      "title": "Create ack episode action API ack: writes an ack action and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 40,
+        "column": 33
+      }
+    },
+    {
+      "id": "d9b5bac9b316ad2-f4522a7579f39ed",
+      "title": "Create ack episode action API ack: audit actions work on old (superseded) episodes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 70,
+        "column": 14
+      }
+    },
+    {
+      "id": "d9b5bac9b316ad2-65a56e7f652ac16",
+      "title": "Create ack episode action API ack: a repeated ack returns 409 and writes no second action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 118,
+        "column": 11
+      }
+    },
+    {
+      "id": "d9b5bac9b316ad2-903e64bccccc5ee",
+      "title": "Create ack episode action API ack: acking again after an unack returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 157,
+        "column": 11
+      }
+    },
+    {
+      "id": "d9b5bac9b316ad2-3c6ae065262479e",
+      "title": "Create ack episode action API schema: rejects alert_id in the body (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 195,
+        "column": 29
+      }
+    },
+    {
+      "id": "d9b5bac9b316ad2-741711f7baf41dd",
+      "title": "Create ack episode action API schema: rejects unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 207,
+        "column": 20
+      }
+    },
+    {
+      "id": "d9b5bac9b316ad2-2b24a4c38416ceb",
+      "title": "Create ack episode action API schema: rejects alert_id over 150 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 215,
+        "column": 100
+      }
+    },
+    {
+      "id": "d9b5bac9b316ad2-c3b80ec5bbdc44e",
+      "title": "Create ack episode action API returns 404 when alert_id matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 221,
+        "column": 14
+      }
+    },
+    {
+      "id": "d9b5bac9b316ad2-219a1326a38492d",
+      "title": "Create ack episode action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 231,
+        "column": 7
+      }
+    },
+    {
+      "id": "d9b5bac9b316ad2-63aeefd9fe225c9",
+      "title": "Create ack episode action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 240,
+        "column": 63
+      }
+    },
+    {
+      "id": "457488b13ba1b4b-b370774c3bc25c6",
+      "title": "Create activate episode action API activate: writes an activate action and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 30,
+        "column": 23
+      }
+    },
+    {
+      "id": "457488b13ba1b4b-11e9d92ef4e3e2f",
+      "title": "Create activate episode action API activate: writes a synthetic .rule-events doc that flips the episode back to active + breached",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 70,
+        "column": 22
+      }
+    },
+    {
+      "id": "457488b13ba1b4b-927795a37c2c923",
+      "title": "Create activate episode action API schema: rejects body missing reason with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 125,
+        "column": 31
+      }
+    },
+    {
+      "id": "457488b13ba1b4b-56166db84c15360",
+      "title": "Create activate episode action API schema: rejects empty reason with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 129,
+        "column": 9
+      }
+    },
+    {
+      "id": "457488b13ba1b4b-d9fc14cf3953b1f",
+      "title": "Create activate episode action API schema: rejects reason over 1024 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 139,
+        "column": 12
+      }
+    },
+    {
+      "id": "457488b13ba1b4b-d75563cb20f8508",
+      "title": "Create activate episode action API schema: rejects unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 146,
+        "column": 7
+      }
+    },
+    {
+      "id": "457488b13ba1b4b-dc418051bf9ed4b",
+      "title": "Create activate episode action API schema: rejects alert_id over 150 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 154,
+        "column": 40
+      }
+    },
+    {
+      "id": "457488b13ba1b4b-b26eabda065f280",
+      "title": "Create activate episode action API returns 404 when alert_id matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 163,
+        "column": 13
+      }
+    },
+    {
+      "id": "457488b13ba1b4b-5748c5efd84cdd3",
+      "title": "Create activate episode action API returns 409 when the episode exists but is not the latest of its series",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 172,
+        "column": 13
+      }
+    },
+    {
+      "id": "457488b13ba1b4b-05c5adce1f0e8a3",
+      "title": "Create activate episode action API precondition: rejects activate when the episode is already active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 212,
+        "column": 57
+      }
+    },
+    {
+      "id": "457488b13ba1b4b-9523139905426f6",
+      "title": "Create activate episode action API activate: allows a recovering episode to be reopened (cancel the wind-down)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 249,
+        "column": 43
+      }
+    },
+    {
+      "id": "457488b13ba1b4b-26fa5bf0018d0b7",
+      "title": "Create activate episode action API activate: allows a pending episode to be forced past the activation counter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 285,
+        "column": 43
+      }
+    },
+    {
+      "id": "457488b13ba1b4b-7bcd6accbbcd46c",
+      "title": "Create activate episode action API activate: allows reopen of a naturally-recovered (never user-deactivated) episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 317,
+        "column": 33
+      }
+    },
+    {
+      "id": "457488b13ba1b4b-0952e069bc87f95",
+      "title": "Create activate episode action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 363,
+        "column": 14
+      }
+    },
+    {
+      "id": "457488b13ba1b4b-574f993bf5370cc",
+      "title": "Create activate episode action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_activate_episode_action.spec.ts",
+        "line": 378,
+        "column": 16
+      }
+    },
+    {
+      "id": "00849b374697fec-f158754c10e60c2",
+      "title": "Create assign episode action API assign: writes an assign action with assignee_uid and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 31,
+        "column": 23
+      }
+    },
+    {
+      "id": "00849b374697fec-f642e4b7e384021",
+      "title": "Create assign episode action API assign: null assignee_uid clears the assignee and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 66,
+        "column": 22
+      }
+    },
+    {
+      "id": "00849b374697fec-02e7c0c2a549b77",
+      "title": "Create assign episode action API assign: repeating the current assignee returns 409 and writes no second action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 106,
+        "column": 22
+      }
+    },
+    {
+      "id": "00849b374697fec-5725e4faabbebaa",
+      "title": "Create assign episode action API assign: clearing the assignee of an unassigned alert returns 409",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 147,
+        "column": 29
+      }
+    },
+    {
+      "id": "00849b374697fec-a7974c3858a157a",
+      "title": "Create assign episode action API assign: reinstating a cleared assignee returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 177,
+        "column": 15
+      }
+    },
+    {
+      "id": "00849b374697fec-a0c3238e64cc708",
+      "title": "Create assign episode action API assign: audit actions work on old (superseded) episodes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 220,
+        "column": 4
+      }
+    },
+    {
+      "id": "00849b374697fec-73ca3f79c48e0b1",
+      "title": "Create assign episode action API schema: rejects body missing assignee_uid with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 271,
+        "column": 74
+      }
+    },
+    {
+      "id": "00849b374697fec-e9a675387a620a2",
+      "title": "Create assign episode action API schema: rejects alert_id in the body (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 278,
+        "column": 5
+      }
+    },
+    {
+      "id": "00849b374697fec-6452a512a6976d5",
+      "title": "Create assign episode action API schema: rejects assignee_uid over 150 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 287,
+        "column": 12
+      }
+    },
+    {
+      "id": "00849b374697fec-2f344f444fb4f84",
+      "title": "Create assign episode action API schema: rejects an empty assignee_uid with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 296,
+        "column": 61
+      }
+    },
+    {
+      "id": "00849b374697fec-bd87bc72ac18cdf",
+      "title": "Create assign episode action API schema: rejects assignee_uid that is neither string nor null with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 306,
+        "column": 13
+      }
+    },
+    {
+      "id": "00849b374697fec-3183b7ee1a1bcdc",
+      "title": "Create assign episode action API schema: rejects unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 315,
+        "column": 24
+      }
+    },
+    {
+      "id": "00849b374697fec-a37d92bdc663b88",
+      "title": "Create assign episode action API schema: rejects alert_id over 150 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 324,
+        "column": 98
+      }
+    },
+    {
+      "id": "00849b374697fec-c5003c76dc8d184",
+      "title": "Create assign episode action API returns 404 when alert_id matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 331,
+        "column": 5
+      }
+    },
+    {
+      "id": "00849b374697fec-1703188eba307ae",
+      "title": "Create assign episode action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 342,
+        "column": 11
+      }
+    },
+    {
+      "id": "00849b374697fec-290909946551a59",
+      "title": "Create assign episode action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 349,
+        "column": 81
+      }
+    },
+    {
+      "id": "08e1c714a85ecdb-0d5a36a98129d53",
+      "title": "Create deactivate episode action API deactivate: writes a deactivate action and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 30,
+        "column": 23
+      }
+    },
+    {
+      "id": "08e1c714a85ecdb-ce381aea60fcc20",
+      "title": "Create deactivate episode action API deactivate: writes a synthetic recovered/inactive rule event carrying the prior event data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 69,
+        "column": 22
+      }
+    },
+    {
+      "id": "08e1c714a85ecdb-52b87d4249173a4",
+      "title": "Create deactivate episode action API schema: rejects body missing reason with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 134,
+        "column": 27
+      }
+    },
+    {
+      "id": "08e1c714a85ecdb-ce7e4873423f4a8",
+      "title": "Create deactivate episode action API schema: rejects empty reason with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 127,
+        "column": 9
+      }
+    },
+    {
+      "id": "08e1c714a85ecdb-6fe913f8f6293b6",
+      "title": "Create deactivate episode action API schema: rejects reason over 1024 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 138,
+        "column": 12
+      }
+    },
+    {
+      "id": "08e1c714a85ecdb-cce66134b77bad0",
+      "title": "Create deactivate episode action API schema: rejects unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 145,
+        "column": 7
+      }
+    },
+    {
+      "id": "08e1c714a85ecdb-6805d32bdd92f65",
+      "title": "Create deactivate episode action API schema: rejects alert_id over 150 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 154,
+        "column": 40
+      }
+    },
+    {
+      "id": "08e1c714a85ecdb-30e178bad765479",
+      "title": "Create deactivate episode action API returns 404 when alert_id matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 164,
+        "column": 13
+      }
+    },
+    {
+      "id": "08e1c714a85ecdb-71a213dfd0ebd0f",
+      "title": "Create deactivate episode action API returns 409 when the episode exists but is not the latest of its series",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 174,
+        "column": 13
+      }
+    },
+    {
+      "id": "08e1c714a85ecdb-f16e66b74add17a",
+      "title": "Create deactivate episode action API precondition: rejects deactivate of an already-inactive episode with INVALID_ALERT_STATE_TRANSITION (409)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 215,
+        "column": 57
+      }
+    },
+    {
+      "id": "08e1c714a85ecdb-041d4f47dff2cd0",
+      "title": "Create deactivate episode action API precondition: allows deactivate of a pending episode (forces it closed before activation)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 252,
+        "column": 43
+      }
+    },
+    {
+      "id": "08e1c714a85ecdb-bff9face1808a5e",
+      "title": "Create deactivate episode action API precondition: allows deactivate of a recovering episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 287,
+        "column": 52
+      }
+    },
+    {
+      "id": "08e1c714a85ecdb-b47c958acaca701",
+      "title": "Create deactivate episode action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 318,
+        "column": 24
+      }
+    },
+    {
+      "id": "08e1c714a85ecdb-87d8fea998cba9a",
+      "title": "Create deactivate episode action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_deactivate_episode_action.spec.ts",
+        "line": 330,
+        "column": 28
+      }
+    },
+    {
+      "id": "0d48294bb3001db-c2a6d3872c3c59f",
+      "title": "Create snooze series action API snooze: writes a snooze action with snoozed_until and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 31,
+        "column": 23
+      }
+    },
+    {
+      "id": "0d48294bb3001db-294fea4c7a5f2c9",
+      "title": "Create snooze series action API snooze: writes a snooze action without snoozed_until and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 67,
+        "column": 22
+      }
+    },
+    {
+      "id": "0d48294bb3001db-319ad8c18d6fd56",
+      "title": "Create snooze series action API schema: rejects snoozed_until that is not ISO 8601 with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 100,
+        "column": 22
+      }
+    },
+    {
+      "id": "0d48294bb3001db-04a780fe030f1fc",
+      "title": "Create snooze series action API schema: rejects snoozed_until without the time component with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 110,
+        "column": 22
+      }
+    },
+    {
+      "id": "0d48294bb3001db-10e6a547f0c136b",
+      "title": "Create snooze series action API schema: rejects unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 121,
+        "column": 7
+      }
+    },
+    {
+      "id": "0d48294bb3001db-35a998a3f2ee596",
+      "title": "Create snooze series action API schema: rejects a group_hash with a plain label with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 151,
+        "column": 31
+      }
+    },
+    {
+      "id": "0d48294bb3001db-39ebef826167408",
+      "title": "Create snooze series action API schema: rejects a group_hash with too few characters with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 151,
+        "column": 31
+      }
+    },
+    {
+      "id": "0d48294bb3001db-b9004da73520419",
+      "title": "Create snooze series action API schema: rejects a group_hash with too many characters with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 151,
+        "column": 31
+      }
+    },
+    {
+      "id": "0d48294bb3001db-0a243f8e3e71f66",
+      "title": "Create snooze series action API schema: rejects a group_hash with a non-hex character with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 151,
+        "column": 31
+      }
+    },
+    {
+      "id": "0d48294bb3001db-2ec4154f43e28c6",
+      "title": "Create snooze series action API returns 404 when group_hash matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 159,
+        "column": 85
+      }
+    },
+    {
+      "id": "0d48294bb3001db-12f9d0783ba24ea",
+      "title": "Create snooze series action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 171,
+        "column": 5
+      }
+    },
+    {
+      "id": "0d48294bb3001db-715a749c02fb8cc",
+      "title": "Create snooze series action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 182,
+        "column": 8
+      }
+    },
+    {
+      "id": "4eb3bed707d0e38-eefcae55b02f552",
+      "title": "Create tag episode action API tag: writes a tag action and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 39,
+        "column": 33
+      }
+    },
+    {
+      "id": "4eb3bed707d0e38-ba33912223e4b1e",
+      "title": "Create tag episode action API tag: an empty tags array clears the tags and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 74,
+        "column": 21
+      }
+    },
+    {
+      "id": "4eb3bed707d0e38-c08dcfa6d44e9f2",
+      "title": "Create tag episode action API tag: repeating the current set returns 409 regardless of order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 116,
+        "column": 30
+      }
+    },
+    {
+      "id": "4eb3bed707d0e38-765ef81123b5945",
+      "title": "Create tag episode action API tag: re-applying a cleared set returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 161,
+        "column": 97
+      }
+    },
+    {
+      "id": "4eb3bed707d0e38-4a431a18ad1c2a2",
+      "title": "Create tag episode action API tag: audit actions work on old (superseded) episodes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 209,
+        "column": 31
+      }
+    },
+    {
+      "id": "4eb3bed707d0e38-6c4c7b7a0523476",
+      "title": "Create tag episode action API schema: rejects body missing tags with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 255,
+        "column": 73
+      }
+    },
+    {
+      "id": "4eb3bed707d0e38-d396e79cd204e98",
+      "title": "Create tag episode action API schema: rejects more than 20 tags with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 262,
+        "column": 24
+      }
+    },
+    {
+      "id": "4eb3bed707d0e38-f7a4a860c1f123b",
+      "title": "Create tag episode action API schema: rejects an empty tag string with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 271,
+        "column": 24
+      }
+    },
+    {
+      "id": "4eb3bed707d0e38-85d6219b35643f3",
+      "title": "Create tag episode action API schema: rejects a tag over 128 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 281,
+        "column": 18
+      }
+    },
+    {
+      "id": "4eb3bed707d0e38-9a5d5d135c93563",
+      "title": "Create tag episode action API schema: rejects non-string tag elements with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 290,
+        "column": 18
+      }
+    },
+    {
+      "id": "4eb3bed707d0e38-df33e3bdcbb9a4a",
+      "title": "Create tag episode action API schema: rejects unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 299,
+        "column": 18
+      }
+    },
+    {
+      "id": "4eb3bed707d0e38-0f3415dc3a952b5",
+      "title": "Create tag episode action API schema: rejects alert_id over 150 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 309,
+        "column": 15
+      }
+    },
+    {
+      "id": "4eb3bed707d0e38-62b874754d9919f",
+      "title": "Create tag episode action API returns 404 when alert_id matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 318,
+        "column": 27
+      }
+    },
+    {
+      "id": "4eb3bed707d0e38-952b1b081d041a7",
+      "title": "Create tag episode action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 332,
+        "column": 25
+      }
+    },
+    {
+      "id": "4eb3bed707d0e38-d4118782914daeb",
+      "title": "Create tag episode action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 342,
+        "column": 2
+      }
+    },
+    {
+      "id": "d5d2c55a9515483-d2537288ee1f07c",
+      "title": "Create unack episode action API unack: writes an unack action and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_unack_episode_action.spec.ts",
+        "line": 30,
+        "column": 23
+      }
+    },
+    {
+      "id": "d5d2c55a9515483-773715de8464089",
+      "title": "Create unack episode action API unack: audit actions work on old (superseded) episodes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_unack_episode_action.spec.ts",
+        "line": 67,
+        "column": 12
+      }
+    },
+    {
+      "id": "d5d2c55a9515483-8f970e740c842e2",
+      "title": "Create unack episode action API unack: unacking an alert that is not acknowledged returns 409",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_unack_episode_action.spec.ts",
+        "line": 122,
+        "column": 14
+      }
+    },
+    {
+      "id": "d5d2c55a9515483-3792cf6047cc929",
+      "title": "Create unack episode action API schema: rejects alert_id in the body (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_unack_episode_action.spec.ts",
+        "line": 157,
+        "column": 15
+      }
+    },
+    {
+      "id": "d5d2c55a9515483-48a60e9a5560543",
+      "title": "Create unack episode action API schema: rejects unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_unack_episode_action.spec.ts",
+        "line": 168,
+        "column": 13
+      }
+    },
+    {
+      "id": "d5d2c55a9515483-33d75bd793468f2",
+      "title": "Create unack episode action API schema: rejects alert_id over 150 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_unack_episode_action.spec.ts",
+        "line": 175,
+        "column": 22
+      }
+    },
+    {
+      "id": "d5d2c55a9515483-e1b5131f7ecaa8b",
+      "title": "Create unack episode action API returns 404 when alert_id matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_unack_episode_action.spec.ts",
+        "line": 181,
+        "column": 5
+      }
+    },
+    {
+      "id": "d5d2c55a9515483-acc40fe337beb0c",
+      "title": "Create unack episode action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_unack_episode_action.spec.ts",
+        "line": 192,
+        "column": 11
+      }
+    },
+    {
+      "id": "d5d2c55a9515483-5d4140188f67b17",
+      "title": "Create unack episode action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_unack_episode_action.spec.ts",
+        "line": 199,
+        "column": 81
+      }
+    },
+    {
+      "id": "a8155e371cea5a3-f6d73fc79183b35",
+      "title": "Create unsnooze series action API happy path: writes an unsnooze action and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_unsnooze_series_action.spec.ts",
+        "line": 31,
+        "column": 23
+      }
+    },
+    {
+      "id": "a8155e371cea5a3-546087194472dde",
+      "title": "Create unsnooze series action API schema: rejects unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_unsnooze_series_action.spec.ts",
+        "line": 68,
+        "column": 14
+      }
+    },
+    {
+      "id": "a8155e371cea5a3-ef8b42d34c258f6",
+      "title": "Create unsnooze series action API schema: rejects a group_hash that is not a SHA-256 digest with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_unsnooze_series_action.spec.ts",
+        "line": 78,
+        "column": 98
+      }
+    },
+    {
+      "id": "a8155e371cea5a3-0f2a436229ebfc0",
+      "title": "Create unsnooze series action API returns 404 when group_hash matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_unsnooze_series_action.spec.ts",
+        "line": 85,
+        "column": 12
+      }
+    },
+    {
+      "id": "a8155e371cea5a3-260e24e37815051",
+      "title": "Create unsnooze series action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_unsnooze_series_action.spec.ts",
+        "line": 101,
+        "column": 11
+      }
+    },
+    {
+      "id": "a8155e371cea5a3-a134af93aabad36",
+      "title": "Create unsnooze series action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_unsnooze_series_action.spec.ts",
+        "line": 110,
+        "column": 63
+      }
+    },
+    {
+      "id": "9eed9c99ffddd93-aaee8a03285479c",
+      "title": "List execution history — tolerates missing rule ids resolves names for surviving rules and falls back to id for deleted ones",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history_rule_lookup.spec.ts",
+        "line": 71,
+        "column": 65
+      }
+    },
+    {
+      "id": "063aaf1e88d5c37-36a81457fa3a0b8",
+      "title": "List action policy execution history API validation: rejects page=0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
+        "line": 36,
+        "column": 23
+      }
+    },
+    {
+      "id": "063aaf1e88d5c37-5ebd7738a8f9927",
+      "title": "List action policy execution history API validation: rejects perPage=0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
+        "line": 40,
+        "column": 79
+      }
+    },
+    {
+      "id": "063aaf1e88d5c37-d6dfb71cdafb301",
+      "title": "List action policy execution history API validation: accepts perPage at the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
+        "line": 47,
+        "column": 71
+      }
+    },
+    {
+      "id": "063aaf1e88d5c37-fc55d016cdaa50f",
+      "title": "List action policy execution history API validation: rejects perPage above the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
+        "line": 55,
+        "column": 13
+      }
+    },
+    {
+      "id": "063aaf1e88d5c37-e717ac28a025e9c",
+      "title": "List action policy execution history API validation: rejects page * perPage above the result window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
+        "line": 61,
+        "column": 14
+      }
+    },
+    {
+      "id": "063aaf1e88d5c37-8d0ea03d87fb7be",
+      "title": "List action policy execution history API validation: rejects an unknown sort field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
+        "line": 71,
+        "column": 7
+      }
+    },
+    {
+      "id": "063aaf1e88d5c37-43148742ae09b7e",
+      "title": "List action policy execution history API returns the schema defaults for page, per_page and total",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
+        "line": 77,
+        "column": 42
+      }
+    },
+    {
+      "id": "063aaf1e88d5c37-58581c6ab0dbccb",
+      "title": "List action policy execution history API validation: accepts a `to` upper bound",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
+        "line": 86,
+        "column": 67
+      }
+    },
+    {
+      "id": "063aaf1e88d5c37-0fb15d391ffcfe7",
+      "title": "List action policy execution history API validation: accepts an outcomes array filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
+        "line": 95,
+        "column": 13
+      }
+    },
+    {
+      "id": "063aaf1e88d5c37-7c661738ba52f3a",
+      "title": "List action policy execution history API validation: rejects an unknown outcome value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
+        "line": 105,
+        "column": 13
+      }
+    },
+    {
+      "id": "063aaf1e88d5c37-6b910f3060af188",
+      "title": "List action policy execution history API validation: rejects non-numeric perPage",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
+        "line": 109,
+        "column": 8
+      }
+    },
+    {
+      "id": "063aaf1e88d5c37-e8b3c545002c624",
+      "title": "List action policy execution history API validation: rejects non-numeric page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
+        "line": 115,
+        "column": 58
+      }
+    },
+    {
+      "id": "063aaf1e88d5c37-5b875229280a9b5",
+      "title": "List action policy execution history API authorization: 200 with alerting_v2_execution_history read privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
+        "line": 121,
+        "column": 70
+      }
+    },
+    {
+      "id": "063aaf1e88d5c37-ae43868df72210a",
+      "title": "List action policy execution history API authorization: 200 with alerting_v2_execution_history all privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
+        "line": 127,
+        "column": 14
+      }
+    },
+    {
+      "id": "063aaf1e88d5c37-151dcfebdcd6818",
+      "title": "List action policy execution history API authorization: 403 without any alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_execution_history.spec.ts",
+        "line": 137,
+        "column": 7
+      }
+    },
+    {
+      "id": "30e7de065b28dbd-7203929f492383a",
+      "title": "List rule executions API happy path: returns at least one execution record after the rule executor runs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
+        "line": 37,
+        "column": 11
+      }
+    },
+    {
+      "id": "30e7de065b28dbd-b1832491e84c04e",
+      "title": "List rule executions API space scoping: does not return executions from another space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
+        "line": 65,
+        "column": 16
+      }
+    },
+    {
+      "id": "30e7de065b28dbd-9c3299cf0e9b518",
+      "title": "List rule executions API validation: rejects page=0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
+        "line": 102,
+        "column": 78
+      }
+    },
+    {
+      "id": "30e7de065b28dbd-554c6ef42ef9692",
+      "title": "List rule executions API validation: rejects perPage=0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
+        "line": 123,
+        "column": 14
+      }
+    },
+    {
+      "id": "30e7de065b28dbd-5da988c52fd8619",
+      "title": "List rule executions API validation: rejects perPage above the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
+        "line": 130,
+        "column": 7
+      }
+    },
+    {
+      "id": "30e7de065b28dbd-37ffaf2c2ffce93",
+      "title": "List rule executions API validation: rejects unknown outcome values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
+        "line": 136,
+        "column": 82
+      }
+    },
+    {
+      "id": "30e7de065b28dbd-c69da1a84fa65de",
+      "title": "List rule executions API validation: rejects malformed datetimes for from",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
+        "line": 144,
+        "column": 69
+      }
+    },
+    {
+      "id": "30e7de065b28dbd-77783faff1b5063",
+      "title": "List rule executions API authorization: 200 with alerting_v2_execution_history read privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
+        "line": 148,
+        "column": 12
+      }
+    },
+    {
+      "id": "30e7de065b28dbd-6a966cfb4221288",
+      "title": "List rule executions API authorization: 200 with alerting_v2_execution_history all privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
+        "line": 153,
+        "column": 22
+      }
+    },
+    {
+      "id": "30e7de065b28dbd-459ac26444f350d",
+      "title": "List rule executions API authorization: 403 without any alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
+        "line": 162,
+        "column": 16
+      }
+    },
+    {
+      "id": "18ff53bc0b9026e-e35a15e1cb7bd4c",
+      "title": "Rule event fields suggestions API returns the union of data.* field names across all matching alerts when no matcher is given",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
+        "line": 87,
+        "column": 13
+      }
+    },
+    {
+      "id": "18ff53bc0b9026e-ea3e3e07112398d",
+      "title": "Rule event fields suggestions API falls back to the unfiltered result when matcher cannot be parsed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
+        "line": 110,
+        "column": 6
+      }
+    },
+    {
+      "id": "18ff53bc0b9026e-fdcb48ef8a6e538",
+      "title": "Rule event fields suggestions API validation: rejects empty matcher with a 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
+        "line": 126,
+        "column": 13
+      }
+    },
+    {
+      "id": "18ff53bc0b9026e-5b801ad7b6a08a0",
+      "title": "Rule event fields suggestions API validation: rejects matcher longer than the schema limit with a 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
+        "line": 133,
+        "column": 14
+      }
+    },
+    {
+      "id": "18ff53bc0b9026e-7769c37cc0e3f41",
+      "title": "Rule event fields suggestions API authorization: returns 200 for a user with read-only privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
+        "line": 145,
+        "column": 10
+      }
+    },
+    {
+      "id": "18ff53bc0b9026e-77c75d547010bfc",
+      "title": "Rule event fields suggestions API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
+        "line": 155,
+        "column": 15
+      }
+    },
+    {
+      "id": "ab4563b82b8fede-29fbf9a9b986d0d",
+      "title": "Suggest user profiles API matches the profile of a user that has signed in",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 61,
+        "column": 13
+      }
+    },
+    {
+      "id": "ab4563b82b8fede-467b1db18814577",
+      "title": "Suggest user profiles API returns an empty list when nothing matches the search term",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 74,
+        "column": 74
+      }
+    },
+    {
+      "id": "ab4563b82b8fede-963e5c02016237e",
+      "title": "Suggest user profiles API returns an unfiltered list when the body has no name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 84,
+        "column": 14
+      }
+    },
+    {
+      "id": "ab4563b82b8fede-c52e7158aaff388",
+      "title": "Suggest user profiles API returns an unfiltered list when the name is empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 103,
+        "column": 78
+      }
+    },
+    {
+      "id": "ab4563b82b8fede-0d852e7fad0b165",
+      "title": "Suggest user profiles API validation: rejects a name longer than the schema limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 110,
+        "column": 71
+      }
+    },
+    {
+      "id": "ab4563b82b8fede-bc90b46fbe54133",
+      "title": "Suggest user profiles API validation: rejects a size above the schema limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 116,
+        "column": 20
+      }
+    },
+    {
+      "id": "ab4563b82b8fede-1b180939ef0f850",
+      "title": "Suggest user profiles API validation: rejects a negative size",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 122,
+        "column": 14
+      }
+    },
+    {
+      "id": "ab4563b82b8fede-e73458164ed8ce6",
+      "title": "Suggest user profiles API validation: rejects a fractional size",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 131,
+        "column": 8
+      }
+    },
+    {
+      "id": "ab4563b82b8fede-694627abe749ff9",
+      "title": "Suggest user profiles API authorization: returns 200 for a user with read-only alerts privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 140,
+        "column": 31
+      }
+    },
+    {
+      "id": "ab4563b82b8fede-aacd31fc7641ebb",
+      "title": "Suggest user profiles API authorization: returns 200 for a user with all alerts privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 148,
+        "column": 13
+      }
+    },
+    {
+      "id": "ab4563b82b8fede-563bc2fa7e983f8",
+      "title": "Suggest user profiles API authorization: returns 403 for a user with rules privileges but no alerts privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 159,
+        "column": 63
+      }
+    },
+    {
+      "id": "ab4563b82b8fede-a5db523f4aff7d3",
+      "title": "Suggest user profiles API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
+        "line": 172,
+        "column": 32
+      }
+    },
+    {
+      "id": "4499cd5ec46a429-ebf10327abcc16d",
+      "title": "Unset alerting:v2:enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
+      }
+    }
+  ]
+}

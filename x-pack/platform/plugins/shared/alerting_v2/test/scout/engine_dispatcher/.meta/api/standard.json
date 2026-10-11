@@ -1,0 +1,508 @@
+{
+  "sha1": "a6c236f18da8f576efc5e5b367d75d85555cb6a7",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "fdd03da0e57b354-abc3c97abd88ccf",
+      "title": "Enable alerting:v2:enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "98e07605e6e2555-57406c6ad330b4f",
+      "title": "Dispatcher does not dispatch any episodes when there are no alert events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 280,
+        "column": 23
+      }
+    },
+    {
+      "id": "98e07605e6e2555-3e4105e9415ebd2",
+      "title": "Dispatcher dispatches all unique episodes when alert events have no prior fire actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 292,
+        "column": 7
+      }
+    },
+    {
+      "id": "98e07605e6e2555-929937a134bb0fd",
+      "title": "Dispatcher persists notified actions for dispatched action groups when the action policy has a throttle interval",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 427,
+        "column": 64
+      }
+    },
+    {
+      "id": "98e07605e6e2555-007600ab43704da",
+      "title": "Dispatcher only dispatches the new events when some episodes already have fires",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 507,
+        "column": 22
+      }
+    },
+    {
+      "id": "98e07605e6e2555-5c049b2017b1c88",
+      "title": "Dispatcher dispatches fire actions for non-suppressed episodes and suppress actions for suppressed ones when alert episodes have user actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 606,
+        "column": 9
+      }
+    },
+    {
+      "id": "98e07605e6e2555-bd1da056944abc9",
+      "title": "Dispatcher lifts suppression when the last user action is an unsnooze, an expired snooze, or an activate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 897,
+        "column": 42
+      }
+    },
+    {
+      "id": "98e07605e6e2555-8e42f31ee1f6a78",
+      "title": "Dispatcher does not carry an ack from a previous episode of the series over to the current episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 1061,
+        "column": 22
+      }
+    },
+    {
+      "id": "98e07605e6e2555-2e8527aacf4031e",
+      "title": "Dispatcher only dispatches episodes matching the KQL expression when the action policy has a matcher",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 1105,
+        "column": 7
+      }
+    },
+    {
+      "id": "98e07605e6e2555-65558d4a4228bd6",
+      "title": "Dispatcher groups episodes by the specified data fields when the action policy groups per field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 1180,
+        "column": 23
+      }
+    },
+    {
+      "id": "98e07605e6e2555-159291ccca999fe",
+      "title": "Dispatcher throttle strategies / per_alert + on_status_change throttles on a second dispatch when status is unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 1289,
+        "column": 28
+      }
+    },
+    {
+      "id": "98e07605e6e2555-bc5270746632182",
+      "title": "Dispatcher throttle strategies / per_alert + per_status_interval throttles within the interval when status is unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 1337,
+        "column": 29
+      }
+    },
+    {
+      "id": "98e07605e6e2555-c0bd7bec44bcc2d",
+      "title": "Dispatcher throttle strategies / per_alert + every_time dispatches a new event even when the episode status is unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 1396,
+        "column": 25
+      }
+    },
+    {
+      "id": "98e07605e6e2555-3f23cb4f970ee65",
+      "title": "Dispatcher throttle strategies / all + time_interval digest groups all episodes and stays throttled on subsequent dispatches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 1467,
+        "column": 22
+      }
+    },
+    {
+      "id": "98e07605e6e2555-ce74b814830769a",
+      "title": "Dispatcher throttle strategies / per_field + time_interval throttles groups on subsequent dispatches within the interval",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 1527,
+        "column": 22
+      }
+    },
+    {
+      "id": "98e07605e6e2555-d4efedcc2a49b50",
+      "title": "Dispatcher suppresses dispatch with `reason: maintenance_window:<id>` when an enabled maintenance window covers the alert events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 1627,
+        "column": 28
+      }
+    },
+    {
+      "id": "98e07605e6e2555-20e906f18aa683d",
+      "title": "Dispatcher tag-scoped policy / dispatches only for rules with the matching routing tag, not a matching rule tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 1735,
+        "column": 29
+      }
+    },
+    {
+      "id": "98e07605e6e2555-21a5af82115b934",
+      "title": "Dispatcher multiple policies / produces one fire per matching policy when the same episode matches both",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 1794,
+        "column": 23
+      }
+    },
+    {
+      "id": "98e07605e6e2555-e8f512cc4896cca",
+      "title": "Dispatcher lookback window / does not dispatch events older than the dispatcher lookback window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 1849,
+        "column": 7
+      }
+    },
+    {
+      "id": "98e07605e6e2555-94f2614f2eba907",
+      "title": "Dispatcher snoozed policy / does not dispatch when the action policy is snoozed until a future time",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 1872,
+        "column": 24
+      }
+    },
+    {
+      "id": "98e07605e6e2555-31a5b5e249000f9",
+      "title": "Dispatcher missing destination / still records fire and notified actions when the destination workflow does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 1913,
+        "column": 14
+      }
+    },
+    {
+      "id": "98e07605e6e2555-497da19176376ab",
+      "title": "Dispatcher writes a throttled-policy suppress record when on_status_change holds back an episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 1948,
+        "column": 7
+      }
+    },
+    {
+      "id": "98e07605e6e2555-5a5180678e1b4aa",
+      "title": "Dispatcher writes an `unmatched` action record when no policy matches the rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 1826,
+        "column": 27
+      }
+    },
+    {
+      "id": "98e07605e6e2555-a519d776f8731e1",
+      "title": "Dispatcher dispatches external alerts (source-based episodes with no rule_id)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 1862,
+        "column": 27
+      }
+    },
+    {
+      "id": "a1b7f8c5e8a3cf5-ebf10327abcc16d",
+      "title": "Unset alerting:v2:enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
+      }
+    }
+  ]
+}
