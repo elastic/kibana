@@ -120,6 +120,7 @@ const DEFAULT_SEARCH_FIELDS = [
 
 export const DEFAULT_FROM_DATE = 'now-30d';
 export const DEFAULT_TO_DATE = 'now';
+export const ALL_CASES_FROM_DATE = '1970-01-01T00:00:00.000Z';
 
 // TODO: Remove reporters. Move searchFields to API.
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
