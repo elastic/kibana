@@ -289,6 +289,8 @@ export function createEvaluatePersonaMatrixDataset({
       trajectoryEvaluator,
       createUnclassifiedToolsEvaluator({
         extractToolCalls: getAgentBuilderToolCalls,
+        goldenPathExtractor: (expected) =>
+          (expected as PersonaMatrixDatasetExpected | undefined)?.tool_sequence ?? [],
         classifyTool,
       }),
       expectedToolCalledEvaluator,
