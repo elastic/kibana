@@ -5,18 +5,9 @@
  * 2.0.
  */
 
-import type { EntityStoreEuid } from '@kbn/entity-store/public';
 import { buildAlertEuidPipeline } from './alert_euid_pipeline';
 
-const mockEuid = {
-  esql: {
-    getFieldEvaluations: () => undefined,
-    getEuidEvaluation: (_type: string, varName: string) => `${varName} = "mock_euid"`,
-  },
-} as unknown as EntityStoreEuid;
-
-const pipelineText = (euid: EntityStoreEuid = mockEuid): string =>
-  buildAlertEuidPipeline(euid).join('\n');
+const pipelineText = (): string => buildAlertEuidPipeline().join('\n');
 
 describe('buildAlertEuidPipeline', () => {
   it('FORKs stamped alerts away from EUID derivation', () => {
@@ -34,34 +25,24 @@ describe('buildAlertEuidPipeline', () => {
     expect(stampedEnd).toBeGreaterThan(-1);
     const stamped = query.slice(0, stampedEnd);
     const derived = query.slice(stampedEnd);
-    expect(stamped).not.toContain('user_euid = "mock_euid"');
-    expect(derived).toContain('user_euid = "mock_euid"');
-    expect(derived).toContain('host_euid = "mock_euid"');
-    expect(derived).toContain('service_euid = "mock_euid"');
-    expect(derived).toContain('MV_APPEND(MV_APPEND(user_euid, host_euid), service_euid)');
+    expect(stamped).not.toContain('user_euid =');
+    expect(derived).toContain('user_euid =');
+    expect(derived).toContain('host_euid =');
+    expect(derived).toContain('service_euid =');
+    expect(derived).toContain('_ea_entity_id = MV_DEDUPE(MV_APPEND(MV_APPEND(');
   });
 
   it('expands _ea_entity_id, filters nulls, deduplicates, then renames to entity.id for the JOIN', () => {
-    const pipeline = buildAlertEuidPipeline(mockEuid);
+    const pipeline = buildAlertEuidPipeline();
     expect(pipeline).toContain('| MV_EXPAND _ea_entity_id');
     expect(pipeline).toContain('| WHERE _ea_entity_id IS NOT NULL');
-    expect(pipeline).toContain('| STATS BY _ea_entity_id');
+    expect(pipeline).toContain('| STATS has_severe_alert = MAX(is_severe_alert) BY _ea_entity_id');
     expect(pipeline).toContain('| RENAME _ea_entity_id AS `entity.id`');
   });
 
-  it('includes optional field evaluation EVALs when the euid provides them', () => {
-    const euidWithFieldEvals = {
-      esql: {
-        getFieldEvaluations: (type: string) =>
-          type === 'user' ? 'user.namespace = user.domain' : undefined,
-        getEuidEvaluation: (_type: string, varName: string) => `${varName} = "mock_euid"`,
-      },
-    } as unknown as EntityStoreEuid;
-
-    expect(pipelineText(euidWithFieldEvals)).toContain('| EVAL user.namespace = user.domain');
-  });
-
-  it('does not include a field evaluation EVAL when getFieldEvaluations returns undefined', () => {
-    expect(pipelineText()).not.toContain('user.namespace');
+  it('evaluates the fields the EUIDs read before the EUIDs', () => {
+    const derived = pipelineText().split('WHERE `kibana.alert.entity.id` IS NULL')[1];
+    expect(derived.indexOf('_src_entity_source0 =')).toBeGreaterThan(-1);
+    expect(derived.indexOf('_src_entity_source0 =')).toBeLessThan(derived.indexOf('user_euid ='));
   });
 });
