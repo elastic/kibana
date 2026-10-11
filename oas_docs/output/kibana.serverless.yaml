@@ -169899,6 +169899,9 @@ components:
       properties:
         keepPoliciesUpToDate:
           type: boolean
+        logsdb_columnar:
+          description: Store the logs data streams of this integration in the logsdb_columnar index mode. Only accepted when at least one logs data stream of the installed package declares columnar readiness. Takes effect on the next rollover.
+          type: boolean
         namespace_customization_enabled_for:
           description: Namespaces for which namespace-level customization is enabled on this package.
           items:

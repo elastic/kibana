@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
@@ -15,11 +17,22 @@ jest.mock('./get', () => ({
   getInstallationObject: jest.fn(),
   getPackageInfo: jest.fn(),
 }));
+jest.mock('./update_logsdb_columnar', () => {
+  const actual = jest.requireActual('./update_logsdb_columnar');
+  return {
+    ...actual,
+    getInstalledPackageOrThrow: jest.fn(),
+    applyLogsdbColumnarIndexMode: jest.fn(),
+  };
+});
 jest.mock('../../audit_logging', () => ({
   auditLoggingService: { writeCustomSoAuditLog: jest.fn() },
 }));
 
 const { getInstallationObject, getPackageInfo } = jest.requireMock('./get');
+const { getInstalledPackageOrThrow, applyLogsdbColumnarIndexMode } = jest.requireMock(
+  './update_logsdb_columnar'
+);
 
 const pendingReview = {
   target_version: '2.0.0',
@@ -270,5 +283,86 @@ describe('updatePackage', () => {
     expect(soClient.update).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, 'test-pkg', {
       keep_policies_up_to_date: true,
     });
+  });
+});
+
+describe('updatePackage — logsdb_columnar', () => {
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const logger = loggerMock.create();
+
+  const readyPackageInfo = {
+    name: 'test-pkg',
+    elasticsearch: { logsdb_columnar: 'opt_in' },
+    data_streams: [{ type: 'logs', dataset: 'test-pkg.ds', elasticsearch: {} }],
+  };
+
+  const mockInstallation = (attributes: Record<string, unknown> = {}) => {
+    getInstallationObject.mockResolvedValueOnce({
+      id: 'test-pkg',
+      attributes: { name: 'test-pkg', version: '1.0.0', ...attributes },
+    });
+    getPackageInfo.mockResolvedValueOnce({});
+  };
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('persists the choice and applies it to Elasticsearch', async () => {
+    const soClient = savedObjectsClientMock.create();
+    mockInstallation();
+    getInstalledPackageOrThrow.mockResolvedValueOnce({ packageInfo: readyPackageInfo });
+
+    await updatePackage({
+      savedObjectsClient: soClient,
+      esClient,
+      logger,
+      pkgName: 'test-pkg',
+      logsdb_columnar: true,
+    });
+
+    expect(soClient.update).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, 'test-pkg', {
+      logsdb_columnar_enabled: true,
+    });
+    expect(applyLogsdbColumnarIndexMode).toHaveBeenCalledWith(
+      expect.objectContaining({ pkgName: 'test-pkg', enabled: true })
+    );
+  });
+
+  it('does nothing when the choice is unchanged', async () => {
+    const soClient = savedObjectsClientMock.create();
+    mockInstallation({ logsdb_columnar_enabled: true });
+
+    await updatePackage({
+      savedObjectsClient: soClient,
+      esClient,
+      logger,
+      pkgName: 'test-pkg',
+      logsdb_columnar: true,
+    });
+
+    expect(getInstalledPackageOrThrow).not.toHaveBeenCalled();
+    expect(applyLogsdbColumnarIndexMode).not.toHaveBeenCalled();
+  });
+
+  it('rejects enabling when no logs data stream is ready, before anything is written', async () => {
+    const soClient = savedObjectsClientMock.create();
+    mockInstallation();
+    getInstalledPackageOrThrow.mockResolvedValueOnce({
+      packageInfo: { name: 'test-pkg', data_streams: [{ type: 'logs', dataset: 'x' }] },
+    });
+
+    await expect(
+      updatePackage({
+        savedObjectsClient: soClient,
+        esClient,
+        logger,
+        pkgName: 'test-pkg',
+        logsdb_columnar: true,
+      })
+    ).rejects.toThrow(/has no logs data stream that declares readiness/);
+
+    expect(soClient.update).not.toHaveBeenCalled();
+    expect(applyLogsdbColumnarIndexMode).not.toHaveBeenCalled();
   });
 });

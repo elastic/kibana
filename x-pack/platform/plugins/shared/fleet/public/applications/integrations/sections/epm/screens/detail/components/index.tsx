@@ -12,5 +12,6 @@ export { UpdateIcon } from './update_icon';
 export { IntegrationPolicyCount } from './integration_policy_count';
 export { IconPanel, LoadingIconPanel, MiniIcon } from './icon_panel';
 export { KeepPoliciesUpToDateSwitch } from './keep_policies_up_to_date_switch';
+export { ColumnarIndexModeSwitch } from './columnar_index_mode_switch';
 export { NamespaceCustomizationSection } from './namespace_customization_section';
 export { BidirectionalIntegrationsBanner } from './bidirectional_integrations_callout';

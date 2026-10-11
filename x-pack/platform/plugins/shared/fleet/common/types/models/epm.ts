@@ -200,6 +200,12 @@ interface RegistryAdditionalProperties {
     privileges?: {
       cluster?: string[];
     };
+    /**
+     * Package-level columnar readiness for the `logsdb_columnar` index mode (package-spec
+     * 3.7.0). Applies to every `type: logs` data stream of the package unless the data stream
+     * overrides it with its own `elasticsearch.logsdb_columnar`. Absent means not ready.
+     */
+    logsdb_columnar?: Exclude<LogsdbColumnarReadiness, 'unsupported'>;
   };
 }
 interface RegistryOverridePropertyValue {
@@ -539,6 +545,16 @@ export interface RegistryAgent {
   privileges?: { root?: boolean };
 }
 
+/**
+ * Columnar readiness declared by a package (package-spec 3.7.0, `elasticsearch.logsdb_columnar`).
+ *
+ * - `opt_in`: compatible; Fleet offers a per-integration opt-in and LogsDB stays in effect until
+ *   the user opts in.
+ * - `default`: new installations use `logsdb_columnar` by default; the user can opt out.
+ * - `unsupported`: data-stream level only; the data stream must stay on LogsDB.
+ */
+export type LogsdbColumnarReadiness = 'opt_in' | 'default' | 'unsupported';
+
 export interface RegistryElasticsearch {
   privileges?: RegistryDataStreamPrivileges;
   'index_template.settings'?: estypes.IndicesIndexSettings;
@@ -547,6 +563,13 @@ export interface RegistryElasticsearch {
   'ingest_pipeline.name'?: string;
   source_mode?: 'default' | 'synthetic';
   index_mode?: 'time_series';
+  /**
+   * Data-stream-level columnar readiness from `data_stream/<ds>/manifest.yml` (package-spec
+   * 3.7.0). Overrides the package-level `elasticsearch.logsdb_columnar` value; absent at both
+   * levels means the data stream is not ready for the `logsdb_columnar` index mode.
+   * Only meaningful on `type: logs` data streams and only when `index_mode` is unset.
+   */
+  logsdb_columnar?: LogsdbColumnarReadiness;
   dynamic_dataset?: boolean;
   dynamic_namespace?: boolean;
 }
@@ -866,6 +889,13 @@ export interface Installation {
   is_dependency_of?: IsDependencyOf | null;
   /** Whether the package was installed as a dependency (not manually by a user) */
   installed_as_dependency?: boolean;
+  /**
+   * The user's choice for the `logsdb_columnar` index mode, stored once per installation and
+   * applied to every logs data stream of the package that declares columnar readiness.
+   * `undefined` means the user has not chosen; the package's `default` readiness then applies
+   * to new installations only.
+   */
+  logsdb_columnar_enabled?: boolean;
   /** Namespaces opted in for namespace-level customization for this package. */
   namespace_customization_enabled_for?: string[];
   /** Per-namespace managed settings (e.g. ILM policy) for this package. */

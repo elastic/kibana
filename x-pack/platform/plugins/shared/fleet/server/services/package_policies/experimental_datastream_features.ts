@@ -188,6 +188,9 @@ export async function handleExperimentalDatastreamFeatureOptIn({
         name: componentTemplateName,
         ...body,
         _meta: {
+          // Keep the package metadata (managed_by, package name, …) that the installer wrote;
+          // a bare `_meta` here would drop it and make the template look unmanaged.
+          ...(componentTemplate._meta ?? {}),
           has_experimental_data_stream_indexing_features: hasExperimentalDataStreamIndexingFeatures,
         },
       });
@@ -225,6 +228,8 @@ export async function handleExperimentalDatastreamFeatureOptIn({
         name: featureMapEntry.data_stream,
         ...indexTemplateBody,
         _meta: {
+          // Same as for the component template above: preserve the existing package metadata.
+          ...(indexTemplateBody._meta ?? {}),
           has_experimental_data_stream_indexing_features: featureMapEntry.features.tsdb,
         },
         // GET brings string | string[] | undefined but this PUT expects string[]
@@ -246,7 +251,10 @@ export async function handleExperimentalDatastreamFeatureOptIn({
       await updateCurrentWriteIndices(
         esClient,
         appContextService.getLogger(),
-        updatedIndexTemplates
+        updatedIndexTemplates,
+        // Opting out of TSDB resets the template mode to the cluster default; the write index
+        // keeps `time_series` until it is rolled over, so ask for the rollover explicitly.
+        { rolloverOnIndexModeReset: true }
       );
     } catch (err) {
       if (isTotalFieldsLimitError(err)) {

@@ -84,6 +84,7 @@ export function getTemplate({
   hidden,
   registryElasticsearch,
   isIndexModeTimeSeries,
+  indexMode,
   type,
   isOtelInputType,
 }: {
@@ -95,6 +96,7 @@ export function getTemplate({
   hidden?: boolean;
   registryElasticsearch?: RegistryElasticsearch | undefined;
   isIndexModeTimeSeries?: boolean;
+  indexMode?: string;
   isOtelInputType?: boolean;
 }): IndexTemplate {
   const template = getBaseTemplate({
@@ -105,6 +107,7 @@ export function getTemplate({
     registryElasticsearch,
     hidden,
     isIndexModeTimeSeries,
+    indexMode,
   });
   if (template.template.settings.index.final_pipeline) {
     throw new PackageInvalidArchiveError(
@@ -337,6 +340,7 @@ function getBaseTemplate({
   hidden,
   registryElasticsearch,
   isIndexModeTimeSeries,
+  indexMode,
 }: {
   templateIndexPattern: string;
   packageName: string;
@@ -345,6 +349,7 @@ function getBaseTemplate({
   hidden?: boolean;
   registryElasticsearch: RegistryElasticsearch | undefined;
   isIndexModeTimeSeries?: boolean;
+  indexMode?: string;
 }): IndexTemplate {
   const _meta = getESAssetMetadata({ packageName });
 
@@ -352,6 +357,10 @@ function getBaseTemplate({
   if (isIndexModeTimeSeries) {
     settingsIndex = {
       mode: 'time_series',
+    };
+  } else if (indexMode) {
+    settingsIndex = {
+      mode: indexMode,
     };
   }
 
@@ -381,6 +390,7 @@ export const updateCurrentWriteIndices = async (
   options?: {
     ignoreMappingUpdateErrors?: boolean;
     skipDataStreamRollover?: boolean;
+    rolloverOnIndexModeReset?: boolean;
   }
 ): Promise<void> => {
   if (!templates.length) return;
@@ -442,6 +452,12 @@ const getDataStreams = async (
     currentWriteIndex: dataStream.indices?.at(-1)?.index_name,
   }));
 };
+
+// Index modes Fleet writes explicitly to `settings.index.mode`; they are only ever present on a
+// write index because a toggle or the package manifest put them there, never because of a
+// cluster default. That is what makes it safe to roll over when the template no longer declares
+// a mode: the write index is still on a mode that nothing asks for anymore.
+const TOGGLEABLE_INDEX_MODES: string[] = ['time_series', 'logsdb_columnar'];
 
 const MAPPER_EXCEPTION_REASONS_REQUIRING_ROLLOVER = [
   'subobjects',
@@ -595,6 +611,7 @@ const updateAllDataStreams = async (
   options?: {
     ignoreMappingUpdateErrors?: boolean;
     skipDataStreamRollover?: boolean;
+    rolloverOnIndexModeReset?: boolean;
   }
 ): Promise<void> => {
   const concurrency =
@@ -631,6 +648,7 @@ const updateExistingDataStream = async ({
   options?: {
     ignoreMappingUpdateErrors?: boolean;
     skipDataStreamRollover?: boolean;
+    rolloverOnIndexModeReset?: boolean;
   };
 }) => {
   const existingDs = await esClient.indices.get({
@@ -759,9 +777,20 @@ const updateExistingDataStream = async ({
   const packageDefinedIndexMode = settings?.index?.mode;
   const packageDefinedSourceMode = settings?.index?.mapping?.source?.mode;
 
+  // When the template declares no mode the cluster default applies at index creation, so a
+  // mismatch with the current write index is normal (e.g. logsdb by default) and must not roll
+  // over. The exception is an explicit opt-out of a toggleable mode: the write index still has
+  // the old mode while the template reset to the default, and only a rollover can switch it.
+  const indexModeChanged =
+    packageDefinedIndexMode !== undefined
+      ? currentIndexMode !== packageDefinedIndexMode
+      : options?.rolloverOnIndexModeReset === true &&
+        currentIndexMode !== undefined &&
+        TOGGLEABLE_INDEX_MODES.includes(currentIndexMode);
+
   // Trigger a rollover if the index mode or source type has changed
   if (
-    (packageDefinedIndexMode !== undefined && currentIndexMode !== settings?.index?.mode) ||
+    indexModeChanged ||
     (packageDefinedSourceMode !== undefined &&
       currentSourceType !== settings?.index?.mapping?.source?.mode) ||
     dynamicDimensionMappingsChanged

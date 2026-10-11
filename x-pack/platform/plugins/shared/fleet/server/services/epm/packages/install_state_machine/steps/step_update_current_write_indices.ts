@@ -20,6 +20,11 @@ export async function stepUpdateCurrentWriteIndices(context: InstallContext) {
     updateCurrentWriteIndices(esClient, logger, indexTemplates || [], {
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
+      // The install may have removed an index mode Fleet manages (`time_series`,
+      // `logsdb_columnar`) from a data stream's index template — because the package dropped it,
+      // or because the data stream is now marked unsupported for logsdb_columnar. The write
+      // index keeps the old mode until it is rolled over, so ask for the rollover explicitly.
+      rolloverOnIndexModeReset: true,
     })
   );
 }

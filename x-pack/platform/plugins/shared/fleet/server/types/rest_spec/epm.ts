@@ -895,6 +895,14 @@ export const UpdatePackageRequestSchema = {
         })
       ),
       namespace_customization_settings: schema.maybe(NamespaceCustomizationSettingsSchema),
+      logsdb_columnar: schema.maybe(
+        schema.boolean({
+          meta: {
+            description:
+              'Store the logs data streams of this integration in the logsdb_columnar index mode. Only accepted when at least one logs data stream of the installed package declares columnar readiness. Takes effect on the next rollover.',
+          },
+        })
+      ),
     },
     { meta: { id: 'update_package_request' } }
   ),

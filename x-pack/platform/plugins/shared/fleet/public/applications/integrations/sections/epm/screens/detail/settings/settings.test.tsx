@@ -89,6 +89,29 @@ jest.mock('../components', () => {
   const MockReact = jest.requireActual('react');
   return {
     KeepPoliciesUpToDateSwitch: () => null,
+    ColumnarIndexModeSwitch: ({
+      checked,
+      onChange,
+      unsupportedDataStreams,
+    }: {
+      checked: boolean;
+      onChange: () => void;
+      unsupportedDataStreams?: string[];
+    }) =>
+      MockReact.createElement(
+        'div',
+        null,
+        MockReact.createElement(
+          'button',
+          { 'data-test-subj': 'mock-columnar-switch', onClick: onChange },
+          checked ? 'on' : 'off'
+        ),
+        MockReact.createElement(
+          'div',
+          { 'data-test-subj': 'mock-columnar-unsupported' },
+          (unsupportedDataStreams ?? []).join(', ')
+        )
+      ),
     NamespaceCustomizationSection: ({
       savedNamespaces,
       onSave,
@@ -271,6 +294,104 @@ describe('SettingsPage', () => {
       // Should show version info instead of install section
       expect(result.getByText('Installed version')).toBeInTheDocument();
       expect(result.queryByTestId('installPermissionCallout')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('columnar index mode switch', () => {
+    const installedWithReadiness = (
+      overrides: Partial<PackageInfo> = {},
+      installationOverrides: Record<string, unknown> = {}
+    ) =>
+      ({
+        ...basePackageInfo,
+        status: 'installed',
+        elasticsearch: { logsdb_columnar: 'opt_in' },
+        data_streams: [
+          { type: 'logs', dataset: 'nginx.access', elasticsearch: {} },
+          {
+            type: 'logs',
+            dataset: 'nginx.error',
+            elasticsearch: { logsdb_columnar: 'unsupported' },
+          },
+        ],
+        installationInfo: {
+          version: '1.3.0',
+          install_source: 'registry',
+          install_status: 'installed',
+          verification_status: 'verified',
+          verification_key_id: null,
+          installed_kibana: [],
+          installed_es: [],
+          type: 'epm-package',
+          name: 'nginx',
+          ...installationOverrides,
+        },
+        ...overrides,
+      } as unknown as PackageInfo);
+
+    beforeEach(() => {
+      mockUseGetPackageInstallStatus.mockReturnValue(() => ({
+        status: InstallStatus.installed,
+        version: '1.3.0',
+      }));
+      mockUseAuthz.mockReturnValue({
+        fleet: { readSettings: true },
+        integrations: { installPackages: true, writePackageSettings: true },
+      });
+    });
+
+    it('is shown when a logs data stream declares readiness, with the unsupported ones listed', () => {
+      const result = renderComponent(installedWithReadiness());
+
+      expect(result.getByTestId('mock-columnar-switch')).toHaveTextContent('off');
+      expect(result.getByTestId('mock-columnar-unsupported')).toHaveTextContent('nginx.error');
+    });
+
+    it('reflects the stored installation-level choice', () => {
+      const result = renderComponent(installedWithReadiness({}, { logsdb_columnar_enabled: true }));
+
+      expect(result.getByTestId('mock-columnar-switch')).toHaveTextContent('on');
+    });
+
+    it('is hidden when no logs data stream declares readiness', () => {
+      const result = renderComponent(
+        installedWithReadiness({
+          elasticsearch: undefined,
+          data_streams: [{ type: 'logs', dataset: 'nginx.access', elasticsearch: {} }],
+        } as unknown as Partial<PackageInfo>)
+      );
+
+      expect(result.queryByTestId('mock-columnar-switch')).not.toBeInTheDocument();
+    });
+
+    it('is hidden when the integration is not installed', () => {
+      mockUseGetPackageInstallStatus.mockReturnValue(() => ({
+        status: InstallStatus.notInstalled,
+        version: null,
+      }));
+
+      const result = renderComponent(
+        installedWithReadiness({ status: 'not_installed', installationInfo: undefined } as any)
+      );
+
+      expect(result.queryByTestId('mock-columnar-switch')).not.toBeInTheDocument();
+    });
+
+    it('sends the new value to the update package API', () => {
+      const mutate = jest.fn();
+      jest.mocked(useUpdatePackageMutation).mockReturnValue({ mutate, isLoading: false } as any);
+
+      const result = renderComponent(installedWithReadiness());
+      fireEvent.click(result.getByTestId('mock-columnar-switch'));
+
+      expect(mutate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pkgName: 'nginx',
+          pkgVersion: '1.3.0',
+          body: { logsdb_columnar: true },
+        }),
+        expect.anything()
+      );
     });
   });
 
