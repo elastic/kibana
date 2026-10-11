@@ -184,12 +184,47 @@ const redactUpstreamSecrets = (text: string): string =>
       '$1[redacted]'
     );
 
+// Keys are compared lower-cased with `-`, `_` and whitespace removed, so `api_key`, `apiKey` and
+// `API-Key` (and `access_token` / `accessToken`, `client_secret` / `clientSecret`, ...) all match.
+const isSensitiveKey = (key: string): boolean => {
+  const normalized = key.toLowerCase().replace(/[-_\s]/g, '');
+  return (
+    normalized === 'authorization' ||
+    normalized === 'passwd' ||
+    normalized === 'credential' ||
+    normalized === 'credentials' ||
+    normalized.includes('apikey') ||
+    normalized.includes('secret') ||
+    normalized.includes('privatekey') ||
+    normalized.endsWith('password') ||
+    normalized.endsWith('token')
+  );
+};
+
+// Replaces the WHOLE value (scalar, object or array) of a sensitive key. The text based patterns
+// in `redactUpstreamSecrets` only consume a scalar value and leak the rest of a non-scalar one.
+const redactSensitiveKeysReplacer = (key: string, value: unknown): unknown =>
+  key !== '' && value !== null && value !== undefined && isSensitiveKey(key) ? '[redacted]' : value;
+
+const stringifyStructured = (value: unknown): string | undefined =>
+  JSON.stringify(value, redactSensitiveKeysReplacer);
+
 const stringifyUpstreamBody = (body: unknown): string => {
   if (body === undefined || body === null) return '';
-  if (typeof body === 'string') return body;
-  if (Buffer.isBuffer(body)) return body.toString('utf8');
+  if (typeof body === 'string' || Buffer.isBuffer(body)) {
+    const text = typeof body === 'string' ? body : body.toString('utf8');
+    const trimmed = text.trimStart();
+    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+      try {
+        return stringifyStructured(JSON.parse(text)) ?? text;
+      } catch (e) {
+        // not (complete) JSON: the text based redaction handles it
+      }
+    }
+    return text;
+  }
   try {
-    return JSON.stringify(body) ?? '';
+    return stringifyStructured(body) ?? '';
   } catch (e) {
     return String(body);
   }

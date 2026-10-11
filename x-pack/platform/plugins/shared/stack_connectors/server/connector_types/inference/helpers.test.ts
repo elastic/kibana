@@ -268,3 +268,54 @@ describe('error message boundaries and redaction', () => {
     expect(result).toContain('[redacted]');
   });
 });
+
+describe('structured redaction of non-scalar secret values', () => {
+  it.each([
+    ['object value', { password: { inner: 'hunter2' } }, 'hunter2'],
+    ['array value', { credential: ['s3cr3t'] }, 's3cr3t'],
+    ['deeply nested object value', { error: { api_key: { value: 'k-abc' } } }, 'k-abc'],
+    ['token object value', { token: { t: 'xyz' } }, 'xyz'],
+    ['camelCase key', { clientSecret: { id: 'cs-123' } }, 'cs-123'],
+    ['case-insensitive key', { Authorization: { scheme: 'Basic', v: 'dXNlcjpw' } }, 'dXNlcjpw'],
+    ['secret nested in an array', { errors: [{ refresh_token: { v: 'rt-9' } }] }, 'rt-9'],
+    ['top-level array body', [{ password: ['pw-1', 'pw-2'] }], 'pw-2'],
+  ])('redacts %s from object bodies', (_name, body, secret) => {
+    expect(truncateUpstreamBody(body)).not.toContain(secret);
+    expect(truncateUpstreamBody(body)).toContain('[redacted]');
+    expect(
+      buildInferenceErrorMessage({ message: 'failed', response: { data: body } })
+    ).not.toContain(secret);
+  });
+
+  it.each([
+    ['{"password":{"inner":"hunter2"}}', 'hunter2'],
+    ['{"credential":["s3cr3t"]}', 's3cr3t'],
+    ['{"error":{"api_key":{"value":"k-abc"}}}', 'k-abc'],
+    ['{"token":{"t":"xyz"}}', 'xyz'],
+    ['[{"secret":{"a":["deep-secret"]}}]', 'deep-secret'],
+  ])('redacts non-scalar secrets from JSON string body %s', (body, secret) => {
+    expect(truncateUpstreamBody(body)).not.toContain(secret);
+    expect(buildInferenceErrorMessage({ message: 'failed', body })).not.toContain(secret);
+  });
+
+  it('redacts non-scalar secrets from Buffer bodies', () => {
+    const body = Buffer.from('{"password":{"inner":"hunter2"},"detail":"bad request"}');
+    const result = truncateUpstreamBody(body);
+    expect(result).not.toContain('hunter2');
+    expect(result).toContain('bad request');
+  });
+
+  it('keeps non-sensitive siblings intact', () => {
+    const result = truncateUpstreamBody({
+      error: { type: 'invalid_request', max_tokens: 10, password: { a: 'b' } },
+    });
+    expect(result).toContain('invalid_request');
+    expect(result).toContain('"max_tokens":10');
+  });
+
+  it('still redacts non-JSON and truncated text through the regex path', () => {
+    expect(truncateUpstreamBody('upstream said password: hunter2 sorry')).not.toContain('hunter2');
+    expect(truncateUpstreamBody('{"password":"hunter2","detail":"cut o')).not.toContain('hunter2');
+    expect(truncateUpstreamBody('Bearer abc.def.ghi failed')).not.toContain('abc.def.ghi');
+  });
+});
