@@ -8,6 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '@kbn/evals';
+import { createAgentBuilderToolClassifier } from '@kbn/evals';
 import {
   internalTools,
   isAttachmentTool,
@@ -168,6 +169,15 @@ type ScoreFn = (t: Extract<Trajectory, { available: true }>) => {
   metadata: Record<string, unknown>;
 };
 
+const classifyTool = createAgentBuilderToolClassifier();
+
+/**
+ * The call order check reads skill loads and attachment tools, so those stay in the scored
+ * sequence; other Agent Builder runtime tools (todos, sleep, ...) are dropped.
+ */
+const isUsedByCallOrder = (name: string) =>
+  name === internalTools.loadSkill || isAttachmentTool(name);
+
 const trajectoryEvaluator = (
   name: string,
   fetchTrajectory: ReturnType<typeof createTrajectoryFetcher>,
@@ -195,7 +205,21 @@ const trajectoryEvaluator = (
         metadata: { incomplete: true, toolNames, agentTraceId: trajectory.agentTraceId },
       };
     }
-    const { score, explanation, metadata } = scoreFn(trajectory);
+    const unclassifiedToolIds = [
+      ...new Set(toolNames.filter((tool) => classifyTool({ id: tool }) === 'unclassified')),
+    ];
+    if (unclassifiedToolIds.length > 0) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: `unclassified-tool:${unclassifiedToolIds.join(',')}`,
+        metadata: { unclassifiedToolIds, toolNames, agentTraceId: trajectory.agentTraceId },
+      };
+    }
+    const calls = trajectory.calls.filter(
+      (call) => isUsedByCallOrder(call.name) || classifyTool({ id: call.name }) !== 'runtime'
+    );
+    const { score, explanation, metadata } = scoreFn({ ...trajectory, calls });
     return {
       score,
       label: undefined,

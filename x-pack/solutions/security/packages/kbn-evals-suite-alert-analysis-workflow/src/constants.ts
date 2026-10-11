@@ -40,20 +40,3 @@ export const EVAL_TAG_PREFIX = 'eval-alert-analysis';
 export const CLASSIFICATIONS = ['true_positive', 'false_positive', 'inconclusive'] as const;
 
 export type Classification = (typeof CLASSIFICATIONS)[number];
-
-/**
- * Tool ids the agent-builder runtime injects into every agent run regardless of the
- * workflow's `tools: []` override (`createVersionedAttachmentTools` in agent_builder's
- * `select_tools.ts`). They mirror the internal ids in `@kbn/agent-builder-common`
- * (`attachmentTools.*`, `internalTools.writeTodos`) and are inlined to keep this package free
- * of a runtime dependency on agent-builder. They are not domain tool use, so the zero-tool
- * trajectory guardrail must not count them.
- */
-export const HARNESS_TOOL_IDS: readonly string[] = [
-  'attachments.read',
-  'attachments.update',
-  'attachments.add',
-  'attachments.list',
-  'attachments.diff',
-  'write_todos',
-];

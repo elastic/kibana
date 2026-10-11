@@ -41,6 +41,8 @@ dependsOn:
   - '@kbn/license-api-guard-plugin'
   - '@kbn/esql-language'
   - '@kbn/esql-utils'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/analytics'
 tags:
   - plugin
   - prod

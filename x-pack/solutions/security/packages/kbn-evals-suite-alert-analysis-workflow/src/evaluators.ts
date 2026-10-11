@@ -6,9 +6,15 @@
  */
 
 import type { Evaluator } from '@kbn/evals';
-import { createTrajectoryEvaluator } from '@kbn/evals';
-import { CLASSIFICATIONS, HARNESS_TOOL_IDS, type Classification } from './constants';
+import {
+  createAgentBuilderToolClassifier,
+  createTrajectoryEvaluator,
+  createUnclassifiedToolsEvaluator,
+} from '@kbn/evals';
+import { CLASSIFICATIONS, type Classification } from './constants';
 import type { AlertAnalysisVerdict } from './workflow_task';
+
+const classifyTool = createAgentBuilderToolClassifier();
 
 interface ExpectedVerdict {
   classification: Classification;
@@ -80,16 +86,16 @@ export const validVerdict: Evaluator = {
 
 /**
  * L2 guardrail: the workflow pre-builds context, so the `ai.agent` step should not call tools.
- * Golden path is empty; any domain tool call fails trajectory. Runtime-injected harness tools
- * (`attachments.*`, `write_todos`) are not exposed by the workflow and are ignored.
+ * Golden path is empty; any tool call fails trajectory, except Agent Builder runtime tools
+ * (attachments, todos, ...). An unknown tool makes the result N/A.
  */
 export const createAlertAnalysisTrajectoryEvaluator = (): Evaluator => {
   const inner = createTrajectoryEvaluator({
-    extractToolCalls: (output) =>
-      (asVerdict(output).toolCallIds ?? []).filter((id) => !HARNESS_TOOL_IDS.includes(id)),
+    extractToolCalls: (output) => asVerdict(output).toolCallIds ?? [],
     goldenPathExtractor: () => [],
     orderWeight: 1,
     coverageWeight: 0,
+    classifyTool,
   });
 
   return {
@@ -107,3 +113,10 @@ export const createAlertAnalysisTrajectoryEvaluator = (): Evaluator => {
     },
   };
 };
+
+/** Count of tools in the agent's trace that Agent Builder's classification cannot place. */
+export const createAlertAnalysisUnclassifiedToolsEvaluator = (): Evaluator =>
+  createUnclassifiedToolsEvaluator({
+    extractToolCalls: (output) => asVerdict(output).toolCallIds ?? [],
+    classifyTool,
+  });
