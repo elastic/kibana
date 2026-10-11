@@ -40,9 +40,7 @@ export const PausedActivityCallout = ({
       data-test-subj="significantEventsPausedBanner"
       title={getDetectionPausedCalloutTitle(status)}
       text={
-        partialFailuresDescription
-          ? `${description} ${partialFailuresDescription}`
-          : description
+        partialFailuresDescription ? `${description} ${partialFailuresDescription}` : description
       }
       actionProps={
         canManageAndConfigure && settingsHref
