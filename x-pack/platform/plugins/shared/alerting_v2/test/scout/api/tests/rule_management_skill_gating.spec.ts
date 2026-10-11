@@ -266,16 +266,22 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
         );
         expect(setResponse).toHaveStatusCode(200);
 
-        const response = await apiClient.get(`/s/${id}${SKILLS_API}`, {
-          headers,
-          responseType: 'json',
-        });
-        expect(response).toHaveStatusCode(200);
-
-        const skillIds = getSkillIds(response.body.results);
-        for (const skillId of ALERTING_V2_SKILL_IDS) {
-          expect(skillIds).toContain(skillId);
-        }
+        await expect
+          .poll(
+            async () => {
+              const response = await apiClient.get(`/s/${id}${SKILLS_API}`, {
+                headers,
+                responseType: 'json',
+              });
+              // Returned, not thrown: throwing inside expect.poll aborts polling instead of retrying.
+              if (response.statusCode !== 200) {
+                return `status ${response.statusCode}: ${JSON.stringify(response.body)}`;
+              }
+              return getSkillIds(response.body.results);
+            },
+            { timeout: SETTINGS_PROPAGATION_TIMEOUT, intervals: [1_000] }
+          )
+          .toStrictEqual(expect.arrayContaining(ALERTING_V2_SKILL_IDS));
       } finally {
         await apiServices.spaces.delete(id);
       }
