@@ -64,12 +64,23 @@ export class ToastsService extends FtrService {
     }
   }
 
-  public async getTitleAndDismiss(): Promise<string> {
-    const toast = await this.find.byCssSelector('.euiToast', 6 * this.defaultFindTimeout);
-    await toast.moveMouseTo();
-    const title = await (await this.testSubjects.find('euiToastHeader__title')).getVisibleText();
+  public async getTitleAndDismiss(toastSubject?: string): Promise<string> {
+    const { toast, title } = await this.retry.tryForTime(6 * this.defaultFindTimeout, async () => {
+      const toastElement = toastSubject
+        ? await this.testSubjects.find(toastSubject, this.defaultFindTimeout)
+        : await this.find.byCssSelector('.euiToast', this.defaultFindTimeout);
+      const toastTitle = await (
+        await toastElement.findByTestSubject('euiToastHeader__title')
+      ).getVisibleText();
+      if (!toastTitle.trim()) {
+        throw new Error('Toast title is not visible yet');
+      }
+      return { toast: toastElement, title: toastTitle };
+    });
 
-    await this.testSubjects.click('toastCloseButton');
+    await toast.moveMouseTo();
+    await (await toast.findByTestSubject('toastCloseButton')).click();
+    await this.find.waitForElementStale(toast, this.defaultFindTimeout);
     return title;
   }
 

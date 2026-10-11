@@ -527,7 +527,7 @@ export class VisualizePageObject extends FtrService {
 
     // Confirm that the Visualization has actually been saved
     await this.testSubjects.existOrFail('saveVisualizationSuccess');
-    const message = await this.toasts.getTitleAndDismiss();
+    const message = await this.toasts.getTitleAndDismiss('saveVisualizationSuccess');
     await this.common.waitForSaveModalToClose();
 
     return message;
