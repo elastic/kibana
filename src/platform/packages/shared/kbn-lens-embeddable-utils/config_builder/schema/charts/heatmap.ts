@@ -79,6 +79,12 @@ const heatmapStylingSchema = z
     description: 'Visual chart styling options',
   });
 
+const heatmapAxisTitleSchema = axisTitleSchema.extend({
+  visible: z.boolean().default(false).optional().meta({
+    description: 'When `true`, displays the title. Defaults to `false`.',
+  }),
+});
+
 const heatmapSharedConfigSchema = z.object({
   type: z.literal('heatmap'),
   legend: legendSchema.optional().meta({
@@ -92,7 +98,7 @@ const heatmapSharedConfigSchema = z.object({
     .object({
       x: z
         .object({
-          title: axisTitleSchema.optional(),
+          title: heatmapAxisTitleSchema.optional(),
           labels: labelsSchema.optional(),
           sort: heatmapSortPredicateSchema.optional(),
           scale: xScaleSchema,
@@ -106,7 +112,7 @@ const heatmapSharedConfigSchema = z.object({
         }),
       y: z
         .object({
-          title: axisTitleSchema.optional(),
+          title: heatmapAxisTitleSchema.optional(),
           labels: simpleLabelsSchema.optional(),
           sort: heatmapSortPredicateSchema.optional(),
         })
