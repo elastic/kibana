@@ -1,5 +1,5 @@
 {
-  "sha1": "3b03d7749db7bfa5863dfeaa6490b665051744c9",
+  "sha1": "971c8c00f693dfbb4f2cafbb6249af762dfd1654",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -52,8 +52,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 206,
-        "column": 23
+        "line": 213,
+        "column": 33
       }
     },
     {
@@ -65,8 +65,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 245,
-        "column": 46
+        "line": 253,
+        "column": 9
       }
     },
     {
@@ -78,8 +78,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 291,
-        "column": 18
+        "line": 300,
+        "column": 13
       }
     },
     {
@@ -91,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 352,
-        "column": 25
+        "line": 362,
+        "column": 17
       }
     },
     {
@@ -104,8 +104,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 371,
-        "column": 77
+        "line": 380,
+        "column": 15
       }
     },
     {
@@ -117,8 +117,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 430,
-        "column": 15
+        "line": 438,
+        "column": 9
       }
     },
     {
@@ -130,8 +130,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 485,
-        "column": 13
+        "line": 491,
+        "column": 52
       }
     },
     {
@@ -143,8 +143,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 546,
-        "column": 16
+        "line": 552,
+        "column": 41
       }
     },
     {
@@ -156,7 +156,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 584,
+        "line": 592,
         "column": 14
       }
     },
@@ -169,7 +169,20 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 634,
+        "line": 645,
+        "column": 9
+      }
+    },
+    {
+      "id": "50cd3300664bf57-613f3fc5b3e06b3",
+      "title": "Bulk episode actions API precondition: reports INVALID_ALERT_STATE_TRANSITION for an already acknowledged item",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 696,
         "column": 15
       }
     },
@@ -182,8 +195,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 686,
-        "column": 67
+        "line": 758,
+        "column": 68
       }
     },
     {
@@ -195,8 +208,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 696,
-        "column": 52
+        "line": 768,
+        "column": 12
+      }
+    },
+    {
+      "id": "50cd3300664bf57-a5f2b3ae7533c3d",
+      "title": "Bulk episode actions API schema: rejects items repeating an alert_id with 400 and writes nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 776,
+        "column": 23
       }
     },
     {
@@ -208,8 +234,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 705,
-        "column": 5
+        "line": 805,
+        "column": 11
       }
     },
     {
@@ -221,8 +247,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 715,
-        "column": 92
+        "line": 814,
+        "column": 12
       }
     },
     {
@@ -234,8 +260,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 727,
-        "column": 84
+        "line": 825,
+        "column": 12
       }
     },
     {
@@ -247,8 +273,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 736,
-        "column": 12
+        "line": 836,
+        "column": 54
       }
     },
     {
@@ -260,8 +286,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 752,
-        "column": 4
+        "line": 851,
+        "column": 12
       }
     },
     {
@@ -273,8 +299,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 766,
-        "column": 30
+        "line": 869,
+        "column": 14
       }
     },
     {
@@ -286,8 +312,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 782,
-        "column": 37
+        "line": 887,
+        "column": 24
       }
     },
     {
@@ -299,8 +325,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 798,
-        "column": 51
+        "line": 898,
+        "column": 43
       }
     },
     {
@@ -312,8 +338,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 809,
-        "column": 13
+        "line": 908,
+        "column": 4
       }
     },
     {
@@ -325,8 +351,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 819,
-        "column": 3
+        "line": 1076,
+        "column": 27
       }
     },
     {
@@ -338,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 971,
+        "line": 1091,
         "column": 27
       }
     },
@@ -351,7 +377,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 988,
+        "line": 1108,
         "column": 27
       }
     },
@@ -378,7 +404,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
         "line": 95,
-        "column": 25
+        "column": 23
       }
     },
     {
@@ -585,7 +611,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 35,
+        "line": 36,
         "column": 31
       }
     },
@@ -598,8 +624,34 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 65,
+        "line": 66,
         "column": 12
+      }
+    },
+    {
+      "id": "fc2b57b36f3106f-65a56e7f652ac16",
+      "title": "Create ack episode action API ack: a repeated ack returns 409 and writes no second action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 114,
+        "column": 9
+      }
+    },
+    {
+      "id": "fc2b57b36f3106f-903e64bccccc5ee",
+      "title": "Create ack episode action API ack: acking again after an unack returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 153,
+        "column": 9
       }
     },
     {
@@ -611,8 +663,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 113,
-        "column": 9
+        "line": 191,
+        "column": 27
       }
     },
     {
@@ -624,8 +676,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 124,
-        "column": 5
+        "line": 201,
+        "column": 16
       }
     },
     {
@@ -637,8 +689,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 133,
-        "column": 11
+        "line": 208,
+        "column": 98
       }
     },
     {
@@ -650,8 +702,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 137,
-        "column": 7
+        "line": 214,
+        "column": 12
       }
     },
     {
@@ -663,8 +715,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 147,
-        "column": 12
+        "line": 224,
+        "column": 5
       }
     },
     {
@@ -676,8 +728,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 157,
-        "column": 12
+        "line": 233,
+        "column": 61
       }
     },
     {
@@ -902,6 +954,45 @@
       }
     },
     {
+      "id": "f62e03a22ba2d1d-02e7c0c2a549b77",
+      "title": "Create assign episode action API assign: repeating the current assignee returns 409 and writes no second action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 106,
+        "column": 22
+      }
+    },
+    {
+      "id": "f62e03a22ba2d1d-5725e4faabbebaa",
+      "title": "Create assign episode action API assign: clearing the assignee of an unassigned alert returns 409",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 147,
+        "column": 29
+      }
+    },
+    {
+      "id": "f62e03a22ba2d1d-a7974c3858a157a",
+      "title": "Create assign episode action API assign: reinstating a cleared assignee returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 177,
+        "column": 15
+      }
+    },
+    {
       "id": "f62e03a22ba2d1d-a0c3238e64cc708",
       "title": "Create assign episode action API assign: audit actions work on old (superseded) episodes",
       "expectedStatus": "passed",
@@ -910,8 +1001,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 100,
-        "column": 22
+        "line": 220,
+        "column": 4
       }
     },
     {
@@ -923,8 +1014,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 151,
-        "column": 21
+        "line": 271,
+        "column": 74
       }
     },
     {
@@ -936,8 +1027,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 159,
-        "column": 22
+        "line": 278,
+        "column": 5
       }
     },
     {
@@ -949,8 +1040,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 171,
-        "column": 16
+        "line": 287,
+        "column": 12
       }
     },
     {
@@ -962,8 +1053,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 180,
-        "column": 14
+        "line": 296,
+        "column": 61
       }
     },
     {
@@ -975,8 +1066,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 188,
-        "column": 4
+        "line": 306,
+        "column": 13
       }
     },
     {
@@ -988,8 +1079,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 195,
-        "column": 12
+        "line": 315,
+        "column": 24
       }
     },
     {
@@ -1001,8 +1092,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 205,
-        "column": 9
+        "line": 324,
+        "column": 98
       }
     },
     {
@@ -1014,8 +1105,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 214,
-        "column": 29
+        "line": 331,
+        "column": 5
       }
     },
     {
@@ -1027,8 +1118,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 223,
-        "column": 29
+        "line": 342,
+        "column": 11
       }
     },
     {
@@ -1040,8 +1131,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 232,
-        "column": 41
+        "line": 349,
+        "column": 81
       }
     },
     {
@@ -1396,8 +1487,8 @@
       }
     },
     {
-      "id": "08995d5c2fad38e-b0b60061f48a124",
-      "title": "Create tag episode action API tag: accepts an empty tags array and returns 204",
+      "id": "08995d5c2fad38e-ba33912223e4b1e",
+      "title": "Create tag episode action API tag: an empty tags array clears the tags and returns 204",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1409,6 +1500,32 @@
       }
     },
     {
+      "id": "08995d5c2fad38e-c08dcfa6d44e9f2",
+      "title": "Create tag episode action API tag: repeating the current set returns 409 regardless of order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 112,
+        "column": 28
+      }
+    },
+    {
+      "id": "08995d5c2fad38e-765ef81123b5945",
+      "title": "Create tag episode action API tag: re-applying a cleared set returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 157,
+        "column": 95
+      }
+    },
+    {
       "id": "08995d5c2fad38e-4a431a18ad1c2a2",
       "title": "Create tag episode action API tag: audit actions work on old (superseded) episodes",
       "expectedStatus": "passed",
@@ -1417,8 +1534,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 105,
-        "column": 27
+        "line": 205,
+        "column": 29
       }
     },
     {
@@ -1430,8 +1547,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 161,
-        "column": 11
+        "line": 251,
+        "column": 71
       }
     },
     {
@@ -1443,8 +1560,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 167,
-        "column": 12
+        "line": 258,
+        "column": 22
       }
     },
     {
@@ -1456,8 +1573,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 174,
-        "column": 7
+        "line": 267,
+        "column": 22
       }
     },
     {
@@ -1469,8 +1586,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 184,
-        "column": 12
+        "line": 277,
+        "column": 16
       }
     },
     {
@@ -1482,8 +1599,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 193,
-        "column": 12
+        "line": 286,
+        "column": 16
       }
     },
     {
@@ -1495,8 +1612,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 203,
-        "column": 12
+        "line": 295,
+        "column": 16
       }
     },
     {
@@ -1508,8 +1625,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 212,
-        "column": 12
+        "line": 305,
+        "column": 13
       }
     },
     {
@@ -1521,8 +1638,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 221,
-        "column": 12
+        "line": 314,
+        "column": 25
       }
     },
     {
@@ -1534,8 +1651,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 231,
-        "column": 81
+        "line": 328,
+        "column": 23
       }
     },
     {
@@ -1547,8 +1664,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 243,
-        "column": 9
+        "line": 337,
+        "column": 3
       }
     },
     {
@@ -1560,7 +1677,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 29,
+        "line": 30,
         "column": 23
       }
     },
@@ -1573,8 +1690,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 60,
+        "line": 67,
         "column": 12
+      }
+    },
+    {
+      "id": "e225861e8bcf6b0-8f970e740c842e2",
+      "title": "Create unack episode action API unack: unacking an alert that is not acknowledged returns 409",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
+        "line": 122,
+        "column": 14
       }
     },
     {
@@ -1586,8 +1716,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 109,
-        "column": 14
+        "line": 157,
+        "column": 15
       }
     },
     {
@@ -1599,8 +1729,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 120,
-        "column": 16
+        "line": 168,
+        "column": 13
       }
     },
     {
@@ -1612,8 +1742,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 127,
-        "column": 98
+        "line": 175,
+        "column": 22
       }
     },
     {
@@ -1625,8 +1755,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 133,
-        "column": 12
+        "line": 181,
+        "column": 5
       }
     },
     {
@@ -1638,8 +1768,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 143,
-        "column": 5
+        "line": 192,
+        "column": 11
       }
     },
     {
@@ -1651,8 +1781,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 152,
-        "column": 61
+        "line": 199,
+        "column": 81
       }
     },
     {

@@ -1,5 +1,5 @@
 {
-  "sha1": "041a64a9a8ee84ab96284380eafa6a929c0359c1",
+  "sha1": "9d2259695048e3c3ef0bb20c9d62da2e51eb92f9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1710,8 +1710,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
-        "line": 174,
-        "column": 24
+        "line": 179,
+        "column": 14
       }
     },
     {
@@ -1726,7 +1726,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
-        "line": 187,
+        "line": 194,
         "column": 5
       }
     },
@@ -1742,7 +1742,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
-        "line": 198,
+        "line": 205,
         "column": 16
       }
     }

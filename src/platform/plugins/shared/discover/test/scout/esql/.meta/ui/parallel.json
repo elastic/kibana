@@ -1,5 +1,5 @@
 {
-  "sha1": "c932ad1e626cb33ba3b8cd8bf1cd392b30e0c56e",
+  "sha1": "5ea341c57efca1079236dad578fa0221173bd3d0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -42,6 +42,26 @@
       }
     },
     {
+      "id": "fa5789ca8f73c09-835aee764bc0b68",
+      "title": "Discover ES|QL query hover functionality user is able to interact with the hover content of an erroneous query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_esql_query_hover.spec.ts",
+        "line": 28,
+        "column": 25
+      }
+    },
+    {
       "id": "f0aa70d045832f5-cefaa0e86801e0f",
       "title": "ES|QL Discover session dashboard editing saves a linked session edit and returns to the dashboard",
       "expectedStatus": "passed",
@@ -70,33 +90,33 @@
     {
       "id": "1c089c23a3a34ee-c086c6dd3ca9c78",
       "title": "Discover session API — visualization persistence preserves a saved Line histogram through a session API round trip",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_vis_context.spec.ts",
         "line": 199,
-        "column": 25
+        "column": 71
       }
     },
     {
       "id": "1c089c23a3a34ee-81bc50dd8256a34",
       "title": "Discover session API — visualization persistence preserves a histogram breakdown and its legend through a session API round trip",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_vis_context.spec.ts",
-        "line": 244,
-        "column": 39
+        "line": 245,
+        "column": 37
       }
     },
     {
       "id": "1c089c23a3a34ee-b267b371abd83b2",
       "title": "Discover session API — visualization persistence preserves a Treemap Lens suggestion through a session API round trip",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
@@ -109,26 +129,26 @@
     {
       "id": "1c089c23a3a34ee-0276bd7bb738e93",
       "title": "Discover session API — visualization persistence preserves a legacy single-field breakdown through UI save and an API round trip",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_vis_context.spec.ts",
-        "line": 337,
-        "column": 19
+        "line": 336,
+        "column": 26
       }
     },
     {
       "id": "1c089c23a3a34ee-9dd6fd97c2e1ecd",
       "title": "Discover session API — visualization persistence preserves legacy legend values through UI save and an API round trip",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_vis_context.spec.ts",
-        "line": 382,
+        "line": 379,
         "column": 24
       }
     },
@@ -988,59 +1008,59 @@
     {
       "id": "7559256b7de2725-d9df4ccfd2ab919",
       "title": "Discover ES|QL visualization persistence renders an ES|QL histogram and updates it for a new time range",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
-        "line": 27,
-        "column": 66
+        "line": 28,
+        "column": 48
       }
     },
     {
       "id": "7559256b7de2725-b111512c2c5891a",
       "title": "Discover ES|QL visualization persistence preserves the chart data view ID after reload with a selected ES|QL control",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
         "line": 43,
-        "column": 22
+        "column": 24
       }
     },
     {
       "id": "7559256b7de2725-4a53b8e635ec851",
       "title": "Discover ES|QL visualization persistence persists a Line histogram and reverts a shape change",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
         "line": 81,
-        "column": 24
+        "column": 21
       }
     },
     {
       "id": "7559256b7de2725-b5ef1007684a89a",
       "title": "Discover ES|QL visualization persistence changes an ES|QL histogram to a breakdown and a Lens suggestion",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
         "line": 101,
-        "column": 24
+        "column": 28
       }
     },
     {
       "id": "7559256b7de2725-5b86a1c0a252ef1",
       "title": "Discover ES|QL visualization persistence retains compatible visualization changes and reverts incompatible query changes",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
@@ -1053,20 +1073,20 @@
     {
       "id": "7559256b7de2725-20af93919242847",
       "title": "Discover ES|QL visualization persistence saves an invalidated histogram as a Lens suggestion and restores it after a query revert",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/visualization_persistence.spec.ts",
         "line": 144,
-        "column": 22
+        "column": 24
       }
     },
     {
       "id": "7559256b7de2725-6ecf58a65a18325",
       "title": "Discover ES|QL visualization persistence persists a Lens flyout shape and closes the flyout on revert",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],

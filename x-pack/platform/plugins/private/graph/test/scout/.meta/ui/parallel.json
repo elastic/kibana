@@ -1,9 +1,90 @@
 {
-  "sha1": "943ae12904748313a3c23f3881006a10e567a343",
+  "sha1": "bdb7fe96558a8f1be4a6bc192a3808882f911db5",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "0217ec70af28896-9f356954daf88e5",
+      "title": "load Graph test data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/private/graph/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "a936b84d299b274-d0c0c3b618f758d",
+      "title": "Graph - blocklist shows blocklisted nodes in settings and allows unblocking them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/graph/test/scout/ui/parallel_tests/graph_blocklist.spec.ts",
+        "line": 25,
+        "column": 13
+      }
+    },
+    {
+      "id": "ecf371e31130435-715d6856bc43d3f",
+      "title": "Graph - data actions expands nodes, fills connections, and exposes requests in Inspector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/graph/test/scout/ui/parallel_tests/graph_data_actions.spec.ts",
+        "line": 25,
+        "column": 13
+      }
+    },
+    {
+      "id": "a26774d295fc5a8-b9eefd6a3949282",
+      "title": "Graph - datasource switching switches datasource and resets the rendered topology",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/graph/test/scout/ui/parallel_tests/graph_datasource_switch.spec.ts",
+        "line": 38,
+        "column": 13
+      }
+    },
+    {
+      "id": "cbca50696b798bb-47798124f0f4bdd",
+      "title": "Graph - drilldowns offers the raw documents drilldown for a selected node",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/graph/test/scout/ui/parallel_tests/graph_drilldown.spec.ts",
+        "line": 38,
+        "column": 5
+      }
+    },
+    {
+      "id": "cbca50696b798bb-13e37cab3a099bc",
+      "title": "Graph - drilldowns persists and executes a custom Discover encoder",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/graph/test/scout/ui/parallel_tests/graph_drilldown.spec.ts",
+        "line": 50,
+        "column": 19
+      }
+    },
     {
       "id": "90fff840c08261e-5a00ec1e729ddb6",
       "title": "Graph listing page - delete flow select all and delete removes all graphs and shows empty state",
@@ -58,6 +139,62 @@
         "file": "x-pack/platform/plugins/private/graph/test/scout/ui/parallel_tests/graph_listing.spec.ts",
         "line": 40,
         "column": 23
+      }
+    },
+    {
+      "id": "afc527f9b2cea34-0534b09116c361a",
+      "title": "Graph - search cancellation keeps the latest result when searches are submitted consecutively",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/graph/test/scout/ui/parallel_tests/graph_search_cancellation.spec.ts",
+        "line": 25,
+        "column": 13
+      }
+    },
+    {
+      "id": "4695e3f922c0cb7-9ecaafd61f810e4",
+      "title": "Graph - topology editing merges nodes and restores the rendered topology with undo and redo",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/graph/test/scout/ui/parallel_tests/graph_topology_editing.spec.ts",
+        "line": 25,
+        "column": 13
+      }
+    },
+    {
+      "id": "4695e3f922c0cb7-b72154c7d2e74db",
+      "title": "Graph - topology editing groups and ungroups selected nodes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/graph/test/scout/ui/parallel_tests/graph_topology_editing.spec.ts",
+        "line": 38,
+        "column": 19
+      }
+    },
+    {
+      "id": "7622788a53c027f-00400e515aa23b2",
+      "title": "Graph - workspace presentation persistence restores a custom node label and color after save and reopen",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/graph/test/scout/ui/parallel_tests/graph_workspace_persistence.spec.ts",
+        "line": 31,
+        "column": 35
       }
     }
   ]

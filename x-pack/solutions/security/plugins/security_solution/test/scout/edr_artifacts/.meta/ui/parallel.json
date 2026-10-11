@@ -1,5 +1,5 @@
 {
-  "sha1": "8c4587690118ead463cd38ff1b549a079db924f5",
+  "sha1": "b128f893cc4368cfdb98bd68030f3c6afc85b420",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -291,6 +291,38 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
         "line": 182,
         "column": 29
+      }
+    },
+    {
+      "id": "1eed5c01ecd207a-eee2d92fa61adc1",
+      "title": "Endpoint exception OR operator creates one endpoint exception per OR group",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/endpoint_exception_or_suite.ts",
+        "line": 45,
+        "column": 25
+      }
+    },
+    {
+      "id": "1eed5c01ecd207a-5c3b965cba3a29e",
+      "title": "Endpoint exception OR operator splits an edited endpoint exception into one artifact per OR group",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/endpoint_exception_or_suite.ts",
+        "line": 64,
+        "column": 25
       }
     },
     {

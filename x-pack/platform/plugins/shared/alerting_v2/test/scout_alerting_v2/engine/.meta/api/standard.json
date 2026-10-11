@@ -1,5 +1,5 @@
 {
-  "sha1": "1ab3799aae20cc537987ab0f886afa4c670902d8",
+  "sha1": "9f966408ede7f126719c12e9baf84fa5c07ef075",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -425,6 +425,34 @@
       }
     },
     {
+      "id": "89aded2614076f0-f031c12351371f0",
+      "title": "Rule change history API list + detail: returns lean rows with server-side diffs and full snapshots on detail",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history_http.spec.ts",
+        "line": 29,
+        "column": 71
+      }
+    },
+    {
+      "id": "89aded2614076f0-5c25cb3a2bbc6d8",
+      "title": "Rule change history API detail: resolves an older event from the change id alone, without a rule id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history_http.spec.ts",
+        "line": 96,
+        "column": 47
+      }
+    },
+    {
       "id": "134d64c4c7ff58c-7f791e41745c742",
       "title": "Rule change history create: logs a rule_create entry with sequence 1 and a RuleResponse-shaped snapshot",
       "expectedStatus": "passed",
@@ -520,20 +548,6 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
         "line": 401,
         "column": 80
-      }
-    },
-    {
-      "id": "134d64c4c7ff58c-7466317b0fa1c8e",
-      "title": "Rule change history HTTP list + detail: returns lean rows with server-side diffs and full snapshots on detail",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
-        "line": 461,
-        "column": 18
       }
     },
     {
