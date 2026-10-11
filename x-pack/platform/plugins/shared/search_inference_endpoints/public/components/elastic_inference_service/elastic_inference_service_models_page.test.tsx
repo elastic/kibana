@@ -16,6 +16,7 @@ import { ElasticInferenceServiceModelsPage } from './elastic_inference_service_m
 import { EIS_DISPLAY_OPTIONS_TOUR_STORAGE_KEY } from '../../hooks/use_display_options_tour';
 import type { EisInferenceEndpoint } from '../../../common/types';
 import { useEisModels } from '../../hooks/use_eis_models';
+import type { EisPageState } from '../../hooks/use_eis_page_state';
 import { InferenceEndpoints } from '../../__mocks__/inference_endpoints';
 
 jest.mock('../../hooks/use_eis_models');
@@ -23,6 +24,9 @@ jest.mock('../../hooks/use_kibana');
 
 const { useKibana } = jest.requireMock('../../hooks/use_kibana');
 const mockUseKibana = useKibana as jest.Mock;
+
+const mockNavigateToApp = jest.fn();
+const mockShowErrorDialog = jest.fn();
 
 const mockKibanaReturn = ({
   manage = true,
@@ -32,9 +36,11 @@ const mockKibanaReturn = ({
     notifications: {
       toasts: { addSuccess: jest.fn(), addDanger: jest.fn() },
       tours: { isEnabled: () => toursEnabled },
+      showErrorDialog: mockShowErrorDialog,
     },
     application: {
       capabilities: { searchInferenceEndpoints: { show: true, manage } },
+      navigateToApp: mockNavigateToApp,
     },
   },
 });
@@ -57,12 +63,15 @@ const countCards = (container: HTMLElement) =>
 
 // The page mounts under the app's `Router`, which is what enables the Content
 // List's URL sync — omitting it here hid a filtering regression from jest.
-const renderPage = () =>
+const renderPage = (pageState: EisPageState = 'models') =>
   render(
     <EuiThemeProvider>
       <I18nProvider>
         <Router history={createMemoryHistory()}>
-          <ElasticInferenceServiceModelsPage />
+          <ElasticInferenceServiceModelsPage
+            pageState={pageState}
+            isCloudConnectPromoVisible={false}
+          />
         </Router>
       </I18nProvider>
     </EuiThemeProvider>
@@ -88,14 +97,93 @@ describe('ElasticInferenceServiceModelsPage', () => {
 
   it('renders a loading spinner when data is loading', () => {
     mockUseEisModels.mockReturnValue({ data: undefined, isLoading: true, isError: false });
-    const { container } = renderPage();
-    expect(container.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+    const { getByTestId } = renderPage('loading');
+    expect(getByTestId('eisModelsLoadingSpinner')).toBeInTheDocument();
   });
 
-  it('renders an error prompt when fetching fails', () => {
-    mockUseEisModels.mockReturnValue({ data: undefined, isLoading: false, isError: true });
-    const { getByText } = renderPage();
-    expect(getByText('Unable to load models')).toBeInTheDocument();
+  describe('Elastic Inference Service unavailable', () => {
+    const error = new Error('Service unavailable');
+    const refetch = jest.fn();
+
+    it('renders the unavailable prompt without the models grid', () => {
+      mockUseEisModels.mockReturnValue({ data: undefined, isError: true, error, refetch });
+      const { getByTestId, queryByTestId } = renderPage('unavailable');
+      expect(getByTestId('eisUnavailablePrompt')).toBeInTheDocument();
+      expect(queryByTestId(SEARCH_BOX)).not.toBeInTheDocument();
+    });
+
+    it('refetches the models when Retry is clicked', () => {
+      mockUseEisModels.mockReturnValue({ data: undefined, isError: true, error, refetch });
+      const { getByTestId } = renderPage('unavailable');
+      fireEvent.click(getByTestId('eisUnavailableRetryButton'));
+      expect(refetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('opens the error dialog when View error details is clicked', () => {
+      mockUseEisModels.mockReturnValue({ data: undefined, isError: true, error, refetch });
+      const { getByTestId } = renderPage('unavailable');
+      fireEvent.click(getByTestId('eisUnavailableErrorDetailsButton'));
+      expect(mockShowErrorDialog).toHaveBeenCalledWith({
+        title: 'Elastic Inference Service unavailable',
+        error,
+      });
+    });
+
+    it('shows a loading Retry button while refetching', () => {
+      mockUseEisModels.mockReturnValue({
+        data: undefined,
+        isError: true,
+        isFetching: true,
+        error,
+        refetch,
+      });
+      const { getByTestId } = renderPage('unavailable');
+      expect(getByTestId('eisUnavailableRetryButton')).toBeDisabled();
+    });
+
+    it('hides View error details when there is no error', () => {
+      mockUseEisModels.mockReturnValue({ data: [], error: null, refetch });
+      const { queryByTestId } = renderPage('unavailable');
+      expect(queryByTestId('eisUnavailableErrorDetailsButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('self-managed without Elastic Inference Service', () => {
+    it('renders the self-managed empty prompt without the models grid', () => {
+      mockUseEisModels.mockReturnValue({ data: [], isLoading: false, isError: false });
+      const { getByTestId, queryByTestId } = renderPage('selfManagedEmpty');
+      expect(getByTestId('eisSelfManagedEmptyPrompt')).toBeInTheDocument();
+      expect(getByTestId('eisDocumentationLink')).toBeInTheDocument();
+      expect(queryByTestId(SEARCH_BOX)).not.toBeInTheDocument();
+    });
+
+    it('opens Cloud Connect when Connect your cluster is clicked', () => {
+      mockUseEisModels.mockReturnValue({ data: [], isLoading: false, isError: false });
+      const { getByTestId } = renderPage('selfManagedEmpty');
+      fireEvent.click(getByTestId('eisConnectYourClusterButton'));
+      expect(mockNavigateToApp).toHaveBeenCalledWith('cloud_connect', { openInNewTab: true });
+    });
+  });
+
+  describe('Elastic Inference Service disabled in Cloud Connect', () => {
+    it('renders the disabled callout above the models grid', async () => {
+      mockUseEisModels.mockReturnValue({ data: endpoints, isLoading: false, isError: false });
+      const { container, getByTestId } = renderPage('serviceDisabled');
+      expect(getByTestId('eisServiceDisabledCallout')).toBeInTheDocument();
+      await waitFor(() => expect(countCards(container)).toBeGreaterThan(0));
+    });
+
+    it('opens Cloud Connect when Open Cloud Connect is clicked', () => {
+      mockUseEisModels.mockReturnValue({ data: endpoints, isLoading: false, isError: false });
+      const { getByTestId } = renderPage('serviceDisabled');
+      fireEvent.click(getByTestId('eisOpenCloudConnectButton'));
+      expect(mockNavigateToApp).toHaveBeenCalledWith('cloud_connect', { openInNewTab: true });
+    });
+
+    it('does not render the disabled callout when the service is enabled', async () => {
+      const { queryByTestId } = await renderPopulatedPage();
+      expect(queryByTestId('eisServiceDisabledCallout')).not.toBeInTheDocument();
+    });
   });
 
   it('renders model cards when data is loaded', async () => {

@@ -38999,8 +38999,6 @@
     "xpack.searchInferenceEndpoints.eisModelCard.previewStatusBadge.content": "Vorschau",
     "xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button": "Cloud-Nutzung anzeigen",
     "xpack.searchInferenceEndpoints.eisModelsPage.description": "Modelle und Endpunkte für Elastic Inference Service verwalten",
-    "xpack.searchInferenceEndpoints.eisModelspage.error.body": "Beim Abrufen der Modelldaten ist ein Fehler aufgetreten.",
-    "xpack.searchInferenceEndpoints.eisModelspage.error.title": "Modelle können nicht geladen werden",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.embedding": "Einbettung",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.llm": "LLM",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.rerank": "RERANK",

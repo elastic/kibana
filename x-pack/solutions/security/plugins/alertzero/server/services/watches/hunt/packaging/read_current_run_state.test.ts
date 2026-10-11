@@ -7,6 +7,7 @@
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import { readCurrentRunState } from './read_current_run_state';
+import type { RehydrateProcessSelectors } from './rehydrate_process_selectors';
 
 const reportId = 'rpt-package-1';
 const runId = 'run-abc';
@@ -26,17 +27,25 @@ const sseAttachment = ({
   tier2Targets,
   severity = 'high',
   corroboratedTechniqueId,
+  entities = [
+    { field: 'host.name', value: 'host-a' },
+    ...userNames.map((value) => ({ field: 'user.name', value })),
+  ],
+  confidence = 0.9,
+  timeRange = { from: '2026-09-25T00:00:00.000Z', to: '2026-09-25T01:00:00.000Z' },
 }: {
   actionableIndices?: string[];
   events?: Array<{
     event_id: string;
     source_index: string;
-    matched?: { technique_id: string; field: string };
+    matched?: { technique_id?: string; field: string; ioc?: { type: 'ip'; value: string } };
   }>;
   attachmentId?: string;
   title?: string;
   evidenceFor?: string[];
   tier1TotalHits?: number;
+  entities?: Array<{ field: string; value: string }>;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
   tier2Behaviors?: Array<{
     technique_id: string;
     technique_name?: string;
@@ -51,12 +60,13 @@ const sseAttachment = ({
   hypothesis?: string;
   userNames?: string[];
   tier2Targets?: string[];
-  severity?: 'low' | 'medium' | 'high' | 'critical';
   /**
    * Mirrors `sse_mapper`'s `corroborated_technique_id`: set only on an entry scoped to a
    * technique the run actually corroborated, never on the report-scoped fallback entry.
    */
   corroboratedTechniqueId?: string;
+  confidence?: number;
+  timeRange?: { from: string; to: string };
 }): VersionedAttachment => ({
   id: attachmentId,
   type: 'security.significant_security_event',
@@ -69,7 +79,7 @@ const sseAttachment = ({
       data: {
         title,
         severity,
-        confidence: 0.9,
+        confidence,
         status: 'open',
         source_watch: 'system-security-hunt-continuous-threat-hunt',
         capability: 'continuous_threat_hunt',
@@ -88,10 +98,7 @@ const sseAttachment = ({
             technique_id: label.split(' ')[0],
           })),
         ],
-        entities: [
-          { field: 'host.name', value: 'host-a' },
-          ...userNames.map((value) => ({ field: 'user.name', value })),
-        ],
+        entities,
         events: events ?? [
           {
             event_id: 'evt-1',
@@ -106,10 +113,7 @@ const sseAttachment = ({
         hunt_result: {
           has_confirmed_hit: true,
           hit_sources: ['tier1'],
-          time_range: {
-            from: '2026-09-25T00:00:00.000Z',
-            to: '2026-09-25T01:00:00.000Z',
-          },
+          time_range: timeRange,
           tier1: {
             status: 'environment_hits_found',
             counts: {
@@ -158,7 +162,11 @@ const sseAttachment = ({
 });
 
 describe('readCurrentRunState', () => {
-  const resolveHostEnrollment = async () => ({ enrolled: true as const, agentId: 'agent-1' });
+  const resolveHostEnrollment = async () => ({
+    enrolled: true as const,
+    agentId: 'agent-1',
+    capabilities: ['isolation'],
+  });
   const rehydrateProcessSelectors = async () => [];
 
   it('matches a .ds- backing event index against a *-suffixed actionable pattern', async () => {
@@ -279,6 +287,135 @@ describe('readCurrentRunState', () => {
     });
 
     expect(state).toBeUndefined();
+  });
+
+  it('extracts and dedupes user.name and service.name entities across current-run SSEs', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({
+          attachmentId: 'sse-1',
+          entities: [
+            { field: 'host.name', value: 'host-a' },
+            { field: 'user.name', value: 'dev-user' },
+            { field: 'service.name', value: 'escalated-role' },
+          ],
+        }),
+        sseAttachment({
+          attachmentId: 'sse-2',
+          entities: [
+            { field: 'user.name', value: 'dev-user' },
+            { field: 'user.name', value: 'ops-user' },
+            { field: 'service.name', value: 'escalated-role' },
+          ],
+        }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.users).toEqual(['dev-user', 'ops-user']);
+    expect(state?.services).toEqual(['escalated-role']);
+    expect(state?.hosts.map((h) => h.name)).toEqual(['host-a']);
+  });
+
+  it('ignores other allowlisted entity fields when extracting identities, but flags them as unnamed identity evidence', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({
+          entities: [
+            { field: 'host.name', value: 'host-a' },
+            { field: 'user.email', value: 'dev@example.com' },
+            { field: 'host.id', value: 'h-1' },
+          ],
+        }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.users).toEqual([]);
+    expect(state?.services).toEqual([]);
+    // user.email can't be named as a subject, but it's still identity evidence -- unlike
+    // host.id, which isn't identity evidence at all and must not flip this flag on its own.
+    expect(state?.hasUnnamedIdentityEntity).toBe(true);
+  });
+
+  it('does not treat host.id as unnamed identity evidence', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({
+          entities: [
+            { field: 'host.name', value: 'host-a' },
+            { field: 'host.id', value: 'h-1' },
+          ],
+        }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.hasUnnamedIdentityEntity).toBe(false);
+  });
+
+  it.each(['user.id', 'service.id'] as const)(
+    'flags %s as unnamed identity evidence',
+    async (field) => {
+      const state = await readCurrentRunState({
+        attachments: [
+          sseAttachment({
+            entities: [{ field, value: 'some-id' }],
+          }),
+        ],
+        reportId,
+        runId,
+        resolveHostEnrollment,
+        rehydrateProcessSelectors,
+      });
+
+      expect(state?.hasUnnamedIdentityEntity).toBe(true);
+    }
+  );
+
+  it('does not flag unnamed identity evidence when every entity is already named or host-scoped', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({
+          entities: [
+            { field: 'host.name', value: 'host-a' },
+            { field: 'user.name', value: 'dev-user' },
+            { field: 'service.name', value: 'escalated-role' },
+          ],
+        }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.hasUnnamedIdentityEntity).toBe(false);
+  });
+
+  it('takes the max severity across current-run SSEs', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({ attachmentId: 'sse-1', severity: 'medium' }),
+        sseAttachment({ attachmentId: 'sse-2', severity: 'critical' }),
+        sseAttachment({ attachmentId: 'sse-3', severity: 'low' }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.severity).toBe('critical');
   });
 
   it('dedupes identical titles and evidence lines across current-run SSEs', async () => {
@@ -548,4 +685,118 @@ describe('readCurrentRunState', () => {
       expect(state?.severity).toBe(expected);
     }
   );
+
+  it('takes the max severity and max confidence across current-run SSEs', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({ attachmentId: 'sse-1', severity: 'medium', confidence: 0.95 }),
+        sseAttachment({ attachmentId: 'sse-2', severity: 'critical', confidence: 0.6 }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.severity).toBe('critical');
+    expect(state?.confidence).toBe(0.95);
+  });
+
+  it('takes the min from / max to of hunt_result.time_range as the hunt window', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({
+          attachmentId: 'sse-1',
+          timeRange: { from: '2026-09-20T00:00:00.000Z', to: '2026-09-22T00:00:00.000Z' },
+        }),
+        sseAttachment({
+          attachmentId: 'sse-2',
+          timeRange: { from: '2026-09-21T00:00:00.000Z', to: '2026-09-25T00:00:00.000Z' },
+        }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.huntWindow).toEqual({
+      from: '2026-09-20T00:00:00.000Z',
+      to: '2026-09-25T00:00:00.000Z',
+    });
+  });
+
+  it('threads endpoint capabilities from the enrollment resolver onto the host, [] when unenrolled', async () => {
+    const state = await readCurrentRunState({
+      attachments: [sseAttachment({})],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+    expect(state?.hosts).toEqual([
+      { name: 'host-a', enrolled: true, agentId: 'agent-1', capabilities: ['isolation'] },
+    ]);
+
+    const unenrolled = await readCurrentRunState({
+      attachments: [sseAttachment({})],
+      reportId,
+      runId,
+      resolveHostEnrollment: async () => ({ enrolled: false }),
+      rehydrateProcessSelectors,
+    });
+    expect(unenrolled?.hosts).toEqual([{ name: 'host-a', enrolled: false, capabilities: [] }]);
+  });
+
+  it('forwards matched.ioc to the rehydrator as a presence flag alongside technique_id', async () => {
+    const rehydrate: jest.MockedFunction<RehydrateProcessSelectors> = jest
+      .fn()
+      .mockResolvedValue([]);
+    await readCurrentRunState({
+      attachments: [
+        sseAttachment({
+          events: [
+            {
+              event_id: 'evt-ioc',
+              source_index: '.ds-logs-endpoint.events.process-default-2026.09.25-000001',
+              matched: { field: 'destination.ip', ioc: { type: 'ip', value: '203.0.113.9' } },
+            },
+            {
+              event_id: 'evt-technique',
+              source_index: '.ds-logs-endpoint.events.process-default-2026.09.25-000001',
+              matched: { field: '_id', technique_id: 'T1059.001' },
+            },
+            {
+              event_id: 'evt-plain',
+              source_index: '.ds-logs-endpoint.events.process-default-2026.09.25-000001',
+            },
+          ],
+        }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors: rehydrate,
+    });
+
+    expect(rehydrate).toHaveBeenCalledWith({
+      alerts: [],
+      events: [
+        {
+          event_id: 'evt-ioc',
+          source_index: '.ds-logs-endpoint.events.process-default-2026.09.25-000001',
+          matched: { ioc: true },
+        },
+        {
+          event_id: 'evt-technique',
+          source_index: '.ds-logs-endpoint.events.process-default-2026.09.25-000001',
+          matched: { technique_id: 'T1059.001' },
+        },
+        {
+          event_id: 'evt-plain',
+          source_index: '.ds-logs-endpoint.events.process-default-2026.09.25-000001',
+        },
+      ],
+    });
+  });
 });

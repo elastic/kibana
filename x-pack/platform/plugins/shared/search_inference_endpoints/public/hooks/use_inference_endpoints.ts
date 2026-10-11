@@ -14,7 +14,7 @@ import { INFERENCE_ENDPOINTS_QUERY_KEY } from '../../common/constants';
 export const useQueryInferenceEndpoints = () => {
   const { services } = useKibana();
 
-  return useQuery({
+  return useQuery<InferenceAPIConfigResponse[], Error>({
     queryKey: [INFERENCE_ENDPOINTS_QUERY_KEY],
     queryFn: async () => {
       const response = await services.http.get<{
