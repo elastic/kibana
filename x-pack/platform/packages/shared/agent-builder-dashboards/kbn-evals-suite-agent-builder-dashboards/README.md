@@ -34,11 +34,11 @@ Chart presentation is checked on each panel's Lens Config API config, against th
 - **Dashboard Control Queries** (`CODE`): every stored control's values query (`FROM <index> | STATS BY <field>`) executes against the cluster. A control on a column the index does not have, such as a `DISSECT` output, fails with "Unknown column" and renders as a broken dropdown. Scored as the fraction of controls whose query executes, with the number of values each would offer in the metadata. Skipped when the dashboard has no controls.
 - **Dashboard Control Sourcing** (`CODE`): controls query the index directly, so a control on a column that only exists in an ES|QL result (`DISSECT`, `GROK`, `EVAL`) renders "Unknown column". Gated on a gold `controls` block that lists the index's mapped fields. Scored as the fraction of these assertions that hold:
   - every stored control is on a mapped field, by exact name; the field list names the real `.keyword` siblings
-  - every control the agent asked `generate_dashboard` for is on a mapped field, read from the `add_controls` operations in the tool params, since the server drops unmapped controls before they are stored
+  - every control the agent asked `generate_dashboard` for is on a mapped field, read from the `controls` in the tool params, since the server drops unmapped controls before they are stored
   - at least one control carries `user_requested` when the prompt asked for controls, and none does otherwise; the agent may add controls of its own next to the requested ones, but asking `generate_dashboard` for no control at all when the prompt asked for some fails
   - a control exists on each field the prompt names (`mustInclude`)
   - each filter the prompt asks for by name (`requestedFilters`) has a stored control on one of its mapped substitutes, or a reply sentence that names it alongside a control or filter (the stored controls already show it was not added), so a requested filter the agent never tried still counts
-  - the reply repeats no raw `add_controls` error text
+  - the reply repeats no raw control error text
   - when more requested fields failed (each field counted once, however often it was retried) than were stored on a mapped substitute, the reply names at least that many of the failed fields alongside a control or filter (`status code` names `status_code`); a generic "some filters could not be added" does not count, and a failed control the agent replaced with a mapped one needs no mention
 - **Enhance Mode Question** (`CODE`): a bare "enhance" request ends the opening turn with one `ask_user_question` offering an appearance option and a content option, before anything is written. A request that names the mode does not ask.
 - **Enhance Mode Compliance** (`CODE`), binary:
@@ -112,7 +112,7 @@ Content defects, which only content mode should fix:
 
 `src/fixtures/dissect_logs_results.ts` is what Discover attaches when a user clicks "AI Agent" over ES|QL results: the query, its columns, a few sample rows, the hit count and the time range, under the `esql.query_results` attachment type. The query parses the raw access-log line in `message` with `DISSECT` into `client_ip`, `http_method`, `path`, `http_version`, `status_code`, `response_bytes` and `user_agent`. None of these is mapped on `kibana_sample_data_logs`, and none clashes with a mapped field, so they are exactly the columns a control must not use. `src/fixtures/sample_logs_fields.ts` lists the mapped fields the Control Sourcing evaluator checks against.
 
-These examples assume the `add_controls` field validation from [#288080](https://github.com/elastic/kibana/pull/288080): unmapped controls the agent adds on its own are left out silently, and unmapped controls the user asked for come back under `failures` for the agent to report.
+These examples assume the control field validation from [#288080](https://github.com/elastic/kibana/pull/288080): unmapped controls the agent adds on its own are left out silently, and unmapped controls the user asked for come back under `failures` for the agent to report.
 
 ## Prerequisites
 

@@ -124,8 +124,6 @@ const MODE_OPTION_MATCHERS: Record<EnhanceMode, (label: string) => boolean> = {
 export const findModeOptionIndex = (options: Array<{ label: string }>, mode: EnhanceMode): number =>
   options.findIndex(({ label }) => MODE_OPTION_MATCHERS[mode](label));
 
-const ADD_CONTROLS_OPERATION = 'add_controls';
-
 /** One control the agent asked `generate_dashboard` to add, as sent in the tool params. */
 export interface AttemptedControl {
   type: string;
@@ -139,32 +137,26 @@ export interface AttemptedControl {
 const getGenerateDashboardSteps = (steps: Step[]): Step[] =>
   steps.filter((step) => step.type === 'tool_call' && step.tool_id === GENERATE_DASHBOARD_TOOL_ID);
 
+const getSentControls = ({ params }: Step): Array<Record<string, unknown>> =>
+  isRecord(params) && Array.isArray(params.controls) ? params.controls.filter(isRecord) : [];
+
 /**
- * Every control across all `add_controls` operations the agent sent to
- * `generate_dashboard`, in call order. Unlike the stored dashboard, this shows
- * what the agent tried: the server may drop a control whose field is not mapped.
+ * Every control the agent sent in `generate_dashboard` `controls`, in call order. Unlike the
+ * stored dashboard, this shows what the agent tried: the server may drop a control whose field is
+ * not mapped.
  */
 export const getAttemptedControls = (steps: Step[]): AttemptedControl[] =>
-  getGenerateDashboardSteps(steps).flatMap((step, call) => {
-    const operations =
-      isRecord(step.params) && Array.isArray(step.params.operations) ? step.params.operations : [];
-    return operations
-      .filter(
-        (operation): operation is Record<string, unknown> =>
-          isRecord(operation) && operation.operation === ADD_CONTROLS_OPERATION
-      )
-      .flatMap(({ controls }) => (Array.isArray(controls) ? controls : []))
-      .filter(isRecord)
-      .map((control) => ({
-        type: typeof control.type === 'string' ? control.type : 'unknown',
-        ...(typeof control.field_name === 'string' ? { field: control.field_name } : {}),
-        userRequested: control.user_requested === true,
-        call,
-      }));
-  });
+  getGenerateDashboardSteps(steps).flatMap((step, call) =>
+    getSentControls(step).map((control) => ({
+      type: typeof control.type === 'string' ? control.type : 'unknown',
+      ...(typeof control.field_name === 'string' ? { field: control.field_name } : {}),
+      userRequested: control.user_requested === true,
+      call,
+    }))
+  );
 
-/** A `generate_dashboard` operation the server could not apply, as reported under `data.failures`. */
-export interface OperationFailure {
+/** A `generate_dashboard` change the server could not apply, as reported under `data.failures`. */
+export interface DashboardFailure {
   type: string;
   identifier: string;
   error: string;
@@ -172,30 +164,42 @@ export interface OperationFailure {
   call: number;
 }
 
-/** Failures every `generate_dashboard` call reported, optionally only those of one operation type. */
-export const getOperationFailures = (steps: Step[], type?: string): OperationFailure[] =>
-  getGenerateDashboardSteps(steps).flatMap((step, call) =>
-    (Array.isArray(step.results) ? step.results : [])
-      .flatMap((result) =>
-        isRecord(result) && isRecord(result.data) && Array.isArray(result.data.failures)
-          ? result.data.failures
-          : []
-      )
-      .filter(
-        (failure): failure is Omit<OperationFailure, 'call'> =>
-          isRecord(failure) &&
-          typeof failure.type === 'string' &&
-          typeof failure.identifier === 'string' &&
-          typeof failure.error === 'string' &&
-          (type === undefined || failure.type === type)
-      )
-      .map(({ type: failureType, identifier, error }) => ({
-        type: failureType,
-        identifier,
-        error,
-        call,
-      }))
-  );
+const getStepFailures = ({ results }: Step, call: number): DashboardFailure[] =>
+  (Array.isArray(results) ? results : [])
+    .flatMap((result) =>
+      isRecord(result) && isRecord(result.data) && Array.isArray(result.data.failures)
+        ? result.data.failures
+        : []
+    )
+    .filter(
+      (failure): failure is Omit<DashboardFailure, 'call'> =>
+        isRecord(failure) &&
+        typeof failure.type === 'string' &&
+        typeof failure.identifier === 'string' &&
+        typeof failure.error === 'string'
+    )
+    .map(({ type, identifier, error }) => ({ type, identifier, error, call }));
 
-export const getAddControlsFailures = (steps: Step[]): OperationFailure[] =>
-  getOperationFailures(steps, ADD_CONTROLS_OPERATION);
+/** Failures every `generate_dashboard` call reported. */
+export const getDashboardFailures = (steps: Step[]): DashboardFailure[] =>
+  getGenerateDashboardSteps(steps).flatMap(getStepFailures);
+
+const CONTROL_INPUT_IDENTIFIER = /^controls\[\d+\]$/;
+
+/**
+ * Failures of the controls each `generate_dashboard` call sent. The server identifies a control
+ * by its position (`controls[1]`) or by its field, grouping same-message fields as "a, b".
+ */
+export const getControlFailures = (steps: Step[]): DashboardFailure[] =>
+  getGenerateDashboardSteps(steps).flatMap((step, call) => {
+    const sentFields = new Set(
+      getSentControls(step).flatMap(({ field_name: field }) =>
+        typeof field === 'string' ? [field] : []
+      )
+    );
+    return getStepFailures(step, call).filter(
+      ({ identifier }) =>
+        CONTROL_INPUT_IDENTIFIER.test(identifier) ||
+        identifier.split(',').every((field) => sentFields.has(field.trim()))
+    );
+  });

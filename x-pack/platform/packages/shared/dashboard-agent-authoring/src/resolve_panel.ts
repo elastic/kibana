@@ -6,12 +6,13 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
-import type { OperationFailure } from './utils';
+import { DASHBOARD_FAILURE_TYPES } from './failure_types';
+import type { DashboardFailure } from './utils';
 
 /**
  * Type-agnostic primitives for inline panel content resolution: the resolution
  * result, the failure helper, and the request fields shared by every panel type.
- * Each renderer contributes its own request shape (see `operations/panels/<type>`),
+ * Each renderer contributes its own request shape (see `panels/<type>`),
  * and the panels barrel aggregates them into the `ResolvePanelContent` contract,
  * which the host implements and injects.
  */
@@ -27,11 +28,8 @@ export type PanelContentAttempt =
     }
   | {
       type: 'failure';
-      failure: OperationFailure;
+      failure: DashboardFailure;
     };
-
-/** Operations that can trigger inline panel resolution. */
-export type InlinePanelOperationType = 'add_section' | 'add_panels' | 'edit_panels';
 
 /** One-sentence note describing a chart authored during the current turn. */
 export interface PanelAuthoringNote {
@@ -45,21 +43,19 @@ export interface PanelAuthoringNote {
  * own payload (e.g. `panels/vis` adds the natural-language / ES|QL fields).
  */
 export interface PanelResolutionRequestBase {
-  operationType: InlinePanelOperationType;
   /** Human-facing identifier for failure attribution (panelId or the query). */
   identifier: string;
-  /** Present when editing an existing panel; `edit_panels` has checked it matches the renderer. */
+  /** Present when editing an existing panel; upsert has checked it matches the renderer. */
   existingPanel?: AttachmentPanel;
 }
 
 export const createPanelFailureResult = (
-  type: OperationFailure['type'],
   identifier: string,
   error: string
 ): Extract<PanelContentAttempt, { type: 'failure' }> => ({
   type: 'failure',
   failure: {
-    type,
+    type: DASHBOARD_FAILURE_TYPES.upsertDashboard,
     identifier,
     error,
   },

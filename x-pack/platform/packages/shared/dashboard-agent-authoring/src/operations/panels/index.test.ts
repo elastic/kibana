@@ -8,11 +8,10 @@
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
 import {
-  addPanelsItemSchema,
-  addSectionPanelItemSchema,
   buildConfigPanelContent,
-  editPanelItemSchema,
-  getConfigPanelEditError,
+  editPanelInputSchema,
+  getEditableEmbeddableTypes,
+  newPanelInputSchema,
 } from '.';
 
 const grid = { x: 0, y: 0, w: 12, h: 5 };
@@ -24,38 +23,38 @@ const lensRequest = {
 };
 
 describe('panel item schemas', () => {
-  it.each([
-    ['add_panels', addPanelsItemSchema],
-    ['add_section', addSectionPanelItemSchema],
-  ])('routes a Lens request without renderer through the %s schema', (_, schema) => {
-    expect(
-      schema.safeParse({
-        ...lensRequest,
-        chartType: SupportedChartType.Metric,
-      }).success
-    ).toBe(true);
-  });
+  it.each([['new panel', newPanelInputSchema]])(
+    'routes a Lens request without renderer through the %s schema',
+    (_, schema) => {
+      expect(
+        schema.safeParse({
+          ...lensRequest,
+          chartType: SupportedChartType.Metric,
+        }).success
+      ).toBe(true);
+    }
+  );
 
-  it.each([
-    ['add_panels', addPanelsItemSchema],
-    ['add_section', addSectionPanelItemSchema],
-  ])('requires chartType for a Lens request through the %s schema', (_, schema) => {
-    expect(schema.safeParse(lensRequest).success).toBe(false);
-  });
+  it.each([['new panel', newPanelInputSchema]])(
+    'requires chartType for a Lens request through the %s schema',
+    (_, schema) => {
+      expect(schema.safeParse(lensRequest).success).toBe(false);
+    }
+  );
 
-  it.each([
-    ['add_panels', addPanelsItemSchema],
-    ['add_section', addSectionPanelItemSchema],
-  ])('rejects a by-value visualization config through the %s schema', (_, schema) => {
-    expect(
-      schema.safeParse({
-        source: 'config',
-        type: 'vis',
-        grid,
-        config: { type: 'metric' },
-      }).success
-    ).toBe(false);
-  });
+  it.each([['new panel', newPanelInputSchema]])(
+    'rejects a by-value visualization config through the %s schema',
+    (_, schema) => {
+      expect(
+        schema.safeParse({
+          source: 'config',
+          type: 'vis',
+          grid,
+          config: { type: 'metric' },
+        }).success
+      ).toBe(false);
+    }
+  );
 });
 
 describe('custom_content panel schemas', () => {
@@ -66,17 +65,14 @@ describe('custom_content panel schemas', () => {
     query: 'Show a KPI card for total errors',
   };
 
-  it.each([
-    ['add_panels', addPanelsItemSchema],
-    ['add_section', addSectionPanelItemSchema],
-  ])('accepts a custom_content request with only a query through %s', (_, schema) => {
-    expect(schema.safeParse(customContentRequest).success).toBe(true);
-  });
+  it.each([['new panel', newPanelInputSchema]])(
+    'accepts a custom_content request with only a query through %s',
+    (_, schema) => {
+      expect(schema.safeParse(customContentRequest).success).toBe(true);
+    }
+  );
 
-  it.each([
-    ['add_panels', addPanelsItemSchema],
-    ['add_section', addSectionPanelItemSchema],
-  ])(
+  it.each([['new panel', newPanelInputSchema]])(
     'keeps esql and drops Lens-only fields on a custom_content request through %s',
     (_, schema) => {
       const result = schema.safeParse({
@@ -95,18 +91,18 @@ describe('custom_content panel schemas', () => {
     }
   );
 
-  it.each([
-    ['add_panels', addPanelsItemSchema],
-    ['add_section', addSectionPanelItemSchema],
-  ])('rejects a custom_content request without a query through %s', (_, schema) => {
-    const { query, ...withoutQuery } = customContentRequest;
+  it.each([['new panel', newPanelInputSchema]])(
+    'rejects a custom_content request without a query through %s',
+    (_, schema) => {
+      const { query, ...withoutQuery } = customContentRequest;
 
-    expect(schema.safeParse(withoutQuery).success).toBe(false);
-  });
+      expect(schema.safeParse(withoutQuery).success).toBe(false);
+    }
+  );
 
   it('rejects the former config-source custom_content shape', () => {
     expect(
-      addPanelsItemSchema.safeParse({
+      newPanelInputSchema.safeParse({
         source: 'config',
         type: 'custom_content',
         grid,
@@ -116,7 +112,7 @@ describe('custom_content panel schemas', () => {
   });
 });
 
-describe('edit_panels item schema', () => {
+describe('edit panel input schema', () => {
   const customContentEdit = {
     source: 'request' as const,
     renderer: 'custom_content' as const,
@@ -125,7 +121,7 @@ describe('edit_panels item schema', () => {
 
   it('accepts a Lens edit without renderer', () => {
     expect(
-      editPanelItemSchema.safeParse({ source: 'request', panelId: 'panel-1', query: 'retitle' })
+      editPanelInputSchema.safeParse({ source: 'request', panelId: 'panel-1', query: 'retitle' })
         .success
     ).toBe(true);
   });
@@ -135,16 +131,16 @@ describe('edit_panels item schema', () => {
     ['an esql-only', { esql: 'FROM logs-* | STATS count = COUNT(*)' }],
     ['a query-removing', { esql: null }],
   ])('accepts %s custom_content edit', (_, fields) => {
-    expect(editPanelItemSchema.safeParse({ ...customContentEdit, ...fields }).success).toBe(true);
+    expect(editPanelInputSchema.safeParse({ ...customContentEdit, ...fields }).success).toBe(true);
   });
 
   it('rejects a custom_content edit with nothing to change', () => {
-    expect(editPanelItemSchema.safeParse(customContentEdit).success).toBe(false);
+    expect(editPanelInputSchema.safeParse(customContentEdit).success).toBe(false);
   });
 
   it('accepts a markdown config edit', () => {
     expect(
-      editPanelItemSchema.safeParse({
+      editPanelInputSchema.safeParse({
         source: 'config',
         type: 'markdown',
         panelId: 'md-1',
@@ -162,21 +158,14 @@ describe('by-value panel type registry', () => {
     });
   });
 
-  it('allows editing a panel of the same embeddable type', () => {
+  it('edits only panels of the same embeddable type', () => {
     expect(
-      getConfigPanelEditError('markdown', {
-        id: 'md-1',
-        type: MARKDOWN_EMBEDDABLE_TYPE,
-        config: { content: 'old' },
-        grid,
+      getEditableEmbeddableTypes({
+        source: 'config',
+        type: 'markdown',
+        config: { content: 'new', settings: { open_links_in_new_tab: true } },
       })
-    ).toBeUndefined();
-  });
-
-  it('rejects editing a panel of a different embeddable type', () => {
-    expect(
-      getConfigPanelEditError('markdown', { id: 'panel-1', type: 'lens', config: {}, grid })
-    ).toMatch(/Panel "panel-1" with type "lens" cannot be edited as markdown/);
+    ).toEqual([MARKDOWN_EMBEDDABLE_TYPE]);
   });
 });
 
@@ -188,16 +177,16 @@ describe('ML anomaly panel schemas', () => {
     config: { job_ids: ['job-1'], title: 'Anomaly charts of job-1' },
   };
 
-  it.each([
-    ['add_panels', addPanelsItemSchema],
-    ['add_section', addSectionPanelItemSchema],
-  ])('accepts an anomaly charts panel with title through %s', (_, schema) => {
-    expect(schema.safeParse(chartsBase).success).toBe(true);
-  });
+  it.each([['new panel', newPanelInputSchema]])(
+    'accepts an anomaly charts panel with title through %s',
+    (_, schema) => {
+      expect(schema.safeParse(chartsBase).success).toBe(true);
+    }
+  );
 
-  it('accepts ML anomaly panel edit_panels items', () => {
+  it('accepts ML anomaly panel edits', () => {
     expect(
-      editPanelItemSchema.safeParse({
+      editPanelInputSchema.safeParse({
         source: 'config' as const,
         type: 'ml_anomaly_charts' as const,
         panelId: 'charts-1',
@@ -205,7 +194,7 @@ describe('ML anomaly panel schemas', () => {
       }).success
     ).toBe(true);
     expect(
-      editPanelItemSchema.safeParse({
+      editPanelInputSchema.safeParse({
         source: 'config' as const,
         type: 'ml_anomaly_swimlane' as const,
         panelId: 'swim-1',
@@ -217,7 +206,7 @@ describe('ML anomaly panel schemas', () => {
       }).success
     ).toBe(true);
     expect(
-      editPanelItemSchema.safeParse({
+      editPanelInputSchema.safeParse({
         source: 'config' as const,
         type: 'ml_single_metric_viewer' as const,
         panelId: 'smv-1',
