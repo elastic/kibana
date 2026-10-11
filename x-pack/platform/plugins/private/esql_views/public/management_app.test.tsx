@@ -34,8 +34,7 @@ import type {
 type EsqlEditorProps = Omit<ESQLEditorProps, 'ref'>;
 
 const mockRunPreview = jest.fn().mockResolvedValue(undefined);
-const mockResetPreview = jest.fn();
-const mockResetPreviewIfQueryChanged = jest.fn();
+const mockClearPreviewErrorIfQueryChanged = jest.fn();
 const mockUseEsqlViewPreview = jest.fn<UseEsqlViewPreviewResult, [EsqlViewPreviewDependencies]>();
 const mockEsqlDataGrid = jest.fn();
 
@@ -162,8 +161,7 @@ describe('ManagementApp', () => {
     jest.clearAllMocks();
     mockRunPreview.mockResolvedValue(undefined);
     mockUseEsqlViewPreview.mockReturnValue({
-      resetPreview: mockResetPreview,
-      resetPreviewIfQueryChanged: mockResetPreviewIfQueryChanged,
+      clearPreviewErrorIfQueryChanged: mockClearPreviewErrorIfQueryChanged,
       error: undefined,
       hasRun: false,
       isLoading: false,
@@ -364,7 +362,7 @@ describe('ManagementApp', () => {
 
     fireEvent.click(screen.getByTestId('mockSelectHistoryQuery'));
     expect(screen.getByTestId('esqlViewQueryEditor')).toHaveValue(historyQuery);
-    expect(mockResetPreviewIfQueryChanged).toHaveBeenCalledWith(historyQuery);
+    expect(mockClearPreviewErrorIfQueryChanged).toHaveBeenCalledWith(historyQuery);
     expect(mockRunPreview).toHaveBeenLastCalledWith(
       { esql: historyQuery },
       expect.any(AbortController)
@@ -421,7 +419,7 @@ describe('ManagementApp', () => {
     expect(mockRunPreview).not.toHaveBeenCalled();
   });
 
-  it('matches the prototype preview accordion and configures the shared result grid', async () => {
+  it('keeps existing results visible while loading and configures the shared result grid', async () => {
     const client = createClient();
     const editorProps = jest.fn();
     const Editor = (props: EsqlEditorProps) => {
@@ -441,11 +439,10 @@ describe('ManagementApp', () => {
       rows: [['first'], ['second']],
     };
     mockUseEsqlViewPreview.mockReturnValue({
-      resetPreview: mockResetPreview,
-      resetPreviewIfQueryChanged: mockResetPreviewIfQueryChanged,
+      clearPreviewErrorIfQueryChanged: mockClearPreviewErrorIfQueryChanged,
       error: undefined,
       hasRun: true,
-      isLoading: false,
+      isLoading: true,
       result: previewResult,
       runPreview: mockRunPreview,
     });
@@ -461,6 +458,7 @@ describe('ManagementApp', () => {
     fireEvent.click(screen.getByText('ES|QL Query Results'));
 
     expect(await screen.findByTestId('mockEsqlDataGrid')).toHaveTextContent('2 preview rows');
+    expect(screen.queryByTestId('esqlViewPreviewLoading')).not.toBeInTheDocument();
     expect(mockEsqlDataGrid).toHaveBeenCalledWith(
       expect.objectContaining({
         columns: previewResult.columns,
@@ -492,6 +490,34 @@ describe('ManagementApp', () => {
     expect(
       screen.getByText('Run the query above to preview its results here.')
     ).toBeInTheDocument();
+  });
+
+  it('surfaces preview errors only through the ES|QL editor', async () => {
+    const client = createClient();
+    const editorProps = jest.fn();
+    const previewError = new Error('Preview request failed');
+    const Editor = (props: EsqlEditorProps) => {
+      editorProps(props);
+      return <MockEsqlEditor {...props} />;
+    };
+    client.getViews.mockResolvedValue({ views: [] });
+    mockUseEsqlViewPreview.mockReturnValue({
+      clearPreviewErrorIfQueryChanged: mockClearPreviewErrorIfQueryChanged,
+      error: previewError,
+      hasRun: true,
+      isLoading: false,
+      result: undefined,
+      runPreview: mockRunPreview,
+    });
+
+    renderApp(client, { EsqlEditor: Editor });
+
+    await screen.findByText('No ES|QL views found');
+    fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
+    fireEvent.click(screen.getByText('ES|QL Query Results'));
+
+    expect(editorProps.mock.lastCall?.[0].errors).toEqual([previewError]);
+    expect(screen.queryByTestId('esqlViewPreviewError')).not.toBeInTheDocument();
   });
 
   it('validates fields while creating a view and refetches after saving', async () => {
@@ -744,8 +770,7 @@ describe('ManagementApp', () => {
     });
     client.createView.mockResolvedValue({ acknowledged: true });
     mockUseEsqlViewPreview.mockReturnValue({
-      resetPreview: mockResetPreview,
-      resetPreviewIfQueryChanged: mockResetPreviewIfQueryChanged,
+      clearPreviewErrorIfQueryChanged: mockClearPreviewErrorIfQueryChanged,
       error: new Error('Preview request failed'),
       hasRun: true,
       isLoading: false,

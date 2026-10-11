@@ -167,9 +167,6 @@ export const translations = {
       defaultMessage: 'The query ran successfully but returned no results.',
     }
   ),
-  previewErrorTitle: i18n.translate('xpack.esqlViews.managementPage.previewErrorTitle', {
-    defaultMessage: 'Unable to preview query results',
-  }),
   nameRequiredErrorMessage: i18n.translate(
     'xpack.esqlViews.managementPage.nameRequiredErrorMessage',
     {
