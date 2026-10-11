@@ -17,7 +17,6 @@ const baseInput = {
   title: 'Checkout latency',
   symptom_hypothesis: 'Checkout requests are delayed because the payment dependency is timing out.',
   summary: 'P99 latency breached SLO',
-  severity: 'high' as const,
   confidence: 0.8,
 };
 
@@ -45,7 +44,7 @@ describe('createEventToolHandler', () => {
   it('passes explicit status through', async () => {
     await createEventToolHandler({
       eventSearchClient: {} as never,
-      eventInput: { ...baseInput, status: 'inactive' as const },
+      eventInput: { ...baseInput, status: 'inactive' },
       alertEventsClient: {} as never,
     });
 

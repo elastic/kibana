@@ -6,12 +6,12 @@
  */
 
 import type { SignificantEvent, SignalEntry } from '@kbn/significant-events-schema';
-import { getCalibratedSeverity } from './severity_calibration_guard';
+import { lockSeverityForCompletedInvestigation } from './severity_lock';
 
 const detectionSignal = (
   ruleUuid: string,
   verdict: Extract<SignalEntry, { type: 'detection' }>['verdict'] = 'confirms'
-): Extract<SignalEntry, { type: 'detection' }> => ({
+): SignalEntry => ({
   type: 'detection',
   stream_name: 'logs.test',
   description: `Signal for ${ruleUuid}`,
@@ -34,7 +34,6 @@ const makeEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
     stream_names: ['logs.test'],
     title: 'Test event',
     summary: 'Test summary',
-    confidence: 0.8,
     signals: [detectionSignal('rule-1')],
     investigations: [
       {
@@ -46,8 +45,10 @@ const makeEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
     ...overrides,
   } as SignificantEvent);
 
-const calibrate = (overrides: Partial<Parameters<typeof getCalibratedSeverity>[0]> = {}) =>
-  getCalibratedSeverity({
+const lock = (
+  overrides: Partial<Parameters<typeof lockSeverityForCompletedInvestigation>[0]> = {}
+) =>
+  lockSeverityForCompletedInvestigation({
     source: 'discovery',
     latestEvent: makeEvent(),
     proposedSeverity: 'high',
@@ -56,7 +57,7 @@ const calibrate = (overrides: Partial<Parameters<typeof getCalibratedSeverity>[0
     ...overrides,
   });
 
-describe('getCalibratedSeverity', () => {
+describe('lockSeverityForCompletedInvestigation', () => {
   it.each([
     ['a new event', { latestEvent: undefined }],
     ['a source-less write', { source: undefined }],
@@ -74,45 +75,43 @@ describe('getCalibratedSeverity', () => {
         }),
       },
     ],
-  ])('keeps the proposed severity for %s', (_, overrides) => {
-    expect(calibrate(overrides)).toBe('high');
+  ])('keeps the computed severity for %s', (_, overrides) => {
+    expect(lock(overrides)).toBe('high');
   });
 
   it.each(['high', 'low'] as const)(
-    'preserves the current severity when Discovery proposes %s for a known rule',
+    'preserves the current severity when Discovery computes %s for a known rule',
     (proposedSeverity) => {
-      expect(calibrate({ proposedSeverity })).toBe('medium');
+      expect(lock({ proposedSeverity })).toBe('medium');
     }
   );
 
   it('does not unlock for a new rule that is not confirmed', () => {
-    expect(calibrate({ proposedSignals: [detectionSignal('rule-2', 'inconclusive')] })).toBe(
-      'medium'
-    );
+    expect(lock({ proposedSignals: [detectionSignal('rule-2', 'inconclusive')] })).toBe('medium');
   });
 
-  it('accepts severity for a new confirmed rule', () => {
-    expect(calibrate({ proposedSignals: [detectionSignal('rule-2')] })).toBe('high');
+  it('accepts the computed severity for a new confirmed rule', () => {
+    expect(lock({ proposedSignals: [detectionSignal('rule-2')] })).toBe('high');
   });
 
-  it('accepts severity on inactive status', () => {
-    expect(calibrate({ proposedStatus: 'inactive' })).toBe('high');
+  it('accepts the computed severity on inactive status', () => {
+    expect(lock({ proposedStatus: 'inactive' })).toBe('high');
   });
 
-  it('accepts severity when reactivating an inactive event', () => {
-    expect(calibrate({ latestEvent: makeEvent({ status: 'inactive' }) })).toBe('high');
+  it('accepts the computed severity when reactivating an inactive event', () => {
+    expect(lock({ latestEvent: makeEvent({ status: 'inactive' }) })).toBe('high');
   });
 
   it('uses an unlocked write as the baseline for the next continuation', () => {
     const newRule = detectionSignal('rule-2');
-    const unlockedSeverity = calibrate({ proposedSignals: [newRule] });
+    const unlockedSeverity = lock({ proposedSignals: [newRule] });
     const newTip = makeEvent({
       severity: unlockedSeverity,
       signals: [detectionSignal('rule-1'), newRule],
     });
 
     expect(
-      calibrate({
+      lock({
         latestEvent: newTip,
         proposedSeverity: 'critical',
         proposedSignals: [newRule],

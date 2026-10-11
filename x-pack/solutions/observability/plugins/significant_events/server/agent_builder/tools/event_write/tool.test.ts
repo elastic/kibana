@@ -6,6 +6,13 @@
  */
 
 import type { RunContextStackEntry } from '@kbn/agent-builder-server';
+import type { SignalEntry, SignificantEvent } from '@kbn/significant-events-schema';
+import {
+  MAX_ASSESSMENT_NOTE_LENGTH,
+  MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+} from '@kbn/significant-events-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -15,7 +22,7 @@ import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '../../agents/discovery/di
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import { BulkWriteError, MAX_BULK_WRITE_ITEMS } from '../bulk_write';
 import { eventsWriteBulkHandler } from './handler';
-import { createEventsWriteTool, eventsWriteSchema } from './tool';
+import { createEventsWriteTool, eventsWriteItemSchema, eventsWriteSchema } from './tool';
 
 jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
@@ -29,19 +36,22 @@ jest.mock('./handler', () => ({
   eventsWriteBulkHandler: jest.fn(),
 }));
 
-const input = {
+const input: Partial<SignificantEvent> = {
   event_id: 'event-1',
-  status: 'active' as const,
+  status: 'active',
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
-  severity: 'high' as const,
+  severity: 'medium',
   confidence: 0.8,
 };
 
 const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
 
-const createTool = (telemetry: { trackAgentToolEventsWrite: jest.Mock }) => {
+const createTool = (
+  telemetry: { trackAgentToolEventsWrite: jest.Mock },
+  logger = loggingSystemMock.createLogger()
+) => {
   const getScopedClients = jest.fn().mockResolvedValue({
     getEventSearchClient: jest.fn().mockReturnValue({}),
     getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
@@ -51,7 +61,7 @@ const createTool = (telemetry: { trackAgentToolEventsWrite: jest.Mock }) => {
   return createEventsWriteTool({
     getScopedClients: getScopedClients as unknown as GetScopedClients,
     server: {} as SignificantEventsServer,
-    logger: loggingSystemMock.createLogger(),
+    logger,
     telemetry: telemetry as never,
   });
 };
@@ -92,8 +102,8 @@ describe('events_write tool', () => {
   });
 
   it('rejects duplicate detection rules anywhere in a write', () => {
-    const signal = {
-      type: 'detection' as const,
+    const signal: SignalEntry = {
+      type: 'detection',
       stream_name: 'logs.test',
       description: 'Found: error. Impact: requests failed.',
       verdict: 'confirms',
@@ -101,7 +111,7 @@ describe('events_write tool', () => {
       metadata: {
         rule_uuid: 'rule-1',
         detection_id: 'detection-1',
-        change_point_type: 'spike' as const,
+        change_point_type: 'spike',
         p_value: 0.01,
       },
     };
@@ -126,103 +136,39 @@ describe('events_write tool', () => {
     });
   });
 
-  describe('open high-severity confirms invariant', () => {
-    const signalWith = (verdict: string) => ({
-      type: 'detection' as const,
+  it('rejects mixing confirms and not_checked on the same item', () => {
+    const confirmsSignal: SignalEntry = {
+      type: 'detection',
       stream_name: 'logs.test',
       description: 'Found: matching failure logs at similar pre/post rates. Impact: not new.',
-      verdict,
+      verdict: 'confirms',
       evidence: { esql_query: 'FROM logs.test', result: 'found' },
       metadata: {
         rule_uuid: 'rule-1',
         detection_id: 'detection-1',
-        change_point_type: 'spike' as const,
+        change_point_type: 'spike',
         p_value: 0.01,
       },
+    };
+    const quiet: SignalEntry = {
+      type: 'detection',
+      stream_name: 'logs.test',
+      description: 'Rule Y: no backed query KI matched this detection.',
+      verdict: 'not_checked',
+      metadata: {
+        rule_uuid: 'rule-2',
+        detection_id: 'detection-2',
+        change_point_type: 'spike',
+        p_value: 0.2,
+      },
+    };
+    const result = eventsWriteSchema.safeParse({
+      items: [{ ...input, signals: [confirmsSignal, quiet] }],
     });
-
-    it('rejects a new active high item whose grounded signals lack a confirms verdict', () => {
-      const { event_id: _omitted, ...newEventInput } = input;
-      const result = eventsWriteSchema.safeParse({
-        items: [{ ...newEventInput, signals: [signalWith('inconclusive')] }],
-      });
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues.at(-1)?.message).toContain('requires at least one confirms');
-      }
-    });
-
-    it('accepts an active high continuation (event_id present) with only inconclusive grounded signals', () => {
-      expect(
-        eventsWriteSchema.safeParse({
-          items: [{ ...input, signals: [signalWith('inconclusive')] }],
-        }).success
-      ).toBe(true);
-    });
-
-    it('accepts an active high item backed by a confirms signal', () => {
-      expect(
-        eventsWriteSchema.safeParse({
-          items: [{ ...input, signals: [signalWith('confirms')] }],
-        }).success
-      ).toBe(true);
-    });
-
-    it('accepts an active medium item with only inconclusive grounded signals', () => {
-      expect(
-        eventsWriteSchema.safeParse({
-          items: [{ ...input, severity: 'medium' as const, signals: [signalWith('inconclusive')] }],
-        }).success
-      ).toBe(true);
-    });
-
-    it('rejects mixing confirms and not_checked on the same item', () => {
-      const quiet = {
-        type: 'detection' as const,
-        stream_name: 'logs.test',
-        description: 'Rule Y: no backed query KI matched this detection.',
-        verdict: 'not_checked' as const,
-        metadata: {
-          rule_uuid: 'rule-2',
-          detection_id: 'detection-2',
-          change_point_type: 'spike' as const,
-          p_value: 0.2,
-        },
-      };
-      const result = eventsWriteSchema.safeParse({
-        items: [{ ...input, signals: [signalWith('confirms'), quiet] }],
-      });
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues.at(-1)?.message).toContain('cannot include not_checked');
-      }
-    });
-
-    it('accepts an active high item whose only grounded signal is off_topic (observed-error path)', () => {
-      expect(
-        eventsWriteSchema.safeParse({
-          items: [{ ...input, signals: [signalWith('off_topic')] }],
-        }).success
-      ).toBe(true);
-    });
-
-    it('accepts an active high item whose signals carry no evidence (quiet rules)', () => {
-      const quiet = {
-        type: 'detection' as const,
-        stream_name: 'logs.test',
-        description: 'Rule X: no backed query KI matched this detection.',
-        verdict: 'not_checked',
-        metadata: {
-          rule_uuid: 'rule-1',
-          detection_id: 'detection-1',
-          change_point_type: 'spike' as const,
-          p_value: 0.01,
-        },
-      };
-      expect(eventsWriteSchema.safeParse({ items: [{ ...input, signals: [quiet] }] }).success).toBe(
-        true
-      );
-    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.at(-1)?.message).toContain('cannot include not_checked');
+    }
   });
 
   it('normalizes an empty event_id to an omitted event_id', () => {
@@ -231,14 +177,6 @@ describe('events_write tool', () => {
     });
 
     expect(result.items[0].event_id).toBeUndefined();
-  });
-
-  it('accepts medium for known-ongoing events', () => {
-    const result = eventsWriteSchema.safeParse({
-      items: [{ ...input, severity: 'medium' }],
-    });
-
-    expect(result.success).toBe(true);
   });
 
   it('accepts only discovery as the optional caller source', () => {
@@ -448,27 +386,6 @@ describe('events_write tool', () => {
     );
   });
 
-  it('writes unenriched causal features when the lookup fails', async () => {
-    getFeatures.mockRejectedValue(new Error('ki index unavailable'));
-    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
-      { index: 0, event_uuid: 'u', event_id: 'e', status: 'open', written: true },
-    ]);
-    const causalFeatures = [{ feature_id: 'checkout-api', name: 'Checkout API' }];
-
-    await invokeHandler(
-      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
-      { items: [{ ...input, causal_features: causalFeatures }] },
-      createMockToolContext()
-    );
-
-    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
-      expect.objectContaining({
-        eventSearchClient: {},
-        inputs: [expect.objectContaining({ causal_features: causalFeatures })],
-      })
-    );
-  });
-
   it('returns aligned results and tracks each item', async () => {
     (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
       {
@@ -552,5 +469,73 @@ describe('events_write tool', () => {
         ],
       })
     );
+  });
+});
+
+describe('eventsWriteItemSchema', () => {
+  const validItem = {
+    status: 'active',
+    stream_names: ['logs.test'],
+    title: 'Test event',
+    symptom_hypothesis: 'Requests are delayed because a dependency is timing out.',
+    summary: 'P99 latency breached SLO',
+    severity: 'medium',
+    confidence: 0.82,
+    assessment_note: 'Verified via execute_esql',
+    causal_features: [],
+    blast_radius: [],
+    signals: [
+      {
+        type: 'detection',
+        stream_name: 'logs.test',
+        description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH),
+        verdict: 'not_checked',
+        metadata: {
+          detection_id: 'det-1',
+          rule_uuid: 'rule-1',
+          change_point_type: 'spike',
+          p_value: 0.01,
+        },
+      },
+    ],
+  };
+
+  it('accepts a valid item at the field length boundaries', () => {
+    expect(eventsWriteItemSchema.safeParse(validItem).success).toBe(true);
+  });
+
+  it('requires the agent to propose a severity', () => {
+    const { severity: _omitted, ...withoutSeverity } = validItem;
+
+    expect(eventsWriteItemSchema.safeParse(withoutSeverity).success).toBe(false);
+  });
+
+  it.each(['critical', 'high', 'medium', 'low'])('accepts and keeps severity %s', (severity) => {
+    const result = eventsWriteItemSchema.safeParse({ ...validItem, severity });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.severity).toBe(severity);
+    }
+  });
+
+  it('rejects an unknown severity', () => {
+    expect(eventsWriteItemSchema.safeParse({ ...validItem, severity: 'info' }).success).toBe(false);
+  });
+
+  it.each([
+    [
+      'signal description',
+      {
+        signals: [
+          { ...validItem.signals[0], description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH + 1) },
+        ],
+      },
+    ],
+    ['symptom_hypothesis', { symptom_hypothesis: 'x'.repeat(MAX_SYMPTOM_HYPOTHESIS_LENGTH + 1) }],
+    ['summary', { summary: 'x'.repeat(MAX_SUMMARY_LENGTH + 1) }],
+    ['assessment_note', { assessment_note: 'x'.repeat(MAX_ASSESSMENT_NOTE_LENGTH + 1) }],
+  ])('rejects %s exceeding the length limit', (_, overrides) => {
+    expect(eventsWriteItemSchema.safeParse({ ...validItem, ...overrides }).success).toBe(false);
   });
 });

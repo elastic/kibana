@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { Severity, SignificantEvent } from '@kbn/significant-events-schema';
 import { createBulkWriteOutcomeUnknownError, type CompactBulkError } from '../bulk_write';
 
 export type EventsWriteInput = Pick<
@@ -15,17 +15,17 @@ export type EventsWriteInput = Pick<
   | 'title'
   | 'symptom_hypothesis'
   | 'summary'
-  | 'severity'
   | 'confidence'
   | 'assessment_note'
   | 'signals'
   | 'causal_features'
   | 'blast_radius'
   | 'workflow_execution_id'
-> & {
-  event_id?: string;
-  conversation_id?: string;
-};
+> &
+  Partial<Pick<SignificantEvent, 'severity'>> & {
+    event_id?: string;
+    conversation_id?: string;
+  };
 
 export interface EventsWriteResult {
   index: number;
@@ -35,6 +35,7 @@ export interface EventsWriteResult {
   /** Set when the stored title and symptom_hypothesis were preserved because this continuation
    *  introduced no new rule UUIDs — preventing identity hijack by an unrelated condition. */
   narrative_preserved?: true;
+  severity: Severity;
 }
 
 export interface EventsWriteDuplicateResult {
@@ -45,6 +46,8 @@ export interface EventsWriteDuplicateResult {
   skipped: true;
   reason: 'existing_active_event';
   existing_event_id: string;
+  /** Stored tier of the active event this write deduplicated into. */
+  severity?: Severity;
 }
 
 export interface EventsWriteNoOpResult {
@@ -54,6 +57,8 @@ export interface EventsWriteNoOpResult {
   written: false;
   skipped: true;
   reason: 'unchanged_outcome';
+  /** Stored tier that the unchanged outcome matched. */
+  severity?: Severity;
 }
 
 export interface EventsWriteFailureResult {
@@ -91,7 +96,7 @@ export type EventsWriteBulkResult =
 
 export type BulkResults = Array<EventsWriteBulkResult | undefined>;
 
-/** Fills in every still-undefined slot or throws. */
+/** Fills in every still-`undefined` slot or throws — every candidate must resolve to exactly one result. */
 export const alignResults = (results: BulkResults, message: string): EventsWriteBulkResult[] => {
   const aligned: EventsWriteBulkResult[] = [];
   for (const result of results) {

@@ -109,9 +109,7 @@ export const eventsWriteItemSchema = lazySchema(() =>
     )
     .superRefine((item, ctx) => {
       const signals = item.signals ?? [];
-      const grounded = signals.filter((s) => s.evidence != null);
-      const hasConfirms = grounded.some((s) => s.verdict === 'confirms');
-      const hasOffTopicObservedError = grounded.some((s) => s.verdict === 'off_topic');
+      const hasConfirms = signals.some((s) => s.evidence != null && s.verdict === 'confirms');
       const hasNotChecked = signals.some((s) => s.verdict === 'not_checked');
 
       if (hasConfirms && hasNotChecked) {
@@ -119,22 +117,6 @@ export const eventsWriteItemSchema = lazySchema(() =>
           code: z.ZodIssueCode.custom,
           message:
             'A confirms item cannot include not_checked signals; emit each not_checked detection as its own inactive item.',
-        });
-      }
-      // Continuations inherit prior severity; this cycle's signals may be
-      // inconclusive (telemetry gap, errored query) without a new confirms.
-      if (
-        item.event_id === undefined &&
-        item.status === 'active' &&
-        (item.severity === 'high' || item.severity === 'critical') &&
-        grounded.length > 0 &&
-        !hasConfirms &&
-        !hasOffTopicObservedError
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            'An active event at "high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or a non-active status.',
         });
       }
     })
@@ -202,7 +184,8 @@ const enrichCausalFeatures = async (
   }
 
   try {
-    // `featureIds` matches slug-style references and `id` matches uuid-style references.
+    // Stored docs keep the derived uuid in their root `id`, so `id` matches uuid-style
+    // references and `featureIds` (feature.slug) matches slug-style ones.
     const references = [...causalFeatures, ...blastRadiusEntries];
     const featureIds = [...new Set(references.map(({ feature_id: featureId }) => featureId))];
     const streamNames = [
@@ -260,25 +243,14 @@ const enrichCausalFeatures = async (
           item.stream_names
         );
         return feature
-          ? {
-              ...causalFeature,
-              feature_id: feature.id,
-              type: feature.type,
-              subtype: feature.subtype,
-            }
+          ? { ...causalFeature, type: feature.type, subtype: feature.subtype }
           : causalFeature;
       }),
       // Blast radius rows carry their own row-shape discriminator in `type`; only the
       // indicator's subtype is enriched.
       blast_radius: item.blast_radius?.map((entry) => {
         const feature = resolveFeature(entry.feature_id, entry.stream_name, item.stream_names);
-        return feature
-          ? {
-              ...entry,
-              feature_id: feature.id,
-              subtype: feature.subtype,
-            }
-          : entry;
+        return feature ? { ...entry, subtype: feature.subtype } : entry;
       }),
     }));
   } catch (error) {
@@ -315,12 +287,15 @@ export function createEventsWriteTool({
       Discovery calls must set top-level \`source\` to \`"discovery"\`.
 
       **With event_id**: append a version to an existing event with the supplied status.
-      Signals and topology are merged with prior versions. No-op if severity and status are
-      unchanged (written: false, reason: unchanged_outcome). For Discovery writes, a completed
-      investigation makes the stored severity authoritative. It is preserved unless Discovery
-      marks the event inactive, reactivates an inactive event, or submits a confirmed
-      rule UUID absent from the current event. When no new rule UUIDs are introduced, title and
-      symptom_hypothesis are frozen to the stored values and narrative_preserved: true is returned.
+      Signals and topology are merged with prior versions. \`severity\` is your verdict under its
+      field contract, decided from the merged confirming signals; the writer stores it as given
+      (an inactive event is low) and returns the stored tier. No-op if the stored severity and
+      status are unchanged (written: false, reason: unchanged_outcome). For Discovery writes, a
+      completed investigation makes the stored severity authoritative over the newly proposed
+      one. It is preserved unless Discovery marks the event inactive, reactivates an inactive event, or
+      submits a confirmed rule UUID absent from the current event. When no new rule UUIDs are
+      introduced, title and symptom_hypothesis are frozen to the stored values and
+      narrative_preserved: true is returned.
 
       **Without event_id**: find-or-create. When the item has confirmed rules, scans all
       currently-active events for one that confirms every submitted confirmed rule and shares at
@@ -387,6 +362,7 @@ export function createEventsWriteTool({
                 written: result.written,
                 stream_names: input.stream_names,
                 error_message: isBulkError ? result.error.reason : undefined,
+                ...(result.written ? { severity: result.severity } : {}),
               }),
           });
         });
