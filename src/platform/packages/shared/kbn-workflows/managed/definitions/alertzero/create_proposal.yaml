@@ -79,6 +79,15 @@ triggers:
           description: >
             Set by the caller when its autonomy policy already permits this
             action. Defaults to false so the gate is fail-closed.
+        proposalId:
+          type: string
+          description: >
+            The id to create the proposal under, for a caller that derives it
+            from what it is proposing. An id that already exists fails the run
+            with a conflict before anything is gated. The caller owns the id, so
+            it must include the space and anything else that has to keep two
+            producers apart. Must be a UUID. Omit for a proposal that is always
+            new.
       # `origin` is absent on purpose: this workflow owns it. The gate closes
       # its own inputs to additional properties, so accepting one here would
       # only let a caller pass a value that the forward below has to discard.
@@ -135,6 +144,7 @@ steps:
     type: workflow.execute
     with:
       workflow-id: system-create-proposal
+      run-as-mode: inherit
       inputs:
         conversationId: "${{ inputs.conversationId }}"
         title: "${{ inputs.title }}"
@@ -146,6 +156,7 @@ steps:
         confidence: "${{ inputs.confidence }}"
         expiresIn: "${{ inputs.expiresIn }}"
         autoApprove: "${{ steps.resolve_auto_approve.output.value }}"
+        proposalId: "${{ inputs.proposalId }}"
         origin: alertzero
 
   # `{{ }}` here, matching how the gate emits these same three values, so an

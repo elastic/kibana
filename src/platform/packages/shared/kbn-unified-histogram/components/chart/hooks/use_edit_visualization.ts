@@ -8,7 +8,6 @@
  */
 
 import type { DataSource } from '@kbn/data-source';
-import { DataViewSource } from '@kbn/data-source';
 import type { TimeRange } from '@kbn/es-query';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -23,22 +22,20 @@ export const useEditVisualization = ({
   dataSource,
   relativeTimeRange,
   lensAttributes,
-  isPlainRecord,
 }: {
   services: UnifiedHistogramServices;
   dataSource: DataSource | undefined;
   relativeTimeRange?: TimeRange;
   lensAttributes?: TypedLensByValueInput['attributes'];
-  isPlainRecord?: boolean;
 }) => {
   const [canVisualize, setCanVisualize] = useState(false);
 
   const checkCanVisualize = useCallback(async () => {
-    if (!dataSource?.id || isPlainRecord) {
+    if (!dataSource?.id) {
       return false;
     }
 
-    if (!(dataSource instanceof DataViewSource)) {
+    if (dataSource.kind !== 'index-pattern') {
       return false;
     }
 
@@ -57,7 +54,7 @@ export const useEditVisualization = ({
     );
 
     return Boolean(compatibleActions.length);
-  }, [dataSource, isPlainRecord, services.uiActions]);
+  }, [dataSource, services.uiActions]);
 
   const onEditVisualization = useMemo(() => {
     if (!canVisualize || !lensAttributes) {

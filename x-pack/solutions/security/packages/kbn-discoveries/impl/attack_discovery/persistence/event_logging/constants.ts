@@ -8,6 +8,10 @@
 // Event log provider for Attack Discovery
 export const ATTACK_DISCOVERY_EVENT_PROVIDER = 'securitySolution.attackDiscovery' as const;
 
+// Tags events written by a service account (e.g. an AlertZero Worker), which no user owns, so
+// every user in the space with access to Attack Discovery can read them
+export const ATTACK_DISCOVERY_EVENT_SERVICE_ACCOUNT_TAG = 'serviceAccount' as const;
+
 // Event log action constants
 export const ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED =
   'alert-retrieval-started' as const;

@@ -22,7 +22,7 @@ describe('RulesListPrompts', () => {
   it('shows the rules-specific missing privileges title when unauthorized', () => {
     renderWithI18n(<RulesListPrompts {...defaultProps} showNoAuthPrompt />);
     const prompt = screen.getByTestId('noPermissionPrompt');
-    expect(prompt).toHaveTextContent('No permissions to read rules');
+    expect(prompt).toHaveTextContent('No permissions to read Classic rules');
     // The generic "rules and alerts" copy should not be used on the rules page.
     expect(prompt).not.toHaveTextContent('No permissions to read rules and alerts');
   });

@@ -17,6 +17,7 @@ import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, catchError, from, map, of, type Subscription } from 'rxjs';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
+import { NightshiftSettingsLocatorDefinition } from '../common/locators';
 import type {
   NightshiftPublicSetup,
   NightshiftPublicStart,
@@ -38,8 +39,13 @@ export class NightshiftPlugin
 
   constructor(private readonly context: PluginInitializerContext) {}
 
-  setup(coreSetup: CoreSetup<NightshiftStartDependencies>): NightshiftPublicSetup {
+  setup(
+    coreSetup: CoreSetup<NightshiftStartDependencies>,
+    pluginsSetup: NightshiftSetupDependencies
+  ): NightshiftPublicSetup {
     const startServicesPromise = coreSetup.getStartServices();
+
+    pluginsSetup.share.url.locators.create(new NightshiftSettingsLocatorDefinition());
 
     coreSetup.application.register({
       id: NIGHTSHIFT_APP_ID,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -20,9 +20,14 @@ import { getKiIdentificationStatusToolHandler } from './handler';
 export const SIGNIFICANT_EVENTS_KI_IDENTIFICATION_STATUS_TOOL_ID =
   'platform.sig_events.ki_identification_status';
 
-const onboardingStatusSchema = z.object({
-  stream_name: z.string().max(MAX_ID_LENGTH).describe('Target stream name, e.g. "logs.ecs.nginx".'),
-});
+const onboardingStatusSchema = lazySchema(() =>
+  z.object({
+    stream_name: z
+      .string()
+      .max(MAX_ID_LENGTH)
+      .describe('Target stream name, e.g. "logs.ecs.nginx".'),
+  })
+);
 
 export const createKiIdentificationStatusTool = ({
   server,
