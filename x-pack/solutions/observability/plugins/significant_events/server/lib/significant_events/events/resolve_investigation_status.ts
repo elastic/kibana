@@ -6,86 +6,53 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { ExecutionStatus, isTerminalStatus, type WorkflowExecutionDto } from '@kbn/workflows';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import pLimit from 'p-limit';
-import {
-  INVESTIGATE_STEP_ID,
-  investigationStateSchema,
-  type InvestigationRunStatus,
-} from '@kbn/significant-events-schema';
+import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
+import type { InvestigationRunStatus } from '@kbn/significant-events-schema';
 
-const INVESTIGATION_STATUS_READ_CONCURRENCY = 5;
+/** Matches the shared list API's bound on its `id` filter. */
+const MAX_IDS_PER_READ = 100;
 
-export const resolveStatusFromExecution = (
-  execution: Pick<WorkflowExecutionDto, 'status' | 'stepExecutions'>
-): InvestigationRunStatus => {
-  if (!isTerminalStatus(execution.status)) {
-    return 'pending';
-  }
-
-  const stepExecution = (execution.stepExecutions ?? [])
-    .filter((step) => step.stepId === INVESTIGATE_STEP_ID)
-    .sort((a, b) => a.stepExecutionIndex - b.stepExecutionIndex)
-    .at(-1);
-
-  if (stepExecution?.error) {
-    return 'failed';
-  }
-
-  const output = stepExecution?.output as { structured_output?: unknown } | undefined;
-  if (investigationStateSchema.safeParse(output?.structured_output).success) {
-    return 'complete';
-  }
-
-  if (execution.status !== ExecutionStatus.COMPLETED) {
-    return 'failed';
-  }
-
-  return 'pending';
-};
-
+/**
+ * Reports the state of each investigation a significant event lists, from the shared
+ * investigations API: `pending` while its agent runs, `complete`
+ * otherwise. The ids are investigation (conversation) ids. An id the caller cannot read, or that
+ * names no investigation (for example a workflow execution id recorded before investigations were
+ * conversations), is omitted.
+ */
 export const resolveInvestigationStatuses = async ({
-  workflowsManagement,
+  agenticInvestigations,
   request,
-  spaceId,
-  workflowExecutionIds,
+  investigationIds,
   logger,
 }: {
-  workflowsManagement?: WorkflowsServerPluginSetup;
+  agenticInvestigations?: Pick<AgenticInvestigationsPluginStart, 'getInvestigationsClient'>;
   request: KibanaRequest;
-  spaceId: string;
-  workflowExecutionIds: string[];
+  investigationIds: string[];
   logger: Logger;
 }): Promise<Record<string, InvestigationRunStatus>> => {
-  const uniqueIds = [...new Set(workflowExecutionIds.filter(Boolean))];
+  const uniqueIds = [...new Set(investigationIds.filter(Boolean))];
 
-  if (!workflowsManagement) {
-    logger.debug('Workflows management not available, cannot resolve investigation statuses');
+  if (!agenticInvestigations) {
+    logger.debug('Agentic investigations not available, cannot resolve investigation statuses');
     return Object.fromEntries(uniqueIds.map((id) => [id, 'unavailable'] as const));
   }
 
-  const limit = pLimit(INVESTIGATION_STATUS_READ_CONCURRENCY);
-  const entries = await Promise.all(
-    uniqueIds.map((id) =>
-      limit(async () => {
-        try {
-          const execution = await workflowsManagement.management
-            .getClient(request)
-            .getWorkflowExecution(id, spaceId, {
-              includeOutput: true,
-            });
-          return execution ? ([id, resolveStatusFromExecution(execution)] as const) : undefined;
-        } catch (error) {
-          const reason = error instanceof Error ? error.message : String(error);
-          logger.debug(
-            `Could not resolve investigation status for workflow execution "${id}": ${reason}`
-          );
-          return [id, 'unavailable'] as const;
-        }
-      })
-    )
-  );
-
-  return Object.fromEntries(entries.filter((entry) => entry != null));
+  const client = agenticInvestigations.getInvestigationsClient(request);
+  const statuses: Record<string, InvestigationRunStatus> = {};
+  for (let start = 0; start < uniqueIds.length; start += MAX_IDS_PER_READ) {
+    const chunk = uniqueIds.slice(start, start + MAX_IDS_PER_READ);
+    try {
+      const { results } = await client.list({ id: chunk, per_page: chunk.length });
+      for (const { id, in_progress: inProgress } of results) {
+        statuses[id] = inProgress ? 'pending' : 'complete';
+      }
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      logger.debug(`Could not resolve investigation statuses: ${reason}`);
+      for (const id of chunk) {
+        statuses[id] = 'unavailable';
+      }
+    }
+  }
+  return statuses;
 };

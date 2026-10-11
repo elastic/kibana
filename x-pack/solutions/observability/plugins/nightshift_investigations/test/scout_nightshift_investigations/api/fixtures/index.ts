@@ -24,6 +24,24 @@ export {
 } from './helpers';
 export type { SeedTimeWindow } from './helpers';
 export {
+  cancelRunsOf,
+  cancelWorkflowRuns,
+  createAlertStartWorkflow,
+  deleteWorkflow,
+  findInvestigationBySubject,
+  findOrCreateSlackThread,
+  getSharedInvestigation,
+  listSharedInvestigations,
+  makeAlertSnapshot,
+  runAlertStartWorkflow,
+  setInvestigationStatus,
+  startInvestigation,
+  startUnresponsiveLlm,
+  waitForInvestigation,
+  waitForInvestigationInProgress,
+} from './write_path';
+export type { SharedInvestigation, SharedInvestigationSubject } from './write_path';
+export {
   NIGHTSHIFT_MANAGE_ROLE,
   NIGHTSHIFT_READ_ROLE,
   NIGHTSHIFT_NO_ACCESS_ROLE,

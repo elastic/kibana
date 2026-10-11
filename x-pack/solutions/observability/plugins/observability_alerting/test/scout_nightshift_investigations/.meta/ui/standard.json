@@ -1,5 +1,5 @@
 {
-  "sha1": "742363c821cef4f4c84734497dedbea2c4fddbd5",
+  "sha1": "a823c0f840ed87253b5fcbef7ea9b63a473aef83",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout_nightshift_investigations/ui/tests/inbox_investigation_actions.spec.ts",
-        "line": 97,
-        "column": 22
+        "line": 111,
+        "column": 9
       }
     },
     {
@@ -32,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout_nightshift_investigations/ui/tests/inbox_investigation_actions.spec.ts",
-        "line": 150,
-        "column": 18
+        "line": 162,
+        "column": 39
       }
     },
     {
@@ -48,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout_nightshift_investigations/ui/tests/inbox_investigation_actions.spec.ts",
-        "line": 171,
-        "column": 26
+        "line": 185,
+        "column": 13
       }
     }
   ]

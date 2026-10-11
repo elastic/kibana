@@ -11,19 +11,16 @@ import type { NotifiableInvestigation } from './notification_delivery';
 const URL = 'https://kibana.example.com/app/nightshift?investigationId=inv-1';
 
 const completed = (overrides: Partial<NotifiableInvestigation> = {}): NotifiableInvestigation => ({
+  investigation_id: 'inv-1',
   title: 'Checkout latency spike',
-  status: 'completed',
   severity: 'high',
   summary: 'p99 latency on checkout rose after the 14:02 deploy of payments-api.',
   impact: {
-    entities: [
-      { name: 'checkout', type: 'service' },
-      { name: 'payments-api', type: 'service' },
-    ],
+    entities: [{ name: 'checkout' }, { name: 'payments-api' }],
   },
   recommendations: [
-    { title: 'Roll back payments-api to v1.41', confidence: 0.8 },
-    { title: 'Raise the connection pool', confidence: 0.5 },
+    { title: 'Roll back payments-api to v1.41' },
+    { title: 'Raise the connection pool' },
   ],
   ...overrides,
 });
@@ -82,7 +79,7 @@ describe('formatInvestigationSlackMessage', () => {
       investigation: completed({
         title: 'Latency <checkout> & friends',
         summary: 'Errors > 5% on <api>',
-        recommendations: [{ title: 'Restart <pod>', confidence: 0.9 }],
+        recommendations: [{ title: 'Restart <pod>' }],
       }),
       url: URL,
       automationName: 'A & B',
@@ -110,7 +107,7 @@ describe('formatInvestigationSlackMessage', () => {
   it('posts a short failure message with the recorded error', () => {
     expect(
       formatInvestigationSlackMessage({
-        investigation: completed({ status: 'failed', error: 'Agent timed out after 30m' }),
+        investigation: completed({ error: 'Agent timed out after 30m' }),
         phase: 'failed',
         url: URL,
         automationName: 'Prod critical alerts',

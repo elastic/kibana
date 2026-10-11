@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID } from '../tools/investigation_progress_report/tool';
+import { SET_HYPOTHESES_TOOL_ID } from '@kbn/agentic-investigations-plugin/common';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import {
   isEvidenceCall,
@@ -268,15 +268,11 @@ describe('renderMemoryTranscript with evidenceOnly', () => {
       'CORTEX_PAGE'
     ),
     tool('nightshift_sandbox_bash', { command: 'cat /workspace/decision-trees/x.md' }, 'TREE_BODY'),
-    tool(
-      SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
-      { summary: 'PROGRESS_SUMMARY' },
-      'ok'
-    ),
+    tool(SET_HYPOTHESES_TOOL_ID, { hypotheses: [{ candidate: 'PROGRESS_SUMMARY' }] }, 'ok'),
     tool('nightshift_sandbox_bash', { command: 'esql "FROM metrics-redis*"' }, 'evicted_keys=4210'),
   ];
 
-  it('drops seeded reads and progress reports with their results, keeping the other calls', () => {
+  it('drops seeded reads and recorded findings with their results, keeping the other calls', () => {
     const text = renderMemoryTranscript({
       task: 't',
       investigation,

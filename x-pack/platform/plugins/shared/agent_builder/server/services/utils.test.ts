@@ -406,6 +406,108 @@ describe('getUserFromRequest', () => {
     expect(result).toEqual({ id: 'profile-456', username: 'some-user', isAdmin: false });
     expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
   });
+
+  describe('fake requests authenticated with an API key', () => {
+    const apiKeyId = 'task-api-key-id';
+    const createApiKeyFakeRequest = () =>
+      httpServerMock.createFakeKibanaRequest({
+        headers: {
+          authorization: `ApiKey ${Buffer.from(`${apiKeyId}:secret`).toString('base64')}`,
+        },
+      });
+
+    it('resolves the key creator profile uid for an un-enriched request, like the HTTP path', async () => {
+      security.authc.getCurrentUser.mockReturnValue(null);
+      esClient.security.authenticate.mockResolvedValue({
+        username: 'elastic',
+        authentication_type: 'api_key',
+      } as any);
+      esClient.security.getApiKey.mockResolvedValue({
+        api_keys: [{ id: apiKeyId, username: 'elastic', profile_uid: 'profile-elastic' }],
+      } as any);
+
+      const result = await getUserFromRequest({
+        request: createApiKeyFakeRequest(),
+        security,
+        esClient,
+      });
+
+      expect(result).toEqual({ id: 'profile-elastic', username: 'elastic', isAdmin: false });
+      expect(esClient.security.getApiKey).toHaveBeenCalledWith({
+        with_profile_uid: true,
+        id: apiKeyId,
+      });
+    });
+
+    it('resolves the key creator profile uid for a request enriched with a username only', async () => {
+      // Enrichment hides authentication_type and authentication_realm.
+      security.authc.getCurrentUser.mockReturnValue({ username: 'elastic' } as any);
+      esClient.security.getApiKey.mockResolvedValue({
+        api_keys: [{ id: apiKeyId, username: 'elastic', profile_uid: 'profile-elastic' }],
+      } as any);
+
+      const result = await getUserFromRequest({
+        request: createApiKeyFakeRequest(),
+        security,
+        esClient,
+      });
+
+      expect(result).toEqual({ id: 'profile-elastic', username: 'elastic', isAdmin: false });
+      expect(esClient.security.authenticate).not.toHaveBeenCalled();
+    });
+
+    it('keeps the enriched profile uid without looking up the key', async () => {
+      security.authc.getCurrentUser.mockReturnValue({
+        username: 'originating-user',
+        profile_uid: 'profile-originating',
+      } as any);
+
+      const result = await getUserFromRequest({
+        request: createApiKeyFakeRequest(),
+        security,
+        esClient,
+      });
+
+      expect(result).toEqual({
+        id: 'profile-originating',
+        username: 'originating-user',
+        isAdmin: false,
+      });
+      expect(esClient.security.getApiKey).not.toHaveBeenCalled();
+    });
+
+    it('leaves the id unset when the key was created by another user than the enriched one', async () => {
+      security.authc.getCurrentUser.mockReturnValue({ username: 'originating-user' } as any);
+      esClient.security.getApiKey.mockResolvedValue({
+        api_keys: [{ id: apiKeyId, username: 'key-owner', profile_uid: 'profile-key-owner' }],
+      } as any);
+
+      const result = await getUserFromRequest({
+        request: createApiKeyFakeRequest(),
+        security,
+        esClient,
+      });
+
+      expect(result).toEqual({ id: undefined, username: 'originating-user', isAdmin: false });
+    });
+
+    it('does not look up a key for an un-enriched request that is not authenticated with one', async () => {
+      security.authc.getCurrentUser.mockReturnValue(null);
+      esClient.security.authenticate.mockResolvedValue({
+        username: 'elastic',
+        authentication_type: 'realm',
+      } as any);
+
+      const result = await getUserFromRequest({
+        request: createApiKeyFakeRequest(),
+        security,
+        esClient,
+      });
+
+      expect(result).toEqual({ id: undefined, username: 'elastic', isAdmin: false });
+      expect(esClient.security.getApiKey).not.toHaveBeenCalled();
+    });
+  });
 });
 
 describe('isAdminFromRequest', () => {

@@ -61,8 +61,13 @@ const collectStepsByType = (steps: WorkflowStep[], type: string): WorkflowStep[]
   return matches;
 };
 
+const workflow = parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml) as {
+  settings: { concurrency: { key: string; strategy: string; max: number } };
+  triggers: Array<{ inputs: { properties: Record<string, unknown>; required: string[] } }>;
+};
+
 describe('Nightshift investigation workflow', () => {
-  it('persists the shared investigation output without sig-events write-back', () => {
+  it('records the investigation through the agent tools rather than persist steps', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.id).toBe('system-nightshift-investigation');
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(2);
     expect(investigation.name).toBe('Nightshift Investigation');
@@ -73,38 +78,12 @@ describe('Nightshift investigation workflow', () => {
       'emit_investigation_started',
       'notify_started',
       'investigate',
-      'persist_investigation_completed',
-      'render_investigation_canvas',
-      'list_conversation_attachments',
-      'find_investigation_canvas',
-      'update_investigation_canvas',
-      'add_investigation_canvas',
-      'persist_investigation_failed',
       'emit_investigation_completed',
       'emit_investigation_failed',
       'notify_completed',
       'notify_failed',
       'fail_investigation',
     ]);
-    expect(investigation.steps.some((step) => step.name === 'merge_investigation_gaps')).toBe(
-      false
-    );
-
-    const persistCompleted = requireStep('persist_investigation_completed');
-    expect(persistCompleted.with?.body).toEqual(
-      expect.objectContaining({
-        status: 'completed',
-        conversation_id: '${{ steps.investigate.output.conversation_id }}',
-      })
-    );
-    expect(persistCompleted.with?.body).not.toHaveProperty('trigger_feedback');
-    expect(persistCompleted.with?.body).not.toHaveProperty('blind_spots');
-    expect(persistCompleted.with?.body).not.toHaveProperty('timeline');
-    expect(persistCompleted.with?.body).toEqual(
-      expect.objectContaining({
-        impact: '${{ steps.investigate.output.structured_output.impact }}',
-      })
-    );
     expect(requireStep('investigate').with?.message).toContain('{{ inputs.context | json }}');
   });
 
@@ -125,6 +104,35 @@ describe('Nightshift investigation workflow', () => {
       '{{ steps.resolve_model.output.connector_id }}'
     );
     expect(requireStep('investigate')['connector-id-by-feature']).toBeUndefined();
+  });
+
+  it('runs one execution per investigation at a time, in arrival order', () => {
+    expect(workflow.settings.concurrency).toEqual({
+      key: 'investigation:{{ inputs.investigation_id | default: execution.id }}',
+      strategy: 'queue',
+      max: 1,
+    });
+  });
+
+  it('takes the investigation and its subjects as inputs, and no concurrency key', () => {
+    const [{ inputs }] = workflow.triggers;
+    expect(Object.keys(inputs.properties)).toEqual(
+      expect.arrayContaining(['investigation_id', 'subjects', 'context'])
+    );
+    expect(inputs.properties).not.toHaveProperty('concurrency_key');
+    // Agent Builder titles the investigation from its first round; `title` is still accepted.
+    expect(inputs.required).toEqual(['message']);
+    expect(inputs.properties).toHaveProperty('title');
+  });
+
+  it('lets the agent record its findings: no output schema, no conversation of its own', () => {
+    const investigate = requireStep('investigate') as WorkflowStep & Record<string, unknown>;
+    expect(investigate).not.toHaveProperty('create-conversation');
+    expect(investigate).not.toHaveProperty('public-conversation');
+    expect(investigate.with).not.toHaveProperty('schema');
+    expect(investigate.with).not.toHaveProperty('metadata');
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toMatch(/ai\.attachment\./);
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toContain('method: PATCH');
   });
 
   it('keeps each notification failure nonfatal and selects the terminal phase from the agent result', () => {
@@ -254,7 +262,7 @@ describe('Nightshift investigation workflow', () => {
     expect(unscoped.map(({ name, with: params }) => `${name}: ${params?.path}`)).toEqual([]);
   });
 
-  it('addresses a continued investigation by its id rather than the run', () => {
+  it('addresses the investigation by its id rather than the run', () => {
     const requestSteps = collectStepsByType(investigation.steps, 'kibana.request');
 
     for (const { with: params } of requestSteps) {
@@ -265,32 +273,27 @@ describe('Nightshift investigation workflow', () => {
     });
   });
 
-  it('continues the conversation the investigation record names', () => {
+  it('continues the conversation _ensure resolves', () => {
     expect(requireStep('investigate').with).toMatchObject({
       conversation_id: '${{ steps.persist_investigation_started.output.conversation_id }}',
     });
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toContain('inputs.conversation_id');
   });
 
-  it('knows nothing about Slack', () => {
-    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toMatch(/slack/i);
+  it('keeps the lifecycle emits and fails a run whose agent step failed', () => {
+    expect(requireStep('emit_investigation_completed').if).toBe(
+      '${{ steps.investigate.error == null }}'
+    );
+    expect(requireStep('emit_investigation_failed').if).toBe(
+      '${{ steps.investigate.error != null }}'
+    );
+    expect(requireStep('fail_investigation')).toMatchObject({
+      type: 'workflow.fail',
+      if: '${{ steps.investigate.error != null }}',
+    });
   });
 
-  it('looks the canvas up, updates it when it is active and adds it when it does not exist', () => {
-    expect(requireStep('render_investigation_canvas').with).toMatchObject({
-      investigation_canvas_id: '{{ inputs.investigation_id | default: execution.id }}',
-    });
-    expect(requireStep('list_conversation_attachments')).toMatchObject({
-      type: 'ai.attachment.list',
-      with: { include_deleted: true },
-    });
-    expect(requireStep('update_investigation_canvas')).toMatchObject({
-      if: '${{ variables.investigation_canvas_matches.first.active == true }}',
-      with: { attachment_id: '{{ variables.investigation_canvas_id }}' },
-    });
-    expect(requireStep('add_investigation_canvas')).toMatchObject({
-      if: '${{ variables.investigation_canvas_matches.size == 0 }}',
-      with: { id: '{{ variables.investigation_canvas_id }}', type: 'text' },
-    });
+  it('knows nothing about Slack', () => {
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toMatch(/slack/i);
   });
 });

@@ -8,12 +8,13 @@
 import { randomUUID } from 'crypto';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { Logger } from '@kbn/core/server';
-import type {
-  GetInvestigationResponse,
-  InvestigationNotificationDestination,
-} from '../../../common';
+import type { InvestigationNotificationDestination } from '../../../common';
 import { prepareNotificationDelivery } from './notification_delivery';
-import type { ExecuteConnector, NotificationDelivery } from './notification_delivery';
+import type {
+  ExecuteConnector,
+  NotifiableInvestigation,
+  NotificationDelivery,
+} from './notification_delivery';
 import type { NotificationRoutingClient } from './notification_routing_client';
 import type {
   NotificationPhase,
@@ -29,7 +30,7 @@ export interface DeliverInvestigationNotificationsResult {
 }
 
 interface DeliverInvestigationNotificationsParams {
-  investigation: GetInvestigationResponse;
+  investigation: NotifiableInvestigation;
   executionId: string;
   workflowId: string;
   phase: NotificationPhase;

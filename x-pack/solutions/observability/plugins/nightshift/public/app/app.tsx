@@ -21,7 +21,8 @@ import { usePageReady } from '@kbn/ebt-tools';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
-import type { ListInvestigationItem, Severity } from '@kbn/nightshift-investigations-plugin/common';
+import type { Severity } from '@kbn/nightshift-investigations-plugin/common';
+import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
 import { useKibana } from '../hooks/use_kibana';
 import { isHttpNotFoundError } from '../common/http_error';
@@ -31,11 +32,12 @@ import {
   InvestigationList,
   type InvestigationListHandle,
 } from '../investigation/investigation_list';
-import { InvestigationDetailFlyout } from '../investigation/investigation_detail_flyout';
 import { isInvestigationSectionVisible } from '../investigation/investigation_section';
 import { InvestigationSeverityTiles } from '../investigation/investigation_severity_tiles';
 import { StartInvestigationPanel } from '../investigation/start_investigation_panel';
+import { useFlyoutShareUrlCustomAction } from '../common/flyout_share_url_button';
 import {
+  buildNightshiftInvestigationFlyoutShareUrl,
   clearNightshiftInvestigationIdParam,
   getNightshiftInvestigationIdFromSearch,
   getNightshiftSearchQueryFromSearch,
@@ -54,7 +56,8 @@ const INVESTIGATIONS_SEARCH_DEBOUNCE_MS = 300;
 
 export function NightshiftApp(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const { application, nightshiftInvestigations } = useKibana().services;
+  const { application, nightshiftInvestigations, agenticInvestigations, agentBuilder } =
+    useKibana().services;
   const history = useHistory();
   const { search } = useLocation();
   const sectionsRef = useRef<InvestigationListHandle>(null);
@@ -93,7 +96,11 @@ export function NightshiftApp(): React.ReactElement {
     [sections]
   );
 
-  const isInvestigationsAvailable = nightshiftInvestigations?.investigationsClient != null;
+  // Investigations are Agent Builder conversations listed by the agentic investigations API.
+  const isInvestigationsAvailable =
+    nightshiftInvestigations?.investigationsClient != null &&
+    agenticInvestigations != null &&
+    agentBuilder != null;
   const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
   const [isStartInvestigationOpen, setIsStartInvestigationOpen] = useState(false);
 
@@ -113,9 +120,9 @@ export function NightshiftApp(): React.ReactElement {
   });
 
   const handleInvestigationClick = useCallback(
-    (investigation: ListInvestigationItem) => {
+    (investigation: InvestigationSummary) => {
       const params = new URLSearchParams(history.location.search);
-      setNightshiftInvestigationIdParam(params, investigation.investigation_id);
+      setNightshiftInvestigationIdParam(params, investigation.id);
       history.replace({ search: params.toString() });
     },
     [history]
@@ -126,6 +133,47 @@ export function NightshiftApp(): React.ReactElement {
     clearNightshiftInvestigationIdParam(params);
     history.replace({ search: params.toString() });
   }, [history]);
+
+  const getInvestigationShareUrl = useCallback(
+    () =>
+      selectedInvestigationId
+        ? buildNightshiftInvestigationFlyoutShareUrl(selectedInvestigationId)
+        : window.location.href,
+    [selectedInvestigationId]
+  );
+  const shareInvestigationAction = useFlyoutShareUrlCustomAction(getInvestigationShareUrl);
+
+  // `?investigationId=` (also what the investigation locator builds) opens the investigation's
+  // Agent Builder conversation details flyout; the id is the conversation id.
+  useEffect(() => {
+    if (!selectedInvestigationId || !agentBuilder) {
+      return;
+    }
+    let closeFlyout: (() => void) | undefined;
+    let isCancelled = false;
+    void agentBuilder
+      .openConversationDetails({
+        conversationId: selectedInvestigationId,
+        trailingActions: [shareInvestigationAction],
+        // Closed by the user, not replaced by another selection or unmounted.
+        onClose: () => {
+          if (!isCancelled) {
+            handleFlyoutClose();
+          }
+        },
+      })
+      .then((close) => {
+        if (isCancelled) {
+          close();
+        } else {
+          closeFlyout = close;
+        }
+      });
+    return () => {
+      isCancelled = true;
+      closeFlyout?.();
+    };
+  }, [agentBuilder, handleFlyoutClose, selectedInvestigationId, shareInvestigationAction]);
 
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -179,11 +227,9 @@ export function NightshiftApp(): React.ReactElement {
       key2: 'investigation_total',
       value2: totalCount,
       key3: 'active_investigation_count',
-      value3: loadedInvestigations.filter(
-        ({ status }) => status === 'pending' || status === 'running'
-      ).length,
-      key4: 'failed_investigation_count',
-      value4: loadedInvestigations.filter(({ status }) => status === 'failed').length,
+      value3: loadedInvestigations.filter(({ in_progress: inProgress }) => inProgress).length,
+      key4: 'unrated_investigation_count',
+      value4: loadedInvestigations.filter(({ metadata }) => metadata.severity === undefined).length,
     },
     meta: {
       description: '[ttfmp_nightshift] The Nightshift landing page has loaded investigations.',
@@ -266,14 +312,6 @@ export function NightshiftApp(): React.ReactElement {
         selectedInvestigationId={selectedInvestigationId}
         onInvestigationClick={handleInvestigationClick}
       />
-
-      {selectedInvestigationId && (
-        <InvestigationDetailFlyout
-          key={selectedInvestigationId}
-          investigationId={selectedInvestigationId}
-          onClose={handleFlyoutClose}
-        />
-      )}
     </EuiFlexGroup>
   );
 }

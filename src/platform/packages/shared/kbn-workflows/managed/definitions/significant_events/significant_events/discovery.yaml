@@ -395,9 +395,9 @@ steps:
 
                   # Fire-and-forget a root-cause investigation for each newly-active event that
                   # has not been investigated before. Async so discovery (45m) never blocks on the
-                  # investigation (60m). concurrency_key per event_id ensures a reactivated event
-                  # cancels the prior in-progress investigation rather than queuing alongside it
-                  # (cancel-in-progress / max:1 in the investigation workflow).
+                  # investigation (60m). A re-opened event whose investigation is still open
+                  # continues that investigation, because the start matches open investigations
+                  # by subject (the event id).
                   # Skip the launch when the event lookup fails or misses: the investigation
                   # requires the resolved title, summary, and symptom hypothesis as context.
                   - name: guard_resolved_event
@@ -427,7 +427,6 @@ steps:
                               title: '{{ steps.resolve_active_event.output.hits[0].title }}'
                               summary: '{{ steps.resolve_active_event.output.hits[0].summary }}'
                               stream_names: '${{ steps.resolve_active_event.output.hits[0].stream_names | default: [] }}'
-                              concurrency_key: '{{ foreach.item.event_id }}'
                               trigger_type: automatic
                               context:
                                 event_id: '{{ foreach.item.event_id }}'
