@@ -238,9 +238,9 @@ The Workers service owns per-space installation, reading persisted values, enabl
 
 ### Scheduled Workers
 
-Not every Worker is schedule-driven — the rest are alert- or event-triggered — so a schedule is a per-Worker opt-in rather than part of `CommonWorkerTemplateValues`. A Worker without one carries no interval in its template values and none in its projected settings.
+Not every Worker is schedule-driven — some are event-triggered — so a schedule is a per-Worker opt-in rather than part of `CommonWorkerTemplateValues`. A Worker without one carries no interval in its template values and none in its projected settings.
 
-Scheduled Workers today: `system-security-floor-attack-discovery` (default `24h`), `system-security-detection-rule-tuning` (default `2h`) and `system-security-detection-rule-coverage` (default `1h`). The two Detection Workers also keep a `manual` trigger for on-demand sweeps.
+Scheduled Workers today: `system-security-floor-alert-triage` (default `15m`), `system-security-floor-attack-discovery` (default `24h`), `system-security-detection-rule-tuning` (default `2h`) and `system-security-detection-rule-coverage` (default `1h`). The Alert Triage and the two Detection Workers also keep a `manual` trigger for on-demand sweeps.
 
 The interval is a positive count with a unit of minutes, hours or days (`'30m'`, `'24h'`, `'7d'`). It is validated by the `WorkerScheduleInterval` OpenAPI schema at the route boundary and rendered verbatim into the trigger's `every`. Seconds are not offered: the workflow engine only accepts `s` at 60 or above. Changing an interval rewrites the workflow YAML, and the post-install `updateWorkflow` call is what re-registers the Task Manager task.
 
@@ -280,6 +280,18 @@ Tests to update:
 - `worker_registry.test.ts` — set the Worker's `EXPECTED_WORKER_SETTINGS` entry with its `scheduleInterval` and add `'scheduled'` to `triggerTypes` (keep `'manual'` if the YAML keeps that trigger).
 - `worker_settings.test.ts` — add the Worker to `SCHEDULED_WORKER_IDS` so the "rejects an interval patch" cases stop running against it.
 - `worker_settings_compat.test.ts` — regenerate the settings contract snapshot (see [Changing Worker settings safely](#changing-worker-settings-safely)).
+
+### Alert Triage sweep
+
+Alert Triage no longer runs once per rule execution, and enabling it attaches nothing to rules. It is a scheduled sweep that plans budgeted, fair batches of waiting alerts and starts one batch workflow per rule, so triage stays a bounded share of Task Manager.
+
+- **Sweep** (`system-security-floor-alert-triage`, per space, concurrency `drop`, max 1): checks Task Manager headroom, reclaims claims whose batch is gone, picks a batch per rule within the budget, claims the alerts with `az:triage_pending`, starts the batches with `workflow.executeAsync`, and records each execution id on that batch's alerts as `az:triage_exec:<id>`. Every sweep writes `skip_reason` (`none`, `tm_behind`, `tm_unknown`, `live_batches_unreadable`, `in_flight_ceiling`, `nothing_pending`) and its planning numbers to its own execution output, including `aged_out_alerts`, the count of open alerts older than the look-back that were never triaged (`-1` if that count failed).
+- **Batch** (`system-security-floor-alert-triage-batch`, installed once, concurrency `queue`): 4 batches analyse at once per space and the rest wait without holding a Task Manager slot, up to 40 in flight. Each batch opens one Investigation, calls Alert Analysis, writes verdict tags and notes, removes the claim, and hands confident false positives to the closure review as one proposal. `server/alert_triage/batch_concurrency.test.ts` pins the YAML numbers to the planner constants.
+- **Settings:** `scheduleInterval` (default `15m`), `extras.budgetPerHour` (default `1300`) and `extras.lookbackHours` (default `24`), plus the existing confidence floor and autonomy. The look-back is the search window: older alerts are never read or tagged.
+
+**What a cost unit means.** A batch costs 5 units of fixed overhead (the Investigation, the Alert Analysis hop and the review hand-off) plus 1 unit per alert. The hourly budget is scaled to the sweep interval (`floor(budgetPerHour × minutes / 60)`), so changing the interval does not change the hourly total. Units are a planning currency, not tokens or seconds. Each rule gets up to 30 alerts first, then rules are topped up round-robin to 100 until the budget runs out.
+
+**Alert Analysis settings the Worker path uses.** The batch calls `system-security-alert-analysis` with `calledByWorker: true`, `autoCloseEnabled: false` (closing is a proposal, never inline), `autoCloseConfidenceScoreMinThreshold` from this Worker's setting, the `alertzero_reasoning` model feature, and the Investigation id. Its tag prefix comes from the space's Alert Analysis runtime config, so alerts Alert Analysis tagged on its own are left alone. Alert Analysis run on its own keeps reading its own space settings and is unchanged.
 
 ### Worker-specific settings (`extras`)
 
