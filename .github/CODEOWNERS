@@ -3936,6 +3936,9 @@ src/platform/packages/shared/kbn-apm-ui-shared/src/components/genai @elastic/obs
 # Inbox FTR test directory (no kibana.jsonc — manual entry)
 /x-pack/platform/test/inbox_api_integration/ @elastic/security-generative-ai
 
+# Shared FTR wait optimization guidance
+/src/platform/test/functional/wait_optimization.md @elastic/kibana-operations @elastic/appex-qa
+
 # FTR config manifests have no single owner — touched by all solutions.
 # Leaving this unowned avoids routing every edit through Kibana Operations.
 /.buildkite/ftr-manifests/

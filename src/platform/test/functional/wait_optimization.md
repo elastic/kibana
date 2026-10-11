@@ -97,7 +97,7 @@ All 13 Visualize configs completed successfully in normal runs: 356 active tests
 | `group11` | 13 | 44.5 | Passed (body only; setup/cleanup unthrottled) |
 | `group2` | 35 | 52.5 | Passed (bodies and beforeEach/afterEach; suite setup unthrottled) |
 | `group3` | 7 | 9.2 | Passed (bodies and beforeEach/afterEach; suite setup unthrottled) |
-| `group4` | 11 | 39.9 | Failed; investigation open |
+| `group4` | 11 | 39.9 | Passed (body only; setup/cleanup unthrottled) |
 | `group6` | 55 | 111.9 | Failed; investigation open |
 | `group7` | 19 | 62.2 | Failed; investigation open |
 | `group8` | 22 | 29.1 | Failed; investigation open |
@@ -108,6 +108,6 @@ All 13 Visualize configs completed successfully in normal runs: 356 active tests
 
 For the 8 remaining configs with successful baselines, recorded waits/lookups fell from 1779.4 to 395.8 seconds. These are individual local runs; some baselines already contain earlier shared-helper improvements. Failed group8 and replacement-charts-2 baselines are excluded from comparisons.
 
-The FAST_3G batch is not a clean pass. Group4 and group6 hit beforeEach deadlines during full-page resets, and group7 exceeded its bulk-delete test deadline. Group8 exposed pie-result and annotation readiness failures; replacement charts 1 failed waiting for an embedded visualization and replacement charts 2 read stale legend results. These remain open validation work. No config or Mocha deadline was increased.
+The FAST_3G batch is not a clean pass. The initial group4 run and group6 hit beforeEach deadlines during full-page resets; group4 subsequently passed all 11 bodies with setup and cleanup unthrottled, and group7 exceeded its bulk-delete test deadline. Group8 exposed pie-result and annotation readiness failures; replacement charts 1 failed waiting for an embedded visualization and replacement charts 2 read stale legend results. These remain open validation work. No config or Mocha deadline was increased.
 
 Raw recordings and per-pass reports remain local artifacts under `target/ftr-wait-recordings/`; this catalog retains the transferable patterns and source references.
