@@ -14,7 +14,19 @@ export type {
   MitreEntity,
 } from './src/schema';
 
-export { mitreEntitySchema, mitreEntitiesSchema } from './src/schema';
+export {
+  MITRE_FRAMEWORKS,
+  mitreFrameworkSchema,
+  mitreEntitySchema,
+  mitreEntitiesSchema,
+} from './src/schema';
+
+export {
+  THREAT_FRAMEWORK_NAME,
+  getMitreFrameworkByThreatName,
+  getMitreFrameworkById,
+  buildMitreReferenceUrl,
+} from './src/threat_framework';
 
 export type {
   MitreEntityStatus,
@@ -47,3 +59,18 @@ export type {
   GetMitreEntitiesRequestParams,
   GetMitreEntitiesResponse,
 } from './src/api';
+
+// Test-only builders; the package is side-effect free so exporting them here is safe.
+export {
+  buildMockMitreTactic,
+  buildMockMitreTechnique,
+  buildMockMitreSubtechnique,
+  buildMockMitreEntities,
+  buildMockAtlasTactic,
+  buildMockAtlasTechnique,
+  buildMockAtlasSubtechnique,
+  buildMockMitreTacticSummary,
+  buildMockMitreTechniqueSummary,
+  buildMockMitreSubtechniqueSummary,
+  buildMockMitreEntitySummaryBuckets,
+} from './src/mitre_entity_builders';

@@ -6,7 +6,12 @@
  */
 
 import { globalTeardownHook } from '@kbn/scout-security';
-import { SEEDED_MITRE_FRAMEWORK_VERSION, SEEDED_MITRE_INDEX } from '../fixtures/mitre_fixtures';
+import {
+  SEEDED_ATLAS_FRAMEWORK_VERSION,
+  SEEDED_MITRE_FRAMEWORK_VERSION,
+  SEEDED_MITRE_INDEX,
+  getSeededSoIds,
+} from '../fixtures/mitre_fixtures';
 import {
   createSystemIndicesEsClient,
   deleteSystemIndicesEsUser,
@@ -14,14 +19,16 @@ import {
 
 /**
  * Removes the synthetic MITRE fixture entities seeded by global.setup.ts.
- * Only deletes documents at framework_version 99.0 so real populated data
- * (from any bundled MITRE artifact) is untouched.
+ * Deletes only the exact seeded documents, matched by `_id`, so real populated data
+ * (from any bundled MITRE artifact) and any other document at the seeded versions
+ * is untouched. Both the enterprise and the atlas fixtures are removed.
  */
 globalTeardownHook(
-  `Remove synthetic MITRE entities (version ${SEEDED_MITRE_FRAMEWORK_VERSION})`,
+  `Remove synthetic MITRE entities (versions ${SEEDED_MITRE_FRAMEWORK_VERSION}, ${SEEDED_ATLAS_FRAMEWORK_VERSION})`,
   async ({ esClient, config, log }) => {
+    const seededSoIds = getSeededSoIds();
     log.info(
-      `[managed-mitre teardown] Deleting framework_version ${SEEDED_MITRE_FRAMEWORK_VERSION} entities from ${SEEDED_MITRE_INDEX}`
+      `[managed-mitre teardown] Deleting ${seededSoIds.length} seeded entities by _id from ${SEEDED_MITRE_INDEX}`
     );
 
     const seederClient = await createSystemIndicesEsClient(esClient, config);
@@ -29,18 +36,7 @@ globalTeardownHook(
       const result = await seederClient.deleteByQuery({
         index: SEEDED_MITRE_INDEX,
         refresh: true,
-        query: {
-          bool: {
-            must: [
-              { term: { type: 'mitre-attack-entity' } },
-              {
-                term: {
-                  'mitre-attack-entity.framework_version': SEEDED_MITRE_FRAMEWORK_VERSION,
-                },
-              },
-            ],
-          },
-        },
+        query: { ids: { values: seededSoIds } },
       });
 
       // deleteByQuery throws on a real failure, so zero deletions just means the

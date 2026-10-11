@@ -11,6 +11,7 @@ import { schema } from '../../../../../../rule_creation_ui/components/step_about
 import type { ThreatArray } from '../../../../../../../../common/api/detection_engine';
 import { AddMitreAttackThreat } from '../../../../../../rule_creation_ui/components/mitre';
 import { filterEmptyThreats } from '../../../../../../rule_creation_ui/pages/rule_creation/helpers';
+import { MITRE_ATTACK_FRAMEWORK } from '../../../../../../../../common/detection_engine/mitre/iterate_mitre_threat_entities';
 
 export const threatSchema = { threat: schema.threat } as FormSchema<{ threat: ThreatArray }>;
 
@@ -24,7 +25,9 @@ export function threatSerializer(formData: FormData): {
   return {
     threat: filterEmptyThreats(formData.threat).map((singleThreat) => ({
       ...singleThreat,
-      framework: 'MITRE ATT&CK',
+      // Rows added via the picker's "Add tactic" button carry no framework yet (undefined or empty string),
+      // so fall back to ATT&CK while preserving any framework already set (e.g. ATLAS).
+      framework: singleThreat.framework || MITRE_ATTACK_FRAMEWORK,
     })),
   };
 }

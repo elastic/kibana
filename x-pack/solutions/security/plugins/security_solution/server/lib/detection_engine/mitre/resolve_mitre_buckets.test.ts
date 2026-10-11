@@ -6,7 +6,12 @@
  */
 
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
-import { resolveMitreBuckets, resetResolveMitreBucketsCache } from './resolve_mitre_buckets';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  resolveMitreBuckets,
+  resolveMitreBucketsByFramework,
+  resetResolveMitreBucketsCache,
+} from './resolve_mitre_buckets';
 
 // Minimal fixture that satisfies the legacy blob shape so the real
 // transformLegacyMitreData adapter can be exercised without loading the full blob.
@@ -58,6 +63,30 @@ describe('resolveMitreBuckets — managed path', () => {
     expect(mockList).toHaveBeenCalledTimes(1);
     expect(result.tactics[0]).toMatchObject({ id: 'TA0099', name: 'Managed Tactic' });
     expect(result.techniques[0]).toMatchObject({ id: 'T9001', name: 'Managed Technique' });
+  });
+
+  it('defaults to the enterprise framework', async () => {
+    const { client, mockList } = makeClient();
+
+    await resolveMitreBuckets(client);
+
+    expect(mockList).toHaveBeenCalledWith({ framework: 'enterprise' });
+  });
+
+  it('forwards the framework to list()', async () => {
+    const { client, mockList } = makeClient();
+
+    await resolveMitreBuckets(client, 'atlas');
+
+    expect(mockList).toHaveBeenCalledWith({ framework: 'atlas' });
+  });
+
+  it('includes the framework in the "not initialized" error', async () => {
+    const { client } = makeClient(true);
+
+    await expect(resolveMitreBuckets(client, 'atlas')).rejects.toThrow(
+      'Managed MITRE data is not initialized (framework: atlas)'
+    );
   });
 
   it('calls list() on every invocation so runtime data changes are always visible', async () => {
@@ -115,6 +144,71 @@ describe('resolveMitreBuckets — legacy fallback path', () => {
     expect(result.tactics[0]).toMatchObject({ id: 'TA0001', name: 'Initial Access' });
     expect(result.techniques).toHaveLength(1);
     expect(result.techniques[0]).toMatchObject({ id: 'T1078', name: 'Valid Accounts' });
+  });
+
+  it('rejects for frameworks other than enterprise', async () => {
+    await expect(resolveMitreBuckets(undefined, 'atlas')).rejects.toThrow(
+      'Legacy MITRE data source only provides the enterprise framework (requested: atlas)'
+    );
+  });
+});
+
+describe('resolveMitreBucketsByFramework', () => {
+  const makeFrameworkClient = (
+    atlasResult: 'ok' | 'reject'
+  ): { client: MitreAttackDataClient; mockList: jest.Mock } => {
+    const mockList = jest
+      .fn()
+      .mockImplementation(async ({ framework }: { framework?: string } = {}) => {
+        if (framework === 'atlas') {
+          if (atlasResult === 'reject') {
+            throw new Error('atlas unavailable');
+          }
+          return {
+            framework: 'atlas' as const,
+            tactics: [{ id: 'AML.TA0000', name: 'Atlas Tactic' }],
+            techniques: [],
+            subtechniques: [],
+          };
+        }
+        return {
+          framework: 'enterprise' as const,
+          tactics: [{ id: 'TA0099', name: 'Managed Tactic' }],
+          techniques: [],
+          subtechniques: [],
+        };
+      });
+    return { client: { list: mockList, getById: jest.fn() }, mockList };
+  };
+
+  it('returns buckets for both frameworks when both resolve', async () => {
+    const { client } = makeFrameworkClient('ok');
+
+    const result = await resolveMitreBucketsByFramework(client, ['enterprise', 'atlas']);
+
+    expect(result.enterprise?.tactics[0]).toMatchObject({ id: 'TA0099' });
+    expect(result.atlas?.tactics[0]).toMatchObject({ id: 'AML.TA0000' });
+  });
+
+  it('omits a rejected framework, keeps the other, and logs at debug', async () => {
+    const { client } = makeFrameworkClient('reject');
+    const logger = loggingSystemMock.createLogger();
+
+    const result = await resolveMitreBucketsByFramework(client, ['enterprise', 'atlas'], logger);
+
+    expect(Object.keys(result)).toEqual(['enterprise']);
+    expect(logger.debug).toHaveBeenCalledTimes(1);
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('atlas'));
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('atlas unavailable'));
+  });
+
+  it('returns an empty record when every framework rejects', async () => {
+    const mockList = jest.fn().mockRejectedValue(new Error('SO unavailable'));
+    const client: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+
+    const result = await resolveMitreBucketsByFramework(client, ['enterprise', 'atlas']);
+
+    expect(result).toEqual({});
   });
 });
 

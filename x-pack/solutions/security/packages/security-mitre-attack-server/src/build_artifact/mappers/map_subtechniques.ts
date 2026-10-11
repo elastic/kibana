@@ -6,7 +6,7 @@
  */
 
 import type { MitreFramework, MitreSubtechnique } from '@kbn/security-mitre-attack-common';
-import type { StixBundle } from '../types';
+import type { StixBundle, StixSourceName } from '../types';
 import {
   buildRevokedByTargetRefs,
   buildTacticByShortname,
@@ -17,15 +17,34 @@ import {
 } from './helpers';
 
 /**
- * Maps subtechnique attack-pattern entities into subtechniques, sorted by ATT&CK ID.
+ * Derives the parent technique ID implied by a subtechnique ID by dropping its last dot
+ * segment: 'T1003.001' -> 'T1003', 'AML.T0024.002' -> 'AML.T0024'. ATLAS IDs contain a
+ * dot in the technique part itself, so a split on the first dot would be wrong.
+ */
+const getParentIdFromDotPrefix = (subtechniqueId: string): string => {
+  const lastDot = subtechniqueId.lastIndexOf('.');
+  const isOnlyAtlasPrefixDot =
+    subtechniqueId.startsWith('AML.') && lastDot === subtechniqueId.indexOf('.');
+  if (lastDot === -1 || isOnlyAtlasPrefixDot) {
+    throw new Error(
+      `Subtechnique ID '${subtechniqueId}' is malformed: expected a parent technique ID followed by a dot-separated suffix (e.g. 'T1003.001' or 'AML.T0024.002').`
+    );
+  }
+  return subtechniqueId.slice(0, lastDot);
+};
+
+/**
+ * Maps subtechnique attack-pattern entities into subtechniques, sorted by MITRE ID.
  * The parent technique comes from the 'subtechnique-of' relationship, cross-checked
- * against the subtechnique ID's dot prefix (T1003.001 implies T1003), which is also
- * the fallback when the relationship is missing.
+ * against the subtechnique ID minus its last dot segment (T1003.001 implies T1003,
+ * AML.T0024.002 implies AML.T0024), which is also the fallback when the relationship
+ * is missing.
  */
 export const mapSubtechniques = (
   bundle: StixBundle,
   framework: MitreFramework,
-  frameworkVersion: string
+  frameworkVersion: string,
+  sourceName: StixSourceName
 ): MitreSubtechnique[] => {
   const { objects } = bundle;
 
@@ -46,16 +65,17 @@ export const mapSubtechniques = (
 
   return subtechniqueEntities
     .flatMap((stixEntity) => {
-      const mitreReference = getMitreReference(stixEntity);
+      const mitreReference = getMitreReference(stixEntity, sourceName);
       if (mitreReference == null) return [];
 
       const parentStixId = subtechniqueParentRef.get(stixEntity.id);
-      const dotPrefixId = mitreReference.id.split('.')[0];
+      const dotPrefixId = getParentIdFromDotPrefix(mitreReference.id);
 
       let techniqueId: string;
       if (parentStixId != null) {
         const parentEntity = entityById.get(parentStixId);
-        const parentMitreReference = parentEntity != null ? getMitreReference(parentEntity) : null;
+        const parentMitreReference =
+          parentEntity != null ? getMitreReference(parentEntity, sourceName) : null;
         const relationshipId = parentMitreReference?.id ?? dotPrefixId;
         if (parentMitreReference != null && relationshipId !== dotPrefixId) {
           throw new Error(
@@ -80,8 +100,13 @@ export const mapSubtechniques = (
           description: stixEntity.description ?? '',
           revoked: stixEntity.revoked === true,
           deprecated: stixEntity.x_mitre_deprecated === true,
-          superseded_by_id: resolveSupersededBy(stixEntity.id, entityById, revokedByTargetRefs),
-          tactic_ids: resolveTacticIds(stixEntity, tacticByShortname),
+          superseded_by_id: resolveSupersededBy(
+            stixEntity.id,
+            entityById,
+            revokedByTargetRefs,
+            sourceName
+          ),
+          tactic_ids: resolveTacticIds(stixEntity, tacticByShortname, sourceName),
           technique_id: techniqueId,
         },
       ];

@@ -141,6 +141,46 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
         });
+
+        it('returns response with a single rule mapped to MITRE ATLAS categories', async () => {
+          const rule1 = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({
+              threat: [
+                {
+                  framework: 'MITRE ATLAS',
+                  tactic: {
+                    id: 'AML.TA0000',
+                    name: 'Reconnaissance',
+                    reference: 'https://atlas.mitre.org/tactics/AML.TA0000',
+                  },
+                  technique: [
+                    {
+                      id: 'AML.T0044',
+                      name: 'Full ML Model Access',
+                      reference: 'https://atlas.mitre.org/techniques/AML.T0044',
+                      subtechnique: [
+                        {
+                          id: 'AML.T0024.002',
+                          name: 'Extract ML Model',
+                          reference: 'https://atlas.mitre.org/techniques/AML.T0024.002',
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            })
+          );
+
+          const body = await getCoverageOverview(supertest);
+
+          expect(body.coverage['AML.TA0000']).to.eql([rule1.id]);
+          expect(body.coverage['AML.T0044']).to.eql([rule1.id]);
+          expect(body.coverage['AML.T0024.002']).to.eql([rule1.id]);
+          expect(body.unmapped_rule_ids).not.to.contain(rule1.id);
+        });
       });
 
       describe('with filters', () => {

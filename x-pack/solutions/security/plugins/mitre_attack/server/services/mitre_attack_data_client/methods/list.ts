@@ -46,8 +46,10 @@ export const list = async ({
     }
   }
 
-  // Fetch all entities in a single page. Each MITRE enterprise dataset has less than 1000 entities
-  // (873 for ATT&CK enterprise 19.2). 10,000 is a generous ceiling for future versions and frameworks.
+  // Fetch all entities in a single page. A single framework version is well under 1000 entities
+  // (873 for ATT&CK enterprise 19.2, ~213 for ATLAS 2026.8), and the filter below scopes the query
+  // to one framework and version. 10,000 is a generous ceiling for future versions and frameworks.
+  // Silent truncation would under-report entities, so a warning is logged below if it ever happens.
   const findResponse = await savedObjectsRepository.find<MitreEntity>({
     type: MITRE_ATTACK_ENTITY_SO_TYPE,
     namespaces: ['*'],
@@ -56,6 +58,12 @@ export const list = async ({
     sortOrder: 'asc',
     filter: buildKqlFilter({ framework, frameworkVersion, types, status }),
   });
+
+  if (findResponse.total > findResponse.saved_objects.length) {
+    logger.warn(
+      `MITRE list for framework "${framework}" version "${frameworkVersion}" was truncated: received ${findResponse.saved_objects.length} of ${findResponse.total} entities. Paging is needed to return all entities.`
+    );
+  }
 
   const tactics: MitreTactic[] = [];
   const techniques: MitreTechnique[] = [];

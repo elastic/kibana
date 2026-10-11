@@ -398,10 +398,13 @@ export class AlertZeroPlugin
 
     this.scanFailuresService = new ScanFailuresService(management, this.logger);
 
+    const mitreDataClient = plugins.mitreAttack?.getMitreDataClient?.();
+
     this.huntServices = {
       getProposalsService: () => this.requireProposals().getProposalsService(),
       getInference: () => plugins.inference,
       getSearchInferenceEndpoints: () => plugins.searchInferenceEndpoints,
+      mitreDataClient,
     };
 
     return this.alertZeroStartContract();

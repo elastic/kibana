@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { loadMitreArtifact } from '@kbn/security-mitre-attack-server';
+import type { Logger } from '@kbn/core/server';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type {
   MitreEntity,
   MitreSubtechnique,
@@ -13,7 +14,7 @@ import type {
 } from '@kbn/security-mitre-attack-common';
 
 /**
- * The slice of a MITRE ATT&CK technique or sub-technique that Tier 2
+ * The slice of a MITRE ATT&CK Enterprise technique or sub-technique that Tier 2
  * validation needs. `id` is always a live (non-revoked, non-deprecated) id:
  * when a revoked id is looked up, the entry returned is its live successor.
  */
@@ -47,7 +48,8 @@ const toEntry = (entity: TechniqueLike): MitreCatalogEntry => ({
 });
 
 /**
- * Builds the Tier 2 lookup maps from the flat ATT&CK entity list. Deprecated
+ * Builds the Tier 2 lookup maps from a flat list of ATT&CK Enterprise entities.
+ * Pure: the caller is responsible for passing a single framework. Deprecated
  * entries are dropped. Revoked entries that name exactly one live successor
  * in `superseded_by_id` resolve to that successor, so an LLM that still emits
  * a retired id (for example `T1562.001`) lands on the current technique
@@ -80,16 +82,58 @@ export const buildMitreCatalog = (entities: MitreEntity[]): MitreCatalog => {
   return { techniqueById, subtechniqueById };
 };
 
-let cached: MitreCatalog | undefined;
+const EMPTY_CATALOG: MitreCatalog = {
+  techniqueById: new Map(),
+  subtechniqueById: new Map(),
+};
+
+// The catalog is global ATT&CK Enterprise reference data, identical for every space; keyed by client only so a fresh client (tests) gets a fresh catalog, not for per-space isolation.
+// Keyed by client so a fresh client (tests, or a future client swap) never sees a stale catalog.
+const catalogByClient = new WeakMap<MitreAttackDataClient, MitreCatalog>();
 
 /**
- * Lazily loads the ATT&CK artifact shipped by `@kbn/security-mitre-attack-server`
- * and memoizes the derived lookups. The artifact read and parse happen on the
- * first Tier 2 run, not at plugin load.
+ * Loads the ATT&CK Enterprise catalog from the managed MITRE data client and memoizes it per client.
+ *
+ * An empty collection (population not finished) or a missing client yields an empty catalog
+ * that is not cached, so the next call retries.
  */
-export const getMitreCatalog = (): MitreCatalog => {
-  if (!cached) {
-    cached = buildMitreCatalog(loadMitreArtifact());
+export const getMitreCatalog = async ({
+  mitreDataClient,
+  logger,
+}: {
+  mitreDataClient?: MitreAttackDataClient;
+  logger?: Logger;
+} = {}): Promise<MitreCatalog> => {
+  if (!mitreDataClient) {
+    logger?.debug('MITRE data client is unavailable');
+    return EMPTY_CATALOG;
   }
-  return cached;
+
+  const cached = catalogByClient.get(mitreDataClient);
+  if (cached) return cached;
+
+  let techniques: MitreTechnique[];
+  let subtechniques: MitreSubtechnique[];
+  try {
+    ({ techniques, subtechniques } = await mitreDataClient.list({
+      framework: 'enterprise',
+      status: 'all',
+    }));
+  } catch (error) {
+    // A transient read failure must not fail the hunt, retry on the next call.
+    logger?.warn(
+      `Failed to load the MITRE catalog; Technique validation is skipped for this run: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return EMPTY_CATALOG;
+  }
+  if (techniques.length === 0 && subtechniques.length === 0) {
+    logger?.debug('MITRE collection is empty (not populated yet); not caching catalog');
+    return EMPTY_CATALOG;
+  }
+
+  const catalog = buildMitreCatalog([...techniques, ...subtechniques]);
+  catalogByClient.set(mitreDataClient, catalog);
+  return catalog;
 };

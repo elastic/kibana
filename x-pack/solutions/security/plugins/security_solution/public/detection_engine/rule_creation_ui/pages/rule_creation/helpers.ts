@@ -62,6 +62,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
+import { MITRE_ATTACK_FRAMEWORK } from '../../../../../common/detection_engine/mitre/iterate_mitre_threat_entities';
 import {
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
@@ -632,7 +633,9 @@ export const formatAboutStepData = (
       : [],
     threat: filterEmptyThreats(threat).map((singleThreat) => ({
       ...singleThreat,
-      framework: 'MITRE ATT&CK',
+      // Rows added via the picker's "Add tactic" button carry no framework yet (undefined or empty string),
+      // so fall back to ATT&CK while preserving any framework already set (e.g. ATLAS).
+      framework: singleThreat.framework || MITRE_ATTACK_FRAMEWORK,
     })),
     threat_indicator_path: threatIndicatorPath,
     timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,

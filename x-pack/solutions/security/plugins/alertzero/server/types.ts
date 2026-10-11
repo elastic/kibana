@@ -21,6 +21,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
+import type { MitreAttackServerStart } from '@kbn/mitre-attack-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -143,6 +144,11 @@ export interface AlertZeroStartDependencies {
    * Absence degrades every host to unenrolled, same as no agent found.
    */
   fleet?: FleetStartContract;
+  /**
+   * Optional, matching the plugin manifest. Supplies the MITRE data client behind the Tier 2
+   * technique catalog. Absence (or its managed source being off) leaves the catalog empty.
+   */
+  mitreAttack?: MitreAttackServerStart;
 }
 
 export type AlertZeroRouter = IRouter<AlertZeroRequestHandlerContext>;
