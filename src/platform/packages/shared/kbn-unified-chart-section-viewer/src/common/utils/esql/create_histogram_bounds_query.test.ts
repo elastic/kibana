@@ -31,7 +31,8 @@ describe('createHistogramBoundsQuery', () => {
     ).toEqual({
       metricKey: 'metrics-a::latency.exp',
       source: 'metrics-a',
-      esqlQuery: `TS metrics-a
+      esqlQuery: `SET unmapped_fields = "NULLIFY";
+TS metrics-a
   | STATS min_value = MIN(latency.exp), max_value = MAX(latency.exp)`,
     });
   });
