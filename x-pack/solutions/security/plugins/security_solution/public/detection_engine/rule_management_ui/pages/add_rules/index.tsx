@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { redirectToDetections } from '../../../common/helpers';
 import { SecurityPageName } from '../../../../app/types';
-import { HeaderPage } from '../../../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useKibana } from '../../../../common/lib/kibana';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
@@ -16,10 +16,9 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 
-import * as i18n from './translations';
 import { AddPrebuiltRulesTable } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_table';
 import { AddPrebuiltRulesTableContextProvider } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_table_context';
-import { AddPrebuiltRulesHeaderButtons } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_header_buttons';
+import { AddPrebuiltRulesAppHeader } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_app_header';
 import { APP_UI_ID } from '../../../../../common';
 import { NeedAdminForUpdateRulesCallOut } from '../../../rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { MissingDetectionsPrivilegesCallOut } from '../../../../detections/components/callouts/missing_detections_privileges_callout';
@@ -49,14 +48,12 @@ const AddRulesPageComponent: React.FC = () => {
 
   return (
     <>
-      <NeedAdminForUpdateRulesCallOut />
-      <MissingDetectionsPrivilegesCallOut />
-
       <AddPrebuiltRulesTableContextProvider>
+        <AddPrebuiltRulesAppHeader />
+        <NeedAdminForUpdateRulesCallOut />
+        <MissingDetectionsPrivilegesCallOut />
         <SecuritySolutionPageWrapper>
-          <HeaderPage title={i18n.PAGE_TITLE}>
-            <AddPrebuiltRulesHeaderButtons />
-          </HeaderPage>
+          <EuiSpacer size="s" />
           <AddPrebuiltRulesTable />
         </SecuritySolutionPageWrapper>
       </AddPrebuiltRulesTableContextProvider>
