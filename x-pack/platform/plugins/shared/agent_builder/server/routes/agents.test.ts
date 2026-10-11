@@ -352,7 +352,7 @@ describe('Agent Routes - ai_indices Context Engine gate', () => {
   const callList = (contextEngineEnabled: boolean) =>
     routeHandlers[`GET:${listPath}`].handler(
       createMockContext(contextEngineEnabled),
-      {},
+      { query: { include_hidden: false } },
       mockResponse
     ) as Promise<{
       type: string;

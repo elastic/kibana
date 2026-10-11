@@ -11,8 +11,10 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import {
   agentBuilderDefaultAgentId,
+  chatAgentTypeId,
   createBadRequestError,
   isAgentNotFoundError,
+  SYSTEM_USER_ID,
 } from '@kbn/agent-builder-common';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { GetAgentOptions, WritableAgentProvider, AgentProviderFn } from '../agent_source';
@@ -156,8 +158,13 @@ export const toInternalDefinition = ({
   availabilityByAgentId: Map<string, AgentAvailabilityConfig>;
   availabilityCache: AgentAvailabilityCache;
 }): InternalAgentDefinition => {
+  const type = definition.type ?? chatAgentTypeId;
+  const isSystemCreated = definition.created_by?.username === SYSTEM_USER_ID;
   return {
     ...definition,
+    // System-installed non-chat agents (Nightshift, SigEvents, AlertZero…) are hidden by default.
+    // Chat-typed system agents (e.g. the default elastic-ai-agent) remain visible.
+    hidden: definition.hidden ?? (isSystemCreated && type !== chatAgentTypeId),
     readonly: false,
     isAvailable: async (ctx) => {
       const availability = availabilityByAgentId.get(definition.id);

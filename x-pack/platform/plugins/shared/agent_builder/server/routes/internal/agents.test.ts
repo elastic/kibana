@@ -143,10 +143,10 @@ describe('registerInternalAgentRoutes', () => {
       ]);
     });
 
-    it('lists agents with no options, matching the public list endpoint visibility', async () => {
+    it('lists all agents including hidden ones', async () => {
       await callList(true);
 
-      expect(mockList).toHaveBeenCalledWith();
+      expect(mockList).toHaveBeenCalledWith({ includeHidden: true });
     });
 
     it('returns not found and does not resolve anything when the Context Engine is disabled', async () => {

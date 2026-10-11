@@ -14,6 +14,7 @@ import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { useAgentModel } from '../../../hooks/agents/use_agent_model';
+import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import {
   useAgentId,
   useConversationReadOnly,
@@ -43,6 +44,9 @@ jest.mock('../../../hooks/agents/use_validate_agent_id', () => ({
 }));
 jest.mock('../../../hooks/agents/use_agent_model', () => ({
   useAgentModel: jest.fn(),
+}));
+jest.mock('../../../hooks/agents/use_agent_by_id', () => ({
+  useAgentBuilderAgentById: jest.fn(),
 }));
 jest.mock('../../../hooks/use_conversation', () => ({
   useAgentId: jest.fn(),
@@ -159,6 +163,7 @@ const mockedUseConversationStream = jest.mocked(useConversationStream);
 const mockedUseAgentBuilderAgents = jest.mocked(useAgentBuilderAgents);
 const mockedUseValidateAgentId = jest.mocked(useValidateAgentId);
 const mockedUseAgentModel = jest.mocked(useAgentModel);
+const mockedUseAgentBuilderAgentById = jest.mocked(useAgentBuilderAgentById);
 const mockedUseAgentId = jest.mocked(useAgentId);
 const mockedUseConversationReadOnly = jest.mocked(useConversationReadOnly);
 const mockedUseConversationTitle = jest.mocked(useConversationTitle);
@@ -207,6 +212,7 @@ describe('ConversationInput', () => {
     mockedUseValidateAgentId.mockReturnValue(((agentId?: string): agentId is string =>
       Boolean(agentId)) as never);
     mockedUseAgentModel.mockReturnValue({ isLoading: false, isLocked: false });
+    mockedUseAgentBuilderAgentById.mockReturnValue({ agent: undefined, isLoading: false } as never);
     mockedUseAgentId.mockReturnValue('elastic-ai-agent');
     mockedUseConversationReadOnly.mockReturnValue({ isReadOnly: false, isLoading: false });
     mockedUseConversationTitle.mockReturnValue({ title: '', isLoading: false } as never);
