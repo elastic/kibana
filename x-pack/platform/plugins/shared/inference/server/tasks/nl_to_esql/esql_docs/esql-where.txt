@@ -1,6 +1,8 @@
 # WHERE
 
-The WHERE command filters rows from the input table based on a condition that evaluates to true. Fields with null values are excluded from results when using value exclusions, meaning WHERE field != "value" is interpreted as WHERE field != "value" AND field IS NOT NULL.
+The `WHERE` processing command produces a table that contains all rows from the input table for which the provided condition evaluates to `true`.
+
+For value exclusions, fields with `null` values are excluded from search results. In this context, `null` means either an explicit `null` value in the document or no value at all. For example, `WHERE field != "value"` is interpreted as `WHERE field != "value" AND field IS NOT NULL`.
 
 ## Syntax
 
@@ -10,167 +12,206 @@ The WHERE command filters rows from the input table based on a condition that ev
 
 #### expression
 
-A boolean expression used to filter rows.
+A boolean expression.
 
 ## Examples
 
-Filter employees who are still hired:
+Filter employees by the `still_hired` boolean field.
 
-Returns only employees whose `still_hired` field is true, showing their first and last names.
 ```esql
 FROM employees
 | KEEP first_name, last_name, still_hired
 | WHERE still_hired == true
 ```
 
-Simplify the condition when the field is boolean:
+Filter employees by the `still_hired` boolean field using the simplified boolean form.
 
-Filters employees to include only those who are still hired, using the boolean field directly.
 ```esql
 FROM employees
 | KEEP first_name, last_name, still_hired
 | WHERE still_hired
 ```
 
-Retrieve logs from the last hour using date math:
+Retrieve rows from the last hour using date math and `NOW()`.
 
-Returns log entries from the last hour by comparing the `@timestamp` field to the current time minus one hour.
 ```esql
 FROM sample_data
 | WHERE @timestamp > NOW() - 1 hour
 ```
 
-Filter rows using a function, such as LENGTH:
+Filter employees by the character length of `first_name`.
 
-Shows employees whose first names are shorter than four characters.
 ```esql
 FROM employees
 | KEEP first_name, last_name, height
 | WHERE LENGTH(first_name) < 4
 ```
 
-Check for NULL values using IS NULL:
+Filter employees where `birth_date` is `NULL`.
 
-Finds employees whose `birth_date` field is missing or null.
 ```esql
 FROM employees
 | WHERE birth_date IS NULL
 ```
 
-Check for non-NULL values and count employees:
+| first_name:keyword | last_name:keyword |
+| --- | --- |
+| Basil | Tramer |
+| Florian | Syrotiuk |
+| Lucien | Rosenbaum |
 
-Counts the number of employees who have a non-null value in the `is_rehired` field.
+Count employees where `is_rehired` is not `NULL`.
+
 ```esql
 FROM employees
 | WHERE is_rehired IS NOT NULL
 | STATS COUNT(emp_no)
 ```
 
-Match text using the MATCH function:
+| COUNT(emp_no):long |
+| --- |
+| 84 |
 
-Finds books where the `author` field matches the term "Faulkner".
+Filter books by matching `author` against `Faulkner`.
+
 ```esql
 FROM books
 | WHERE MATCH(author, "Faulkner")
 ```
 
-Match text with multiple terms and keep the title:
+| book_no:keyword | author:text |
+| --- | --- |
+| 2378 | [Carol Faulkner, Holly Byers Ochoa, Lucretia Mott] |
+| 2713 | William Faulkner |
+| 2847 | Colleen Faulkner |
+| 2883 | William Faulkner |
+| 3293 | Danny Faulkner |
 
-Returns book titles that match all the terms "Hobbit", "Back", and "Again" in the `title` field.
+Filter books by matching `title` with the `AND` operator.
+
 ```esql
 FROM books
 | WHERE MATCH(title, "Hobbit Back Again", {"operator": "AND"})
 | KEEP title;
 ```
 
-Use the LIKE operator to filter based on string patterns:
+| title:text |
+| --- |
+| The Hobbit or There and Back Again |
 
-Finds employees whose first names match the pattern "?b*", where "?" is any character followed by "b" and any characters after.
+Filter employees whose `first_name` matches a `LIKE` wildcard pattern.
+
 ```esql
 FROM employees
 | WHERE first_name LIKE """?b*"""
 | KEEP first_name, last_name
 ```
 
-Escape special characters in LIKE patterns:
+| first_name:keyword | last_name:keyword |
+| --- | --- |
+| Ebbe | Callaway |
+| Eberhardt | Terkki |
 
-Filters rows where the `message` field exactly matches "foo * bar", escaping the asterisk.
+Filter a row by matching a literal `*` character with `LIKE`.
+
 ```esql
 ROW message = "foo * bar"
 | WHERE message LIKE "foo \\* bar"
 ```
 
-Reduce escaping overhead with triple quotes in LIKE:
+Filter a row by matching a literal `*` character with `LIKE` and triple-quoted strings.
 
-Filters rows where the `message` field matches "foo * bar", using triple quotes to simplify escaping.
 ```esql
 ROW message = "foo * bar"
 | WHERE message LIKE """foo \* bar"""
 ```
 
-Match against multiple LIKE patterns:
+Filter a Windows-style path with `LIKE` and triple-quoted strings.
 
-Returns rows where the `message` field matches either the pattern "foo*" or "bar?".
+```esql
+ROW path = """C:\Windows\System32\foo.txt"""
+| WHERE path LIKE """C:\\Windows*"""
+```
+
+Filter a row by matching any pattern in a `LIKE` pattern list.
+
 ```esql
 ROW message = "foobar"
 | WHERE message like ("foo*", "bar?")
 ```
 
-Use REST query placeholders with LIKE:
+Filter employees with a `LIKE` pattern supplied through a REST query placeholder.
 
-Filters employees whose first names match a pattern provided as a REST query parameter.
 ```esql
 FROM employees
 | WHERE first_name LIKE ?pattern
 | KEEP first_name, last_name
 ```
 
-Filter using RLIKE with regular expressions:
+Filter employees with a `LIKE` pattern built from a constant expression.
 
-Finds employees whose first names match the regular expression ".leja.*".
+```esql
+from employees | where first_name like concat("Eber", "*") | keep emp_no, first_name
+```
+
+Filter employees whose `first_name` matches an `RLIKE` regular expression.
+
 ```esql
 FROM employees
 | WHERE first_name RLIKE """.leja.*"""
 | KEEP first_name, last_name
 ```
 
-Escape special characters in RLIKE patterns:
+| first_name:keyword | last_name:keyword |
+| --- | --- |
+| Alejandro | McAlpine |
 
-Filters rows where the `message` field matches the regular expression "foo \( bar", escaping the parenthesis.
+Filter a row by matching a literal `(` character with `RLIKE`.
+
 ```esql
 ROW message = "foo ( bar"
 | WHERE message RLIKE "foo \\( bar"
 ```
 
-Reduce escaping overhead with triple quotes in RLIKE:
+Filter a row by matching a literal `(` character with `RLIKE` and triple-quoted strings.
 
-Filters rows where the `message` field matches the regular expression "foo \( bar", using triple quotes for easier escaping.
 ```esql
 ROW message = "foo ( bar"
 | WHERE message RLIKE """foo \( bar"""
 ```
 
-Match against multiple RLIKE patterns:
+Filter a row by matching any pattern in an `RLIKE` pattern list.
 
-Returns rows where the `message` field matches either the regular expression "foo.*" or "bar.".
 ```esql
 ROW message = "foobar"
 | WHERE message RLIKE ("foo.*", "bar.")
 ```
 
-Use REST query placeholders with RLIKE:
+Filter employees with an `RLIKE` pattern supplied through a REST query placeholder.
 
-Filters employees whose first names match a regular expression provided as a REST query parameter.
 ```esql
 FROM employees
 | WHERE first_name RLIKE ?pattern
 | KEEP first_name, last_name
 ```
 
-Test membership in a list using IN:
+Filter employees with an `RLIKE` pattern built from a constant expression.
 
-Keeps rows where the value of `c-a` is in the list (3, b / 2, a).
+```esql
+from employees | where first_name rlike concat("Eber", ".*") | keep emp_no, first_name
+```
+
+Filter rows by testing whether `c-a` equals any element in an `IN` list.
+
 ```esql
 ROW a = 1, b = 4, c = 3
 | WHERE c-a IN (3, b / 2, a)
 ```
+
+| a:integer | b:integer | c:integer |
+| --- | --- | --- |
+| 1 | 4 | 3 |
+
+## Limitations
+
+When used on `text` fields, `LIKE` and `RLIKE` treat the field as a `keyword` and do not use the analyzer. Pattern matching is case-sensitive and must match the exact indexed string. To perform full-text search, use `MATCH` or `QSTR`.

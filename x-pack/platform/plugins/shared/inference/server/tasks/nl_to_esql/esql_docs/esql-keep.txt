@@ -1,6 +1,14 @@
 # KEEP
 
-The KEEP command allows you to specify which columns are returned and the order in which they appear. When a field name matches multiple expressions, precedence rules determine which expression is used: complete field names have the highest priority, followed by partial wildcard expressions, and finally the wildcard-only expression. If two expressions have the same precedence, the rightmost one takes priority.
+The `KEEP` processing command specifies which columns are returned and the order in which they are returned.
+
+Precedence rules are applied when a field name matches multiple expressions. Fields are added in the order they appear. If one field matches multiple expressions, the following precedence rules apply, from highest to lowest priority:
+
+1. Complete field name, with no wildcards
+2. Partial wildcard expressions, such as `fieldNam*`
+3. Wildcard only, `*`
+
+If a field matches two expressions with the same precedence, the rightmost expression wins.
 
 ## Syntax
 
@@ -10,48 +18,65 @@ The KEEP command allows you to specify which columns are returned and the order 
 
 #### columns
 
-A comma-separated list of columns to keep. Wildcards are supported. If a column matches multiple expressions, precedence rules are applied to determine which expression is used.
+A comma-separated list of columns to keep. Supports wildcards. Precedence rules apply when an existing column matches multiple wildcards or column names.
 
 ## Examples
 
-Selects and orders the columns emp_no, first_name, last_name, and height.
+Specify the returned columns and their order:
 
 ```esql
 FROM employees
 | KEEP emp_no, first_name, last_name, height
 ```
 
-Returns all columns whose names start with "h".
+emp_no:integer | first_name:keyword | last_name:keyword | height:double
+10001 | Georgi | Facello | 2.03
+10002 | Bezalel | Simmel | 2.08
+10003 | Parto | Bamford | 1.83
+10004 | Chirstian | Koblick | 1.78
+10005 | Kyoichi | Maliniak | 2.05
+
+Select columns whose names match the `h*` wildcard pattern:
 
 ```esql
 FROM employees
 | KEEP h*
 ```
 
-Returns columns starting with "h" followed by all remaining columns.
+height:double | height.float:double | height.half_float:double | height.scaled_float:double | hire_date:date
+
+Return columns starting with `h` before all remaining columns:
 
 ```esql
 FROM employees
 | KEEP h*, *
 ```
 
-Returns first_name and last_name, with first_name taking precedence over the wildcard.
+height:double | height.float:double | height.half_float:double | height.scaled_float:double | hire_date:date | avg_worked_seconds:long | birth_date:date | emp_no:integer | first_name:keyword | gender:keyword | is_rehired:boolean | job_positions:keyword | languages:integer | languages.byte:integer | languages.long:long | languages.short:integer | last_name:keyword | salary:integer | salary_change:double | salary_change.int:integer | salary_change.keyword:keyword | salary_change.long:long | still_hired:boolean
+
+Show complete field name precedence over wildcard expressions:
 
 ```esql
 FROM employees
 | KEEP first_name, last_name, first_name*
 ```
 
-Returns columns matching first_name* and first_na*, with the rightmost expression taking precedence.
+first_name:keyword | last_name:keyword
+
+Show that the rightmost wildcard wins when wildcard priorities are equal:
 
 ```esql
 FROM employees
 | KEEP first_name*, last_name, first_na*
 ```
 
-Returns all columns, with first_name appearing last due to its position in the argument list.
+last_name:keyword | first_name:keyword
+
+Show that the bare `*` wildcard has the lowest precedence:
 
 ```esql
 FROM employees
 | KEEP *, first_name
 ```
+
+avg_worked_seconds:long | birth_date:date | emp_no:integer | gender:keyword | height:double | height.float:double | height.half_float:double | height.scaled_float:double | hire_date:date | is_rehired:boolean | job_positions:keyword | languages:integer | languages.byte:integer | languages.long:long | languages.short:integer | last_name:keyword | salary:integer | salary_change:double | salary_change.int:integer | salary_change.keyword:keyword | salary_change.long:long | still_hired:boolean | first_name:keyword

@@ -1,29 +1,31 @@
 # SAMPLE
 
-The SAMPLE function collects a specified number of sample values from a field.
+The `SAMPLE` command samples a fraction of the table rows.
+
+For automatic sampling with extrapolation and confidence intervals, see Approximate `STATS` queries.
 
 ## Syntax
 
-`SAMPLE(field, limit)`
+`SAMPLE probability`
 
 ### Parameters
 
-#### field
+#### probability
 
-The field from which to collect sample values.
-
-#### limit
-
-The maximum number of values to collect.
+The probability that a row is included in the sample. The value must be between 0 and 1, exclusive.
 
 ## Examples
 
-Collects up to 5 sample values from the `gender` field across all employee records.
+Sample 5% of employee rows and keep only employee numbers.
 
 ```esql
 FROM employees
-| STATS sample = SAMPLE(gender, 5)
-```OM employees
 | KEEP emp_no
 | SAMPLE 0.05
 ```
+
+emp_no:integer
+10018
+10024
+10062
+10081

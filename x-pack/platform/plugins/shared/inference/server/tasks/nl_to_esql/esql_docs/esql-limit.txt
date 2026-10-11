@@ -1,20 +1,26 @@
 # LIMIT
 
-The LIMIT command restricts the number of rows returned by a query. It is useful for controlling the size of the result set, especially when working with large datasets.
+The `LIMIT` processing command limits the number of rows returned. When `BY` is specified, up to `max_number_of_rows` rows are retained for each distinct combination of the grouping expressions.
 
 ## Syntax
 
 `LIMIT max_number_of_rows`
 
+`LIMIT max_number_of_rows BY grouping_expr1[, ..., grouping_exprN]`
+
 ### Parameters
 
-#### max_number_of_rows
+#### `max_number_of_rows`
 
-The maximum number of rows to return.
+The maximum number of rows to return. When `BY` is specified, the maximum number of rows to return per group.
+
+#### `grouping_exprX`
+
+Optional. An expression that outputs the values to group by.
 
 ## Examples
 
-Returns the first 5 employees after sorting all employees by their employee number in ascending order.
+Return the first five employees after sorting by employee number.
 
 ```esql
 FROM employees
@@ -22,6 +28,40 @@ FROM employees
 | LIMIT 5
 ```
 
+Return the highest-paid employee for each gender.
+
+```esql
+FROM employees
+| SORT salary DESC
+| LIMIT 1 BY gender
+| KEEP first_name, last_name, salary, gender
+```
+
+first_name:keyword | last_name:keyword | salary:integer | gender:keyword
+Otmar | Herbst | 74999 | M
+Tzvetan | Zielinski | 74572 | F
+Lillian | Haddadi | 73717 | null
+
+Return the highest-paid employee for each language and gender combination.
+
+```esql
+FROM employees
+| SORT salary DESC
+| LIMIT 1 BY languages, gender
+```
+
 ## Limitations
 
-Queries do not return more than 10,000 rows, regardless of the LIMIT value. This is a configurable upper limit. The default and maximum limits can be changed using the dynamic cluster settings `esql.query.result_truncation_default_size` and `esql.query.result_truncation_max_size`. Increasing these limits may result in higher memory usage, longer processing times, and increased internode traffic. The upper limit applies only to the number of rows output by the query, not to the number of documents processed.
+Queries do not return more than 10,000 rows by default, regardless of the `LIMIT` value. This upper limit applies only to the number of rows output by the query, not to the number of documents processed.
+
+The default and maximum limits can be changed using these dynamic cluster settings:
+
+- `esql.query.result_truncation_default_size`
+- `esql.query.result_truncation_max_size`
+
+For time-series queries that use the `TS` or `PROMQL` source commands, including requests to the PromQL HTTP API, the default and maximum limits are higher and can be changed using these cluster settings:
+
+- `esql.query.timeseries_result_truncation_default_size`
+- `esql.query.timeseries_result_truncation_max_size`
+
+Increasing these values can increase memory pressure, processing time, and internode traffic within and across clusters.

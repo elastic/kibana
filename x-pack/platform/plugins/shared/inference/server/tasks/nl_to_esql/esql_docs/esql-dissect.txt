@@ -1,6 +1,6 @@
 # DISSECT
 
-The DISSECT command is used to extract structured data from a string. It matches the string against a delimiter-based pattern and extracts the specified keys as columns.
+The DISSECT command extracts structured data from a string. It matches the string against a delimiter-based pattern and extracts the specified keys as columns.
 
 ## Syntax
 
@@ -10,7 +10,7 @@ The DISSECT command is used to extract structured data from a string. It matches
 
 #### input
 
-The column containing the string you want to structure. If the column has multiple values, DISSECT will process each value.
+The column that contains the string you want to structure. If the column has multiple values, DISSECT will process each value.
 
 #### pattern
 
@@ -18,11 +18,11 @@ A dissect pattern. If a field name conflicts with an existing column, the existi
 
 #### <separator>
 
-A string used as the separator between appended values, when using the append modifier.
+Optional. A string used as the separator between appended values, when using the append modifier.
 
 ## Examples
 
-Extracts the date, message, and IP address from a structured log string and keeps only those fields.
+Parse a timestamp, message, and IP address from a structured string:
 
 ```esql
 ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
@@ -30,7 +30,10 @@ ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
 | KEEP date, msg, ip
 ```
 
-Parses a log string to extract the date, message, and IP address, then converts the extracted date string to a datetime type.
+date:keyword | msg:keyword | ip:keyword
+2023-01-23T12:15:00.000Z | some text | 127.0.0.1
+
+Convert a dissected timestamp string to a date value:
 
 ```esql
 ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
@@ -38,3 +41,6 @@ ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
 | KEEP date, msg, ip
 | EVAL date = TO_DATETIME(date)
 ```
+
+msg:keyword | ip:keyword | date:date
+some text | 127.0.0.1 | 2023-01-23T12:15:00.000Z

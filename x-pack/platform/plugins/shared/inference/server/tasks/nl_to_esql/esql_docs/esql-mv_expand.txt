@@ -1,6 +1,6 @@
 # MV_EXPAND
 
-The MV_EXPAND command expands multivalued columns so that each value appears in its own row, duplicating the other columns for each expanded value.
+The `MV_EXPAND` processing command expands multivalued columns into one row per value, duplicating other columns.
 
 ## Syntax
 
@@ -14,13 +14,29 @@ The multivalued column to expand.
 
 ## Examples
 
-Expands each value in the multivalued column `a` into its own row, while duplicating the values of columns `b` and `j` for each expanded value.
+Expand the multivalued `a` column into one row per value:
 
 ```esql
 ROW a=[1,2,3], b="b", j=["a","b"]
 | MV_EXPAND a
 ```
 
+a:integer | b:keyword | j:keyword
+--- | --- | ---
+1 | b | ["a", "b"]
+2 | b | ["a", "b"]
+3 | b | ["a", "b"]
+
 ## Limitations
 
-The output rows produced by MV_EXPAND can be in any order and may not respect preceding SORT commands. To guarantee a specific ordering, place a SORT after any MV_EXPAND commands.
+`MV_EXPAND` does not preserve the sort order from a preceding `SORT`. The output rows can be in any order. To guarantee a certain ordering, place a `SORT` after `MV_EXPAND`.
+
+If a `WHERE` clause follows `MV_EXPAND`, it may prevent the query planner from merging a preceding `SORT` with a trailing `LIMIT` into an efficient `TopN` operation. In such cases, the query fails with a validation exception: `MV_EXPAND [MV_EXPAND field] cannot yet have an unbounded SORT [SORT field] before it: either move the SORT after it, or add a LIMIT after the SORT`.
+
+To work around this, add a `LIMIT` before `MV_EXPAND`:
+
+Sorts the data, limits the number of rows, expands the multivalued field, and then filters the expanded values.
+
+```esql
+FROM index | SORT field | LIMIT 1000 | MV_EXPAND mv_field | WHERE mv_field == "value"
+```
