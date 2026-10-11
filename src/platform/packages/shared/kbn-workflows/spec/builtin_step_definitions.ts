@@ -331,6 +331,15 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
       slack2:
         connector-id: my-slack2-connector
         channels: ['C0123456789']`,
+        `- name: ask_in_servicenow
+  type: waitForInput
+  with:
+    message: "Choose how to proceed"
+    channels:
+      servicenow:
+        connector-id: my-servicenow-connector
+        table: incident
+        sys-id: abc123def456`,
       ],
     },
   },
@@ -362,7 +371,11 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
         channels: ['C0123456789', '#alerts']
       slack2:
         connector-id: my-slack2-connector
-        channels: ['C0123456789']`,
+        channels: ['C0123456789']
+      servicenow:
+        connector-id: my-servicenow-connector
+        table: incident
+        sys-id: abc123def456`,
       ],
     },
   },

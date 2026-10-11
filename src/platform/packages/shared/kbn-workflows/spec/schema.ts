@@ -374,12 +374,30 @@ export const HitlSlack2ChannelSchema = z.object({
     ),
 });
 
+export const HitlServiceNowChannelSchema = z.object({
+  'connector-id': z
+    .string()
+    .min(1)
+    .max(CONNECTOR_ID_MAX_LENGTH)
+    .describe('ServiceNow connector saved object id or name'),
+  table: z
+    .string()
+    .min(1)
+    .max(200)
+    .describe(
+      'The ServiceNow table containing the record (e.g., incident, change_request, problem)'
+    ),
+  'sys-id': z.string().min(1).max(200).describe('The sys_id of the record to add the comment to'),
+});
+
 const hitlChannelDescriptions = {
   slack: 'Notify via a Slack incoming-webhook connector (posts to the webhook configured channel)',
   slack_api:
     'Notify via a Slack API connector. Set connector-id and one or more channel IDs and/or #channel names.',
   slack2:
     'Notify via a Slack (v2) connector using sendMessage. Set connector-id and one or more conversation IDs.',
+  servicenow:
+    'Add a customer-visible comment to an existing ServiceNow record. Set connector-id, table, and sys-id.',
 } as const;
 
 export const WaitForInputChannelsSchema = z
@@ -393,6 +411,9 @@ export const WaitForInputChannelsSchema = z
     slack2: HitlSlack2ChannelSchema.extend(hitlChannelMessageField)
       .optional()
       .describe(hitlChannelDescriptions.slack2),
+    servicenow: HitlServiceNowChannelSchema.extend(hitlChannelMessageField)
+      .optional()
+      .describe(hitlChannelDescriptions.servicenow),
   })
   .optional()
   .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
@@ -404,6 +425,9 @@ export const WaitForApprovalChannelsSchema = z
       .optional()
       .describe(hitlChannelDescriptions.slack_api),
     slack2: HitlSlack2ChannelSchema.loose().optional().describe(hitlChannelDescriptions.slack2),
+    servicenow: HitlServiceNowChannelSchema.loose()
+      .optional()
+      .describe(hitlChannelDescriptions.servicenow),
   })
   .optional()
   .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);

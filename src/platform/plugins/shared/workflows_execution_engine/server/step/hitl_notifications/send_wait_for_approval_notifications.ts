@@ -11,7 +11,10 @@ import type { WaitForApprovalStep } from '@kbn/workflows';
 import { buildExternalResumeUrl } from '@kbn/workflows/server';
 import {
   assertConnectorSucceeded,
+  buildServiceNowAddCommentInput,
   buildSlack2SendMessageInput,
+  fitHitlTextPreservingSuffix,
+  SERVICENOW_COMMENT_MAX_LENGTH,
   slackApiChannelTarget,
 } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
@@ -46,6 +49,26 @@ export function buildWaitForApprovalResumeLinks({
 
 function escapeSlackMrkdwnUrl(url: string): string {
   return url.replace(/&/g, '&amp;');
+}
+
+function buildServiceNowApprovalComment({
+  message,
+  approveLabel,
+  rejectLabel,
+  approveUrl,
+  rejectUrl,
+}: {
+  message: string;
+  approveLabel: string;
+  rejectLabel: string;
+  approveUrl: string;
+  rejectUrl: string;
+}): string {
+  return fitHitlTextPreservingSuffix(
+    message,
+    `${approveLabel}: ${approveUrl}\n${rejectLabel}: ${rejectUrl}`,
+    SERVICENOW_COMMENT_MAX_LENGTH
+  );
 }
 
 function buildSlackMessage({
@@ -196,5 +219,23 @@ export async function sendWaitForApprovalNotifications({
       });
       assertConnectorSucceeded(result);
     }
+  }
+
+  const serviceNowConfig = channels.servicenow;
+  const serviceNowConnectorId = serviceNowConfig?.['connector-id'];
+  const serviceNowTable = serviceNowConfig?.table;
+  const serviceNowSysId = serviceNowConfig?.['sys-id'];
+  if (serviceNowConnectorId && serviceNowTable && serviceNowSysId) {
+    const result = await connectorExecutor.execute({
+      connectorType: 'servicenow_search',
+      connectorNameOrId: serviceNowConnectorId,
+      input: buildServiceNowAddCommentInput(
+        serviceNowTable,
+        serviceNowSysId,
+        buildServiceNowApprovalComment(linkParams)
+      ),
+      abortController,
+    });
+    assertConnectorSucceeded(result);
   }
 }

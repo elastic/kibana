@@ -15,7 +15,11 @@ import {
 import { hasExternalHitlChannels } from './has_external_hitl_channels';
 import {
   assertConnectorSucceeded,
+  buildServiceNowAddCommentInput,
   buildSlack2SendMessageInput,
+  fitHitlRenderedTextPreservingLink,
+  fitHitlTextPreservingSuffix,
+  SERVICENOW_COMMENT_MAX_LENGTH,
   slackApiChannelTarget,
 } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
@@ -24,6 +28,20 @@ type WaitForInputChannels = NonNullable<NonNullable<WaitForInputStep['with']>['c
 
 function escapeSlackMrkdwnUrl(url: string): string {
   return url.replace(/&/g, '&amp;');
+}
+
+function buildDefaultInputServiceNowComment({
+  stepMessage,
+  formUrl,
+}: {
+  stepMessage: string;
+  formUrl: string;
+}): string {
+  return fitHitlTextPreservingSuffix(
+    stepMessage,
+    `Open form: ${formUrl}`,
+    SERVICENOW_COMMENT_MAX_LENGTH
+  );
 }
 
 function buildDefaultInputSlackMessage({
@@ -200,5 +218,33 @@ export async function sendWaitForInputNotifications({
       });
       assertConnectorSucceeded(result);
     }
+  }
+
+  const serviceNowConfig = channels.servicenow;
+  const serviceNowConnectorId = serviceNowConfig?.['connector-id'];
+  const serviceNowTable = serviceNowConfig?.table;
+  const serviceNowSysId = serviceNowConfig?.['sys-id'];
+  if (serviceNowConnectorId && serviceNowTable && serviceNowSysId) {
+    const comment =
+      serviceNowConfig.message != null
+        ? fitHitlRenderedTextPreservingLink(
+            resolveWaitForInputChannelMessage({
+              channelMessageTemplate: serviceNowConfig.message,
+              stepMessage,
+              formUrl,
+              renderTemplate,
+            }),
+            formUrl,
+            SERVICENOW_COMMENT_MAX_LENGTH
+          )
+        : buildDefaultInputServiceNowComment({ stepMessage, formUrl });
+
+    const result = await connectorExecutor.execute({
+      connectorType: 'servicenow_search',
+      connectorNameOrId: serviceNowConnectorId,
+      input: buildServiceNowAddCommentInput(serviceNowTable, serviceNowSysId, comment),
+      abortController,
+    });
+    assertConnectorSucceeded(result);
   }
 }

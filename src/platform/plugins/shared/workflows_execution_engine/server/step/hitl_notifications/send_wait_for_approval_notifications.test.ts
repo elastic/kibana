@@ -42,6 +42,14 @@ describe('send_wait_for_approval_notifications', () => {
         })
       ).toBe(true);
     });
+
+    it('returns true when a ServiceNow record is configured', () => {
+      expect(
+        hasExternalHitlChannels({
+          servicenow: { 'connector-id': 'snow-1', table: 'incident', 'sys-id': 'abc' },
+        })
+      ).toBe(true);
+    });
   });
 
   describe('buildWaitForApprovalResumeLinks', () => {
@@ -194,6 +202,33 @@ describe('send_wait_for_approval_notifications', () => {
         })
       );
       expect(execute.mock.calls[1][0].input.subActionParams.channel).toBe('C0456');
+    });
+
+    it('adds a ServiceNow comment with approve and decline links', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          servicenow: { 'connector-id': 'snow-1', table: 'incident', 'sys-id': 'abc123' },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute).toHaveBeenCalledWith({
+        connectorType: 'servicenow_search',
+        connectorNameOrId: 'snow-1',
+        input: {
+          subAction: 'addComment',
+          subActionParams: {
+            table: 'incident',
+            sysId: 'abc123',
+            comment:
+              'Approve change?\n\nApprove: https://kibana.example/approve\nDecline: https://kibana.example/reject',
+          },
+        },
+        abortController: expect.any(AbortController),
+      });
     });
 
     it('throws when a configured connector fails', async () => {

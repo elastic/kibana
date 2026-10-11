@@ -86,4 +86,55 @@ describe('sendWaitForInputNotifications', () => {
       'Custom: https://kibana.example/form'
     );
   });
+
+  it('adds a ServiceNow comment with the form link and an optional message override', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        servicenow: { 'connector-id': 'snow-1', table: 'incident', 'sys-id': 'abc123' },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form',
+      renderTemplate,
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute).toHaveBeenCalledWith({
+      connectorType: 'servicenow_search',
+      connectorNameOrId: 'snow-1',
+      input: {
+        subAction: 'addComment',
+        subActionParams: {
+          table: 'incident',
+          sysId: 'abc123',
+          comment: 'Please provide input\n\nOpen form: https://kibana.example/form',
+        },
+      },
+      abortController: expect.any(AbortController),
+    });
+
+    execute.mockClear();
+    await sendWaitForInputNotifications({
+      channels: {
+        servicenow: {
+          'connector-id': 'snow-1',
+          table: 'incident',
+          'sys-id': 'abc123',
+          message: 'Ticket form: {{context.hitl.externalFormLink}}',
+        },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form',
+      renderTemplate: (template) =>
+        template.replace('{{context.hitl.externalFormLink}}', 'https://kibana.example/form'),
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute.mock.calls[0][0].input.subActionParams.comment).toBe(
+      'Ticket form: https://kibana.example/form'
+    );
+  });
 });
