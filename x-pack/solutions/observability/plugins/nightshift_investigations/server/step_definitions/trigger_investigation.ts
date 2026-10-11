@@ -15,6 +15,7 @@ import {
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
+  INVESTIGATION_SUBJECT_TYPES,
   INVESTIGATION_TRIGGER_TYPES,
   investigationNotificationDestinationsSchema,
 } from '../../common';
@@ -22,8 +23,10 @@ import type { GetInvestigationsClient } from '../routes/types';
 
 const inputSchema = z.object({
   subject_type: z
-    .enum(['significant_event', 'alert'])
-    .describe('The type of entity being investigated'),
+    .enum(INVESTIGATION_SUBJECT_TYPES)
+    .describe(
+      'The type of entity being investigated. Use "manual" when the prompt is the whole subject, for example a Slack message.'
+    ),
   subject_id: z.string().min(1).describe('The ID of the entity being investigated'),
   title: z
     .string()

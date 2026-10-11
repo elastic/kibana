@@ -61,6 +61,7 @@
     "@kbn/tooling-log",
     "@kbn/occ",
     "@kbn/encrypted-saved-objects-plugin",
-    "@kbn/security-plugin"
+    "@kbn/security-plugin",
+    "@kbn/eval-kql"
   ]
 }
