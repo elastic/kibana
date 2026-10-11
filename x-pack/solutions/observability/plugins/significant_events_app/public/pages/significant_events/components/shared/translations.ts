@@ -27,7 +27,7 @@ export const ACTIVITY_PAUSED_TOOLTIP = i18n.translate(
 export const ACTIVITY_STATUS_LOADING_TOOLTIP = i18n.translate(
   'xpack.significantEventsApp.activityStatusLoadingTooltip',
   {
-    defaultMessage: 'Checking Significant Events activity status…',
+    defaultMessage: 'Checking event activity status…',
   }
 );
 
@@ -36,7 +36,7 @@ export const ACTIVITY_STATUS_ERROR_TOOLTIP = i18n.translate(
   'xpack.significantEventsApp.activityStatusErrorTooltip',
   {
     defaultMessage:
-      'Could not load Significant Events activity status. New activity stays blocked until status is available.',
+      'Could not load event activity status. New activity stays blocked until status is available.',
   }
 );
 
