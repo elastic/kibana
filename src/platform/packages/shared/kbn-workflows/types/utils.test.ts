@@ -31,7 +31,11 @@ import {
   isWhileStep,
   transformWorkflowYamlJsontoEsWorkflow,
 } from './utils';
-import { ConcurrencySlotOccupyingExecutionStatuses, ExecutionStatus } from './v1';
+import {
+  ConcurrencySlotOccupyingExecutionStatuses,
+  ExecutionStatus,
+  WorkflowExecutionCollapseFields,
+} from './v1';
 import type { ConnectorContractUnion, WorkflowStepExecutionDto } from './v1';
 import type { Step, WorkflowYaml } from '../spec/schema';
 
@@ -302,6 +306,12 @@ describe('types/utils', () => {
     it('returns undefined for a known built-in step without stability', () => {
       // 'wait' is a known built-in but has no explicit stability field
       expect(getBuiltInStepStability('wait')).toBeUndefined();
+    });
+  });
+
+  describe('WorkflowExecutionCollapseFields', () => {
+    it('includes workflowId', () => {
+      expect(WorkflowExecutionCollapseFields).toContain('workflowId');
     });
   });
 });
