@@ -72,7 +72,12 @@ describe('Worker settings declarations', () => {
     expect(createDefaultWorkerSettings(TRIAGE)).toEqual({
       workerId: TRIAGE,
       autonomy: 'manual',
-      extras: { autoCloseConfidenceScoreMinThreshold: 0.85 },
+      scheduleInterval: '15m',
+      extras: {
+        autoCloseConfidenceScoreMinThreshold: 0.85,
+        budgetPerHour: 1300,
+        lookbackHours: 24,
+      },
     });
     expect(createDefaultWorkerSettings(ATTACK_DISCOVERY)).not.toHaveProperty('extras');
   });
@@ -127,8 +132,13 @@ describe('Worker settings declarations', () => {
   });
 
   it('rejects a schedule interval on a Worker that owns no schedule', () => {
+    const endpointAnalysis = SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID;
     expect(
-      issuesOf(TRIAGE, { workerId: TRIAGE, autonomy: 'manual', scheduleInterval: '2h' })
+      issuesOf(endpointAnalysis, {
+        workerId: endpointAnalysis,
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+      })
     ).toContain('scheduleInterval');
   });
 

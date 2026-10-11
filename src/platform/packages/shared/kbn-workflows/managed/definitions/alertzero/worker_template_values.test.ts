@@ -33,7 +33,11 @@ const workers: Array<[string, (serviceAccountId?: string) => string]> = [
     (serviceAccountId) =>
       renderAlertTriageWorkerYaml(FLOOR_ALERT_TRIAGE_YAML, {
         ...shared,
-        extras: { autoCloseConfidenceScoreMinThreshold: 0.85 },
+        extras: {
+          autoCloseConfidenceScoreMinThreshold: 0.85,
+          budgetPerHour: 1300,
+          lookbackHours: 24,
+        },
         serviceAccountId,
       }),
   ],
