@@ -9,6 +9,7 @@
 
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as ruleCreationConfig } from '../../evals_detection_watch_rule_creation/stateful/classic.stateful.config';
+import { serviceAccountsServerArgs } from '../../service_accounts/shared';
 
 /**
  * Config set for the detection-watch-rule-tuning eval suite. The suite drives the managed
@@ -26,6 +27,11 @@ import { servers as ruleCreationConfig } from '../../evals_detection_watch_rule_
  * `/internal/alertzero/workers` (list + PATCH, to bind the service account), and every alertzero
  * route is wrapped in `withAlertZeroEnabled`, which 404s while that per-space setting is off
  * (its default). The override covers every space, including per-space worker cells.
+ *
+ * Service accounts must be enabled at boot: since #295215 alertzero reports missing dependencies, and
+ * `withAlertZeroEnabled` answers every route with 503 "AlertZero dependencies are unavailable", while
+ * `xpack.security.serviceAccounts.enabled` is off. The suite binds the worker to a service account, so
+ * the flag (and the test plugin backing it) is spread in from the shared service_accounts set.
  *
  * `investigateRuleSkill` gates registration of the `investigate-rule` Agent Builder skill (default
  * off). The review workflow's diagnose step is told to call `investigate-rule.get_alerts_by_ids`,
@@ -54,6 +60,7 @@ export const servers: ScoutServerConfig = {
       ),
       '--xpack.agenticInvestigations.enabled=true',
       ENABLE_ALERTZERO_ARG,
+      ...serviceAccountsServerArgs,
       `${ENABLE_EXPERIMENTAL_PREFIX}${JSON.stringify([
         ...new Set([...inheritedExperimental, ...REQUIRED_EXPERIMENTAL_FEATURES]),
       ])}`,

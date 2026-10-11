@@ -8,6 +8,7 @@
  */
 
 import { servers } from './classic.stateful.config';
+import { serviceAccountsServerArgs } from '../../service_accounts/shared';
 
 const serverArgs = servers.kbnTestServer.serverArgs ?? [];
 
@@ -36,6 +37,11 @@ const REQUIRED_SERVER_ARGS = [
 describe('evals_detection_watch_rule_tuning Scout config set', () => {
   it('passes every boot-time flag the tuning suite needs', () => {
     expect(REQUIRED_SERVER_ARGS.filter((arg) => !serverArgs.includes(arg))).toEqual([]);
+  });
+
+  it('enables service accounts, without which every alertzero route answers 503', () => {
+    expect(serviceAccountsServerArgs).toContain('--xpack.security.serviceAccounts.enabled=true');
+    expect(serviceAccountsServerArgs.filter((arg) => !serverArgs.includes(arg))).toEqual([]);
   });
 
   it('enables the evals plugin so the suite can export its scores', () => {
