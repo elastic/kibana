@@ -44,13 +44,18 @@ type Trajectory =
   | ({ available: true; joinedOn: string; settled: boolean } & ToolCalls)
   | { available: false; explanation: string };
 
-const skillArgument = (toolArguments: string | null): string | undefined => {
-  try {
-    const { skill } = JSON.parse(toolArguments ?? '') as { skill?: unknown };
-    return typeof skill === 'string' ? skill : undefined;
-  } catch {
-    return undefined;
-  }
+/**
+ * `load_skill` accepts the bare skill name (`{"skill":"<name>"}` — compact JSON of the
+ * tool's only parameter) or a folder/SKILL.md path (`{"skill":"/skills/…/<name>/SKILL.md"}`).
+ * Both forms are normalized to the skill name; a skill whose name merely *contains* the
+ * expected one (`detection-rule-edit-v2`) must not match (aligned with the value-anchored
+ * matching in @kbn/evals trace_based/skill_invocation).
+ */
+export const skillArgument = (toolArguments: string | null): string | undefined => {
+  if (!toolArguments) return undefined;
+  const match = toolArguments.match(/"skill"\s*:\s*"([^"]*)"/);
+  if (!match) return undefined;
+  return skillName(match[1]);
 };
 
 const skillName = (input: string): string => {
@@ -245,7 +250,13 @@ export const scoreCallOrder: ScoreFn = ({ calls }) => {
       'loaded skill is not recorded on the span (agentBuilder:tracing:includeToolDetails is off)'
     );
   } else if (skillName(first.skill) !== RULE_CREATION_SKILL_ID) {
-    violations.push(`loaded skill "${first.skill}" instead of ${RULE_CREATION_SKILL_ID}`);
+    // Diagnostic label, not just a diff: the two common causes are a superseding skill
+    // name (contains the expected id) and a folder-path load that failed to normalize.
+    const isSuperseding = first.skill.includes(RULE_CREATION_SKILL_ID);
+    const diagnostic = isSuperseding ? ' (unexpected skill: name contains the expected id)' : '';
+    violations.push(
+      `loaded skill "${first.skill}" instead of ${RULE_CREATION_SKILL_ID}${diagnostic}`
+    );
   }
   if (firstDraft === -1) violations.push('never drafted a rule');
   if (finishedBeforeDrafting.length > 0) {
