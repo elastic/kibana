@@ -68,7 +68,7 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAlertingV2Editor();
+      await browserAuth.loginAsRuleFormEditor();
     });
 
     /**

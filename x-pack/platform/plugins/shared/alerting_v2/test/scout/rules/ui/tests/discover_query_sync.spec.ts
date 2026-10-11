@@ -30,7 +30,7 @@ test.describe('Discover query sync — Rule flyout', { tag: testData.UI_TAG }, (
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAlertingV2Editor();
+    await browserAuth.loginAsRuleFormEditor();
     await pageObjects.ruleForm.gotoDiscover();
   });
 

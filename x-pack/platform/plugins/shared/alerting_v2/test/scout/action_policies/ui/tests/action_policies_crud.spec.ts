@@ -7,7 +7,6 @@
 
 import { expect } from '@kbn/scout/ui';
 import {
-  ALERTING_V2_ACTION_POLICY_FORM_ROLE,
   buildCreateActionPolicyData,
   buildCreateRuleData,
   buildWorkflowYaml,
@@ -65,7 +64,7 @@ test.describe('Action Policies - create and edit', { tag: testData.UI_TAG }, () 
     browserAuth,
     pageObjects,
   }) => {
-    await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICY_FORM_ROLE);
+    await browserAuth.loginAsActionPolicyFormEditor();
     const { actionPoliciesList, actionPolicyForm } = pageObjects;
 
     await test.step('fill in and submit the create form', async () => {
@@ -127,7 +126,7 @@ test.describe('Action Policies - create and edit', { tag: testData.UI_TAG }, () 
     );
     createdPolicyIds.push(seeded.id);
 
-    await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICY_FORM_ROLE);
+    await browserAuth.loginAsActionPolicyFormEditor();
     const { actionPoliciesList, actionPolicyForm } = pageObjects;
 
     await test.step('the edit form hydrates from the persisted policy', async () => {

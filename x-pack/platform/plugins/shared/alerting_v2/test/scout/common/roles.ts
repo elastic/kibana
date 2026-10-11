@@ -122,27 +122,6 @@ export const ALERTING_V2_RULES_READ_ROLE: KibanaRole = {
   ],
 };
 
-/**
- * Alerting v2 rules read access plus a classic (v1) Rules capability.
- * Used to assert that the Rules list heading shows both the V1 and V2 rules
- * tabs when the viewer can read both surfaces.
- */
-export const ALERTING_V2_RULES_READ_AND_V1_READ_ROLE: KibanaRole = {
-  elasticsearch: READER_ES_PRIVILEGES,
-  kibana: [
-    {
-      base: [],
-      feature: {
-        alerting_v2_rules: ['read'],
-        stackAlerts: ['read'],
-        logs: ['read'],
-        discover: ['read'],
-      },
-      spaces: ['*'],
-    },
-  ],
-};
-
 export const ALERTING_V2_ALERTS_ALL_ROLE: KibanaRole = {
   elasticsearch: WRITER_ES_PRIVILEGES,
   kibana: [
@@ -164,6 +143,21 @@ export const ALERTING_V2_ALERTS_READ_ROLE: KibanaRole = {
       base: [],
       feature: {
         alerting_v2_alerts: ['read'],
+        discover: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
+export const ALERTING_V2_ALERTS_AND_RULES_READ_ROLE: KibanaRole = {
+  elasticsearch: READER_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_alerts: ['read'],
+        alerting_v2_rules: ['read'],
         discover: ['read'],
       },
       spaces: ['*'],
@@ -199,11 +193,6 @@ export const ALERTING_V2_ACTION_POLICIES_READ_ROLE: KibanaRole = {
   ],
 };
 
-/**
- * Composite role granting full access to action policies plus read access to
- * rules. Used by routes that also need `alerting_v2_rules: ['read']`, such as
- * matching action policies for a rule.
- */
 export const ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE: KibanaRole = {
   elasticsearch: WRITER_ES_PRIVILEGES,
   kibana: [
@@ -212,35 +201,6 @@ export const ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE: KibanaRole = {
       feature: {
         alerting_v2_action_policies: ['all'],
         alerting_v2_rules: ['read'],
-        discover: ['all'],
-      },
-      spaces: ['*'],
-    },
-  ],
-};
-
-/**
- * Everything the action policy form page needs to complete a create/edit
- * round-trip in the browser. Each extra privilege is one the form actually
- * exercises:
- *
- * - `alerting_v2_rules: ['read']` — the create and upsert routes require
- *   `rules.read` on top of `actionPolicies.write`.
- * - `alerting_v2_alerts: ['read']` — the matcher input fetches data-field
- *   suggestions from `GET /suggestions/rule_event_fields`.
- * - `workflowsManagement: ['read']` — destinations are workflow references, so
- *   the `destinationsInput` combo box lists workflows via the workflows plugin.
- */
-export const ALERTING_V2_ACTION_POLICY_FORM_ROLE: KibanaRole = {
-  elasticsearch: WRITER_ES_PRIVILEGES,
-  kibana: [
-    {
-      base: [],
-      feature: {
-        alerting_v2_action_policies: ['all'],
-        alerting_v2_rules: ['read'],
-        alerting_v2_alerts: ['read'],
-        workflowsManagement: ['read'],
         discover: ['all'],
       },
       spaces: ['*'],

@@ -6,19 +6,14 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import {
-  ALERTING_V2_RULES_READ_ROLE,
-  ALERTING_V2_RULES_READ_AND_V1_READ_ROLE,
-  test,
-  testData,
-} from '../fixtures';
+import { test, testData } from '../fixtures';
 
 test.describe('Rules list - heading tabs privileges', { tag: testData.UI_TAG }, () => {
   test('shows the V1 and V2 rules tabs when the user can read both surfaces', async ({
     browserAuth,
     pageObjects,
   }) => {
-    await browserAuth.loginWithCustomRole(ALERTING_V2_RULES_READ_AND_V1_READ_ROLE);
+    await browserAuth.loginAsRuleAndClassicRuleViewer();
     await pageObjects.rulesList.goto();
 
     await expect(pageObjects.rulesList.v1RulesTab).toBeVisible();
@@ -29,7 +24,7 @@ test.describe('Rules list - heading tabs privileges', { tag: testData.UI_TAG }, 
     browserAuth,
     pageObjects,
   }) => {
-    await browserAuth.loginWithCustomRole(ALERTING_V2_RULES_READ_ROLE);
+    await browserAuth.loginAsRuleViewer();
     await pageObjects.rulesList.goto();
 
     await expect(pageObjects.rulesList.v1RulesTab).toBeHidden();

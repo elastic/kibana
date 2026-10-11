@@ -6,13 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import {
-  ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
-  ALERTING_V2_ACTION_POLICIES_READ_ROLE,
-  buildCreateActionPolicyData,
-  test,
-  testData,
-} from '../fixtures';
+import { buildCreateActionPolicyData, test, testData } from '../fixtures';
 
 /*
  * Covers the UI capability gating on the Action Policies page.
@@ -39,7 +33,7 @@ test.describe('Action Policies - read/write privileges', { tag: testData.UI_TAG 
   });
 
   test('editor sees every write affordance', async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICIES_ALL_ROLE);
+    await browserAuth.loginAsActionPolicyEditor();
     const { actionPoliciesList } = pageObjects;
     await actionPoliciesList.goto();
     await actionPoliciesList.search(policyName);
@@ -58,7 +52,7 @@ test.describe('Action Policies - read/write privileges', { tag: testData.UI_TAG 
   });
 
   test('read-only user cannot access write affordances', async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICIES_READ_ROLE);
+    await browserAuth.loginAsActionPolicyViewer();
     const { actionPoliciesList } = pageObjects;
     await actionPoliciesList.goto();
     await actionPoliciesList.search(policyName);
@@ -77,7 +71,7 @@ test.describe('Action Policies - read/write privileges', { tag: testData.UI_TAG 
   });
 
   test('read-only user is blocked from the edit route', async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICIES_READ_ROLE);
+    await browserAuth.loginAsActionPolicyViewer();
     await pageObjects.actionPoliciesList.gotoEdit(policyId);
 
     await expect(pageObjects.alertingNavigation.requiredPrivilegesPrompt).toBeVisible();

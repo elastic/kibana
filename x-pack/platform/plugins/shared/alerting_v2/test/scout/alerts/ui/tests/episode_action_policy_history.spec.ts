@@ -29,7 +29,7 @@ test.describe('Alert details — action policy history tab', { tag: testData.UI_
   });
 
   test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAlertingV2Viewer();
+    await browserAuth.loginAsEpisodeDetailsViewer();
   });
 
   test.afterAll(async ({ apiServices }) => {

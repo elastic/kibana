@@ -7,13 +7,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import type { RulesApiService } from '../../../common/services/rules_api_service';
-import {
-  ALERTING_V2_ALERTS_ALL_ROLE,
-  ALERTING_V2_ALERTS_READ_ROLE,
-  buildCreateRuleData,
-  test,
-  testData,
-} from '../fixtures';
+import { buildCreateRuleData, test, testData } from '../fixtures';
 
 const SOURCE_INDEX = 'test-alerting-v2-alerts-privileges-source';
 const SOURCE_HOST = 'host-alerts-privileges';
@@ -26,25 +20,9 @@ const RULE_NAME = 'scout-alerts-privileges-rule';
  * editors get the mutating actions (resolve, ack, snooze, tag, assign, ...)
  * which collapse into the overflow actions menu.
  *
- * Open in Discover is omitted until the episode's rule resolves (PR #294703).
- * The read role therefore also holds alerting_v2_rules read. The suite creates
- * a rule against source data and waits for it to fire an active episode, so
- * the row and the rule are both real.
+ * The suite creates a rule against source data and waits for it to fire an
+ * active episode, so the row and the rule are both real.
  */
-const ALERTS_V2_RULES_READ_ROLE = {
-  ...ALERTING_V2_ALERTS_READ_ROLE,
-  kibana: ALERTING_V2_ALERTS_READ_ROLE.kibana.map((privilege, index) =>
-    index === 0
-      ? {
-          ...privilege,
-          feature: {
-            ...privilege.feature,
-            alerting_v2_rules: ['read'],
-          },
-        }
-      : privilege
-  ),
-};
 
 test.describe('Alerts page - read/write privileges', { tag: testData.UI_TAG }, () => {
   let ruleId: string | undefined;
@@ -99,7 +77,7 @@ test.describe('Alerts page - read/write privileges', { tag: testData.UI_TAG }, (
   });
 
   test('editor sees the mutating episode actions menu', async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginWithCustomRole(ALERTING_V2_ALERTS_ALL_ROLE);
+    await browserAuth.loginAsAlertEditor();
     const { alertEpisodesList } = pageObjects;
     await alertEpisodesList.goto();
     await expect(alertEpisodesList.pageContainer).toBeVisible();
@@ -111,7 +89,7 @@ test.describe('Alerts page - read/write privileges', { tag: testData.UI_TAG }, (
     browserAuth,
     pageObjects,
   }) => {
-    await browserAuth.loginWithCustomRole(ALERTS_V2_RULES_READ_ROLE);
+    await browserAuth.loginAsAlertAndRuleViewer();
     const { alertEpisodesList } = pageObjects;
     await alertEpisodesList.goto();
     await expect(alertEpisodesList.pageContainer).toBeVisible();

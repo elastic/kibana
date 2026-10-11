@@ -22,7 +22,7 @@ test.describe('ES|QL rule flyout — ?param validation', { tag: testData.UI_TAG 
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAlertingV2Editor();
+    await browserAuth.loginAsRuleFormEditor();
     await pageObjects.discover.goto({ queryMode: 'classic' });
   });
 

@@ -116,7 +116,7 @@ test.describe('ComposeDiscoverFlyout — create and edit flows', { tag: testData
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAlertingV2Editor();
+    await browserAuth.loginAsRuleFormEditor();
     await pageObjects.rulesList.goto();
   });
 

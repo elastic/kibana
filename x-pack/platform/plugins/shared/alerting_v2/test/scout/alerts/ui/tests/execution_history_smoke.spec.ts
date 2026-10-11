@@ -5,35 +5,17 @@
  * 2.0.
  */
 
-import type { KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   buildAlertEvent,
   buildCreateActionPolicyData,
   buildCreateRuleData,
   buildWorkflowYaml,
-  READ_ROLE,
   test,
   testData,
 } from '../fixtures';
 
 const { POLL_TIMEOUT_MS } = testData;
-
-/*
- * Viewer plus `workflowsManagement: read`. Opening action-policy details
- * fetches the workflow destination; READ_ROLE alone surfaces a
- * "Failed to load workflow" toast.
- */
-const SMOKE_VIEWER_ROLE: KibanaRole = {
-  elasticsearch: READ_ROLE.elasticsearch,
-  kibana: READ_ROLE.kibana.map((entry) => ({
-    ...entry,
-    feature: {
-      ...entry.feature,
-      workflowsManagement: ['read'],
-    },
-  })),
-};
 
 /*
  * Setup mirrors `list_execution_history_rule_lookup.spec.ts`: a rule-scoped
@@ -97,7 +79,7 @@ test.describe('Execution history — smoke', { tag: testData.UI_TAG }, () => {
   });
 
   test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginWithCustomRole(SMOKE_VIEWER_ROLE);
+    await browserAuth.loginAsExecutionHistoryViewer();
   });
 
   test.afterAll(async ({ apiServices }) => {

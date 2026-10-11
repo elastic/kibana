@@ -6,14 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import {
-  ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE,
-  ALERTING_V2_ACTION_POLICIES_READ_ROLE,
-  buildCreateActionPolicyData,
-  buildCreateRuleData,
-  test,
-  testData,
-} from '../fixtures';
+import { buildCreateActionPolicyData, buildCreateRuleData, test, testData } from '../fixtures';
 
 const POLICY_NAME = 'scout-action-policy-affected-rules';
 const POLICY_TAG = 'scout-affected-rules';
@@ -49,7 +42,7 @@ test.describe('Action Policies - affected rules', { tag: testData.UI_TAG }, () =
     browserAuth,
     pageObjects,
   }) => {
-    await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE);
+    await browserAuth.loginAsActionPolicyRuleReviewer();
     const { actionPoliciesList } = pageObjects;
     await actionPoliciesList.goto();
     await actionPoliciesList.openDetailsFlyout(POLICY_NAME);
@@ -87,7 +80,7 @@ test.describe('Action Policies - affected rules', { tag: testData.UI_TAG }, () =
   });
 
   test('hides the link from users who cannot read rules', async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICIES_READ_ROLE);
+    await browserAuth.loginAsActionPolicyViewer();
     const { actionPoliciesList } = pageObjects;
     await actionPoliciesList.goto();
     await actionPoliciesList.openDetailsFlyout(POLICY_NAME);

@@ -21,7 +21,7 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsAlertingV2Editor();
+      await browserAuth.loginAsRuleFormEditor();
       await pageObjects.discover.goto({ queryMode: 'classic' });
       await pageObjects.discover.writeAndSubmitEsqlQuery(
         'FROM kibana_sample_data_ecommerce | LIMIT 10'

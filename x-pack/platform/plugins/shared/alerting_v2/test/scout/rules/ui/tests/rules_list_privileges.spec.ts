@@ -6,13 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import {
-  ALERTING_V2_RULES_ALL_ROLE,
-  ALERTING_V2_RULES_READ_ROLE,
-  buildCreateRuleData,
-  test,
-  testData,
-} from '../fixtures';
+import { buildCreateRuleData, test, testData } from '../fixtures';
 
 /*
  * Verifies that the server-side Kibana feature capability (alerting_v2_rules
@@ -37,7 +31,7 @@ test.describe('Rules list - read/write privileges', { tag: testData.UI_TAG }, ()
   });
 
   test('editor can create rules and toggle enabled', async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginWithCustomRole(ALERTING_V2_RULES_ALL_ROLE);
+    await browserAuth.loginAsRuleEditor();
     await pageObjects.rulesList.goto();
     await expect(pageObjects.rulesList.rulesListTable).toBeVisible();
     await pageObjects.rulesList.filterBySingleTag(SUITE_TAG);
@@ -50,7 +44,7 @@ test.describe('Rules list - read/write privileges', { tag: testData.UI_TAG }, ()
     browserAuth,
     pageObjects,
   }) => {
-    await browserAuth.loginWithCustomRole(ALERTING_V2_RULES_READ_ROLE);
+    await browserAuth.loginAsRuleViewer();
     await pageObjects.rulesList.goto();
     await expect(pageObjects.rulesList.rulesListTable).toBeVisible();
     await pageObjects.rulesList.filterBySingleTag(SUITE_TAG);

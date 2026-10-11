@@ -7,13 +7,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import type { AlertingPageObjects } from '../fixtures';
-import {
-  ALERTING_V2_ALERTS_ALL_ROLE,
-  ALERTING_V2_ALERTS_READ_ROLE,
-  buildAlertEvent,
-  test,
-  testData,
-} from '../fixtures';
+import { buildAlertEvent, test, testData } from '../fixtures';
 
 const SEEDED_TAG = 'scout-alerts-mgmt-priv-v2';
 const SEEDED_RULE_ID = 'scout-alerts-mgmt-priv-rule';
@@ -101,14 +95,14 @@ test.describe('Alerts management page - privilege-based access', { tag: testData
 
   test('alerting_v2_alerts all user sees the full page', async ({ browserAuth, pageObjects }) => {
     test.setTimeout(testData.MULTI_ROLE_TEST_TIMEOUT_MS);
-    await browserAuth.loginWithCustomRole(ALERTING_V2_ALERTS_ALL_ROLE);
+    await browserAuth.loginAsAlertEditor();
     await pageObjects.alertEpisodesList.goto();
     await assertEpisodesManagementHappyPath(pageObjects);
   });
 
   test('alerting_v2_alerts read user sees the full page', async ({ browserAuth, pageObjects }) => {
     test.setTimeout(testData.MULTI_ROLE_TEST_TIMEOUT_MS);
-    await browserAuth.loginWithCustomRole(ALERTING_V2_ALERTS_READ_ROLE);
+    await browserAuth.loginAsAlertViewer();
     await pageObjects.alertEpisodesList.goto();
     await assertEpisodesManagementHappyPath(pageObjects);
   });

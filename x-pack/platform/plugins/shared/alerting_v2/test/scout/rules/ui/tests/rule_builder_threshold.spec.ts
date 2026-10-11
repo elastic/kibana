@@ -44,7 +44,7 @@ test.describe('Rule Builder — threshold create and edit flows', { tag: testDat
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAlertingV2Editor();
+    await browserAuth.loginAsRuleFormEditor();
     await pageObjects.rulesList.goto();
   });
 
@@ -205,7 +205,7 @@ test.describe('Rule Builder — threshold create and edit flows', { tag: testDat
       // session cookie in place makes that page redirect on the next 401,
       // which aborts the following goto (net::ERR_ABORTED).
       await page.goto('about:blank');
-      await browserAuth.loginAsAlertingV2Viewer();
+      await browserAuth.loginAsRuleViewer();
       await pageObjects.rulesList.goto();
       // The heading renders for any role with read access, so it is the readiness signal that
       // keeps the absence assertion below from passing against a page that has not rendered.

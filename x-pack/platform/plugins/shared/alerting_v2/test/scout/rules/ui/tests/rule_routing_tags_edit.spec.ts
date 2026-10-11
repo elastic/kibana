@@ -38,7 +38,7 @@ test.describe('Rule routing tags — edit via ES|QL form', { tag: testData.UI_TA
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAlertingV2Editor();
+    await browserAuth.loginAsRuleFormEditor();
     await pageObjects.rulesList.goto();
   });
 
