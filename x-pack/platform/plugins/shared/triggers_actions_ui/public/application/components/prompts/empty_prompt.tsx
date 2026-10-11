@@ -44,7 +44,7 @@ export const EmptyPrompt = ({
         <h2>
           <FormattedMessage
             id="xpack.triggersActionsUI.components.emptyPrompt.emptyTitle"
-            defaultMessage="Create your first rule"
+            defaultMessage="Create your first Classic rule"
           />
         </h2>
       }

@@ -6,13 +6,17 @@ description: A package holding an eslint plugin with custom rules for '@kbn/ui-'
 tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'kbn-ui']
 ---
 
-`@kbn/eslint-plugin-kbn-ui` is a collection of custom ESLint rules for `@kbn/ui-` components.
+`@kbn/eslint-plugin-kbn-ui` is a collection of custom lint rules for `@kbn/ui-` components.
+
+The rules run in Oxlint and are configured in `.oxlint/kbn_ui.mts`. `.oxlint/index.mts` loads `oxlint_plugin.js`, which registers `@kbn/swc-register` so Oxlint can load this TypeScript package. The custom rules use Oxlint's `createOnce` API and are wrapped with `eslintCompatPlugin`, so ESLint still resolves `@kbn/kbn-ui/*` names in disable comments.
+
+Rule test cases live in `rules/*.cases.ts` and run through Oxlint's `RuleTester` from `rules/oxlint_rules.test.ts`.
 
 ## `@kbn/kbn-ui/no_restricted_package_imports`
 
-Bans importing listed kbn-ui platform implementation packages outside allowlisted paths, and shows each package's `alternative` (the contract to use instead). Enabled as an error in the shared ESLint config.
+Bans importing listed kbn-ui platform implementation packages outside allowlisted paths, and shows each package's `alternative` (the contract to use instead). Enabled as an error for every file.
 
-Policy: `src/platform/kbn-ui/_tooling/eslint_boundaries.js`. List a package under `packages` to restrict it; add `overrides` for owners that must import it. Do not put path exceptions in the root ESLint config.
+Policy: `src/platform/kbn-ui/_tooling/eslint_boundaries.js`. List a package under `packages` to restrict it; add `overrides` for owners that must import it. Do not put path exceptions in the lint config.
 
 ### Examples
 
@@ -27,7 +31,7 @@ import { ChromeLayout } from '@kbn/ui-chrome-layout';
 
 ## `@kbn/kbn-ui/portable_imports`
 
-typescript-eslint's `no-restricted-imports` (same options as the core rule) under a separate name. `src/platform/kbn-ui/.eslintrc.js` configures it with the portability allowlist for kbn-ui packages. A separate rule name keeps the repo-wide `no-restricted-imports` config in effect for those files instead of replacing it.
+typescript-eslint's `no-restricted-imports` (same options as the core rule) under a separate name. `.oxlint/kbn_ui.mts` configures it with the portability allowlist for kbn-ui packages. A separate rule name keeps the repo-wide `no-restricted-imports` config in effect for those files instead of replacing it.
 
 ## `@kbn/kbn-ui/prefer_kbn_ui_callout`
 

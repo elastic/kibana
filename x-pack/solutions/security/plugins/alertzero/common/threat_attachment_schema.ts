@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { alertZeroAttachmentDataSchema } from './attachment_data_schema';
 import { SEVERITY_LEVELS } from './attachment_enums';
 
@@ -15,12 +15,14 @@ import { SEVERITY_LEVELS } from './attachment_enums';
  * by the `security.threat` renderer; the server only validates and formats the
  * reference and its fallback fields.
  */
-export const threatAttachmentDataSchema = alertZeroAttachmentDataSchema.extend({
-  report_id: z.string().trim().min(1).max(512),
-  title: z.string().trim().min(1).max(512).optional(),
-  severity: z.enum(SEVERITY_LEVELS).optional(),
-  source: z.string().min(1).max(256).optional(),
-});
+export const threatAttachmentDataSchema = lazySchema(() =>
+  alertZeroAttachmentDataSchema.extend({
+    report_id: z.string().trim().min(1).max(512),
+    title: z.string().trim().min(1).max(512).optional(),
+    severity: z.enum(SEVERITY_LEVELS).optional(),
+    source: z.string().min(1).max(256).optional(),
+  })
+);
 
 export type ThreatAttachmentData = z.infer<typeof threatAttachmentDataSchema>;
 
@@ -36,9 +38,11 @@ export type ThreatAttachmentData = z.infer<typeof threatAttachmentDataSchema>;
  *
  * `report_id` is deliberately left strict: without it there is nothing to show or fetch.
  */
-export const threatAttachmentReadSchema = threatAttachmentDataSchema.extend({
-  attachmentLabel: threatAttachmentDataSchema.shape.attachmentLabel.catch(undefined).optional(),
-  title: threatAttachmentDataSchema.shape.title.catch(undefined).optional(),
-  severity: threatAttachmentDataSchema.shape.severity.catch(undefined).optional(),
-  source: threatAttachmentDataSchema.shape.source.catch(undefined).optional(),
-});
+export const threatAttachmentReadSchema = lazySchema(() =>
+  threatAttachmentDataSchema.extend({
+    attachmentLabel: threatAttachmentDataSchema.shape.attachmentLabel.catch(undefined).optional(),
+    title: threatAttachmentDataSchema.shape.title.catch(undefined).optional(),
+    severity: threatAttachmentDataSchema.shape.severity.catch(undefined).optional(),
+    source: threatAttachmentDataSchema.shape.source.catch(undefined).optional(),
+  })
+);

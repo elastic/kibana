@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/293331
-type: enhancement
-products:
-- product: cloud-serverless
-- product: kibana
-title: "Show region options in the Elastic Inference Service model flyout"
-description: Improves the Elastic Inference Service model flyout by showing the geographies and regions where each model's inference traffic can be restricted.

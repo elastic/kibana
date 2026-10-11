@@ -25,6 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
   const timelionChartSelector = 'timelionChart';
+  const timelionCodeEditorTestId = 'timelionCodeEditor';
 
   describe('Timelion visualization', () => {
     before(async () => {
@@ -41,7 +42,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     const initVisualization = async (expression: string, interval: string = '12h') => {
       await visEditor.setTimelionInterval(interval);
-      await monacoEditor.setCodeEditorValue(expression);
+      await monacoEditor.setCodeEditorValueByCssSelector(
+        `[data-test-subj="${timelionCodeEditorTestId}"]`,
+        expression
+      );
       await visEditor.clickGo();
     };
 
@@ -241,10 +245,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('expression typeahead', () => {
       it('should display function suggestions', async () => {
-        await monacoEditor.setCodeEditorValue('');
-        await monacoEditor.typeCodeEditorValue('.e', 'timelionCodeEditor');
+        await monacoEditor.clearCodeEditorValue(timelionCodeEditorTestId);
+        await monacoEditor.simulateTyping(timelionCodeEditorTestId, '.e');
         await retry.try(async () => {
-          expect(await monacoEditor.getCodeEditorValue(0)).to.eql('.e');
+          expect(await monacoEditor.getCodeEditorValueByTestSubj(timelionCodeEditorTestId)).to.eql(
+            '.e'
+          );
         });
         const suggestions = await timelion.getSuggestionItemsText();
         expect(suggestions.length).to.eql(2);
@@ -252,7 +258,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(suggestions[1].includes('es')).to.eql(true);
         await timelion.clickSuggestion(1);
         await retry.try(async () => {
-          expect(await monacoEditor.getCodeEditorValue(0)).to.eql('.es()');
+          expect(await monacoEditor.getCodeEditorValueByTestSubj(timelionCodeEditorTestId)).to.eql(
+            '.es()'
+          );
         });
       });
 
@@ -261,17 +269,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const typeExpressionTriggeringSuggestions = async (expression: string) => {
             const prefix = expression.slice(0, -1);
             const triggerCharacter = expression.slice(-1);
-            await monacoEditor.typeCodeEditorValue(prefix, 'timelionCodeEditor');
+            await monacoEditor.simulateTyping(timelionCodeEditorTestId, prefix);
             await retry.try(async () => {
-              const value = await monacoEditor.getCodeEditorValue(0);
+              const value = await monacoEditor.getCodeEditorValueByTestSubj(
+                timelionCodeEditorTestId
+              );
               expect(value.includes(prefix)).to.eql(true);
             });
-            await monacoEditor.typeCodeEditorValue(triggerCharacter, 'timelionCodeEditor');
+            await monacoEditor.simulateTyping(timelionCodeEditorTestId, triggerCharacter);
           };
 
           it('should show index pattern suggestions for index argument', async () => {
-            await monacoEditor.setCodeEditorValue('');
-            await monacoEditor.typeCodeEditorValue('.es(index=', 'timelionCodeEditor');
+            await monacoEditor.clearCodeEditorValue(timelionCodeEditorTestId);
+            await monacoEditor.simulateTyping(timelionCodeEditorTestId, '.es(index=');
             // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
             await retry.try(async () => {
               const suggestions = await timelion.getSuggestionItemsText();
@@ -281,7 +291,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           it('should show field suggestions for timefield argument when index pattern set', async () => {
             const expression = '.es(index=logstash-*, timefield=';
-            await monacoEditor.setCodeEditorValue('');
+            await monacoEditor.clearCodeEditorValue(timelionCodeEditorTestId);
             await typeExpressionTriggeringSuggestions(expression);
             // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
             await retry.try(async () => {
@@ -293,7 +303,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           it('should show field suggestions for split argument when index pattern set', async () => {
             const expression = '.es(index=logstash-*, timefield=@timestamp, split=';
-            await monacoEditor.setCodeEditorValue('');
+            await monacoEditor.clearCodeEditorValue(timelionCodeEditorTestId);
             await typeExpressionTriggeringSuggestions(expression);
             // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
             await retry.try(async () => {
@@ -305,7 +315,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           it('should show field suggestions for metric argument when index pattern set', async () => {
             const expression = '.es(index=logstash-*, timefield=@timestamp, metric=avg:';
-            await monacoEditor.setCodeEditorValue('');
+            await monacoEditor.clearCodeEditorValue(timelionCodeEditorTestId);
             await typeExpressionTriggeringSuggestions(expression);
             // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
             await retry.try(async () => {

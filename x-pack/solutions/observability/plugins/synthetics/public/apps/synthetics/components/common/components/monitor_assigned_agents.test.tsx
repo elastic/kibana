@@ -37,7 +37,7 @@ const assignment = (
 ): MonitorLocationAssignment => ({
   locationId: 'loc-1',
   locationLabel: 'Local Docker PL',
-  isAgentSharding: false,
+  isShardingActive: false,
   agentPolicyId: 'policy-1',
   agentPolicyName: 'Policy One',
   agents: [
@@ -135,7 +135,7 @@ describe('MonitorAssignedAgents', () => {
     mockUseAssignments.mockReturnValue({
       assignments: [
         assignment({
-          isAgentSharding: true,
+          isShardingActive: true,
           agents: [
             {
               agentId: 'agent-2',
@@ -165,7 +165,7 @@ describe('MonitorAssignedAgents', () => {
 
   it('shows an unassigned state when a sharded location has no pinned agent yet', () => {
     mockUseAssignments.mockReturnValue({
-      assignments: [assignment({ isAgentSharding: true, agents: [] })],
+      assignments: [assignment({ isShardingActive: true, agents: [] })],
       loading: false,
       error: false,
     });
@@ -185,7 +185,7 @@ describe('MonitorAssignedAgents', () => {
     mockUseAssignments.mockReturnValue({
       assignments: [
         assignment({
-          isAgentSharding: true,
+          isShardingActive: true,
           agents: [
             {
               agentId: 'gone-agent',

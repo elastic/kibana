@@ -31,13 +31,16 @@ export interface ICommandMethods<TContext = ICommandContext> {
    * @param command The parsed Abstract Syntax Tree for deeper semantic validation.
    * @param ast The full Abstract Syntax Tree of the ESQL query.
    * @param context Additional context needed for validation (e.g., available fields).
+   * @param callbacks Optional callbacks for resolving data that requires asynchronous lookups.
+   * @param query The ESQL query string, used to recover the source text of nodes when needed.
    * @returns Return an array of validation errors/warnings.
    */
   validate?: (
     command: ESQLAstAllCommands,
     ast: ESQLCommand[],
     context?: TContext,
-    callbacks?: ICommandCallbacks
+    callbacks?: ICommandCallbacks,
+    query?: string
   ) => ESQLMessage[];
 
   /**
@@ -99,6 +102,7 @@ export interface ICommandMetadata {
   hiddenAfterCommands?: string[]; // Optional list of command names; this command is not suggested when any of them appear anywhere in the pipeline
   subquerySource?: boolean; // Optional property to indicate if the command can start a subquery expression.
   hiddenWhenQueryContainsSubqueries?: boolean; // Optional property to hide the command when the query contains subqueries.
+  docPreserving?: boolean; // Optional property to indicate each output row still maps to one input document, so a full-text WHERE before it can be reused by HIGHLIGHT.
 }
 
 /**

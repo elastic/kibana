@@ -232,8 +232,7 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async enterMarkdown(markdown: string) {
     await this.clearMarkdown();
-    const input = await this.find.byCssSelector('.tvbMarkdownEditor__editor textarea');
-    await input.type(markdown);
+    await this.monacoEditor.setCodeEditorValueByCssSelector('.tvbMarkdownEditor__editor', markdown);
     await this.waitForPanelModelValue('markdown', markdown);
   }
 
@@ -263,19 +262,18 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async clearMarkdown() {
-    const input = await this.find.byCssSelector('.tvbMarkdownEditor__editor textarea');
-    await input.clickMouseButton();
-    await input.clearValueWithKeyboard();
-    await this.retry.waitForWithTimeout(
-      'text area is cleared',
-      20000,
-      async () => (await this.monacoEditor.getCodeEditorValue()) === ''
-    );
+    await this.monacoEditor.clearCodeEditorValueByCssSelector('.tvbMarkdownEditor__editor');
+    await this.retry.waitForWithTimeout('text area is cleared', 20000, async () => {
+      const linesContainer = await this.find.byCssSelector(
+        '.tvbMarkdownEditor__editor .view-lines'
+      );
+      const lines = await linesContainer.findAllByClassName('mtk1');
+      return lines.length === 0;
+    });
   }
 
   public async waitForMarkdownTextAreaCleaned() {
-    const input = await this.find.byCssSelector('.tvbMarkdownEditor__editor textarea');
-    await input.clearValueWithKeyboard();
+    await this.monacoEditor.clearCodeEditorValueByCssSelector('.tvbMarkdownEditor__editor');
     const text = await this.getMarkdownText();
     return text.length === 0;
   }
