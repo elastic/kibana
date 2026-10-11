@@ -38,7 +38,18 @@ jest.mock('../../hooks/use_kibana', () => ({
       },
     },
     dependencies: {
-      start: {},
+      start: {
+        share: {
+          url: {
+            locators: {
+              get: jest.fn(() => ({
+                getRedirectUrl: ({ tab }: { tab?: string }) =>
+                  `/app/nightshift/settings${tab ? `/${tab}` : ''}`,
+              })),
+            },
+          },
+        },
+      },
     },
   }),
 }));

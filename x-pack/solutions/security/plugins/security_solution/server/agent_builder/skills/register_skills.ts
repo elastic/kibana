@@ -19,6 +19,7 @@ import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
 import { alertTriageSkill } from './alert_triage';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
+import { createEndpointResponseActionsSkill } from './endpoint_response_actions';
 import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
 import { createInvestigateRuleSkill } from './investigate_rule';
 import { createFindRulesSkill } from './find_rules';
@@ -29,6 +30,7 @@ import {
   automaticMigrationRulesStopMigrationSkill,
   automaticMigrationRulesUpdateMigrationSkill,
   automaticMigrationRulesDeleteMigrationSkill,
+  automaticMigrationRulesUpdateTranslatedRuleSkill,
   automaticMigrationRulesInstallRulesSkill,
 } from './siem_migration';
 import { entityAnalyticsLeadsSkill } from './entity_analytics_leads';
@@ -119,6 +121,7 @@ export const registerSkills = async ({
     await agentBuilder.skills.register(automaticMigrationRulesStopMigrationSkill);
     await agentBuilder.skills.register(automaticMigrationRulesUpdateMigrationSkill);
     await agentBuilder.skills.register(automaticMigrationRulesDeleteMigrationSkill);
+    await agentBuilder.skills.register(automaticMigrationRulesUpdateTranslatedRuleSkill);
     await agentBuilder.skills.register(automaticMigrationRulesInstallRulesSkill);
   }
 
@@ -140,6 +143,12 @@ export const registerSkills = async ({
         endpointAppContextService: options.endpointAppContextService,
         getStartServices,
       })
+    );
+  }
+
+  if (experimentalFeatures.endpointResponseActionsSkill) {
+    await agentBuilder.skills.register(
+      createEndpointResponseActionsSkill(options.endpointAppContextService)
     );
   }
 

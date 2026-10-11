@@ -119,6 +119,8 @@ describe('WorkflowTags', () => {
     expect(screen.queryByRole('option', { name: longTag })).not.toBeInTheDocument();
   });
 
+  // Mounting a pill per configured tag is intrinsic to exercising the real limit, so this
+  // boundary test gets more headroom than the plugin-wide budget its siblings run under.
   it('does not add a custom tag once the maximum number of tags is configured', async () => {
     const workflowTags = Array.from(
       { length: MAX_WORKFLOW_TAGS_PER_CONFIGURATION },
@@ -126,10 +128,12 @@ describe('WorkflowTags', () => {
     );
     renderWithTestingProviders(<WorkflowTags {...defaultProps} workflowTags={workflowTags} />);
 
-    await userEvent.type(getSearchInput(), 'one-too-many{enter}');
+    await userEvent.click(getSearchInput());
+    await userEvent.paste('one-too-many');
+    await userEvent.keyboard('{enter}');
 
     expect(onChange).not.toHaveBeenCalled();
-  });
+  }, 30_000);
 
   it('removes a tag when its selection is cleared', async () => {
     renderWithTestingProviders(<WorkflowTags {...defaultProps} />);

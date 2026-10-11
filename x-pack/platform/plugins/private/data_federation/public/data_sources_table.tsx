@@ -118,6 +118,7 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
                     isDisabled={!isSupportedType}
                     onClick={() => onEdit(item)}
                     data-test-subj="dataSetsEditButton"
+                    data-telemetry-id="dataFederation-dataSources-editButton"
                   />
                 </span>
               </EuiToolTip>
@@ -145,6 +146,7 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
                       isDisabled={hasDataSets}
                       onClick={() => onDelete(item)}
                       data-test-subj="dataSetsDeleteIconButton"
+                      data-telemetry-id="dataFederation-dataSources-deleteButton"
                     />
                   </span>
                 </EuiToolTip>
@@ -182,6 +184,7 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
               <EuiButton
                 color="danger"
                 data-test-subj="dataSetsDeleteButton"
+                data-telemetry-id="dataFederation-dataSources-bulkDeleteButton"
                 iconType="trash"
                 onClick={() => {
                   onDeleteSelected(selectedDataSources);
@@ -195,6 +198,7 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
               fill
               color="primary"
               data-test-subj="dataSetsCreateButton"
+              data-telemetry-id="dataFederation-dataSources-createButton"
               onClick={onCreate}
             >
               {mainTranslations.actions.addButtonLabel}

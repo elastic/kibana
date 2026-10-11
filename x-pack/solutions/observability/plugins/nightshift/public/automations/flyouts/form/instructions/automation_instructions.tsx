@@ -7,25 +7,30 @@
 
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiPanel,
   EuiPopover,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { InstructionMode } from '../automation_form_values';
+import { SectionHeader } from '../section_header';
 
 const labels = {
   instructions: i18n.translate('xpack.nightshift.automations.flyout.instructions', {
     defaultMessage: 'Instructions',
+  }),
+  noInstructions: i18n.translate('xpack.nightshift.automations.flyout.noInstructions', {
+    defaultMessage: 'No instructions',
   }),
   mode: i18n.translate('xpack.nightshift.automations.flyout.instructionMode', {
     defaultMessage: 'Instruction mode',
@@ -43,21 +48,10 @@ const modes: Record<
     placeholder: string;
     icon: string;
     color: 'accentSecondary' | 'primary';
+    badgeColor: 'success' | 'primary';
     accent: 'textAccentSecondary' | 'textPrimary';
   }
 > = {
-  ask: {
-    label: i18n.translate('xpack.nightshift.automations.flyout.askMode', { defaultMessage: 'Ask' }),
-    help: i18n.translate('xpack.nightshift.automations.flyout.askModeHelp', {
-      defaultMessage: 'Get direct answers and explanations without running a deep investigation.',
-    }),
-    placeholder: i18n.translate('xpack.nightshift.automations.flyout.askPlaceholder', {
-      defaultMessage: 'Ask a question when this automation runs…',
-    }),
-    icon: 'comment',
-    color: 'accentSecondary',
-    accent: 'textAccentSecondary',
-  },
   investigate: {
     label: i18n.translate('xpack.nightshift.automations.flyout.investigateMode', {
       defaultMessage: 'Investigate',
@@ -71,7 +65,21 @@ const modes: Record<
     }),
     icon: 'reporter',
     color: 'primary',
+    badgeColor: 'primary',
     accent: 'textPrimary',
+  },
+  ask: {
+    label: i18n.translate('xpack.nightshift.automations.flyout.askMode', { defaultMessage: 'Ask' }),
+    help: i18n.translate('xpack.nightshift.automations.flyout.askModeHelp', {
+      defaultMessage: 'Get direct answers and explanations without running a deep investigation.',
+    }),
+    placeholder: i18n.translate('xpack.nightshift.automations.flyout.askPlaceholder', {
+      defaultMessage: 'Ask a question when this automation runs…',
+    }),
+    icon: 'comment',
+    color: 'accentSecondary',
+    badgeColor: 'success',
+    accent: 'textAccentSecondary',
   },
 };
 
@@ -82,11 +90,13 @@ export const AutomationInstructions = ({
   mode,
   onInstructionsChange,
   onModeChange,
+  readOnly = false,
 }: {
   instructions: string;
   mode: InstructionMode;
   onInstructionsChange: (instructions: string) => void;
   onModeChange: (mode: InstructionMode) => void;
+  readOnly?: boolean;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
@@ -102,11 +112,39 @@ export const AutomationInstructions = ({
     textarea.style.overflowY = textarea.scrollHeight > MAX_HEIGHT ? 'auto' : 'hidden';
   }, [instructions]);
 
+  if (readOnly) {
+    return (
+      <>
+        <SectionHeader
+          title={labels.instructions}
+          titleAppend={
+            <EuiBadge
+              color={current.badgeColor}
+              iconType={current.icon}
+              data-test-subj="automationInstructionMode"
+            >
+              {current.label}
+            </EuiBadge>
+          }
+        />
+        <EuiSpacer size="s" />
+        <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+          <EuiText
+            size="s"
+            color={instructions ? undefined : 'subdued'}
+            css={{ whiteSpace: 'pre-wrap' }}
+            data-test-subj="automationInstructions"
+          >
+            {instructions || labels.noInstructions}
+          </EuiText>
+        </EuiPanel>
+      </>
+    );
+  }
+
   return (
     <>
-      <EuiTitle size="xs">
-        <h3>{labels.instructions}</h3>
-      </EuiTitle>
+      <SectionHeader title={labels.instructions} />
       <EuiSpacer size="s" />
       <div
         css={css`
