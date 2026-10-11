@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor, within } from '@testing-library/react';
 
 import type { ToastsStart } from '@kbn/core/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -431,6 +431,11 @@ describe('CreateDataSourceFlyout', () => {
       const onSave = jest.fn().mockResolvedValue(null);
       const { getByTestId } = renderFederatedS3EditFlyout(onSave);
 
+      fireEvent.click(
+        within(getByTestId('createDataSourceFlyoutS3FederatedSetupMethod-manual')).getByRole(
+          'radio'
+        )
+      );
       const setupSteps = getByTestId('createDataSourceFlyoutS3FederatedManualSteps');
       const annotationLikeButton = document.createElement('button');
       setupSteps.appendChild(annotationLikeButton);

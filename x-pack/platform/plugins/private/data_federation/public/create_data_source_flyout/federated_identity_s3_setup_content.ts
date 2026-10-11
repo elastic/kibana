@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+import type { FederatedIdentityDeployConfig } from './federated_identity_deploy_panel';
 import type { FederatedIdentityManualSetupStep } from './federated_identity_manual_setup';
 import { federatedIdentityManualSetupStrings } from './federated_identity_manual_setup_code_block';
 
@@ -23,6 +24,26 @@ export const s3FederatedIdentitySetupStrings = {
   roleArnHelp: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.roleArnHelp.manual', {
     defaultMessage: 'Paste the ARN returned by step 3 above.',
   }),
+
+  deployRoleArnHelp: i18n.translate(
+    'xpack.dataFederation.createFlyout.s3.federated.roleArnHelp.deploy',
+    {
+      defaultMessage:
+        'After the resources are created, copy RoleArn value from Outputs in CloudFormation and paste it here.',
+    }
+  ),
+
+  cloudFormationMethod: i18n.translate(
+    'xpack.dataFederation.createFlyout.s3.federated.setupMethod.cloudFormation',
+    { defaultMessage: 'CloudFormation' }
+  ),
+
+  manualMethod: i18n.translate(
+    'xpack.dataFederation.createFlyout.s3.federated.setupMethod.manual',
+    {
+      defaultMessage: 'Manual',
+    }
+  ),
 };
 
 /** Quotes a value so the shell exports it verbatim instead of expanding it. */
@@ -168,3 +189,80 @@ export const getS3FederatedIdentityManualSteps = ({
     },
   },
 ];
+
+/**
+ * Elastic-hosted template the quick create link loads. Placeholder: the bucket does not exist
+ * yet, so the launch link will not resolve until the final URL is published and updated here.
+ */
+export const S3_CLOUDFORMATION_TEMPLATE_URL =
+  'https://elastic-data-federation-cft.s3.amazonaws.com/cloudformation-federated-identity-s3.yml';
+
+export const buildS3CloudFormationLaunchUrl = ({
+  jwtIssuer,
+  subject,
+}: {
+  jwtIssuer: string;
+  subject: string;
+}): string => {
+  const params = new URLSearchParams({
+    templateURL: S3_CLOUDFORMATION_TEMPLATE_URL,
+    stackName: 'elastic-data-federation',
+  });
+  params.set('param_JwtIssuer', jwtIssuer);
+  params.set('param_Subject', subject);
+
+  return `https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?${params}`;
+};
+
+export const getS3FederatedIdentityDeployConfig = ({
+  jwtIssuer,
+  subject,
+}: {
+  jwtIssuer: string;
+  subject: string;
+}): FederatedIdentityDeployConfig => ({
+  title: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.title', {
+    defaultMessage: 'Set up AWS access with CloudFormation',
+  }),
+  description: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.description', {
+    defaultMessage: 'Open the template in AWS and create the required resources.',
+  }),
+  launchUrl: buildS3CloudFormationLaunchUrl({ jwtIssuer, subject }),
+  launchButtonLabel: i18n.translate(
+    'xpack.dataFederation.createFlyout.s3.federated.deploy.launchButton',
+    {
+      defaultMessage: 'Open template in AWS Console',
+    }
+  ),
+  createsTitle: i18n.translate(
+    'xpack.dataFederation.createFlyout.s3.federated.deploy.createsTitle',
+    {
+      defaultMessage: 'What the template creates',
+    }
+  ),
+  createsItems: [
+    {
+      id: 'idp',
+      label: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.creates.idp', {
+        defaultMessage:
+          'An IAM OIDC identity provider that trusts your Elastic project or deployment.',
+      }),
+    },
+    {
+      id: 'role',
+      label: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.creates.role', {
+        defaultMessage: 'An IAM role restricted to your project or deployment ID.',
+      }),
+    },
+    {
+      id: 'policy',
+      label: i18n.translate(
+        'xpack.dataFederation.createFlyout.s3.federated.deploy.creates.policy',
+        {
+          defaultMessage:
+            'An S3 read policy with s3:GetObject, s3:ListBucket, and s3:GetBucketLocation permissions.',
+        }
+      ),
+    },
+  ],
+});
