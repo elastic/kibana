@@ -145,12 +145,30 @@ const isGithubEventType = (eventType: string): eventType is GithubEventType =>
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+// Form-encoded webhooks (GitHub's API default) send the event JSON as a `payload` string.
+const toDeliveryBody = (rawBody: unknown): Record<string, unknown> | undefined => {
+  if (!isPlainObject(rawBody)) {
+    return undefined;
+  }
+  const { payload } = rawBody;
+  if (typeof payload !== 'string') {
+    return rawBody;
+  }
+  try {
+    const parsed: unknown = JSON.parse(payload);
+    return isPlainObject(parsed) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 export const githubEvents: ConnectorSpecEvents = {
   definitions,
   headers: ['x-github-event', 'x-github-delivery'],
   async handleEvents({ headers, rawBody }) {
     const delivery = DeliveryHeadersSchema.safeParse(headers);
-    if (!delivery.success || !isPlainObject(rawBody)) {
+    const body = toDeliveryBody(rawBody);
+    if (!delivery.success || body === undefined) {
       return { type: 'emit', events: [] };
     }
 
@@ -160,7 +178,7 @@ export const githubEvents: ConnectorSpecEvents = {
     }
 
     const requiredAction = requiredActions[eventType];
-    if (requiredAction !== undefined && rawBody.action !== requiredAction) {
+    if (requiredAction !== undefined && body.action !== requiredAction) {
       return { type: 'emit', events: [] };
     }
 
@@ -170,7 +188,7 @@ export const githubEvents: ConnectorSpecEvents = {
         {
           eventId: definitions[eventType].eventId,
           correlationKey: deliveryId ?? uuidv4(),
-          payload: { eventType, body: rawBody },
+          payload: { eventType, body },
         },
       ],
     };

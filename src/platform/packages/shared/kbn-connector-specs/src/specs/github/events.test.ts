@@ -217,6 +217,35 @@ describe('GitHub named events', () => {
   });
 
   it.each([
+    ['issues', { action: 'opened', issue: { number: 1 } }],
+    ['release', { action: 'published', release: { id: 1 } }],
+  ])('emits %s from a form-encoded payload', async (eventType, body) => {
+    const result = await githubEvents.handleEvents(
+      createContext(eventType, { payload: JSON.stringify(body) })
+    );
+    expect(result).toEqual({
+      type: 'emit',
+      events: [
+        {
+          eventId: `github.${eventType}`,
+          correlationKey: 'delivery-123',
+          payload: { eventType, body },
+        },
+      ],
+    });
+  });
+
+  it.each(['not json', '[]', 'null'])(
+    'does not emit for a form-encoded payload that is not a JSON object: %p',
+    async (payload) => {
+      expect(await githubEvents.handleEvents(createContext('issues', { payload }))).toEqual({
+        type: 'emit',
+        events: [],
+      });
+    }
+  );
+
+  it.each([
     { 'x-github-event': undefined },
     { 'x-github-event': ['issues', 'push'] },
     { 'x-github-event': 'i'.repeat(257) },
