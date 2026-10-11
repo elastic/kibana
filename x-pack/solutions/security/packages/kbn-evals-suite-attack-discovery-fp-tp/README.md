@@ -114,7 +114,6 @@ What each evaluator checks after the #295393 tightening: `PayloadConformance` no
 
 ## Follow-ups (sample-workflow removal done)
 
-1. Add a weekly step to `.buildkite/pipelines/evals/llm_evals.yml`, copying `Evals: Alert Analysis Workflow` with `EVAL_SUITE_ID: 'security-attack-discovery-fp-tp'`.
-2. Give `UnsafeClose` new discriminating scenarios — a `false_positive` prediction on a non-FP gold — so it can leave the 1.0 ceiling. `PayloadConformance` no longer needs this (rules 1-3 enforced). Tracked in #295393.
+1. Give `UnsafeClose` new discriminating scenarios — a `false_positive` prediction on a non-FP gold — so it can leave the 1.0 ceiling. `PayloadConformance` no longer needs this (rules 1-3 enforced).
 
-Until then the suite runs on demand through the `evals:security-attack-discovery-fp-tp` PR label.
+Runs weekly on the core EIS models and on demand via the `evals:security-attack-discovery-fp-tp` label.
