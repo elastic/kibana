@@ -1,0 +1,75 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "729aa18d-06a6-41c7-b175-b65b739b1181"
+  },
+  "chain": "okta-cloud",
+  "step": "alice.chen MFA factors reset",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-okta.system",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "iam"
+            ],
+            "type": [
+              "change"
+            ],
+            "action": "user.mfa.factor.reset_all",
+            "outcome": "success",
+            "kind": "event"
+          },
+          "user": {
+            "name": "alice.chen@corp.example.com",
+            "email": "alice.chen@corp.example.com"
+          },
+          "source": {
+            "ip": "198.51.100.90"
+          },
+          "okta": {
+            "actor": {
+              "alternate_id": "alice.chen@corp.example.com"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "Event is an ordinary session start",
+    "docs": [
+      {
+        "stream": "logs-okta.system",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "iam"
+            ],
+            "type": [
+              "change"
+            ],
+            "action": "user.session.start",
+            "outcome": "success",
+            "kind": "event"
+          },
+          "user": {
+            "name": "alice.chen@corp.example.com",
+            "email": "alice.chen@corp.example.com"
+          },
+          "source": {
+            "ip": "198.51.100.90"
+          },
+          "okta": {
+            "actor": {
+              "alternate_id": "alice.chen@corp.example.com"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

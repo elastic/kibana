@@ -1,0 +1,125 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "c3b915e0-22f3-4bf7-991d-b643513c722f"
+  },
+  "chain": "bits-mshta",
+  "step": "BITS job notify command line (T1197 persistence)",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-jordan-04",
+            "id": "azqa-wks-jordan-04",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-jordan-04"
+          },
+          "user": {
+            "name": "jordan.park",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "cmd.exe",
+            "executable": "C:\\Windows\\System32\\cmd.exe",
+            "command_line": "cmd.exe /c C:\\ProgramData\\notify.bat",
+            "args": [
+              "cmd.exe",
+              "/c",
+              "C:\\ProgramData\\notify.bat"
+            ],
+            "entity_id": "azqa-cmd.exe-836308",
+            "parent": {
+              "name": "svchost.exe",
+              "executable": "C:\\Windows\\System32\\svchost.exe",
+              "entity_id": "azqa-svchost.exe-513328",
+              "args": [
+                "C:\\Windows\\System32\\svchost.exe",
+                "-k",
+                "netsvcs",
+                "-p",
+                "-s",
+                "BITS"
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "Same child, but the svchost parent hosts the Schedule service, not BITS (parent.args no longer contains BITS)",
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-jordan-04",
+            "id": "azqa-wks-jordan-04",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-jordan-04"
+          },
+          "user": {
+            "name": "jordan.park",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "cmd.exe",
+            "executable": "C:\\Windows\\System32\\cmd.exe",
+            "command_line": "cmd.exe /c C:\\ProgramData\\notify.bat",
+            "args": [
+              "cmd.exe",
+              "/c",
+              "C:\\ProgramData\\notify.bat"
+            ],
+            "entity_id": "azqa-cmd.exe-836308",
+            "parent": {
+              "name": "svchost.exe",
+              "executable": "C:\\Windows\\System32\\svchost.exe",
+              "entity_id": "azqa-svchost.exe-513328",
+              "args": [
+                "C:\\Windows\\System32\\svchost.exe",
+                "-k",
+                "netsvcs",
+                "-p",
+                "-s",
+                "Schedule"
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+}

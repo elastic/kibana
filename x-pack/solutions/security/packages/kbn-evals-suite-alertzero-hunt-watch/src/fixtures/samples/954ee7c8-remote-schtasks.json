@@ -1,0 +1,183 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "954ee7c8-5437-49ae-b2d6-2960883898e9"
+  },
+  "chain": "wmi-lateral",
+  "step": "Remote schtasks on dc-fs-09",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.network",
+        "at": -125,
+        "doc": {
+          "event": {
+            "category": [
+              "network"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "connection_accepted",
+            "kind": "event"
+          },
+          "host": {
+            "name": "dc-fs-09",
+            "id": "azqa-dc-fs-09",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "dc-fs-09"
+          },
+          "user": {
+            "name": "karen.d"
+          },
+          "process": {
+            "name": "svchost.exe",
+            "executable": "C:\\Windows\\System32\\svchost.exe",
+            "entity_id": "azqa-svchost-rts"
+          },
+          "source": {
+            "ip": "10.20.0.16",
+            "port": 51234
+          },
+          "destination": {
+            "ip": "10.20.0.5",
+            "port": 49667
+          },
+          "network": {
+            "direction": "ingress"
+          }
+        }
+      },
+      {
+        "stream": "logs-endpoint.events.registry",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "registry"
+            ],
+            "type": [
+              "change"
+            ],
+            "action": "modification",
+            "kind": "event"
+          },
+          "host": {
+            "name": "dc-fs-09",
+            "id": "azqa-dc-fs-09",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "dc-fs-09"
+          },
+          "user": {
+            "name": "karen.d"
+          },
+          "process": {
+            "name": "svchost.exe",
+            "executable": "C:\\Windows\\System32\\svchost.exe",
+            "entity_id": "azqa-svchost-rts"
+          },
+          "registry": {
+            "hive": "HKLM",
+            "value": "Actions",
+            "key": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Schedule\\TaskCache\\Tasks\\{5A1B2C3D-0000-4000-8000-000000000001}",
+            "path": "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Schedule\\TaskCache\\Tasks\\{5A1B2C3D-0000-4000-8000-000000000001}\\Actions"
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "Inbound connection is SMB on a well-known port (<49152), not an RPC ephemeral-port call",
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.network",
+        "at": -125,
+        "doc": {
+          "event": {
+            "category": [
+              "network"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "connection_accepted",
+            "kind": "event"
+          },
+          "host": {
+            "name": "dc-fs-09",
+            "id": "azqa-dc-fs-09",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "dc-fs-09"
+          },
+          "user": {
+            "name": "karen.d"
+          },
+          "process": {
+            "name": "svchost.exe",
+            "executable": "C:\\Windows\\System32\\svchost.exe",
+            "entity_id": "azqa-svchost-rts"
+          },
+          "source": {
+            "ip": "10.20.0.16",
+            "port": 445
+          },
+          "destination": {
+            "ip": "10.20.0.5",
+            "port": 445
+          },
+          "network": {
+            "direction": "ingress"
+          }
+        }
+      },
+      {
+        "stream": "logs-endpoint.events.registry",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "registry"
+            ],
+            "type": [
+              "change"
+            ],
+            "action": "modification",
+            "kind": "event"
+          },
+          "host": {
+            "name": "dc-fs-09",
+            "id": "azqa-dc-fs-09",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "dc-fs-09"
+          },
+          "user": {
+            "name": "karen.d"
+          },
+          "process": {
+            "name": "svchost.exe",
+            "executable": "C:\\Windows\\System32\\svchost.exe",
+            "entity_id": "azqa-svchost-rts"
+          },
+          "registry": {
+            "hive": "HKLM",
+            "value": "Actions",
+            "key": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Schedule\\TaskCache\\Tasks\\{5A1B2C3D-0000-4000-8000-000000000001}",
+            "path": "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Schedule\\TaskCache\\Tasks\\{5A1B2C3D-0000-4000-8000-000000000001}\\Actions"
+          }
+        }
+      }
+    ]
+  }
+}

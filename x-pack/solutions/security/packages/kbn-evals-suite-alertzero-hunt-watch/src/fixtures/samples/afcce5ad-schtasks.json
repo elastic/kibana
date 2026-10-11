@@ -1,0 +1,211 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "afcce5ad-65de-4ed2-8516-5e093d3ac99a"
+  },
+  "chain": "bits-mshta",
+  "step": "schtasks persistence",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -125,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-jordan-04",
+            "id": "azqa-wks-jordan-04",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-jordan-04"
+          },
+          "user": {
+            "name": "jordan.park",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "powershell.exe",
+            "executable": "C:\\Windows\\System32\\powershell.exe",
+            "command_line": "powershell.exe -NoP -File C:\\ProgramData\\a.ps1",
+            "args": [
+              "powershell.exe",
+              "-NoP",
+              "-File",
+              "C:\\ProgramData\\a.ps1"
+            ],
+            "entity_id": "azqa-ps-sch-001",
+            "parent": {
+              "name": "mshta.exe",
+              "executable": "C:\\Windows\\System32\\mshta.exe",
+              "entity_id": "azqa-mshta.exe-140781"
+            }
+          }
+        }
+      },
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-jordan-04",
+            "id": "azqa-wks-jordan-04",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-jordan-04"
+          },
+          "user": {
+            "name": "jordan.park",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "schtasks.exe",
+            "executable": "C:\\Windows\\System32\\schtasks.exe",
+            "command_line": "schtasks.exe /create /sc minute /mo 5 /tn Updater /tr C:\\ProgramData\\a.exe",
+            "args": [
+              "schtasks.exe",
+              "/create",
+              "/sc",
+              "minute",
+              "/mo",
+              "5",
+              "/tn",
+              "Updater",
+              "/tr",
+              "C:\\ProgramData\\a.exe"
+            ],
+            "entity_id": "azqa-schtasks.exe-721178",
+            "parent": {
+              "name": "powershell.exe",
+              "executable": "C:\\Windows\\System32\\powershell.exe",
+              "entity_id": "azqa-ps-sch-001"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "schtasks only queries a task (/query), no /create",
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -125,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-jordan-04",
+            "id": "azqa-wks-jordan-04",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-jordan-04"
+          },
+          "user": {
+            "name": "jordan.park",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "powershell.exe",
+            "executable": "C:\\Windows\\System32\\powershell.exe",
+            "command_line": "powershell.exe -NoP -File C:\\ProgramData\\a.ps1",
+            "args": [
+              "powershell.exe",
+              "-NoP",
+              "-File",
+              "C:\\ProgramData\\a.ps1"
+            ],
+            "entity_id": "azqa-ps-sch-001",
+            "parent": {
+              "name": "mshta.exe",
+              "executable": "C:\\Windows\\System32\\mshta.exe",
+              "entity_id": "azqa-mshta.exe-140781"
+            }
+          }
+        }
+      },
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-jordan-04",
+            "id": "azqa-wks-jordan-04",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-jordan-04"
+          },
+          "user": {
+            "name": "jordan.park",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "schtasks.exe",
+            "executable": "C:\\Windows\\System32\\schtasks.exe",
+            "command_line": "schtasks.exe /query /tn Updater",
+            "args": [
+              "schtasks.exe",
+              "/query",
+              "/tn",
+              "Updater"
+            ],
+            "entity_id": "azqa-schtasks.exe-221277",
+            "parent": {
+              "name": "powershell.exe",
+              "executable": "C:\\Windows\\System32\\powershell.exe",
+              "entity_id": "azqa-ps-sch-001"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

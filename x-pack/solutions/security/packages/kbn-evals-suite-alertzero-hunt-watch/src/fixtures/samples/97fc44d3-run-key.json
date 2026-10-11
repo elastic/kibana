@@ -1,0 +1,107 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "97fc44d3-8dae-4019-ae83-298c3015600f"
+  },
+  "chain": "encoded-powershell",
+  "step": "Run key persistence",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.registry",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "registry"
+            ],
+            "type": [
+              "change"
+            ],
+            "action": "modification",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-alice-01",
+            "id": "azqa-wks-alice-01",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-alice-01"
+          },
+          "user": {
+            "name": "alice.chen",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "registry": {
+            "hive": "HKEY_USERS",
+            "key": "S-1-5-21-1111-2222-3333-1105\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+            "path": "HKEY_USERS\\S-1-5-21-1111-2222-3333-1105\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\Updater",
+            "value": "Updater",
+            "data": {
+              "strings": [
+                "powershell.exe -w hidden -File C:\\Users\\alice.chen\\AppData\\Roaming\\update.ps1"
+              ]
+            }
+          },
+          "process": {
+            "name": "powershell.exe",
+            "executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "entity_id": "azqa-ps-run"
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "Run value points into C:\\Program Files (legitimate installer autorun), excluded by the rule",
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.registry",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "registry"
+            ],
+            "type": [
+              "change"
+            ],
+            "action": "modification",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-alice-01",
+            "id": "azqa-wks-alice-01",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-alice-01"
+          },
+          "user": {
+            "name": "alice.chen",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "registry": {
+            "hive": "HKEY_USERS",
+            "key": "S-1-5-21-1111-2222-3333-1105\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+            "path": "HKEY_USERS\\S-1-5-21-1111-2222-3333-1105\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\Updater",
+            "value": "Updater",
+            "data": {
+              "strings": [
+                "C:\\Program Files\\Vendor\\updater.exe"
+              ]
+            }
+          },
+          "process": {
+            "name": "updater.exe",
+            "executable": "C:\\Program Files\\Vendor\\updater.exe",
+            "entity_id": "azqa-ps-run"
+          }
+        }
+      }
+    ]
+  }
+}
