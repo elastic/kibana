@@ -29,6 +29,7 @@ const storageSettings = {
       status: types.keyword({}),
       // Absent while awaiting, which is what `must_not exists` filters on.
       decision: types.keyword({}),
+      decisionPending: types.boolean({}),
       supersededBy: types.keyword({}),
       // `rootProposalId` is set on every revision, so one term query resolves the
       // chain. `revision` orders it; `createdAt` cannot, being inherited unchanged.

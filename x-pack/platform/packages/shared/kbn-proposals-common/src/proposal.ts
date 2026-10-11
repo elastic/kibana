@@ -199,6 +199,8 @@ export const proposalSchema = z.object({
   decidedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
   dismissReason: dismissReasonSchema.optional(),
   rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
+  /** Blocks revisions between gate release and the workflow's decision write. */
+  decisionPending: z.boolean().optional(),
   executionError: z.string().max(MAX_ERROR_LENGTH).optional(),
   /**
    * The `executionError` of the attempt this proposal re-offers: copied from
