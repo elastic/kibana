@@ -19,7 +19,7 @@ export type RehydrateProcessSelectors = (args: {
     event_id: string;
     source_index: string;
     /** Present when the SSE attributed this event to a technique; preferred over a plain sample ref during dedupe. */
-    matched?: { technique_id?: string };
+    matched?: { technique_id?: string; ioc?: true };
   }>;
 }) => Promise<ProcessSelector[]>;
 
@@ -51,7 +51,7 @@ interface RehydrateSource {
 interface RehydrateRef {
   index: string;
   id: string;
-  matched?: { technique_id?: string };
+  matched?: { technique_id?: string; ioc?: true };
 }
 
 interface Candidate {
@@ -60,6 +60,7 @@ interface Candidate {
   pid?: number;
   entityId?: string;
   processName: string;
+  processExecutable?: string;
   timestamp: string;
   /**
    * From a technique-attributed SSE ref, not a plain Tier 1 sample; preferred on dedupe, and
@@ -67,6 +68,15 @@ interface Candidate {
    * is implicated in.
    */
   techniqueId?: string;
+  /** Every technique any ref for this process was attributed to; unioned on dedupe. */
+  techniqueIds: string[];
+  /**
+   * Timestamp of the representative ref, used only to rank candidates. Kept apart from
+   * `timestamp` (newest across merged refs) so ranking never depends on ref order.
+   */
+  rankTimestamp: string;
+  /** The ref that produced this candidate was the Tier 1 IOC match; OR-ed across refs on dedupe. */
+  iocMatched: boolean;
 }
 
 const asTypeList = (value: string | string[] | undefined): string[] =>
@@ -91,8 +101,12 @@ const extractCandidate = (source: RehydrateSource, ref: RehydrateRef): Candidate
     pid,
     entityId,
     processName: source.process?.name ?? source.process?.executable ?? 'unknown process',
+    processExecutable: source.process?.executable,
     timestamp: source['@timestamp'] ?? new Date(0).toISOString(),
     techniqueId: ref.matched?.technique_id,
+    techniqueIds: ref.matched?.technique_id ? [ref.matched.technique_id] : [],
+    rankTimestamp: source['@timestamp'] ?? new Date(0).toISOString(),
+    iocMatched: ref.matched?.ioc === true,
   };
 };
 
@@ -101,7 +115,7 @@ const extractCandidate = (source: RehydrateSource, ref: RehydrateRef): Candidate
 const isBetterCandidate = (next: Candidate, current: Candidate): boolean =>
   Boolean(next.techniqueId) !== Boolean(current.techniqueId)
     ? Boolean(next.techniqueId)
-    : next.timestamp > current.timestamp;
+    : next.rankTimestamp > current.rankTimestamp;
 
 /**
  * Builds process selectors from the SSE's own event/alert refs via one `mget`, so kill-process
@@ -171,9 +185,21 @@ export const makeRehydrateProcessSelectors = (
     for (const candidate of candidates) {
       const key = `${candidate.hostName}|${candidate.processKey}`;
       const existing = byKey.get(key);
-      if (!existing || isBetterCandidate(candidate, existing)) {
+      if (!existing) {
         byKey.set(key, candidate);
+        continue;
       }
+      // A process that matched an IOC in one ref stays matched even when a newer or
+      // technique-attributed ref wins the slot.
+      const iocMatched = existing.iocMatched || candidate.iocMatched;
+      byKey.set(key, {
+        ...(isBetterCandidate(candidate, existing) ? candidate : existing),
+        iocMatched,
+        techniqueIds: [...new Set([...existing.techniqueIds, ...candidate.techniqueIds])],
+        // Attribution can pick the winner, but staleness must see the newest observation.
+        timestamp:
+          candidate.timestamp > existing.timestamp ? candidate.timestamp : existing.timestamp,
+      });
     }
 
     const byHost = new Map<string, Candidate[]>();
@@ -196,7 +222,12 @@ export const makeRehydrateProcessSelectors = (
           hostName: candidate.hostName,
           observedAt: candidate.timestamp,
           processName: candidate.processName,
+          ...(candidate.processExecutable
+            ? { processExecutable: candidate.processExecutable }
+            : {}),
           techniqueId: candidate.techniqueId,
+          ...(candidate.techniqueIds.length > 0 ? { techniqueIds: candidate.techniqueIds } : {}),
+          iocMatched: candidate.iocMatched,
         });
       }
     }

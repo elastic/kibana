@@ -7,20 +7,20 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiConfirmModal,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { SlackChannelBinding } from '@kbn/significant-events-plugin/common';
 import { useRelayAppBindings, useBindChannel, useUnbindChannel } from './use_relay_app_bindings';
 
@@ -96,11 +96,25 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
         ),
       },
       {
+        field: 'status' as const,
+        name: i18n.translate('xpack.nightshift.settings.apps.slackTableStatus', {
+          defaultMessage: 'Status',
+        }),
+        render: () => (
+          <EuiBadge color="success">
+            {i18n.translate('xpack.nightshift.settings.apps.slackChannelConnected', {
+              defaultMessage: 'Connected',
+            })}
+          </EuiBadge>
+        ),
+      },
+      {
         field: 'actions' as const,
         name: i18n.translate('xpack.nightshift.settings.apps.slackTableActions', {
           defaultMessage: 'Actions',
         }),
-        width: '100px',
+        align: 'right' as const,
+        width: '120px',
         render: (_: unknown, binding: SlackChannelBinding) => (
           <BindingActionCell
             binding={binding}
@@ -117,67 +131,66 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
 
   return (
     <>
-      <EuiCallOut
-        size="s"
-        iconType="info"
-        color="primary"
-        data-test-subj="streamsSlackAppChannelsCallout"
-      >
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.nightshift.settings.apps.slackChannelsCallout"
-            defaultMessage="Invite {botName} to a Slack channel, then paste the channel ID below and select {bind} to connect it to this deployment."
-            values={{
-              botName: <strong>{'@Elastic'}</strong>,
-              bind: (
-                <strong>
-                  {i18n.translate('xpack.nightshift.settings.apps.slackBindChannel', {
-                    defaultMessage: 'Connect',
-                  })}
-                </strong>
-              ),
-            }}
-          />
-        </EuiText>
-      </EuiCallOut>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="s" alignItems="flexStart">
-        <EuiFlexItem grow={false}>
-          <EuiFieldText
-            css={{ minWidth: '300px' }}
-            value={channelId}
-            onChange={(e) => setChannelId(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                onBind();
-              }
-            }}
-            disabled={!canEdit || isBinding}
-            placeholder={i18n.translate(
-              'xpack.nightshift.settings.apps.slackChannelIdPlaceholder',
-              { defaultMessage: 'Enter a Slack channel ID' }
-            )}
-            aria-label={i18n.translate('xpack.nightshift.settings.apps.slackChannelIdAriaLabel', {
-              defaultMessage: 'Slack channel ID',
+      <EuiFlexGroup gutterSize="m" alignItems="flexStart" justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h5>
+              {i18n.translate('xpack.nightshift.settings.apps.slackChannelsTitle', {
+                defaultMessage: 'Connected channels',
+              })}
+            </h5>
+          </EuiTitle>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.nightshift.settings.apps.slackChannelsDescription', {
+              defaultMessage: '@Elastic only answers in these channels.',
             })}
-            data-test-subj="streamsSlackAppChannelIdInput"
-          />
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            isDisabled={!canBind}
-            isLoading={isBinding}
-            onClick={onBind}
-            data-test-subj="streamsSlackAppBindChannelButton"
-          >
-            {i18n.translate('xpack.nightshift.settings.apps.slackBindChannel', {
-              defaultMessage: 'Connect',
-            })}
-          </EuiButton>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiFieldText
+                compressed
+                css={{ minWidth: '240px' }}
+                value={channelId}
+                onChange={(e) => setChannelId(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    onBind();
+                  }
+                }}
+                disabled={!canEdit || isBinding}
+                placeholder={i18n.translate(
+                  'xpack.nightshift.settings.apps.slackChannelIdPlaceholder',
+                  { defaultMessage: 'Enter a Slack channel ID' }
+                )}
+                aria-label={i18n.translate(
+                  'xpack.nightshift.settings.apps.slackChannelIdAriaLabel',
+                  {
+                    defaultMessage: 'Slack channel ID',
+                  }
+                )}
+                data-test-subj="streamsSlackAppChannelIdInput"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="plus"
+                isDisabled={!canBind}
+                isLoading={isBinding}
+                onClick={onBind}
+                data-test-subj="streamsSlackAppBindChannelButton"
+              >
+                {i18n.translate('xpack.nightshift.settings.apps.slackBindChannel', {
+                  defaultMessage: 'Connect channel',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <EuiBasicTable
         css={{ width: '100%' }}
         items={bindings}
@@ -186,7 +199,8 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
         noItemsMessage={
           <EuiText size="xs" color="subdued">
             {i18n.translate('xpack.nightshift.settings.apps.slackNoChannels', {
-              defaultMessage: 'No connected channels',
+              defaultMessage:
+                'Invite @Elastic to a Slack channel, enter the channel ID, and connect.',
             })}
           </EuiText>
         }

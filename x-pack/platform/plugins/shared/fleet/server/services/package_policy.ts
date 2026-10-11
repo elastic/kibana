@@ -104,6 +104,7 @@ import {
   FleetError,
   fleetErrorToResponseOptions,
   PackagePolicyValidationError,
+  PackageFipsIncompatibleError,
   PackagePolicyRestrictionRelatedError,
   PackagePolicyNotFoundError,
   HostedAgentPolicyRestrictionRelatedError,
@@ -171,6 +172,7 @@ import { getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from './security';
 import { agentPolicyService, getAgentPolicySavedObjectType } from './agent_policy';
 import { getPackageInfo, ensureInstalledPackage, getInstallationObject } from './epm/packages';
 import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
+import { isPackageFipsIncompatible } from './epm/packages/filter_fips_packages';
 import {
   compileTemplate,
   getMetaVariables,
@@ -684,6 +686,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         prerelease: true,
       }));
 
+    assertFipsCompatiblePackageOrThrow(enrichedPackagePolicy, pkgInfo, options?.force);
+
     let inputs = getInputsWithIds(enrichedPackagePolicy, packagePolicyId, undefined, pkgInfo);
 
     // Check if it is a limited package, and if so, check that the corresponding agent policy does not
@@ -1073,6 +1077,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
 
         const { pkgInfo, assetsMap } = packageInfoAndAsset;
+
+        assertFipsCompatiblePackageOrThrow(packagePolicy, pkgInfo, options?.force);
 
         let inputs = getInputsWithIds(packagePolicy, packagePolicyId, undefined, pkgInfo);
 
@@ -1765,6 +1771,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
 
+    assertFipsCompatiblePackageOrThrow(
+      { inputs },
+      pkgInfo,
+      options?.force,
+      oldPackagePolicy.inputs
+    );
+
     _validateRestrictedFieldsNotModifiedOrThrow({
       oldPackagePolicy,
       packagePolicyUpdate,
@@ -2017,7 +2030,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       } else {
         await deleteSecrets({
           esClient,
-          soClient,
+          // Secrets are global: a package policy in another Space may reference one, and the
+          // request-scoped client only sees its own Space.
+          soClient: appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+          checkAllSpaces: true,
           ids: secretsToDelete.map((s) => s.id),
           agentPolicyIds: [...associatedPolicyIds],
         });
@@ -2256,6 +2272,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         const { pkgInfo, assetsMap } = pkgInfoAndAsset;
         let inputs = getInputsWithIds(restOfPackagePolicy, oldPackagePolicy.id, undefined, pkgInfo);
         inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
+
+        assertFipsCompatiblePackageOrThrow(
+          { inputs },
+          pkgInfo,
+          options?.force,
+          oldPackagePolicy.inputs
+        );
 
         validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
@@ -2512,7 +2535,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       const runDelete = () =>
         deleteSecrets({
           esClient,
-          soClient,
+          // Secrets are global: see the single update above.
+          soClient: appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+          checkAllSpaces: true,
           ids: secretIdsToDelete,
           agentPolicyIds: agentPolicyIdsForDelete,
         });
@@ -3920,6 +3945,61 @@ function validateConditionPlacement(packagePolicy: NewPackagePolicy) {
       if (isAgentless) throwAgentless();
       if (isOtel) throwOtel();
     }
+  }
+}
+
+// Same resolution rule as _compilePackagePolicyInput: inputs without a policy template use the first one.
+function resolveInputPolicyTemplateName(
+  input: Pick<PackagePolicyInput, 'policy_template'>,
+  pkgInfo: PackageInfo
+) {
+  return input.policy_template ?? pkgInfo.policy_templates?.[0]?.name;
+}
+
+// When `oldInputs` is passed (update), only inputs that were not already enabled are checked,
+// so existing policies keep working and can still be edited.
+function assertFipsCompatiblePackageOrThrow(
+  packagePolicy: Pick<NewPackagePolicy, 'inputs'>,
+  pkgInfo: PackageInfo,
+  force?: boolean,
+  oldInputs?: Array<Pick<PackagePolicyInput, 'type' | 'name' | 'policy_template' | 'enabled'>>
+) {
+  if (force || !appContextService.getIsFipsEnabled()) {
+    return;
+  }
+  const action = oldInputs ? 'update' : 'create';
+  if (!oldInputs && isPackageFipsIncompatible(pkgInfo.policy_templates)) {
+    throw new PackageFipsIncompatibleError(
+      `Cannot create a package policy for ${pkgInfo.name}: the integration is not FIPS compatible`
+    );
+  }
+  const nonFipsTemplates = new Set(
+    (pkgInfo.policy_templates ?? [])
+      .filter((template) => template.fips_compatible === false)
+      .map((template) => template.name)
+  );
+  const nonFipsInput = packagePolicy.inputs.find((input) => {
+    const templateName = resolveInputPolicyTemplateName(input, pkgInfo);
+    if (!input.enabled || !templateName || !nonFipsTemplates.has(templateName)) {
+      return false;
+    }
+    return !oldInputs?.some(
+      (oldInput) =>
+        oldInput.enabled &&
+        oldInput.type === input.type &&
+        getInputEffectiveName(oldInput) === getInputEffectiveName(input) &&
+        resolveInputPolicyTemplateName(oldInput, pkgInfo) === templateName
+    );
+  });
+  if (nonFipsInput) {
+    throw new PackageFipsIncompatibleError(
+      `Cannot ${action} a package policy for ${
+        pkgInfo.name
+      }: the policy template ${resolveInputPolicyTemplateName(
+        nonFipsInput,
+        pkgInfo
+      )} is not FIPS compatible`
+    );
   }
 }
 

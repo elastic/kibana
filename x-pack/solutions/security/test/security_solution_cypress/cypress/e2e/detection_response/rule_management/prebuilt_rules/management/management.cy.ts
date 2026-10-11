@@ -129,7 +129,7 @@ describe('Prebuilt rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI
             'have.text',
             `Elastic rules (${expectedNumberOfRulesAfterDeletion})`
           );
-          cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', `Add Elastic rules1`);
+          cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', 'Add Elastic rules (1)');
 
           // Navigate to the prebuilt rule installation page
           cy.get(ADD_ELASTIC_RULES_BTN).click();
@@ -161,7 +161,7 @@ describe('Prebuilt rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI
 
           cy.get(ADD_ELASTIC_RULES_BTN).should(
             'have.text',
-            `Add Elastic rules${rulesToDelete.length}`
+            `Add Elastic rules (${rulesToDelete.length})`
           );
           cy.get(ELASTIC_RULES_BTN).should(
             'have.text',

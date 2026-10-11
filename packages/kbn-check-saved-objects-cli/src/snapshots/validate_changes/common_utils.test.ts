@@ -7,13 +7,54 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { schema } from '@kbn/config-schema';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { MigrationInfoRecord, ModelVersionSummary } from '../../types';
 import { isSavedObjectsCheckError } from '../../findings';
 import {
   getMappingFieldPaths,
   validateNoIndexOrEnabledFalse,
   validateNoIndexOrEnabledFalseInAllMappings,
+  validateUpdateSchemaContinuity,
 } from './common_utils';
+
+describe('validateUpdateSchemaContinuity', () => {
+  const attrs = schema.object({ title: schema.string() });
+  const buildType = (modelVersions: SavedObjectsType['modelVersions']): SavedObjectsType => ({
+    name: 'my-type',
+    hidden: false,
+    namespaceType: 'agnostic',
+    mappings: { properties: {} },
+    modelVersions,
+  });
+
+  it('does not throw when no model version defines an update schema', () => {
+    const type = buildType({
+      1: { changes: [], schemas: { create: attrs } },
+      2: { changes: [], schemas: { create: attrs } },
+    });
+    expect(() => validateUpdateSchemaContinuity('my-type', type)).not.toThrow();
+  });
+
+  it('does not throw when update is introduced by a later model version', () => {
+    const type = buildType({
+      1: { changes: [], schemas: { create: attrs } },
+      2: { changes: [], schemas: { create: attrs, update: attrs } },
+      3: { changes: [], schemas: { create: attrs, update: attrs } },
+    });
+    expect(() => validateUpdateSchemaContinuity('my-type', type)).not.toThrow();
+  });
+
+  it('throws when a model version after the first update schema omits update', () => {
+    const type = buildType({
+      1: { changes: [], schemas: { create: attrs, update: attrs } },
+      2: { changes: [], schemas: { create: attrs } },
+    });
+    expect(() => validateUpdateSchemaContinuity('my-type', type)).toThrow(
+      "The SO type 'my-type' defines an 'update' schema in model version '1', but model version(s) '2' do not."
+    );
+  });
+});
 
 describe('validateNoIndexOrEnabledFalse', () => {
   const modelVersionWithFlattenedNewMappings: ModelVersionSummary = {

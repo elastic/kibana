@@ -204,6 +204,20 @@ export const toApiQuery = (query: ReadableQuery): Query => ({
   ...(hasBreachCondition(query.breach) ? { breach: { segment: query.breach.segment } } : {}),
 });
 
+export const toApiDescription = (
+  description: RuleSavedObjectAttributes['metadata']['description']
+): string | undefined => description || undefined;
+
+export const toApiArtifacts = (
+  artifacts: RuleSavedObjectAttributes['artifacts']
+): RuleSavedObjectAttributes['artifacts'] =>
+  artifacts?.length ? artifacts.map(({ id, type, data }) => ({ id, type, data })) : undefined;
+
+export const toApiGrouping = (
+  grouping: RuleSavedObjectAttributes['grouping']
+): RuleSavedObjectAttributes['grouping'] =>
+  grouping?.fields?.length ? { fields: grouping.fields } : undefined;
+
 /** Projects a stored `state_transition` onto the public shape, dropping the flat scalars. */
 export const toApiStateTransition = (
   stateTransition?: StoredStateTransition | null
