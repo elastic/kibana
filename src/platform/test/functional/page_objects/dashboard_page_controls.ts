@@ -537,6 +537,9 @@ export class DashboardPageControls extends FtrService {
       await input.clearValue();
       await input.type(search, { charByChar: true });
     });
+    // Search and the loading indicator each debounce for 100 ms. Allow both to
+    // commit before checking disappearance, including searches with zero results.
+    await this.common.sleep(250);
     await this.optionsListPopoverWaitForLoading();
   }
 
@@ -544,6 +547,7 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`clearing search from options list`);
     await this.optionsListPopoverAssertOpen();
     await this.find.clickByCssSelector('.euiFormControlLayoutClearButton');
+    await this.common.sleep(250);
     await this.optionsListPopoverWaitForLoading();
   }
 
@@ -800,12 +804,14 @@ export class DashboardPageControls extends FtrService {
     expectedLowerBound: string,
     expectedUpperBound: string
   ) {
-    expect(await this.rangeSliderGetLowerBoundAttribute(controlId, compare)).to.be(
-      expectedLowerBound
-    );
-    expect(await this.rangeSliderGetUpperBoundAttribute(controlId, compare)).to.be(
-      expectedUpperBound
-    );
+    await this.retry.try(async () => {
+      expect(await this.rangeSliderGetLowerBoundAttribute(controlId, compare)).to.be(
+        expectedLowerBound
+      );
+      expect(await this.rangeSliderGetUpperBoundAttribute(controlId, compare)).to.be(
+        expectedUpperBound
+      );
+    });
   }
 
   // Time slider functions

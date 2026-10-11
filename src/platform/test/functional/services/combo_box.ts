@@ -11,6 +11,57 @@ import expect from '@kbn/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
+/** Returns normalized full text and label lines for decorated combobox options. */
+export const getComboBoxOptionTextCandidates = (
+  text: string,
+  requestedValue?: string
+): string[] => {
+  const normalize = (value: string) => value.toLowerCase().trim();
+  return [
+    ...new Set([
+      normalize(text),
+      ...text.split('\n').map(normalize),
+      ...(requestedValue === undefined ? [] : [normalize(requestedValue)]),
+    ]),
+  ].filter(Boolean);
+};
+
+/** Matches option labels and decorations while preserving prefix shorthand selection. */
+export const findMatchingComboBoxOption = <Option extends { text: string }>(
+  options: readonly Option[],
+  value: string
+): Option | undefined => {
+  const normalizedValue = value.toLowerCase().trim();
+  if (!normalizedValue) return;
+
+  const candidates = options.map((option) => ({
+    option,
+    texts: getComboBoxOptionTextCandidates(option.text),
+  }));
+  const exact = candidates.find(({ texts }) => texts.includes(normalizedValue));
+  if (exact) return exact.option;
+
+  const prefix = candidates.filter(({ texts }) =>
+    texts.some((text) => text.startsWith(normalizedValue))
+  );
+  const boundaryMatch = prefix.find(({ texts }) =>
+    texts.some(
+      (text) =>
+        text.startsWith(normalizedValue) &&
+        /^[^\p{L}\p{N}_]/u.test(text.slice(normalizedValue.length))
+    )
+  );
+  const prefixMatch = boundaryMatch?.option ?? prefix[0]?.option;
+  if (prefixMatch) return prefixMatch;
+
+  // EUI searches inside labels and treats separate words as search terms, so
+  // callers can use "k" for ".kibana" or "resource name" for "resource.name".
+  const searchTerms = normalizedValue.split(/\s+/);
+  return candidates.find(({ texts }) =>
+    texts.some((text) => searchTerms.every((term) => text.includes(term)))
+  )?.option;
+};
+
 /**
  * wrapper around EuiComboBox interactions
  */
@@ -73,7 +124,11 @@ export class ComboBoxService extends FtrService {
    * @param trimmedValue normalized option text to match; when undefined, the first option is clicked
    */
   private async clickOption(isMouseClick: boolean, trimmedValue?: string): Promise<string> {
-    const element = await this.findOption(trimmedValue);
+    // Async option providers can commit after their spinner disappears. Poll the
+    // options without typing again, which would restart a debounced search.
+    const element = await this.retry.tryForTime(this.WAIT_FOR_EXISTS_TIME, () =>
+      this.findOption(trimmedValue)
+    );
     const selectedText = await element.getVisibleText();
     // Native click avoids scrolling that can close the dropdown.
     if (isMouseClick) {
@@ -100,20 +155,13 @@ export class ComboBoxService extends FtrService {
         await this.find.allByCssSelector(`.euiComboBoxOption`, 0)
       ).map(async (e) => {
         const text = (await e.getVisibleText()) ?? '';
-        return { element: e, text, formattedText: text.toLowerCase().trim() };
+        return { element: e, text };
       })
     );
 
-    const exactMatch = optionsWithText.find(({ formattedText }) => formattedText === trimmedValue);
-    if (exactMatch) {
-      return exactMatch.element;
-    }
-
-    const prefixMatches = optionsWithText.filter(({ formattedText }) =>
-      formattedText.startsWith(trimmedValue)
-    );
-    if (prefixMatches.length > 0) {
-      return prefixMatches[0].element;
+    const match = findMatchingComboBoxOption(optionsWithText, trimmedValue);
+    if (match) {
+      return match.element;
     }
 
     throw new Error(
@@ -146,14 +194,10 @@ export class ComboBoxService extends FtrService {
     options = { clickWithMouse: false }
   ): Promise<void> {
     const trimmedValue = value.toLowerCase().trim();
+    let selectedText = value;
     this.log.debug(`comboBox.setElement, value: ${trimmedValue}`);
     await this.retry.try(async () => {
-      if (
-        await this.isOptionSelected(comboBoxElement, trimmedValue, {
-          allowInvalid: true,
-          allowMultiple: true,
-        })
-      ) {
+      if (await this.isRenderedOptionSelected(comboBoxElement, selectedText, value)) {
         this.log.debug('value is already selected. returning');
         return;
       }
@@ -161,15 +205,30 @@ export class ComboBoxService extends FtrService {
       await comboBoxElement.scrollIntoViewIfNecessary();
       await this.setFilterValue(comboBoxElement, value);
       await this.openOptionsList(comboBoxElement);
-      const selectedText = await this.clickOption(options.clickWithMouse, trimmedValue);
+      selectedText = await this.clickOption(options.clickWithMouse, trimmedValue);
       await this.closeOptionsList(comboBoxElement);
-      expect(
-        await this.isOptionSelected(comboBoxElement, selectedText, {
+      expect(await this.isRenderedOptionSelected(comboBoxElement, selectedText, value)).to.equal(
+        true
+      );
+    });
+  }
+
+  private async isRenderedOptionSelected(
+    comboBoxElement: WebElementWrapper,
+    text: string,
+    requestedValue: string
+  ): Promise<boolean> {
+    for (const candidate of getComboBoxOptionTextCandidates(text, requestedValue)) {
+      if (
+        await this.isOptionSelected(comboBoxElement, candidate, {
           allowInvalid: true,
           allowMultiple: true,
         })
-      ).to.equal(true);
-    });
+      ) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

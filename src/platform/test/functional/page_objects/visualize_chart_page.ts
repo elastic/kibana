@@ -297,7 +297,6 @@ export class VisualizeChartPageObject extends FtrService {
     chartSelector: string,
     availableColor: string
   ): Promise<void> {
-    await this.waitForVisualizationRenderComplete();
     const chart = await this.find.byCssSelector(chartSelector);
     const legendItemColor = await chart.findByCssSelector(
       `[data-ech-series-name="${name}"] .echLegendItem__color`
