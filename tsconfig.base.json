@@ -77,6 +77,8 @@
       "@kbn/ai-anonymization-common/*": ["./x-pack/platform/packages/shared/ai-infra/ai-anonymization-common/*"],
       "@kbn/ai-anonymization-server": ["./x-pack/platform/packages/shared/ai-infra/ai-anonymization-server"],
       "@kbn/ai-anonymization-server/*": ["./x-pack/platform/packages/shared/ai-infra/ai-anonymization-server/*"],
+      "@kbn/ai-anonymization-settings-plugin": ["./x-pack/platform/plugins/private/ai_anonymization_settings"],
+      "@kbn/ai-anonymization-settings-plugin/*": ["./x-pack/platform/plugins/private/ai_anonymization_settings/*"],
       "@kbn/ai-assistant": ["./x-pack/platform/packages/shared/kbn-ai-assistant"],
       "@kbn/ai-assistant/*": ["./x-pack/platform/packages/shared/kbn-ai-assistant/*"],
       "@kbn/ai-assistant-common": ["./x-pack/platform/packages/shared/ai-assistant/common"],

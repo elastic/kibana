@@ -7,7 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { anonymizeRecords } from './anonymize_records';
-import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
+import type { AnonymizationRule, RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
 import type { MlInferenceResponseResult } from '@elastic/elasticsearch/lib/api/types';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { RegexWorkerService } from './regex_worker_service';
@@ -334,6 +334,7 @@ describe('anonymizeRecords', () => {
       anonymizationRules: [regexRule, nerRule],
       regexWorker,
       esClient: mockEsClient,
+      logger,
     });
 
     expect(result.records[0].content).toContain('EMAIL_');
@@ -410,6 +411,113 @@ describe('anonymizeRecords', () => {
     const maskIn = (text: string) => text.match(/PER_[0-9a-f]{40}/)?.[0];
     expect(maskIn(result.records[0].content)).toBeDefined();
     expect(maskIn(result.records[1].content)).toBe(maskIn(result.records[0].content));
+  });
+
+  it('warns when it skips an NER rule because its model is not available, so the gap is visible', async () => {
+    mockEsClient.ml.inferTrainedModel.mockRejectedValueOnce(
+      new Error("The NER model 'model-1' was not found. Please download and deploy the model.")
+    );
+
+    await anonymizeRecords({
+      input: [{ content: 'Contact me at jane@example.com' }],
+      anonymizationRules: [nerRule],
+      regexWorker,
+      esClient: mockEsClient,
+      logger,
+    });
+
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(`model: ${(nerRule as { modelId?: string }).modelId ?? 'default'}`)
+    );
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('was not found'));
+  });
+
+  it('throws when regex execution fails and onFailure is "block" (default)', async () => {
+    jest.spyOn(regexWorker, 'run').mockRejectedValueOnce(new Error('regex worker crashed'));
+
+    await expect(
+      anonymizeRecords({
+        input: [{ content: 'jorge21@gmail.com' }],
+        anonymizationRules: [regexRule],
+        regexWorker,
+        esClient: mockEsClient,
+      })
+    ).rejects.toThrow('regex worker crashed');
+  });
+
+  it('proceeds unmasked and logs a warning when regex execution fails and onFailure is "allow_unsafe"', async () => {
+    jest.spyOn(regexWorker, 'run').mockRejectedValueOnce(new Error('regex worker crashed'));
+
+    const input = [{ content: 'jorge21@gmail.com' }];
+    const result = await anonymizeRecords({
+      input,
+      anonymizationRules: [regexRule],
+      regexWorker,
+      esClient: mockEsClient,
+      onFailure: 'allow_unsafe',
+      logger,
+    });
+
+    expect(result.records[0].content).toBe('jorge21@gmail.com');
+    expect(result.anonymizations).toHaveLength(0);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('regex worker crashed'));
+  });
+
+  describe('a custom rule whose pattern does not compile', () => {
+    const brokenRule: RegexAnonymizationRule = {
+      type: 'RegExp',
+      enabled: true,
+      id: 'custom-broken',
+      name: 'Broken pattern',
+      entityClass: 'MISC',
+      pattern: '(unclosed',
+    };
+    const input = [{ content: 'jorge21@gmail.com' }];
+
+    it('fails the call under onFailure "block" instead of silently leaving data unmasked', async () => {
+      await expect(
+        anonymizeRecords({
+          input,
+          anonymizationRules: [regexRule, brokenRule],
+          regexWorker,
+          esClient: mockEsClient,
+          onFailure: 'block',
+        })
+      ).rejects.toThrow(/"Broken pattern" has an invalid regular expression/);
+    });
+
+    it('proceeds unmasked, and says why, under onFailure "allow_unsafe"', async () => {
+      const result = await anonymizeRecords({
+        input,
+        anonymizationRules: [regexRule, brokenRule],
+        regexWorker,
+        esClient: mockEsClient,
+        onFailure: 'allow_unsafe',
+        logger,
+      });
+
+      expect(result.records[0].content).toBe('jorge21@gmail.com');
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('invalid regular expression')
+      );
+    });
+  });
+
+  it('skips every regex rule, not just the broken one, when onFailure is "allow_unsafe"', async () => {
+    const brokenRule = { ...regexRule, pattern: '(unclosed' };
+
+    const result = await anonymizeRecords({
+      input: [{ content: 'jorge21@gmail.com' }],
+      anonymizationRules: [brokenRule, regexRule],
+      regexWorker,
+      esClient: mockEsClient,
+      onFailure: 'allow_unsafe',
+      logger,
+    });
+
+    expect(result.records[0].content).toBe('jorge21@gmail.com');
+    expect(result.anonymizations).toHaveLength(0);
   });
 
   it('applies known replacements before regex processing', async () => {

@@ -1,0 +1,301 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React, { useMemo, useState } from 'react';
+import {
+  EuiBadge,
+  EuiBasicTable,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { CodeEditor } from '@kbn/code-editor';
+import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
+import { usePatternTester } from '../hooks/use_pattern_tester';
+import type { PatternTestAnonymization } from '../hooks/use_pattern_tester';
+
+export const DEFAULT_EXAMPLE_INPUT_OBJECT: Record<string, unknown> = {
+  host: { name: 'web-prod-eu-04', ip: '10.42.7.19' },
+  user: { name: 'CORP\\a.mehta' },
+  source: { ip: '198.51.100.23' },
+  destination: { ip: '10.42.8.2' },
+  contact: 'a.mehta@example.com',
+  message: 'Repeated login failures detected from external IP',
+};
+
+export const DEFAULT_EXAMPLE_INPUT = JSON.stringify(DEFAULT_EXAMPLE_INPUT_OBJECT, null, 2);
+
+/** JSON objects/arrays are tested structurally; anything else is tested as plain text. */
+const parseTesterInput = (value: string): unknown => {
+  try {
+    const parsed = JSON.parse(value);
+    return parsed !== null && typeof parsed === 'object' ? parsed : value;
+  } catch {
+    return value;
+  }
+};
+
+const formatTesterOutput = (maskedInput: unknown): string => {
+  if (maskedInput === undefined) {
+    return '';
+  }
+  return typeof maskedInput === 'string' ? maskedInput : JSON.stringify(maskedInput, null, 2);
+};
+
+interface PatternTesterPanelProps {
+  /** Regex rules to test with, e.g. all enabled rules, or the enabled rules plus a draft rule. */
+  rules: RegexAnonymizationRule[];
+  defaultInput?: string;
+}
+
+/** Tall enough to show a realistic multi-field example without immediately needing to scroll. */
+const CODE_EDITOR_HEIGHT = 420;
+
+const columns: Array<EuiBasicTableColumn<PatternTestAnonymization>> = [
+  {
+    field: 'entityType',
+    name: i18n.translate('xpack.aiAnonymizationSettings.patternTester.table.entityType', {
+      defaultMessage: 'Entity type',
+    }),
+    render: (entityType: string) => <EuiBadge color="hollow">{entityType}</EuiBadge>,
+  },
+  {
+    field: 'originalValue',
+    name: i18n.translate('xpack.aiAnonymizationSettings.patternTester.table.originalValue', {
+      defaultMessage: 'Original value',
+    }),
+  },
+  {
+    field: 'mask',
+    name: i18n.translate('xpack.aiAnonymizationSettings.patternTester.table.mask', {
+      defaultMessage: 'The model sees',
+    }),
+    width: '220px',
+    truncateText: true,
+    render: (mask: string) => (
+      <EuiToolTip content={mask}>
+        <EuiText
+          size="s"
+          color="accent"
+          tabIndex={0}
+          css={{
+            maxWidth: 200,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {mask}
+        </EuiText>
+      </EuiToolTip>
+    ),
+  },
+  {
+    field: 'occurrences',
+    name: i18n.translate('xpack.aiAnonymizationSettings.patternTester.table.occurrences', {
+      defaultMessage: 'Occurrences',
+    }),
+  },
+];
+
+export const PatternTesterPanel: React.FC<PatternTesterPanelProps> = ({
+  rules,
+  defaultInput = DEFAULT_EXAMPLE_INPUT,
+}) => {
+  const [inputValue, setInputValue] = useState(defaultInput);
+  const { test, result, isLoading } = usePatternTester();
+
+  const parsedInput = useMemo(() => parseTesterInput(inputValue), [inputValue]);
+  const editorLanguage = typeof parsedInput === 'string' ? 'plaintext' : 'json';
+
+  const outputValue = formatTesterOutput(result?.maskedInput);
+  const handleTest = () => test(parsedInput, rules);
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexItem>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow
+              label={
+                <EuiTitle size="xs">
+                  <h3>
+                    <FormattedMessage
+                      id="xpack.aiAnonymizationSettings.patternTester.inputLabel"
+                      defaultMessage="Input"
+                    />
+                  </h3>
+                </EuiTitle>
+              }
+              helpText={
+                <FormattedMessage
+                  id="xpack.aiAnonymizationSettings.patternTester.inputHelpText"
+                  defaultMessage="What the analyst sees. Paste JSON or plain text to try your own values."
+                />
+              }
+              fullWidth
+            >
+              <CodeEditor
+                languageId={editorLanguage}
+                height={CODE_EDITOR_HEIGHT}
+                value={inputValue}
+                onChange={setInputValue}
+                options={{ fontSize: 12, minimap: { enabled: false }, scrollBeyondLastLine: false }}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow
+              label={
+                <EuiTitle size="xs">
+                  <h3>
+                    <FormattedMessage
+                      id="xpack.aiAnonymizationSettings.patternTester.outputLabel"
+                      defaultMessage="Output"
+                    />
+                  </h3>
+                </EuiTitle>
+              }
+              labelAppend={
+                <EuiCopy textToCopy={outputValue}>
+                  {(copy) => (
+                    <EuiButtonEmpty
+                      size="xs"
+                      iconType="copy"
+                      onClick={copy}
+                      isDisabled={!result}
+                      data-test-subj="aiAnonymizationSettingsCopyOutputButton"
+                    >
+                      <FormattedMessage
+                        id="xpack.aiAnonymizationSettings.patternTester.copyOutput"
+                        defaultMessage="Copy"
+                      />
+                    </EuiButtonEmpty>
+                  )}
+                </EuiCopy>
+              }
+              helpText={
+                <FormattedMessage
+                  id="xpack.aiAnonymizationSettings.patternTester.outputHelpText"
+                  defaultMessage="What the model receives"
+                />
+              }
+              fullWidth
+            >
+              <CodeEditor
+                languageId={editorLanguage}
+                height={CODE_EDITOR_HEIGHT}
+                value={outputValue}
+                onChange={() => {}}
+                options={{
+                  readOnly: true,
+                  fontSize: 12,
+                  minimap: { enabled: false },
+                  scrollBeyondLastLine: false,
+                }}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {/* Explicit gap: the code editor's help text paints outside the form row's measured height. */}
+        <EuiSpacer size="m" />
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="play"
+              onClick={handleTest}
+              isLoading={isLoading}
+              data-test-subj="aiAnonymizationSettingsTestPatternButton"
+            >
+              <FormattedMessage
+                id="xpack.aiAnonymizationSettings.patternTester.testButton"
+                defaultMessage="Test pattern"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          {result && (
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">
+                  {i18n.translate('xpack.aiAnonymizationSettings.patternTester.valuesMasked', {
+                    defaultMessage: '{count} values masked',
+                    values: { count: result.stats.valuesMasked },
+                  })}
+                </EuiBadge>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">
+                  {i18n.translate('xpack.aiAnonymizationSettings.patternTester.uniqueValues', {
+                    defaultMessage: '{count} unique values',
+                    values: { count: result.stats.uniqueValues },
+                  })}
+                </EuiBadge>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">
+                  {i18n.translate('xpack.aiAnonymizationSettings.patternTester.rulesApplied', {
+                    defaultMessage: '{count} rules applied',
+                    values: { count: result.stats.rulesApplied },
+                  })}
+                </EuiBadge>
+              </EuiFlexItem>
+            </>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+
+      {result && (
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.aiAnonymizationSettings.patternTester.resultsTitle"
+                defaultMessage="What was anonymized"
+              />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="info" color="subdued" aria-hidden={true} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="xpack.aiAnonymizationSettings.patternTester.inMemoryNote"
+                  defaultMessage="This mapping is in-memory only — discarded after each response."
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiBasicTable
+            items={result.anonymizations}
+            columns={columns}
+            tableCaption={i18n.translate(
+              'xpack.aiAnonymizationSettings.patternTester.resultsTableCaption',
+              { defaultMessage: 'Values anonymized by the tested patterns' }
+            )}
+          />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+};
