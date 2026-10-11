@@ -143,6 +143,13 @@ export const allowedExperimentalValues = Object.freeze({
   leadGenerationEnabled: true,
 
   /**
+   * Enables the Entity Analytics Executive Brief proof of concept
+   * (async generation routes and the header AI button).
+   * PoC branch only: on by default so the CI cloud deployment shows it (do not merge).
+   */
+  entityAnalyticsExecutiveBriefEnabled: true,
+
+  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,

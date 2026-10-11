@@ -25,8 +25,13 @@ export interface SignalCardData {
   noDataMessage?: string;
   description: string;
   delta?: number;
+  /** True while the delta query is in flight — show a spinner in place of the badge number. */
+  isDeltaLoading?: boolean;
   filterLabel: string;
+  /** One value per dot across the selected time range, oldest first. */
   trend?: number[];
+  /** True while the trend query is in flight — reserves the sparkline space. */
+  isTrendLoading?: boolean;
 }
 
 export interface ActiveFilter {
