@@ -23,12 +23,12 @@ jest.mock('../hooks/use_significant_events_maintenance', () => ({
 const renderCallout = () =>
   render(
     <I18nProvider>
-      <DetectionPausedCallout />
+      <DetectionPausedCallout canManageAndConfigure={true} />
     </I18nProvider>
   );
 
 describe('DetectionPausedCallout', () => {
-  it('shows the page-level paused status with attribution', () => {
+  it('matches the Significant Events paused banner copy without a settings action', () => {
     mockMaintenanceStatus = {
       data: {
         state: 'paused',
@@ -46,13 +46,15 @@ describe('DetectionPausedCallout', () => {
     renderCallout();
 
     const callout = screen.getByTestId('streams-settings-maintenance-paused-status');
+    expect(callout).toHaveTextContent('Detection is paused by achyut@elastic.co');
+    expect(callout).toHaveTextContent('Nightshift activity is stopped across the deployment');
     expect(callout).toHaveTextContent(
-      'Detection process is paused by achyut@elastic.co · 168 rules and 14 automations disabled.'
+      'Manual triggers are blocked until you resume from Settings.'
     );
-    expect(callout).not.toHaveTextContent('Nightshift activity is stopped across the deployment');
+    expect(screen.queryByRole('link', { name: 'Open settings' })).not.toBeInTheDocument();
   });
 
-  it('keeps automatic pauses compact', () => {
+  it('keeps automatic pause copy aligned with the Significant Events banner', () => {
     mockMaintenanceStatus = {
       data: { state: 'paused', updatedBy: MAINTENANCE_FEATURE_FLAG_ACTOR },
     };
@@ -61,7 +63,7 @@ describe('DetectionPausedCallout', () => {
 
     const callout = screen.getByTestId('streams-settings-maintenance-paused-status');
     expect(callout).toHaveTextContent('Paused automatically because Nightshift was turned off');
-    expect(callout).not.toHaveTextContent('Turning Nightshift back on does not resume activity');
+    expect(callout).toHaveTextContent('Turning Nightshift back on does not resume activity');
   });
 
   it('does not render while detection activity is enabled', () => {

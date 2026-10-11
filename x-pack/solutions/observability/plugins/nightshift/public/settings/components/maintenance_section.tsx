@@ -29,6 +29,7 @@ import {
   useMaintenanceStatus,
   useSignificantEventsMaintenanceActions,
 } from '../hooks/use_significant_events_maintenance';
+import { DetectionPausedCallout } from './detection_paused_callout';
 import { SettingsSectionRow } from './settings_section';
 
 const SECTION_TITLE = i18n.translate('xpack.nightshift.settings.maintenance.title', {
@@ -121,6 +122,7 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
         description={<p>{SECTION_DESCRIPTION}</p>}
         data-test-subj="streams-settings-maintenance-section"
       >
+        <DetectionPausedCallout canManageAndConfigure={canManage} />
         {isError && (
           <>
             <KbnDangerCallout
@@ -185,7 +187,7 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
             <EuiSpacer />
           </>
         )}
-        <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+        <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="streams-settings-maintenance-toggle-button"

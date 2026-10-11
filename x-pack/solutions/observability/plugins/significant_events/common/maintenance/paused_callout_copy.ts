@@ -23,13 +23,13 @@ export const getDetectionPausedCalloutTitle = (
 
   if (status.updatedBy) {
     return i18n.translate('xpack.significantEvents.maintenance.pausedCallout.userTitle', {
-      defaultMessage: 'Detection is paused by {user}.',
+      defaultMessage: 'Detection is paused by {user}',
       values: { user: status.updatedBy },
     });
   }
 
   return i18n.translate('xpack.significantEvents.maintenance.pausedCallout.title', {
-    defaultMessage: 'Detection is paused.',
+    defaultMessage: 'Detection is paused',
   });
 };
 
