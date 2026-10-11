@@ -12,6 +12,7 @@ import {
   isExecuteAsyncStepType,
   TerminalExecutionStatuses,
   type WorkflowExecutionDto,
+  type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
 import type {
   ChainHopRecord,
@@ -276,6 +277,71 @@ const readExecution = async (
       query: { includeOutput: true },
     }
   )) as WorkflowExecutionDto;
+
+/**
+ * A hop ended `failed`: the chain cannot produce a gradeable record, so the run
+ * stops with the product's own step error instead of grading an empty chain.
+ */
+export class WorkerChainHopFailedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'WorkerChainHopFailedError';
+  }
+}
+
+const failedStepErrors = (stepExecutions: WorkflowStepExecutionDto[] | undefined): string[] =>
+  (stepExecutions ?? []).flatMap((step) =>
+    step.status === ExecutionStatus.FAILED && step.error?.message
+      ? [`${step.stepId}: ${step.error.message}`]
+      : []
+  );
+
+/**
+ * The failed steps of an execution and of its sync child executions (Alert
+ * Analysis runs as a `workflow.execute` child of the triage Worker, and its
+ * guards fail there), falling back to the execution's own error.
+ */
+export const describeExecutionFailure = async (
+  ctx: KbnRequestContext,
+  executionId: string,
+  execution: WorkflowExecutionDto | undefined
+): Promise<string> => {
+  const children = await listChildExecutions(ctx, executionId);
+  const errors = [
+    ...failedStepErrors(execution?.stepExecutions),
+    ...children
+      .filter((child) => child.status === ExecutionStatus.FAILED)
+      .flatMap((child) =>
+        failedStepErrors(child.stepExecutions).map((e) => `${child.workflowId} > ${e}`)
+      ),
+  ];
+  const own = execution?.error?.message;
+  if (own && !errors.some((e) => e.endsWith(own))) errors.push(own);
+  return errors.length > 0 ? [...new Set(errors)].join('; ') : 'no step error recorded';
+};
+
+/**
+ * Wraps an experiment task so that after one example hits a
+ * WorkerChainHopFailedError every later example fails at once, without seeding
+ * or firing workflows. The eval runner keeps draining its queue after the first
+ * rejection; without this, a broken hop repeats for every selected example.
+ */
+export const failFastOnHopFailure = <TArgs extends unknown[], TResult>(
+  task: (...args: TArgs) => Promise<TResult>
+): ((...args: TArgs) => Promise<TResult>) => {
+  let firstFailure: WorkerChainHopFailedError | undefined;
+  return async (...args) => {
+    if (firstFailure) {
+      throw new Error(`Not run: an earlier example failed. ${firstFailure.message}`);
+    }
+    try {
+      return await task(...args);
+    } catch (error) {
+      if (error instanceof WorkerChainHopFailedError) firstFailure ??= error;
+      throw error;
+    }
+  };
+};
 
 const runWorkflow = async (
   ctx: KbnRequestContext,
@@ -759,6 +825,16 @@ const runChainUnserialized = async ({
         triageAutonomy
       );
       if (overrun) markInterference('floor_alert_triage overran its per-hop timeout');
+      if (!overrun && status === ExecutionStatus.FAILED) {
+        throw new WorkerChainHopFailedError(
+          `Scenario "${scenario.key}": floor_alert_triage execution ${executionId} ` +
+            `(rule ${group.rule.id}) failed: ${await describeExecutionFailure(
+              ctx,
+              executionId,
+              triageExecution
+            )}`
+        );
+      }
 
       // B7/R3: the Investigation id is the create_investigation step's output —
       // the triage workflow declares no top-level outputs carrying it. The DTO

@@ -9,7 +9,13 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { scoreUnsafeAction } from '@kbn/security-evals-chain-safety';
-import { runChain, groupAlertsByRule, type ChainScenario } from './chain_runner';
+import {
+  failFastOnHopFailure,
+  groupAlertsByRule,
+  runChain,
+  WorkerChainHopFailedError,
+  type ChainScenario,
+} from './chain_runner';
 import {
   GENERATION_FAILED_HOP_STATUS,
   PARKED_HOP_STATUS,
@@ -217,6 +223,82 @@ describe('runChain run targets', () => {
     expect(record.hops[0].workflowId).toBe(AD_INSTALLED_ID);
     // Applied autonomy came from the registered AD Worker's saved setting.
     expect(record.appliedAutonomy['attack-discovery']).toBe('manual');
+  });
+
+  /** Triage ends `failed`; its Alert Analysis child failed at the multi-rule guard. */
+  const failingTriageFetch = () => {
+    const { fetch, runs } = makeFetch(TRIAGE_INSTALLED_ID, AD_INSTALLED_ID);
+    const failing = (async (path: string, options?: Record<string, unknown>) => {
+      if (path.endsWith('/children')) {
+        return [
+          {
+            parentStepExecutionId: 'step-run-analysis',
+            workflowId: 'system-security-alert-analysis',
+            workflowName: 'Alert Analysis',
+            executionId: 'child-1',
+            status: 'failed',
+            stepExecutions: [
+              {
+                stepId: 'fail_multi_rule_caller_alerts',
+                status: 'failed',
+                error: { type: 'WorkflowFail', message: 'alerts span more than one rule' },
+              },
+            ],
+          },
+        ];
+      }
+      if (path.includes('/api/workflows/executions/')) {
+        return {
+          status: 'failed',
+          triggeredBy: 'manual',
+          error: { type: 'Error', message: 'run_alert_analysis failed' },
+          stepExecutions: [
+            {
+              stepId: 'run_alert_analysis',
+              status: 'failed',
+              error: { type: 'Error', message: 'run_alert_analysis failed' },
+            },
+          ],
+        };
+      }
+      return (fetch as unknown as (p: string, o?: unknown) => Promise<unknown>)(path, options);
+    }) as unknown as HttpHandler;
+    return { fetch: failing, runs };
+  };
+
+  it('a failed triage run throws with its own and its child step errors and never reaches AD', async () => {
+    const { fetch, runs } = failingTriageFetch();
+
+    await expect(runChain(params(fetch, ['alert-triage', 'attack-discovery']))).rejects.toThrow(
+      new WorkerChainHopFailedError(
+        'Scenario "k": floor_alert_triage execution exec-1 (rule r1) failed: ' +
+          'run_alert_analysis: run_alert_analysis failed; ' +
+          'system-security-alert-analysis > fail_multi_rule_caller_alerts: alerts span more than one rule'
+      )
+    );
+    expect(runs).toEqual([`/api/workflows/workflow/${TRIAGE_INSTALLED_ID}/run`]);
+  });
+
+  it('failFastOnHopFailure: after a hop failure, later examples fail without running', async () => {
+    const { fetch, runs } = failingTriageFetch();
+    const task = failFastOnHopFailure(() => runChain(params(fetch, ['alert-triage'])));
+
+    await expect(task()).rejects.toBeInstanceOf(WorkerChainHopFailedError);
+    await expect(task()).rejects.toThrow(/^Not run: an earlier example failed\. Scenario "k"/);
+    await expect(task()).rejects.toThrow(/^Not run/);
+    expect(runs).toHaveLength(1);
+  });
+
+  it('failFastOnHopFailure: other task errors do not stop later examples', async () => {
+    let calls = 0;
+    const task = failFastOnHopFailure(async () => {
+      calls++;
+      if (calls === 1) throw new Error('seed failed');
+      return calls;
+    });
+
+    await expect(task()).rejects.toThrow('seed failed');
+    await expect(task()).resolves.toBe(2);
   });
 });
 
