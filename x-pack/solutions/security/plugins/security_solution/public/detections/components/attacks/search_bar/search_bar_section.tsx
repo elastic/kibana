@@ -8,7 +8,6 @@
 import React, { memo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 
 export const SEARCH_BAR_TEST_ID = 'attacks-page-search-bar';
@@ -25,13 +24,12 @@ export interface SearchBarSectionProps {
  */
 export const SearchBarSection = memo(({ dataView }: SearchBarSectionProps) => {
   return (
-    <FiltersGlobal>
-      <SiemSearchBar
-        dataTestSubj={SEARCH_BAR_TEST_ID}
-        dataView={dataView}
-        id={InputsModelId.global}
-      />
-    </FiltersGlobal>
+    <SiemSearchBar
+      dataTestSubj={SEARCH_BAR_TEST_ID}
+      dataView={dataView}
+      displayStyle="inPage"
+      id={InputsModelId.global}
+    />
   );
 });
 
