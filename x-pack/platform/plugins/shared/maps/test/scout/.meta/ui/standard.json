@@ -1,9 +1,22 @@
 {
-  "sha1": "d4feb469813e9344b267e75ea2df4bc9704b24e8",
+  "sha1": "d40644afd34fa2353f73895d464be109efcb30a7",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "c319c21859730be-f65c09c2ef11711",
+      "title": "Maps - add layer panel add layer panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/add_layer_panel.spec.ts",
+        "line": 23,
+        "column": 23
+      }
+    },
     {
       "id": "1b636f9f6580698-7f7cef42f9d98b6",
       "title": "Maps - auto fit map to bounds initial location - should automatically fit to bounds on initial map load",
@@ -70,6 +83,32 @@
       }
     },
     {
+      "id": "ec95465caa2c2e6-e43f59b01c6aca8",
+      "title": "Maps - discover visualize button should link geo_shape fields to Maps application",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/discover.spec.ts",
+        "line": 32,
+        "column": 43
+      }
+    },
+    {
+      "id": "ec95465caa2c2e6-d54d63688fc0a79",
+      "title": "Maps - discover visualize button should link geo_point fields to Maps application with time and query context",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/discover.spec.ts",
+        "line": 42,
+        "column": 95
+      }
+    },
+    {
       "id": "f6a280d8279d22c-f971711f1dbaf1d",
       "title": "Maps embedded in dashboard - request cancellation cancels search when navigating away from the dashboard",
       "expectedStatus": "passed",
@@ -93,6 +132,32 @@
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/embedded_map_search_cancellation.spec.ts",
         "line": 62,
         "column": 13
+      }
+    },
+    {
+      "id": "a3c825a06a68628-05c550063c1ac43",
+      "title": "Maps - point to point source point to point source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/es_pew_pew_source.spec.ts",
+        "line": 28,
+        "column": 10
+      }
+    },
+    {
+      "id": "2b58c2f7a4aa23d-ed5412ca0db7724",
+      "title": "Maps - ES|QL source should display ES|QL statement results on map",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/esql_source.spec.ts",
+        "line": 26,
+        "column": 10
       }
     },
     {
@@ -126,6 +191,58 @@
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/full_screen_mode.spec.ts",
         "line": 18,
         "column": 43
+      }
+    },
+    {
+      "id": "c9f558a25c010a7-2d274f3f81370a3",
+      "title": "Maps - auto open file upload wizard should open layer add panel when openLayerWizard URL param is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/geofile_wizard_auto_open.spec.ts",
+        "line": 11,
+        "column": 14
+      }
+    },
+    {
+      "id": "bcb6268324e88ba-7bb72c07e814602",
+      "title": "Maps - geojson file upload geojson file upload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/geojson_file_upload.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "5d71a383d633261-8c519116f24604d",
+      "title": "Maps - layer with joins layer with joins",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/joins.spec.ts",
+        "line": 31,
+        "column": 23
+      }
+    },
+    {
+      "id": "9ef7c2e9e572087-f4dfe961da30788",
+      "title": "Maps - shapefile upload shapefile upload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/shapefile_upload.spec.ts",
+        "line": 28,
+        "column": 7
       }
     },
     {
@@ -165,6 +282,32 @@
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/tooltip_filter_actions.spec.ts",
         "line": 67,
         "column": 7
+      }
+    },
+    {
+      "id": "ee0564455f63b64-fb77bff710d188a",
+      "title": "Maps - geo top hits split on string field - should display top hits per entity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/top_hits.spec.ts",
+        "line": 40,
+        "column": 10
+      }
+    },
+    {
+      "id": "ee0564455f63b64-9f194f7e74d3a46",
+      "title": "Maps - geo top hits split on scripted field - should display top hits per entity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/top_hits.spec.ts",
+        "line": 45,
+        "column": 15
       }
     }
   ]

@@ -1,5 +1,5 @@
 {
-  "sha1": "802654afbce6290cd000224f6170eb36dc35483c",
+  "sha1": "039dab7c897e38f3c8f304a60c701998b802d45f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -509,8 +509,7 @@
       "title": "Discover app - errors should render invalid scripted field error",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/error_handling.spec.ts",
@@ -1207,6 +1206,58 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/saved_searches.spec.ts",
         "line": 75,
         "column": 9
+      }
+    },
+    {
+      "id": "95fb6f1ca7693bd-410e96cc9eb8bac",
+      "title": "Using scripted fields in Discover numeric field: value, sort, filter and Lens hand-off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/scripted_fields.spec.ts",
+        "line": 137,
+        "column": 22
+      }
+    },
+    {
+      "id": "95fb6f1ca7693bd-bb52826822140e7",
+      "title": "Using scripted fields in Discover string field: value, sort and filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/scripted_fields.spec.ts",
+        "line": 174,
+        "column": 29
+      }
+    },
+    {
+      "id": "95fb6f1ca7693bd-32c2689be36a794",
+      "title": "Using scripted fields in Discover boolean field: value and filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/scripted_fields.spec.ts",
+        "line": 203,
+        "column": 22
+      }
+    },
+    {
+      "id": "95fb6f1ca7693bd-44e69b77e0921c5",
+      "title": "Using scripted fields in Discover date field: formatted value and filter from a cell",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/scripted_fields.spec.ts",
+        "line": 230,
+        "column": 5
       }
     },
     {

@@ -1,5 +1,5 @@
 {
-  "sha1": "f63253a523f972f78aa32503ef955bbb756b537d",
+  "sha1": "b95ce36e6aed03d61c0001760f1d910d632ec79a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -78,8 +78,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 217,
-        "column": 1
+        "line": 300,
+        "column": 10
       }
     },
     {
@@ -92,8 +92,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 227,
-        "column": 26
+        "line": 314,
+        "column": 13
       }
     },
     {
@@ -106,22 +106,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 234,
-        "column": 7
-      }
-    },
-    {
-      "id": "9d390434634ed3b-e442638b251f019",
-      "title": "Semantic Memory page E3 reports the seeded usefulness, decayed, and separates it from confidence",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 245,
-        "column": 13
+        "line": 320,
+        "column": 24
       }
     },
     {
@@ -134,7 +120,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 271,
+        "line": 352,
         "column": 13
       }
     },
@@ -148,13 +134,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 286,
-        "column": 7
+        "line": 366,
+        "column": 73
       }
     },
     {
-      "id": "9d390434634ed3b-15a2be67ecc6001",
-      "title": "Semantic Memory page E6 renders a merge lineage one level per row, each crumb linking to its source",
+      "id": "9d390434634ed3b-004df82bac7f351",
+      "title": "Semantic Memory page E6 names the direct sources of a merge, each one linking to its memory",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -162,8 +148,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 314,
-        "column": 98
+        "line": 410,
+        "column": 9
       }
     },
     {
@@ -176,8 +162,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 344,
-        "column": 14
+        "line": 431,
+        "column": 13
       }
     },
     {
@@ -190,8 +176,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 371,
-        "column": 21
+        "line": 466,
+        "column": 7
       }
     },
     {
@@ -204,8 +190,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 400,
-        "column": 11
+        "line": 491,
+        "column": 13
       }
     },
     {
@@ -218,8 +204,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 442,
-        "column": 13
+        "line": 526,
+        "column": 26
       }
     },
     {
@@ -232,8 +218,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 457,
-        "column": 13
+        "line": 539,
+        "column": 23
+      }
+    },
+    {
+      "id": "9d390434634ed3b-d5400376710bac1",
+      "title": "Semantic Memory page E13 filters the view by one keyword cell, then ANDs a second",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
+        "line": 622,
+        "column": 25
       }
     },
     {
@@ -246,8 +246,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 474,
-        "column": 24
+        "line": 666,
+        "column": 25
       }
     }
   ]

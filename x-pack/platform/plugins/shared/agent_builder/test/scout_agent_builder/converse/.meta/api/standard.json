@@ -1,5 +1,5 @@
 {
-  "sha1": "c563455037583b98e5c62fd3b9c57985ee849dde",
+  "sha1": "3d1a6f3bcaf6049106b017b54df66121a98efaf7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -583,7 +583,7 @@
     {
       "id": "69411a87481f950-3869981e6c97b56",
       "title": "Agent Builder - converse callback API delivers completed response to callback URL",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -592,14 +592,30 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 134,
-        "column": 24
+        "line": 138,
+        "column": 23
+      }
+    },
+    {
+      "id": "69411a87481f950-afb719b3a3f36ee",
+      "title": "Agent Builder - converse callback API renders the Slack surface payload with attachments in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
+        "line": 225,
+        "column": 14
       }
     },
     {
       "id": "69411a87481f950-92f5e782bc9e4c1",
       "title": "Agent Builder - converse callback API stores callback origin authorship on list and get conversation responses",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -608,14 +624,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 196,
+        "line": 268,
         "column": 14
       }
     },
     {
       "id": "69411a87481f950-edfb8df4e3d1793",
       "title": "Agent Builder - converse callback API delivers failed response to callback URL",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -624,14 +640,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 292,
-        "column": 11
+        "line": 365,
+        "column": 15
       }
     },
     {
       "id": "69411a87481f950-0dffc761e12b7ef",
       "title": "Agent Builder - converse callback API delivers aborted response to callback URL",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -640,14 +656,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 329,
-        "column": 31
+        "line": 397,
+        "column": 18
       }
     },
     {
       "id": "69411a87481f950-82a75a6c138a614",
       "title": "Agent Builder - converse callback API returns the existing execution for a replayed idempotency key",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -656,8 +672,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 369,
-        "column": 18
+        "line": 439,
+        "column": 19
       }
     },
     {
@@ -672,14 +688,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 432,
-        "column": 23
+        "line": 507,
+        "column": 17
       }
     },
     {
       "id": "69411a87481f950-be5f9d8b14fa9ea",
       "title": "Agent Builder - converse callback API schedules separate executions for the same key on different origins",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -688,14 +704,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 497,
-        "column": 18
+        "line": 568,
+        "column": 13
       }
     },
     {
       "id": "69411a87481f950-a98d347436e2dcf",
       "title": "Agent Builder - converse callback API prefers a caller-provided execution id over the idempotency key",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -704,14 +720,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 556,
-        "column": 31
+        "line": 627,
+        "column": 13
       }
     },
     {
       "id": "69411a87481f950-8077e4c805574b4",
       "title": "Agent Builder - converse callback API continues conversation for repeated Slack origin",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -720,8 +736,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 595,
-        "column": 9
+        "line": 668,
+        "column": 32
       }
     },
     {

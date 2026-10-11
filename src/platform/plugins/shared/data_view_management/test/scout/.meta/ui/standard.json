@@ -1,5 +1,5 @@
 {
-  "sha1": "82031c3bbc92b821cd25f2d48529faead6096ae1",
+  "sha1": "23e75557b35bb278106f735c1cd5d6776bb53351",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -184,6 +184,19 @@
         "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/data_views_spaces_management.spec.ts",
         "line": 28,
         "column": 5
+      }
+    },
+    {
+      "id": "f3502e8f1067a17-f08c233dc925fcf",
+      "title": "Data view with a large number of fields shows the expected number of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/tests/huge_fields.spec.ts",
+        "line": 31,
+        "column": 28
       }
     }
   ]

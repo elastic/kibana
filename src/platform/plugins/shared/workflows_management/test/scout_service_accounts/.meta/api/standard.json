@@ -1,5 +1,5 @@
 {
-  "sha1": "1827243081494ed725292375cee384ab5573ceaa",
+  "sha1": "74577d120805d8d45811d85d273ee1bda145e6e1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -142,6 +142,227 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_import.spec.ts",
         "line": 19,
         "column": 42
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-c8d21ac3fd6381c",
+      "title": "Managed child service account inheritance requires superuser privileges for global example mutations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 164,
+        "column": 6
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-9ae50459c071803",
+      "title": "Managed child service account inheritance cleans up waiting inherited executions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 220,
+        "column": 23
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-c993ba319744694",
+      "title": "Managed child service account inheritance sync managed child retains inherited identity through wait and resume",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 250,
+        "column": 25
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-b2b13e6d22cb235",
+      "title": "Managed child service account inheritance async managed child retains inherited identity through wait and resume",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 250,
+        "column": 25
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-222eed9d8a167b8",
+      "title": "Managed child service account inheritance sync global managed child inherits a per-space binding through resume",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 304,
+        "column": 28
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-4bacce4af425027",
+      "title": "Managed child service account inheritance async global managed child inherits a per-space binding through resume",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 304,
+        "column": 28
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-07b71b31be80be7",
+      "title": "Managed child service account inheritance sync workflow-level fallback inherits the parent service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 339,
+        "column": 13
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-144a23756c75ca3",
+      "title": "Managed child service account inheritance async workflow-level fallback inherits the parent service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 339,
+        "column": 13
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-7e7c5d48449eea9",
+      "title": "Managed child service account inheritance blocks uninstall while an inherited child is active (global=false)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 362,
+        "column": 30
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-35624f0ecea7ac8",
+      "title": "Managed child service account inheritance blocks uninstall while an inherited child is active (global=true)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 362,
+        "column": 30
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-faac11070b63b86",
+      "title": "Managed child service account inheritance uses the latest installed child without a revision approval",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 405,
+        "column": 15
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-cfa756a5ff8713f",
+      "title": "Managed child service account inheritance rejects unmanaged children before creating a delegated execution",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 429,
+        "column": 36
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-2aefd948ea79efe",
+      "title": "Managed child service account inheritance requires explicit override and leaves the child binding unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 437,
+        "column": 55
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-7b4dff94182dbbc",
+      "title": "Managed child service account inheritance rejects inheritance without a parent service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 470,
+        "column": 6
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-e00fef506afb33c",
+      "title": "Managed child service account inheritance default preserves the original caller rather than inheriting implicitly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 477,
+        "column": 85
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-56180236d81bc21",
+      "title": "Managed child service account inheritance nested inheritance keeps the root binding and rejects an unmanaged grandchild",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 486,
+        "column": 65
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-8b95c3e65d48171",
+      "title": "Managed child service account inheritance changing the root binding while an async child waits fails closed on resume",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 516,
+        "column": 34
       }
     },
     {

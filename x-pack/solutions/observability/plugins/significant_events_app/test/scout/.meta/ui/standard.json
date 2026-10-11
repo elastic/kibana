@@ -1,5 +1,5 @@
 {
-  "sha1": "6c806147fad5fd09bb653942cbfa9ba0e7e4d56a",
+  "sha1": "647f0c51d2a6aac9d139d2b1d35602f587e4e40d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events_app/test/scout/ui/tests/significant_events.spec.ts",
-        "line": 57,
-        "column": 9
+        "line": 46,
+        "column": 25
       }
     },
     {
@@ -32,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events_app/test/scout/ui/tests/significant_events.spec.ts",
-        "line": 69,
-        "column": 9
+        "line": 57,
+        "column": 10
       }
     },
     {
@@ -48,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events_app/test/scout/ui/tests/significant_events.spec.ts",
-        "line": 88,
-        "column": 9
+        "line": 78,
+        "column": 54
       }
     }
   ]

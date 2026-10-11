@@ -1,5 +1,5 @@
 {
-  "sha1": "82031c3bbc92b821cd25f2d48529faead6096ae1",
+  "sha1": "23e75557b35bb278106f735c1cd5d6776bb53351",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -22,6 +22,38 @@
         "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/global.setup.ts",
         "line": 14,
         "column": 13
+      }
+    },
+    {
+      "id": "100a959426f4987-20d5b6b1ced14bb",
+      "title": "Data view field caps cache advanced setting shows the cache setting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/cache_max_age_setting.spec.ts",
+        "line": 19,
+        "column": 57
+      }
+    },
+    {
+      "id": "100a959426f4987-66e105e48c0bd22",
+      "title": "Data view field caps cache advanced setting does not show the cache setting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/cache_max_age_setting.spec.ts",
+        "line": 24,
+        "column": 5
       }
     },
     {
@@ -325,6 +357,86 @@
       }
     },
     {
+      "id": "1fea4fc8f5f7f79-51793df884ca20c",
+      "title": "Data view field filters creates a field filter and edits it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_field_filters.spec.ts",
+        "line": 23,
+        "column": 25
+      }
+    },
+    {
+      "id": "a6785eccae75d57-c4b84eec6f48aa8",
+      "title": "Data view not found redirects to the main view and shows an error when the data view is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_not_found.spec.ts",
+        "line": 17,
+        "column": 13
+      }
+    },
+    {
+      "id": "9d2a2f06e24a0d6-e12b4de8b744f0a",
+      "title": "Data views on index aliases creates a data view without a time field on an alias and discovers its documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_on_alias.spec.ts",
+        "line": 104,
+        "column": 44
+      }
+    },
+    {
+      "id": "9d2a2f06e24a0d6-e4671a992909962",
+      "title": "Data views on index aliases creates a data view with a time field on an alias and discovers its documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_on_alias.spec.ts",
+        "line": 124,
+        "column": 3
+      }
+    },
+    {
       "id": "a03cc315338d5fd-6a776ea4e6136bd",
       "title": "Data view field popularity persistence saved popularity persists after page reload",
       "expectedStatus": "passed",
@@ -362,6 +474,26 @@
         "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_popularity.spec.ts",
         "line": 44,
         "column": 13
+      }
+    },
+    {
+      "id": "3725ef704330c96-b6afb95b085e60c",
+      "title": "Data view relationships shows the saved objects that reference the data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_relationships.spec.ts",
+        "line": 27,
+        "column": 5
       }
     },
     {
@@ -405,6 +537,26 @@
       }
     },
     {
+      "id": "a1fcc66b8d3b632-c3a5faf2d42fb5e",
+      "title": "Data views list spaces column shows the spaces of each data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_views_spaces_column.spec.ts",
+        "line": 24,
+        "column": 25
+      }
+    },
+    {
       "id": "de0a19f8704a115-cdb0e0d2ef7a709",
       "title": "Data view creation with exclusion expression data view with exclusion pattern shows only included index fields",
       "expectedStatus": "passed",
@@ -422,6 +574,324 @@
         "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/exclude_data_view.spec.ts",
         "line": 39,
         "column": 60
+      }
+    },
+    {
+      "id": "846807dc5ab466f-b9878b5c34342ac",
+      "title": "Data view field editor preview shows the preview for a field in _source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/field_editor_preview.spec.ts",
+        "line": 33,
+        "column": 33
+      }
+    },
+    {
+      "id": "846807dc5ab466f-4e3b5880d644fa6",
+      "title": "Data view field editor preview shows the preview for a field not in _source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/field_editor_preview.spec.ts",
+        "line": 37,
+        "column": 71
+      }
+    },
+    {
+      "id": "7edef7d72fc00c1-b17d27399c45991",
+      "title": "Data view field formatters applies text, link and color formats from the field flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/field_formatter.spec.ts",
+        "line": 52,
+        "column": 39
+      }
+    },
+    {
+      "id": "7edef7d72fc00c1-f624b3ea51a27c8",
+      "title": "Data view field formatters applies the default formatter from a field meta unit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/field_formatter.spec.ts",
+        "line": 101,
+        "column": 13
+      }
+    },
+    {
+      "id": "eb08ecf3ecea39b-dafe07d81734164",
+      "title": "Data views legacy URL redirects redirects the legacy listing URL to data views management",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/legacy_url_redirect.spec.ts",
+        "line": 24,
+        "column": 25
+      }
+    },
+    {
+      "id": "eb08ecf3ecea39b-6ea6696cd8f8366",
+      "title": "Data views legacy URL redirects redirects a legacy data view URL to the data view page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/legacy_url_redirect.spec.ts",
+        "line": 28,
+        "column": 23
+      }
+    },
+    {
+      "id": "99a6e1eea0c5fed-23ff7155862fb2c",
+      "title": "Managed data view shows the managed badge on the data view page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/managed_data_view.spec.ts",
+        "line": 29,
+        "column": 5
+      }
+    },
+    {
+      "id": "99a6e1eea0c5fed-234a72476dc17be",
+      "title": "Managed data view disables the data view editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/managed_data_view.spec.ts",
+        "line": 33,
+        "column": 5
+      }
+    },
+    {
+      "id": "99a6e1eea0c5fed-c81c305329cf94e",
+      "title": "Managed data view disables the field editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/managed_data_view.spec.ts",
+        "line": 39,
+        "column": 75
+      }
+    },
+    {
+      "id": "99a6e1eea0c5fed-7bc87eea8d9d6f7",
+      "title": "Managed data view does not offer deletion on the data view page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/managed_data_view.spec.ts",
+        "line": 46,
+        "column": 13
+      }
+    },
+    {
+      "id": "99a6e1eea0c5fed-e1d7ae4f63f5398",
+      "title": "Managed data view disables the delete action on the list page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/managed_data_view.spec.ts",
+        "line": 47,
+        "column": 65
+      }
+    },
+    {
+      "id": "067a6c5515fae5e-bbbfefa7c304dc5",
+      "title": "Data view runtime fields creates, modifies and deletes a runtime field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/runtime_fields.spec.ts",
+        "line": 24,
+        "column": 5
+      }
+    },
+    {
+      "id": "067a6c5515fae5e-bdbd60aec2a817c",
+      "title": "Data view runtime fields creates, modifies and deletes a composite runtime field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/runtime_fields.spec.ts",
+        "line": 55,
+        "column": 28
+      }
+    },
+    {
+      "id": "ff6a7a65c384d6d-df65a126bce8e3a",
+      "title": "Data view scripted fields does not allow saving of invalid scripts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/scripted_fields.spec.ts",
+        "line": 25,
+        "column": 13
+      }
+    },
+    {
+      "id": "ff6a7a65c384d6d-95f2d5843ac0a0d",
+      "title": "Data view scripted fields creates a scripted field and re-saves it repeatedly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/scripted_fields.spec.ts",
+        "line": 35,
+        "column": 84
+      }
+    },
+    {
+      "id": "a72c16b37cef00a-3aca376e38444dc",
+      "title": "Data Views: Try ES|QL navigates to Discover and presents an ES|QL query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/try_esql.spec.ts",
+        "line": 16,
+        "column": 5
+      }
+    },
+    {
+      "id": "602b512db99864d-b22a280d6ea68b5",
+      "title": "Data view version conflict — field format surfaces a version conflict when saving a field format of an outdated data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/version_conflict_field_format.spec.ts",
+        "line": 26,
+        "column": 27
+      }
+    },
+    {
+      "id": "73709f858093f26-19f2986af5c9388",
+      "title": "Data view version conflict — scripted field surfaces a version conflict when saving a scripted field of an outdated data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/version_conflict_scripted_field.spec.ts",
+        "line": 26,
+        "column": 27
       }
     }
   ]

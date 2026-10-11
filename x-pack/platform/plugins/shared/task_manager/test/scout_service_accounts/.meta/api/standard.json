@@ -1,0 +1,99 @@
+{
+  "sha1": "f4f88303e469f3b60de34d0dabcd0db959ff1626",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "018134b55a471eb-4e4673fe7ca0ac0",
+      "title": "Task Manager service account credentials stores the credential as plain attributes and its value encrypted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/credential_round_trip.spec.ts",
+        "line": 108,
+        "column": 7
+      }
+    },
+    {
+      "id": "018134b55a471eb-890695b649843e4",
+      "title": "Task Manager service account credentials bulk schedules a service account task and an API key task together",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/credential_round_trip.spec.ts",
+        "line": 114,
+        "column": 26
+      }
+    },
+    {
+      "id": "018134b55a471eb-609e62265393559",
+      "title": "Task Manager service account credentials does not let bulkSchedule overwrite a task that has a credential",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/credential_round_trip.spec.ts",
+        "line": 140,
+        "column": 76
+      }
+    },
+    {
+      "id": "018134b55a471eb-9d6d22084881d0f",
+      "title": "Task Manager service account credentials keeps the credential decryptable after bulkUpdateState",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/credential_round_trip.spec.ts",
+        "line": 166,
+        "column": 15
+      }
+    },
+    {
+      "id": "018134b55a471eb-1bffcaae54415e1",
+      "title": "Task Manager service account credentials keeps the credential decryptable after bulkUpdateSchedules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/credential_round_trip.spec.ts",
+        "line": 166,
+        "column": 15
+      }
+    },
+    {
+      "id": "018134b55a471eb-5a7a80272f8dd51",
+      "title": "Task Manager service account credentials fails to decrypt once the credential is changed outside Task Manager",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/credential_round_trip.spec.ts",
+        "line": 178,
+        "column": 23
+      }
+    },
+    {
+      "id": "018134b55a471eb-6fae533d4d863c6",
+      "title": "Task Manager service account credentials keeps API key tasks decryptable after a merged update",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_service_accounts/api/tests/credential_round_trip.spec.ts",
+        "line": 192,
+        "column": 50
+      }
+    }
+  ]
+}
